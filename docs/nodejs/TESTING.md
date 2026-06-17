@@ -409,6 +409,14 @@ Current `ocr` bridge v1.1 partial focused instrumentation:
 
 This suite verifies the `ocr` bridge registry, fake-provider request/response behavior, `require("ocr")`, shadowing protection, `recognize(image, options?)`, `recognizeText(image, options?)`, `detectTextBounds(image, options?)`, opaque image-handle validation before dispatch, frozen OCR result snapshots, timeout and `ocr`/`image` permission propagation, manifest capability denial before dispatch, and stable Android provider rejection until a real OCR capability provider is connected.
 
+Current `storage` bridge v1.1 partial focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest"
+```
+
+This suite verifies the `storage`/`storages` bridge registry, fake-provider request/response behavior, shadowing protection, `create`/`open` frozen store handles, `get`/`put`/`remove`/`clear`/`keys`/`contains`, JSON-only values, manifest capability denial before dispatch, Android provider persistence, and working-directory namespace isolation.
+
 Current bridge permission manifest focused instrumentation:
 
 ```powershell

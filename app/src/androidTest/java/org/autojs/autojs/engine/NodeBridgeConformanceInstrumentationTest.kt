@@ -145,6 +145,11 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "saveImage" || method === "recycle") result = null;
                   } else if (moduleName === "ocr") {
                     result = [{ text: "hello", confidence: 0.91, bounds: { left: 1, top: 2, right: 3, bottom: 4 } }];
+                  } else if (moduleName === "storage" || moduleName === "storages") {
+                    if (method === "get") result = { found: true, value: { ok: true } };
+                    else if (method === "keys") result = ["alpha"];
+                    else if (method === "contains") result = true;
+                    else result = null;
                   } else if (moduleName === "work_manager") {
                     if (method === "scheduleOnce") result = "work-once";
                     else if (method === "schedulePeriodic") result = "work-periodic";
@@ -178,6 +183,8 @@ class NodeBridgeConformanceInstrumentationTest {
               const image = require("image");
               const images = require("images");
               const ocr = require("ocr");
+              const storage = require("storage");
+              const storages = require("storages");
               const workManager = require("work_manager");
 
               [
@@ -193,6 +200,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["image", image],
                 ["images", images],
                 ["ocr", ocr],
+                ["storage", storage],
+                ["storages", storages],
                 ["work_manager", workManager]
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
@@ -208,6 +217,8 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("image", image, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
               expectExports("images", images, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
               expectExports("ocr", ocr, ["recognize", "recognizeText", "detectTextBounds"]);
+              expectExports("storage", storage, ["create", "open"]);
+              expectExports("storages", storages, ["create", "open"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
 
               assert.strictEqual(typeof app.packageName, "string");
@@ -272,6 +283,15 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(ocrResults[0].bounds.bottom, 4);
               assert.strictEqual(await expectPromise("ocr.recognizeText", ocr.recognizeText(capture, { timeoutMs: 1055 })), "hello");
               assert.strictEqual((await expectPromise("ocr.detectTextBounds", ocr.detectTextBounds(capture, { timeoutMs: 1056 })))[0].bounds.right, 3);
+              const store = storage.create("settings");
+              expectFrozen("storage.store", store);
+              expectExports("storage.store", store, ["get", "put", "remove", "clear", "keys", "contains"]);
+              await expectPromise("storage.put", store.put("alpha", { ok: true }, { timeoutMs: 1057 }));
+              assert.strictEqual((await expectPromise("storage.get", store.get("alpha", null, { timeoutMs: 1058 }))).ok, true);
+              assert.deepStrictEqual(await expectPromise("storage.keys", store.keys({ timeoutMs: 1059 })), ["alpha"]);
+              assert.strictEqual(await expectPromise("storage.contains", store.contains("alpha", { timeoutMs: 1060 })), true);
+              await expectPromise("storage.remove", store.remove("alpha", { timeoutMs: 1061 }));
+              await expectPromise("storage.clear", storages.open("settings").clear({ timeoutMs: 1062 }));
               assert.strictEqual(await expectPromise("work_manager.scheduleOnce", workManager.scheduleOnce({ scriptPath: "main.cjs", timeoutMs: 1055 })), "work-once");
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
@@ -294,6 +314,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "ocr.recognize",
                 "ocr.recognizeText",
                 "ocr.detectTextBounds",
+                "storage.put",
+                "storages.clear",
                 "work_manager.list"
               ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));
               console.log("bridge.conformance.request_count=" + requests.length);
@@ -471,6 +493,8 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.IMAGE to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),
             NodeBridgeModules.IMAGES to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
+            NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),
+            NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
         )
     }

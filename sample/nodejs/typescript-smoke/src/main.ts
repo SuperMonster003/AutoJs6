@@ -10,6 +10,8 @@ import mediaProjection = require("media_projection");
 import image = require("image");
 import images = require("images");
 import ocr = require("ocr");
+import storage = require("storage");
+import storages = require("storages");
 import fetchModule = require("fetch");
 import axios = require("axios");
 import websocket = require("websocket");
@@ -90,6 +92,13 @@ async function smoke(): Promise<void> {
     region: [0, 0, 10, 10],
     timeoutMs: 1000
   });
+  const store: storage.StorageStore = storage.create("settings");
+  await store.put("enabled", true, { timeoutMs: 1000 });
+  const storedEnabled: boolean = await storages.open("settings").get("enabled", false, { timeoutMs: 1000 });
+  const storageKeys: readonly string[] = await store.keys({ timeoutMs: 1000 });
+  const storageContains: boolean = await store.contains("enabled", { timeoutMs: 1000 });
+  await store.remove("enabled", { timeoutMs: 1000 });
+  await store.clear({ timeoutMs: 1000 });
   await image.recycle(template, { timeoutMs: 1000 });
   await images.recycle(frame, { timeoutMs: 1000 });
 
@@ -181,6 +190,9 @@ async function smoke(): Promise<void> {
   void ocrResults;
   void ocrText;
   void ocrBounds;
+  void storedEnabled;
+  void storageKeys;
+  void storageContains;
   void responseText;
   void responseJson;
   void fetchDiagnostics;

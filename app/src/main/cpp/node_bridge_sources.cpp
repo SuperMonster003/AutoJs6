@@ -8005,6 +8005,8 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_image_cache = null;
   let __autojs6_limited_images_cache = null;
   let __autojs6_limited_ocr_cache = null;
+  let __autojs6_limited_storage_cache = null;
+  let __autojs6_limited_storages_cache = null;
   let __autojs6_limited_clipboard_cache = null;
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
@@ -8854,6 +8856,7 @@ std::string buildEmbeddedScriptExecutionSource(
       return ["image"];
     }
     if (moduleName === "ocr") return ["ocr", "image"];
+    if (moduleName === "storage" || moduleName === "storages") return ["storage"];
     if (moduleName === "clipboard") return ["clipboard"];
     if (moduleName === "device") return ["device"];
     if (moduleName === "shell") return ["shell"];
@@ -13063,6 +13066,132 @@ std::string buildEmbeddedScriptExecutionSource(
       detectTextBounds
     });
     return __autojs6_limited_ocr_cache;
+  }
+  function __autojs6_storage_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_storage_invalid_argument_error(moduleName, methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      moduleName,
+      methodName
+    );
+  }
+  function __autojs6_storage_name(moduleName, methodName, value, label) {
+    const text = value === undefined || value === null ? "" : String(value).trim();
+    if (!text) {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " requires a non-empty " + label + ".");
+    }
+    if (text.indexOf("\u0000") !== -1 || text.length > 128) {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " received an invalid " + label + ".");
+    }
+    return text;
+  }
+  function __autojs6_storage_json_value(moduleName, methodName, value) {
+    if (value === undefined || typeof value === "function" || typeof value === "symbol") {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " value must be JSON-serializable.");
+    }
+    let json = "";
+    try {
+      json = JSON.stringify(value);
+    } catch (error) {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " value must be JSON-serializable.");
+    }
+    if (json === undefined) {
+      throw __autojs6_storage_invalid_argument_error(moduleName, methodName, moduleName + "." + methodName + " value must be JSON-serializable.");
+    }
+    return value;
+  }
+  function __autojs6_storage_bridge_options(options, fallbackMs) {
+    const input = __autojs6_storage_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions: ["storage"]
+    };
+  }
+  function __autojs6_limited_storage(moduleName) {
+    if (moduleName === "storages" && __autojs6_limited_storages_cache) {
+      return __autojs6_limited_storages_cache;
+    }
+    if (moduleName === "storage" && __autojs6_limited_storage_cache) {
+      return __autojs6_limited_storage_cache;
+    }
+    function createStore(name) {
+      const storeName = __autojs6_storage_name(moduleName, "create", name, "storage name");
+      function call(methodName, args, options, fallbackMs) {
+        return __autojs6_call_autojs(
+          moduleName,
+          methodName,
+          [storeName].concat(args || []),
+          __autojs6_storage_bridge_options(options, fallbackMs || 5000)
+        );
+      }
+      function get(key, defaultValue, options) {
+        const checkedKey = __autojs6_storage_name(moduleName, "get", key, "key");
+        return call("get", [checkedKey], options, 5000).then(function(result) {
+          if (result && typeof result === "object" && result.found === true) {
+            return result.value;
+          }
+          return defaultValue;
+        });
+      }
+      function put(key, value, options) {
+        const checkedKey = __autojs6_storage_name(moduleName, "put", key, "key");
+        const checkedValue = __autojs6_storage_json_value(moduleName, "put", value);
+        return call("put", [checkedKey, checkedValue], options, 5000).then(function() {
+          return undefined;
+        });
+      }
+      function remove(key, options) {
+        const checkedKey = __autojs6_storage_name(moduleName, "remove", key, "key");
+        return call("remove", [checkedKey], options, 5000).then(function() {
+          return undefined;
+        });
+      }
+      function clear(options) {
+        return call("clear", [], options, 5000).then(function() {
+          return undefined;
+        });
+      }
+      function keys(options) {
+        return call("keys", [], options, 5000).then(function(result) {
+          return Object.freeze(Array.isArray(result) ? result.map(String) : []);
+        });
+      }
+      function contains(key, options) {
+        const checkedKey = __autojs6_storage_name(moduleName, "contains", key, "key");
+        return call("contains", [checkedKey], options, 5000).then(function(result) {
+          return result === true;
+        });
+      }
+      return Object.freeze({
+        name: storeName,
+        get,
+        put,
+        remove,
+        clear,
+        keys,
+        contains
+      });
+    }
+    function create(name) {
+      return createStore(name);
+    }
+    function open(name) {
+      return createStore(name);
+    }
+    const moduleValue = Object.freeze({
+      create,
+      open
+    });
+    if (moduleName === "storages") {
+      __autojs6_limited_storages_cache = moduleValue;
+    } else {
+      __autojs6_limited_storage_cache = moduleValue;
+    }
+    return moduleValue;
   }
   function __autojs6_call_autojs(moduleName, methodName, args, options) {
     const moduleValue = moduleName === undefined || moduleName === null ? "" : String(moduleName);
@@ -27731,6 +27860,12 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "ocr") {
       return "ocr";
     }
+    if (name === "storage") {
+      return "storage";
+    }
+    if (name === "storages") {
+      return "storages";
+    }
     if (name === "clipboard") {
       return "clipboard";
     }
@@ -27957,6 +28092,12 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "ocr") {
       return __autojs6_limited_ocr();
+    }
+    if (name === "storage") {
+      return __autojs6_limited_storage("storage");
+    }
+    if (name === "storages") {
+      return __autojs6_limited_storage("storages");
     }
     if (name === "clipboard") {
       return __autojs6_limited_clipboard();

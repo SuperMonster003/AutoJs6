@@ -1,0 +1,261 @@
+package org.autojs.autojs.engine
+
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+import java.io.File
+
+class NodeStorageBridgeInstrumentationTest {
+
+    private val context = NodeEmbeddedTestHarness.targetContext
+
+    @Before
+    fun settleBefore() {
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+    }
+
+    @After
+    fun settleAfter() {
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+    }
+
+    @Test
+    fun kotlinStorageBridgeRegistryAndManifestAreStable() {
+        listOf("storage", "storages").forEach { module ->
+            listOf("get", "put", "remove", "clear", "keys", "contains").forEach { method ->
+                assertTrue(NodeBridgeModules.supports(module, method))
+                assertEquals(
+                    listOf(NodeBridgePermissionManifest.STORAGE),
+                    NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method),
+                )
+            }
+        }
+        assertFalse(NodeBridgeModules.supports("storage", "rawSharedPreferences"))
+        assertEquals("storage", NodeBridgePermissionManifest.normalizeCapability("storages"))
+    }
+
+    @Test
+    fun jsStorageBridgeUsesFakeTransportAndBlocksShadowing() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node storage bridge fake transport regression")
+
+        val workDir = File(context.cacheDir, "node-bridge-storage-shadow").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create storage bridge working directory: $absolutePath" }
+        }
+        listOf("storage", "storages").forEach { module ->
+            File(workDir, "node_modules/$module").apply {
+                check(mkdirs()) { "Failed to create storage shadow module directory: $absolutePath" }
+            }.resolve("index.js").writeText("""module.exports = { shadow: true, create: () => "shadow" };""")
+        }
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const requests = [];
+              const buckets = Object.create(null);
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const storeName = request.args[0];
+                  const key = request.args[1];
+                  const bucket = buckets[storeName] || (buckets[storeName] = Object.create(null));
+                  let result = null;
+                  if (request.method === "get") {
+                    result = Object.prototype.hasOwnProperty.call(bucket, key)
+                      ? { found: true, value: bucket[key] }
+                      : { found: false };
+                  } else if (request.method === "put") {
+                    bucket[key] = request.args[2];
+                  } else if (request.method === "remove") {
+                    delete bucket[key];
+                  } else if (request.method === "clear") {
+                    Object.keys(bucket).forEach((entry) => delete bucket[entry]);
+                  } else if (request.method === "keys") {
+                    result = Object.keys(bucket).sort();
+                  } else if (request.method === "contains") {
+                    result = Object.prototype.hasOwnProperty.call(bucket, key);
+                  }
+                  setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                    id: request.id,
+                    ok: true,
+                    result
+                  })));
+                }
+              });
+
+              const storage = require("storage");
+              const storages = require("storages");
+              const store = storage.create("settings");
+              const alias = storages.open("settings");
+              await store.clear({ timeoutMs: 1000 });
+              await store.put("theme", { mode: "dark", count: 2 }, { timeoutMs: 1000 });
+              const value = await alias.get("theme", null, { timeoutMs: 1000 });
+              const missing = await store.get("missing", "fallback");
+              const containsBefore = await store.contains("theme");
+              const keysBefore = await store.keys();
+              await store.remove("theme");
+              const containsAfter = await alias.contains("theme");
+
+              console.log("storage.resolve=" + [require.resolve("storage"), require.resolve("storages")].join("|"));
+              console.log("storage.shadow=" + [storage.shadow === true, storages.shadow === true].join("|"));
+              console.log("storage.frozen=" + [Object.isFrozen(storage), Object.isFrozen(storages), Object.isFrozen(store)].join("|"));
+              console.log("storage.methods=" + [typeof storage.create, typeof storage.open, typeof store.get, typeof store.put, typeof store.keys].join("|"));
+              console.log("storage.value=" + [value.mode, value.count, missing, containsBefore, keysBefore.join(","), containsAfter].join("|"));
+              console.log("storage.requests=" + requests.map((request) => request.module + "." + request.method).join("|"));
+              console.log("storage.permissions=" + requests[0].permissions.join("|"));
+              console.log("storage.pending=" + bridge.__test.pendingCount());
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-storage-fake.js>",
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("storage fake bridge", result)
+        assertTrue(result.stdout.contains("storage.resolve=storage|storages"))
+        assertTrue(result.stdout.contains("storage.shadow=false|false"))
+        assertTrue(result.stdout.contains("storage.frozen=true|true|true"))
+        assertTrue(result.stdout.contains("storage.methods=function|function|function|function|function"))
+        assertTrue(result.stdout.contains("storage.value=dark|2|fallback|true|theme|false"))
+        assertTrue(result.stdout.contains("storage.requests=storage.clear|storage.put|storages.get|storage.get|storage.contains|storage.keys|storage.remove|storages.contains"))
+        assertTrue(result.stdout.contains("storage.permissions=storage"))
+        assertTrue(result.stdout.contains("storage.pending=0"))
+    }
+
+    @Test
+    fun jsStorageRequiresManifestCapabilityBeforeDispatch() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node storage manifest capability regression")
+
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(emptyList())
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  requests.push(JSON.parse(message));
+                }
+              });
+              let code = "";
+              let missing = "";
+              try {
+                await require("storage").create("settings").get("theme");
+              } catch (error) {
+                code = String(error && (error.autojs6Code || error.code || ""));
+                missing = Array.isArray(error && error.missingCapabilities) ? error.missingCapabilities.join(",") : "";
+              }
+              console.log("storage.manifest.denied=" + [code, missing, requests.length, bridge.__test.pendingCount()].join("|"));
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-storage-manifest.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("storage manifest capability denial", result)
+        assertTrue(
+            result.stdout.contains(
+                "storage.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|storage|0|0",
+            ),
+        )
+    }
+
+    @Test
+    fun androidStorageProviderPersistsAndScopesByWorkingDirectory() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node storage Android provider regression")
+
+        val firstWorkDir = storageWorkDir("node-bridge-storage-android-one")
+        val secondWorkDir = storageWorkDir("node-bridge-storage-android-two")
+
+        val writeResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const store = require("storage").create("settings");
+              await store.clear();
+              await store.put("token", { value: "persist", count: 1 });
+              console.log("storage.android.write=done");
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-storage-android-write.js>",
+            workingDirectory = firstWorkDir,
+        )
+        NodeEmbeddedTestHarness.assertSucceeded("storage Android write", writeResult)
+        assertTrue(writeResult.stdout.contains("storage.android.write=done"))
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val readResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const store = require("storage").open("settings");
+              const value = await store.get("token", null);
+              const contains = await store.contains("token");
+              const keys = await store.keys();
+              console.log("storage.android.same=" + [value.value, value.count, contains, keys.join(",")].join("|"));
+              await store.clear();
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-storage-android-read.js>",
+            workingDirectory = firstWorkDir,
+        )
+        NodeEmbeddedTestHarness.assertSucceeded("storage Android read", readResult)
+        assertTrue(readResult.stdout.contains("storage.android.same=persist|1|true|token"))
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val aliasResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const store = require("storages").open("settings");
+              await store.put("alias", "ok");
+              console.log("storage.android.alias=" + await store.get("alias", "missing"));
+              await store.remove("alias");
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-storage-android-alias.js>",
+            workingDirectory = firstWorkDir,
+        )
+        NodeEmbeddedTestHarness.assertSucceeded("storage Android storages alias", aliasResult)
+        assertTrue(aliasResult.stdout.contains("storage.android.alias=ok"))
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val isolatedResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const store = require("storage").create("settings");
+              const value = await store.get("token", "missing");
+              console.log("storage.android.other=" + value);
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-storage-android-isolated.js>",
+            workingDirectory = secondWorkDir,
+        )
+        NodeEmbeddedTestHarness.assertSucceeded("storage Android namespace isolation", isolatedResult)
+        assertTrue(isolatedResult.stdout.contains("storage.android.other=missing"))
+    }
+
+    private fun storageWorkDir(name: String): File {
+        return File(context.cacheDir, name).apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create storage provider working directory: $absolutePath" }
+            resolve("project.json").writeText(
+                """
+                {
+                  "type": "node",
+                  "node": {
+                    "permissions": ["storage"]
+                  }
+                }
+                """.trimIndent(),
+            )
+        }
+    }
+}

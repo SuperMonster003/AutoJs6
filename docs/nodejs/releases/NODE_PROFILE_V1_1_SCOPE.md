@@ -61,6 +61,7 @@ small set of already-gated features toward practical use.
 | Controlled axios | experimental | `require("axios")` exposes an AutoJs6-owned fetch-backed compatibility adapter for `get`/`post`/`request`, `baseURL`, params, headers, timeout, response types, and Axios-like errors while denying custom adapter/agent/proxy/raw transport paths. |
 | WebSocket | experimental | Controlled bridge surface covers connect, send/receive text and binary messages, close/error events, handler properties, listener aliases, bounded queue/message policy, service-destroy cleanup, and raw socket denial; live provider remains default-off. |
 | OCR | partial | `require("ocr")` exposes `recognize`, `recognizeText`, and `detectTextBounds` over opaque image handles with `ocr` + `image` capability checks; Android provider remains fail-closed until real provider/model ownership is accepted. |
+| Storage | partial | `require("storage")` and `require("storages")` expose JSON-only project/package-scoped key-value stores with explicit `storage` capability checks. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
@@ -116,6 +117,10 @@ small set of already-gated features toward practical use.
 - OCR bridge smoke passes for fake-provider `recognize`, `recognizeText`, and
   `detectTextBounds`, opaque image handle validation, manifest capability
   denial, TypeScript declarations, and fail-closed Android provider behavior.
+- Storage bridge smoke passes for `storage`/`storages` create/open,
+  get/put/remove/clear/keys/contains, JSON value policy, manifest denial,
+  Android provider persistence, working-directory namespace isolation, and
+  TypeScript declarations.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
   execution/stress suites pass on Sony.

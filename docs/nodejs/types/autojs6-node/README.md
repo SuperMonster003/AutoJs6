@@ -14,6 +14,8 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `image`
 - `images`
 - `ocr`
+- `storage`
+- `storages`
 - `fetch`
 - `axios`
 - `websocket`

@@ -750,6 +750,7 @@ Declared capability names:
 - `screen_capture` (`media_projection` is accepted as an alias)
 - `image`
 - `ocr`
+- `storage`
 - `clipboard`
 - `device`
 - `shell`, `shell.root`
@@ -863,6 +864,19 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - current JavaScript API, fake-provider tests, manifest-denial behavior, type declarations, and bridge protocol are stable
   - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an OCR capability provider is connected
   - no raw OCR engine, model path, native pointer, `Bitmap`, `Mat`, `ImageWrapper`, or Java object crosses into Node
+- `storage` / `storages`
+  - `create(name): StorageStore`
+  - `open(name): StorageStore`
+  - `StorageStore.get(key, defaultValue?, options?): Promise<JsonValue>`
+  - `StorageStore.put(key, value, options?): Promise<void>`
+  - `StorageStore.remove(key, options?): Promise<void>`
+  - `StorageStore.clear(options?): Promise<void>`
+  - `StorageStore.keys(options?): Promise<readonly string[]>`
+  - `StorageStore.contains(key, options?): Promise<boolean>`
+  - values must be JSON-serializable; `undefined`, functions, symbols, native objects, and circular structures are rejected before dispatch
+  - requests require the `storage` capability
+  - Android provider data is scoped by package identity, working directory, and storage name in app-private SharedPreferences
+  - JavaScript receives frozen store handles only; no raw `SharedPreferences`, database, file, or Android object crosses into Node
 - `clipboard`
   - `getText(options?): Promise<string>`
   - `setText(text, options?): Promise<void>`

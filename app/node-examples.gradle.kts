@@ -38,6 +38,8 @@ private val nodeTypeDeclarationModules = listOf(
     "image",
     "images",
     "ocr",
+    "storage",
+    "storages",
     "fetch",
     "axios",
     "websocket",

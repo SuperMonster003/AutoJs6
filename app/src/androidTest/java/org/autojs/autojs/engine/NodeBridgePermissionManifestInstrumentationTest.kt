@@ -112,6 +112,16 @@ class NodeBridgePermissionManifestInstrumentationTest {
             listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "detectTextBounds"),
         )
+        listOf("storage", "storages").forEach { module ->
+            assertEquals(
+                listOf(NodeBridgePermissionManifest.STORAGE),
+                NodeBridgePermissionManifest.requiredCapabilitiesFor(module, "get"),
+            )
+            assertEquals(
+                listOf(NodeBridgePermissionManifest.STORAGE),
+                NodeBridgePermissionManifest.requiredCapabilitiesFor(module, "put"),
+            )
+        }
     }
 
     @Test

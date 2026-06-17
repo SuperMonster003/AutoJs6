@@ -39,6 +39,8 @@ import java.io.File
 import java.io.InputStream
 import java.net.URI
 import java.net.URL
+import java.security.MessageDigest
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
@@ -449,6 +451,8 @@ object NodeBridgeModules {
     const val IMAGE = "image"
     const val IMAGES = "images"
     const val OCR = "ocr"
+    const val STORAGE = "storage"
+    const val STORAGES = "storages"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -477,6 +481,8 @@ object NodeBridgeModules {
     val imageModules = setOf(IMAGE, IMAGES)
     val imageMethods = setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle")
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
+    val storageModules = setOf(STORAGE, STORAGES)
+    val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")
@@ -495,6 +501,8 @@ object NodeBridgeModules {
         IMAGE to imageMethods,
         IMAGES to imageMethods,
         OCR to ocrMethods,
+        STORAGE to storageMethods,
+        STORAGES to storageMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
         SHELL to shellMethods,
@@ -575,6 +583,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, callback)
             request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, callback)
             request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, callback)
+            request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, callback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, callback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, callback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
@@ -949,6 +958,109 @@ class AndroidNodeBridgeCapabilityProvider(
                 ),
             ),
         )
+    }
+
+    private fun dispatchStorage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = runCatching {
+            val args = JSONArray(request.argsJson.ifBlank { "[]" })
+            val storeName = storageStringArg(request, args, 0, "storage name", NodeStorageBridgePolicy.MAX_STORE_NAME_LENGTH)
+            val prefs = appContext.getSharedPreferences(storagePreferencesName(storeName), Context.MODE_PRIVATE)
+            when (request.method) {
+                "get" -> {
+                    val key = storageStringArg(request, args, 1, "key", NodeStorageBridgePolicy.MAX_KEY_LENGTH)
+                    val stored = prefs.getString(key, null)
+                    val result = JSONObject().put("found", stored != null)
+                    if (stored != null) {
+                        result.put("value", NodeBridgeJson.parseJsonValue(stored))
+                    }
+                    NodeBridgeResponse.success(request.id, result.toString())
+                }
+                "put" -> {
+                    val key = storageStringArg(request, args, 1, "key", NodeStorageBridgePolicy.MAX_KEY_LENGTH)
+                    if (args.length() < 3) {
+                        throw StorageBridgeException(
+                            NodeBridgeError.invalidRequest(
+                                message = "AutoJs6 storage.put requires a JSON value.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    val valueJson = NodeBridgeJson.valueToJson(args.opt(2))
+                    if (valueJson.toByteArray(Charsets.UTF_8).size > NodeStorageBridgePolicy.MAX_VALUE_BYTES) {
+                        throw StorageBridgeException(
+                            NodeBridgeError.resourceLimit(
+                                message = "AutoJs6 storage value exceeded ${NodeStorageBridgePolicy.MAX_VALUE_BYTES} bytes.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    if (!prefs.edit().putString(key, valueJson).commit()) {
+                        throw StorageBridgeException(
+                            NodeBridgeError.permissionDenied(
+                                message = "AutoJs6 storage write failed.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    NodeBridgeResponse.success(request.id, "null")
+                }
+                "remove" -> {
+                    val key = storageStringArg(request, args, 1, "key", NodeStorageBridgePolicy.MAX_KEY_LENGTH)
+                    prefs.edit().remove(key).commit()
+                    NodeBridgeResponse.success(request.id, "null")
+                }
+                "clear" -> {
+                    prefs.edit().clear().commit()
+                    NodeBridgeResponse.success(request.id, "null")
+                }
+                "keys" -> {
+                    val keys = prefs.all.keys.sorted()
+                    NodeBridgeResponse.success(request.id, JSONArray(keys).toString())
+                }
+                "contains" -> {
+                    val key = storageStringArg(request, args, 1, "key", NodeStorageBridgePolicy.MAX_KEY_LENGTH)
+                    NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(prefs.contains(key)))
+                }
+                else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+            }
+        }.getOrElse { error ->
+            val bridgeError = (error as? StorageBridgeException)?.bridgeError
+                ?: NodeBridgeError.invalidRequest(
+                    message = error.message ?: "AutoJs6 storage request failed.",
+                    module = request.module,
+                    method = request.method,
+                )
+            NodeBridgeResponse.failure(request.id, bridgeError)
+        }
+        callback(response)
+    }
+
+    private fun storageStringArg(
+        request: NodeBridgeRequest,
+        args: JSONArray,
+        index: Int,
+        label: String,
+        maxLength: Int,
+    ): String {
+        val value = args.opt(index)
+        if (value !is String || value.isBlank() || value.length > maxLength || '\u0000' in value) {
+            throw StorageBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 storage $label must be a non-empty string up to $maxLength characters.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return value.trim()
+    }
+
+    private fun storagePreferencesName(storeName: String): String {
+        val packageName = engineInfo.packageName.ifBlank { appContext.packageName }
+        return NodeStorageBridgePolicy.preferencesName(packageName, engineInfo.cwd, storeName)
     }
 
     private fun dispatchClipboard(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -2888,6 +3000,37 @@ private data class ControlledFetchParseResult(
     val value: ControlledFetchRequest? = null,
     val error: NodeBridgeError? = null,
 )
+
+private object NodeStorageBridgePolicy {
+    const val MAX_STORE_NAME_LENGTH = 128
+    const val MAX_KEY_LENGTH = 256
+    const val MAX_VALUE_BYTES = 64 * 1024
+    private const val PREFS_PREFIX = "autojs.node.storage"
+
+    fun preferencesName(packageName: String, cwd: String, storeName: String): String {
+        val packagePart = sanitize(packageName.ifBlank { "unknown" })
+        val cwdPart = sha256(cwd.ifBlank { "default" }).take(16)
+        val storePart = sanitize(storeName).take(64).ifBlank { "store" }
+        return "$PREFS_PREFIX.$packagePart.$cwdPart.$storePart"
+    }
+
+    private fun sanitize(value: String): String {
+        return value.map { char ->
+            when {
+                char.isLetterOrDigit() -> char.lowercaseChar()
+                char == '.' || char == '_' || char == '-' -> char
+                else -> '_'
+            }
+        }.joinToString("")
+    }
+
+    private fun sha256(value: String): String {
+        val bytes = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
+        return bytes.joinToString("") { byte -> String.format(Locale.US, "%02x", byte.toInt() and 0xff) }
+    }
+}
+
+private class StorageBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
 
 private class ControlledFetchException(
     val code: String,

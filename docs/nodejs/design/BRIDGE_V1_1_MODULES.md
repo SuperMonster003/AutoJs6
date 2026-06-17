@@ -25,6 +25,7 @@ Current declared capability names:
 - `accessibility`
 - `screen_capture`
 - `image`
+- `storage`
 - `clipboard`
 - `device`
 - `shell`, `shell.root`
@@ -41,6 +42,7 @@ Current module registry includes:
 - `accessibility`
 - `media_projection`
 - `image` / `images`
+- `storage` / `storages`
 - `clipboard`
 - `device`
 - `shell`
@@ -77,7 +79,7 @@ for risk/impact:
 
 | Candidate | User value | Security risk | Testability | Packaged impact | Permission impact | v1.1 decision |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| `storage` | 5 | 2 | 5 | 2 | 1 | Best first new module candidate. |
+| `storage` | 5 | 2 | 5 | 2 | 1 | Implemented as v1.1 partial in Task 173. |
 | `notifications` post-only | 4 | 3 | 4 | 3 | 3 | Candidate after permission and channel policy. |
 | `ocr` | 5 | 3 | 3 | 4 | 2 | Protocol MVP added in Task 148; live provider remains blocked on image/provider ownership. |
 | `sensors` | 3 | 3 | 4 | 2 | 2 | Candidate for read-only/rate-limited MVP. |
@@ -107,7 +109,7 @@ This produces more user value than adding another partially owned module.
 
 #### `storage`
 
-Recommended first new module if v1.1 implements a bridge module.
+Implemented as the first new v1.1 bridge module in Task 173.
 
 Initial capability:
 
@@ -137,7 +139,10 @@ Constraints:
   normalization, manifest capability enforcement, and provider destroy.
 
 This module has high utility, no Android permission requirement, and a clear
-bridge shape.
+bridge shape. The implemented Node surface is `require("storage")` and the
+AutoJs-style alias `require("storages")`, both exposing `create(name)` and
+`open(name)` store factories. Store handles are frozen JavaScript objects, and
+all reads/writes dispatch through the controlled bridge.
 
 #### `notifications` Post-Only
 
@@ -327,7 +332,8 @@ The recommended v1.1 bridge order is:
 
 1. Finish existing `dialogs`, `media_projection`, and `image` provider
    ownership before new high-risk modules.
-2. Implement `storage` first if a new module is needed.
+2. Keep `storage` as the first implemented new module and use its capability,
+   namespace, and JSON-only tests as the template for future low-risk modules.
 3. Consider post-only `notifications` after permission/channel policy.
 4. Consider bounded read-only `sensors` after privacy/rate-limit review.
 5. Keep the Task 148 OCR protocol MVP fail-closed until image handles are

@@ -22,6 +22,7 @@ object NodeBridgePermissionManifest {
     const val SCREEN_CAPTURE = "screen_capture"
     const val IMAGE = "image"
     const val OCR = "ocr"
+    const val STORAGE = "storage"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -50,6 +51,7 @@ object NodeBridgePermissionManifest {
         SCREEN_CAPTURE,
         IMAGE,
         OCR,
+        STORAGE,
         CLIPBOARD,
         DEVICE,
         SHELL,
@@ -69,6 +71,7 @@ object NodeBridgePermissionManifest {
         "engines:exec" to ENGINES_EXEC,
         "engine.exec" to ENGINES_EXEC,
         "shell:root" to SHELL_ROOT,
+        "storages" to STORAGE,
         "java" to JAVA_INTEROP,
     )
 
@@ -200,6 +203,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(IMAGE)
             }
             NodeBridgeModules.OCR -> listOf(OCR, IMAGE)
+            NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
             NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
             NodeBridgeModules.DEVICE -> listOf(DEVICE)
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)
