@@ -1,6 +1,6 @@
 # Worker Threads Design Gate v1
 
-Status: experimental design gate, blocked for Node Profile v1 GA execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled.
+Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason.
 
 ## Goal
 
@@ -15,7 +15,7 @@ Workers are high risk in AutoJs6 because they multiply:
 - access-control surfaces for AutoJs bridge modules
 - packaged APK compatibility state
 
-Task 42 froze the boundary. Task 63 added a request-local experimental path intended to run local CommonJS worker scripts with a smaller capability set than the parent script. Task 122 blocks publishing that path as runnable for GA because native `worker_threads` is unavailable in the evaluated Embedded Node build.
+Task 42 froze the boundary. Task 63 added a request-local experimental path intended to run local CommonJS worker scripts with a smaller capability set than the parent script. Task 122 blocked publishing that path as runnable for GA because native `worker_threads` is unavailable in the evaluated Embedded Node build. Task 170 kept the same decision for v1.1: the default denial and design gates remain valid, but runnable worker partial support cannot be claimed until a libnode build exposes native workers and the focused execution and stress suites pass.
 
 ## Feature Flag
 
@@ -49,7 +49,7 @@ With the flag off:
 
 ## Intended Experimental Scope
 
-When the request-local experimental flag is enabled and the Embedded Node build exposes native `worker_threads`, the first allowed scope is:
+When the request-local experimental flag is enabled and the Embedded Node build exposes native `worker_threads`, the first allowed scope remains:
 
 - pure JavaScript CPU work
 - JSON-serializable `workerData`
@@ -197,7 +197,7 @@ Current gates:
 - `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
-Current GA evaluation: [../reports/WORKER_EXPERIMENTAL_EVALUATION.md](../reports/WORKER_EXPERIMENTAL_EVALUATION.md). The default design gate passes, but worker execution/stress suites are blocked by native module availability.
+Current evaluation: [../reports/WORKER_EXPERIMENTAL_EVALUATION.md](../reports/WORKER_EXPERIMENTAL_EVALUATION.md). The default design gate passes, but worker execution/stress suites are blocked by native module availability. The 2026-06-17 v1.1 recheck confirmed that Task 170 cannot graduate workers to runnable partial support without changing the Embedded Node native build.
 
 Follow-up gates should add:
 

@@ -2,13 +2,15 @@
 
 Date: 2026-06-16
 
+Latest v1.1 recheck: 2026-06-17
+
 Device: Sony XQ-AT72 (`QV710AF65F`), Android 12
 
-Branch/package identity: `feature/nodejs-runtime`, `org.autojs.autojs6.nodejs`
+Branch/package identity: initial GA evaluation on `feature/nodejs-runtime`, `org.autojs.autojs6.nodejs`; v1.1 recheck on `feature/nodejs-runtime-v1.1`.
 
 ## Recommendation
 
-Do not promote or expose `worker_threads` as a runnable experiment for Node Profile v1 GA.
+Do not promote or expose `worker_threads` as a runnable experiment for Node Profile v1 GA or v1.1 partial support.
 
 Keep `worker_threads` disabled by default, and document the current experimental path as blocked in this Embedded Node
 build. The JavaScript/Kotlin gate behaves correctly, but enabling the experimental flag reaches a native availability
@@ -23,6 +25,10 @@ Until a libnode build exposes a usable native `worker_threads` module and the fo
 device, the release contract should treat workers as unavailable, not as a supported or advertised experimental runtime
 surface.
 
+For Task 170, the v1.1 target remains blocked rather than downgraded to a same-thread fallback. Worker semantics require
+real native Worker isolation, and packaged workers must not silently fall back to Rhino, parent-thread execution, or
+unrestricted Node behavior.
+
 ## Commands Run
 
 Default design gate:
@@ -30,6 +36,15 @@ Default design gate:
 ```powershell
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest"
+```
+
+Result: passed, 1/1 tests.
+
+v1.1 recheck on 2026-06-17:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Result: passed, 1/1 tests.
@@ -43,6 +58,17 @@ $env:ANDROID_SERIAL='QV710AF65F'
 
 Result: failed, 1/1 tests. The request reached `embedded_script.request.worker_threads_experimental_enabled=true`, then
 failed with `ERR_AUTOJS6_WORKER_DISABLED` because native `worker_threads` was unavailable.
+
+v1.1 recheck on 2026-06-17:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+Result: failed, 1/1 tests. The pure-JS worker test still reaches
+`embedded_script.request.worker_threads_experimental_enabled=true`, then fails with `ERR_AUTOJS6_WORKER_DISABLED` because
+native `worker_threads` is unavailable in this Embedded Node build.
 
 Earlier exploratory runs also checked the full worker group:
 
@@ -117,12 +143,13 @@ this build. It must pass before any future worker experiment can be shown to use
 
 ## Release Decision
 
-Node Profile v1 GA should document `worker_threads` as:
+Node Profile v1 GA and v1.1 should document `worker_threads` as:
 
 - disabled by default
 - unavailable in the current Embedded Node build even when the experimental flag is enabled
 - not part of the stable Node Profile v1 surface
-- not an advertised runnable experiment for GA
+- not a runnable v1.1 partial capability until native availability changes
+- not an advertised runnable experiment for GA or v1.1
 
 The next unblock gate should:
 
