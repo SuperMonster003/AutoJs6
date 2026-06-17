@@ -28,9 +28,9 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun mjsEntryStillRejectsWhenExperimentalFlagIsDisabled() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM experimental bootstrap default-off regression")
-        assertFalse(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
+    fun mjsEntryCanStillRejectWhenEsmIsExplicitlyDisabled() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM partial explicit-off regression")
+        assertTrue(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
 
         val workDir = freshWorkDir("esm-default-off")
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
@@ -47,8 +47,8 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalMjsEntrySupportsLocalStaticImportAndTopLevelAwait() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM experimental bootstrap")
+    fun partialMjsEntrySupportsLocalStaticImportAndTopLevelAwaitByDefault() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM partial bootstrap")
         val workDir = freshWorkDir("esm-local-import")
         val entry = File(workDir, "main.mjs")
         val dependency = File(workDir, "dep.mjs").apply {
@@ -69,10 +69,9 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = entry.absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("experimental mjs import", result)
+        NodeEmbeddedTestHarness.assertSucceeded("partial mjs import", result)
         assertTrue(result.stdout.contains("esm.local=dep.ok"))
         assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
         assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
@@ -82,7 +81,48 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalPackageTypeModuleEntryRunsAsEsm() {
+    fun partialMjsEntrySupportsInjectedModuleSourcesGraph() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM moduleSources graph")
+        val workDir = freshWorkDir("esm-module-sources")
+        val entry = File(workDir, "main.mjs")
+        val dependency = File(workDir, "dep.mjs")
+        val legacy = File(workDir, "legacy.cjs")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                import dep, { named, explode } from "./dep.mjs";
+                import legacy from "./legacy.cjs";
+                let stackOk = false;
+                try {
+                  explode();
+                } catch (error) {
+                  stackOk = String(error && error.stack || "").includes("dep.mjs");
+                }
+                console.log("esm.moduleSources.ready=" + (dep.value === "esm" && named === "named" && legacy.value === "cjs"));
+                console.log("esm.moduleSources.stack=" + stackOk);
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+            moduleSources = mapOf(
+                dependency.absolutePath to """
+                    export default { value: "esm" };
+                    export const named = "named";
+                    export function explode() { throw new Error("moduleSources stack"); }
+                """.trimIndent(),
+                legacy.absolutePath to """module.exports = { value: "cjs" };""",
+            ),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM moduleSources graph", result)
+        assertTrue(result.stdout.contains("esm.moduleSources.ready=true"))
+        assertTrue(result.stdout.contains("esm.moduleSources.stack=true"))
+        assertEquals("2", result.nativeValues["embedded_script.esm_module_graph_size"])
+        assertTrue(result.nativeValues["embedded_script.esm_module_graph_modules"].orEmpty().contains(dependency.absolutePath))
+    }
+
+    @Test
+    fun partialPackageTypeModuleEntryRunsAsEsmByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package type=module bootstrap")
         val workDir = freshWorkDir("esm-type-module")
         File(workDir, "package.json").writeText("""{"type":"module"}""")
@@ -95,13 +135,12 @@ class NodeEsmExperimentalInstrumentationTest {
             """.trimIndent(),
             sourceName = entry.absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("experimental type=module entry", result)
+        NodeEmbeddedTestHarness.assertSucceeded("partial type=module entry", result)
         assertTrue(result.stdout.contains("esm.type=type-module"))
         assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
-        assertEquals("type=module accepted by Embedded Node experimental ESM", result.nativeValues["embedded_script.package_type_module_policy"])
+        assertEquals("type=module accepted by Embedded Node partial ESM", result.nativeValues["embedded_script.package_type_module_policy"])
     }
 
     @Test
@@ -202,7 +241,7 @@ class NodeEsmExperimentalInstrumentationTest {
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("cjs require mjs", result), result.succeeded)
         assertEquals(NodeRuntimeErrorCodes.REQUIRE_ESM_UNSUPPORTED, result.errorCode)
-        assertTrue(result.errorMessage.orEmpty().contains("CommonJS require() cannot load experimental ESM modules"))
+        assertTrue(result.errorMessage.orEmpty().contains("CommonJS require() cannot load AutoJs6 partial ESM modules"))
     }
 
     @Test

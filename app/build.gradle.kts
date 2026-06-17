@@ -130,7 +130,7 @@ val nodeJsEmbeddedProbeLifecycleEnabled = providers.gradleProperty("autojs.nodej
 val nodeJsEmbeddedScriptEnabled = providers.gradleProperty("autojs.nodejs.embedded.script.enabled").orElse("true").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
-val nodeJsEsmExperimentalEnabled = providers.gradleProperty("autojs.nodejs.esm.experimental").orElse("false").get()
+val nodeJsEsmExperimentalEnabled = providers.gradleProperty("autojs.nodejs.esm.experimental").orElse("true").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val nodeJsDynamicImportExperimentalEnabled = providers.gradleProperty("autojs.nodejs.dynamicImport.experimental").orElse("false").get()
@@ -161,7 +161,6 @@ val nodeJsReleaseTaskRequested = taskNames.any { rawTaskName ->
                     )
 }
 val nodeJsReleaseForbiddenExperimentalFlags = linkedMapOf(
-    "autojs.nodejs.esm.experimental" to nodeJsEsmExperimentalEnabled,
     "autojs.nodejs.dynamicImport.experimental" to nodeJsDynamicImportExperimentalEnabled,
     "autojs.nodejs.network.experimental" to nodeJsNetworkExperimentalEnabled,
     "autojs.nodejs.worker_threads.experimental" to nodeJsWorkerThreadsExperimentalEnabled,

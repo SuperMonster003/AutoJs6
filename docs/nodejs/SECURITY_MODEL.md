@@ -111,17 +111,17 @@ Release builds reject release-forbidden experimental flags even when a Gradle pr
 
 ## ESM Policy
 
-ESM is experimental and disabled by default.
+ESM is partial and enabled by default in Node Profile v1.1.
 
-The build flag is `autojs.nodejs.esm.experimental=false`. Dynamic import has its own gate, `autojs.nodejs.dynamicImport.experimental=false`. With the flags off:
+The legacy build switch is `autojs.nodejs.esm.experimental=true`. Dynamic import has its own gate, `autojs.nodejs.dynamicImport.experimental=false`. With ESM enabled and dynamic import off:
 
-- `.mjs` routes to the Node backend but fails before execution
-- static `import`/`export` syntax is rejected
+- `.mjs` routes to the Node backend and runs as partial ESM
+- static `import`/`export` syntax is accepted only in ESM entries and ESM graph modules
 - dynamic `import()` is rejected
 - `import.meta` is rejected
-- package `type=module` remains diagnostic-only for current CommonJS loading
+- package `type=module` can route `.js` entries to ESM
 
-With the ESM flag on, ESM v1 is limited to scoped static imports, simple exports, top-level await, CommonJS default import through the existing CommonJS loader, supported builtin imports through the Safe Node allowlist, and package `exports`/`imports` condition selection with the ESM condition set. ESM package targets may use `.mjs` only when they remain inside the package root and working directory. It must not bypass scoped filesystem, package target, builtin, native addon, network, or bridge policies. Disabled builtins remain disabled when imported from ESM. Dynamic import remains disabled unless the separate dynamic import gate is also enabled. When enabled, dynamic import is limited to local relative specifiers inside `workingDirectory`; package/builtin imports, URL imports, absolute paths, and escapes remain denied. Loader hooks, raw Node loader authority from `node:module`, and CJS `require()` of ESM remain disabled; the CJS-to-ESM boundary fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED` when the experimental flag is enabled.
+ESM v1.1 is limited to scoped static imports, simple exports, top-level await, CommonJS default import through the existing CommonJS loader, supported builtin imports through the Safe Node allowlist, and package `exports`/`imports` condition selection with the ESM condition set. ESM package targets may use `.mjs` only when they remain inside the package root and working directory. It must not bypass scoped filesystem, package target, builtin, native addon, network, or bridge policies. Disabled builtins remain disabled when imported from ESM. Dynamic import remains disabled unless the separate dynamic import gate is also enabled. When enabled, dynamic import is limited to local relative specifiers inside `workingDirectory`; package/builtin imports, URL imports, absolute paths, and escapes remain denied. Loader hooks, raw Node loader authority from `node:module`, and CJS `require()` of ESM remain disabled; the CJS-to-ESM boundary fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
 
 ## Privacy-Safe Compatibility Modules
 

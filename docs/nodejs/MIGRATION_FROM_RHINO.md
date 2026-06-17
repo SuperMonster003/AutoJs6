@@ -22,7 +22,7 @@ main.cjs
 main.mjs
 ```
 
-`.mjs` currently routes to the Node backend, but ESM remains disabled by default in AutoJs6 Safe Node Profile. Use CommonJS (`require`) unless an explicit future ESM flag says otherwise.
+`.mjs` currently routes to the Node backend and runs through the Node Profile v1.1 partial ESM path. Use CommonJS (`require`) when you need the widest compatibility; partial ESM supports local static imports, selected builtin imports, and ESM-to-CJS interop, but not the full desktop Node loader.
 
 For projects, prefer:
 

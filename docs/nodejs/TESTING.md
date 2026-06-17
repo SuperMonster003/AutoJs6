@@ -506,15 +506,15 @@ Current feature flag registry focused instrumentation:
 
 This suite verifies the centralized `NodeRuntimeCapabilities.featureFlags` registry, safe defaults for high and critical security flags, build-only/debug-only/release-forbidden classification, denied project/package override policy, debug build-time override allowance, release build override rejection, unknown-flag rejection warnings, Node project/package metadata rejection, and JavaScript `require("autojs6:profile").featureFlags` diagnostics.
 
-Current ESM experimental focused instrumentation:
+Current ESM partial focused instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest"
 ```
 
-This suite keeps `.mjs` rejected with the default flag, then enables the internal experimental request flag to cover `.mjs` entry execution, local static `.mjs` imports, top-level await, package `type=module` entry routing, scoped import escape denial, ESM default import from CommonJS, ESM import of supported builtins, disabled builtin rejection from ESM, CJS `require()` of ESM rejection with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`, package `exports`/`imports` condition selection with resolver trace for both ESM and CommonJS importers, `.mjs` package targets, nested package imports, self-reference, null blocking, unsafe target denial, dynamic import default denial when only ESM is enabled, experimental local relative dynamic import, dynamic import scoped escape denial, and package/URL dynamic import rejection.
+This suite verifies that `.mjs` can still be rejected by an explicit ESM-off diagnostic request, then covers default partial `.mjs` entry execution, local static `.mjs` imports, top-level await, package `type=module` entry routing, scoped import escape denial, ESM default import from CommonJS, ESM import of supported builtins, disabled builtin rejection from ESM, CJS `require()` of ESM rejection with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`, package `exports`/`imports` condition selection with resolver trace for both ESM and CommonJS importers, `.mjs` package targets, nested package imports, self-reference, null blocking, unsafe target denial, dynamic import default denial when only ESM is enabled, experimental local relative dynamic import, dynamic import scoped escape denial, and package/URL dynamic import rejection.
 
-Experimental packaged `.mjs` smoke is deliberately gated behind the Gradle flag:
+Packaged `.mjs` smoke requires a refreshed inrt template built with ESM enabled:
 
 ```powershell
 .\gradlew.bat --console=plain :app:assembleInrtDebug :app:assembleAppDebug :app:assembleAppDebugAndroidTest "-Pautojs.nodejs.esm.experimental=true"
@@ -522,7 +522,7 @@ adb push app\build\outputs\apk\inrt\debug\inrt-v6.7.1-alpha4-universal.apk /sdca
 adb shell am instrument -w -r -e class org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk -e autojs.embeddedNode.packagedSmokeTemplateOverride true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
-With the default flags off, the packaged ESM diagnostics smoke continues to assert `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`, and the packaged dynamic import diagnostics smoke continues to assert `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`. The experimental packaged smoke intentionally requires a refreshed inrt template override because release/default templates must keep ESM and dynamic import disabled. The current packaged ESM smoke is a single-file `.mjs` entry check; encrypted packaged ESM and dynamic import module graphs are still design-gated follow-ups.
+With ESM partial enabled by default, the packaged ESM diagnostics smoke asserts the CommonJS-to-ESM boundary with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`, and the packaged dynamic import diagnostics smoke continues to assert `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`. The packaged `.mjs` smoke intentionally requires a refreshed inrt template override because older templates may still carry default-off ESM wiring. The current packaged ESM smoke covers a `.mjs` entry importing a local `.mjs` dependency and a local CommonJS dependency through encrypted runtime module sources, plus source-name stack shape. Dynamic import module graphs are still design-gated follow-ups.
 
 Current GA promotion evaluation: `docs/nodejs/reports/ESM_EXPERIMENTAL_EVALUATION.md`.
 Current v1.1 promotion evaluation: `docs/nodejs/releases/V1_1_ESM_PROMOTION.md`.
@@ -701,7 +701,7 @@ Every release candidate should cover these classes of denial:
 - `worker_threads` default denial and design-gate flag
 - static ESM import
 - dynamic import
-- `autojs.nodejs.esm.experimental=false` keeps `.mjs` rejected by default
+- `autojs.nodejs.esm.experimental=true` keeps `.mjs` enabled by default; explicit ESM-off requests still reject
 - `autojs.nodejs.worker_threads.experimental=false` keeps worker threads rejected by default
 - absolute filesystem paths
 - `..` filesystem escape

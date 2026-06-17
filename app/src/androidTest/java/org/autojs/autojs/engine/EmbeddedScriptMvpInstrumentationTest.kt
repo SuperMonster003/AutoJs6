@@ -1644,8 +1644,8 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertTrue(result.stdout.contains("profile.readonly=true"))
         assertTrue(result.stdout.contains("profile.identity=true"))
         assertTrue(result.stdout.contains("profile.resolve=autojs6:profile"))
-        assertTrue(result.stdout.contains("profile.flags=true/false/false/false/false/false/true"))
-        assertTrue(result.stdout.contains("profile.experimental=false/false/false"))
+        assertTrue(result.stdout.contains("profile.flags=true/true/false/false/false/false/true"))
+        assertTrue(result.stdout.contains("profile.experimental=true/false/false"))
         assertTrue(result.stdout.contains("profile.frozen=true/true/true/true/true/true/true/true"))
         assertTrue(result.stdout.contains("profile.builtins=true/true/true/true/true/false"))
         assertTrue(result.stdout.contains("profile.errors=ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED"))
@@ -20346,7 +20346,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 moduleSources = mapOf(preferred.canonicalPath to """module.exports = "preloaded";"""),
             )
             assertTrue(precedence.errorMessage.orEmpty(), precedence.succeeded)
-            assertTrue(precedence.stdout.contains("module.createRequire.target.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"))
+            assertTrue(precedence.stdout.contains("module.createRequire.target.esm.code=ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED"))
             assertTrue(precedence.stdout.contains("module.createRequire.target.native.message=true"))
             assertTrue(precedence.stdout.contains("module.createRequire.precedence=preloaded"))
             assertEquals("0", precedence.nativeValues["embedded_script.dynamic_require_fallback_loaded_count"])
@@ -21292,7 +21292,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun nodeProjectRunnerProjectMainKeepsMjsUnsupportedGate() {
+    fun nodeProjectRunnerProjectMainSupportsMjsEntry() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val projectRoot = File(context.cacheDir, "embedded-node-project-main-mjs-${System.nanoTime()}").apply {
@@ -21309,10 +21309,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             val request = NativeNodeEmbeddedProjectRunner.ProjectRequest(projectRoot = projectRoot)
             val result = NativeNodeEmbeddedProjectRunner.runProject(context, request)
 
-            assertFalse(result.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", result.errorCode)
-            assertTrue(result.errorMessage.orEmpty().contains("ESM/import"))
-            assertTrue(result.errorMessage.orEmpty().contains(".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."))
+            assertTrue(NodeEmbeddedTestHarness.describeResult("project main mjs", result), result.succeeded)
+            assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
             assertEquals("project", result.nativeValues["embedded_project_runner.kind"])
             assertEquals(entry.canonicalPath, result.nativeValues["embedded_project_runner.entry_file"])
         } finally {
@@ -22766,7 +22765,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun nodeProjectRunnerRejectsUnsafeEntriesAndLeavesEsmUnsupported() {
+    fun nodeProjectRunnerSupportsMjsAndRejectsUnsafeEntries() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val projectRoot = File(context.cacheDir, "embedded-node-project-runner-deny-${System.nanoTime()}").apply {
@@ -22779,10 +22778,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             }
             val esmRequest = NodeProjectRunRequest(projectRoot = projectRoot, entryFile = esmEntry)
             val esm = runNodeProject(esmRequest)
-            assertFalse(esm.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esm.errorCode)
-            assertTrue(esm.errorMessage.orEmpty().contains("ESM/import"))
-            assertTrue(esm.errorMessage.orEmpty().contains(".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."))
+            assertTrue(describeNodeProjectRun(esmRequest, esm), esm.succeeded)
+            assertEquals("true", esm.nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", esm.nativeValues["embedded_script.esm_entry"])
 
             val nativeEntry = File(projectRoot, "entry.node").apply {
                 writeText("native", StandardCharsets.UTF_8)
@@ -25150,7 +25148,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 listOf("--cwd", ".", "--config", "tool.config.mjs", "--out", "dist/result.json"),
             )
             assertFalse(esmConfig.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esmConfig.errorCode)
+            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", esmConfig.errorCode)
 
             settleEmbeddedScriptServiceProcess()
 
@@ -25359,7 +25357,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 ),
             )
             assertFalse(mjsConfig.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", mjsConfig.errorCode)
+            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", mjsConfig.errorCode)
 
             settleEmbeddedScriptServiceProcess()
 
@@ -25578,9 +25576,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                 mapOf("cli.mjs" to "export default 1;\n"),
             )
             val esm = runEmbeddedPackageBin(projectDir = esmPackage, packageDir = esmPackage, binName = "esm")
-            assertFalse(esm.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esm.errorCode)
-            assertTrue(esm.errorMessage.orEmpty().contains("ESM/import"))
+            assertTrue(esm.errorMessage.orEmpty(), esm.succeeded)
+            assertEquals("true", esm.nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", esm.nativeValues["embedded_script.esm_entry"])
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -26272,8 +26270,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             )
 
             val esm = runFailure("""const target = "./esm.mjs"; require(target);""")
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esm.errorCode)
-            assertMessageContains(esm, "ESM/import is not supported", "./esm.mjs", "request='./esm.mjs'")
+            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", esm.errorCode)
+            assertMessageContains(esm, "CommonJS require() cannot load AutoJs6 partial ESM modules", "./esm.mjs", "request='./esm.mjs'")
 
             val native = runFailure("""const target = "./native.node"; require(target);""")
             assertMessageContains(native, "Unsupported Embedded Node local module extension", "./native.node", "request='./native.node'")
@@ -27146,8 +27144,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 workingDirectory = scriptDir.canonicalPath,
             )
             assertFalse(esm.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", esm.errorCode)
-            assertTrue(esm.errorMessage.orEmpty().contains("ESM/import is not supported"))
+            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", esm.errorCode)
+            assertTrue(esm.errorMessage.orEmpty().contains("CommonJS require() cannot load AutoJs6 partial ESM modules"))
             assertTrue(esm.errorMessage.orEmpty().contains(".mjs"))
         } finally {
             outsideFile.delete()
@@ -27677,19 +27675,17 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun esmUnsupportedGateRejectsMjsEntrypointsAndCommonJsResolutionTargets() {
+    fun esmPartialSupportsMjsEntrypointsAndKeepsCommonJsRequireBoundary() {
         assumeEmbeddedScriptExecutionEnabled()
 
-        assertFalse(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
-        val esmCode = "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
-        val esmMessage = "ESM/import is not supported in Embedded Node.js MVP"
-        val mjsMessage = ".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."
+        assertTrue(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
+        val requireEsmCode = "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED"
         val scriptDir = File(context.cacheDir, "embedded-esm-gate-${System.nanoTime()}").apply {
             check(mkdirs()) { "Failed to create ESM gate test dir: $absolutePath" }
         }
         try {
             val entryMjs = File(scriptDir, "entry.mjs").apply {
-                writeText("""console.log("should-not-run");""", StandardCharsets.UTF_8)
+                writeText("""console.log("esm.entry.default=true");""", StandardCharsets.UTF_8)
             }
 
             val entry = runEmbeddedScript(
@@ -27697,10 +27693,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                 sourceName = entryMjs.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
             )
-            assertFalse(entry.succeeded)
-            assertEquals(esmCode, entry.errorCode)
-            assertTrue(entry.errorMessage.orEmpty().contains(esmMessage))
-            assertTrue(entry.errorMessage.orEmpty().contains(mjsMessage))
+            assertTrue(entry.errorMessage.orEmpty(), entry.succeeded)
+            assertTrue(entry.stdout, entry.stdout.contains("esm.entry.default=true"))
+            assertEquals("true", entry.nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", entry.nativeValues["embedded_script.esm_entry"])
 
             settleEmbeddedScriptServiceProcess()
 
@@ -27714,8 +27710,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                       } catch (error) {
                         console.log(label + ".code=" + error.code);
                         const message = String(error.message).replace(/\s+/g, " ");
-                        console.log(label + ".message=" + message.includes("ESM/import is not supported in Embedded Node.js MVP"));
-                        console.log(label + ".mjsMessage=" + message.includes(".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."));
+                        console.log(label + ".message=" + message.includes("CommonJS require() cannot load AutoJs6 partial ESM modules"));
+                        console.log(label + ".mjsMessage=" + message.includes(".mjs"));
                       }
                     }
                     console.log("cjs=" + require("./dep.cjs"));
@@ -27784,7 +27780,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("cjs=inner+dep"))
             assertTrue(result.stdout, result.stdout.contains("typeModuleJs=type-module-js-cjs"))
             listOf("relativeMjs", "mainMjs", "exportsMjs", "importsMjs").forEach { label ->
-                assertTrue(result.stdout, result.stdout.contains("$label.code=$esmCode"))
+                assertTrue(result.stdout, result.stdout.contains("$label.code=$requireEsmCode"))
                 assertTrue(result.stdout, result.stdout.contains("$label.message=true"))
                 assertTrue(result.stdout, result.stdout.contains("$label.mjsMessage=true"))
             }
@@ -28317,7 +28313,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """
             )
             assertFalse(mainMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", mainMjs.errorCode)
+            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", mainMjs.errorCode)
             assertTrue(mainMjs.errorMessage.orEmpty().contains("main-mjs-pkg"))
             assertTrue(mainMjs.errorMessage.orEmpty().contains("target='./esm.mjs'"))
             assertTrue(mainMjs.errorMessage.orEmpty().contains("ignoredFields='module|browser|types'"))
@@ -28815,7 +28811,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """
             )
             assertFalse(createRequireMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", createRequireMjs.errorCode)
+            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", createRequireMjs.errorCode)
             assertTrue(createRequireMjs.errorMessage.orEmpty().contains("require-mjs-pkg"))
             assertTrue(createRequireMjs.errorMessage.orEmpty().contains("target='./esm.mjs'"))
             assertTrue(createRequireMjs.errorMessage.orEmpty().contains("conditionKeys='import|require'"))
@@ -28833,7 +28829,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """
             )
             assertFalse(importsDefaultMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", importsDefaultMjs.errorCode)
+            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", importsDefaultMjs.errorCode)
             assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("#default-mjs"))
             assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("field='imports'"))
             assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("selectedCondition='default'"))
@@ -30771,14 +30767,14 @@ class EmbeddedScriptMvpInstrumentationTest {
         settleEmbeddedScriptServiceProcess()
 
         val esm = runEmbeddedScript(
-            """console.log("mjs should not execute");""",
+            """console.log(import.meta.url);""",
             "embedded-envelope-esm-source.mjs",
         )
         assertErrorEnvelope(
             result = esm,
             sourceName = "embedded-envelope-esm-source.mjs",
             errorName = "Error",
-            messageToken = "ESM/import is not supported in Embedded Node.js MVP",
+            messageToken = "import.meta is disabled for partial ESM module",
             errorCode = "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
         )
 
@@ -30924,7 +30920,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun fileEngineTypeNodeProjectRunnerKeepsMjsUnsupportedGate() {
+    fun fileEngineTypeNodeProjectRunnerSupportsMjsEntry() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val projectRoot = File(context.cacheDir, "embedded-type-node-project-mjs-${System.nanoTime()}").apply {
@@ -30937,12 +30933,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             }
 
             val engine = NativeNodeEmbeddedJavaScriptEngine(context)
-            val failure = runCatching { engine.doExecution(JavaScriptFileSource(entry)) }.exceptionOrNull()
-            assertTrue("Expected ESM unsupported failure", failure != null)
-            val message = failure?.message.orEmpty()
-            assertTrue(message, message.contains("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"))
-            assertTrue(message, message.contains("ESM/import"))
-            assertTrue(message, message.contains(".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile."))
+            assertEquals(0, engine.doExecution(JavaScriptFileSource(entry)))
+            val nativeValues = engine.lastEmbeddedScriptResultNativeValues
+            assertEquals("true", nativeValues["embedded_script.esm_enabled"])
+            assertEquals("true", nativeValues["embedded_script.esm_entry"])
         } finally {
             runCatching { RhinoContext.exit() }
             projectRoot.deleteRecursively()

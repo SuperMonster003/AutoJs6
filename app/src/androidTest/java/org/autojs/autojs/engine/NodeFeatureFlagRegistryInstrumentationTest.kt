@@ -47,16 +47,18 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             ids,
         )
 
-        assertFalse(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
+        assertTrue(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED)
-        assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.ESM_EXPERIMENTAL_PROPERTY])
+        assertEquals(null, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.ESM_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY])
+        assertTrue(NodeRuntimeCapabilities.featureFlagsById.getValue("esm").defaultEnabled)
+        assertEquals("partial", NodeRuntimeCapabilities.featureFlagsById.getValue("esm").status)
 
         flags
             .filter { it.securityLevel == "high" || it.securityLevel == "critical" }
@@ -74,9 +76,10 @@ class NodeFeatureFlagRegistryInstrumentationTest {
         val buildOverrideAllowed = flags.filter { it.buildTimeOverrideAllowed }.map { it.id }.toSet()
         assertEquals(setOf("esm", "dynamic_import", "network", "worker_threads", "java_interop"), buildOverrideAllowed)
         assertEquals(buildOverrideAllowed, NodeRuntimeCapabilities.buildOnlyFeatureFlags.map { it.id }.toSet())
-        assertEquals(buildOverrideAllowed, NodeRuntimeCapabilities.debugOnlyFeatureFlags.map { it.id }.toSet())
+        assertEquals(buildOverrideAllowed - "esm", NodeRuntimeCapabilities.debugOnlyFeatureFlags.map { it.id }.toSet())
         assertEquals(emptySet<String>(), NodeRuntimeCapabilities.projectAllowedFeatureFlags.map { it.id }.toSet())
         assertEquals(emptySet<String>(), NodeRuntimeCapabilities.packagedAllowedFeatureFlags.map { it.id }.toSet())
+        assertFalse(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "esm" })
         assertTrue(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "network" })
         assertTrue(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "java_interop" })
         assertFalse(NodeRuntimeCapabilities.featureFlagsById.getValue("fs_streams").releaseForbidden)
@@ -152,7 +155,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
         )
 
         assertTrue(releaseAudit.hasRejectedOverrides)
-        assertEquals(setOf("esm", "network", "java_interop"), releaseAudit.rejectedFeatureIds.toSet())
+        assertEquals(setOf("network", "java_interop"), releaseAudit.rejectedFeatureIds.toSet())
         assertTrue(releaseAudit.rejected.all { it.reason == "release_forbidden" })
     }
 
@@ -217,7 +220,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             "nodejs";
             const profile = require("autojs6:profile");
             const expected = {
-              esm: false,
+              esm: true,
               dynamic_import: false,
               network: false,
               raw_node_network_modules: false,
@@ -251,6 +254,9 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             if (!Array.isArray(profile.enabledExperimentalFlags) || profile.enabledExperimentalFlags.length !== 0) {
               throw new Error("no experimental flags should be enabled by default");
             }
+            if (profile.featureFlags.esm.status !== "partial" || profile.featureFlags.esm.enabled !== true) {
+              throw new Error("esm partial default mismatch");
+            }
             if (profile.featureFlags.dynamic_import.gradleProperty !== "autojs.nodejs.dynamicImport.experimental") {
               throw new Error("dynamic_import gradle property mismatch");
             }
@@ -271,8 +277,8 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             }
             if (
               profile.featureFlags.esm.buildOnly !== true ||
-              profile.featureFlags.esm.debugOnly !== true ||
-              profile.featureFlags.esm.releaseForbidden !== true
+              profile.featureFlags.esm.debugOnly !== false ||
+              profile.featureFlags.esm.releaseForbidden !== false
             ) {
               throw new Error("esm classification mismatch");
             }
@@ -296,10 +302,13 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             if (profile.experimentalFlags.dynamicImport !== false) {
               throw new Error("dynamicImport experimental snapshot mismatch");
             }
+            if (profile.experimentalFlags.esm !== true) {
+              throw new Error("legacy esm experimental snapshot mismatch");
+            }
             if (profile.experimentalFlags.javaInterop !== false) {
               throw new Error("javaInterop experimental snapshot mismatch");
             }
-            for (const id of ["esm", "dynamic_import", "network", "worker_threads", "child_process", "native_addon", "java_interop"]) {
+            for (const id of ["dynamic_import", "network", "worker_threads", "child_process", "native_addon", "java_interop"]) {
               if (!profile.deniedFeatureFlags.includes(id)) {
                 throw new Error("deniedFeatureFlags missing " + id);
               }

@@ -26,8 +26,8 @@ Stable Node routing accepts:
 - `project.json` with `type: "node"` or `projectType: "node"`
 - encrypted script metadata that marks the script as a Node entry
 
-`.mjs` preserves user intent and routes to Node. Default GA behavior still rejects ESM execution unless an explicit
-experimental build enables `autojs.nodejs.esm.experimental=true`.
+`.mjs` preserves user intent and routes to Node. In Node Profile v1.1, `.mjs` runs through the partial ESM path by
+default. CommonJS remains the widest-compatibility path, and dynamic `import()` is still separately gated.
 
 ## Project Shape
 

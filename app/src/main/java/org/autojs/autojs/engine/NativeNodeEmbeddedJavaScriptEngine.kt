@@ -403,7 +403,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         }
         val runtimeSources = linkedMapOf<String, String>()
         root.walkTopDown()
-            .filter { file -> file.isFile && file.extension.lowercase() in COMMON_JS_MODULE_EXTENSIONS }
+            .filter { file -> file.isFile && file.extension.lowercase() in RUNTIME_MODULE_SOURCE_EXTENSIONS }
             .map { file -> file to file.relativePathInside(root) }
             .sortedWith(
                 compareBy<Pair<File, String>>(
@@ -1010,6 +1010,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         const val RUNTIME_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
         const val RUNTIME_MODULE_SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
         val COMMON_JS_MODULE_EXTENSIONS = NodeRuntimeCapabilities.commonJsModuleExtensions
+        val RUNTIME_MODULE_SOURCE_EXTENSIONS = COMMON_JS_MODULE_EXTENSIONS + MJS_EXTENSION
         val COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS = NodeRuntimeCapabilities.commonJsRecursiveSourceExtensions
         val PACKAGE_JSON_EXPORT_CONDITIONS = NodeRuntimeCapabilities.packageJsonExportConditions
         const val COMMON_JS_REQUIRE_SEPARATOR = """(?:\s|/\*[\s\S]*?\*/|//[^\r\n]*(?:\r?\n|$))*"""

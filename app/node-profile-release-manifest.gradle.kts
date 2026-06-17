@@ -275,7 +275,7 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
             ),
             "nodeProfile" to linkedMapOf(
                 "name" to "AutoJs6 Safe Node Profile",
-                "engine" to "autojs6-node-profile-v1",
+                "engine" to "autojs6-node-profile-v1.1",
                 "expectedNode" to "v24.5.0",
                 "releaseFlavor" to releaseFlavor,
                 "backend" to effectiveBackend,

@@ -553,8 +553,8 @@ class EmbeddedNodePackagedApkSmokeTest {
                   resolverAgain === resolver,
                 blocked: errorCodeOf(() => require("resolver-edge-pkg/private/secret")) === "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
                   imports.blocked === "ERR_PACKAGE_IMPORT_NOT_DEFINED",
-                esmRejected: errorCodeOf(() => require("resolver-edge-pkg/esm")) === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
-                  imports.esm === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
+                esmRejected: errorCodeOf(() => require("resolver-edge-pkg/esm")) === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
+                  imports.esm === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED"
               };
               console.log("packaged.cjs.resolver.ready=true");
               console.log("packaged.cjs.resolver.ok=" + Object.values(checks).every(Boolean));
@@ -8733,7 +8733,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             const typeModuleMain = capture(() => require("diagnostic-type-module"));
             const typeModuleMessage = String(typeModuleMain.message);
             console.log("packaged.diagnostics.esm.type_module.message=" + (
-              typeModuleMain.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
+              typeModuleMain.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
               typeModuleMessage.includes("diagnostic-type-module") &&
               typeModuleMessage.includes("package.json") &&
               typeModuleMessage.includes("field='main'") &&
@@ -8743,7 +8743,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             const exportsContext = capture(() => require("diagnostic-esm-export-context"));
             const exportsContextMessage = String(exportsContext.message);
             console.log("packaged.diagnostics.esm.exports_context=" + (
-              exportsContext.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
+              exportsContext.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
               exportsContextMessage.includes("diagnostic-esm-export-context") &&
               exportsContextMessage.includes("field='exports'") &&
               exportsContextMessage.includes("conditionKeys='import|require'") &&
@@ -8895,7 +8895,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                   console.log("packaged.diagnostics.esm.unexpected=true");
                 } catch (error) {
                   console.log("packaged.diagnostics.esm.code=" + error.code);
-                  console.log("packaged.diagnostics.esm.message=" + String(error.message).includes("ESM/import is not supported"));
+                  console.log("packaged.diagnostics.esm.message=" + String(error.message).includes("CommonJS require() cannot load AutoJs6 partial ESM modules"));
                 }
             """.trimIndent() + "\n",
             extraFiles = mapOf(
@@ -8909,20 +8909,19 @@ class EmbeddedNodePackagedApkSmokeTest {
     @Test
     fun installAndRunExperimentalEsmEmbeddedNodePackagedApk() {
         assumeTrue(
-            "Embedded Node.js packaged experimental ESM smoke requires embedded script execution build support.",
+            "Embedded Node.js packaged partial ESM smoke requires embedded script execution build support.",
             BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
         )
         assumeTrue(
-            "Embedded Node.js packaged experimental ESM smoke requires -Pautojs.nodejs.esm.experimental=true.",
+            "Embedded Node.js packaged partial ESM smoke requires Node Profile v1.1 ESM to be enabled.",
             BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         )
         assumeTrue(
-            "Embedded Node.js packaged experimental ESM smoke requires a refreshed inrt template override built with " +
-                    "-Pautojs.nodejs.esm.experimental=true.",
+            "Embedded Node.js packaged partial ESM smoke requires a refreshed inrt template override built with ESM enabled.",
             isPackagedSmokeTemplateOverrideEnabled(),
         )
 
-        assumePackagedSmokeTemplateAvailable("Packaged experimental ESM install-and-run smoke")
+        assumePackagedSmokeTemplateAvailable("Packaged partial ESM install-and-run smoke")
 
         val outputApk = buildPackagedGateDiagnosticsApk(
             rootName = "embedded-node-packaged-experimental-esm-smoke",
@@ -8931,15 +8930,35 @@ class EmbeddedNodePackagedApkSmokeTest {
             packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
             mainScriptName = "main.mjs",
             mainScript = """
+                import dep, { named, explode } from "./lib.mjs";
+                import legacy from "./legacy.cjs";
+
                 const value = 42;
                 const suffix = "esm-v1";
                 const awaited = await Promise.resolve("awaited");
-                const ready = value === 42 && suffix === "esm-v1" && awaited === "awaited";
+                let stackOk = false;
+                try {
+                  explode();
+                } catch (error) {
+                  stackOk = String(error && error.stack || "").includes("lib.mjs");
+                }
+                const graph = dep.value === "esm-lib" && named === "named" && legacy.value === "legacy";
+                const ready = value === 42 && suffix === "esm-v1" && awaited === "awaited" && graph && stackOk;
 
                 console.log("packaged.experimental_esm.ready=" + ready);
                 console.log("packaged.experimental_esm.entry=" + (value === 42 && suffix === "esm-v1"));
                 console.log("packaged.experimental_esm.tla=" + (awaited === "awaited"));
+                console.log("packaged.experimental_esm.graph=" + graph);
+                console.log("packaged.experimental_esm.stack_source=" + stackOk);
             """.trimIndent() + "\n",
+            extraFiles = mapOf(
+                "lib.mjs" to """
+                    export default { value: "esm-lib" };
+                    export const named = "named";
+                    export function explode() { throw new Error("packaged esm source"); }
+                """.trimIndent() + "\n",
+                "legacy.cjs" to """module.exports = { value: "legacy" };""" + "\n",
+            ),
             runtimeMarkers = EXPERIMENTAL_ESM_RUNTIME_MARKERS,
             requiredTemplateDexMarkers = EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS,
         )
@@ -12164,7 +12183,7 @@ $permissionsJson
             outputApk = outputApk,
             packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
             shellApkPath = "/data/local/tmp/autojs6-packaged-node-experimental-esm-smoke.apk",
-            label = "packaged experimental ESM smoke",
+            label = "packaged partial ESM smoke",
             requiredMarkers = EXPERIMENTAL_ESM_RUNTIME_MARKERS,
         )
     }
@@ -13415,7 +13434,7 @@ $permissionsJson
             "packaged.diagnostics.esm.type_module.message=true",
             "packaged.diagnostics.esm.exports_context=true",
             "packaged.diagnostics.after_failure.ok=true",
-            "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
+            "packaged.diagnostics.esm.code=ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
             "packaged.diagnostics.dynamic_import.code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED",
             "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",
             "packaged.diagnostics.timeout.timedOut=true",
@@ -13434,13 +13453,15 @@ $permissionsJson
             "packaged.diagnostics.after_failure.ok=true",
         )
         private val ESM_DIAGNOSTICS_MARKERS = listOf(
-            "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
+            "packaged.diagnostics.esm.code=ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
             "packaged.diagnostics.esm.message=true",
         )
         private val EXPERIMENTAL_ESM_RUNTIME_MARKERS = listOf(
             "packaged.experimental_esm.ready=true",
             "packaged.experimental_esm.entry=true",
             "packaged.experimental_esm.tla=true",
+            "packaged.experimental_esm.graph=true",
+            "packaged.experimental_esm.stack_source=true",
         )
         private val EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS = listOf(
             "esmExperimentalEnabled=",

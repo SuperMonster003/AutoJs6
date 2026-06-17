@@ -150,7 +150,7 @@ object NodeDoctorReportGenerator {
         put("disabledProcessApis", JSONArray(NodeRuntimeCapabilities.disabledProcessApis.sorted()))
         put("scopedFs", true)
         put("commonJs", true)
-        put("esmDefaultEnabled", false)
+        put("esmDefaultEnabled", NodeRuntimeCapabilities.featureFlagsById.getValue("esm").defaultEnabled)
         put("nativeAddonDefaultEnabled", false)
         put("childProcessDefaultEnabled", false)
     }

@@ -41,10 +41,10 @@ AutoJs6 behavior:
 
 - `"nodejs";` and `"node";` route to the Node backend.
 - `.node.js`, `.cjs`, and `.mjs` route to the Node backend.
-- `.mjs` is a Node route, but ESM execution remains disabled by default.
-- default ESM rejection uses `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
+- `.mjs` runs through the Node Profile v1.1 partial ESM path by default.
+- CommonJS `require()` of ESM remains rejected with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
 
-Porting note: use `.cjs` or `"nodejs";` plus CommonJS `require()` for current AutoJs6 compatibility.
+Porting note: use `.cjs` or `"nodejs";` plus CommonJS `require()` when you need the widest AutoJs6 compatibility.
 
 ## Module Style
 
@@ -56,7 +56,8 @@ AutoJs6 behavior:
 
 - CommonJS `require()` is the primary supported module system.
 - package `main`, `exports`, `imports`, self-reference, scoped packages, and JSON modules are supported within the Safe Node Profile.
-- ESM static import and dynamic import are disabled by default.
+- ESM static import is partially supported from `.mjs` and `type=module` entries.
+- Dynamic import is disabled by default.
 
 Porting note:
 
@@ -188,7 +189,7 @@ AutoJs6 packaged Node APK support is a first-class target, but it is tied to the
 - module sources and encrypted Node entries are checked by packaged diagnostics.
 - `nodeFull`, `nodeMini`, and `rhinoOnly` release flavor policy is enforced.
 
-Porting note: a Pro/AutoX Node script that runs in its original environment may still fail packaged AutoJs6 verification if it depends on unsupported builtins, unrestricted fs, native addons, raw network, or ESM.
+Porting note: a Pro/AutoX Node script that runs in its original environment may still fail packaged AutoJs6 verification if it depends on unsupported builtins, unrestricted fs, native addons, raw network, full desktop ESM loader behavior, or dynamic import.
 
 ## Quick Porting Matrix
 
@@ -196,7 +197,7 @@ Porting note: a Pro/AutoX Node script that runs in its original environment may 
 | --- | --- | --- | --- |
 | Default `.js` engine | Rhino | Rhino | Rhino compatibility preserved |
 | Node directive | `"nodejs";` | suffix-focused docs | `"nodejs";` / `"node";` |
-| `.mjs` | Node + ESM | Node + ESM | Node route, ESM disabled by default |
+| `.mjs` | Node + ESM | Node + ESM | Partial ESM |
 | Main module style | `require()` | `import` | `require()` |
 | Dynamic import | not the AutoJs6 target | documented as unsupported | disabled by default |
 | npm install | documented user workflow | not the AutoJs6 target | unsupported |

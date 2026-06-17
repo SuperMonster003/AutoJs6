@@ -72,12 +72,12 @@ data class NodeRuntimeFeatureFlag(
 object NodeRuntimeCapabilities {
 
     const val PROFILE_NAME = "AutoJs6 Safe Node Profile"
-    const val ENGINE_VERSION = "autojs6-node-profile-v1"
+    const val ENGINE_VERSION = "autojs6-node-profile-v1.1"
     const val NODE_HEADER_VERSION = "24.5.0"
     const val NODE_VERSION_EXPECTED_PREFIX = "v24.5.0"
 
     const val ESM_EXPERIMENTAL_PROPERTY = "autojs.nodejs.esm.experimental"
-    const val ESM_EXPERIMENTAL_DEFAULT = false
+    const val ESM_EXPERIMENTAL_DEFAULT = true
     const val DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY = "autojs.nodejs.dynamicImport.experimental"
     const val DYNAMIC_IMPORT_EXPERIMENTAL_DEFAULT = false
     const val NETWORK_EXPERIMENTAL_PROPERTY = "autojs.nodejs.network.experimental"
@@ -102,7 +102,7 @@ object NodeRuntimeCapabilities {
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "medium",
-            status = "experimental",
+            status = "partial",
         ),
         NodeRuntimeFeatureFlag(
             id = "dynamic_import",

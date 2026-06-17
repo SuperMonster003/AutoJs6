@@ -104,10 +104,10 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED
 
-- Meaning: ESM execution is not enabled in the stable profile.
-- Common cause: `.mjs`, `type: "module"`, static `import`, `export`, or `import.meta` is used without the experimental ESM flag.
-- Example: running a `.mjs` entry in a normal GA build.
-- How to fix: use `.cjs` or CommonJS syntax for stable scripts.
+- Meaning: ESM execution is not enabled for this path, or the requested ESM syntax is outside the partial profile.
+- Common cause: ESM was explicitly disabled for a diagnostic run, static `import`/`export` syntax was used in a CommonJS entry, or an unsupported ESM form such as `import.meta` was used.
+- Example: `import.meta.url` in a v1.1 partial ESM module.
+- How to fix: use supported partial ESM syntax, move static imports into a `.mjs` or `type=module` entry, or keep CommonJS syntax in `.cjs`/CommonJS files.
 - Related docs: [design/ESM.md](design/ESM.md), [QUICK_START.md](QUICK_START.md).
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED
@@ -361,9 +361,9 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 ## ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED
 
 - Meaning: CommonJS attempted to require an ESM module in a profile that does not support that boundary.
-- Common cause: `require()` resolves to `.mjs` or package `type: "module"` under the experimental ESM path.
+- Common cause: `require()` resolves to `.mjs` or a package target selected as ESM.
 - Example: `require("./module.mjs")`.
-- How to fix: use CommonJS modules for stable scripts or import from ESM only in an approved experimental flow.
+- How to fix: import the CommonJS dependency from an ESM entry, or provide a CommonJS package branch for `require`.
 - Related docs: [design/ESM.md](design/ESM.md), [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md).
 
 ## ERR_AUTOJS6_SCRIPT_TIMEOUT

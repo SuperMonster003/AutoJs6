@@ -8343,18 +8343,18 @@ std::string buildEmbeddedScriptExecutionSource(
         id: "esm",
         diagnosticName: "esm",
         gradleProperty: "autojs.nodejs.esm.experimental",
-        defaultEnabled: false,
+        defaultEnabled: true,
         enabled: __autojs6_esm_experimental_enabled,
         buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
         buildOnly: true,
-        debugOnly: true,
+        debugOnly: false,
         projectAllowed: false,
         packagedAllowed: false,
-        releaseForbidden: true,
+        releaseForbidden: false,
         securityLevel: "medium",
-        status: "experimental"
+        status: "partial"
       }),
       dynamic_import: Object.freeze({
         id: "dynamic_import",
@@ -8575,7 +8575,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     __autojs6_profile_cache = Object.freeze({
       name: "AutoJs6 Safe Node Profile",
-      engineVersion: "autojs6-node-profile-v1",
+      engineVersion: "autojs6-node-profile-v1.1",
       node: typeof process === "object" && process ? process.version : "",
       cjs: true,
       esm: __autojs6_esm_experimental_enabled,
@@ -13525,7 +13525,7 @@ std::string buildEmbeddedScriptExecutionSource(
       const detail = context + " resolves to an .mjs module for '" + moduleName + "'.";
       if (__autojs6_esm_experimental_enabled) {
         throw __autojs6_require_esm_unsupported(
-          "CommonJS require() cannot load experimental ESM modules in AutoJs6 Safe Node Profile: " + detail
+          "CommonJS require() cannot load AutoJs6 partial ESM modules in AutoJs6 Safe Node Profile: " + detail
         );
       }
       throw __autojs6_esm_unsupported(__autojs6_esm_unsupported_message(__autojs6_mjs_unsupported_detail(detail)));
@@ -26495,7 +26495,7 @@ std::string buildEmbeddedScriptExecutionSource(
       const packageData = __autojs6_package_data(scope.packageJsonResolved, filename);
       if (!__autojs6_package_type_is_module(packageData)) return false;
       __autojs6_package_diagnostics.lastTypeModulePolicy =
-        "type=module accepted by Embedded Node experimental ESM";
+        "type=module accepted by Embedded Node partial ESM";
       __autojs6_package_diagnostics.lastTypeModulePackage =
         __autojs6_package_name(packageData) || __autojs6_diagnostic_path(scope.packageDir);
       __autojs6_package_diagnostics.lastTypeModulePackageJson =
@@ -26517,7 +26517,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_esm_validate_identifier(name, context) {
     const value = String(name || "").trim();
     if (!/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(value)) {
-      throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM identifier in " + context + ": " + value);
+      throw __autojs6_esm_error("Unsupported Embedded Node partial ESM identifier in " + context + ": " + value);
     }
     return value;
   }
@@ -26545,14 +26545,14 @@ std::string buildEmbeddedScriptExecutionSource(
     function bindNamespace(value) {
       const match = /^\*\s+as\s+([A-Za-z_$][0-9A-Za-z_$]*)$/.exec(value.trim());
       if (!match) {
-        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM namespace import in " + sourceName + ": " + value);
+        throw __autojs6_esm_error("Unsupported Embedded Node partial ESM namespace import in " + sourceName + ": " + value);
       }
       lines.push("const " + match[1] + " = " + importVar + ";");
     }
     function bindNamed(value) {
       const body = value.trim();
       if (body.charAt(0) !== "{" || body.charAt(body.length - 1) !== "}") {
-        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import binding in " + sourceName + ": " + value);
+        throw __autojs6_esm_error("Unsupported Embedded Node partial ESM import binding in " + sourceName + ": " + value);
       }
       for (const item of __autojs6_esm_split_named_list(sourceName, body.slice(1, -1))) {
         lines.push("const " + item.local + " = " + importVar + "[" + JSON.stringify(item.exported) + "];");
@@ -26602,10 +26602,10 @@ std::string buildEmbeddedScriptExecutionSource(
     for (const candidate of candidates) {
       const resolved = path.resolve(candidate);
       if (!__autojs6_path_within_root(resolved, root) || __autojs6_sensitive_path(resolved)) {
-        throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+        throw __autojs6_esm_error("Embedded Node partial ESM import escapes working directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
       }
       if (packageDir && !__autojs6_path_within_root(resolved, packageDir)) {
-        throw __autojs6_esm_error("Embedded Node experimental ESM package import escapes package directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+        throw __autojs6_esm_error("Embedded Node partial ESM package import escapes package directory: " + specifier, "ERR_AUTOJS6_FS_PATH_ESCAPE");
       }
       const record = __autojs6_module_record(resolved, true);
       if (!record) continue;
@@ -26615,10 +26615,10 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_throw_if_native_addon_extension(
           extension,
           specifier,
-          "Embedded Node experimental ESM import",
-          "Unsupported Embedded Node experimental ESM import extension: " + specifier
+          "Embedded Node partial ESM import",
+          "Unsupported Embedded Node partial ESM import extension: " + specifier
         );
-        throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import extension: " + specifier);
+        throw __autojs6_esm_error("Unsupported Embedded Node partial ESM import extension: " + specifier);
       }
       __autojs6_resolve_trace("esm import matched", {
         request: specifier,
@@ -26633,14 +26633,14 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_resolve_esm_module(specifier, parentFilename) {
     const path = __autojs6_path_module();
     if (!path || typeof path.resolve !== "function" || typeof path.extname !== "function" || typeof path.isAbsolute !== "function") {
-      throw __autojs6_esm_error("Embedded Node experimental ESM needs the allowlisted path module.");
+      throw __autojs6_esm_error("Embedded Node partial ESM needs the allowlisted path module.");
     }
     const name = String(specifier || "");
     if (name.indexOf("\u0000") >= 0) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM rejects NUL import specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
+      throw __autojs6_esm_error("Embedded Node partial ESM rejects NUL import specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
     }
     if (path.isAbsolute(name)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM rejects absolute import: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+      throw __autojs6_esm_error("Embedded Node partial ESM rejects absolute import: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
     }
     if (__autojs6_esm_builtin_specifier(name)) {
       __autojs6_resolve_trace("esm builtin matched", {
@@ -26652,7 +26652,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (__autojs6_protocol_specifier(name)) {
       const code = /^https?:/i.test(name) ? "ERR_AUTOJS6_NETWORK_DISABLED" : "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
-      throw __autojs6_esm_error("Embedded Node experimental ESM rejects protocol import: " + name, code);
+      throw __autojs6_esm_error("Embedded Node partial ESM rejects protocol import: " + name, code);
     }
     const root = path.resolve(__autojs6_module_root || __autojs6_module_dirname(parentFilename));
     if (name.indexOf("#") === 0) {
@@ -26672,24 +26672,24 @@ std::string buildEmbeddedScriptExecutionSource(
     const parentDir = __autojs6_module_dirname(parentFilename);
     const base = path.resolve(parentDir || root, name);
     if (!__autojs6_path_within_root(base, root) || __autojs6_sensitive_path(base)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+      throw __autojs6_esm_error("Embedded Node partial ESM import escapes working directory: " + name, "ERR_AUTOJS6_FS_PATH_ESCAPE");
     }
     const extension = __autojs6_normalized_extension(path.extname(base));
     __autojs6_throw_if_native_addon_extension(
       extension,
       name,
-      "Embedded Node experimental ESM import",
-      "Unsupported Embedded Node experimental ESM import extension: " + name
+      "Embedded Node partial ESM import",
+      "Unsupported Embedded Node partial ESM import extension: " + name
     );
     if (extension && !__autojs6_is_esm_extension(extension) && !__autojs6_supported_local_module_extension(extension)) {
-      throw __autojs6_esm_error("Unsupported Embedded Node experimental ESM import extension: " + name);
+      throw __autojs6_esm_error("Unsupported Embedded Node partial ESM import extension: " + name);
     }
     const candidates = extension ? [base] : [base + ".mjs", base + ".cjs", base + ".json"];
     const resolved = __autojs6_resolve_esm_file_candidate(candidates, root, name, parentFilename);
     if (resolved) {
       return resolved;
     }
-    throw __autojs6_module_not_found("Cannot find Embedded Node experimental ESM module '" + name + "' from '" + parentFilename + "'.");
+    throw __autojs6_module_not_found("Cannot find Embedded Node partial ESM module '" + name + "' from '" + parentFilename + "'.");
   }
   function __autojs6_esm_transform_exports(source, sourceName) {
     let body = String(source || "");
@@ -26697,11 +26697,11 @@ std::string buildEmbeddedScriptExecutionSource(
     let hasDefault = false;
     const masked = __autojs6_mask_non_code(body);
     if (/(^|[\r\n;{}])\s*export\s+(?:\*|\{[^}]*\}\s+from\b)/.test(masked)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM v1 does not support re-export syntax in " + sourceName + ".");
+      throw __autojs6_esm_error("Embedded Node partial ESM v1 does not support re-export syntax in " + sourceName + ".");
     }
     body = body.replace(/\bexport\s+default\s+/g, function() {
       if (hasDefault) {
-        throw __autojs6_esm_error("Embedded Node experimental ESM module has more than one default export: " + sourceName);
+        throw __autojs6_esm_error("Embedded Node partial ESM module has more than one default export: " + sourceName);
       }
       hasDefault = true;
       return "const __autojs6_esm_default = ";
@@ -26785,13 +26785,13 @@ std::string buildEmbeddedScriptExecutionSource(
       if (next === "(") {
         if (!__autojs6_dynamic_import_experimental_enabled) {
           throw __autojs6_dynamic_import_unsupported(
-            __autojs6_esm_unsupported_message("dynamic import is disabled for experimental ESM module '" + filename + "'.")
+            __autojs6_esm_unsupported_message("dynamic import is disabled for partial ESM module '" + filename + "'.")
           );
         }
         continue;
       }
       if (next === "." && masked.slice(nextIndex, nextIndex + 5) === ".meta") {
-        throw __autojs6_esm_error("import.meta is disabled for experimental ESM module '" + filename + "'.");
+        throw __autojs6_esm_error("import.meta is disabled for partial ESM module '" + filename + "'.");
       }
     }
     const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3\s*;?/g;
@@ -26822,7 +26822,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const transformedBody = __autojs6_transform_dynamic_import_calls(exportTransform.body, filename, "__filename");
     const remaining = __autojs6_mask_non_code(transformedBody);
     if (/(^|[\r\n;{}])\s*import\b/.test(remaining) || /(^|[\r\n;{}])\s*export\b/.test(remaining)) {
-      throw __autojs6_esm_error("Embedded Node experimental ESM v1 found unsupported import/export syntax in " + filename + ".");
+      throw __autojs6_esm_error("Embedded Node partial ESM v1 found unsupported import/export syntax in " + filename + ".");
     }
     return bindingLines.join("\n") + "\n" + transformedBody + "\n" + exportTransform.tail;
   }
@@ -26845,7 +26845,7 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       if (!__autojs6_esm_experimental_enabled) {
         throw __autojs6_esm_unsupported(
-          __autojs6_esm_unsupported_message("dynamic import requires experimental ESM to be enabled.")
+          __autojs6_esm_unsupported_message("dynamic import requires partial ESM to be enabled.")
         );
       }
       const name = specifier === undefined || specifier === null ? "" : String(specifier);
@@ -26878,7 +26878,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const record = entryRecord || __autojs6_module_record(resolved, true);
     if (!record) {
-      throw __autojs6_module_not_found("Cannot find Embedded Node experimental ESM module '" + resolved + "'.");
+      throw __autojs6_module_not_found("Cannot find Embedded Node partial ESM module '" + resolved + "'.");
     }
     const namespace = Object.create(null);
     const cacheRecord = {

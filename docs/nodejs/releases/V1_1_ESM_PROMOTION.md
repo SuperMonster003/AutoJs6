@@ -10,16 +10,18 @@ Package identity: production, `org.autojs.autojs6`
 
 ## Recommendation
 
-Keep ESM experimental for Node Profile v1.1.
+Promote the controlled ESM subset to Node Profile v1.1 partial support.
 
-Do not promote ESM to partial support yet. The controlled ESM subset is useful
-and the focused production-identity tests are green after the source-map offset
-fix in `app/src/main/cpp/node_bridge_sources.cpp`, but the support contract would
-still be broader than the evidence:
+This document originally recorded a conservative hold. Task 153 supersedes that
+hold by narrowing the support contract to the exact behavior already covered by
+focused gates: `.mjs` and `type=module` entries, local static imports, selected
+builtin imports, ESM-to-CJS interop, package condition selection, and stable
+denial of unsupported boundaries. The promotion is intentionally partial
+because these gaps remain:
 
 - there is no real ESM npm package corpus;
-- packaged APK coverage is still default-denial diagnostics plus focused
-  experimental smoke, not encrypted packaged ESM graph support;
+- packaged APK coverage is a focused `.mjs` entry plus local `.mjs`/CommonJS
+  graph smoke, not broad package/export or dynamic import graph support;
 - dynamic import remains a separate narrower experiment;
 - `import.meta`, loader hooks, raw `node:module` loader authority, URL/network
   imports, and CJS `require()` of ESM remain unsupported;
@@ -62,20 +64,20 @@ Result:
 
 | Gate | Status | Notes |
 | --- | --- | --- |
-| `.mjs` entry | Pass as experiment | Default profile still rejects; internal experimental request can run `.mjs`. |
-| local static import | Pass as experiment | Scoped local `.mjs` imports are covered. |
-| package `type=module` | Pass as experiment | Entry routing works when the ESM experiment is enabled. |
-| package `exports` import condition | Pass as experiment | Synthetic package tests cover `import`, `node`, and `default` condition order. |
-| package `imports` import condition | Pass as experiment | Synthetic package tests cover importer-sensitive conditions. |
-| ESM import of CJS | Pass as experiment | Default/namespace-style access stays scoped through existing CJS loader cache. |
-| supported builtin import | Pass as experiment | Uses the Safe Node builtin allowlist. |
+| `.mjs` entry | Pass as partial | Default profile runs `.mjs`; explicit ESM-off requests still reject. |
+| local static import | Pass as partial | Scoped local `.mjs` imports are covered. |
+| package `type=module` | Pass as partial | Entry routing works by default under the v1.1 profile. |
+| package `exports` import condition | Pass as partial | Synthetic package tests cover `import`, `node`, and `default` condition order. |
+| package `imports` import condition | Pass as partial | Synthetic package tests cover importer-sensitive conditions. |
+| ESM import of CJS | Pass as partial | Default/namespace-style access stays scoped through existing CJS loader cache. |
+| supported builtin import | Pass as partial | Uses the Safe Node builtin allowlist. |
 | disabled builtin import | Pass | Denied through existing policy. |
 | CJS `require()` of ESM | Pass as denial | Fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`. |
-| top-level await | Pass as experiment | Covered in focused ESM tests. |
+| top-level await | Pass as partial | Covered in focused ESM tests. |
 | dynamic import | Experimental only | Local relative imports pass only with the separate dynamic-import experiment; package, URL, absolute, and escape cases remain denied. |
 | source maps | Pass after fix | Inline and scoped external maps now map result `errorStack`; external escapes remain denied. |
 | real npm corpus | Insufficient | Existing corpus is CommonJS-only and explicitly excludes `type=module`. |
-| packaged APK | Insufficient for promotion | Default ESM and dynamic-import diagnostics pass; encrypted packaged ESM graphs are not supported. |
+| packaged APK | Partial | `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import and broad package graphs are not supported. |
 
 ## Source Map Finding
 
@@ -99,25 +101,25 @@ support contract without more history.
 
 ## Packaged APK Decision
 
-Packaged APK behavior remains conservative:
+Packaged APK behavior remains conservative but no longer treats all ESM as
+default-denied:
 
-- default packaged `.mjs` diagnostics still return
-  `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`;
+- packaged CommonJS requiring ESM returns
+  `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`;
 - default packaged dynamic import diagnostics still return
   `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`;
-- experimental single-file packaged `.mjs` smoke remains useful, but it is not
-  enough for partial support because encrypted packaged ESM graphs, moduleSources
+- packaged `.mjs` graph smoke is part of the v1.1 partial gate, but it is not
+  enough for broader support because package/export graphs, richer module source
   metadata, and dynamic import graphs are still design-gated.
 
 ## v1.1 Decision
 
 For Node Profile v1.1:
 
-- keep `autojs.nodejs.esm.experimental=false` by default;
+- set `autojs.nodejs.esm.experimental=true` by default as the legacy ESM switch;
 - keep `autojs.nodejs.dynamicImport.experimental=false` by default and separate
   from static ESM;
-- keep documenting `.mjs` as a Node route that is rejected unless an explicit
-  experimental build/request enables ESM;
+- document `.mjs` and `type=module` as partial ESM support;
 - keep real npm compatibility claims CommonJS-only until an ESM npm corpus is
   admitted;
 - do not update `NODE_PROFILE_V1_STABLE_SURFACE.md` to include ESM.
@@ -127,7 +129,8 @@ For Node Profile v1.1:
 Before reconsidering partial promotion, add:
 
 - a small real ESM npm package corpus with license notes and no native addons;
-- packaged ESM graph smoke for plain and encrypted module graphs;
+- broader packaged ESM graph smoke for package exports/imports and nested
+  package graphs;
 - packaged verifier metadata for ESM graph source count, source kinds, and
   package condition context;
 - service destroy/cancellation tests during ESM linking and top-level await;

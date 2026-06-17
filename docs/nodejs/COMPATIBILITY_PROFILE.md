@@ -47,7 +47,7 @@ The release/debug gate also runs:
 
 | Flag id | Gradle property | Default | Build override | project.json override | Packaged APK override | Release forbidden | Security | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `esm` | `autojs.nodejs.esm.experimental` | false | true | false | false | true | medium | experimental |
+| `esm` | `autojs.nodejs.esm.experimental` | true | true | false | false | false | medium | partial |
 | `dynamic_import` | `autojs.nodejs.dynamicImport.experimental` | false | true | false | false | true | medium | experimental |
 | `network` | `autojs.nodejs.network.experimental` | false | true | false | false | true | high | experimental |
 | `raw_node_network_modules` | none | false | false | false | false | true | high | disabled |
@@ -69,7 +69,7 @@ Runtime diagnostics expose the same state through `require("autojs6:profile").fe
 - `"node";` directive
 - `.node.js`
 - `.cjs`
-- `.mjs` as a Node route only
+- `.mjs` as a Node ESM entry
 - `project.json` with `type: "node"` or `projectType: "node"`
 - package bin launch paths resolved from Node project metadata
 - encrypted script headers carrying the Node execution flag
@@ -124,8 +124,8 @@ The future design gate is documented in [design/LONG_RUNNING_SERVICE.md](design/
 Unsupported or rejected module source forms:
 
 - native `.node` addon entries, rejected with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED` from direct relative imports, `module.createRequire()`, package `main`, package `exports`, package `imports`, and package subpath imports
-- static ESM import execution
-- dynamic import execution unless both `autojs.nodejs.esm.experimental` and `autojs.nodejs.dynamicImport.experimental` are enabled for an experimental run
+- static ESM import execution only from ESM entries and ESM graph modules
+- dynamic import execution unless `autojs.nodejs.dynamicImport.experimental` is enabled for an experimental run
 - package export/import targets that escape the package root
 - unsupported package export/import extensions
 
@@ -350,12 +350,12 @@ Network-related limited builtins may exist for feature detection and stable deni
 
 ## ESM Status
 
-`.mjs` routes to Node so user intent is preserved. ESM execution is still not a default supported capability, but an experimental v1 path exists behind the explicit flag.
+`.mjs` routes to Node and ESM execution is a default partial capability in Node Profile v1.1.
 
-The explicit gate flag is:
+The legacy build switch remains:
 
 ```properties
-autojs.nodejs.esm.experimental=false
+autojs.nodejs.esm.experimental=true
 ```
 
 Dynamic import has a separate gate and remains off when only ESM is enabled:
@@ -364,21 +364,16 @@ Dynamic import has a separate gate and remains off when only ESM is enabled:
 autojs.nodejs.dynamicImport.experimental=false
 ```
 
-With the flag off, `.mjs` entry and resolution errors include:
+Expected ESM boundary errors:
 
-```text
-.mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile.
-```
-
-Expected errors:
-
-- static ESM path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
+- explicit ESM-off request path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
+- static `import` syntax in a CommonJS entry path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
 - dynamic import path: legacy `code` `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`, canonical `autojs6Code` `ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`
-- CJS `require()` of ESM while the experimental flag is enabled: `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
+- CJS `require()` of ESM: `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
 
-Default `require("autojs6:profile")` reports `esm=false`, `dynamicImport=false`, `experimentalFlags.esm=false`, and `experimentalFlags.dynamicImport=false`.
+Default `require("autojs6:profile")` reports `esm=true`, `dynamicImport=false`, `featureFlags.esm.status="partial"`, `featureFlags.esm.defaultEnabled=true`, and `experimentalFlags.dynamicImport=false`. The legacy `experimentalFlags.esm` snapshot remains `true` for compatibility with older diagnostics.
 
-With the flag enabled for an embedded script request, experimental ESM v1 supports:
+Node Profile v1.1 partial ESM supports:
 
 - `.mjs` entry execution
 - package `type=module` entry execution for `.js`
@@ -394,7 +389,7 @@ With the flag enabled for an embedded script request, experimental ESM v1 suppor
 
 CommonJS package condition order remains `require`, `node`, `default`.
 
-Experimental ESM v1 still rejects `import.meta`, CJS `require()` of ESM, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
+Partial ESM still rejects `import.meta`, CJS `require()` of ESM, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
 
 With both experimental flags enabled, dynamic `import()` is limited to local relative specifiers inside `workingDirectory`. It rejects package/builtin specifiers, absolute paths, `file:` URLs, network URLs, and path escapes with stable AutoJs6 errors.
 
@@ -410,7 +405,7 @@ Injected `moduleSources` are bounded before native runtime startup. The v1 limit
 - per-module UTF-8 source bytes: `262144`
 - total UTF-8 source bytes: `524288`
 
-The limits apply to CommonJS preload records and encrypted packaged/runtime module source records. Over-budget requests fail with `ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED` before the embedded service starts native Node.
+The limits apply to CommonJS preload records and encrypted packaged/runtime module source records, including partial ESM `.mjs` records. Over-budget requests fail with `ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED` before the embedded service starts native Node.
 
 Packaged APKs carry `assets/project/preload-budget.expected.txt` when full smoke moduleSources are requested. The packaged verifier checks the budget marker, count, total bytes, per-module maximum, and largest-module report before runtime smoke execution.
 
