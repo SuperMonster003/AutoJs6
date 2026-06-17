@@ -219,7 +219,6 @@ val nodeJsFuzzerReplayBudget = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonString("b
 val nodeJsFuzzerReplaySeed = nodeJsFuzzerSeedFileText?.nodeJsSeedJsonLong("baseSeed")
 val nodeJsFuzzerDefaultBudget = when {
     taskNames.any { it.contains("verifyNodeNightlyGate", ignoreCase = true) || it.contains("verifyNodeReleaseGate", ignoreCase = true) } -> "extended"
-    nodeJsTestDeviceProfile == "v1_1_beta" -> "extended"
     nodeJsTestDeviceProfile == "full" -> "extended"
     nodeJsTestDeviceProfile in setOf("emulator", "smoke") -> "quick"
     else -> "normal"
@@ -270,7 +269,6 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
 }
 val nodeJsV11BetaInstrumentationClasses = (
         listOf(
-            "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
             "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
             "org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest",
             "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",

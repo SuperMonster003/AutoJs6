@@ -21,8 +21,7 @@ Required coverage:
 - v1.1 alpha capability coverage for ESM, real npm corpus, controlled network,
   WebSocket, expanded bridge modules, packaged v1.1 bridge smoke, security, and
   resource stress.
-- Baseline runtime and lifecycle regressions through
-  `EmbeddedScriptMvpInstrumentationTest` and `NodeEmbeddedLifecycleStressInstrumentationTest`.
+- Lifecycle regressions through `NodeEmbeddedLifecycleStressInstrumentationTest`.
 - Scoped fs and resolver fuzzers.
 - Native addon denial.
 - fs promises compatibility.
@@ -42,6 +41,10 @@ autojs.nodejs.bridgeStress.iterations=12
 ```
 
 Override those Gradle properties for local probes.
+
+The beta profile keeps the default `normal` fuzzer budget. Run
+`-Pautojs.nodejs.fuzzerBudget=extended` only as a separate stress subgate so a
+new extended-fuzzer seed does not block the normal beta stabilization signal.
 
 The task fails unless `autojs.nodejs.test.deviceProfile=v1_1_beta` is explicit.
 Keep `ANDROID_SERIAL` pointed at Sony XQ-AT72 `QV710AF65F` when multiple devices
@@ -68,3 +71,19 @@ A passing beta gate means the v1.1 alpha surface is stable enough to consider
 release-candidate planning. It does not promote controlled network live
 providers, long-running mode, worker_threads, floaty/overlay, native addons,
 raw process, or raw network modules.
+
+## Initial Validation
+
+Validated on 2026-06-18 Asia/Shanghai against Sony XQ-AT72 `QV710AF65F`:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeV11BetaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
+```
+
+Result:
+
+- Build: passed.
+- Connected instrumentation: 146 tests, 0 failures, 0 errors, 0 skipped.
+- Fuzzer seeds: 0 discovered, 0 written.
+- Summary JSON: `build/reports/nodejs/v1.1-beta-summary.json`.

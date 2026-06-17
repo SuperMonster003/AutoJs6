@@ -66,10 +66,11 @@ The gate writes:
 build/reports/nodejs/v1.1-beta-summary.json
 ```
 
-The `v1_1_beta` device profile includes the alpha capability set plus baseline
-runtime, lifecycle, fs promises, native-addon denial, resolver fuzzer, and
-scoped-fs fuzzer coverage. It also runs packaged host verification and tooling
-checks through the aggregate task dependencies.
+The `v1_1_beta` device profile includes the alpha capability set plus lifecycle,
+fs promises, native-addon denial, resolver fuzzer, and scoped-fs fuzzer
+coverage. It keeps the default normal fuzzer budget; extended fuzzer budget runs
+remain separate stress subgates. The beta aggregate also runs packaged host
+verification and tooling checks through task dependencies.
 
 ## Explicit Subgates
 

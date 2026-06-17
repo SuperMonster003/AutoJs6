@@ -112,8 +112,8 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Scope:
 
 - all v1.1 alpha capability coverage
-- baseline runtime, lifecycle, fs promises, native-addon denial, resolver
-  fuzzer, and scoped-fs fuzzer regressions
+- lifecycle, fs promises, native-addon denial, resolver fuzzer, and scoped-fs
+  fuzzer regressions
 - packaged host verification
 - error catalog, project wizard, and TypeScript declaration checks
 - JSON summary at `build/reports/nodejs/v1.1-beta-summary.json`
@@ -125,6 +125,9 @@ template-override subgates until the refreshed inrt template is the default. See
 The task fails unless `autojs.nodejs.test.deviceProfile=v1_1_beta` is explicit.
 Keep `ANDROID_SERIAL` pointed at the Sony unattended device when multiple
 devices are attached.
+
+The beta profile keeps the default normal fuzzer budget. Use
+`-Pautojs.nodejs.fuzzerBudget=extended` only as a separate stress subgate.
 
 ## Release Gate
 

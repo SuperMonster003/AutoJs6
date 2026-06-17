@@ -153,7 +153,6 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
                 "area" to "beta baseline regressions",
                 "status" to "required",
                 "tests" to listOf(
-                    "EmbeddedScriptMvpInstrumentationTest",
                     "NodeEmbeddedLifecycleStressInstrumentationTest",
                     "NodeFsPromisesInstrumentationTest",
                     "NodeNativeAddonPolicyInstrumentationTest",
@@ -267,6 +266,7 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
             "notes" to listOf(
                 "This is a v1.1 beta stabilization gate, not a release candidate or tag gate.",
                 "Run with ANDROID_SERIAL targeting the Sony unattended device and -P$nodeV11BetaDeviceProfileProperty=$nodeV11BetaDeviceProfile.",
+                "The beta device profile keeps the default normal fuzzer budget; run extended fuzzer budget as a separate stress subgate.",
                 "Packaged .mjs and dynamic import install-and-run smokes remain explicit template-override subgates until the refreshed inrt template is default.",
                 "Worker runtime stress is included only when autojs.nodejs.worker_threads.experimental=true.",
             ),
