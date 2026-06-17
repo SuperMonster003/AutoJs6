@@ -120,7 +120,7 @@ Stable bridge API conformance:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeConformanceInstrumentationTest"
 ```
 
-This suite freezes the stable AutoJs bridge API shape for `toast`, `app`, `dialogs`, `clipboard`, `device`, `shell`, `engines`, `accessibility`, `media_projection`, `image`/`images`, `ocr`, `storage`/`storages`, `notifications`, and `work_manager`. It verifies Kotlin registry drift, JavaScript module exports, Promise contracts, provider error shape, capability denial, handle method shape, and pending-call cleanup after bridge destroy.
+This suite freezes the stable AutoJs bridge API shape for `toast`, `app`, `dialogs`, `clipboard`, `device`, `shell`, `engines`, `accessibility`, `media_projection`, `image`/`images`, `ocr`, `storage`/`storages`, `notifications`, `sensors`, and `work_manager`. It verifies Kotlin registry drift, JavaScript module exports, Promise contracts, provider error shape, capability denial, handle method shape, and pending-call cleanup after bridge destroy.
 
 Focused bridge RPC fuzzer:
 
@@ -424,6 +424,14 @@ Current `notifications` bridge v1.1 partial focused instrumentation:
 ```
 
 This suite verifies the `notifications` bridge registry, fake-provider request/response behavior, shadowing protection, `notify`/`cancel`/`cancelAll`, notification option serialization, manifest capability denial before dispatch, Android `POST_NOTIFICATIONS` manifest mapping, Android provider permission-denial or post/cancel smoke, and owned notification resource cleanup on provider destroy.
+
+Current `sensors` bridge v1.1 partial focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest"
+```
+
+This suite verifies the `sensors` bridge registry, fake-provider request/response behavior, shadowing protection, `getAvailableSensors`, `once`, `subscribe`, subscription `ready`/`close`, event snapshot freezing, type/callback validation, manifest capability denial before dispatch, Android provider sensor listing, and live subscription resource cleanup when a supported device sensor is available.
 
 Current bridge permission manifest focused instrumentation:
 

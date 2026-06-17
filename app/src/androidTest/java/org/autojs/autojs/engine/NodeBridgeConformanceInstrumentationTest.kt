@@ -152,6 +152,18 @@ class NodeBridgeConformanceInstrumentationTest {
                     else result = null;
                   } else if (moduleName === "notifications") {
                     result = method === "notify" ? (request.args[0].id || 9001) : null;
+                  } else if (moduleName === "sensors") {
+                    if (method === "getAvailableSensors") {
+                      result = [{ type: "accelerometer", name: "fake accelerometer", vendor: "AutoJs6", version: 1 }];
+                    } else if (method === "once") {
+                      result = { type: request.args[0].type, timestamp: 1, accuracy: 3, values: [1, 2, 3] };
+                    } else if (method === "subscribe") {
+                      result = { id: "sensor-conformance", type: request.args[0].type, samplingIntervalMs: request.args[0].samplingIntervalMs, maxQueueSize: request.args[0].maxQueueSize };
+                    } else if (method === "drainEvents") {
+                      result = [{ type: "event", event: { type: "light", timestamp: 2, accuracy: 3, values: [42] } }];
+                    } else if (method === "unsubscribe") {
+                      result = null;
+                    }
                   } else if (moduleName === "work_manager") {
                     if (method === "scheduleOnce") result = "work-once";
                     else if (method === "schedulePeriodic") result = "work-periodic";
@@ -188,6 +200,7 @@ class NodeBridgeConformanceInstrumentationTest {
               const storage = require("storage");
               const storages = require("storages");
               const notifications = require("notifications");
+              const sensors = require("sensors");
               const workManager = require("work_manager");
 
               [
@@ -206,6 +219,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["storage", storage],
                 ["storages", storages],
                 ["notifications", notifications],
+                ["sensors", sensors],
                 ["work_manager", workManager]
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
@@ -224,6 +238,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("storage", storage, ["create", "open"]);
               expectExports("storages", storages, ["create", "open"]);
               expectExports("notifications", notifications, ["notify", "cancel", "cancelAll"]);
+              expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
 
               assert.strictEqual(typeof app.packageName, "string");
@@ -301,6 +316,22 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(notificationId, 9001);
               await expectPromise("notifications.cancel", notifications.cancel(notificationId, { timeoutMs: 1064 }));
               await expectPromise("notifications.cancelAll", notifications.cancelAll({ timeoutMs: 1065 }));
+              assert.strictEqual((await expectPromise("sensors.getAvailableSensors", sensors.getAvailableSensors({ timeoutMs: 1066 })))[0].type, "accelerometer");
+              assert.strictEqual((await expectPromise("sensors.once", sensors.once("accelerometer", { timeoutMs: 1067 }))).values[2], 3);
+              let sensorCallbackCount = 0;
+              let sensorCallbackResolve;
+              const sensorCallbackReady = new Promise((resolve) => { sensorCallbackResolve = resolve; });
+              const sensorSub = sensors.subscribe("light", (event) => {
+                if (event.values[0] === 42) {
+                  sensorCallbackCount += 1;
+                  sensorCallbackResolve();
+                }
+              }, { timeoutMs: 1068, drainIntervalMs: 1 });
+              expectFrozen("sensors.subscription", sensorSub);
+              await expectPromise("sensors.subscribe.ready", sensorSub.ready);
+              await sensorCallbackReady;
+              await expectPromise("sensors.subscription.close", sensorSub.close({ timeoutMs: 1069 }));
+              assert(sensorCallbackCount >= 1, "sensors subscription callback did not run");
               assert.strictEqual(await expectPromise("work_manager.scheduleOnce", workManager.scheduleOnce({ scriptPath: "main.cjs", timeoutMs: 1055 })), "work-once");
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
@@ -327,12 +358,17 @@ class NodeBridgeConformanceInstrumentationTest {
                 "storages.clear",
                 "notifications.notify",
                 "notifications.cancelAll",
+                "sensors.once",
+                "sensors.unsubscribe",
                 "work_manager.list"
               ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));
               console.log("bridge.conformance.request_count=" + requests.length);
               console.log("bridge.conformance.pending=" + bridge.__test.pendingCount());
               console.log("bridge.conformance=PASS");
-            })();
+            })().catch((error) => {
+              console.log("bridge.conformance.error=" + (error && error.stack ? error.stack : String(error)));
+              process.exitCode = 1;
+            });
             """.trimIndent(),
             "<embedded-autojs-bridge-conformance.js>",
             workingDirectory = workDir,
@@ -340,8 +376,8 @@ class NodeBridgeConformanceInstrumentationTest {
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("bridge API conformance", result)
-        assertTrue(result.stdout.contains("bridge.conformance=PASS"))
-        assertTrue(result.stdout.contains("bridge.conformance.pending=0"))
+        assertTrue(result.stdout, result.stdout.contains("bridge.conformance=PASS"))
+        assertTrue(result.stdout, result.stdout.contains("bridge.conformance.pending=0"))
     }
 
     @Test
@@ -507,6 +543,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.NOTIFICATIONS to setOf("notify", "cancel", "cancelAll"),
+            NodeBridgeModules.SENSORS to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
         )
     }

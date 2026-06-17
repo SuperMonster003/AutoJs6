@@ -11,6 +11,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -462,6 +466,7 @@ object NodeBridgeModules {
     const val STORAGE = "storage"
     const val STORAGES = "storages"
     const val NOTIFICATIONS = "notifications"
+    const val SENSORS = "sensors"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -493,6 +498,7 @@ object NodeBridgeModules {
     val storageModules = setOf(STORAGE, STORAGES)
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
     val notificationsMethods = setOf("notify", "cancel", "cancelAll")
+    val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")
@@ -514,6 +520,7 @@ object NodeBridgeModules {
         STORAGE to storageMethods,
         STORAGES to storageMethods,
         NOTIFICATIONS to notificationsMethods,
+        SENSORS to sensorsMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
         SHELL to shellMethods,
@@ -574,6 +581,10 @@ class AndroidNodeBridgeCapabilityProvider(
     private val javaHandles = ConcurrentHashMap<String, Any>()
     private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
     private val notificationIdCounter = AtomicInteger(1_000_000)
+    private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
+    private val sensorManager by lazy {
+        appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+    }
     private val resourceRegistry = NodeBridgeResourceRegistry(engineInfo.id)
     private val activeShellCommands = AtomicInteger(0)
     private val maxActiveShellCommands = AtomicInteger(0)
@@ -598,6 +609,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, callback)
             request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, callback)
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, callback)
+            request.module == NodeBridgeModules.SENSORS && request.method in NodeBridgeModules.sensorsMethods -> dispatchSensors(request, callback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, callback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, callback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
@@ -633,6 +645,7 @@ class AndroidNodeBridgeCapabilityProvider(
         workManagerTasks.clear()
         javaHandles.clear()
         notificationHandles.clear()
+        sensorSubscriptions.clear()
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -1200,6 +1213,191 @@ class AndroidNodeBridgeCapabilityProvider(
             lockscreenVisibility = Notification.VISIBILITY_PRIVATE
         }
         manager.createNotificationChannel(channel)
+    }
+
+    private fun dispatchSensors(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        when (request.method) {
+            "getAvailableSensors" -> dispatchSensorsAvailable(request, callback)
+            "once" -> dispatchSensorOnce(request, callback)
+            "subscribe" -> dispatchSensorSubscribe(request, callback)
+            "unsubscribe" -> dispatchSensorUnsubscribe(request, callback)
+            "drainEvents" -> dispatchSensorDrainEvents(request, callback)
+            else -> callback(unavailable(request))
+        }
+    }
+
+    private fun dispatchSensorsAvailable(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val manager = sensorManager
+        if (manager == null) {
+            callback(NodeBridgeResponse.success(request.id, JSONArray().toString()))
+            return
+        }
+        val sensors = JSONArray()
+        ControlledSensorPolicy.allowedSensorTypes.forEach { (wireName, sensorType) ->
+            manager.getDefaultSensor(sensorType)?.let { sensor ->
+                sensors.put(ControlledSensorPolicy.sensorInfoJson(wireName, sensor))
+            }
+        }
+        callback(NodeBridgeResponse.success(request.id, sensors.toString()))
+    }
+
+    private fun dispatchSensorOnce(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val descriptor = ControlledSensorRequestDescriptor.fromRequest(request)
+        if (descriptor.error != null || descriptor.value == null) {
+            callback(NodeBridgeResponse.failure(request.id, descriptor.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        mainHandler.post {
+            val manager = sensorManager
+            val sensor = manager?.getDefaultSensor(descriptor.value.sensorType)
+            if (manager == null || sensor == null) {
+                callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
+                return@post
+            }
+            val listenerRef = arrayOfNulls<SensorEventListener>(1)
+            val resourceId = "sensor-once-${UUID.randomUUID()}"
+            val responded = AtomicBoolean(false)
+            val timeoutRunnable = Runnable {
+                if (responded.compareAndSet(false, true)) {
+                    resourceRegistry.close(resourceId, "sensor.once.timeout")
+                    callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.timeout(request.module, request.method)))
+                }
+            }
+            val listener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    if (responded.compareAndSet(false, true)) {
+                        mainHandler.removeCallbacks(timeoutRunnable)
+                        resourceRegistry.close(resourceId, "sensor.once.event")
+                        callback(
+                            NodeBridgeResponse.success(
+                                request.id,
+                                ControlledSensorPolicy.sensorEventJson(descriptor.value.type, event).toString(),
+                            ),
+                        )
+                    }
+                }
+
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+            }
+            listenerRef[0] = listener
+            resourceRegistry.register(
+                type = NodeBridgeResourceType.SENSOR_SUBSCRIPTION,
+                id = resourceId,
+                metadata = mapOf("type" to descriptor.value.type, "mode" to "once"),
+            ) {
+                listenerRef[0]?.let { manager.unregisterListener(it) }
+                mainHandler.removeCallbacks(timeoutRunnable)
+            }
+            if (!manager.registerListener(listener, sensor, descriptor.value.samplingPeriodUs)) {
+                resourceRegistry.close(resourceId, "sensor.once.register_failed")
+                callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
+                return@post
+            }
+            mainHandler.postDelayed(timeoutRunnable, descriptor.value.timeoutMs)
+        }
+    }
+
+    private fun dispatchSensorSubscribe(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val descriptor = ControlledSensorRequestDescriptor.fromRequest(request)
+        if (descriptor.error != null || descriptor.value == null) {
+            callback(NodeBridgeResponse.failure(request.id, descriptor.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        mainHandler.post {
+            val manager = sensorManager
+            val sensor = manager?.getDefaultSensor(descriptor.value.sensorType)
+            if (manager == null || sensor == null) {
+                callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
+                return@post
+            }
+            if (sensorSubscriptions.size >= ControlledSensorPolicy.MAX_SUBSCRIPTIONS) {
+                bridgeResourceLimitRejections.incrementAndGet()
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.resourceLimit(
+                            message = "AutoJs6 sensors bridge reached the active subscription limit.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+                return@post
+            }
+            val subscriptionId = "sensor-${UUID.randomUUID()}"
+            val subscription = ControlledSensorSubscription(
+                id = subscriptionId,
+                type = descriptor.value.type,
+                maxQueueSize = descriptor.value.maxQueueSize,
+            )
+            val listener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    subscription.queueEvent(ControlledSensorPolicy.sensorEventJson(descriptor.value.type, event))
+                }
+
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                    subscription.queueAccuracy(accuracy)
+                }
+            }
+            subscription.listener = listener
+            sensorSubscriptions[subscriptionId] = subscription
+            resourceRegistry.register(
+                type = NodeBridgeResourceType.SENSOR_SUBSCRIPTION,
+                id = subscriptionId,
+                metadata = mapOf(
+                    "type" to descriptor.value.type,
+                    "samplingIntervalMs" to descriptor.value.samplingIntervalMs.toString(),
+                ),
+            ) {
+                sensorSubscriptions.remove(subscriptionId)
+                subscription.listener?.let { manager.unregisterListener(it) }
+                subscription.queueClose()
+            }
+            if (!manager.registerListener(listener, sensor, descriptor.value.samplingPeriodUs)) {
+                resourceRegistry.close(subscriptionId, "sensor.subscribe.register_failed")
+                callback(NodeBridgeResponse.failure(request.id, sensorUnavailableError(request, descriptor.value.type)))
+                return@post
+            }
+            callback(NodeBridgeResponse.success(request.id, subscription.toJson(descriptor.value).toString()))
+        }
+    }
+
+    private fun dispatchSensorUnsubscribe(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val payload = request.firstObjectArg()
+        val subscriptionId = payload?.optString("id").orEmpty()
+        if (subscriptionId.isBlank()) {
+            callback(NodeBridgeResponse.failure(request.id, sensorInvalidRequest(request, "sensors.unsubscribe requires a subscription id.")))
+            return
+        }
+        resourceRegistry.close(subscriptionId, "sensor.unsubscribe")
+        callback(NodeBridgeResponse.success(request.id, "null"))
+    }
+
+    private fun dispatchSensorDrainEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val payload = request.firstObjectArg()
+        val subscriptionId = payload?.optString("id").orEmpty()
+        val subscription = sensorSubscriptions[subscriptionId]
+        if (payload == null || subscription == null) {
+            callback(NodeBridgeResponse.success(request.id, JSONArray().toString()))
+            return
+        }
+        callback(NodeBridgeResponse.success(request.id, subscription.drainEvents().toString()))
+    }
+
+    private fun sensorUnavailableError(request: NodeBridgeRequest, type: String): NodeBridgeError {
+        return NodeBridgeError.permissionDenied(
+            message = "AutoJs6 sensors bridge cannot access sensor type: $type.",
+            module = request.module,
+            method = request.method,
+        )
+    }
+
+    private fun sensorInvalidRequest(request: NodeBridgeRequest, message: String): NodeBridgeError {
+        return NodeBridgeError.invalidRequest(
+            message = message,
+            module = request.module,
+            method = request.method,
+        )
     }
 
     private fun dispatchClipboard(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -3337,6 +3535,165 @@ private object ControlledNotificationPolicy {
 }
 
 private class NotificationBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
+
+private data class ControlledSensorRequest(
+    val type: String,
+    val sensorType: Int,
+    val samplingIntervalMs: Long,
+    val samplingPeriodUs: Int,
+    val timeoutMs: Long,
+    val maxQueueSize: Int,
+)
+
+private data class ControlledSensorRequestDescriptor(
+    val value: ControlledSensorRequest? = null,
+    val error: NodeBridgeError? = null,
+) {
+    companion object {
+        fun fromRequest(request: NodeBridgeRequest): ControlledSensorRequestDescriptor {
+            val args = runCatching { JSONArray(request.argsJson.ifBlank { "[]" }) }.getOrDefault(JSONArray())
+            val payload = args.optJSONObject(0)
+                ?: return ControlledSensorRequestDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "sensors.${request.method} requires a descriptor object.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            val type = payload.optString("type", "").trim().lowercase(Locale.US)
+            val sensorType = ControlledSensorPolicy.allowedSensorTypes[type]
+                ?: return ControlledSensorRequestDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "sensors.${request.method} supports only accelerometer, gyroscope, and light.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            val samplingIntervalMs = parseLong(
+                payload.opt("samplingIntervalMs"),
+                fallback = ControlledSensorPolicy.DEFAULT_SAMPLING_INTERVAL_MS,
+            ).coerceIn(ControlledSensorPolicy.MIN_SAMPLING_INTERVAL_MS, ControlledSensorPolicy.MAX_SAMPLING_INTERVAL_MS)
+            val timeoutMs = parseLong(
+                payload.opt("timeoutMs"),
+                fallback = ControlledSensorPolicy.DEFAULT_TIMEOUT_MS,
+            ).coerceIn(ControlledSensorPolicy.MIN_TIMEOUT_MS, ControlledSensorPolicy.MAX_TIMEOUT_MS)
+            val maxQueueSize = parseInt(
+                payload.opt("maxQueueSize"),
+                fallback = ControlledSensorPolicy.DEFAULT_MAX_QUEUE_SIZE,
+            ).coerceIn(1, ControlledSensorPolicy.HARD_MAX_QUEUE_SIZE)
+            return ControlledSensorRequestDescriptor(
+                value = ControlledSensorRequest(
+                    type = type,
+                    sensorType = sensorType,
+                    samplingIntervalMs = samplingIntervalMs,
+                    samplingPeriodUs = (samplingIntervalMs * 1000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                    timeoutMs = timeoutMs,
+                    maxQueueSize = maxQueueSize,
+                ),
+            )
+        }
+
+        private fun parseLong(value: Any?, fallback: Long): Long {
+            return when (value) {
+                is Int -> value.toLong()
+                is Long -> value
+                is Number -> value.toDouble().takeIf { it.isFinite() }?.toLong()
+                is String -> value.toLongOrNull()
+                else -> null
+            } ?: fallback
+        }
+
+        private fun parseInt(value: Any?, fallback: Int): Int {
+            return parseLong(value, fallback.toLong()).coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+        }
+    }
+}
+
+private object ControlledSensorPolicy {
+    const val MAX_SUBSCRIPTIONS = 4
+    const val MIN_SAMPLING_INTERVAL_MS = 100L
+    const val DEFAULT_SAMPLING_INTERVAL_MS = 250L
+    const val MAX_SAMPLING_INTERVAL_MS = 60_000L
+    const val MIN_TIMEOUT_MS = 100L
+    const val DEFAULT_TIMEOUT_MS = 5_000L
+    const val MAX_TIMEOUT_MS = 60_000L
+    const val DEFAULT_MAX_QUEUE_SIZE = 16
+    const val HARD_MAX_QUEUE_SIZE = 64
+
+    val allowedSensorTypes: Map<String, Int> = linkedMapOf(
+        "accelerometer" to Sensor.TYPE_ACCELEROMETER,
+        "gyroscope" to Sensor.TYPE_GYROSCOPE,
+        "light" to Sensor.TYPE_LIGHT,
+    )
+
+    fun sensorInfoJson(type: String, sensor: Sensor): JSONObject {
+        return JSONObject()
+            .put("type", type)
+            .put("name", sensor.name.orEmpty())
+            .put("vendor", sensor.vendor.orEmpty())
+            .put("version", sensor.version)
+            .put("resolution", sensor.resolution.toDouble())
+            .put("power", sensor.power.toDouble())
+            .put("minDelayUs", sensor.minDelay)
+            .put("maxDelayUs", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) sensor.maxDelay else 0)
+    }
+
+    fun sensorEventJson(type: String, event: SensorEvent): JSONObject {
+        return JSONObject()
+            .put("type", type)
+            .put("timestamp", event.timestamp)
+            .put("accuracy", event.accuracy)
+            .put("values", JSONArray().also { values ->
+                event.values.forEach { values.put(it.toDouble()) }
+            })
+    }
+}
+
+private class ControlledSensorSubscription(
+    val id: String,
+    val type: String,
+    private val maxQueueSize: Int,
+) {
+    private val events = ConcurrentLinkedQueue<JSONObject>()
+    @Volatile
+    var listener: SensorEventListener? = null
+
+    fun queueEvent(event: JSONObject) {
+        queue(JSONObject().put("type", "event").put("event", event))
+    }
+
+    fun queueAccuracy(accuracy: Int) {
+        queue(JSONObject().put("type", "accuracy").put("accuracy", accuracy))
+    }
+
+    fun queueClose() {
+        queue(JSONObject().put("type", "close"))
+    }
+
+    fun drainEvents(): JSONArray {
+        val result = JSONArray()
+        while (true) {
+            val event = events.poll() ?: break
+            result.put(event)
+        }
+        return result
+    }
+
+    fun toJson(request: ControlledSensorRequest): JSONObject {
+        return JSONObject()
+            .put("id", id)
+            .put("type", type)
+            .put("samplingIntervalMs", request.samplingIntervalMs)
+            .put("maxQueueSize", maxQueueSize)
+    }
+
+    private fun queue(event: JSONObject) {
+        while (events.size >= maxQueueSize) {
+            events.poll() ?: break
+        }
+        events.add(event)
+    }
+}
 
 private class ControlledFetchException(
     val code: String,

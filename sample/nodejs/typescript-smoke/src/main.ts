@@ -13,6 +13,7 @@ import ocr = require("ocr");
 import storage = require("storage");
 import storages = require("storages");
 import notifications = require("notifications");
+import sensors = require("sensors");
 import fetchModule = require("fetch");
 import axios = require("axios");
 import websocket = require("websocket");
@@ -110,6 +111,17 @@ async function smoke(): Promise<void> {
   }, { timeoutMs: 1000 });
   await notifications.cancel(notificationId, { timeoutMs: 1000 });
   await notifications.cancelAll({ timeoutMs: 1000 });
+  const availableSensors: readonly sensors.SensorInfo[] = await sensors.getAvailableSensors({ timeoutMs: 1000 });
+  const sensorEvent: sensors.SensorEvent = await sensors.once("accelerometer", {
+    samplingIntervalMs: sensors.policy.minSamplingIntervalMs,
+    timeoutMs: 1000
+  });
+  const sensorSub: sensors.SensorSubscription = sensors.subscribe("light", (event) => {
+    const values: readonly number[] = event.values;
+    void values;
+  }, { samplingIntervalMs: 250, drainIntervalMs: 100, timeoutMs: 1000 });
+  await sensorSub.ready;
+  await sensorSub.close({ timeoutMs: 1000 });
   await image.recycle(template, { timeoutMs: 1000 });
   await images.recycle(frame, { timeoutMs: 1000 });
 
@@ -205,6 +217,9 @@ async function smoke(): Promise<void> {
   void storageKeys;
   void storageContains;
   void notificationId;
+  void availableSensors;
+  void sensorEvent;
+  void sensorSub;
   void responseText;
   void responseJson;
   void fetchDiagnostics;

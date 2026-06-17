@@ -8008,6 +8008,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_storage_cache = null;
   let __autojs6_limited_storages_cache = null;
   let __autojs6_limited_notifications_cache = null;
+  let __autojs6_limited_sensors_cache = null;
   let __autojs6_limited_clipboard_cache = null;
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
@@ -8859,6 +8860,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (moduleName === "ocr") return ["ocr", "image"];
     if (moduleName === "storage" || moduleName === "storages") return ["storage"];
     if (moduleName === "notifications") return ["notifications"];
+    if (moduleName === "sensors") return ["sensors"];
     if (moduleName === "clipboard") return ["clipboard"];
     if (moduleName === "device") return ["device"];
     if (moduleName === "shell") return ["shell"];
@@ -13291,6 +13293,254 @@ std::string buildEmbeddedScriptExecutionSource(
       cancelAll
     });
     return __autojs6_limited_notifications_cache;
+  }
+  const __autojs6_sensors_allowed_types = Object.freeze(["accelerometer", "gyroscope", "light"]);
+  const __autojs6_sensors_policy = Object.freeze({
+    maxSubscriptions: 4,
+    minSamplingIntervalMs: 100,
+    defaultSamplingIntervalMs: 250,
+    maxSamplingIntervalMs: 60000,
+    defaultTimeoutMs: 5000,
+    drainIntervalMs: 100,
+    defaultMaxQueueSize: 16,
+    hardMaxQueueSize: 64
+  });
+  function __autojs6_sensors_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_sensors_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "sensors",
+      methodName
+    );
+  }
+  function __autojs6_sensors_number(value, fallback, min, max) {
+    const numberValue = value === undefined || value === null ? fallback : Number(value);
+    if (!Number.isFinite(numberValue)) {
+      return fallback;
+    }
+    return Math.min(max, Math.max(min, Math.trunc(numberValue)));
+  }
+  function __autojs6_sensors_type(methodName, value) {
+    const text = String(value === undefined || value === null ? "" : value).trim().toLowerCase();
+    if (__autojs6_sensors_allowed_types.indexOf(text) < 0) {
+      throw __autojs6_sensors_invalid_argument_error(
+        methodName,
+        "sensors." + methodName + " supports only accelerometer, gyroscope, and light."
+      );
+    }
+    return text;
+  }
+  function __autojs6_sensors_descriptor(methodName, type, options) {
+    const opts = __autojs6_sensors_options(options);
+    const samplingSource = opts.samplingIntervalMs === undefined ? opts.intervalMs : opts.samplingIntervalMs;
+    const timeoutMs = __autojs6_sensors_number(
+      opts.timeoutMs,
+      __autojs6_sensors_policy.defaultTimeoutMs,
+      100,
+      60000
+    );
+    return {
+      type: __autojs6_sensors_type(methodName, type),
+      samplingIntervalMs: __autojs6_sensors_number(
+        samplingSource,
+        __autojs6_sensors_policy.defaultSamplingIntervalMs,
+        __autojs6_sensors_policy.minSamplingIntervalMs,
+        __autojs6_sensors_policy.maxSamplingIntervalMs
+      ),
+      timeoutMs,
+      maxQueueSize: __autojs6_sensors_number(
+        opts.maxQueueSize,
+        __autojs6_sensors_policy.defaultMaxQueueSize,
+        1,
+        __autojs6_sensors_policy.hardMaxQueueSize
+      )
+    };
+  }
+  function __autojs6_sensors_call_options(options, fallbackMs) {
+    const opts = __autojs6_sensors_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(opts.timeoutMs === undefined ? fallbackMs : opts.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(opts),
+      permissions: ["sensors"]
+    };
+  }
+  function __autojs6_sensors_freeze_event(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const values = Array.isArray(source.values) ? source.values.map(Number) : [];
+    return Object.freeze({
+      type: String(source.type || ""),
+      timestamp: Number(source.timestamp || 0),
+      accuracy: Number(source.accuracy || 0),
+      values: Object.freeze(values)
+    });
+  }
+  function __autojs6_sensors_emit_error(state, error) {
+    if (typeof state.onerror === "function") {
+      try {
+        state.onerror(error);
+      } catch (thrown) {
+        setImmediate(function() { throw thrown; });
+      }
+    }
+  }
+  function __autojs6_sensors_schedule_drain(state) {
+    if (state.closed || state.timer !== null || state.drainPromise !== null || !state.id) {
+      return;
+    }
+    state.timer = setTimeout(function() {
+      state.timer = null;
+      if (state.closed || !state.id) {
+        return;
+      }
+      state.drainPromise = __autojs6_call_autojs(
+        "sensors",
+        "drainEvents",
+        [{ id: state.id }],
+        { timeoutMs: 5000, permissions: ["sensors"] }
+      ).then(function(events) {
+        if (state.closed) {
+          return;
+        }
+        const list = Array.isArray(events) ? events : [];
+        for (const event of list) {
+          if (!event || typeof event !== "object") continue;
+          if (event.type === "event") {
+            try {
+              state.callback(__autojs6_sensors_freeze_event(event.event));
+            } catch (error) {
+              setImmediate(function() { throw error; });
+            }
+          } else if (event.type === "error") {
+            __autojs6_sensors_emit_error(state, event.error || event);
+          } else if (event.type === "close") {
+            state.closed = true;
+          }
+        }
+      }, function(error) {
+        if (!state.closed) {
+          state.closed = true;
+          __autojs6_sensors_emit_error(state, error);
+        }
+      }).then(function() {
+        state.drainPromise = null;
+        if (!state.closed) {
+          __autojs6_sensors_schedule_drain(state);
+        }
+      });
+    }, state.drainIntervalMs);
+  }
+  function __autojs6_limited_sensors() {
+    if (__autojs6_limited_sensors_cache) {
+      return __autojs6_limited_sensors_cache;
+    }
+    function getAvailableSensors(options) {
+      const opts = __autojs6_sensors_options(options);
+      return __autojs6_call_autojs(
+        "sensors",
+        "getAvailableSensors",
+        [],
+        __autojs6_sensors_call_options(opts, 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(function(item) {
+          return Object.freeze(Object.assign({}, item));
+        }));
+      });
+    }
+    function once(type, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_sensors_descriptor("once", type, options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "sensors",
+        "once",
+        [descriptor],
+        __autojs6_sensors_call_options(options, descriptor.timeoutMs + 1000)
+      ).then(__autojs6_sensors_freeze_event);
+    }
+    function subscribe(type, callback, options) {
+      if (typeof callback !== "function") {
+        throw __autojs6_sensors_invalid_argument_error(
+          "subscribe",
+          "sensors.subscribe requires a callback function."
+        );
+      }
+      const opts = __autojs6_sensors_options(options);
+      const descriptor = __autojs6_sensors_descriptor("subscribe", type, opts);
+      const state = {
+        id: "",
+        type: descriptor.type,
+        closed: false,
+        timer: null,
+        drainPromise: null,
+        callback,
+        onerror: null,
+        drainIntervalMs: __autojs6_sensors_number(
+          opts.drainIntervalMs,
+          __autojs6_sensors_policy.drainIntervalMs,
+          25,
+          5000
+        )
+      };
+      const subscription = Object.freeze({
+        get id() { return state.id; },
+        get type() { return state.type; },
+        get closed() { return state.closed; },
+        get ready() { return ready; },
+        close(closeOptions) {
+          if (state.closed) {
+            return Promise.resolve(undefined);
+          }
+          state.closed = true;
+          if (state.timer !== null) {
+            clearTimeout(state.timer);
+            state.timer = null;
+          }
+          return ready.then(function() {
+            if (!state.id) {
+              return undefined;
+            }
+            return (state.drainPromise || Promise.resolve()).then(function() {
+              return __autojs6_call_autojs(
+                "sensors",
+                "unsubscribe",
+                [{ id: state.id }],
+                __autojs6_sensors_call_options(closeOptions, 5000)
+              ).then(function() {
+                return undefined;
+              });
+            });
+          });
+        }
+      });
+      const ready = __autojs6_call_autojs(
+        "sensors",
+        "subscribe",
+        [descriptor],
+        __autojs6_sensors_call_options(opts, 5000)
+      ).then(function(record) {
+        state.id = String(record && record.id || "");
+        state.type = String(record && record.type || descriptor.type);
+        __autojs6_sensors_schedule_drain(state);
+        return undefined;
+      }, function(error) {
+        state.closed = true;
+        throw error;
+      });
+      return subscription;
+    }
+    __autojs6_limited_sensors_cache = Object.freeze({
+      policy: __autojs6_sensors_policy,
+      getAvailableSensors,
+      once,
+      subscribe
+    });
+    return __autojs6_limited_sensors_cache;
   }
   function __autojs6_call_autojs(moduleName, methodName, args, options) {
     const moduleValue = moduleName === undefined || moduleName === null ? "" : String(moduleName);
@@ -27968,6 +28218,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "notifications") {
       return "notifications";
     }
+    if (name === "sensors") {
+      return "sensors";
+    }
     if (name === "clipboard") {
       return "clipboard";
     }
@@ -28203,6 +28456,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "notifications") {
       return __autojs6_limited_notifications();
+    }
+    if (name === "sensors") {
+      return __autojs6_limited_sensors();
     }
     if (name === "clipboard") {
       return __autojs6_limited_clipboard();

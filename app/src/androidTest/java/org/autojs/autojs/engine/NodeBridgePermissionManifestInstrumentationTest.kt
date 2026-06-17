@@ -131,6 +131,14 @@ class NodeBridgePermissionManifestInstrumentationTest {
             listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "cancelAll"),
         )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.SENSORS),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("sensors", "getAvailableSensors"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.SENSORS),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("sensors", "subscribe"),
+        )
     }
 
     @Test

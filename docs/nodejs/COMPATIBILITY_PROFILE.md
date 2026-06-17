@@ -740,7 +740,8 @@ JavaScript surface with fake-provider tests, type declarations, manifest
 enforcement, and fail-closed Android provider behavior. Real OCR model/provider
 ownership remains future work. Task 173 adds JSON-only `storage`/`storages`
 provider storage, and Task 174 adds post-only `notifications` with Android
-permission gating and owned-notification cleanup.
+permission gating and owned-notification cleanup. Task 175 adds bounded
+`sensors` events with controlled subscription cleanup.
 
 Declared capability names:
 
@@ -754,6 +755,7 @@ Declared capability names:
 - `ocr`
 - `storage`
 - `notifications`
+- `sensors`
 - `clipboard`
 - `device`
 - `shell`, `shell.root`
@@ -890,6 +892,16 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - Android provider checks notification runtime permission/app notification state before posting
   - the provider tracks notifications owned by the current Node execution and cancels remaining owned notifications on provider destroy
   - JavaScript receives only numeric ids; no raw `Notification`, `NotificationChannel`, `PendingIntent`, `RemoteViews`, or Android object crosses into Node
+- `sensors`
+  - `getAvailableSensors(options?): Promise<readonly SensorInfo[]>`
+  - `once(type, options?): Promise<SensorEvent>`
+  - `subscribe(type, callback, options?): SensorSubscription`
+  - supported types: `accelerometer`, `gyroscope`, `light`
+  - options: `{ samplingIntervalMs?: number, intervalMs?: number, timeoutMs?: number, maxQueueSize?: number, drainIntervalMs?: number }`
+  - subscriptions expose frozen local handles with `id`, `type`, `closed`, `ready`, and `close(options?)`
+  - requests require the `sensors` capability
+  - Android provider subscriptions are bounded, event queues are capped, and provider destroy unregisters live listeners
+  - JavaScript receives frozen JSON event snapshots only; no raw `SensorManager`, `Sensor`, `SensorEvent`, listener, `Context`, or Android object crosses into Node
 - `clipboard`
   - `getText(options?): Promise<string>`
   - `setText(text, options?): Promise<void>`

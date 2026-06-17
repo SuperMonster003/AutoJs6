@@ -41,6 +41,7 @@ private val nodeTypeDeclarationModules = listOf(
     "storage",
     "storages",
     "notifications",
+    "sensors",
     "fetch",
     "axios",
     "websocket",

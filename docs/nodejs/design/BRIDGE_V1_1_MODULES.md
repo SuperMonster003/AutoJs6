@@ -82,7 +82,7 @@ for risk/impact:
 | `storage` | 5 | 2 | 5 | 2 | 1 | Implemented as v1.1 partial in Task 173. |
 | `notifications` post-only | 4 | 3 | 4 | 3 | 3 | Implemented as v1.1 partial in Task 174. |
 | `ocr` | 5 | 3 | 3 | 4 | 2 | Protocol MVP added in Task 148; live provider remains blocked on image/provider ownership. |
-| `sensors` | 3 | 3 | 4 | 2 | 2 | Candidate for read-only/rate-limited MVP. |
+| `sensors` | 3 | 3 | 4 | 2 | 2 | Implemented as v1.1 partial in Task 175. |
 | controlled `http` wrapper | 4 | 4 | 3 | 4 | 4 | Defer until network promotion gates pass. |
 | `ui` | 5 | 5 | 2 | 5 | 3 | Design gate only for v1.1. |
 | `floaty` | 4 | 5 | 2 | 5 | 5 | Defer behind UI and overlay policy. |
@@ -184,24 +184,29 @@ Possible capability:
 sensors
 ```
 
-Initial scope should be read-only and bounded:
+Initial scope is read-only and bounded:
 
 ```js
 const sensors = require("sensors");
 const sample = await sensors.once("accelerometer", { timeoutMs: 1000 });
-const sub = await sensors.subscribe("gyroscope", { intervalMs: 200, durationMs: 5000 });
+const sub = sensors.subscribe("gyroscope", (event) => console.log(event.values), { intervalMs: 200 });
+await sub.ready;
 await sub.close();
 ```
 
 Constraints:
 
 - No continuous unbounded subscriptions.
-- Rate limits and duration limits are mandatory.
+- Sampling interval, active subscription, and event queue limits are mandatory.
 - Provider-owned resource handles must be closed on stop/destroy.
 - Results are JSON snapshots.
 - Deny high-risk or permissioned sensor classes until separately reviewed.
 
-This is testable with fake providers but has privacy and battery implications.
+The implemented module supports only `accelerometer`, `gyroscope`, and `light`.
+JavaScript receives frozen JSON event snapshots; raw `SensorManager`, `Sensor`,
+`SensorEvent`, listeners, and Android objects remain denied. This is still a
+privacy- and battery-sensitive surface, so future sensor types need separate
+review.
 
 ### Tier 2: Valuable But Dependency-Blocked
 
@@ -342,7 +347,9 @@ The recommended v1.1 bridge order is:
 3. Use post-only `notifications` as the pattern for future user-visible
    status surfaces: explicit capability, Android permission mapping, and
    owned-resource cleanup.
-4. Consider bounded read-only `sensors` after privacy/rate-limit review.
+4. Use bounded read-only `sensors` as the pattern for event-style bridge
+   modules: provider queues events, JavaScript drains snapshots, and destroy
+   closes native listeners.
 5. Keep the Task 148 OCR protocol MVP fail-closed until image handles are
    provider-owned and packaged model policy is clear.
 6. Keep `ui`, `floaty`, `plugins`, controlled `http`, and Shizuku/root advanced

@@ -20,6 +20,7 @@ enum class NodeBridgeResourceType(val idPrefix: String) {
     WORKER("worker"),
     NETWORK_CALL("network"),
     NOTIFICATION("notification"),
+    SENSOR_SUBSCRIPTION("sensor"),
 }
 
 class NodeBridgeResourceHandle internal constructor(

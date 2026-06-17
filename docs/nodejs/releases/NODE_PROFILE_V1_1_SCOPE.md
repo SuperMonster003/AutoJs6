@@ -63,6 +63,7 @@ small set of already-gated features toward practical use.
 | OCR | partial | `require("ocr")` exposes `recognize`, `recognizeText`, and `detectTextBounds` over opaque image handles with `ocr` + `image` capability checks; Android provider remains fail-closed until real provider/model ownership is accepted. |
 | Storage | partial | `require("storage")` and `require("storages")` expose JSON-only project/package-scoped key-value stores with explicit `storage` capability checks. |
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, and owned-resource cleanup. |
+| Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
@@ -126,6 +127,10 @@ small set of already-gated features toward practical use.
   fake-provider request serialization, manifest denial, Android
   permission-denial or post/cancel behavior, owned-resource cleanup,
   `POST_NOTIFICATIONS` manifest mapping, and TypeScript declarations.
+- Sensors bridge smoke passes for `getAvailableSensors`, `once`,
+  `subscribe`, fake-provider event draining, manifest denial, Android sensor
+  listing, live subscription cleanup when a supported sensor exists, and
+  TypeScript declarations.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
   execution/stress suites pass on Sony.
