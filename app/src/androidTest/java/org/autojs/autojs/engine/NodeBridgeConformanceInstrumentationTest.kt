@@ -52,6 +52,7 @@ class NodeBridgeConformanceInstrumentationTest {
               const assert = require("assert");
               const bridge = require("autojs6:bridge");
               const requests = [];
+              let uiDrained = false;
 
               function respond(request, ok, result, error) {
                 setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
@@ -169,6 +170,15 @@ class NodeBridgeConformanceInstrumentationTest {
                     } else if (method === "unsubscribe") {
                       result = null;
                     }
+                  } else if (moduleName === "ui") {
+                    if (method === "showLayout") {
+                      result = { id: "ui-conformance" };
+                    } else if (method === "drainEvents") {
+                      result = uiDrained ? [] : [{ type: "click", id: "ok", text: "OK" }];
+                      uiDrained = true;
+                    } else if (method === "update" || method === "close") {
+                      result = null;
+                    }
                   } else if (moduleName === "work_manager") {
                     if (method === "scheduleOnce") result = "work-once";
                     else if (method === "schedulePeriodic") result = "work-periodic";
@@ -206,6 +216,7 @@ class NodeBridgeConformanceInstrumentationTest {
               const storages = require("storages");
               const notifications = require("notifications");
               const sensors = require("sensors");
+              const ui = require("ui");
               const workManager = require("work_manager");
 
               [
@@ -225,6 +236,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["storages", storages],
                 ["notifications", notifications],
                 ["sensors", sensors],
+                ["ui", ui],
                 ["work_manager", workManager]
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
@@ -244,6 +256,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("storages", storages, ["create", "open"]);
               expectExports("notifications", notifications, ["notify", "cancel", "cancelAll"]);
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
+              expectExports("ui", ui, ["showLayout"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
 
               assert.strictEqual(typeof app.packageName, "string");
@@ -350,6 +363,24 @@ class NodeBridgeConformanceInstrumentationTest {
               await sensorCallbackReady;
               await expectPromise("sensors.subscription.close", sensorSub.close({ timeoutMs: 1069 }));
               assert(sensorCallbackCount >= 1, "sensors subscription callback did not run");
+              const uiHandle = await expectPromise("ui.showLayout", ui.showLayout({ type: "Vertical", children: [{ type: "Text", id: "title", text: "Node" }, { type: "Button", id: "ok", text: "OK" }] }, { timeoutMs: 1070, drainIntervalMs: 1 }));
+              expectFrozen("ui.handle", uiHandle);
+              expectExports("ui.handle", uiHandle, ["on", "update", "close"]);
+              let uiClickCount = 0;
+              let uiOff = function() {};
+              const uiReady = new Promise((resolve) => {
+                uiOff = uiHandle.on("click", (event) => {
+                  if (event.id === "ok" && event.handleId === "ui-conformance") {
+                    uiClickCount += 1;
+                    uiOff();
+                    resolve();
+                  }
+                }, { drainIntervalMs: 1, timeoutMs: 1071 });
+              });
+              await uiReady;
+              await expectPromise("ui.update", uiHandle.update({ id: "title", text: "Updated" }, { timeoutMs: 1072 }));
+              await expectPromise("ui.close", uiHandle.close({ timeoutMs: 1073 }));
+              assert(uiClickCount >= 1, "ui click callback did not run");
               assert.strictEqual(await expectPromise("work_manager.scheduleOnce", workManager.scheduleOnce({ scriptPath: "main.cjs", timeoutMs: 1055 })), "work-once");
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
@@ -381,6 +412,10 @@ class NodeBridgeConformanceInstrumentationTest {
                 "notifications.cancelAll",
                 "sensors.once",
                 "sensors.unsubscribe",
+                "ui.showLayout",
+                "ui.drainEvents",
+                "ui.update",
+                "ui.close",
                 "work_manager.list"
               ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));
               console.log("bridge.conformance.request_count=" + requests.length);
@@ -569,6 +604,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.NOTIFICATIONS to setOf("notify", "cancel", "cancelAll"),
             NodeBridgeModules.SENSORS to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
+            NodeBridgeModules.UI to setOf("showLayout", "update", "close", "drainEvents"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
         )
     }

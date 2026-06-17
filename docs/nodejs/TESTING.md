@@ -121,7 +121,7 @@ Stable bridge API conformance:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeConformanceInstrumentationTest"
 ```
 
-This suite freezes the stable AutoJs bridge API shape for `toast`, `app`, `dialogs`, `clipboard`, `device`, `shell`, `engines`, `accessibility`, `media_projection`, `image`/`images`, `ocr`, `storage`/`storages`, `notifications`, `sensors`, and `work_manager`. It verifies Kotlin registry drift, JavaScript module exports, Promise contracts, provider error shape, capability denial, handle method shape, and pending-call cleanup after bridge destroy.
+This suite freezes the stable AutoJs bridge API shape for `toast`, `app`, `dialogs`, `clipboard`, `device`, `shell`, `engines`, `accessibility`, `media_projection`, `image`/`images`, `ocr`, `storage`/`storages`, `notifications`, `sensors`, `ui`, and `work_manager`. It verifies Kotlin registry drift, JavaScript module exports, Promise contracts, provider error shape, capability denial, handle method shape, and pending-call cleanup after bridge destroy.
 
 Focused bridge RPC fuzzer:
 
@@ -433,6 +433,14 @@ Current `sensors` bridge v1.1 partial focused instrumentation:
 ```
 
 This suite verifies the `sensors` bridge registry, fake-provider request/response behavior, shadowing protection, `getAvailableSensors`, `once`, `subscribe`, subscription `ready`/`close`, event snapshot freezing, type/callback validation, manifest capability denial before dispatch, Android provider sensor listing, and live subscription resource cleanup when a supported device sensor is available.
+
+Current `ui` bridge protocol-gate focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest"
+```
+
+This suite verifies the `ui` bridge registry, capability manifest mapping, fake-provider `showLayout`, `drainEvents`, `update`, and `close`, shadowing protection for `require("ui")`, opaque handle shape, button/click event delivery through drained JSON snapshots, timeout and permission propagation, JSON-only invalid descriptor rejection before dispatch, absence of raw View/Activity handle properties, and the current Android provider fail-closed path until an Activity-owned UI provider exists.
 
 Current bridge permission manifest focused instrumentation:
 

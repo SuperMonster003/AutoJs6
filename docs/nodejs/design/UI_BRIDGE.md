@@ -1,7 +1,9 @@
 # Node UI Bridge Design Gate
 
-Status: design gate only. No `require("ui")` runtime module is implemented by
-this document.
+Status: Task 182 reserves a protocol-gated `require("ui")` module. The
+JavaScript wrapper, capability manifest entry, fake-provider event protocol,
+TypeScript declarations, and Android fail-closed provider path exist. A real
+Activity-owned Android UI provider is still not implemented.
 
 ## Goal
 
@@ -16,12 +18,21 @@ a separate provider contract before any runtime API is exposed.
 
 ## Current Decision
 
-Do not expose `require("ui")` in Node Profile v1.1.
+Expose only the narrow protocol reservation for `require("ui")` in Node Profile
+v1.1.
 
-The only acceptable next step is an Activity-owned design prototype behind a
-dedicated capability and test gate. It must not expose raw Android `Context`,
-`Activity`, `View`, `Fragment`, `Window`, `Handler`, Rhino `NativeView`, or Java
-objects to Node scripts.
+The current module accepts JSON-only layout descriptors through
+`showLayout(layoutJson, options?)`, returns an opaque `UiHandle`, supports
+`handle.on(event, callback)`, `handle.update(patch)`, and `handle.close()`, and
+routes event delivery through bounded `drainEvents` bridge calls. The default
+Android provider rejects every `ui` method with
+`ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an Activity-owned provider is
+accepted.
+
+The next implementation step remains an Activity-owned provider behind the
+same `ui` capability and focused tests. It must not expose raw Android
+`Context`, `Activity`, `View`, `Fragment`, `Window`, `Handler`, Rhino
+`NativeView`, or Java objects to Node scripts.
 
 Existing bridge modules remain the UI-adjacent surface for now:
 
@@ -46,8 +57,8 @@ The Node UI bridge is not:
 
 | Mode | Description | Decision |
 | --- | --- | --- |
-| No Node UI module | Node scripts use existing bridge modules only. | Current v1.1 behavior. |
-| Activity-owned declarative UI | A provider owns an Activity and accepts JSON layout/state/actions. | Preferred first design if UI is added. |
+| Protocol-gated `require("ui")` | JavaScript module and fake-provider protocol exist; Android provider fails closed. | Current v1.1 behavior. |
+| Activity-owned declarative UI | A provider owns an Activity and accepts JSON layout/state/actions. | Required next step before real UI. |
 | WebView-hosted UI | Node drives a constrained local WebView surface. | Possible separate design, not default. |
 | Rhino UI compatibility shim | Node mimics Rhino `ui.*` and XML semantics. | Migration-only and high risk. |
 | Floaty/overlay UI | Node owns overlay windows. | Must wait behind overlay permission and floaty policy. |
@@ -65,8 +76,10 @@ ui.webview
 ui.overlay
 ```
 
-For a first MVP, prefer `ui.activity` over broad `ui`. `ui.overlay` must not be
-implied by `ui`; overlay windows need separate user-visible permission,
+Task 182 uses the broad `ui` capability only for the reserved JSON protocol.
+Future narrower names may still be introduced if the first live provider needs
+separate Activity, dialog, WebView, or overlay permissions. `ui.overlay` must
+not be implied by `ui`; overlay windows need separate user-visible permission,
 foreground-service, packaged manifest, and disclosure policy.
 
 Bridge capability manifests should remain deny-by-default when a project opts
@@ -188,42 +201,40 @@ It should avoid:
 - implicit current Activity access
 - overlay support as part of the first UI module
 
-## Possible Activity-Owned API Shape
+## Reserved API Shape
 
-This is illustrative only:
+Task 182 reserves this JavaScript shape:
 
 ```js
 const ui = require("ui");
 
-const session = await ui.show({
-  title: "Example",
-  layout: {
-    type: "column",
-    children: [
-      { id: "name", type: "textInput", hint: "Name" },
-      { id: "ok", type: "button", text: "OK" }
-    ]
-  },
+const handle = await ui.showLayout({
+  type: "Vertical",
+  children: [
+    { id: "name", type: "Input", hint: "Name" },
+    { id: "ok", type: "Button", text: "OK" }
+  ]
+}, {
   timeoutMs: 10000
 });
 
-for await (const event of session.events({ timeoutMs: 60000 })) {
+const off = handle.on("click", async (event) => {
   if (event.type === "click" && event.id === "ok") {
-    const values = await session.values();
-    await session.close();
-    break;
+    off();
+    await handle.update({ id: "ok", text: "Done" });
+    await handle.close();
   }
-}
+});
 ```
 
 Required properties if this shape is selected:
 
-- `ui.show(descriptor, options?)` returns an opaque `UiSession`
+- `ui.showLayout(layoutJson, options?)` returns an opaque `UiHandle`
 - descriptors are JSON only and schema-validated before dispatch
-- event stream has max queue length and backpressure behavior
-- `session.close()` is idempotent
-- all widget ids are scoped to the session
-- `session.values()` returns JSON snapshots only
+- event draining has bounded request size and listener cleanup
+- `handle.close()` is idempotent
+- all widget ids are scoped to the handle/session
+- state reads, if later added, return JSON snapshots only
 - no raw View or Activity object crosses into Node
 
 ## WebView Option
@@ -278,12 +289,21 @@ Any future implementation must enforce:
 
 ## Test Gate
 
-Minimum tests before implementing a runtime module:
+Task 182 protocol tests now cover:
+
+- Kotlin registry and permission manifest coverage for `ui`
+- fake-provider `showLayout`, `update`, `drainEvents`, and `close`
+- JavaScript shadowing protection for `require("ui")`
+- event callback delivery through drained JSON snapshots
+- JSON-only invalid descriptor rejection before dispatch
+- no raw View/Activity property on the JavaScript handle
+- Android provider fail-closed behavior until an Activity provider exists
+- TypeScript declaration smoke
+
+Minimum tests before implementing a real Android UI provider:
 
 - schema parser unit tests for layout descriptors
-- Kotlin registry and permission manifest coverage
 - fake-provider success, failure, timeout, cancellation, and destroy tests
-- JavaScript shadowing protection for `require("ui")`
 - no raw-object serialization tests
 - Activity instrumentation for show, event, state read, close, Back, and destroy
 - rotation or explicit configuration-change policy test
@@ -308,6 +328,7 @@ Minimum tests before implementing a runtime module:
 
 ## Recommendation
 
-Keep UI as a v1.1 design gate. Do not implement `require("ui")` until the
-Activity-owned provider, lifecycle, packaged APK behavior, Rhino compatibility
-boundary, and test gate above are accepted.
+Keep real UI rendering as a v1.1 design gate. The reserved `require("ui")`
+protocol should remain fail-closed on Android until the Activity-owned provider,
+lifecycle, packaged APK behavior, Rhino compatibility boundary, and provider
+test gate above are accepted.

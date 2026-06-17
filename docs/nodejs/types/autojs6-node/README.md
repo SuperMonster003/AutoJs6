@@ -18,6 +18,7 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `storages`
 - `notifications`
 - `sensors`
+- `ui`
 - `fetch`
 - `axios`
 - `websocket`

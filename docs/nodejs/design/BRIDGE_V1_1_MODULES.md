@@ -84,7 +84,7 @@ for risk/impact:
 | `ocr` | 5 | 3 | 3 | 4 | 2 | Protocol MVP added in Task 148; live provider remains blocked on image/provider ownership. |
 | `sensors` | 3 | 3 | 4 | 2 | 2 | Implemented as v1.1 partial in Task 175. |
 | controlled `http` wrapper | 4 | 4 | 3 | 4 | 4 | Defer until network promotion gates pass. |
-| `ui` | 5 | 5 | 2 | 5 | 3 | Design gate only for v1.1. |
+| `ui` | 5 | 5 | 3 | 5 | 3 | Protocol gate reserved in Task 182; live Activity provider remains design-gated. |
 | `floaty` | 4 | 5 | 2 | 5 | 5 | Defer behind UI and overlay policy. |
 | `plugins` | 4 | 5 | 2 | 5 | 4 | Design gate only for v1.1. |
 | Shizuku/root shell | 3 | 5 | 2 | 5 | 5 | Not a v1.1 bridge expansion. |
@@ -273,7 +273,8 @@ network opt-in fixture.
 
 #### `ui`
 
-Node-driven UI needs a separate design gate before implementation.
+Node-driven UI needs a separate Activity-owned provider gate before live
+Android rendering.
 
 Open questions:
 
@@ -283,13 +284,12 @@ Open questions:
 - How does this coexist with Rhino UI scripts?
 - How are UI object handles represented and cleaned up?
 
-No v1.1 implementation should start until `docs/nodejs/design/UI_BRIDGE.md`
-answers these questions.
-
-Task 149 adds that design gate in [UI_BRIDGE.md](UI_BRIDGE.md). The current
-decision remains no `require("ui")` runtime module until an Activity-owned
-provider, lifecycle, packaged APK behavior, Rhino compatibility boundary, and
-test gate are accepted.
+Task 149 added that design gate in [UI_BRIDGE.md](UI_BRIDGE.md). Task 182
+reserves a protocol-gated `require("ui")` module with JSON-only
+`showLayout`, opaque handle `on`/`update`/`close`, fake-provider event
+draining, TypeScript declarations, and Android provider fail-closed behavior.
+The live Activity-owned provider, lifecycle, packaged APK behavior, Rhino
+compatibility boundary, and provider test gate remain unimplemented.
 
 #### `floaty`
 
@@ -352,8 +352,9 @@ The recommended v1.1 bridge order is:
    closes native listeners.
 5. Keep the Task 148 OCR protocol MVP fail-closed until image handles are
    provider-owned and packaged model policy is clear.
-6. Keep `ui`, `floaty`, `plugins`, controlled `http`, and Shizuku/root advanced
-   shell as design gates only.
+6. Keep live `ui`, `floaty`, `plugins`, controlled `http`, and Shizuku/root
+   advanced shell as design gates only. The current `ui` surface is a
+   fail-closed protocol reservation, not a live Android UI provider.
 
 ## Minimum Test Gate For Any New Module
 

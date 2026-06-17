@@ -147,6 +147,14 @@ class NodeBridgePermissionManifestInstrumentationTest {
             listOf(NodeBridgePermissionManifest.SENSORS),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("sensors", "subscribe"),
         )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.UI),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("ui", "showLayout"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.UI),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("ui", "drainEvents"),
+        )
     }
 
     @Test

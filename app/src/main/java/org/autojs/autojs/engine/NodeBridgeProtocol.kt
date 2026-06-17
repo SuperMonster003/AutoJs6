@@ -468,6 +468,7 @@ object NodeBridgeModules {
     const val STORAGES = "storages"
     const val NOTIFICATIONS = "notifications"
     const val SENSORS = "sensors"
+    const val UI = "ui"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -517,6 +518,7 @@ object NodeBridgeModules {
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
     val notificationsMethods = setOf("notify", "cancel", "cancelAll")
     val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
+    val uiMethods = setOf("showLayout", "update", "close", "drainEvents")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")
@@ -539,6 +541,7 @@ object NodeBridgeModules {
         STORAGES to storageMethods,
         NOTIFICATIONS to notificationsMethods,
         SENSORS to sensorsMethods,
+        UI to uiMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
         SHELL to shellMethods,
@@ -628,6 +631,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, callback)
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, callback)
             request.module == NodeBridgeModules.SENSORS && request.method in NodeBridgeModules.sensorsMethods -> dispatchSensors(request, callback)
+            request.module == NodeBridgeModules.UI && request.method in NodeBridgeModules.uiMethods -> dispatchUi(request, callback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, callback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, callback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
@@ -754,6 +758,19 @@ class AndroidNodeBridgeCapabilityProvider(
                     module = request.module,
                     method = request.method,
                     requirement = "a UI capability provider",
+                ),
+            ),
+        )
+    }
+
+    private fun dispatchUi(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        callback(
+            NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.capabilityProviderMissing(
+                    module = request.module,
+                    method = request.method,
+                    requirement = "an Activity-owned UI capability provider",
                 ),
             ),
         )

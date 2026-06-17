@@ -8009,6 +8009,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_storages_cache = null;
   let __autojs6_limited_notifications_cache = null;
   let __autojs6_limited_sensors_cache = null;
+  let __autojs6_limited_ui_cache = null;
   let __autojs6_limited_clipboard_cache = null;
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
@@ -8861,6 +8862,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (moduleName === "storage" || moduleName === "storages") return ["storage"];
     if (moduleName === "notifications") return ["notifications"];
     if (moduleName === "sensors") return ["sensors"];
+    if (moduleName === "ui") return ["ui"];
     if (moduleName === "clipboard") return ["clipboard"];
     if (moduleName === "device") return ["device"];
     if (moduleName === "shell") return ["shell"];
@@ -12333,6 +12335,248 @@ std::string buildEmbeddedScriptExecutionSource(
       select
     });
     return __autojs6_limited_dialogs_cache;
+  }
+  function __autojs6_ui_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_ui_timeout_from_options(options, fallbackMs) {
+    return options && typeof options === "object" && options.timeoutMs !== undefined
+      ? options.timeoutMs
+      : fallbackMs;
+  }
+  function __autojs6_ui_bridge_options(options, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_ui_timeout_from_options(options, fallbackMs),
+      permissions: ["ui"],
+      signal: __autojs6_bridge_signal_from_options(options)
+    };
+  }
+  function __autojs6_ui_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "ui",
+      methodName
+    );
+  }
+  function __autojs6_ui_validate_json(value, methodName, path, depth, seen) {
+    if (depth > 16) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor is too deep at " + path + ".");
+    }
+    if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      if (typeof value === "number" && !Number.isFinite(value)) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor contains a non-finite number at " + path + ".");
+      }
+      return value;
+    }
+    if (!value || typeof value !== "object") {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must be JSON-only at " + path + ".");
+    }
+    if (seen.indexOf(value) >= 0) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must not contain cycles.");
+    }
+    seen.push(value);
+    if (Array.isArray(value)) {
+      if (value.length > 128) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor array is too large at " + path + ".");
+      }
+      const arrayResult = value.map(function(entry, index) {
+        return __autojs6_ui_validate_json(entry, methodName, path + "[" + index + "]", depth + 1, seen);
+      });
+      seen.pop();
+      return arrayResult;
+    }
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must use plain JSON objects at " + path + ".");
+    }
+    const keys = Object.keys(value);
+    if (keys.length > 64) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor object is too large at " + path + ".");
+    }
+    const objectResult = Object.create(null);
+    keys.forEach(function(key) {
+      const entry = value[key];
+      if (entry === undefined || typeof entry === "function" || typeof entry === "symbol" || typeof entry === "bigint") {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must be JSON-only at " + path + "." + key + ".");
+      }
+      objectResult[key] = __autojs6_ui_validate_json(entry, methodName, path + "." + key, depth + 1, seen);
+    });
+    seen.pop();
+    return objectResult;
+  }
+  function __autojs6_ui_descriptor(value, methodName) {
+    const descriptor = __autojs6_ui_validate_json(value, methodName, "layout", 0, []);
+    const text = JSON.stringify(descriptor);
+    if (!text || text.length > 32768) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor exceeds 32768 characters.");
+    }
+    if (!descriptor || typeof descriptor !== "object" || Array.isArray(descriptor)) {
+      throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " requires a JSON object descriptor.");
+    }
+    return descriptor;
+  }
+  function __autojs6_ui_handle_id(value) {
+    if (typeof value === "string") {
+      return value.trim();
+    }
+    if (value && typeof value === "object") {
+      return String(value.id || value.handleId || value.__autojs6UiHandle || "").trim();
+    }
+    return "";
+  }
+  function __autojs6_ui_handle(result, moduleOptions) {
+    const id = __autojs6_ui_handle_id(result);
+    if (!id) {
+      throw __autojs6_ui_invalid_argument_error("showLayout", "ui.showLayout provider returned an invalid UI handle.");
+    }
+    const listeners = Object.create(null);
+    let closed = false;
+    let drainTimer = null;
+    let draining = false;
+    const defaultDrainIntervalMs = Math.max(10, Math.min(1000, Number(moduleOptions.drainIntervalMs) || 50));
+    function listenerCount() {
+      return Object.keys(listeners).reduce(function(total, key) {
+        return total + listeners[key].length;
+      }, 0);
+    }
+    function stopDrainIfIdle() {
+      if (listenerCount() === 0 && drainTimer !== null) {
+        clearInterval(drainTimer);
+        drainTimer = null;
+      }
+    }
+    function dispatchEvent(event) {
+      if (!event || typeof event !== "object") {
+        return;
+      }
+      const type = event.type === undefined || event.type === null ? "" : String(event.type);
+      const targets = []
+        .concat(listeners[type] || [])
+        .concat(listeners["*"] || []);
+      targets.forEach(function(callback) {
+        try {
+          callback(Object.freeze(Object.assign({}, event, { handleId: id })));
+        } catch (error) {
+          setTimeout(function() { throw error; }, 0);
+        }
+      });
+    }
+    function drain(options) {
+      if (closed || draining || listenerCount() === 0) {
+        return;
+      }
+      draining = true;
+      const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
+      __autojs6_call_autojs(
+        "ui",
+        "drainEvents",
+        [id, { maxEvents: 16 }],
+        __autojs6_ui_bridge_options(bridgeOptions, 5000)
+      ).then(function(events) {
+        if (Array.isArray(events)) {
+          events.forEach(dispatchEvent);
+        }
+      }, function() {
+        return undefined;
+      }).finally(function() {
+        draining = false;
+      });
+    }
+    function on(eventName, callback, options) {
+      const event = eventName === undefined || eventName === null ? "" : String(eventName).trim();
+      if (!event || typeof callback !== "function") {
+        throw __autojs6_ui_invalid_argument_error("on", "ui.handle.on requires an event name and callback.");
+      }
+      if (!listeners[event]) {
+        listeners[event] = [];
+      }
+      listeners[event].push(callback);
+      if (drainTimer === null) {
+        const intervalMs = Math.max(10, Math.min(1000, Number((options && options.drainIntervalMs) || moduleOptions.drainIntervalMs) || defaultDrainIntervalMs));
+        drainTimer = setInterval(function() { drain(options); }, intervalMs);
+        drain(options);
+      }
+      return function unsubscribe() {
+        const bucket = listeners[event] || [];
+        const index = bucket.indexOf(callback);
+        if (index >= 0) {
+          bucket.splice(index, 1);
+        }
+        stopDrainIfIdle();
+      };
+    }
+    function update(patch, options) {
+      if (closed) {
+        return Promise.resolve(undefined);
+      }
+      let descriptor;
+      try {
+        descriptor = __autojs6_ui_descriptor(patch, "update");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui",
+        "update",
+        [id, descriptor],
+        __autojs6_ui_bridge_options(bridgeOptions, 10000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    function close(options) {
+      if (closed) {
+        return Promise.resolve(undefined);
+      }
+      closed = true;
+      if (drainTimer !== null) {
+        clearInterval(drainTimer);
+        drainTimer = null;
+      }
+      const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui",
+        "close",
+        [id],
+        __autojs6_ui_bridge_options(bridgeOptions, 10000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    return Object.freeze({
+      id,
+      on,
+      update,
+      close
+    });
+  }
+  function __autojs6_limited_ui() {
+    if (__autojs6_limited_ui_cache) {
+      return __autojs6_limited_ui_cache;
+    }
+    function showLayout(layoutJson, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_ui_descriptor(layoutJson, "showLayout");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const bridgeOptions = __autojs6_ui_options(options);
+      return __autojs6_call_autojs(
+        "ui",
+        "showLayout",
+        [descriptor],
+        __autojs6_ui_bridge_options(bridgeOptions, 10000)
+      ).then(function(result) {
+        return __autojs6_ui_handle(result, bridgeOptions);
+      });
+    }
+    __autojs6_limited_ui_cache = Object.freeze({
+      showLayout
+    });
+    return __autojs6_limited_ui_cache;
   }
   function __autojs6_accessibility_timeout_from_options(options, fallbackMs) {
     return options && typeof options === "object" && options.timeoutMs !== undefined
@@ -28712,6 +28956,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "sensors") {
       return "sensors";
     }
+    if (name === "ui") {
+      return "ui";
+    }
     if (name === "clipboard") {
       return "clipboard";
     }
@@ -28950,6 +29197,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "sensors") {
       return __autojs6_limited_sensors();
+    }
+    if (name === "ui") {
+      return __autojs6_limited_ui();
     }
     if (name === "clipboard") {
       return __autojs6_limited_clipboard();

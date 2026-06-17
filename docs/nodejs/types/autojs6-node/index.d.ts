@@ -15,6 +15,7 @@
 /// <reference path="./storages.d.ts" />
 /// <reference path="./notifications.d.ts" />
 /// <reference path="./sensors.d.ts" />
+/// <reference path="./ui.d.ts" />
 /// <reference path="./fetch.d.ts" />
 /// <reference path="./axios.d.ts" />
 /// <reference path="./websocket.d.ts" />

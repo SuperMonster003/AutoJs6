@@ -427,7 +427,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
                     "name" to module,
                     "status" to when (module) {
                         "fetch" -> "experimental"
-                        "accessibility", "media_projection", "image", "images", "dialogs" -> "partial"
+                        "accessibility", "media_projection", "image", "images", "dialogs", "ui" -> "partial"
                         else -> "stable"
                     },
                     "methods" to methods.sorted(),
@@ -506,7 +506,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
             bridgeModules.forEach { (module, methods) ->
                 val status = when (module) {
                     "fetch" -> "experimental"
-                    "accessibility", "media_projection", "image", "images", "dialogs" -> "partial"
+                    "accessibility", "media_projection", "image", "images", "dialogs", "ui" -> "partial"
                     else -> "stable"
                 }
                 appendLine(tableRow(module, status, methods.sorted().joinToString(", ")))

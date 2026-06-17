@@ -25,6 +25,7 @@ object NodeBridgePermissionManifest {
     const val STORAGE = "storage"
     const val NOTIFICATIONS = "notifications"
     const val SENSORS = "sensors"
+    const val UI = "ui"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -57,6 +58,7 @@ object NodeBridgePermissionManifest {
         STORAGE,
         NOTIFICATIONS,
         SENSORS,
+        UI,
         CLIPBOARD,
         DEVICE,
         SHELL,
@@ -213,6 +215,7 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
             NodeBridgeModules.NOTIFICATIONS -> listOf(NOTIFICATIONS)
             NodeBridgeModules.SENSORS -> listOf(SENSORS)
+            NodeBridgeModules.UI -> listOf(UI)
             NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
             NodeBridgeModules.DEVICE -> listOf(DEVICE)
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)

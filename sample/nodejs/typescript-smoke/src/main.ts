@@ -14,6 +14,7 @@ import storage = require("storage");
 import storages = require("storages");
 import notifications = require("notifications");
 import sensors = require("sensors");
+import ui = require("ui");
 import fetchModule = require("fetch");
 import axios = require("axios");
 import websocket = require("websocket");
@@ -142,6 +143,22 @@ async function smoke(): Promise<void> {
   }, { samplingIntervalMs: 250, drainIntervalMs: 100, timeoutMs: 1000 });
   await sensorSub.ready;
   await sensorSub.close({ timeoutMs: 1000 });
+
+  const uiHandle: ui.UiHandle = await ui.showLayout({
+    type: "Vertical",
+    children: [
+      { id: "title", type: "Text", text: "Node UI" },
+      { id: "ok", type: "Button", text: "OK" }
+    ]
+  }, { timeoutMs: 1000, drainIntervalMs: 50 });
+  const unsubscribeUi: () => void = uiHandle.on("click", (event: ui.UiEvent) => {
+    const eventId: string | undefined = event.id;
+    void eventId;
+  }, { drainIntervalMs: 50, timeoutMs: 1000 });
+  await uiHandle.update({ id: "title", text: "Updated" }, { timeoutMs: 1000 });
+  unsubscribeUi();
+  await uiHandle.close({ timeoutMs: 1000 });
+
   await image.recycle(template, { timeoutMs: 1000 });
   await images.recycle(frame, { timeoutMs: 1000 });
 
@@ -243,6 +260,8 @@ async function smoke(): Promise<void> {
   void availableSensors;
   void sensorEvent;
   void sensorSub;
+  void uiHandle;
+  void unsubscribeUi;
   void responseText;
   void responseJson;
   void fetchDiagnostics;

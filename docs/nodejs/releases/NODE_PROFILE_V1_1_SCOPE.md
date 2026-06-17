@@ -65,6 +65,7 @@ small set of already-gated features toward practical use.
 | Storage | partial | `require("storage")` and `require("storages")` expose JSON-only project/package-scoped key-value stores with explicit `storage` capability checks. |
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, and owned-resource cleanup. |
 | Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
+| UI bridge protocol | protocol-gated partial | `require("ui")` reserves JSON-only `showLayout`, opaque `UiHandle.on/update/close`, and drained event snapshots with explicit `ui` capability checks; the Android provider remains fail-closed until an Activity-owned provider is accepted. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for long-click, set-text, and scroll while keeping JSON-only snapshots and explicit `accessibility` capability checks. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
 | Work Manager metadata | partial | `require("work_manager")` registers controlled scheduled-task metadata for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`, stores embedded backend plus `scriptPath`/project `entry` metadata, supports packaged entry descriptors, and still does not launch background Node executions. |
@@ -141,6 +142,11 @@ small set of already-gated features toward practical use.
   `subscribe`, fake-provider event draining, manifest denial, Android sensor
   listing, live subscription cleanup when a supported sensor exists, and
   TypeScript declarations.
+- UI bridge protocol smoke passes for `require("ui")`, fake-provider
+  `showLayout`, button/click event drain, `handle.update()`, `handle.close()`,
+  JSON-only invalid descriptor denial before dispatch, shadowing protection,
+  no raw View/Activity property on the handle, Android provider fail-closed
+  behavior, and TypeScript declarations.
 - Accessibility selector v2 smoke passes for regex, clickable/enabled, depth,
   bounds descriptors, `longClick`, `setText`, `scrollForward`,
   `scrollBackward`, timeout/cancellation cleanup, manifest denial, no raw node

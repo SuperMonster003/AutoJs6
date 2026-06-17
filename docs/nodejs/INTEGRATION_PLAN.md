@@ -135,7 +135,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Reject pending bridge calls when the script service stops.
 - Track provider-owned bridge resources per execution and close leaked handles on stop/destroy.
 - Apply per-execution bridge concurrency and resource limits before provider calls can flood the service.
-- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, `work_manager` metadata registration, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image`.
+- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, `work_manager` metadata registration, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, protocol-gated `media_projection`/`image`, and fail-closed protocol-gated `ui`.
 
 ### P5 Release Gates
 
@@ -175,7 +175,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 ## Immediate Next Tasks
 
 1. Harden the private live bridge transport and refresh packaged templates so packaged apps can use the same live path.
-2. Keep `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, and protocol-gated `media_projection`/`image` stable while designing real capability providers.
+2. Keep `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, protocol-gated `media_projection`/`image`, and protocol-gated `ui` stable while designing real capability providers.
 3. Treat `project.json node.permissions` and `package.json autojs6.node.permissions` as the bridge capability manifest when present; missing declarations reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 3. Treat `project.json node.bridgeLimits` and `package.json autojs6.node.bridgeLimits` as safe bridge limit overrides; above-hard-max values must be ignored with diagnostics.
 3. Design the real accessibility and MediaProjection/image providers before enabling Android-backed actions, screenshot capture, image decoding, or live node/image handles. Accessibility selector descriptors and node snapshots must remain JSON-only.

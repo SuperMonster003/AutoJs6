@@ -745,7 +745,9 @@ enforcement, and fail-closed Android provider behavior. Real OCR model/provider
 ownership remains future work. Task 173 adds JSON-only `storage`/`storages`
 provider storage, and Task 174 adds post-only `notifications` with Android
 permission gating and owned-notification cleanup. Task 175 adds bounded
-`sensors` events with controlled subscription cleanup.
+`sensors` events with controlled subscription cleanup. Task 182 reserves the
+protocol-gated `ui` module with fake-provider tests and an Android fail-closed
+provider path; real Activity-owned UI remains design-gated.
 
 Declared capability names:
 
@@ -760,6 +762,7 @@ Declared capability names:
 - `storage`
 - `notifications`
 - `sensors`
+- `ui`
 - `clipboard`
 - `device`
 - `shell`, `shell.root`
@@ -929,6 +932,18 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - requests require the `sensors` capability
   - Android provider subscriptions are bounded, event queues are capped, and provider destroy unregisters live listeners
   - JavaScript receives frozen JSON event snapshots only; no raw `SensorManager`, `Sensor`, `SensorEvent`, listener, `Context`, or Android object crosses into Node
+- `ui`
+  - `showLayout(layoutJson, options?): Promise<UiHandle>`
+  - `UiHandle.id: string`
+  - `UiHandle.on(event, callback, options?): () => void`
+  - `UiHandle.update(patch, options?): Promise<void>`
+  - `UiHandle.close(options?): Promise<void>`
+  - layout descriptors and update patches must be JSON-only plain objects; functions, symbols, `bigint`, `undefined`, cycles, non-plain object instances, excessive depth, excessive object keys, excessive array length, and oversized descriptors are rejected before dispatch
+  - event callbacks receive frozen JSON snapshots with `handleId`; events are delivered by bounded `drainEvents` bridge requests instead of direct Android-to-JavaScript callbacks
+  - requests require the `ui` capability
+  - current JavaScript API, fake-provider tests, type declarations, and bridge protocol are reserved
+  - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an Activity-owned UI provider is connected
+  - JavaScript receives only an opaque handle; no raw `Context`, `Activity`, `View`, `Window`, `Fragment`, `Handler`, Rhino `NativeView`, overlay window, Binder, or Java object crosses into Node
 - `clipboard`
   - `getText(options?): Promise<string>`
   - `setText(text, options?): Promise<void>`
@@ -1074,7 +1089,7 @@ Live bridge diagnostics are recorded in result `nativeValues`:
 - `embedded_script.bridge_resource_limit_rejection_count`
 - `embedded_script.bridge_rate_limited_count`
 
-The current Android provider registers live resources for controlled fetch calls, controlled WebSocket sessions, shell executions, `work_manager` metadata tasks, and experimental Java object handles. The registry also reserves resource types for future image handles, screen capturers, dialogs, and workers so those providers can share the same destroy path when they become live Android capabilities.
+The current Android provider registers live resources for controlled fetch calls, controlled WebSocket sessions, shell executions, `work_manager` metadata tasks, and experimental Java object handles. The registry also reserves resource types for future image handles, screen capturers, dialogs, UI sessions, and workers so those providers can share the same destroy path when they become live Android capabilities.
 
 The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path. The `shell` and `work_manager` modules are intentionally not executed by queued fallback; packaged `shell.exec()` and `work_manager.schedule*()` should remain live-bridge-only capabilities.
 
