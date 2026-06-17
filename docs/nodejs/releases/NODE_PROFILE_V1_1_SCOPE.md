@@ -175,6 +175,12 @@ small set of already-gated features toward practical use.
 - Project wizard smoke passes for every checked template, JSON validator output,
   missing-entry diagnostics, invalid package name diagnostics, unknown
   permission diagnostics, and unsafe dependency bundle diagnostics.
+- Phase 5 security corpus passes for ESM/static import escape denial, local
+  dynamic import escape and network URL denial, fs stream escape cleanup,
+  fetch/WebSocket unsupported schemes, UI handle cleanup without raw View
+  exposure, plugin `.node` rejection, worker bridge access denial or
+  unavailable-worker fail-closed behavior, shell `child_process` denial, and
+  zlib stream error cleanup.
 - Execution queue smoke passes for default `ERR_AUTOJS6_NODE_ENGINE_BUSY`
   rejection, explicit enqueue order, queued cancellation, queued timeout before
   user code runs, one-entry queue-full denial, queue status diagnostics, and

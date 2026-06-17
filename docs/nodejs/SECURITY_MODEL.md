@@ -388,9 +388,15 @@ Every Node release candidate must verify:
 - dangerous process APIs denied
 - dangerous builtins denied or limited as documented
 - scoped fs escape tests pass
+- fs stream escape tests pass and leave no active stream resources
 - native addon loading denied
 - ESM and dynamic import paths return stable policy errors
 - network operations are denied unless explicitly feature-gated
+- controlled fetch/WebSocket unsupported schemes reject before provider I/O
+- UI/plugin/worker/shell v1.1 boundaries keep raw Android objects, native
+  addons, worker bridge access or unavailable-worker fallback, and
+  `child_process` unavailable
+- zlib stream failures do not leave active stream resources
 - direct Java/Android interop, reflection, class loaders, native library loading, and raw Android objects remain unavailable
 - packaged APK verifier passes
 - lifecycle timeout does not poison the next run

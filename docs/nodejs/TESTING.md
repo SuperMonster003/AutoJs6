@@ -255,6 +255,15 @@ Current security regression instrumentation:
 
 This suite verifies dangerous process APIs, disabled builtins, network operation denial, scoped fs escape denial, native addon extension denial, and package exports/imports escape denial with stable error codes or documented current denial shape. `process.chdir` is treated as scoped and controlled; the security tests verify absolute and escaping chdir targets are rejected.
 
+The Phase 5 security corpus in the same class also covers v1.1 expansion
+boundaries: ESM static import escape denial, local dynamic import escape and
+network URL denial, `fs.createReadStream()`/`fs.createWriteStream()` scoped
+escape denial plus cleanup counters, unsupported `fetch`/`websocket` schemes,
+UI handle cleanup without raw View exposure, JS-only plugin `.node` rejection,
+worker-local bridge module denial when worker support is available or
+worker_threads fail-closed when unavailable, shell usage while `child_process`
+remains disabled, and zlib stream error cleanup.
+
 Focused native addon policy instrumentation:
 
 ```powershell
