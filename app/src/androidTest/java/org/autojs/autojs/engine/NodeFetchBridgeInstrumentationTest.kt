@@ -101,6 +101,16 @@ class NodeFetchBridgeInstrumentationTest {
               const bridge = require("autojs6:bridge");
               const { Buffer } = require("buffer");
               const requests = [];
+              async function readWebStream(webStream) {
+                const reader = webStream.getReader();
+                const chunks = [];
+                while (true) {
+                  const next = await reader.read();
+                  if (next.done) break;
+                  chunks.push(Buffer.from(next.value));
+                }
+                return Buffer.concat(chunks).toString("utf8");
+              }
               function headerValue(headers, name) {
                 const lower = String(name).toLowerCase();
                 const found = (headers || []).find((entry) => String(entry[0]).toLowerCase() === lower);
@@ -173,6 +183,7 @@ class NodeFetchBridgeInstrumentationTest {
                 timeoutMs: 1000,
                 maxResponseBytes: 1024
               });
+              const getBodyStreamText = await readWebStream(get.body.stream());
               const getText = await get.text();
               const post = await fetchModule("https://example.invalid/post", {
                 method: "POST",
@@ -224,6 +235,7 @@ class NodeFetchBridgeInstrumentationTest {
               console.log("fetch.frozen=" + Object.isFrozen(fetchModule));
               console.log("fetch.aliases=" + [typeof fetch, typeof fetchModule, fetchModule.fetch === fetchModule, fetchModule.default === fetchModule].join("|"));
               console.log("fetch.get=" + [get.status, get.statusText, get.ok, get.url, get.headers.get("x-echo"), getText].join("|"));
+              console.log("fetch.get_body_stream=" + getBodyStreamText);
               console.log("fetch.post=" + [post.status, post.ok, postJson.method, postJson.body, postJson.type].join("|"));
               console.log("fetch.requests=" + requests.map((request) => request.args[0].method + ":" + request.args[0].url.split("/").pop()).join("|"));
               console.log("fetch.permissions=" + requests.every((request) => request.permissions.indexOf("network") >= 0));
@@ -245,6 +257,7 @@ class NodeFetchBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("fetch.frozen=true"))
         assertTrue(result.stdout.contains("fetch.aliases=function|function|true|true"))
         assertTrue(result.stdout.contains("fetch.get=200|OK|true|https://example.invalid/get|yes|hello"))
+        assertTrue(result.stdout.contains("fetch.get_body_stream=hello"))
         assertTrue(result.stdout.contains("fetch.post=201|true|POST|payload|text/plain"))
         assertTrue(result.stdout.contains("fetch.requests=GET:get|POST:post|GET:timeout|GET:abort|GET:large"))
         assertTrue(result.stdout.contains("fetch.permissions=true"))

@@ -93,6 +93,7 @@ The wrapper supports:
 - `maxResponseBytes`
 - `maxRedirects`
 - `Response.text()`, `Response.arrayBuffer()`, and `Response.json()`
+- `Response.body.stream()` for bounded Web Stream reads
 - `require("fetch").policy`
 - `require("fetch").diagnostics()`
 
@@ -233,7 +234,11 @@ Current behavior:
 
 ## Body Budgets
 
-The first implementation is buffer-oriented, not stream-oriented.
+The first implementation is buffer-oriented, not network-stream-oriented.
+`Response.body` is the current Blob-backed body object, so scripts that need a
+Web Stream should call `response.body.stream()`. Direct spec-style
+`Response.body` as a `ReadableStream`, streaming request bodies, and streaming
+network responses remain deferred to a later design gate.
 
 Recommended defaults:
 

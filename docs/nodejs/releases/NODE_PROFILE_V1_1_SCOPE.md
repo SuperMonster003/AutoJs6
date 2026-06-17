@@ -52,6 +52,7 @@ small set of already-gated features toward practical use.
 | Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import local graph smoke is covered separately. |
 | Buffer module | partial | `require("buffer")`, `require("node:buffer")`, and ESM `node:buffer` use the same builtin wrapper and cannot be shadowed by `node_modules/buffer`. |
 | Stream primitives | partial | Async iteration, callback/promise pipeline and finished helpers, Web Streams adapters, backpressure smoke, destroy propagation, and shadowing denial stay covered as pure-JS compatibility surface. |
+| Web Streams | partial | `stream/web`, globals, Blob streams, Node/Web adapters, and bounded fetch `response.body.stream()` reads are supported without direct network streaming. |
 | fs streams | partial | Scoped read/write streams support read, write, pipe, stable denial paths, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | zlib streams | partial | Bounded transform streams support gzip/gunzip and deflate/inflate pipelines, scoped fs pipeline smoke, invalid input errors, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | Controlled fetch | experimental | Future v1.1 batch; raw network remains disabled. |
@@ -80,6 +81,9 @@ small set of already-gated features toward practical use.
 - Stream smoke passes for async iteration, callback and promise pipeline,
   callback and promise finished, Web Streams adapters, slow-writable
   backpressure, destroy propagation, and `node_modules/stream` shadow denial.
+- Web Streams smoke passes for `stream/web`, global constructors, Blob streams,
+  Node/Web adapters, controlled fetch `response.body.stream()` reads, and
+  packaged APK markers.
 - fs stream smoke passes for read/write/pipe, scoped escape denial,
   `/proc`/`/sys`/`/dev` absolute path denial, active stream timeout cleanup,
   and packaged APK markers.

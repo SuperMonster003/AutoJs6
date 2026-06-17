@@ -253,6 +253,11 @@ state helpers, `stream/consumers`, and the current limited `stream/web` surface.
 permitted streams; they do not grant raw network, process, native addon, or
 unscoped filesystem authority.
 
+Web Streams v1.1 is documented in `docs/nodejs/design/WEB_STREAMS_V1_1.md`.
+Controlled fetch response bodies remain buffer-bounded and Blob-backed; use
+`response.body.stream()` for the Web Stream read path. Direct spec-style
+`Response.body` as a `ReadableStream` is deferred.
+
 The `buffer` wrapper is available through `require("buffer")`, `require("node:buffer")`,
 bare ESM `import "buffer"`, and ESM `import "node:buffer"`. It exposes the
 safe Node-managed surface already used by the runtime: `Buffer`, `Blob`, `File`,
@@ -472,7 +477,7 @@ Use global `fetch()` or `require("fetch")` for controlled request experiments, a
 
 Current `require("autojs6:profile")` reports `network=false` and `experimentalFlags.network=false`.
 
-Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, `maxRedirects`, and text/arrayBuffer/json response helpers. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. No `axios` builtin adapter is exposed.
+Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, `maxRedirects`, text/arrayBuffer/json response helpers, and Web Stream reads through `response.body.stream()`. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. No `axios` builtin adapter is exposed.
 
 The controlled request policy is bounded even when fake or experimental live providers are used:
 
