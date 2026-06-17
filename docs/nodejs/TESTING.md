@@ -472,6 +472,8 @@ This suite verifies `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=fals
 
 Task 122 GA evaluation report: [reports/WORKER_EXPERIMENTAL_EVALUATION.md](reports/WORKER_EXPERIMENTAL_EVALUATION.md).
 
+Task 146 v1.1 worker policy: [releases/V1_1_WORKER_POLICY.md](releases/V1_1_WORKER_POLICY.md).
+
 Current experimental worker_threads focused instrumentation:
 
 ```powershell
