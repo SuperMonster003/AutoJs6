@@ -323,6 +323,9 @@ private val embeddedNodePackagingKnownBridgeCapabilities = listOf(
     "accessibility",
     "screen_capture",
     "image",
+    "ocr",
+    "storage",
+    "ui",
     "clipboard",
     "device",
     "shell",
@@ -359,6 +362,7 @@ private val embeddedNodePackagingSmokeApkNames = listOf(
     "PackagedNodeEsmDiagnosticsSmoke_v1.0.0.apk",
     "PackagedNodeDynamicImportDiagnosticsSmoke_v1.0.0.apk",
     "PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk",
+    "PackagedNodeV11BridgeSmoke_v1.0.0.apk",
 )
 private val embeddedNodePackagingSmokeVerifierReadyApkNames = setOf(
     "PackagedNodeSmoke_v1.0.0.apk",
@@ -658,6 +662,7 @@ private fun embeddedNodePackagingNormalizeBridgeCapability(value: String): Strin
         when (normalized) {
             "media_projection", "media.projection", "screen.capture", "screencapture" -> "screen_capture"
             "engine.exec" -> "engines.exec"
+            "storages" -> "storage"
             "java" -> "java_interop"
             else -> normalized
         }

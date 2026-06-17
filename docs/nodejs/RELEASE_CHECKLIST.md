@@ -95,6 +95,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] packaged `app` bridge smoke passes, reports the packaged app id, and cannot be shadowed by `node_modules/app`
 - [ ] packaged `clipboard` bridge smoke passes and cannot be shadowed by `node_modules/clipboard`
 - [ ] packaged `device` bridge smoke passes, keeps sensitive identifiers absent, declares `android.permission.VIBRATE`, and cannot be shadowed by `node_modules/device`
+- [ ] packaged v1.1 bridge smoke passes for controlled `fetch`, OCR, `storage`/`storages`, UI, and `work_manager` fake transport with declared `node.permissions`, bridge-module shadowing protection, and zero pending bridge calls
 - [ ] packaged `engines` bridge smoke passes after the inrt template carries live bridge metadata
 - [ ] template APK refreshed when inrt bytecode or manifest changes
 - [ ] template reproducibility report records `template.refresh.ready=true`, template APK SHA-256, normalized manifest SHA-256, and native lib injection policy

@@ -201,6 +201,11 @@ small set of already-gated features toward practical use.
 - zlib stream smoke passes for gzip/gunzip, deflate/inflate, scoped fs
   read->gzip->write, invalid gzip error propagation, active stream timeout
   cleanup, and packaged APK markers.
+- Packaged APK v1.1 bridge smoke passes for declared `node.permissions`,
+  controlled `fetch` fake transport, OCR opaque image handle requests,
+  JSON `storage`/`storages` CRUD, UI fake layout/event/update/close,
+  `work_manager` metadata schedule/list/cancel serialization, bridge-module
+  shadowing protection, and zero pending bridge calls.
 - Compatibility profile marks ESM and dynamic import as `partial`.
 
 ## Safety Invariants

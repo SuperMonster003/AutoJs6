@@ -79,7 +79,7 @@ Current packaged APK smoke instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest"
 ```
 
-This suite covers packaged CommonJS/npm/fs/native-lib behavior and the packaged `toast`/`app`/`clipboard`/`device` bridge smoke, including bridge-module shadowing protection.
+This suite covers packaged CommonJS/npm/fs/native-lib behavior, the packaged `toast`/`app`/`clipboard`/`device` bridge smoke, and the v1.1 fake-provider packaged bridge smoke for controlled `fetch`, `ocr`, `storage`/`storages`, `ui`, and `work_manager`, including declared `node.permissions`, bridge-module shadowing protection, and pending-call cleanup.
 
 Focused packaged `toast` bridge smoke:
 
@@ -118,6 +118,14 @@ Focused packaged `device` bridge smoke:
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDeviceBridgeEmbeddedNodePackagedApk"
 ```
+
+Focused packaged v1.1 bridge smoke:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunV11BridgeEmbeddedNodePackagedApk" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This smoke proves the v1.1 bridge modules are not main-app-only by packaging fake-provider coverage for controlled `fetch`, OCR opaque image handles, JSON storage, UI handles/events, and `work_manager` metadata serialization without granting live Android provider authority.
 
 Current bridge protocol instrumentation:
 

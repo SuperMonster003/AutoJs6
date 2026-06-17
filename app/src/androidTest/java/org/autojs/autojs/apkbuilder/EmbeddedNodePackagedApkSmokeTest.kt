@@ -8194,6 +8194,29 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildV11BridgeEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged v1.1 bridge smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedV11BridgeApk()
+    }
+
+    @Test
+    fun installAndRunV11BridgeEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged v1.1 bridge install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged v1.1 bridge install-and-run smoke")
+
+        val outputApk = buildPackagedV11BridgeApk()
+        assertInstallAndRunPackagedV11BridgeSmoke(outputApk)
+    }
+
+    @Test
     fun buildPackageScriptLaunchEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged package script launch smoke requires embedded script execution build support.",
@@ -10959,6 +10982,263 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedV11BridgeApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function main() {
+              const bridge = require("autojs6:bridge");
+              const { Buffer } = require("buffer");
+              const requests = [];
+              const stores = Object.create(null);
+              const tasks = new Map();
+              let workSequence = 0;
+              let uiDrained = false;
+
+              function respond(request, ok, result, error) {
+                setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                  id: request.id,
+                  ok,
+                  result,
+                  error
+                })));
+              }
+
+              function textResponse(payload, text, status) {
+                return {
+                  url: payload.url,
+                  status,
+                  statusText: status === 200 ? "OK" : "Created",
+                  headers: [["content-type", "text/plain"], ["x-packaged", "v1.1"]],
+                  bodyBase64: Buffer.from(text).toString("base64"),
+                  bodyBytes: Buffer.byteLength(text)
+                };
+              }
+
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const args = request.args || [];
+                  if (request.module === "fetch" && request.method === "request") {
+                    respond(request, true, textResponse(args[0], "packaged-fetch", 200));
+                    return;
+                  }
+                  if (request.module === "ocr") {
+                    respond(request, true, [
+                      { text: "packaged", confidence: 0.91, bounds: { left: 1, top: 2, right: 3, bottom: 4 } }
+                    ]);
+                    return;
+                  }
+                  if (request.module === "storage" || request.module === "storages") {
+                    const storeName = args[0];
+                    const key = args[1];
+                    const bucket = stores[storeName] || (stores[storeName] = Object.create(null));
+                    if (request.method === "clear") {
+                      Object.keys(bucket).forEach((entry) => delete bucket[entry]);
+                      respond(request, true, null);
+                    } else if (request.method === "put") {
+                      bucket[key] = args[2];
+                      respond(request, true, null);
+                    } else if (request.method === "get") {
+                      respond(request, true, Object.prototype.hasOwnProperty.call(bucket, key)
+                        ? { found: true, value: bucket[key] }
+                        : { found: false });
+                    } else if (request.method === "contains") {
+                      respond(request, true, Object.prototype.hasOwnProperty.call(bucket, key));
+                    } else if (request.method === "keys") {
+                      respond(request, true, Object.keys(bucket).sort());
+                    } else if (request.method === "remove") {
+                      delete bucket[key];
+                      respond(request, true, null);
+                    }
+                    return;
+                  }
+                  if (request.module === "ui") {
+                    if (request.method === "showLayout") {
+                      respond(request, true, { id: "packaged-ui-1" });
+                    } else if (request.method === "drainEvents") {
+                      respond(request, true, uiDrained ? [] : [{ type: "click", id: "ok", text: "OK" }]);
+                      uiDrained = true;
+                    } else {
+                      respond(request, true, null);
+                    }
+                    return;
+                  }
+                  if (request.module === "work_manager") {
+                    if (request.method === "scheduleOnce") {
+                      workSequence += 1;
+                      const descriptor = args[0];
+                      const id = "packaged-work-" + workSequence;
+                      tasks.set(id, Object.assign({
+                        id,
+                        type: "once",
+                        status: "registered",
+                        scheduler: "metadata",
+                        packageName: "$V11_BRIDGE_PACKAGE_NAME",
+                        createdAtEpochMs: workSequence
+                      }, descriptor));
+                      respond(request, true, id);
+                    } else if (request.method === "list") {
+                      respond(request, true, Array.from(tasks.values()));
+                    } else if (request.method === "cancel") {
+                      tasks.delete(args[0]);
+                      respond(request, true, null);
+                    }
+                    return;
+                  }
+                  respond(request, false, null, {
+                    code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                    message: "unexpected packaged v1.1 bridge request",
+                    module: request.module,
+                    method: request.method
+                  });
+                }
+              });
+
+              const fetchModule = require("fetch");
+              const fetchResult = await fetch("https://example.invalid/v1_1", {
+                headers: { "x-packaged": "v1.1" },
+                timeoutMs: 1000,
+                maxResponseBytes: 1024
+              });
+              const fetchText = await fetchResult.text();
+
+              const ocr = require("ocr");
+              const ocrResult = await ocr.recognize(
+                { id: "packaged-image-1", __autojs6ImageHandle: "packaged-image-1", width: 10, height: 20 },
+                { lang: "auto", timeoutMs: 1000 }
+              );
+
+              const storage = require("storage");
+              const storages = require("storages");
+              const store = storage.create("settings");
+              const alias = storages.open("settings");
+              await store.clear({ timeoutMs: 1000 });
+              await store.put("mode", { value: "packaged", count: 11 }, { timeoutMs: 1000 });
+              const stored = await alias.get("mode", null, { timeoutMs: 1000 });
+              const storageContains = await store.contains("mode", { timeoutMs: 1000 });
+              const storageKeys = await alias.keys({ timeoutMs: 1000 });
+              await store.remove("mode", { timeoutMs: 1000 });
+
+              const ui = require("ui");
+              const handle = await ui.showLayout({
+                type: "Vertical",
+                children: [
+                  { type: "Text", id: "title", text: "Node v1.1" },
+                  { type: "Button", id: "ok", text: "OK" }
+                ]
+              }, { timeoutMs: 1000, drainIntervalMs: 1 });
+              let clicked = "";
+              const clickedReady = new Promise((resolve) => {
+                const off = handle.on("click", (event) => {
+                  clicked = event.id + ":" + event.handleId;
+                  off();
+                  resolve();
+                }, { timeoutMs: 1000, drainIntervalMs: 1 });
+              });
+              await clickedReady;
+              await handle.update({ id: "title", text: "Updated" }, { timeoutMs: 1000 });
+              await handle.close({ timeoutMs: 1000 });
+
+              const work = require("work_manager");
+              const workId = await work.scheduleOnce({
+                scriptPath: "./main.js",
+                delayMs: 1234,
+                timeoutMs: 777,
+                constraints: { network: true }
+              });
+              const workBefore = await work.list({ timeoutMs: 1000 });
+              await work.cancel(workId, { timeoutMs: 1000 });
+              const workAfter = await work.list({ timeoutMs: 1000 });
+
+              const fetchOk = require.resolve("fetch") === "fetch" &&
+                fetchModule.shadow !== true &&
+                fetchResult.status === 200 &&
+                fetchResult.headers.get("x-packaged") === "v1.1" &&
+                fetchText === "packaged-fetch";
+              const ocrOk = require.resolve("ocr") === "ocr" &&
+                ocr.shadow !== true &&
+                ocrResult[0].text === "packaged" &&
+                ocrResult[0].bounds.bottom === 4;
+              const storageOk = require.resolve("storage") === "storage" &&
+                require.resolve("storages") === "storages" &&
+                storage.shadow !== true &&
+                storages.shadow !== true &&
+                stored.value === "packaged" &&
+                stored.count === 11 &&
+                storageContains === true &&
+                storageKeys.join(",") === "mode";
+              const uiOk = require.resolve("ui") === "ui" &&
+                ui.shadow !== true &&
+                handle.id === "packaged-ui-1" &&
+                clicked === "ok:packaged-ui-1";
+              const workOk = require.resolve("work_manager") === "work_manager" &&
+                work.shadow !== true &&
+                workId === "packaged-work-1" &&
+                workBefore.length === 1 &&
+                workBefore[0].scriptPath === "main.js" &&
+                workBefore[0].constraints.network === true &&
+                workAfter.length === 0;
+              const requiredPermissionsOk = requests.every((request) => {
+                if (request.module === "fetch") {
+                  return request.permissions.indexOf("network") >= 0;
+                }
+                if (request.module === "ocr") {
+                  return request.permissions.indexOf("ocr") >= 0 && request.permissions.indexOf("image") >= 0;
+                }
+                if (request.module === "storage" || request.module === "storages") {
+                  return request.permissions.indexOf("storage") >= 0;
+                }
+                if (request.module === "ui") {
+                  return request.permissions.indexOf("ui") >= 0;
+                }
+                if (request.module === "work_manager") {
+                  return request.permissions.indexOf("work_manager") >= 0;
+                }
+                return false;
+              });
+              const noShadowOk = [fetchModule, ocr, storage, storages, ui, work].every((module) => module.shadow !== true);
+              const ready = fetchOk && ocrOk && storageOk && uiOk && workOk && requiredPermissionsOk &&
+                noShadowOk && bridge.__test.pendingCount() === 0;
+
+              console.log("packaged.v1_1_bridge.ready=" + ready);
+              console.log("packaged.v1_1_bridge.fetch=" + fetchOk);
+              console.log("packaged.v1_1_bridge.ocr=" + ocrOk);
+              console.log("packaged.v1_1_bridge.storage=" + storageOk);
+              console.log("packaged.v1_1_bridge.ui=" + uiOk);
+              console.log("packaged.v1_1_bridge.work_manager=" + workOk);
+              console.log("packaged.v1_1_bridge.permissions=" + requiredPermissionsOk);
+              console.log("packaged.v1_1_bridge.no_shadow=" + noShadowOk);
+              console.log("packaged.v1_1_bridge.pending=" + bridge.__test.pendingCount());
+            }
+
+            return main().catch(error => {
+              console.error("packaged.v1_1_bridge.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-v11-bridge-smoke",
+            outputApkName = V11_BRIDGE_APK_NAME,
+            projectName = V11_BRIDGE_PROJECT_NAME,
+            packageName = V11_BRIDGE_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraFiles = mapOf(
+                "node_modules/fetch/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/ocr/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/storage/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/storages/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/ui/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/work_manager/index.js" to """module.exports = { shadow: true };""" + "\n",
+            ),
+            nodePermissions = V11_BRIDGE_NODE_PERMISSIONS,
+            runtimeMarkers = V11_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedGateDiagnosticsApk(
         rootName: String,
         outputApkName: String,
@@ -10968,6 +11248,7 @@ class EmbeddedNodePackagedApkSmokeTest {
         mainScript: String,
         extraFiles: Map<String, String> = emptyMap(),
         extraPermissions: List<String> = emptyList(),
+        nodePermissions: List<String> = emptyList(),
         runtimeMarkers: List<String>,
         requiredTemplateDexMarkers: List<String> = emptyList(),
     ): File {
@@ -10994,6 +11275,20 @@ class EmbeddedNodePackagedApkSmokeTest {
                 ).distinct()
         val permissionsJson = permissions.joinToString(separator = ",\n") { permission ->
             "                \"$permission\""
+        }
+        val nodePermissionsJson = nodePermissions.joinToString(separator = ",\n") { permission ->
+            "                  \"$permission\""
+        }
+        val nodeConfigJson = if (nodePermissions.isEmpty()) {
+            ""
+        } else {
+            buildString {
+                appendLine("              \"node\": {")
+                appendLine("                \"permissions\": [")
+                appendLine(nodePermissionsJson)
+                appendLine("                ]")
+                appendLine("              },")
+            }
         }
 
         File(projectDir, mainScriptName).apply {
@@ -11023,6 +11318,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "permissions": [
 $permissionsJson
               ],
+$nodeConfigJson
               "launchConfig": {
                 "logsVisible": true,
                 "splashVisible": false,
@@ -11045,6 +11341,9 @@ $permissionsJson
             .setAbis(arrayListOf("arm64-v8a"))
             .setLibs(arrayListOf(ApkBuilder.Lib.EMBEDDED_NODE_JS.label))
             .setPermissions(ArrayList(permissions))
+        if (nodePermissions.isNotEmpty()) {
+            config.setNodeConfig(ProjectConfig.NodeConfig().setPermissions(ArrayList(nodePermissions)))
+        }
         config.launchConfig = LaunchConfig().apply {
             isLogsVisible = true
             isSplashVisible = false
@@ -11073,6 +11372,7 @@ $permissionsJson
             mainScriptName = mainScriptName,
             mainScript = mainScript,
             extraFiles = extraFiles,
+            nodePermissions = nodePermissions,
             runtimeMarkers = runtimeMarkers,
         )
         exportPackagedSmokeApkForHost(outputApk)
@@ -11694,6 +11994,7 @@ $permissionsJson
         mainScriptName: String,
         mainScript: String,
         extraFiles: Map<String, String>,
+        nodePermissions: List<String>,
         runtimeMarkers: List<String>,
     ) {
         ZipFile(outputApk).use { zip ->
@@ -11716,6 +12017,13 @@ $permissionsJson
                 "Bundled gate diagnostics project config should keep Embedded Node.js lib selection",
                 ApkBuilder.Lib.EMBEDDED_NODE_JS.label in bundledConfig.libs,
             )
+            if (nodePermissions.isNotEmpty()) {
+                assertEquals(
+                    "Bundled gate diagnostics project config should keep Node bridge permissions",
+                    nodePermissions.sorted(),
+                    bundledConfig.nodeConfig?.permissions.orEmpty().sorted(),
+                )
+            }
 
             val expectedMatrix = readZipText(zip, "assets/project/runtime-matrix.expected.txt")
             runtimeMarkers.forEach { marker ->
@@ -12190,6 +12498,16 @@ $permissionsJson
             shellApkPath = "/data/local/tmp/autojs6-packaged-node-device-bridge-smoke.apk",
             label = "packaged device bridge smoke",
             requiredMarkers = DEVICE_BRIDGE_RUNTIME_MARKERS,
+        )
+    }
+
+    private fun assertInstallAndRunPackagedV11BridgeSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = V11_BRIDGE_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-v11-bridge-smoke.apk",
+            label = "packaged v1.1 bridge smoke",
+            requiredMarkers = V11_BRIDGE_RUNTIME_MARKERS,
         )
     }
 
@@ -13004,6 +13322,9 @@ $permissionsJson
         private const val DEVICE_BRIDGE_PROJECT_NAME = "PackagedNodeDeviceBridgeSmoke"
         private const val DEVICE_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.device.smoke"
         private const val DEVICE_BRIDGE_APK_NAME = "PackagedNodeDeviceBridgeSmoke_v1.0.0.apk"
+        private const val V11_BRIDGE_PROJECT_NAME = "PackagedNodeV11BridgeSmoke"
+        private const val V11_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.v11.bridge.smoke"
+        private const val V11_BRIDGE_APK_NAME = "PackagedNodeV11BridgeSmoke_v1.0.0.apk"
         private const val SCRIPT_LAUNCH_PROJECT_NAME = "PackagedNodeScriptLaunchSmoke"
         private const val SCRIPT_LAUNCH_PACKAGE_NAME = "org.autojs6.packaged.node.script.launch.smoke"
         private const val SCRIPT_LAUNCH_APK_NAME = "PackagedNodeScriptLaunchSmoke_v1.0.0.apk"
@@ -13320,6 +13641,25 @@ $permissionsJson
             "packaged.device.values=true",
             "packaged.device.sensitive=true",
             "packaged.device.shadow=true",
+        )
+        private val V11_BRIDGE_NODE_PERMISSIONS = listOf(
+            "network",
+            "ocr",
+            "image",
+            "storage",
+            "ui",
+            "work_manager",
+        )
+        private val V11_BRIDGE_RUNTIME_MARKERS = listOf(
+            "packaged.v1_1_bridge.ready=true",
+            "packaged.v1_1_bridge.fetch=true",
+            "packaged.v1_1_bridge.ocr=true",
+            "packaged.v1_1_bridge.storage=true",
+            "packaged.v1_1_bridge.ui=true",
+            "packaged.v1_1_bridge.work_manager=true",
+            "packaged.v1_1_bridge.permissions=true",
+            "packaged.v1_1_bridge.no_shadow=true",
+            "packaged.v1_1_bridge.pending=0",
         )
         private val SCRIPT_LAUNCH_RUNTIME_MARKERS = listOf(
             "packaged.script_launch.ready=true",
