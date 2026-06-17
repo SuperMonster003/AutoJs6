@@ -13375,6 +13375,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                   const denied = [
                     captureSync(() => fs.createReadStream("../outside.txt"), "escapes working directory"),
                     captureSync(() => fs.createWriteStream("/sdcard/autojs6-stream.txt"), "rejects absolute path"),
+                    captureSync(() => fs.createReadStream("/proc/self/cmdline"), "rejects absolute path"),
+                    captureSync(() => fs.createReadStream("/sys/kernel"), "rejects absolute path"),
+                    captureSync(() => fs.createWriteStream("/dev/null"), "rejects absolute path"),
                     captureSync(() => fs.createReadStream("./streams/out.txt", { fd: 0 }), "not open or not owned"),
                     captureSync(() => fs.createWriteStream("./streams/out.txt", { fd: 1 }), "not open or not owned"),
                     captureSync(() => fs.createReadStream("./streams/out.txt", { flags: "w" }), "read stream flags"),
@@ -13436,7 +13439,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("fs.stream.fd=file-stream|true|file-stream|true|fd-write|true"))
             assertTrue(result.stdout.contains("fs.stream.filehandle_fd=2345|true|012XYZ6789|true"))
             assertTrue(result.stdout.contains("fs.stream.missing=error:ENOENT"))
-            assertTrue(result.stdout.contains("fs.stream.denied=11/11"))
+            assertTrue(result.stdout.contains("fs.stream.denied=14/14"))
+            assertEquals(false, result.pendingScopedFsStreams)
+            assertEquals(0, result.pendingScopedFsStreamCount)
             assertEquals("file-stream", File(scriptDir, "streams/out.txt").readText(StandardCharsets.UTF_8))
             assertEquals("url-stream", File(scriptDir, "streams/url.txt").readText(StandardCharsets.UTF_8))
             assertEquals("fd-write", File(scriptDir, "streams/fd-write.txt").readText(StandardCharsets.UTF_8))

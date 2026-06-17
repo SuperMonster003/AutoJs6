@@ -168,6 +168,52 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
+    fun activeScopedFsStreamTimesOutThenNextRunWorks() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-lifecycle-fs-stream-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create lifecycle fs stream dir: $absolutePath" }
+        }
+        try {
+            val timeout = runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const fs = require("fs");
+                    fs.mkdirSync("./stream-timeout", { recursive: true });
+                    fs.writeFileSync("./stream-timeout/input.bin", Buffer.alloc(2 * 1024 * 1024, 65));
+                    globalThis.__autojs6HeldReadable = fs.createReadStream("./stream-timeout/input.bin", {
+                      highWaterMark: 64 * 1024
+                    });
+                    globalThis.__autojs6HeldReadable.on("data", () => {
+                      console.log("stress.fs.stream.paused");
+                      globalThis.__autojs6HeldReadable.pause();
+                    });
+                    globalThis.__autojs6HeldReadable.on("end", () => console.log("stress.fs.stream.unexpected_end"));
+                    console.log("stress.fs.stream.pending");
+                """.trimIndent(),
+                sourceName = "<lifecycle-stress-fs-stream.js>",
+                workingDirectory = scriptDir.absolutePath,
+                timeoutMs = FAULT_TIMEOUT_MS,
+            )
+
+            assertTimedOut("active scoped fs stream", timeout)
+            assertEquals(false, timeout.pendingTimers)
+            assertEquals(true, timeout.pendingScopedFsStreams)
+            assertEquals(1, timeout.pendingScopedFsStreamCount)
+            assertEquals(true, timeout.pendingCallbacks)
+            assertTrue(
+                timeout.errorMessage.orEmpty(),
+                timeout.errorMessage.orEmpty().contains("pendingScopedFsStreamCount=1"),
+            )
+            settleEmbeddedScriptServiceProcess()
+
+            assertRecoveryRun("after.fs.stream")
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun nestedFsCallbacksDrainBeforeSuccess() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -641,7 +687,10 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
     ) {
         assertFalse("$label unexpectedly succeeded", result.succeeded)
-        assertTrue("$label should time out", result.timedOut)
+        assertTrue(
+            "$label should time out\nstdout=${result.stdout}\nstderr=${result.stderr}\nerror=${result.errorName}: ${result.errorMessage}\nnativeValues=${result.nativeValues}",
+            result.timedOut,
+        )
         assertEquals("EmbeddedScriptTimeoutError", result.errorName)
         assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT", result.errorCode)
         assertTrue(

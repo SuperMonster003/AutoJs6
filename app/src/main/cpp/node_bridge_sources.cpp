@@ -9024,6 +9024,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_bridge_destroy(reason) {
     __autojs6_bridge_destroyed = true;
+    __autojs6_destroy_all_scoped_fs_streams("bridge destroy");
     const message = reason ? String(reason) : "AutoJs6 bridge process is not available.";
     const records = Array.from(__autojs6_bridge_pending.values());
     for (const record of records) {
@@ -16992,9 +16993,18 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     let settled = false;
     let fdUnregistered = false;
+    let keepAliveHandle = null;
     const unregisterFd = fdRecord && __autojs6_stream_auto_closes_fd(options);
     __autojs6_pending_scoped_fs_streams.push(stream);
     __autojs6_adjust_pending_callback("fs", 1);
+    if (typeof setInterval === "function" && typeof clearInterval === "function") {
+      try {
+        keepAliveHandle = setInterval(function() {}, 2147483647);
+        __autojs6_untrack_timer("interval", keepAliveHandle);
+      } catch (_) {
+        keepAliveHandle = null;
+      }
+    }
     function unregisterStreamFd() {
       if (!unregisterFd || fdUnregistered) {
         return;
@@ -17002,11 +17012,21 @@ std::string buildEmbeddedScriptExecutionSource(
       fdUnregistered = true;
       __autojs6_unregister_scoped_fd(fdRecord.fd);
     }
+    function clearKeepAlive() {
+      if (keepAliveHandle === null) {
+        return;
+      }
+      try {
+        clearInterval(keepAliveHandle);
+      } catch (_) {}
+      keepAliveHandle = null;
+    }
     function settle() {
       if (settled) {
         return;
       }
       settled = true;
+      clearKeepAlive();
       unregisterStreamFd();
       const index = __autojs6_pending_scoped_fs_streams.indexOf(stream);
       if (index >= 0) {
@@ -17031,6 +17051,21 @@ std::string buildEmbeddedScriptExecutionSource(
     stream.once("finish", settle);
     stream.once("error", settleError);
     return stream;
+  }
+  function __autojs6_destroy_all_scoped_fs_streams(reason) {
+    const streams = __autojs6_pending_scoped_fs_streams.slice();
+    if (streams.length <= 0) {
+      return;
+    }
+    for (const stream of streams) {
+      try {
+        if (stream && typeof stream.destroy === "function") {
+          stream.destroy();
+        } else if (stream && typeof stream.close === "function") {
+          stream.close();
+        }
+      } catch (_) {}
+    }
   }
   function __autojs6_readdir_options_with_file_types(options) {
     return Boolean(options && typeof options === "object" && options.withFileTypes === true);
@@ -27716,6 +27751,8 @@ std::string buildEmbeddedScriptExecutionSource(
       pendingIntervalCount,
       pendingImmediateCount,
       pendingScopedFsCallbacks: __autojs6_pending_scoped_fs_callbacks,
+      pendingScopedFsStreams: __autojs6_pending_scoped_fs_streams.length > 0,
+      pendingScopedFsStreamCount: __autojs6_pending_scoped_fs_streams.length,
       pendingScopedFsWatchCount: __autojs6_scoped_fs_watch_records.length,
       pendingScopedFsWatchFileCount: __autojs6_scoped_watch_file_records.length,
       pendingWorkerCount: __autojs6_worker_threads_diagnostics.activeWorkerCount,
@@ -27751,6 +27788,8 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.pendingIntervalCount = summary.pendingIntervalCount;
     fields.pendingImmediateCount = summary.pendingImmediateCount;
     fields.pendingScopedFsCallbacks = summary.pendingScopedFsCallbacks;
+    fields.pendingScopedFsStreams = summary.pendingScopedFsStreams;
+    fields.pendingScopedFsStreamCount = summary.pendingScopedFsStreamCount;
     fields.pendingScopedFsWatchCount = summary.pendingScopedFsWatchCount;
     fields.pendingScopedFsWatchFileCount = summary.pendingScopedFsWatchFileCount;
     fields.pendingWorkers = summary.pendingWorkers;
@@ -27816,6 +27855,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_finish_success(value) {
     if (__autojs6_finished) return;
     __autojs6_terminate_all_worker_threads("script success");
+    __autojs6_destroy_all_scoped_fs_streams("script success");
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
     __autojs6_close_all_scoped_fds();
@@ -27833,6 +27873,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_finish_error(error) {
     if (__autojs6_finished) return;
     __autojs6_terminate_all_worker_threads("script failure");
+    __autojs6_destroy_all_scoped_fs_streams("script failure");
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
     __autojs6_close_all_scoped_fds();

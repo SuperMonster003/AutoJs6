@@ -35,6 +35,8 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.pending_interval_count", jsonNumberField(text, "pendingIntervalCount"));
     putPayload(payload, "embedded_script.pending_immediate_count", jsonNumberField(text, "pendingImmediateCount"));
     putPayload(payload, "embedded_script.pending_scoped_fs_callbacks", jsonNumberField(text, "pendingScopedFsCallbacks"));
+    putPayload(payload, "embedded_script.pending_scoped_fs_streams", jsonBooleanField(text, "pendingScopedFsStreams"));
+    putPayload(payload, "embedded_script.pending_scoped_fs_stream_count", jsonNumberField(text, "pendingScopedFsStreamCount"));
     putPayload(payload, "embedded_script.pending_workers", jsonBooleanField(text, "pendingWorkers"));
     putPayload(payload, "embedded_script.pending_worker_count", jsonNumberField(text, "pendingWorkerCount"));
     putPayload(payload, "embedded_script.pending_crypto_callbacks", jsonNumberField(text, "pendingCryptoCallbacks"));

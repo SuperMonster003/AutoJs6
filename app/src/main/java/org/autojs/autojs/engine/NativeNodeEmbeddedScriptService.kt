@@ -909,6 +909,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val DEFAULT_TIMEOUT_MS = 3000L
         private val TIMER_SOURCE_HINT_PATTERN = Regex("""\bset(?:Timeout|Interval|Immediate)\s*\(""")
         private val FS_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bfs\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
+        private val FS_STREAM_SOURCE_HINT_PATTERN = Regex("""\b(?:fs|nodeFs)\.create(?:Read|Write)Stream\s*\(""")
         private val CRYPTO_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bcrypto\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
         private val DNS_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bdns\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
         private val ZLIB_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bzlib\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
@@ -1393,6 +1394,8 @@ class NativeNodeEmbeddedScriptService : Service() {
                 pendingTimers = nativeValues["embedded_script.pending_timers"]?.equals("true", ignoreCase = true),
                 pendingTimerCount = nativeValues["embedded_script.pending_timer_count"]?.toIntOrNull(),
                 pendingScopedFsCallbacks = nativeValues["embedded_script.pending_scoped_fs_callbacks"]?.toIntOrNull(),
+                pendingScopedFsStreams = nativeValues["embedded_script.pending_scoped_fs_streams"]?.equals("true", ignoreCase = true),
+                pendingScopedFsStreamCount = nativeValues["embedded_script.pending_scoped_fs_stream_count"]?.toIntOrNull(),
                 pendingCryptoCallbacks = nativeValues["embedded_script.pending_crypto_callbacks"]?.toIntOrNull(),
                 pendingDnsCallbacks = nativeValues["embedded_script.pending_dns_callbacks"]?.toIntOrNull(),
                 pendingZlibCallbacks = nativeValues["embedded_script.pending_zlib_callbacks"]?.toIntOrNull(),
@@ -1471,6 +1474,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             val timeoutMs = request.timeoutMs.coerceAtLeast(1L)
             val pendingTimers = hasLikelyPendingTimerSourceHint(request.source)
             val pendingScopedFsCallbacks = hasLikelyScopedFsCallbackSourceHint(request.source)
+            val pendingScopedFsStreams = hasLikelyScopedFsStreamSourceHint(request.source)
             val pendingCryptoCallbacks = hasLikelyCryptoCallbackSourceHint(request.source)
             val pendingDnsCallbacks = hasLikelyDnsCallbackSourceHint(request.source)
             val pendingZlibCallbacks = hasLikelyZlibCallbackSourceHint(request.source)
@@ -1487,17 +1491,21 @@ class NativeNodeEmbeddedScriptService : Service() {
                 "embedded_script.pending_timers" to pendingTimers.toString(),
                 "embedded_script.pending_timer_count" to if (pendingTimers) "1" else "0",
                 "embedded_script.pending_scoped_fs_callbacks" to if (pendingScopedFsCallbacks) "1" else "0",
+                "embedded_script.pending_scoped_fs_streams" to pendingScopedFsStreams.toString(),
+                "embedded_script.pending_scoped_fs_stream_count" to if (pendingScopedFsStreams) "1" else "0",
                 "embedded_script.pending_crypto_callbacks" to if (pendingCryptoCallbacks) "1" else "0",
                 "embedded_script.pending_dns_callbacks" to if (pendingDnsCallbacks) "1" else "0",
                 "embedded_script.pending_zlib_callbacks" to if (pendingZlibCallbacks) "1" else "0",
                 "embedded_script.pending_async_callbacks" to listOf(
                     pendingScopedFsCallbacks,
+                    pendingScopedFsStreams,
                     pendingCryptoCallbacks,
                     pendingDnsCallbacks,
                     pendingZlibCallbacks,
                 ).count { it }.toString(),
                 "embedded_script.pending_callbacks" to (
                     pendingScopedFsCallbacks ||
+                        pendingScopedFsStreams ||
                         pendingCryptoCallbacks ||
                         pendingDnsCallbacks ||
                         pendingZlibCallbacks
@@ -1534,6 +1542,9 @@ class NativeNodeEmbeddedScriptService : Service() {
                 append("pendingScopedFsCallbacks=")
                 append(nativeValues["embedded_script.pending_scoped_fs_callbacks"] ?: "unknown")
                 append('\n')
+                append("pendingScopedFsStreamCount=")
+                append(nativeValues["embedded_script.pending_scoped_fs_stream_count"] ?: "unknown")
+                append('\n')
                 append("pendingCryptoCallbacks=")
                 append(nativeValues["embedded_script.pending_crypto_callbacks"] ?: "unknown")
                 append('\n')
@@ -1551,6 +1562,10 @@ class NativeNodeEmbeddedScriptService : Service() {
 
         private fun hasLikelyScopedFsCallbackSourceHint(source: String): Boolean {
             return FS_CALLBACK_SOURCE_HINT_PATTERN.containsMatchIn(source)
+        }
+
+        private fun hasLikelyScopedFsStreamSourceHint(source: String): Boolean {
+            return FS_STREAM_SOURCE_HINT_PATTERN.containsMatchIn(source)
         }
 
         private fun hasLikelyCryptoCallbackSourceHint(source: String): Boolean {
@@ -1778,6 +1793,8 @@ class NativeNodeEmbeddedScriptService : Service() {
             pendingIntervalCount?.let { putInt(EXTRA_RESULT_PENDING_INTERVAL_COUNT, it) }
             pendingImmediateCount?.let { putInt(EXTRA_RESULT_PENDING_IMMEDIATE_COUNT, it) }
             pendingScopedFsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS, it) }
+            pendingScopedFsStreams?.let { putBoolean(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS, it) }
+            pendingScopedFsStreamCount?.let { putInt(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT, it) }
             pendingCryptoCallbacks?.let { putInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS, it) }
             pendingDnsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS, it) }
             pendingZlibCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS, it) }
@@ -1847,6 +1864,10 @@ class NativeNodeEmbeddedScriptService : Service() {
                     ?.getInt(EXTRA_RESULT_PENDING_IMMEDIATE_COUNT),
                 pendingScopedFsCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS),
+                pendingScopedFsStreams = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS) }
+                    ?.getBoolean(EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS),
+                pendingScopedFsStreamCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT) }
+                    ?.getInt(EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT),
                 pendingCryptoCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS),
                 pendingDnsCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_DNS_CALLBACKS) }
@@ -1882,6 +1903,8 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RESULT_PENDING_INTERVAL_COUNT = "result_pending_interval_count"
         private const val EXTRA_RESULT_PENDING_IMMEDIATE_COUNT = "result_pending_immediate_count"
         private const val EXTRA_RESULT_PENDING_SCOPED_FS_CALLBACKS = "result_pending_scoped_fs_callbacks"
+        private const val EXTRA_RESULT_PENDING_SCOPED_FS_STREAMS = "result_pending_scoped_fs_streams"
+        private const val EXTRA_RESULT_PENDING_SCOPED_FS_STREAM_COUNT = "result_pending_scoped_fs_stream_count"
         private const val EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS = "result_pending_crypto_callbacks"
         private const val EXTRA_RESULT_PENDING_DNS_CALLBACKS = "result_pending_dns_callbacks"
         private const val EXTRA_RESULT_PENDING_ZLIB_CALLBACKS = "result_pending_zlib_callbacks"

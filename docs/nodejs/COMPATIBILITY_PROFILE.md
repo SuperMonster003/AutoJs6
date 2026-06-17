@@ -251,6 +251,13 @@ safe Node-managed surface already used by the runtime: `Buffer`, `Blob`, `File`,
 and `require("buffer").Buffer` must stay identical, and builtin routing must
 win over `node_modules/buffer` shadow packages.
 
+The `fs` wrapper exposes a scoped stream MVP through `createReadStream()` and
+`createWriteStream()`. These streams use the same scoped path policy as the rest
+of `fs`: absolute paths, path escape, symlink escape, and Android/device roots
+such as `/proc`, `/sys`, and `/dev` remain denied. Active scoped fs streams are
+tracked in runtime diagnostics and are destroyed during runtime cleanup so a
+timed-out or stopped service does not poison the next execution.
+
 ## `node:module` Safe Subset
 
 `require("module")` and `require("node:module")` are partial limited builtins for CommonJS/npm compatibility. They expose only:

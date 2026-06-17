@@ -37,6 +37,7 @@ The current test corpus covers:
 - stream interaction with readline
 - scoped `fs.createReadStream`
 - scoped `fs.createWriteStream`
+- scoped fs stream active-resource diagnostics
 - zlib transform streams
 
 ## Safety Boundaries
@@ -48,6 +49,7 @@ Required boundaries:
 - no network sockets through streams unless a future network design gate opens them
 - fs streams must use scoped fs path validation
 - FileHandle streams must use owned fd tracking
+- active scoped fs streams must be tracked until `close`, `end`, `finish`, or `error`
 - zlib streams must enforce zlib input/output budgets
 - stream constructors must not expose raw native handles
 - destroyed streams must release callbacks and pending counters
@@ -77,6 +79,7 @@ Lifecycle tests should cover:
 - writable drain and finish
 - timeout with active stream
 - service destroy with active stream
+- active scoped fs stream timeout recovery
 
 ## Deferred Work
 
@@ -97,6 +100,8 @@ Required coverage:
 - callback and promise pipeline error propagation
 - `finished` callback and promise paths
 - scoped fs read/write streams reject escaping paths
+- scoped fs read/write streams reject absolute Android/device paths, including `/proc`, `/sys`, and `/dev`
+- active scoped fs streams are visible in pending diagnostics and do not poison the next execution after timeout/service cleanup
 - zlib stream roundtrip remains bounded
 - `node:stream` cannot be shadowed
 
