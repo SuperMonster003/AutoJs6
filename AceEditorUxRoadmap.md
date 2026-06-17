@@ -180,7 +180,7 @@ Notes:
   while the completion popup is open instead of jumping to file start/end.
 - [x] Record every cursor location change as a TAB long-press return point,
   independent of which command caused the jump.
-- [ ] Add a standalone Code editor settings page and an in-editor settings
+- [x] Add a standalone Code editor settings page and an in-editor settings
   dialog using the same content model.
 - [x] Reorganize global settings and editor overflow menus so top-level editor
   settings stay concise and advanced options move into the dedicated page or
@@ -212,4 +212,5 @@ Notes:
   Code editor group has been reduced to engine, log behavior, auto-show log
   panel, and an All settings entry. The editor overflow menu now keeps only
   common editor actions at the top level and moves advanced editor preferences
-  behind the Settings entry; the in-editor settings dialog is still pending.
+  behind the Settings entry; the in-editor settings dialog embeds the same
+  settings fragment as the standalone page.

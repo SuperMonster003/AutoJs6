@@ -7,4 +7,5 @@
     <item type="id" name="package_name" />
     <item type="id" name="view_tag_view_extras" />
     <item type="id" name="tag_backcompat_dialog_back_callback" />
+    <item type="id" name="code_editor_settings_dialog_container" />
 </resources>

@@ -11,7 +11,7 @@ class CodeEditorSettingsActivity : PreferencesActivity() {
 
     override val titleRes: Int = R.string.text_code_editor_settings
 
-    override fun createPreferencesFragment(): Fragment = CodeEditorSettingsFragment()
+    override fun createPreferencesFragment(): Fragment = CodeEditorSettingsFragment.newInstance()
 
     companion object {
 

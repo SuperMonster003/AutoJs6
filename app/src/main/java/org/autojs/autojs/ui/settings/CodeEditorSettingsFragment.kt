@@ -35,7 +35,9 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         }
         listView.isHorizontalScrollBarEnabled = false
         listView.isVerticalScrollBarEnabled = false
-        listView.excludePaddingClippableViewFromBottomNavigationBar()
+        if (!embeddedInDialog) {
+            listView.excludePaddingClippableViewFromBottomNavigationBar()
+        }
     }
 
     override fun onResume() {
@@ -94,5 +96,21 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
             key(R.string.key_editor_pinch_to_zoom_strategy),
             key(R.string.default_key_editor_pinch_to_zoom_strategy),
         )
+    }
+
+    private val embeddedInDialog: Boolean
+        get() = arguments?.getBoolean(ARG_EMBEDDED_IN_DIALOG) == true
+
+    companion object {
+
+        private const val ARG_EMBEDDED_IN_DIALOG = "embedded_in_dialog"
+
+        fun newInstance(embeddedInDialog: Boolean = false): CodeEditorSettingsFragment {
+            return CodeEditorSettingsFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean(ARG_EMBEDDED_IN_DIALOG, embeddedInDialog)
+                }
+            }
+        }
     }
 }

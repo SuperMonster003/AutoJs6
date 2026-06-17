@@ -20,7 +20,7 @@ import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
 import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
-import org.autojs.autojs.ui.settings.CodeEditorSettingsActivity;
+import org.autojs.autojs.ui.settings.CodeEditorSettingsDialog;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.util.IntentUtils;
@@ -114,7 +114,7 @@ public class EditorMenu {
             return tryDoing(mEditorView::forceStop);
         }
         if (itemId == R.id.action_editor_settings) {
-            CodeEditorSettingsActivity.launch(mContext);
+            CodeEditorSettingsDialog.show(mContext);
             return true;
         }
         return onEditOptionsSelected(item)
