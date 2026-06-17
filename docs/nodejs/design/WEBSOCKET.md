@@ -70,10 +70,16 @@ interface WebSocketConnection {
   id: string;
   url: string;
   readyState: "connecting" | "open" | "closing" | "closed";
+  onopen: (() => void) | null;
+  onmessage: ((message: WebSocketMessage) => void) | null;
+  onclose: ((event: { type: "close"; code: number; reason: string }) => void) | null;
+  onerror: ((error: Error) => void) | null;
   send(data: string | Buffer | ArrayBuffer | Uint8Array): Promise<void>;
   close(code?: number, reason?: string): Promise<void>;
   on(event: "open" | "message" | "close" | "error", listener: Function): this;
   off(event: "open" | "message" | "close" | "error", listener: Function): this;
+  addEventListener(event: "open" | "message" | "close" | "error", listener: Function): this;
+  removeEventListener(event: "open" | "message" | "close" | "error", listener: Function): this;
 }
 
 function connect(url: WebSocketUrl, options?: ConnectOptions): Promise<WebSocketConnection>;
@@ -215,8 +221,12 @@ Covered paths:
 - experimental state visible in `require("autojs6:profile")`
 - `require("websocket")` reserved by the Safe Node Profile
 - fake provider connect/open/close
+- connect descriptor headers, protocols, and max queue size
 - send text
 - receive text
+- send/receive binary Base64 payloads
+- `on`/`off`, `addEventListener`/`removeEventListener`, and `onopen`/`onmessage`/`onerror`/`onclose` handler properties
+- close event object and error event delivery
 - max connection rejection
 - max message size rejection
 - unsupported scheme rejection

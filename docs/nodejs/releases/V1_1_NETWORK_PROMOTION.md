@@ -80,7 +80,7 @@ The refreshed packaged aggregate report was written to
 | --- | --- | --- |
 | controlled `fetch` wrapper | Pass as experiment | Fake-provider `GET`/`POST`, global `fetch`, and `require("fetch")` pass. |
 | controlled `fetch` partial surface | Pass as experiment | Task 166 hardens headers, string/Buffer/Uint8Array bodies, `Response.text()`/`json()`/`arrayBuffer()`, abort-before-dispatch, redirect manual/error, and raw `node:https` denial. |
-| controlled WebSocket wrapper | Pass as experiment | Fake-provider connect, send, receive, close, `require("websocket")`, and diagnostics pass. |
+| controlled WebSocket wrapper | Pass as experiment | Fake-provider connect descriptor, send/receive text and binary, close/error events, handler properties, listener aliases, `require("websocket")`, diagnostics, service destroy, and raw socket denial pass. |
 | timeout policy | Pass | Focused fetch and WebSocket tests cover timeout rejection. |
 | abort policy | Pass for fetch | Fetch abort rejection is covered. WebSocket cancellation remains tied to timeout/destroy paths. |
 | response/message size budget | Pass | Fetch response-size and WebSocket message-size rejections are covered. |
@@ -133,7 +133,7 @@ For Node Profile v1.1:
 
 - keep `autojs.nodejs.network.experimental=false` by default;
 - keep controlled `fetch`, `axios`, and `websocket` documented as experimental
-  wrappers/adapters;
+  wrappers/adapters with hardened fake-provider surfaces;
 - keep raw Node networking denied for bare names, `node:` aliases, and
   shadowing attempts;
 - claim only the AutoJs6 fetch-backed axios adapter surface, not desktop axios

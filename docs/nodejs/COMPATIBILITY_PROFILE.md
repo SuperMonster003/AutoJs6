@@ -531,10 +531,12 @@ Controlled WebSocket support has an experimental MVP, but live Android network I
 - `connection.close(code?, reason?, options?): Promise<void>`
 - `connection.on("open" | "message" | "close" | "error", listener)`
 - `connection.off("open" | "message" | "close" | "error", listener)`
+- `connection.addEventListener(...)` / `connection.removeEventListener(...)` aliases
+- `connection.onopen`, `connection.onmessage`, `connection.onclose`, and `connection.onerror` handler properties
 - `policy`
 - `diagnostics()`
 
-The MVP is provider-backed through the AutoJs6 bridge and uses bounded policy: max 2 active connections, `ws:`/`wss:` only, default timeout `10000` ms, default message budget `65536` bytes, and bounded queued events. The Android provider is backed by OkHttp only when `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=true`; normal builds reject with `ERR_AUTOJS6_NETWORK_DISABLED`. Fake-provider tests cover connect, send, receive, close, timeout, max-connection denial, message-size denial, service-destroy rejection, diagnostics, and raw `net`/`tls` denial.
+The MVP is provider-backed through the AutoJs6 bridge and uses bounded policy: max 2 active connections, `ws:`/`wss:` only, default timeout `10000` ms, default message budget `65536` bytes, bounded queued events, headers/protocol negotiation descriptors, and string or binary send payloads. The Android provider is backed by OkHttp only when `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=true`; normal builds reject with `ERR_AUTOJS6_NETWORK_DISABLED`. Fake-provider tests cover connect descriptor shape, send/receive text and binary messages, close/error event dispatch, timeout, max-connection denial, message-size denial, service-destroy rejection, diagnostics, and raw `net`/`tls` denial.
 
 Raw `net`, `tls`, and HTTP upgrade authority remains denied, so userland packages cannot open sockets through desktop Node APIs. The module boundary is documented in `docs/nodejs/design/WEBSOCKET.md`.
 
@@ -901,7 +903,8 @@ Overrides outside the documented safe range are ignored and reported in `profile
 - `websocket`
   - `connect(url, options?): Promise<WebSocketConnection>` through `require("websocket")`
   - options: `{ headers?: object | array, protocols?: string[] | string, timeoutMs?: number, maxMessageBytes?: number, maxQueueSize?: number, signal?: AbortSignal }`
-  - connection methods: `send(data, options?)`, `close(code?, reason?, options?)`, `on(event, listener)`, and `off(event, listener)`
+  - connection methods: `send(data, options?)`, `close(code?, reason?, options?)`, `on(event, listener)`, `off(event, listener)`, `addEventListener(event, listener)`, and `removeEventListener(event, listener)`
+  - handler properties: `onopen`, `onmessage`, `onclose`, and `onerror`; close listeners receive `{ type, code, reason }`
   - module diagnostics: `require("websocket").policy` and `require("websocket").diagnostics()`
   - accepts only `ws:` and `wss:` URLs; text and binary messages are buffered and budgeted
   - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover connect, send, receive, close, timeout, max connection, message budget, service destroy, diagnostics, and that raw `net`/`tls` plus their `node:` aliases remain disabled

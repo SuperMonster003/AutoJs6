@@ -10276,11 +10276,21 @@ std::string buildEmbeddedScriptExecutionSource(
     return __autojs6_websocket_send_descriptor(String(data), maxMessageBytes);
   }
   function __autojs6_websocket_emit(connection, eventName) {
+    const args = Array.prototype.slice.call(arguments, 2);
+    const handler = connection["on" + String(eventName)];
+    if (typeof handler === "function") {
+      try {
+        handler.apply(connection, args);
+      } catch (error) {
+        setImmediate(function() {
+          throw error;
+        });
+      }
+    }
     const listeners = connection.__listeners[eventName];
     if (!listeners || listeners.length === 0) {
       return;
     }
-    const args = Array.prototype.slice.call(arguments, 2);
     listeners.slice().forEach(function(listener) {
       try {
         listener.apply(connection, args);
@@ -10302,7 +10312,11 @@ std::string buildEmbeddedScriptExecutionSource(
       connection.__drainTimer = null;
     }
     __autojs6_websocket_finish_connection();
-    __autojs6_websocket_emit(connection, "close", code === undefined ? 1000 : code, reason || "");
+    __autojs6_websocket_emit(connection, "close", Object.freeze({
+      type: "close",
+      code: code === undefined ? 1000 : code,
+      reason: reason || ""
+    }));
   }
   function __autojs6_websocket_process_events(connection, events) {
     const list = Array.isArray(events) ? events : [];
@@ -10358,6 +10372,10 @@ std::string buildEmbeddedScriptExecutionSource(
       url: String(record.url || ""),
       readyState: "open",
       maxMessageBytes: __autojs6_websocket_max_message_bytes(connectionOptions.maxMessageBytes),
+      onopen: null,
+      onmessage: null,
+      onclose: null,
+      onerror: null,
       __listeners: Object.create(null),
       __closed: false,
       __drainTimer: null,
@@ -10375,6 +10393,12 @@ std::string buildEmbeddedScriptExecutionSource(
         if (!list) return this;
         this.__listeners[key] = list.filter(function(item) { return item !== listener; });
         return this;
+      },
+      addEventListener(eventName, listener) {
+        return this.on(eventName, listener);
+      },
+      removeEventListener(eventName, listener) {
+        return this.off(eventName, listener);
       },
       send(data, sendOptions) {
         if (this.__closed) {

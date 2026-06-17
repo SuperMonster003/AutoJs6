@@ -59,7 +59,7 @@ small set of already-gated features toward practical use.
 | zlib streams | partial | Bounded transform streams support gzip/gunzip and deflate/inflate pipelines, scoped fs pipeline smoke, invalid input errors, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
 | Controlled axios | experimental | `require("axios")` exposes an AutoJs6-owned fetch-backed compatibility adapter for `get`/`post`/`request`, `baseURL`, params, headers, timeout, response types, and Axios-like errors while denying custom adapter/agent/proxy/raw transport paths. |
-| WebSocket | experimental | Future v1.1 batch; raw sockets remain disabled. |
+| WebSocket | experimental | Controlled bridge surface covers connect, send/receive text and binary messages, close/error events, handler properties, listener aliases, bounded queue/message policy, service-destroy cleanup, and raw socket denial; live provider remains default-off. |
 | Worker threads | experimental | Disabled by default. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
@@ -103,6 +103,11 @@ small set of already-gated features toward practical use.
   json/text/arraybuffer response types, Axios-like error shape, custom
   adapter/agent/proxy denial, `node_modules/axios` shadow denial, packaged
   default-provider denial, and raw network denial.
+- Controlled WebSocket smoke passes for reserved `require("websocket")`,
+  fake-provider connect/send/receive/close, headers/protocols/maxQueueSize
+  descriptors, text and binary payloads, handler properties, listener aliases,
+  close/error event shape, timeout, message budget, max connection, service
+  destroy cleanup, default-provider denial, and raw socket denial.
 - fs stream smoke passes for read/write/pipe, scoped escape denial,
   `/proc`/`/sys`/`/dev` absolute path denial, active stream timeout cleanup,
   and packaged APK markers.

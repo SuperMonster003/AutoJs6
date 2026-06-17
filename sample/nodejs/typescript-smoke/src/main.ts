@@ -108,8 +108,17 @@ async function smoke(): Promise<void> {
   const axiosDiagnostics: axios.Diagnostics = axios.diagnostics();
 
   const connection: websocket.Connection = await websocket.connect("wss://example.invalid/socket", {
+    headers: { "x-mode": "types" },
+    protocols: ["json"],
     timeoutMs: websocket.policy.defaultTimeoutMs,
-    maxMessageBytes: websocket.policy.defaultMaxMessageBytes
+    maxMessageBytes: websocket.policy.defaultMaxMessageBytes,
+    maxQueueSize: websocket.policy.defaultMaxQueueSize
+  });
+  connection.onmessage = (message) => {
+    void message.type;
+  };
+  connection.onclose = (event) => {
+    void event.code;
   });
   connection.on("message", (message) => {
     const maybeText: string | undefined = message.text;

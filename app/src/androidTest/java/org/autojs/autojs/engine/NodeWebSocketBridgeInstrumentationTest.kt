@@ -68,6 +68,11 @@ class NodeWebSocketBridgeInstrumentationTest {
                       function sleep(ms) {
                         return new Promise((resolve) => setTimeout(resolve, ms));
                       }
+                      function headerValue(headers, name) {
+                        const lower = String(name).toLowerCase();
+                        const found = (headers || []).find((entry) => String(entry[0]).toLowerCase() === lower);
+                        return found ? String(found[1]) : "";
+                      }
                       async function waitFor(predicate, label) {
                         for (let i = 0; i < 80; i += 1) {
                           if (predicate()) return;
@@ -126,7 +131,13 @@ class NodeWebSocketBridgeInstrumentationTest {
                           }
                           if (request.method === "send") {
                             const session = sessionFor(payload.id);
-                            session.events.push({ type: "message", message: { type: "text", text: "echo:" + (payload.text || payload.dataBase64 || "") } });
+                            if (payload.text === "trigger-error") {
+                              session.events.push({ type: "error", error: { code: "ERR_FAKE_WS", message: "fake websocket error" } });
+                            } else if (payload.dataBase64) {
+                              session.events.push({ type: "message", message: { type: "binary", dataBase64: payload.dataBase64 } });
+                            } else {
+                              session.events.push({ type: "message", message: { type: "text", text: "echo:" + (payload.text || "") } });
+                            }
                             respond(request, true, true);
                             return;
                           }
@@ -145,16 +156,61 @@ class NodeWebSocketBridgeInstrumentationTest {
                       const profile = require("autojs6:profile");
                       const resolved = require.resolve("websocket");
                       const connection = await websocket.connect("wss://example.invalid/socket", {
+                        headers: { "x-mode": "bridge" },
+                        protocols: ["json", "events"],
                         timeoutMs: 1000,
-                        maxMessageBytes: 64
+                        maxMessageBytes: 64,
+                        maxQueueSize: 4
                       });
-                      const firstMessage = await new Promise((resolve) => connection.on("message", resolve));
+                      const socketConnect = requests.find((request) =>
+                        request.method === "connect" && request.args[0].url.indexOf("/socket") >= 0
+                      ).args[0];
+                      const propertyMessages = [];
+                      const propertyErrors = [];
+                      const closeEvents = [];
+                      const openEvents = [];
+                      let offCount = 0;
+                      connection.onopen = () => {
+                        openEvents.push("prop");
+                      };
+                      connection.onmessage = (message) => {
+                        propertyMessages.push(message.type + ":" + (message.text || message.dataBase64 || ""));
+                      };
+                      connection.onerror = (error) => {
+                        propertyErrors.push(codeOf(error));
+                      };
+                      connection.onclose = (event) => {
+                        closeEvents.push("prop:" + event.code + ":" + event.reason);
+                      };
+                      const openPromise = new Promise((resolve) => connection.addEventListener("open", () => {
+                        openEvents.push("listener");
+                        resolve(undefined);
+                      }));
+                      const firstMessagePromise = new Promise((resolve) => connection.on("message", resolve));
+                      const firstMessage = await firstMessagePromise;
+                      await openPromise;
+                      const removedListener = () => { offCount += 1; };
+                      connection.addEventListener("message", removedListener);
+                      connection.removeEventListener("message", removedListener);
                       const echoPromise = new Promise((resolve) => connection.on("message", (message) => {
                         if (message.text && message.text.indexOf("echo:") === 0) resolve(message);
                       }));
                       await connection.send("hello");
                       const echoMessage = await echoPromise;
+                      const binaryPromise = new Promise((resolve) => connection.on("message", (message) => {
+                        if (message.dataBase64) resolve(message);
+                      }));
+                      await connection.send(new Uint8Array([1, 2, 3]));
+                      const binaryMessage = await binaryPromise;
+                      const errorPromise = new Promise((resolve) => connection.on("error", (error) => resolve(codeOf(error))));
+                      await connection.send("trigger-error");
+                      const errorCode = await errorPromise;
+                      const closePromise = new Promise((resolve) => connection.on("close", (event) => {
+                        closeEvents.push("listener:" + event.code + ":" + event.reason);
+                        resolve(event);
+                      }));
                       await connection.close(1000, "done");
+                      await closePromise;
 
                       const a = await websocket.connect("wss://example.invalid/a", { timeoutMs: 1000 });
                       const b = await websocket.connect("wss://example.invalid/b", { timeoutMs: 1000 });
@@ -224,7 +280,22 @@ class NodeWebSocketBridgeInstrumentationTest {
                         websocket.policy.defaultTimeoutMs,
                         websocket.policy.defaultMaxMessageBytes
                       ].join("|"));
+                      console.log("websocket.connect_options=" + [
+                        headerValue(socketConnect.headers, "x-mode"),
+                        socketConnect.protocols.join(","),
+                        socketConnect.maxQueueSize,
+                        socketConnect.maxMessageBytes
+                      ].join("|"));
                       console.log("websocket.messages=" + [firstMessage.text, echoMessage.text].join("|"));
+                      console.log("websocket.events=" + [
+                        openEvents.join(","),
+                        propertyMessages.join(","),
+                        binaryMessage.dataBase64,
+                        propertyErrors.join(","),
+                        errorCode,
+                        closeEvents.join(","),
+                        offCount
+                      ].join("|"));
                       console.log("websocket.codes=" + [
                         concurrentCode,
                         schemeCode,
@@ -254,7 +325,14 @@ class NodeWebSocketBridgeInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("websocket.shadow=false"))
             assertTrue(result.stdout, result.stdout.contains("websocket.frozen=true"))
             assertTrue(result.stdout, result.stdout.contains("websocket.policy=2|10000|65536"))
+            assertTrue(result.stdout, result.stdout.contains("websocket.connect_options=bridge|json,events|4|64"))
             assertTrue(result.stdout, result.stdout.contains("websocket.messages=server-ready|echo:hello"))
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "websocket.events=prop,listener|text:server-ready,text:echo:hello,binary:AQID|AQID|ERR_FAKE_WS|ERR_FAKE_WS|prop:1000:done,listener:1000:done|0",
+                ),
+            )
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
