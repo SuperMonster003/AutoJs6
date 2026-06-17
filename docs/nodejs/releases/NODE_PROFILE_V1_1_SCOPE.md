@@ -67,6 +67,7 @@ small set of already-gated features toward practical use.
 | Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for long-click, set-text, and scroll while keeping JSON-only snapshots and explicit `accessibility` capability checks. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
+| Work Manager metadata | partial | `require("work_manager")` registers controlled scheduled-task metadata for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`, stores embedded backend plus `scriptPath`/project `entry` metadata, supports packaged entry descriptors, and still does not launch background Node executions. |
 | Long-running mode | blocked | Request protocol carries `executionMode`, but v1.1 currently supports only `one_shot`; explicit `long_running`/`service` requests are rejected before user code runs. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
 | Native addon | unsupported | Must remain disabled. |
@@ -147,6 +148,11 @@ small set of already-gated features toward practical use.
   default timeout changes, non-zero exit, timeout result shape, scoped
   cwd/path/env denial, root capability denial, unsupported Shizuku reporting,
   Android non-root execution, and `child_process` denial.
+- Work Manager metadata smoke passes for schedule-once, schedule-periodic,
+  cancel, list, `work_manager` capability tagging, embedded backend and
+  `scriptPath`/project `entry` metadata, packaged entry descriptors, scoped
+  path and missing-file denial, minimum periodic interval enforcement, and
+  `tasks`/raw scheduler denial.
 - Long-running mode remains blocked until an async service lifecycle exists,
   but the explicit `executionMode` policy gate rejects `long_running`/`service`
   before user code runs while normal interval scripts still time out.

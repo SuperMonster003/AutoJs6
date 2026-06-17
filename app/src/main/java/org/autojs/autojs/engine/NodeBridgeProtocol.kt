@@ -1744,6 +1744,8 @@ class AndroidNodeBridgeCapabilityProvider(
             metadata = mapOf(
                 "kind" to kind.name.lowercase(),
                 "scheduler" to task.optString("scheduler", "metadata"),
+                "backend" to task.optString("backend", "embedded"),
+                "entryKind" to task.optString("entryKind", "scriptPath"),
             ),
         ) {
             workManagerTasks.remove(id)
@@ -2768,7 +2770,7 @@ private object ControlledWorkManagerPolicy {
 
 private data class ControlledWorkTaskDescriptor(
     val kind: ControlledWorkTaskKind,
-    val scriptPath: String,
+    val entryPath: String,
     val entryKind: String,
     val backend: String,
     val packaged: Boolean,
@@ -2783,8 +2785,12 @@ private data class ControlledWorkTaskDescriptor(
             put("status", "registered")
             put("scheduler", "metadata")
             put("backend", backend)
-            put("scriptPath", scriptPath)
             put("entryKind", entryKind)
+            if (entryKind == "projectEntry") {
+                put("entry", entryPath)
+            } else {
+                put("scriptPath", entryPath)
+            }
             put("packaged", packaged)
             put("delayMs", delayMs)
             intervalMs?.let { put("intervalMs", it) }
@@ -2826,12 +2832,12 @@ private data class ControlledWorkTaskDescriptor(
                 hasEntry -> "projectEntry"
                 else -> ""
             }
-            val scriptPath = normalizeRelativeScriptPath(rawScriptPath)
+            val entryPath = normalizeRelativeScriptPath(rawScriptPath)
                 ?: return ControlledWorkTaskParseResult(
                     error = workTaskError(request, "work_manager task path must be a non-empty relative path inside the scoped project."),
                 )
             val packaged = payload.optBoolean("packaged", false)
-            if (resolveScopedScriptPath(appContext, engineInfo, scriptPath, packaged) == null) {
+            if (resolveScopedScriptPath(appContext, engineInfo, entryPath, packaged) == null) {
                 return ControlledWorkTaskParseResult(
                     error = workTaskError(request, "work_manager task path must resolve inside the scoped working directory."),
                 )
@@ -2876,7 +2882,7 @@ private data class ControlledWorkTaskDescriptor(
             return ControlledWorkTaskParseResult(
                 value = ControlledWorkTaskDescriptor(
                     kind = kind,
-                    scriptPath = scriptPath,
+                    entryPath = entryPath,
                     entryKind = entryKind,
                     backend = "embedded",
                     packaged = packaged,

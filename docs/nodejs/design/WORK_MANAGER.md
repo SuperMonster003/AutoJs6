@@ -1,6 +1,6 @@
 # Work Manager Design And MVP Gate
 
-Status: Task 65 exposes `require("work_manager")` as a controlled bridge MVP for scheduled-task metadata registration. It does not launch background Node executions yet. `require("tasks")` remains unavailable to Embedded Node scripts.
+Status: Tasks 65 and 180 expose `require("work_manager")` as a controlled bridge MVP for scheduled-task metadata registration. It does not launch background Node executions yet. `require("tasks")` remains unavailable to Embedded Node scripts.
 
 ## Goal
 
@@ -42,7 +42,7 @@ This means the Node design should extend AutoJs6 task descriptors and launch rou
 
 ## Implemented MVP Scope
 
-The Task 65 implementation exposes scheduled-task metadata registration through `require("work_manager")`.
+The Task 65/180 implementation exposes scheduled-task metadata registration through `require("work_manager")`.
 
 Current JavaScript shape:
 
@@ -82,6 +82,7 @@ Current behavior:
 
 - descriptors are stored in provider-owned metadata for the current bridge provider instance
 - the Android provider validates descriptor policy again after JavaScript validation
+- task metadata stores `backend` plus either ordinary `scriptPath` or project `entry` with `entryKind`
 - `scriptPath` and `entry` must be relative, non-empty, NUL-free, and scoped to the working directory
 - non-packaged paths must resolve to an existing file inside the working directory
 - packaged project entries can serialize metadata without requiring a plaintext file path
@@ -295,13 +296,14 @@ The JavaScript result should receive a serialized trigger object, not a raw Andr
 
 ## Tests Required
 
-Task 65 coverage:
+Task 65/180 coverage:
 
 - `require("work_manager")` module routing and shadowing protection
 - `require("tasks")` remains unavailable
 - positive once and periodic metadata registration through a fake provider
 - `cancel` and `list`
-- packaged project-entry metadata serialization
+- ordinary `scriptPath` versus project `entry` metadata serialization
+- packaged project-entry metadata serialization, including packaged entries without a plaintext file
 - queued fallback rejection
 - Android provider metadata storage
 - scoped entry path denial for absolute, NUL, `..`, and missing non-packaged files
@@ -322,4 +324,4 @@ Future execution work needs additional coverage:
 
 ## Current Decision
 
-Task 65 implements `require("work_manager")` as a controlled metadata-registration MVP. The Safe Node Profile still denies direct Android scheduler authority and does not execute scheduled Node work in the background yet. Timed execution remains the only approved next scheduling direction, and it must land through a bridge provider, user-visible registration, descriptor persistence, scoped path validation, packaged manifest verification, and focused tests. Broadcast, startup, boot, and package-event registration remain deferred.
+Tasks 65 and 180 implement `require("work_manager")` as a controlled metadata-registration MVP. The Safe Node Profile still denies direct Android scheduler authority and does not execute scheduled Node work in the background yet. Timed execution remains the only approved next scheduling direction, and it must land through a bridge provider, user-visible registration, descriptor persistence, scoped path validation, packaged manifest verification, and focused tests. Broadcast, startup, boot, and package-event registration remain deferred.

@@ -44,6 +44,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
                     val payload = JSONArray(request.argsJson).getJSONObject(0)
                     assertEquals("embedded", payload.getString("backend"))
                     assertEquals("main.cjs", payload.getString("scriptPath"))
+                    assertEquals("scriptPath", payload.getString("entryKind"))
                     assertEquals(1_000L, payload.getLong("delayMs"))
                     assertTrue(payload.getJSONObject("constraints").getBoolean("network"))
                     NodeBridgeResponse.success(request.id, NodeBridgeJsonValue.string("fake-once"))
@@ -51,6 +52,8 @@ class NodeWorkManagerBridgeInstrumentationTest {
                 "schedulePeriodic" -> {
                     val payload = JSONArray(request.argsJson).getJSONObject(0)
                     assertEquals("projectEntry", payload.getString("entryKind"))
+                    assertEquals("main.cjs", payload.getString("entry"))
+                    assertFalse(payload.has("scriptPath"))
                     assertEquals(900_000L, payload.getLong("intervalMs"))
                     assertTrue(payload.getBoolean("packaged"))
                     NodeBridgeResponse.success(request.id, NodeBridgeJsonValue.string("fake-periodic"))
@@ -67,7 +70,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
                 id = "work-manager-once-1",
                 module = "work_manager",
                 method = "scheduleOnce",
-                argsJson = """[{"scriptPath":"main.cjs","backend":"embedded","delayMs":1000,"constraints":{"network":true}}]""",
+                argsJson = """[{"scriptPath":"main.cjs","entryKind":"scriptPath","backend":"embedded","delayMs":1000,"constraints":{"network":true}}]""",
                 timeoutMs = 2_000L,
                 permissions = listOf("work_manager"),
             ),
@@ -77,7 +80,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
                 id = "work-manager-periodic-1",
                 module = "work_manager",
                 method = "schedulePeriodic",
-                argsJson = """[{"entry":"main.cjs","backend":"embedded","packaged":true,"intervalMs":900000,"constraints":{"charging":true}}]""",
+                argsJson = """[{"entry":"main.cjs","entryKind":"projectEntry","backend":"embedded","packaged":true,"intervalMs":900000,"constraints":{"charging":true}}]""",
                 timeoutMs = 2_000L,
                 permissions = listOf("work_manager"),
             ),
@@ -213,7 +216,8 @@ class NodeWorkManagerBridgeInstrumentationTest {
               console.log("work.methods=" + [typeof work.scheduleOnce, typeof work.schedulePeriodic, typeof work.cancel, typeof work.list].join("|"));
               console.log("work.policy=" + [work.policy.maxTasksPerProvider, work.policy.minPeriodicIntervalMs, work.policy.maxPeriodicIntervalMs].join("|"));
               console.log("work.ids=" + onceId + "|" + periodicId);
-              console.log("work.before=" + beforeCancel.map((task) => [task.id, task.type, task.scriptPath, task.entryKind, task.packaged, task.constraints.network, task.constraints.charging].join(":")).join("|"));
+              console.log("work.before=" + beforeCancel.map((task) => [task.id, task.type, task.scriptPath || "", task.entry || "", task.entryKind, task.packaged, task.constraints.network, task.constraints.charging].join(":")).join("|"));
+              console.log("work.request_entry=" + [requests[0].args[0].scriptPath || "", requests[0].args[0].entry || "", requests[1].args[0].scriptPath || "", requests[1].args[0].entry || ""].join("|"));
               console.log("work.after=" + afterCancel.map((task) => task.id).join("|"));
               console.log("work.requests=" + requests.map((request) => request.method).join("|"));
               console.log("work.permissions=" + requests.slice(0, 3).every((request) => request.permissions.indexOf("work_manager") >= 0));
@@ -236,8 +240,9 @@ class NodeWorkManagerBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("work.methods=function|function|function|function"))
         assertTrue(result.stdout.contains("work.policy=64|900000|2592000000"))
         assertTrue(result.stdout.contains("work.ids=fake-work-1|fake-work-2"))
-        assertTrue(result.stdout.contains("fake-work-1:once:main.cjs:scriptPath:false:true:false"))
-        assertTrue(result.stdout.contains("fake-work-2:periodic:main.cjs:projectEntry:true:false:true"))
+        assertTrue(result.stdout.contains("fake-work-1:once:main.cjs::scriptPath:false:true:false"))
+        assertTrue(result.stdout.contains("fake-work-2:periodic::main.cjs:projectEntry:true:false:true"))
+        assertTrue(result.stdout.contains("work.request_entry=main.cjs|||main.cjs"))
         assertTrue(result.stdout.contains("work.after=fake-work-2"))
         assertTrue(result.stdout.contains("work.permissions=true"))
         assertTrue(result.stdout.contains("work.timeout=777"))
@@ -281,11 +286,38 @@ class NodeWorkManagerBridgeInstrumentationTest {
         assertEquals(setOf(onceId, periodicId), (0 until tasks.length()).map { tasks.getJSONObject(it).getString("id") }.toSet())
         assertTrue((0 until tasks.length()).map { tasks.getJSONObject(it).getString("scheduler") }.all { it == "metadata" })
         assertTrue((0 until tasks.length()).map { tasks.getJSONObject(it).getString("backend") }.all { it == "embedded" })
+        val onceTask = taskById(tasks, onceId)
+        assertEquals("scriptPath", onceTask.getString("entryKind"))
+        assertEquals("main.cjs", onceTask.getString("scriptPath"))
+        assertFalse(onceTask.has("entry"))
+        val periodicTask = taskById(tasks, periodicId)
+        assertEquals("projectEntry", periodicTask.getString("entryKind"))
+        assertEquals("main.cjs", periodicTask.getString("entry"))
+        assertFalse(periodicTask.has("scriptPath"))
+        assertTrue(periodicTask.getBoolean("packaged"))
 
         val deniedPath = dispatch(provider, "scheduleOnce", """[{"scriptPath":"../escape.cjs"}]""")
         assertFalse(deniedPath.ok)
         assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, deniedPath.error?.code)
         assertEquals("work_manager", deniedPath.error?.module)
+
+        val deniedAbsolute = dispatch(provider, "scheduleOnce", """[{"scriptPath":"/sdcard/escape.cjs"}]""")
+        assertFalse(deniedAbsolute.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, deniedAbsolute.error?.code)
+
+        val deniedMissing = dispatch(provider, "scheduleOnce", """[{"entry":"missing.cjs"}]""")
+        assertFalse(deniedMissing.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, deniedMissing.error?.code)
+
+        val packagedMissing = dispatch(provider, "scheduleOnce", """[{"entry":"packaged/main.cjs","packaged":true}]""")
+        assertTrue(packagedMissing.ok)
+        val packagedMissingId = jsonString(packagedMissing.resultJson.orEmpty())
+        val withPackagedMissing = JSONArray(dispatch(provider, "list", "[]").resultJson.orEmpty())
+        val packagedMissingTask = taskById(withPackagedMissing, packagedMissingId)
+        assertEquals("projectEntry", packagedMissingTask.getString("entryKind"))
+        assertEquals("packaged/main.cjs", packagedMissingTask.getString("entry"))
+        assertTrue(packagedMissingTask.getBoolean("packaged"))
+        assertTrue(dispatch(provider, "cancel", JSONArray().put(packagedMissingId).toString()).ok)
 
         val deniedInterval = dispatch(provider, "schedulePeriodic", """[{"scriptPath":"main.cjs","intervalMs":1000}]""")
         assertFalse(deniedInterval.ok)
@@ -320,6 +352,16 @@ class NodeWorkManagerBridgeInstrumentationTest {
 
     private fun jsonString(json: String): String {
         return JSONTokener(json).nextValue() as String
+    }
+
+    private fun taskById(tasks: JSONArray, id: String): JSONObject {
+        for (index in 0 until tasks.length()) {
+            val task = tasks.getJSONObject(index)
+            if (task.optString("id") == id) {
+                return task
+            }
+        }
+        throw AssertionError("Missing work_manager task id: $id")
     }
 }
 

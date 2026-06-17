@@ -995,8 +995,8 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `list(options?): Promise<readonly TaskInfo[]>`
   - options: `{ scriptPath?: string, entry?: string, backend?: "embedded", delayMs?: number, intervalMs?: number, packaged?: boolean, constraints?: { charging?: boolean, network?: boolean, idle?: boolean }, timeoutMs?: number }`
   - current MVP registers provider-owned task metadata only; it does not launch background Node executions yet
-  - `backend` is restricted to `embedded`, paths must stay relative to the scoped working directory, and periodic intervals are bounded to at least `900000` ms
-  - packaged metadata can mark project entries with `packaged: true`, but older packaged templates without live bridge metadata do not queue persistent registration
+  - `backend` is restricted to `embedded`, task metadata preserves either `scriptPath` or project `entry` plus `entryKind`, paths must stay relative to the scoped working directory, non-packaged entries must exist as files, and periodic intervals are bounded to at least `900000` ms
+  - packaged metadata can mark project entries with `packaged: true` and does not require a plaintext source file in the working directory, but older packaged templates without live bridge metadata do not queue persistent registration
   - provider-owned task metadata is registered as a bridge resource and is cleared on execution destroy
   - raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter objects remain unavailable to JavaScript
 
@@ -1089,9 +1089,9 @@ Node scripts can register controlled scheduled-task metadata through `require("w
 Current policy:
 
 - `require("work_manager")` is exposed as a Promise bridge module for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`.
-- Task 65 stores provider-owned metadata only; it does not execute background Node scripts yet.
+- Tasks 65 and 180 store provider-owned backend and entry metadata only; they do not execute background Node scripts yet.
 - `work_manager` is a live-bridge capability. Queued host fallback rejects it with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` so older packaged templates cannot create persistent tasks as one-way effects.
-- Registered descriptors accept only `backend: "embedded"`, scoped relative `scriptPath` or packaged project `entry`, bounded delay/interval values, and boolean `charging`, `network`, and `idle` constraints.
+- Registered descriptors accept only `backend: "embedded"`, scoped relative `scriptPath` or project `entry`, bounded delay/interval values, and boolean `charging`, `network`, and `idle` constraints. Non-packaged entries must resolve to files inside the working directory; packaged entries may serialize metadata without a plaintext file.
 - `require("tasks")` is not exposed in the Embedded Node Safe Node Profile.
 - Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.
 - Existing Rhino task APIs remain unchanged.

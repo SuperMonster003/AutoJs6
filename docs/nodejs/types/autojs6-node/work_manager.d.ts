@@ -46,8 +46,10 @@
 
     export interface Policy {
       readonly maxTasksPerProvider: number;
+      readonly maxDelayMs: number;
       readonly minPeriodicIntervalMs: number;
       readonly maxPeriodicIntervalMs: number;
+      readonly allowedConstraints: readonly (keyof WorkConstraints)[];
     }
 
     export interface WorkManagerModule {

@@ -11380,7 +11380,7 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     return {
-      scriptPath: parts.join("/"),
+      path: parts.join("/"),
       entryKind: hasEntry && !hasScriptPath ? "projectEntry" : "scriptPath"
     };
   }
@@ -11425,7 +11425,6 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     const descriptor = {
-      scriptPath: path.scriptPath,
       entryKind: path.entryKind,
       backend: "embedded",
       packaged: input.packaged === true,
@@ -11440,6 +11439,11 @@ std::string buildEmbeddedScriptExecutionSource(
       ),
       constraints: __autojs6_work_manager_constraints(input.constraints, methodName)
     };
+    if (path.entryKind === "projectEntry") {
+      descriptor.entry = path.path;
+    } else {
+      descriptor.scriptPath = path.path;
+    }
     if (kind === "periodic") {
       descriptor.intervalMs = __autojs6_work_manager_duration_ms(
         input.intervalMs,
@@ -11465,14 +11469,18 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_work_manager_task_info(value) {
     const source = value && typeof value === "object" ? value : {};
+    const entryKind = source.entryKind === undefined || source.entryKind === null ? "" : String(source.entryKind);
+    const scriptPath = source.scriptPath === undefined || source.scriptPath === null ? "" : String(source.scriptPath);
+    const explicitEntry = source.entry === undefined || source.entry === null ? "" : String(source.entry);
     return Object.freeze({
       id: source.id === undefined || source.id === null ? "" : String(source.id),
       type: source.type === undefined || source.type === null ? "" : String(source.type),
       status: source.status === undefined || source.status === null ? "" : String(source.status),
       scheduler: source.scheduler === undefined || source.scheduler === null ? "" : String(source.scheduler),
       backend: source.backend === undefined || source.backend === null ? "" : String(source.backend),
-      scriptPath: source.scriptPath === undefined || source.scriptPath === null ? "" : String(source.scriptPath),
-      entryKind: source.entryKind === undefined || source.entryKind === null ? "" : String(source.entryKind),
+      scriptPath,
+      entry: explicitEntry || (entryKind === "projectEntry" ? scriptPath : ""),
+      entryKind,
       packaged: source.packaged === true,
       delayMs: Number(source.delayMs) || 0,
       intervalMs: source.intervalMs === undefined || source.intervalMs === null ? null : Number(source.intervalMs),
