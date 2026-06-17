@@ -1,10 +1,15 @@
 package org.autojs.autojs.engine
 
+import android.Manifest
 import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
@@ -20,6 +25,8 @@ import android.util.Base64
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -29,6 +36,7 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -453,6 +461,7 @@ object NodeBridgeModules {
     const val OCR = "ocr"
     const val STORAGE = "storage"
     const val STORAGES = "storages"
+    const val NOTIFICATIONS = "notifications"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -483,6 +492,7 @@ object NodeBridgeModules {
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val storageModules = setOf(STORAGE, STORAGES)
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
+    val notificationsMethods = setOf("notify", "cancel", "cancelAll")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")
@@ -503,6 +513,7 @@ object NodeBridgeModules {
         OCR to ocrMethods,
         STORAGE to storageMethods,
         STORAGES to storageMethods,
+        NOTIFICATIONS to notificationsMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
         SHELL to shellMethods,
@@ -561,6 +572,8 @@ class AndroidNodeBridgeCapabilityProvider(
     }
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
     private val javaHandles = ConcurrentHashMap<String, Any>()
+    private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
+    private val notificationIdCounter = AtomicInteger(1_000_000)
     private val resourceRegistry = NodeBridgeResourceRegistry(engineInfo.id)
     private val activeShellCommands = AtomicInteger(0)
     private val maxActiveShellCommands = AtomicInteger(0)
@@ -584,6 +597,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, callback)
             request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, callback)
             request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, callback)
+            request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, callback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, callback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, callback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
@@ -618,6 +632,7 @@ class AndroidNodeBridgeCapabilityProvider(
         websocketSessions.clear()
         workManagerTasks.clear()
         javaHandles.clear()
+        notificationHandles.clear()
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -1061,6 +1076,130 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun storagePreferencesName(storeName: String): String {
         val packageName = engineInfo.packageName.ifBlank { appContext.packageName }
         return NodeStorageBridgePolicy.preferencesName(packageName, engineInfo.cwd, storeName)
+    }
+
+    private fun dispatchNotifications(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        dispatchOnMain(request, callback) {
+            runCatching {
+                val args = JSONArray(request.argsJson.ifBlank { "[]" })
+                when (request.method) {
+                    "notify" -> {
+                        val payload = args.optJSONObject(0)
+                            ?: throw NotificationBridgeException(
+                                NodeBridgeError.invalidRequest(
+                                    message = "notifications.notify requires an options object.",
+                                    module = request.module,
+                                    method = request.method,
+                                ),
+                            )
+                        val descriptor = ControlledNotificationDescriptor.fromJson(
+                            request = request,
+                            payload = payload,
+                            fallbackId = notificationIdCounter.getAndIncrement(),
+                            defaultChannelName = appContext.getString(R.string.app_name),
+                        )
+                        ensureNotificationPostingAllowed(request)
+                        if (!notificationHandles.containsKey(descriptor.id) &&
+                            notificationHandles.size >= ControlledNotificationPolicy.MAX_ACTIVE_NOTIFICATIONS
+                        ) {
+                            bridgeResourceLimitRejections.incrementAndGet()
+                            throw NotificationBridgeException(
+                                NodeBridgeError.resourceLimit(
+                                    message = "AutoJs6 notifications bridge reached the active notification limit.",
+                                    module = request.module,
+                                    method = request.method,
+                                ),
+                            )
+                        }
+                        ensureNotificationChannel(descriptor)
+                        NotificationManagerCompat.from(appContext).notify(descriptor.id, descriptor.toNotification(appContext))
+                        notificationHandles.remove(descriptor.id)?.release("notification.update")
+                        val handle = resourceRegistry.register(
+                            type = NodeBridgeResourceType.NOTIFICATION,
+                            id = "notification-${descriptor.id}",
+                            metadata = mapOf(
+                                "channel" to descriptor.channel,
+                                "ongoing" to descriptor.ongoing.toString(),
+                            ),
+                        ) {
+                            notificationHandles.remove(descriptor.id)
+                            NotificationManagerCompat.from(appContext).cancel(descriptor.id)
+                        }
+                        notificationHandles[descriptor.id] = handle
+                        NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(descriptor.id))
+                    }
+                    "cancel" -> {
+                        val id = ControlledNotificationDescriptor.parseNotificationIdArg(request, args, 0)
+                        notificationHandles.remove(id)?.close("notification.cancel")
+                        NodeBridgeResponse.success(request.id, "null")
+                    }
+                    "cancelAll" -> {
+                        notificationHandles.values.toList().forEach { handle ->
+                            handle.close("notification.cancelAll")
+                        }
+                        NodeBridgeResponse.success(request.id, "null")
+                    }
+                    else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+                }
+            }.getOrElse { error ->
+                val bridgeError = when (error) {
+                    is NotificationBridgeException -> error.bridgeError
+                    is SecurityException -> NodeBridgeError.permissionDenied(
+                        message = "AutoJs6 notifications bridge could not post notification: ${error.message ?: error.javaClass.name}",
+                        module = request.module,
+                        method = request.method,
+                    )
+                    else -> NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 notifications request failed.",
+                        module = request.module,
+                        method = request.method,
+                    )
+                }
+                NodeBridgeResponse.failure(request.id, bridgeError)
+            }
+        }
+    }
+
+    private fun ensureNotificationPostingAllowed(request: NodeBridgeRequest) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            throw NotificationBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 notifications bridge requires android.permission.POST_NOTIFICATIONS.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        if (!NotificationManagerCompat.from(appContext).areNotificationsEnabled()) {
+            throw NotificationBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 notifications are disabled for this app.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+    }
+
+    private fun ensureNotificationChannel(descriptor: ControlledNotificationDescriptor) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return
+        }
+        val manager = appContext.getSystemService(NotificationManager::class.java)
+        if (manager.getNotificationChannel(descriptor.channel) != null) {
+            return
+        }
+        val channel = NotificationChannel(
+            descriptor.channel,
+            descriptor.channelName,
+            ControlledNotificationPolicy.importanceForPriority(descriptor.priority),
+        ).apply {
+            description = "AutoJs6 Node notifications"
+            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        }
+        manager.createNotificationChannel(channel)
     }
 
     private fun dispatchClipboard(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -3031,6 +3170,173 @@ private object NodeStorageBridgePolicy {
 }
 
 private class StorageBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
+
+private data class ControlledNotificationDescriptor(
+    val id: Int,
+    val title: String,
+    val text: String,
+    val channel: String,
+    val channelName: String,
+    val ongoing: Boolean,
+    val priority: Int,
+) {
+    fun toNotification(context: Context): Notification {
+        return NotificationCompat.Builder(context, channel)
+            .setSmallIcon(R.drawable.autojs6_status_bar_icon)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setOngoing(ongoing)
+            .setAutoCancel(!ongoing)
+            .setPriority(priority)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setLocalOnly(true)
+            .build()
+    }
+
+    companion object {
+        fun fromJson(
+            request: NodeBridgeRequest,
+            payload: JSONObject,
+            fallbackId: Int,
+            defaultChannelName: String,
+        ): ControlledNotificationDescriptor {
+            val title = optionalString(request, payload, "title", ControlledNotificationPolicy.MAX_TITLE_LENGTH)
+                ?: "AutoJs6 Node"
+            val text = optionalString(request, payload, "text", ControlledNotificationPolicy.MAX_TEXT_LENGTH).orEmpty()
+            if (title.isBlank() && text.isBlank()) {
+                throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications.notify requires title or text.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val id = parseOptionalNotificationId(request, payload.opt("id")) ?: fallbackId
+            val channel = optionalString(request, payload, "channel", ControlledNotificationPolicy.MAX_CHANNEL_LENGTH)
+                ?.takeIf { it.isNotBlank() }
+                ?: ControlledNotificationPolicy.DEFAULT_CHANNEL_ID
+            val channelName = optionalString(request, payload, "channelName", ControlledNotificationPolicy.MAX_TITLE_LENGTH)
+                ?.takeIf { it.isNotBlank() }
+                ?: defaultChannelName
+            val priority = parsePriority(request, payload.opt("priority"))
+            return ControlledNotificationDescriptor(
+                id = id,
+                title = title,
+                text = text,
+                channel = channel,
+                channelName = channelName,
+                ongoing = payload.optBoolean("ongoing", false),
+                priority = priority,
+            )
+        }
+
+        fun parseNotificationIdArg(request: NodeBridgeRequest, args: JSONArray, index: Int): Int {
+            return parseOptionalNotificationId(request, args.opt(index))
+                ?: throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications.cancel requires a positive integer id.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+        }
+
+        private fun optionalString(
+            request: NodeBridgeRequest,
+            payload: JSONObject,
+            name: String,
+            maxLength: Int,
+        ): String? {
+            if (!payload.has(name) || payload.isNull(name)) {
+                return null
+            }
+            val value = payload.opt(name)
+            if (value !is String || value.length > maxLength || '\u0000' in value) {
+                throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications.notify option $name must be a string up to $maxLength characters.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return value.trim()
+        }
+
+        private fun parseOptionalNotificationId(request: NodeBridgeRequest, value: Any?): Int? {
+            if (value == null || value == JSONObject.NULL) {
+                return null
+            }
+            val id = when (value) {
+                is Int -> value
+                is Long -> value.takeIf { it <= Int.MAX_VALUE }?.toInt()
+                is Number -> value.toDouble().takeIf { it.isFinite() && it % 1.0 == 0.0 && it <= Int.MAX_VALUE }?.toInt()
+                is String -> value.toIntOrNull()
+                else -> null
+            }
+            if (id == null || id <= 0) {
+                throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications notify/cancel id must be a positive integer.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return id
+        }
+
+        private fun parsePriority(request: NodeBridgeRequest, value: Any?): Int {
+            if (value == null || value == JSONObject.NULL) {
+                return NotificationCompat.PRIORITY_DEFAULT
+            }
+            val priority = when (value) {
+                is Number -> value.toInt()
+                is String -> when (value.trim().lowercase(Locale.US)) {
+                    "min" -> NotificationCompat.PRIORITY_MIN
+                    "low" -> NotificationCompat.PRIORITY_LOW
+                    "default" -> NotificationCompat.PRIORITY_DEFAULT
+                    "high" -> NotificationCompat.PRIORITY_HIGH
+                    "max" -> NotificationCompat.PRIORITY_MAX
+                    else -> null
+                }
+                else -> null
+            }
+            if (priority == null || priority !in NotificationCompat.PRIORITY_MIN..NotificationCompat.PRIORITY_MAX) {
+                throw NotificationBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "notifications.notify priority must be min, low, default, high, max, or a supported NotificationCompat priority.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return priority
+        }
+    }
+}
+
+private object ControlledNotificationPolicy {
+    const val DEFAULT_CHANNEL_ID = "autojs6-node"
+    const val MAX_ACTIVE_NOTIFICATIONS = 32
+    const val MAX_TITLE_LENGTH = 120
+    const val MAX_TEXT_LENGTH = 1024
+    const val MAX_CHANNEL_LENGTH = 80
+
+    fun importanceForPriority(priority: Int): Int {
+        return when (priority) {
+            NotificationCompat.PRIORITY_MIN -> NotificationManager.IMPORTANCE_MIN
+            NotificationCompat.PRIORITY_LOW -> NotificationManager.IMPORTANCE_LOW
+            NotificationCompat.PRIORITY_HIGH,
+            NotificationCompat.PRIORITY_MAX -> NotificationManager.IMPORTANCE_HIGH
+            else -> NotificationManager.IMPORTANCE_DEFAULT
+        }
+    }
+}
+
+private class NotificationBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
 
 private class ControlledFetchException(
     val code: String,

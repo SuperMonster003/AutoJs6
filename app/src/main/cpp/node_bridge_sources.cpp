@@ -8007,6 +8007,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_ocr_cache = null;
   let __autojs6_limited_storage_cache = null;
   let __autojs6_limited_storages_cache = null;
+  let __autojs6_limited_notifications_cache = null;
   let __autojs6_limited_clipboard_cache = null;
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
@@ -8857,6 +8858,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (moduleName === "ocr") return ["ocr", "image"];
     if (moduleName === "storage" || moduleName === "storages") return ["storage"];
+    if (moduleName === "notifications") return ["notifications"];
     if (moduleName === "clipboard") return ["clipboard"];
     if (moduleName === "device") return ["device"];
     if (moduleName === "shell") return ["shell"];
@@ -13192,6 +13194,103 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_limited_storage_cache = moduleValue;
     }
     return moduleValue;
+  }
+  function __autojs6_notifications_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_notifications_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "notifications",
+      methodName
+    );
+  }
+  function __autojs6_notifications_call_options(options, fallbackMs) {
+    const input = __autojs6_notifications_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions: ["notifications"]
+    };
+  }
+  function __autojs6_notifications_payload(options) {
+    if (!options || typeof options !== "object" || Array.isArray(options)) {
+      throw __autojs6_notifications_invalid_argument_error(
+        "notify",
+        "notifications.notify requires an options object."
+      );
+    }
+    const payload = {};
+    ["id", "title", "text", "channel", "channelName", "ongoing", "priority"].forEach(function(key) {
+      if (options[key] !== undefined) {
+        payload[key] = options[key];
+      }
+    });
+    return payload;
+  }
+  function __autojs6_notifications_id(methodName, value) {
+    const numberValue = Number(value);
+    if (!Number.isFinite(numberValue) || Math.trunc(numberValue) !== numberValue || numberValue <= 0) {
+      throw __autojs6_notifications_invalid_argument_error(
+        methodName,
+        "notifications." + methodName + " requires a positive integer id."
+      );
+    }
+    return numberValue;
+  }
+  function __autojs6_limited_notifications() {
+    if (__autojs6_limited_notifications_cache) {
+      return __autojs6_limited_notifications_cache;
+    }
+    function notify(options, callOptions) {
+      let payload;
+      try {
+        payload = __autojs6_notifications_payload(options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "notifications",
+        "notify",
+        [payload],
+        __autojs6_notifications_call_options(callOptions, 5000)
+      ).then(function(result) {
+        return Number(result);
+      });
+    }
+    function cancel(id, options) {
+      let notificationId;
+      try {
+        notificationId = __autojs6_notifications_id("cancel", id);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "notifications",
+        "cancel",
+        [notificationId],
+        __autojs6_notifications_call_options(options, 5000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    function cancelAll(options) {
+      return __autojs6_call_autojs(
+        "notifications",
+        "cancelAll",
+        [],
+        __autojs6_notifications_call_options(options, 5000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    __autojs6_limited_notifications_cache = Object.freeze({
+      notify,
+      cancel,
+      cancelAll
+    });
+    return __autojs6_limited_notifications_cache;
   }
   function __autojs6_call_autojs(moduleName, methodName, args, options) {
     const moduleValue = moduleName === undefined || moduleName === null ? "" : String(moduleName);
@@ -27866,6 +27965,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "storages") {
       return "storages";
     }
+    if (name === "notifications") {
+      return "notifications";
+    }
     if (name === "clipboard") {
       return "clipboard";
     }
@@ -28098,6 +28200,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "storages") {
       return __autojs6_limited_storage("storages");
+    }
+    if (name === "notifications") {
+      return __autojs6_limited_notifications();
     }
     if (name === "clipboard") {
       return __autojs6_limited_clipboard();

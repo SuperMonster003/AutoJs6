@@ -80,7 +80,7 @@ for risk/impact:
 | Candidate | User value | Security risk | Testability | Packaged impact | Permission impact | v1.1 decision |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | `storage` | 5 | 2 | 5 | 2 | 1 | Implemented as v1.1 partial in Task 173. |
-| `notifications` post-only | 4 | 3 | 4 | 3 | 3 | Candidate after permission and channel policy. |
+| `notifications` post-only | 4 | 3 | 4 | 3 | 3 | Implemented as v1.1 partial in Task 174. |
 | `ocr` | 5 | 3 | 3 | 4 | 2 | Protocol MVP added in Task 148; live provider remains blocked on image/provider ownership. |
 | `sensors` | 3 | 3 | 4 | 2 | 2 | Candidate for read-only/rate-limited MVP. |
 | controlled `http` wrapper | 4 | 4 | 3 | 4 | 4 | Defer until network promotion gates pass. |
@@ -152,24 +152,29 @@ Possible capability:
 notifications
 ```
 
-Initial scope should be post/cancel only:
+Initial scope is post/cancel only:
 
 ```js
 const notifications = require("notifications");
-await notifications.post({ id: "sync", title: "Done", text: "Export finished" });
-await notifications.cancel("sync");
+const id = await notifications.notify({ title: "Done", text: "Export finished" });
+await notifications.cancel(id);
 ```
 
 Constraints:
 
 - No notification listener service.
 - No raw `Notification`, `PendingIntent`, `RemoteViews`, or channel object.
-- Channel ids are provider-owned and normalized.
+- Channel ids are provider-owned strings; JavaScript receives only numeric notification ids.
 - Android 13+ `POST_NOTIFICATIONS` permission and packaged manifest behavior
-  must be explicit.
+  are explicit through the `notifications` capability.
+- Owned notifications are registered against the current Node execution and
+  canceled on provider destroy.
 - No background scheduling authority; use `work_manager` design gates for that.
 
-This is useful but should follow a permission review.
+The implemented module is `require("notifications")` with `notify(options)`,
+`cancel(id)`, and `cancelAll()`. It remains post-only: actions, listeners,
+custom `PendingIntent`, and raw Android notification objects stay outside the
+Safe Node Profile.
 
 #### `sensors`
 
@@ -334,7 +339,9 @@ The recommended v1.1 bridge order is:
    ownership before new high-risk modules.
 2. Keep `storage` as the first implemented new module and use its capability,
    namespace, and JSON-only tests as the template for future low-risk modules.
-3. Consider post-only `notifications` after permission/channel policy.
+3. Use post-only `notifications` as the pattern for future user-visible
+   status surfaces: explicit capability, Android permission mapping, and
+   owned-resource cleanup.
 4. Consider bounded read-only `sensors` after privacy/rate-limit review.
 5. Keep the Task 148 OCR protocol MVP fail-closed until image handles are
    provider-owned and packaged model policy is clear.

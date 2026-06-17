@@ -150,6 +150,8 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "keys") result = ["alpha"];
                     else if (method === "contains") result = true;
                     else result = null;
+                  } else if (moduleName === "notifications") {
+                    result = method === "notify" ? (request.args[0].id || 9001) : null;
                   } else if (moduleName === "work_manager") {
                     if (method === "scheduleOnce") result = "work-once";
                     else if (method === "schedulePeriodic") result = "work-periodic";
@@ -185,6 +187,7 @@ class NodeBridgeConformanceInstrumentationTest {
               const ocr = require("ocr");
               const storage = require("storage");
               const storages = require("storages");
+              const notifications = require("notifications");
               const workManager = require("work_manager");
 
               [
@@ -202,6 +205,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["ocr", ocr],
                 ["storage", storage],
                 ["storages", storages],
+                ["notifications", notifications],
                 ["work_manager", workManager]
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
@@ -219,6 +223,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("ocr", ocr, ["recognize", "recognizeText", "detectTextBounds"]);
               expectExports("storage", storage, ["create", "open"]);
               expectExports("storages", storages, ["create", "open"]);
+              expectExports("notifications", notifications, ["notify", "cancel", "cancelAll"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
 
               assert.strictEqual(typeof app.packageName, "string");
@@ -292,6 +297,10 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("storage.contains", store.contains("alpha", { timeoutMs: 1060 })), true);
               await expectPromise("storage.remove", store.remove("alpha", { timeoutMs: 1061 }));
               await expectPromise("storage.clear", storages.open("settings").clear({ timeoutMs: 1062 }));
+              const notificationId = await expectPromise("notifications.notify", notifications.notify({ id: 9001, title: "Node", text: "running", channel: "conformance", ongoing: true, priority: "low" }, { timeoutMs: 1063 }));
+              assert.strictEqual(notificationId, 9001);
+              await expectPromise("notifications.cancel", notifications.cancel(notificationId, { timeoutMs: 1064 }));
+              await expectPromise("notifications.cancelAll", notifications.cancelAll({ timeoutMs: 1065 }));
               assert.strictEqual(await expectPromise("work_manager.scheduleOnce", workManager.scheduleOnce({ scriptPath: "main.cjs", timeoutMs: 1055 })), "work-once");
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
@@ -316,6 +325,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "ocr.detectTextBounds",
                 "storage.put",
                 "storages.clear",
+                "notifications.notify",
+                "notifications.cancelAll",
                 "work_manager.list"
               ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));
               console.log("bridge.conformance.request_count=" + requests.length);
@@ -495,6 +506,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
             NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
+            NodeBridgeModules.NOTIFICATIONS to setOf("notify", "cancel", "cancelAll"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
         )
     }

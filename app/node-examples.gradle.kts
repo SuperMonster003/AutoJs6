@@ -40,6 +40,7 @@ private val nodeTypeDeclarationModules = listOf(
     "ocr",
     "storage",
     "storages",
+    "notifications",
     "fetch",
     "axios",
     "websocket",

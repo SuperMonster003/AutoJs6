@@ -738,7 +738,9 @@ v1.1 bridge expansion planning is tracked in
 `ocr` bridge protocol MVP, and Task 172 expands it to the v1.1 partial
 JavaScript surface with fake-provider tests, type declarations, manifest
 enforcement, and fail-closed Android provider behavior. Real OCR model/provider
-ownership remains future work.
+ownership remains future work. Task 173 adds JSON-only `storage`/`storages`
+provider storage, and Task 174 adds post-only `notifications` with Android
+permission gating and owned-notification cleanup.
 
 Declared capability names:
 
@@ -751,6 +753,7 @@ Declared capability names:
 - `image`
 - `ocr`
 - `storage`
+- `notifications`
 - `clipboard`
 - `device`
 - `shell`, `shell.root`
@@ -877,6 +880,16 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - requests require the `storage` capability
   - Android provider data is scoped by package identity, working directory, and storage name in app-private SharedPreferences
   - JavaScript receives frozen store handles only; no raw `SharedPreferences`, database, file, or Android object crosses into Node
+- `notifications`
+  - `notify(options, callOptions?): Promise<number>`
+  - `cancel(id, options?): Promise<void>`
+  - `cancelAll(options?): Promise<void>`
+  - options: `{ id?: number, title?: string, text?: string, channel?: string, channelName?: string, ongoing?: boolean, priority?: "min" | "low" | "default" | "high" | "max" | number }`
+  - requests require the `notifications` capability
+  - packaged capability manifests map `notifications` to `android.permission.POST_NOTIFICATIONS`
+  - Android provider checks notification runtime permission/app notification state before posting
+  - the provider tracks notifications owned by the current Node execution and cancels remaining owned notifications on provider destroy
+  - JavaScript receives only numeric ids; no raw `Notification`, `NotificationChannel`, `PendingIntent`, `RemoteViews`, or Android object crosses into Node
 - `clipboard`
   - `getText(options?): Promise<string>`
   - `setText(text, options?): Promise<void>`

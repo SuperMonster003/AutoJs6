@@ -120,7 +120,7 @@ Stable bridge API conformance:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeConformanceInstrumentationTest"
 ```
 
-This suite freezes the stable AutoJs bridge API shape for `toast`, `app`, `dialogs`, `clipboard`, `device`, `shell`, `engines`, `accessibility`, `media_projection`, `image`/`images`, `ocr`, and `work_manager`. It verifies Kotlin registry drift, JavaScript module exports, Promise contracts, provider error shape, capability denial, handle method shape, and pending-call cleanup after bridge destroy.
+This suite freezes the stable AutoJs bridge API shape for `toast`, `app`, `dialogs`, `clipboard`, `device`, `shell`, `engines`, `accessibility`, `media_projection`, `image`/`images`, `ocr`, `storage`/`storages`, `notifications`, and `work_manager`. It verifies Kotlin registry drift, JavaScript module exports, Promise contracts, provider error shape, capability denial, handle method shape, and pending-call cleanup after bridge destroy.
 
 Focused bridge RPC fuzzer:
 
@@ -417,13 +417,21 @@ Current `storage` bridge v1.1 partial focused instrumentation:
 
 This suite verifies the `storage`/`storages` bridge registry, fake-provider request/response behavior, shadowing protection, `create`/`open` frozen store handles, `get`/`put`/`remove`/`clear`/`keys`/`contains`, JSON-only values, manifest capability denial before dispatch, Android provider persistence, and working-directory namespace isolation.
 
+Current `notifications` bridge v1.1 partial focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeNotificationsBridgeInstrumentationTest"
+```
+
+This suite verifies the `notifications` bridge registry, fake-provider request/response behavior, shadowing protection, `notify`/`cancel`/`cancelAll`, notification option serialization, manifest capability denial before dispatch, Android `POST_NOTIFICATIONS` manifest mapping, Android provider permission-denial or post/cancel smoke, and owned notification resource cleanup on provider destroy.
+
 Current bridge permission manifest focused instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgePermissionManifestInstrumentationTest"
 ```
 
-This suite verifies `project.json node.permissions`, `package.json autojs6.node.permissions`, capability normalization, Android manifest permission mapping, provider-side module/method capability coverage, declared `toast` dispatch, undeclared provider requests, enforced-manifest provider rejection, root-shell capability rejection before execution, packaged manifest permission mismatch detection, and the JavaScript capability report exposed through `autojs6:bridge` and `autojs6:profile`.
+This suite verifies `project.json node.permissions`, `package.json autojs6.node.permissions`, capability normalization, Android manifest permission mapping including `POST_NOTIFICATIONS`, provider-side module/method capability coverage, declared `toast` dispatch, undeclared provider requests, enforced-manifest provider rejection, root-shell capability rejection before execution, packaged manifest permission mismatch detection, and the JavaScript capability report exposed through `autojs6:bridge` and `autojs6:profile`.
 
 Current `shell` bridge focused instrumentation:
 

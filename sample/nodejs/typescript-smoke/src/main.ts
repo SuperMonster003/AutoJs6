@@ -12,6 +12,7 @@ import images = require("images");
 import ocr = require("ocr");
 import storage = require("storage");
 import storages = require("storages");
+import notifications = require("notifications");
 import fetchModule = require("fetch");
 import axios = require("axios");
 import websocket = require("websocket");
@@ -99,6 +100,16 @@ async function smoke(): Promise<void> {
   const storageContains: boolean = await store.contains("enabled", { timeoutMs: 1000 });
   await store.remove("enabled", { timeoutMs: 1000 });
   await store.clear({ timeoutMs: 1000 });
+  const notificationId: notifications.NotificationId = await notifications.notify({
+    id: 710003,
+    title: "AutoJs6 Node",
+    text: "Type smoke",
+    channel: "node-types",
+    ongoing: true,
+    priority: "low"
+  }, { timeoutMs: 1000 });
+  await notifications.cancel(notificationId, { timeoutMs: 1000 });
+  await notifications.cancelAll({ timeoutMs: 1000 });
   await image.recycle(template, { timeoutMs: 1000 });
   await images.recycle(frame, { timeoutMs: 1000 });
 
@@ -193,6 +204,7 @@ async function smoke(): Promise<void> {
   void storedEnabled;
   void storageKeys;
   void storageContains;
+  void notificationId;
   void responseText;
   void responseJson;
   void fetchDiagnostics;

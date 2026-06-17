@@ -23,6 +23,7 @@ object NodeBridgePermissionManifest {
     const val IMAGE = "image"
     const val OCR = "ocr"
     const val STORAGE = "storage"
+    const val NOTIFICATIONS = "notifications"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -37,6 +38,7 @@ object NodeBridgePermissionManifest {
         "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE =
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+    const val ANDROID_PERMISSION_POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS"
 
     val definedCapabilities: List<String> = listOf(
         TOAST,
@@ -52,6 +54,7 @@ object NodeBridgePermissionManifest {
         IMAGE,
         OCR,
         STORAGE,
+        NOTIFICATIONS,
         CLIPBOARD,
         DEVICE,
         SHELL,
@@ -76,6 +79,7 @@ object NodeBridgePermissionManifest {
     )
 
     private val androidPermissionsByCapability = linkedMapOf(
+        NOTIFICATIONS to listOf(ANDROID_PERMISSION_POST_NOTIFICATIONS),
         NETWORK to listOf(ANDROID_PERMISSION_INTERNET),
         SCREEN_CAPTURE to listOf(
             ANDROID_PERMISSION_FOREGROUND_SERVICE,
@@ -85,6 +89,7 @@ object NodeBridgePermissionManifest {
     )
 
     private val androidPermissionOrder = listOf(
+        ANDROID_PERMISSION_POST_NOTIFICATIONS,
         ANDROID_PERMISSION_INTERNET,
         ANDROID_PERMISSION_FOREGROUND_SERVICE,
         ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
@@ -204,6 +209,7 @@ object NodeBridgePermissionManifest {
             }
             NodeBridgeModules.OCR -> listOf(OCR, IMAGE)
             NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
+            NodeBridgeModules.NOTIFICATIONS -> listOf(NOTIFICATIONS)
             NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
             NodeBridgeModules.DEVICE -> listOf(DEVICE)
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)

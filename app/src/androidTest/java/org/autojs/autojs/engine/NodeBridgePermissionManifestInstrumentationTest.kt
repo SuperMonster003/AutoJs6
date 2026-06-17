@@ -46,7 +46,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
               "name": "bridge-permission-manifest",
               "autojs6": {
                 "node": {
-                  "permissions": ["network", "media_projection"]
+                  "permissions": ["network", "media_projection", "notifications"]
                 }
               }
             }
@@ -57,7 +57,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
 
         assertTrue(manifest.enforced)
         assertEquals(
-            listOf("app.launch", "network", "screen_capture", "toast", "unknown.future"),
+            listOf("app.launch", "network", "notifications", "screen_capture", "toast", "unknown.future"),
             manifest.permissions,
         )
         assertEquals(listOf("unknown.future"), manifest.unknownPermissions)
@@ -65,6 +65,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
         assertTrue(manifest.sources.contains("package.json:autojs6.node.permissions"))
         assertEquals(
             listOf(
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_POST_NOTIFICATIONS,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
@@ -122,6 +123,14 @@ class NodeBridgePermissionManifestInstrumentationTest {
                 NodeBridgePermissionManifest.requiredCapabilitiesFor(module, "put"),
             )
         }
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "notify"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "cancelAll"),
+        )
     }
 
     @Test
@@ -223,12 +232,13 @@ class NodeBridgePermissionManifestInstrumentationTest {
     @Test
     fun androidPermissionMismatchIsDerivedFromCapabilityManifest() {
         val missing = NodeBridgePermissionManifest.missingAndroidPermissionsForCapabilities(
-            capabilities = listOf("network", "screen_capture"),
+            capabilities = listOf("network", "screen_capture", "notifications"),
             declaredAndroidPermissions = listOf(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
         )
 
         assertEquals(
             listOf(
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_POST_NOTIFICATIONS,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE,
@@ -249,7 +259,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
               "name": "packaged-capability-mismatch",
               "autojs6": {
                 "node": {
-                  "permissions": ["network", "media_projection"]
+                  "permissions": ["network", "media_projection", "notifications"]
                 }
               }
             }
@@ -259,6 +269,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
 
         assertEquals(
             listOf(
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_POST_NOTIFICATIONS,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
@@ -268,6 +279,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
         )
         assertEquals(
             listOf(
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_POST_NOTIFICATIONS,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE,
             ),
