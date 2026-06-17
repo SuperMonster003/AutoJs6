@@ -48,6 +48,15 @@
             app:summary="@string/summary_ace_word_wrap_enabled"
             app:longClickPrompt="@string/description_ace_word_wrap_enabled_preference" />
 
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_word_wrap_indent_style"
+            app:title="@string/text_editor_word_wrap_indent_style"
+            app:itemKeys="@array/keys_editor_word_wrap_indent_style"
+            app:itemValues="@array/values_editor_word_wrap_indent_style"
+            app:itemDefaultKey="@string/default_key_editor_word_wrap_indent_style"
+            app:longClickPrompt="@string/description_editor_word_wrap_indent_style_preference" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory

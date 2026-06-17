@@ -525,6 +525,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
     fun notifyDisplayPreferencesChanged() {
         invokeAce("setWordWrapEnabled", EditorDisplayPreferences.isWordWrapEnabled().toString())
+        invokeAce("setWordWrapIndentStyle", quote(EditorDisplayPreferences.wordWrapIndentStyle()))
         invokeAce("setLineNumbersEnabled", EditorDisplayPreferences.isLineNumbersEnabled().toString())
         invokeAce("setBreakpointMarkersEnabled", EditorDisplayPreferences.isBreakpointMarkersEnabled().toString())
         invokeAce("setFoldMarkersEnabled", EditorDisplayPreferences.isFoldMarkersEnabled().toString())
@@ -959,6 +960,10 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun bridgeWordWrapEnabled(): Boolean {
         return AceEditorDisplayPreferences.isWordWrapEnabled()
+    }
+
+    internal fun bridgeWordWrapIndentStyle(): String {
+        return AceEditorDisplayPreferences.wordWrapIndentStyle()
     }
 
     internal fun bridgeLineNumbersEnabled(): Boolean {

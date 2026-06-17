@@ -170,7 +170,7 @@ Notes:
   long-press, double-tap, and vertical scroll behavior outside the narrow
   system gesture edge.
 - [x] Add word wrap support to the Native editor if technically feasible.
-- [ ] Add a wrap indentation style setting: continuation indent, default, and
+- [x] Add a wrap indentation style setting: continuation indent, default, and
   classic flush continuation.
 - [x] Expand line-number visibility into independent gutter visibility controls
   for breakpoints, line numbers, and fold markers across ACE and Native where
@@ -220,3 +220,8 @@ Notes:
 - Native editor now applies the shared word-wrap preference. Wrapped visual
   lines are mapped back to logical file lines for line numbers, breakpoint
   gutter taps, cursor positions, and jump operations.
+- Wrap indentation is available as an ACE-backed display preference with
+  continuation indent as the default, a default option for future ACE asset
+  compatibility, and classic flush continuation. Native keeps the setting
+  disabled with the current-engine unsupported hint because it has no matching
+  visual-wrap indentation surface.

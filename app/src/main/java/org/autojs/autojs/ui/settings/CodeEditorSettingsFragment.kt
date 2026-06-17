@@ -64,6 +64,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         val aceSelected = EditorEnginePreferences.get() == EditorEngineType.ACE
         setPreferenceAvailable(R.string.key_ace_editor_font, aceSelected)
         setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected, R.string.summary_ace_lsp_enabled)
+        setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)
         setPreferenceAvailable(R.string.key_editor_fold_markers_enabled, aceSelected, R.string.summary_editor_fold_markers_enabled)
 
         if (!aceSelected && currentPinchToZoomKey() == getString(R.string.key_editor_pinch_to_zoom_scale_view)) {
@@ -82,10 +83,17 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
     ) {
         findPreference<Preference>(getString(keyRes))?.apply {
             isEnabled = available
-            if (this !is MaterialListPreference && enabledSummaryRes != null) {
-                summary = getString(
-                    if (available) enabledSummaryRes else R.string.summary_editor_setting_unavailable_for_current_engine
-                )
+            if (enabledSummaryRes != null) {
+                val summaryRes = if (available) enabledSummaryRes else R.string.summary_editor_setting_unavailable_for_current_engine
+                if (this is MaterialListPreference) {
+                    if (available) {
+                        useEntrySummaryProvider()
+                    } else {
+                        useStaticSummaryProvider(getString(summaryRes))
+                    }
+                } else {
+                    summary = getString(summaryRes)
+                }
             }
         }
     }

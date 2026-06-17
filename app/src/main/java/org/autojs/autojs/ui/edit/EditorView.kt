@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
@@ -58,6 +59,7 @@ import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar.OnHintClickListener
 import org.autojs.autojs.ui.edit.debug.DebugBar
+import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorAssets
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorTestHooks
@@ -469,6 +471,20 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         restartSearchStatsAsync(reason = "debounce")
     }
 
+    private val mEditorDisplayPreferenceKeys = setOf(
+        EditorDisplayPreferences.KEY_WORD_WRAP_ENABLED,
+        EditorDisplayPreferences.KEY_WORD_WRAP_INDENT_STYLE,
+        EditorDisplayPreferences.KEY_LINE_NUMBERS_ENABLED,
+        EditorDisplayPreferences.KEY_BREAKPOINT_MARKERS_ENABLED,
+        EditorDisplayPreferences.KEY_FOLD_MARKERS_ENABLED,
+    )
+
+    private val mEditorDisplayPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key in mEditorDisplayPreferenceKeys) {
+            post { editor.notifyDisplayPreferencesChanged() }
+        }
+    }
+
     constructor(context: Context) : super(context)
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -522,6 +538,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED))
         }
         registerFunctionsKeyboardBackHandler()
+        Pref.get().registerOnSharedPreferenceChangeListener(mEditorDisplayPreferenceChangeListener)
     }
 
     fun handleIntent(intent: Intent): Observable<String> {
@@ -890,6 +907,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         super.onDetachedFromWindow()
         context.unregisterReceiver(mOnRunFinishedReceiver)
         unregisterFunctionsKeyboardBackHandler()
+        Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorDisplayPreferenceChangeListener)
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =

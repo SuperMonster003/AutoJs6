@@ -58,6 +58,11 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun getWordWrapIndentStyle(): String {
+        return editor.bridgeWordWrapIndentStyle()
+    }
+
+    @JavascriptInterface
     fun isLineNumbersEnabled(): Boolean {
         return editor.bridgeLineNumbersEnabled()
     }

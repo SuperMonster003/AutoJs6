@@ -76,6 +76,14 @@
         return value === true || String(value).toLowerCase() === "true";
     }
 
+    function callBridgeString(name, defaultValue) {
+        var value = callBridge(name);
+        if (value === null || typeof value === "undefined") {
+            return String(defaultValue || "");
+        }
+        return String(value);
+    }
+
     function notifyError(message) {
         try {
             if (bridge && typeof bridge.notifyError === "function") {
@@ -1260,6 +1268,25 @@
         notifyStateChanged("wordWrapChanged");
     }
 
+    function normalizeWordWrapIndentStyle(style) {
+        style = String(style || "").toLowerCase();
+        if (style === "classic" || style === "default" || style === "continuation") {
+            return style;
+        }
+        return "continuation";
+    }
+
+    function setWordWrapIndentStyle(style) {
+        style = normalizeWordWrapIndentStyle(style);
+        try {
+            editor.setOption("indentedSoftWrap", style !== "classic");
+        } catch (ignore) {
+            // ACE 1.4.12 supports this option; keep the bridge tolerant for asset swaps.
+        }
+        scheduleResize("word_wrap_indent_style_changed");
+        notifyStateChanged("wordWrapIndentStyleChanged");
+    }
+
     function setLineNumbersEnabled(enabled) {
         editor.setOption("showLineNumbers", !!enabled);
         scheduleResize("line_numbers_changed");
@@ -1447,6 +1474,7 @@
 
         var initialTheme = callBridge("getTheme") || "ace/theme/textmate";
         var wordWrapEnabled = callBridgeBoolean("isWordWrapEnabled", false);
+        var wordWrapIndentStyle = callBridgeString("getWordWrapIndentStyle", "continuation");
         var lineNumbersEnabled = callBridgeBoolean("isLineNumbersEnabled", true);
         breakpointMarkersEnabled = callBridgeBoolean("isBreakpointMarkersEnabled", true);
         foldMarkersEnabled = callBridgeBoolean("isFoldMarkersEnabled", true);
@@ -1461,6 +1489,7 @@
             showFoldWidgets: foldMarkersEnabled,
             fixedWidthGutter: true,
             highlightActiveLine: true,
+            indentedSoftWrap: normalizeWordWrapIndentStyle(wordWrapIndentStyle) !== "classic",
             wrap: wordWrapEnabled,
             fontFamily: callBridge("getFontFamily") || DEFAULT_FONT_FAMILY
         });
@@ -1565,6 +1594,7 @@
             setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus,
             setFontFamily: setFontFamily,
             setWordWrapEnabled: setWordWrapEnabled,
+            setWordWrapIndentStyle: setWordWrapIndentStyle,
             setLineNumbersEnabled: setLineNumbersEnabled,
             setBreakpointMarkersEnabled: setBreakpointMarkersEnabled,
             setFoldMarkersEnabled: setFoldMarkersEnabled,

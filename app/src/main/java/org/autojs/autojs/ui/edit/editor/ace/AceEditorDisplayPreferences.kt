@@ -15,6 +15,14 @@ object AceEditorDisplayPreferences {
         EditorDisplayPreferences.setWordWrapEnabled(enabled)
     }
 
+    fun wordWrapIndentStyle(): String {
+        return EditorDisplayPreferences.wordWrapIndentStyle()
+    }
+
+    fun setWordWrapIndentStyle(style: String) {
+        EditorDisplayPreferences.setWordWrapIndentStyle(style)
+    }
+
     fun isLineNumbersEnabled(): Boolean {
         return EditorDisplayPreferences.isLineNumbersEnabled()
     }
