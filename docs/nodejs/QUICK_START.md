@@ -3,6 +3,8 @@
 This page is the short entry point for the AutoJs6 Safe Node Profile. For the complete release boundary, read
 [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md) and
 [releases/NODE_PROFILE_V1_STABLE_SURFACE.md](releases/NODE_PROFILE_V1_STABLE_SURFACE.md).
+For the current v1.1 user-facing draft, read
+[NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md).
 
 ## Minimal Script
 
@@ -103,6 +105,7 @@ realpath escapes, and `/proc`, `/sys`, or `/dev` access are rejected.
 
 ## What To Read Next
 
+- v1.1 feature draft: [NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md)
 - Examples: [EXAMPLES.md](EXAMPLES.md)
 - Project wizard and validator: [PROJECT_WIZARD.md](PROJECT_WIZARD.md)
 - Rhino migration: [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md)

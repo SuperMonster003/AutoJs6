@@ -3,6 +3,7 @@
 This guide explains how existing AutoJs6 Rhino scripts should move to the Embedded Node runtime. Node support is a second engine with a different compatibility profile; it is not a drop-in replacement for Rhino globals.
 
 If you are adapting scripts from Auto.js Pro 9 or AutoX.js v7, also read [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md).
+For the current v1.1 Node feature status, read [NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md).
 
 ## Entry Points
 

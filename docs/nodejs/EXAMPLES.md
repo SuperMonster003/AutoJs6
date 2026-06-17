@@ -19,8 +19,9 @@ main-app smoke, and whether it is packaged-compatible.
 
 For Rhino-to-Node migration guidance, see [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md). For behavior differences from Auto.js Pro 9 and AutoX.js v7, see [COMPATIBILITY_NOTES_PRO_AUTOX.md](COMPATIBILITY_NOTES_PRO_AUTOX.md).
 
-For the smallest stable entry-point shape, see [QUICK_START.md](QUICK_START.md). For current release limitations and
-workarounds, see [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md).
+For the smallest stable entry-point shape, see [QUICK_START.md](QUICK_START.md). For the current v1.1 feature draft, see
+[NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md). For current release limitations and workarounds, see
+[releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md).
 
 To create a new user project from a checked template or validate an existing
 project directory, use [PROJECT_WIZARD.md](PROJECT_WIZARD.md):

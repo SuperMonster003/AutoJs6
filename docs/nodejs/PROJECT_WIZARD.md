@@ -3,6 +3,8 @@
 `tools/nodejs/project/autojs6-node-project.js` is a host-side helper for
 creating and validating Safe Node Profile project directories. It does not run
 inside Android and does not loosen runtime policy.
+For the current v1.1 feature status behind these templates, see
+[NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md).
 
 ## Create
 

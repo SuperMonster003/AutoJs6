@@ -1,0 +1,420 @@
+# Node Profile v1.1 User Draft
+
+This draft is the user-facing map for Node Profile v1.1 features. It describes
+what scripts can try today and what still requires a design gate, test provider,
+or future runtime work.
+
+For the exact compatibility boundary, read
+[COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md). For the release target
+matrix, read
+[releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md](releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md).
+
+## Status Legend
+
+- `stable`: intended as a supported user surface within the Safe Node Profile.
+- `partial`: usable subset with explicit limits; desktop Node or Rhino parity is
+  not implied.
+- `experimental`: available only behind explicit capability/feature gates or
+  provider support; behavior may still change.
+- `blocked`: documented shape only; normal user scripts should not rely on it.
+
+## Stable Base
+
+These v1 foundations remain the recommended path for production-like scripts:
+
+- CommonJS entry scripts with `"nodejs";`, `.cjs`, or `.node.js`.
+- Project metadata through `project.json`.
+- Vendored pure JavaScript dependencies under `node_modules`.
+- Scoped filesystem access rooted at the script working directory.
+- Existing bridge modules such as `toast`, `app`, `clipboard`, and `device`
+  when the matching capability is declared.
+
+Example project permissions:
+
+```json
+{
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 30000,
+    "permissions": ["toast", "app"]
+  }
+}
+```
+
+When `node.permissions` is present, undeclared bridge calls reject before they
+reach an Android provider.
+
+## v1.1 Feature Status
+
+| Feature | Status | User-facing note |
+| --- | --- | --- |
+| ESM scripts | partial | `.mjs`, `type=module`, local static imports, selected builtin imports, top-level await, ESM-to-CJS interop, package conditions, and local dynamic import are covered. Loader hooks and full desktop Node parity are not supported. |
+| `fetch` / `axios` | experimental | Controlled bridge-backed HTTP shape. Requires `network` capability and a provider-enabled build; raw `http`, `https`, `net`, `tls`, `dns`, and `dgram` remain denied. |
+| WebSocket | experimental | Controlled bridge-backed connections with bounded messages and connection counts. Requires `network` capability and provider support; raw sockets remain denied. |
+| OCR | partial | `require("ocr")` accepts opaque image handles. Real OCR model/provider availability is separate from the JavaScript API shape. |
+| `storage` / `storages` | partial | JSON-only key/value storage with project/package/working-directory isolation. No raw SharedPreferences or file handles are exposed. |
+| notifications | partial | Controlled post/cancel API with Android notification permission handling. Actions and richer notification layouts are not part of this draft. |
+| sensors | partial | Limited sensor set: accelerometer, gyroscope, and light. Subscriptions are bounded and close on provider destroy. |
+| UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
+| `work_manager` | partial | Metadata registration for scheduled Node work. It stores descriptors; scheduled execution and persistent background Node runtime are future gates. |
+| JS-only plugins | experimental | Project-local `./plugins/<id>` loading only. Native plugins, signed archives, installers, and packaged plugin runtime are not enabled. |
+| long-running Node scripts | blocked | Explicit service/long-running mode is rejected before user code. Normal scripts remain one-shot and timeout-bounded. |
+
+## ESM Scripts
+
+Status: `partial`.
+
+Use `.mjs` or `package.json` with `"type": "module"`:
+
+```js
+// main.mjs
+import path from "node:path";
+import helper from "./helper.mjs";
+
+const value = await helper();
+console.log(path.basename(import.meta.url), value);
+```
+
+Supported in the v1.1 partial path:
+
+- local static imports of `.mjs`, `.js`, and `.cjs`
+- top-level await
+- default import from CommonJS
+- selected builtin imports such as `node:path`, `node:buffer`, and supported
+  stream/zlib modules
+- package `exports` and `imports` conditions through the AutoJs6 resolver
+- local dynamic `import()` for relative modules, allowed builtins, and scoped
+  packages
+
+Still out of scope:
+
+- loader hooks
+- network URL imports
+- absolute or path-escape imports
+- native addons
+- raw network, `child_process`, `process.binding`, or `process.dlopen`
+
+CommonJS remains the widest-compatibility format. Calling `require()` on an ESM
+module rejects with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
+
+## Controlled Fetch And Axios
+
+Status: `experimental`.
+
+Declare `network` before using controlled network modules:
+
+```json
+{
+  "node": {
+    "permissions": ["network"]
+  }
+}
+```
+
+Fetch:
+
+```js
+"nodejs";
+
+const fetch = require("fetch");
+
+const response = await fetch("https://example.com/data.json", {
+  timeoutMs: 5000,
+  maxResponseBytes: 64 * 1024
+});
+
+console.log(response.status, await response.text());
+console.log(fetch.diagnostics());
+```
+
+Axios compatibility layer:
+
+```js
+"nodejs";
+
+const axios = require("axios");
+
+const response = await axios.get("https://example.com/data.json", {
+  timeout: 5000,
+  responseType: "json"
+});
+
+console.log(response.status, response.data);
+```
+
+Limits:
+
+- raw Node network modules remain disabled
+- desktop axios adapters, agents, proxy tunneling, and custom adapters are
+  denied
+- response size, redirect count, timeout, and concurrency are bounded
+- normal builds without the controlled Android provider reject with a stable
+  network-disabled error
+
+Packaged APKs add `android.permission.INTERNET` only from explicit `network`
+capability metadata, not from module presence.
+
+## WebSocket
+
+Status: `experimental`.
+
+```js
+"nodejs";
+
+const websocket = require("websocket");
+
+const socket = await websocket.connect("wss://example.com/events", {
+  timeoutMs: 5000,
+  maxMessageBytes: 16 * 1024
+});
+
+socket.onmessage = (message) => {
+  console.log(message.type, message.text || message.dataBase64);
+};
+
+await socket.send("hello");
+await socket.close(1000, "done");
+```
+
+The wrapper exposes only controlled connection handles. It does not expose raw
+TCP/TLS sockets, HTTP upgrade authority, or unlimited queues.
+
+## OCR
+
+Status: `partial`.
+
+OCR consumes opaque image handles returned by the image/screen-capture bridge.
+It does not accept raw Android `Bitmap`, OpenCV, or model objects.
+
+```js
+"nodejs";
+
+const ocr = require("ocr");
+
+const imageHandle = await captureOrReadImageSomehow();
+const results = await ocr.recognize(imageHandle, {
+  lang: "auto",
+  region: [0, 0, 500, 300],
+  timeoutMs: 5000
+});
+
+for (const result of results) {
+  console.log(result.text, result.confidence, result.bounds);
+}
+```
+
+Declare both `ocr` and `image` capabilities when OCR is used with image handles.
+If the Android OCR provider or model assets are unavailable, the Promise rejects
+instead of exposing a raw engine.
+
+## Storage
+
+Status: `partial`.
+
+```js
+"nodejs";
+
+const storage = require("storage");
+const settings = storage.create("settings");
+
+await settings.put("mode", { value: "fast", retries: 2 });
+console.log(await settings.get("mode", { value: "safe", retries: 0 }));
+console.log(await settings.keys());
+await settings.remove("mode");
+```
+
+`require("storages")` is an alias of `require("storage")`.
+
+Values must be JSON-compatible. Storage is scoped by package/project/working
+directory and does not expose raw database, SharedPreferences, or file handles.
+
+## Notifications
+
+Status: `partial`.
+
+```js
+"nodejs";
+
+const notifications = require("notifications");
+
+const id = await notifications.notify({
+  title: "Node task",
+  text: "Running",
+  channel: "node",
+  ongoing: true,
+  priority: "default"
+});
+
+await notifications.cancel(id);
+```
+
+Declare `notifications`. On Android versions that require runtime notification
+permission, permission denial is reported as a bridge error. Only notifications
+owned by the provider are cancelled.
+
+## Sensors
+
+Status: `partial`.
+
+```js
+"nodejs";
+
+const sensors = require("sensors");
+
+console.log(await sensors.getAvailableSensors());
+
+const event = await sensors.once("accelerometer", {
+  samplingIntervalMs: 200,
+  timeoutMs: 5000
+});
+console.log(event.values);
+
+const subscription = sensors.subscribe("light", (reading) => {
+  console.log(reading.values[0]);
+}, { samplingIntervalMs: 1000 });
+
+await subscription.ready;
+await subscription.close();
+```
+
+Supported sensor names are `accelerometer`, `gyroscope`, and `light`.
+Sampling intervals, subscription count, and event queue size are bounded.
+
+## UI MVP
+
+Status: `partial`.
+
+The v1.1 UI module uses JSON descriptors and opaque handles. No raw `Activity`,
+`View`, `Context`, or layout inflater object crosses into JavaScript.
+
+```js
+"nodejs";
+
+const ui = require("ui");
+
+const handle = await ui.showLayout({
+  type: "Vertical",
+  children: [
+    { type: "Text", id: "title", text: "Node UI" },
+    { type: "Button", id: "ok", text: "OK" }
+  ]
+});
+
+const off = handle.on("click", async (event) => {
+  if (event.id === "ok") {
+    off();
+    await handle.update({ id: "title", text: "Clicked" });
+    await handle.close();
+  }
+});
+```
+
+Current provider status is fail-closed unless an Activity-owned UI provider is
+explicitly connected. Scripts should treat UI as protocol-gated, not as a
+replacement for Rhino UI APIs yet.
+
+## Work Manager
+
+Status: `partial`.
+
+```js
+"nodejs";
+
+const workManager = require("work_manager");
+
+const id = await workManager.scheduleOnce({
+  scriptPath: "./main.cjs",
+  delayMs: 60_000,
+  backend: "embedded",
+  constraints: { network: true }
+});
+
+console.log(await workManager.list());
+await workManager.cancel(id);
+```
+
+The current module stores bounded task metadata. It does not yet guarantee
+background execution of Node scripts after process death or reboot. `tasks` is
+not exposed in the Safe Node Profile.
+
+## JS-only Plugins
+
+Status: `experimental`.
+
+Project-local plugins live under `./plugins/<id>` and require exact
+`plugin.<id>` capability opt-in:
+
+```text
+project/
+  project.json
+  plugins/
+    org.example.demo/
+      package.json
+      index.js
+```
+
+```json
+{
+  "node": {
+    "permissions": ["plugin.org.example.demo"]
+  }
+}
+```
+
+```js
+"nodejs";
+
+const plugins = require("plugins");
+
+console.log(plugins.manifest("org.example.demo"));
+const demo = plugins.load("org.example.demo");
+console.log(demo);
+```
+
+Only JavaScript plugin entries are in scope. Native addons, signed plugin
+archives, installers, updates, Java provider expansion, and packaged plugin
+runtime are not enabled.
+
+## Long-running Node Scripts
+
+Status: `blocked`.
+
+The shape is reserved, but normal builds reject it before user code runs:
+
+```json
+{
+  "node": {
+    "executionMode": "long_running",
+    "timeoutMs": 0
+  }
+}
+```
+
+Keep scripts one-shot and timeout-bounded. Use notifications and
+`work_manager` metadata only within their current partial limits. A future
+long-running mode still needs foreground notification ownership, user stop
+controls, quotas, restart policy, packaged checks, and lifecycle tests.
+
+## Packaging Notes
+
+Packaged APK support is a first-class v1.1 target, but support depends on each
+feature's provider status:
+
+- packaged CommonJS, dependency, fs, stream, zlib, and bridge routing smokes are
+  covered
+- packaged v1.1 bridge smoke covers controlled `fetch`, OCR, storage, UI, and
+  `work_manager` through fake transport
+- packaged `.mjs` and local dynamic import smokes still require a refreshed inrt
+  template override until that template becomes the default
+- packaged plugins and long-running service mode are not enabled
+
+## See Also
+
+- [QUICK_START.md](QUICK_START.md)
+- [PROJECT_WIZARD.md](PROJECT_WIZARD.md)
+- [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md)
+- [types/autojs6-node](types/autojs6-node)
+- [releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md](releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md)
+- [TESTING.md](TESTING.md)
