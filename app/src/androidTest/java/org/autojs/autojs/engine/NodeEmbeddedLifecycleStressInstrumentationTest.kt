@@ -81,6 +81,45 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
+    fun explicitLongRunningModeIsRejectedBeforeUserScriptRuns() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-long-running-policy-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create long-running policy dir: $absolutePath" }
+        }
+        val marker = File(scriptDir, "unexpected.txt")
+
+        try {
+            val result = runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    require("fs").writeFileSync("./unexpected.txt", "ran");
+                    setInterval(() => {}, 100);
+                """.trimIndent(),
+                sourceName = "<lifecycle-stress-long-running-policy.js>",
+                workingDirectory = scriptDir.absolutePath,
+                timeoutMs = 0L,
+                executionMode = "longRunning",
+            )
+
+            assertFalse("long-running policy gate unexpectedly succeeded", result.succeeded)
+            assertFalse("long-running policy gate must not be reported as a script timeout", result.timedOut)
+            assertEquals(NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION, result.errorCode)
+            assertEquals("long_running", result.nativeValues["embedded_script.execution_mode"])
+            assertEquals("true", result.nativeValues["embedded_script.long_running_requested"])
+            assertEquals("false", result.nativeValues["embedded_script.long_running_supported"])
+            assertEquals("true", result.nativeValues["embedded_script.execution_mode_rejected"])
+            assertTrue(result.errorMessage.orEmpty(), result.errorMessage.orEmpty().contains("Long-running service mode remains design-only"))
+            assertFalse("long-running rejected script should not have entered user code", marker.exists())
+
+            assertRecoveryRun("after.long_running.policy")
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun uncaughtExceptionDoesNotPoisonNextRun() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -737,6 +776,7 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         sourceName: String,
         workingDirectory: String? = context.cacheDir.absolutePath,
         timeoutMs: Long = SIMPLE_TIMEOUT_MS,
+        executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             context,
@@ -744,6 +784,7 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                 source = source,
                 sourceName = sourceName,
                 workingDirectory = workingDirectory,
+                executionMode = executionMode,
                 timeoutMs = timeoutMs,
             ),
         )

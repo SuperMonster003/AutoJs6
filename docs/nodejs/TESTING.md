@@ -58,7 +58,7 @@ Long-running service mode is currently a design gate only:
 docs/nodejs/design/LONG_RUNNING_SERVICE.md
 ```
 
-There is no service-mode runtime test yet because no runtime implementation exists. Until that changes, lifecycle tests must continue to verify that normal scripts are one-shot executions controlled by `timeoutMs`, including timeout recovery and uncleared interval timeout behavior.
+There is no service-mode runtime test yet because no runtime implementation exists. Until that changes, lifecycle tests must continue to verify that normal scripts are one-shot executions controlled by `timeoutMs`, including timeout recovery, uncleared interval timeout behavior, and the explicit `long_running`/`service` execution-mode policy gate that rejects before user code runs.
 
 Current packaged APK smoke instrumentation:
 

@@ -2,6 +2,13 @@
 
 Status: design gate only. No long-running Node service runtime is implemented by this document.
 
+Task 179 adds the first runtime contract guard: embedded script requests now
+carry an `executionMode` field through the service request spool. `one_shot` is
+the only supported runtime mode. Explicit `long_running` or `service` requests
+are rejected before user JavaScript runs with
+`ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`, and pending timers still time
+out as normal one-shot scripts.
+
 ## Goal
 
 AutoJs6 currently treats Embedded Node scripts as bounded one-shot automation executions. Long-running Node scripts need a separate product and lifecycle model so they do not weaken the Safe Node Profile.
@@ -32,7 +39,7 @@ Long-running service mode is not:
 | One-shot embedded script | Implemented | Required | Console/notification while running | directive, file route, project route, packaged route |
 | Execution queue | Implemented | Queue timeout plus per-script timeout | Caller-owned diagnostics | `enqueueScript(...)` |
 | Scheduled Node task | Metadata MVP only | Required per execution | Future task UI/notification | `work_manager` metadata |
-| Long-running Node service | Not implemented | Startup timeout plus watchdog policy | Persistent foreground notification | Future explicit service descriptor |
+| Long-running Node service | Rejected before user code | Startup timeout plus watchdog policy | Persistent foreground notification | Future explicit service descriptor |
 
 ## Explicit Opt-In
 
@@ -66,6 +73,11 @@ The exact schema is deferred, but required properties should include:
 - required bridge/network permissions
 
 The default for all existing scripts remains one-shot mode.
+
+The current runtime accepts only `executionMode: "one_shot"`. The aliases
+`"longRunning"`, `"long_running"`, and `"service"` are recognized only to
+produce a stable unsupported-option diagnostic; they do not start a background
+service and they do not convert `timeoutMs: 0` into an unbounded run.
 
 ## Foreground Notification
 

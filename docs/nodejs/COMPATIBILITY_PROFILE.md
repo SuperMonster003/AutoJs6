@@ -116,6 +116,10 @@ Current behavior remains:
 
 - normal embedded scripts require `timeoutMs`
 - timeout produces the existing timeout diagnostic shape
+- `EmbeddedScriptRequest.executionMode` is serialized through the service
+  request spool; `one_shot` is the only supported value
+- explicit `long_running`/`service` requests are rejected before user code
+  runs with `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`
 - service process exit is expected after one-shot execution settles
 - packaged Node entries remain one-shot unless a future explicit service descriptor is implemented
 

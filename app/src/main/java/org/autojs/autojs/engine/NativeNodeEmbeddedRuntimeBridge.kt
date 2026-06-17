@@ -718,6 +718,24 @@ object NativeNodeEmbeddedRuntimeBridge {
                 errorCode = NodeRuntimeErrorCodes.NODE_DISABLED,
             )
         }
+        val executionMode = NodeExecutionModePolicy.normalize(request.executionMode)
+        if (!NodeExecutionModePolicy.isSupported(executionMode)) {
+            return failureEmbeddedScriptResult(
+                request = request,
+                processName = processName,
+                pid = pid,
+                startedAt = startedAt,
+                message = "Embedded Node executionMode '$executionMode' is not supported by the v1.1 runtime. Long-running service mode remains design-only; use '${NodeExecutionModePolicy.MODE_ONE_SHOT}' with a positive timeout for normal scripts.",
+                nativeValues = mapOf(
+                    "embedded_script.execution_mode" to executionMode,
+                    "embedded_script.long_running_requested" to NodeExecutionModePolicy.isLongRunningRequest(executionMode).toString(),
+                    "embedded_script.long_running_supported" to "false",
+                    "embedded_script.execution_mode_rejected" to "true",
+                    "embedded_script.error_code" to NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION,
+                ),
+                errorCode = NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION,
+            )
+        }
         val sourceBytes = request.source.toByteArray(StandardCharsets.UTF_8).size
         if (sourceBytes > EMBEDDED_SCRIPT_SOURCE_MAX_BYTES) {
             return failureEmbeddedScriptResult(
@@ -17124,6 +17142,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val sourceName: String,
         val workingDirectory: String? = null,
         val executionId: String? = null,
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val timeoutMs: Long = BuildConfig.NODEJS_EMBEDDED_PROBE_TIMEOUT_MS.coerceAtLeast(1L),
         val queueMode: String = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
         val queueTimeoutMs: Long = 0L,

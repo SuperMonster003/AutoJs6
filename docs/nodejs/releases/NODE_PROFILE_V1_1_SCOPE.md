@@ -67,6 +67,7 @@ small set of already-gated features toward practical use.
 | Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for long-click, set-text, and scroll while keeping JSON-only snapshots and explicit `accessibility` capability checks. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
+| Long-running mode | blocked | Request protocol carries `executionMode`, but v1.1 currently supports only `one_shot`; explicit `long_running`/`service` requests are rejected before user code runs. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
@@ -146,6 +147,9 @@ small set of already-gated features toward practical use.
   default timeout changes, non-zero exit, timeout result shape, scoped
   cwd/path/env denial, root capability denial, unsupported Shizuku reporting,
   Android non-root execution, and `child_process` denial.
+- Long-running mode remains blocked until an async service lifecycle exists,
+  but the explicit `executionMode` policy gate rejects `long_running`/`service`
+  before user code runs while normal interval scripts still time out.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
   execution/stress suites pass on Sony.

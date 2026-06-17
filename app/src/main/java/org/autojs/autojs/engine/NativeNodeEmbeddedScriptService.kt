@@ -108,9 +108,15 @@ class NativeNodeEmbeddedScriptService : Service() {
             stopServiceIfQueueIdle(startId)
             return
         }
+        NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(serviceRequest)?.let { failure ->
+            receiver?.send(RESULT_SCRIPT, failure.toBundle())
+            stopServiceIfQueueIdle(startId)
+            return
+        }
         val source = serviceRequest.source
         val sourceName = serviceRequest.sourceName.ifBlank { DEFAULT_SOURCE_NAME }
         val workingDirectory = serviceRequest.workingDirectory?.takeIf { it.isNotBlank() }
+        val executionMode = NodeExecutionModePolicy.normalize(serviceRequest.executionMode)
         val timeoutMs = serviceRequest.timeoutMs.coerceAtLeast(1L)
         val esmExperimentalEnabled = serviceRequest.esmExperimentalEnabled
         val dynamicImportLocalEnabled = BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED
@@ -184,6 +190,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             source = source,
             sourceName = sourceName,
             workingDirectory = workingDirectory,
+            executionMode = executionMode,
             timeoutMs = timeoutMs,
             captureStdout = serviceRequest.captureStdout,
             captureStderr = serviceRequest.captureStderr,
@@ -212,6 +219,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             mapOf(
                 "startId" to startId,
                 "workingDirectory" to workingDirectory.orEmpty(),
+                "executionMode" to executionMode,
                 "timeoutMs" to timeoutMs,
                 "moduleSourceCount" to moduleSources.size,
                 "runtimeModuleSourceCount" to enrichedRuntimeModuleSources.size,
@@ -238,6 +246,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
                     "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +
                     "queueMode=$queueMode queued=${slotLease.queued} queueWaitMs=${slotLease.queueWaitMs} " +
+                    "executionMode=$executionMode " +
                     "bridgeLimits=${bridgeLimits.toJson()} " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
@@ -253,6 +262,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             )
             timeline?.recordNativeResult(nativeResult)
             val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
+                .withExecutionMode(executionMode)
             timeline?.recordBridge(result)
             val completed = when {
                 result.succeeded -> {
@@ -590,6 +600,23 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
     }
 
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withExecutionMode(
+        executionMode: String,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val normalizedMode = NodeExecutionModePolicy.normalize(executionMode)
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                put("embedded_script.execution_mode", normalizedMode)
+                put(
+                    "embedded_script.long_running_requested",
+                    NodeExecutionModePolicy.isLongRunningRequest(normalizedMode).toString(),
+                )
+                put("embedded_script.long_running_supported", "false")
+            },
+        )
+    }
+
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withTimeline(
         timeline: NodeEmbeddedRuntimeTimeline?,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
@@ -872,6 +899,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_SOURCE = "source"
         private const val EXTRA_SOURCE_NAME = "source_name"
         private const val EXTRA_WORKING_DIRECTORY = "working_directory"
+        private const val EXTRA_EXECUTION_MODE = "execution_mode"
         private const val EXTRA_TIMEOUT_MS = "timeout_ms"
         private const val EXTRA_ESM_EXPERIMENTAL_ENABLED = "esm_experimental_enabled"
         private const val EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED = "dynamic_import_experimental_enabled"
@@ -997,6 +1025,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_RESULT_RECEIVER, receiver)
                 putExtra(EXTRA_SOURCE_NAME, request.sourceName)
                 putExtra(EXTRA_WORKING_DIRECTORY, request.workingDirectory)
+                putExtra(EXTRA_EXECUTION_MODE, request.executionMode)
                 putExtra(EXTRA_TIMEOUT_MS, request.timeoutMs.coerceAtLeast(1L))
                 putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, request.esmExperimentalEnabled)
                 putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, request.dynamicImportExperimentalEnabled)
@@ -1633,6 +1662,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 sourceName = getStringExtra(EXTRA_SOURCE_NAME).orEmpty().ifBlank { DEFAULT_SOURCE_NAME },
                 workingDirectory = getStringExtra(EXTRA_WORKING_DIRECTORY)?.takeIf { it.isNotBlank() },
                 executionId = getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() },
+                executionMode = NodeExecutionModePolicy.normalize(getStringExtra(EXTRA_EXECUTION_MODE)),
                 timeoutMs = getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),
                 env = envExtra(),
                 moduleSources = moduleSourcesExtra(),
@@ -1680,6 +1710,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 put("sourceName", request.sourceName)
                 put("workingDirectory", request.workingDirectory)
                 put("executionId", request.executionId)
+                put("executionMode", NodeExecutionModePolicy.normalize(request.executionMode))
                 put("timeoutMs", request.timeoutMs.coerceAtLeast(1L))
                 put("queueMode", request.queueMode)
                 put("queueTimeoutMs", request.queueTimeoutMs)
@@ -1707,6 +1738,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 sourceName = json.optString("sourceName").ifBlank { DEFAULT_SOURCE_NAME },
                 workingDirectory = json.optString("workingDirectory").takeIf { it.isNotBlank() },
                 executionId = json.optString("executionId").takeIf { it.isNotBlank() },
+                executionMode = NodeExecutionModePolicy.normalize(json.optString("executionMode")),
                 timeoutMs = json.optLong("timeoutMs", DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),
                 queueMode = json.optString("queueMode").ifBlank { NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY },
                 queueTimeoutMs = json.optLong("queueTimeoutMs", 0L),
