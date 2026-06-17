@@ -82,7 +82,7 @@ small set of already-gated features toward practical use.
 
 - `.mjs` entry smoke passes without a per-test ESM opt-in.
 - Fixed real npm corpus increases from the v1.0 CommonJS-only baseline and
-  produces `build/reports/nodejs/npm-compat-v1.1.md`.
+  produces `build/reports/nodejs/npm-compat-v1.1.md` and `build/reports/nodejs/v1.1-differential.md`.
 - Package `type=module` entry smoke passes.
 - Local static import, named export, default export, and top-level await pass.
 - ESM imports of allowed builtins pass.

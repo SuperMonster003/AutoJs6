@@ -53,14 +53,20 @@ function main() {
   const jsonPath = path.join(reportDir, "desktop-node-differential.json");
   const markdownPath = path.join(reportDir, "desktop-node-differential.md");
   const v11ReportPath = path.resolve(options.compatReport || path.join(path.dirname(reportDir), "npm-compat-v1.1.md"));
+  const v11DifferentialPath = path.resolve(
+    options.v11DifferentialReport || path.join(path.dirname(reportDir), "v1.1-differential.md"),
+  );
   fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2) + "\n");
   fs.writeFileSync(markdownPath, renderMarkdown(report));
   fs.mkdirSync(path.dirname(v11ReportPath), { recursive: true });
   fs.writeFileSync(v11ReportPath, renderV11CompatMarkdown(report));
+  fs.mkdirSync(path.dirname(v11DifferentialPath), { recursive: true });
+  fs.writeFileSync(v11DifferentialPath, renderV11DifferentialMarkdown(report));
 
   console.log("Differential JSON: " + jsonPath);
   console.log("Differential Markdown: " + markdownPath);
   console.log("NPM compatibility v1.1 Markdown: " + v11ReportPath);
+  console.log("Node Profile v1.1 differential Markdown: " + v11DifferentialPath);
   console.log("Differential summary: " + JSON.stringify(report.summary));
 
   if (report.summary.desktopFailures > 0 || report.summary.bugs > 0) {
@@ -104,6 +110,7 @@ function printHelp() {
     "  --autojs-log <file>   Gradle/logcat text containing realnpm.differential.result= JSON lines.",
     "  --autojs-json <file>  JSON file containing an array, {results:[]}, or {rows:[{autojs}]} shape.",
     "  --compat-report <file>  Output v1.1 npm compatibility Markdown report.",
+    "  --v11-differential-report <file>  Output v1.1 differential Markdown report.",
   ].join("\n"));
 }
 
@@ -378,6 +385,112 @@ function renderV11CompatMarkdown(report) {
   lines.push(JSON.stringify(report.summary, null, 2));
   lines.push("```");
   return lines.join("\n") + "\n";
+}
+
+function renderV11DifferentialMarkdown(report) {
+  const categories = summarizeV11CapabilityCategories(report.rows);
+  const lines = [];
+  lines.push("# Node Profile v1.1 Differential Report");
+  lines.push("");
+  lines.push("- Generated: `" + report.generatedAt + "`");
+  lines.push("- Desktop Node: `" + report.desktopNode.version + "`");
+  lines.push("- Fixture root: `" + report.fixtureRoot + "`");
+  lines.push("- AutoJs source: `" + (report.autoJsSource || "not supplied") + "`");
+  lines.push("- Measurement mode: `" + (report.autoJsSource ? "desktop-vs-autojs6" : "desktop-baseline-only") + "`");
+  lines.push("");
+  lines.push("## Classification Summary");
+  lines.push("");
+  lines.push("| Classification | Count |");
+  lines.push("| --- | ---: |");
+  lines.push("| matched | `" + report.summary.matched + "` |");
+  lines.push("| expected AutoJs6 restriction | `" + report.summary.expectedRestrictions + "` |");
+  lines.push("| unsupported | `" + report.summary.unsupported + "` |");
+  lines.push("| flaky | `" + report.summary.flaky + "` |");
+  lines.push("| bug | `" + report.summary.bugs + "` |");
+  lines.push("| desktop failures | `" + report.summary.desktopFailures + "` |");
+  lines.push("");
+  lines.push("## Required v1.1 Coverage");
+  lines.push("");
+  lines.push("| Capability area | Fixtures | Classification counts |");
+  lines.push("| --- | --- | --- |");
+  categories.forEach((category) => {
+    lines.push([
+      category.name,
+      category.fixtures.join(", ") || "none",
+      renderClassificationCounts(category.counts),
+    ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  });
+  lines.push("");
+  lines.push("## Fixture Results");
+  lines.push("");
+  lines.push("| Fixture | Patterns | Desktop | AutoJs6 | Classification | Reason |");
+  lines.push("| --- | --- | --- | --- | --- | --- |");
+  report.rows.forEach((row) => {
+    lines.push([
+      row.fixture,
+      (row.patterns || []).join(", "),
+      row.desktop.expectedOutputFound && row.desktop.exitCode === 0 ? "pass" : "fail",
+      row.autojs ? (row.autojs.exitCode === 0 ? "pass" : "fail") : "not supplied",
+      row.comparison.classification,
+      row.comparison.reason,
+    ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  });
+  return lines.join("\n") + "\n";
+}
+
+function summarizeV11CapabilityCategories(rows) {
+  return [
+    {
+      name: "ESM packages",
+      matches: ["esm", "hybrid", "exports import", "exports"],
+    },
+    {
+      name: "stream packages",
+      matches: ["stream utility"],
+    },
+    {
+      name: "zlib packages",
+      matches: ["zlib"],
+    },
+    {
+      name: "fetch packages",
+      matches: ["fetch"],
+    },
+    {
+      name: "buffer packages",
+      matches: ["buffer"],
+    },
+  ].map((category) => {
+    const matchedRows = rows.filter((row) => {
+      const haystack = (row.patterns || []).join(" ").toLowerCase();
+      return category.matches.some((needle) => haystack.includes(needle));
+    });
+    return {
+      name: category.name,
+      fixtures: matchedRows.map((row) => row.fixture),
+      counts: countClassifications(matchedRows),
+    };
+  });
+}
+
+function countClassifications(rows) {
+  return rows.reduce((counts, row) => {
+    const classification = row.comparison.classification;
+    counts[classification] = (counts[classification] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function renderClassificationCounts(counts) {
+  return [
+    "matched",
+    "expected AutoJs6 restriction",
+    "unsupported",
+    "flaky",
+    "bug",
+  ].filter((classification) => counts[classification] > 0)
+    .map((classification) => classification + "=" + counts[classification])
+    .join(", ") || "none";
 }
 
 function markdownCell(value) {

@@ -224,8 +224,9 @@ packages below `node_modules` so the corpus can exercise partial ESM package imp
 to ESM.
 
 `tools/nodejs/differential/run-differential-tests.js` runs the same fixed fixtures under desktop Node 24 and writes a
-JSON/Markdown report under `build/reports/nodejs/differential/` plus the v1.1 summary report
-`build/reports/nodejs/npm-compat-v1.1.md`. When supplied with `realnpm.differential.result=...` lines emitted by
+JSON/Markdown report under `build/reports/nodejs/differential/`, the v1.1 npm summary report
+`build/reports/nodejs/npm-compat-v1.1.md`, and the Task 188 measurement report
+`build/reports/nodejs/v1.1-differential.md`. When supplied with `realnpm.differential.result=...` lines emitted by
 `NodeRealNpmCompatInstrumentationTest`, it compares normalized stdout, exit code, error code, and error message pattern,
 then classifies differences as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
 

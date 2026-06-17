@@ -196,13 +196,16 @@ This host-side script runs the fixed real npm fixtures under desktop Node 24 and
 build/reports/nodejs/differential/desktop-node-differential.json
 build/reports/nodejs/differential/desktop-node-differential.md
 build/reports/nodejs/npm-compat-v1.1.md
+build/reports/nodejs/v1.1-differential.md
 ```
 
 `NodeRealNpmCompatInstrumentationTest` emits `realnpm.differential.result=...` JSON lines for each fixture. The Android
 Gradle plugin stores these lines in the connected test logcat output, for example under
 `app/build/outputs/androidTest-results/connected/.../logcat-org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest-realPureJavaScriptPackageCorpusPasses.txt`.
 Pass that file to the harness with `--autojs-log <file>` to compare AutoJs6 against the desktop baseline. Differences are
-classified as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
+classified as matched, expected AutoJs6 restriction, unsupported, flaky, or bug. The `v1.1-differential.md` report
+also groups the fixed fixtures by the Task 188 capability areas: ESM packages, stream packages, zlib packages, fetch
+packages, and buffer packages.
 
 Current dependency bundler verification:
 
