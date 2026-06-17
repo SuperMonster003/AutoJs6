@@ -1391,6 +1391,37 @@
         return (" " + String(target && target.className || "") + " ").indexOf(" " + token + " ") >= 0;
     }
 
+    function findAncestorWithClassToken(target, token, stopAt) {
+        while (target && target !== stopAt) {
+            if (hasClassToken(target, token)) {
+                return target;
+            }
+            target = target.parentNode;
+        }
+        return null;
+    }
+
+    function isPointInsideElement(element, clientX, clientY) {
+        if (!element || !element.getBoundingClientRect) {
+            return false;
+        }
+        var rect = element.getBoundingClientRect();
+        return clientX >= rect.left && clientX <= rect.right &&
+            clientY >= rect.top && clientY <= rect.bottom;
+    }
+
+    function isGutterFoldWidgetEvent(target, domEvent) {
+        var foldWidget = findAncestorWithClassToken(target, "ace_fold-widget", editor && editor.container);
+        if (!foldWidget && target && target.querySelector) {
+            foldWidget = target.querySelector(".ace_fold-widget");
+        }
+        return !!foldWidget && isPointInsideElement(
+            foldWidget,
+            domEvent && domEvent.clientX,
+            domEvent && domEvent.clientY
+        );
+    }
+
     function isFoldPlaceholderTarget(target) {
         while (target && target !== editor.container) {
             if (hasClassToken(target, "ace_gutter-cell") || hasClassToken(target, "ace_fold-widget")) {
@@ -1534,6 +1565,9 @@
             }
             var target = event.domEvent.target;
             if (!target || target.className.indexOf("ace_gutter-cell") === -1) {
+                return;
+            }
+            if (foldMarkersEnabled && isGutterFoldWidgetEvent(target, event.domEvent)) {
                 return;
             }
             if (event.clientX > target.getBoundingClientRect().left + 24) {

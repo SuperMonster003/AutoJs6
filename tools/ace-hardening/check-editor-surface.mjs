@@ -335,6 +335,8 @@ assertIncludes(bridge, "resizeFallbackTimer = setTimeout(function()", "resize fa
 assertIncludes(bridge, 'JSON.stringify({ reason: String(reason || "") })', "resizeDone reason payload");
 assertIncludes(bridge, 'editor.on("guttermousedown", function(event)', "gutter mouse handler");
 assertIncludes(bridge, 'target.className.indexOf("ace_gutter-cell")', "gutter-cell guard");
+assertIncludes(bridge, "function isGutterFoldWidgetEvent(target, domEvent)", "gutter fold widget breakpoint guard");
+assertIncludes(bridge, "foldMarkersEnabled && isGutterFoldWidgetEvent(target, event.domEvent)", "breakpoint gutter handler preserves fold widget clicks");
 assertIncludes(bridge, "getBoundingClientRect().left + 24", "gutter breakpoint tap zone");
 assertIncludes(bridge, "event.stop();", "gutter click event stop");
 assertIncludes(bridge, 'callBridgeBoolean("isWordWrapEnabled", false)', "ACE word wrap preference bridge");

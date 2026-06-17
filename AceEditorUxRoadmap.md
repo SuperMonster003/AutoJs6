@@ -164,7 +164,7 @@ Notes:
   selection offsets as document-absolute offsets.
 - [ ] Keep double-tap and long-press host action modes anchored near the user's
   touch point without upper-left fallback flicker.
-- [ ] Preserve gutter fold toggle while keeping folded-code placeholder unfold
+- [x] Preserve gutter fold toggle while keeping folded-code placeholder unfold
   support.
 - [ ] Keep Sony right-edge back gesture protection while preserving normal tap,
   long-press, double-tap, and vertical scroll behavior outside the narrow
@@ -225,3 +225,6 @@ Notes:
   compatibility, and classic flush continuation. Native keeps the setting
   disabled with the current-engine unsupported hint because it has no matching
   visual-wrap indentation surface.
+- ACE gutter fold widgets are explicitly exempted from the custom breakpoint
+  tap zone, so native gutter folding can still collapse/expand code while the
+  folded-code placeholder click capture remains available for unfolding.
