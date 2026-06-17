@@ -90,4 +90,5 @@ Focused lifecycle stress coverage verifies:
 - default concurrent starts still reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`
 - an explicitly queued second script runs after the first finishes
 - a queued script can be cancelled by execution id
+- a queued script times out with `ERR_AUTOJS6_NODE_QUEUE_TIMEOUT` before user code runs
 - a third enqueue fails with `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full

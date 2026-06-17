@@ -626,6 +626,80 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
+    fun queuedExecutionTimeoutReturnsStableError() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-queue-timeout-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create queue timeout dir: $absolutePath" }
+        }
+        val firstStarted = File(scriptDir, "first-started.txt")
+        val secondMarker = File(scriptDir, "second-ran.txt")
+        val firstId = "queue-timeout-first-${System.nanoTime()}"
+        val secondId = "queue-timeout-second-${System.nanoTime()}"
+        val firstResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+
+        val firstThread = Thread {
+            firstResult.set(
+                enqueueEmbeddedScript(
+                    source = """
+                        "nodejs";
+                        const fs = require("fs");
+                        fs.writeFileSync("./first-started.txt", "started");
+                        return new Promise((resolve) => setTimeout(resolve, 2500));
+                    """.trimIndent(),
+                    sourceName = "<lifecycle-stress-queue-timeout-first.js>",
+                    workingDirectory = scriptDir.absolutePath,
+                    timeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    executionId = firstId,
+                    queueTimeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                ),
+            )
+        }.apply {
+            name = "AutoJs6NodeQueueTimeoutFirst"
+            start()
+        }
+
+        try {
+            assertTrue(
+                "First queue-timeout run did not enter user script before timeout.",
+                waitUntil(5000L) { firstStarted.isFile },
+            )
+
+            val second = enqueueEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const fs = require("fs");
+                    fs.writeFileSync("./second-ran.txt", "unexpected");
+                    console.log("stress.queue.timeout.second.unexpected");
+                """.trimIndent(),
+                sourceName = "<lifecycle-stress-queue-timeout-second.js>",
+                workingDirectory = scriptDir.absolutePath,
+                timeoutMs = SIMPLE_TIMEOUT_MS,
+                executionId = secondId,
+                queueTimeoutMs = QUEUE_SHORT_TIMEOUT_MS,
+            )
+
+            assertFalse("Queue-timeout run unexpectedly succeeded.", second.succeeded)
+            assertFalse("Queue-timeout failure should not be reported as a script timeout.", second.timedOut)
+            assertEquals(NodeRuntimeErrorCodes.NODE_QUEUE_TIMEOUT, second.errorCode)
+            assertEquals("true", second.nativeValues["embedded_script.queue_timeout"])
+            assertEquals("queue_timeout", second.nativeValues["embedded_script.queue_status"])
+            assertTrue(
+                second.nativeValues["embedded_script.queue_wait_ms"].orEmpty(),
+                second.nativeValues["embedded_script.queue_wait_ms"].orEmpty().toLongOrNull() ?: 0L > 0L,
+            )
+            assertFalse("Timed-out queued script must not run user code.", secondMarker.exists())
+
+            firstThread.join(QUEUE_TEST_TIMEOUT_MS + 3000L)
+            val first = firstResult.get()
+            assertTrue("First queue-timeout run did not produce a result.", first != null)
+            assertSucceeded("queue timeout first", first!!)
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun queueLimitReachedReturnsStableError() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -840,5 +914,6 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         private const val FAULT_TIMEOUT_MS = 900L
         private const val CONCURRENT_TIMEOUT_MS = 10000L
         private const val QUEUE_TEST_TIMEOUT_MS = 10000L
+        private const val QUEUE_SHORT_TIMEOUT_MS = 500L
     }
 }
