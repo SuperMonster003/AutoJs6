@@ -1,0 +1,14 @@
+{
+  "name": "@autojs6-fixtures/buffer-fetch-assert-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "assertion-helper-probe": "1.0.0",
+    "buffer-equals-probe": "1.0.0",
+    "fetch-fallback-probe": "1.0.0"
+  }
+}

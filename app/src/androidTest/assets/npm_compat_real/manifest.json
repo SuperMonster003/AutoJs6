@@ -37,6 +37,22 @@
         "constants/util.types/events",
         "diagnostics_channel graceful support"
       ]
+    },
+    {
+      "name": "esm-hybrid-packages",
+      "patterns": [
+        "ESM-only small package",
+        "hybrid CJS/ESM package",
+        "package exports import/require conditions"
+      ]
+    },
+    {
+      "name": "buffer-fetch-assert",
+      "patterns": [
+        "buffer utility",
+        "fetch wrapper fallback",
+        "assertion/test helper"
+      ]
     }
   ]
 }

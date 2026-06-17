@@ -142,14 +142,19 @@ patterns rather than broad npm compatibility claims:
 - glob/path matching plus crypto hash utility use
 - stream utility plus zlib buffer utility use
 - core builtin feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`
+- ESM-only dependency import and hybrid CJS/ESM package condition selection
+- Buffer utility, fetch wrapper fallback, and assertion helper patterns
 
 These fixtures are intentionally checked in. Tests must not fetch packages from the network, run install/postinstall
-scripts, load native addons, or include ESM-only packages.
+scripts, or load native addons. Fixture runners remain CommonJS `test.cjs` files; v1.1 permits ESM-only dependency
+packages below `node_modules` so the corpus can exercise partial ESM package import without converting the runner itself
+to ESM.
 
 `tools/nodejs/differential/run-differential-tests.js` runs the same fixed fixtures under desktop Node 24 and writes a
-JSON/Markdown report under `build/reports/nodejs/differential/`. When supplied with `realnpm.differential.result=...`
-lines emitted by `NodeRealNpmCompatInstrumentationTest`, it compares normalized stdout, exit code, error code, and error
-message pattern, then classifies differences as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
+JSON/Markdown report under `build/reports/nodejs/differential/` plus the v1.1 summary report
+`build/reports/nodejs/npm-compat-v1.1.md`. When supplied with `realnpm.differential.result=...` lines emitted by
+`NodeRealNpmCompatInstrumentationTest`, it compares normalized stdout, exit code, error code, and error message pattern,
+then classifies differences as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
 
 `:app:bundleNodeDependencies` is the host-side dependency bundling gate. It consumes a project that already has
 `package.json` and `node_modules`, validates the tree without running package code, copies a sanitized bundle to

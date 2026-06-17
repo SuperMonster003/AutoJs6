@@ -1,0 +1,1 @@
+realnpm.esm-hybrid-packages=esm-only/named|esm/import|cjs/require

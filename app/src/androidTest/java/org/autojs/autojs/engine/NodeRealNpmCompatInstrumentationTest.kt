@@ -29,7 +29,7 @@ class NodeRealNpmCompatInstrumentationTest {
         try {
             val corpusRoot = File(workDir, CORPUS_ASSET_DIR)
             val fixtures = readFixtures(corpusRoot)
-            assertEquals("unexpected real npm fixture count", 5, fixtures.size)
+            assertEquals("unexpected real npm fixture count", 7, fixtures.size)
 
             fixtures.forEach { fixture ->
                 val fixtureDir = File(corpusRoot, fixture.name)
@@ -37,6 +37,8 @@ class NodeRealNpmCompatInstrumentationTest {
                 assertTrue("missing package.json for ${fixture.name}", File(fixtureDir, "package.json").isFile)
                 assertTrue("missing test.cjs for ${fixture.name}", File(fixtureDir, "test.cjs").isFile)
                 assertTrue("missing expected.txt for ${fixture.name}", File(fixtureDir, "expected.txt").isFile)
+                val rootPackageJson = JSONObject(File(fixtureDir, "package.json").readText())
+                assertFalse("fixture runner package must stay CommonJS-compatible: ${fixture.name}", rootPackageJson.optString("type") == "module")
 
                 val licenseNote = File(fixtureDir, "LICENSE_NOTE.md")
                 assertTrue("missing license note for ${fixture.name}", licenseNote.isFile)
@@ -51,7 +53,9 @@ class NodeRealNpmCompatInstrumentationTest {
                 assertFalse("native addon must not be vendored: $relativePath", file.name.endsWith(".node"))
                 if (file.name == "package.json") {
                     val json = JSONObject(file.readText())
-                    assertFalse("ESM-only fixture package is not allowed: $relativePath", json.optString("type") == "module")
+                    if (json.optString("type") == "module") {
+                        assertTrue("ESM package metadata is only allowed below node_modules: $relativePath", relativePath.contains("/node_modules/"))
+                    }
                     val scripts = json.optJSONObject("scripts")
                     if (scripts != null) {
                         FORBIDDEN_PACKAGE_SCRIPTS.forEach { scriptName ->

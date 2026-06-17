@@ -166,8 +166,10 @@ Current fixed real npm corpus instrumentation:
 This suite copies `app/src/androidTest/assets/npm_compat_real/` into a scoped working directory and runs fixed, offline,
 license-noted CommonJS package snapshots. It covers small utilities, nested dependencies, semver parsing,
 querystring/URL utilities, glob/path matching, crypto hashing, stream utilities, zlib buffer utilities, and core builtin
-feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`. It also checks that the corpus
-contains no native addons, no install/postinstall scripts, and no ESM-only package metadata.
+feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`. The v1.1 corpus also covers an
+ESM-only dependency, a hybrid CJS/ESM package, Buffer helpers, fetch-wrapper fallback behavior, and assertion/test helper
+patterns. It also checks that the corpus contains no native addons, no install/postinstall scripts, and no ESM root
+runner; ESM-only package metadata is allowed only below fixture `node_modules`.
 
 Desktop Node differential harness:
 
@@ -180,6 +182,7 @@ This host-side script runs the fixed real npm fixtures under desktop Node 24 and
 ```text
 build/reports/nodejs/differential/desktop-node-differential.json
 build/reports/nodejs/differential/desktop-node-differential.md
+build/reports/nodejs/npm-compat-v1.1.md
 ```
 
 `NodeRealNpmCompatInstrumentationTest` emits `realnpm.differential.result=...` JSON lines for each fixture. The Android

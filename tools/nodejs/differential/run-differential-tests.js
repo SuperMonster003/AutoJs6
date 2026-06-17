@@ -52,11 +52,15 @@ function main() {
   fs.mkdirSync(reportDir, { recursive: true });
   const jsonPath = path.join(reportDir, "desktop-node-differential.json");
   const markdownPath = path.join(reportDir, "desktop-node-differential.md");
+  const v11ReportPath = path.resolve(options.compatReport || path.join(path.dirname(reportDir), "npm-compat-v1.1.md"));
   fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2) + "\n");
   fs.writeFileSync(markdownPath, renderMarkdown(report));
+  fs.mkdirSync(path.dirname(v11ReportPath), { recursive: true });
+  fs.writeFileSync(v11ReportPath, renderV11CompatMarkdown(report));
 
   console.log("Differential JSON: " + jsonPath);
   console.log("Differential Markdown: " + markdownPath);
+  console.log("NPM compatibility v1.1 Markdown: " + v11ReportPath);
   console.log("Differential summary: " + JSON.stringify(report.summary));
 
   if (report.summary.desktopFailures > 0 || report.summary.bugs > 0) {
@@ -99,6 +103,7 @@ function printHelp() {
     "  --node <path>         Desktop Node binary. Defaults to process.execPath.",
     "  --autojs-log <file>   Gradle/logcat text containing realnpm.differential.result= JSON lines.",
     "  --autojs-json <file>  JSON file containing an array, {results:[]}, or {rows:[{autojs}]} shape.",
+    "  --compat-report <file>  Output v1.1 npm compatibility Markdown report.",
   ].join("\n"));
 }
 
@@ -321,6 +326,53 @@ function renderMarkdown(report) {
       row.comparison.reason,
     ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
   });
+  lines.push("");
+  lines.push("```json");
+  lines.push(JSON.stringify(report.summary, null, 2));
+  lines.push("```");
+  return lines.join("\n") + "\n";
+}
+
+function renderV11CompatMarkdown(report) {
+  const categories = new Map();
+  report.rows.forEach((row) => {
+    (row.patterns || []).forEach((pattern) => {
+      const list = categories.get(pattern) || [];
+      list.push(row.fixture);
+      categories.set(pattern, list);
+    });
+  });
+
+  const lines = [];
+  lines.push("# Node Profile v1.1 NPM Compatibility Report");
+  lines.push("");
+  lines.push("- Generated: `" + report.generatedAt + "`");
+  lines.push("- Desktop Node: `" + report.desktopNode.version + "`");
+  lines.push("- Fixture root: `" + report.fixtureRoot + "`");
+  lines.push("- Fixed fixture count: `" + report.summary.fixtures + "`");
+  lines.push("- Desktop failures: `" + report.summary.desktopFailures + "`");
+  lines.push("- AutoJs source: `" + (report.autoJsSource || "not supplied") + "`");
+  lines.push("");
+  lines.push("## Fixture Coverage");
+  lines.push("");
+  lines.push("| Fixture | Patterns | Desktop baseline | AutoJs6 result |");
+  lines.push("| --- | --- | --- | --- |");
+  report.rows.forEach((row) => {
+    lines.push([
+      row.fixture,
+      (row.patterns || []).join(", "),
+      row.desktop.expectedOutputFound && row.desktop.exitCode === 0 ? "pass" : "fail",
+      row.autojs ? (row.autojs.exitCode === 0 ? "pass" : "fail") : "not supplied",
+    ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+  });
+  lines.push("");
+  lines.push("## Pattern Index");
+  lines.push("");
+  Array.from(categories.keys()).sort().forEach((pattern) => {
+    lines.push("- `" + pattern + "`: " + categories.get(pattern).join(", "));
+  });
+  lines.push("");
+  lines.push("## Summary");
   lines.push("");
   lines.push("```json");
   lines.push(JSON.stringify(report.summary, null, 2));
