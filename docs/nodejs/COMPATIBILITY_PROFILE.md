@@ -678,6 +678,10 @@ Cancellation policy:
 
 Current user-facing bridge modules:
 
+v1.1 bridge expansion planning is tracked in
+[BRIDGE_V1_1_MODULES.md](design/BRIDGE_V1_1_MODULES.md). That plan is a design
+gate only and does not add new runtime APIs.
+
 Declared capability names:
 
 - `toast`
