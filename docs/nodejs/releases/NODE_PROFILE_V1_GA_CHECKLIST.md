@@ -8,6 +8,10 @@ Current production-identity gate commit: `857e6e82`
 
 Current Sony gate device: Sony XQ-AT72 `QV710AF65F`
 
+Approved GA tag: `node-profile-v1.0.0`
+
+Approved release identity status: `production-identity-final-gate-passed`
+
 ## Tag Preconditions
 
 - [ ] Worktree is clean: `git status --short --branch` prints only the branch line.
@@ -15,8 +19,8 @@ Current Sony gate device: Sony XQ-AT72 `QV710AF65F`
 - [x] Final public package identity is approved as `org.autojs.autojs6` / `AutoJs6`.
 - [x] Temporary current-branch test identity `org.autojs.autojs6.nodejs` is no longer the default public identity.
 - [x] Production-identity Sony gate has passed after restoring `org.autojs.autojs6`.
-- [ ] Final `VERSION_BUILD` and `BUILD_TIME` churn in `version.properties` is reviewed and intentional.
-- [ ] `NODE_PROFILE_V1_GA.md` replaces `TBD` placeholders with the approved final commit and tag.
+- [x] Final `VERSION_BUILD` is approved as `3923`; final `BUILD_TIME` is the committed/Gradle-regenerated release time.
+- [x] `NODE_PROFILE_V1_GA.md` replaces `TBD` placeholders with the approved final tag.
 - [ ] No experimental feature is promoted without `EXPERIMENTAL_PROMOTION_POLICY.md` evidence.
 - [ ] Rhino fallback, backend switches, native one-shot backend, scoped fs, and high-risk default-off policies are unchanged.
 
@@ -26,7 +30,7 @@ Run from a clean worktree with Sony selected when connected-device evidence is n
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.releaseTag=<approved-tag>" "-Pautojs.nodejs.releaseIdentityStatus=production-identity-final-gate-passed" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.releaseTag=node-profile-v1.0.0" "-Pautojs.nodejs.releaseIdentityStatus=production-identity-final-gate-passed" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
 ```
 
 The production-identity final gate has passed from commit `857e6e82`. Rerun the full release gate if source, identity,
@@ -62,9 +66,9 @@ Task 129 generated the current artifact set on 2026-06-16 from commit `7e047953`
 The release manifest generated during this prep run records version code `3924` because `assembleAppDebug` auto-incremented the local build. The tracked `version.properties` file was restored afterward; regenerate the manifest from the approved final version state before publication.
 
 Task 131 adds explicit release identity fields to the manifest. Final generation must pass
-`-Pautojs.nodejs.identity=production`, `-Pautojs.nodejs.releaseTag=<approved-tag>`, and
-`-Pautojs.nodejs.releaseIdentityStatus=<approved-status>` so `release.tag` and `release.identityStatus` do not remain
-ambiguous.
+`-Pautojs.nodejs.identity=production`, `-Pautojs.nodejs.releaseTag=node-profile-v1.0.0`, and
+`-Pautojs.nodejs.releaseIdentityStatus=production-identity-final-gate-passed` so `release.tag` and
+`release.identityStatus` do not remain ambiguous.
 
 ## Device Gate Evidence
 
@@ -110,7 +114,7 @@ Expected skips:
 - [ ] [../FLAKE_POLICY.md](../FLAKE_POLICY.md) is reviewed before any rerun classification.
 - [ ] [../MAINTENANCE_PLAN.md](../MAINTENANCE_PLAN.md) covers the post-GA cadence, versioning, deprecation, and triage process.
 - [ ] [NODE_PROFILE_V1_TAG_DRY_RUN.md](NODE_PROFILE_V1_TAG_DRY_RUN.md) has been reviewed before creating the tag.
-- [ ] `tools/nodejs/verify-node-profile-tag.ps1 -Tag <approved-tag>` passes before pushing the tag.
+- [ ] `tools/nodejs/verify-node-profile-tag.ps1 -Tag node-profile-v1.0.0` passes before pushing the tag.
 
 ## Do Not Tag If
 

@@ -113,7 +113,7 @@ It also records release sign-off fields under `release`:
 For the final public tag, run manifest generation from a clean worktree with explicit properties, for example:
 
 ```powershell
-.\gradlew.bat --console=plain :app:generateNodeProfileReleaseManifest "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.releaseTag=<approved-tag>" "-Pautojs.nodejs.releaseIdentityStatus=<approved-status>"
+.\gradlew.bat --console=plain :app:generateNodeProfileReleaseManifest "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.releaseTag=node-profile-v1.0.0" "-Pautojs.nodejs.releaseIdentityStatus=production-identity-final-gate-passed"
 ```
 
 Allowed `identityStatus` values are documentation-level labels. Suggested values:

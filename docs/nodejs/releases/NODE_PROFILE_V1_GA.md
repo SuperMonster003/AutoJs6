@@ -1,7 +1,7 @@
 # AutoJs6 Node Profile v1 GA Release Notes
 
-Status: draft. This document is prepared for GA but must not be treated as a publication record until the final version
-state and tag are approved.
+Status: final release candidate. This document is prepared for the approved Node Profile v1 GA tag; publish only after
+the local tag verification flow passes.
 
 Target profile: AutoJs6 Safe Node Profile v1
 
@@ -9,7 +9,9 @@ Test-identity GA candidate gate commit: `7e047953`
 
 Production-identity final gate commit: `857e6e82`
 
-Final GA commit/tag: `TBD`
+Final GA tag: `node-profile-v1.0.0`
+
+Final GA commit: the commit annotated by `node-profile-v1.0.0`
 
 ## Headline
 
@@ -235,10 +237,10 @@ commit the approved version/build state before regenerating the manifest with th
 
 ## Publication Checklist
 
-Before tagging GA:
+Before pushing or publishing GA:
 
 - complete [NODE_PROFILE_V1_GA_CHECKLIST.md](NODE_PROFILE_V1_GA_CHECKLIST.md)
-- final commit and tag replace the `TBD` placeholders
+- final tag is `node-profile-v1.0.0`
 - [NODE_PROFILE_V1_STABLE_SURFACE.md](NODE_PROFILE_V1_STABLE_SURFACE.md) matches the generated compatibility profile
 - [NODE_PROFILE_V1_KNOWN_ISSUES.md](NODE_PROFILE_V1_KNOWN_ISSUES.md) is current
 - full Sony production-identity GA gate result is attached

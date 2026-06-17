@@ -1,11 +1,10 @@
 # AutoJs6 Node Profile v1 Tag Dry Run
 
-Status: dry run only. Do not create a tag until the maintainer approves the final package identity, version/build state,
-commit, and tag name.
+Status: dry run only. Create the local tag only after the final release-prep commit is clean and the manifest checks pass.
 
-Suggested tag placeholder: `<approved-tag>`
+Approved tag: `node-profile-v1.0.0`
 
-Suggested tag message placeholder: `AutoJs6 Node Profile v1 GA`
+Approved tag message: `AutoJs6 Node Profile v1 GA`
 
 ## Preconditions
 
@@ -24,7 +23,7 @@ Required state:
 - `NODE_PROFILE_V1_RELEASE_IDENTITY.md` records the approved identity decision;
 - `app/build/reports/nodejs/release-manifest.json` was regenerated from the approved final commit and version state;
 - the release manifest `git.commit` equals `git rev-parse HEAD`;
-- the release manifest `release.tag` equals `<approved-tag>`;
+- the release manifest `release.tag` equals `node-profile-v1.0.0`;
 - the release manifest `app.identityProfile` equals `production`;
 - production-identity Sony gate evidence is recorded because the public release identity differs from the Task 128 test
   identity.
@@ -49,7 +48,7 @@ Get-Content app\build\reports\nodejs\release-manifest.json | ConvertFrom-Json | 
 Regenerate and collect final artifacts after the approved identity and version state are committed:
 
 ```powershell
-.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.releaseTag=<approved-tag>" "-Pautojs.nodejs.releaseIdentityStatus=<approved-status>" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+.\gradlew.bat --console=plain :app:generateNodeCompatibilityProfile :app:generateDesktopNodeDifferentialReport :app:nativeNodeDependencyReportAppDebug :app:nativeNodeSymbolArchiveReport :app:embeddedNodeDoctorReport :app:embeddedNodePackagingPreflightAppDebug :app:verifyNodeTemplateReproducibility :app:embeddedNodePackagedSmokeHostVerify :app:nativeNodeAbiSizeReport :app:pullNodeEmbeddedPerformanceReports :app:generateNodeProfileReleaseManifest :app:generateNodeNightlyReport "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.releaseTag=node-profile-v1.0.0" "-Pautojs.nodejs.releaseIdentityStatus=production-identity-final-gate-passed" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
 .\gradlew.bat --console=plain :app:collectNodeProfileGaArtifacts
 ```
 
@@ -61,20 +60,20 @@ before tagging.
 Only run these after maintainer approval:
 
 ```powershell
-git tag -a <approved-tag> -m "AutoJs6 Node Profile v1 GA"
-git show --stat --oneline --summary <approved-tag>
+git tag -a node-profile-v1.0.0 -m "AutoJs6 Node Profile v1 GA"
+git show --stat --oneline --summary node-profile-v1.0.0
 ```
 
 Do not push automatically. Push only after the post-tag verification script passes:
 
 ```powershell
-.\tools\nodejs\verify-node-profile-tag.ps1 -Tag <approved-tag>
+.\tools\nodejs\verify-node-profile-tag.ps1 -Tag node-profile-v1.0.0
 ```
 
 Optional static checks:
 
 ```powershell
-.\tools\nodejs\verify-node-profile-tag.ps1 -Tag <approved-tag> -RunStaticChecks
+.\tools\nodejs\verify-node-profile-tag.ps1 -Tag node-profile-v1.0.0 -RunStaticChecks
 ```
 
 The script defaults to `-ExpectedIdentityProfile production`, `-ExpectedApplicationId org.autojs.autojs6`, and
@@ -84,7 +83,7 @@ Optional device smoke:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\tools\nodejs\verify-node-profile-tag.ps1 -Tag <approved-tag> -RunStaticChecks -RunDeviceSmoke -AndroidSerial QV710AF65F
+.\tools\nodejs\verify-node-profile-tag.ps1 -Tag node-profile-v1.0.0 -RunStaticChecks -RunDeviceSmoke -AndroidSerial QV710AF65F
 ```
 
 ## Failure Policy

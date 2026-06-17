@@ -71,6 +71,7 @@ val collectNodeProfileGaArtifacts = tasks.register("collectNodeProfileGaArtifact
             NodeProfileGaArtifact(latestMemoryReport, "performance/${latestMemoryReport?.name ?: "embedded-node-memory-leak-stress-missing.json"}"),
             NodeProfileGaArtifact(appReports.resolve("embedded-node/packaged-smoke-aggregate.txt"), "packaged/packaged-smoke-aggregate.txt"),
             NodeProfileGaArtifact(docsRoot.resolve("reports/phase4/sony-ga-candidate/README.md"), "gate/sony-ga-candidate.md"),
+            NodeProfileGaArtifact(docsRoot.resolve("reports/phase4/sony-production-identity-final-gate/README.md"), "gate/sony-production-identity-final-gate.md"),
             NodeProfileGaArtifact(docsRoot.resolve("releases/NODE_PROFILE_V1_KNOWN_ISSUES.md"), "docs/NODE_PROFILE_V1_KNOWN_ISSUES.md"),
             NodeProfileGaArtifact(docsRoot.resolve("releases/NODE_PROFILE_V1_STABLE_SURFACE.md"), "docs/NODE_PROFILE_V1_STABLE_SURFACE.md"),
             NodeProfileGaArtifact(docsRoot.resolve("ERROR_CATALOG.md"), "docs/ERROR_CATALOG.md"),

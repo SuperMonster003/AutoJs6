@@ -56,8 +56,7 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 
 ## Still Required Before Publication
 
-- Select the final `VERSION_BUILD` / `BUILD_TIME` state and regenerate the release manifest from that clean state.
-- Regenerate the final release manifest and nightly report with the approved tag and
-  `-Pautojs.nodejs.releaseIdentityStatus=production-identity-final-gate-passed`.
-- Replace `TBD` placeholders in GA release notes with the approved final commit and tag.
-- Create the tag only after maintainer approval.
+- Regenerate the final release manifest and nightly report from the final release-prep commit with tag
+  `node-profile-v1.0.0` and identity status `production-identity-final-gate-passed`.
+- Create the local tag after final manifest verification passes.
+- Push the tag only after `tools/nodejs/verify-node-profile-tag.ps1 -Tag node-profile-v1.0.0` passes.
