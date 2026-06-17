@@ -859,14 +859,23 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `captureScreen(options?): Promise<Image | null>`
   - `readImage(path, options?): Promise<Image | null>`
   - `saveImage(image, path, options?): Promise<void>`
+  - `saveImage(image, path, format, options?): Promise<void>`
   - `clip(image, x, y, w, h, options?): Promise<Image | null>`
   - `resize(image, w, h, options?): Promise<Image | null>`
+  - `grayscale(image, options?): Promise<Image | null>`
+  - `threshold(image, options?): Promise<Image | null>`
   - `findImage(source, template, options?): Promise<Point | null>`
+  - `matchTemplate(source, template, options?): Promise<readonly ImageMatch[]>`
+  - `findColor(image, color, options?): Promise<Point | null>`
+  - `findMultiColors(image, color, points, options?): Promise<Point | null>`
+  - `getSize(image): { width, height }`
   - `recycle(image, options?): Promise<void>`
   - `images` is also reserved as an AutoJs-style alias with the same API shape
   - `captureScreen()` requests an already-granted screen-capture path through the future MediaProjection-backed image provider; it must not prompt directly from the Node service
   - `readImage()` and `saveImage()` accept scoped relative paths only; absolute paths, NUL bytes, and `..` escapes are rejected before bridge dispatch
-  - `clip()` and `resize()` return new opaque image handles
+  - `clip()`, `resize()`, `grayscale()`, and `threshold()` return new opaque image handles and count against the per-execution image-handle limit until recycled
+  - `matchTemplate()` returns frozen JSON match snapshots with `{ x, y, score }`; `findColor()` and `findMultiColors()` return frozen `Point` snapshots or `null`
+  - `getSize()` reads the frozen image-handle snapshot locally and does not dispatch to Android
   - repeated `recycle()` calls for the same normalized handle are safe from JavaScript and dispatch at most once per module instance
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
   - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an image capability provider is connected

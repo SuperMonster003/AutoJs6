@@ -102,6 +102,10 @@ class NodeBridgePermissionManifestInstrumentationTest {
             NodeBridgePermissionManifest.requiredCapabilitiesFor("image", "captureScreen"),
         )
         assertEquals(
+            listOf(NodeBridgePermissionManifest.IMAGE),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("image", "grayscale"),
+        )
+        assertEquals(
             listOf(NodeBridgePermissionManifest.ACCESSIBILITY),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("accessibility", "setText"),
         )

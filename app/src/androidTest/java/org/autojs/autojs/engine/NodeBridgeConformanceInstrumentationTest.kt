@@ -141,7 +141,12 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "readImage") result = imageHandle(moduleName + "-read", 10, 20);
                     else if (method === "clip") result = imageHandle(moduleName + "-clip", request.args[1].width, request.args[1].height);
                     else if (method === "resize") result = imageHandle(moduleName + "-resize", request.args[1].width, request.args[1].height);
+                    else if (method === "grayscale") result = imageHandle(moduleName + "-gray", request.args[0].width, request.args[0].height);
+                    else if (method === "threshold") result = imageHandle(moduleName + "-binary", request.args[0].width, request.args[0].height);
                     else if (method === "findImage") result = { x: 7, y: 8 };
+                    else if (method === "matchTemplate") result = [{ x: 1, y: 2, score: 0.9 }];
+                    else if (method === "findColor") result = { x: 5, y: 6 };
+                    else if (method === "findMultiColors") result = { x: 9, y: 10 };
                     else if (method === "saveImage" || method === "recycle") result = null;
                   } else if (moduleName === "ocr") {
                     result = [{ text: "hello", confidence: 0.91, bounds: { left: 1, top: 2, right: 3, bottom: 4 } }];
@@ -232,8 +237,8 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("engines", engines, ["myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"]);
               expectExports("accessibility", accessibility, ["isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains"]);
               expectExports("media_projection", mediaProjection, ["requestScreenCapture"]);
-              expectExports("image", image, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
-              expectExports("images", images, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
+              expectExports("image", image, ["captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "getSize", "recycle"]);
+              expectExports("images", images, ["captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "getSize", "recycle"]);
               expectExports("ocr", ocr, ["recognize", "recognizeText", "detectTextBounds"]);
               expectExports("storage", storage, ["create", "open"]);
               expectExports("storages", storages, ["create", "open"]);
@@ -299,9 +304,15 @@ class NodeBridgeConformanceInstrumentationTest {
               await expectPromise("image.saveImage", image.saveImage(capture, "out.png", { timeoutMs: 1048 }));
               const clipped = await expectPromise("image.clip", image.clip(capture, 0, 0, 5, 5, { timeoutMs: 1049 }));
               const resized = await expectPromise("image.resize", image.resize(clipped, 4, 4, { timeoutMs: 1050 }));
-              assert.deepStrictEqual(await expectPromise("image.findImage", image.findImage(resized, template, { timeoutMs: 1051 })), { x: 7, y: 8 });
-              await expectPromise("image.recycle", image.recycle(template, { timeoutMs: 1052 }));
-              assert.strictEqual((await expectPromise("images.resize", images.resize(frame, 3, 3, { timeoutMs: 1053 }))).__autojs6ImageHandle, "images-resize");
+              const gray = await expectPromise("image.grayscale", image.grayscale(resized, { timeoutMs: 1051 }));
+              const binary = await expectPromise("image.threshold", image.threshold(gray, { threshold: 128, timeoutMs: 1052 }));
+              assert.deepStrictEqual(await expectPromise("image.findImage", image.findImage(binary, template, { timeoutMs: 1053 })), { x: 7, y: 8 });
+              assert.strictEqual((await expectPromise("image.matchTemplate", image.matchTemplate(binary, template, { timeoutMs: 1054 })))[0].score, 0.9);
+              assert.deepStrictEqual(await expectPromise("image.findColor", image.findColor(binary, "#ffffff", { timeoutMs: 1055 })), { x: 5, y: 6 });
+              assert.deepStrictEqual(await expectPromise("image.findMultiColors", image.findMultiColors(binary, "#ffffff", [[1, 0, "#000000"]], { timeoutMs: 1056 })), { x: 9, y: 10 });
+              assert.deepStrictEqual(image.getSize(binary), { width: 4, height: 4 });
+              await expectPromise("image.recycle", image.recycle(template, { timeoutMs: 1057 }));
+              assert.strictEqual((await expectPromise("images.resize", images.resize(frame, 3, 3, { timeoutMs: 1058 }))).__autojs6ImageHandle, "images-resize");
               const ocrResults = await expectPromise("ocr.recognize", ocr.recognize(capture, { timeoutMs: 1054 }));
               assert.strictEqual(ocrResults[0].text, "hello");
               assert.strictEqual(ocrResults[0].bounds.bottom, 4);
@@ -355,6 +366,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "accessibility.setText",
                 "media_projection.nextImage",
                 "image.findImage",
+                "image.matchTemplate",
+                "image.findColor",
                 "images.resize",
                 "ocr.recognize",
                 "ocr.recognizeText",
@@ -546,8 +559,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "scrollBackward",
             ),
             NodeBridgeModules.MEDIA_PROJECTION to setOf("requestScreenCapture", "nextImage", "stop"),
-            NodeBridgeModules.IMAGE to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),
-            NodeBridgeModules.IMAGES to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),
+            NodeBridgeModules.IMAGE to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
+            NodeBridgeModules.IMAGES to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
             NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),

@@ -498,7 +498,20 @@ object NodeBridgeModules {
     )
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
-    val imageMethods = setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle")
+    val imageMethods = setOf(
+        "captureScreen",
+        "readImage",
+        "saveImage",
+        "clip",
+        "resize",
+        "grayscale",
+        "threshold",
+        "findImage",
+        "matchTemplate",
+        "findColor",
+        "findMultiColors",
+        "recycle",
+    )
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val storageModules = setOf(STORAGE, STORAGES)
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")

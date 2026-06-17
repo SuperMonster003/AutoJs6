@@ -60,6 +60,7 @@ small set of already-gated features toward practical use.
 | Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
 | Controlled axios | experimental | `require("axios")` exposes an AutoJs6-owned fetch-backed compatibility adapter for `get`/`post`/`request`, `baseURL`, params, headers, timeout, response types, and Axios-like errors while denying custom adapter/agent/proxy/raw transport paths. |
 | WebSocket | experimental | Controlled bridge surface covers connect, send/receive text and binary messages, close/error events, handler properties, listener aliases, bounded queue/message policy, service-destroy cleanup, and raw socket denial; live provider remains default-off. |
+| Image advanced operations | partial | `require("image")` and `require("images")` expand opaque-handle workflows with grayscale, threshold, template matching, color search, local size snapshots, and save format overloads while keeping Android provider ownership fail-closed. |
 | OCR | partial | `require("ocr")` exposes `recognize`, `recognizeText`, and `detectTextBounds` over opaque image handles with `ocr` + `image` capability checks; Android provider remains fail-closed until real provider/model ownership is accepted. |
 | Storage | partial | `require("storage")` and `require("storages")` expose JSON-only project/package-scoped key-value stores with explicit `storage` capability checks. |
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, and owned-resource cleanup. |
@@ -117,6 +118,10 @@ small set of already-gated features toward practical use.
   `websocket` with the `network` bridge capability, maps that capability to
   `android.permission.INTERNET` for packaged APKs, and reports the mapping in
   Node doctor text/JSON output.
+- Image advanced operation smoke passes for `grayscale`, `threshold`,
+  `matchTemplate`, `findColor`, `findMultiColors`, local `getSize`, scoped
+  `saveImage` format overloads, generated image-handle tracking, provider
+  unavailable denial, and TypeScript declarations.
 - OCR bridge smoke passes for fake-provider `recognize`, `recognizeText`, and
   `detectTextBounds`, opaque image handle validation, manifest capability
   denial, TypeScript declarations, and fail-closed Android provider behavior.

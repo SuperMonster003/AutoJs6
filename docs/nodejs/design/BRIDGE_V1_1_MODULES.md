@@ -98,8 +98,8 @@ modules:
 
 - Activity-owned `dialogs` provider with lifecycle and cancellation policy.
 - Activity-owned `media_projection` provider for screen-capture permission.
-- Android-owned `image` provider for capture/read/save/template matching with
-  opaque handles and cleanup.
+- Android-owned `image` provider for capture/read/save/transforms/template
+  matching/color search with opaque handles and cleanup.
 - Packaged diagnostics for each bridge module that requires manifest
   permissions or template metadata.
 

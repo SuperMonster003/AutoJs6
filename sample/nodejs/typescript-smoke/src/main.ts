@@ -93,9 +93,16 @@ async function smoke(): Promise<void> {
   const capture = await image.captureScreen({ requireExistingPermission: true, timeoutMs: 1000 });
   const template = await images.readImage("template.png", { timeoutMs: 1000 });
   await image.saveImage(capture, "out/result.png", { format: "png", timeoutMs: 1000 });
+  await image.saveImage(capture, "out/result-copy.png", "png", { timeoutMs: 1000 });
   const clipped = await image.clip(capture, 0, 0, 10, 10, { timeoutMs: 1000 });
   const resized = await images.resize(clipped, 5, 5, { timeoutMs: 1000 });
+  const gray = await image.grayscale(resized, { timeoutMs: 1000 });
+  const binary = await image.threshold(gray, { threshold: 128, maxValue: 255, type: "binary", timeoutMs: 1000 });
   const point = await image.findImage(resized, template, { threshold: 0.8, timeoutMs: 1000 });
+  const matches: readonly image.ImageMatch[] = await image.matchTemplate(binary, template, { threshold: 0.8, limit: 3, timeoutMs: 1000 });
+  const colorPoint = await image.findColor(binary, "#ff0000", { threshold: 4, timeoutMs: 1000 });
+  const multiPoint = await image.findMultiColors(binary, 0xff0000, [[1, 0, "#00ff00"], { x: 0, y: 1, color: "#0000ff" }], { timeoutMs: 1000 });
+  const size: image.ImageSize = image.getSize(binary);
   const ocrResults: readonly ocr.OcrResult[] = await ocr.recognize(capture, { lang: "auto", timeoutMs: 1000 });
   const ocrText: string = await ocr.recognizeText(capture, { timeoutMs: 1000 });
   const ocrBounds: readonly ocr.OcrResult[] = await ocr.detectTextBounds(capture, {

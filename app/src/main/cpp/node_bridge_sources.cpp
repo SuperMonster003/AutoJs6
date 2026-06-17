@@ -12887,6 +12887,120 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return Object.freeze({ x, y });
   }
+  function __autojs6_image_integer(moduleName, methodName, fieldName, value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_image_invalid_argument_error(
+        moduleName,
+        methodName,
+        moduleName + "." + methodName + " requires finite numeric " + fieldName + "."
+      );
+    }
+    return Math.trunc(number);
+  }
+  function __autojs6_image_color(moduleName, methodName, fieldName, value) {
+    if (typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 4294967295) {
+      return Math.trunc(value);
+    }
+    const text = value === undefined || value === null ? "" : String(value).trim();
+    if (text.length > 0 && text.length <= 64 && text.indexOf("\u0000") === -1) {
+      return text;
+    }
+    throw __autojs6_image_invalid_argument_error(
+      moduleName,
+      methodName,
+      moduleName + "." + methodName + " requires " + fieldName + " to be a color number or string."
+    );
+  }
+  function __autojs6_image_multi_color_points(moduleName, methodName, points) {
+    if (!Array.isArray(points) || points.length === 0) {
+      throw __autojs6_image_invalid_argument_error(
+        moduleName,
+        methodName,
+        moduleName + "." + methodName + " requires a non-empty multi-color points array."
+      );
+    }
+    const normalized = [];
+    for (let i = 0; i < points.length; i++) {
+      const point = points[i];
+      const xValue = Array.isArray(point) ? point[0] : point && point.x;
+      const yValue = Array.isArray(point) ? point[1] : point && point.y;
+      const colorValue = Array.isArray(point) ? point[2] : point && point.color;
+      normalized.push(Object.freeze({
+        x: __autojs6_image_integer(moduleName, methodName, "points[" + i + "].x", xValue),
+        y: __autojs6_image_integer(moduleName, methodName, "points[" + i + "].y", yValue),
+        color: __autojs6_image_color(moduleName, methodName, "points[" + i + "].color", colorValue)
+      }));
+    }
+    return Object.freeze(normalized);
+  }
+  function __autojs6_image_threshold_options(moduleName, methodName, options) {
+    const input = __autojs6_image_options(options);
+    const output = {};
+    Object.keys(input).forEach(function(key) {
+      output[key] = input[key];
+    });
+    if (input.threshold !== undefined) {
+      const threshold = Number(input.threshold);
+      if (!Number.isFinite(threshold) || threshold < 0 || threshold > 255) {
+        throw __autojs6_image_invalid_argument_error(
+          moduleName,
+          methodName,
+          moduleName + "." + methodName + " options.threshold must be between 0 and 255."
+        );
+      }
+      output.threshold = Math.trunc(threshold);
+    }
+    if (input.maxValue !== undefined) {
+      const maxValue = Number(input.maxValue);
+      if (!Number.isFinite(maxValue) || maxValue < 0 || maxValue > 255) {
+        throw __autojs6_image_invalid_argument_error(
+          moduleName,
+          methodName,
+          moduleName + "." + methodName + " options.maxValue must be between 0 and 255."
+        );
+      }
+      output.maxValue = Math.trunc(maxValue);
+    }
+    if (input.type !== undefined) {
+      const type = String(input.type);
+      if (["binary", "binary_inv", "trunc", "tozero", "tozero_inv"].indexOf(type) < 0) {
+        throw __autojs6_image_invalid_argument_error(
+          moduleName,
+          methodName,
+          moduleName + "." + methodName + " options.type is not supported."
+        );
+      }
+      output.type = type;
+    }
+    return output;
+  }
+  function __autojs6_normalize_image_match(value) {
+    const point = __autojs6_normalize_point(value);
+    if (!point) {
+      return null;
+    }
+    const scoreValue = value && value.score !== undefined ? value.score : value && (value.similarity !== undefined ? value.similarity : value.confidence);
+    const score = Number(scoreValue);
+    return Object.freeze({
+      x: point.x,
+      y: point.y,
+      score: Number.isFinite(score) ? score : null
+    });
+  }
+  function __autojs6_normalize_image_matches(value) {
+    const values = Array.isArray(value)
+      ? value
+      : (value && typeof value === "object" && Array.isArray(value.matches) ? value.matches : []);
+    const matches = [];
+    for (let i = 0; i < values.length; i++) {
+      const match = __autojs6_normalize_image_match(values[i]);
+      if (match) {
+        matches.push(match);
+      }
+    }
+    return Object.freeze(matches);
+  }
   function __autojs6_media_projection_handle_id(value) {
     if (!value || typeof value !== "object") {
       return "";
@@ -12999,7 +13113,7 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       });
     }
-    function saveImage(image, path, options) {
+    function saveImage(image, path, formatOrOptions, maybeOptions) {
       const imageHandle = __autojs6_normalize_image_handle(image);
       if (!imageHandle) {
         return Promise.reject(__autojs6_image_invalid_argument_error(
@@ -13014,7 +13128,9 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (error) {
         return Promise.reject(error);
       }
-      const saveOptions = __autojs6_image_options(options);
+      const saveOptions = typeof formatOrOptions === "string"
+        ? Object.assign({}, __autojs6_image_options(maybeOptions), { format: formatOrOptions })
+        : __autojs6_image_options(formatOrOptions);
       return __autojs6_call_autojs(
         bridgeModuleName,
         "saveImage",
@@ -13080,6 +13196,38 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       });
     }
+    function imageTransform(methodName, image, options, normalizeOptions) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          methodName,
+          bridgeModuleName + "." + methodName + " requires an image handle."
+        ));
+      }
+      let transformOptions;
+      try {
+        transformOptions = typeof normalizeOptions === "function"
+          ? normalizeOptions(bridgeModuleName, methodName, options)
+          : __autojs6_image_options(options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_track_image_creation(bridgeModuleName, methodName, function() {
+        return __autojs6_call_autojs(
+          bridgeModuleName,
+          methodName,
+          [imageHandle, transformOptions],
+          __autojs6_image_bridge_options(transformOptions, 10000)
+        );
+      });
+    }
+    function grayscale(image, options) {
+      return imageTransform("grayscale", image, options);
+    }
+    function threshold(image, options) {
+      return imageTransform("threshold", image, options, __autojs6_image_threshold_options);
+    }
     function findImage(source, template, options) {
       const sourceId = __autojs6_image_handle_id(source);
       const templateId = __autojs6_image_handle_id(template);
@@ -13101,6 +13249,87 @@ std::string buildEmbeddedScriptExecutionSource(
         ],
         __autojs6_image_bridge_options(findOptions, 10000)
       ).then(__autojs6_normalize_point);
+    }
+    function matchTemplate(source, template, options) {
+      const sourceId = __autojs6_image_handle_id(source);
+      const templateId = __autojs6_image_handle_id(template);
+      if (!sourceId || !templateId) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          "matchTemplate",
+          bridgeModuleName + ".matchTemplate requires source and template image handles."
+        ));
+      }
+      const matchOptions = __autojs6_image_options(options);
+      return __autojs6_call_autojs(
+        bridgeModuleName,
+        "matchTemplate",
+        [
+          __autojs6_normalize_image_handle(source),
+          __autojs6_normalize_image_handle(template),
+          matchOptions
+        ],
+        __autojs6_image_bridge_options(matchOptions, 10000)
+      ).then(__autojs6_normalize_image_matches);
+    }
+    function findColor(image, color, options) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          "findColor",
+          bridgeModuleName + ".findColor requires an image handle."
+        ));
+      }
+      let targetColor;
+      try {
+        targetColor = __autojs6_image_color(bridgeModuleName, "findColor", "color", color);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const findOptions = __autojs6_image_options(options);
+      return __autojs6_call_autojs(
+        bridgeModuleName,
+        "findColor",
+        [imageHandle, targetColor, findOptions],
+        __autojs6_image_bridge_options(findOptions, 10000)
+      ).then(__autojs6_normalize_point);
+    }
+    function findMultiColors(image, color, points, options) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          "findMultiColors",
+          bridgeModuleName + ".findMultiColors requires an image handle."
+        ));
+      }
+      let targetColor;
+      let colorPoints;
+      try {
+        targetColor = __autojs6_image_color(bridgeModuleName, "findMultiColors", "color", color);
+        colorPoints = __autojs6_image_multi_color_points(bridgeModuleName, "findMultiColors", points);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const findOptions = __autojs6_image_options(options);
+      return __autojs6_call_autojs(
+        bridgeModuleName,
+        "findMultiColors",
+        [imageHandle, targetColor, colorPoints, findOptions],
+        __autojs6_image_bridge_options(findOptions, 10000)
+      ).then(__autojs6_normalize_point);
+    }
+    function getSize(image) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        throw __autojs6_image_invalid_argument_error(
+          bridgeModuleName,
+          "getSize",
+          bridgeModuleName + ".getSize requires an image handle."
+        );
+      }
+      return Object.freeze({ width: imageHandle.width, height: imageHandle.height });
     }
     function recycle(image, options) {
       const imageHandle = __autojs6_normalize_image_handle(image);
@@ -13131,7 +13360,13 @@ std::string buildEmbeddedScriptExecutionSource(
       saveImage,
       clip,
       resize,
+      grayscale,
+      threshold,
       findImage,
+      matchTemplate,
+      findColor,
+      findMultiColors,
+      getSize,
       recycle
     });
     if (bridgeModuleName === "images") {
