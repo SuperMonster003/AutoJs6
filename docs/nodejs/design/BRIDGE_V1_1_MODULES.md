@@ -85,7 +85,7 @@ for risk/impact:
 | `sensors` | 3 | 3 | 4 | 2 | 2 | Implemented as v1.1 partial in Task 175. |
 | controlled `http` wrapper | 4 | 4 | 3 | 4 | 4 | Defer until network promotion gates pass. |
 | `ui` | 5 | 5 | 3 | 5 | 3 | Protocol gate reserved in Task 182; live Activity provider remains design-gated. |
-| `floaty` | 4 | 5 | 2 | 5 | 5 | Defer behind UI and overlay policy. |
+| `floaty` | 4 | 5 | 2 | 5 | 5 | Design gate recorded in Task 183; no runtime module. |
 | `plugins` | 4 | 5 | 2 | 5 | 4 | Design gate only for v1.1. |
 | Shizuku/root shell | 3 | 5 | 2 | 5 | 5 | Not a v1.1 bridge expansion. |
 
@@ -304,6 +304,12 @@ It requires:
 - user-visible disclosure and packaged manifest policy.
 
 Floaty should wait behind the UI bridge design gate.
+
+Task 183 records the overlay-specific gate in
+[FLOATY_NODE.md](FLOATY_NODE.md). The current decision remains no
+`require("floaty")` or `require("ui.overlay")` runtime module until overlay
+permission flow, foreground disclosure, packaged APK behavior, resource
+cleanup, and no-raw-Window/View tests are accepted.
 
 #### `plugins`
 

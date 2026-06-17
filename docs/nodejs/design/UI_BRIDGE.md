@@ -269,7 +269,9 @@ Overlay UI requires:
 - denial behavior when overlay permission is absent
 - cleanup on script stop, Activity destroy, service destroy, and crash
 
-Overlay support should use a separate `ui.overlay` or `floaty` design gate.
+Overlay support uses the separate [FLOATY_NODE.md](FLOATY_NODE.md) design gate
+and should be exposed, if ever implemented, through a separate `ui.overlay` or
+`floaty` capability.
 
 ## Security Requirements
 
