@@ -19,6 +19,18 @@ Run these before device tests:
 .\gradlew.bat --console=plain :app:nativeNodeSymbolArchiveReport
 ```
 
+Host-side project wizard and validator gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeProjectWizard
+```
+
+This gate runs `tools/nodejs/project/autojs6-node-project.js` against all
+checked templates (`commonjs-app`, `esm-app`, `automation-script`,
+`screenshot-ocr-script`, `network-fetch-script`) and invalid fixtures for
+missing entries, invalid package names, unknown permissions, and unsafe
+dependency bundles.
+
 ## Device Instrumentation
 
 Device-specific gates should use `autojs.nodejs.test.deviceProfile`; see [DEVICE_MATRIX.md](DEVICE_MATRIX.md).

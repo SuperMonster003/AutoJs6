@@ -114,6 +114,21 @@ enforced bridge permission manifest; by default it declares no capabilities.
 Callers must explicitly pass `bridgeCapabilities` to allow a bridge capability,
 and the Android provider still performs the normal request audit.
 
+## Project Wizard And Validator
+
+`tools/nodejs/project/autojs6-node-project.js` is a host-side developer tool for
+creating and validating Safe Node Profile projects. It can generate
+`commonjs-app`, `esm-app`, `automation-script`, `screenshot-ocr-script`, and
+`network-fetch-script` templates, then validate `project.json`, `package.json`,
+entry files, bridge permission metadata, supported module type, and sanitized
+dependency bundle shape.
+
+Validator failures are actionable JSON issues with a stable `code`, `file`,
+`message`, and `hint`. The tool rejects unsafe entry paths, unknown bridge
+capabilities, native addon files, `binding.gyp`, lifecycle scripts, symlinks,
+and generated `.bin` shims before users try to run or package the project. See
+[PROJECT_WIZARD.md](PROJECT_WIZARD.md).
+
 ## JS-Only Plugin Prototype
 
 `require("plugins")` is reserved by the Safe Node Profile and cannot be

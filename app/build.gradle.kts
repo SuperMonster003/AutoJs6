@@ -1192,6 +1192,7 @@ apply(from = "node-profile-release-manifest.gradle.kts")
 apply(from = "node-profile-ga-artifacts.gradle.kts")
 apply(from = "node-error-catalog.gradle.kts")
 apply(from = "node-examples.gradle.kts")
+apply(from = "node-project-wizard.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

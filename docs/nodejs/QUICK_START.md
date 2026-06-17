@@ -56,6 +56,17 @@ Example `project.json`:
 
 When `node.permissions` is present, undeclared bridge capabilities reject before dispatch.
 
+To generate a valid starter project or validate an existing one, use the
+host-side project wizard:
+
+```powershell
+node tools/nodejs/project/autojs6-node-project.js create --template commonjs-app --out D:\work\my-node-app
+node tools/nodejs/project/autojs6-node-project.js validate D:\work\my-node-app
+```
+
+See [PROJECT_WIZARD.md](PROJECT_WIZARD.md) for all templates and validator
+error codes.
+
 ## CommonJS And Dependencies
 
 The stable v1 path is CommonJS-first:
@@ -93,6 +104,7 @@ realpath escapes, and `/proc`, `/sys`, or `/dev` access are rejected.
 ## What To Read Next
 
 - Examples: [EXAMPLES.md](EXAMPLES.md)
+- Project wizard and validator: [PROJECT_WIZARD.md](PROJECT_WIZARD.md)
 - Rhino migration: [MIGRATION_FROM_RHINO.md](MIGRATION_FROM_RHINO.md)
 - Error catalog: [ERROR_CATALOG.md](ERROR_CATALOG.md)
 - Known issues: [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md)
