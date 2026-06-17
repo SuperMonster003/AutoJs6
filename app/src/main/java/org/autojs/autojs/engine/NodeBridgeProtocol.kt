@@ -476,7 +476,7 @@ object NodeBridgeModules {
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
     val imageMethods = setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle")
-    val ocrMethods = setOf("recognize")
+    val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")

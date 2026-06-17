@@ -200,11 +200,13 @@ This is testable with fake providers but has privacy and battery implications.
 OCR is high value, but it should not bypass the image bridge or model/asset
 policy.
 
-Task 148 adds the protocol MVP only: `require("ocr").recognize(image, options?)`
-is routed as a controlled bridge module, uses existing opaque image handles,
-requires both `ocr` and `image` capabilities, has fake-provider and manifest
-tests, and rejects through the Android provider until a real OCR provider is
-connected.
+Task 148 added the protocol MVP and Task 172 promotes the JavaScript surface to
+v1.1 partial: `require("ocr").recognize(image, options?)`,
+`recognizeText(image, options?)`, and `detectTextBounds(image, options?)` are
+routed as controlled bridge methods, use existing opaque image handles, require
+both `ocr` and `image` capabilities, have fake-provider, manifest, conformance,
+and TypeScript gates, and reject through the Android provider until a real OCR
+provider is connected.
 
 Possible capability:
 
@@ -218,6 +220,8 @@ Possible API:
 const ocr = require("ocr");
 const image = await require("image").readImage("./screen.png");
 const results = await ocr.recognize(image, { lang: "auto" });
+const text = await ocr.recognizeText(image, { lang: "auto" });
+const bounds = await ocr.detectTextBounds(image, { lang: "auto" });
 await image.recycle();
 ```
 
@@ -225,6 +229,10 @@ Constraints:
 
 - Input must be an existing image handle or controlled screen-capture handle.
 - Results are frozen JSON snapshots.
+- `recognizeText()` returns a single newline-joined string so text-only scripts
+  do not need to inspect bounds.
+- `detectTextBounds()` keeps the result snapshot shape and is reserved for
+  provider implementations that can distinguish detection from extraction.
 - OCR provider owns model selection, timeouts, memory budgets, and cleanup.
 - Packaged APK verifier must account for OCR model assets if packaged OCR is in
   scope.

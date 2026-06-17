@@ -13023,25 +13023,44 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_limited_ocr_cache) {
       return __autojs6_limited_ocr_cache;
     }
-    function recognize(image, options) {
+    function callOcr(methodName, image, options) {
       const imageHandle = __autojs6_normalize_image_handle(image);
       if (!imageHandle) {
         return Promise.reject(__autojs6_image_invalid_argument_error(
           "ocr",
-          "recognize",
-          "ocr.recognize requires an image handle."
+          methodName,
+          "ocr." + methodName + " requires an image handle."
         ));
       }
       const recognizeOptions = __autojs6_image_options(options);
       return __autojs6_call_autojs(
         "ocr",
-        "recognize",
+        methodName,
         [imageHandle, recognizeOptions],
         __autojs6_ocr_bridge_options(recognizeOptions, 30000)
       ).then(__autojs6_ocr_normalize_results);
     }
+    function recognize(image, options) {
+      return callOcr("recognize", image, options);
+    }
+    function recognizeText(image, options) {
+      return callOcr("recognizeText", image, options).then(function(results) {
+        const textValues = [];
+        for (let i = 0; i < results.length; i++) {
+          if (typeof results[i].text === "string" && results[i].text.length > 0) {
+            textValues.push(results[i].text);
+          }
+        }
+        return textValues.join("\n");
+      });
+    }
+    function detectTextBounds(image, options) {
+      return callOcr("detectTextBounds", image, options);
+    }
     __autojs6_limited_ocr_cache = Object.freeze({
-      recognize
+      recognize,
+      recognizeText,
+      detectTextBounds
     });
     return __autojs6_limited_ocr_cache;
   }

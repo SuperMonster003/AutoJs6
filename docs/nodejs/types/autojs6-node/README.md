@@ -13,6 +13,7 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `media_projection`
 - `image`
 - `images`
+- `ocr`
 - `fetch`
 - `axios`
 - `websocket`

@@ -401,13 +401,13 @@ Current `image` bridge expansion focused instrumentation:
 
 This suite verifies the `image`/`images` bridge registry, fake provider request/response behavior, `captureScreen`, scoped `readImage`/`saveImage` path rejection, `clip`, `resize`, `findImage`, idempotent `recycle`, shadowing protection, opaque handle normalization, timeout and permission propagation, and stable Android provider rejection until a real image capability provider is connected.
 
-Current `ocr` bridge MVP focused instrumentation:
+Current `ocr` bridge v1.1 partial focused instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest"
 ```
 
-This suite verifies the `ocr` bridge registry, fake-provider request/response behavior, `require("ocr")`, shadowing protection, `recognize(image, options?)`, opaque image-handle validation before dispatch, frozen OCR result snapshots, timeout and `ocr`/`image` permission propagation, manifest capability denial before dispatch, and stable Android provider rejection until a real OCR capability provider is connected.
+This suite verifies the `ocr` bridge registry, fake-provider request/response behavior, `require("ocr")`, shadowing protection, `recognize(image, options?)`, `recognizeText(image, options?)`, `detectTextBounds(image, options?)`, opaque image-handle validation before dispatch, frozen OCR result snapshots, timeout and `ocr`/`image` permission propagation, manifest capability denial before dispatch, and stable Android provider rejection until a real OCR capability provider is connected.
 
 Current bridge permission manifest focused instrumentation:
 

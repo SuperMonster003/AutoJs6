@@ -25,10 +25,20 @@ class NodeOcrBridgeInstrumentationTest {
     @Test
     fun kotlinOcrBridgeRegistryAndFakeProviderAreStable() {
         assertTrue(NodeBridgeModules.supports("ocr", "recognize"))
+        assertTrue(NodeBridgeModules.supports("ocr", "recognizeText"))
+        assertTrue(NodeBridgeModules.supports("ocr", "detectTextBounds"))
         assertFalse(NodeBridgeModules.supports("ocr", "detectRaw"))
         assertEquals(
             listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "recognize"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "recognizeText"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "detectTextBounds"),
         )
 
         val provider = FakeNodeBridgeCapabilityProvider { request ->
@@ -98,16 +108,30 @@ class NodeOcrBridgeInstrumentationTest {
                   const request = JSON.parse(message);
                   requests.push(request);
                   setImmediate(() => {
+                    const result = request.method === "recognizeText"
+                      ? [
+                          {
+                            text: "hello",
+                            confidence: 0.91,
+                            bounds: { left: 1, top: 2, right: 3, bottom: 4 }
+                          },
+                          {
+                            text: "world",
+                            confidence: 0.92,
+                            bounds: { left: 5, top: 6, right: 7, bottom: 8 }
+                          }
+                        ]
+                      : [
+                          {
+                            text: "hello",
+                            confidence: 0.91,
+                            bounds: { left: 1, top: 2, right: 3, bottom: 4 }
+                          }
+                        ];
                     bridge.__test.receiveMessage(JSON.stringify({
                       id: request.id,
                       ok: true,
-                      result: [
-                        {
-                          text: "hello",
-                          confidence: 0.91,
-                          bounds: { left: 1, top: 2, right: 3, bottom: 4 }
-                        }
-                      ]
+                      result
                     }));
                   });
                 }
@@ -120,14 +144,18 @@ class NodeOcrBridgeInstrumentationTest {
                 region: { x: 1, y: 2, width: 3, height: 4 },
                 timeoutMs: 1234
               });
+              const text = await ocr.recognizeText(handle, { timeoutMs: 1235 });
+              const bounds = await ocr.detectTextBounds(handle, { timeoutMs: 1236 });
 
               console.log("ocr.resolve=" + require.resolve("ocr"));
               console.log("ocr.shadow=" + (ocr.shadow === true));
               console.log("ocr.frozen=" + Object.isFrozen(ocr));
-              console.log("ocr.methods=" + [typeof ocr.recognize, typeof ocr.detectRaw].join("|"));
+              console.log("ocr.methods=" + [typeof ocr.recognize, typeof ocr.recognizeText, typeof ocr.detectTextBounds, typeof ocr.detectRaw].join("|"));
               console.log("ocr.result.frozen=" + [Object.isFrozen(results), Object.isFrozen(results[0]), Object.isFrozen(results[0].bounds)].join("|"));
               console.log("ocr.result.value=" + [results[0].text, results[0].confidence, results[0].bounds.left, results[0].bounds.bottom].join("|"));
+              console.log("ocr.aliases=" + [text.replace("\n", ","), bounds[0].text, bounds[0].bounds.bottom].join("|"));
               console.log("ocr.request=" + [requests[0].module, requests[0].method, requests[0].args[0].id, requests[0].args[1].lang, requests[0].timeoutMs].join("|"));
+              console.log("ocr.requests=" + requests.map((request) => request.method).join("|"));
               console.log("ocr.permissions=" + requests[0].permissions.join("|"));
               console.log("ocr.pending=" + bridge.__test.pendingCount());
             })();
@@ -140,10 +168,12 @@ class NodeOcrBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("ocr.resolve=ocr"))
         assertTrue(result.stdout.contains("ocr.shadow=false"))
         assertTrue(result.stdout.contains("ocr.frozen=true"))
-        assertTrue(result.stdout.contains("ocr.methods=function|undefined"))
+        assertTrue(result.stdout.contains("ocr.methods=function|function|function|undefined"))
         assertTrue(result.stdout.contains("ocr.result.frozen=true|true|true"))
         assertTrue(result.stdout.contains("ocr.result.value=hello|0.91|1|4"))
+        assertTrue(result.stdout.contains("ocr.aliases=hello,world|hello|4"))
         assertTrue(result.stdout.contains("ocr.request=ocr|recognize|image-1|auto|1234"))
+        assertTrue(result.stdout.contains("ocr.requests=recognize|recognizeText|detectTextBounds"))
         assertTrue(result.stdout.contains("ocr.permissions=ocr|image"))
         assertTrue(result.stdout.contains("ocr.pending=0"))
     }
@@ -169,7 +199,9 @@ class NodeOcrBridgeInstrumentationTest {
               for (const item of [
                 ["null", () => ocr.recognize(null)],
                 ["empty", () => ocr.recognize({})],
-                ["string", () => ocr.recognize("image-1")]
+                ["string", () => ocr.recognize("image-1")],
+                ["text", () => ocr.recognizeText({})],
+                ["bounds", () => ocr.detectTextBounds("image-1")]
               ]) {
                 try {
                   await item[1]();
@@ -187,7 +219,7 @@ class NodeOcrBridgeInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("OCR invalid image handles", result)
         assertFalse(result.stdout.contains(":unexpected"))
-        assertTrue(result.stdout.contains("ocr.invalid=null:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|empty:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|string:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
+        assertTrue(result.stdout.contains("ocr.invalid=null:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|empty:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|string:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|text:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|bounds:ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.stdout.contains("ocr.invalid.requests=0"))
     }
 
@@ -211,7 +243,7 @@ class NodeOcrBridgeInstrumentationTest {
               let code = "";
               let missing = "";
               try {
-                await require("ocr").recognize({ id: "image-1", width: 10, height: 20 }, { timeoutMs: 1000 });
+                await require("ocr").detectTextBounds({ id: "image-1", width: 10, height: 20 }, { timeoutMs: 1000 });
               } catch (error) {
                 code = String(error && (error.autojs6Code || error.code || ""));
                 missing = Array.isArray(error && error.missingCapabilities) ? error.missingCapabilities.join(",") : "";
@@ -242,7 +274,7 @@ class NodeOcrBridgeInstrumentationTest {
               const ocr = require("ocr");
               let denied = "";
               try {
-                await ocr.recognize({ id: "image-1", width: 10, height: 20 }, { timeoutMs: 1000 });
+                await ocr.recognizeText({ id: "image-1", width: 10, height: 20 }, { timeoutMs: 1000 });
                 denied = "unexpected";
               } catch (error) {
                 denied = [error.code, error.autojs6Code, error.module, error.method].join("/");
@@ -255,7 +287,7 @@ class NodeOcrBridgeInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("OCR Android rejection", result)
         assertFalse(result.stdout.contains("unexpected"))
-        assertTrue(result.stdout.contains("ocr.android.denied=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ocr/recognize"))
+        assertTrue(result.stdout.contains("ocr.android.denied=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ocr/recognizeText"))
         assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
         assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
         assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])

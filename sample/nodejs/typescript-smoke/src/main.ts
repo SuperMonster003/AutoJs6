@@ -9,6 +9,7 @@ import accessibility = require("accessibility");
 import mediaProjection = require("media_projection");
 import image = require("image");
 import images = require("images");
+import ocr = require("ocr");
 import fetchModule = require("fetch");
 import axios = require("axios");
 import websocket = require("websocket");
@@ -83,6 +84,12 @@ async function smoke(): Promise<void> {
   const clipped = await image.clip(capture, 0, 0, 10, 10, { timeoutMs: 1000 });
   const resized = await images.resize(clipped, 5, 5, { timeoutMs: 1000 });
   const point = await image.findImage(resized, template, { threshold: 0.8, timeoutMs: 1000 });
+  const ocrResults: readonly ocr.OcrResult[] = await ocr.recognize(capture, { lang: "auto", timeoutMs: 1000 });
+  const ocrText: string = await ocr.recognizeText(capture, { timeoutMs: 1000 });
+  const ocrBounds: readonly ocr.OcrResult[] = await ocr.detectTextBounds(capture, {
+    region: [0, 0, 10, 10],
+    timeoutMs: 1000
+  });
   await image.recycle(template, { timeoutMs: 1000 });
   await images.recycle(frame, { timeoutMs: 1000 });
 
@@ -171,6 +178,9 @@ async function smoke(): Promise<void> {
   void foundAll;
   void clickedText;
   void point;
+  void ocrResults;
+  void ocrText;
+  void ocrBounds;
   void responseText;
   void responseJson;
   void fetchDiagnostics;

@@ -10,6 +10,7 @@
 /// <reference path="./media_projection.d.ts" />
 /// <reference path="./image.d.ts" />
 /// <reference path="./images.d.ts" />
+/// <reference path="./ocr.d.ts" />
 /// <reference path="./fetch.d.ts" />
 /// <reference path="./axios.d.ts" />
 /// <reference path="./websocket.d.ts" />

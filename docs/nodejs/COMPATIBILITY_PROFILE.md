@@ -734,9 +734,11 @@ Cancellation policy:
 Current user-facing bridge modules:
 
 v1.1 bridge expansion planning is tracked in
-[BRIDGE_V1_1_MODULES.md](design/BRIDGE_V1_1_MODULES.md). Task 148 adds an
-`ocr` bridge protocol MVP with fake-provider tests and fail-closed Android
-provider behavior; real OCR model/provider ownership remains future work.
+[BRIDGE_V1_1_MODULES.md](design/BRIDGE_V1_1_MODULES.md). Task 148 added the
+`ocr` bridge protocol MVP, and Task 172 expands it to the v1.1 partial
+JavaScript surface with fake-provider tests, type declarations, manifest
+enforcement, and fail-closed Android provider behavior. Real OCR model/provider
+ownership remains future work.
 
 Declared capability names:
 
@@ -851,10 +853,14 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - optional real-device `screen_capture` smoke validates frame decode and recycle behavior against the Android capture pipeline while JavaScript still receives only opaque future handles
 - `ocr`
   - `recognize(image, options?): Promise<readonly OcrResult[]>`
+  - `recognizeText(image, options?): Promise<string>`
+  - `detectTextBounds(image, options?): Promise<readonly OcrResult[]>`
   - `OcrResult` is a frozen JSON snapshot with `text: string`, `confidence: number | null`, and optional frozen `bounds: { left: number, top: number, right: number, bottom: number }`
+  - `recognizeText()` returns the recognized text values joined with newline characters
+  - `detectTextBounds()` returns the same frozen result shape as `recognize()` and is reserved for providers that distinguish text detection from text extraction internally
   - input must be an existing image handle from `image`, `images`, or `media_projection.nextImage()`
   - requests require both `ocr` and `image` capabilities because OCR consumes provider-owned image handles
-  - current JavaScript API, fake-provider tests, manifest-denial behavior, and bridge protocol are stable
+  - current JavaScript API, fake-provider tests, manifest-denial behavior, type declarations, and bridge protocol are stable
   - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an OCR capability provider is connected
   - no raw OCR engine, model path, native pointer, `Bitmap`, `Mat`, `ImageWrapper`, or Java object crosses into Node
 - `clipboard`

@@ -60,6 +60,7 @@ small set of already-gated features toward practical use.
 | Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
 | Controlled axios | experimental | `require("axios")` exposes an AutoJs6-owned fetch-backed compatibility adapter for `get`/`post`/`request`, `baseURL`, params, headers, timeout, response types, and Axios-like errors while denying custom adapter/agent/proxy/raw transport paths. |
 | WebSocket | experimental | Controlled bridge surface covers connect, send/receive text and binary messages, close/error events, handler properties, listener aliases, bounded queue/message policy, service-destroy cleanup, and raw socket denial; live provider remains default-off. |
+| OCR | partial | `require("ocr")` exposes `recognize`, `recognizeText`, and `detectTextBounds` over opaque image handles with `ocr` + `image` capability checks; Android provider remains fail-closed until real provider/model ownership is accepted. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
@@ -112,6 +113,9 @@ small set of already-gated features toward practical use.
   `websocket` with the `network` bridge capability, maps that capability to
   `android.permission.INTERNET` for packaged APKs, and reports the mapping in
   Node doctor text/JSON output.
+- OCR bridge smoke passes for fake-provider `recognize`, `recognizeText`, and
+  `detectTextBounds`, opaque image handle validation, manifest capability
+  denial, TypeScript declarations, and fail-closed Android provider behavior.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
   execution/stress suites pass on Sony.

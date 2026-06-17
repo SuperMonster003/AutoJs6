@@ -207,7 +207,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("media_projection", mediaProjection, ["requestScreenCapture"]);
               expectExports("image", image, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
               expectExports("images", images, ["captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"]);
-              expectExports("ocr", ocr, ["recognize"]);
+              expectExports("ocr", ocr, ["recognize", "recognizeText", "detectTextBounds"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
 
               assert.strictEqual(typeof app.packageName, "string");
@@ -270,6 +270,8 @@ class NodeBridgeConformanceInstrumentationTest {
               const ocrResults = await expectPromise("ocr.recognize", ocr.recognize(capture, { timeoutMs: 1054 }));
               assert.strictEqual(ocrResults[0].text, "hello");
               assert.strictEqual(ocrResults[0].bounds.bottom, 4);
+              assert.strictEqual(await expectPromise("ocr.recognizeText", ocr.recognizeText(capture, { timeoutMs: 1055 })), "hello");
+              assert.strictEqual((await expectPromise("ocr.detectTextBounds", ocr.detectTextBounds(capture, { timeoutMs: 1056 })))[0].bounds.right, 3);
               assert.strictEqual(await expectPromise("work_manager.scheduleOnce", workManager.scheduleOnce({ scriptPath: "main.cjs", timeoutMs: 1055 })), "work-once");
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
@@ -290,6 +292,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "image.findImage",
                 "images.resize",
                 "ocr.recognize",
+                "ocr.recognizeText",
+                "ocr.detectTextBounds",
                 "work_manager.list"
               ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));
               console.log("bridge.conformance.request_count=" + requests.length);
@@ -466,7 +470,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.MEDIA_PROJECTION to setOf("requestScreenCapture", "nextImage", "stop"),
             NodeBridgeModules.IMAGE to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),
             NodeBridgeModules.IMAGES to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle"),
-            NodeBridgeModules.OCR to setOf("recognize"),
+            NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
         )
     }

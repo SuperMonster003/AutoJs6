@@ -104,6 +104,14 @@ class NodeBridgePermissionManifestInstrumentationTest {
             listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "recognize"),
         )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "recognizeText"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "detectTextBounds"),
+        )
     }
 
     @Test

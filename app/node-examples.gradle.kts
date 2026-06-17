@@ -37,6 +37,7 @@ private val nodeTypeDeclarationModules = listOf(
     "media_projection",
     "image",
     "images",
+    "ocr",
     "fetch",
     "axios",
     "websocket",
