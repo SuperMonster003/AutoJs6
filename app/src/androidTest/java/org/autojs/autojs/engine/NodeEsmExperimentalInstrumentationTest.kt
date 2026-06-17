@@ -189,16 +189,31 @@ class NodeEsmExperimentalInstrumentationTest {
     fun experimentalEsmImportsSupportedBuiltins() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM importing supported builtins")
         val workDir = freshWorkDir("esm-import-builtins")
+        File(workDir, "node_modules/buffer/index.js").apply {
+            parentFile?.mkdirs()
+            writeText("""module.exports = { shadow: true, Buffer: function ShadowBuffer() {} };""")
+        }
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
+                import bareBuffer, { Buffer as BareBuffer } from "buffer";
+                import nodeBuffer, { Buffer as NodeBuffer, Blob as NodeBlob, atob, btoa } from "node:buffer";
                 import path from "node:path";
                 import { EventEmitter } from "node:events";
                 const events = new EventEmitter();
                 let seen = false;
                 events.on("ready", () => { seen = true; });
                 events.emit("ready");
-                console.log("esm.builtin=" + path.basename("/tmp/entry.txt") + "/" + seen);
+                const blobText = await new NodeBlob([NodeBuffer.from("blob")]).text();
+                const bufferOk =
+                  BareBuffer === Buffer &&
+                  NodeBuffer === Buffer &&
+                  bareBuffer === nodeBuffer &&
+                  nodeBuffer.shadow !== true &&
+                  NodeBuffer.from("buffer").toString("base64") === "YnVmZmVy" &&
+                  atob(btoa("roundtrip")) === "roundtrip" &&
+                  blobText === "blob";
+                console.log("esm.builtin=" + path.basename("/tmp/entry.txt") + "/" + seen + "/" + bufferOk);
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
@@ -206,7 +221,7 @@ class NodeEsmExperimentalInstrumentationTest {
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("experimental esm imports builtins", result)
-        assertTrue(result.stdout.contains("esm.builtin=entry.txt/true"))
+        assertTrue(result.stdout.contains("esm.builtin=entry.txt/true/true"))
     }
 
     @Test

@@ -50,6 +50,7 @@ small set of already-gated features toward practical use.
 | Package ESM conditions | partial | ESM uses `import`, `node`, `default`; CJS keeps `require`, `node`, `default`. |
 | Dynamic import | partial | Local-only dynamic import is enabled by default for relative modules, allowed builtins, and scoped packages. |
 | Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import local graph smoke is covered separately. |
+| Buffer module | partial | `require("buffer")`, `require("node:buffer")`, and ESM `node:buffer` use the same builtin wrapper and cannot be shadowed by `node_modules/buffer`. |
 | Controlled fetch | experimental | Future v1.1 batch; raw network remains disabled. |
 | WebSocket | experimental | Future v1.1 batch; raw sockets remain disabled. |
 | Worker threads | experimental | Disabled by default. |
@@ -71,6 +72,8 @@ small set of already-gated features toward practical use.
 - Dynamic import local-only smoke passes for `.mjs`, CommonJS, allowed builtins,
   and packages, while URL, absolute path, escape, and disabled builtin paths
   remain denied.
+- Buffer smoke passes for CJS and ESM import forms, global consistency, common
+  construction APIs, and `node_modules/buffer` shadow denial.
 - Compatibility profile marks ESM and dynamic import as `partial`.
 
 ## Safety Invariants

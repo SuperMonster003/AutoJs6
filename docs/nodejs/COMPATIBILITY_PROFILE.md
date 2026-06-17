@@ -244,6 +244,13 @@ Limited builtin map currently includes:
 
 Limited means API-compatible enough for the current tests and targeted pure-JS npm packages, not full desktop Node.js compatibility.
 
+The `buffer` wrapper is available through `require("buffer")`, `require("node:buffer")`,
+bare ESM `import "buffer"`, and ESM `import "node:buffer"`. It exposes the
+safe Node-managed surface already used by the runtime: `Buffer`, `Blob`, `File`,
+`atob`, `btoa`, `constants` when present, and encoding helpers. `globalThis.Buffer`
+and `require("buffer").Buffer` must stay identical, and builtin routing must
+win over `node_modules/buffer` shadow packages.
+
 ## `node:module` Safe Subset
 
 `require("module")` and `require("node:module")` are partial limited builtins for CommonJS/npm compatibility. They expose only:
