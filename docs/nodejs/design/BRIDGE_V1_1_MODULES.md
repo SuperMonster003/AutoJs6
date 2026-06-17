@@ -79,7 +79,7 @@ for risk/impact:
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | `storage` | 5 | 2 | 5 | 2 | 1 | Best first new module candidate. |
 | `notifications` post-only | 4 | 3 | 4 | 3 | 3 | Candidate after permission and channel policy. |
-| `ocr` | 5 | 3 | 3 | 4 | 2 | Candidate after image/provider ownership is ready. |
+| `ocr` | 5 | 3 | 3 | 4 | 2 | Protocol MVP added in Task 148; live provider remains blocked on image/provider ownership. |
 | `sensors` | 3 | 3 | 4 | 2 | 2 | Candidate for read-only/rate-limited MVP. |
 | controlled `http` wrapper | 4 | 4 | 3 | 4 | 4 | Defer until network promotion gates pass. |
 | `ui` | 5 | 5 | 2 | 5 | 3 | Design gate only for v1.1. |
@@ -200,6 +200,12 @@ This is testable with fake providers but has privacy and battery implications.
 OCR is high value, but it should not bypass the image bridge or model/asset
 policy.
 
+Task 148 adds the protocol MVP only: `require("ocr").recognize(image, options?)`
+is routed as a controlled bridge module, uses existing opaque image handles,
+requires both `ocr` and `image` capabilities, has fake-provider and manifest
+tests, and rejects through the Android provider until a real OCR provider is
+connected.
+
 Possible capability:
 
 ```text
@@ -225,8 +231,10 @@ Constraints:
 - No raw engine, model path, native pointer, `Bitmap`, `Mat`, or Java object
   crosses into Node.
 
-This should be Task 148 only after image/provider ownership is ready enough to
-make the handle lifecycle real.
+The remaining work is provider ownership: model packaging, memory budgets,
+image-handle lifecycle integration, packaged APK asset policy, and live Android
+OCR smoke. Those remain blocked until image/provider ownership is ready enough
+to make the handle lifecycle real.
 
 #### Controlled `http` Wrapper
 
@@ -305,8 +313,8 @@ The recommended v1.1 bridge order is:
 2. Implement `storage` first if a new module is needed.
 3. Consider post-only `notifications` after permission/channel policy.
 4. Consider bounded read-only `sensors` after privacy/rate-limit review.
-5. Start OCR only after image handles are provider-owned and packaged model
-   policy is clear.
+5. Keep the Task 148 OCR protocol MVP fail-closed until image handles are
+   provider-owned and packaged model policy is clear.
 6. Keep `ui`, `floaty`, `plugins`, controlled `http`, and Shizuku/root advanced
    shell as design gates only.
 

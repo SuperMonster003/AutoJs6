@@ -21,6 +21,7 @@ object NodeBridgePermissionManifest {
     const val ACCESSIBILITY = "accessibility"
     const val SCREEN_CAPTURE = "screen_capture"
     const val IMAGE = "image"
+    const val OCR = "ocr"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -48,6 +49,7 @@ object NodeBridgePermissionManifest {
         ACCESSIBILITY,
         SCREEN_CAPTURE,
         IMAGE,
+        OCR,
         CLIPBOARD,
         DEVICE,
         SHELL,
@@ -197,6 +199,7 @@ object NodeBridgePermissionManifest {
                 "captureScreen" -> listOf(IMAGE, SCREEN_CAPTURE)
                 else -> listOf(IMAGE)
             }
+            NodeBridgeModules.OCR -> listOf(OCR, IMAGE)
             NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
             NodeBridgeModules.DEVICE -> listOf(DEVICE)
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)

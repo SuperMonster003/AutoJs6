@@ -448,6 +448,7 @@ object NodeBridgeModules {
     const val MEDIA_PROJECTION = "media_projection"
     const val IMAGE = "image"
     const val IMAGES = "images"
+    const val OCR = "ocr"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -475,6 +476,7 @@ object NodeBridgeModules {
     val mediaProjectionMethods = setOf("requestScreenCapture", "nextImage", "stop")
     val imageModules = setOf(IMAGE, IMAGES)
     val imageMethods = setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "findImage", "recycle")
+    val ocrMethods = setOf("recognize")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")
@@ -492,6 +494,7 @@ object NodeBridgeModules {
         MEDIA_PROJECTION to mediaProjectionMethods,
         IMAGE to imageMethods,
         IMAGES to imageMethods,
+        OCR to ocrMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
         SHELL to shellMethods,
@@ -571,6 +574,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.ACCESSIBILITY && request.method in NodeBridgeModules.accessibilityMethods -> dispatchAccessibility(request, callback)
             request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, callback)
             request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, callback)
+            request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, callback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, callback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, callback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
@@ -929,6 +933,19 @@ class AndroidNodeBridgeCapabilityProvider(
                     module = request.module,
                     method = request.method,
                     requirement = "an image capability provider",
+                ),
+            ),
+        )
+    }
+
+    private fun dispatchOcr(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        callback(
+            NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.capabilityProviderMissing(
+                    module = request.module,
+                    method = request.method,
+                    requirement = "an OCR capability provider",
                 ),
             ),
         )

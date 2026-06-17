@@ -100,6 +100,10 @@ class NodeBridgePermissionManifestInstrumentationTest {
             listOf(NodeBridgePermissionManifest.IMAGE, NodeBridgePermissionManifest.SCREEN_CAPTURE),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("image", "captureScreen"),
         )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("ocr", "recognize"),
+        )
     }
 
     @Test

@@ -184,7 +184,7 @@ With the experimental request flag on, workers are pure JavaScript compute worke
 
 - AutoJs bridge modules or `autojs6:bridge`
 - Android `Context`
-- accessibility, media projection, image, UI/dialog, shell, engines, clipboard, or device providers
+- accessibility, media projection, image, OCR, UI/dialog, shell, engines, clipboard, or device providers
 - raw network modules
 - native addons
 - child process APIs
@@ -259,7 +259,7 @@ Required bridge properties:
 
 Bridge capability manifests are optional for legacy compatibility. When a Node project declares `node.permissions` in `project.json` or `autojs6.node.permissions` in `package.json`, the bridge becomes deny-by-default for that execution. Missing declarations reject in JavaScript before the request reaches the native or Android provider. The Android provider also audits every supported bridge request before dispatch: the request must carry the required capability names, and an enforced project manifest must declare them. Failures use `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 
-Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activity`, `dialogs`, `engines`, `engines.exec`, `accessibility`, `screen_capture`, `image`, `clipboard`, `device`, `shell`, `shell.root`, `network`, `work_manager`, and `java_interop`. Declaring a parent such as `app` or `engines` grants its non-root child methods; `shell.root` must be declared explicitly. `media_projection` is accepted as an alias for `screen_capture`.
+Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activity`, `dialogs`, `engines`, `engines.exec`, `accessibility`, `screen_capture`, `image`, `ocr`, `clipboard`, `device`, `shell`, `shell.root`, `network`, `work_manager`, and `java_interop`. Declaring a parent such as `app` or `engines` grants its non-root child methods; `shell.root` must be declared explicitly. `media_projection` is accepted as an alias for `screen_capture`.
 
 Bridge limit policy is optional and safe by default. Projects may lower or safely raise limits through `node.bridgeLimits` in `project.json` or `autojs6.node.bridgeLimits` in `package.json`; values above the hard maximum are ignored and reported through `profile.bridgeLimits.warnings`. The current policy bounds pending bridge calls, JS image handles, live shell commands, controlled fetch calls, controlled WebSocket sessions, and accessibility requests per second. Resource exhaustion uses `ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`; request-rate exhaustion uses `ERR_AUTOJS6_BRIDGE_RATE_LIMITED`.
 
@@ -280,6 +280,8 @@ The `accessibility` bridge currently exposes a stable JavaScript Promise API and
 The `media_projection` bridge currently exposes the JavaScript Promise API and opaque screen-capturer handle shape, but the Android provider rejects until an Activity-owned MediaProjection capability provider is connected. It must not request screen-capture permission from the embedded Node service process directly.
 
 The `image` and `images` bridge modules currently expose opaque image-handle API shapes and fake-provider tests only, including `captureScreen`, scoped `readImage`/`saveImage`, `clip`, `resize`, `findImage`, and idempotent JavaScript-side `recycle`. The Android provider rejects until screenshot capture, image decoding, template matching, and handle cleanup are owned by a dedicated capability provider. `captureScreen()` must use an already-authorized MediaProjection provider path and must not request screen-capture permission from the embedded Node service process. JavaScript must never receive raw `Bitmap`, `Mat`, `ImageWrapper`, native pointer, or filesystem path handles outside the scoped policy.
+
+The `ocr` bridge module exposes only `recognize(image, options?)` over existing opaque image handles. It requires both `ocr` and `image` capabilities, validates the image handle before dispatch, returns frozen JSON text-result snapshots, and currently rejects through the Android provider until a dedicated OCR provider is connected. JavaScript must not receive raw OCR engines, model paths, native pointers, `Bitmap`, `Mat`, `ImageWrapper`, or Java objects.
 
 Image and node handles must be opaque ids with explicit lifecycle cleanup.
 

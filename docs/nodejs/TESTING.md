@@ -112,7 +112,7 @@ Current bridge protocol instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest"
 ```
 
-This suite covers the Kotlin bridge protocol, strict malformed request shape checks, bridge module registry, unavailable module/method errors, malformed live request responses, duplicate provider callback suppression, provider dispatch exception conversion, JavaScript fake transport, timeout/destroy handling, the current private live file transport, and the `toast`/`app`/`engines`/`dialogs`/`accessibility`/`media_projection`/`image` bridge smoke. The `app` smoke verifies that JavaScript can observe a real provider result, including a missing application lookup returning `false`. The `engines` smoke verifies current engine snapshots, bridge-module shadowing protection, live `all`/`stopAll`/`stopSelf` responses, and the controlled `execScript`/`execScriptFile` method shape. The `dialogs` smoke verifies fake provider results and the stable Android rejection path while the UI provider is not connected. The `accessibility` smoke verifies fake provider results, shadowing protection, disabled status reporting, and stable action rejection until an accessibility provider is connected. The `media_projection` and `image` smoke verifies fake opaque handles, `image`/`images` shadowing protection, and stable Android provider rejection until screenshot and image providers are connected. The `clipboard` and `device` bridges have their own focused test classes.
+This suite covers the Kotlin bridge protocol, strict malformed request shape checks, bridge module registry, unavailable module/method errors, malformed live request responses, duplicate provider callback suppression, provider dispatch exception conversion, JavaScript fake transport, timeout/destroy handling, the current private live file transport, and the `toast`/`app`/`engines`/`dialogs`/`accessibility`/`media_projection`/`image` bridge smoke. The `app` smoke verifies that JavaScript can observe a real provider result, including a missing application lookup returning `false`. The `engines` smoke verifies current engine snapshots, bridge-module shadowing protection, live `all`/`stopAll`/`stopSelf` responses, and the controlled `execScript`/`execScriptFile` method shape. The `dialogs` smoke verifies fake provider results and the stable Android rejection path while the UI provider is not connected. The `accessibility` smoke verifies fake provider results, shadowing protection, disabled status reporting, and stable action rejection until an accessibility provider is connected. The `media_projection` and `image` smoke verifies fake opaque handles, `image`/`images` shadowing protection, and stable Android provider rejection until screenshot and image providers are connected. The `ocr`, `clipboard`, and `device` bridges have their own focused test classes.
 
 Stable bridge API conformance:
 
@@ -120,7 +120,7 @@ Stable bridge API conformance:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeConformanceInstrumentationTest"
 ```
 
-This suite freezes the stable AutoJs bridge API shape for `toast`, `app`, `dialogs`, `clipboard`, `device`, `shell`, `engines`, `accessibility`, `media_projection`, `image`/`images`, and `work_manager`. It verifies Kotlin registry drift, JavaScript module exports, Promise contracts, provider error shape, capability denial, handle method shape, and pending-call cleanup after bridge destroy.
+This suite freezes the stable AutoJs bridge API shape for `toast`, `app`, `dialogs`, `clipboard`, `device`, `shell`, `engines`, `accessibility`, `media_projection`, `image`/`images`, `ocr`, and `work_manager`. It verifies Kotlin registry drift, JavaScript module exports, Promise contracts, provider error shape, capability denial, handle method shape, and pending-call cleanup after bridge destroy.
 
 Focused bridge RPC fuzzer:
 
@@ -383,6 +383,14 @@ Current `image` bridge expansion focused instrumentation:
 ```
 
 This suite verifies the `image`/`images` bridge registry, fake provider request/response behavior, `captureScreen`, scoped `readImage`/`saveImage` path rejection, `clip`, `resize`, `findImage`, idempotent `recycle`, shadowing protection, opaque handle normalization, timeout and permission propagation, and stable Android provider rejection until a real image capability provider is connected.
+
+Current `ocr` bridge MVP focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest"
+```
+
+This suite verifies the `ocr` bridge registry, fake-provider request/response behavior, `require("ocr")`, shadowing protection, `recognize(image, options?)`, opaque image-handle validation before dispatch, frozen OCR result snapshots, timeout and `ocr`/`image` permission propagation, manifest capability denial before dispatch, and stable Android provider rejection until a real OCR capability provider is connected.
 
 Current bridge permission manifest focused instrumentation:
 

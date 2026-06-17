@@ -8004,6 +8004,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_media_projection_cache = null;
   let __autojs6_limited_image_cache = null;
   let __autojs6_limited_images_cache = null;
+  let __autojs6_limited_ocr_cache = null;
   let __autojs6_limited_clipboard_cache = null;
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
@@ -8851,6 +8852,7 @@ std::string buildEmbeddedScriptExecutionSource(
       if (methodName === "captureScreen") return ["image", "screen_capture"];
       return ["image"];
     }
+    if (moduleName === "ocr") return ["ocr", "image"];
     if (moduleName === "clipboard") return ["clipboard"];
     if (moduleName === "device") return ["device"];
     if (moduleName === "shell") return ["shell"];
@@ -12626,6 +12628,88 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_limited_image_cache = moduleValue;
     }
     return moduleValue;
+  }
+  function __autojs6_ocr_bridge_options(options, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_image_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options),
+      permissions: ["ocr", "image"]
+    };
+  }
+  function __autojs6_ocr_normalize_bounds(value) {
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+    const left = Number(value.left);
+    const top = Number(value.top);
+    const right = Number(value.right);
+    const bottom = Number(value.bottom);
+    if (Number.isFinite(left) && Number.isFinite(top) && Number.isFinite(right) && Number.isFinite(bottom)) {
+      return Object.freeze({ left, top, right, bottom });
+    }
+    const x = Number(value.x);
+    const y = Number(value.y);
+    const width = Number(value.width);
+    const height = Number(value.height);
+    if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(width) && Number.isFinite(height)) {
+      return Object.freeze({ left: x, top: y, right: x + width, bottom: y + height });
+    }
+    return null;
+  }
+  function __autojs6_ocr_normalize_result(value) {
+    if (typeof value === "string") {
+      return Object.freeze({ text: value, confidence: null });
+    }
+    const source = value && typeof value === "object" ? value : {};
+    const textValue = typeof source.text === "string"
+      ? source.text
+      : (typeof source.label === "string" ? source.label : "");
+    const confidenceValue = Number(source.confidence);
+    const normalized = {
+      text: textValue,
+      confidence: Number.isFinite(confidenceValue) ? confidenceValue : null
+    };
+    const bounds = __autojs6_ocr_normalize_bounds(source.bounds || source.boundingBox || source.region);
+    if (bounds) {
+      normalized.bounds = bounds;
+    }
+    return Object.freeze(normalized);
+  }
+  function __autojs6_ocr_normalize_results(value) {
+    const values = Array.isArray(value)
+      ? value
+      : (value && typeof value === "object" && Array.isArray(value.results) ? value.results : []);
+    const results = [];
+    for (let i = 0; i < values.length; i++) {
+      results.push(__autojs6_ocr_normalize_result(values[i]));
+    }
+    return Object.freeze(results);
+  }
+  function __autojs6_limited_ocr() {
+    if (__autojs6_limited_ocr_cache) {
+      return __autojs6_limited_ocr_cache;
+    }
+    function recognize(image, options) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          "ocr",
+          "recognize",
+          "ocr.recognize requires an image handle."
+        ));
+      }
+      const recognizeOptions = __autojs6_image_options(options);
+      return __autojs6_call_autojs(
+        "ocr",
+        "recognize",
+        [imageHandle, recognizeOptions],
+        __autojs6_ocr_bridge_options(recognizeOptions, 30000)
+      ).then(__autojs6_ocr_normalize_results);
+    }
+    __autojs6_limited_ocr_cache = Object.freeze({
+      recognize
+    });
+    return __autojs6_limited_ocr_cache;
   }
   function __autojs6_call_autojs(moduleName, methodName, args, options) {
     const moduleValue = moduleName === undefined || moduleName === null ? "" : String(moduleName);
@@ -27166,6 +27250,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "images") {
       return "images";
     }
+    if (name === "ocr") {
+      return "ocr";
+    }
     if (name === "clipboard") {
       return "clipboard";
     }
@@ -27386,6 +27473,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "images") {
       return __autojs6_limited_image("images");
+    }
+    if (name === "ocr") {
+      return __autojs6_limited_ocr();
     }
     if (name === "clipboard") {
       return __autojs6_limited_clipboard();

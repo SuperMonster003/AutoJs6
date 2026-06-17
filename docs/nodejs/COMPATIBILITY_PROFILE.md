@@ -679,8 +679,9 @@ Cancellation policy:
 Current user-facing bridge modules:
 
 v1.1 bridge expansion planning is tracked in
-[BRIDGE_V1_1_MODULES.md](design/BRIDGE_V1_1_MODULES.md). That plan is a design
-gate only and does not add new runtime APIs.
+[BRIDGE_V1_1_MODULES.md](design/BRIDGE_V1_1_MODULES.md). Task 148 adds an
+`ocr` bridge protocol MVP with fake-provider tests and fail-closed Android
+provider behavior; real OCR model/provider ownership remains future work.
 
 Declared capability names:
 
@@ -691,6 +692,7 @@ Declared capability names:
 - `accessibility`
 - `screen_capture` (`media_projection` is accepted as an alias)
 - `image`
+- `ocr`
 - `clipboard`
 - `device`
 - `shell`, `shell.root`
@@ -792,6 +794,14 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
   - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an image capability provider is connected
   - optional real-device `screen_capture` smoke validates frame decode and recycle behavior against the Android capture pipeline while JavaScript still receives only opaque future handles
+- `ocr`
+  - `recognize(image, options?): Promise<readonly OcrResult[]>`
+  - `OcrResult` is a frozen JSON snapshot with `text: string`, `confidence: number | null`, and optional frozen `bounds: { left: number, top: number, right: number, bottom: number }`
+  - input must be an existing image handle from `image`, `images`, or `media_projection.nextImage()`
+  - requests require both `ocr` and `image` capabilities because OCR consumes provider-owned image handles
+  - current JavaScript API, fake-provider tests, manifest-denial behavior, and bridge protocol are stable
+  - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an OCR capability provider is connected
+  - no raw OCR engine, model path, native pointer, `Bitmap`, `Mat`, `ImageWrapper`, or Java object crosses into Node
 - `clipboard`
   - `getText(options?): Promise<string>`
   - `setText(text, options?): Promise<void>`
