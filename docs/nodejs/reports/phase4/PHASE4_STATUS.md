@@ -35,6 +35,12 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
   identity profile.
 - Passed the Sony production-identity final gate from commit `857e6e82` with
   `:app:verifyNodeReleaseGate "-Pautojs.nodejs.identity=production" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"`.
+- Finalized GA metadata with `VERSION_BUILD=3923`, release tag `node-profile-v1.0.0`, and identity status
+  `production-identity-final-gate-passed`.
+- Merged Node Profile v1 GA into `master` at commit `d017807f`.
+- Moved local annotated tag `node-profile-v1.0.0` to the `master` merge commit and passed
+  `tools/nodejs/verify-node-profile-tag.ps1 -Tag node-profile-v1.0.0`.
+- Created follow-up development branch `feature/nodejs-runtime-v1.1` from the GA merge commit.
 
 ## Evidence
 
@@ -53,10 +59,13 @@ OnePlus OPD2413 `63751f63` is now excluded from unattended current-branch gates 
 - GA artifact bundle task: `:app:collectNodeProfileGaArtifacts`
 - Tag dry run: `docs/nodejs/releases/NODE_PROFILE_V1_TAG_DRY_RUN.md`
 - Post-tag verification script: `tools/nodejs/verify-node-profile-tag.ps1`
+- Final GA merge commit: `d017807f`
+- Final local GA tag: `node-profile-v1.0.0`
+- Follow-up branch: `feature/nodejs-runtime-v1.1`
 
-## Still Required Before Publication
+## Publication Sign-off Status
 
-- Regenerate the final release manifest and nightly report from the final release-prep commit with tag
+- Final release manifest and nightly report were regenerated from the final GA state with tag
   `node-profile-v1.0.0` and identity status `production-identity-final-gate-passed`.
-- Create the local tag after final manifest verification passes.
-- Push the tag only after `tools/nodejs/verify-node-profile-tag.ps1 -Tag node-profile-v1.0.0` passes.
+- Local tag creation and post-tag verification passed.
+- Branch and tag push remain a maintainer-controlled publication step; no remote push is implied by this report.

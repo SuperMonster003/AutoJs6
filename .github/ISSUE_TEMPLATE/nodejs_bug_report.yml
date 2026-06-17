@@ -1,0 +1,132 @@
+name: Node.js runtime bug
+description: Report an AutoJs6 Node Profile, packaged APK, bridge, or scoped fs issue.
+title: "[Node.js] "
+labels:
+  - node
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please attach only the smallest reproduction and the log window around the failure. Remove secrets and private data before uploading logs or projects.
+  - type: input
+    id: autojs_version
+    attributes:
+      label: AutoJs6 version
+      description: Version name and version code, for example 6.7.1 Alpha4 / 3923.
+    validations:
+      required: true
+  - type: input
+    id: node_profile
+    attributes:
+      label: Node Profile version
+      description: Release tag or profile version, for example node-profile-v1.0.0.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android
+      description: Model, Android version, API level, ABI, and whether this is a physical device or emulator.
+    validations:
+      required: true
+  - type: dropdown
+    id: package_identity
+    attributes:
+      label: Package identity
+      options:
+        - org.autojs.autojs6
+        - org.autojs.autojs6.nodejs
+        - packaged APK
+        - other
+    validations:
+      required: true
+  - type: dropdown
+    id: script_type
+    attributes:
+      label: Script entry type
+      options:
+        - editor script
+        - project file
+        - packaged APK entry
+        - .cjs
+        - .mjs
+        - package bin
+        - package.json script
+        - other
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - embedded runtime
+        - packaged APK
+        - CommonJS or resolver
+        - scoped fs
+        - bridge API
+        - native crash
+        - experimental feature
+        - diagnostics or docs
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: feature_flags
+    attributes:
+      label: Backend and feature flags
+      description: Include backend, identity profile, and any Node-related Gradle or runtime flags.
+      placeholder: |
+        backend=embedded
+        identity=production
+        experimental flags=none
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Paste a minimal script or describe the smallest project that reproduces the issue.
+      render: javascript
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include error messages, exit code, timeout, or crash symptoms.
+    validations:
+      required: true
+  - type: textarea
+    id: node_doctor
+    attributes:
+      label: Node Doctor report
+      description: Attach or paste relevant lines from node-doctor-report.txt/json.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and packaged verifier output
+      description: Attach logcat crash window, tombstone excerpt, or packaged APK verifier output when applicable.
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Reporter checklist
+      options:
+        - label: I removed secrets and private data from logs and reproduction files.
+          required: true
+        - label: I included whether this is main app or packaged APK behavior.
+          required: true
+        - label: I included package identity and feature flags.
+          required: true

@@ -3,6 +3,16 @@
 This plan starts after Node Profile v1 GA. It keeps the Safe Node Profile publishable without expanding the default
 authority surface by accident.
 
+## Operational Runbooks
+
+- [POST_GA_SMOKE.md](POST_GA_SMOKE.md) defines daily, weekly, nightly, and monthly smoke cadence.
+- [CRASH_INTAKE.md](CRASH_INTAKE.md) defines required crash attachments, labels, severity, and closure criteria.
+- [releases/V1_0_X_HOTFIX_POLICY.md](releases/V1_0_X_HOTFIX_POLICY.md) defines patch-release scope and minimum gates.
+- [tools/nodejs/bisect-node-smoke.ps1](../../tools/nodejs/bisect-node-smoke.ps1) provides a small git-bisect-compatible
+  Node smoke helper.
+- [.github/ISSUE_TEMPLATE/nodejs_bug_report.yml](../../.github/ISSUE_TEMPLATE/nodejs_bug_report.yml) is the user-facing
+  Node bug report template.
+
 ## Maintenance Invariants
 
 - Rhino fallback remains available.
@@ -26,6 +36,8 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Record failures with the failing task, class, method, device serial, package identity, and whether the failure is
 reproducible. Do not retry security, scoped fs, packaged script, bridge capability, or leak assertions to make a smoke
 pass.
+
+See [POST_GA_SMOKE.md](POST_GA_SMOKE.md) for the full post-GA cadence.
 
 ## Nightly Extended Gate
 
@@ -123,6 +135,8 @@ Classify the issue:
 P0/P1 fixes require a focused regression test, release note, and backport decision. Native crashes require symbolication
 against the matching `nativeNodeSymbolArchiveReport` output before closure.
 
+See [CRASH_INTAKE.md](CRASH_INTAKE.md) for the full intake workflow and issue-template fields.
+
 ## Versioning Policy
 
 Node Profile v1.x patch releases may include:
@@ -132,6 +146,8 @@ Node Profile v1.x patch releases may include:
 - scoped fs, resolver, packaged APK, bridge, and lifecycle hardening that does not remove documented stable behavior;
 - new optional bridge fields or docs when older scripts continue to work;
 - experimental feature fixes that remain behind their existing flags.
+
+See [releases/V1_0_X_HOTFIX_POLICY.md](releases/V1_0_X_HOTFIX_POLICY.md) for the v1.0.x hotfix boundary and minimum gate.
 
 Node Profile v2 is required for:
 

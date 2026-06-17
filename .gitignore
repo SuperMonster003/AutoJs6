@@ -35,7 +35,9 @@ desktop.ini
 /captures/
 /release/
 /releases/
-/tools/
+/tools/*
+!/tools/nodejs/
+!/tools/nodejs/**
 
 /gradle/wrappers/backup/
 
