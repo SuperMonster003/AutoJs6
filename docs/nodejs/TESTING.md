@@ -450,6 +450,19 @@ Current JS-only plugin prototype focused instrumentation:
 
 This suite verifies reserved `require("plugins")` and `require.resolve("plugins")`, local `node_modules/plugins` shadowing denial, project-local `./plugins/<id>` package loading, `autojs6.plugin.permissions` metadata, exact `plugin.<id>` opt-in, plugin-requested permission denial before code execution, `.node` rejection with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`, plugin entry path escape denial, plugin-root relative resolution, and TypeScript declaration coverage.
 
+Current Node developer REPL focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeDeveloperReplInstrumentationTest"
+```
+
+This suite verifies the debug-build-only developer REPL entry, simple eval
+result capture, console output capture, allowed `path` builtin require,
+continued `child_process` denial, deny-by-default bridge capability manifest
+behavior, explicit bridge capability opt-in through `toast`, isolated temporary
+working directory use, scoped filesystem writes inside that directory, and
+cleanup after `close()`.
+
 Current bridge permission manifest focused instrumentation:
 
 ```powershell

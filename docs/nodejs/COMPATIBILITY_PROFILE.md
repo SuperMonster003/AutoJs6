@@ -94,6 +94,26 @@ Runtime diagnostics expose the same state through `require("autojs6:profile").fe
 - resolver visualizer report through `node tools/nodejs/resolver/explain-node-resolve.js --mode compact|verbose|json --request <specifier> --from <file> --trace-file <stderr-log>` or `:app:explainNodeResolve` with `-Pautojs.nodejs.resolve.*`
 - optional embedded runtime timeline trace through `autojs.nodejs.timelineTrace=true` or `AUTOJS6_NODE_TIMELINE_TRACE=1`, reported as `embedded_script.timeline_json` and disabled by default
 
+## Developer REPL
+
+`NodeDeveloperRepl` is a debug-build-only developer entry for inspecting the
+Safe Node Profile without enabling inspector, `vm`, `child_process`, worker
+threads, Java interop, or broader filesystem access. It is a programmatic
+line-eval session, not a production script API or a long-running Node process.
+
+Each session creates a unique temporary `workingDirectory` under app cache and
+uses that directory as both `process.cwd()` and the source-name root for
+relative `require()` calls. `close()` deletes the directory and any files
+created during the session. The API reuses the normal embedded script service,
+so stdout/stderr capture, result text, scoped filesystem policy, builtin
+allowlist, native addon denial, and timeout behavior are identical to ordinary
+one-shot scripts.
+
+Bridge modules are deny-by-default in REPL sessions. The REPL always injects an
+enforced bridge permission manifest; by default it declares no capabilities.
+Callers must explicitly pass `bridgeCapabilities` to allow a bridge capability,
+and the Android provider still performs the normal request audit.
+
 ## JS-Only Plugin Prototype
 
 `require("plugins")` is reserved by the Safe Node Profile and cannot be
