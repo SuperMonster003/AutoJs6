@@ -208,3 +208,7 @@ Notes:
   fallbacks; Native applies breakpoint marker and line-number visibility, while
   fold markers remain disabled/no-op because the Native editor has no fold
   marker surface.
+- The standalone Code editor settings page now exists and the global settings
+  Code editor group has been reduced to engine, log behavior, auto-show log
+  panel, and an All settings entry. The in-editor settings dialog and editor
+  overflow menu reorganization are still pending.

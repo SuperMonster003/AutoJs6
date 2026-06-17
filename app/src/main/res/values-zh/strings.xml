@@ -551,6 +551,8 @@
     <string name="text_app_version_code">应用版本号</string>
     <string name="text_app_version_name">应用版本名</string>
     <string name="text_appearance">外观</string>
+    <string name="text_general">常规</string>
+    <string name="text_all_settings">全部设置</string>
     <string name="text_applying_binary_resources">正在应用二进制资源</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">[姓名, 组织名称, 组织单位, 国家代码, 州或省份, 城市或区域, 街道] 至少填写一个</string>
     <string name="text_attribute">属性</string>
@@ -1485,11 +1487,18 @@
     <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式。此设置不会修改文件内容。</string>
     <string name="description_editor_engine_preference">ACE 是默认编辑器。原生编辑器仍可作为 fallback 使用，也可以手动选择。</string>
     <string name="text_code_editor">代码编辑器</string>
+    <string name="text_code_editor_settings">代码编辑器设置</string>
+    <string name="text_editor_assistance">辅助</string>
+    <string name="text_editor_gestures">操作手势</string>
+    <string name="text_editor_gutter_markers">边栏标记</string>
+    <string name="text_editor_shortcut_input_bar">快捷输入栏</string>
     <string name="entry_editor_log_button_behavior_bottom_sheet">底部日志面板</string>
     <string name="entry_editor_log_button_behavior_fullscreen_page">全屏日志页面</string>
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">运行后自动显示底部日志面板</string>
     <string name="text_editor_log_button_behavior">编辑器日志按钮行为</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">编辑器运行按钮启动脚本后自动打开底部日志面板</string>
+    <string name="summary_code_editor_settings">打开完整的代码编辑器设置页面。</string>
+    <string name="summary_editor_shortcut_input_bar">配置两个编辑器引擎共用的快捷输入符号。</string>
     <string name="description_editor_log_button_behavior_preference">选择编辑器日志按钮打开日志的方式: 底部日志面板或全屏日志页面.</string>
     <plurals name="text_ace_action_used_times">
         <item quantity="other">使用 %1$d 次</item>

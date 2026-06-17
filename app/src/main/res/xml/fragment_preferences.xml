@@ -146,54 +146,10 @@
             app:itemDefaultKey="@string/default_key_editor_log_button_behavior"
             app:longClickPrompt="@string/description_editor_log_button_behavior_preference" />
 
-        <org.autojs.autojs.theme.preference.MaterialListPreference
+        <org.autojs.autojs.ui.settings.CodeEditorSettingsPreference
             app:layout="@layout/preference_custom"
-            app:key="@string/key_ace_editor_font"
-            app:title="@string/text_ace_editor_font"
-            app:itemKeys="@array/keys_ace_editor_font"
-            app:itemValues="@array/values_ace_editor_font"
-            app:itemDefaultKey="@string/default_key_ace_editor_font"
-            app:longClickPrompt="@string/description_ace_editor_font_preference" />
-
-        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_ace_word_wrap_enabled"
-            app:defaultValue="@bool/pref_ace_word_wrap_enabled"
-            app:title="@string/text_ace_word_wrap_enabled"
-            app:summary="@string/summary_ace_word_wrap_enabled"
-            app:longClickPrompt="@string/description_ace_word_wrap_enabled_preference" />
-
-        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_ace_line_numbers_enabled"
-            app:defaultValue="@bool/pref_ace_line_numbers_enabled"
-            app:title="@string/text_ace_line_numbers_enabled"
-            app:summary="@string/summary_ace_line_numbers_enabled"
-            app:longClickPrompt="@string/description_ace_line_numbers_enabled_preference" />
-
-        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_editor_breakpoint_markers_enabled"
-            app:defaultValue="true"
-            app:title="@string/text_editor_breakpoint_markers_enabled"
-            app:summary="@string/summary_editor_breakpoint_markers_enabled"
-            app:longClickPrompt="@string/description_editor_breakpoint_markers_enabled_preference" />
-
-        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_editor_fold_markers_enabled"
-            app:defaultValue="true"
-            app:title="@string/text_editor_fold_markers_enabled"
-            app:summary="@string/summary_editor_fold_markers_enabled"
-            app:longClickPrompt="@string/description_editor_fold_markers_enabled_preference" />
-
-        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
-            app:layout="@layout/preference_custom"
-            app:key="@string/key_ace_lsp_enabled"
-            app:defaultValue="@bool/pref_ace_lsp_enabled"
-            app:title="@string/text_ace_lsp_enabled"
-            app:summary="@string/summary_ace_lsp_enabled"
-            app:longClickPrompt="@string/description_ace_lsp_enabled_preference" />
+            app:title="@string/text_all_settings"
+            app:summary="@string/summary_code_editor_settings" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

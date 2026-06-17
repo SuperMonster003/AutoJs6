@@ -866,6 +866,8 @@
     <string name="text_app_version_code">App version code</string>
     <string name="text_app_version_name">App version name</string>
     <string name="text_appearance">Appearance</string>
+    <string name="text_general">General</string>
+    <string name="text_all_settings">All settings</string>
     <string name="text_applying_binary_resources">Applying binary resources</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from [Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street] must be filled</string>
     <string name="text_attribute">Attribute</string>
@@ -1775,11 +1777,18 @@
     <string name="text_maximize">Maximize</string>
     <string name="text_stop_simplified">Stop</string>
     <string name="text_code_editor">Code editor</string>
+    <string name="text_code_editor_settings">Code editor settings</string>
+    <string name="text_editor_assistance">Assistance</string>
+    <string name="text_editor_gestures">Gestures</string>
+    <string name="text_editor_gutter_markers">Gutter markers</string>
+    <string name="text_editor_shortcut_input_bar">Shortcut input bar</string>
     <string name="entry_editor_log_button_behavior_bottom_sheet">Bottom log panel</string>
     <string name="entry_editor_log_button_behavior_fullscreen_page">Fullscreen log page</string>
     <string name="text_editor_auto_show_log_bottom_sheet_on_run">Auto show bottom log panel after running</string>
     <string name="text_editor_log_button_behavior">Editor log button behavior</string>
     <string name="summary_editor_auto_show_log_bottom_sheet_on_run">Automatically open the bottom log panel after the editor Run button starts a script</string>
+    <string name="summary_code_editor_settings">Open the full code editor settings page.</string>
+    <string name="summary_editor_shortcut_input_bar">Configure shortcut input symbols shared by editor engines.</string>
     <string name="summary_ace_line_numbers_enabled">Show line numbers in the editor gutter.</string>
     <string name="summary_editor_breakpoint_markers_enabled">Show breakpoint markers in the editor gutter.</string>
     <string name="summary_editor_fold_markers_enabled">Show code folding markers in the editor gutter.</string>

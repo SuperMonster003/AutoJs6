@@ -331,6 +331,10 @@
             android:theme="@style/AppTheme.Settings" />
 
         <activity
+            android:name="org.autojs.autojs.ui.settings.CodeEditorSettingsActivity"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
             android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
             android:theme="@style/AppTheme.Settings" />
 

@@ -20,6 +20,7 @@ const FILES = {
   stringsZh: "app/src/main/res/values-zh/strings.xml",
   arrays: "app/src/main/res/values/arrays.xml",
   fragmentPreferences: "app/src/main/res/xml/fragment_preferences.xml",
+  codeEditorSettings: "app/src/main/res/xml/fragment_code_editor_settings.xml",
   editorEngineType: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineType.kt",
   editorEnginePreferences: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEnginePreferences.kt",
   editorEngineFactory: "app/src/main/java/org/autojs/autojs/ui/edit/editor/engine/EditorEngineFactory.kt",
@@ -163,6 +164,8 @@ assertIncludes(FILES.stringsZh, 'name="text_ace_word_wrap_enabled"', "Simplified
 assertIncludes(FILES.stringsZh, 'name="text_ace_line_numbers_enabled"', "Simplified Chinese ACE line number string");
 assertIncludes(FILES.stringsZh, 'name="text_editor_breakpoint_markers_enabled"', "Simplified Chinese editor breakpoint marker string");
 assertIncludes(FILES.stringsZh, 'name="text_editor_fold_markers_enabled"', "Simplified Chinese editor fold marker string");
+assertIncludes(FILES.stringsZh, 'name="text_code_editor_settings"', "Simplified Chinese code editor settings string");
+assertIncludes(FILES.stringsZh, 'name="text_editor_shortcut_input_bar"', "Simplified Chinese shortcut input bar string");
 assertOrder(
   FILES.arrays,
   [
@@ -180,14 +183,34 @@ assertOrder(
     'app:key="@string/key_editor_engine"',
     'app:key="@string/key_editor_auto_show_log_bottom_sheet_on_run"',
     'app:key="@string/key_editor_log_button_behavior"',
-    'app:key="@string/key_ace_editor_font"',
-    'app:key="@string/key_ace_word_wrap_enabled"',
-    'app:key="@string/key_ace_line_numbers_enabled"',
-    'app:key="@string/key_editor_breakpoint_markers_enabled"',
-    'app:key="@string/key_editor_fold_markers_enabled"',
-    'app:key="@string/key_ace_lsp_enabled"',
+    'app:title="@string/text_all_settings"',
   ],
-  "code editor preference order",
+  "global code editor preference order",
+);
+assertOrder(
+  FILES.codeEditorSettings,
+  [
+    'app:title="@string/text_general"',
+    'app:key="@string/key_editor_engine"',
+    'app:title="@string/text_appearance"',
+    'app:key="@string/key_editor_theme"',
+    'app:key="@string/key_ace_editor_font"',
+    'app:key="@string/key_editor_text_size"',
+    'app:key="@string/key_ace_word_wrap_enabled"',
+    'app:title="@string/text_log"',
+    'app:key="@string/key_editor_log_button_behavior"',
+    'app:key="@string/key_editor_auto_show_log_bottom_sheet_on_run"',
+    'app:title="@string/text_editor_assistance"',
+    'app:title="@string/text_editor_shortcut_input_bar"',
+    'app:key="@string/key_ace_lsp_enabled"',
+    'app:title="@string/text_editor_gestures"',
+    'app:key="@string/key_editor_pinch_to_zoom_strategy"',
+    'app:title="@string/text_editor_gutter_markers"',
+    'app:key="@string/key_editor_breakpoint_markers_enabled"',
+    'app:key="@string/key_ace_line_numbers_enabled"',
+    'app:key="@string/key_editor_fold_markers_enabled"',
+  ],
+  "dedicated code editor preference order",
 );
 assertMatch(
   FILES.editorEngineType,
