@@ -9024,6 +9024,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_bridge_destroy(reason) {
     __autojs6_bridge_destroyed = true;
+    __autojs6_destroy_all_zlib_streams("bridge destroy");
     __autojs6_destroy_all_scoped_fs_streams("bridge destroy");
     const message = reason ? String(reason) : "AutoJs6 bridge process is not available.";
     const records = Array.from(__autojs6_bridge_pending.values());
@@ -15302,6 +15303,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_pending_dns_callbacks = 0;
   let __autojs6_pending_zlib_callbacks = 0;
   let __autojs6_pending_scoped_fs_streams = [];
+  let __autojs6_pending_zlib_streams = [];
   let __autojs6_scoped_watch_file_records = [];
   let __autojs6_scoped_fs_watch_records = [];
   let __autojs6_scoped_fd_records = Object.create(null);
@@ -15312,7 +15314,8 @@ std::string buildEmbeddedScriptExecutionSource(
     return __autojs6_pending_scoped_fs_callbacks +
       __autojs6_pending_crypto_callbacks +
       __autojs6_pending_dns_callbacks +
-      __autojs6_pending_zlib_callbacks;
+      __autojs6_pending_zlib_callbacks +
+      __autojs6_pending_zlib_streams.length;
   }
   function __autojs6_schedule_task(callback) {
     if (typeof setImmediate === "function") {
@@ -15373,6 +15376,71 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_schedule_zlib_callback(callback, action) {
     __autojs6_schedule_pending_callback("zlib", action);
+  }
+  function __autojs6_track_zlib_stream(stream) {
+    if (!stream || typeof stream.once !== "function") {
+      return stream;
+    }
+    let settled = false;
+    let keepAliveHandle = null;
+    const record = {
+      stream,
+      settle
+    };
+    __autojs6_pending_zlib_streams.push(record);
+    if (typeof setInterval === "function" && typeof clearInterval === "function") {
+      try {
+        keepAliveHandle = setInterval(function() {}, 2147483647);
+        __autojs6_untrack_timer("interval", keepAliveHandle);
+      } catch (_) {
+        keepAliveHandle = null;
+      }
+    }
+    function clearKeepAlive() {
+      if (keepAliveHandle === null) {
+        return;
+      }
+      try {
+        clearInterval(keepAliveHandle);
+      } catch (_) {}
+      keepAliveHandle = null;
+    }
+    function settle() {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearKeepAlive();
+      const index = __autojs6_pending_zlib_streams.indexOf(record);
+      if (index >= 0) {
+        __autojs6_pending_zlib_streams.splice(index, 1);
+      }
+      __autojs6_try_finish_deferred_success();
+    }
+    stream.once("close", settle);
+    stream.once("end", settle);
+    stream.once("finish", settle);
+    stream.once("error", settle);
+    return stream;
+  }
+  function __autojs6_destroy_all_zlib_streams(reason) {
+    const records = __autojs6_pending_zlib_streams.slice();
+    if (records.length <= 0) {
+      return;
+    }
+    for (const record of records) {
+      const stream = record && record.stream;
+      try {
+        if (stream && typeof stream.destroy === "function") {
+          stream.destroy();
+        }
+      } catch (_) {
+      } finally {
+        if (record && typeof record.settle === "function") {
+          record.settle();
+        }
+      }
+    }
   }
   function __autojs6_require_callback(callback, operation) {
     if (typeof callback !== "function") {
@@ -22317,11 +22385,20 @@ std::string buildEmbeddedScriptExecutionSource(
     return function(options) {
       const chunks = [];
       let inputSize = 0;
+      let tracked = false;
       const originalOptions = options;
       const transformOptions = __autojs6_zlib_stream_transform_options(options);
       const stream = new nodeStream.Transform(transformOptions);
+      function activateStream() {
+        if (tracked) {
+          return;
+        }
+        tracked = true;
+        __autojs6_track_zlib_stream(stream);
+      }
       stream._transform = function(chunk, encoding, callback) {
         try {
+          activateStream();
           const chunkSize = __autojs6_binary_like_size(chunk);
           inputSize += chunkSize;
           if (inputSize > __autojs6_zlib_input_limit) {
@@ -22337,6 +22414,7 @@ std::string buildEmbeddedScriptExecutionSource(
       };
       stream._flush = function(callback) {
         try {
+          activateStream();
           const input = chunks.length === 1 ? chunks[0] : Buffer.concat(chunks, inputSize);
           const output = originalOptions === undefined
             ? syncFn(input)
@@ -27759,6 +27837,8 @@ std::string buildEmbeddedScriptExecutionSource(
       pendingCryptoCallbacks: __autojs6_pending_crypto_callbacks,
       pendingDnsCallbacks: __autojs6_pending_dns_callbacks,
       pendingZlibCallbacks: __autojs6_pending_zlib_callbacks,
+      pendingZlibStreams: __autojs6_pending_zlib_streams.length > 0,
+      pendingZlibStreamCount: __autojs6_pending_zlib_streams.length,
       pendingAsyncCallbacks,
       pendingWorkers: __autojs6_worker_threads_diagnostics.activeWorkerCount > 0,
       pendingCallbacks: pendingAsyncCallbacks > 0
@@ -27797,6 +27877,8 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.pendingCryptoCallbacks = summary.pendingCryptoCallbacks;
     fields.pendingDnsCallbacks = summary.pendingDnsCallbacks;
     fields.pendingZlibCallbacks = summary.pendingZlibCallbacks;
+    fields.pendingZlibStreams = summary.pendingZlibStreams;
+    fields.pendingZlibStreamCount = summary.pendingZlibStreamCount;
     fields.pendingAsyncCallbacks = summary.pendingAsyncCallbacks;
     fields.pendingCallbacks = summary.pendingCallbacks;
     fields.pendingSummary = summary;
@@ -27855,6 +27937,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_finish_success(value) {
     if (__autojs6_finished) return;
     __autojs6_terminate_all_worker_threads("script success");
+    __autojs6_destroy_all_zlib_streams("script success");
     __autojs6_destroy_all_scoped_fs_streams("script success");
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
@@ -27873,6 +27956,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_finish_error(error) {
     if (__autojs6_finished) return;
     __autojs6_terminate_all_worker_threads("script failure");
+    __autojs6_destroy_all_zlib_streams("script failure");
     __autojs6_destroy_all_scoped_fs_streams("script failure");
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();

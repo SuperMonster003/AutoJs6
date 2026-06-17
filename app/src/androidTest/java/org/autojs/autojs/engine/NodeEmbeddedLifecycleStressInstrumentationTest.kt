@@ -214,6 +214,39 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
+    fun activeZlibStreamTimesOutThenNextRunWorks() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val timeout = runEmbeddedScript(
+            source = """
+                "nodejs";
+                const zlib = require("zlib");
+                globalThis.__autojs6HeldGzip = zlib.createGzip();
+                globalThis.__autojs6HeldGzip.on("data", () => {
+                  console.log("stress.zlib.stream.data");
+                });
+                globalThis.__autojs6HeldGzip.write(Buffer.from("pending-zlib-stream"));
+                console.log("stress.zlib.stream.pending");
+            """.trimIndent(),
+            sourceName = "<lifecycle-stress-zlib-stream.js>",
+            timeoutMs = FAULT_TIMEOUT_MS,
+        )
+
+        assertTimedOut("active zlib stream", timeout)
+        assertEquals(false, timeout.pendingTimers)
+        assertEquals(true, timeout.pendingZlibStreams)
+        assertEquals(1, timeout.pendingZlibStreamCount)
+        assertEquals(true, timeout.pendingCallbacks)
+        assertTrue(
+            timeout.errorMessage.orEmpty(),
+            timeout.errorMessage.orEmpty().contains("pendingZlibStreamCount=1"),
+        )
+        settleEmbeddedScriptServiceProcess()
+
+        assertRecoveryRun("after.zlib.stream")
+    }
+
+    @Test
     fun nestedFsCallbacksDrainBeforeSuccess() {
         assumeEmbeddedScriptExecutionEnabled()
 

@@ -196,6 +196,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             result.pendingScopedFsCallbacks?.let { append(" pendingScopedFsCallbacks=").append(it) }
             result.pendingCryptoCallbacks?.let { append(" pendingCryptoCallbacks=").append(it) }
             result.pendingZlibCallbacks?.let { append(" pendingZlibCallbacks=").append(it) }
+            result.pendingZlibStreamCount?.let { append(" pendingZlibStreamCount=").append(it) }
             result.pendingAsyncCallbacks?.let { append(" pendingAsyncCallbacks=").append(it) }
             result.pendingCallbacks?.let { append(" pendingCallbacks=").append(it) }
         }

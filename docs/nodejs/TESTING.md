@@ -284,7 +284,7 @@ Current zlib focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeZlibBufferInstrumentationTest"
 ```
 
-This suite verifies `zlib`/`node:zlib` identity, shadowing protection, callback/promisified/buffer/stream roundtrips, invalid input rejection, frozen constants, pending callback drain, and stable denial for `zlib/promises`.
+This suite verifies `zlib`/`node:zlib` identity, shadowing protection, callback/promisified/buffer/stream roundtrips, scoped fs read->gzip->write pipeline behavior, invalid input rejection, frozen constants, pending callback/stream drain, active zlib stream timeout recovery, and stable denial for `zlib/promises`.
 
 Current crypto focused instrumentation:
 

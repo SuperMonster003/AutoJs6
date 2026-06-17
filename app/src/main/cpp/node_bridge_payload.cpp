@@ -42,6 +42,8 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.pending_crypto_callbacks", jsonNumberField(text, "pendingCryptoCallbacks"));
     putPayload(payload, "embedded_script.pending_dns_callbacks", jsonNumberField(text, "pendingDnsCallbacks"));
     putPayload(payload, "embedded_script.pending_zlib_callbacks", jsonNumberField(text, "pendingZlibCallbacks"));
+    putPayload(payload, "embedded_script.pending_zlib_streams", jsonBooleanField(text, "pendingZlibStreams"));
+    putPayload(payload, "embedded_script.pending_zlib_stream_count", jsonNumberField(text, "pendingZlibStreamCount"));
     putPayload(payload, "embedded_script.pending_async_callbacks", jsonNumberField(text, "pendingAsyncCallbacks"));
     putPayload(payload, "embedded_script.pending_callbacks", jsonBooleanField(text, "pendingCallbacks"));
     putPayload(payload, "embedded_script.bridge_requests_json", jsonStringField(text, "bridgeRequestsJson"));

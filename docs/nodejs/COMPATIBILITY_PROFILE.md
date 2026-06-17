@@ -258,6 +258,14 @@ such as `/proc`, `/sys`, and `/dev` remain denied. Active scoped fs streams are
 tracked in runtime diagnostics and are destroyed during runtime cleanup so a
 timed-out or stopped service does not poison the next execution.
 
+The `zlib` wrapper exposes bounded transform streams for `createGzip()`,
+`createGunzip()`, `createDeflate()`, `createInflate()`, raw deflate/inflate,
+and Brotli compression/decompression. Active zlib transform tracking starts
+after the stream receives data or flushes, so feature-detection constructors do
+not keep scripts alive. Active transforms are reported with
+`pendingZlibStreams` and `pendingZlibStreamCount`, destroyed during runtime
+cleanup, and keep the next execution clean after timeout or service stop.
+
 ## `node:module` Safe Subset
 
 `require("module")` and `require("node:module")` are partial limited builtins for CommonJS/npm compatibility. They expose only:

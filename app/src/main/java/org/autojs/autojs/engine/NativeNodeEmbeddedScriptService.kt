@@ -913,6 +913,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private val CRYPTO_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bcrypto\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
         private val DNS_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bdns\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
         private val ZLIB_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bzlib\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
+        private val ZLIB_STREAM_SOURCE_HINT_PATTERN = Regex("""\bzlib\.create(?:Gzip|Gunzip|Deflate|Inflate|DeflateRaw|InflateRaw|BrotliCompress|BrotliDecompress)\s*\(""")
 
         fun enqueueScript(
             context: Context,
@@ -1399,6 +1400,8 @@ class NativeNodeEmbeddedScriptService : Service() {
                 pendingCryptoCallbacks = nativeValues["embedded_script.pending_crypto_callbacks"]?.toIntOrNull(),
                 pendingDnsCallbacks = nativeValues["embedded_script.pending_dns_callbacks"]?.toIntOrNull(),
                 pendingZlibCallbacks = nativeValues["embedded_script.pending_zlib_callbacks"]?.toIntOrNull(),
+                pendingZlibStreams = nativeValues["embedded_script.pending_zlib_streams"]?.equals("true", ignoreCase = true),
+                pendingZlibStreamCount = nativeValues["embedded_script.pending_zlib_stream_count"]?.toIntOrNull(),
                 pendingAsyncCallbacks = nativeValues["embedded_script.pending_async_callbacks"]?.toIntOrNull(),
                 pendingCallbacks = nativeValues["embedded_script.pending_callbacks"]?.equals("true", ignoreCase = true),
             )
@@ -1478,6 +1481,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             val pendingCryptoCallbacks = hasLikelyCryptoCallbackSourceHint(request.source)
             val pendingDnsCallbacks = hasLikelyDnsCallbackSourceHint(request.source)
             val pendingZlibCallbacks = hasLikelyZlibCallbackSourceHint(request.source)
+            val pendingZlibStreams = hasLikelyZlibStreamSourceHint(request.source)
             return linkedMapOf(
                 "embedded_script.succeeded" to "false",
                 "embedded_script.exit_code" to TIMEOUT_EXIT_CODE.toString(),
@@ -1496,19 +1500,23 @@ class NativeNodeEmbeddedScriptService : Service() {
                 "embedded_script.pending_crypto_callbacks" to if (pendingCryptoCallbacks) "1" else "0",
                 "embedded_script.pending_dns_callbacks" to if (pendingDnsCallbacks) "1" else "0",
                 "embedded_script.pending_zlib_callbacks" to if (pendingZlibCallbacks) "1" else "0",
+                "embedded_script.pending_zlib_streams" to pendingZlibStreams.toString(),
+                "embedded_script.pending_zlib_stream_count" to if (pendingZlibStreams) "1" else "0",
                 "embedded_script.pending_async_callbacks" to listOf(
                     pendingScopedFsCallbacks,
                     pendingScopedFsStreams,
                     pendingCryptoCallbacks,
                     pendingDnsCallbacks,
                     pendingZlibCallbacks,
+                    pendingZlibStreams,
                 ).count { it }.toString(),
                 "embedded_script.pending_callbacks" to (
                     pendingScopedFsCallbacks ||
                         pendingScopedFsStreams ||
                         pendingCryptoCallbacks ||
                         pendingDnsCallbacks ||
-                        pendingZlibCallbacks
+                        pendingZlibCallbacks ||
+                        pendingZlibStreams
                     ).toString(),
             )
         }
@@ -1553,6 +1561,9 @@ class NativeNodeEmbeddedScriptService : Service() {
                 append('\n')
                 append("pendingZlibCallbacks=")
                 append(nativeValues["embedded_script.pending_zlib_callbacks"] ?: "unknown")
+                append('\n')
+                append("pendingZlibStreamCount=")
+                append(nativeValues["embedded_script.pending_zlib_stream_count"] ?: "unknown")
             }
         }
 
@@ -1578,6 +1589,10 @@ class NativeNodeEmbeddedScriptService : Service() {
 
         private fun hasLikelyZlibCallbackSourceHint(source: String): Boolean {
             return ZLIB_CALLBACK_SOURCE_HINT_PATTERN.containsMatchIn(source)
+        }
+
+        private fun hasLikelyZlibStreamSourceHint(source: String): Boolean {
+            return ZLIB_STREAM_SOURCE_HINT_PATTERN.containsMatchIn(source)
         }
 
         private fun writeEmbeddedScriptRequestSpool(
@@ -1798,6 +1813,8 @@ class NativeNodeEmbeddedScriptService : Service() {
             pendingCryptoCallbacks?.let { putInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS, it) }
             pendingDnsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS, it) }
             pendingZlibCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS, it) }
+            pendingZlibStreams?.let { putBoolean(EXTRA_RESULT_PENDING_ZLIB_STREAMS, it) }
+            pendingZlibStreamCount?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT, it) }
             pendingAsyncCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS, it) }
             pendingCallbacks?.let { putBoolean(EXTRA_RESULT_PENDING_CALLBACKS, it) }
             val transportNativeValues = nativeValues
@@ -1874,6 +1891,10 @@ class NativeNodeEmbeddedScriptService : Service() {
                     ?.getInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS),
                 pendingZlibCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS),
+                pendingZlibStreams = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_STREAMS) }
+                    ?.getBoolean(EXTRA_RESULT_PENDING_ZLIB_STREAMS),
+                pendingZlibStreamCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT) }
+                    ?.getInt(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT),
                 pendingAsyncCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS),
                 pendingCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_CALLBACKS) }
@@ -1908,6 +1929,8 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS = "result_pending_crypto_callbacks"
         private const val EXTRA_RESULT_PENDING_DNS_CALLBACKS = "result_pending_dns_callbacks"
         private const val EXTRA_RESULT_PENDING_ZLIB_CALLBACKS = "result_pending_zlib_callbacks"
+        private const val EXTRA_RESULT_PENDING_ZLIB_STREAMS = "result_pending_zlib_streams"
+        private const val EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT = "result_pending_zlib_stream_count"
         private const val EXTRA_RESULT_PENDING_ASYNC_CALLBACKS = "result_pending_async_callbacks"
         private const val EXTRA_RESULT_PENDING_CALLBACKS = "result_pending_callbacks"
         private const val EXTRA_RESULT_NATIVE_PAYLOAD = "result_native_payload"

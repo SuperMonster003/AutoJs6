@@ -52,6 +52,7 @@ small set of already-gated features toward practical use.
 | Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import local graph smoke is covered separately. |
 | Buffer module | partial | `require("buffer")`, `require("node:buffer")`, and ESM `node:buffer` use the same builtin wrapper and cannot be shadowed by `node_modules/buffer`. |
 | fs streams | partial | Scoped read/write streams support read, write, pipe, stable denial paths, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
+| zlib streams | partial | Bounded transform streams support gzip/gunzip and deflate/inflate pipelines, scoped fs pipeline smoke, invalid input errors, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | Controlled fetch | experimental | Future v1.1 batch; raw network remains disabled. |
 | WebSocket | experimental | Future v1.1 batch; raw sockets remain disabled. |
 | Worker threads | experimental | Disabled by default. |
@@ -78,6 +79,9 @@ small set of already-gated features toward practical use.
 - fs stream smoke passes for read/write/pipe, scoped escape denial,
   `/proc`/`/sys`/`/dev` absolute path denial, active stream timeout cleanup,
   and packaged APK markers.
+- zlib stream smoke passes for gzip/gunzip, deflate/inflate, scoped fs
+  read->gzip->write, invalid gzip error propagation, active stream timeout
+  cleanup, and packaged APK markers.
 - Compatibility profile marks ESM and dynamic import as `partial`.
 
 ## Safety Invariants

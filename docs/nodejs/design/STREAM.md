@@ -50,7 +50,7 @@ Required boundaries:
 - fs streams must use scoped fs path validation
 - FileHandle streams must use owned fd tracking
 - active scoped fs streams must be tracked until `close`, `end`, `finish`, or `error`
-- zlib streams must enforce zlib input/output budgets
+- zlib streams must enforce zlib input/output budgets and active stream cleanup
 - stream constructors must not expose raw native handles
 - destroyed streams must release callbacks and pending counters
 - timeout must destroy active AutoJs6-owned streams
@@ -103,6 +103,7 @@ Required coverage:
 - scoped fs read/write streams reject absolute Android/device paths, including `/proc`, `/sys`, and `/dev`
 - active scoped fs streams are visible in pending diagnostics and do not poison the next execution after timeout/service cleanup
 - zlib stream roundtrip remains bounded
+- active zlib transforms are visible in pending diagnostics after first data write and do not poison the next execution after timeout/service cleanup
 - `node:stream` cannot be shadowed
 
 Current coverage lives in the embedded stream, fs, readline, zlib, compatibility corpus, security regression tests, and `NodeStreamMvpInstrumentationTest`.

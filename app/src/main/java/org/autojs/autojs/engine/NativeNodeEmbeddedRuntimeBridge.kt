@@ -650,6 +650,8 @@ object NativeNodeEmbeddedRuntimeBridge {
             pendingCryptoCallbacks = nativeValues["embedded_script.pending_crypto_callbacks"].toOptionalInt(),
             pendingDnsCallbacks = nativeValues["embedded_script.pending_dns_callbacks"].toOptionalInt(),
             pendingZlibCallbacks = nativeValues["embedded_script.pending_zlib_callbacks"].toOptionalInt(),
+            pendingZlibStreams = nativeValues["embedded_script.pending_zlib_streams"].toOptionalBoolean(),
+            pendingZlibStreamCount = nativeValues["embedded_script.pending_zlib_stream_count"].toOptionalInt(),
             pendingAsyncCallbacks = nativeValues["embedded_script.pending_async_callbacks"].toOptionalInt(),
             pendingCallbacks = nativeValues["embedded_script.pending_callbacks"].toOptionalBoolean(),
         )
@@ -17168,6 +17170,8 @@ object NativeNodeEmbeddedRuntimeBridge {
         val pendingCryptoCallbacks: Int? = null,
         val pendingDnsCallbacks: Int? = null,
         val pendingZlibCallbacks: Int? = null,
+        val pendingZlibStreams: Boolean? = null,
+        val pendingZlibStreamCount: Int? = null,
         val pendingAsyncCallbacks: Int? = null,
         val pendingCallbacks: Boolean? = null,
     )
