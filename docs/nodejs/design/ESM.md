@@ -11,7 +11,7 @@ AutoJs6 must eventually account for `.mjs`, `package.json` `type`, static `impor
 The v1.1 implementation promotes the existing controlled subset:
 
 - `.mjs` routes to the Node backend and runs as partial ESM by default.
-- dynamic import is rejected by default.
+- dynamic import runs through the local-only AutoJs6-managed loader by default.
 - package `type=module` switches `.js` entry files into ESM mode.
 - encrypted and packaged module graphs are not interpreted as unrestricted Node ESM graphs.
 
@@ -31,21 +31,27 @@ Current wiring:
 - JavaScript profile snapshot: `require("autojs6:profile").experimentalFlags.esm`
 - Embedded script request flag: `esmExperimentalEnabled`
 
-The flag enables only AutoJs6 partial ESM v1.1. It does not enable Node's raw ESM loader, dynamic import, loader hooks, raw `node:module` loader authority, network imports, native addons, or unrestricted builtins.
+The flag enables only AutoJs6 partial ESM v1.1. It does not enable Node's raw ESM loader, loader hooks, raw `node:module` loader authority, network imports, native addons, or unrestricted builtins.
 
-Dynamic import is intentionally split into a second gate:
+Dynamic import is intentionally split into a local-only switch:
 
 ```properties
-autojs.nodejs.dynamicImport.experimental=false
+autojs.nodejs.dynamicImport.local=true
 ```
 
 Current dynamic import wiring:
 
-- Gradle property default: `false`
-- BuildConfig field: `NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED`
-- Kotlin capability registry: `NodeRuntimeCapabilities.DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY`
+- Gradle property default: `true`
+- BuildConfig field: `NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED`
+- Kotlin capability registry: `NodeRuntimeCapabilities.DYNAMIC_IMPORT_LOCAL_PROPERTY`
 - JavaScript profile snapshot: `require("autojs6:profile").experimentalFlags.dynamicImport`
 - Embedded script request flag: `dynamicImportExperimentalEnabled`
+
+The legacy broad experiment remains release-forbidden:
+
+```properties
+autojs.nodejs.dynamicImport.experimental=false
+```
 
 ## Current Default Behavior
 
@@ -54,7 +60,7 @@ Default behavior:
 - `.mjs` entries run as partial ESM.
 - `.js` entries run as ESM only when the nearest scoped `package.json` contains `"type": "module"`.
 - static `import`/`export` syntax in CommonJS entries still fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
-- dynamic `import()` fails with legacy `code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED` and canonical `autojs6Code=ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`.
+- dynamic `import()` supports local-only package, builtin, `.mjs`, and CommonJS imports.
 - `import.meta` fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
 - CommonJS `require()` of `.mjs` or package targets that resolve to ESM fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
 
@@ -171,30 +177,29 @@ Future hardening should ensure:
 
 ## Dynamic Import
 
-Current default: disabled.
+Current default: enabled as local-only partial support.
 
-Static ESM and dynamic import are separate gates. Enabling `autojs.nodejs.esm.experimental=true` does not enable `import()`.
+AutoJs6-managed dynamic import supports:
 
-With both `autojs.nodejs.esm.experimental=true` and `autojs.nodejs.dynamicImport.experimental=true`, AutoJs6-managed dynamic import supports only:
-
-- local relative specifiers such as `./dep.mjs`
-- targets resolved inside `workingDirectory`
+- local relative specifiers such as `./dep.mjs` and `./dep.cjs`
+- safe package specifiers resolved inside `workingDirectory`
+- allowed builtin specifiers such as `node:path`
+- package `exports`/`imports` condition order for ESM importers
 - the same ESM/CJS interop path as static ESM imports
 
 It rejects:
 
-- package and builtin dynamic imports
+- disabled builtin specifiers such as `node:child_process`
 - absolute paths
 - `file:`, `data:`, and other protocol imports
 - `http:` and `https:` network imports
 - `..` or realpath escapes outside `workingDirectory`
+- dynamic-code sources such as `eval` and `Function`
 
 Dynamic import still must answer in future phases:
 
-- whether CJS may call `import()`
-- whether ESM may call `import()`
-- whether imported graph chunks can be loaded after initial startup
-- how encrypted packaged module sources are discovered
+- broader npm package graphs
+- richer package/export graph metadata for packaged APKs
 - how scoped file URLs are validated
 - how service destroy cancels pending imports
 
@@ -294,4 +299,4 @@ The partial profile must keep tests for:
 
 ## Current Decision
 
-ESM is partial and enabled by default for Node Profile v1.1. Partial v1.1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, and a focused packaged `.mjs` graph smoke with refreshed template support. Dynamic import is a separate experiment behind `autojs.nodejs.dynamicImport.experimental=true` and is limited to local relative specifiers inside `workingDirectory`. This path still does not enable loader hooks, raw `node:module` loader authority, network imports, CJS `require()` of ESM, or unrestricted packaged encrypted ESM graphs.
+ESM is partial and enabled by default for Node Profile v1.1. Partial v1.1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, local-only dynamic import, and a focused packaged `.mjs` graph smoke with refreshed template support. Dynamic import is limited to local relative modules, allowed builtins, and packages resolved inside `workingDirectory`. This path still does not enable loader hooks, raw `node:module` loader authority, network imports, CJS `require()` of ESM, unrestricted file URLs, or unrestricted packaged encrypted ESM graphs.

@@ -113,6 +113,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         val workingDirectory = serviceRequest.workingDirectory?.takeIf { it.isNotBlank() }
         val timeoutMs = serviceRequest.timeoutMs.coerceAtLeast(1L)
         val esmExperimentalEnabled = serviceRequest.esmExperimentalEnabled
+        val dynamicImportLocalEnabled = BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED
         val dynamicImportExperimentalEnabled = serviceRequest.dynamicImportExperimentalEnabled
         val workerThreadsExperimentalEnabled = serviceRequest.workerThreadsExperimentalEnabled
         val javaInteropExperimentalEnabled = serviceRequest.javaInteropExperimentalEnabled
@@ -232,6 +233,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "script.enter executionId=$executionId processName=$processName pid=$pid sourceName=$sourceName " +
                     "env=${env.size} moduleSources=${moduleSources.size} runtimeModuleSources=${enrichedRuntimeModuleSources.size} " +
                     "esmExperimentalEnabled=$esmExperimentalEnabled " +
+                    "dynamicImportLocalEnabled=$dynamicImportLocalEnabled " +
                     "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
                     "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
                     "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +

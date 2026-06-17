@@ -547,9 +547,10 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun dynamicImportStaysDisabledWhenOnlyEsmExperimentalFlagIsEnabled() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("dynamic import default-off regression")
-        assertFalse(BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED)
+    fun dynamicImportCanStillRejectWhenExplicitlyDisabled() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("dynamic import explicit-off regression")
+        assertTrue(BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED)
+        assertTrue(BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED)
         val workDir = freshWorkDir("esm-dynamic-default-off")
         File(workDir, "dep.mjs").writeText("""export const value = "unexpected";""")
 
@@ -569,8 +570,8 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalDynamicImportSupportsLocalRelativeEsmModule() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("experimental local dynamic import")
+    fun localDynamicImportSupportsRelativeEsmAndCjsModulesByDefault() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import")
         val workDir = freshWorkDir("esm-dynamic-local")
         val dependency = File(workDir, "dep.mjs").apply {
             writeText(
@@ -580,28 +581,93 @@ class NodeEsmExperimentalInstrumentationTest {
                 """.trimIndent(),
             )
         }
+        File(workDir, "legacy.cjs").writeText("""module.exports = { value: "legacy" };""")
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
                 const mod = await import("./dep.mjs");
-                console.log("esm.dynamic=" + mod.default.value + "/" + mod.named);
+                const legacy = await import("./legacy.cjs");
+                console.log("esm.dynamic=" + mod.default.value + "/" + mod.named + "/" + legacy.default.value);
             """.trimIndent(),
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = true,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("experimental local dynamic import", result)
-        assertTrue(result.stdout.contains("esm.dynamic=default/named"))
+        NodeEmbeddedTestHarness.assertSucceeded("local dynamic import", result)
+        assertTrue(result.stdout.contains("esm.dynamic=default/named/legacy"))
         assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
         assertEquals("true", result.nativeValues["embedded_script.dynamic_import_enabled"])
         assertTrue(result.nativeValues["embedded_script.esm_module_graph_modules"].orEmpty().contains(dependency.absolutePath))
     }
 
     @Test
-    fun experimentalDynamicImportCannotEscapeWorkingDirectory() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("experimental dynamic import scoped guard")
+    fun localDynamicImportSupportsAllowedBuiltinsAndDeniesDisabledBuiltins() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import builtins")
+        val workDir = freshWorkDir("esm-dynamic-builtins")
+
+        val allowed = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const path = await import("node:path");
+                console.log("esm.dynamic.builtin=" + (path.default.basename("/tmp/value.txt") === "value.txt"));
+            """.trimIndent(),
+            sourceName = File(workDir, "builtin-main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("local dynamic import builtin", allowed)
+        assertTrue(allowed.stdout.contains("esm.dynamic.builtin=true"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val denied = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """await import("node:child_process");""",
+            sourceName = File(workDir, "denied-builtin-main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import disabled builtin", denied), denied.succeeded)
+        assertEquals(NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED, denied.errorCode)
+        assertTrue(denied.errorMessage.orEmpty().contains("child_process"))
+    }
+
+    @Test
+    fun localDynamicImportSupportsSafePackageImportCondition() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import package")
+        val workDir = freshWorkDir("esm-dynamic-package")
+        val packageDir = File(workDir, "node_modules/safe-package").apply { mkdirs() }
+        File(packageDir, "package.json").writeText(
+            """
+            {
+              "name": "safe-package",
+              "exports": {
+                ".": {
+                  "import": "./esm.mjs",
+                  "require": "./cjs.cjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(packageDir, "esm.mjs").writeText("""export default { value: "esm-condition" };""")
+        File(packageDir, "cjs.cjs").writeText("""module.exports = { value: "require-condition" };""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const pkg = await import("safe-package");
+                console.log("esm.dynamic.package=" + pkg.default.value);
+            """.trimIndent(),
+            sourceName = File(workDir, "package-main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("local dynamic import package", result)
+        assertTrue(result.stdout.contains("esm.dynamic.package=esm-condition"))
+        assertEquals("true", result.nativeValues["embedded_script.dynamic_import_enabled"])
+    }
+
+    @Test
+    fun localDynamicImportCannotEscapeWorkingDirectory() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import scoped guard")
         val parent = freshWorkDir("esm-dynamic-escape-parent")
         val workDir = File(parent, "project").apply { mkdirs() }
         File(parent, "outside.mjs").writeText("""export const value = "outside";""")
@@ -610,35 +676,27 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """await import("../outside.mjs");""",
             sourceName = File(workDir, "main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = true,
         )
 
-        assertFalse(NodeEmbeddedTestHarness.describeResult("experimental dynamic import escape", result), result.succeeded)
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import escape", result), result.succeeded)
         assertEquals("ERR_AUTOJS6_FS_PATH_ESCAPE", result.errorCode)
         assertEquals("true", result.nativeValues["embedded_script.dynamic_import_enabled"])
         assertTrue(result.nativeValues["embedded_script.esm_last_denied_reason"].orEmpty().contains("escapes working directory"))
     }
 
     @Test
-    fun experimentalDynamicImportRejectsPackageAndUrlSpecifiers() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("experimental dynamic import restricted specifiers")
+    fun localDynamicImportRejectsUrlAndAbsoluteSpecifiers() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import restricted specifiers")
         val workDir = freshWorkDir("esm-dynamic-restricted")
 
-        val packageSpecifier = NodeEmbeddedTestHarness.runEmbeddedScript(
-            source = """await import("some-package");""",
-            sourceName = File(workDir, "package-main.mjs").absolutePath,
+        val absolute = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """await import("/tmp/dep.mjs");""",
+            sourceName = File(workDir, "absolute-main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = true,
         )
 
-        assertFalse(
-            NodeEmbeddedTestHarness.describeResult("experimental dynamic import package specifier", packageSpecifier),
-            packageSpecifier.succeeded,
-        )
-        assertEquals(NodeRuntimeErrorCodes.LEGACY_DYNAMIC_IMPORT_UNSUPPORTED, packageSpecifier.errorCode)
-        assertTrue(packageSpecifier.errorMessage.orEmpty().contains("only local relative imports"))
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import absolute", absolute), absolute.succeeded)
+        assertEquals("ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED", absolute.errorCode)
 
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
 
@@ -646,13 +704,22 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """await import("file:///tmp/dep.mjs");""",
             sourceName = File(workDir, "url-main.mjs").absolutePath,
             workingDirectory = workDir,
-            esmExperimentalEnabled = true,
-            dynamicImportExperimentalEnabled = true,
         )
 
-        assertFalse(NodeEmbeddedTestHarness.describeResult("experimental dynamic import file URL", fileUrl), fileUrl.succeeded)
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import file URL", fileUrl), fileUrl.succeeded)
         assertEquals(NodeRuntimeErrorCodes.LEGACY_DYNAMIC_IMPORT_UNSUPPORTED, fileUrl.errorCode)
         assertTrue(fileUrl.errorMessage.orEmpty().contains("URL/protocol imports"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val networkUrl = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """await import("https://example.test/dep.mjs");""",
+            sourceName = File(workDir, "network-main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import network URL", networkUrl), networkUrl.succeeded)
+        assertEquals("ERR_AUTOJS6_NETWORK_DISABLED", networkUrl.errorCode)
     }
 
     private fun freshWorkDir(name: String): File {

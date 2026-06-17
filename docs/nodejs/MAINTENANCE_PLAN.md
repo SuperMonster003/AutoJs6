@@ -94,8 +94,10 @@ ESM review:
 
 - revisit `.mjs`, package `type`, CJS/ESM interop, top-level await, `import.meta`, source maps, dynamic import, packaged
   APK smoke, and scoped file URL denial;
-- keep dynamic import default-off until its gate is green, and keep ESM partial
-  support under focused regression and packaged smoke coverage.
+- keep dynamic import local-only after the v1.1 gate, and keep ESM partial
+  support under focused regression and packaged smoke coverage. Broader URL,
+  loader-hook, and package-graph dynamic import support still needs a future
+  gate.
 
 Worker review:
 

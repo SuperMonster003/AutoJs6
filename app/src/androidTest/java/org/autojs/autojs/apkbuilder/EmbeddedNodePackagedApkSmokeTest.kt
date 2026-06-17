@@ -8766,12 +8766,28 @@ class EmbeddedNodePackagedApkSmokeTest {
         File(projectDir, "dynamic-import.js").writeText(
             """
             "nodejs";
-            import("./dynamic-target.js");
+            return Promise.all([
+              import("./dynamic-target.mjs"),
+              import("./dynamic-legacy.cjs")
+            ]).then(([esm, cjs]) => {
+              const mjsOk = esm.default.value === "dynamic-esm" && esm.named === "named";
+              const cjsOk = cjs.default.value === "dynamic-cjs";
+              console.log("packaged.dynamic_import.ready=" + (mjsOk && cjsOk));
+              console.log("packaged.dynamic_import.mjs=" + mjsOk);
+              console.log("packaged.dynamic_import.cjs=" + cjsOk);
+            });
             """.trimIndent() + "\n",
             StandardCharsets.UTF_8,
         )
-        File(projectDir, "dynamic-target.js").writeText(
-            """module.exports = { value: "should-not-load" };""" + "\n",
+        File(projectDir, "dynamic-target.mjs").writeText(
+            """
+            export default { value: "dynamic-esm" };
+            export const named = "named";
+            """.trimIndent() + "\n",
+            StandardCharsets.UTF_8,
+        )
+        File(projectDir, "dynamic-legacy.cjs").writeText(
+            """module.exports = { value: "dynamic-cjs" };""" + "\n",
             StandardCharsets.UTF_8,
         )
         File(projectDir, "timeout.js").writeText(
@@ -8966,34 +8982,50 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
-    fun installAndRunDynamicImportDiagnosticsEmbeddedNodePackagedApk() {
+    fun installAndRunDynamicImportLocalEmbeddedNodePackagedApk() {
         assumeTrue(
-            "Embedded Node.js packaged dynamic import diagnostics install-and-run smoke requires embedded script execution build support.",
+            "Embedded Node.js packaged dynamic import local install-and-run smoke requires embedded script execution build support.",
             BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
         )
+        assumeTrue(
+            "Embedded Node.js packaged dynamic import local install-and-run smoke requires Node Profile v1.1 dynamic import local support.",
+            BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED && BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+        )
+        assumeTrue(
+            "Embedded Node.js packaged dynamic import local install-and-run smoke requires a refreshed inrt template override built with local dynamic import enabled.",
+            isPackagedSmokeTemplateOverrideEnabled(),
+        )
 
-        assumePackagedSmokeTemplateAvailable("Packaged dynamic import diagnostics install-and-run smoke")
+        assumePackagedSmokeTemplateAvailable("Packaged dynamic import local install-and-run smoke")
 
         val outputApk = buildPackagedGateDiagnosticsApk(
-            rootName = "embedded-node-packaged-dynamic-import-diagnostics-smoke",
+            rootName = "embedded-node-packaged-dynamic-import-local-smoke",
             outputApkName = DYNAMIC_IMPORT_DIAGNOSTICS_APK_NAME,
             projectName = DYNAMIC_IMPORT_DIAGNOSTICS_PROJECT_NAME,
             packageName = DYNAMIC_IMPORT_DIAGNOSTICS_PACKAGE_NAME,
             mainScriptName = "dynamic-import.js",
             mainScript = """
                 "nodejs";
-                try {
-                  eval("import('./dynamic-target.js')");
-                  console.log("packaged.diagnostics.dynamic_import.unexpected=true");
-                } catch (error) {
-                  console.log("packaged.diagnostics.dynamic_import.code=" + error.code);
-                  console.log("packaged.diagnostics.dynamic_import.message=" + String(error.message).includes("dynamic import is disabled"));
-                }
+                return Promise.all([
+                  import("./dynamic-target.mjs"),
+                  import("./dynamic-legacy.cjs")
+                ]).then(([esm, cjs]) => {
+                  const mjsOk = esm.default.value === "dynamic-esm" && esm.named === "named";
+                  const cjsOk = cjs.default.value === "dynamic-cjs";
+                  console.log("packaged.dynamic_import.ready=" + (mjsOk && cjsOk));
+                  console.log("packaged.dynamic_import.mjs=" + mjsOk);
+                  console.log("packaged.dynamic_import.cjs=" + cjsOk);
+                });
             """.trimIndent() + "\n",
             extraFiles = mapOf(
-                "dynamic-target.js" to """module.exports = { value: "should-not-load" };""" + "\n",
+                "dynamic-target.mjs" to """
+                    export default { value: "dynamic-esm" };
+                    export const named = "named";
+                """.trimIndent() + "\n",
+                "dynamic-legacy.cjs" to """module.exports = { value: "dynamic-cjs" };""" + "\n",
             ),
             runtimeMarkers = DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS,
+            requiredTemplateDexMarkers = DYNAMIC_IMPORT_TEMPLATE_DEX_MARKERS,
         )
         assertInstallAndRunPackagedDynamicImportDiagnosticsSmoke(outputApk)
     }
@@ -12045,7 +12077,8 @@ $permissionsJson
             "main.js",
             "esm-entry.mjs",
             "dynamic-import.js",
-            "dynamic-target.js",
+            "dynamic-target.mjs",
+            "dynamic-legacy.cjs",
             "timeout.js",
             "node_modules/diagnostic-boom/index.js",
             "node_modules/diagnostic-type-module/index.mjs",
@@ -12192,8 +12225,8 @@ $permissionsJson
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
             packageName = DYNAMIC_IMPORT_DIAGNOSTICS_PACKAGE_NAME,
-            shellApkPath = "/data/local/tmp/autojs6-packaged-node-dynamic-import-diagnostics-smoke.apk",
-            label = "packaged dynamic import diagnostics smoke",
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-dynamic-import-local-smoke.apk",
+            label = "packaged dynamic import local smoke",
             requiredMarkers = DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS,
         )
     }
@@ -13435,7 +13468,9 @@ $permissionsJson
             "packaged.diagnostics.esm.exports_context=true",
             "packaged.diagnostics.after_failure.ok=true",
             "packaged.diagnostics.esm.code=ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
-            "packaged.diagnostics.dynamic_import.code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED",
+            "packaged.dynamic_import.ready=true",
+            "packaged.dynamic_import.mjs=true",
+            "packaged.dynamic_import.cjs=true",
             "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",
             "packaged.diagnostics.timeout.timedOut=true",
             "packaged.diagnostics.timeout.pendingTimers=true",
@@ -13467,8 +13502,12 @@ $permissionsJson
             "esmExperimentalEnabled=",
         )
         private val DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS = listOf(
-            "packaged.diagnostics.dynamic_import.code=ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED",
-            "packaged.diagnostics.dynamic_import.message=true",
+            "packaged.dynamic_import.ready=true",
+            "packaged.dynamic_import.mjs=true",
+            "packaged.dynamic_import.cjs=true",
+        )
+        private val DYNAMIC_IMPORT_TEMPLATE_DEX_MARKERS = listOf(
+            "dynamicImportLocalEnabled=",
         )
         private val TIMEOUT_DIAGNOSTICS_RUNTIME_MARKERS = listOf(
             "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",

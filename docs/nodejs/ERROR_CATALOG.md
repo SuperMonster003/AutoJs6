@@ -98,8 +98,8 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 
 - Meaning: Legacy code value for unsupported dynamic import.
 - Common cause: compatibility path preserving the old `error.code` while attaching `autojs6Code=ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`.
-- Example: `import("./x.mjs")` in the stable profile.
-- How to fix: use CommonJS or an experimental build with the dynamic-import gate enabled.
+- Example: `import("file:///tmp/x.mjs")`, `eval("import('./x.mjs')")`, or an explicit diagnostic request with dynamic import disabled.
+- How to fix: use local-only dynamic import from script source, avoid URL/protocol specifiers and dynamic-code constructors, or keep CommonJS.
 - Related docs: [design/ESM.md](design/ESM.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED

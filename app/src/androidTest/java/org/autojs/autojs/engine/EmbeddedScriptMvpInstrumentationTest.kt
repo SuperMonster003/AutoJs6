@@ -1644,7 +1644,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertTrue(result.stdout.contains("profile.readonly=true"))
         assertTrue(result.stdout.contains("profile.identity=true"))
         assertTrue(result.stdout.contains("profile.resolve=autojs6:profile"))
-        assertTrue(result.stdout.contains("profile.flags=true/true/false/false/false/false/true"))
+        assertTrue(result.stdout.contains("profile.flags=true/true/true/false/false/false/true"))
         assertTrue(result.stdout.contains("profile.experimental=true/false/false"))
         assertTrue(result.stdout.contains("profile.frozen=true/true/true/true/true/true/true/true"))
         assertTrue(result.stdout.contains("profile.builtins=true/true/true/true/true/false"))
@@ -28859,16 +28859,16 @@ class EmbeddedScriptMvpInstrumentationTest {
             val dynamicImport = runEmbeddedScript(
                 source = """
                     "nodejs";
-                    import("./dependency.js");
+                    return import("./dependency.js").then(mod => {
+                      console.log("dynamic.import.cjs=" + mod.default.value);
+                    });
                 """.trimIndent(),
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
                 moduleSources = moduleSourcesFor(dependency),
             )
-            assertFalse(dynamicImport.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED", dynamicImport.errorCode)
-            assertTrue(dynamicImport.errorMessage.orEmpty().contains("ESM/import is not supported in Embedded Node.js MVP"))
-            assertTrue(dynamicImport.errorMessage.orEmpty().contains("dynamic import is disabled"))
+            assertTrue(dynamicImport.errorMessage.orEmpty() + "\n" + dynamicImport.stdout, dynamicImport.succeeded)
+            assertTrue(dynamicImport.stdout.contains("dynamic.import.cjs=dependency"))
 
             settleEmbeddedScriptServiceProcess()
 

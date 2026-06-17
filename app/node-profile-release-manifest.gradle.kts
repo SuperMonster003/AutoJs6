@@ -218,7 +218,11 @@ val generateNodeProfileReleaseManifest = tasks.register("generateNodeProfileRele
             ),
             "autojs.nodejs.esm.experimental" to nodeProfileReleaseManifestBooleanProperty(
                 "autojs.nodejs.esm.experimental",
-                false,
+                true,
+            ),
+            "autojs.nodejs.dynamicImport.local" to nodeProfileReleaseManifestBooleanProperty(
+                "autojs.nodejs.dynamicImport.local",
+                true,
             ),
             "autojs.nodejs.dynamicImport.experimental" to nodeProfileReleaseManifestBooleanProperty(
                 "autojs.nodejs.dynamicImport.experimental",

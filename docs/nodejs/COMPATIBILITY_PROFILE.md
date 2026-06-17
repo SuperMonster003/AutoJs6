@@ -48,7 +48,7 @@ The release/debug gate also runs:
 | Flag id | Gradle property | Default | Build override | project.json override | Packaged APK override | Release forbidden | Security | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `esm` | `autojs.nodejs.esm.experimental` | true | true | false | false | false | medium | partial |
-| `dynamic_import` | `autojs.nodejs.dynamicImport.experimental` | false | true | false | false | true | medium | experimental |
+| `dynamic_import` | `autojs.nodejs.dynamicImport.local` | true | true | false | false | false | medium | partial |
 | `network` | `autojs.nodejs.network.experimental` | false | true | false | false | true | high | experimental |
 | `raw_node_network_modules` | none | false | false | false | false | true | high | disabled |
 | `websocket` | none | false | false | false | false | true | high | experimental |
@@ -125,7 +125,7 @@ Unsupported or rejected module source forms:
 
 - native `.node` addon entries, rejected with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED` from direct relative imports, `module.createRequire()`, package `main`, package `exports`, package `imports`, and package subpath imports
 - static ESM import execution only from ESM entries and ESM graph modules
-- dynamic import execution unless `autojs.nodejs.dynamicImport.experimental` is enabled for an experimental run
+- dynamic import from `eval`, `Function`, URL/protocol specifiers, absolute paths, or outside `workingDirectory`
 - package export/import targets that escape the package root
 - unsupported package export/import extensions
 
@@ -358,7 +358,13 @@ The legacy build switch remains:
 autojs.nodejs.esm.experimental=true
 ```
 
-Dynamic import has a separate gate and remains off when only ESM is enabled:
+Dynamic import has a separate local-only switch and is enabled by default in Node Profile v1.1:
+
+```properties
+autojs.nodejs.dynamicImport.local=true
+```
+
+The legacy broad experiment remains release-forbidden:
 
 ```properties
 autojs.nodejs.dynamicImport.experimental=false
@@ -368,10 +374,10 @@ Expected ESM boundary errors:
 
 - explicit ESM-off request path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
 - static `import` syntax in a CommonJS entry path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
-- dynamic import path: legacy `code` `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`, canonical `autojs6Code` `ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`
+- disabled or unsupported dynamic import path: legacy `code` `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`, canonical `autojs6Code` `ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`
 - CJS `require()` of ESM: `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
 
-Default `require("autojs6:profile")` reports `esm=true`, `dynamicImport=false`, `featureFlags.esm.status="partial"`, `featureFlags.esm.defaultEnabled=true`, and `experimentalFlags.dynamicImport=false`. The legacy `experimentalFlags.esm` snapshot remains `true` for compatibility with older diagnostics.
+Default `require("autojs6:profile")` reports `esm=true`, `dynamicImport=true`, `featureFlags.esm.status="partial"`, `featureFlags.dynamic_import.status="partial"`, `featureFlags.dynamic_import.defaultEnabled=true`, and `experimentalFlags.dynamicImport=true`. The legacy `experimentalFlags.esm` and `experimentalFlags.dynamicImport` snapshots remain for compatibility with older diagnostics.
 
 Node Profile v1.1 partial ESM supports:
 
@@ -391,7 +397,7 @@ CommonJS package condition order remains `require`, `node`, `default`.
 
 Partial ESM still rejects `import.meta`, CJS `require()` of ESM, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
 
-With both experimental flags enabled, dynamic `import()` is limited to local relative specifiers inside `workingDirectory`. It rejects package/builtin specifiers, absolute paths, `file:` URLs, network URLs, and path escapes with stable AutoJs6 errors.
+Dynamic `import()` is local-only partial support. It allows local relative `.mjs` and CommonJS modules, allowed builtins, and packages resolved inside `workingDirectory` with ESM package condition order. It rejects disabled builtins, absolute paths, `file:`/`data:` URLs, network URLs, path escapes, loader hooks, and dynamic-code sources such as `eval` and `Function` with stable AutoJs6 errors.
 
 Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, `esmModuleGraphModules`, and `dynamicImportEnabled` in the embedded script result envelope.
 

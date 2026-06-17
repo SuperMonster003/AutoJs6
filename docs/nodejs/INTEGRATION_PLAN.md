@@ -60,6 +60,7 @@ Related properties:
 - `autojs.nodejs.embedded.probe.timeout.ms=3000`
 - `autojs.nodejs.embedded.probe.lifecycle=false`
 - `autojs.nodejs.esm.experimental=true`
+- `autojs.nodejs.dynamicImport.local=true`
 - `autojs.nodejs.dynamicImport.experimental=false`
 - `autojs.nodejs.network.experimental=false`
 - `autojs.nodejs.worker_threads.experimental=false`
@@ -179,7 +180,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 3. Treat `project.json node.bridgeLimits` and `package.json autojs6.node.bridgeLimits` as safe bridge limit overrides; above-hard-max values must be ignored with diagnostics.
 3. Design the real accessibility and MediaProjection/image providers before enabling Android-backed actions, screenshot capture, image decoding, or live node/image handles. Accessibility selector descriptors and node snapshots must remain JSON-only.
 4. Keep scheduled/background task execution behind `docs/nodejs/design/WORK_MANAGER.md`; `work_manager` currently registers controlled metadata only, and future timed execution should use a bridge provider, persistent user-visible descriptors, and packaged manifest gates.
-5. Keep ESM constrained by `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=true`; `.mjs` is a Node Profile v1.1 partial ESM route, not a full desktop Node loader. Keep dynamic import behind the separate `autojs.nodejs.dynamicImport.experimental=false` gate.
+5. Keep ESM constrained by `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=true`; `.mjs` is a Node Profile v1.1 partial ESM route, not a full desktop Node loader. Keep dynamic import local-only through `autojs.nodejs.dynamicImport.local=true`; the legacy `autojs.nodejs.dynamicImport.experimental=false` switch remains release-forbidden.
 6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds and raw Node network modules stay denied.
 7. Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; Task 42 freezes the worker boundary without enabling worker execution.
 8. Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md`; `java_interop` is a default-off allowlist experiment and must not expose raw Java, Android, reflection, class-loader, native-library, process, or filesystem authority.

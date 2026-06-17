@@ -360,7 +360,7 @@ val generateNodeCompatibilityProfile = tasks.register("generateNodeCompatibility
             add(mapOf("name" to "process.dlopen", "status" to "disabled", "securityLevel" to "critical"))
             add(mapOf("name" to "worker_threads", "status" to "experimental-disabled", "securityLevel" to "high"))
             add(mapOf("name" to "raw_node_network", "status" to "disabled", "securityLevel" to "high"))
-            add(mapOf("name" to "dynamic_import", "status" to "experimental-disabled", "securityLevel" to "medium"))
+            add(mapOf("name" to "dynamic_import", "status" to "partial", "securityLevel" to "medium"))
             add(mapOf("name" to "esm", "status" to "partial", "securityLevel" to "medium"))
             add(mapOf("name" to "vm", "status" to "disabled", "securityLevel" to "high"))
             add(mapOf("name" to "inspector", "status" to "disabled", "securityLevel" to "high"))

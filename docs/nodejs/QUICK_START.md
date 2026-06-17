@@ -27,7 +27,8 @@ Stable Node routing accepts:
 - encrypted script metadata that marks the script as a Node entry
 
 `.mjs` preserves user intent and routes to Node. In Node Profile v1.1, `.mjs` runs through the partial ESM path by
-default. CommonJS remains the widest-compatibility path, and dynamic `import()` is still separately gated.
+default. CommonJS remains the widest-compatibility path. Dynamic `import()` is available only through the local-only
+profile for relative modules, allowed builtins, and scoped packages.
 
 ## Project Shape
 

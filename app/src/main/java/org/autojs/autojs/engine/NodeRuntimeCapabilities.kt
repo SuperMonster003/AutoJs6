@@ -78,6 +78,8 @@ object NodeRuntimeCapabilities {
 
     const val ESM_EXPERIMENTAL_PROPERTY = "autojs.nodejs.esm.experimental"
     const val ESM_EXPERIMENTAL_DEFAULT = true
+    const val DYNAMIC_IMPORT_LOCAL_PROPERTY = "autojs.nodejs.dynamicImport.local"
+    const val DYNAMIC_IMPORT_LOCAL_DEFAULT = true
     const val DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY = "autojs.nodejs.dynamicImport.experimental"
     const val DYNAMIC_IMPORT_EXPERIMENTAL_DEFAULT = false
     const val NETWORK_EXPERIMENTAL_PROPERTY = "autojs.nodejs.network.experimental"
@@ -107,13 +109,13 @@ object NodeRuntimeCapabilities {
         NodeRuntimeFeatureFlag(
             id = "dynamic_import",
             diagnosticName = "dynamicImport",
-            gradleProperty = DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY,
-            defaultEnabled = DYNAMIC_IMPORT_EXPERIMENTAL_DEFAULT,
+            gradleProperty = DYNAMIC_IMPORT_LOCAL_PROPERTY,
+            defaultEnabled = DYNAMIC_IMPORT_LOCAL_DEFAULT,
             buildTimeOverrideAllowed = true,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "medium",
-            status = "experimental",
+            status = "partial",
         ),
         NodeRuntimeFeatureFlag(
             id = "network",
@@ -244,6 +246,7 @@ object NodeRuntimeCapabilities {
             put(flag.diagnosticName.lowercase(Locale.US), flag.id)
             flag.gradleProperty?.let { put(it.lowercase(Locale.US), flag.id) }
         }
+        put(DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY.lowercase(Locale.US), "dynamic_import")
         put("dynamicimport", "dynamic_import")
         put("rawnodenetworkmodules", "raw_node_network_modules")
         put("workerthreads", "worker_threads")

@@ -48,8 +48,8 @@ small set of already-gated features toward practical use.
 | ESM builtin import | partial | Only allowed builtins and limited wrappers. |
 | ESM/CJS interop | partial | ESM may import CJS; CJS `require()` of ESM remains denied. |
 | Package ESM conditions | partial | ESM uses `import`, `node`, `default`; CJS keeps `require`, `node`, `default`. |
-| Dynamic import | experimental | Local relative dynamic import remains behind the separate gate. |
-| Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import graphs remain gated. |
+| Dynamic import | partial | Local-only dynamic import is enabled by default for relative modules, allowed builtins, and scoped packages. |
+| Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import local graph smoke is covered separately. |
 | Controlled fetch | experimental | Future v1.1 batch; raw network remains disabled. |
 | WebSocket | experimental | Future v1.1 batch; raw sockets remain disabled. |
 | Worker threads | experimental | Disabled by default. |
@@ -68,9 +68,10 @@ small set of already-gated features toward practical use.
 - CommonJS `require()` of `.mjs` fails with
   `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
 - Packaged `.mjs` graph smoke passes with refreshed template support.
-- Dynamic import stays disabled by default and documents its local-only
-  experimental boundary.
-- Compatibility profile marks ESM as `partial`.
+- Dynamic import local-only smoke passes for `.mjs`, CommonJS, allowed builtins,
+  and packages, while URL, absolute path, escape, and disabled builtin paths
+  remain denied.
+- Compatibility profile marks ESM and dynamic import as `partial`.
 
 ## Safety Invariants
 

@@ -8359,19 +8359,19 @@ std::string buildEmbeddedScriptExecutionSource(
       dynamic_import: Object.freeze({
         id: "dynamic_import",
         diagnosticName: "dynamicImport",
-        gradleProperty: "autojs.nodejs.dynamicImport.experimental",
-        defaultEnabled: false,
+        gradleProperty: "autojs.nodejs.dynamicImport.local",
+        defaultEnabled: true,
         enabled: __autojs6_dynamic_import_experimental_enabled,
         buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
         buildOnly: true,
-        debugOnly: true,
+        debugOnly: false,
         projectAllowed: false,
         packagedAllowed: false,
-        releaseForbidden: true,
+        releaseForbidden: false,
         securityLevel: "medium",
-        status: "experimental"
+        status: "partial"
       }),
       network: Object.freeze({
         id: "network",
@@ -26850,24 +26850,19 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       const name = specifier === undefined || specifier === null ? "" : String(specifier);
       if (name.indexOf("\0") >= 0) {
-        throw __autojs6_esm_error("Embedded Node experimental dynamic import rejects NUL byte in specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
+        throw __autojs6_esm_error("Embedded Node local dynamic import rejects NUL byte in specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
       }
       const path = __autojs6_path_module();
       if (path.isAbsolute(name)) {
-        throw __autojs6_esm_error("Embedded Node experimental dynamic import rejects absolute path: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+        throw __autojs6_esm_error("Embedded Node local dynamic import rejects absolute path: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
       }
       const protocolMatch = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(name);
-      if (protocolMatch) {
+      if (protocolMatch && !__autojs6_esm_builtin_specifier(name)) {
         const protocol = protocolMatch[1].toLowerCase();
         if (protocol === "http" || protocol === "https") {
-          throw __autojs6_error("Embedded Node experimental dynamic import rejects network URL imports: " + name, "ERR_AUTOJS6_NETWORK_DISABLED");
+          throw __autojs6_error("Embedded Node local dynamic import rejects network URL imports: " + name, "ERR_AUTOJS6_NETWORK_DISABLED");
         }
-        throw __autojs6_dynamic_import_unsupported("Embedded Node experimental dynamic import rejects URL/protocol imports: " + name);
-      }
-      if (!__autojs6_is_relative_module_name(name)) {
-        throw __autojs6_dynamic_import_unsupported(
-          "Embedded Node experimental dynamic import currently allows only local relative imports; package and builtin dynamic import is disabled: " + name
-        );
+        throw __autojs6_dynamic_import_unsupported("Embedded Node local dynamic import rejects URL/protocol imports: " + name);
       }
       return __autojs6_load_esm_module(name, parentFilename || __autojs6_source_name);
     });
