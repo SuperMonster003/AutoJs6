@@ -233,7 +233,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate"]);
-              expectExports("shell", shell, ["exec"]);
+              expectExports("shell", shell, ["exec", "execFile", "checkAccess", "setDefaultTimeout"]);
               expectExports("engines", engines, ["myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"]);
               expectExports("accessibility", accessibility, ["isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains"]);
               expectExports("media_projection", mediaProjection, ["requestScreenCapture"]);
@@ -274,6 +274,9 @@ class NodeBridgeConformanceInstrumentationTest {
               await expectPromise("device.wakeUp", device.wakeUp({ timeoutMs: 1025 }));
               await expectPromise("device.vibrate", device.vibrate(5, { timeoutMs: 1026 }));
               assert.strictEqual((await expectPromise("shell.exec", shell.exec("echo ok", { timeoutMs: 1027 }))).code, 0);
+              assert.strictEqual(shell.setDefaultTimeout(2000), 2000);
+              assert.strictEqual(shell.checkAccess({ shizuku: true }).shizuku, false);
+              assert.strictEqual((await expectPromise("shell.execFile", shell.execFile("scripts/run.sh", ["--dry-run"], { timeoutMs: 1028 }))).code, 0);
               assert.strictEqual((await expectPromise("engines.all", engines.all({ timeoutMs: 1028 }))).length >= 1, true);
               assert.strictEqual(await expectPromise("engines.stopAll", engines.stopAll({ timeoutMs: 1029 })), 2);
               assert.strictEqual(await expectPromise("engines.stopSelf", engines.stopSelf({ timeoutMs: 1030 })), true);

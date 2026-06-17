@@ -50,6 +50,11 @@ async function smoke(): Promise<void> {
     env: { AUTOJS6_TYPES: "ok" },
     timeoutMs: 1000
   });
+  const shellDefaultTimeout: number = shell.setDefaultTimeout(2000);
+  const shellAccess: shell.ShellAccessReport = shell.checkAccess({ root: true, shizuku: true });
+  const shellFileResult: shell.ShellResult = await shell.execFile("scripts/run.sh", ["--dry-run"], {
+    timeoutMs: 1000
+  });
 
   const currentEngine: engines.EngineSnapshot = engines.myEngine();
   const allEngines: readonly engines.EngineSnapshot[] = await engines.all({ timeoutMs: 1000 });
@@ -210,6 +215,9 @@ async function smoke(): Promise<void> {
   void density;
   void screenOn;
   void shellResult;
+  void shellDefaultTimeout;
+  void shellAccess;
+  void shellFileResult;
   void currentEngine;
   void allEngines;
   void childEngine;

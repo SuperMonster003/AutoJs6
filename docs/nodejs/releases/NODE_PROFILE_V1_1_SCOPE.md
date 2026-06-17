@@ -66,6 +66,7 @@ small set of already-gated features toward practical use.
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, and owned-resource cleanup. |
 | Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for long-click, set-text, and scroll while keeping JSON-only snapshots and explicit `accessibility` capability checks. |
+| Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
@@ -141,6 +142,10 @@ small set of already-gated features toward practical use.
   bounds descriptors, `longClick`, `setText`, `scrollForward`,
   `scrollBackward`, timeout/cancellation cleanup, manifest denial, no raw node
   leak, and TypeScript declarations.
+- Shell control smoke passes for `exec`, JS-layer `execFile`, `checkAccess`,
+  default timeout changes, non-zero exit, timeout result shape, scoped
+  cwd/path/env denial, root capability denial, unsupported Shizuku reporting,
+  Android non-root execution, and `child_process` denial.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
   execution/stress suites pass on Sony.

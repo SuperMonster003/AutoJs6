@@ -80,6 +80,9 @@ class NodeShellBridgeInstrumentationTest {
         File(workDir, "sub").apply {
             check(mkdirs()) { "Failed to create shell bridge cwd directory: $absolutePath" }
         }
+        File(workDir, "scripts").apply {
+            check(mkdirs()) { "Failed to create shell bridge scripts directory: $absolutePath" }
+        }
         File(workDir, "node_modules/shell").apply {
             check(mkdirs()) { "Failed to create shell shadow module directory: $absolutePath" }
         }.resolve("index.js").writeText("""module.exports = { shadow: true, exec: () => "shadow" };""")
@@ -97,6 +100,10 @@ class NodeShellBridgeInstrumentationTest {
                   let result = { code: 0, stdout: "ok\n", stderr: "" };
                   if (request.module === "shell" && request.method === "exec" && request.args[1].root === true) {
                     result = { code: 0, stdout: "root-ok\n", stderr: "" };
+                  } else if (request.module === "shell" && request.method === "exec" && request.args[0].indexOf("scripts/run.sh") >= 0) {
+                    result = { code: 0, stdout: "file-ok\n", stderr: "" };
+                  } else if (request.module === "shell" && request.method === "exec" && request.args[0] === "echo default") {
+                    result = { code: 0, stdout: "default-ok\n", stderr: "" };
                   }
                   setImmediate(() => {
                     bridge.__test.receiveMessage(JSON.stringify({
@@ -116,11 +123,33 @@ class NodeShellBridgeInstrumentationTest {
                 env: { AUTOJS6_SHELL_TEST: "ok" }
               });
               const root = await shell.exec("id", { root: true, timeoutMs: 1235 });
+              const defaultTimeout = shell.setDefaultTimeout(4321);
+              const access = shell.checkAccess({ root: true, shizuku: true });
+              const file = await shell.execFile("scripts/run.sh", ["--dry-run", "value with space"], { timeoutMs: 1236 });
+              const defaulted = await shell.exec("echo default");
               let cwdEscapeCode = "";
               try {
                 await shell.exec("echo denied", { cwd: "../escape" });
               } catch (error) {
                 cwdEscapeCode = error && (error.autojs6Code || error.code) || "";
+              }
+              let execFileEscapeCode = "";
+              try {
+                await shell.execFile("../escape.sh");
+              } catch (error) {
+                execFileEscapeCode = error && (error.autojs6Code || error.code) || "";
+              }
+              let execFileArgsCode = "";
+              try {
+                await shell.execFile("scripts/run.sh", [1]);
+              } catch (error) {
+                execFileArgsCode = error && (error.autojs6Code || error.code) || "";
+              }
+              let defaultTimeoutCode = "";
+              try {
+                shell.setDefaultTimeout(0);
+              } catch (error) {
+                defaultTimeoutCode = error && (error.autojs6Code || error.code) || "";
               }
               let childProcessCode = "";
               try {
@@ -131,17 +160,24 @@ class NodeShellBridgeInstrumentationTest {
               console.log("shell.resolve=" + resolved);
               console.log("shell.shadow=" + (shell.shadow === true));
               console.log("shell.frozen=" + Object.isFrozen(shell));
-              console.log("shell.methods=" + [typeof shell.exec, typeof shell.spawn, typeof shell.open].join("|"));
+              console.log("shell.methods=" + [typeof shell.exec, typeof shell.execFile, typeof shell.checkAccess, typeof shell.setDefaultTimeout, typeof shell.spawn, typeof shell.open].join("|"));
               console.log("shell.normal=" + [normal.code, normal.stdout, normal.stderr].join("|"));
               console.log("shell.root=" + [root.code, root.stdout, root.stderr].join("|"));
+              console.log("shell.execFile=" + [file.code, file.stdout, file.stderr].join("|"));
+              console.log("shell.defaulted=" + [defaulted.code, defaulted.stdout, defaulted.stderr, defaultTimeout].join("|"));
+              console.log("shell.access=" + [access.shell, access.root, access.shizuku, access.missingCapabilities.join(",")].join("|"));
               console.log("shell.requests=" + requests.map(r => r.method).join("|"));
               console.log("shell.command=" + requests[0].args[0]);
+              console.log("shell.execFile.command=" + requests[2].args[0]);
               console.log("shell.cwd=" + requests[0].args[1].cwd);
               console.log("shell.env=" + requests[0].args[1].env.AUTOJS6_SHELL_TEST);
               console.log("shell.root.flag=" + requests[1].args[1].root);
               console.log("shell.timeouts=" + requests.map(r => r.args[1].timeoutMs + "/" + r.timeoutMs).join("|"));
-              console.log("shell.permissions=" + requests[0].permissions.join(",") + "|" + requests[1].permissions.join(","));
+              console.log("shell.permissions=" + requests.map(r => r.permissions.join(",")).join("|"));
               console.log("shell.cwd_escape=" + cwdEscapeCode);
+              console.log("shell.execFile_escape=" + execFileEscapeCode);
+              console.log("shell.execFile_args=" + execFileArgsCode);
+              console.log("shell.default_timeout_invalid=" + defaultTimeoutCode);
               console.log("shell.child_process=" + childProcessCode);
               console.log("shell.pending=" + bridge.__test.pendingCount());
             })();
@@ -154,17 +190,24 @@ class NodeShellBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("shell.resolve=shell"))
         assertTrue(result.stdout.contains("shell.shadow=false"))
         assertTrue(result.stdout.contains("shell.frozen=true"))
-        assertTrue(result.stdout.contains("shell.methods=function|undefined|undefined"))
+        assertTrue(result.stdout.contains("shell.methods=function|function|function|function|undefined|undefined"))
         assertTrue(result.stdout.contains("shell.normal=0|ok"))
         assertTrue(result.stdout.contains("shell.root=0|root-ok"))
-        assertTrue(result.stdout.contains("shell.requests=exec|exec"))
+        assertTrue(result.stdout.contains("shell.execFile=0|file-ok"))
+        assertTrue(result.stdout.contains("shell.defaulted=0|default-ok"))
+        assertTrue(result.stdout.contains("shell.access=true|true|false|shell.shizuku"))
+        assertTrue(result.stdout.contains("shell.requests=exec|exec|exec|exec"))
         assertTrue(result.stdout.contains("shell.command=echo ok"))
+        assertTrue(result.stdout.contains("shell.execFile.command='scripts/run.sh' '--dry-run' 'value with space'"))
         assertTrue(result.stdout.contains("shell.cwd=sub"))
         assertTrue(result.stdout.contains("shell.env=ok"))
         assertTrue(result.stdout.contains("shell.root.flag=true"))
-        assertTrue(result.stdout.contains("shell.timeouts=1234/2234|1235/2235"))
-        assertTrue(result.stdout.contains("shell.permissions=shell|shell,shell:root"))
+        assertTrue(result.stdout.contains("shell.timeouts=1234/2234|1235/2235|1236/2236|4321/5321"))
+        assertTrue(result.stdout.contains("shell.permissions=shell|shell,shell:root|shell|shell"))
         assertTrue(result.stdout.contains("shell.cwd_escape=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
+        assertTrue(result.stdout.contains("shell.execFile_escape=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
+        assertTrue(result.stdout.contains("shell.execFile_args=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
+        assertTrue(result.stdout.contains("shell.default_timeout_invalid=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.stdout.contains("shell.child_process=ERR_AUTOJS6_BUILTIN_DISABLED"))
         assertTrue(result.stdout.contains("shell.pending=0"))
     }
@@ -200,6 +243,7 @@ class NodeShellBridgeInstrumentationTest {
               }
 
               const shell = require("shell");
+              const access = shell.checkAccess({ root: true, shizuku: true });
               const result = await shell.exec("echo allowed", { timeoutMs: 1234 });
               let rootDeniedCode = "";
               let rootMissing = "";
@@ -214,9 +258,10 @@ class NodeShellBridgeInstrumentationTest {
 
               console.log("shell.policy.child_process=" + childProcessCode);
               console.log("shell.policy.exec=" + result.code + "/" + result.stdout.trim() + "/" + requests.length);
+              console.log("shell.policy.access=" + [access.shell, access.root, access.shizuku, access.missingCapabilities.join("|")].join("|"));
               console.log("shell.policy.permissions=" + requests[0].permissions.join("|"));
               console.log("shell.policy.root_denied=" + rootDeniedCode + "/" + rootMissing + "/" + requests.length);
-              console.log("shell.policy.methods=" + [typeof shell.exec, typeof shell.spawn, typeof shell.open].join("|"));
+              console.log("shell.policy.methods=" + [typeof shell.exec, typeof shell.execFile, typeof shell.checkAccess, typeof shell.setDefaultTimeout, typeof shell.spawn, typeof shell.open].join("|"));
               console.log("shell.policy.pending=" + bridge.__test.pendingCount());
             })();
             """.trimIndent(),
@@ -227,13 +272,14 @@ class NodeShellBridgeInstrumentationTest {
         NodeEmbeddedTestHarness.assertSucceeded("shell child_process alternative declared capability", allowed)
         assertTrue(allowed.stdout.contains("shell.policy.child_process=ERR_AUTOJS6_BUILTIN_DISABLED"))
         assertTrue(allowed.stdout.contains("shell.policy.exec=0/allowed/1"))
+        assertTrue(allowed.stdout.contains("shell.policy.access=true|false|false|shell.root|shell.shizuku"))
         assertTrue(allowed.stdout.contains("shell.policy.permissions=shell"))
         assertTrue(
             allowed.stdout.contains(
                 "shell.policy.root_denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}/shell.root/1",
             ),
         )
-        assertTrue(allowed.stdout.contains("shell.policy.methods=function|undefined|undefined"))
+        assertTrue(allowed.stdout.contains("shell.policy.methods=function|function|function|function|undefined|undefined"))
         assertTrue(allowed.stdout.contains("shell.policy.pending=0"))
 
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()

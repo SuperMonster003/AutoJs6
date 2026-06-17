@@ -11128,16 +11128,20 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_shell_options(value) {
     return value && typeof value === "object" && !Array.isArray(value) ? value : {};
   }
-  function __autojs6_shell_invalid_argument_error(message) {
+  function __autojs6_shell_invalid_argument_error(methodName, message) {
+    if (message === undefined) {
+      message = methodName;
+      methodName = "exec";
+    }
     return __autojs6_bridge_error(
       message,
       "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
       "shell",
-      "exec"
+      methodName
     );
   }
-  function __autojs6_shell_timeout_ms(value) {
-    return __autojs6_bridge_timeout_ms(value === undefined ? 30000 : value);
+  function __autojs6_shell_timeout_ms(value, fallbackMs) {
+    return __autojs6_bridge_timeout_ms(value === undefined ? fallbackMs : value);
   }
   function __autojs6_shell_bridge_timeout_ms(commandTimeoutMs) {
     return Math.min(2147483647, Math.max(1, Number(commandTimeoutMs) + 1000));
@@ -11179,6 +11183,38 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return env;
   }
+  function __autojs6_shell_normalize_exec_file_path(value) {
+    const text = value === undefined || value === null ? "" : String(value);
+    if (!text || text.indexOf("\u0000") >= 0) {
+      throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile path must be non-empty without NUL bytes.");
+    }
+    if (text.charAt(0) === "/" || /^[A-Za-z]:[\\/]/.test(text)) {
+      throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile path must be relative to the scoped working directory.");
+    }
+    const normalized = text.replace(/\\/g, "/");
+    const parts = normalized.split("/").filter(Boolean);
+    if (parts.length === 0 || parts.indexOf("..") >= 0) {
+      throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile path must not escape the scoped working directory.");
+    }
+    return normalized.indexOf("/") >= 0 ? normalized : "./" + normalized;
+  }
+  function __autojs6_shell_exec_file_args(value) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    if (!Array.isArray(value)) {
+      throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile args must be an array of strings.");
+    }
+    return value.map(function(item, index) {
+      if (typeof item !== "string" || item.indexOf("\u0000") >= 0) {
+        throw __autojs6_shell_invalid_argument_error("execFile", "shell.execFile args[" + index + "] must be a string without NUL bytes.");
+      }
+      return item;
+    });
+  }
+  function __autojs6_shell_quote(value) {
+    return "'" + String(value).replace(/'/g, "'\"'\"'") + "'";
+  }
   function __autojs6_shell_result(value) {
     const source = value && typeof value === "object" ? value : {};
     const rawCode = Number(source.code);
@@ -11192,6 +11228,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_limited_shell_cache) {
       return __autojs6_limited_shell_cache;
     }
+    let defaultTimeoutMs = 30000;
     function exec(command, options) {
       const commandText = command === undefined || command === null ? "" : String(command);
       if (!commandText || commandText.indexOf("\u0000") >= 0) {
@@ -11203,7 +11240,7 @@ std::string buildEmbeddedScriptExecutionSource(
       let inputOptions;
       try {
         inputOptions = __autojs6_shell_options(options);
-        const timeoutMs = __autojs6_shell_timeout_ms(inputOptions.timeoutMs);
+        const timeoutMs = __autojs6_shell_timeout_ms(inputOptions.timeoutMs, defaultTimeoutMs);
         normalizedOptions = {
           root: inputOptions.root === true,
           timeoutMs,
@@ -11225,8 +11262,48 @@ std::string buildEmbeddedScriptExecutionSource(
         }
       ).then(__autojs6_shell_result);
     }
+    function execFile(path, args, options) {
+      let command;
+      try {
+        const target = __autojs6_shell_normalize_exec_file_path(path);
+        const argv = __autojs6_shell_exec_file_args(args);
+        command = [target].concat(argv).map(__autojs6_shell_quote).join(" ");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return exec(command, options);
+    }
+    function checkAccess(options) {
+      const opts = __autojs6_shell_options(options);
+      const requested = ["shell"];
+      if (opts.root === true) {
+        requested.push("shell:root");
+      }
+      let missing = __autojs6_bridge_missing_capabilities(requested);
+      if (opts.shizuku === true) {
+        missing = missing.concat(["shell.shizuku"]);
+      }
+      const frozenMissing = Object.freeze(missing.slice());
+      return Object.freeze({
+        shell: missing.indexOf("shell") < 0,
+        root: opts.root === true && missing.indexOf("shell.root") < 0,
+        shizuku: false,
+        missingCapabilities: frozenMissing
+      });
+    }
+    function setDefaultTimeout(ms) {
+      const timeoutMs = __autojs6_shell_timeout_ms(ms, defaultTimeoutMs);
+      if (!Number.isFinite(Number(ms)) || Number(ms) <= 0) {
+        throw __autojs6_shell_invalid_argument_error("setDefaultTimeout", "shell.setDefaultTimeout requires a positive timeout in milliseconds.");
+      }
+      defaultTimeoutMs = timeoutMs;
+      return defaultTimeoutMs;
+    }
     __autojs6_limited_shell_cache = Object.freeze({
-      exec
+      exec,
+      execFile,
+      checkAccess,
+      setDefaultTimeout
     });
     return __autojs6_limited_shell_cache;
   }
