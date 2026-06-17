@@ -160,7 +160,7 @@ Notes:
 
 ## Gate UX-7: Follow-Up UX Feedback
 
-- [ ] Stabilize Gboard spacebar cursor direction in ACE without treating IME
+- [x] Stabilize Gboard spacebar cursor direction in ACE without treating IME
   selection offsets as document-absolute offsets.
 - [ ] Keep double-tap and long-press host action modes anchored near the user's
   touch point without upper-left fallback flicker.
@@ -228,3 +228,7 @@ Notes:
 - ACE gutter fold widgets are explicitly exempted from the custom breakpoint
   tap zone, so native gutter folding can still collapse/expand code while the
   folded-code placeholder click capture remains available for unfolding.
+- ACE now suppresses WebView absolute collapsed `InputConnection.setSelection`
+  calls outside text mutation windows and treats Gboard spacebar cursor updates
+  as relative deltas only, preventing local IME offsets from jumping the cursor
+  back near the beginning of the document.

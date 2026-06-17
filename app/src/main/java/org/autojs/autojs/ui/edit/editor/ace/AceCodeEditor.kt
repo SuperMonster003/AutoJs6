@@ -1544,23 +1544,28 @@ class AceCodeEditor @JvmOverloads constructor(
                 }
 
                 override fun setSelection(start: Int, end: Int): Boolean {
-                    val previousSelection = lastCollapsedSelection
-                    val delta = start - previousSelection
-                    val baseHandled = super.setSelection(start, end)
                     if (start == end && start >= 0) {
+                        val previousSelection = lastCollapsedSelection
+                        val delta = start - previousSelection
                         lastCollapsedSelection = start
+                        if (SystemClock.uptimeMillis() < ignoreSelectionUntilUptimeMillis) {
+                            return super.setSelection(start, end)
+                        }
                         if (
                             previousSelection >= 0 &&
-                            SystemClock.uptimeMillis() >= ignoreSelectionUntilUptimeMillis &&
                             abs(delta) in 1..IME_SELECTION_CURSOR_MAX_DELTA &&
                             softKeyboardSelectionHandler(start, delta, "InputConnection.setSelection")
                         ) {
                             return true
                         }
+                        // Gboard spacebar cursor mode reports offsets inside the composing
+                        // input buffer, not document-absolute offsets. Suppress WebView's
+                        // absolute setSelection so ACE only receives relative cursor deltas.
+                        return true
                     } else {
                         lastCollapsedSelection = -1
                     }
-                    return baseHandled
+                    return super.setSelection(start, end)
                 }
 
                 private fun markImeTextMutation() {

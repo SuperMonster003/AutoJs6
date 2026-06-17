@@ -444,6 +444,8 @@ assertIncludes(aceCodeEditor, "flushPendingImeCursorSelection", "ACE IME cursor 
 assertIncludes(aceCodeEditor, "moveCursor(delta)", "ACE IME cursor relative delta dispatch");
 assertIncludes(aceCodeEditor, "InputConnectionWrapper", "ACE WebView InputConnection wrapper");
 assertIncludes(aceCodeEditor, "override fun setSelection(start: Int, end: Int)", "ACE IME setSelection cursor interception");
+assertIncludes(aceCodeEditor, "not document-absolute offsets", "ACE IME setSelection avoids document-absolute offsets");
+assertMatch(aceCodeEditor, /not document-absolute offsets[\s\S]*return true[\s\S]*\} else/, "ACE IME setSelection suppresses WebView absolute collapsed selection");
 assertIncludes(aceCodeEditor, '"ime_cursor_selection"', "ACE IME setSelection diagnostics event");
 assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_LEFT", "ACE soft-keyboard cursor left key");
 assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_RIGHT", "ACE soft-keyboard cursor right key");
