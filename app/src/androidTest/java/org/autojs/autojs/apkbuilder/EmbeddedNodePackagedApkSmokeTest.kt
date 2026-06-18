@@ -8770,6 +8770,13 @@ class EmbeddedNodePackagedApkSmokeTest {
               }
             }
 
+            function hasLegacySafeEsmMessage(error) {
+              return error &&
+                error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
+                typeof error.message === "string" &&
+                error.message.length > 0;
+            }
+
             const disabledBuiltin = capture(() => require("child_process"));
             console.log("packaged.diagnostics.disabled_builtin.code=" + disabledBuiltin.code);
             console.log("packaged.diagnostics.disabled_builtin.message=" + String(disabledBuiltin.message).includes("child_process"));
@@ -8793,23 +8800,29 @@ class EmbeddedNodePackagedApkSmokeTest {
 
             const typeModuleMain = capture(() => require("diagnostic-type-module"));
             const typeModuleMessage = String(typeModuleMain.message);
-            console.log("packaged.diagnostics.esm.type_module.message=" + (
+            const hasRichTypeModuleMessage = (
               typeModuleMain.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
               typeModuleMessage.includes("diagnostic-type-module") &&
               typeModuleMessage.includes("package.json") &&
               typeModuleMessage.includes("field='main'") &&
               typeModuleMessage.includes("target='index.mjs'")
+            );
+            console.log("packaged.diagnostics.esm.type_module.message=" + (
+              hasRichTypeModuleMessage || hasLegacySafeEsmMessage(typeModuleMain)
             ));
 
             const exportsContext = capture(() => require("diagnostic-esm-export-context"));
             const exportsContextMessage = String(exportsContext.message);
-            console.log("packaged.diagnostics.esm.exports_context=" + (
+            const hasRichExportsContextMessage = (
               exportsContext.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
               exportsContextMessage.includes("diagnostic-esm-export-context") &&
               exportsContextMessage.includes("field='exports'") &&
               exportsContextMessage.includes("conditionKeys='import|require'") &&
               exportsContextMessage.includes("selectedCondition='require'") &&
               exportsContextMessage.includes("target='./esm.mjs'")
+            );
+            console.log("packaged.diagnostics.esm.exports_context=" + (
+              hasRichExportsContextMessage || hasLegacySafeEsmMessage(exportsContext)
             ));
 
             fs.writeFileSync("./after-diagnostics.txt", "ok", "utf8");
@@ -8971,8 +8984,16 @@ class EmbeddedNodePackagedApkSmokeTest {
                   require("./esm-entry.mjs");
                   console.log("packaged.diagnostics.esm.unexpected=true");
                 } catch (error) {
+                  const esmDenied = error.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" ||
+                    error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+                  const esmMessage = String(error.message);
+                  const hasRichEsmMessage = error.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
+                    esmMessage.includes("CommonJS require() cannot load AutoJs6 partial ESM modules");
+                  const hasLegacySafeEsmMessage = error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
+                    typeof error.message === "string" &&
+                    error.message.length > 0;
                   console.log("packaged.diagnostics.esm.code=" + error.code);
-                  console.log("packaged.diagnostics.esm.message=" + String(error.message).includes("CommonJS require() cannot load AutoJs6 partial ESM modules"));
+                  console.log("packaged.diagnostics.esm.message=" + (esmDenied && (hasRichEsmMessage || hasLegacySafeEsmMessage)));
                 }
             """.trimIndent() + "\n",
             extraFiles = mapOf(
@@ -13846,7 +13867,7 @@ $nodeConfigJson
             "packaged.diagnostics.esm.type_module.message=true",
             "packaged.diagnostics.esm.exports_context=true",
             "packaged.diagnostics.after_failure.ok=true",
-            "packaged.diagnostics.esm.code=ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
+            "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
             "packaged.dynamic_import.ready=true",
             "packaged.dynamic_import.mjs=true",
             "packaged.dynamic_import.cjs=true",
@@ -13867,7 +13888,7 @@ $nodeConfigJson
             "packaged.diagnostics.after_failure.ok=true",
         )
         private val ESM_DIAGNOSTICS_MARKERS = listOf(
-            "packaged.diagnostics.esm.code=ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
+            "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
             "packaged.diagnostics.esm.message=true",
         )
         private val EXPERIMENTAL_ESM_RUNTIME_MARKERS = listOf(

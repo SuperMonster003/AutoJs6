@@ -3533,7 +3533,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                   }
                 }
 
-                run().catch((error) => {
+                return run().catch((error) => {
                   console.log("readline.error=" + (error && error.message || error));
                   throw error;
                 });
@@ -10735,7 +10735,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     """
                     "nodejs";
                     const compose = require("pkg-readline-compose-like");
-                    compose.run().then((result) => {
+                    return compose.run().then((result) => {
                       console.log("readline.npm.ok=" + result.ok);
                       console.log("readline.npm.callback=" + result.callback);
                       console.log("readline.npm.promise=" + result.promise);
