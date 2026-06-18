@@ -1,6 +1,8 @@
 # Long-Running Node Service Mode
 
-Status: Phase 7 state-machine gate only. No long-running Node service runtime is implemented by this document.
+Status: Phase 7 S7-18 controlled interactive foreground MVP. Normal script,
+project, package, and WorkManager launches remain one-shot; only the explicit
+interactive session launch surface can run `interactive_long_running`.
 
 Task 179 adds the first runtime contract guard: embedded script requests now
 carry an `executionMode` field through the service request spool. `one_shot` is
@@ -12,8 +14,10 @@ out as normal one-shot scripts.
 Task S7-17 expands that guard into a versioned execution-mode state machine:
 
 - `one_shot`: implemented; requires a positive script timeout.
-- `interactive_long_running`: reserved; requires foreground notification,
-  user stop controls, quotas, and lifecycle gates before it can run.
+- `interactive_long_running`: partial; supported only by the explicit
+  interactive session launch surface with a persistent foreground notification,
+  Stop action, status file, duration/resource summary, and restart policy
+  `never`.
 - `scheduled`: reserved; WorkManager currently launches bounded one-shot runs
   until the dedicated scheduled task runner gate exists.
 - `worker_computation`: reserved; blocked behind worker_threads capability
@@ -23,6 +27,15 @@ Each mode definition records timeout policy, foreground requirement,
 notification requirement, allowed provider set, restart policy, quota profile,
 and stop semantics. Unsupported mode requests are rejected before user code and
 return the same policy metadata in native values.
+
+Task S7-18 adds the first runtime slice for user-visible long-running Node
+automation. `NativeNodeEmbeddedScriptService.startInteractiveLongRunning(...)`
+starts an explicitly requested `interactive_long_running` session in the
+embedded Node process, promotes the service to foreground with a persistent
+notification, writes JSON status snapshots under app-private storage, exposes
+duration and active resource summary fields, and supports a notification/client
+Stop path that schedules clean Node process teardown. It deliberately does not
+enable implicit service mode for ordinary script execution.
 
 ## Goal
 
@@ -34,7 +47,9 @@ This design separates:
 - scheduled/background tasks: AutoJs6 task-owned launches
 - long-running services: explicit foreground, user-visible Node service sessions
 
-Normal scripts must remain timeout-controlled. A future long-running mode must be explicit and must not be enabled by a file suffix, `"nodejs";` directive, package metadata guess, or accidental pending timer.
+Normal scripts must remain timeout-controlled. Long-running mode must be
+explicit and must not be enabled by a file suffix, `"nodejs";` directive,
+package metadata guess, or accidental pending timer.
 
 ## Non-Goals
 
@@ -54,12 +69,13 @@ Long-running service mode is not:
 | `one_shot` | Implemented | Required positive script timeout | Console/notification while running | directive, file route, project route, packaged route |
 | Execution queue | Implemented helper, not a mode | Queue timeout plus per-script timeout | Caller-owned diagnostics | `enqueueScript(...)` |
 | `scheduled` | Reserved; WorkManager still launches bounded one-shot executions | Required task timeout | Future task UI/notification | future scheduled runner |
-| `interactive_long_running` | Rejected before user code | Startup timeout plus stop grace and watchdog policy | Persistent foreground notification with Stop | future explicit service descriptor |
+| `interactive_long_running` | Partial explicit foreground MVP | Startup timeout plus stop grace and watchdog policy | Persistent foreground notification with Stop | explicit interactive session API |
 | `worker_computation` | Reserved behind worker_threads gates | Startup/task timeout | None | future worker runtime |
 
 ## Explicit Opt-In
 
-Future service mode must require a dedicated descriptor, for example:
+Broader project/package service mode must require a dedicated descriptor, for
+example:
 
 ```json
 {
@@ -90,17 +106,25 @@ The exact schema is deferred, but required properties should include:
 
 The default for all existing scripts remains one-shot mode.
 
-The current runtime accepts only `executionMode: "one_shot"`. The aliases
-`"interactiveLongRunning"`, `"longRunning"`, `"long_running"`, and `"service"`
-normalize to `interactive_long_running` only to produce a stable
-unsupported-option diagnostic; they do not start a background service and they
-do not convert `timeoutMs: 0` into an unbounded run. `scheduled` and
-`workerComputation` are also recognized as reserved modes and rejected before
-user code until their dedicated gates are implemented.
+The current runtime accepts `executionMode: "one_shot"` for normal script
+launches. The aliases `"interactiveLongRunning"`, `"longRunning"`,
+`"long_running"`, and `"service"` normalize to `interactive_long_running`, but
+direct script launches still reject before user JavaScript runs and do not
+convert `timeoutMs: 0` into an unbounded run. `interactive_long_running` is
+accepted only when the service request is created through the explicit
+interactive session launch surface. `scheduled` and `workerComputation` are
+also recognized as reserved modes and rejected before user code until their
+dedicated gates are implemented.
 
 ## Foreground Notification
 
 Long-running service mode must run with an explicit foreground notification while active.
+
+The S7-18 MVP notification uses the dedicated Embedded Node foreground service
+channel, a persistent service notification, and a Stop action bound to the
+current execution id. The notification content identifies the interactive Node
+runtime and source name. Rich diagnostics/open-console actions remain future
+work.
 
 Required notification properties:
 
@@ -146,7 +170,16 @@ Long-running service mode must provide multiple stop paths:
 - `engines.stopAll()` from AutoJs6-owned control surfaces
 - packaged app stop control when running in packaged APK
 
-Stop must route through the same lifecycle controller. JavaScript should receive a cooperative shutdown signal before force stop, but force stop must remain available if the service does not drain.
+The S7-18 MVP implements the foreground notification Stop action and the
+programmatic client stop path
+`NativeNodeEmbeddedScriptService.stopInteractiveLongRunning(context,
+executionId)`. Stop requests mark the interactive status as stopping/stopped and
+schedule the isolated embedded Node process to exit. Console UI, script-level
+cooperative stop callbacks, and packaged app stop controls remain future gates.
+
+Stop must route through the same lifecycle controller. JavaScript should
+eventually receive a cooperative shutdown signal before force stop, but force
+stop must remain available if the service does not drain.
 
 Suggested future JavaScript shape:
 
@@ -263,6 +296,11 @@ Suggested future descriptor:
 
 Long-running services should not reuse the current one-shot lifecycle assumptions blindly.
 
+The S7-18 MVP still runs in `:nodejs_embedded` and keeps the existing
+single-active Node environment invariant. It is an interactive runtime surface,
+not a generic service scheduler. No automatic restart is attempted after stop,
+timeout, process exit, or failure.
+
 Open design choices:
 
 - reuse `:nodejs_embedded` with a dedicated service component
@@ -301,24 +339,31 @@ Long-running service diagnostics should include:
 
 Diagnostics should be attachable through the existing Embedded Node doctor report once a runtime provider exists.
 
-## Tests Required Before Implementation
+The S7-18 MVP writes app-private JSON status snapshots containing schema
+version, execution id, execution mode, launch surface, source name, working
+directory, state, start/update timestamps, duration, stop-request flag, restart
+policy `never`, `automaticRestart=false`, stop action name, active resource
+summary, policy metadata, and native values.
 
-No runtime implementation should land without focused tests for:
+## Tests
+
+The current S7-18 gate covers:
 
 - normal scripts still time out
-- service startup timeout
-- ready signal success path
 - notification stop action
-- console stop action
-- cooperative stop drain
-- force stop after grace timeout
-- service destroy rejects pending bridge calls
-- controlled fetch/WebSocket cleanup
-- quota exceeded paths
-- packaged manifest verifier
-- packaged service smoke
-- crash without restart
-- bounded restart policy if implemented
+- explicit interactive session status: starting/running/stopping/stopped
+- runtime duration and active resource summary fields
+- app UI leaving foreground while the script remains alive
+- notification/client Stop path and recovery after process teardown
+- direct script `interactiveLongRunning`/legacy `long_running` rejection before
+  user code
+- one-shot interval timeout regression
+
+Before broader service mode promotion, add focused tests for startup ready
+signals, console stop, cooperative stop drain, force stop after grace timeout,
+service destroy rejection for pending bridge calls, controlled fetch/WebSocket
+cleanup, quota exceeded paths, packaged manifest verification, packaged service
+smoke, crash without restart, and bounded restart policy if implemented.
 
 ## Release Gate
 
@@ -326,9 +371,12 @@ Any release with long-running service mode enabled must verify:
 
 - normal one-shot timeout tests still pass
 - `NodeEmbeddedLifecycleStressInstrumentationTest` still passes
+- `NodeInteractiveLongRunningInstrumentationTest` passes on the target device
 - foreground service permissions and type are correct
-- packaged diagnostic report includes service-mode checks
+- status snapshots include duration, restart policy `never`, stop action, and
+  active resource summary
 - raw network and dangerous process APIs remain denied
 - service mode is documented as explicit and user-visible
 
-Until those gates exist, long-running service mode remains a design-only future capability.
+Packaged service mode still remains disabled until packaged manifest, template,
+diagnostic, and stop-control gates exist.

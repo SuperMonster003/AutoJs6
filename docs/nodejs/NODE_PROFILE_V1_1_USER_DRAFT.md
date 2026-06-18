@@ -60,7 +60,7 @@ reach an Android provider.
 | UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
 | `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, and raw Android scheduler APIs remain unavailable. |
 | JS-only plugins | experimental | Project-local `./plugins/<id>` loading only. Native plugins, signed archives, installers, and packaged plugin runtime are not enabled. |
-| execution modes beyond `one_shot` | blocked | `interactive_long_running`, `scheduled`, and `worker_computation` are reserved by the Phase 7 state machine and reject before user code. Normal scripts remain one-shot and timeout-bounded. |
+| execution modes beyond `one_shot` | partial | `interactive_long_running` is available only through the explicit interactive foreground runtime with a persistent Stop notification and restart policy `never`. Direct script requests still reject before user code; `scheduled` and `worker_computation` remain reserved. Normal scripts remain one-shot and timeout-bounded. |
 
 ## ESM Scripts
 
@@ -379,9 +379,10 @@ runtime are not enabled.
 
 ## Long-running Node Scripts
 
-Status: `blocked`.
+Status: `partial`.
 
-The shape is reserved, but normal builds reject it before user code runs:
+Normal scripts cannot opt into long-running behavior directly. This request
+shape is rejected before user code runs:
 
 ```json
 {
@@ -392,13 +393,17 @@ The shape is reserved, but normal builds reject it before user code runs:
 }
 ```
 
+The v1.1 runtime has a controlled interactive foreground entry for host-owned
+launches. It starts a user-visible Node session, posts a persistent notification
+with Stop, reports status/duration/resource summary in app-private storage, and
+uses restart policy `never`. It is not a packaged service descriptor, scheduler,
+or hidden background mode.
+
 Keep normal scripts one-shot and timeout-bounded. Use notifications and the
 controlled `work_manager` scheduling MVP within their current partial limits:
-scheduled entries remain scoped, bounded, and WorkManager-backed, while a future
-long-running mode still needs foreground notification ownership, user stop
-controls, quotas, restart policy, packaged checks, and lifecycle tests. The
-reserved `scheduled` and `workerComputation` execution modes are policy
-descriptors only until their dedicated gates are implemented.
+scheduled entries remain scoped, bounded, and WorkManager-backed. The reserved
+`scheduled` and `workerComputation` execution modes are policy descriptors only
+until their dedicated gates are implemented.
 
 ## Packaging Notes
 
@@ -411,7 +416,7 @@ feature's provider status:
   `work_manager` through fake transport
 - packaged `.mjs`, package `type=module`, and local dynamic import smokes run
   against the default production inrt template through `:app:verifyNodePackagedEsmGate`
-- packaged plugins and long-running service mode are not enabled
+- packaged plugins and packaged long-running service mode are not enabled
 
 ## See Also
 

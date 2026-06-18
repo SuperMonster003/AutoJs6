@@ -30,15 +30,23 @@ class NodeExecutionModePolicyInstrumentationTest {
 
         val oneShot = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_ONE_SHOT)
         assertTrue(oneShot.supported)
+        assertTrue(NodeExecutionModePolicy.isSupported(NodeExecutionModePolicy.MODE_ONE_SHOT))
         assertEquals("required_positive_timeout", oneShot.timeoutPolicy)
         assertEquals("never", oneShot.restartPolicy)
         assertTrue(oneShot.allowedProviders.contains("work_manager"))
 
         val interactive = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING)
-        assertFalse(interactive.supported)
+        assertTrue(interactive.supported)
+        assertFalse(NodeExecutionModePolicy.isSupported(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING))
+        assertTrue(
+            NodeExecutionModePolicy.isSupported(
+                NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+            ),
+        )
         assertEquals("required", interactive.foregroundRequirement)
         assertEquals("persistent_stop_action_required", interactive.notificationRequirement)
-        assertTrue(interactive.unsupportedReason.orEmpty().contains("foreground notification ownership"))
+        assertTrue(interactive.unsupportedReason.orEmpty().contains("explicit interactive session"))
 
         val scheduled = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_SCHEDULED)
         assertFalse(scheduled.supported)
@@ -81,14 +89,25 @@ class NodeExecutionModePolicyInstrumentationTest {
     fun unsupportedModesReturnStablePolicyMetadata() {
         val interactive = NodeExecutionModePolicy.nativeValues("longRunning")
         assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, interactive["embedded_script.execution_mode"])
-        assertEquals("reserved", interactive["embedded_script.execution_mode_status"])
+        assertEquals("partial", interactive["embedded_script.execution_mode_status"])
+        assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT, interactive["embedded_script.execution_mode_launch_surface"])
         assertEquals("false", interactive["embedded_script.execution_mode_supported"])
+        assertEquals(
+            NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+            interactive["embedded_script.execution_mode_supported_launch_surfaces"],
+        )
         assertEquals("true", interactive["embedded_script.long_running_requested"])
         assertEquals("false", interactive["embedded_script.long_running_supported"])
         assertTrue(
             interactive["embedded_script.execution_mode_allowed_providers"].orEmpty(),
             interactive["embedded_script.execution_mode_allowed_providers"].orEmpty().contains("notifications"),
         )
+        val interactiveSession = NodeExecutionModePolicy.nativeValues(
+            "longRunning",
+            NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+        )
+        assertEquals("true", interactiveSession["embedded_script.execution_mode_supported"])
+        assertEquals("true", interactiveSession["embedded_script.long_running_supported"])
 
         val scheduled = NodeExecutionModePolicy.nativeValues("scheduled")
         assertEquals("false", scheduled["embedded_script.execution_mode_supported"])

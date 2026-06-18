@@ -227,10 +227,14 @@ event delivery, provider cleanup, descriptor denial, and foreign-handle denial.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real one-shot embedded Node execution, delayed cancel
 prevention, path/capability enforcement, and persisted run metadata.
-`verifyNodeLongRunningGate` keeps long-running activation fail-closed: it freezes
-the Phase 7 execution-mode state machine, verifies only `one_shot` executes, and
-continues lifecycle/resource stress coverage for timeouts, queueing, cleanup,
-and reserved-mode rejection before user code.
+`verifyNodeLongRunningGate` keeps normal long-running activation fail-closed
+while covering the S7-18 interactive foreground MVP. It freezes the Phase 7
+execution-mode state machine, verifies ordinary script launches still execute
+only `one_shot`, rejects direct `interactiveLongRunning`/legacy `long_running`
+before user code, and runs the explicit interactive session status/foreground
+survival/Stop-action recovery test. It also continues lifecycle/resource stress
+coverage for timeouts, queueing, cleanup, and reserved-mode rejection before
+user code.
 
 ## Release Gate
 

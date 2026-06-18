@@ -119,7 +119,20 @@ opt in to each bridge capability and the provider audit still applies.
 
 Embedded Node execution is single-active per `:nodejs_embedded` process. Normal concurrent starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY` instead of overlapping V8/libuv lifecycle ownership or silently queuing. A bounded execution queue exists only for explicit enqueue requests; queue full, timeout, and cancellation paths use stable `ERR_AUTOJS6_NODE_QUEUE_*` errors. See `docs/nodejs/design/MULTI_INSTANCE.md` and `docs/nodejs/design/EXECUTION_QUEUE.md`.
 
-Long-running Node service mode remains a design-only future capability. It must not be inferred from pending timers, open network/WebSocket handles, `timeoutMs: 0`, or package metadata. Normal scripts remain one-shot and timeout-controlled until an explicit foreground-service descriptor, user stop controls, resource quotas, packaged APK checks, and crash restart policy are implemented. The request protocol recognizes `executionMode` through the Phase 7 state machine: `one_shot` is executable, while `interactive_long_running`, `scheduled`, and `worker_computation` are reserved and rejected before user code runs with their timeout, foreground, notification, provider, restart, quota, and stop policy metadata. See `docs/nodejs/design/LONG_RUNNING_SERVICE.md`.
+Long-running Node service mode is limited to the explicit S7-18 interactive
+foreground runtime. It must not be inferred from pending timers, open
+network/WebSocket handles, `timeoutMs: 0`, or package metadata. Normal scripts
+remain one-shot and timeout-controlled; direct script
+`interactiveLongRunning`/legacy `long_running` requests reject before user code.
+The request protocol recognizes `executionMode` through the Phase 7 state
+machine: `one_shot` is executable for normal launches,
+`interactive_long_running` is executable only through the explicit
+`interactive_session` launch surface with a persistent notification and Stop
+action, and `scheduled`/`worker_computation` remain reserved. Interactive
+long-running status records restart policy `never`, `automaticRestart=false`,
+duration, active resources, and the Stop action; packaged service mode,
+automatic restart, service descriptors, broader quotas, and script-level
+cooperative stop remain gated. See `docs/nodejs/design/LONG_RUNNING_SERVICE.md`.
 
 ## Feature Flag Policy
 

@@ -205,7 +205,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] runtime timeline trace remains off by default and records service/native/bootstrap/stdout/pending/bridge/stop/drain/destroy events when opted in
 - [ ] concurrent embedded Node starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`, and a later run succeeds after the active execution finishes
 - [ ] explicit embedded execution queue runs a second script after the first, supports queued cancellation, and returns `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full
-- [ ] long-running service mode remains disabled/design-only unless foreground notification, user stop, quotas, packaged checks, and restart policy tests are implemented
+- [ ] interactive long-running mode remains explicit, foreground, user-stoppable, restart policy `never`, and unavailable to normal script/package launches unless their dedicated gates are implemented
 
 ## Diagnostics
 

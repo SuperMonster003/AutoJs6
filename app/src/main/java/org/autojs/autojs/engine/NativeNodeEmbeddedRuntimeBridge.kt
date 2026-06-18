@@ -704,7 +704,10 @@ object NativeNodeEmbeddedRuntimeBridge {
         )
     }
 
-    fun validateEmbeddedScriptRequestBeforeServiceStart(request: EmbeddedScriptRequest): EmbeddedScriptResult? {
+    fun validateEmbeddedScriptRequestBeforeServiceStart(
+        request: EmbeddedScriptRequest,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+    ): EmbeddedScriptResult? {
         val startedAt = SystemClock.elapsedRealtime()
         val processName = currentProcessName()
         val pid = Process.myPid()
@@ -719,14 +722,14 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
         val executionMode = NodeExecutionModePolicy.normalize(request.executionMode)
-        if (!NodeExecutionModePolicy.isSupported(executionMode)) {
+        if (!NodeExecutionModePolicy.isSupported(executionMode, launchSurface)) {
             return failureEmbeddedScriptResult(
                 request = request,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = NodeExecutionModePolicy.unsupportedMessage(executionMode),
-                nativeValues = NodeExecutionModePolicy.nativeValues(executionMode) + mapOf(
+                message = NodeExecutionModePolicy.unsupportedMessage(executionMode, launchSurface),
+                nativeValues = NodeExecutionModePolicy.nativeValues(executionMode, launchSurface) + mapOf(
                     "embedded_script.execution_mode_rejected" to "true",
                     "embedded_script.error_code" to NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION,
                 ),

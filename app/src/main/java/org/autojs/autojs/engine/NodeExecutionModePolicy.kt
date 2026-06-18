@@ -7,14 +7,17 @@ object NodeExecutionModePolicy {
     const val MODE_SCHEDULED = "scheduled"
     const val MODE_WORKER_COMPUTATION = "worker_computation"
 
+    const val LAUNCH_SURFACE_SCRIPT = "script"
+    const val LAUNCH_SURFACE_INTERACTIVE_SESSION = "interactive_session"
+
     // Legacy request aliases retained for stable rejection diagnostics.
     const val MODE_LONG_RUNNING = "long_running"
     const val MODE_SERVICE = "service"
 
     data class Definition(
         val mode: String,
-        val supported: Boolean,
         val status: String,
+        val supportedLaunchSurfaces: Set<String>,
         val timeoutPolicy: String,
         val foregroundRequirement: String,
         val notificationRequirement: String,
@@ -23,7 +26,12 @@ object NodeExecutionModePolicy {
         val resourceQuotaProfile: String,
         val stopSemantics: String,
         val unsupportedReason: String? = null,
-    )
+    ) {
+        val supported: Boolean
+            get() = supportedLaunchSurfaces.isNotEmpty()
+
+        fun supports(launchSurface: String): Boolean = launchSurface in supportedLaunchSurfaces
+    }
 
     fun normalize(mode: String?): String {
         val normalized = mode
@@ -60,25 +68,36 @@ object NodeExecutionModePolicy {
 
     fun canonicalModes(): List<String> = DEFINITIONS.map { it.mode }
 
-    fun isSupported(mode: String?): Boolean = definition(mode).supported
+    fun isSupported(
+        mode: String?,
+        launchSurface: String = LAUNCH_SURFACE_SCRIPT,
+    ): Boolean = definition(mode).supports(launchSurface)
 
     fun isLongRunningRequest(mode: String?): Boolean {
         return normalize(mode) == MODE_INTERACTIVE_LONG_RUNNING
     }
 
-    fun unsupportedMessage(mode: String?): String {
+    fun unsupportedMessage(
+        mode: String?,
+        launchSurface: String = LAUNCH_SURFACE_SCRIPT,
+    ): String {
         val definition = definition(mode)
         val reason = definition.unsupportedReason?.let { " $it" }.orEmpty()
-        return "Embedded Node executionMode '${definition.mode}' is not supported by the Phase 7 runtime state machine.$reason " +
+        return "Embedded Node executionMode '${definition.mode}' is not supported for launchSurface '$launchSurface' by the Phase 7 runtime state machine.$reason " +
             "Use '$MODE_ONE_SHOT' with a positive timeout for normal scripts."
     }
 
-    fun nativeValues(mode: String?): Map<String, String> {
+    fun nativeValues(
+        mode: String?,
+        launchSurface: String = LAUNCH_SURFACE_SCRIPT,
+    ): Map<String, String> {
         val definition = definition(mode)
         return linkedMapOf(
             "embedded_script.execution_mode" to definition.mode,
             "embedded_script.execution_mode_status" to definition.status,
-            "embedded_script.execution_mode_supported" to definition.supported.toString(),
+            "embedded_script.execution_mode_launch_surface" to launchSurface,
+            "embedded_script.execution_mode_supported" to definition.supports(launchSurface).toString(),
+            "embedded_script.execution_mode_supported_launch_surfaces" to definition.supportedLaunchSurfaces.joinToString(",").ifBlank { "none" },
             "embedded_script.execution_mode_timeout_policy" to definition.timeoutPolicy,
             "embedded_script.execution_mode_foreground_requirement" to definition.foregroundRequirement,
             "embedded_script.execution_mode_notification_requirement" to definition.notificationRequirement,
@@ -88,7 +107,7 @@ object NodeExecutionModePolicy {
             "embedded_script.execution_mode_stop_semantics" to definition.stopSemantics,
             "embedded_script.long_running_requested" to isLongRunningRequest(definition.mode).toString(),
             "embedded_script.long_running_supported" to (
-                definition.mode == MODE_INTERACTIVE_LONG_RUNNING && definition.supported
+                definition.mode == MODE_INTERACTIVE_LONG_RUNNING && definition.supports(launchSurface)
                 ).toString(),
         )
     }
@@ -96,8 +115,8 @@ object NodeExecutionModePolicy {
     private fun unknownDefinition(mode: String): Definition {
         return Definition(
             mode = mode,
-            supported = false,
             status = "unknown",
+            supportedLaunchSurfaces = emptySet(),
             timeoutPolicy = "none",
             foregroundRequirement = "none",
             notificationRequirement = "none",
@@ -131,8 +150,8 @@ object NodeExecutionModePolicy {
     private val DEFINITIONS = listOf(
         Definition(
             mode = MODE_ONE_SHOT,
-            supported = true,
             status = "available",
+            supportedLaunchSurfaces = setOf(LAUNCH_SURFACE_SCRIPT),
             timeoutPolicy = "required_positive_timeout",
             foregroundRequirement = "transient_embedded_service",
             notificationRequirement = "transient_execution_notification",
@@ -143,8 +162,8 @@ object NodeExecutionModePolicy {
         ),
         Definition(
             mode = MODE_INTERACTIVE_LONG_RUNNING,
-            supported = false,
-            status = "reserved",
+            status = "partial",
+            supportedLaunchSurfaces = setOf(LAUNCH_SURFACE_INTERACTIVE_SESSION),
             timeoutPolicy = "startup_timeout_stop_grace_and_watchdog",
             foregroundRequirement = "required",
             notificationRequirement = "persistent_stop_action_required",
@@ -163,12 +182,12 @@ object NodeExecutionModePolicy {
             restartPolicy = "never",
             resourceQuotaProfile = "interactive_long_running_strict",
             stopSemantics = "foreground_or_user_stop_then_graceful_destroy",
-            unsupportedReason = "Interactive long-running mode still needs foreground notification ownership, user stop controls, quotas, and lifecycle gates.",
+            unsupportedReason = "Interactive long-running mode is available only through the explicit interactive session launch surface; direct script launches remain one-shot.",
         ),
         Definition(
             mode = MODE_SCHEDULED,
-            supported = false,
             status = "reserved",
+            supportedLaunchSurfaces = emptySet(),
             timeoutPolicy = "required_task_timeout",
             foregroundRequirement = "workmanager_policy_dependent",
             notificationRequirement = "task_visibility_required_before_promotion",
@@ -187,8 +206,8 @@ object NodeExecutionModePolicy {
         ),
         Definition(
             mode = MODE_WORKER_COMPUTATION,
-            supported = false,
             status = "reserved",
+            supportedLaunchSurfaces = emptySet(),
             timeoutPolicy = "startup_and_task_timeout",
             foregroundRequirement = "not_applicable",
             notificationRequirement = "not_applicable",

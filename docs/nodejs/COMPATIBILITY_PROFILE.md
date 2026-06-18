@@ -173,7 +173,10 @@ See [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md).
 
 ## Long-Running Service Mode
 
-Long-running Node service mode is not part of the current Safe Node Profile runtime. Pending timers, WebSocket handles, network requests, or open bridge resources do not convert a normal script into a service.
+Long-running Node service mode is only partially available through the explicit
+interactive foreground runtime. Pending timers, WebSocket handles, network
+requests, or open bridge resources do not convert a normal script into a
+service.
 
 Current behavior remains:
 
@@ -183,15 +186,21 @@ Current behavior remains:
   request spool and normalized through the Phase 7 mode state machine
 - canonical modes are `one_shot`, `interactive_long_running`, `scheduled`, and
   `worker_computation`
-- `one_shot` is the only supported executable value
-- `interactiveLongRunning`, legacy `long_running`/`service`, `scheduled`, and
-  `workerComputation` requests are rejected before user code runs with
-  `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`
+- `one_shot` is the only supported executable value for normal script launches
+- `interactive_long_running` is supported only by the explicit
+  `interactive_session` launch surface used by
+  `NativeNodeEmbeddedScriptService.startInteractiveLongRunning(...)`
+- direct script `interactiveLongRunning`, legacy `long_running`/`service`,
+  `scheduled`, and `workerComputation` requests are rejected before user code
+  runs with `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`
 - rejection native values include timeout policy, foreground requirement,
   notification requirement, allowed-provider list, restart policy, quota
-  profile, and stop semantics
+  profile, stop semantics, launch surface, and supported launch surfaces
+- interactive status snapshots include runtime duration, Stop action, active
+  resource summary, restart policy `never`, and `automaticRestart=false`
 - service process exit is expected after one-shot execution settles
-- packaged Node entries remain one-shot unless a future explicit service descriptor is implemented
+- packaged Node entries remain one-shot unless a future explicit service
+  descriptor is implemented
 
 The future design gate is documented in [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
 

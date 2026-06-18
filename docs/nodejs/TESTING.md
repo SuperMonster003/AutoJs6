@@ -65,13 +65,30 @@ Focused embedded execution queue coverage:
 
 These tests verify that default concurrent starts still reject, explicit enqueue runs after the active script, queued executions can be cancelled by execution id, queue wait timeout returns `ERR_AUTOJS6_NODE_QUEUE_TIMEOUT` before user code runs, and the one-entry queue limit returns `ERR_AUTOJS6_NODE_QUEUE_FULL`.
 
-Long-running service mode is currently a design gate only:
+Long-running service mode has a controlled interactive foreground MVP:
 
 ```text
 docs/nodejs/design/LONG_RUNNING_SERVICE.md
 ```
 
-There is no service-mode runtime test yet because no runtime implementation exists. Until that changes, lifecycle tests must continue to verify that normal scripts are one-shot executions controlled by `timeoutMs`, including timeout recovery, uncleared interval timeout behavior, and the explicit execution-mode policy gate that rejects reserved modes before user code runs. `NodeExecutionModePolicyInstrumentationTest` freezes the Phase 7 state machine for `one_shot`, `interactive_long_running`, `scheduled`, and `worker_computation`; `NodeEmbeddedLifecycleStressInstrumentationTest#explicitLongRunningModeIsRejectedBeforeUserScriptRuns` verifies that the `interactiveLongRunning`/legacy `long_running` path cannot be enabled by `timeoutMs=0` or pending timers.
+`NodeInteractiveLongRunningInstrumentationTest` starts
+`NativeNodeEmbeddedScriptService.startInteractiveLongRunning(...)`, waits for
+the app-private status snapshot to report `running`, sends the app UI to the
+background, verifies the script remains alive, then uses the stop path and
+checks recovery after the isolated Node process exits. The status snapshot must
+include `executionMode=interactive_long_running`,
+`launchSurface=interactive_session`, runtime duration, active resource summary,
+restart policy `never`, `automaticRestart=false`, and the Stop action name.
+
+Lifecycle tests must still verify that normal scripts are one-shot executions
+controlled by `timeoutMs`, including timeout recovery, uncleared interval
+timeout behavior, and the explicit execution-mode policy gate that rejects
+reserved or unsupported launch surfaces before user code runs.
+`NodeExecutionModePolicyInstrumentationTest` freezes the Phase 7 state machine
+for `one_shot`, `interactive_long_running`, `scheduled`, and
+`worker_computation`; `NodeEmbeddedLifecycleStressInstrumentationTest#explicitLongRunningModeIsRejectedBeforeUserScriptRuns`
+verifies that direct script `interactiveLongRunning`/legacy `long_running`
+cannot be enabled by `timeoutMs=0` or pending timers.
 
 Current packaged APK smoke instrumentation:
 

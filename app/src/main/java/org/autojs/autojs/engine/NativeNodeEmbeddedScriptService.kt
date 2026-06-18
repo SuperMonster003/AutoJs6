@@ -1,5 +1,7 @@
 ﻿package org.autojs.autojs.engine
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -13,12 +15,15 @@ import android.os.Looper
 import android.os.Process
 import android.os.ResultReceiver
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import org.autojs.autojs.App
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.ForegroundServiceCreator
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.util.ForegroundServiceUtils
 import org.autojs.autojs.util.ForegroundServiceUtils.FOREGROUND_SERVICE_TYPE_UNKNOWN
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -37,6 +42,16 @@ class NativeNodeEmbeddedScriptService : Service() {
     private var exitScheduled = false
     @Volatile
     private var activeLifecycle: NodeEmbeddedRuntimeLifecycle? = null
+    @Volatile
+    private var activeExecutionId: String? = null
+    @Volatile
+    private var activeExecutionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT
+    @Volatile
+    private var activeSourceName: String = DEFAULT_SOURCE_NAME
+    @Volatile
+    private var activeWorkingDirectory: String? = null
+    @Volatile
+    private var activeStartedAtEpochMs: Long = 0L
     private var foregroundServiceCreator: ForegroundServiceCreator? = null
 
     private val foregroundServiceType = when {
@@ -53,6 +68,8 @@ class NativeNodeEmbeddedScriptService : Service() {
     }
 
     override fun onDestroy() {
+        val interactiveExecutionId = activeExecutionId
+            ?.takeIf { activeExecutionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING }
         cancelAllQueuedExecutionsInService()
         activeLifecycle?.let { lifecycle ->
             if (lifecycle.state !in setOf(
@@ -65,7 +82,22 @@ class NativeNodeEmbeddedScriptService : Service() {
             }
             lifecycle.transition(NodeEmbeddedRuntimeState.DESTROYED, "service.onDestroy")
         }
+        interactiveExecutionId?.let { executionId ->
+            NodeInteractiveLongRunningStatusStore.write(
+                context = this,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                sourceName = activeSourceName,
+                workingDirectory = activeWorkingDirectory,
+                startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                stopRequested = true,
+                message = "service.onDestroy",
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("destroyed"),
+                nativeValues = activeLifecycle?.nativeValues().orEmpty(),
+            )
+        }
         activeLifecycle = null
+        clearActiveInteractiveSession(interactiveExecutionId)
         foregroundServiceCreator?.stopForeground(STOP_FOREGROUND_REMOVE)
         foregroundServiceCreator = null
         scheduleProcessExit(0)
@@ -81,6 +113,10 @@ class NativeNodeEmbeddedScriptService : Service() {
                     name = "NativeNodeEmbeddedScriptService-$startId"
                     start()
                 }
+                START_NOT_STICKY
+            }
+            ACTION_STOP_INTERACTIVE -> {
+                stopInteractiveLongRunning(intent, startId)
                 START_NOT_STICKY
             }
             else -> {
@@ -108,7 +144,10 @@ class NativeNodeEmbeddedScriptService : Service() {
             stopServiceIfQueueIdle(startId)
             return
         }
-        NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(serviceRequest)?.let { failure ->
+        val launchSurface = intent.getStringExtra(EXTRA_LAUNCH_SURFACE)
+            ?.takeIf { it.isNotBlank() }
+            ?: NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT
+        NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(serviceRequest, launchSurface)?.let { failure ->
             receiver?.send(RESULT_SCRIPT, failure.toBundle())
             stopServiceIfQueueIdle(startId)
             return
@@ -133,6 +172,25 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
         val executionId = serviceRequest.executionId?.takeIf { it.isNotBlank() }
             ?: newExecutionId()
+        val interactiveSession = executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
+            launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
+        if (interactiveSession) {
+            activeExecutionId = executionId
+            activeExecutionMode = executionMode
+            activeSourceName = sourceName
+            activeWorkingDirectory = workingDirectory
+            activeStartedAtEpochMs = System.currentTimeMillis()
+            NodeInteractiveLongRunningStatusStore.write(
+                context = this,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STARTING,
+                sourceName = sourceName,
+                workingDirectory = workingDirectory,
+                startedAtEpochMs = activeStartedAtEpochMs,
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("starting"),
+            )
+            updateInteractiveForeground(executionId, sourceName)
+        }
         val processName = currentProcessName()
         val pid = Process.myPid()
         val queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY
@@ -143,6 +201,22 @@ class NativeNodeEmbeddedScriptService : Service() {
             queueTimeoutMs = queueTimeoutMs,
         )
         if (slotDecision is ExecutionSlotDecision.Rejected) {
+            if (interactiveSession) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    message = slotDecision.failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("queue_rejected"),
+                    nativeValues = mapOf(
+                        "embedded_script.error_code" to slotDecision.failure.errorCode,
+                        "embedded_script.queue_rejected" to "true",
+                    ),
+                )
+            }
             receiver?.send(
                 RESULT_SCRIPT,
                 queueFailureResult(
@@ -255,6 +329,18 @@ class NativeNodeEmbeddedScriptService : Service() {
             bridgeSession.start()
             timeline?.mark("bridge_transport_ready", mapOf("transport" to "file"))
             lifecycle.transition(NodeEmbeddedRuntimeState.RUNNING, "native.enter")
+            if (interactiveSession) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_RUNNING,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("running"),
+                    nativeValues = lifecycle.nativeValues(),
+                )
+            }
             timeline?.mark("native_enter")
             val nativeResult = NativeNodeEmbeddedRuntimeBridge.runEmbeddedScriptInCurrentProcess(
                 context = this,
@@ -262,7 +348,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             )
             timeline?.recordNativeResult(nativeResult)
             val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
-                .withExecutionMode(executionMode)
+                .withExecutionMode(executionMode, launchSurface)
             timeline?.recordBridge(result)
             val completed = when {
                 result.succeeded -> {
@@ -285,6 +371,24 @@ class NativeNodeEmbeddedScriptService : Service() {
                     result
                 }
             }
+            if (interactiveSession) {
+                val state = when {
+                    completed.succeeded -> NodeInteractiveLongRunningStatusStore.STATE_STOPPED
+                    completed.timedOut -> NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT
+                    else -> NodeInteractiveLongRunningStatusStore.STATE_FAILED
+                }
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = state,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    message = completed.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary(state, completed.nativeValues),
+                    nativeValues = lifecycle.nativeValues() + completed.nativeValues,
+                )
+            }
             timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
             receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).withQueueLease(slotLease).withTimeline(timeline).toBundle())
         } catch (e: Throwable) {
@@ -299,6 +403,19 @@ class NativeNodeEmbeddedScriptService : Service() {
             lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "service.exception")
             Log.e(TAG, "Native Node embedded script service failed.", e)
             timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
+            if (interactiveSession) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    message = e.message ?: e.javaClass.name,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("exception"),
+                    nativeValues = lifecycle.nativeValues(),
+                )
+            }
             receiver?.send(
                 RESULT_SCRIPT,
                 NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
@@ -334,8 +451,11 @@ class NativeNodeEmbeddedScriptService : Service() {
                 Log.i(
                     TAG,
                     "script.queue.keep_service_alive executionId=$executionId active=${queueStatus.activeExecutionId.orEmpty()} " +
-                        "queued=${queueStatus.queuedCount}",
+                    "queued=${queueStatus.queuedCount}",
                 )
+            }
+            if (interactiveSession) {
+                clearActiveInteractiveSession(executionId)
             }
         }
     }
@@ -602,11 +722,12 @@ class NativeNodeEmbeddedScriptService : Service() {
 
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withExecutionMode(
         executionMode: String,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return copy(
             nativeValues = linkedMapOf<String, String>().apply {
                 putAll(nativeValues)
-                putAll(NodeExecutionModePolicy.nativeValues(executionMode))
+                putAll(NodeExecutionModePolicy.nativeValues(executionMode, launchSurface))
             },
         )
     }
@@ -880,6 +1001,113 @@ class NativeNodeEmbeddedScriptService : Service() {
         val maxQueuedExecutions: Int,
     )
 
+    private fun stopInteractiveLongRunning(intent: Intent, startId: Int) {
+        val requestedExecutionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
+        val executionId = activeExecutionId
+        if (executionId == null || (requestedExecutionId != null && requestedExecutionId != executionId)) {
+            Log.w(
+                TAG,
+                "interactive.stop.ignored requested=${requestedExecutionId.orEmpty()} active=${executionId.orEmpty()}",
+            )
+            stopSelf(startId)
+            return
+        }
+        activeLifecycle?.let { lifecycle ->
+            if (lifecycle.state !in setOf(
+                    NodeEmbeddedRuntimeState.STOPPING,
+                    NodeEmbeddedRuntimeState.STOPPED,
+                    NodeEmbeddedRuntimeState.DESTROYED,
+                )
+            ) {
+                lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "interactive.stop")
+            }
+        }
+        NodeInteractiveLongRunningStatusStore.write(
+            context = this,
+            executionId = executionId,
+            state = NodeInteractiveLongRunningStatusStore.STATE_STOPPING,
+            sourceName = activeSourceName,
+            workingDirectory = activeWorkingDirectory,
+            startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+            stopRequested = true,
+            message = "interactive.stop.requested",
+            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("stopping"),
+            nativeValues = activeLifecycle?.nativeValues().orEmpty(),
+        )
+        NodeInteractiveLongRunningStatusStore.write(
+            context = this,
+            executionId = executionId,
+            state = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+            sourceName = activeSourceName,
+            workingDirectory = activeWorkingDirectory,
+            startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+            stopRequested = true,
+            message = "interactive.stop.accepted",
+            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("process_exit_scheduled"),
+            nativeValues = activeLifecycle?.nativeValues().orEmpty(),
+        )
+        stopSelf(startId)
+        scheduleProcessExit(0)
+    }
+
+    private fun updateInteractiveForeground(executionId: String, sourceName: String) {
+        ForegroundServiceUtils.createNotificationChannelIfNeeded(
+            this,
+            NativeNodeEmbeddedScriptService::class.java,
+            "AutoJs6 interactive Node runtime",
+            "Runs user-visible long-running Node automation",
+        )
+        val channelId = ForegroundServiceUtils.getChannelId(NativeNodeEmbeddedScriptService::class.java)
+        val contentIntent = PendingIntent.getActivity(
+            this,
+            INTERACTIVE_CONTENT_REQUEST_CODE,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val stopIntent = Intent(this, NativeNodeEmbeddedScriptService::class.java).apply {
+            action = ACTION_STOP_INTERACTIVE
+            putExtra(EXTRA_EXECUTION_ID, executionId)
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this,
+            INTERACTIVE_STOP_REQUEST_CODE,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val displayName = sourceName.ifBlank { DEFAULT_SOURCE_NAME }
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("AutoJs6 interactive Node runtime")
+            .setContentText("Running $displayName")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("Running $displayName"))
+            .setContentIntent(contentIntent)
+            .setSmallIcon(R.drawable.autojs6_status_bar_icon)
+            .setOngoing(true)
+            .setSilent(true)
+            .setWhen(System.currentTimeMillis())
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setChannelId(channelId)
+            .addAction(R.drawable.ic_stop_black_48dp, "Stop", stopPendingIntent)
+            .build()
+            .apply { flags = flags or Notification.FLAG_FOREGROUND_SERVICE }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && foregroundServiceType != FOREGROUND_SERVICE_TYPE_UNKNOWN) {
+            startForeground(NOTIFICATION_ID, notification, foregroundServiceType)
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
+    }
+
+    private fun clearActiveInteractiveSession(executionId: String?) {
+        if (executionId != null && activeExecutionId != executionId) {
+            return
+        }
+        activeExecutionId = null
+        activeExecutionMode = NodeExecutionModePolicy.MODE_ONE_SHOT
+        activeSourceName = DEFAULT_SOURCE_NAME
+        activeWorkingDirectory = null
+        activeStartedAtEpochMs = 0L
+    }
+
     companion object {
 
         private const val TAG = "NativeNodeEmbeddedScriptService"
@@ -889,11 +1117,13 @@ class NativeNodeEmbeddedScriptService : Service() {
         private val QUEUED_EXECUTION_IDS = ArrayDeque<String>()
         private val CANCELLED_QUEUED_EXECUTION_IDS = mutableSetOf<String>()
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
+        private const val ACTION_STOP_INTERACTIVE = NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME
         private const val EXTRA_RESULT_RECEIVER = "result_receiver"
         private const val EXTRA_SOURCE = "source"
         private const val EXTRA_SOURCE_NAME = "source_name"
         private const val EXTRA_WORKING_DIRECTORY = "working_directory"
         private const val EXTRA_EXECUTION_MODE = "execution_mode"
+        private const val EXTRA_LAUNCH_SURFACE = "launch_surface"
         private const val EXTRA_TIMEOUT_MS = "timeout_ms"
         private const val EXTRA_ESM_EXPERIMENTAL_ENABLED = "esm_experimental_enabled"
         private const val EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED = "dynamic_import_experimental_enabled"
@@ -917,7 +1147,10 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val REQUEST_SPOOL_VERSION = 1
         private const val RESULT_SCRIPT = 1
         private const val NOTIFICATION_ID = 0xA6E4
+        private const val INTERACTIVE_CONTENT_REQUEST_CODE = 0xA6E5
+        private const val INTERACTIVE_STOP_REQUEST_CODE = 0xA6E6
         private const val PROCESS_EXIT_DELAY_MS = 250L
+        private const val DEFAULT_INTERACTIVE_TIMEOUT_MS = 3_600_000L
         private const val CLIENT_QUEUE_PROCESS_SETTLE_MS = 650L
         private const val BRIDGE_DISPATCH_WAIT_MS = 1000L
         private const val BRIDGE_LIVE_POLL_INTERVAL_MS = 10L
@@ -1077,6 +1310,161 @@ class NativeNodeEmbeddedScriptService : Service() {
                 startedAt = startedAt,
                 executionId = executionId,
             )
+        }
+
+        data class InteractiveLongRunningSession(
+            val executionId: String,
+            val started: Boolean,
+            val status: JSONObject?,
+            val error: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult? = null,
+        )
+
+        fun startInteractiveLongRunning(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        ): InteractiveLongRunningSession {
+            val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
+            val appContext = context.applicationContext
+            val startedAt = android.os.SystemClock.elapsedRealtime()
+            val requestForService = request.copy(
+                executionId = executionId,
+                executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                timeoutMs = request.timeoutMs.takeIf { it > 0L } ?: DEFAULT_INTERACTIVE_TIMEOUT_MS,
+                queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                queueTimeoutMs = 0L,
+            )
+            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(
+                requestForService,
+                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+            )?.let { failure ->
+                val status = NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = requestForService.sourceName,
+                    workingDirectory = requestForService.workingDirectory,
+                    message = failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("preflight_failed"),
+                    nativeValues = failure.nativeValues,
+                )
+                return InteractiveLongRunningSession(
+                    executionId = executionId,
+                    started = false,
+                    status = status,
+                    error = failure.withLifecycle(preflightFailureLifecycle(executionId, requestForService)),
+                )
+            }
+            NodeInteractiveLongRunningStatusStore.write(
+                context = appContext,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STARTING,
+                sourceName = requestForService.sourceName,
+                workingDirectory = requestForService.workingDirectory,
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("client_starting"),
+            )
+            var requestSpoolFile: File? = null
+            try {
+                requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, requestForService)
+                val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
+                    action = ACTION_RUN_SCRIPT
+                    putExtra(EXTRA_SOURCE_NAME, requestForService.sourceName)
+                    putExtra(EXTRA_WORKING_DIRECTORY, requestForService.workingDirectory)
+                    putExtra(EXTRA_EXECUTION_MODE, requestForService.executionMode)
+                    putExtra(EXTRA_LAUNCH_SURFACE, NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION)
+                    putExtra(EXTRA_TIMEOUT_MS, requestForService.timeoutMs.coerceAtLeast(1L))
+                    putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, requestForService.esmExperimentalEnabled)
+                    putExtra(
+                        EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                        requestForService.dynamicImportExperimentalEnabled,
+                    )
+                    putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
+                    putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
+                    putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+                    putExtra(EXTRA_EXECUTION_ID, executionId)
+                    putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
+                }
+                val component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    appContext.startForegroundService(intent)
+                } else {
+                    appContext.startService(intent)
+                }
+                if (component == null) {
+                    val failure = processCrashedOrTimedOut(
+                        request = requestForService,
+                        message = "Failed to start interactive embedded script service.",
+                        startedAt = startedAt,
+                        executionId = executionId,
+                    )
+                    val status = NodeInteractiveLongRunningStatusStore.write(
+                        context = appContext,
+                        executionId = executionId,
+                        state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                        sourceName = requestForService.sourceName,
+                        workingDirectory = requestForService.workingDirectory,
+                        message = failure.errorMessage,
+                        activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_failed"),
+                        nativeValues = failure.nativeValues,
+                    )
+                    requestSpoolFile.parentFile?.deleteRecursively()
+                    return InteractiveLongRunningSession(executionId, false, status, failure)
+                }
+                return InteractiveLongRunningSession(
+                    executionId = executionId,
+                    started = true,
+                    status = NodeInteractiveLongRunningStatusStore.read(appContext, executionId),
+                )
+            } catch (e: Throwable) {
+                requestSpoolFile?.parentFile?.deleteRecursively()
+                val failure = processCrashedOrTimedOut(
+                    request = requestForService,
+                    message = "Interactive embedded script service failed to start.\n${e.message ?: e.javaClass.name}",
+                    throwable = e,
+                    startedAt = startedAt,
+                    executionId = executionId,
+                )
+                val status = NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = requestForService.sourceName,
+                    workingDirectory = requestForService.workingDirectory,
+                    message = failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_exception"),
+                    nativeValues = failure.nativeValues,
+                )
+                return InteractiveLongRunningSession(executionId, false, status, failure)
+            }
+        }
+
+        fun stopInteractiveLongRunning(context: Context, executionId: String): Boolean {
+            val appContext = context.applicationContext
+            val current = NodeInteractiveLongRunningStatusStore.read(appContext, executionId)
+            NodeInteractiveLongRunningStatusStore.write(
+                context = appContext,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STOPPING,
+                sourceName = current?.optString("sourceName").orEmpty().ifBlank { DEFAULT_SOURCE_NAME },
+                workingDirectory = current?.optString("workingDirectory")?.takeIf { it.isNotBlank() },
+                startedAtEpochMs = current?.optLong("startedAtEpochMs")?.takeIf { it > 0L },
+                stopRequested = true,
+                message = "client.stop.requested",
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("client_stopping"),
+            )
+            val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
+                action = ACTION_STOP_INTERACTIVE
+                putExtra(EXTRA_EXECUTION_ID, executionId)
+            }
+            return runCatching {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    appContext.startForegroundService(intent)
+                } else {
+                    appContext.startService(intent)
+                } != null
+            }.getOrDefault(false)
+        }
+
+        fun interactiveLongRunningStatus(context: Context, executionId: String): JSONObject? {
+            return NodeInteractiveLongRunningStatusStore.read(context.applicationContext, executionId)
         }
 
         private fun acquireExecutionSlot(
