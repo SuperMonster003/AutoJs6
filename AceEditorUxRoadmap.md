@@ -437,7 +437,7 @@ and updated alongside commits.
    - [x] Apply editor theme changes immediately where feasible.
    - [x] Apply editor font changes immediately where feasible.
    - [x] Apply editor font-size changes immediately where feasible.
-   - [ ] Preserve dynamic gutter-width behavior when ACE word wrap is enabled.
+   - [x] Preserve dynamic gutter-width behavior when ACE word wrap is enabled.
    - [ ] Improve disabled unsupported-option visuals and hints consistently on
      both settings surfaces.
 

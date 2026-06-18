@@ -458,6 +458,9 @@ assertIncludes(bridge, 'callBridgeBoolean("isBreakpointMarkersEnabled", true)', 
 assertIncludes(bridge, 'callBridgeBoolean("isFoldMarkersEnabled", true)', "ACE fold marker preference bridge");
 assertIncludes(bridge, 'callBridgeString("getGutterWidthMode", "dynamic")', "ACE gutter width mode preference bridge");
 assertIncludes(bridge, 'fixedWidthGutter: gutterWidthMode === "fixed"', "preference-driven ACE gutter width");
+assertIncludes(bridge, "function installDynamicWrapGutterWidthPatch()", "ACE dynamic gutter stays dynamic under word wrap");
+assertIncludes(bridge, 'gutterWidthMode === "dynamic" && sessionForGutter && sessionForGutter.$useWrapMode', "ACE dynamic gutter patch detects wrapped sessions");
+assertIncludes(bridge, "sessionForGutter.$useWrapMode = false", "ACE dynamic gutter patch bypasses wrap-mode fixed-width measurement");
 assertIncludes(bridge, "showGutter: hasVisibleGutterContent()", "ACE gutter hides when all gutter content is disabled");
 assertIncludes(bridge, 'setEditorContainerClass("autojs6-hide-gutter", !showGutter)', "ACE gutter hide class runtime sync");
 assertIncludes(bridge, "indentedSoftWrap: normalizeWordWrapIndentStyle(wordWrapIndentStyle) !== \"classic\"", "ACE word wrap indentation init option");

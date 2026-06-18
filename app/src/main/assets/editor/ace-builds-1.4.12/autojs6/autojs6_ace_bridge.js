@@ -1347,7 +1347,7 @@
         enabled = !!enabled;
         session.setUseWrapMode(enabled);
         editor.setOption("wrap", enabled);
-        scheduleResize("word_wrap_changed");
+        applyGutterOptions("word_wrap_changed");
         notifyStateChanged("wordWrapChanged");
     }
 
@@ -1373,6 +1373,32 @@
     function normalizeGutterWidthMode(mode) {
         mode = String(mode || "").toLowerCase();
         return mode === "fixed" ? "fixed" : "dynamic";
+    }
+
+    function installDynamicWrapGutterWidthPatch() {
+        var renderer = editor && editor.renderer;
+        var gutterLayer = renderer && renderer.$gutterLayer;
+        if (!gutterLayer || !gutterLayer.$updateGutterWidth || gutterLayer.$autojs6DynamicWrapGutterWidthPatch) {
+            return;
+        }
+        var originalUpdateGutterWidth = gutterLayer.$updateGutterWidth;
+        gutterLayer.$updateGutterWidth = function(config) {
+            var sessionForGutter = this.session;
+            if (gutterWidthMode === "dynamic" && sessionForGutter && sessionForGutter.$useWrapMode) {
+                var originalUseWrapMode = sessionForGutter.$useWrapMode;
+                var originalFixedWidth = this.$fixedWidth;
+                try {
+                    sessionForGutter.$useWrapMode = false;
+                    this.$fixedWidth = false;
+                    return originalUpdateGutterWidth.call(this, config);
+                } finally {
+                    sessionForGutter.$useWrapMode = originalUseWrapMode;
+                    this.$fixedWidth = originalFixedWidth;
+                }
+            }
+            return originalUpdateGutterWidth.call(this, config);
+        };
+        gutterLayer.$autojs6DynamicWrapGutterWidthPatch = true;
     }
 
     function hasVisibleGutterContent() {
@@ -1704,6 +1730,7 @@
         installRightEdgeGestureGuard();
         installAceMobileTouchCancellation();
         installFoldPlaceholderClickCapture();
+        installDynamicWrapGutterWidthPatch();
         session.setMode("ace/mode/javascript");
         session.setUseWorker(false);
         session.setTabSize(4);
