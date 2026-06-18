@@ -14,6 +14,7 @@ The gate writes:
 
 ```text
 build/reports/nodejs/v1.1-beta-summary.json
+app/build/reports/nodejs/v1.1-beta-blockers.json
 ```
 
 Required coverage:
@@ -27,6 +28,7 @@ Required coverage:
 - fs promises compatibility.
 - Packaged host verification through `verifyEmbeddedNodePackagedDebug`.
 - Error catalog, project wizard, and TypeScript declaration checks.
+- Beta blocker register verification through `verifyNodeV11BetaBlockerRegister`.
 - Worker design gate by default; worker runtime stress only when
   `autojs.nodejs.worker_threads.experimental=true`.
 
@@ -87,3 +89,4 @@ Result:
 - Connected instrumentation: 146 tests, 0 failures, 0 errors, 0 skipped.
 - Fuzzer seeds: 0 discovered, 0 written.
 - Summary JSON: `build/reports/nodejs/v1.1-beta-summary.json`.
+- Blocker register report: `app/build/reports/nodejs/v1.1-beta-blockers.json`.

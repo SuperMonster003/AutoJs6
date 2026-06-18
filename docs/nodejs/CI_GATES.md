@@ -116,6 +116,7 @@ Scope:
   fuzzer regressions
 - packaged host verification
 - error catalog, project wizard, and TypeScript declaration checks
+- beta blocker register verification
 - JSON summary at `build/reports/nodejs/v1.1-beta-summary.json`
 
 Packaged `.mjs` and local dynamic import install-and-run smokes remain explicit

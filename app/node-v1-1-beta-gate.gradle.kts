@@ -4,6 +4,19 @@ import java.time.ZonedDateTime
 
 private val nodeV11BetaDeviceProfileProperty = "autojs.nodejs.test.deviceProfile"
 private val nodeV11BetaDeviceProfile = "v1_1_beta"
+private val nodeV11BetaBlockerRegisterPath = "docs/nodejs/releases/NODE_PROFILE_V1_1_BETA_BLOCKERS.md"
+private val nodeV11BetaRequiredBlockers = listOf(
+    "V11-BETA-PACKAGED-ESM-TEMPLATE",
+    "V11-BETA-NETWORK-LIVE-PROVIDER",
+    "V11-BETA-WEBSOCKET-LIVE-PROVIDER",
+    "V11-BETA-UI-LIVE-PROVIDER",
+    "V11-BETA-FLOATY-OVERLAY",
+    "V11-BETA-LONG-RUNNING",
+    "V11-BETA-WORKER-THREADS",
+    "V11-BETA-JAVA-INTEROP",
+    "V11-BETA-PLUGIN-RUNTIME",
+    "V11-BETA-WORK-MANAGER-EXECUTION",
+)
 
 private fun nodeV11BetaJson(value: Any?): String =
     JsonOutput.prettyPrint(JsonOutput.toJson(value))
@@ -66,6 +79,77 @@ private fun nodeV11BetaBooleanProperty(name: String, defaultValue: Boolean = fal
         ?.let { it == "true" || it == "yes" || it == "1" }
         ?: defaultValue
 
+private fun nodeV11BetaBlockSection(text: String, id: String): String? =
+    Regex(
+        pattern = """^##\s+${Regex.escape(id)}\b.*?(?=^##\s+|\z)""",
+        options = setOf(RegexOption.MULTILINE, RegexOption.DOT_MATCHES_ALL),
+    ).find(text)?.value
+
+val verifyNodeV11BetaBlockerRegister = tasks.register("verifyNodeV11BetaBlockerRegister") {
+    group = "verification"
+    description = "Verifies the Node Profile v1.1 beta blocker register contains the required RC decision entries."
+
+    val blockerFile = rootProject.layout.projectDirectory.file(nodeV11BetaBlockerRegisterPath)
+    val reportFile = layout.buildDirectory.file("reports/nodejs/v1.1-beta-blockers.json")
+    inputs.file(blockerFile)
+    outputs.file(reportFile)
+
+    doLast {
+        val file = blockerFile.asFile
+        if (!file.isFile) {
+            throw GradleException("Missing Node Profile v1.1 beta blocker register: ${file.absolutePath}")
+        }
+        val text = file.readText()
+        val records = nodeV11BetaRequiredBlockers.map { id ->
+            val section = nodeV11BetaBlockSection(text, id)
+            val status = section
+                ?.lineSequence()
+                ?.firstOrNull { it.startsWith("Status:") }
+                ?.substringAfter(':')
+                ?.trim()
+            val hasRcDecision = section?.contains(Regex("""(?m)^RC decision:\s+\S""")) == true
+            val hasUnblockCondition = section?.contains(Regex("""(?m)^Unblock condition:\s*$""")) == true
+            val hasValidation = section?.contains(Regex("""(?m)^Validation:\s*$""")) == true
+            linkedMapOf(
+                "id" to id,
+                "present" to (section != null),
+                "status" to status,
+                "hasRcDecision" to hasRcDecision,
+                "hasUnblockCondition" to hasUnblockCondition,
+                "hasValidation" to hasValidation,
+            )
+        }
+        val invalid = records.filter { record ->
+            record["present"] != true ||
+                    record["status"] !in setOf("open", "deferred", "closed") ||
+                    record["hasRcDecision"] != true ||
+                    record["hasUnblockCondition"] != true ||
+                    record["hasValidation"] != true
+        }
+        val report = linkedMapOf(
+            "schema" to "autojs6-node-profile-v1-1-beta-blockers-v1",
+            "register" to nodeV11BetaBlockerRegisterPath,
+            "requiredBlockers" to nodeV11BetaRequiredBlockers,
+            "records" to records,
+            "ready" to invalid.isEmpty(),
+            "invalid" to invalid,
+        )
+        reportFile.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(nodeV11BetaJson(report) + "\n")
+        }
+        if (invalid.isNotEmpty()) {
+            throw GradleException(
+                "Node Profile v1.1 beta blocker register is incomplete: " +
+                        invalid.joinToString { it["id"].toString() } +
+                        ". See ${reportFile.get().asFile.absolutePath}"
+            )
+        }
+        logger.lifecycle("Node Profile v1.1 beta blocker register covers ${records.size} required entries.")
+        logger.lifecycle("Node Profile v1.1 beta blocker report written to ${reportFile.get().asFile.absolutePath}")
+    }
+}
+
 val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
     group = "verification"
     description = "Writes the Node Profile v1.1 beta stabilization summary JSON from available gate reports."
@@ -77,6 +161,7 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
         "verifyNodeErrorCatalog",
         "verifyNodeProjectWizard",
         "verifyAutoJs6NodeTypeDeclarations",
+        verifyNodeV11BetaBlockerRegister,
     )
     mustRunAfter("connectedAppDebugAndroidTest", "embeddedNodePackagedSmokeHostVerify", "collectNodeFuzzerSeeds")
 
@@ -249,6 +334,10 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
                     appReportsRoot.resolve("nodejs/project-wizard/project-wizard-report.json"),
                     rootDir,
                 ),
+                "betaBlockers" to nodeV11BetaReportReference(
+                    appReportsRoot.resolve("nodejs/v1.1-beta-blockers.json"),
+                    rootDir,
+                ),
                 "fuzzerSeeds" to linkedMapOf(
                     "dir" to fuzzerSeedDir.nodeV11BetaPathRelativeTo(rootDir),
                     "count" to fuzzerSeedFiles.size,
@@ -295,6 +384,7 @@ tasks.register("verifyNodeV11BetaGate") {
             "verifyNodeErrorCatalog",
             "verifyNodeProjectWizard",
             "verifyAutoJs6NodeTypeDeclarations",
+            verifyNodeV11BetaBlockerRegister,
             "connectedAppDebugAndroidTest",
         )
     }

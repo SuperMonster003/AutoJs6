@@ -50,6 +50,7 @@ experimental or blocked features from leaking into a release candidate.
 | packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, explicit template-override subgates for packaged ESM/dynamic import |
 | security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, or bridge bypass |
 | DX/tooling | required | error catalog, project wizard, TypeScript declarations, doctor/compatibility reports |
+| blocker register | required | [NODE_PROFILE_V1_1_BETA_BLOCKERS.md](NODE_PROFILE_V1_1_BETA_BLOCKERS.md), verified by `:app:verifyNodeV11BetaBlockerRegister` |
 
 ## Beta Gate
 
@@ -71,6 +72,11 @@ fs promises, native-addon denial, resolver fuzzer, and scoped-fs fuzzer
 coverage. It keeps the default normal fuzzer budget; extended fuzzer budget runs
 remain separate stress subgates. The beta aggregate also runs packaged host
 verification and tooling checks through task dependencies.
+
+The beta gate also verifies
+[NODE_PROFILE_V1_1_BETA_BLOCKERS.md](NODE_PROFILE_V1_1_BETA_BLOCKERS.md) so
+experimental, protocol-gated, blocked, and explicit-subgate surfaces have an RC
+decision entry before release-candidate planning.
 
 ## Explicit Subgates
 
@@ -95,6 +101,7 @@ stabilization pass, not a packaged ESM release decision.
 - All promoted v1.1 `partial` features have docs and security negative tests.
 - All `experimental`, `protocol-gated`, and `blocked` features have explicit
   release notes or blocker entries.
+- `:app:verifyNodeV11BetaBlockerRegister` passes.
 - No release-forbidden experimental flag is needed for the default beta gate.
 
 ## RC Readiness Decision

@@ -961,6 +961,8 @@ requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/
 reports. Running `verifyNodeV11AlphaGate` finalizes with this summary automatically.
 `generateNodeV11BetaSummary` writes `build/reports/nodejs/v1.1-beta-summary.json` from the current build, packaged host,
 tooling, and device reports. Running `verifyNodeV11BetaGate` finalizes with this summary automatically.
+`verifyNodeV11BetaBlockerRegister` writes `app/build/reports/nodejs/v1.1-beta-blockers.json` and is part of the beta
+gate so RC-blocking experimental, protocol-gated, blocked, and explicit-subgate surfaces stay recorded.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable
