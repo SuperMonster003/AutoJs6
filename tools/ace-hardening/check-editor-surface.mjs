@@ -532,6 +532,8 @@ assertIncludes(aceCodeEditor, "RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f", "ACE
 
 assertIncludes(aceScriptEditorEngine, "notifyPinchToZoomStrategyChanged", "ACE pinch zoom strategy forwarding");
 assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch text-size state callback");
+assertIncludes(aceScriptEditorEngine, "var onAceStateChanged", "ACE engine state-change callback");
+assertIncludes(aceScriptEditorEngine, "override fun onStateChanged", "ACE engine forwards bridge state changes");
 assertIncludes(nativeCodeEditorEngine, "codeEditor.setWordWrapEnabled(false)", "Native editor keeps word wrap disabled");
 assertIncludes(nativeCodeEditorEngine, "gutterWidthMode = EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED", "Native editor keeps fixed gutter width");
 assertIncludes(codeEditText, "fun setWordWrapEnabled(enabled: Boolean)", "Native word wrap edit text toggle");
@@ -556,6 +558,7 @@ assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dia
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");
 assertIncludes(editorView, "AceActionFavoritesDialog.show", "ACE action favorites dialog integration");
 assertIncludes(editorView, "fun recordAceActionForMenuItem", "ACE action history menu recording entry point");
+assertIncludes(editorView, "aceEditor.onAceStateChanged", "ACE state changes refresh editor toolbar state");
 assertIncludes(editorView, "actionForAceSelectionAction", "ACE selection action history mapping");
 assertIncludes(editorView, "private fun executeAceHistoryAction", "ACE generic action history executor");
 assertIncludes(editorView, "private fun actionForToolbarItem", "ACE toolbar action history mapping");

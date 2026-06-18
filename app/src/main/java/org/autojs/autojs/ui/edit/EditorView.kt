@@ -1649,6 +1649,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mAutoCompletion = null
         recordLastAceDiagnostics(oldEditor)
         (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
+        (oldEditor as? AceScriptEditorEngine)?.onAceStateChanged = null
         (oldEditor as? AceScriptEditorEngine)?.onSelectionAction = null
         oldEditor.onUserTouchInTextArea = null
         binding.editorContainer.removeView(oldEditor.view)
@@ -1703,8 +1704,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun configureAceActionHistory(editor: ScriptEditorEngine) {
-        (editor as? AceScriptEditorEngine)?.onSelectionAction = { action ->
-            actionForAceSelectionAction(action)?.let(::recordAceHistoryAction)
+        (editor as? AceScriptEditorEngine)?.let { aceEditor ->
+            aceEditor.onAceStateChanged = {
+                schedulePrimaryMenuStateSync()
+            }
+            aceEditor.onSelectionAction = { action ->
+                actionForAceSelectionAction(action)?.let(::recordAceHistoryAction)
+            }
         }
     }
 

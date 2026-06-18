@@ -40,6 +40,7 @@ class AceScriptEditorEngine(
     private var suppressProgrammaticTextChange = false
 
     var onFatalFailure: ((AceFailure) -> Unit)? = null
+    var onAceStateChanged: (() -> Unit)? = null
     var onSelectionAction: ((SelectionAction) -> Unit)? = null
 
     fun createAceDiagnosticsSnapshot(
@@ -516,6 +517,10 @@ class AceScriptEditorEngine(
 
     private fun createAceListener(): AceCodeEditor.Listener {
         return object : AceCodeEditor.Listener {
+            override fun onStateChanged(state: AceCodeEditor.AceEditorState) {
+                onAceStateChanged?.invoke()
+            }
+
             override fun onTextChanged(text: String, state: AceCodeEditor.AceEditorState) {
                 if (suppressProgrammaticTextChange) {
                     suppressProgrammaticTextChange = false
