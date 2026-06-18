@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
@@ -51,11 +52,13 @@ data class NodeBridgeProviderHealth(
     val status: NodeBridgeProviderStatus,
     val lastFailure: String? = null,
     val activeResourceCount: Int = 0,
+    val details: Map<String, String> = emptyMap(),
 ) {
     fun toJsonObject(): JSONObject = definition.toJsonObject().apply {
         put("status", status.wireName)
         put("lastFailure", lastFailure ?: JSONObject.NULL)
         put("activeResourceCount", activeResourceCount.coerceAtLeast(0))
+        put("details", JSONObject(details))
     }
 }
 
@@ -154,6 +157,7 @@ object NodeBridgeProviderRegistry {
                 status = androidStatus(definition.id, appContext),
                 lastFailure = lastFailures[definition.id],
                 activeResourceCount = activeResourceCounts[definition.id] ?: 0,
+                details = androidDetails(definition.id, appContext),
             )
         }
     }
@@ -202,17 +206,68 @@ object NodeBridgeProviderRegistry {
         } else {
             NodeBridgeProviderStatus.UNAVAILABLE
         }
-        OCR_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
+        OCR_PROVIDER -> if (mlKitOcrAvailable()) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
         SENSORS_PROVIDER -> sensorsStatus(context)
         ACCESSIBILITY_PROVIDER -> accessibilityStatus()
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
-        IMAGE_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
+        IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.FAKE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
+    }
+
+    private fun androidDetails(id: String, context: Context): Map<String, String> = when (id) {
+        OCR_PROVIDER -> ocrDetails(context)
+        IMAGE_PROVIDER -> linkedMapOf(
+            "liveMethods" to "readImage,recycle",
+            "blockedMethods" to "captureScreen,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors",
+            "statusReason" to "partial image-handle backend for OCR live provider",
+        )
+        else -> emptyMap()
+    }
+
+    private fun ocrDetails(context: Context): Map<String, String> {
+        val appContext = context.applicationContext
+        val paddleVariant = when {
+            hasAsset(appContext, "labels/ppocr_keys_ocrv5.txt") &&
+                    hasAsset(appContext, "models/pp-ocrv5-arm/PP-OCRv5_mobile_det.nb") -> "v5"
+            hasAsset(appContext, "labels/ppocr_keys_v1.txt") &&
+                    hasAsset(appContext, "models/ocr_v3_for_cpu/det_opt.nb") -> "v3"
+            else -> "none"
+        }
+        return linkedMapOf(
+            "defaultEngine" to "mlkit-chinese",
+            "mlkitAvailable" to mlKitOcrAvailable().toString(),
+            "paddleEmbeddedVariant" to paddleVariant,
+            "paddleEmbeddedAssets" to (paddleVariant != "none").toString(),
+            "paddlePluginServiceCount" to queryPaddleOcrPluginServiceCount(appContext).toString(),
+            "modelSelection" to "options.lang/model accepted by API; live provider currently routes to MLKit Chinese recognizer",
+        )
+    }
+
+    private fun mlKitOcrAvailable(): Boolean {
+        return runCatching {
+            Class.forName("com.google.mlkit.vision.text.TextRecognition")
+            Class.forName("com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions")
+        }.isSuccess
+    }
+
+    private fun hasAsset(context: Context, path: String): Boolean {
+        return runCatching { context.assets.open(path).use { true } }.getOrDefault(false)
+    }
+
+    private fun queryPaddleOcrPluginServiceCount(context: Context): Int {
+        val intent = Intent("org.autojs.plugin.PADDLE_OCR")
+        val pm = context.packageManager
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0)).size
+        } else {
+            @Suppress("DEPRECATION")
+            pm.queryIntentServices(intent, 0).size
+        }
     }
 
     private fun notificationStatus(context: Context): NodeBridgeProviderStatus {

@@ -173,6 +173,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 .\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+.\gradlew.bat --console=plain :app:verifyNodeLiveOcrGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -190,6 +191,10 @@ controlled-fetch/axios Android I/O plus provider destroy cancellation coverage.
 `verifyNodeLiveWebSocketGate` follows the same opt-in rule for controlled
 WebSocket Android I/O, including loopback text/binary roundtrip, close,
 timeout/size-limit rejection, raw socket denial, and destroy cleanup.
+`verifyNodeLiveOcrGate` validates the live MLKit OCR provider over
+provider-owned image handles created by the scoped `image.readImage()` path,
+including region recognition, `image.recycle()`, unknown-handle denial, and
+zero active OCR/image resources after cleanup.
 
 ## Release Gate
 

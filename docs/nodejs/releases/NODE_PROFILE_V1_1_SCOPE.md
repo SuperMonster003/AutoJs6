@@ -61,7 +61,7 @@ small set of already-gated features toward practical use.
 | Controlled axios | experimental | `require("axios")` exposes an AutoJs6-owned fetch-backed compatibility adapter for `get`/`post`/`request`, `baseURL`, params, headers, timeout, response types, and Axios-like errors while denying custom adapter/agent/proxy/raw transport paths. |
 | WebSocket | experimental | Controlled bridge surface covers connect, send/receive text and binary messages, close/error events, handler properties, listener aliases, bounded queue/message policy, service-destroy cleanup, and raw socket denial; live provider remains default-off. |
 | Image advanced operations | partial | `require("image")` and `require("images")` expand opaque-handle workflows with grayscale, threshold, template matching, color search, local size snapshots, and save format overloads while keeping Android provider ownership fail-closed. |
-| OCR | partial | `require("ocr")` exposes `recognize`, `recognizeText`, and `detectTextBounds` over opaque image handles with `ocr` + `image` capability checks; Android provider remains fail-closed until real provider/model ownership is accepted. |
+| OCR | partial | `require("ocr")` exposes `recognize`, `recognizeText`, and `detectTextBounds` over opaque image handles with `ocr` + `image` capability checks; Android now has a live MLKit provider over scoped `image.readImage()` handles, while packaged model policy and broader image-provider ownership remain gated. |
 | Storage | partial | `require("storage")` and `require("storages")` expose JSON-only project/package-scoped key-value stores with explicit `storage` capability checks. |
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, and owned-resource cleanup. |
 | Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
@@ -132,7 +132,8 @@ small set of already-gated features toward practical use.
   unavailable denial, and TypeScript declarations.
 - OCR bridge smoke passes for fake-provider `recognize`, `recognizeText`, and
   `detectTextBounds`, opaque image handle validation, manifest capability
-  denial, TypeScript declarations, and fail-closed Android provider behavior.
+  denial, TypeScript declarations, and live MLKit Android provider behavior
+  over scoped provider-owned image handles with cleanup diagnostics.
 - Storage bridge smoke passes for `storage`/`storages` create/open,
   get/put/remove/clear/keys/contains, JSON value policy, manifest denial,
   Android provider persistence, working-directory namespace isolation, and

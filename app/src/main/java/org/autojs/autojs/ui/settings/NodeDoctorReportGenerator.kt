@@ -300,6 +300,14 @@ object NodeDoctorReportGenerator {
                     "  ${provider.getString("displayName")}: status=${provider.getString("status")} " +
                             "version=${provider.getString("version")} active=${provider.getInt("activeResourceCount")}",
                 )
+                val details = provider.optJSONObject("details")
+                if (details != null && details.length() > 0) {
+                    appendLine(
+                        "    details: " + details.keys().asSequence()
+                            .map { key -> "$key=${details.optString(key)}" }
+                            .joinToString(", "),
+                    )
+                }
             }
             appendLine()
             appendLine("Packaged Template:")

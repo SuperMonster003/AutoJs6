@@ -3627,6 +3627,19 @@ val verifyNodeLiveWebSocketGate = tasks.register("verifyNodeLiveWebSocketGate") 
     }
 }
 
+val verifyNodeLiveOcrGate = tasks.register("verifyNodeLiveOcrGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 OCR live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodeLongRunningGate = tasks.register("verifyNodeLongRunningGate") {
     group = "verification"
     description = "Runs the focused Node Phase 7 long-running/resource-lifecycle readiness gate on a connected Sony/full device profile."

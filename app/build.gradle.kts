@@ -303,6 +303,10 @@ val nodeJsLiveWebSocketGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#jsWebSocketUsesAndroidLiveProviderWhenNetworkExperimentEnabled",
     "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#androidWebSocketProviderClosesActiveLiveConnectionOnDestroy",
 )
+val nodeJsLiveOcrGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest#kotlinOcrLiveProviderRecognizesMlKitImageHandle",
+    "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest#androidOcrRejectsUnknownImageHandleWithoutLeakingResources",
+)
 val nodeJsLongRunningGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
@@ -347,6 +351,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodeLiveFetchGate" to nodeJsLiveFetchGateInstrumentationClasses,
     "verifyNodeLiveWebSocketGate" to nodeJsLiveWebSocketGateInstrumentationClasses,
+    "verifyNodeLiveOcrGate" to nodeJsLiveOcrGateInstrumentationClasses,
     "verifyNodeLongRunningGate" to nodeJsLongRunningGateInstrumentationClasses,
     "verifyNodeWorkerGate" to nodeJsWorkerGateInstrumentationClasses,
     "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,

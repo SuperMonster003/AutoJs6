@@ -54,10 +54,12 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             },
             healthById.getValue("fetch").status,
         )
-        assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("ocr").status)
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ocr").status)
         assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("media_projection").status)
-        assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("image").status)
+        assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("image").status)
         assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("ui").status)
+        assertEquals("mlkit-chinese", healthById.getValue("ocr").details.getValue("defaultEngine"))
+        assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("storage").status)
         assertEquals(NodeBridgeProviderStatus.FAKE, healthById.getValue("work_manager").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)

@@ -77,6 +77,10 @@ The controlled WebSocket live-provider subgate uses the same explicit flag and
 validates loopback Android text/binary I/O, close, timeout/size-limit rejection,
 raw socket denial, and provider destroy cleanup while WebSocket remains
 experimental and default-off.
+The live OCR provider subgate validates MLKit recognition over scoped
+provider-owned image handles, region handling, `image.recycle()` cleanup,
+unknown-handle denial, and zero active OCR/image resources; it does not promote
+screenshot capture, image transforms, or packaged OCR model assets.
 
 ## Pass Meaning
 

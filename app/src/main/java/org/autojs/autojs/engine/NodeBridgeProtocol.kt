@@ -10,6 +10,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -32,6 +34,11 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.Text
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizer
+import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -668,6 +675,13 @@ class AndroidNodeBridgeCapabilityProvider(
     private val networkDiagnostics = ControlledFetchDiagnostics()
     private val websocketSessions = ConcurrentHashMap<String, ControlledWebSocketSession>()
     private val websocketDiagnostics = ControlledWebSocketDiagnostics()
+    private val imageHandles = ConcurrentHashMap<String, ControlledImageHandle>()
+    private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
+    private val ocrDiagnostics = ControlledOcrDiagnostics()
+    private val ocrRecognizerDelegate = lazy {
+        TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
+    }
+    private val ocrRecognizer: TextRecognizer by ocrRecognizerDelegate
     private val bridgePermissionManifest by lazy {
         NodeBridgePermissionManifest.fromWorkingDirectory(engineInfo.cwd)
     }
@@ -719,6 +733,9 @@ class AndroidNodeBridgeCapabilityProvider(
     override fun nativeDiagnostics(): Map<String, String> = linkedMapOf<String, String>().apply {
         putAll(networkDiagnostics.nativeValues())
         putAll(websocketDiagnostics.nativeValues())
+        putAll(ocrDiagnostics.nativeValues())
+        put("embedded_script.image_active_handle_count", imageHandles.size.toString())
+        put("embedded_script.ocr_active_operation_count", ocrOperations.size.toString())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
         putAll(resourceRegistry.nativeDiagnostics())
@@ -736,6 +753,8 @@ class AndroidNodeBridgeCapabilityProvider(
             activeResourceCounts = mapOf(
                 "fetch" to networkCalls.size,
                 "websocket" to websocketSessions.size,
+                "ocr" to ocrOperations.size,
+                "image" to imageHandles.size,
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
                 "work_manager" to workManagerTasks.size,
@@ -748,10 +767,19 @@ class AndroidNodeBridgeCapabilityProvider(
         val destroyReason = reason.code.ifBlank { reason.message }
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
+        ocrDiagnostics.recordServiceDestroyCancellation(ocrOperations.size)
+        ocrOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
+        ocrOperations.clear()
         resourceRegistry.closeAll(destroyReason)
         networkCalls.values.forEach { call -> runCatching { call.cancel() } }
         networkCalls.clear()
         websocketSessions.clear()
+        imageHandles.clear()
+        runCatching {
+            if (ocrRecognizerDelegate.isInitialized()) {
+                ocrRecognizer.close()
+            }
+        }
         workManagerTasks.clear()
         javaHandles.clear()
         notificationHandles.clear()
@@ -1250,29 +1278,275 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchImage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        callback(
-            NodeBridgeResponse.failure(
-                request.id,
-                NodeBridgeError.capabilityProviderMissing(
-                    module = request.module,
-                    method = request.method,
-                    requirement = "an image capability provider",
+        when (request.method) {
+            "readImage" -> dispatchImageRead(request, callback)
+            "recycle" -> dispatchImageRecycle(request, callback)
+            else -> callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "a screenshot/image processing capability provider for ${request.method}",
+                    ),
                 ),
-            ),
-        )
+            )
+        }
     }
 
     private fun dispatchOcr(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        callback(
-            NodeBridgeResponse.failure(
-                request.id,
-                NodeBridgeError.capabilityProviderMissing(
-                    module = request.module,
-                    method = request.method,
-                    requirement = "an OCR capability provider",
+        val args = request.argsArray()
+        val imageArg = args.optJSONObject(0)
+        val options = args.optJSONObject(1) ?: JSONObject()
+        val imageId = imageArg?.optNonBlankString("__autojs6ImageHandle")
+            ?: imageArg?.optNonBlankString("id")
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 OCR requires an existing provider-owned image handle.",
+                        module = request.module,
+                        method = request.method,
+                    ),
                 ),
+            )
+        val handle = imageHandles[imageId]
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 OCR image handle is not active or has been recycled: $imageId",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val ocrInput = runCatching { handle.ocrBitmap(options) }.getOrElse { error ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 OCR region is invalid.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val operationResource = resourceRegistry.register(
+            type = NodeBridgeResourceType.OCR_OPERATION,
+            id = "ocr-${request.id}",
+            metadata = mapOf(
+                "method" to request.method,
+                "image" to imageId,
             ),
+        ) {
+            ocrInput.recycleIfNeeded()
+        }
+        val operation = ControlledOcrOperation(resource = operationResource)
+        ocrOperations[request.id] = operation
+        ocrDiagnostics.recordDispatch()
+        val timeoutMs = request.timeoutMs.coerceIn(1L, MAX_TIMEOUT_MS)
+        val timeoutRunnable = Runnable {
+            if (operation.finish()) {
+                ocrOperations.remove(request.id)
+                operation.resource.close("timeout:$timeoutMs")
+                ocrDiagnostics.recordFailure()
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.timeout(request.module, request.method),
+                    ),
+                )
+            }
+        }
+        operation.timeoutRunnable = timeoutRunnable
+        mainHandler.postDelayed(timeoutRunnable, timeoutMs)
+
+        val task = runCatching { ocrRecognizer.process(InputImage.fromBitmap(ocrInput.bitmap, 0)) }
+            .getOrElse { error ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    ocrOperations.remove(request.id)
+                    operation.resource.close("failed")
+                    ocrDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = error.message ?: error.javaClass.name,
+                                module = request.module,
+                                method = request.method,
+                                stack = error.stackTraceToString(),
+                            ),
+                        ),
+                    )
+                }
+                return
+            }
+        task
+            .addOnSuccessListener { text ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    ocrOperations.remove(request.id)
+                    operation.resource.close("success")
+                    callback(NodeBridgeResponse.success(request.id, text.toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY)))
+                }
+            }
+            .addOnCanceledListener {
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    ocrOperations.remove(request.id)
+                    operation.resource.close("cancelled")
+                    ocrDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = "AutoJs6 OCR provider cancelled the recognition task.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        ),
+                    )
+                }
+            }
+            .addOnFailureListener { error ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    ocrOperations.remove(request.id)
+                    operation.resource.close("failed")
+                    ocrDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = error.message ?: error.javaClass.name,
+                                module = request.module,
+                                method = request.method,
+                                stack = error.stackTraceToString(),
+                            ),
+                        ),
+                    )
+                }
+            }
+    }
+
+    private fun dispatchImageRead(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val path = args.optString(0, "")
+        val file = resolveScopedProjectFile(path)
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.permissionDenied(
+                        message = "AutoJs6 image.readImage path must stay inside the scoped working directory.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        if (!file.isFile) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 image.readImage target does not exist: $path",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        if (imageHandles.size >= bridgeLimits.maxImageHandles) {
+            bridgeResourceLimitRejections.incrementAndGet()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.resourceLimit(
+                        message = "AutoJs6 image bridge exceeded ${bridgeLimits.maxImageHandles} active image handles.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 image.readImage could not decode image: $path",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val id = "image-${UUID.randomUUID()}"
+        val resource = resourceRegistry.register(
+            type = NodeBridgeResourceType.IMAGE_HANDLE,
+            id = id,
+            metadata = mapOf(
+                "source" to file.name,
+                "width" to bitmap.width.toString(),
+                "height" to bitmap.height.toString(),
+            ),
+        ) {
+            if (!bitmap.isRecycled) {
+                bitmap.recycle()
+            }
+        }
+        val handle = ControlledImageHandle(
+            id = id,
+            bitmap = bitmap,
+            resource = resource,
         )
+        imageHandles[id] = handle
+        callback(NodeBridgeResponse.success(request.id, handle.toJson().toString()))
+    }
+
+    private fun dispatchImageRecycle(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val image = args.optJSONObject(0)
+        val id = image?.optNonBlankString("__autojs6ImageHandle")
+            ?: image?.optNonBlankString("id")
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 image.recycle requires an image handle.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val handle = imageHandles.remove(id)
+        if (handle != null) {
+            handle.resource.close("recycle")
+        }
+        callback(NodeBridgeResponse.success(request.id, "true"))
+    }
+
+    private fun resolveScopedProjectFile(rawPath: String): File? {
+        if (rawPath.isBlank() || rawPath.indexOf('\u0000') >= 0) {
+            return null
+        }
+        val input = rawPath.trim().replace('\\', '/')
+        if (input.startsWith("/") || input.contains(':')) {
+            return null
+        }
+        val segments = input.split('/').filter { it.isNotBlank() }
+        if (segments.isEmpty() || segments.any { it == ".." }) {
+            return null
+        }
+        val base = File(engineInfo.cwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath).canonicalFile
+        val candidate = File(base, segments.joinToString(File.separator)).canonicalFile
+        val basePath = base.path.trimEnd(File.separatorChar)
+        val candidatePath = candidate.path
+        return candidate.takeIf { candidatePath == basePath || candidatePath.startsWith(basePath + File.separator) }
     }
 
     private fun dispatchStorage(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -3665,6 +3939,162 @@ private object NodeStorageBridgePolicy {
 }
 
 private class StorageBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
+
+private data class ControlledImageHandle(
+    val id: String,
+    val bitmap: Bitmap,
+    val resource: NodeBridgeResourceHandle,
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("id", id)
+        .put("__autojs6ImageHandle", id)
+        .put("width", bitmap.width)
+        .put("height", bitmap.height)
+
+    fun ocrBitmap(options: JSONObject): ControlledOcrInput {
+        check(!bitmap.isRecycled) { "AutoJs6 image handle has been recycled: $id" }
+        val region = ControlledOcrRegion.fromOptions(options)
+            ?: return ControlledOcrInput(bitmap = bitmap)
+        require(region.x >= 0 && region.y >= 0 && region.width > 0 && region.height > 0) {
+            "AutoJs6 OCR region must use non-negative x/y and positive width/height."
+        }
+        require(region.x + region.width <= bitmap.width && region.y + region.height <= bitmap.height) {
+            "AutoJs6 OCR region must stay inside the image bounds."
+        }
+        return ControlledOcrInput(
+            bitmap = Bitmap.createBitmap(bitmap, region.x, region.y, region.width, region.height),
+            offsetX = region.x,
+            offsetY = region.y,
+            recycleAfterUse = true,
+        )
+    }
+}
+
+private data class ControlledOcrInput(
+    val bitmap: Bitmap,
+    val offsetX: Int = 0,
+    val offsetY: Int = 0,
+    val recycleAfterUse: Boolean = false,
+) {
+    fun recycleIfNeeded() {
+        if (recycleAfterUse && !bitmap.isRecycled) {
+            bitmap.recycle()
+        }
+    }
+}
+
+private data class ControlledOcrRegion(
+    val x: Int,
+    val y: Int,
+    val width: Int,
+    val height: Int,
+) {
+    companion object {
+        fun fromOptions(options: JSONObject): ControlledOcrRegion? {
+            if (!options.has("region") || options.isNull("region")) {
+                return null
+            }
+            val value = options.opt("region")
+            return when (value) {
+                is JSONObject -> ControlledOcrRegion(
+                    x = finiteInt(value.opt("x"), "region.x"),
+                    y = finiteInt(value.opt("y"), "region.y"),
+                    width = finiteInt(value.opt("width"), "region.width"),
+                    height = finiteInt(value.opt("height"), "region.height"),
+                )
+                is JSONArray -> {
+                    require(value.length() >= 4) { "AutoJs6 OCR region array must contain x, y, width, and height." }
+                    ControlledOcrRegion(
+                        x = finiteInt(value.opt(0), "region[0]"),
+                        y = finiteInt(value.opt(1), "region[1]"),
+                        width = finiteInt(value.opt(2), "region[2]"),
+                        height = finiteInt(value.opt(3), "region[3]"),
+                    )
+                }
+                else -> throw IllegalArgumentException("AutoJs6 OCR region must be an object or array.")
+            }
+        }
+
+        private fun finiteInt(value: Any?, label: String): Int {
+            val number = when (value) {
+                is Int -> value.toDouble()
+                is Long -> value.toDouble()
+                is Number -> value.toDouble()
+                is String -> value.toDoubleOrNull()
+                else -> null
+            }
+            require(number != null && number.isFinite()) { "AutoJs6 OCR $label must be a finite number." }
+            return number.toInt()
+        }
+    }
+}
+
+private class ControlledOcrOperation(
+    val resource: NodeBridgeResourceHandle,
+) {
+    private val completed = AtomicBoolean(false)
+
+    @Volatile
+    var timeoutRunnable: Runnable? = null
+
+    fun finish(): Boolean = completed.compareAndSet(false, true)
+
+    fun cancel(reason: String) {
+        if (finish()) {
+            resource.close(reason)
+        }
+    }
+}
+
+private class ControlledOcrDiagnostics {
+    private val dispatchCount = AtomicInteger(0)
+    private val failedCount = AtomicInteger(0)
+    private val serviceDestroyCancellationCount = AtomicInteger(0)
+
+    fun recordDispatch() {
+        dispatchCount.incrementAndGet()
+    }
+
+    fun recordFailure() {
+        failedCount.incrementAndGet()
+    }
+
+    fun recordServiceDestroyCancellation(count: Int) {
+        if (count > 0) {
+            serviceDestroyCancellationCount.addAndGet(count)
+        }
+    }
+
+    fun nativeValues(): Map<String, String> = linkedMapOf(
+        "embedded_script.ocr_live_dispatch_count" to dispatchCount.get().toString(),
+        "embedded_script.ocr_live_dispatch_failed_count" to failedCount.get().toString(),
+        "embedded_script.ocr_service_destroy_cancel_count" to serviceDestroyCancellationCount.get().toString(),
+    )
+}
+
+private fun Text.toOcrResultsJson(offsetX: Int, offsetY: Int): String {
+    val results = JSONArray()
+    textBlocks.forEach { block ->
+        block.lines.forEach { line ->
+            val bounds = line.boundingBox
+            val item = JSONObject()
+                .put("text", line.text.orEmpty())
+                .put("confidence", line.confidence.takeIf { it.isFinite() }?.toDouble() ?: JSONObject.NULL)
+            if (bounds != null) {
+                item.put(
+                    "bounds",
+                    JSONObject()
+                        .put("left", bounds.left + offsetX)
+                        .put("top", bounds.top + offsetY)
+                        .put("right", bounds.right + offsetX)
+                        .put("bottom", bounds.bottom + offsetY),
+                )
+            }
+            results.put(item)
+        }
+    }
+    return results.toString()
+}
 
 private data class ControlledNotificationDescriptor(
     val id: Int,

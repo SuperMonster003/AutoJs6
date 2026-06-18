@@ -25,7 +25,11 @@ Current declared capability names:
 - `accessibility`
 - `screen_capture`
 - `image`
+- `ocr`
 - `storage`
+- `notifications`
+- `sensors`
+- `ui`
 - `clipboard`
 - `device`
 - `shell`, `shell.root`
@@ -42,7 +46,11 @@ Current module registry includes:
 - `accessibility`
 - `media_projection`
 - `image` / `images`
+- `ocr`
 - `storage` / `storages`
+- `notifications`
+- `sensors`
+- `ui`
 - `clipboard`
 - `device`
 - `shell`
@@ -81,7 +89,7 @@ for risk/impact:
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | `storage` | 5 | 2 | 5 | 2 | 1 | Implemented as v1.1 partial in Task 173. |
 | `notifications` post-only | 4 | 3 | 4 | 3 | 3 | Implemented as v1.1 partial in Task 174. |
-| `ocr` | 5 | 3 | 3 | 4 | 2 | Protocol MVP added in Task 148; live provider remains blocked on image/provider ownership. |
+| `ocr` | 5 | 3 | 4 | 4 | 2 | Protocol MVP added in Task 148; Phase 7 adds a live MLKit provider over scoped provider-owned image handles. |
 | `sensors` | 3 | 3 | 4 | 2 | 2 | Implemented as v1.1 partial in Task 175. |
 | controlled `http` wrapper | 4 | 4 | 3 | 4 | 4 | Defer until network promotion gates pass. |
 | `ui` | 5 | 5 | 3 | 5 | 3 | Protocol gate reserved in Task 182; live Activity provider remains design-gated. |
@@ -219,9 +227,10 @@ Task 148 added the protocol MVP and Task 172 promotes the JavaScript surface to
 v1.1 partial: `require("ocr").recognize(image, options?)`,
 `recognizeText(image, options?)`, and `detectTextBounds(image, options?)` are
 routed as controlled bridge methods, use existing opaque image handles, require
-both `ocr` and `image` capabilities, have fake-provider, manifest, conformance,
-and TypeScript gates, and reject through the Android provider until a real OCR
-provider is connected.
+both `ocr` and `image` capabilities, and have fake-provider, manifest,
+conformance, and TypeScript gates. Phase 7 adds the first live Android provider:
+MLKit Chinese text recognition over provider-owned image handles created by the
+scoped `image.readImage()` path and closed with `image.recycle()`.
 
 Possible capability:
 
@@ -249,15 +258,17 @@ Constraints:
 - `detectTextBounds()` keeps the result snapshot shape and is reserved for
   provider implementations that can distinguish detection from extraction.
 - OCR provider owns model selection, timeouts, memory budgets, and cleanup.
+- Current live OCR uses MLKit Chinese text recognition; Paddle/RapidOCR model
+  asset or plugin-provider selection remains diagnostic-only.
 - Packaged APK verifier must account for OCR model assets if packaged OCR is in
   scope.
 - No raw engine, model path, native pointer, `Bitmap`, `Mat`, or Java object
   crosses into Node.
 
-The remaining work is provider ownership: model packaging, memory budgets,
-image-handle lifecycle integration, packaged APK asset policy, and live Android
-OCR smoke. Those remain blocked until image/provider ownership is ready enough
-to make the handle lifecycle real.
+The remaining work is broader provider ownership: packaged OCR asset policy,
+alternate model/provider selection, screenshot/media-projection image sources,
+image transforms, and template/color operations. Those remain blocked until the
+image provider lifecycle is ready beyond scoped local-file handles.
 
 #### Controlled `http` Wrapper
 
@@ -359,8 +370,9 @@ The recommended v1.1 bridge order is:
 4. Use bounded read-only `sensors` as the pattern for event-style bridge
    modules: provider queues events, JavaScript drains snapshots, and destroy
    closes native listeners.
-5. Keep the Task 148 OCR protocol MVP fail-closed until image handles are
-   provider-owned and packaged model policy is clear.
+5. Keep OCR partial: the Phase 7 live MLKit provider may consume scoped
+   provider-owned image handles, but packaged model policy, screenshot sources,
+   and broader image transforms remain gated.
 6. Keep live `ui`, `floaty`, `plugins`, controlled `http`, and Shizuku/root
    advanced shell as design gates only. The current `ui` surface is a
    fail-closed protocol reservation, not a live Android UI provider.

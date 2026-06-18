@@ -1,14 +1,20 @@
 package org.autojs.autojs.engine
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
+import com.baidu.paddle.lite.ocr.R as PaddleOcrR
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class NodeOcrBridgeInstrumentationTest {
 
@@ -264,8 +270,129 @@ class NodeOcrBridgeInstrumentationTest {
     }
 
     @Test
-    fun androidOcrRejectsUntilProviderIsConnected() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node OCR Android rejection regression")
+    fun kotlinOcrLiveProviderRecognizesMlKitImageHandle() {
+        val ocrHealth = NodeBridgeProviderRegistry.androidHealth(NodeEmbeddedTestHarness.targetContext)
+            .associateBy { it.definition.id }
+            .getValue("ocr")
+        assumeTrue("MLKit OCR provider must be available for live OCR gate", ocrHealth.status == NodeBridgeProviderStatus.AVAILABLE)
+
+        val workDir = File(NodeEmbeddedTestHarness.targetContext.cacheDir, "node-bridge-ocr-live").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create OCR live working directory: $absolutePath" }
+        }
+        writeLiveOcrFixture(File(workDir, "ocr-live.png"))
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "type": "node",
+              "node": {
+                "permissions": ["image", "ocr"]
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            NodeEmbeddedTestHarness.targetContext,
+            NodeBridgeEngineInfo.fromContext(
+                NodeEmbeddedTestHarness.targetContext,
+                id = "ocr-live-provider",
+                sourceName = "ocr-live-provider.cjs",
+                cwd = workDir.absolutePath,
+            ),
+        )
+
+        val read = dispatch(
+            provider,
+            module = "image",
+            method = "readImage",
+            argsJson = """["ocr-live.png"]""",
+            timeoutMs = 10_000L,
+            permissions = listOf("image"),
+        )
+        assertTrue(read.toString(), read.ok)
+        val handle = JSONObject(read.resultJson.orEmpty())
+        assertTrue(handle.getString("__autojs6ImageHandle").startsWith("image-"))
+
+        val recognize = dispatch(
+            provider,
+            module = "ocr",
+            method = "recognize",
+            argsJson = JSONArray().put(handle).put(JSONObject().put("lang", "zh-CN")).toString(),
+            timeoutMs = 30_000L,
+            permissions = listOf("ocr", "image"),
+        )
+        assertTrue(recognize.toString(), recognize.ok)
+        val results = JSONArray(recognize.resultJson.orEmpty())
+        val recognizedText = (0 until results.length()).joinToString("") { index ->
+            results.getJSONObject(index).getString("text")
+        }.replace("\\s+".toRegex(), "")
+        assertTrue("Expected OCR text to contain 测试, result=${recognize.resultJson}", recognizedText.contains("测试"))
+        assertTrue("Expected at least one OCR result with bounds: ${recognize.resultJson}", results.getJSONObject(0).has("bounds"))
+
+        val recognizeText = dispatch(
+            provider,
+            module = "ocr",
+            method = "recognizeText",
+            argsJson = JSONArray().put(handle).put(JSONObject().put("lang", "zh-CN")).toString(),
+            timeoutMs = 30_000L,
+            permissions = listOf("ocr", "image"),
+        )
+        assertTrue(recognizeText.toString(), recognizeText.ok)
+        val textResults = JSONArray(recognizeText.resultJson.orEmpty())
+        val joinedText = (0 until textResults.length()).joinToString("") { index ->
+            textResults.getJSONObject(index).getString("text")
+        }.replace("\\s+".toRegex(), "")
+        assertTrue("Expected recognizeText OCR text to contain 测试, result=${recognizeText.resultJson}", joinedText.contains("测试"))
+
+        val bounds = dispatch(
+            provider,
+            module = "ocr",
+            method = "detectTextBounds",
+            argsJson = JSONArray()
+                .put(handle)
+                .put(JSONObject().put("lang", "zh-CN").put("region", JSONArray().put(0).put(0).put(handle.getInt("width")).put(handle.getInt("height"))))
+                .toString(),
+            timeoutMs = 30_000L,
+            permissions = listOf("ocr", "image"),
+        )
+        assertTrue(bounds.toString(), bounds.ok)
+        assertTrue(JSONArray(bounds.resultJson.orEmpty()).length() > 0)
+
+        val recycle = dispatch(
+            provider,
+            module = "image",
+            method = "recycle",
+            argsJson = JSONArray().put(handle).toString(),
+            timeoutMs = 1_000L,
+            permissions = listOf("image"),
+        )
+        assertTrue(recycle.toString(), recycle.ok)
+
+        val recycled = dispatch(
+            provider,
+            module = "ocr",
+            method = "recognizeText",
+            argsJson = JSONArray().put(handle).put(JSONObject()).toString(),
+            timeoutMs = 1_000L,
+            permissions = listOf("ocr", "image"),
+        )
+        assertFalse(recycled.toString(), recycled.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, recycled.error?.code)
+
+        val diagnostics = provider.nativeDiagnostics()
+        assertEquals("0", diagnostics["embedded_script.image_active_handle_count"])
+        assertEquals("0", diagnostics["embedded_script.ocr_active_operation_count"])
+        assertEquals("0", diagnostics["embedded_script.bridge_resource.active_count"])
+        assertEquals("3", diagnostics["embedded_script.ocr_live_dispatch_count"])
+        assertEquals("0", diagnostics["embedded_script.ocr_live_dispatch_failed_count"])
+        assertEquals("0", diagnostics["embedded_script.ocr_service_destroy_cancel_count"])
+        provider.destroy(NodeBridgeError.processDead())
+    }
+
+    @Test
+    fun androidOcrRejectsUnknownImageHandleWithoutLeakingResources() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node OCR Android unknown-handle regression")
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """
@@ -282,16 +409,57 @@ class NodeOcrBridgeInstrumentationTest {
               console.log("ocr.android.denied=" + denied);
             })();
             """.trimIndent(),
-            "<embedded-autojs-ocr-android.js>",
+            "<embedded-autojs-ocr-unknown-handle.js>",
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("OCR Android rejection", result)
+        NodeEmbeddedTestHarness.assertSucceeded("OCR Android unknown handle rejection", result)
         assertFalse(result.stdout.contains("unexpected"))
-        assertTrue(result.stdout.contains("ocr.android.denied=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ocr/recognizeText"))
+        assertTrue(result.stdout.contains("ocr.android.denied=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST/ERR_AUTOJS6_BRIDGE_INVALID_REQUEST/ocr/recognizeText"))
         assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
         assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
         assertEquals("1", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
         assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_pending_count"])
+        assertEquals("0", result.nativeValues["embedded_script.bridge_resource.active_count"])
         assertEquals("done", result.nativeValues["embedded_script.bridge_live_dispatch_status"])
+    }
+
+    private fun dispatch(
+        provider: NodeBridgeCapabilityProvider,
+        module: String,
+        method: String,
+        argsJson: String,
+        timeoutMs: Long = 1_000L,
+        permissions: List<String> = emptyList(),
+    ): NodeBridgeResponse {
+        val latch = CountDownLatch(1)
+        var response: NodeBridgeResponse? = null
+        provider.dispatch(
+            NodeBridgeRequest(
+                id = "$module-$method-${System.nanoTime()}",
+                module = module,
+                method = method,
+                argsJson = argsJson,
+                timeoutMs = timeoutMs,
+                permissions = permissions,
+            ),
+        ) { bridgeResponse ->
+            response = bridgeResponse
+            latch.countDown()
+        }
+        assertTrue("Timed out waiting for $module.$method", latch.await(timeoutMs + 2_000L, TimeUnit.MILLISECONDS))
+        return checkNotNull(response) { "Missing response for $module.$method" }
+    }
+
+    private fun writeLiveOcrFixture(file: File) {
+        val source = BitmapFactory.decodeResource(NodeEmbeddedTestHarness.targetContext.resources, PaddleOcrR.drawable.paddle_ocr_test)
+            ?: error("Failed to decode OCR fixture resource")
+        val scaled = Bitmap.createScaledBitmap(source, source.width * 4, source.height * 4, false)
+        file.outputStream().use { out ->
+            check(scaled.compress(Bitmap.CompressFormat.PNG, 100, out)) { "Failed to write OCR live fixture" }
+        }
+        if (scaled !== source) {
+            scaled.recycle()
+        }
+        source.recycle()
     }
 }

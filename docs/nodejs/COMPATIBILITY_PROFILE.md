@@ -809,10 +809,11 @@ Current user-facing bridge modules:
 
 v1.1 bridge expansion planning is tracked in
 [BRIDGE_V1_1_MODULES.md](design/BRIDGE_V1_1_MODULES.md). Task 148 added the
-`ocr` bridge protocol MVP, and Task 172 expands it to the v1.1 partial
-JavaScript surface with fake-provider tests, type declarations, manifest
-enforcement, and fail-closed Android provider behavior. Real OCR model/provider
-ownership remains future work. Task 173 adds JSON-only `storage`/`storages`
+`ocr` bridge protocol MVP, Task 172 expands it to the v1.1 partial JavaScript
+surface, and Phase 7 adds a live Android MLKit OCR provider over provider-owned
+image handles with a scoped `image.readImage()`/`image.recycle()` backend. OCR
+packaged model policy and broader image-provider ownership remain future work.
+Task 173 adds JSON-only `storage`/`storages`
 provider storage, and Task 174 adds post-only `notifications` with Android
 permission gating and owned-notification cleanup. Task 175 adds bounded
 `sensors` events with controlled subscription cleanup. Task 182 reserves the
@@ -955,7 +956,8 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `getSize()` reads the frozen image-handle snapshot locally and does not dispatch to Android
   - repeated `recycle()` calls for the same normalized handle are safe from JavaScript and dispatch at most once per module instance
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
-  - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an image capability provider is connected
+  - current Android provider supports the scoped local-file `readImage()` and `recycle()` path used by the live OCR provider, returning provider-owned opaque handles and enforcing the per-execution image-handle limit
+  - screenshot capture, save, transform, template-matching, and color-search methods still reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until full image capability provider ownership is connected
   - optional real-device `screen_capture` smoke validates frame decode and recycle behavior against the Android capture pipeline while JavaScript still receives only opaque future handles
 - `ocr`
   - `recognize(image, options?): Promise<readonly OcrResult[]>`
@@ -967,7 +969,8 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - input must be an existing image handle from `image`, `images`, or `media_projection.nextImage()`
   - requests require both `ocr` and `image` capabilities because OCR consumes provider-owned image handles
   - current JavaScript API, fake-provider tests, manifest-denial behavior, type declarations, and bridge protocol are stable
-  - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an OCR capability provider is connected
+  - current Android provider uses MLKit Chinese text recognition over active provider-owned image handles, supports optional bounded `region` descriptors, and reports zero active OCR operations after success, timeout, failure, or destroy cleanup
+  - unknown, recycled, or non-provider-owned image handles reject with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
   - no raw OCR engine, model path, native pointer, `Bitmap`, `Mat`, `ImageWrapper`, or Java object crosses into Node
 - `storage` / `storages`
   - `create(name): StorageStore`

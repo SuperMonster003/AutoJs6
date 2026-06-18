@@ -254,8 +254,8 @@ class NodeBridgeResourceLeakStressInstrumentationTest {
                 argsJson = """[{"id":"image-$index","width":10,"height":20},{"timeoutMs":1000}]""",
                 permissions = listOf("ocr", "image"),
             )
-            assertFalse("OCR provider is expected to fail closed in normal builds", ocr.ok)
-            assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, ocr.error?.code)
+            assertFalse("OCR provider should reject unknown image handles without leaking resources", ocr.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, ocr.error?.code)
             assertNoActiveBridgeResources(provider, "ocr-$index")
 
             storageRoundTrip(provider, index)
