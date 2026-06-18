@@ -87,7 +87,6 @@
     <string name="key_editor_word_wrap_indent_style" translatable="false">key_$_editor_word_wrap_indent_style</string>
     <string name="key_editor_word_wrap_indent_style_classic" translatable="false">classic</string>
     <string name="key_editor_word_wrap_indent_style_continuation" translatable="false">continuation</string>
-    <string name="key_editor_word_wrap_indent_style_default" translatable="false">default</string>
     <string name="key_about_app_and_developer" translatable="false">key_$_about_app_and_developer</string>
     <string name="key_about_app_tips" translatable="false">key_$_about_app_tips</string>
     <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
@@ -502,7 +501,6 @@
     <string name="entry_editor_gutter_width_mode_fixed">Fixed</string>
     <string name="entry_editor_word_wrap_indent_style_classic">Flush continuation</string>
     <string name="entry_editor_word_wrap_indent_style_continuation">Continuation indent</string>
-    <string name="entry_editor_word_wrap_indent_style_default">Default</string>
     <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
     <string name="entry_ace_editor_font_source_code_pro">Source Code Pro</string>
     <string name="entry_ace_editor_font_system_monospace">System monospace</string>

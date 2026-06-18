@@ -346,12 +346,12 @@ class NativeCodeEditorEngine(
     }
 
     private fun applyDisplayPreferences() {
-        codeEditor.setWordWrapEnabled(EditorDisplayPreferences.isWordWrapEnabled())
+        codeEditor.setWordWrapEnabled(false)
         codeEditor.setGutterDisplayOptions(
             showBreakpointMarkers = EditorDisplayPreferences.isBreakpointMarkersEnabled(),
             showLineNumbers = EditorDisplayPreferences.isLineNumbersEnabled(),
             showFoldMarkers = EditorDisplayPreferences.isFoldMarkersEnabled(),
-            gutterWidthMode = EditorDisplayPreferences.gutterWidthMode(),
+            gutterWidthMode = EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED,
         )
     }
 

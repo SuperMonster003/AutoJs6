@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.util.StringUtils.key
@@ -64,8 +65,16 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         val aceSelected = EditorEnginePreferences.get() == EditorEngineType.ACE
         setPreferenceAvailable(R.string.key_ace_editor_font, aceSelected)
         setPreferenceAvailable(R.string.key_ace_lsp_enabled, aceSelected, R.string.summary_ace_lsp_enabled)
+        setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected, R.string.summary_ace_word_wrap_enabled)
         setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)
+        setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected, R.string.summary_editor_gutter_width_mode)
         setPreferenceAvailable(R.string.key_editor_fold_markers_enabled, aceSelected, R.string.summary_editor_fold_markers_enabled)
+
+        if (!aceSelected) {
+            EditorDisplayPreferences.setWordWrapEnabled(false)
+            EditorDisplayPreferences.setWordWrapIndentStyle(EditorDisplayPreferences.WORD_WRAP_INDENT_STYLE_CONTINUATION)
+            EditorDisplayPreferences.setGutterWidthMode(EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED)
+        }
 
         if (!aceSelected && currentPinchToZoomKey() == getString(R.string.key_editor_pinch_to_zoom_scale_view)) {
             Pref.putString(

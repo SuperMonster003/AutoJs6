@@ -271,11 +271,20 @@ assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_pinch_to_zoo
 assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_fx_keyboard"', "editor shortcut input menu item moved to settings page");
 assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_theme"', "editor theme menu item moved to settings page");
 assertNotIncludes(FILES.editorMenu, 'android:id="@+id/action_editor_engine"', "editor engine menu item moved to settings page");
-assertNotIncludes(FILES.codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_ace_word_wrap_enabled", "word wrap remains available across editor engines");
+assertIncludes(
+  FILES.codeEditorSettingsFragment,
+  "setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected, R.string.summary_ace_word_wrap_enabled)",
+  "word wrap disabled outside ACE",
+);
 assertIncludes(
   FILES.codeEditorSettingsFragment,
   "setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)",
   "word wrap indentation style disabled outside ACE",
+);
+assertIncludes(
+  FILES.codeEditorSettingsFragment,
+  "setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected, R.string.summary_editor_gutter_width_mode)",
+  "dynamic gutter width disabled outside ACE",
 );
 assertNotIncludes(
   FILES.codeEditorSettingsDialog,

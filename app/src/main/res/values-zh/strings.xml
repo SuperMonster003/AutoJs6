@@ -1443,7 +1443,6 @@
     <string name="entry_editor_gutter_width_mode_fixed">固定</string>
     <string name="entry_editor_word_wrap_indent_style_classic">顶格续行</string>
     <string name="entry_editor_word_wrap_indent_style_continuation">延续缩进</string>
-    <string name="entry_editor_word_wrap_indent_style_default">默认</string>
     <string name="text_ace_diagnostics_copied">Ace 诊断信息已复制到剪贴板</string>
     <string name="text_ace_editor_debug">Ace 编辑器调试</string>
     <string name="text_ace_editor_debug_description">打开独立的 Ace WebView 编辑器测试页面</string>

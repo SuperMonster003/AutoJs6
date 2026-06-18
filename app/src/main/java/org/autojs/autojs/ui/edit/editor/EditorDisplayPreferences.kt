@@ -12,7 +12,6 @@ object EditorDisplayPreferences {
     const val KEY_GUTTER_WIDTH_MODE = "key_\$_editor_gutter_width_mode"
 
     const val WORD_WRAP_INDENT_STYLE_CONTINUATION = "continuation"
-    const val WORD_WRAP_INDENT_STYLE_DEFAULT = "default"
     const val WORD_WRAP_INDENT_STYLE_CLASSIC = "classic"
     const val GUTTER_WIDTH_MODE_DYNAMIC = "dynamic"
     const val GUTTER_WIDTH_MODE_FIXED = "fixed"
@@ -83,7 +82,6 @@ object EditorDisplayPreferences {
 
     private val WORD_WRAP_INDENT_STYLES = setOf(
         WORD_WRAP_INDENT_STYLE_CONTINUATION,
-        WORD_WRAP_INDENT_STYLE_DEFAULT,
         WORD_WRAP_INDENT_STYLE_CLASSIC,
     )
 

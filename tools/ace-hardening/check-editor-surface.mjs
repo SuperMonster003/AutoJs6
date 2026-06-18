@@ -201,6 +201,19 @@ const CODE_EDITOR_SETTINGS_DIALOG_PATH = path.join(
   "settings",
   "CodeEditorSettingsDialog.kt",
 );
+const CODE_EDITOR_SETTINGS_FRAGMENT_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "settings",
+  "CodeEditorSettingsFragment.kt",
+);
 const FRAGMENT_HOST_MATERIAL_DIALOG_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -281,6 +294,7 @@ const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
 const aceActionHistoryStore = read(ACE_ACTION_HISTORY_STORE_PATH);
 const aceActionFavoritesDialog = read(ACE_ACTION_FAVORITES_DIALOG_PATH);
 const codeEditorSettingsDialog = read(CODE_EDITOR_SETTINGS_DIALOG_PATH);
+const codeEditorSettingsFragment = read(CODE_EDITOR_SETTINGS_FRAGMENT_PATH);
 const fragmentHostMaterialDialog = read(FRAGMENT_HOST_MATERIAL_DIALOG_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
@@ -518,7 +532,8 @@ assertIncludes(aceCodeEditor, "RIGHT_EDGE_BACK_GESTURE_MIN_GUARD_DP = 24f", "ACE
 
 assertIncludes(aceScriptEditorEngine, "notifyPinchToZoomStrategyChanged", "ACE pinch zoom strategy forwarding");
 assertIncludes(aceScriptEditorEngine, "onTextSizeSpChangedByGesture", "ACE pinch text-size state callback");
-assertIncludes(nativeCodeEditorEngine, "codeEditor.setWordWrapEnabled(EditorDisplayPreferences.isWordWrapEnabled())", "Native word wrap preference application");
+assertIncludes(nativeCodeEditorEngine, "codeEditor.setWordWrapEnabled(false)", "Native editor keeps word wrap disabled");
+assertIncludes(nativeCodeEditorEngine, "gutterWidthMode = EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED", "Native editor keeps fixed gutter width");
 assertIncludes(codeEditText, "fun setWordWrapEnabled(enabled: Boolean)", "Native word wrap edit text toggle");
 assertIncludes(codeEditText, "fun getLogicalLineForVisualLine", "Native wrapped visual-line to logical-line mapping");
 assertIncludes(editorPinchToZoomPreference, "EditorEnginePreferences.get() == EditorEngineType.ACE", "ACE-only scale-view preference enablement");
@@ -613,6 +628,10 @@ if (aceActionFavoritesDialog.includes("notifyItemRangeChanged(0, itemCount)")) {
 
 assertIncludes(codeEditorSettingsDialog, "FragmentHostMaterialDialog.Builder", "editor settings dialog uses fragment-safe MaterialDialog host");
 assertIncludes(codeEditorSettingsDialog, ".widgetThemeColor()", "editor settings dialog uses themed MaterialDialog buttons");
+assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected", "editor settings disables word wrap for non-Ace engines");
+assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected", "editor settings disables gutter width mode for non-Ace engines");
+assertIncludes(codeEditorSettingsFragment, "EditorDisplayPreferences.setWordWrapEnabled(false)", "editor settings normalizes native word wrap value");
+assertIncludes(codeEditorSettingsFragment, "EditorDisplayPreferences.setGutterWidthMode(EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED)", "editor settings normalizes native gutter width value");
 assertIncludes(fragmentHostMaterialDialog, "class FragmentHostMaterialDialog", "fragment-hosting MaterialDialog wrapper");
 assertIncludes(fragmentHostMaterialDialog, "override fun setContentView(view: View)", "fragment host intercepts DialogFragment content view");
 assertIncludes(fragmentHostMaterialDialog, "customView(", "fragment host uses MaterialDialog custom view container");
