@@ -1022,7 +1022,7 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - event callbacks receive frozen JSON snapshots with `handleId`; events are delivered by bounded `drainEvents` bridge requests instead of direct Android-to-JavaScript callbacks
   - requests require the `ui` capability
   - current JavaScript API, fake-provider tests, type declarations, and bridge protocol are reserved
-  - current Android provider rejects with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an Activity-owned UI provider is connected
+  - Android provider starts an internal Activity and supports `Column`, `Row`, `Text`, `Button`, `Input`, `Image`, and `ScrollView` descriptors, `update`, Button/Input/lifecycle events, state snapshots, `close`, provider-destroy cleanup, and a bounded active UI session count
   - JavaScript receives only an opaque handle; no raw `Context`, `Activity`, `View`, `Window`, `Fragment`, `Handler`, Rhino `NativeView`, overlay window, Binder, or Java object crosses into Node
 - `clipboard`
   - `getText(options?): Promise<string>`

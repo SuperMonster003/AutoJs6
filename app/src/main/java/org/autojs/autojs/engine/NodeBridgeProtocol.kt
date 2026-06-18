@@ -690,6 +690,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
     private val notificationIdCounter = AtomicInteger(1_000_000)
     private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
+    private val uiSessionIds = ConcurrentHashMap.newKeySet<String>()
     private val sensorManager by lazy {
         appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
     }
@@ -757,6 +758,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "image" to imageHandles.size,
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
+                "ui" to uiSessionIds.size,
                 "work_manager" to workManagerTasks.size,
                 "shell" to activeShellCommands.get(),
             ),
@@ -784,6 +786,7 @@ class AndroidNodeBridgeCapabilityProvider(
         javaHandles.clear()
         notificationHandles.clear()
         sensorSubscriptions.clear()
+        uiSessionIds.clear()
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -880,15 +883,136 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchUi(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        callback(
-            NodeBridgeResponse.failure(
-                request.id,
-                NodeBridgeError.capabilityProviderMissing(
-                    module = request.module,
-                    method = request.method,
-                    requirement = "an Activity-owned UI capability provider",
+        when (request.method) {
+            "showLayout" -> dispatchUiShowLayout(request, callback)
+            "close" -> dispatchOwnedUiRequest(request, releaseOnClose = true, callback = callback)
+            "update", "drainEvents" -> dispatchOwnedUiRequest(request, releaseOnClose = false, callback = callback)
+            else -> callback(unavailable(request))
+        }
+    }
+
+    private fun dispatchUiShowLayout(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (uiSessionIds.size >= MAX_ACTIVE_UI_SESSIONS) {
+            callback(NodeBridgeResponse.failure(request.id, uiSessionLimitError(request)))
+            return
+        }
+        NodeBridgeUiDispatchService.dispatch(appContext, request) { response ->
+            if (!response.ok) {
+                callback(response)
+                return@dispatch
+            }
+            val sessionId = runCatching {
+                JSONObject(response.resultJson.orEmpty()).optString("id")
+            }.getOrDefault("")
+            if (sessionId.isBlank()) {
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.providerFailed(
+                            message = "AutoJs6 UI provider returned an invalid UI handle.",
+                            module = request.module,
+                            method = request.method,
+                            code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                        ),
+                    ),
+                )
+                return@dispatch
+            }
+            if (uiSessionIds.size >= MAX_ACTIVE_UI_SESSIONS) {
+                NodeBridgeUiDispatchService.dispatch(appContext, uiCloseRequest(sessionId, "ui_session_limit")) {}
+                callback(NodeBridgeResponse.failure(request.id, uiSessionLimitError(request)))
+                return@dispatch
+            }
+            val handle = runCatching {
+                resourceRegistry.register(
+                    type = NodeBridgeResourceType.UI_SESSION,
+                    id = sessionId,
+                    metadata = mapOf("module" to request.module),
+                ) { reason ->
+                    uiSessionIds.remove(sessionId)
+                    NodeBridgeUiDispatchService.dispatch(
+                        appContext,
+                        uiCloseRequest(sessionId, reason),
+                    ) {
+                        // Best-effort cleanup during execution destroy.
+                    }
+                }
+            }.getOrElse { error ->
+                NodeBridgeUiDispatchService.dispatch(appContext, uiCloseRequest(sessionId, "resource_register_failed")) {}
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.providerFailed(
+                            message = error.message ?: error.javaClass.name,
+                            module = request.module,
+                            method = request.method,
+                            code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                        ),
+                    ),
+                )
+                return@dispatch
+            }
+            uiSessionIds += handle.id
+            callback(response)
+        }
+    }
+
+    private fun dispatchOwnedUiRequest(
+        request: NodeBridgeRequest,
+        releaseOnClose: Boolean,
+        callback: (NodeBridgeResponse) -> Unit,
+    ) {
+        val sessionId = uiSessionId(request.argsJson)
+        if (sessionId.isBlank() || sessionId !in uiSessionIds) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 ui.${request.method} requires an active UI handle owned by this execution.",
+                        module = request.module,
+                        method = request.method,
+                    ),
                 ),
-            ),
+            )
+            return
+        }
+        NodeBridgeUiDispatchService.dispatch(appContext, request) { response ->
+            if (releaseOnClose) {
+                uiSessionIds.remove(sessionId)
+                resourceRegistry.release(sessionId, "ui.close")
+            }
+            callback(response)
+        }
+    }
+
+    private fun uiSessionId(argsJson: String): String {
+        val args = runCatching { JSONArray(argsJson) }.getOrDefault(JSONArray())
+        return when (val raw = args.opt(0)) {
+            is String -> raw
+            is JSONObject -> raw.optString("id", raw.optString("handleId", raw.optString("__autojs6UiHandle")))
+            else -> ""
+        }.trim()
+    }
+
+    private fun uiCloseRequest(sessionId: String, reason: String): NodeBridgeRequest {
+        return NodeBridgeRequest(
+            id = "ui-close-${UUID.randomUUID()}",
+            module = NodeBridgeModules.UI,
+            method = "close",
+            argsJson = JSONArray()
+                .put(sessionId)
+                .put(JSONObject().put("reason", reason))
+                .toString(),
+            timeoutMs = 5_000L,
+            permissions = listOf(NodeBridgePermissionManifest.UI),
+        )
+    }
+
+    private fun uiSessionLimitError(request: NodeBridgeRequest): NodeBridgeError {
+        return NodeBridgeError.resourceLimit(
+            message = "AutoJs6 UI bridge reached the active UI session limit ($MAX_ACTIVE_UI_SESSIONS).",
+            module = request.module,
+            method = request.method,
         )
     }
 
@@ -3143,6 +3267,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private companion object {
         const val TAG = "AndroidNodeBridge"
         const val SHELL_STREAM_JOIN_MS = 500L
+        const val MAX_ACTIVE_UI_SESSIONS = 4
     }
 }
 

@@ -1,9 +1,9 @@
 # Node UI Bridge Design Gate
 
-Status: Task 182 reserves a protocol-gated `require("ui")` module. The
-JavaScript wrapper, capability manifest entry, fake-provider event protocol,
-TypeScript declarations, and Android fail-closed provider path exist. A real
-Activity-owned Android UI provider is still not implemented.
+Status: Task S7-14 activates the first Activity-owned `require("ui")` live
+provider MVP. The JavaScript wrapper, capability manifest entry, fake-provider
+event protocol, TypeScript declarations, Android Activity provider, and focused
+live gate now exist.
 
 ## Goal
 
@@ -18,18 +18,19 @@ a separate provider contract before any runtime API is exposed.
 
 ## Current Decision
 
-Expose only the narrow protocol reservation for `require("ui")` in Node Profile
-v1.1.
+Expose only the narrow declarative Activity UI provider for `require("ui")` in
+Node Profile v1.1.
 
 The current module accepts JSON-only layout descriptors through
 `showLayout(layoutJson, options?)`, returns an opaque `UiHandle`, supports
 `handle.on(event, callback)`, `handle.update(patch)`, and `handle.close()`, and
-routes event delivery through bounded `drainEvents` bridge calls. The default
-Android provider rejects every `ui` method with
-`ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until an Activity-owned provider is
-accepted.
+routes event delivery through bounded `drainEvents` bridge calls. The Android
+provider now starts an internal, non-exported Activity and supports `Column`,
+`Row`, `Text`, `Button`, `Input`, `Image`, and `ScrollView` descriptors.
+Button/input/lifecycle/update events are serialized JSON snapshots; raw Android
+objects never cross into JavaScript.
 
-The next implementation step remains an Activity-owned provider behind the
+The next implementation step is component/data-binding expansion behind the
 same `ui` capability and focused tests. It must not expose raw Android
 `Context`, `Activity`, `View`, `Fragment`, `Window`, `Handler`, Rhino
 `NativeView`, or Java objects to Node scripts.
@@ -57,8 +58,8 @@ The Node UI bridge is not:
 
 | Mode | Description | Decision |
 | --- | --- | --- |
-| Protocol-gated `require("ui")` | JavaScript module and fake-provider protocol exist; Android provider fails closed. | Current v1.1 behavior. |
-| Activity-owned declarative UI | A provider owns an Activity and accepts JSON layout/state/actions. | Required next step before real UI. |
+| Protocol-gated `require("ui")` | JavaScript module and fake-provider protocol exist. | Baseline retained for regression tests. |
+| Activity-owned declarative UI | A provider owns an internal Activity and accepts JSON layout/state/actions. | Current v1.1 live MVP. |
 | WebView-hosted UI | Node drives a constrained local WebView surface. | Possible separate design, not default. |
 | Rhino UI compatibility shim | Node mimics Rhino `ui.*` and XML semantics. | Migration-only and high risk. |
 | Floaty/overlay UI | Node owns overlay windows. | Must wait behind overlay permission and floaty policy. |
@@ -76,7 +77,7 @@ ui.webview
 ui.overlay
 ```
 
-Task 182 uses the broad `ui` capability only for the reserved JSON protocol.
+Task S7-14 uses the broad `ui` capability for the Activity-owned JSON protocol.
 Future narrower names may still be introduced if the first live provider needs
 separate Activity, dialog, WebView, or overlay permissions. `ui.overlay` must
 not be implied by `ui`; overlay windows need separate user-visible permission,
@@ -291,23 +292,27 @@ Any future implementation must enforce:
 
 ## Test Gate
 
-Task 182 protocol tests now cover:
+Task S7-14 tests now cover:
 
 - Kotlin registry and permission manifest coverage for `ui`
 - fake-provider `showLayout`, `update`, `drainEvents`, and `close`
 - JavaScript shadowing protection for `require("ui")`
-- event callback delivery through drained JSON snapshots
+- fake-provider and Android-live event callback delivery through drained JSON
+  snapshots
 - JSON-only invalid descriptor rejection before dispatch
 - no raw View/Activity property on the JavaScript handle
-- Android provider fail-closed behavior until an Activity provider exists
+- Android live Activity show, Button/Input event delivery, update, close, and
+  destroy cleanup
+- unsupported descriptor and foreign handle denial
+- active UI session limit denial
 - TypeScript declaration smoke
 
-Minimum tests before implementing a real Android UI provider:
+Minimum tests before expanding the Android UI provider:
 
 - schema parser unit tests for layout descriptors
 - fake-provider success, failure, timeout, cancellation, and destroy tests
 - no raw-object serialization tests
-- Activity instrumentation for show, event, state read, close, Back, and destroy
+- Activity instrumentation for Back and configuration-change policy
 - rotation or explicit configuration-change policy test
 - packaged APK smoke for UI entry, Back, crash, and relaunch behavior
 - leak test for Activity, View, session, and event listener cleanup

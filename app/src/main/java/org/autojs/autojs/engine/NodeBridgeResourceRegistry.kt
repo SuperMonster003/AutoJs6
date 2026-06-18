@@ -22,6 +22,7 @@ enum class NodeBridgeResourceType(val idPrefix: String) {
     NETWORK_CALL("network"),
     NOTIFICATION("notification"),
     SENSOR_SUBSCRIPTION("sensor"),
+    UI_SESSION("ui"),
 }
 
 class NodeBridgeResourceHandle internal constructor(

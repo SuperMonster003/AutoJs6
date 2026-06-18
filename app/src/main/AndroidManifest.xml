@@ -438,6 +438,16 @@
             android:exported="false" />
 
         <service
+            android:name="org.autojs.autojs.engine.NodeBridgeUiDispatchService"
+            android:exported="false" />
+
+        <activity
+            android:name="org.autojs.autojs.engine.NodeBridgeUiActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:theme="@style/AppTheme" />
+
+        <service
             android:name="org.autojs.autojs.engine.NativeNodeEmbeddedProbeService"
             android:exported="false"
             android:foregroundServiceType="specialUse"

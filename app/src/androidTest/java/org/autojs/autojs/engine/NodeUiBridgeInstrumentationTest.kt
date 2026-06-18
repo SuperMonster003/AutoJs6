@@ -1,16 +1,24 @@
 package org.autojs.autojs.engine
 
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.thread
 
 class NodeUiBridgeInstrumentationTest {
 
@@ -18,11 +26,13 @@ class NodeUiBridgeInstrumentationTest {
 
     @Before
     fun settleBefore() {
+        NodeBridgeUiSessionStore.closeAll("ui-test-before")
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
     }
 
     @After
     fun settleAfter() {
+        NodeBridgeUiSessionStore.closeAll("ui-test-after")
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
     }
 
@@ -206,20 +216,253 @@ class NodeUiBridgeInstrumentationTest {
     }
 
     @Test
-    fun androidUiProviderFailsClosedUntilActivityProviderExists() {
-        val provider = AndroidNodeBridgeCapabilityProvider(context)
+    fun jsUiModuleUsesAndroidLiveProviderForButtonAndInputEvents() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node ui live provider regression")
+
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(NodeBridgeUiActivity::class.java.name, null, false)
+        val resultRef = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        val latch = CountDownLatch(1)
+        val workDir = File(context.cacheDir, "node-bridge-ui-live-js").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create ui live working directory: $absolutePath" }
+        }
+        try {
+            thread(name = "AutoJs6NodeUiLiveJsTest", isDaemon = true) {
+                resultRef.set(
+                    NodeEmbeddedTestHarness.runEmbeddedScript(
+                        """
+                        "nodejs";
+                        (async function main() {
+                          const ui = require("ui");
+                          const handle = await ui.showLayout({
+                            type: "Column",
+                            children: [
+                              { type: "Text", id: "title", text: "Starting" },
+                              { type: "Input", id: "name", hint: "Name" },
+                              { type: "Button", id: "ok", text: "OK" }
+                            ]
+                          }, { drainIntervalMs: 10, timeoutMs: 5000 });
+                          let clicked = "";
+                          let input = "";
+                          let inputFrozen = false;
+                          let clickFrozen = false;
+                          let offClick = function() {};
+                          let offInput = function() {};
+                          const done = new Promise((resolve) => {
+                            function maybeDone() {
+                              if (clicked && input) {
+                                offClick();
+                                offInput();
+                                resolve();
+                              }
+                            }
+                            offClick = handle.on("click", (event) => {
+                              clicked = event.id + ":" + event.handleId;
+                              clickFrozen = Object.isFrozen(event);
+                              maybeDone();
+                            }, { drainIntervalMs: 10, timeoutMs: 5000 });
+                            offInput = handle.on("input", (event) => {
+                              input = event.value || event.text || "";
+                              inputFrozen = Object.isFrozen(event);
+                              maybeDone();
+                            }, { drainIntervalMs: 10, timeoutMs: 5000 });
+                            setTimeout(resolve, 8000);
+                          });
+                          await handle.update({ id: "title", text: "Ready" }, { timeoutMs: 5000 });
+                          await done;
+                          await handle.close({ timeoutMs: 5000 });
+                          console.log("ui.live.clicked=" + clicked + "|" + clickFrozen);
+                          console.log("ui.live.input=" + input + "|" + inputFrozen);
+                          console.log("ui.live.no_raw_view=" + (handle.view === undefined && handle.androidView === undefined));
+                        })();
+                        """.trimIndent(),
+                        "<embedded-autojs-ui-live.js>",
+                        workingDirectory = workDir,
+                        timeoutMs = 30_000L,
+                    ),
+                )
+                latch.countDown()
+            }
+
+            val activity = monitor.waitForActivityWithTimeout(10_000L) as? NodeBridgeUiActivity
+            assertNotNull("Node UI Activity did not open for JS live test", activity)
+            assertTrue("Node UI Activity did not become ready", waitUntil {
+                var ready = false
+                instrumentation.runOnMainSync {
+                    val title = activity!!.window.decorView.findViewWithTag<View>("title") as? TextView
+                    ready = title?.text?.toString() == "Ready"
+                }
+                ready
+            })
+            instrumentation.runOnMainSync {
+                val root = activity!!.window.decorView
+                (root.findViewWithTag<View>("ok") as Button).performClick()
+                (root.findViewWithTag<View>("name") as EditText).setText("Bob")
+            }
+            assertTrue("Timed out waiting for JS live ui result", latch.await(35, TimeUnit.SECONDS))
+            val result = checkNotNull(resultRef.get()) { "Missing JS live ui result" }
+            NodeEmbeddedTestHarness.assertSucceeded("ui live bridge", result)
+            assertTrue(Regex("""ui\.live\.clicked=ok:ui-[^\r\n|]+\|true""").containsMatchIn(result.stdout))
+            assertTrue(result.stdout.contains("ui.live.input=Bob|true"))
+            assertTrue(result.stdout.contains("ui.live.no_raw_view=true"))
+        } finally {
+            instrumentation.removeMonitor(monitor)
+            NodeBridgeUiSessionStore.closeAll("ui-live-js-test-cleanup")
+            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        }
+    }
+
+    @Test
+    fun androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(NodeBridgeUiActivity::class.java.name, null, false)
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(context, id = "ui-live-provider-1"),
+        )
+        try {
+            val show = dispatch(
+                provider,
+                method = "showLayout",
+                argsJson = """
+                    [{
+                      "type":"Column",
+                      "children":[
+                        {"type":"Text","id":"title","text":"Node UI"},
+                        {"type":"Row","children":[
+                          {"type":"Input","id":"name","hint":"Name"},
+                          {"type":"Button","id":"ok","text":"OK"}
+                        ]},
+                        {"type":"ScrollView","id":"scroll","children":[
+                          {"type":"Image","id":"logo","alt":"Logo"}
+                        ]}
+                      ]
+                    }]
+                """.trimIndent(),
+            )
+            assertTrue(show.toString(), show.ok)
+            val handleId = JSONObject(show.resultJson.orEmpty()).getString("id")
+            assertTrue(handleId.startsWith("ui-"))
+            assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
+
+            val activity = monitor.waitForActivityWithTimeout(5_000L) as? NodeBridgeUiActivity
+            assertNotNull("Node UI Activity did not open", activity)
+            instrumentation.waitForIdleSync()
+            instrumentation.runOnMainSync {
+                val root = activity!!.window.decorView
+                assertEquals("Node UI", (root.findViewWithTag<View>("title") as TextView).text.toString())
+                (root.findViewWithTag<View>("ok") as Button).performClick()
+                val input = root.findViewWithTag<View>("name") as EditText
+                input.setText("Alice")
+            }
+
+            val events = waitForUiEvents(provider, handleId) { collected ->
+                collected.hasEvent("click", "ok") && collected.hasEvent("input", "name")
+            }
+            val click = events.firstEvent("click", "ok")
+            assertEquals(handleId, click.getString("handleId"))
+            assertEquals("OK", click.getString("text"))
+            val input = events.firstEvent("input", "name")
+            assertEquals("Alice", input.getString("value"))
+            assertEquals(
+                "Alice",
+                input
+                    .getJSONObject("snapshot")
+                    .getJSONObject("state")
+                    .getJSONObject("name")
+                    .getString("value"),
+            )
+
+            val update = dispatch(provider, method = "update", argsJson = """["$handleId",{"id":"title","text":"Updated"}]""")
+            assertTrue(update.toString(), update.ok)
+            instrumentation.waitForIdleSync()
+            instrumentation.runOnMainSync {
+                assertEquals(
+                    "Updated",
+                    (activity!!.window.decorView.findViewWithTag<View>("title") as TextView).text.toString(),
+                )
+            }
+
+            val close = dispatch(provider, method = "close", argsJson = """["$handleId"]""")
+            assertTrue(close.toString(), close.ok)
+            assertTrue("UI session was not removed after close", waitUntil { NodeBridgeUiSessionStore.get(handleId) == null })
+            assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+            assertEquals(0, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
+
+            val destroyShow = dispatch(
+                provider,
+                method = "showLayout",
+                argsJson = """[{"type":"Column","children":[{"type":"Button","id":"destroy","text":"Destroy"}]}]""",
+            )
+            assertTrue(destroyShow.toString(), destroyShow.ok)
+            val destroyHandleId = JSONObject(destroyShow.resultJson.orEmpty()).getString("id")
+            assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.UI_SESSION))
+            provider.destroy()
+            assertTrue("Provider destroy did not close UI", waitUntil { NodeBridgeUiSessionStore.get(destroyHandleId) == null })
+            assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+        } finally {
+            provider.destroy()
+            instrumentation.removeMonitor(monitor)
+            NodeBridgeUiSessionStore.closeAll("ui-live-test-cleanup")
+        }
+    }
+
+    @Test
+    fun androidUiProviderRejectsUnsupportedDescriptorsAndForeignHandles() {
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(context, id = "ui-live-provider-negative"),
+        )
         val response = dispatch(
             provider,
             method = "showLayout",
-            argsJson = """[{"type":"Text","id":"title","text":"Hello"}]""",
+            argsJson = """[{"type":"RawView","id":"raw"}]""",
         )
 
         assertFalse(response.toString(), response.ok)
-        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, response.error?.code)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, response.error?.code)
         assertEquals("ui", response.error?.module)
         assertEquals("showLayout", response.error?.method)
-        assertTrue(response.error?.message.orEmpty().contains("Activity-owned UI capability provider"))
+        assertTrue(response.error?.message.orEmpty().contains("unsupported component type"))
         assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+
+        val foreignUpdate = dispatch(
+            provider,
+            method = "update",
+            argsJson = """["ui-foreign",{"id":"title","text":"Nope"}]""",
+        )
+        assertFalse(foreignUpdate.toString(), foreignUpdate.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, foreignUpdate.error?.code)
+        assertTrue(foreignUpdate.error?.message.orEmpty().contains("owned by this execution"))
+
+        val limitProvider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(context, id = "ui-live-provider-limit"),
+        )
+        val handles = mutableListOf<String>()
+        try {
+            repeat(4) { index ->
+                val show = dispatch(
+                    limitProvider,
+                    method = "showLayout",
+                    argsJson = """[{"type":"Text","id":"title-$index","text":"Limit $index"}]""",
+                )
+                assertTrue(show.toString(), show.ok)
+                handles += JSONObject(show.resultJson.orEmpty()).getString("id")
+            }
+            val tooMany = dispatch(
+                limitProvider,
+                method = "showLayout",
+                argsJson = """[{"type":"Text","id":"too-many","text":"Too many"}]""",
+            )
+            assertFalse(tooMany.toString(), tooMany.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT, tooMany.error?.code)
+            assertTrue(tooMany.error?.message.orEmpty().contains("active UI session limit"))
+        } finally {
+            limitProvider.destroy()
+            assertTrue("UI limit sessions were not removed", waitUntil { handles.all { NodeBridgeUiSessionStore.get(it) == null } })
+        }
     }
 
     private fun dispatch(
@@ -244,5 +487,59 @@ class NodeUiBridgeInstrumentationTest {
         }
         assertTrue("Timed out waiting for ui.$method response", latch.await(5, TimeUnit.SECONDS))
         return checkNotNull(response) { "Missing ui.$method response" }
+    }
+
+    private fun waitForUiEvents(
+        provider: NodeBridgeCapabilityProvider,
+        handleId: String,
+        predicate: (JSONArray) -> Boolean,
+    ): JSONArray {
+        val collected = JSONArray()
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+        while (System.nanoTime() < deadline) {
+            val response = dispatch(provider, method = "drainEvents", argsJson = """["$handleId",{"maxEvents":16}]""")
+            assertTrue(response.toString(), response.ok)
+            val batch = JSONArray(response.resultJson.orEmpty())
+            for (index in 0 until batch.length()) {
+                collected.put(batch.getJSONObject(index))
+            }
+            if (predicate(collected)) {
+                return collected
+            }
+            Thread.sleep(50L)
+        }
+        return collected
+    }
+
+    private fun JSONArray.hasEvent(type: String, id: String): Boolean {
+        return (0 until length()).any { index ->
+            val event = getJSONObject(index)
+            event.optString("type") == type && event.optString("id") == id
+        }
+    }
+
+    private fun JSONArray.firstEvent(type: String, id: String): JSONObject {
+        for (index in 0 until length()) {
+            val event = getJSONObject(index)
+            if (event.optString("type") == type && event.optString("id") == id) {
+                return event
+            }
+        }
+        throw AssertionError("Missing UI event $type/$id in $this")
+    }
+
+    private fun activeTypeCount(diagnostics: Map<String, String>, type: NodeBridgeResourceType): Int {
+        return JSONObject(diagnostics["embedded_script.bridge_resource.active_types"].orEmpty()).optInt(type.name, 0)
+    }
+
+    private fun waitUntil(timeoutMs: Long = 5_000L, predicate: () -> Boolean): Boolean {
+        val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs)
+        while (System.nanoTime() < deadline) {
+            if (predicate()) {
+                return true
+            }
+            Thread.sleep(50L)
+        }
+        return predicate()
     }
 }

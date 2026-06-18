@@ -504,13 +504,14 @@ $env:ANDROID_SERIAL="QV710AF65F"
 
 This suite verifies the `sensors` bridge registry, fake-provider request/response behavior, shadowing protection, `getAvailableSensors`, `once`, `subscribe`, subscription `ready`/`close`, event snapshot freezing, type/callback validation, manifest capability denial before dispatch, Android provider sensor listing, live one-shot events, live subscription drain/unsubscribe cleanup, sampling interval clamping, maximum subscription denial, missing-provider unavailable errors, and live subscription resource cleanup when a supported device sensor is available.
 
-Current `ui` bridge protocol-gate focused instrumentation:
+Current `ui` bridge live-provider focused instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest"
+.\gradlew.bat --console=plain :app:verifyNodeLiveUiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This suite verifies the `ui` bridge registry, capability manifest mapping, fake-provider `showLayout`, `drainEvents`, `update`, and `close`, shadowing protection for `require("ui")`, opaque handle shape, button/click event delivery through drained JSON snapshots, timeout and permission propagation, JSON-only invalid descriptor rejection before dispatch, absence of raw View/Activity handle properties, and the current Android provider fail-closed path until an Activity-owned UI provider exists.
+This suite verifies the `ui` bridge registry, capability manifest mapping, fake-provider `showLayout`, `drainEvents`, `update`, and `close`, shadowing protection for `require("ui")`, opaque handle shape, fake-provider and Android-live `handle.on` callback delivery through drained JSON snapshots, timeout and permission propagation, JSON-only invalid descriptor rejection before dispatch, absence of raw View/Activity handle properties, live Android Activity show, Button/Input event delivery into Node, state snapshots, update, close, provider-destroy cleanup, unsupported descriptor denial, foreign-handle denial, and active UI session limit denial.
 
 Current JS-only plugin prototype focused instrumentation:
 

@@ -213,7 +213,7 @@ object NodeBridgeProviderRegistry {
         ACCESSIBILITY_PROVIDER -> accessibilityStatus()
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
         IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
-        UI_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
+        UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.FAKE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
@@ -225,6 +225,13 @@ object NodeBridgeProviderRegistry {
             "liveMethods" to "readImage,recycle",
             "blockedMethods" to "captureScreen,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors",
             "statusReason" to "partial image-handle backend for OCR live provider",
+        )
+        UI_PROVIDER -> linkedMapOf(
+            "liveMethods" to "showLayout,update,drainEvents,close",
+            "components" to "Column,Row,Text,Button,Input,Image,ScrollView",
+            "eventDelivery" to "bounded drainEvents JSON snapshots",
+            "maxActiveSessionsPerExecution" to "4",
+            "statusReason" to "Activity-owned declarative UI MVP",
         )
         else -> emptyMap()
     }
