@@ -196,7 +196,7 @@ Notes:
   Find / Replace, build packaging, file details, and Java class import.
 - [x] Add a standalone Code editor settings page and an in-editor settings
   dialog using the same content model.
-- [ ] Move the in-editor settings dialog to a fragment-safe MaterialDialog path.
+- [x] Move the in-editor settings dialog to a fragment-safe MaterialDialog path.
 - [x] Reorganize global settings and editor overflow menus so top-level editor
   settings stay concise and advanced options move into the dedicated page or
   dialog.
@@ -280,6 +280,9 @@ Notes:
   the favorites dialog can replay shortcut-panel commands, toolbar commands,
   and the first batch of direct overflow-menu commands through the same
   ranking, pinning, deletion, and repeat-last-command flow.
+- The in-editor settings dialog now uses a dedicated MaterialDialog host that
+  accepts DialogFragment content through a custom view container, avoiding the
+  unsupported `MaterialDialog.setContentView()` path.
 - The visible wrap-indentation chooser now offers only continuation indent and
   flush continuation. The old `default` key remains accepted for persisted
   compatibility but is no longer offered as a separate option.

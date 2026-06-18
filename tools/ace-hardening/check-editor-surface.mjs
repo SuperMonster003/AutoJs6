@@ -187,6 +187,32 @@ const ACE_ACTION_FAVORITES_DIALOG_PATH = path.join(
   "keyboard",
   "AceActionFavoritesDialog.kt",
 );
+const CODE_EDITOR_SETTINGS_DIALOG_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "settings",
+  "CodeEditorSettingsDialog.kt",
+);
+const FRAGMENT_HOST_MATERIAL_DIALOG_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "settings",
+  "FragmentHostMaterialDialog.kt",
+);
 const DIAGNOSTICS_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -252,6 +278,8 @@ const codeCompletionBar = read(CODE_COMPLETION_BAR_PATH);
 const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
 const aceActionHistoryStore = read(ACE_ACTION_HISTORY_STORE_PATH);
 const aceActionFavoritesDialog = read(ACE_ACTION_FAVORITES_DIALOG_PATH);
+const codeEditorSettingsDialog = read(CODE_EDITOR_SETTINGS_DIALOG_PATH);
+const fragmentHostMaterialDialog = read(FRAGMENT_HOST_MATERIAL_DIALOG_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
 assertOrder(
@@ -542,6 +570,12 @@ assertIncludes(aceActionFavoritesDialog, "confirmDelete", "ACE action favorites 
 assertIncludes(aceActionFavoritesDialog, "confirmClear", "ACE action favorites clear confirmation");
 assertIncludes(aceActionFavoritesDialog, "togglePinned", "ACE action favorites pin toggle");
 assertIncludes(aceActionFavoritesDialog, "persistOrder", "ACE action favorites order persistence");
+
+assertIncludes(codeEditorSettingsDialog, "FragmentHostMaterialDialog.Builder", "editor settings dialog uses fragment-safe MaterialDialog host");
+assertIncludes(codeEditorSettingsDialog, ".widgetThemeColor()", "editor settings dialog uses themed MaterialDialog buttons");
+assertIncludes(fragmentHostMaterialDialog, "class FragmentHostMaterialDialog", "fragment-hosting MaterialDialog wrapper");
+assertIncludes(fragmentHostMaterialDialog, "override fun setContentView(view: View)", "fragment host intercepts DialogFragment content view");
+assertIncludes(fragmentHostMaterialDialog, "customView(", "fragment host uses MaterialDialog custom view container");
 
 assertIncludes(diagnostics, "lastFirstPaintAtUptimeMillis", "first-paint diagnostics field");
 assertIncludes(diagnostics, "lastAceResizeScheduledReason", "resize scheduled diagnostics field");

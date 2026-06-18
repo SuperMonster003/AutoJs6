@@ -4,20 +4,15 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
-import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ContextUtils.findActivity
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs6.R
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -29,17 +24,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val context = inflater.context
-        return LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(context.resolveThemeColor(android.R.attr.colorBackground))
-
-            addView(createTitleView(context))
-            addView(createDivider(context))
-            addView(createSettingsContainer(context))
-            addView(createDivider(context))
-            addView(createButtonBar(context))
-        }
+        return createSettingsContainer(inflater.context)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,9 +41,15 @@ class CodeEditorSettingsDialog : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return super.onCreateDialog(savedInstanceState).apply {
-            setCanceledOnTouchOutside(true)
-        }
+        return FragmentHostMaterialDialog.Builder(requireContext())
+            .title(R.string.text_code_editor_settings)
+            .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
+            .widgetThemeColor()
+            .build()
+            .apply {
+                setCanceledOnTouchOutside(true)
+            }
     }
 
     override fun onStart() {
@@ -67,60 +58,14 @@ class CodeEditorSettingsDialog : DialogFragment() {
         dialog?.window?.setLayout(width, WindowManager.LayoutParams.WRAP_CONTENT)
     }
 
-    private fun createTitleView(context: Context): TextView {
-        return TextView(context).apply {
-            text = context.getString(R.string.text_code_editor_settings)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-            setTextColor(ThemeColorManager.colorPrimary)
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(context.dp(24), context.dp(20), context.dp(24), context.dp(14))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            )
-        }
-    }
-
     private fun createSettingsContainer(context: Context): FrameLayout {
         val height = min((resources.displayMetrics.heightPixels * 0.68f).roundToInt(), context.dp(560))
         return FrameLayout(context).apply {
             id = R.id.code_editor_settings_dialog_container
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
                 height,
             )
-        }
-    }
-
-    private fun createButtonBar(context: Context): LinearLayout {
-        return LinearLayout(context).apply {
-            gravity = Gravity.END or Gravity.CENTER_VERTICAL
-            setPadding(context.dp(8), context.dp(6), context.dp(8), context.dp(6))
-            addView(Button(context).apply {
-                text = context.getString(R.string.dialog_button_dismiss)
-                setTextColor(ThemeColorManager.colorPrimary)
-                setOnClickListener { dismissAllowingStateLoss() }
-            })
-        }
-    }
-
-    private fun createDivider(context: Context): View {
-        return View(context).apply {
-            setBackgroundColor(ContextCompat.getColor(context, R.color.divider))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                1,
-            )
-        }
-    }
-
-    private fun Context.resolveThemeColor(attr: Int): Int {
-        val out = TypedValue()
-        theme.resolveAttribute(attr, out, true)
-        return if (out.resourceId != 0) {
-            getColor(out.resourceId)
-        } else {
-            out.data
         }
     }
 
