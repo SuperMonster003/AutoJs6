@@ -291,8 +291,9 @@ assertNotIncludes(
   "MaterialDialog.Builder(requireContext()).build()",
   "MaterialDialog cannot back DialogFragment view content directly",
 );
-assertIncludes(FILES.codeEditorSettingsDialog, "CodeEditorSettingsFragment.newInstance(embeddedInDialog = true)", "in-editor settings dialog uses shared settings fragment");
-assertIncludes(FILES.editorMenuHandler, "CodeEditorSettingsDialog.show(mContext)", "editor settings menu opens in-editor settings dialog");
+assertIncludes(FILES.codeEditorSettingsDialog, "CodeEditorSettingsFragment.newInstance(", "in-editor settings dialog uses shared settings fragment");
+assertIncludes(FILES.codeEditorSettingsDialog, "recordAceActionFavorites", "in-editor settings dialog can track ACE setting actions");
+assertIncludes(FILES.editorMenuHandler, "mEditorView.showEditorSettingsDialog()", "editor settings menu opens in-editor settings dialog");
 assertMatch(
   FILES.editorEngineType,
   /enum class EditorEngineType\(val preferenceValue: String\) \{\s*NATIVE\("native"\),\s*ACE\("ace"\);/s,

@@ -87,6 +87,7 @@
 
         <org.autojs.autojs.ui.settings.EditorShortcutInputPreference
             app:layout="@layout/preference_custom"
+            app:key="@string/key_editor_shortcut_input_bar"
             app:title="@string/text_editor_shortcut_input_bar"
             app:summary="@string/summary_editor_shortcut_input_bar" />
 

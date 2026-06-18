@@ -34,7 +34,12 @@ class CodeEditorSettingsDialog : DialogFragment() {
                 .beginTransaction()
                 .replace(
                     R.id.code_editor_settings_dialog_container,
-                    CodeEditorSettingsFragment.newInstance(embeddedInDialog = true),
+                    CodeEditorSettingsFragment.newInstance(
+                        embeddedInDialog = true,
+                        initialPreferenceKey = initialPreferenceKey,
+                        recordAceActionFavorites = recordAceActionFavorites,
+                        suppressInitialActionRecord = suppressInitialActionRecord,
+                    ),
                 )
                 .commit()
         }
@@ -77,12 +82,35 @@ class CodeEditorSettingsDialog : DialogFragment() {
         ).roundToInt()
     }
 
+    fun openPreference(preferenceKey: String, suppressActionRecord: Boolean = false) {
+        (childFragmentManager.findFragmentById(R.id.code_editor_settings_dialog_container) as? CodeEditorSettingsFragment)
+            ?.openPreference(preferenceKey, suppressActionRecord)
+    }
+
+    private val initialPreferenceKey: String?
+        get() = arguments?.getString(ARG_INITIAL_PREFERENCE_KEY)
+
+    private val recordAceActionFavorites: Boolean
+        get() = arguments?.getBoolean(ARG_RECORD_ACE_ACTION_FAVORITES) == true
+
+    private val suppressInitialActionRecord: Boolean
+        get() = arguments?.getBoolean(ARG_SUPPRESS_INITIAL_ACTION_RECORD) == true
+
     companion object {
 
         private const val TAG = "CodeEditorSettingsDialog"
+        private const val ARG_INITIAL_PREFERENCE_KEY = "initial_preference_key"
+        private const val ARG_RECORD_ACE_ACTION_FAVORITES = "record_ace_action_favorites"
+        private const val ARG_SUPPRESS_INITIAL_ACTION_RECORD = "suppress_initial_action_record"
 
         @JvmStatic
-        fun show(context: Context) {
+        @JvmOverloads
+        fun show(
+            context: Context,
+            initialPreferenceKey: String? = null,
+            recordAceActionFavorites: Boolean = false,
+            suppressInitialActionRecord: Boolean = false,
+        ) {
             val activity = context.findActivity()
             if (activity !is FragmentActivity || activity.isFinishing || activity.isDestroyed) {
                 CodeEditorSettingsActivity.launch(context)
@@ -93,9 +121,18 @@ class CodeEditorSettingsDialog : DialogFragment() {
                 CodeEditorSettingsActivity.launch(context)
                 return
             }
-            if (fragmentManager.findFragmentByTag(TAG) == null) {
-                CodeEditorSettingsDialog().show(fragmentManager, TAG)
+            val existingDialog = fragmentManager.findFragmentByTag(TAG) as? CodeEditorSettingsDialog
+            if (existingDialog != null) {
+                initialPreferenceKey?.let { existingDialog.openPreference(it, suppressInitialActionRecord) }
+                return
             }
+            CodeEditorSettingsDialog().apply {
+                arguments = Bundle().apply {
+                    putBoolean(ARG_RECORD_ACE_ACTION_FAVORITES, recordAceActionFavorites)
+                    putBoolean(ARG_SUPPRESS_INITIAL_ACTION_RECORD, suppressInitialActionRecord)
+                    initialPreferenceKey?.let { putString(ARG_INITIAL_PREFERENCE_KEY, it) }
+                }
+            }.show(fragmentManager, TAG)
         }
     }
 }

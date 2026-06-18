@@ -256,6 +256,19 @@ const CODE_EDITOR_SETTINGS_FRAGMENT_PATH = path.join(
   "settings",
   "CodeEditorSettingsFragment.kt",
 );
+const EDITOR_SETTING_ACTION_REGISTRY_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "settings",
+  "EditorSettingActionRegistry.kt",
+);
 const FRAGMENT_HOST_MATERIAL_DIALOG_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -340,6 +353,7 @@ const symbolsConfigStore = read(SYMBOLS_CONFIG_STORE_PATH);
 const symbolsSettingsActivity = read(SYMBOLS_SETTINGS_ACTIVITY_PATH);
 const codeEditorSettingsDialog = read(CODE_EDITOR_SETTINGS_DIALOG_PATH);
 const codeEditorSettingsFragment = read(CODE_EDITOR_SETTINGS_FRAGMENT_PATH);
+const editorSettingActionRegistry = read(EDITOR_SETTING_ACTION_REGISTRY_PATH);
 const fragmentHostMaterialDialog = read(FRAGMENT_HOST_MATERIAL_DIALOG_PATH);
 const diagnostics = read(DIAGNOSTICS_PATH);
 
@@ -645,7 +659,11 @@ assertIncludes(editorView, "ACTION_JUMP_TO_PREVIOUS_CURSOR", "editor action hist
 assertIncludes(editorView, "ACTION_BUILD_APK", "editor action history build APK action id");
 assertIncludes(editorView, "ACTION_IMPORT_JAVA_CLASS", "editor action history Java class search action id");
 assertIncludes(editorView, "ACTION_FILE_DETAILS", "editor action history file details action id");
+assertIncludes(editorView, "executeEditorSettingHistoryAction", "editor action history open-ended setting action replay");
+assertIncludes(editorView, "EditorSettingActionRegistry.preferenceKeyFromActionId", "editor setting action id decoding");
+assertIncludes(editorView, "suppressInitialSettingActionRecord = true", "editor setting action replay avoids duplicate recording");
 assertIncludes(editorMenu, "mEditorView.recordAceActionForMenuItem(itemId)", "editor overflow menu records ACE actions");
+assertIncludes(editorMenu, "mEditorView.showEditorSettingsDialog()", "editor overflow settings menu enables ACE setting-action tracking");
 assertIncludes(editorMenu, "mEditorView::showFindOrReplaceDialog", "editor overflow menu shares find/replace action launcher");
 assertIncludes(editorMenu, "mEditorView::showJumpToLineDialog", "editor overflow menu shares jump-to-line action launcher");
 assertIncludes(editorMenu, "mEditorView::startBuildApkActivity", "editor overflow menu shares build APK launcher");
@@ -709,10 +727,19 @@ if (aceActionFavoritesDialog.includes("notifyItemRangeChanged(0, itemCount)")) {
 
 assertIncludes(codeEditorSettingsDialog, "FragmentHostMaterialDialog.Builder", "editor settings dialog uses fragment-safe MaterialDialog host");
 assertIncludes(codeEditorSettingsDialog, ".widgetThemeColor()", "editor settings dialog uses themed MaterialDialog buttons");
+assertIncludes(codeEditorSettingsDialog, "initialPreferenceKey", "editor settings dialog can open a requested preference");
+assertIncludes(codeEditorSettingsDialog, "recordAceActionFavorites", "editor settings dialog can enable ACE action tracking");
 assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_ace_word_wrap_enabled, aceSelected", "editor settings disables word wrap for non-Ace engines");
 assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected", "editor settings disables gutter width mode for non-Ace engines");
 assertIncludes(codeEditorSettingsFragment, "EditorDisplayPreferences.setWordWrapEnabled(false)", "editor settings normalizes native word wrap value");
 assertIncludes(codeEditorSettingsFragment, "EditorDisplayPreferences.setGutterWidthMode(EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED)", "editor settings normalizes native gutter width value");
+assertIncludes(codeEditorSettingsFragment, "recordAceSettingAction", "editor settings records open-ended setting actions");
+assertIncludes(codeEditorSettingsFragment, "EditorSettingActionRegistry.actionIdForPreferenceKey", "editor settings records stable setting action ids");
+assertIncludes(editorSettingActionRegistry, "ACTION_ID_PREFIX = \"editor_setting:\"", "editor setting actions use stable id prefix");
+assertIncludes(editorSettingActionRegistry, "R.string.key_editor_engine", "editor engine setting action is registered");
+assertIncludes(editorSettingActionRegistry, "R.string.key_ace_word_wrap_enabled", "word wrap setting action is registered");
+assertIncludes(editorSettingActionRegistry, "R.string.key_editor_text_size", "font-size setting action is registered");
+assertIncludes(editorSettingActionRegistry, "R.string.key_editor_shortcut_input_bar", "shortcut input setting action is registered");
 assertIncludes(fragmentHostMaterialDialog, "class FragmentHostMaterialDialog", "fragment-hosting MaterialDialog wrapper");
 assertIncludes(fragmentHostMaterialDialog, "override fun setContentView(view: View)", "fragment host intercepts DialogFragment content view");
 assertIncludes(fragmentHostMaterialDialog, "customView(", "fragment host uses MaterialDialog custom view container");

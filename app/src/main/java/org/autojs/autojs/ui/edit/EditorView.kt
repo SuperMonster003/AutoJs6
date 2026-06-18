@@ -112,6 +112,7 @@ import org.autojs.autojs.ui.edit.toolbar.ToolbarFragment
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
 import org.autojs.autojs.ui.project.BuildActivity
+import org.autojs.autojs.ui.settings.EditorSettingActionRegistry
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
@@ -2889,6 +2890,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         actionForMenuItem(itemId)?.let(::recordAceHistoryAction)
     }
 
+    @JvmOverloads
+    fun showEditorSettingsDialog(
+        initialPreferenceKey: String? = null,
+        suppressInitialSettingActionRecord: Boolean = false,
+    ) {
+        EditorSettingsDialogLauncher.show(
+            context = context,
+            initialPreferenceKey = initialPreferenceKey,
+            recordAceActionFavorites = editor.engineType == EditorEngineType.ACE,
+            suppressInitialActionRecord = suppressInitialSettingActionRecord,
+        )
+    }
+
     private fun executeAceHistoryAction(
         action: AceActionHistoryStore.Action,
         record: Boolean,
@@ -2939,7 +2953,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_REMOVE_ALL_BREAKPOINTS -> true.also { mCommandDispatcher.removeAllBreakpoints() }
             ACTION_BUILD_APK -> true.also { startBuildApkActivity() }
             ACTION_LOG -> true.also { openEditorLogByPreference() }
-            ACTION_SETTINGS -> true.also { EditorSettingsDialogLauncher.show(context) }
+            ACTION_SETTINGS -> true.also { showEditorSettingsDialog() }
             ACTION_CONSOLE -> true.also { showConsole() }
             ACTION_IMPORT_JAVA_CLASS -> true.also { showJavaClassSearchDialog() }
             ACTION_FILE_DETAILS -> true.also { showFileDetailsDialog() }
@@ -2949,12 +2963,25 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_VERSION_HISTORY -> true.also { showVersionHistoryDialog() }
             ACTION_EXIT_EDITOR -> true.also { triggerHostBackPress() }
             ACTION_JUMP_TO_PREVIOUS_CURSOR -> toggleAceShortcutReturnPoint()
-            else -> false
+            else -> executeEditorSettingHistoryAction(action)
         }
         if (handled && record) {
             AceActionHistoryStore.record(context, action)
         }
         return handled
+    }
+
+    private fun executeEditorSettingHistoryAction(action: AceActionHistoryStore.Action): Boolean {
+        val preferenceKey = EditorSettingActionRegistry.preferenceKeyFromActionId(action.id)
+            ?: return false
+        if (!EditorSettingActionRegistry.isKnownPreferenceKey(context, preferenceKey)) {
+            return false
+        }
+        showEditorSettingsDialog(
+            initialPreferenceKey = preferenceKey,
+            suppressInitialSettingActionRecord = true,
+        )
+        return true
     }
 
     private fun recordAceHistoryAction(action: AceActionHistoryStore.Action) {

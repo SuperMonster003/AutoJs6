@@ -1463,6 +1463,7 @@
     <string name="text_ace_action_clear_confirm">是否清空全部编辑器行为历史?</string>
     <string name="text_ace_action_delete_confirm" formatted="true">是否从编辑器行为历史中删除 "%1$s"?</string>
     <string name="text_ace_no_last_action">暂无上一次编辑器操作</string>
+    <string name="text_set_editor_setting_action" formatted="true">设置%1$s</string>
     <string name="text_ace_get_text">获取文本</string>
     <string name="text_ace_ime_stress">IME 压力测试</string>
     <string name="text_ace_ime_stress_done">IME 压力测试完成: %1$d 轮</string>

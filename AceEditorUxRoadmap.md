@@ -145,7 +145,7 @@ Acceptance:
   list state.
 - [x] Persist manual action-favorite reorder for both pinned and unpinned
   entries after drag release.
-- [ ] Record open-ended editor setting actions in action favorites, such as
+- [x] Record open-ended editor setting actions in action favorites, such as
   setting word wrap, editor engine, font, and font size.
 
 Acceptance:
@@ -409,7 +409,7 @@ and updated alongside commits.
    - [x] Support left-swipe delete and right-swipe pin/unpin.
    - [x] Use `R.drawable.ic_thumbtacks` for pinned items.
    - [x] Repeat the last action with star long-press.
-   - [ ] Record open-ended setting actions such as setting wrap indentation,
+   - [x] Record open-ended setting actions such as setting wrap indentation,
      word wrap, editor engine, font, and font size.
 
 16. Read-only mode

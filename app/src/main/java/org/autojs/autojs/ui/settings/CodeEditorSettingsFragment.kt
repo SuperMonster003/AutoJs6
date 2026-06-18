@@ -14,15 +14,19 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
+import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 
 class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private var suppressedPreferenceActionKey: String? = null
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_code_editor_settings, rootKey)
         syncEditorEnginePreferenceAvailability()
+        suppressedPreferenceActionKey = initialPreferenceKey.takeIf { suppressInitialActionRecord }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -39,6 +43,7 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         if (!embeddedInDialog) {
             listView.excludePaddingClippableViewFromBottomNavigationBar()
         }
+        openInitialPreferenceIfNeeded()
     }
 
     override fun onResume() {
@@ -59,6 +64,50 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         ) {
             syncEditorEnginePreferenceAvailability()
         }
+    }
+
+    override fun onPreferenceTreeClick(preference: Preference): Boolean {
+        recordAceSettingAction(preference)
+        return super.onPreferenceTreeClick(preference)
+    }
+
+    fun openPreference(preferenceKey: String, suppressActionRecord: Boolean = false) {
+        if (suppressActionRecord) {
+            suppressedPreferenceActionKey = preferenceKey
+        }
+        listView.post {
+            findPreference<Preference>(preferenceKey)?.let { preference ->
+                scrollToPreference(preference)
+                preference.performClick()
+            }
+        }
+    }
+
+    private fun openInitialPreferenceIfNeeded() {
+        initialPreferenceKey?.let { openPreference(it, suppressInitialActionRecord) }
+    }
+
+    private fun recordAceSettingAction(preference: Preference) {
+        if (!recordAceActionFavorites) {
+            return
+        }
+        val preferenceKey = preference.key ?: return
+        if (!EditorSettingActionRegistry.isKnownPreferenceKey(requireContext(), preferenceKey)) {
+            return
+        }
+        if (suppressedPreferenceActionKey == preferenceKey) {
+            suppressedPreferenceActionKey = null
+            return
+        }
+        val label = EditorSettingActionRegistry.labelForPreferenceKey(requireContext(), preferenceKey) ?: return
+        AceActionHistoryStore.record(
+            requireContext(),
+            AceActionHistoryStore.Action(
+                id = EditorSettingActionRegistry.actionIdForPreferenceKey(preferenceKey),
+                label = label,
+                mutatesText = false,
+            ),
+        )
     }
 
     private fun syncEditorEnginePreferenceAvailability() {
@@ -117,14 +166,34 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
     private val embeddedInDialog: Boolean
         get() = arguments?.getBoolean(ARG_EMBEDDED_IN_DIALOG) == true
 
+    private val initialPreferenceKey: String?
+        get() = arguments?.getString(ARG_INITIAL_PREFERENCE_KEY)
+
+    private val recordAceActionFavorites: Boolean
+        get() = arguments?.getBoolean(ARG_RECORD_ACE_ACTION_FAVORITES) == true
+
+    private val suppressInitialActionRecord: Boolean
+        get() = arguments?.getBoolean(ARG_SUPPRESS_INITIAL_ACTION_RECORD) == true
+
     companion object {
 
         private const val ARG_EMBEDDED_IN_DIALOG = "embedded_in_dialog"
+        private const val ARG_INITIAL_PREFERENCE_KEY = "initial_preference_key"
+        private const val ARG_RECORD_ACE_ACTION_FAVORITES = "record_ace_action_favorites"
+        private const val ARG_SUPPRESS_INITIAL_ACTION_RECORD = "suppress_initial_action_record"
 
-        fun newInstance(embeddedInDialog: Boolean = false): CodeEditorSettingsFragment {
+        fun newInstance(
+            embeddedInDialog: Boolean = false,
+            initialPreferenceKey: String? = null,
+            recordAceActionFavorites: Boolean = false,
+            suppressInitialActionRecord: Boolean = false,
+        ): CodeEditorSettingsFragment {
             return CodeEditorSettingsFragment().apply {
                 arguments = Bundle().apply {
                     putBoolean(ARG_EMBEDDED_IN_DIALOG, embeddedInDialog)
+                    putBoolean(ARG_RECORD_ACE_ACTION_FAVORITES, recordAceActionFavorites)
+                    putBoolean(ARG_SUPPRESS_INITIAL_ACTION_RECORD, suppressInitialActionRecord)
+                    initialPreferenceKey?.let { putString(ARG_INITIAL_PREFERENCE_KEY, it) }
                 }
             }
         }

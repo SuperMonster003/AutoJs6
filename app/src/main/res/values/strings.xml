@@ -137,6 +137,7 @@
     <string name="key_editor_gutter_width_mode" translatable="false">key_$_editor_gutter_width_mode</string>
     <string name="key_editor_gutter_width_mode_dynamic" translatable="false">dynamic</string>
     <string name="key_editor_gutter_width_mode_fixed" translatable="false">fixed</string>
+    <string name="key_editor_shortcut_input_bar" translatable="false">key_$_editor_shortcut_input_bar</string>
     <string name="key_editor_text_size" translatable="false">key_$_editor_text_size</string>
     <string name="key_editor_theme" translatable="false">key_$_editor_theme</string>
     <string name="key_enable_a11y_service_with_root_access" translatable="false">key_$_enable_a11y_service_with_root_access</string>
@@ -1107,6 +1108,7 @@
     <string name="text_ace_action_clear_confirm">Clear all editor action history?</string>
     <string name="text_ace_action_delete_confirm" formatted="true">Delete \"%1$s\" from editor action history?</string>
     <string name="text_ace_no_last_action">No last editor action</string>
+    <string name="text_set_editor_setting_action" formatted="true">Set %1$s</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
