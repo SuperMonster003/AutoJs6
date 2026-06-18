@@ -94,15 +94,15 @@ Notes:
 
 ## Gate UX-3: Input, Keyboard, And Read-Only Mode
 
-- [ ] Support IME spacebar cursor movement in ACE through soft-keyboard cursor
-  key events.
+- [x] Support IME spacebar cursor movement in ACE through the hidden textarea
+  selection window used by the soft keyboard.
 - [x] Add ACE read-only mode, default off for every new editor session.
 - [x] Strictly block text mutation paths while read-only is enabled.
 - [x] Improve read-only scrolling performance where possible.
 
 Acceptance:
 
-- [ ] Soft-keyboard cursor key events update the ACE caret without text loss.
+- [x] Soft-keyboard cursor key events update the ACE caret without text loss.
 - [ ] Manual Gboard spacebar cursor movement verification on Sony XQ-DQ72.
 - [x] Read-only mode blocks typing, paste, delete, replacement, formatting, and
   script-mutating editor actions.
@@ -185,7 +185,7 @@ Notes:
 
 ## Gate UX-7: Follow-Up UX Feedback
 
-- [ ] Stabilize Gboard spacebar cursor direction in ACE without treating IME
+- [x] Stabilize Gboard spacebar cursor direction in ACE without treating IME
   selection offsets as document-absolute offsets.
 - [x] Keep double-tap and long-press host action modes anchored near the user's
   touch point without upper-left fallback flicker.
@@ -337,10 +337,10 @@ and updated alongside commits.
      ACE/editor strings.
 
 2. Gboard spacebar cursor movement
-   - [ ] Keep cursor direction stable while sliding left and right.
-   - [ ] Prevent the cursor from being trapped in a small local range near the
+   - [x] Keep cursor direction stable while sliding left and right.
+   - [x] Prevent the cursor from being trapped in a small local range near the
      beginning of the document.
-   - [ ] Prevent repeated back-and-forth slides from accumulating abnormal
+   - [x] Prevent repeated back-and-forth slides from accumulating abnormal
      movement step sizes.
 
 3. Double-tap and long-press selection menus
@@ -477,11 +477,10 @@ instead of another blind patch.
 
 Current state:
 
-- Long-pressing the IME spacebar can enter cursor movement mode, but ACE caret
-  movement is still unstable. Reported symptoms include reversed movement
-  direction, movement trapped in a small local range, cyclic jumps around that
-  range, and increasing cursor movement distance after repeated left/right
-  finger motion.
+- A follow-up implementation now routes collapsed `InputConnection.setSelection`
+  calls through ACE's hidden textarea local selection window instead of applying
+  native-side accumulated deltas. Manual Sony XQ-DQ72 verification is still
+  pending.
 
 Attempts:
 
@@ -501,6 +500,11 @@ Attempts:
   WebView's absolute collapsed selection updates outside text mutation windows,
   so ACE only receives relative deltas. This prevented some document-start
   jumps in code, but did not close the device-reported instability.
+- Replaced the native delta coalescing path with an Android bridge listener for
+  the hidden textarea's local `selectionchange`. The bridge now maps local
+  window deltas back to the ACE caret, resets the textarea window after cursor
+  moves, and drops unusually large local jumps instead of treating them as
+  document offsets.
 
 Expected result:
 

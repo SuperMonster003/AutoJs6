@@ -49,6 +49,15 @@
     var rightEdgeGestureGuardStartY = 0;
     var rightEdgeGestureGuardTracking = false;
     var foldTapCandidate = null;
+    var imeTextInputSelectionWindow = {
+        installed: false,
+        element: null,
+        value: "",
+        start: -1,
+        end: -1
+    };
+    var imeTextInputSelectionSyncing = false;
+    var lastImeTextInputSelectionNotifyAt = 0;
     var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
@@ -62,6 +71,7 @@
     var RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X = 14;
     var RIGHT_EDGE_GESTURE_VERTICAL_SLOP = 24;
     var FOLD_TAP_TOUCH_SLOP_SQUARED = 100;
+    var IME_TEXT_INPUT_SELECTION_MAX_DELTA = 64;
 
     function callBridge(name, args) {
         try {
@@ -799,6 +809,145 @@
         }
     }
 
+    function isAndroidUserAgent() {
+        return typeof navigator !== "undefined" && /Android/i.test(String(navigator.userAgent || ""));
+    }
+
+    function getImeTextInputElement() {
+        var textInput = editor && editor.textInput;
+        if (!textInput || typeof textInput.getElement !== "function") {
+            return null;
+        }
+        var element = textInput.getElement();
+        if (
+            !element ||
+            typeof element.selectionStart !== "number" ||
+            typeof element.selectionEnd !== "number"
+        ) {
+            return null;
+        }
+        return element;
+    }
+
+    function syncImeTextInputSelectionWindow(reason) {
+        var element = getImeTextInputElement();
+        if (!element) {
+            imeTextInputSelectionWindow.element = null;
+            imeTextInputSelectionWindow.value = "";
+            imeTextInputSelectionWindow.start = -1;
+            imeTextInputSelectionWindow.end = -1;
+            return false;
+        }
+        var value = String(element.value || "");
+        var start = Math.max(0, Math.min(Number(element.selectionStart) || 0, value.length));
+        var end = Math.max(0, Math.min(Number(element.selectionEnd) || 0, value.length));
+        imeTextInputSelectionWindow.element = element;
+        imeTextInputSelectionWindow.value = value;
+        imeTextInputSelectionWindow.start = start;
+        imeTextInputSelectionWindow.end = end;
+        if (reason === "editor_ready" || reason === "selectionchange_large_delta") {
+            callBridge("notifyEvent", [
+                "imeTextInputSelectionWindow",
+                JSON.stringify({
+                    reason: String(reason),
+                    start: start,
+                    end: end,
+                    length: value.length
+                })
+            ]);
+        }
+        return true;
+    }
+
+    function resetImeTextInputSelectionWindow(reason) {
+        if (!isAndroidUserAgent()) {
+            return false;
+        }
+        var textInput = editor && editor.textInput;
+        imeTextInputSelectionSyncing = true;
+        try {
+            if (textInput && typeof textInput.resetSelection === "function") {
+                textInput.resetSelection();
+            }
+        } catch (error) {
+            notifyRecoverableError("imeTextInputSelectionWindow", error);
+        } finally {
+            syncImeTextInputSelectionWindow(reason || "reset");
+            imeTextInputSelectionSyncing = false;
+        }
+        return imeTextInputSelectionWindow.element !== null;
+    }
+
+    function handleImeTextInputSelectionChange() {
+        if (!isAndroidUserAgent() || imeTextInputSelectionSyncing) {
+            return;
+        }
+        var element = getImeTextInputElement();
+        if (!element || document.activeElement !== element) {
+            return;
+        }
+        var value = String(element.value || "");
+        var start = Math.max(0, Math.min(Number(element.selectionStart) || 0, value.length));
+        var end = Math.max(0, Math.min(Number(element.selectionEnd) || 0, value.length));
+        if (
+            imeTextInputSelectionWindow.element !== element ||
+            imeTextInputSelectionWindow.start < 0 ||
+            imeTextInputSelectionWindow.value !== value ||
+            start !== end
+        ) {
+            syncImeTextInputSelectionWindow("selectionchange_sync");
+            return;
+        }
+        var previous = imeTextInputSelectionWindow.start;
+        var delta = start - previous;
+        if (delta === 0) {
+            syncImeTextInputSelectionWindow("");
+            return;
+        }
+        if (Math.abs(delta) > IME_TEXT_INPUT_SELECTION_MAX_DELTA) {
+            callBridge("notifyEvent", [
+                "imeTextInputSelectionDropped",
+                JSON.stringify({
+                    previous: previous,
+                    start: start,
+                    delta: delta,
+                    length: value.length
+                })
+            ]);
+            syncImeTextInputSelectionWindow("selectionchange_large_delta");
+            return;
+        }
+        var now = Date.now();
+        if (now - lastImeTextInputSelectionNotifyAt >= 100) {
+            lastImeTextInputSelectionNotifyAt = now;
+            callBridge("notifyEvent", [
+                "imeTextInputSelection",
+                JSON.stringify({
+                    previous: previous,
+                    start: start,
+                    delta: delta,
+                    length: value.length
+                })
+            ]);
+        }
+        moveCursor(delta);
+    }
+
+    function installImeTextInputSelectionWindow() {
+        if (!isAndroidUserAgent() || imeTextInputSelectionWindow.installed) {
+            return;
+        }
+        imeTextInputSelectionWindow.installed = true;
+        document.addEventListener("selectionchange", handleImeTextInputSelectionChange, true);
+        if (editor && editor.on) {
+            editor.on("destroy", function() {
+                document.removeEventListener("selectionchange", handleImeTextInputSelectionChange, true);
+                imeTextInputSelectionWindow.installed = false;
+            });
+        }
+        resetImeTextInputSelectionWindow("editor_ready");
+    }
+
     function notifySelectionChanged() {
         lastSelectionChangedAt = Date.now();
         var selection = getSelectionState();
@@ -1205,6 +1354,7 @@
         var selection = getSelectionState();
         var next = Math.max(0, Math.min(selection.startOffset + (Number(delta) || 0), session.getValue().length));
         selectRange(next, next);
+        resetImeTextInputSelectionWindow("move_cursor");
     }
 
     function deleteLine() {
@@ -1839,6 +1989,7 @@
 
         editor.selection.on("changeCursor", notifyCursorChanged);
         editor.selection.on("changeSelection", notifySelectionChanged);
+        installImeTextInputSelectionWindow();
         global.addEventListener("resize", function() {
             scheduleResize("window_resize");
         });

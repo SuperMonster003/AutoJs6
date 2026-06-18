@@ -86,9 +86,6 @@ class AceCodeEditor @JvmOverloads constructor(
     private val scheduledResizeRunnable = Runnable {
         runScheduledResize()
     }
-    private val imeCursorSelectionRunnable = Runnable {
-        flushPendingImeCursorSelection()
-    }
     private val pendingSelectionActionModeRunnable = Runnable {
         flushPendingSelectionActionModeRequest()
     }
@@ -195,7 +192,6 @@ class AceCodeEditor @JvmOverloads constructor(
     private var selectionActionModeExpectedFinish = false
     private var selectionActionModeStabilizeUntilUptimeMillis = 0L
     private var selectionActionModeStabilizeRestarted = false
-    private var pendingImeCursorDelta = 0
     private var lastTextTouchX = -1f
     private var lastTextTouchY = -1f
     private var lastTextTouchAtUptimeMillis = 0L
@@ -1622,35 +1618,14 @@ class AceCodeEditor @JvmOverloads constructor(
         return event.action == KeyEvent.ACTION_DOWN || event.action == KeyEvent.ACTION_UP
     }
 
-    private fun handleSoftKeyboardCursorSelection(offset: Int, delta: Int, source: String): Boolean {
-        if (
-            !isReady ||
-            delta == 0 ||
-            abs(delta) > IME_SELECTION_CURSOR_MAX_DELTA
-        ) {
-            return false
-        }
-        pendingImeCursorDelta += delta
-        eventHistory.record(
-            "ime_cursor_selection",
-            "source=$source,offset=$offset,delta=$delta",
-        )
-        mainHandler.removeCallbacks(imeCursorSelectionRunnable)
-        mainHandler.postDelayed(imeCursorSelectionRunnable, IME_CURSOR_SELECTION_APPLY_DELAY_MS)
-        return true
-    }
-
-    private fun flushPendingImeCursorSelection() {
-        val delta = pendingImeCursorDelta
-        pendingImeCursorDelta = 0
-        if (delta == 0) {
+    private fun handleSoftKeyboardCursorSelection(offset: Int, delta: Int, source: String) {
+        if (!isReady) {
             return
         }
         eventHistory.record(
-            "ime_cursor_selection_apply",
-            "delta=$delta",
+            "ime_cursor_selection",
+            "source=$source,offset=$offset,delta=$delta,mode=textarea_window",
         )
-        moveCursor(delta)
     }
 
     private fun isSoftKeyboardCursorKey(keyCode: Int, event: KeyEvent): Boolean {
@@ -1666,7 +1641,7 @@ class AceCodeEditor @JvmOverloads constructor(
     private class AceWebView(
         context: Context,
         private val softKeyboardCursorKeyHandler: (Int, KeyEvent) -> Boolean,
-        private val softKeyboardSelectionHandler: (Int, Int, String) -> Boolean,
+        private val softKeyboardSelectionHandler: (Int, Int, String) -> Unit,
         private val allowHostActionModeStart: () -> Boolean,
         private val onSuppressedActionModeStart: () -> Unit,
     ) : WebView(context) {
@@ -1698,21 +1673,19 @@ class AceCodeEditor @JvmOverloads constructor(
                 override fun setSelection(start: Int, end: Int): Boolean {
                     if (start == end && start >= 0) {
                         val previousSelection = lastCollapsedSelection
-                        val delta = start - previousSelection
+                        val delta = if (previousSelection >= 0) start - previousSelection else 0
                         lastCollapsedSelection = start
                         if (SystemClock.uptimeMillis() < ignoreSelectionUntilUptimeMillis) {
-                            return super.setSelection(start, end)
-                        }
-                        if (
-                            previousSelection >= 0 &&
-                            abs(delta) in 1..IME_SELECTION_CURSOR_MAX_DELTA &&
-                            softKeyboardSelectionHandler(start, delta, "InputConnection.setSelection")
-                        ) {
+                            super.setSelection(start, end)
+                            softKeyboardSelectionHandler(start, delta, "InputConnection.setSelection.suppressed")
                             return true
                         }
-                        // Gboard spacebar cursor mode reports offsets inside the composing
-                        // input buffer, not document-absolute offsets. Suppress WebView's
-                        // absolute setSelection so ACE only receives relative cursor deltas.
+                        super.setSelection(start, end)
+                        softKeyboardSelectionHandler(start, delta, "InputConnection.setSelection.textarea")
+                        // Gboard spacebar cursor mode reports offsets inside ACE's hidden
+                        // textarea window. Let WebView update that local selection so the
+                        // bridge can map the local window delta back to the ACE caret, while
+                        // still consuming the call to avoid document-absolute fallback moves.
                         return true
                     } else {
                         lastCollapsedSelection = -1
@@ -2267,8 +2240,6 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val TEXT_MIRROR_CALIBRATION_DELAY_MS = 500L
         private const val IME_REQUEST_COALESCE_MS = 150L
         private const val IME_TRANSITION_HEARTBEAT_SUSPEND_MS = 800L
-        private const val IME_SELECTION_CURSOR_MAX_DELTA = 64
-        private const val IME_CURSOR_SELECTION_APPLY_DELAY_MS = 8L
         private const val IME_TEXT_INPUT_SELECTION_SUPPRESS_MS = 120L
         private const val RESIZE_SETTLE_DELAY_MS = 120L
         private const val IME_HEIGHT_THRESHOLD_DP = 80f
