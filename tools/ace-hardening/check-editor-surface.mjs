@@ -188,6 +188,20 @@ const ACE_ACTION_FAVORITES_DIALOG_PATH = path.join(
   "keyboard",
   "AceActionFavoritesDialog.kt",
 );
+const FUNCTIONS_KEYBOARD_HELPER_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "keyboard",
+  "FunctionsKeyboardHelper.java",
+);
 const SYMBOLS_CONFIG_STORE_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -321,6 +335,7 @@ const codeCompletionBar = read(CODE_COMPLETION_BAR_PATH);
 const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
 const aceActionHistoryStore = read(ACE_ACTION_HISTORY_STORE_PATH);
 const aceActionFavoritesDialog = read(ACE_ACTION_FAVORITES_DIALOG_PATH);
+const functionsKeyboardHelper = read(FUNCTIONS_KEYBOARD_HELPER_PATH);
 const symbolsConfigStore = read(SYMBOLS_CONFIG_STORE_PATH);
 const symbolsSettingsActivity = read(SYMBOLS_SETTINGS_ACTIVITY_PATH);
 const codeEditorSettingsDialog = read(CODE_EDITOR_SETTINGS_DIALOG_PATH);
@@ -621,6 +636,10 @@ assertIncludes(editorMenu, "buildReadOnlyMenuTitle", "editor read-only menu them
 assertIncludes(editorMenu, "item.setCheckable(false)", "editor read-only menu avoids system default checkbox tint");
 assertIncludes(editorMenu, "ThemeColorManager.getColorPrimary()", "editor read-only menu uses runtime theme color");
 assertIncludes(editorMenu, "ForegroundColorSpan", "editor read-only menu colors checkbox marker");
+assertIncludes(functionsKeyboardHelper, "mFunctionsLayout == null", "function keyboard hide tolerates missing layout");
+assertIncludes(functionsKeyboardHelper, "mFunctionsLayout.setVisibility(View.GONE)", "function keyboard hide always clears visibility");
+assertIncludes(functionsKeyboardHelper, "params != null && params.height != 0", "function keyboard hide clears stale height");
+assertIncludes(functionsKeyboardHelper, "showSoftInput && wasVisible", "function keyboard hide preserves soft-input restore guard");
 
 assertIncludes(codeCompletion, "val iconResId", "code completion optional icon model");
 assertIncludes(codeCompletionBar, "getIconResId(position)", "code completion optional icon lookup");

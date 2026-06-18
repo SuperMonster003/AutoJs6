@@ -54,7 +54,7 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
     }
 
     public void onSoftKeyboardShown() {
-        if (mFunctionsLayout.isShown()) {
+        if (mFunctionsLayout != null && mFunctionsLayout.isShown()) {
             lockContentHeight();
             hideFunctionsLayout(false);
             mEditView.postDelayed(FunctionsKeyboardHelper.this::unlockContentHeightDelayed, 200L);
@@ -120,17 +120,25 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
     }
 
     public void hideFunctionsLayout(boolean showSoftInput) {
-        if (mFunctionsLayout.isShown()) {
-            mFunctionsLayout.setVisibility(View.GONE);
+        if (mFunctionsLayout == null) {
+            return;
+        }
 
-            // Reset height so the next show() won't inherit an old value unexpectedly.
-            // zh-CN: 重置高度, 避免下次 show() 意外继承旧高度.
-            mFunctionsLayout.getLayoutParams().height = 0;
+        boolean wasVisible = mFunctionsLayout.isShown() || mFunctionsLayout.getVisibility() == View.VISIBLE;
+        mFunctionsLayout.setVisibility(View.GONE);
+
+        // Reset height even when the view is not attached/shown, because read-only mode can
+        // hide its parent before this helper sees a visible function keyboard.
+        android.view.ViewGroup.LayoutParams params = mFunctionsLayout.getLayoutParams();
+        if (params != null && params.height != 0) {
+            params.height = 0;
+            mFunctionsLayout.setLayoutParams(params);
+        } else {
             mFunctionsLayout.requestLayout();
+        }
 
-            if (showSoftInput) {
-                showSoftInput();
-            }
+        if (showSoftInput && wasVisible) {
+            showSoftInput();
         }
     }
 

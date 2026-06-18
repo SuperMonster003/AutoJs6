@@ -400,7 +400,7 @@ and updated alongside commits.
    - [x] Hide the function keyboard area while read-only mode is enabled.
    - [x] Theme the Read-only mode menu checkbox with AutoJs6 colors in checked
      and unchecked states.
-   - [ ] Remove the occasional empty JsDroidEditor keyboard-area overlay after
+   - [x] Remove the occasional empty JsDroidEditor keyboard-area overlay after
      enabling read-only mode.
 
 17. Pinch zoom
