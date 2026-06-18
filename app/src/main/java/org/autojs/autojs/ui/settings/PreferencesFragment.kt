@@ -1,18 +1,39 @@
 package org.autojs.autojs.ui.settings
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.EdgeEffect
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.preference.MaterialListPreference
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 
-class PreferencesFragment : PreferenceFragmentCompat() {
+class PreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_preferences, rootKey)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
+        refreshSharedCodeEditorPreferences()
+    }
+
+    override fun onPause() {
+        preferenceManager.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
+        super.onPause()
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key in sharedCodeEditorPreferenceKeys) {
+            refreshSharedCodeEditorPreferences()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -29,4 +50,21 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         listView.excludePaddingClippableViewFromBottomNavigationBar()
     }
 
+    private fun refreshSharedCodeEditorPreferences() {
+        findPreference<MaterialListPreference>(getString(R.string.key_editor_engine))?.useEntrySummaryProvider()
+        findPreference<MaterialListPreference>(getString(R.string.key_editor_log_button_behavior))?.useEntrySummaryProvider()
+        findPreference<SwitchPreference>(getString(R.string.key_editor_auto_show_log_bottom_sheet_on_run))?.isChecked =
+            Pref.getBoolean(
+                R.string.key_editor_auto_show_log_bottom_sheet_on_run,
+                R.bool.pref_editor_auto_show_log_bottom_sheet_on_run,
+            )
+        listView.adapter?.notifyDataSetChanged()
+    }
+
+    private val sharedCodeEditorPreferenceKeys: Set<String>
+        get() = setOf(
+            getString(R.string.key_editor_engine),
+            getString(R.string.key_editor_auto_show_log_bottom_sheet_on_run),
+            getString(R.string.key_editor_log_button_behavior),
+        )
 }
