@@ -89,6 +89,13 @@ The live sensors subgate validates Android-backed sensor listing, one-shot
 events, subscribe/drain/unsubscribe cleanup, sampling interval clamping,
 maximum subscription denial, missing-provider unavailable errors, and destroy
 cleanup for supported accelerometer/gyroscope/light hardware.
+The accessibility/image subgate validates selector timeout/cancellation,
+Android accessibility unavailable rejection, scoped `image.readImage()` to OCR
+to `image.recycle()` behavior, OCR unknown-handle cleanup, and screenshot /
+advanced-image fail-closed policy. If the AutoJs6 accessibility service is
+already enabled on the device, it also validates controlled-Activity selector
+`findOne` and selector `click`; otherwise that live accessibility smoke is an
+explicit skip.
 
 ## Pass Meaning
 

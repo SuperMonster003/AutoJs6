@@ -423,7 +423,16 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pautojs.nodejs.test.deviceProfile=accessibility"
 ```
 
-Enable the current branch's AutoJs6 accessibility service manually before running it. The profile is not part of normal PR, Sony, full, nightly, or release gates; it launches a controlled test UI and validates `isEnabled`, `ensureEnabled`, `findByText`, and `clickText` through the Android provider path. Add `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home.
+Enable the current branch's AutoJs6 accessibility service manually before running it. The profile is not part of normal PR, Sony, full, nightly, or release gates; it launches a controlled test UI and validates `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`, and selector `click` through the Android provider path. Add `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home.
+
+Focused accessibility/image live gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveAccessibilityImageGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This focused gate runs selector timeout/cancellation, Android accessibility unavailable rejection, scoped `image.readImage()` to OCR to `image.recycle()` live behavior, OCR unknown-handle cleanup, and screenshot/advanced image fail-closed coverage. It also enables the controlled Activity accessibility smoke; that smoke validates real `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`, selector `click`, stale JSON snapshot behavior, and post-click lookup when the AutoJs6 accessibility service is already enabled, and otherwise records an explicit JUnit skip without changing device accessibility settings.
 
 Optional real-device `screen_capture` smoke:
 

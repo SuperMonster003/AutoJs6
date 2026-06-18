@@ -176,6 +176,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeLiveOcrGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveStorageNotificationsGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveSensorsGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveAccessibilityImageGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -208,6 +209,13 @@ one-shot events, live subscribe/drain/unsubscribe behavior, sampling interval
 clamping, maximum subscription denial, missing-provider unavailable errors, and
 destroy cleanup for accelerometer/gyroscope/light providers available on the
 device.
+`verifyNodeLiveAccessibilityImageGate` validates selector timeout/cancellation,
+accessibility provider unavailable errors, scoped `image.readImage()` to OCR to
+`image.recycle()` live behavior, and screenshot/advanced image fail-closed
+paths. If the AutoJs6 accessibility service is already enabled on the device,
+it also launches a controlled Activity and validates real selector `findOne`
+and selector `click`; otherwise that single real-accessibility smoke is an
+explicit JUnit skip.
 
 ## Release Gate
 

@@ -926,7 +926,8 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - selector v2 fields remain JSON-only descriptors: regular expressions are serialized as `{ pattern, flags }`, bounds are `{ left, top, right, bottom }`, and no raw selector or node object crosses the bridge
   - returned `UiNode` values are frozen JSON snapshots only; no live `AccessibilityNodeInfo`, `UiObject`, or selector object crosses into Node
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
-  - when an operational AutoJs6 accessibility service is visible in the current process, the Android provider can validate `isEnabled`, `ensureEnabled`, `findByText`, `clickText`, selector `findOne`/`findAll`, selector `click`/`longClick`/`setText`/`scrollForward`/`scrollBackward`, and Back/Home/Recents global actions through controlled JSON snapshots and booleans
+  - when an operational AutoJs6 accessibility service is visible in the current process, the Android provider can validate `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`/`findAll`, selector `click`/`longClick`/`setText`/`scrollForward`/`scrollBackward`, and Back/Home/Recents global actions through controlled JSON snapshots and booleans
+  - the focused accessibility/image gate launches a controlled Activity and exercises real selector `findOne`/`click` only when the service is already enabled; it does not modify device accessibility settings
   - when an accessibility provider is unavailable in the current process, including isolated embedded service processes that cannot see the main-process service instance, `isEnabled`/`ensureEnabled` return `false` and action/query methods reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 - `media_projection`
   - `requestScreenCapture(options?): Promise<ScreenCapturer>`
@@ -959,6 +960,7 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - repeated `recycle()` calls for the same normalized handle are safe from JavaScript and dispatch at most once per module instance
   - current JavaScript API, fake-provider tests, and bridge protocol are stable
   - current Android provider supports the scoped local-file `readImage()` and `recycle()` path used by the live OCR provider, returning provider-owned opaque handles and enforcing the per-execution image-handle limit
+  - the focused accessibility/image gate keeps screenshot capture and advanced image operations fail-closed while validating the scoped `readImage()` to OCR to `recycle()` path
   - screenshot capture, save, transform, template-matching, and color-search methods still reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` until full image capability provider ownership is connected
   - optional real-device `screen_capture` smoke validates frame decode and recycle behavior against the Android capture pipeline while JavaScript still receives only opaque future handles
 - `ocr`

@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.content.Intent
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -68,9 +69,25 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
         assertEquals("android.widget.TextView", node.getString("className"))
         assertNotNull(node.getJSONObject("bounds"))
 
+        val selectorFound = provider.dispatchAccessibilityRequest(
+            method = "findOne",
+            argsJson = JSONArray()
+                .put(selector(NodeAccessibilitySmokeActivity.TARGET_TEXT))
+                .put(JSONObject().put("timeoutMs", 1000))
+                .toString(),
+        )
+        assertTrue(selectorFound.error?.message.orEmpty(), selectorFound.ok)
+        val selectorNode = JSONObject(selectorFound.resultJson ?: "null")
+        assertEquals(NodeAccessibilitySmokeActivity.TARGET_TEXT, selectorNode.getString("text"))
+        assertEquals(NodeAccessibilitySmokeActivity.TARGET_DESC, selectorNode.getString("desc"))
+        assertNotNull(selectorNode.getJSONObject("bounds"))
+
         val clicked = provider.dispatchAccessibilityRequest(
-            method = "clickText",
-            argsJson = """["${NodeAccessibilitySmokeActivity.BUTTON_TEXT}",{"timeoutMs":1000}]""",
+            method = "click",
+            argsJson = JSONArray()
+                .put(selector(NodeAccessibilitySmokeActivity.BUTTON_TEXT))
+                .put(JSONObject().put("timeoutMs", 1000))
+                .toString(),
         )
         assertTrue(clicked.error?.message.orEmpty(), clicked.ok)
         assertEquals("true", clicked.resultJson)
@@ -86,6 +103,7 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
         )
         assertTrue(clickedText.error?.message.orEmpty(), clickedText.ok)
         assertEquals(NodeAccessibilitySmokeActivity.CLICKED_TEXT, JSONObject(clickedText.resultJson ?: "null").getString("text"))
+        assertEquals(NodeAccessibilitySmokeActivity.TARGET_TEXT, selectorNode.getString("text"))
 
         if (accessibilityGlobalActionsEnabled()) {
             val back = provider.dispatchAccessibilityRequest("back")
@@ -97,6 +115,13 @@ class NodeAccessibilityRealDeviceSmokeInstrumentationTest {
             assertTrue(home.error?.message.orEmpty(), home.ok)
             assertEquals("true", home.resultJson)
         }
+    }
+
+    private fun selector(text: String): JSONObject {
+        return JSONObject()
+            .put("type", "autojs6.accessibility.selector")
+            .put("version", 1)
+            .put("text", text)
     }
 
     private fun launchSmokeActivity() {

@@ -319,6 +319,14 @@ val nodeJsLiveSensorsGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest#androidProviderEnforcesLiveSubscriptionLimitWhenAvailable",
     "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest#androidProviderReportsUnavailableWhenSensorManagerMissing",
 )
+val nodeJsLiveAccessibilityImageGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeAccessibilityRealDeviceSmokeInstrumentationTest#providerFindsAndClicksControlledUiWhenAccessibilityServiceIsEnabled",
+    "org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest#jsAccessibilitySelectorV2HonorsTimeoutAndCancellation",
+    "org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest#androidAccessibilitySelectorV2RejectsUntilProviderIsConnected",
+    "org.autojs.autojs.engine.NodeImageBridgeExpansionInstrumentationTest#androidImageExpansionRejectsUntilProviderIsConnected",
+    "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest#kotlinOcrLiveProviderRecognizesMlKitImageHandle",
+    "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest#androidOcrRejectsUnknownImageHandleWithoutLeakingResources",
+)
 val nodeJsLongRunningGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
@@ -366,6 +374,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeLiveOcrGate" to nodeJsLiveOcrGateInstrumentationClasses,
     "verifyNodeLiveStorageNotificationsGate" to nodeJsLiveStorageNotificationsGateInstrumentationClasses,
     "verifyNodeLiveSensorsGate" to nodeJsLiveSensorsGateInstrumentationClasses,
+    "verifyNodeLiveAccessibilityImageGate" to nodeJsLiveAccessibilityImageGateInstrumentationClasses,
     "verifyNodeLongRunningGate" to nodeJsLongRunningGateInstrumentationClasses,
     "verifyNodeWorkerGate" to nodeJsWorkerGateInstrumentationClasses,
     "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,
@@ -890,6 +899,9 @@ android {
         if (nodeJsFocusedGateInstrumentationClassArgument != null && !explicitInstrumentationClass) {
             testInstrumentationRunnerArguments["class"] = nodeJsFocusedGateInstrumentationClassArgument
             testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = "sony"
+            if (nodeJsRequestedFocusedGate == "verifyNodeLiveAccessibilityImageGate") {
+                testInstrumentationRunnerArguments["autojs.nodejs.accessibilitySmoke"] = "true"
+            }
         } else if (nodeJsFuzzerReplayRunnerClass != null && !explicitInstrumentationClass) {
             testInstrumentationRunnerArguments["class"] = nodeJsFuzzerReplayRunnerClass
         } else if (nodeJsTestDeviceProfile != null && !explicitInstrumentationClass) {

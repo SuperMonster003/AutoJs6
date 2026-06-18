@@ -156,6 +156,23 @@ events, subscribe/drain/unsubscribe cleanup, sampling interval clamping,
 maximum subscription denial, missing-provider unavailable errors, and destroy
 cleanup for supported accelerometer/gyroscope/light hardware.
 
+Accessibility/image live coverage is an explicit Phase 7 subgate because
+accessibility service authorization and screen capture permission are
+device-state dependent:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveAccessibilityImageGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+A passing accessibility/image gate proves selector timeout/cancellation,
+Android accessibility unavailable rejection, scoped `image.readImage()` to OCR
+to `image.recycle()` behavior, OCR unknown-handle cleanup, and screenshot /
+advanced-image fail-closed policy. When the AutoJs6 accessibility service is
+already enabled on the device, the same gate also proves controlled-Activity
+selector `findOne` and selector `click`; otherwise that live accessibility
+smoke is an explicit skip.
+
 ## Exit Criteria
 
 - `:app:verifyNodeV11BetaGate` passes on Sony with `v1_1_beta`.
