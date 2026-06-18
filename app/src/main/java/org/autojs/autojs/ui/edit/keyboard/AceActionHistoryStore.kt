@@ -54,7 +54,8 @@ object AceActionHistoryStore {
     }
 
     fun getRankedEntries(context: Context): List<Entry> {
-        return readEntries(readRoot(context)).values.sortedWith(ENTRY_COMPARATOR)
+        val root = readRoot(context)
+        return readEntries(root).values.sortedWith(entryComparator(root.optString("lastActionId")))
     }
 
     fun setPinned(context: Context, id: String, pinned: Boolean, now: Long = System.currentTimeMillis()) {
@@ -170,12 +171,12 @@ object AceActionHistoryStore {
         }
     }
 
-    private val ENTRY_COMPARATOR = Comparator<Entry> { left, right ->
+    private fun entryComparator(lastActionId: String?) = Comparator<Entry> { left, right ->
         compareValuesBy(left, right) { if (it.pinned) 0 else 1 }
             .takeIf { it != 0 }
             ?: when {
                 left.pinned && right.pinned -> comparePinned(left, right)
-                else -> compareUnpinned(left, right)
+                else -> compareUnpinned(left, right, lastActionId)
             }
     }
 
@@ -187,8 +188,12 @@ object AceActionHistoryStore {
             ?: compareValues(left.id, right.id)
     }
 
-    private fun compareUnpinned(left: Entry, right: Entry): Int {
-        return compareValues(right.usageCount, left.usageCount)
+    private fun compareUnpinned(left: Entry, right: Entry, lastActionId: String?): Int {
+        val leftIsLast = left.id == lastActionId
+        val rightIsLast = right.id == lastActionId
+        return compareValues(if (leftIsLast) 0 else 1, if (rightIsLast) 0 else 1)
+            .takeIf { it != 0 }
+            ?: compareValues(right.usageCount, left.usageCount)
             .takeIf { it != 0 }
             ?: compareValues(right.lastUsedAt, left.lastUsedAt).takeIf { it != 0 }
             ?: compareValues(left.label, right.label).takeIf { it != 0 }

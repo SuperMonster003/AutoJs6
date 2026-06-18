@@ -796,6 +796,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
 
         inactiveContent.visibility = GONE
+        if (!interactive && mReadOnly && !mEditorLoading && !mLoadingBarRequested) {
+            activeContent.visibility = GONE
+            mInputMethodEnhanceBar.visibility = GONE
+            return
+        }
+        mInputMethodEnhanceBar.visibility = VISIBLE
         activeContent.visibility = if (interactive) VISIBLE else INVISIBLE
     }
 
@@ -1501,19 +1507,19 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun isReadOnlyLockedByIntent(): Boolean = mReadOnlyLockedByIntent
 
-    fun canToggleAceReadOnlyMode(): Boolean {
-        return editor.engineType == EditorEngineType.ACE && !mReadOnlyLockedByIntent && !mEditorLoading
+    fun canToggleReadOnlyMode(): Boolean {
+        return !mReadOnlyLockedByIntent && !mEditorLoading
     }
 
-    fun toggleAceReadOnlyMode() {
-        if (!canToggleAceReadOnlyMode()) {
+    fun toggleReadOnlyMode() {
+        if (!canToggleReadOnlyMode()) {
             return
         }
-        setAceReadOnlyMode(!mReadOnly, toast = true)
+        setSessionReadOnlyMode(!mReadOnly, toast = true)
     }
 
-    private fun setAceReadOnlyMode(readOnly: Boolean, toast: Boolean = false) {
-        if (mReadOnlyLockedByIntent || editor.engineType != EditorEngineType.ACE) {
+    private fun setSessionReadOnlyMode(readOnly: Boolean, toast: Boolean = false) {
+        if (mReadOnlyLockedByIntent) {
             return
         }
         applySessionReadOnly(readOnly)
@@ -2008,6 +2014,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // zh-CN: 历史导航后重新计算保存按钮状态.
         saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
         syncPrimaryMenuState()
+        schedulePrimaryMenuStateSync()
     }
 
     private fun redo() {
@@ -2030,6 +2037,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // 因为已回到基线, 且保存后没有发生直接编辑.
         saveStickyDirty = editor.isTextChanged || mHadDirectEditSinceSave
         syncPrimaryMenuState()
+        schedulePrimaryMenuStateSync()
     }
 
     fun save(): Observable<String> =

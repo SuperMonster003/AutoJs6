@@ -15,7 +15,6 @@ import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher;
-import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType;
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
 import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
@@ -57,26 +56,19 @@ public class EditorMenu {
         if (menu == null) {
             return;
         }
-        prepareAceReadOnlyMenu(menu);
+        prepareReadOnlyMenu(menu);
         setReadOnlySensitiveMenuItemsVisible(menu, !mEditorView.isReadOnly());
     }
 
-    private void setReadOnlySensitiveMenuItemsVisible(Menu menu, boolean visible) {
-        setMenuItemVisible(menu, R.id.action_find_or_replace, visible);
-        setMenuItemVisible(menu, R.id.action_copy_line, visible);
-        setMenuItemVisible(menu, R.id.action_paste, visible);
-        setMenuItemVisible(menu, R.id.action_delete_line, visible);
-        setMenuItemVisible(menu, R.id.action_clear, visible);
-        setMenuItemVisible(menu, R.id.action_comment, visible);
-        setMenuItemVisible(menu, R.id.action_beautify, visible);
-        setMenuItemVisible(menu, R.id.action_jump, visible);
-        setMenuItemVisible(menu, R.id.action_debug, visible);
-        setMenuItemVisible(menu, R.id.action_build_apk, visible);
-        setMenuItemVisible(menu, R.id.action_console, visible);
-        setMenuItemVisible(menu, R.id.action_import_java_class, visible);
-        setMenuItemVisible(menu, R.id.action_file_details, visible);
-        setMenuItemVisible(menu, R.id.action_version_history, visible);
-        setMenuItemVisible(menu, R.id.action_open_by_other_apps, visible);
+    private void setReadOnlySensitiveMenuItemsVisible(Menu menu, boolean mutable) {
+        setMenuItemVisible(menu, R.id.action_find_or_replace, mutable);
+        setMenuItemVisible(menu, R.id.action_paste, mutable);
+        setMenuItemVisible(menu, R.id.action_delete_line, mutable);
+        setMenuItemVisible(menu, R.id.action_clear, mutable);
+        setMenuItemVisible(menu, R.id.action_comment, mutable);
+        setMenuItemVisible(menu, R.id.action_beautify, mutable);
+        setMenuItemVisible(menu, R.id.action_debug, mutable);
+        setMenuItemVisible(menu, R.id.action_import_java_class, mutable);
     }
 
     private void setMenuItemVisible(Menu menu, int itemId, boolean visible) {
@@ -94,14 +86,14 @@ public class EditorMenu {
         return mEditorView.getCommandDispatcher();
     }
 
-    private void prepareAceReadOnlyMenu(Menu menu) {
+    private void prepareReadOnlyMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.action_ace_read_only_mode);
         if (item == null) {
             return;
         }
-        boolean visible = currentEditor().getEngineType() == EditorEngineType.ACE && !mEditorView.isReadOnlyLockedByIntent();
+        boolean visible = !mEditorView.isReadOnlyLockedByIntent();
         item.setVisible(visible);
-        item.setEnabled(mEditorView.canToggleAceReadOnlyMode());
+        item.setEnabled(mEditorView.canToggleReadOnlyMode());
         item.setChecked(mEditorView.isReadOnly());
     }
 
@@ -185,7 +177,7 @@ public class EditorMenu {
             return true;
         }
         if (itemId == R.id.action_ace_read_only_mode) {
-            return tryDoing(mEditorView::toggleAceReadOnlyMode);
+            return tryDoing(mEditorView::toggleReadOnlyMode);
         }
         if (itemId == R.id.action_copy_ace_diagnostics) {
             return tryDoing(mEditorView::copyAceDiagnosticsToClipboard);

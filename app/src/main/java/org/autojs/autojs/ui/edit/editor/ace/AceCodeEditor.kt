@@ -502,6 +502,9 @@ class AceCodeEditor @JvmOverloads constructor(
     fun setReadOnly(readOnly: Boolean) {
         this.readOnly = readOnly
         selectionActionMode?.invalidate()
+        if (readOnly) {
+            hideSoftInput()
+        }
         invokeAce("setReadOnly", readOnly.toString())
     }
 
@@ -983,6 +986,10 @@ class AceCodeEditor @JvmOverloads constructor(
     }
 
     internal fun showSoftInput() {
+        if (readOnly) {
+            eventHistory.record("ime_show_blocked", "readOnly=true")
+            return
+        }
         postToMain {
             val now = SystemClock.uptimeMillis()
             val decision = imeController.requestShow(now)

@@ -15,12 +15,12 @@
 
     <string name="app_name" translatable="false">AutoJs6 ACE</string>
     <string name="app_name_qq" translatable="false">QQ</string>
-    <string name="text_ace_editor_debug">ACE editor debug</string>
-    <string name="text_ace_editor_debug_description">Open an isolated ACE WebView editor test page</string>
+    <string name="text_ace_editor_debug">Ace editor debug</string>
+    <string name="text_ace_editor_debug_description">Open an isolated Ace WebView editor test page</string>
     <string name="text_ace_editor_debug_status">%1$s | lines %2$d | cursor %3$d:%4$d | breakpoints %5$d | dirty %6$s</string>
-    <string name="text_ace_editor_debug_status_loading">Loading ACE editor...</string>
-    <string name="text_ace_editor_debug_text_length">ACE text length: %1$d</string>
-    <string name="text_ace_diagnostics_copied">ACE diagnostics copied to clipboard</string>
+    <string name="text_ace_editor_debug_status_loading">Loading Ace editor...</string>
+    <string name="text_ace_editor_debug_text_length">Ace text length: %1$d</string>
+    <string name="text_ace_diagnostics_copied">Ace diagnostics copied to clipboard</string>
     <string name="text_ace_get_text">Get text</string>
     <string name="text_ace_ime_stress">IME stress</string>
     <string name="text_ace_ime_stress_done">IME stress finished: %1$d cycles</string>
@@ -492,9 +492,9 @@
     <string name="entry_editor_pinch_to_zoom_change_text_size">Change text size</string>
     <string name="entry_editor_pinch_to_zoom_disable">Disable</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
-    <string name="entry_editor_engine_ace">Web editor (experimental)</string>
-    <string name="entry_editor_engine_native">Native editor</string>
-    <string name="entry_editor_word_wrap_indent_style_classic">Classic flush continuation</string>
+    <string name="entry_editor_engine_ace">Ace</string>
+    <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_word_wrap_indent_style_classic">Flush continuation</string>
     <string name="entry_editor_word_wrap_indent_style_continuation">Continuation indent</string>
     <string name="entry_editor_word_wrap_indent_style_default">Default</string>
     <string name="entry_ace_editor_font_jetbrains_mono">JetBrains Mono</string>
@@ -679,7 +679,7 @@
     <string name="error_timeout_while_querying_plugin_info">Timeout while querying %1$s plugin info.</string>
     <string name="error_unable_to_display_file_details_as_current_file_path_is_unknown">Current file path is unknown, unable to display file details</string>
     <string name="error_unable_to_display_version_history_as_current_file_path_is_unknown">Current file path is unknown, unable to display version history</string>
-    <string name="error_ace_editor_unavailable">ACE editor is unavailable; native editor is still active</string>
+    <string name="error_ace_editor_unavailable">Ace editor is unavailable; JsDroidEditor is still active</string>
     <string name="error_unable_to_open_with_other_apps_as_current_file_path_is_unknown">Current file path is unknown, unable to open with other apps</string>
     <string name="error_unable_to_package_application_as_current_file_path_is_unknown">Current file path is unknown, unable to package application</string>
     <string name="error_unable_to_save_file_as_current_file_path_is_unknown">Current file path is unknown, unable to save file</string>
@@ -992,7 +992,7 @@
     <string name="text_content">Content</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copy</string>
-    <string name="text_copy_ace_diagnostics">Copy ACE diagnostics</string>
+    <string name="text_copy_ace_diagnostics">Copy Ace diagnostics</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_command">Copy cmd</string>
@@ -1095,19 +1095,19 @@
     <string name="text_ace_line_numbers_enabled">Line numbers</string>
     <string name="text_editor_breakpoint_markers_enabled">Breakpoint markers</string>
     <string name="text_editor_fold_markers_enabled">Code folding markers</string>
-    <string name="text_ace_action_favorites">ACE action favorites</string>
+    <string name="text_ace_action_favorites">Action favorites</string>
     <string name="text_ace_action_history_empty">No editor action history</string>
     <string name="text_ace_action_pin">Pin</string>
     <string name="text_ace_action_pinned">Pinned</string>
     <string name="text_ace_action_unpin">Unpin</string>
-    <string name="text_ace_action_clear_confirm">Clear all ACE action history?</string>
-    <string name="text_ace_action_delete_confirm" formatted="true">Delete \"%1$s\" from ACE action history?</string>
+    <string name="text_ace_action_clear_confirm">Clear all editor action history?</string>
+    <string name="text_ace_action_delete_confirm" formatted="true">Delete \"%1$s\" from editor action history?</string>
     <string name="text_ace_no_last_action">No last editor action</string>
     <string name="text_editor_engine">Editor engine</string>
     <string name="text_editor_engine_switched" formatted="true">Editor engine switched to %s</string>
     <string name="text_editor_engine_switched_with_undo_notice" formatted="true">Editor engine switched to %s. Undo/redo history is not preserved across editor engines</string>
-    <string name="text_ace_editor_fallback_native" formatted="true">ACE editor failed (%1$s); switched to native editor. Copy ACE diagnostics from the More menu for details</string>
-    <string name="text_ace_large_file_uses_native_editor">ACE editor is routed to the native editor by the active fallback policy</string>
+    <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
+    <string name="text_ace_large_file_uses_native_editor">Ace editor is routed to JsDroidEditor by the active fallback policy</string>
     <string name="text_ace_word_wrap_enabled">Word wrap</string>
     <string name="text_editor_word_wrap_indent_style">Wrap indentation</string>
 
@@ -1807,12 +1807,12 @@
     <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented.</string>
     <string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>
     <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
-    <string name="description_editor_engine_preference">The Web editor is the default. Native remains available as a fallback and can be selected explicitly.</string>
+    <string name="description_editor_engine_preference">Ace is the default editor engine. JsDroidEditor remains available as a fallback and can be selected explicitly.</string>
     <string name="description_ace_editor_font_preference">Choose the editor font. JetBrains Mono is the default; Source Code Pro and system monospace are available fallbacks.</string>
     <string name="description_ace_line_numbers_enabled_preference">Show or hide editor gutter line numbers. Folding, breakpoints, and gutter layout remain available.</string>
     <string name="description_editor_breakpoint_markers_enabled_preference">Show or hide breakpoint markers in the editor gutter. Breakpoint data and debug menu actions remain available.</string>
-    <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. Native editor has no fold-marker surface.</string>
+    <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>
     <string name="description_ace_lsp_enabled_preference">Experimental LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, the editor keeps using static completion.</string>
     <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
-    <string name="description_editor_word_wrap_indent_style_preference">Continuation indent keeps wrapped visual lines aligned with the original indentation. Classic flush continuation starts wrapped visual lines at the viewport edge.</string>
+    <string name="description_editor_word_wrap_indent_style_preference">Continuation indent keeps wrapped visual lines aligned with the original indentation. Flush continuation starts wrapped visual lines at the viewport edge.</string>
 </resources>

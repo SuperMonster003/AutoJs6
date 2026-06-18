@@ -174,7 +174,7 @@ object AceActionFavoritesDialog {
             holder.subtitle.visibility = View.VISIBLE
             holder.subtitle.text = subtitle(entry)
             holder.icon.setImageResource(
-                if (entry.pinned) R.drawable.ic_ali_pin_to_left else R.drawable.ic_ali_fx,
+                if (entry.pinned) R.drawable.ic_thumbtacks else R.drawable.ic_ali_fx,
             )
             holder.icon.imageTintList = ColorStateList.valueOf(context.getColor(R.color.day_night))
             holder.itemView.setOnClickListener {
@@ -305,7 +305,7 @@ object AceActionFavoritesDialog {
                     itemView = itemView,
                     left = itemView.left,
                     right = itemView.left + dX.toInt(),
-                    iconRes = R.drawable.ic_ali_pin_to_left,
+                    iconRes = R.drawable.ic_thumbtacks,
                     label = pinLabel(viewHolder.bindingAdapterPosition),
                     color = Color.rgb(46, 125, 50),
                     alignStart = true,

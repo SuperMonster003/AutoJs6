@@ -69,7 +69,7 @@ object AceShortcutPanel {
     )
 
     private val BOTTOM_ROW = listOf(
-        command("★", Command.ActionFavorites, R.drawable.ic_star_black_48dp),
+        command("☆", Command.ActionFavorites, R.drawable.ic_star_border_black_48dp),
         command("Left", Command.MoveLeft, R.drawable.ic_keyboard_arrow_left_black_48dp),
         command("Down", Command.MoveDown, R.drawable.ic_keyboard_arrow_down_black_48dp),
         command("Right", Command.MoveRight, R.drawable.ic_keyboard_arrow_right_black_48dp),

@@ -495,7 +495,7 @@ assertIncludes(codeCompletionBar, "setFixedItemSizeDp", "completion bar fixed it
 
 assertIncludes(aceShortcutPanel, 'command("ESC", Command.Escape)', "ACE shortcut ESC key");
 assertIncludes(aceShortcutPanel, 'command("TAB", Command.Tab)', "ACE shortcut TAB key");
-assertIncludes(aceShortcutPanel, 'command("★", Command.ActionFavorites, R.drawable.ic_star_black_48dp)', "ACE shortcut favorites star entry");
+assertIncludes(aceShortcutPanel, 'command("☆", Command.ActionFavorites, R.drawable.ic_star_border_black_48dp)', "ACE shortcut favorites hollow star entry");
 assertIncludes(aceShortcutPanel, 'R.drawable.ic_keyboard_arrow_up_black_48dp', "ACE shortcut arrow-up drawable");
 assertIncludes(aceShortcutPanel, 'R.drawable.ic_keyboard_arrow_down_black_48dp', "ACE shortcut arrow-down drawable");
 assertIncludes(aceShortcutPanel, 'R.drawable.ic_keyboard_arrow_left_black_48dp', "ACE shortcut arrow-left drawable");
@@ -507,6 +507,7 @@ assertIncludes(aceShortcutPanel, "fun actionById", "ACE shortcut stable action l
 assertIncludes(aceActionHistoryStore, "fun record(", "ACE action history record API");
 assertIncludes(aceActionHistoryStore, "fun getRankedEntries", "ACE action history ranking API");
 assertIncludes(aceActionHistoryStore, "fun getLastActionId", "ACE action history last action API");
+assertIncludes(aceActionHistoryStore, 'entryComparator(root.optString("lastActionId"))', "ACE action favorites latest-action ranking");
 assertIncludes(aceActionHistoryStore, "fun applyFavoritesOrder", "ACE action favorites order API");
 assertIncludes(aceActionHistoryStore, "usageCount", "ACE action history frequency field");
 assertIncludes(aceActionHistoryStore, "lastUsedAt", "ACE action history recency field");
@@ -514,6 +515,7 @@ assertIncludes(aceActionHistoryStore, "manualOrder", "ACE action history manual 
 
 assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT", "ACE action favorites swipe gestures");
 assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.UP or ItemTouchHelper.DOWN", "ACE action favorites drag reorder");
+assertIncludes(aceActionFavoritesDialog, "R.drawable.ic_thumbtacks", "ACE action favorites thumbtack icon");
 assertIncludes(aceActionFavoritesDialog, "confirmDelete", "ACE action favorites delete confirmation");
 assertIncludes(aceActionFavoritesDialog, "confirmClear", "ACE action favorites clear confirmation");
 assertIncludes(aceActionFavoritesDialog, "togglePinned", "ACE action favorites pin toggle");
