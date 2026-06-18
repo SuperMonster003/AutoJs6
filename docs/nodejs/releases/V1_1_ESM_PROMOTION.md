@@ -46,16 +46,11 @@ Result after source-map offset fix:
 22 tests, 0 failures, 0 errors, 0 skipped
 ```
 
-Packaged ESM and dynamic import local diagnostics:
+Packaged ESM and dynamic import local focused gate:
 
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
-.\gradlew.bat --console=plain :app:assembleInrtDebug "-Pautojs.nodejs.esm.experimental=true" "-Pautojs.nodejs.dynamicImport.local=true" "-Pautojs.nodejs.dynamicImport.experimental=true"
-adb -s QV710AF65F push app\build\outputs\apk\inrt\debug\inrt-v6.7.1-alpha4-universal.apk /data/local/tmp/autojs6-inrt-debug-template.apk
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest `
-  "-Pautojs.nodejs.identity=production" `
-  "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunEsmDiagnosticsEmbeddedNodePackagedApk,org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk" `
-  "-Pandroid.testInstrumentationRunnerArguments.autojs.embeddedNode.packagedSmokeTemplateOverride=true"
+.\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.identity=production" "-Pautojs.embeddedNode.expectedAbis=arm64-v8a"
 ```
 
 Result:

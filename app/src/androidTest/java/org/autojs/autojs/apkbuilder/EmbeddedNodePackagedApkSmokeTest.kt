@@ -16,6 +16,7 @@ import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor
 import org.autojs.autojs.script.NodeProjectLaunchKind
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -9014,10 +9015,6 @@ class EmbeddedNodePackagedApkSmokeTest {
             "Embedded Node.js packaged partial ESM smoke requires Node Profile v1.1 ESM to be enabled.",
             BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         )
-        assumeTrue(
-            "Embedded Node.js packaged partial ESM smoke requires a refreshed inrt template override built with ESM enabled.",
-            isPackagedSmokeTemplateOverrideEnabled(),
-        )
 
         assumePackagedSmokeTemplateAvailable("Packaged partial ESM install-and-run smoke")
 
@@ -9028,32 +9025,76 @@ class EmbeddedNodePackagedApkSmokeTest {
             packageName = EXPERIMENTAL_ESM_PACKAGE_NAME,
             mainScriptName = "main.mjs",
             mainScript = """
+                import path from "path";
+                import { createRequire } from "module";
                 import dep, { named, explode } from "./lib.mjs";
                 import legacy from "./legacy.cjs";
+                import typed, { filenameOk as typedFilenameOk } from "./typed-entry.js";
+
+                const localRequire = createRequire(__filename);
 
                 const value = 42;
                 const suffix = "esm-v1";
                 const awaited = await Promise.resolve("awaited");
+                const builtinOk = path.basename("/safe/project/main.mjs") === "main.mjs";
+                const fullPathOk = path.isAbsolute(__filename) && __filename.endsWith("/main.mjs");
+                const requireLegacy = localRequire("./legacy.cjs");
                 let stackOk = false;
                 try {
                   explode();
                 } catch (error) {
                   stackOk = String(error && error.stack || "").includes("lib.mjs");
                 }
-                const graph = dep.value === "esm-lib" && named === "named" && legacy.value === "legacy";
-                const ready = value === 42 && suffix === "esm-v1" && awaited === "awaited" && graph && stackOk;
+                let childProcessDenied = false;
+                try {
+                  localRequire("child_process");
+                } catch (error) {
+                  childProcessDenied =
+                    error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" ||
+                    error.code === "ERR_AUTOJS6_BUILTIN_DISABLED" ||
+                    error.autojs6Code === "ERR_AUTOJS6_BUILTIN_DISABLED";
+                }
+                let fsEscapeDenied = false;
+                try {
+                  localRequire("fs").readFileSync("../outside.txt", "utf8");
+                } catch (error) {
+                  fsEscapeDenied = String(error && error.message || "").includes("escapes");
+                }
+                const graph = dep.value === "esm-lib" &&
+                  named === "named" &&
+                  legacy.value === "legacy" &&
+                  requireLegacy.value === "legacy" &&
+                  typed.value === "typed-module" &&
+                  typedFilenameOk === true;
+                const security = childProcessDenied && fsEscapeDenied;
+                const ready = value === 42 && suffix === "esm-v1" && awaited === "awaited" &&
+                  builtinOk && fullPathOk && graph && security && stackOk;
 
                 console.log("packaged.experimental_esm.ready=" + ready);
                 console.log("packaged.experimental_esm.entry=" + (value === 42 && suffix === "esm-v1"));
                 console.log("packaged.experimental_esm.tla=" + (awaited === "awaited"));
+                console.log("packaged.experimental_esm.builtin=" + builtinOk);
+                console.log("packaged.experimental_esm.full_path=" + fullPathOk);
+                console.log("packaged.experimental_esm.type_module=" + (typed.value === "typed-module" && typedFilenameOk === true));
                 console.log("packaged.experimental_esm.graph=" + graph);
+                console.log("packaged.experimental_esm.security=" + security);
                 console.log("packaged.experimental_esm.stack_source=" + stackOk);
             """.trimIndent() + "\n",
             extraFiles = mapOf(
+                NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAME to packagedRuntimeCompatibilityDescriptor(
+                    esmPartial = true,
+                    dynamicImportLocal = false,
+                ),
+                "package.json" to """{"name":"packaged-esm-smoke","version":"1.0.0","type":"module"}""" + "\n",
                 "lib.mjs" to """
                     export default { value: "esm-lib" };
                     export const named = "named";
                     export function explode() { throw new Error("packaged esm source"); }
+                """.trimIndent() + "\n",
+                "typed-entry.js" to """
+                    const filenameOk = typeof __filename === "string" && __filename.endsWith("/typed-entry.js");
+                    export default { value: "typed-module" };
+                    export { filenameOk };
                 """.trimIndent() + "\n",
                 "legacy.cjs" to """module.exports = { value: "legacy" };""" + "\n",
             ),
@@ -9073,10 +9114,6 @@ class EmbeddedNodePackagedApkSmokeTest {
             "Embedded Node.js packaged dynamic import local install-and-run smoke requires Node Profile v1.1 dynamic import local support.",
             BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED && BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
         )
-        assumeTrue(
-            "Embedded Node.js packaged dynamic import local install-and-run smoke requires a refreshed inrt template override built with local dynamic import enabled.",
-            isPackagedSmokeTemplateOverrideEnabled(),
-        )
 
         assumePackagedSmokeTemplateAvailable("Packaged dynamic import local install-and-run smoke")
 
@@ -9090,24 +9127,58 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "nodejs";
                 return Promise.all([
                   import("./dynamic-target.mjs"),
-                  import("./dynamic-legacy.cjs")
-                ]).then(([esm, cjs]) => {
+                  import("./dynamic-legacy.cjs"),
+                  import("./dynamic-type-module.js"),
+                  import("../../outside.mjs").then(() => false, (error) => {
+                    return error.code === "ERR_AUTOJS6_FS_PATH_ESCAPE" ||
+                      String(error && error.message || "").includes("escapes") ||
+                      String(error && error.message || "").includes("rejects");
+                  }),
+                  import("node:child_process").then(() => false, (error) => {
+                    return error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" ||
+                      error.code === "ERR_AUTOJS6_BUILTIN_DISABLED" ||
+                      error.autojs6Code === "ERR_AUTOJS6_BUILTIN_DISABLED";
+                  })
+                ]).then(([esm, cjs, typed, pathEscapeDenied, childProcessDenied]) => {
                   const mjsOk = esm.default.value === "dynamic-esm" && esm.named === "named";
                   const cjsOk = cjs.default.value === "dynamic-cjs";
-                  console.log("packaged.dynamic_import.ready=" + (mjsOk && cjsOk));
+                  const typedOk = typed.default.value === "dynamic-typed";
+                  const fullPathOk = esm.filenameOk === true && cjs.default.filenameOk === true && typed.filenameOk === true;
+                  const securityOk = pathEscapeDenied && childProcessDenied;
+                  console.log("packaged.dynamic_import.ready=" + (mjsOk && cjsOk && typedOk && fullPathOk && securityOk));
                   console.log("packaged.dynamic_import.mjs=" + mjsOk);
                   console.log("packaged.dynamic_import.cjs=" + cjsOk);
+                  console.log("packaged.dynamic_import.type_module=" + typedOk);
+                  console.log("packaged.dynamic_import.full_path=" + fullPathOk);
+                  console.log("packaged.dynamic_import.child_process_denied=" + childProcessDenied);
+                  console.log("packaged.dynamic_import.path_escape_denied=" + pathEscapeDenied);
+                  console.log("packaged.dynamic_import.security=" + securityOk);
                 });
             """.trimIndent() + "\n",
             extraFiles = mapOf(
+                NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAME to packagedRuntimeCompatibilityDescriptor(
+                    esmPartial = true,
+                    dynamicImportLocal = true,
+                ),
+                "package.json" to """{"name":"packaged-dynamic-import-smoke","version":"1.0.0","type":"module"}""" + "\n",
                 "dynamic-target.mjs" to """
                     export default { value: "dynamic-esm" };
                     export const named = "named";
+                    export const filenameOk = typeof __filename === "string" && __filename.endsWith("/dynamic-target.mjs");
                 """.trimIndent() + "\n",
-                "dynamic-legacy.cjs" to """module.exports = { value: "dynamic-cjs" };""" + "\n",
+                "dynamic-legacy.cjs" to """
+                    module.exports = {
+                      value: "dynamic-cjs",
+                      filenameOk: typeof __filename === "string" && __filename.endsWith("/dynamic-legacy.cjs")
+                    };
+                """.trimIndent() + "\n",
+                "dynamic-type-module.js" to """
+                    const filenameOk = typeof __filename === "string" && __filename.endsWith("/dynamic-type-module.js");
+                    export default { value: "dynamic-typed" };
+                    export { filenameOk };
+                """.trimIndent() + "\n",
             ),
             runtimeMarkers = DYNAMIC_IMPORT_DIAGNOSTICS_MARKERS,
-            requiredTemplateDexMarkers = DYNAMIC_IMPORT_TEMPLATE_DEX_MARKERS,
         )
         assertInstallAndRunPackagedDynamicImportDiagnosticsSmoke(outputApk)
     }
@@ -9165,6 +9236,20 @@ class EmbeddedNodePackagedApkSmokeTest {
             val outputApk = buildPackagedLaunchFailureApk(failureCase)
             assertInstallAndRunPackagedLaunchFailureSmoke(outputApk, failureCase)
         }
+    }
+
+    @Test
+    fun installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged runtime compatibility descriptor mismatch smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged runtime compatibility descriptor mismatch install-and-run smoke")
+
+        val failureCase = packagedRuntimeCompatibilityDescriptorMismatchFailureCase()
+        val outputApk = buildPackagedLaunchFailureApk(failureCase)
+        assertInstallAndRunPackagedLaunchFailureSmoke(outputApk, failureCase)
     }
 
     @Test
@@ -9244,6 +9329,44 @@ class EmbeddedNodePackagedApkSmokeTest {
         val env: Map<String, String> = emptyMap(),
         val timeoutMs: Long? = null,
     )
+
+    private fun packagedRuntimeCompatibilityDescriptorMismatchFailureCase(): PackagedLaunchFailureCase {
+        val secretEnv = JSONObject().put(PACKAGED_LAUNCH_FAILURE_SECRET_KEY, PACKAGED_LAUNCH_FAILURE_SECRET_VALUE)
+        val descriptor = JSONObject()
+            .put("launchKind", NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue)
+            .put("env", secretEnv)
+            .toString()
+        return PackagedLaunchFailureCase(
+            id = "runtime-descriptor-profile-mismatch",
+            projectName = "PackagedNodeRuntimeDescriptorProfileMismatchFailureSmoke",
+            packageName = "org.autojs6.packaged.node.failure.runtimedescriptorprofilemismatch",
+            outputApkName = "PackagedNodeRuntimeDescriptorProfileMismatchFailureSmoke_v1.0.0.apk",
+            descriptor = descriptor,
+            extraFiles = mapOf(
+                NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAME to JSONObject()
+                    .put("schema", NodeProjectRuntimeCompatibilityDescriptor.SCHEMA)
+                    .put("nodeProfile", "node-profile-v9.9")
+                    .put("runtimeBackend", "embedded")
+                    .put(
+                        "features",
+                        JSONObject()
+                            .put("esmPartial", true)
+                            .put("dynamicImportLocal", true),
+                    )
+                    .toString() + "\n",
+            ),
+            requiredEntries = listOf(NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAME),
+            requiredLogMarkers = listOf(
+                NodeProjectLaunchDiagnostics.LAUNCH_FAILURE_MARKER,
+                "stage=descriptor",
+                "requestReady=false",
+                "Unsupported packaged Node runtime compatibility descriptor profile: node-profile-v9.9",
+                "errorClass=IllegalArgumentException",
+            ),
+            verifyDescriptor = false,
+            descriptorInput = true,
+        )
+    }
 
     private fun packagedLaunchFailureCases(): List<PackagedLaunchFailureCase> {
         val projectEntryLaunchKind = NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue
@@ -13895,7 +14018,11 @@ $nodeConfigJson
             "packaged.experimental_esm.ready=true",
             "packaged.experimental_esm.entry=true",
             "packaged.experimental_esm.tla=true",
+            "packaged.experimental_esm.builtin=true",
+            "packaged.experimental_esm.full_path=true",
+            "packaged.experimental_esm.type_module=true",
             "packaged.experimental_esm.graph=true",
+            "packaged.experimental_esm.security=true",
             "packaged.experimental_esm.stack_source=true",
         )
         private val EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS = listOf(
@@ -13905,6 +14032,11 @@ $nodeConfigJson
             "packaged.dynamic_import.ready=true",
             "packaged.dynamic_import.mjs=true",
             "packaged.dynamic_import.cjs=true",
+            "packaged.dynamic_import.type_module=true",
+            "packaged.dynamic_import.full_path=true",
+            "packaged.dynamic_import.child_process_denied=true",
+            "packaged.dynamic_import.path_escape_denied=true",
+            "packaged.dynamic_import.security=true",
         )
         private val DYNAMIC_IMPORT_TEMPLATE_DEX_MARKERS = listOf(
             "dynamicImportLocalEnabled=",
@@ -13943,6 +14075,31 @@ $nodeConfigJson
         private const val ENRICHED_INRT_LAUNCH_SOURCE_DEX_MARKER = "requestLaunchKind="
         private const val PACKAGED_MODULE_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
         private const val PACKAGED_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
+    }
+
+    private fun packagedRuntimeCompatibilityDescriptor(
+        esmPartial: Boolean,
+        dynamicImportLocal: Boolean,
+    ): String {
+        return JSONObject()
+            .put("schema", NodeProjectRuntimeCompatibilityDescriptor.SCHEMA)
+            .put("nodeProfile", NodeProjectRuntimeCompatibilityDescriptor.NODE_PROFILE_V1_1)
+            .put("runtimeBackend", "embedded")
+            .put(
+                "features",
+                JSONObject()
+                    .put("esmPartial", esmPartial)
+                    .put("dynamicImportLocal", dynamicImportLocal)
+                    .put("nativeAddon", false)
+                    .put("unrestrictedChildProcess", false)
+                    .put("rawNetwork", false)
+                    .put("processBinding", false)
+                    .put("processDlopen", false)
+                    .put("unrestrictedJavaInterop", false)
+                    .put("unrestrictedVm", false)
+                    .put("inspector", false),
+            )
+            .toString() + "\n"
     }
 
     private fun readZipText(zip: ZipFile, entryName: String): String =

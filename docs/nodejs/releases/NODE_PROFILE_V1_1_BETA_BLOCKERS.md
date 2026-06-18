@@ -13,32 +13,32 @@ or scoped-fs relaxation.
 
 ## V11-BETA-PACKAGED-ESM-TEMPLATE
 
-Status: deferred
+Status: resolved
 
-RC decision: defer unless the refreshed inrt template becomes the default
-packaged template before RC.
+RC decision: proceed; the refreshed production inrt template is the default
+packaged template for this focused gate.
 
 Surface: packaged `.mjs` entry and local dynamic import install-and-run smokes.
 
-Current state: default beta gate covers main-app ESM and packaged v1.1 bridge
-smoke, but packaged `.mjs` and local dynamic import install-and-run smokes still
-require an explicit refreshed inrt template override.
+Current state: packaged `.mjs`, package `type=module`, local dynamic import,
+source-name stack, disabled builtin denial, scoped escape denial, and runtime
+compatibility descriptor mismatch are covered by the focused production-template
+gate.
 
-Release impact: v1.1 may document ESM as partial only if packaged ESM template
-status is either made default-ready or explicitly marked as a packaged subgate.
+Release impact: v1.1 may document packaged ESM and local dynamic import as
+partial capabilities guarded by `:app:verifyNodePackagedEsmGate`.
 
 Unblock condition:
 
-- refreshed inrt template is default and both packaged ESM subgates pass without
-  `autojs.embeddedNode.packagedSmoke.templateOverride`, or
-- release notes explicitly state packaged ESM/dynamic import require the
-  template-override subgate.
+- refreshed inrt template is default and packaged ESM/dynamic import focused
+  gate passes without a packaged smoke template override.
 
 Validation:
 
+- `:app:verifyNodePackagedEsmGate`
 - `EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk`
 - `EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk`
-- `docs/nodejs/reports/v1.1-beta/README.md`
+- `EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk`
 
 ## V11-BETA-NETWORK-LIVE-PROVIDER
 

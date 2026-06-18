@@ -16,9 +16,11 @@ summary and blocker decisions are machine-verifiable.
   the validated commit.
 - `app/build/reports/nodejs/v1.1-beta-blockers.json` reports all required beta
   blockers.
-- All beta blocker entries are `deferred` or `closed`.
+- All beta blocker entries are `resolved`, `deferred`, or `closed`.
 - Packaged host aggregate reports success, diagnostics, template, and
   moduleSources readiness.
+- `:app:verifyNodePackagedEsmGate` passes on Sony against the production
+  packaged template.
 - No release-forbidden experimental flag is required by the default beta gate.
 
 ## RC Surface
@@ -39,8 +41,6 @@ The RC surface is the v1.1 beta surface after blocker decisions:
 
 The following surfaces are intentionally outside the v1.1 RC promoted surface:
 
-- packaged `.mjs` and local dynamic import install-and-run smokes without the
-  refreshed inrt template override,
 - controlled network and WebSocket live providers,
 - Activity-owned UI provider,
 - floaty/overlay,

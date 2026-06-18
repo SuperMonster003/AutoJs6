@@ -406,8 +406,8 @@ feature's provider status:
   covered
 - packaged v1.1 bridge smoke covers controlled `fetch`, OCR, storage, UI, and
   `work_manager` through fake transport
-- packaged `.mjs` and local dynamic import smokes still require a refreshed inrt
-  template override until that template becomes the default
+- packaged `.mjs`, package `type=module`, and local dynamic import smokes run
+  against the default production inrt template through `:app:verifyNodePackagedEsmGate`
 - packaged plugins and long-running service mode are not enabled
 
 ## See Also

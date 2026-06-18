@@ -630,15 +630,23 @@ Current ESM partial focused instrumentation:
 
 This suite verifies that `.mjs` can still be rejected by an explicit ESM-off diagnostic request, then covers default partial `.mjs` entry execution, local static `.mjs` imports, top-level await, package `type=module` entry routing, scoped import escape denial, ESM default import from CommonJS, ESM import of supported builtins, disabled builtin rejection from ESM, CJS `require()` of ESM rejection with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`, package `exports`/`imports` condition selection with resolver trace for both ESM and CommonJS importers, `.mjs` package targets, nested package imports, self-reference, null blocking, unsafe target denial, explicit dynamic import off rejection, local dynamic import of `.mjs` and CommonJS modules, allowed builtin dynamic import, disabled builtin dynamic import denial, package dynamic import with ESM conditions, dynamic import scoped escape denial, and URL/absolute dynamic import rejection.
 
-Packaged `.mjs` and dynamic import local smokes require a refreshed inrt template built with ESM and local dynamic import enabled:
+Packaged `.mjs`, `package.json` `type=module`, and dynamic import local smokes
+run through the focused packaged ESM gate with the default production inrt
+template:
 
 ```powershell
-.\gradlew.bat --console=plain :app:assembleInrtDebug :app:assembleAppDebug :app:assembleAppDebugAndroidTest "-Pautojs.nodejs.esm.experimental=true" "-Pautojs.nodejs.dynamicImport.local=true" "-Pautojs.nodejs.dynamicImport.experimental=true"
-adb push app\build\outputs\apk\inrt\debug\inrt-v6.7.1-alpha4-universal.apk /sdcard/Download/AutoJs6/embedded-node-template/inrt-debug-template.apk
-adb shell am instrument -w -r -e class org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk,org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk -e autojs.embeddedNode.packagedSmokeTemplateOverride true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.identity=production" "-Pautojs.embeddedNode.expectedAbis=arm64-v8a"
 ```
 
-With ESM partial enabled by default, the packaged ESM diagnostics smoke asserts the CommonJS-to-ESM boundary with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`. The packaged dynamic import smoke now asserts local-only success through encrypted runtime module sources for a `.mjs` target and a CommonJS target. The packaged `.mjs` and dynamic import smokes intentionally require a refreshed inrt template override because older templates may still carry default-off ESM or dynamic import wiring. The current packaged ESM smoke covers a `.mjs` entry importing a local `.mjs` dependency and a local CommonJS dependency through encrypted runtime module sources, plus source-name stack shape. Broader dynamic import package graphs are still design-gated follow-ups.
+With ESM partial enabled by default, the packaged ESM diagnostics smoke asserts
+the CommonJS-to-ESM boundary with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`. The
+focused packaged ESM gate covers a `.mjs` entry, package `type=module` `.js`
+modules, local static imports, selected builtin imports, ESM-to-CJS interop,
+top-level await, source-name stack shape, scoped escape denial, disabled builtin
+denial, local dynamic import of `.mjs`, CommonJS, and type-module targets, and
+runtime compatibility descriptor mismatch before script execution. Broader
+dynamic import package graphs remain design-gated follow-ups.
 
 Current GA promotion evaluation: `docs/nodejs/reports/ESM_EXPERIMENTAL_EVALUATION.md`.
 Current v1.1 promotion evaluation: `docs/nodejs/releases/V1_1_ESM_PROMOTION.md`.

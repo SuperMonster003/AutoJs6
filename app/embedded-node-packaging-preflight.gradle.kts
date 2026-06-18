@@ -3567,6 +3567,19 @@ val verifyNodeNightlyGate = tasks.register("verifyNodeNightlyGate") {
     }
 }
 
+val verifyNodePackagedEsmGate = tasks.register("verifyNodePackagedEsmGate") {
+    group = "verification"
+    description = "Runs the focused Node Profile v1.1 packaged ESM/dynamic import APK gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
     group = "verification"
     description = "Runs the Embedded Node release gate with RC host checks, desktop differential, and explicit heavy device profile."

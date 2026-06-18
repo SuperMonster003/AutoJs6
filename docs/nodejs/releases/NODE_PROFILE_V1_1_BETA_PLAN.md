@@ -14,8 +14,8 @@ experimental or blocked features from leaking into a release candidate.
   `QV710AF65F`.
 - ESM, npm corpus, controlled network, WebSocket, bridge expansion, packaged
   v1.1 smoke, security corpus, and bridge resource stress have alpha coverage.
-- Packaged `.mjs` and local dynamic import install-and-run smokes still require
-  a refreshed inrt template override.
+- Packaged `.mjs`, package `type=module`, and local dynamic import install-and-run
+  smokes have a focused production-template gate.
 
 ## Beta Objectives
 
@@ -43,11 +43,11 @@ experimental or blocked features from leaking into a release candidate.
 
 | Track | Beta target | Required evidence |
 | --- | --- | --- |
-| ESM and dynamic import | stay `partial` | default `.mjs`, `type=module`, static import, local dynamic import, builtin allowlist, resolver denial paths, packaged template subgates |
+| ESM and dynamic import | stay `partial` | default `.mjs`, `type=module`, static import, local dynamic import, builtin allowlist, resolver denial paths, packaged focused gate |
 | npm/builtins | stay `partial` | real npm corpus, desktop differential report, Buffer/core/stream/zlib/Web Streams gates |
 | controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial |
 | AutoJs bridge modules | stay `partial` or `protocol-gated partial` | capability denial, fake provider behavior, Android fail-closed behavior, TypeScript declarations, resource cleanup |
-| packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, explicit template-override subgates for packaged ESM/dynamic import |
+| packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, focused packaged ESM/dynamic import gate |
 | security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, or bridge bypass |
 | DX/tooling | required | error catalog, project wizard, TypeScript declarations, doctor/compatibility reports |
 | blocker register | required | [NODE_PROFILE_V1_1_BETA_BLOCKERS.md](NODE_PROFILE_V1_1_BETA_BLOCKERS.md), verified by `:app:verifyNodeV11BetaBlockerRegister` |
@@ -80,19 +80,22 @@ decision entry before release-candidate planning.
 
 ## Explicit Subgates
 
-The following smokes remain outside the default beta profile until the refreshed
-inrt template is the default packaged template:
+The packaged ESM/dynamic import smokes remain outside the default beta profile
+for feedback-time reasons, but they now run as a focused production-template
+gate:
 
-- `EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk`
-- `EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk`
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.identity=production" "-Pautojs.embeddedNode.expectedAbis=arm64-v8a"
+```
 
-Run them only with a refreshed template override built with the same ESM and
-local dynamic import flags. A passing beta gate without these subgates is a
-stabilization pass, not a packaged ESM release decision.
+A passing beta gate without this focused gate is a stabilization pass, not a
+packaged ESM release decision.
 
 ## Exit Criteria
 
 - `:app:verifyNodeV11BetaGate` passes on Sony with `v1_1_beta`.
+- `:app:verifyNodePackagedEsmGate` passes on Sony with the production template.
 - `build/reports/nodejs/v1.1-beta-summary.json` records a clean git state for
   the validated commit.
 - No beta gate failures are classified as product bugs.

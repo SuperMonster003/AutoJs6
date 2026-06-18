@@ -15,6 +15,7 @@ object NodeProjectLaunchDescriptor {
 
     @JvmStatic
     fun readOptionsOrDefault(projectRoot: File): NodeProjectLaunchOptions {
+        NodeProjectRuntimeCompatibilityDescriptor.requireCompatibleOrDefault(projectRoot)
         val descriptor = descriptorFile(projectRoot)
         return if (descriptor.isFile) {
             readOptions(projectRoot)
@@ -25,6 +26,7 @@ object NodeProjectLaunchDescriptor {
 
     @JvmStatic
     fun readOptions(projectRoot: File): NodeProjectLaunchOptions {
+        NodeProjectRuntimeCompatibilityDescriptor.requireCompatibleOrDefault(projectRoot)
         val descriptor = descriptorFile(projectRoot)
         require(descriptor.isFile) {
             "Missing internal Node project launch descriptor: ${descriptor.absolutePath}"

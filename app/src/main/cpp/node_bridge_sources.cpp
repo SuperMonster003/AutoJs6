@@ -28715,6 +28715,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_esm_module_kind(resolved) {
     const extension = __autojs6_source_extension(resolved);
     if (__autojs6_is_esm_extension(extension)) return "esm";
+    if (extension === ".js" && __autojs6_package_type_module_for_file(resolved)) return "esm";
     if (__autojs6_supported_local_module_extension(extension)) return "cjs";
     return "";
   }

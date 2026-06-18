@@ -276,6 +276,15 @@ val nodeJsV11BetaInstrumentationClasses = (
             "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
         ) + nodeJsV11AlphaInstrumentationClasses
         ).distinct()
+val nodeJsPackagedEsmGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunFullCompatibilityEmbeddedNodePackagedApk",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk",
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
+)
+val nodeJsPackagedEsmGateRequested = taskNames.any { rawTaskName ->
+    rawTaskName.substringAfterLast(':') == "verifyNodePackagedEsmGate"
+}
 val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
     "sony" -> listOf(
         "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
@@ -786,7 +795,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val explicitInstrumentationClass =
             providers.gradleProperty("android.testInstrumentationRunnerArguments.class").orNull.isNullOrBlank().not()
-        if (nodeJsFuzzerReplayRunnerClass != null && !explicitInstrumentationClass) {
+        if (nodeJsPackagedEsmGateRequested && !explicitInstrumentationClass) {
+            testInstrumentationRunnerArguments["class"] = nodeJsPackagedEsmGateInstrumentationClasses.joinToString(",")
+            testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = "sony"
+        } else if (nodeJsFuzzerReplayRunnerClass != null && !explicitInstrumentationClass) {
             testInstrumentationRunnerArguments["class"] = nodeJsFuzzerReplayRunnerClass
         } else if (nodeJsTestDeviceProfile != null && !explicitInstrumentationClass) {
             testInstrumentationRunnerArguments["class"] = nodeJsTestDeviceProfileClasses.joinToString(",")

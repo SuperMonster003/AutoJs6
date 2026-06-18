@@ -52,20 +52,18 @@ The task fails unless `autojs.nodejs.test.deviceProfile=v1_1_beta` is explicit.
 Keep `ANDROID_SERIAL` pointed at Sony XQ-AT72 `QV710AF65F` when multiple devices
 are attached.
 
-## Explicit Template Subgates
+## Packaged ESM Focused Gate
 
-Packaged `.mjs` and dynamic import install-and-run smokes still require a
-refreshed inrt template override:
+Packaged `.mjs`, package `type=module`, and dynamic import install-and-run
+smokes now run against the default production inrt template:
 
 ```powershell
-.\gradlew.bat --console=plain :app:assembleInrtDebug :app:assembleAppDebug :app:assembleAppDebugAndroidTest "-Pautojs.nodejs.esm.experimental=true" "-Pautojs.nodejs.dynamicImport.local=true" "-Pautojs.nodejs.dynamicImport.experimental=true"
-adb push app\build\outputs\apk\inrt\debug\inrt-v6.7.1-alpha4-universal.apk /sdcard/Download/AutoJs6/embedded-node-template/inrt-debug-template.apk
-adb shell am instrument -w -r -e class org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunExperimentalEsmEmbeddedNodePackagedApk,org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk -e autojs.embeddedNode.packagedSmoke.templateOverride true org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.identity=production" "-Pautojs.embeddedNode.expectedAbis=arm64-v8a"
 ```
 
-These subgates are recorded in the beta summary as explicit requirements. They
-do not run in the default beta profile until the refreshed inrt template becomes
-the default packaged template.
+This focused gate keeps the beta gate fast while making packaged ESM and local
+dynamic import independently runnable before RC readiness.
 
 ## Pass Meaning
 

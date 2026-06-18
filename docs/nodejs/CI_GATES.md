@@ -119,9 +119,13 @@ Scope:
 - beta blocker register verification
 - JSON summary at `build/reports/nodejs/v1.1-beta-summary.json`
 
-Packaged `.mjs` and local dynamic import install-and-run smokes remain explicit
-template-override subgates until the refreshed inrt template is the default. See
-[reports/v1.1-beta/README.md](reports/v1.1-beta/README.md).
+Packaged `.mjs` and local dynamic import install-and-run smokes now have a
+focused gate that uses the default production packaged template:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.identity=production" "-Pautojs.embeddedNode.expectedAbis=arm64-v8a"
+```
 
 The task fails unless `autojs.nodejs.test.deviceProfile=v1_1_beta` is explicit.
 Keep `ANDROID_SERIAL` pointed at the Sony unattended device when multiple
