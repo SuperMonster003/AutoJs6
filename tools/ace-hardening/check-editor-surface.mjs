@@ -188,6 +188,34 @@ const ACE_ACTION_FAVORITES_DIALOG_PATH = path.join(
   "keyboard",
   "AceActionFavoritesDialog.kt",
 );
+const SYMBOLS_CONFIG_STORE_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "keyboard",
+  "SymbolsConfigStore.kt",
+);
+const SYMBOLS_SETTINGS_ACTIVITY_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "keyboard",
+  "SymbolsSettingsActivity.kt",
+);
 const CODE_EDITOR_SETTINGS_DIALOG_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -293,6 +321,8 @@ const codeCompletionBar = read(CODE_COMPLETION_BAR_PATH);
 const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
 const aceActionHistoryStore = read(ACE_ACTION_HISTORY_STORE_PATH);
 const aceActionFavoritesDialog = read(ACE_ACTION_FAVORITES_DIALOG_PATH);
+const symbolsConfigStore = read(SYMBOLS_CONFIG_STORE_PATH);
+const symbolsSettingsActivity = read(SYMBOLS_SETTINGS_ACTIVITY_PATH);
 const codeEditorSettingsDialog = read(CODE_EDITOR_SETTINGS_DIALOG_PATH);
 const codeEditorSettingsFragment = read(CODE_EDITOR_SETTINGS_FRAGMENT_PATH);
 const fragmentHostMaterialDialog = read(FRAGMENT_HOST_MATERIAL_DIALOG_PATH);
@@ -544,6 +574,11 @@ assertIncludes(editorPinchToZoomPreference, "indexOf(key(R.string.key_editor_pin
 assertIncludes(editorView, "AceShortcutPanel.topRowCompletions", "ACE shortcut top row binding");
 assertIncludes(editorView, "AceShortcutPanel.bottomRowCompletions", "ACE shortcut bottom row binding");
 assertIncludes(editorView, "SymbolsConfigStore.DefaultSymbolSet.ACE", "ACE shortcut symbol defaults binding");
+assertIncludes(symbolsConfigStore, "defaultSymbolSet: DefaultSymbolSet = DefaultSymbolSet.NATIVE", "symbols store default symbol-set parameter");
+assertIncludes(symbolsConfigStore, "name == PROFILE_DEFAULT_ID && defaultSymbolSet == DefaultSymbolSet.ACE", "symbols store ACE default profile lookup");
+assertIncludes(symbolsSettingsActivity, "EditorEnginePreferences.get()", "symbols settings current editor engine lookup");
+assertIncludes(symbolsSettingsActivity, "loadProfileForCurrentEngine", "symbols settings engine-aware default profile load");
+assertIncludes(symbolsSettingsActivity, "exportProfileToJson(this, currentProfileName, defaultSymbolSet)", "symbols settings engine-aware default profile export");
 assertIncludes(editorView, "mAceSymbolsBar.useFlowLayout()", "ACE shortcut symbol flow layout");
 assertIncludes(editorView, "mAceShortcutTopBar.setFixedItemSizeDp(40, 35)", "ACE shortcut fixed top key size");
 assertIncludes(editorView, "mAceShortcutBottomBar.setFixedItemSizeDp(40, 35)", "ACE shortcut fixed bottom key size");
