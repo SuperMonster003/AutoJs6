@@ -663,13 +663,36 @@ class AceCodeEditor @JvmOverloads constructor(
         if (scaleFactor <= 0f || baseTextSizeSp <= 0f) {
             return
         }
-        val currentSize = (baseTextSizeSp * viewZoomScale).coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+        val currentSize = currentScaleViewTextSizeSp()
         val nextSize = (currentSize * scaleFactor).coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
         if (abs(nextSize - currentSize) < MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP) {
             return
         }
         viewZoomScale = (nextSize / baseTextSizeSp).coerceIn(MIN_VIEW_ZOOM_SCALE, MAX_VIEW_ZOOM_SCALE)
         applyEffectiveTextSizeSp(nextSize, focusX, focusY)
+    }
+
+    private fun currentScaleViewTextSizeSp(): Float {
+        return (baseTextSizeSp * viewZoomScale).coerceIn(MIN_TEXT_SIZE_SP, MAX_TEXT_SIZE_SP)
+    }
+
+    private fun commitScaleViewTextSizeGesture(focusX: Float, focusY: Float) {
+        if (baseTextSizeSp <= 0f) {
+            return
+        }
+        val effectiveSize = currentScaleViewTextSizeSp()
+        val committedSize = effectiveSize
+            .roundToInt()
+            .coerceIn(MIN_TEXT_SIZE_SP.roundToInt(), MAX_TEXT_SIZE_SP.roundToInt())
+            .toFloat()
+        val shouldApplyCommittedSize = viewZoomScale != 1f ||
+            abs(committedSize - effectiveSize) >= MIN_SCALE_VIEW_TEXT_SIZE_DELTA_SP
+        baseTextSizeSp = committedSize
+        viewZoomScale = 1f
+        if (shouldApplyCommittedSize) {
+            applyEffectiveTextSizeSp(committedSize, focusX, focusY)
+            onTextSizeSpChangedByGesture?.invoke(committedSize, true)
+        }
     }
 
     private fun applyEffectiveTextSizeSp(size: Float, focusX: Float?, focusY: Float?) {
@@ -2056,6 +2079,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             pinchGestureActive = false
+            commitScaleViewTextSizeGesture(detector.focusX, detector.focusY)
             super.onScaleEnd(detector)
         }
     }

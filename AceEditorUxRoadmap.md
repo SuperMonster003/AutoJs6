@@ -160,7 +160,7 @@ Acceptance:
   continuous zoom model.
 - [ ] Keep the zoom center near the user's fingers.
 - [ ] Avoid ACE click/caret coordinate drift after pinch gestures.
-- [ ] Persist font-size changes made by pinch gestures.
+- [x] Persist font-size changes made by pinch gestures.
 
 Acceptance:
 
@@ -171,10 +171,10 @@ Acceptance:
 
 Notes:
 
-- ACE `Scale view` is enabled and continuous, but the current anchor is still
-  biased toward the visible top-left area, tap-to-caret coordinates drift after
-  zoom, and gesture-changed font size is not yet persisted. Native `Scale view`
-  remains disabled as under development.
+- ACE `Scale view` is enabled and continuous, and gesture-changed font size is
+  persisted after pinch end. The current anchor is still biased toward the
+  visible top-left area, and tap-to-caret coordinates still drift after zoom.
+  Native `Scale view` remains disabled as under development.
 
 ## Gate UX-7: Follow-Up UX Feedback
 
@@ -426,7 +426,7 @@ and updated alongside commits.
    - [x] Keep the `Scale view` zoom gesture continuous.
    - [ ] Keep the zoom anchor near the two-finger gesture center.
    - [ ] Fix ACE tap-to-caret coordinate offset after zoom.
-   - [ ] Persist font-size changes after pinch zoom.
+   - [x] Persist font-size changes after pinch zoom.
 
 18. Code editor settings page and in-editor settings dialog
    - [x] Add the standalone Code editor settings page.

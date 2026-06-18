@@ -589,6 +589,10 @@ assertIncludes(aceCodeEditor, "PinchZoomStrategy", "ACE pinch zoom strategy mode
 assertIncludes(aceCodeEditor, "handlePinchToZoomTouch", "ACE pinch zoom touch handler");
 assertIncludes(aceCodeEditor, "scaleViewBy", "ACE scale-view zoom handler");
 assertIncludes(aceCodeEditor, "setFontSizeSpKeepingFocus", "ACE focus-preserving zoom native call");
+assertIncludes(aceCodeEditor, "currentScaleViewTextSizeSp", "ACE scale-view effective text-size tracker");
+assertIncludes(aceCodeEditor, "commitScaleViewTextSizeGesture", "ACE scale-view final text-size commit");
+assertIncludes(aceCodeEditor, "commitScaleViewTextSizeGesture(detector.focusX, detector.focusY)", "ACE scale-view pinch commits on gesture end");
+assertIncludes(aceCodeEditor, "onTextSizeSpChangedByGesture?.invoke(committedSize, true)", "ACE scale-view pinch saves committed text size");
 assertIncludes(aceCodeEditor, "fun insertTab()", "native ACE shortcut TAB bridge call");
 assertIncludes(aceCodeEditor, "fun acceptCompletionOrInsertTab()", "native ACE completion accept bridge call");
 assertIncludes(aceCodeEditor, "fun moveCompletionSelectionOrCursor", "native ACE completion navigation bridge call");
