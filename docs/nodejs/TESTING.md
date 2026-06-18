@@ -527,6 +527,15 @@ Current controlled fetch bridge focused instrumentation:
 
 This suite verifies the `fetch` bridge registry, fake provider GET/POST behavior, `require("fetch")`, global `fetch`, shadowing protection, object and array headers, string/Buffer/Uint8Array bodies, `Response.text()`/`json()`/`arrayBuffer()`, `response.body.stream()` Web Stream reads, timeout rejection, abort-before-dispatch and abort-during-dispatch rejection, response-size budget rejection, unsupported URL scheme rejection, redirect limit plus `redirect: "manual"`/`"error"` behavior, max concurrent request rejection, service-destroy rejection cleanup, fetch diagnostics counters, raw `http`/`https`/`net` and `node:https` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`. It also verifies the Task 167 `require("axios")` compatibility layer: reserved module resolution, fake-provider `get`/`post`/`request`, `baseURL`, params serialization, headers, timeout, `responseType: json/text/arraybuffer`, Axios-like error shape, custom adapter/agent/proxy denial, and raw `node:https` denial.
 
+Current controlled fetch/axios live-provider subgate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+```
+
+This explicit experimental gate runs only the live Android provider methods. It starts an on-device loopback HTTP server, verifies real OkHttp-backed `fetch` GET/POST, headers, query params, string and `Uint8Array` bodies, `json()`/`arrayBuffer()` responses, redirect follow, response-size rejection, timeout rejection, fetch-backed `axios.get`/`axios.post`, raw `http`/`net` denial, provider diagnostics, and provider destroy cancellation of an active request. It is intentionally separate from the default live-provider gate because normal builds keep `autojs.nodejs.network.experimental=false`.
+
 Current controlled WebSocket bridge focused instrumentation:
 
 ```powershell

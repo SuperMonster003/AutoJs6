@@ -69,6 +69,10 @@ fixture cache hit/miss status without skipping real install-and-run behavior.
 The live-provider focused gate separately verifies the Phase 7 provider health
 registry and Node Doctor provider status without promoting future live Android
 providers.
+The controlled fetch/axios live-provider subgate is separate and must be run
+with `-Pautojs.nodejs.network.experimental=true`; it validates loopback Android
+I/O and provider destroy cancellation while controlled network remains
+experimental and default-off.
 
 ## Pass Meaning
 

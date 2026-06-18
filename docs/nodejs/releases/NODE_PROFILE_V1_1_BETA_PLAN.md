@@ -45,7 +45,7 @@ experimental or blocked features from leaking into a release candidate.
 | --- | --- | --- |
 | ESM and dynamic import | stay `partial` | default `.mjs`, `type=module`, static import, local dynamic import, builtin allowlist, resolver denial paths, packaged focused gate |
 | npm/builtins | stay `partial` | real npm corpus, desktop differential report, Buffer/core/stream/zlib/Web Streams gates |
-| controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial |
+| controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial, explicit live fetch/axios loopback subgate |
 | AutoJs bridge modules | stay `partial` or `protocol-gated partial` | provider health registry, Doctor provider status, capability denial, fake provider behavior, Android fail-closed behavior, TypeScript declarations, resource cleanup |
 | packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, focused packaged ESM/dynamic import gate |
 | security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, or bridge bypass |
@@ -94,6 +94,18 @@ packaged ESM release decision. The focused gate validates the packaged runtime
 compatibility descriptor version vector and may reuse unchanged APK fixtures by
 normalized cache key; cached fixtures are still installed and launched on the
 device.
+
+Controlled fetch/axios live Android I/O remains an explicit experimental
+subgate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+```
+
+A passing live fetch gate proves the provider-backed loopback smoke and destroy
+cancellation path for the experimental build flag. It does not promote raw
+network modules or make controlled network default-on.
 
 ## Exit Criteria
 

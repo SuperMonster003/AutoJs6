@@ -1,15 +1,26 @@
 package org.autojs.autojs.engine
 
+import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.net.InetAddress
+import java.net.ServerSocket
+import java.net.Socket
+import java.net.URI
 import java.util.Base64
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class NodeFetchBridgeInstrumentationTest {
 
@@ -965,7 +976,227 @@ class NodeFetchBridgeInstrumentationTest {
     }
 
     @Test
+    fun jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled() {
+        assumeTrue(
+            "Build with -Pautojs.nodejs.network.experimental=true to run the live controlled fetch provider smoke.",
+            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+        )
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node controlled fetch live provider smoke")
+
+        ControlledFetchLoopbackServer().use { server ->
+            val baseUrl = server.baseUrl
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                """
+                "nodejs";
+                (async function main() {
+                  const { Buffer } = require("buffer");
+                  const fetchModule = require("fetch");
+                  const axios = require("axios");
+                  const base = "$baseUrl";
+                  function codeOf(error) {
+                    return error && (error.autojs6Code || error.code) || "";
+                  }
+
+                  const getResponse = await fetch(base + "/get?via=fetch", {
+                    headers: { "x-test": "live" },
+                    timeoutMs: 2000,
+                    maxResponseBytes: 2048
+                  });
+                  const getJson = await getResponse.json();
+
+                  const postTextResponse = await fetch(base + "/echo", {
+                    method: "POST",
+                    headers: { "content-type": "text/plain" },
+                    body: "payload",
+                    timeoutMs: 2000,
+                    maxResponseBytes: 2048
+                  });
+                  const postTextJson = await postTextResponse.json();
+
+                  const postBytesResponse = await fetch(base + "/echo", {
+                    method: "POST",
+                    headers: { "x-body": "uint8" },
+                    body: new Uint8Array([65, 66, 67]),
+                    timeoutMs: 2000,
+                    maxResponseBytes: 2048
+                  });
+                  const postBytesJson = await postBytesResponse.json();
+
+                  const bytesResponse = await fetch(base + "/bytes", {
+                    timeoutMs: 2000,
+                    maxResponseBytes: 16
+                  });
+                  const bytesHex = Buffer.from(new Uint8Array(await bytesResponse.arrayBuffer())).toString("hex");
+
+                  const redirectResponse = await fetch(base + "/redirect", {
+                    timeoutMs: 2000,
+                    maxRedirects: 1
+                  });
+                  const redirectJson = await redirectResponse.json();
+
+                  let largeCode = "";
+                  try {
+                    await fetch(base + "/large", { timeoutMs: 2000, maxResponseBytes: 3 });
+                  } catch (error) {
+                    largeCode = codeOf(error);
+                  }
+
+                  let timeoutCode = "";
+                  try {
+                    await fetch(base + "/slow", { timeoutMs: 100, maxResponseBytes: 2048 });
+                  } catch (error) {
+                    timeoutCode = codeOf(error);
+                  }
+
+                  const axiosGet = await axios.get("/get", {
+                    baseURL: base,
+                    params: { via: "axios", tag: ["a", "b"] },
+                    headers: { "x-test": "axios" },
+                    timeout: 2000,
+                    responseType: "json"
+                  });
+                  const axiosPost = await axios.post(base + "/echo", { hello: "axios" }, {
+                    headers: { "x-test": "axios-post" },
+                    timeout: 2000,
+                    responseType: "json"
+                  });
+
+                  let rawHttpCode = "";
+                  try {
+                    require("http").request(base + "/get");
+                  } catch (error) {
+                    rawHttpCode = codeOf(error);
+                  }
+                  let rawNetCode = "";
+                  try {
+                    require("net").connect(80, "127.0.0.1");
+                  } catch (error) {
+                    rawNetCode = codeOf(error);
+                  }
+
+                  const diagnostics = fetchModule.diagnostics();
+                  console.log("live.fetch.get=" + [
+                    getResponse.status,
+                    getJson.method,
+                    getJson.query,
+                    getJson.header
+                  ].join("|"));
+                  console.log("live.fetch.postText=" + [
+                    postTextResponse.status,
+                    postTextJson.method,
+                    postTextJson.body,
+                    postTextJson.contentType
+                  ].join("|"));
+                  console.log("live.fetch.postBytes=" + [
+                    postBytesResponse.status,
+                    postBytesJson.method,
+                    postBytesJson.body,
+                    postBytesJson.header
+                  ].join("|"));
+                  console.log("live.fetch.bytes=" + [bytesResponse.status, bytesHex].join("|"));
+                  console.log("live.fetch.redirect=" + [redirectResponse.status, redirectJson.query].join("|"));
+                  console.log("live.axios.get=" + [
+                    axiosGet.status,
+                    axiosGet.data.method,
+                    axiosGet.data.query,
+                    axiosGet.data.header
+                  ].join("|"));
+                  console.log("live.axios.post=" + [
+                    axiosPost.status,
+                    axiosPost.data.method,
+                    axiosPost.data.body,
+                    axiosPost.data.header
+                  ].join("|"));
+                  console.log("live.fetch.denials=" + [largeCode, timeoutCode, rawHttpCode, rawNetCode].join("|"));
+                  console.log("live.fetch.diagnostics=" + [
+                    diagnostics.activeRequestCount,
+                    diagnostics.completedCount,
+                    diagnostics.timeoutCount,
+                    diagnostics.rejectedByPolicyCount
+                  ].join("|"));
+                })();
+                """.trimIndent(),
+                "<embedded-autojs-fetch-live-provider-source.js>",
+                timeoutMs = 15_000L,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("fetch live provider", result)
+            val resultDetails = NodeEmbeddedTestHarness.describeResult("fetch live provider", result)
+            assertTrue(resultDetails, result.stdout.contains("live.fetch.get=200|GET|via=fetch|live"))
+            assertTrue(resultDetails, result.stdout.contains("live.fetch.postText=201|POST|payload|text/plain"))
+            assertTrue(resultDetails, result.stdout.contains("live.fetch.postBytes=201|POST|ABC|uint8"))
+            assertTrue(resultDetails, result.stdout.contains("live.fetch.bytes=200|070809"))
+            assertTrue(resultDetails, result.stdout.contains("live.fetch.redirect=200|via=redirect"))
+            assertTrue(resultDetails, result.stdout.contains("live.axios.get=200|GET|via=axios&tag=a&tag=b|axios"))
+            assertTrue(resultDetails, result.stdout.contains("""live.axios.post=201|POST|{"hello":"axios"}|axios-post"""))
+            assertTrue(
+                resultDetails,
+                result.stdout.contains(
+                    "live.fetch.denials=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
+                ),
+            )
+            assertTrue(resultDetails, result.stdout.contains("live.fetch.diagnostics=0|7|1|1"))
+            assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
+            assertEquals("10", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
+            assertEquals("2", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
+            assertEquals("0", result.nativeValues["embedded_script.fetch_active_request_count"])
+        }
+    }
+
+    @Test
+    fun androidFetchProviderCancelsActiveLiveRequestOnDestroy() {
+        assumeTrue(
+            "Build with -Pautojs.nodejs.network.experimental=true to run the live controlled fetch cancellation smoke.",
+            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+        )
+
+        ControlledFetchLoopbackServer().use { server ->
+            val provider = AndroidNodeBridgeCapabilityProvider(context)
+            val callbackLatch = CountDownLatch(1)
+            var response: NodeBridgeResponse? = null
+
+            provider.dispatch(
+                NodeBridgeRequest(
+                    id = "fetch-live-destroy-${System.nanoTime()}",
+                    module = "fetch",
+                    method = "request",
+                    argsJson = JSONArray().put(
+                        JSONObject().apply {
+                            put("url", "${server.baseUrl}/slow")
+                            put("method", "GET")
+                            put("timeoutMs", 5_000)
+                            put("maxResponseBytes", 1024)
+                        },
+                    ).toString(),
+                    timeoutMs = 5_000L,
+                    permissions = listOf("network"),
+                ),
+            ) { bridgeResponse ->
+                response = bridgeResponse
+                callbackLatch.countDown()
+            }
+
+            assertTrue("slow fetch request did not reach loopback server", server.awaitSlowRequest())
+            provider.destroy(NodeBridgeError.processDead("fetch live destroy test"))
+            assertTrue("destroy did not cancel the active fetch request", callbackLatch.await(5, TimeUnit.SECONDS))
+
+            val failure = response ?: error("Missing fetch destroy response")
+            assertFalse(failure.ok)
+            assertEquals(NodeRuntimeErrorCodes.NETWORK_ABORTED, failure.error?.code)
+            provider.nativeDiagnostics().also { diagnostics ->
+                assertEquals("0", diagnostics["embedded_script.fetch_active_request_count"])
+                assertEquals("1", diagnostics["embedded_script.fetch_service_destroy_cancellation_count"])
+            }
+        }
+    }
+
+    @Test
     fun androidFetchProviderStaysDisabledInNormalBuilds() {
+        assumeFalse(
+            "This default-denial regression is only meaningful when autojs.nodejs.network.experimental=false.",
+            BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+        )
+
         val provider = AndroidNodeBridgeCapabilityProvider(context)
         val responses = mutableListOf<NodeBridgeResponse>()
         provider.dispatch(
@@ -992,4 +1223,175 @@ class NodeFetchBridgeInstrumentationTest {
         assertEquals("fetch", responses.single().error?.module)
         assertEquals("request", responses.single().error?.method)
     }
+
+    private class ControlledFetchLoopbackServer : AutoCloseable {
+
+        private val executor = Executors.newCachedThreadPool()
+        private val serverSocket = ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))
+        private val slowRequestStarted = CountDownLatch(1)
+
+        @Volatile
+        private var running = true
+
+        val baseUrl: String = "http://127.0.0.1:${serverSocket.localPort}"
+
+        init {
+            executor.execute {
+                while (running) {
+                    val socket = try {
+                        serverSocket.accept()
+                    } catch (error: Exception) {
+                        if (running) {
+                            throw error
+                        }
+                        return@execute
+                    }
+                    executor.execute {
+                        socket.use { accepted ->
+                            runCatching { handle(accepted) }
+                        }
+                    }
+                }
+            }
+        }
+
+        fun awaitSlowRequest(): Boolean = slowRequestStarted.await(2, TimeUnit.SECONDS)
+
+        override fun close() {
+            running = false
+            runCatching { serverSocket.close() }
+            executor.shutdownNow()
+            executor.awaitTermination(2, TimeUnit.SECONDS)
+        }
+
+        private fun handle(socket: Socket) {
+            socket.soTimeout = 5_000
+            val input = socket.getInputStream()
+            val requestLine = readAsciiLine(input) ?: return
+            val parts = requestLine.split(' ', limit = 3)
+            if (parts.size < 2) {
+                writeResponse(socket, HttpResponse(400, "Bad Request", "text/plain", "bad request".toByteArray()))
+                return
+            }
+            val headers = linkedMapOf<String, String>()
+            while (true) {
+                val line = readAsciiLine(input) ?: break
+                if (line.isEmpty()) {
+                    break
+                }
+                val separator = line.indexOf(':')
+                if (separator > 0) {
+                    headers[line.substring(0, separator).trim().lowercase()] = line.substring(separator + 1).trim()
+                }
+            }
+            val contentLength = headers["content-length"]?.toIntOrNull()?.coerceAtLeast(0) ?: 0
+            val body = ByteArray(contentLength)
+            var offset = 0
+            while (offset < contentLength) {
+                val read = input.read(body, offset, contentLength - offset)
+                if (read < 0) {
+                    break
+                }
+                offset += read
+            }
+
+            val uri = URI(parts[1])
+            val request = HttpRequest(
+                method = parts[0],
+                path = uri.path.ifBlank { "/" },
+                query = uri.rawQuery.orEmpty(),
+                headers = headers,
+                body = if (offset == body.size) body else body.copyOf(offset),
+            )
+            writeResponse(socket, route(request))
+        }
+
+        private fun route(request: HttpRequest): HttpResponse {
+            return when (request.path) {
+                "/get" -> jsonResponse(
+                    200,
+                    "OK",
+                    JSONObject()
+                        .put("method", request.method)
+                        .put("query", request.query)
+                        .put("header", request.headers["x-test"].orEmpty()),
+                )
+                "/echo" -> jsonResponse(
+                    201,
+                    "Created",
+                    JSONObject()
+                        .put("method", request.method)
+                        .put("body", request.body.toString(Charsets.UTF_8))
+                        .put("contentType", request.headers["content-type"].orEmpty())
+                        .put("header", request.headers["x-test"] ?: request.headers["x-body"].orEmpty()),
+                )
+                "/bytes" -> HttpResponse(200, "OK", "application/octet-stream", byteArrayOf(7, 8, 9))
+                "/redirect" -> HttpResponse(
+                    302,
+                    "Found",
+                    "text/plain",
+                    ByteArray(0),
+                    listOf("Location" to "/get?via=redirect"),
+                )
+                "/large" -> HttpResponse(200, "OK", "text/plain", "abcdef".toByteArray())
+                "/slow" -> {
+                    slowRequestStarted.countDown()
+                    Thread.sleep(2_000)
+                    HttpResponse(200, "OK", "text/plain", "slow".toByteArray())
+                }
+                else -> HttpResponse(404, "Not Found", "text/plain", "not found".toByteArray())
+            }
+        }
+
+        private fun jsonResponse(status: Int, statusText: String, body: JSONObject): HttpResponse {
+            return HttpResponse(status, statusText, "application/json", body.toString().toByteArray(Charsets.UTF_8))
+        }
+
+        private fun writeResponse(socket: Socket, response: HttpResponse) {
+            val output = socket.getOutputStream()
+            val headers = buildString {
+                append("HTTP/1.1 ${response.status} ${response.statusText}\r\n")
+                append("Content-Type: ${response.contentType}\r\n")
+                append("Content-Length: ${response.body.size}\r\n")
+                append("Connection: close\r\n")
+                response.headers.forEach { (name, value) ->
+                    append("$name: $value\r\n")
+                }
+                append("\r\n")
+            }.toByteArray(Charsets.ISO_8859_1)
+            output.write(headers)
+            output.write(response.body)
+            output.flush()
+        }
+
+        private fun readAsciiLine(input: java.io.InputStream): String? {
+            val output = ByteArrayOutputStream()
+            while (true) {
+                val value = input.read()
+                if (value < 0) {
+                    return if (output.size() == 0) null else String(output.toByteArray(), Charsets.ISO_8859_1).trimEnd('\r')
+                }
+                if (value == '\n'.code) {
+                    return String(output.toByteArray(), Charsets.ISO_8859_1).trimEnd('\r')
+                }
+                output.write(value)
+            }
+        }
+    }
+
+    private data class HttpRequest(
+        val method: String,
+        val path: String,
+        val query: String,
+        val headers: Map<String, String>,
+        val body: ByteArray,
+    )
+
+    private data class HttpResponse(
+        val status: Int,
+        val statusText: String,
+        val contentType: String,
+        val body: ByteArray,
+        val headers: List<Pair<String, String>> = emptyList(),
+    )
 }

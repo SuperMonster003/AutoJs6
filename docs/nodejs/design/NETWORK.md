@@ -354,9 +354,10 @@ Before live network capability is enabled in release builds, tests must cover:
 - service destroy rejection and active-count cleanup: covered by `NodeFetchBridgeInstrumentationTest`
 - diagnostics counters for active, timeout, policy rejection, and abort paths: covered by `NodeFetchBridgeInstrumentationTest`
 - `require("axios")` fetch-backed adapter surface, params serialization, response types, Axios-like errors, custom adapter/agent/proxy denial, and `node_modules/axios` shadow denial: covered by `NodeFetchBridgeInstrumentationTest`
+- explicit live Android fetch/axios smoke: covered by `verifyNodeLiveFetchGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback server and the Android OkHttp provider
 - raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests
 - default Android provider disabled with the flag off: covered by `NodeFetchBridgeInstrumentationTest`
-- service destroy cancellation: provider destroy cancels tracked OkHttp calls; broader live-provider lifecycle stress remains a follow-up
+- service destroy cancellation: covered by `verifyNodeLiveFetchGate`; provider destroy cancels tracked OkHttp calls and returns a stable abort result
 - packaged APK manifest behavior with and without opt-in: capability metadata drives `INTERNET` merging, and verifier/doctor reports expose the mapping and manifest result
 
 ## Non-Goals
