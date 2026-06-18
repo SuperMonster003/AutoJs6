@@ -37,7 +37,7 @@ Acceptance:
 - [x] Increase dark-theme selection contrast.
 - [x] Add dynamic/fixed gutter width modes, keeping dynamic width as the
   default while preserving an optional stable fixed-width mode.
-- [ ] Allow clicking folded-code placeholders to unfold.
+- [x] Allow clicking folded-code placeholders to unfold.
 - [x] Preserve expected automatic cursor reveal on IME/panel changes, but avoid
   unsolicited pull-back while browsing selected code.
 
@@ -48,14 +48,14 @@ Acceptance:
   visible line-number digits.
 - [x] Fixed gutter width does not shrink during the editing session and grows
   only when higher line-number digits become visible.
-- [ ] Fold placeholders unfold without requiring the gutter triangle.
+- [x] Fold placeholders unfold without requiring the gutter triangle.
 - [x] Scrolling selected text offscreen does not pull the editor back unless an
   explicit viewport event such as IME or panel resize requires it.
 
 ## Gate UX-2: Mobile Selection And Gesture Bugs
 
 - [x] Diagnose short-menu/long-menu transitions on double-tap and long-press.
-- [ ] Keep the floating action mode near the selection instead of jumping to the
+- [x] Keep the floating action mode near the selection instead of jumping to the
   upper-left editor area.
 - [x] Prevent transient short-menu flashes while dragging selection handles.
 - [x] Prevent stale upper-left menus after scroll, app switch, or return.
@@ -65,7 +65,8 @@ Acceptance:
 
 Acceptance:
 
-- [ ] Double-tap, long-press, and selection-drag menus stay anchored and stable.
+- [ ] Selection-drag menus stay anchored and stable after the user lifts their
+  finger.
 - [ ] Right-edge system-back gestures close IME or editor without triggering
   ACE long-press selection/haptic feedback on Sony XQ-AT72 when technically
   preventable from the app side.
@@ -136,6 +137,10 @@ Acceptance:
   or unpin, and clear confirmation.
 - [x] Long-press the star to repeat the last command, independent of favorites
   list state.
+- [x] Persist manual action-favorite reorder for both pinned and unpinned
+  entries after drag release.
+- [ ] Record open-ended editor setting actions in action favorites, such as
+  setting word wrap, editor engine, font, and font size.
 
 Acceptance:
 
@@ -147,21 +152,23 @@ Acceptance:
 
 - [x] Implement the existing View zoom strategy or replace it with a better
   continuous zoom model.
-- [x] Keep the zoom center near the user's fingers.
-- [x] Avoid moving the visible code unexpectedly during pinch gestures.
+- [ ] Keep the zoom center near the user's fingers.
+- [ ] Avoid ACE click/caret coordinate drift after pinch gestures.
+- [ ] Persist font-size changes made by pinch gestures.
 
 Acceptance:
 
 - [x] Pinch zoom is continuous.
-- [x] The content near the gesture center remains visible after zoom.
+- [ ] The content near the gesture center remains visible after zoom.
 - [x] Native and ACE behavior are documented separately if implementation
   differs.
 
 Notes:
 
-- ACE `Scale view` is enabled in the pinch-to-zoom menu and uses session-local
-  focus-preserving visual zoom. Native `Scale view` remains disabled as under
-  development.
+- ACE `Scale view` is enabled and continuous, but the current anchor is still
+  biased toward the visible top-left area, tap-to-caret coordinates drift after
+  zoom, and gesture-changed font size is not yet persisted. Native `Scale view`
+  remains disabled as under development.
 
 ## Gate UX-7: Follow-Up UX Feedback
 
@@ -170,7 +177,7 @@ Notes:
 - [x] Keep double-tap and long-press host action modes anchored near the user's
   touch point without upper-left fallback flicker.
 - [x] Preserve gutter fold toggle after folded-code placeholder experiments.
-- [ ] Restore folded-code placeholder unfold support without breaking gutter
+- [x] Restore folded-code placeholder unfold support without breaking gutter
   fold toggles.
 - [ ] Keep Sony right-edge back gesture protection while preserving normal tap,
   long-press, double-tap, and vertical scroll behavior outside the narrow
@@ -214,6 +221,8 @@ Notes:
 - [x] Normalize user-visible editor engine names to Ace and JsDroidEditor.
 - [x] Remove the duplicate Default wrap-indentation option from the visible
   chooser and rename classic flush continuation to flush continuation.
+- [x] Show the ACE-specific default symbol set when opening Symbols settings
+  while the selected editor engine is Ace.
 
 Acceptance:
 
@@ -292,6 +301,146 @@ Notes:
   flush continuation. The old `default` key remains accepted for persisted
   compatibility but is no longer offered as a separate option.
 
+## Latest User Feedback Matrix
+
+This matrix mirrors the latest numbered feedback so every item can be tracked
+and updated alongside commits.
+
+1. Localization
+   - [x] English and Simplified Chinese coverage is complete for the current
+     ACE/editor strings.
+
+2. Gboard spacebar cursor movement
+   - [ ] Keep cursor direction stable while sliding left and right.
+   - [ ] Prevent the cursor from being trapped in a small local range near the
+     beginning of the document.
+   - [ ] Prevent repeated back-and-forth slides from accumulating abnormal
+     movement step sizes.
+
+3. Double-tap and long-press selection menus
+   - [x] Suppress short-menu interference during double-tap and long-press.
+   - [x] Keep double-tap and normal long-press menus near the selection instead
+     of the upper-left editor area.
+   - [ ] Keep the long menu visible after dragging a long-press selection range
+     and lifting the finger.
+
+4. Fold placeholder and gutter folding
+   - [x] Preserve gutter fold-widget collapse/expand.
+   - [x] Expand folded code by tapping the content placeholder.
+   - [x] Avoid triggering long-press selection after placeholder unfold.
+
+5. Selected range auto pull-back
+   - [x] Avoid unsolicited selection reveal while browsing selected code.
+
+6. Background contrast
+   - [x] Improve dark-theme selection contrast.
+   - [x] Improve ACE bracket-match marker contrast.
+
+7. Large-file loading
+   - [x] Keep large ordinary ACE opens on Ace instead of forcing JsDroidEditor.
+
+8. Editor engine switching
+   - [x] Support Ace and JsDroidEditor engine switching.
+
+9. Sony XQ-AT72 right-edge back gesture
+   - [x] Restore normal interaction in the right-side editor area after the
+     earlier wide guard regression.
+   - [ ] Prevent right-edge inward back gestures from leaking into ACE
+     long-press selection and haptic feedback.
+
+10. Gutter width
+   - [x] Provide dynamic and fixed line-number gutter width modes.
+   - [x] Keep JsDroidEditor on fixed gutter width.
+
+11. Word wrap
+   - [x] Support ACE word wrap and expose the setting.
+   - [x] Disable unsupported JsDroidEditor word wrap UI and normalize its
+     stored value.
+   - [x] Keep visible wrap indentation options to continuation indent and flush
+     continuation.
+
+12. Gutter visibility
+   - [x] Support line number visibility.
+   - [x] Support independent breakpoint, line-number, and fold-marker
+     visibility where each engine has a surface for it.
+   - [x] Remove the empty gutter strip when all supported gutter content is
+     hidden.
+
+13. ECMAScript and Node.js completion
+   - [x] Provide signature help for common built-ins such as
+     `Function.prototype.apply`.
+   - [ ] Audit and expand general ECMAScript built-in completions such as
+     `Object.prototype.hasOwnProperty`.
+   - [ ] Plan Node.js type completions for the future Node.js engine branch.
+
+14. ACE function keyboard layout
+   - [x] Match the two-part layout, scrollable symbol area, arrow sizing,
+     shortcut behavior, default symbols, and hollow star entry point.
+
+15. Action favorites
+   - [x] Use the hollow star entry and rename the dialog to Action favorites.
+   - [x] Record toolbar and replayable editor menu actions.
+   - [x] Exclude shortcut short taps and symbol insertion from favorites.
+   - [x] Record shortcut long-press actions and ACE selection-menu actions.
+   - [x] Remove accidental Cancel entries.
+   - [x] Compact the dialog rows and move usage counts to the right as `<n>`.
+   - [x] Keep the most recent unpinned action first below pinned items.
+   - [x] Keep drag sorting active during movement without full-list rebinding.
+   - [x] Persist drag reorder after finger release.
+   - [x] Support left-swipe delete and right-swipe pin/unpin.
+   - [x] Use `R.drawable.ic_thumbtacks` for pinned items.
+   - [x] Repeat the last action with star long-press.
+   - [ ] Record open-ended setting actions such as setting wrap indentation,
+     word wrap, editor engine, font, and font size.
+
+16. Read-only mode
+   - [x] Support session read-only mode for Ace and JsDroidEditor.
+   - [x] Strictly block text mutation paths while read-only is enabled.
+   - [x] Suppress soft keyboard activation in read-only mode.
+   - [x] Hide the function keyboard area while read-only mode is enabled.
+   - [x] Theme the Read-only mode menu checkbox with AutoJs6 colors in checked
+     and unchecked states.
+   - [ ] Remove the occasional empty JsDroidEditor keyboard-area overlay after
+     enabling read-only mode.
+
+17. Pinch zoom
+   - [x] Keep the `Scale view` zoom gesture continuous.
+   - [ ] Keep the zoom anchor near the two-finger gesture center.
+   - [ ] Fix ACE tap-to-caret coordinate offset after zoom.
+   - [ ] Persist font-size changes after pinch zoom.
+
+18. Code editor settings page and in-editor settings dialog
+   - [x] Add the standalone Code editor settings page.
+   - [x] Show the editor settings dialog from the editor menu.
+   - [x] Use a fragment-safe MaterialDialog host for the in-editor settings
+     dialog.
+   - [ ] Apply editor engine changes immediately where feasible.
+   - [ ] Apply editor theme changes immediately where feasible.
+   - [ ] Apply editor font changes immediately where feasible.
+   - [ ] Apply editor font-size changes immediately where feasible.
+   - [ ] Preserve dynamic gutter-width behavior when ACE word wrap is enabled.
+   - [ ] Improve disabled unsupported-option visuals and hints consistently on
+     both settings surfaces.
+
+19. Clear undo/redo
+   - [x] Make Clear undoable and enable Undo after clearing text.
+   - [x] Enable Redo immediately after undoing Clear.
+   - [ ] Suppress the transient long selection menu that appears after redoing
+     Clear.
+
+20. Editor engine names
+   - [x] Use `Ace` and `JsDroidEditor` user-facing engine names.
+   - [x] Keep Ace first and default.
+
+21. Input issues
+   - [ ] Suppress the long selection menu flash when deleting characters with
+     the soft-keyboard Backspace key.
+   - [x] Keep `xx.__proto__.` completion/runtime handling from crashing ACE.
+
+22. Symbols settings
+   - [x] Show the Ace default symbol configuration when the selected engine is
+     Ace.
+
 ## Known Unresolved Issues
 
 These issues have had several implementation attempts but are not considered
@@ -342,53 +491,6 @@ Additional notes:
   offsets under different states. Future work should log raw `InputConnection`
   calls, key events, ACE selection offsets, composing text calls, and WebView
   selection state for the same gesture before changing movement math again.
-
-### Fold Placeholder Click To Unfold
-
-Current state:
-
-- Gutter fold widgets can collapse and expand code again, but clicking the
-  folded-code placeholder displayed in the editor content area, visually similar
-  to `<->`, still does not unfold the code.
-
-Attempts:
-
-- Added DOM click capture on the ACE editor container for folded-code
-  placeholders, targeting `.ace_fold` while explicitly excluding gutter cells
-  and `.ace_fold-widget` gutter widgets.
-- Added `expandFoldAt(row, column)` using several ACE session APIs and
-  fallbacks: `session.getFoldAt(row, column, side)`,
-  `session.getFoldLine(row)`, probing all columns on the row, and finally
-  `session.unfold(row, true)`.
-- Added an ACE `editor.on("click")` fallback to expand folds from the ACE event
-  document position when the DOM target looked like a folded-code placeholder.
-- Fixed a regression introduced by the placeholder work where gutter fold
-  widgets could no longer collapse code. The current code exempts gutter
-  `.ace_fold-widget` hits from the custom breakpoint tap zone and leaves gutter
-  folding to ACE's native handler.
-- Added a touch-level folded-placeholder candidate in the AutoJs6 bridge. It
-  tracks `touchstart` on `.ace_fold`, cancels the candidate when movement
-  exceeds touch slop, and expands the fold on `touchend` before relying on a
-  browser/ACE click event. This is a bridge-level compatibility experiment
-  because the packaged ACE asset currently only includes minified core code.
-
-Expected result:
-
-- Tapping the folded-code placeholder in the content area should expand that
-  fold, while tapping gutter fold widgets should continue to collapse and
-  expand code through ACE's native gutter folding behavior.
-
-Additional notes:
-
-- The remaining failure may be due to the rendered placeholder DOM target not
-  matching `.ace_fold` on Android WebView, ACE translating the tap to a nearby
-  text position instead of the folded range, or ACE 1.4.12 requiring a different
-  internal fold lookup for placeholder widgets. Future work should inspect the
-  actual DOM event target/class list and the fold data returned by
-  `session.getFoldAt()` / `session.getFoldLine()` at the tap point.
-- If the touch-level bridge candidate still fails on device, the next step
-  should be a maintainable ACE mobile `touch_handler` patch rather than another
-  generic DOM click listener.
 
 ### Sony XQ-AT72 Right-Edge Back Gesture
 

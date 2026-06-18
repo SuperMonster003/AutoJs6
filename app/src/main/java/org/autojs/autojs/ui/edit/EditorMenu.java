@@ -4,7 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.text.InputType;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.Nullable;
@@ -13,6 +16,7 @@ import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
+import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher;
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
@@ -21,6 +25,7 @@ import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.settings.CodeEditorSettingsDialog;
 import org.autojs.autojs.util.ClipboardUtils;
+import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
@@ -92,9 +97,22 @@ public class EditorMenu {
             return;
         }
         boolean visible = !mEditorView.isReadOnlyLockedByIntent();
+        boolean readOnly = mEditorView.isReadOnly();
         item.setVisible(visible);
         item.setEnabled(mEditorView.canToggleReadOnlyMode());
-        item.setChecked(mEditorView.isReadOnly());
+        item.setCheckable(false);
+        item.setTitle(buildReadOnlyMenuTitle(readOnly));
+    }
+
+    private CharSequence buildReadOnlyMenuTitle(boolean readOnly) {
+        String marker = readOnly ? "\u2611" : "\u2610";
+        String title = marker + "  " + mContext.getString(R.string.text_ace_read_only_mode);
+        SpannableString spanned = new SpannableString(title);
+        int markerColor = readOnly
+                ? ColorUtils.adjustColorForContrast(mContext.getColor(R.color.window_background), ThemeColorManager.getColorPrimary(), 2.3f)
+                : mContext.getColor(R.color.day_night_full);
+        spanned.setSpan(new ForegroundColorSpan(markerColor), 0, marker.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return spanned;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

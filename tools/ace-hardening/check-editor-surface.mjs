@@ -617,6 +617,10 @@ assertIncludes(editorMenu, "mEditorView::showJumpToLineDialog", "editor overflow
 assertIncludes(editorMenu, "mEditorView::startBuildApkActivity", "editor overflow menu shares build APK launcher");
 assertIncludes(editorMenu, "mEditorView::showFileDetailsDialog", "editor overflow menu shares file details launcher");
 assertIncludes(editorMenu, "mEditorView::showJavaClassSearchDialog", "editor overflow menu shares Java class search launcher");
+assertIncludes(editorMenu, "buildReadOnlyMenuTitle", "editor read-only menu themed title marker");
+assertIncludes(editorMenu, "item.setCheckable(false)", "editor read-only menu avoids system default checkbox tint");
+assertIncludes(editorMenu, "ThemeColorManager.getColorPrimary()", "editor read-only menu uses runtime theme color");
+assertIncludes(editorMenu, "ForegroundColorSpan", "editor read-only menu colors checkbox marker");
 
 assertIncludes(codeCompletion, "val iconResId", "code completion optional icon model");
 assertIncludes(codeCompletionBar, "getIconResId(position)", "code completion optional icon lookup");
