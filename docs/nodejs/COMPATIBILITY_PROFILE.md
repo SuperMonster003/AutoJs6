@@ -13,7 +13,7 @@ workarounds, see [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFIL
 - Execution model: embedded `libnode.so` plus AutoJs6 bootstrap and CommonJS loader.
 - Process model: script service runs in `:nodejs_embedded`.
 - Concurrency model: one active execution per embedded process; default concurrent starts reject, while explicit enqueue uses the bounded execution queue.
-- Service model: long-running Node service mode is design-only and not implemented; normal scripts remain one-shot and timeout-controlled.
+- Service model: Phase 7 defines an execution-mode state machine, but only `one_shot` is executable; normal scripts remain timeout-controlled.
 - Project model: file entry, Node project entry, and packaged APK entry are all supported paths.
 - Kotlin capability registry: `NodeRuntimeCapabilities`
 - JavaScript profile module: `require("autojs6:profile")`
@@ -180,9 +180,16 @@ Current behavior remains:
 - normal embedded scripts require `timeoutMs`
 - timeout produces the existing timeout diagnostic shape
 - `EmbeddedScriptRequest.executionMode` is serialized through the service
-  request spool; `one_shot` is the only supported value
-- explicit `long_running`/`service` requests are rejected before user code
-  runs with `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`
+  request spool and normalized through the Phase 7 mode state machine
+- canonical modes are `one_shot`, `interactive_long_running`, `scheduled`, and
+  `worker_computation`
+- `one_shot` is the only supported executable value
+- `interactiveLongRunning`, legacy `long_running`/`service`, `scheduled`, and
+  `workerComputation` requests are rejected before user code runs with
+  `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`
+- rejection native values include timeout policy, foreground requirement,
+  notification requirement, allowed-provider list, restart policy, quota
+  profile, and stop semantics
 - service process exit is expected after one-shot execution settles
 - packaged Node entries remain one-shot unless a future explicit service descriptor is implemented
 

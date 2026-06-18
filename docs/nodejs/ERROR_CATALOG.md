@@ -146,7 +146,7 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 
 - Meaning: An option was recognized but is unsupported by the Safe Node Profile.
 - Common cause: unsupported fs/glob options, unsupported execution options, or an internal compatibility option.
-- Example: using scoped glob options that follow symlinks outside the working directory, or requesting `executionMode: "long_running"` before service mode is implemented.
+- Example: using scoped glob options that follow symlinks outside the working directory, or requesting `executionMode: "interactiveLongRunning"` before service mode is implemented.
 - How to fix: remove the unsupported option and stay within the documented profile.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 

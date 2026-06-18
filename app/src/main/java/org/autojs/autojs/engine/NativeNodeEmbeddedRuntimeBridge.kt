@@ -725,11 +725,8 @@ object NativeNodeEmbeddedRuntimeBridge {
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = "Embedded Node executionMode '$executionMode' is not supported by the v1.1 runtime. Long-running service mode remains design-only; use '${NodeExecutionModePolicy.MODE_ONE_SHOT}' with a positive timeout for normal scripts.",
-                nativeValues = mapOf(
-                    "embedded_script.execution_mode" to executionMode,
-                    "embedded_script.long_running_requested" to NodeExecutionModePolicy.isLongRunningRequest(executionMode).toString(),
-                    "embedded_script.long_running_supported" to "false",
+                message = NodeExecutionModePolicy.unsupportedMessage(executionMode),
+                nativeValues = NodeExecutionModePolicy.nativeValues(executionMode) + mapOf(
                     "embedded_script.execution_mode_rejected" to "true",
                     "embedded_script.error_code" to NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION,
                 ),

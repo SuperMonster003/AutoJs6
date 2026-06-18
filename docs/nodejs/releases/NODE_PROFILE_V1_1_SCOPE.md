@@ -73,7 +73,7 @@ small set of already-gated features toward practical use.
 | Developer REPL | developer-only partial | `NodeDeveloperRepl` provides a debug-build-only programmatic line-eval session with an isolated temporary `workingDirectory`, normal Safe Node builtin policy, default bridge deny-by-default manifest, and cleanup on close. |
 | Project wizard / validator | developer tooling partial | `tools/nodejs/project/autojs6-node-project.js` generates CommonJS, ESM, automation, screenshot/OCR, and network starter projects, then validates project metadata, entry files, permissions, module type, and sanitized dependency bundles with actionable error codes. |
 | Execution queue policy | partial | Embedded Node remains one active execution per `:nodejs_embedded` process; explicit caller-side enqueue supports one queued execution, queue status, cancellation, queue timeout, and stable busy/full/timeout/cancelled errors. |
-| Long-running mode | blocked | Request protocol carries `executionMode`, but v1.1 currently supports only `one_shot`; explicit `long_running`/`service` requests are rejected before user code runs. |
+| Execution mode state machine | blocked except `one_shot` | Request protocol carries `executionMode`; Phase 7 canonicalizes `one_shot`, `interactive_long_running`, `scheduled`, and `worker_computation`. Only `one_shot` executes. Reserved modes reject before user code with timeout, foreground, notification, provider, restart, quota, and stop-policy metadata. |
 | Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
@@ -198,8 +198,8 @@ small set of already-gated features toward practical use.
   user code runs, one-entry queue-full denial, queue status diagnostics, and
   recovery after the active execution stops.
 - Long-running mode remains blocked until an async service lifecycle exists,
-  but the explicit `executionMode` policy gate rejects `long_running`/`service`
-  before user code runs while normal interval scripts still time out.
+  but the explicit `executionMode` state machine rejects reserved modes before
+  user code runs while normal interval scripts still time out.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
   execution/stress suites pass on Sony.

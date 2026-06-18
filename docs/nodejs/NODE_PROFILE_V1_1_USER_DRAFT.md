@@ -60,7 +60,7 @@ reach an Android provider.
 | UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
 | `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, and raw Android scheduler APIs remain unavailable. |
 | JS-only plugins | experimental | Project-local `./plugins/<id>` loading only. Native plugins, signed archives, installers, and packaged plugin runtime are not enabled. |
-| long-running Node scripts | blocked | Explicit service/long-running mode is rejected before user code. Normal scripts remain one-shot and timeout-bounded. |
+| execution modes beyond `one_shot` | blocked | `interactive_long_running`, `scheduled`, and `worker_computation` are reserved by the Phase 7 state machine and reject before user code. Normal scripts remain one-shot and timeout-bounded. |
 
 ## ESM Scripts
 
@@ -386,7 +386,7 @@ The shape is reserved, but normal builds reject it before user code runs:
 ```json
 {
   "node": {
-    "executionMode": "long_running",
+    "executionMode": "interactiveLongRunning",
     "timeoutMs": 0
   }
 }
@@ -396,7 +396,9 @@ Keep normal scripts one-shot and timeout-bounded. Use notifications and the
 controlled `work_manager` scheduling MVP within their current partial limits:
 scheduled entries remain scoped, bounded, and WorkManager-backed, while a future
 long-running mode still needs foreground notification ownership, user stop
-controls, quotas, restart policy, packaged checks, and lifecycle tests.
+controls, quotas, restart policy, packaged checks, and lifecycle tests. The
+reserved `scheduled` and `workerComputation` execution modes are policy
+descriptors only until their dedicated gates are implemented.
 
 ## Packaging Notes
 

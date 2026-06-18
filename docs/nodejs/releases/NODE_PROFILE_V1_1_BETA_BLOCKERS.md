@@ -155,8 +155,10 @@ RC decision: keep long-running/service execution blocked for v1.1.
 
 Surface: declared long-running Node scripts and service execution mode.
 
-Current state: request protocol carries `executionMode`, but only `one_shot` is
-supported. `long_running` and `service` requests reject before user code runs.
+Current state: request protocol carries `executionMode` through the Phase 7
+state machine, but only `one_shot` is executable. `interactive_long_running`,
+legacy `long_running`/`service` aliases, `scheduled`, and `worker_computation`
+requests reject before user code runs with policy metadata.
 
 Release impact: v1.1 RC must keep normal scripts timeout-bounded and must not
 infer service mode from timers, sockets, bridge resources, or `timeoutMs=0`.

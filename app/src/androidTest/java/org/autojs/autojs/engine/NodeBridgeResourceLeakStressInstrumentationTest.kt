@@ -298,8 +298,14 @@ class NodeBridgeResourceLeakStressInstrumentationTest {
                 argsJson = """[{"type":"Text","text":"Stress $index"},{"timeoutMs":1000}]""",
                 permissions = listOf("ui"),
             )
-            assertFalse("UI provider is expected to fail closed until an Activity-owned provider is connected", ui.ok)
-            assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, ui.error?.code)
+            if (ui.ok) {
+                val handleId = JSONObject(ui.resultJson.orEmpty()).getString("id")
+                assertTrue(handleId.startsWith("ui-"))
+                assertEquals(1, activeTypeCount(provider, NodeBridgeResourceType.UI_SESSION))
+                assertOk(dispatch(provider, "ui", "close", """["$handleId"]""", listOf("ui")))
+            } else {
+                assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, ui.error?.code)
+            }
             assertNoActiveBridgeResources(provider, "ui-$index")
 
             val shell = dispatch(

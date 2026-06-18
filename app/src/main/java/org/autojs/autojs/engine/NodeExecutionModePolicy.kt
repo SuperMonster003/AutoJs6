@@ -3,8 +3,27 @@ package org.autojs.autojs.engine
 object NodeExecutionModePolicy {
 
     const val MODE_ONE_SHOT = "one_shot"
+    const val MODE_INTERACTIVE_LONG_RUNNING = "interactive_long_running"
+    const val MODE_SCHEDULED = "scheduled"
+    const val MODE_WORKER_COMPUTATION = "worker_computation"
+
+    // Legacy request aliases retained for stable rejection diagnostics.
     const val MODE_LONG_RUNNING = "long_running"
     const val MODE_SERVICE = "service"
+
+    data class Definition(
+        val mode: String,
+        val supported: Boolean,
+        val status: String,
+        val timeoutPolicy: String,
+        val foregroundRequirement: String,
+        val notificationRequirement: String,
+        val allowedProviders: List<String>,
+        val restartPolicy: String,
+        val resourceQuotaProfile: String,
+        val stopSemantics: String,
+        val unsupportedReason: String? = null,
+    )
 
     fun normalize(mode: String?): String {
         val normalized = mode
@@ -14,15 +33,172 @@ object NodeExecutionModePolicy {
             ?: MODE_ONE_SHOT
         return when (normalized) {
             "", "oneshot", "one_shot", "one.shot" -> MODE_ONE_SHOT
-            "longrunning", "long_running", "long.running" -> MODE_LONG_RUNNING
-            MODE_SERVICE -> MODE_SERVICE
+            "interactivelongrunning",
+            "interactive_long_running",
+            "interactive.long.running",
+            "longrunning",
+            "long_running",
+            "long.running",
+            MODE_SERVICE,
+            -> MODE_INTERACTIVE_LONG_RUNNING
+            "scheduled", "schedule", "workmanager", "work_manager" -> MODE_SCHEDULED
+            "workercomputation",
+            "worker_computation",
+            "worker.computation",
+            "worker",
+            -> MODE_WORKER_COMPUTATION
             else -> normalized
         }
     }
 
-    fun isSupported(mode: String?): Boolean = normalize(mode) == MODE_ONE_SHOT
+    fun definition(mode: String?): Definition {
+        val normalized = normalize(mode)
+        return DEFINITIONS_BY_MODE[normalized] ?: unknownDefinition(normalized)
+    }
+
+    fun definitions(): List<Definition> = DEFINITIONS
+
+    fun canonicalModes(): List<String> = DEFINITIONS.map { it.mode }
+
+    fun isSupported(mode: String?): Boolean = definition(mode).supported
 
     fun isLongRunningRequest(mode: String?): Boolean {
-        return normalize(mode) in setOf(MODE_LONG_RUNNING, MODE_SERVICE)
+        return normalize(mode) == MODE_INTERACTIVE_LONG_RUNNING
     }
+
+    fun unsupportedMessage(mode: String?): String {
+        val definition = definition(mode)
+        val reason = definition.unsupportedReason?.let { " $it" }.orEmpty()
+        return "Embedded Node executionMode '${definition.mode}' is not supported by the Phase 7 runtime state machine.$reason " +
+            "Use '$MODE_ONE_SHOT' with a positive timeout for normal scripts."
+    }
+
+    fun nativeValues(mode: String?): Map<String, String> {
+        val definition = definition(mode)
+        return linkedMapOf(
+            "embedded_script.execution_mode" to definition.mode,
+            "embedded_script.execution_mode_status" to definition.status,
+            "embedded_script.execution_mode_supported" to definition.supported.toString(),
+            "embedded_script.execution_mode_timeout_policy" to definition.timeoutPolicy,
+            "embedded_script.execution_mode_foreground_requirement" to definition.foregroundRequirement,
+            "embedded_script.execution_mode_notification_requirement" to definition.notificationRequirement,
+            "embedded_script.execution_mode_allowed_providers" to definition.allowedProviders.joinToString(",").ifBlank { "none" },
+            "embedded_script.execution_mode_restart_policy" to definition.restartPolicy,
+            "embedded_script.execution_mode_resource_quota_profile" to definition.resourceQuotaProfile,
+            "embedded_script.execution_mode_stop_semantics" to definition.stopSemantics,
+            "embedded_script.long_running_requested" to isLongRunningRequest(definition.mode).toString(),
+            "embedded_script.long_running_supported" to (
+                definition.mode == MODE_INTERACTIVE_LONG_RUNNING && definition.supported
+                ).toString(),
+        )
+    }
+
+    private fun unknownDefinition(mode: String): Definition {
+        return Definition(
+            mode = mode,
+            supported = false,
+            status = "unknown",
+            timeoutPolicy = "none",
+            foregroundRequirement = "none",
+            notificationRequirement = "none",
+            allowedProviders = emptyList(),
+            restartPolicy = "never",
+            resourceQuotaProfile = "none",
+            stopSemantics = "reject_before_user_code",
+            unsupportedReason = "The mode is not recognized by AutoJs6.",
+        )
+    }
+
+    private val ONE_SHOT_PROVIDERS = listOf(
+        "accessibility",
+        "app",
+        "clipboard",
+        "device",
+        "engines",
+        "fetch",
+        "image",
+        "notifications",
+        "ocr",
+        "sensors",
+        "shell",
+        "storage",
+        "toast",
+        "ui",
+        "websocket",
+        "work_manager",
+    )
+
+    private val DEFINITIONS = listOf(
+        Definition(
+            mode = MODE_ONE_SHOT,
+            supported = true,
+            status = "available",
+            timeoutPolicy = "required_positive_timeout",
+            foregroundRequirement = "transient_embedded_service",
+            notificationRequirement = "transient_execution_notification",
+            allowedProviders = ONE_SHOT_PROVIDERS,
+            restartPolicy = "never",
+            resourceQuotaProfile = "one_shot_default",
+            stopSemantics = "timeout_or_user_stop_destroys_runtime",
+        ),
+        Definition(
+            mode = MODE_INTERACTIVE_LONG_RUNNING,
+            supported = false,
+            status = "reserved",
+            timeoutPolicy = "startup_timeout_stop_grace_and_watchdog",
+            foregroundRequirement = "required",
+            notificationRequirement = "persistent_stop_action_required",
+            allowedProviders = listOf(
+                "accessibility",
+                "fetch",
+                "image",
+                "notifications",
+                "ocr",
+                "sensors",
+                "shell",
+                "storage",
+                "ui",
+                "websocket",
+            ),
+            restartPolicy = "never",
+            resourceQuotaProfile = "interactive_long_running_strict",
+            stopSemantics = "foreground_or_user_stop_then_graceful_destroy",
+            unsupportedReason = "Interactive long-running mode still needs foreground notification ownership, user stop controls, quotas, and lifecycle gates.",
+        ),
+        Definition(
+            mode = MODE_SCHEDULED,
+            supported = false,
+            status = "reserved",
+            timeoutPolicy = "required_task_timeout",
+            foregroundRequirement = "workmanager_policy_dependent",
+            notificationRequirement = "task_visibility_required_before_promotion",
+            allowedProviders = listOf(
+                "fetch",
+                "image",
+                "notifications",
+                "ocr",
+                "storage",
+                "work_manager",
+            ),
+            restartPolicy = "never_no_implicit_retry",
+            resourceQuotaProfile = "scheduled_task_strict",
+            stopSemantics = "cancel_work_then_destroy_runtime",
+            unsupportedReason = "Scheduled Node execution still uses bounded one-shot WorkManager launches until the dedicated scheduled runner gate.",
+        ),
+        Definition(
+            mode = MODE_WORKER_COMPUTATION,
+            supported = false,
+            status = "reserved",
+            timeoutPolicy = "startup_and_task_timeout",
+            foregroundRequirement = "not_applicable",
+            notificationRequirement = "not_applicable",
+            allowedProviders = emptyList(),
+            restartPolicy = "never",
+            resourceQuotaProfile = "worker_computation_restricted",
+            stopSemantics = "terminate_worker_then_release_ports",
+            unsupportedReason = "Worker computation mode remains behind the worker_threads capability isolation gates.",
+        ),
+    )
+
+    private val DEFINITIONS_BY_MODE = DEFINITIONS.associateBy { it.mode }
 }

@@ -1,0 +1,108 @@
+package org.autojs.autojs.engine
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class NodeExecutionModePolicyInstrumentationTest {
+
+    @Test
+    fun phase7StateMachineDefinesAllModePolicies() {
+        assertEquals(
+            listOf(
+                NodeExecutionModePolicy.MODE_ONE_SHOT,
+                NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                NodeExecutionModePolicy.MODE_SCHEDULED,
+                NodeExecutionModePolicy.MODE_WORKER_COMPUTATION,
+            ),
+            NodeExecutionModePolicy.canonicalModes(),
+        )
+
+        NodeExecutionModePolicy.definitions().forEach { definition ->
+            assertTrue("${definition.mode} missing timeout policy", definition.timeoutPolicy.isNotBlank())
+            assertTrue("${definition.mode} missing foreground requirement", definition.foregroundRequirement.isNotBlank())
+            assertTrue("${definition.mode} missing notification requirement", definition.notificationRequirement.isNotBlank())
+            assertTrue("${definition.mode} missing restart policy", definition.restartPolicy.isNotBlank())
+            assertTrue("${definition.mode} missing quota profile", definition.resourceQuotaProfile.isNotBlank())
+            assertTrue("${definition.mode} missing stop semantics", definition.stopSemantics.isNotBlank())
+        }
+
+        val oneShot = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_ONE_SHOT)
+        assertTrue(oneShot.supported)
+        assertEquals("required_positive_timeout", oneShot.timeoutPolicy)
+        assertEquals("never", oneShot.restartPolicy)
+        assertTrue(oneShot.allowedProviders.contains("work_manager"))
+
+        val interactive = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING)
+        assertFalse(interactive.supported)
+        assertEquals("required", interactive.foregroundRequirement)
+        assertEquals("persistent_stop_action_required", interactive.notificationRequirement)
+        assertTrue(interactive.unsupportedReason.orEmpty().contains("foreground notification ownership"))
+
+        val scheduled = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_SCHEDULED)
+        assertFalse(scheduled.supported)
+        assertEquals("never_no_implicit_retry", scheduled.restartPolicy)
+        assertTrue(scheduled.allowedProviders.contains("work_manager"))
+
+        val worker = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_WORKER_COMPUTATION)
+        assertFalse(worker.supported)
+        assertEquals("not_applicable", worker.foregroundRequirement)
+        assertTrue(worker.allowedProviders.isEmpty())
+    }
+
+    @Test
+    fun executionModeAliasesNormalizeToCanonicalModes() {
+        assertEquals(NodeExecutionModePolicy.MODE_ONE_SHOT, NodeExecutionModePolicy.normalize(null))
+        assertEquals(NodeExecutionModePolicy.MODE_ONE_SHOT, NodeExecutionModePolicy.normalize("oneShot"))
+        assertEquals(NodeExecutionModePolicy.MODE_ONE_SHOT, NodeExecutionModePolicy.normalize("one-shot"))
+
+        assertEquals(
+            NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+            NodeExecutionModePolicy.normalize("interactiveLongRunning"),
+        )
+        assertEquals(
+            NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+            NodeExecutionModePolicy.normalize("longRunning"),
+        )
+        assertEquals(
+            NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+            NodeExecutionModePolicy.normalize("service"),
+        )
+
+        assertEquals(NodeExecutionModePolicy.MODE_SCHEDULED, NodeExecutionModePolicy.normalize("work_manager"))
+        assertEquals(
+            NodeExecutionModePolicy.MODE_WORKER_COMPUTATION,
+            NodeExecutionModePolicy.normalize("workerComputation"),
+        )
+    }
+
+    @Test
+    fun unsupportedModesReturnStablePolicyMetadata() {
+        val interactive = NodeExecutionModePolicy.nativeValues("longRunning")
+        assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, interactive["embedded_script.execution_mode"])
+        assertEquals("reserved", interactive["embedded_script.execution_mode_status"])
+        assertEquals("false", interactive["embedded_script.execution_mode_supported"])
+        assertEquals("true", interactive["embedded_script.long_running_requested"])
+        assertEquals("false", interactive["embedded_script.long_running_supported"])
+        assertTrue(
+            interactive["embedded_script.execution_mode_allowed_providers"].orEmpty(),
+            interactive["embedded_script.execution_mode_allowed_providers"].orEmpty().contains("notifications"),
+        )
+
+        val scheduled = NodeExecutionModePolicy.nativeValues("scheduled")
+        assertEquals("false", scheduled["embedded_script.execution_mode_supported"])
+        assertEquals("false", scheduled["embedded_script.long_running_requested"])
+        assertEquals("required_task_timeout", scheduled["embedded_script.execution_mode_timeout_policy"])
+
+        val worker = NodeExecutionModePolicy.nativeValues("workerComputation")
+        assertEquals("none", worker["embedded_script.execution_mode_allowed_providers"])
+        assertEquals("worker_computation_restricted", worker["embedded_script.execution_mode_resource_quota_profile"])
+
+        val unknown = NodeExecutionModePolicy.nativeValues("daemon")
+        assertEquals("daemon", unknown["embedded_script.execution_mode"])
+        assertEquals("unknown", unknown["embedded_script.execution_mode_status"])
+        assertEquals("false", unknown["embedded_script.execution_mode_supported"])
+        assertTrue(NodeExecutionModePolicy.unsupportedMessage("daemon").contains("not supported"))
+    }
+}

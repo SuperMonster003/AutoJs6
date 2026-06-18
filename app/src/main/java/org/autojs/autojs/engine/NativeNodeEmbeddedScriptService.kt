@@ -603,16 +603,10 @@ class NativeNodeEmbeddedScriptService : Service() {
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withExecutionMode(
         executionMode: String,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        val normalizedMode = NodeExecutionModePolicy.normalize(executionMode)
         return copy(
             nativeValues = linkedMapOf<String, String>().apply {
                 putAll(nativeValues)
-                put("embedded_script.execution_mode", normalizedMode)
-                put(
-                    "embedded_script.long_running_requested",
-                    NodeExecutionModePolicy.isLongRunningRequest(normalizedMode).toString(),
-                )
-                put("embedded_script.long_running_supported", "false")
+                putAll(NodeExecutionModePolicy.nativeValues(executionMode))
             },
         )
     }

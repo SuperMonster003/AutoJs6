@@ -1,6 +1,6 @@
 # Long-Running Node Service Mode
 
-Status: design gate only. No long-running Node service runtime is implemented by this document.
+Status: Phase 7 state-machine gate only. No long-running Node service runtime is implemented by this document.
 
 Task 179 adds the first runtime contract guard: embedded script requests now
 carry an `executionMode` field through the service request spool. `one_shot` is
@@ -8,6 +8,21 @@ the only supported runtime mode. Explicit `long_running` or `service` requests
 are rejected before user JavaScript runs with
 `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`, and pending timers still time
 out as normal one-shot scripts.
+
+Task S7-17 expands that guard into a versioned execution-mode state machine:
+
+- `one_shot`: implemented; requires a positive script timeout.
+- `interactive_long_running`: reserved; requires foreground notification,
+  user stop controls, quotas, and lifecycle gates before it can run.
+- `scheduled`: reserved; WorkManager currently launches bounded one-shot runs
+  until the dedicated scheduled task runner gate exists.
+- `worker_computation`: reserved; blocked behind worker_threads capability
+  isolation and worker resource gates.
+
+Each mode definition records timeout policy, foreground requirement,
+notification requirement, allowed provider set, restart policy, quota profile,
+and stop semantics. Unsupported mode requests are rejected before user code and
+return the same policy metadata in native values.
 
 ## Goal
 
@@ -36,10 +51,11 @@ Long-running service mode is not:
 
 | Mode | Current status | Timeout | User visibility | Entry |
 | --- | --- | --- | --- | --- |
-| One-shot embedded script | Implemented | Required | Console/notification while running | directive, file route, project route, packaged route |
-| Execution queue | Implemented | Queue timeout plus per-script timeout | Caller-owned diagnostics | `enqueueScript(...)` |
-| Scheduled Node task | WorkManager timed MVP | Required per execution | Future task UI/notification | `work_manager` |
-| Long-running Node service | Rejected before user code | Startup timeout plus watchdog policy | Persistent foreground notification | Future explicit service descriptor |
+| `one_shot` | Implemented | Required positive script timeout | Console/notification while running | directive, file route, project route, packaged route |
+| Execution queue | Implemented helper, not a mode | Queue timeout plus per-script timeout | Caller-owned diagnostics | `enqueueScript(...)` |
+| `scheduled` | Reserved; WorkManager still launches bounded one-shot executions | Required task timeout | Future task UI/notification | future scheduled runner |
+| `interactive_long_running` | Rejected before user code | Startup timeout plus stop grace and watchdog policy | Persistent foreground notification with Stop | future explicit service descriptor |
+| `worker_computation` | Reserved behind worker_threads gates | Startup/task timeout | None | future worker runtime |
 
 ## Explicit Opt-In
 
@@ -75,9 +91,12 @@ The exact schema is deferred, but required properties should include:
 The default for all existing scripts remains one-shot mode.
 
 The current runtime accepts only `executionMode: "one_shot"`. The aliases
-`"longRunning"`, `"long_running"`, and `"service"` are recognized only to
-produce a stable unsupported-option diagnostic; they do not start a background
-service and they do not convert `timeoutMs: 0` into an unbounded run.
+`"interactiveLongRunning"`, `"longRunning"`, `"long_running"`, and `"service"`
+normalize to `interactive_long_running` only to produce a stable
+unsupported-option diagnostic; they do not start a background service and they
+do not convert `timeoutMs: 0` into an unbounded run. `scheduled` and
+`workerComputation` are also recognized as reserved modes and rejected before
+user code until their dedicated gates are implemented.
 
 ## Foreground Notification
 
