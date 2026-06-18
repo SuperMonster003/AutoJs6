@@ -504,6 +504,9 @@ assertIncludes(bridge, "setBreakpointMarkersEnabled: setBreakpointMarkersEnabled
 assertIncludes(bridge, "setFoldMarkersEnabled: setFoldMarkersEnabled", "ACE fold marker runtime API");
 assertIncludes(bridge, "setGutterWidthMode: setGutterWidthMode", "ACE gutter width mode runtime API");
 assertIncludes(bridge, "function applyFontSizeSp(size)", "ACE font-size helper without implicit resize");
+assertIncludes(bridge, "function refreshFontMetricsForCoordinateMapping()", "ACE zoom refreshes font metrics for coordinate mapping");
+assertIncludes(bridge, "refreshFontMetricsForCoordinateMapping();", "ACE font-size changes refresh coordinate metrics");
+assertIncludes(bridge, "renderer.updateFontSize()", "ACE coordinate metric refresh uses renderer font-size update");
 assertIncludes(bridge, "function scrollToPosition(scrollLeft, scrollTop)", "ACE programmatic scroll state sync helper");
 assertIncludes(bridge, "session.setScrollLeft(nextLeft)", "ACE focus-preserving zoom syncs horizontal session scroll");
 assertIncludes(bridge, "session.setScrollTop(nextTop)", "ACE focus-preserving zoom syncs vertical session scroll");
@@ -601,6 +604,8 @@ assertIncludes(aceCodeEditor, 'eventHistory.record("lsp_manager"', "ACE LSP mana
 assertIncludes(aceCodeEditor, "ScaleGestureDetector", "ACE pinch zoom detector");
 assertIncludes(aceCodeEditor, "PinchZoomStrategy", "ACE pinch zoom strategy model");
 assertIncludes(aceCodeEditor, "handlePinchToZoomTouch", "ACE pinch zoom touch handler");
+assertIncludes(aceCodeEditor, "cancelAceTouchInteraction(\"pinch_zoom_begin\")", "ACE pinch begin cancels stale mobile touch state");
+assertIncludes(aceCodeEditor, "cancelAceTouchInteraction(\"pinch_zoom_end\")", "ACE pinch end cancels stale mobile touch state");
 assertIncludes(aceCodeEditor, "scaleViewBy", "ACE scale-view zoom handler");
 assertIncludes(aceCodeEditor, "setFontSizeSpKeepingFocus", "ACE focus-preserving zoom native call");
 assertIncludes(aceCodeEditor, "currentScaleViewTextSizeSp", "ACE scale-view effective text-size tracker");

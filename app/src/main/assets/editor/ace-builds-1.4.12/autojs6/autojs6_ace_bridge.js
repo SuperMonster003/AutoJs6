@@ -1295,7 +1295,15 @@
     function applyFontSizeSp(size) {
         var sp = Math.max(8, Math.min(Number(size) || 14, 40));
         editor.setFontSize(sp + "px");
+        refreshFontMetricsForCoordinateMapping();
         return sp;
+    }
+
+    function refreshFontMetricsForCoordinateMapping() {
+        var renderer = editor && editor.renderer;
+        if (renderer && renderer.updateFontSize) {
+            renderer.updateFontSize();
+        }
     }
 
     function setFontSizeSp(size) {
@@ -1352,6 +1360,7 @@
         if (!editor || !editor.resize) {
             return;
         }
+        refreshFontMetricsForCoordinateMapping();
         editor.resize(true);
         callBridge("notifyEvent", [
             "resizeDone",

@@ -1387,6 +1387,10 @@ class AceCodeEditor @JvmOverloads constructor(
         pendingSelectionActionModeRequest = null
         mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
         finishSelectionActionMode()
+        cancelAceTouchInteraction(reason)
+    }
+
+    private fun cancelAceTouchInteraction(reason: String) {
         if (isReady) {
             invokeAce("cancelTouchInteraction", quote(reason))
         }
@@ -2041,6 +2045,7 @@ class AceCodeEditor @JvmOverloads constructor(
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             pinchGestureActive = true
             lastTextSizeScaleFactor = 1.0
+            cancelAceTouchInteraction("pinch_zoom_begin")
             return true
         }
 
@@ -2061,6 +2066,7 @@ class AceCodeEditor @JvmOverloads constructor(
             pinchGestureActive = false
             lastTextSizeScaleFactor = 1.0
             onTextSizeSpChangedByGesture?.invoke(baseTextSizeSp, true)
+            cancelAceTouchInteraction("pinch_zoom_end")
             super.onScaleEnd(detector)
         }
     }
@@ -2069,6 +2075,7 @@ class AceCodeEditor @JvmOverloads constructor(
 
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             pinchGestureActive = true
+            cancelAceTouchInteraction("pinch_zoom_begin")
             return true
         }
 
@@ -2080,6 +2087,7 @@ class AceCodeEditor @JvmOverloads constructor(
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             pinchGestureActive = false
             commitScaleViewTextSizeGesture(detector.focusX, detector.focusY)
+            cancelAceTouchInteraction("pinch_zoom_end")
             super.onScaleEnd(detector)
         }
     }
