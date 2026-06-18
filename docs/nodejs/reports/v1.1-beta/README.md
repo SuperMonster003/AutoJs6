@@ -85,6 +85,10 @@ The live storage/notifications subgate validates Android-backed JSON storage
 persistence, working-directory and package-identity isolation, storage quota
 denial, notification post/cancel or runtime-permission denial, stable channel
 creation, ongoing notification ownership metadata, and owned cleanup.
+The live sensors subgate validates Android-backed sensor listing, one-shot
+events, subscribe/drain/unsubscribe cleanup, sampling interval clamping,
+maximum subscription denial, missing-provider unavailable errors, and destroy
+cleanup for supported accelerometer/gyroscope/light hardware.
 
 ## Pass Meaning
 

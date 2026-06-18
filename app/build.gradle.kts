@@ -312,6 +312,13 @@ val nodeJsLiveStorageNotificationsGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest#androidStorageProviderEnforcesQuotaAndPackageIdentityIsolation",
     "org.autojs.autojs.engine.NodeNotificationsBridgeInstrumentationTest#androidProviderPostsOrReportsNotificationPermissionAndTracksOwnedResource",
 )
+val nodeJsLiveSensorsGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest#androidProviderListsSensorsAndCleansUpLiveSubscriptionWhenAvailable",
+    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest#androidProviderOnceObservesLiveSensorEventWhenAvailable",
+    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest#androidProviderSubscribeDrainsEventsAndUnsubscribesWhenAvailable",
+    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest#androidProviderEnforcesLiveSubscriptionLimitWhenAvailable",
+    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest#androidProviderReportsUnavailableWhenSensorManagerMissing",
+)
 val nodeJsLongRunningGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
@@ -358,6 +365,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeLiveWebSocketGate" to nodeJsLiveWebSocketGateInstrumentationClasses,
     "verifyNodeLiveOcrGate" to nodeJsLiveOcrGateInstrumentationClasses,
     "verifyNodeLiveStorageNotificationsGate" to nodeJsLiveStorageNotificationsGateInstrumentationClasses,
+    "verifyNodeLiveSensorsGate" to nodeJsLiveSensorsGateInstrumentationClasses,
     "verifyNodeLongRunningGate" to nodeJsLongRunningGateInstrumentationClasses,
     "verifyNodeWorkerGate" to nodeJsWorkerGateInstrumentationClasses,
     "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,

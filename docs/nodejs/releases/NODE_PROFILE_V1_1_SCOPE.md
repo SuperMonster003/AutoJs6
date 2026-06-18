@@ -64,7 +64,7 @@ small set of already-gated features toward practical use.
 | OCR | partial | `require("ocr")` exposes `recognize`, `recognizeText`, and `detectTextBounds` over opaque image handles with `ocr` + `image` capability checks; Android now has a live MLKit provider over scoped `image.readImage()` handles, while packaged model policy and broader image-provider ownership remain gated. |
 | Storage | partial | `require("storage")` and `require("storages")` expose JSON-only package/cwd-scoped key-value stores with explicit `storage` capability checks, per-value and per-store quotas, and packaged-app isolation. |
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, stable channel IDs, ongoing ownership metadata, and owned-resource cleanup. |
-| Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
+| Sensors | partial | `require("sensors")` exposes Android-backed `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks, sampling clamps, max subscription limits, and destroy cleanup. |
 | UI bridge protocol | protocol-gated partial | `require("ui")` reserves JSON-only `showLayout`, opaque `UiHandle.on/update/close`, and drained event snapshots with explicit `ui` capability checks; the Android provider remains fail-closed until an Activity-owned provider is accepted. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for long-click, set-text, and scroll while keeping JSON-only snapshots and explicit `accessibility` capability checks. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
@@ -145,8 +145,10 @@ small set of already-gated features toward practical use.
   manifest mapping, and TypeScript declarations.
 - Sensors bridge smoke passes for `getAvailableSensors`, `once`,
   `subscribe`, fake-provider event draining, manifest denial, Android sensor
-  listing, live subscription cleanup when a supported sensor exists, and
-  TypeScript declarations.
+  listing, live one-shot events, live subscription drain/unsubscribe,
+  sampling interval clamp, max subscription denial, missing-provider
+  unavailable errors, cleanup when a supported sensor exists, and TypeScript
+  declarations.
 - UI bridge protocol smoke passes for `require("ui")`, fake-provider
   `showLayout`, button/click event drain, `handle.update()`, `handle.close()`,
   JSON-only invalid descriptor denial before dispatch, shadowing protection,

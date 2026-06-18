@@ -486,7 +486,14 @@ Current `sensors` bridge v1.1 partial focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest"
 ```
 
-This suite verifies the `sensors` bridge registry, fake-provider request/response behavior, shadowing protection, `getAvailableSensors`, `once`, `subscribe`, subscription `ready`/`close`, event snapshot freezing, type/callback validation, manifest capability denial before dispatch, Android provider sensor listing, and live subscription resource cleanup when a supported device sensor is available.
+Focused live sensors provider gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveSensorsGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies the `sensors` bridge registry, fake-provider request/response behavior, shadowing protection, `getAvailableSensors`, `once`, `subscribe`, subscription `ready`/`close`, event snapshot freezing, type/callback validation, manifest capability denial before dispatch, Android provider sensor listing, live one-shot events, live subscription drain/unsubscribe cleanup, sampling interval clamping, maximum subscription denial, missing-provider unavailable errors, and live subscription resource cleanup when a supported device sensor is available.
 
 Current `ui` bridge protocol-gate focused instrumentation:
 

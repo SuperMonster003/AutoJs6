@@ -175,6 +175,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 .\gradlew.bat --console=plain :app:verifyNodeLiveOcrGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveStorageNotificationsGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveSensorsGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -202,6 +203,11 @@ zero active OCR/image resources after cleanup.
 persistence, working-directory and package-identity isolation, storage quota
 denial, notification post/cancel or runtime-permission denial, stable channel
 creation, ongoing notification ownership metadata, and owned cleanup.
+`verifyNodeLiveSensorsGate` validates Android-backed sensor listing, live
+one-shot events, live subscribe/drain/unsubscribe behavior, sampling interval
+clamping, maximum subscription denial, missing-provider unavailable errors, and
+destroy cleanup for accelerometer/gyroscope/light providers available on the
+device.
 
 ## Release Gate
 

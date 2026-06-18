@@ -1,5 +1,8 @@
 package org.autojs.autojs.engine
 
+import android.content.Context
+import android.content.ContextWrapper
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -226,6 +229,208 @@ class NodeSensorsBridgeInstrumentationTest {
         provider.destroy(NodeBridgeError.processDead("sensors provider destroy"))
         assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
         assertEquals("1", provider.nativeDiagnostics()["embedded_script.bridge_resource.leak_count"])
+    }
+
+    @Test
+    fun androidProviderOnceObservesLiveSensorEventWhenAvailable() {
+        val provider = sensorProvider("sensors-once-provider")
+        val type = firstAvailableSensorType(provider) ?: return
+
+        val once = dispatch(
+            provider,
+            "once",
+            JSONArray()
+                .put(
+                    JSONObject()
+                        .put("type", type)
+                        .put("samplingIntervalMs", 100)
+                        .put("timeoutMs", 5_000),
+                )
+                .toString(),
+        )
+
+        assertTrue(once.toString(), once.ok)
+        val event = JSONObject(once.resultJson.orEmpty())
+        assertEquals(type, event.getString("type"))
+        assertTrue(event.toString(), event.getLong("timestamp") > 0L)
+        assertTrue(event.toString(), event.getJSONArray("values").length() >= 1)
+        assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+    }
+
+    @Test
+    fun androidProviderSubscribeDrainsEventsAndUnsubscribesWhenAvailable() {
+        val provider = sensorProvider("sensors-subscribe-provider")
+        val type = firstAvailableSensorType(provider) ?: return
+
+        val subscribe = dispatch(
+            provider,
+            "subscribe",
+            JSONArray()
+                .put(
+                    JSONObject()
+                        .put("type", type)
+                        .put("samplingIntervalMs", 1)
+                        .put("maxQueueSize", 2)
+                        .put("timeoutMs", 1_000),
+                )
+                .toString(),
+        )
+
+        if (!subscribe.ok) {
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, subscribe.error?.code)
+            return
+        }
+        val subscription = JSONObject(subscribe.resultJson.orEmpty())
+        assertEquals(type, subscription.getString("type"))
+        assertEquals(100, subscription.getInt("samplingIntervalMs"))
+        assertEquals(2, subscription.getInt("maxQueueSize"))
+        assertEquals("1", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+
+        val event = waitForSensorEvent(provider, subscription.getString("id"))
+        assertEquals(type, event.getString("type"))
+        assertTrue(event.toString(), event.getLong("timestamp") > 0L)
+        assertTrue(event.toString(), event.getJSONArray("values").length() >= 1)
+
+        val unsubscribe = dispatch(
+            provider,
+            "unsubscribe",
+            JSONArray().put(JSONObject().put("id", subscription.getString("id"))).toString(),
+        )
+        assertTrue(unsubscribe.toString(), unsubscribe.ok)
+        assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+    }
+
+    @Test
+    fun androidProviderEnforcesLiveSubscriptionLimitWhenAvailable() {
+        val provider = sensorProvider("sensors-limit-provider")
+        val type = firstAvailableSensorType(provider) ?: return
+        val subscriptionIds = mutableListOf<String>()
+
+        try {
+            repeat(4) { index ->
+                val subscribe = dispatch(
+                    provider,
+                    "subscribe",
+                    JSONArray()
+                        .put(
+                            JSONObject()
+                                .put("type", type)
+                                .put("samplingIntervalMs", 250)
+                                .put("maxQueueSize", 1)
+                                .put("timeoutMs", 1_000 + index),
+                        )
+                        .toString(),
+                )
+                assertTrue(subscribe.toString(), subscribe.ok)
+                subscriptionIds += JSONObject(subscribe.resultJson.orEmpty()).getString("id")
+            }
+
+            val overLimit = dispatch(
+                provider,
+                "subscribe",
+                JSONArray()
+                    .put(
+                        JSONObject()
+                            .put("type", type)
+                            .put("samplingIntervalMs", 250)
+                            .put("maxQueueSize", 1)
+                            .put("timeoutMs", 1_000),
+                    )
+                    .toString(),
+            )
+            assertFalse(overLimit.toString(), overLimit.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT, overLimit.error?.code)
+            assertEquals("4", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+        } finally {
+            subscriptionIds.forEach { id ->
+                dispatch(provider, "unsubscribe", JSONArray().put(JSONObject().put("id", id)).toString())
+            }
+            assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+        }
+    }
+
+    @Test
+    fun androidProviderReportsUnavailableWhenSensorManagerMissing() {
+        val provider = sensorProvider("sensors-missing-manager-provider", contextWithoutSensors())
+
+        val available = dispatch(provider, "getAvailableSensors", "[]")
+        assertTrue(available.toString(), available.ok)
+        assertEquals(0, JSONArray(available.resultJson.orEmpty()).length())
+
+        val once = dispatch(
+            provider,
+            "once",
+            JSONArray()
+                .put(
+                    JSONObject()
+                        .put("type", "accelerometer")
+                        .put("samplingIntervalMs", 100)
+                        .put("timeoutMs", 1_000),
+                )
+                .toString(),
+        )
+        assertFalse(once.toString(), once.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, once.error?.code)
+        assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+    }
+
+    private fun sensorProvider(id: String, providerContext: Context = context): AndroidNodeBridgeCapabilityProvider {
+        val workDir = File(context.cacheDir, "node-bridge-$id").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create sensors provider directory: $absolutePath" }
+        }
+        return AndroidNodeBridgeCapabilityProvider(
+            providerContext,
+            NodeBridgeEngineInfo.fromContext(
+                providerContext,
+                id = id,
+                sourceName = "$id.cjs",
+                cwd = workDir.absolutePath,
+            ),
+        )
+    }
+
+    private fun contextWithoutSensors(): Context {
+        return object : ContextWrapper(context) {
+            override fun getApplicationContext(): Context = this
+
+            override fun getSystemService(name: String): Any? {
+                return if (name == Context.SENSOR_SERVICE) {
+                    null
+                } else {
+                    super.getSystemService(name)
+                }
+            }
+        }
+    }
+
+    private fun firstAvailableSensorType(provider: NodeBridgeCapabilityProvider): String? {
+        val available = dispatch(provider, "getAvailableSensors", "[]")
+        assertTrue(available.toString(), available.ok)
+        val sensors = JSONArray(available.resultJson.orEmpty())
+        val types = (0 until sensors.length()).map { index -> sensors.getJSONObject(index).getString("type") }.toSet()
+        return listOf("accelerometer", "gyroscope", "light").firstOrNull { it in types }
+    }
+
+    private fun waitForSensorEvent(provider: NodeBridgeCapabilityProvider, subscriptionId: String): JSONObject {
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+        while (System.nanoTime() < deadline) {
+            val drained = dispatch(
+                provider,
+                "drainEvents",
+                JSONArray().put(JSONObject().put("id", subscriptionId)).toString(),
+            )
+            assertTrue(drained.toString(), drained.ok)
+            val events = JSONArray(drained.resultJson.orEmpty())
+            for (index in 0 until events.length()) {
+                val item = events.getJSONObject(index)
+                if (item.optString("type") == "event") {
+                    return item.getJSONObject("event")
+                }
+            }
+            Thread.sleep(100)
+        }
+        throw AssertionError("Timed out waiting for live sensor event from $subscriptionId")
     }
 
     private fun dispatch(

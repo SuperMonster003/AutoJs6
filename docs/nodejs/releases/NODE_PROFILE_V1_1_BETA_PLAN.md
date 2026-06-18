@@ -144,6 +144,18 @@ persistence, working-directory and package-identity isolation, quota denial,
 notification post/cancel or runtime-permission denial, stable channel creation,
 ongoing notification ownership metadata, and owned cleanup.
 
+Sensors live Android coverage is a non-network Phase 7 subgate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveSensorsGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+A passing live sensors gate proves Android-backed sensor listing, one-shot
+events, subscribe/drain/unsubscribe cleanup, sampling interval clamping,
+maximum subscription denial, missing-provider unavailable errors, and destroy
+cleanup for supported accelerometer/gyroscope/light hardware.
+
 ## Exit Criteria
 
 - `:app:verifyNodeV11BetaGate` passes on Sony with `v1_1_beta`.

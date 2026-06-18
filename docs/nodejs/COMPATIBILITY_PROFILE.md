@@ -817,7 +817,8 @@ Task 173 adds JSON-only `storage`/`storages`
 provider storage with package/cwd/store isolation and quota checks, and Task
 174 adds post-only `notifications` with Android permission gating, stable
 channels, and owned-notification cleanup. Task 175 adds bounded
-`sensors` events with controlled subscription cleanup. Task 182 reserves the
+`sensors` events with live once/subscribe paths, sampling clamps, subscription
+limits, and controlled cleanup. Task 182 reserves the
 protocol-gated `ui` module with fake-provider tests and an Android fail-closed
 provider path; real Activity-owned UI remains design-gated.
 
@@ -1006,7 +1007,8 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - options: `{ samplingIntervalMs?: number, intervalMs?: number, timeoutMs?: number, maxQueueSize?: number, drainIntervalMs?: number }`
   - subscriptions expose frozen local handles with `id`, `type`, `closed`, `ready`, and `close(options?)`
   - requests require the `sensors` capability
-  - Android provider subscriptions are bounded, event queues are capped, and provider destroy unregisters live listeners
+  - Android provider lists supported hardware, returns live one-shot events, drains live subscription events, clamps sampling intervals to policy, caps active subscriptions, and unregisters listeners on unsubscribe or destroy
+  - missing Android sensor authority or unsupported hardware returns a stable bridge permission/unavailable error rather than exposing raw platform objects
   - JavaScript receives frozen JSON event snapshots only; no raw `SensorManager`, `Sensor`, `SensorEvent`, listener, `Context`, or Android object crosses into Node
 - `ui`
   - `showLayout(layoutJson, options?): Promise<UiHandle>`
