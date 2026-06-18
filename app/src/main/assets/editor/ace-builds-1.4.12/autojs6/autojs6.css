@@ -321,6 +321,19 @@ body.ace-theme-dark .ace_marker-layer .ace_selected-word {
     border-color: rgba(125, 190, 255, 0.72);
 }
 
+.ace_marker-layer .ace_bracket {
+    margin: -1px 0 0 -1px;
+    border: 1px solid rgba(17, 94, 89, 0.92) !important;
+    background: rgba(20, 184, 166, 0.22);
+    box-sizing: border-box;
+}
+
+body.ace-theme-dark .ace_marker-layer .ace_bracket {
+    border-color: rgba(45, 212, 191, 0.96) !important;
+    background: rgba(45, 212, 191, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5);
+}
+
 body.ace-theme-dark .autojs6_hover_tooltip_content code {
     background: rgba(226, 232, 240, 0.12);
 }

@@ -282,6 +282,15 @@ assertNoThrow("missing indices should not throw", () => {
   valuesFor(missingIndicesCompleter, "toast", "toast");
   valuesFor(missingIndicesCompleter, "app.la", "la");
 });
+assertNoThrow("prototype-like member contexts should not throw", () => {
+  valuesFor(completer, "xx.__proto__.", "");
+  valuesFor(completer, "xx.constructor.", "");
+  completer.getHover({
+    getLine(row) {
+      return row === 0 ? "xx.__proto__.value" : "";
+    },
+  }, { row: 0, column: "xx.__proto__.value".length });
+});
 
 assertLanguageToolsAcceptShim();
 assertMobileBridgeStabilityHooks();

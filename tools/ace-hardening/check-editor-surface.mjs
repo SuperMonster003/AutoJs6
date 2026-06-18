@@ -17,6 +17,7 @@ const ACE_ROOT = path.join(
 const HTML_PATH = path.join(ACE_ROOT, "autojs6_editor.html");
 const CSS_PATH = path.join(ACE_ROOT, "autojs6", "autojs6.css");
 const BRIDGE_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_ace_bridge.js");
+const COMPLETER_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_completer.js");
 const LSP_CLIENT_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_lsp_client.js");
 const TOOLTIP_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_tooltip.js");
 const SIGNATURE_HELP_PATH = path.join(ACE_ROOT, "autojs6", "autojs6_signature_help.js");
@@ -263,6 +264,7 @@ function assertOrder(content, items, label) {
 const html = read(HTML_PATH);
 const css = read(CSS_PATH);
 const bridge = read(BRIDGE_PATH);
+const completer = read(COMPLETER_PATH);
 const lspClient = read(LSP_CLIENT_PATH);
 const tooltip = read(TOOLTIP_PATH);
 const signatureHelp = read(SIGNATURE_HELP_PATH);
@@ -319,6 +321,8 @@ assertMatch(css, /body\.autojs6-selection-menu-suppressed \.ace_mobile-menu\s*\{
 assertMatch(css, /body\.autojs6-host-selection-action-mode \.ace_mobile-menu\s*\{[\s\S]*display:\s*none !important/, "host selection action-mode hides ACE mobile menu by default");
 assertMatch(css, /body\.autojs6-host-selection-action-mode \.ace_mobile-menu\s*\{[\s\S]*pointer-events:\s*none !important/, "host selection action-mode blocks ACE mobile menu touch input");
 assertMatch(css, /body\.ace-theme-dark \.ace_marker-layer \.ace_selection\s*\{[\s\S]*rgba\(88,\s*166,\s*255,\s*0\.42\)/, "dark selection contrast");
+assertMatch(css, /\.ace_marker-layer \.ace_bracket\s*\{[\s\S]*background:\s*rgba\(20,\s*184,\s*166,\s*0\.22\)/, "bracket match contrast");
+assertMatch(css, /body\.ace-theme-dark \.ace_marker-layer \.ace_bracket\s*\{[\s\S]*rgba\(45,\s*212,\s*191,\s*0\.28\)/, "dark bracket match contrast");
 assertMatch(css, /\.autojs6_hover_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE hover tooltip must not steal touch input");
 assertMatch(css, /body\.ace-theme-dark \.autojs6_hover_tooltip\s*\{[\s\S]*background:\s*#20242b/, "ACE hover tooltip dark style");
 assertMatch(css, /\.autojs6_signature_tooltip\s*\{[\s\S]*pointer-events:\s*none/, "ACE signature tooltip must not steal touch input");
@@ -384,6 +388,9 @@ assertIncludes(bridge, 'hasClassToken(target, "ace_fold-widget")', "fold placeho
 assertIncludes(bridge, "function isFoldPlaceholderTarget(target)", "fold placeholder target helper");
 assertIncludes(bridge, "function expandFoldFromDomEvent(event)", "fold placeholder DOM capture expansion");
 assertIncludes(bridge, "function handleFoldPlaceholderTouch(event)", "fold placeholder touch capture expansion");
+assertIncludes(bridge, 'cancelAceMobileTouchInteraction("fold_placeholder_touch_start")', "fold placeholder touch start cancels stale ACE mobile touch");
+assertIncludes(bridge, "if (beginFoldPlaceholderTouch(event))", "fold placeholder touchstart capture consumes fold taps");
+assertIncludes(bridge, "if (updateFoldPlaceholderTouch(event))", "fold placeholder touchmove capture preserves fold tap ownership");
 assertIncludes(bridge, "foldPlaceholderTouchExpanded", "fold placeholder touch expansion diagnostics");
 assertIncludes(bridge, '["touchstart", "touchmove", "touchend", "touchcancel"].forEach(function(type)', "fold placeholder touch listener set");
 assertIncludes(bridge, 'editor.container.addEventListener("click", expandFoldFromDomEvent, true)', "fold placeholder click capture listener");
@@ -453,6 +460,10 @@ assertIncludes(signatureHelp, "global.AutoJsAceSignatureHelp", "ACE signature he
 if (signatureHelp.includes("fetch(") || signatureHelp.includes("XMLHttpRequest") || signatureHelp.includes("eval(")) {
   throw new Error("Signature help must stay local and parser-only");
 }
+
+assertIncludes(completer, "modules: Object.create(null)", "ACE completer module map must avoid prototype inheritance");
+assertIncludes(completer, "function membersForModule(source, moduleName)", "ACE completer safe module lookup helper");
+assertIncludes(completer, "Object.prototype.hasOwnProperty.call(source.modules, moduleName)", "ACE completer module lookup must ignore inherited prototype keys");
 
 assertIncludes(aceCodeEditor, "private fun requestFirstPaintWhenStable()", "native first-paint request hook");
 assertIncludes(aceCodeEditor, 'invokeAce("requestFirstPaint", quote("native_ready"))', "native first-paint bridge call");

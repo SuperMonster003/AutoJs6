@@ -1534,13 +1534,14 @@
     function beginFoldPlaceholderTouch(event) {
         if (!editor || !editor.renderer || !isFoldPlaceholderTarget(event && event.target)) {
             foldTapCandidate = null;
-            return;
+            return false;
         }
         var touch = touchFromEvent(event);
         if (!touch) {
             foldTapCandidate = null;
-            return;
+            return false;
         }
+        cancelAceMobileTouchInteraction("fold_placeholder_touch_start");
         var position = editor.renderer.screenToTextCoordinates &&
             editor.renderer.screenToTextCoordinates(touch.clientX, touch.clientY);
         position = position || editor.getCursorPosition();
@@ -1550,22 +1551,25 @@
             row: position.row,
             column: position.column
         };
+        return true;
     }
 
     function updateFoldPlaceholderTouch(event) {
         if (!foldTapCandidate) {
-            return;
+            return false;
         }
         var touch = touchFromEvent(event);
         if (!touch) {
             foldTapCandidate = null;
-            return;
+            return false;
         }
         var dx = Number(touch.clientX) - foldTapCandidate.startX;
         var dy = Number(touch.clientY) - foldTapCandidate.startY;
         if (dx * dx + dy * dy > FOLD_TAP_TOUCH_SLOP_SQUARED) {
             foldTapCandidate = null;
+            return false;
         }
+        return true;
     }
 
     function finishFoldPlaceholderTouch(event) {
@@ -1593,11 +1597,17 @@
     function handleFoldPlaceholderTouch(event) {
         var type = event && event.type;
         if (type === "touchstart") {
-            beginFoldPlaceholderTouch(event);
+            if (beginFoldPlaceholderTouch(event)) {
+                stopFoldPlaceholderClick(event);
+            }
         } else if (type === "touchmove") {
-            updateFoldPlaceholderTouch(event);
+            if (updateFoldPlaceholderTouch(event)) {
+                stopFoldPlaceholderClick(event);
+            }
         } else if (type === "touchend") {
-            finishFoldPlaceholderTouch(event);
+            if (finishFoldPlaceholderTouch(event)) {
+                stopFoldPlaceholderClick(event);
+            }
         } else if (type === "touchcancel") {
             foldTapCandidate = null;
         }
@@ -1626,6 +1636,7 @@
             editor.renderer.screenToTextCoordinates(event.clientX, event.clientY);
         position = position || editor.getCursorPosition();
         if (expandFoldAt(position.row, position.column) || expandFoldAt(position.row, 0)) {
+            cancelAceMobileTouchInteraction("fold_placeholder_click");
             stopFoldPlaceholderClick(event);
             return true;
         }

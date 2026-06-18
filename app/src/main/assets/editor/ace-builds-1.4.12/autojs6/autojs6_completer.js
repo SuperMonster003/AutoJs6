@@ -44,7 +44,7 @@
     function normalizeIndices(indices) {
         var normalized = {
             globals: [],
-            modules: {},
+            modules: Object.create(null),
             snippets: indices && indices.snippets || []
         };
 
@@ -76,9 +76,22 @@
                 normalized.modules[moduleJson.name] = (moduleJson.properties || []).map(normalizeProperty);
             });
         } else {
-            normalized.modules = indices.modules || {};
+            var modules = indices.modules || {};
+            Object.keys(modules).forEach(function(moduleName) {
+                if (Array.isArray(modules[moduleName])) {
+                    normalized.modules[moduleName] = modules[moduleName];
+                }
+            });
         }
         return normalized;
+    }
+
+    function membersForModule(source, moduleName) {
+        if (!source || !source.modules || !Object.prototype.hasOwnProperty.call(source.modules, moduleName)) {
+            return null;
+        }
+        var members = source.modules[moduleName];
+        return Array.isArray(members) ? members : null;
     }
 
     function findMemberContext(session, pos) {
@@ -162,8 +175,9 @@
 
         var beforeToken = line.substring(0, token.startColumn);
         var memberMatch = /([A-Za-z_$][A-Za-z0-9_$]*)\s*\.\s*$/.exec(beforeToken);
-        if (memberMatch && source.modules[memberMatch[1]]) {
-            var member = findByName(source.modules[memberMatch[1]], token.name);
+        var members = memberMatch && membersForModule(source, memberMatch[1]);
+        if (members) {
+            var member = findByName(members, token.name);
             return toHover(member, memberMatch[1] + "." + token.name, memberMatch[1], row, token);
         }
 
@@ -213,10 +227,11 @@
 
             getCompletions: function(editor, session, pos, prefix, callback) {
                 var memberContext = findMemberContext(session, pos);
-                if (memberContext && source.modules[memberContext.moduleName]) {
+                var members = memberContext && membersForModule(source, memberContext.moduleName);
+                if (members) {
                     var replaceWithQualifiedName = (prefix || "").indexOf(".") >= 0;
                     callback(null, dedupe(collect(
-                        source.modules[memberContext.moduleName],
+                        members,
                         memberContext.memberPrefix,
                         1000,
                         function(item, name) {
