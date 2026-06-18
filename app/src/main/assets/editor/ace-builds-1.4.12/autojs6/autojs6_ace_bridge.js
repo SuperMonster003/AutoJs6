@@ -392,6 +392,12 @@
         return Math.min(Math.round(viewportWidth * 0.08), RIGHT_EDGE_GESTURE_GUARD_CSS_PX);
     }
 
+    function isRightEdgeGestureTouchStart(touch, viewportWidth) {
+        return isAndroidUserAgent() &&
+            !!touch &&
+            Number(touch.clientX) >= viewportWidth - rightEdgeGestureGuardWidth();
+    }
+
     function stopDomTouchEvent(event) {
         if (!event) {
             return;
@@ -455,9 +461,8 @@
                     Number(document.documentElement && document.documentElement.clientWidth) ||
                     1
             );
-            rightEdgeGestureGuardTracking = !!touch &&
-                Number(touch.clientX) >= viewportWidth - rightEdgeGestureGuardWidth();
-            rightEdgeGestureGuardActive = false;
+            rightEdgeGestureGuardTracking = isRightEdgeGestureTouchStart(touch, viewportWidth);
+            rightEdgeGestureGuardActive = rightEdgeGestureGuardTracking;
             rightEdgeGestureGuardNotified = false;
             rightEdgeGestureGuardStartX = touch ? Number(touch.clientX) : 0;
             rightEdgeGestureGuardStartY = touch ? Number(touch.clientY) : 0;
@@ -466,7 +471,11 @@
         }
         if (rightEdgeGestureGuardActive) {
             if (!rightEdgeGestureGuardNotified) {
-                cancelAceMobileTouchInteraction("right_edge_back_gesture_dom");
+                cancelAceMobileTouchInteraction(
+                    type === "touchstart" ?
+                        "right_edge_back_gesture_dom_touch_start" :
+                        "right_edge_back_gesture_dom"
+                );
             } else {
                 suppressSelectionActionModeMenu("right_edge_back_gesture_dom");
             }

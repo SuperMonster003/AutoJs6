@@ -448,7 +448,10 @@ assertIncludes(bridge, 'markTextMutationSelectionMenuSuppressed("session_change:
 assertIncludes(bridge, "suppressSelectionActionModeMenu: suppressSelectionActionModeMenu", "native pointer guard selection menu suppression API");
 assertIncludes(bridge, "function handleRightEdgeGestureGuardTouch(event)", "DOM right-edge gesture guard");
 assertIncludes(bridge, "function maybeActivateRightEdgeGestureGuard(event)", "DOM right-edge gesture deferred activation");
+assertIncludes(bridge, "function isRightEdgeGestureTouchStart(touch, viewportWidth)", "DOM right-edge touchstart guard predicate");
+assertIncludes(bridge, "rightEdgeGestureGuardActive = rightEdgeGestureGuardTracking;", "DOM right-edge touchstart activates guard");
 assertIncludes(bridge, "dx <= -RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X", "DOM right-edge guard requires a left swipe");
+assertIncludes(bridge, '"right_edge_back_gesture_dom_touch_start"', "DOM right-edge touchstart cancels ACE long-touch state");
 assertIncludes(bridge, 'document.addEventListener(type, handleRightEdgeGestureGuardTouch, true)', "DOM right-edge gesture capture listener");
 assertIncludes(bridge, "function wrapScrollMethod(owner, methodName)", "scroll method hook wrapper");
 assertIncludes(bridge, 'wrapScrollMethod(editor.renderer, "scrollToY")', "renderer vertical scroll hook");

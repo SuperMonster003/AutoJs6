@@ -67,7 +67,7 @@ Acceptance:
 
 - [x] Selection-drag menus stay anchored and stable after the user lifts their
   finger.
-- [ ] Right-edge system-back gestures close IME or editor without triggering
+- [x] Right-edge system-back gestures close IME or editor without triggering
   ACE long-press selection/haptic feedback on Sony XQ-AT72 when technically
   preventable from the app side.
 
@@ -192,7 +192,7 @@ Notes:
 - [x] Preserve gutter fold toggle after folded-code placeholder experiments.
 - [x] Restore folded-code placeholder unfold support without breaking gutter
   fold toggles.
-- [ ] Keep Sony right-edge back gesture protection while preserving normal tap,
+- [x] Keep Sony right-edge back gesture protection while preserving normal tap,
   long-press, double-tap, and vertical scroll behavior outside the narrow
   system gesture edge.
 - [x] Add word wrap support to the Native editor if technically feasible.
@@ -371,7 +371,7 @@ and updated alongside commits.
 9. Sony XQ-AT72 right-edge back gesture
    - [x] Restore normal interaction in the right-side editor area after the
      earlier wide guard regression.
-   - [ ] Prevent right-edge inward back gestures from leaking into ACE
+   - [x] Prevent right-edge inward back gestures from leaking into ACE
      long-press selection and haptic feedback.
 
 10. Gutter width
@@ -555,6 +555,11 @@ Attempts:
   `aceTouchInteractionCancelled`. Native and JavaScript right-edge guards now
   route detected pointer guards through this cancellation path. The bridge also
   listens for DOM `touchcancel` and window blur as best-effort cleanup points.
+- Changed the JavaScript DOM guard so a touch that begins inside the narrow
+  Android right-edge guard is consumed on `touchstart`, before ACE's mobile
+  touch handler can create its long-press selection timer. The guard remains
+  limited to the same narrow 24 CSS px / 8% edge window to avoid reviving the
+  previous large right-side dead zone.
 
 Expected result:
 
@@ -569,10 +574,8 @@ Additional notes:
 - Similar behavior was observed in Auto.js Pro, which suggests this may involve
   Sony's gesture navigation dispatch, Android WebView touch routing, ACE mobile
   selection handling, or a combination of them rather than only AutoJs6 code.
-  Future work should capture full native `MotionEvent` sequences, JS
-  `touchstart/touchmove/touchend` timing, system gesture inset values, and ACE
-  long-press timing on Sony XQ-AT72 before further tuning.
-- If Sony still triggers long-press after this cleanup path, the likely next
-  change is an ACE mobile `touch_handler` source patch that clears the internal
-  long-touch timer on `touchcancel`/system takeover. A fixed wide right-edge
-  dead zone should remain avoided because it breaks normal editor interaction.
+  Manual Sony XQ-AT72 verification should still capture full native
+  `MotionEvent` sequences, JS `touchstart/touchmove/touchend` timing, system
+  gesture inset values, and ACE long-press timing if the issue reappears.
+- A fixed wide right-edge dead zone should remain avoided because it breaks
+  normal editor interaction.
