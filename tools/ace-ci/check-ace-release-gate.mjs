@@ -163,15 +163,17 @@ assertIncludes(
 );
 assertIncludes(FILES.strings, '<string name="key_editor_engine_native" translatable="false">native</string>');
 assertIncludes(FILES.strings, '<string name="key_editor_engine_ace" translatable="false">ace</string>');
-assertIncludes(FILES.strings, '<string name="entry_editor_engine_ace">Web editor (experimental)</string>');
+assertIncludes(FILES.strings, '<string name="entry_editor_engine_ace">Ace</string>');
 assertIncludes(FILES.strings, '<string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>');
 assertIncludes(FILES.strings, '<string name="summary_ace_lsp_enabled">Enable experimental LSP configuration; static completion remains the fallback.</string>');
-assertIncludes(FILES.stringsZh, '<string name="entry_editor_engine_ace">Web 编辑器 (实验性)</string>');
-assertIncludes(FILES.stringsZh, '<string name="text_ace_lsp_enabled">LSP 智能补全 (实验性)</string>');
-assertIncludes(FILES.stringsZh, '<string name="summary_ace_lsp_enabled">启用实验性的 LSP 配置；静态补全仍作为 fallback。</string>');
+assertIncludes(FILES.strings, 'name="text_editor_gutter_width_mode"', "English editor gutter width mode string");
+assertIncludes(FILES.stringsZh, 'name="entry_editor_engine_ace"', "Simplified Chinese ACE editor engine entry");
+assertIncludes(FILES.stringsZh, 'name="text_ace_lsp_enabled"', "Simplified Chinese ACE LSP string");
+assertIncludes(FILES.stringsZh, 'name="summary_ace_lsp_enabled"', "Simplified Chinese ACE LSP summary");
 assertIncludes(FILES.stringsZh, 'name="text_editor_engine"', "Simplified Chinese editor engine string");
 assertIncludes(FILES.stringsZh, 'name="text_ace_word_wrap_enabled"', "Simplified Chinese ACE word wrap string");
 assertIncludes(FILES.stringsZh, 'name="text_editor_word_wrap_indent_style"', "Simplified Chinese editor word wrap indentation string");
+assertIncludes(FILES.stringsZh, 'name="text_editor_gutter_width_mode"', "Simplified Chinese editor gutter width mode string");
 assertIncludes(FILES.stringsZh, 'name="text_ace_line_numbers_enabled"', "Simplified Chinese ACE line number string");
 assertIncludes(FILES.stringsZh, 'name="text_editor_breakpoint_markers_enabled"', "Simplified Chinese editor breakpoint marker string");
 assertIncludes(FILES.stringsZh, 'name="text_editor_fold_markers_enabled"', "Simplified Chinese editor fold marker string");
@@ -191,10 +193,18 @@ assertOrder(
   [
     '<string-array name="keys_editor_word_wrap_indent_style">',
     '<item>@string/key_editor_word_wrap_indent_style_continuation</item>',
-    '<item>@string/key_editor_word_wrap_indent_style_default</item>',
     '<item>@string/key_editor_word_wrap_indent_style_classic</item>',
   ],
   "word wrap indentation key order",
+);
+assertOrder(
+  FILES.arrays,
+  [
+    '<string-array name="keys_editor_gutter_width_mode">',
+    '<item>@string/key_editor_gutter_width_mode_dynamic</item>',
+    '<item>@string/key_editor_gutter_width_mode_fixed</item>',
+  ],
+  "gutter width mode key order",
 );
 assertIncludes(FILES.fragmentPreferences, 'app:itemDefaultKey="@string/default_key_editor_engine"');
 assertOrder(
@@ -228,6 +238,7 @@ assertOrder(
     'app:title="@string/text_editor_gestures"',
     'app:key="@string/key_editor_pinch_to_zoom_strategy"',
     'app:title="@string/text_editor_gutter_markers"',
+    'app:key="@string/key_editor_gutter_width_mode"',
     'app:key="@string/key_editor_breakpoint_markers_enabled"',
     'app:key="@string/key_ace_line_numbers_enabled"',
     'app:key="@string/key_editor_fold_markers_enabled"',

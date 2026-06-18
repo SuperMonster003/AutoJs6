@@ -734,8 +734,9 @@ class CodeEditor : HVScrollView {
         showBreakpointMarkers: Boolean,
         showLineNumbers: Boolean,
         showFoldMarkers: Boolean,
+        gutterWidthMode: String,
     ) {
-        codeEditText.setGutterDisplayOptions(showBreakpointMarkers, showLineNumbers, showFoldMarkers)
+        codeEditText.setGutterDisplayOptions(showBreakpointMarkers, showLineNumbers, showFoldMarkers, gutterWidthMode)
     }
 
     private fun addOrRemoveBreakpoint(line: Int) {

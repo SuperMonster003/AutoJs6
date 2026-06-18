@@ -35,7 +35,8 @@ Acceptance:
 ## Gate UX-1: Immediate ACE Surface Fixes
 
 - [x] Increase dark-theme selection contrast.
-- [x] Stabilize gutter width to avoid shifts around 99/100 and 999/1000.
+- [x] Add dynamic/fixed gutter width modes, keeping dynamic width as the
+  default while preserving an optional stable fixed-width mode.
 - [ ] Allow clicking folded-code placeholders to unfold.
 - [x] Preserve expected automatic cursor reveal on IME/panel changes, but avoid
   unsolicited pull-back while browsing selected code.
@@ -43,8 +44,10 @@ Acceptance:
 Acceptance:
 
 - [x] Selection is visible in dark theme.
-- [x] Gutter width does not shrink during the editing session and grows only
-  when higher line-number digits become visible.
+- [x] Dynamic gutter width remains the default and follows the currently
+  visible line-number digits.
+- [x] Fixed gutter width does not shrink during the editing session and grows
+  only when higher line-number digits become visible.
 - [ ] Fold placeholders unfold without requiring the gutter triangle.
 - [x] Scrolling selected text offscreen does not pull the editor back unless an
   explicit viewport event such as IME or panel resize requires it.
@@ -220,6 +223,14 @@ Notes:
   fallbacks; Native applies breakpoint marker and line-number visibility, while
   fold markers remain disabled/no-op because the Native editor has no fold
   marker surface.
+- Gutter width now has a shared Dynamic/Fixed setting. Dynamic mode is the
+  default and follows the currently visible line-number digits. Fixed mode keeps
+  a stable session width, starts from the total digit count below 1000 lines or
+  four digits at/above 1000 lines, and grows only when larger visible line
+  numbers require it.
+- When all supported gutter content is hidden, ACE disables its renderer gutter
+  and Native drops its left padding to zero so the narrow empty gutter strip is
+  not left behind.
 - The standalone Code editor settings page now exists and the global settings
   Code editor group has been reduced to engine, log behavior, auto-show log
   panel, and an All settings entry. The editor overflow menu now keeps only

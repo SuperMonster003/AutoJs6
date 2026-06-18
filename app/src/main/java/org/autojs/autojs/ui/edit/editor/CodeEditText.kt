@@ -92,6 +92,8 @@ class CodeEditText : AppCompatEditText {
     private var mShowBreakpointMarkers = true
     private var mShowLineNumbers = true
     private var mShowFoldMarkers = true
+    private var mGutterWidthMode = EditorDisplayPreferences.GUTTER_WIDTH_MODE_DYNAMIC
+    private var mFixedGutterLineNumberDigits = 1
     var isWordWrapEnabled = false
         private set
 
@@ -185,17 +187,24 @@ class CodeEditText : AppCompatEditText {
         showBreakpointMarkers: Boolean,
         showLineNumbers: Boolean,
         showFoldMarkers: Boolean,
+        gutterWidthMode: String,
     ) {
+        val normalizedGutterWidthMode = EditorDisplayPreferences.normalizeGutterWidthMode(gutterWidthMode)
         if (
             mShowBreakpointMarkers == showBreakpointMarkers &&
             mShowLineNumbers == showLineNumbers &&
-            mShowFoldMarkers == showFoldMarkers
+            mShowFoldMarkers == showFoldMarkers &&
+            mGutterWidthMode == normalizedGutterWidthMode
         ) {
             return
         }
         mShowBreakpointMarkers = showBreakpointMarkers
         mShowLineNumbers = showLineNumbers
         mShowFoldMarkers = showFoldMarkers
+        if (mGutterWidthMode != normalizedGutterWidthMode) {
+            mGutterWidthMode = normalizedGutterWidthMode
+            mFixedGutterLineNumberDigits = fixedGutterBaseLineNumberDigits()
+        }
         updatePaddingForGutter()
         invalidate()
     }
@@ -401,8 +410,8 @@ class CodeEditText : AppCompatEditText {
 
             layout ?: return super.onDraw(canvas).also { postInvalidate() }
 
-            updatePaddingForGutter()
             updateLineRangeForDraw(canvas)
+            updatePaddingForGutter()
 
             // 检查行范围是否有效
             if (mFirstLineForDraw < 0 || mFirstLineForDraw > mLastLineForDraw) {
@@ -480,10 +489,42 @@ class CodeEditText : AppCompatEditText {
         }
 
         // 根据行号计算左边距 padding 留出绘制行号的空间
-        val gutterWidth = calculateGutterWidth(getLogicalLineCount().toString().length)
+        val gutterWidth = calculateGutterWidth(lineNumberDigitsForGutter())
         if (paddingLeft != gutterWidth) {
             setPadding(gutterWidth, 0, 0, 0)
         }
+    }
+
+    private fun lineNumberDigitsForGutter(): Int {
+        if (!mShowLineNumbers) {
+            return 1
+        }
+        val visibleDigits = visibleLineNumberDigits()
+        if (mGutterWidthMode != EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED) {
+            return visibleDigits
+        }
+        val digits = maxOf(fixedGutterBaseLineNumberDigits(), mFixedGutterLineNumberDigits, visibleDigits)
+        if (digits != mFixedGutterLineNumberDigits) {
+            mFixedGutterLineNumberDigits = digits
+        }
+        return digits
+    }
+
+    private fun visibleLineNumberDigits(): Int {
+        val currentLayout = layout ?: return 1
+        val fallbackLine = currentLayout.getLineForOffset(selectionStart.coerceAtLeast(0))
+        val firstVisualLine = mFirstLineForDraw.takeIf { it >= 0 } ?: fallbackLine
+        val lastVisualLine = mLastLineForDraw
+            .takeIf { it >= firstVisualLine }
+            ?: firstVisualLine
+        val firstLineNumber = getLogicalLineForVisualLine(firstVisualLine) + 1
+        val lastLineNumber = getLogicalLineForVisualLine(lastVisualLine) + 1
+        return maxOf(firstLineNumber, lastLineNumber, 1).toString().length
+    }
+
+    private fun fixedGutterBaseLineNumberDigits(): Int {
+        val lineCount = getLogicalLineCount().coerceAtLeast(1)
+        return if (lineCount >= 1000) 4 else lineCount.toString().length
     }
 
     private fun calculateGutterWidth(lineNumberDigits: Int): Int {

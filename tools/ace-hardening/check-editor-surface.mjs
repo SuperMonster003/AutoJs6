@@ -344,7 +344,10 @@ assertIncludes(bridge, 'callBridgeString("getWordWrapIndentStyle", "continuation
 assertIncludes(bridge, 'callBridgeBoolean("isLineNumbersEnabled", true)', "ACE line number preference bridge");
 assertIncludes(bridge, 'callBridgeBoolean("isBreakpointMarkersEnabled", true)', "ACE breakpoint marker preference bridge");
 assertIncludes(bridge, 'callBridgeBoolean("isFoldMarkersEnabled", true)', "ACE fold marker preference bridge");
-assertIncludes(bridge, "fixedWidthGutter: true", "fixed-width ACE gutter");
+assertIncludes(bridge, 'callBridgeString("getGutterWidthMode", "dynamic")', "ACE gutter width mode preference bridge");
+assertIncludes(bridge, 'fixedWidthGutter: gutterWidthMode === "fixed"', "preference-driven ACE gutter width");
+assertIncludes(bridge, "showGutter: hasVisibleGutterContent()", "ACE gutter hides when all gutter content is disabled");
+assertIncludes(bridge, 'setEditorContainerClass("autojs6-hide-gutter", !showGutter)', "ACE gutter hide class runtime sync");
 assertIncludes(bridge, "indentedSoftWrap: normalizeWordWrapIndentStyle(wordWrapIndentStyle) !== \"classic\"", "ACE word wrap indentation init option");
 assertIncludes(bridge, "showFoldWidgets: foldMarkersEnabled", "ACE fold widget preference option");
 assertIncludes(bridge, "function expandFoldAt(row, column)", "fold placeholder expansion helper");
@@ -359,6 +362,7 @@ assertIncludes(bridge, "setWordWrapIndentStyle: setWordWrapIndentStyle", "ACE wo
 assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line number runtime API");
 assertIncludes(bridge, "setBreakpointMarkersEnabled: setBreakpointMarkersEnabled", "ACE breakpoint marker runtime API");
 assertIncludes(bridge, "setFoldMarkersEnabled: setFoldMarkersEnabled", "ACE fold marker runtime API");
+assertIncludes(bridge, "setGutterWidthMode: setGutterWidthMode", "ACE gutter width mode runtime API");
 assertIncludes(bridge, "function setFontSizeSpKeepingFocus", "ACE focus-preserving zoom helper");
 assertIncludes(bridge, "setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus", "ACE focus-preserving zoom public API");
 assertIncludes(bridge, "function insertTab()", "ACE shortcut TAB helper");

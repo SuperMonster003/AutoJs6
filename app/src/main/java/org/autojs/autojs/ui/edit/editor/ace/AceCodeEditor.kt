@@ -532,6 +532,7 @@ class AceCodeEditor @JvmOverloads constructor(
         invokeAce("setLineNumbersEnabled", EditorDisplayPreferences.isLineNumbersEnabled().toString())
         invokeAce("setBreakpointMarkersEnabled", EditorDisplayPreferences.isBreakpointMarkersEnabled().toString())
         invokeAce("setFoldMarkersEnabled", EditorDisplayPreferences.isFoldMarkersEnabled().toString())
+        invokeAce("setGutterWidthMode", quote(EditorDisplayPreferences.gutterWidthMode()))
     }
 
     private fun applyPinchToZoomStrategy(newKey: String?) {
@@ -979,6 +980,10 @@ class AceCodeEditor @JvmOverloads constructor(
 
     internal fun bridgeFoldMarkersEnabled(): Boolean {
         return AceEditorDisplayPreferences.isFoldMarkersEnabled()
+    }
+
+    internal fun bridgeGutterWidthMode(): String {
+        return AceEditorDisplayPreferences.gutterWidthMode()
     }
 
     internal fun bridgeLspOptions(): String {

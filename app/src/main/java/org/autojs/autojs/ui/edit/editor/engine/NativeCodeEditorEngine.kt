@@ -351,6 +351,7 @@ class NativeCodeEditorEngine(
             showBreakpointMarkers = EditorDisplayPreferences.isBreakpointMarkersEnabled(),
             showLineNumbers = EditorDisplayPreferences.isLineNumbersEnabled(),
             showFoldMarkers = EditorDisplayPreferences.isFoldMarkersEnabled(),
+            gutterWidthMode = EditorDisplayPreferences.gutterWidthMode(),
         )
     }
 

@@ -12,8 +12,10 @@
     var dirty = false;
     var suppressChange = false;
     var breakpoints = [];
+    var lineNumbersEnabled = true;
     var breakpointMarkersEnabled = true;
     var foldMarkersEnabled = true;
+    var gutterWidthMode = "dynamic";
     var debugMarker = null;
     var storedReplacement = "";
     var scrollNotifyTimer = null;
@@ -1287,9 +1289,19 @@
         notifyStateChanged("wordWrapIndentStyleChanged");
     }
 
+    function normalizeGutterWidthMode(mode) {
+        mode = String(mode || "").toLowerCase();
+        return mode === "fixed" ? "fixed" : "dynamic";
+    }
+
+    function hasVisibleGutterContent() {
+        return !!(lineNumbersEnabled || breakpointMarkersEnabled || foldMarkersEnabled);
+    }
+
     function setLineNumbersEnabled(enabled) {
-        editor.setOption("showLineNumbers", !!enabled);
-        scheduleResize("line_numbers_changed");
+        lineNumbersEnabled = !!enabled;
+        editor.setOption("showLineNumbers", lineNumbersEnabled);
+        applyGutterOptions("line_numbers_changed");
         notifyStateChanged("lineNumbersChanged");
     }
 
@@ -1299,10 +1311,36 @@
         }
     }
 
+    function applyGutterOptions(reason) {
+        var showGutter = hasVisibleGutterContent();
+        try {
+            editor.setOption("fixedWidthGutter", gutterWidthMode === "fixed");
+        } catch (ignore) {
+            // ACE asset swaps may not expose fixedWidthGutter through setOption.
+        }
+        try {
+            editor.renderer.setShowGutter(showGutter);
+        } catch (ignore2) {
+            try {
+                editor.setOption("showGutter", showGutter);
+            } catch (ignore3) {
+                // CSS fallback below still removes the gutter visually.
+            }
+        }
+        setEditorContainerClass("autojs6-hide-gutter", !showGutter);
+        scheduleResize(reason || "gutter_changed");
+    }
+
+    function setGutterWidthMode(mode) {
+        gutterWidthMode = normalizeGutterWidthMode(mode);
+        applyGutterOptions("gutter_width_mode_changed");
+        notifyStateChanged("gutterWidthModeChanged");
+    }
+
     function setBreakpointMarkersEnabled(enabled) {
         breakpointMarkersEnabled = !!enabled;
         setEditorContainerClass("autojs6-hide-breakpoint-markers", !breakpointMarkersEnabled);
-        scheduleResize("breakpoint_markers_changed");
+        applyGutterOptions("breakpoint_markers_changed");
         notifyStateChanged("breakpointMarkersChanged");
     }
 
@@ -1314,7 +1352,7 @@
             // ACE 1.4.x also honors the CSS fallback below.
         }
         setEditorContainerClass("autojs6-hide-fold-markers", !foldMarkersEnabled);
-        scheduleResize("fold_markers_changed");
+        applyGutterOptions("fold_markers_changed");
         notifyStateChanged("foldMarkersChanged");
     }
 
@@ -1506,9 +1544,10 @@
         var initialTheme = callBridge("getTheme") || "ace/theme/textmate";
         var wordWrapEnabled = callBridgeBoolean("isWordWrapEnabled", false);
         var wordWrapIndentStyle = callBridgeString("getWordWrapIndentStyle", "continuation");
-        var lineNumbersEnabled = callBridgeBoolean("isLineNumbersEnabled", true);
+        lineNumbersEnabled = callBridgeBoolean("isLineNumbersEnabled", true);
         breakpointMarkersEnabled = callBridgeBoolean("isBreakpointMarkersEnabled", true);
         foldMarkersEnabled = callBridgeBoolean("isFoldMarkersEnabled", true);
+        gutterWidthMode = normalizeGutterWidthMode(callBridgeString("getGutterWidthMode", "dynamic"));
         applyThemeClass(initialTheme);
         editor.setTheme(initialTheme);
         editor.setOptions({
@@ -1518,7 +1557,8 @@
             showPrintMargin: false,
             showLineNumbers: lineNumbersEnabled,
             showFoldWidgets: foldMarkersEnabled,
-            fixedWidthGutter: true,
+            showGutter: hasVisibleGutterContent(),
+            fixedWidthGutter: gutterWidthMode === "fixed",
             highlightActiveLine: true,
             indentedSoftWrap: normalizeWordWrapIndentStyle(wordWrapIndentStyle) !== "classic",
             wrap: wordWrapEnabled,
@@ -1527,6 +1567,7 @@
         session.setUseWrapMode(wordWrapEnabled);
         setEditorContainerClass("autojs6-hide-breakpoint-markers", !breakpointMarkersEnabled);
         setEditorContainerClass("autojs6-hide-fold-markers", !foldMarkersEnabled);
+        setEditorContainerClass("autojs6-hide-gutter", !hasVisibleGutterContent());
         editor.setFontSize("14px");
 
         if (global.AutoJsAceCompleter) {
@@ -1632,6 +1673,7 @@
             setLineNumbersEnabled: setLineNumbersEnabled,
             setBreakpointMarkersEnabled: setBreakpointMarkersEnabled,
             setFoldMarkersEnabled: setFoldMarkersEnabled,
+            setGutterWidthMode: setGutterWidthMode,
             scheduleResize: scheduleResize,
             requestFirstPaint: requestFirstPaint,
             restoreScroll: restoreScroll,

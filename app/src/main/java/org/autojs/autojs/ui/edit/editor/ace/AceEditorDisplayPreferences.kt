@@ -46,4 +46,12 @@ object AceEditorDisplayPreferences {
     fun setFoldMarkersEnabled(enabled: Boolean) {
         EditorDisplayPreferences.setFoldMarkersEnabled(enabled)
     }
+
+    fun gutterWidthMode(): String {
+        return EditorDisplayPreferences.gutterWidthMode()
+    }
+
+    fun setGutterWidthMode(mode: String) {
+        EditorDisplayPreferences.setGutterWidthMode(mode)
+    }
 }

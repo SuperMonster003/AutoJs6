@@ -118,6 +118,15 @@ body.ace-ready #editor {
     pointer-events: none !important;
 }
 
+#editor.autojs6-hide-gutter .ace_gutter {
+    display: none !important;
+    width: 0 !important;
+}
+
+#editor.autojs6-hide-gutter .ace_scroller {
+    left: 0 !important;
+}
+
 .autojs6_debug_line {
     position: absolute;
     z-index: 5;

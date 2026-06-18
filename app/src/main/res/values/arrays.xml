@@ -160,6 +160,16 @@
         <item>@string/entry_editor_engine_native</item>
     </string-array>
 
+    <string-array name="keys_editor_gutter_width_mode">
+        <item>@string/key_editor_gutter_width_mode_dynamic</item>
+        <item>@string/key_editor_gutter_width_mode_fixed</item>
+    </string-array>
+
+    <string-array name="values_editor_gutter_width_mode">
+        <item>@string/entry_editor_gutter_width_mode_dynamic</item>
+        <item>@string/entry_editor_gutter_width_mode_fixed</item>
+    </string-array>
+
     <string-array name="keys_ace_editor_font">
         <item>@string/key_ace_editor_font_jetbrains_mono</item>
         <item>@string/key_ace_editor_font_source_code_pro</item>

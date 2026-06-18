@@ -1438,6 +1438,8 @@
     <string name="entry_ace_editor_font_system_monospace">系统等宽字体</string>
     <string name="entry_editor_engine_ace">Ace</string>
     <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_gutter_width_mode_dynamic">动态</string>
+    <string name="entry_editor_gutter_width_mode_fixed">固定</string>
     <string name="entry_editor_word_wrap_indent_style_classic">顶格续行</string>
     <string name="entry_editor_word_wrap_indent_style_continuation">延续缩进</string>
     <string name="entry_editor_word_wrap_indent_style_default">默认</string>
@@ -1473,6 +1475,7 @@
     <string name="text_ace_lsp_enabled">LSP 智能补全 (实验性)</string>
     <string name="text_ace_set_sample">设置示例</string>
     <string name="text_ace_word_wrap_enabled">自动换行</string>
+    <string name="text_editor_gutter_width_mode">边栏宽度</string>
     <string name="text_editor_word_wrap_indent_style">换行缩进</string>
     <string name="text_editor_engine">编辑器引擎</string>
     <string name="text_editor_engine_switched" formatted="true">编辑器引擎已切换为 %s</string>
@@ -1483,6 +1486,7 @@
     <string name="summary_editor_setting_unavailable_for_current_engine">不适用于当前编辑器引擎。</string>
     <string name="summary_ace_lsp_enabled">启用实验性的 LSP 配置；静态补全仍作为 fallback。</string>
     <string name="summary_ace_word_wrap_enabled">在编辑器可视区域内对长行自动换行。</string>
+    <string name="summary_editor_gutter_width_mode">选择边栏跟随可见行号位数变化，或在当前会话中保持稳定宽度。</string>
     <string name="summary_editor_word_wrap_indent_style">选择自动换行后的视觉续行缩进方式。</string>
     <string name="description_ace_editor_font_preference">选择编辑器字体。JetBrains Mono 为默认字体；Source Code Pro 和系统等宽字体作为 fallback。</string>
     <string name="description_ace_line_numbers_enabled_preference">显示或隐藏编辑器边栏行号。代码折叠、断点和边栏布局仍然可用。</string>
@@ -1490,6 +1494,7 @@
     <string name="description_editor_fold_markers_enabled_preference">显示或隐藏编辑器边栏中的代码折叠标记。JsDroidEditor 没有折叠标记显示面。</string>
     <string name="description_ace_lsp_enabled_preference">实验性 LSP 支持默认关闭。当前版本仅暴露桥接配置；如果没有可用的 LSP server，编辑器会继续使用静态补全。</string>
     <string name="description_ace_word_wrap_enabled_preference">为长行启用编辑器自动换行模式。此设置不会修改文件内容。</string>
+    <string name="description_editor_gutter_width_mode_preference">动态宽度会跟随当前可见行号位数变化。固定宽度会预留稳定的最小宽度，并且只在看到更高位数的行号时增大。</string>
     <string name="description_editor_word_wrap_indent_style_preference">延续缩进会让自动换行后的视觉续行与原行缩进对齐。顶格续行会让视觉续行从可视区域边缘开始。</string>
     <string name="description_editor_engine_preference">Ace 是默认编辑器引擎。JsDroidEditor 仍可作为 fallback 使用，也可以手动选择。</string>
     <string name="text_code_editor">代码编辑器</string>

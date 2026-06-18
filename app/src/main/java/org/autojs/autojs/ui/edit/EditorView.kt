@@ -477,6 +477,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         EditorDisplayPreferences.KEY_LINE_NUMBERS_ENABLED,
         EditorDisplayPreferences.KEY_BREAKPOINT_MARKERS_ENABLED,
         EditorDisplayPreferences.KEY_FOLD_MARKERS_ENABLED,
+        EditorDisplayPreferences.KEY_GUTTER_WIDTH_MODE,
     )
 
     private val mEditorDisplayPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->

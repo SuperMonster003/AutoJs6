@@ -78,6 +78,11 @@ class AceBridge(
     }
 
     @JavascriptInterface
+    fun getGutterWidthMode(): String {
+        return editor.bridgeGutterWidthMode()
+    }
+
+    @JavascriptInterface
     fun getLspOptions(): String {
         return editor.bridgeLspOptions()
     }

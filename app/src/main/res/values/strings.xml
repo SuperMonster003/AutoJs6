@@ -37,6 +37,7 @@
     <string name="default_key_app_language" translatable="false">@string/key_app_language_auto</string>
     <string name="default_key_documentation_source" translatable="false">@string/key_documentation_source_local</string>
     <string name="default_key_editor_engine" translatable="false">@string/key_editor_engine_ace</string>
+    <string name="default_key_editor_gutter_width_mode" translatable="false">@string/key_editor_gutter_width_mode_dynamic</string>
     <string name="default_key_editor_log_button_behavior" translatable="false">@string/key_editor_log_button_behavior_bottom_sheet</string>
     <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
     <string name="default_key_editor_word_wrap_indent_style" translatable="false">@string/key_editor_word_wrap_indent_style_continuation</string>
@@ -134,6 +135,9 @@
     <string name="key_editor_engine" translatable="false">key_$_editor_engine</string>
     <string name="key_editor_engine_ace" translatable="false">ace</string>
     <string name="key_editor_engine_native" translatable="false">native</string>
+    <string name="key_editor_gutter_width_mode" translatable="false">key_$_editor_gutter_width_mode</string>
+    <string name="key_editor_gutter_width_mode_dynamic" translatable="false">dynamic</string>
+    <string name="key_editor_gutter_width_mode_fixed" translatable="false">fixed</string>
     <string name="key_editor_text_size" translatable="false">key_$_editor_text_size</string>
     <string name="key_editor_theme" translatable="false">key_$_editor_theme</string>
     <string name="key_enable_a11y_service_with_root_access" translatable="false">key_$_enable_a11y_service_with_root_access</string>
@@ -494,6 +498,8 @@
     <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
     <string name="entry_editor_engine_ace">Ace</string>
     <string name="entry_editor_engine_native">JsDroidEditor</string>
+    <string name="entry_editor_gutter_width_mode_dynamic">Dynamic</string>
+    <string name="entry_editor_gutter_width_mode_fixed">Fixed</string>
     <string name="entry_editor_word_wrap_indent_style_classic">Flush continuation</string>
     <string name="entry_editor_word_wrap_indent_style_continuation">Continuation indent</string>
     <string name="entry_editor_word_wrap_indent_style_default">Default</string>
@@ -1109,6 +1115,7 @@
     <string name="text_ace_editor_fallback_native" formatted="true">Ace editor failed (%1$s); switched to JsDroidEditor. Copy Ace diagnostics from the More menu for details</string>
     <string name="text_ace_large_file_uses_native_editor">Ace editor is routed to JsDroidEditor by the active fallback policy</string>
     <string name="text_ace_word_wrap_enabled">Word wrap</string>
+    <string name="text_editor_gutter_width_mode">Gutter width</string>
     <string name="text_editor_word_wrap_indent_style">Wrap indentation</string>
 
     <plurals name="text_ace_action_used_times">
@@ -1804,6 +1811,7 @@
     <string name="summary_editor_setting_unavailable_for_current_engine">Not available for the current editor engine.</string>
     <string name="summary_ace_lsp_enabled">Enable experimental LSP configuration; static completion remains the fallback.</string>
     <string name="summary_ace_word_wrap_enabled">Wrap long lines inside the editor viewport.</string>
+    <string name="summary_editor_gutter_width_mode">Choose whether the gutter follows visible line digits or keeps a stable session width.</string>
     <string name="summary_editor_word_wrap_indent_style">Choose how wrapped visual continuation lines are indented.</string>
     <string name="text_ace_lsp_enabled">LSP smart completion (experimental)</string>
     <string name="description_editor_log_button_behavior_preference">Choose how the editor log button opens logs: bottom log panel or fullscreen log page.</string>
@@ -1814,5 +1822,6 @@
     <string name="description_editor_fold_markers_enabled_preference">Show or hide code folding markers in the editor gutter. JsDroidEditor has no fold-marker surface.</string>
     <string name="description_ace_lsp_enabled_preference">Experimental LSP support is off by default. The current build only exposes bridge options; if no LSP server is available, the editor keeps using static completion.</string>
     <string name="description_ace_word_wrap_enabled_preference">Enable editor wrap mode for long lines. This does not modify file contents.</string>
+    <string name="description_editor_gutter_width_mode_preference">Dynamic width follows currently visible line-number digits. Fixed width preallocates a stable minimum and grows only when larger visible line numbers require it.</string>
     <string name="description_editor_word_wrap_indent_style_preference">Continuation indent keeps wrapped visual lines aligned with the original indentation. Flush continuation starts wrapped visual lines at the viewport edge.</string>
 </resources>
