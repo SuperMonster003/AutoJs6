@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.settings
 import android.content.Context
 import android.os.Build
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
+import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
@@ -54,6 +55,7 @@ object NodeDoctorReportGenerator {
             put("nativeLibraries", nativeLibrariesJson(context, probeResult))
             put("capabilityProfile", capabilityProfileJson())
             put("bridgeCapabilities", bridgeCapabilitiesJson())
+            put("bridgeProviders", bridgeProvidersJson(context))
             put("packagedTemplate", packagedTemplateJson(context))
             put("lastNodeError", lastErrorJson())
             put(
@@ -195,6 +197,10 @@ object NodeDoctorReportGenerator {
         }
     }
 
+    private fun bridgeProvidersJson(context: Context): JSONArray {
+        return NodeBridgeProviderRegistry.toJsonArray(NodeBridgeProviderRegistry.androidHealth(context))
+    }
+
     private fun packagedTemplateJson(context: Context) = JSONObject().apply {
         val assets = runCatching { context.assets.list("").orEmpty().toList() }.getOrDefault(emptyList())
         val present = TEMPLATE_APK_NAME in assets
@@ -285,6 +291,16 @@ object NodeDoctorReportGenerator {
             appendLine("  network Android permissions: ${networkCapability.getJSONArray("requiredAndroidPermissions").join(", ")}")
             appendLine("  controlled network modules: ${networkCapability.getJSONArray("controlledModules").join(", ")}")
             appendLine("  raw Node network modules enabled: ${networkCapability.getBoolean("rawNodeNetworkModulesEnabled")}")
+            appendLine()
+            appendLine("Bridge Providers:")
+            val bridgeProviders = json.getJSONArray("bridgeProviders")
+            for (index in 0 until bridgeProviders.length()) {
+                val provider = bridgeProviders.getJSONObject(index)
+                appendLine(
+                    "  ${provider.getString("displayName")}: status=${provider.getString("status")} " +
+                            "version=${provider.getString("version")} active=${provider.getInt("activeResourceCount")}",
+                )
+            }
             appendLine()
             appendLine("Packaged Template:")
             appendLine("  ${packagedTemplate.getString("templateAsset")}: ${packagedTemplate.getString("status")}")

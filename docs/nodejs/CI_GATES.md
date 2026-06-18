@@ -179,6 +179,9 @@ $env:ANDROID_SERIAL="QV710AF65F"
 `verifyNodePhase7Gate` combines the current focused gate set. These gates select
 existing focused instrumentation classes automatically unless
 `android.testInstrumentationRunnerArguments.class` is supplied explicitly.
+The live-provider gate includes the provider availability registry, Doctor
+provider-health reporting, and current fail-closed/fake-provider classifications;
+it does not promote future Android providers by itself.
 
 ## Release Gate
 

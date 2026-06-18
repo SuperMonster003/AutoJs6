@@ -223,6 +223,37 @@ data class NodeBridgeResponse(
     }
 }
 
+object NodeBridgeErrorCategory {
+    const val UNAVAILABLE = "unavailable"
+    const val PERMISSION_DENIED = "permission-denied"
+    const val CAPABILITY_DENIED = "capability-denied"
+    const val PROVIDER_FAILED = "provider-failed"
+    const val INVALID_REQUEST = "invalid-request"
+    const val RESOURCE_LIMIT = "resource-limit"
+    const val RATE_LIMITED = "rate-limited"
+    const val TIMEOUT = "timeout"
+    const val PROCESS_DEAD = "process-dead"
+    const val RUNTIME_ERROR = "runtime-error"
+
+    fun fromCode(code: String): String = when (code) {
+        NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED -> CAPABILITY_DENIED
+        NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED,
+        NodeRuntimeErrorCodes.NETWORK_PERMISSION_DENIED,
+        NodeRuntimeErrorCodes.NETWORK_POLICY_DENIED -> PERMISSION_DENIED
+        NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST,
+        NodeRuntimeErrorCodes.NETWORK_INVALID_URL -> INVALID_REQUEST
+        NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT,
+        NodeRuntimeErrorCodes.NETWORK_RESPONSE_TOO_LARGE -> RESOURCE_LIMIT
+        NodeRuntimeErrorCodes.BRIDGE_RATE_LIMITED -> RATE_LIMITED
+        NodeRuntimeErrorCodes.BRIDGE_TIMEOUT,
+        NodeRuntimeErrorCodes.NETWORK_TIMEOUT -> TIMEOUT
+        NodeRuntimeErrorCodes.NETWORK_DISABLED -> UNAVAILABLE
+        NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED -> PROVIDER_FAILED
+        NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD -> PROCESS_DEAD
+        else -> RUNTIME_ERROR
+    }
+}
+
 data class NodeBridgeError(
     val name: String = "Error",
     val message: String,
@@ -231,11 +262,13 @@ data class NodeBridgeError(
     val method: String? = null,
     val stack: String? = null,
     val missingCapabilities: List<String> = emptyList(),
+    val category: String = NodeBridgeErrorCategory.fromCode(code),
 ) {
     fun toJsonObject(): JSONObject = JSONObject().apply {
         put("name", name)
         put("message", message)
         put("code", code)
+        put("category", category)
         module?.let { put("module", it) }
         method?.let { put("method", it) }
         stack?.let { put("stack", it) }
@@ -246,14 +279,16 @@ data class NodeBridgeError(
 
     companion object {
         fun fromJsonObject(value: JSONObject): NodeBridgeError {
+            val code = value.optString("code", NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD)
             return NodeBridgeError(
                 name = value.optString("name", "Error"),
                 message = value.optString("message"),
-                code = value.optString("code", NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD),
+                code = code,
                 module = value.optString("module").takeIf { it.isNotBlank() },
                 method = value.optString("method").takeIf { it.isNotBlank() },
                 stack = value.optString("stack").takeIf { it.isNotBlank() },
                 missingCapabilities = value.optionalStringArray("missingCapabilities"),
+                category = value.optNonBlankString("category") ?: NodeBridgeErrorCategory.fromCode(code),
             )
         }
 
@@ -282,12 +317,18 @@ data class NodeBridgeError(
             )
         }
 
-        fun permissionDenied(message: String, module: String? = null, method: String? = null): NodeBridgeError {
+        fun permissionDenied(
+            message: String,
+            module: String? = null,
+            method: String? = null,
+            category: String = NodeBridgeErrorCategory.PERMISSION_DENIED,
+        ): NodeBridgeError {
             return NodeBridgeError(
                 message = message,
                 code = NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED,
                 module = module,
                 method = method,
+                category = category,
             )
         }
 
@@ -306,6 +347,24 @@ data class NodeBridgeError(
                 code = NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT,
                 module = module,
                 method = method,
+                category = NodeBridgeErrorCategory.RESOURCE_LIMIT,
+            )
+        }
+
+        fun providerFailed(
+            message: String,
+            module: String? = null,
+            method: String? = null,
+            stack: String? = null,
+            code: String = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
+        ): NodeBridgeError {
+            return NodeBridgeError(
+                message = message,
+                code = code,
+                module = module,
+                method = method,
+                stack = stack,
+                category = NodeBridgeErrorCategory.PROVIDER_FAILED,
             )
         }
 
@@ -314,6 +373,7 @@ data class NodeBridgeError(
                 message = "AutoJs6 bridge module or method is not available: $module.$method",
                 module = module,
                 method = method,
+                category = NodeBridgeErrorCategory.UNAVAILABLE,
             )
         }
 
@@ -322,6 +382,7 @@ data class NodeBridgeError(
                 message = "AutoJs6 $module bridge requires $requirement.",
                 module = module,
                 method = method,
+                category = NodeBridgeErrorCategory.UNAVAILABLE,
             )
         }
 
@@ -333,15 +394,23 @@ data class NodeBridgeError(
                 module = module,
                 method = method,
                 missingCapabilities = missing,
+                category = NodeBridgeErrorCategory.CAPABILITY_DENIED,
             )
         }
 
-        fun network(message: String, code: String, module: String? = null, method: String? = null): NodeBridgeError {
+        fun network(
+            message: String,
+            code: String,
+            module: String? = null,
+            method: String? = null,
+            category: String = NodeBridgeErrorCategory.fromCode(code),
+        ): NodeBridgeError {
             return NodeBridgeError(
                 message = message,
                 code = code,
                 module = module,
                 method = method,
+                category = category,
             )
         }
 
@@ -561,6 +630,8 @@ interface NodeBridgeCapabilityProvider {
 
     fun nativeDiagnostics(): Map<String, String> = emptyMap()
 
+    fun healthCheck(): List<NodeBridgeProviderHealth> = NodeBridgeProviderRegistry.unavailableHealth()
+
     fun destroy(reason: NodeBridgeError = NodeBridgeError.processDead()) = Unit
 }
 
@@ -576,6 +647,8 @@ class FakeNodeBridgeCapabilityProvider(
         requests += request
         callback(handler(request))
     }
+
+    override fun healthCheck(): List<NodeBridgeProviderHealth> = NodeBridgeProviderRegistry.fakeHealth()
 }
 
 class AndroidNodeBridgeCapabilityProvider(
@@ -654,6 +727,21 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.bridge_rate_limited_count", bridgeRateLimitedRejections.get().toString())
         put("embedded_script.shell_active_command_count", activeShellCommands.get().toString())
         put("embedded_script.shell_max_active_command_count", maxActiveShellCommands.get().toString())
+        put("embedded_script.bridge_provider_health_json", NodeBridgeProviderRegistry.toJsonArray(healthCheck()).toString())
+    }
+
+    override fun healthCheck(): List<NodeBridgeProviderHealth> {
+        return NodeBridgeProviderRegistry.androidHealth(
+            appContext,
+            activeResourceCounts = mapOf(
+                "fetch" to networkCalls.size,
+                "websocket" to websocketSessions.size,
+                "notifications" to notificationHandles.size,
+                "sensors" to sensorSubscriptions.size,
+                "work_manager" to workManagerTasks.size,
+                "shell" to activeShellCommands.get(),
+            ),
+        )
     }
 
     override fun destroy(reason: NodeBridgeError) {
@@ -1687,9 +1775,8 @@ class AndroidNodeBridgeCapabilityProvider(
                 }.getOrElse { error ->
                     NodeBridgeResponse.failure(
                         request.id,
-                        NodeBridgeError(
+                        NodeBridgeError.providerFailed(
                             message = error.message ?: error.javaClass.name,
-                            code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
                             module = request.module,
                             method = request.method,
                             stack = error.stackTraceToString(),
@@ -2382,9 +2469,8 @@ class AndroidNodeBridgeCapabilityProvider(
                 callback(
                     NodeBridgeResponse.failure(
                         request.id,
-                        NodeBridgeError(
+                        NodeBridgeError.providerFailed(
                             message = error.message ?: error.javaClass.name,
-                            code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
                             module = request.module,
                             method = request.method,
                             stack = error.stackTraceToString(),

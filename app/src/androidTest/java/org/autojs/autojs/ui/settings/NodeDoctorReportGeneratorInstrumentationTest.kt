@@ -1,8 +1,11 @@
 package org.autojs.autojs.ui.settings
 
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
+import org.autojs.autojs.engine.NodeBridgeProviderRegistry
+import org.autojs.autojs.engine.NodeBridgeProviderStatus
 import org.autojs.autojs.engine.NodeEmbeddedTestHarness
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -60,11 +63,27 @@ class NodeDoctorReportGeneratorInstrumentationTest {
                 .toString()
                 .contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
         )
+        val bridgeProviders = json.getJSONArray("bridgeProviders")
+        assertEquals(NodeBridgeProviderRegistry.definitions.size, bridgeProviders.length())
+        val providersById = bridgeProviders.byId()
+        assertEquals("fetch/axios", providersById.getValue("fetch").getString("displayName"))
+        assertTrue(providersById.getValue("fetch").getJSONArray("requiredCapabilities").toString().contains("network"))
+        assertEquals(NodeBridgeProviderStatus.UNAVAILABLE.wireName, providersById.getValue("ocr").getString("status"))
+        assertEquals(NodeBridgeProviderStatus.FAKE.wireName, providersById.getValue("work_manager").getString("status"))
+        assertEquals(0, providersById.getValue("shell").getInt("activeResourceCount"))
         assertTrue(text.contains("Bridge Capabilities:"))
+        assertTrue(text.contains("Bridge Providers:"))
+        assertTrue(text.contains("fetch/axios: status="))
         assertTrue(text.contains("Runtime Compatibility:"))
         assertTrue(text.contains(NodeProjectRuntimeCompatibilityDescriptor.ESM_LOADER_VERSION))
         assertTrue(text.contains("network capability: requires declaration=true"))
         assertFalse(text.contains(context.filesDir.absolutePath))
         assertFalse(jsonText.contains(context.filesDir.absolutePath))
+    }
+
+    private fun JSONArray.byId(): Map<String, JSONObject> {
+        return (0 until length())
+            .map { index -> getJSONObject(index) }
+            .associateBy { provider -> provider.getString("id") }
     }
 }

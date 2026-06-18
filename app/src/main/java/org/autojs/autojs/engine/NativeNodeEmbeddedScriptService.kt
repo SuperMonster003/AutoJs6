@@ -1972,9 +1972,8 @@ class NativeNodeEmbeddedScriptService : Service() {
 private fun NodeBridgeRequest.dispatchExceptionResponse(error: Throwable): NodeBridgeResponse {
     return NodeBridgeResponse.failure(
         id,
-        NodeBridgeError(
+        NodeBridgeError.providerFailed(
             message = error.message ?: error.javaClass.name,
-            code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
             module = module,
             method = method,
             stack = error.stackTraceToString(),

@@ -32,9 +32,8 @@ class NodeBridgeEngineDispatchService : Service() {
             }.getOrElse { error ->
                 NodeBridgeResponse.failure(
                     NodeBridgeRequest.recoverId(requestJson).orEmpty(),
-                    NodeBridgeError(
+                    NodeBridgeError.providerFailed(
                         message = error.message ?: error.javaClass.name,
-                        code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
                         module = NodeBridgeRequest.recoverModule(requestJson),
                         method = NodeBridgeRequest.recoverMethod(requestJson),
                     ),
@@ -80,9 +79,8 @@ class NodeBridgeEngineDispatchService : Service() {
         }.getOrElse { error ->
             return NodeBridgeResponse.failure(
                 request.id,
-                NodeBridgeError(
+                NodeBridgeError.providerFailed(
                     message = error.message ?: error.javaClass.name,
-                    code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
                     module = request.module,
                     method = request.method,
                 ),
@@ -129,9 +127,8 @@ class NodeBridgeEngineDispatchService : Service() {
         }.getOrElse { error ->
             return NodeBridgeResponse.failure(
                 request.id,
-                NodeBridgeError(
+                NodeBridgeError.providerFailed(
                     message = error.message ?: error.javaClass.name,
-                    code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
                     module = request.module,
                     method = request.method,
                 ),
@@ -324,9 +321,8 @@ class NodeBridgeEngineDispatchService : Service() {
         private fun NodeBridgeRequest.processDead(message: String): NodeBridgeResponse {
             return NodeBridgeResponse.failure(
                 id,
-                NodeBridgeError(
+                NodeBridgeError.providerFailed(
                     message = message,
-                    code = NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD,
                     module = module,
                     method = method,
                 ),

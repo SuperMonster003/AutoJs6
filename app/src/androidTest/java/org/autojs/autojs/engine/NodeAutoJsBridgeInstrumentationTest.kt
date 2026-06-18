@@ -245,6 +245,7 @@ class NodeAutoJsBridgeInstrumentationTest {
             assertEquals(requestId, response.id)
             assertFalse(response.ok)
             assertEquals(NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD, response.error?.code)
+            assertEquals(NodeBridgeErrorCategory.PROVIDER_FAILED, response.error?.category)
             assertEquals("toast", response.error?.module)
             assertEquals("showToast", response.error?.method)
             assertEquals("provider boom", response.error?.message)
@@ -600,6 +601,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 console.log("dialogs.android.unexpected=true");
               } catch (error) {
                 console.log("dialogs.android.code=" + error.code + "/" + error.autojs6Code);
+                console.log("dialogs.android.category=" + error.category);
                 console.log("dialogs.android.target=" + error.module + "/" + error.method);
                 console.log("dialogs.android.message=" + error.message);
               }
@@ -610,6 +612,7 @@ class NodeAutoJsBridgeInstrumentationTest {
 
         assertTrue(result.errorMessage.orEmpty() + "\n" + result.stdout, result.succeeded)
         assertTrue(result.stdout.contains("dialogs.android.code=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED/ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
+        assertTrue(result.stdout.contains("dialogs.android.category=unavailable"))
         assertTrue(result.stdout.contains("dialogs.android.target=dialogs/alert"))
         assertTrue(result.stdout.contains("dialogs.android.message=AutoJs6 dialogs bridge requires a UI capability provider."))
         assertFalse(result.stdout.contains("dialogs.android.unexpected=true"))
@@ -624,6 +627,7 @@ class NodeAutoJsBridgeInstrumentationTest {
         val response = responses.getJSONObject(0)
         assertFalse(response.getBoolean("ok"))
         assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, response.getJSONObject("error").getString("code"))
+        assertEquals(NodeBridgeErrorCategory.UNAVAILABLE, response.getJSONObject("error").getString("category"))
     }
 
     @Test

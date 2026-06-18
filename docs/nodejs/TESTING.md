@@ -135,6 +135,14 @@ Current bridge protocol instrumentation:
 
 This suite covers the Kotlin bridge protocol, strict malformed request shape checks, bridge module registry, unavailable module/method errors, malformed live request responses, duplicate provider callback suppression, provider dispatch exception conversion, JavaScript fake transport, timeout/destroy handling, the current private live file transport, and the `toast`/`app`/`engines`/`dialogs`/`accessibility`/`media_projection`/`image` bridge smoke. The `app` smoke verifies that JavaScript can observe a real provider result, including a missing application lookup returning `false`. The `engines` smoke verifies current engine snapshots, bridge-module shadowing protection, live `all`/`stopAll`/`stopSelf` responses, and the controlled `execScript`/`execScriptFile` method shape. The `dialogs` smoke verifies fake provider results and the stable Android rejection path while the UI provider is not connected. The `accessibility` smoke verifies fake provider results, shadowing protection, disabled status reporting, and stable action rejection until an accessibility provider is connected. The `media_projection` and `image` smoke verifies fake opaque handles, `image`/`images` shadowing protection, and stable Android provider rejection until screenshot and image providers are connected. The `ocr`, `clipboard`, and `device` bridges have their own focused test classes.
 
+Provider registry and Doctor health instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeProviderRegistryInstrumentationTest,org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest"
+```
+
+This suite verifies the Phase 7 bridge provider registry for `fetch`/`axios`, `websocket`, OCR, storage, notifications, sensors, accessibility, media projection, image, UI, `work_manager`, and shell. It freezes provider version metadata, required AutoJs capabilities, Android permissions, active resource counts, current `available`/`fake`/`unavailable`/`permission-required` health states, Doctor JSON/text reporting, and bridge error categories for unavailable, permission-denied, capability-denied, and provider-failed paths while preserving legacy error codes.
+
 Stable bridge API conformance:
 
 ```powershell

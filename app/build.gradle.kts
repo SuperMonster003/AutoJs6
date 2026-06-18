@@ -283,6 +283,7 @@ val nodeJsPackagedEsmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
 )
 val nodeJsLiveProviderGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeBridgeProviderRegistryInstrumentationTest",
     "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest",
     "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest",
     "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest",

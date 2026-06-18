@@ -46,10 +46,10 @@ experimental or blocked features from leaking into a release candidate.
 | ESM and dynamic import | stay `partial` | default `.mjs`, `type=module`, static import, local dynamic import, builtin allowlist, resolver denial paths, packaged focused gate |
 | npm/builtins | stay `partial` | real npm corpus, desktop differential report, Buffer/core/stream/zlib/Web Streams gates |
 | controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial |
-| AutoJs bridge modules | stay `partial` or `protocol-gated partial` | capability denial, fake provider behavior, Android fail-closed behavior, TypeScript declarations, resource cleanup |
+| AutoJs bridge modules | stay `partial` or `protocol-gated partial` | provider health registry, Doctor provider status, capability denial, fake provider behavior, Android fail-closed behavior, TypeScript declarations, resource cleanup |
 | packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, focused packaged ESM/dynamic import gate |
 | security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, or bridge bypass |
-| DX/tooling | required | error catalog, project wizard, TypeScript declarations, doctor/compatibility reports |
+| DX/tooling | required | error catalog, project wizard, TypeScript declarations, doctor/compatibility/provider-health reports |
 | blocker register | required | [NODE_PROFILE_V1_1_BETA_BLOCKERS.md](NODE_PROFILE_V1_1_BETA_BLOCKERS.md), verified by `:app:verifyNodeV11BetaBlockerRegister` |
 
 ## Beta Gate

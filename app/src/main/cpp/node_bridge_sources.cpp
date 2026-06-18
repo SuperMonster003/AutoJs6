@@ -8954,10 +8954,40 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return [value];
   }
+  function __autojs6_bridge_error_category(code, sourceError) {
+    if (sourceError && sourceError.category) {
+      return String(sourceError.category);
+    }
+    const value = code === undefined || code === null ? "" : String(code);
+    if (value === "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED") return "capability-denied";
+    if (
+      value === "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED" ||
+      value === "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED" ||
+      value === "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    ) return "permission-denied";
+    if (
+      value === "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST" ||
+      value === "ERR_AUTOJS6_NETWORK_INVALID_URL"
+    ) return "invalid-request";
+    if (
+      value === "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT" ||
+      value === "ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE"
+    ) return "resource-limit";
+    if (value === "ERR_AUTOJS6_BRIDGE_RATE_LIMITED") return "rate-limited";
+    if (
+      value === "ERR_AUTOJS6_BRIDGE_TIMEOUT" ||
+      value === "ERR_AUTOJS6_NETWORK_TIMEOUT"
+    ) return "timeout";
+    if (value === "ERR_AUTOJS6_NETWORK_DISABLED") return "unavailable";
+    if (value === "ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED") return "provider-failed";
+    if (value === "ERR_AUTOJS6_BRIDGE_PROCESS_DEAD") return "process-dead";
+    return "runtime-error";
+  }
   function __autojs6_bridge_error(message, code, moduleName, methodName, sourceError) {
     const error = __autojs6_error(message, code);
     if (moduleName) __autojs6_define_error_property(error, "module", moduleName);
     if (methodName) __autojs6_define_error_property(error, "method", methodName);
+    __autojs6_define_error_property(error, "category", __autojs6_bridge_error_category(code, sourceError));
     if (sourceError && sourceError.id) __autojs6_define_error_property(error, "bridgeId", sourceError.id);
     if (sourceError && sourceError.stack) {
       try {

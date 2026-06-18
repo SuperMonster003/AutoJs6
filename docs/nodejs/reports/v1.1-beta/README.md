@@ -66,6 +66,9 @@ This focused gate keeps the beta gate fast while making packaged ESM and local
 dynamic import independently runnable before RC readiness. It also verifies the
 packaged runtime compatibility descriptor version vector and reports APK
 fixture cache hit/miss status without skipping real install-and-run behavior.
+The live-provider focused gate separately verifies the Phase 7 provider health
+registry and Node Doctor provider status without promoting future live Android
+providers.
 
 ## Pass Meaning
 
