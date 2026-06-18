@@ -1270,6 +1270,7 @@
     <string name="text_jump_to_line">Jump to line</string>
     <string name="text_jump_to_line_end">Jump to line end</string>
     <string name="text_jump_to_line_start">Jump to line start</string>
+    <string name="text_jump_to_previous_cursor">Jump to previous cursor</string>
     <string name="text_jump_to_start">Jump to start</string>
     <string name="text_keep_screen_on_when_in_foreground">Keep screen on when in foreground</string>
     <string name="text_key_alias">Alias</string>

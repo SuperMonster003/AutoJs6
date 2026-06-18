@@ -489,6 +489,8 @@ assertIncludes(aceCodeEditor, "fun insertTab()", "native ACE shortcut TAB bridge
 assertIncludes(aceCodeEditor, "fun acceptCompletionOrInsertTab()", "native ACE completion accept bridge call");
 assertIncludes(aceCodeEditor, "fun moveCompletionSelectionOrCursor", "native ACE completion navigation bridge call");
 assertIncludes(aceCodeEditor, "fun handleEscapeKey()", "native ACE shortcut ESC bridge call");
+assertIncludes(aceCodeEditor, "fun onSelectionAction(action: SelectionAction)", "ACE selection action callback");
+assertIncludes(aceCodeEditor, "enum class SelectionAction", "ACE selection action model");
 assertIncludes(aceCodeEditor, "handleSoftKeyboardCursorKey", "ACE soft-keyboard cursor key handler");
 assertIncludes(aceCodeEditor, "handleSoftKeyboardCursorSelection", "ACE soft-keyboard InputConnection cursor selection handler");
 assertIncludes(aceCodeEditor, "flushPendingImeCursorSelection", "ACE IME cursor offset coalescing");
@@ -530,6 +532,7 @@ assertIncludes(editorView, "mAceShortcutTopBar.setFixedItemSizeDp(40, 35)", "ACE
 assertIncludes(editorView, "mAceShortcutBottomBar.setFixedItemSizeDp(40, 35)", "ACE shortcut fixed bottom key size");
 assertIncludes(editorView, "handleAceShortcutClick", "ACE shortcut click handler");
 assertIncludes(editorView, "handleAceShortcutLongClick", "ACE shortcut long-click handler");
+assertIncludes(editorView, "executeAceShortcutAction(it, record = false)", "ACE shortcut short clicks stay out of action history");
 assertIncludes(editorView, "jumpWithAceShortcutReturnPoint", "ACE shortcut long-press return point");
 assertIncludes(editorView, "EditorDisplayPreferences.KEY_WORD_WRAP_INDENT_STYLE", "editor display preference live listener includes word wrap indentation");
 assertIncludes(editorView, "editor.notifyDisplayPreferencesChanged()", "editor display preference changes apply to current engine");
@@ -538,6 +541,7 @@ assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dia
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");
 assertIncludes(editorView, "AceActionFavoritesDialog.show", "ACE action favorites dialog integration");
 assertIncludes(editorView, "fun recordAceActionForMenuItem", "ACE action history menu recording entry point");
+assertIncludes(editorView, "actionForAceSelectionAction", "ACE selection action history mapping");
 assertIncludes(editorView, "private fun executeAceHistoryAction", "ACE generic action history executor");
 assertIncludes(editorView, "private fun actionForToolbarItem", "ACE toolbar action history mapping");
 assertIncludes(editorView, "private fun actionForMenuItem", "ACE menu action history mapping");
@@ -547,7 +551,10 @@ assertIncludes(editorView, "fun startBuildApkActivity", "editor action history b
 assertIncludes(editorView, "fun showFileDetailsDialog", "editor action history file details launcher");
 assertIncludes(editorView, "fun showJavaClassSearchDialog", "editor action history Java class search launcher");
 assertIncludes(editorView, "ACTION_FIND_OR_REPLACE", "editor action history find/replace action id");
+assertIncludes(editorView, "ACTION_COPY_SELECTION", "editor action history copy selection action id");
+assertIncludes(editorView, "ACTION_SELECT_ALL", "editor action history select-all action id");
 assertIncludes(editorView, "ACTION_JUMP_TO_LINE", "editor action history jump-to-line action id");
+assertIncludes(editorView, "ACTION_JUMP_TO_PREVIOUS_CURSOR", "editor action history previous cursor action id");
 assertIncludes(editorView, "ACTION_BUILD_APK", "editor action history build APK action id");
 assertIncludes(editorView, "ACTION_IMPORT_JAVA_CLASS", "editor action history Java class search action id");
 assertIncludes(editorView, "ACTION_FILE_DETAILS", "editor action history file details action id");
@@ -582,6 +589,8 @@ assertIncludes(aceActionHistoryStore, "fun getRankedEntries", "ACE action histor
 assertIncludes(aceActionHistoryStore, "fun getLastActionId", "ACE action history last action API");
 assertIncludes(aceActionHistoryStore, "fun getLastAction", "ACE generic last action lookup");
 assertIncludes(aceActionHistoryStore, 'entryComparator(root.optString("lastActionId"))', "ACE action favorites latest-action ranking");
+assertIncludes(aceActionHistoryStore, 'LEGACY_SHORTCUT_ACTION_PREFIX = "command:"', "ACE action favorites filters legacy shortcut clicks");
+assertIncludes(aceActionHistoryStore, 'DEPRECATED_CANCEL_SEARCH_ACTION_ID = "editor:cancel_search"', "ACE action favorites filters accidental cancel-search action");
 assertIncludes(aceActionHistoryStore, "fun applyFavoritesOrder", "ACE action favorites order API");
 assertIncludes(aceActionHistoryStore, "mutatesText", "ACE action history mutation metadata");
 assertIncludes(aceActionHistoryStore, "usageCount", "ACE action history frequency field");
@@ -592,10 +601,15 @@ assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.LEFT or ItemTouchHelpe
 assertIncludes(aceActionFavoritesDialog, "onActionSelected: (AceActionHistoryStore.Action) -> Unit", "ACE action favorites generic callback");
 assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.UP or ItemTouchHelper.DOWN", "ACE action favorites drag reorder");
 assertIncludes(aceActionFavoritesDialog, "R.drawable.ic_thumbtacks", "ACE action favorites thumbtack icon");
+assertIncludes(aceActionFavoritesDialog, 'holder.usageCount.text = "<${entry.usageCount}>"', "ACE action favorites usage count inline");
+assertIncludes(aceActionFavoritesDialog, "fun finishDrag()", "ACE action favorites drag finalization");
 assertIncludes(aceActionFavoritesDialog, "confirmDelete", "ACE action favorites delete confirmation");
 assertIncludes(aceActionFavoritesDialog, "confirmClear", "ACE action favorites clear confirmation");
 assertIncludes(aceActionFavoritesDialog, "togglePinned", "ACE action favorites pin toggle");
 assertIncludes(aceActionFavoritesDialog, "persistOrder", "ACE action favorites order persistence");
+if (aceActionFavoritesDialog.includes("notifyItemRangeChanged(0, itemCount)")) {
+  throw new Error("ACE action favorites must not rebind the full list while dragging");
+}
 
 assertIncludes(codeEditorSettingsDialog, "FragmentHostMaterialDialog.Builder", "editor settings dialog uses fragment-safe MaterialDialog host");
 assertIncludes(codeEditorSettingsDialog, ".widgetThemeColor()", "editor settings dialog uses themed MaterialDialog buttons");

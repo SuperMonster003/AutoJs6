@@ -93,7 +93,7 @@ object AceActionFavoritesDialog {
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
                 if (moved) {
-                    adapter.persistOrder()
+                    adapter.finishDrag()
                     moved = false
                 }
             }
@@ -147,9 +147,9 @@ object AceActionFavoritesDialog {
     }
 
     private fun dialogListHeight(context: Context, itemCount: Int): Int {
-        val rowHeight = DisplayUtils.dpToPx(64f).roundToInt()
+        val rowHeight = DisplayUtils.dpToPx(48f).roundToInt()
         val maxHeight = (context.resources.displayMetrics.heightPixels * 0.52f).roundToInt()
-        return (rowHeight * itemCount.coerceAtMost(8)).coerceAtMost(maxHeight).coerceAtLeast(rowHeight)
+        return (rowHeight * itemCount.coerceAtMost(10)).coerceAtMost(maxHeight).coerceAtLeast(rowHeight)
     }
 
     private class FavoritesAdapter(
@@ -170,9 +170,17 @@ object AceActionFavoritesDialog {
 
         override fun onBindViewHolder(holder: VH, position: Int) {
             val entry = entries[position]
+            val verticalPadding = DisplayUtils.dpToPx(9f).roundToInt()
+            holder.itemView.setPadding(
+                holder.itemView.paddingLeft,
+                verticalPadding,
+                holder.itemView.paddingRight,
+                verticalPadding,
+            )
             holder.title.text = entry.label
-            holder.subtitle.visibility = View.VISIBLE
-            holder.subtitle.text = subtitle(entry)
+            holder.usageCount.visibility = View.VISIBLE
+            holder.usageCount.text = "<${entry.usageCount}>"
+            holder.subtitle.visibility = View.GONE
             holder.icon.setImageResource(
                 if (entry.pinned) R.drawable.ic_thumbtacks else R.drawable.ic_ali_fx,
             )
@@ -208,7 +216,6 @@ object AceActionFavoritesDialog {
             entries.add(to, moved)
             syncPinnedState()
             notifyItemMoved(from, to)
-            notifyItemRangeChanged(0, itemCount)
             return true
         }
 
@@ -218,6 +225,11 @@ object AceActionFavoritesDialog {
                 entries.map { it.id },
                 pinnedCount,
             )
+        }
+
+        fun finishDrag() {
+            persistOrder()
+            replace(AceActionHistoryStore.getRankedEntries(context))
         }
 
         fun togglePinned(position: Int) {
@@ -270,22 +282,10 @@ object AceActionFavoritesDialog {
             }
         }
 
-        private fun subtitle(entry: AceActionHistoryStore.Entry): String {
-            val usage = context.resources.getQuantityString(
-                R.plurals.text_ace_action_used_times,
-                entry.usageCount,
-                entry.usageCount,
-            )
-            return if (entry.pinned) {
-                context.getString(R.string.text_ace_action_pinned) + " | " + usage
-            } else {
-                usage
-            }
-        }
-
         class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val icon: ImageView = itemView.findViewById(R.id.icon)
             val title: TextView = itemView.findViewById(R.id.title)
+            val usageCount: TextView = itemView.findViewById(R.id.usage_count)
             val subtitle: TextView = itemView.findViewById(R.id.subtitle)
         }
     }

@@ -1649,6 +1649,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mAutoCompletion = null
         recordLastAceDiagnostics(oldEditor)
         (oldEditor as? AceScriptEditorEngine)?.onFatalFailure = null
+        (oldEditor as? AceScriptEditorEngine)?.onSelectionAction = null
         oldEditor.onUserTouchInTextArea = null
         binding.editorContainer.removeView(oldEditor.view)
 
@@ -1698,6 +1699,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun configureAceFallback(editor: ScriptEditorEngine) {
         (editor as? AceScriptEditorEngine)?.onFatalFailure = { failure ->
             post { fallbackToNativeFromAceFailure(failure) }
+        }
+    }
+
+    private fun configureAceActionHistory(editor: ScriptEditorEngine) {
+        (editor as? AceScriptEditorEngine)?.onSelectionAction = { action ->
+            actionForAceSelectionAction(action)?.let(::recordAceHistoryAction)
         }
     }
 
@@ -1833,6 +1840,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun setUpEditor(resetInitialState: Boolean = true) {
         configureAceFallback(editor)
+        configureAceActionHistory(editor)
         editor.let { editor ->
             // Observe user touch in text area to preserve caret position after large-file load.
             // zh-CN: 监听用户在文本区域的触摸, 以便大文件加载完成后保留光标位置.
@@ -2797,7 +2805,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             return true
         }
         return AceShortcutPanel.actionOf(completion)
-            ?.let { executeAceShortcutAction(it, record = true) }
+            ?.let { executeAceShortcutAction(it, record = false) }
             ?: false
     }
 
@@ -2810,26 +2818,33 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 repeatLastAceAction()
             }
             AceShortcutPanel.Command.Escape -> true.also {
+                recordAceHistoryAction(historyAction(ACTION_EXIT_EDITOR, R.string.text_exit, mutatesText = false))
                 triggerHostBackPress()
             }
             AceShortcutPanel.Command.MoveUp -> true.also {
-                handleAceShortcutVerticalLongClick(-1) {
-                    editor.jumpToStart()
+                if (!handleAceShortcutVerticalLongClick(-1)) {
+                    recordAceHistoryAction(historyAction(ACTION_JUMP_TO_START, R.string.text_jump_to_start, mutatesText = false))
+                    jumpWithAceShortcutReturnPoint { editor.jumpToStart() }
                 }
             }
             AceShortcutPanel.Command.MoveDown -> true.also {
-                handleAceShortcutVerticalLongClick(1) {
-                    editor.jumpToEnd()
+                if (!handleAceShortcutVerticalLongClick(1)) {
+                    recordAceHistoryAction(historyAction(ACTION_JUMP_TO_END, R.string.text_jump_to_end, mutatesText = false))
+                    jumpWithAceShortcutReturnPoint { editor.jumpToEnd() }
                 }
             }
             AceShortcutPanel.Command.MoveLeft -> true.also {
+                recordAceHistoryAction(historyAction(ACTION_JUMP_TO_LINE_START, R.string.text_jump_to_line_start, mutatesText = false))
                 jumpWithAceShortcutReturnPoint { editor.jumpToLineStart() }
             }
             AceShortcutPanel.Command.MoveRight -> true.also {
+                recordAceHistoryAction(historyAction(ACTION_JUMP_TO_LINE_END, R.string.text_jump_to_line_end, mutatesText = false))
                 jumpWithAceShortcutReturnPoint { editor.jumpToLineEnd() }
             }
             AceShortcutPanel.Command.Tab -> true.also {
-                toggleAceShortcutReturnPoint()
+                if (toggleAceShortcutReturnPoint()) {
+                    recordAceHistoryAction(historyAction(ACTION_JUMP_TO_PREVIOUS_CURSOR, R.string.text_jump_to_previous_cursor, mutatesText = false))
+                }
             }
             null -> false
         }
@@ -2861,9 +2876,6 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (action.mutatesText && editor.isReadOnly) {
             return true
         }
-        AceShortcutPanel.actionById(action.id)?.let { shortcutAction ->
-            return executeAceShortcutAction(shortcutAction, record)
-        }
         val handled = when (action.id) {
             ACTION_RUN -> true.also { runAndSaveFileIfNeeded() }
             ACTION_FORCE_STOP -> true.also { forceStop() }
@@ -2886,9 +2898,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 replace()
                 onSearchStateMaybeChanged()
             }
+            ACTION_COPY_SELECTION -> true.also { copySelectedTextToClipboard() }
             ACTION_COPY_ALL -> true.also { copyAllToClipboard() }
             ACTION_COPY_LINE -> true.also { mCommandDispatcher.copyLine() }
             ACTION_PASTE -> true.also { pasteFromClipboard() }
+            ACTION_SELECT_ALL -> (editor as? AceScriptEditorEngine)?.let { aceEditor ->
+                true.also { aceEditor.selectAll() }
+            } ?: false
             ACTION_DELETE_LINE -> true.also { mCommandDispatcher.deleteLine() }
             ACTION_CLEAR -> true.also { mCommandDispatcher.clear() }
             ACTION_TOGGLE_COMMENT -> true.also { mCommandDispatcher.toggleComment() }
@@ -2911,6 +2927,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_COPY_ACE_DIAGNOSTICS -> true.also { copyAceDiagnosticsToClipboard() }
             ACTION_OPEN_BY_OTHER_APPS -> true.also { openByOtherApps() }
             ACTION_VERSION_HISTORY -> true.also { showVersionHistoryDialog() }
+            ACTION_EXIT_EDITOR -> true.also { triggerHostBackPress() }
+            ACTION_JUMP_TO_PREVIOUS_CURSOR -> toggleAceShortcutReturnPoint()
             else -> false
         }
         if (handled && record) {
@@ -2937,9 +2955,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         R.id.redo -> historyAction(ACTION_REDO, R.string.text_redo, mutatesText = true)
         R.id.find_next -> historyAction(ACTION_FIND_NEXT, R.string.text_find_next_simplified, mutatesText = false)
         R.id.find_prev -> historyAction(ACTION_FIND_PREV, R.string.text_find_prev_simplified, mutatesText = false)
-        R.id.cancel_search -> historyAction(ACTION_CANCEL_SEARCH, R.string.text_cancel, mutatesText = false)
         R.id.replace -> historyAction(ACTION_REPLACE_SELECTION, R.string.text_replace, mutatesText = true)
         else -> null
+    }
+
+    private fun actionForAceSelectionAction(action: AceScriptEditorEngine.SelectionAction): AceActionHistoryStore.Action? = when (action) {
+        AceScriptEditorEngine.SelectionAction.Copy -> historyAction(ACTION_COPY_SELECTION, R.string.text_copy, mutatesText = false)
+        AceScriptEditorEngine.SelectionAction.Paste -> historyAction(ACTION_PASTE, R.string.text_paste, mutatesText = true)
+        AceScriptEditorEngine.SelectionAction.SelectAll -> historyAction(ACTION_SELECT_ALL, R.string.text_select_all, mutatesText = false)
+        AceScriptEditorEngine.SelectionAction.DeleteLine -> historyAction(ACTION_DELETE_LINE, R.string.text_delete_line, mutatesText = true)
+        AceScriptEditorEngine.SelectionAction.CopyLine -> historyAction(ACTION_COPY_LINE, R.string.text_copy_line, mutatesText = false)
     }
 
     private fun actionForMenuItem(itemId: Int): AceActionHistoryStore.Action? = when (itemId) {
@@ -2985,6 +3010,15 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun copyAllToClipboard() {
         ClipboardUtils.setClip(context, editor.text)
+        showSnack(this, R.string.text_already_copied_to_clip)
+    }
+
+    private fun copySelectedTextToClipboard() {
+        val selectedText = editor.selectedTextSnapshot
+        if (selectedText.isEmpty()) {
+            return
+        }
+        ClipboardUtils.setClip(context, selectedText)
         showSnack(this, R.string.text_already_copied_to_clip)
     }
 
@@ -3042,13 +3076,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return true
     }
 
-    private fun handleAceShortcutVerticalLongClick(delta: Int, jumpWhenNoCompletion: () -> Unit) {
+    private fun handleAceShortcutVerticalLongClick(delta: Int): Boolean {
         val aceEditor = editor as? AceScriptEditorEngine
         if (aceEditor?.isCompletionPopupOpen() == true) {
             aceEditor.moveCompletionSelectionOrCursor(delta)
-            return
+            return true
         }
-        jumpWithAceShortcutReturnPoint(jumpWhenNoCompletion)
+        return false
     }
 
     private fun jumpWithAceShortcutReturnPoint(jump: () -> Unit) {
@@ -3056,13 +3090,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         jump()
     }
 
-    private fun toggleAceShortcutReturnPoint() {
-        val target = mAceShortcutReturnSelection ?: return
+    private fun toggleAceShortcutReturnPoint(): Boolean {
+        val target = mAceShortcutReturnSelection ?: return false
         val current = editor.selection
         mAceShortcutReturnSelection = current
         mAceShortcutLastObservedSelection = current
         mAceShortcutReturnJumpInProgress = true
         editor.jumpTo(target.startLine, target.startColumn)
+        return true
     }
 
     private fun rememberAceShortcutReturnPoint() {
@@ -3188,9 +3223,11 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_CANCEL_SEARCH = "editor:cancel_search"
         private const val ACTION_FIND_OR_REPLACE = "editor:find_or_replace"
         private const val ACTION_REPLACE_SELECTION = "editor:replace_selection"
+        private const val ACTION_COPY_SELECTION = "editor:copy_selection"
         private const val ACTION_COPY_ALL = "editor:copy_all"
         private const val ACTION_COPY_LINE = "editor:copy_line"
         private const val ACTION_PASTE = "editor:paste"
+        private const val ACTION_SELECT_ALL = "editor:select_all"
         private const val ACTION_DELETE_LINE = "editor:delete_line"
         private const val ACTION_CLEAR = "editor:clear"
         private const val ACTION_TOGGLE_COMMENT = "editor:toggle_comment"
@@ -3213,5 +3250,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_COPY_ACE_DIAGNOSTICS = "editor:copy_ace_diagnostics"
         private const val ACTION_OPEN_BY_OTHER_APPS = "editor:open_by_other_apps"
         private const val ACTION_VERSION_HISTORY = "editor:version_history"
+        private const val ACTION_EXIT_EDITOR = "editor:exit"
+        private const val ACTION_JUMP_TO_PREVIOUS_CURSOR = "editor:jump_to_previous_cursor"
     }
 }

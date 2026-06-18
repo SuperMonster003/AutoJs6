@@ -11,6 +11,8 @@ object AceActionHistoryStore {
     private const val KEY_STATE_JSON = "state_json"
     private const val VERSION = 1
     private const val DEFAULT_MANUAL_ORDER = Int.MAX_VALUE
+    private const val LEGACY_SHORTCUT_ACTION_PREFIX = "command:"
+    private const val DEPRECATED_CANCEL_SEARCH_ACTION_ID = "editor:cancel_search"
 
     data class Entry(
         val id: String,
@@ -168,6 +170,9 @@ object AceActionHistoryStore {
 
     private fun JSONObject.toEntry(): Entry? {
         val id = optString("id").takeIf { it.isNotBlank() } ?: return null
+        if (isDeprecatedActionId(id)) {
+            return null
+        }
         val label = optString("label").takeIf { it.isNotBlank() } ?: id
         val usageCount = optInt("usageCount", 0).coerceAtLeast(0)
         if (usageCount <= 0) {
@@ -185,6 +190,11 @@ object AceActionHistoryStore {
             pinnedAt = optLong("pinnedAt", 0L),
             manualOrder = optInt("manualOrder", DEFAULT_MANUAL_ORDER),
         )
+    }
+
+    private fun isDeprecatedActionId(id: String): Boolean {
+        return id.startsWith(LEGACY_SHORTCUT_ACTION_PREFIX) ||
+            id == DEPRECATED_CANCEL_SEARCH_ACTION_ID
     }
 
     private fun Entry.toJson(): JSONObject {

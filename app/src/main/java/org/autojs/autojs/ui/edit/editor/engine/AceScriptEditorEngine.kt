@@ -40,6 +40,7 @@ class AceScriptEditorEngine(
     private var suppressProgrammaticTextChange = false
 
     var onFatalFailure: ((AceFailure) -> Unit)? = null
+    var onSelectionAction: ((SelectionAction) -> Unit)? = null
 
     fun createAceDiagnosticsSnapshot(
         fileSizeBytes: Long? = null,
@@ -509,6 +510,10 @@ class AceScriptEditorEngine(
         aceCodeEditor.destroy()
     }
 
+    fun selectAll() {
+        selectRange(0, textSnapshot.length)
+    }
+
     private fun createAceListener(): AceCodeEditor.Listener {
         return object : AceCodeEditor.Listener {
             override fun onTextChanged(text: String, state: AceCodeEditor.AceEditorState) {
@@ -527,6 +532,10 @@ class AceScriptEditorEngine(
                 breakpointChangeListener?.onBreakpointChange(line, enabled)
             }
 
+            override fun onSelectionAction(action: AceCodeEditor.SelectionAction) {
+                onSelectionAction?.invoke(action.toEngineSelectionAction())
+            }
+
             override fun onFailure(failure: AceFailure) {
                 onFatalFailure?.invoke(failure)
             }
@@ -534,6 +543,22 @@ class AceScriptEditorEngine(
     }
 
     private fun canMutateText(): Boolean = !readOnly || loadingText
+
+    private fun AceCodeEditor.SelectionAction.toEngineSelectionAction(): SelectionAction = when (this) {
+        AceCodeEditor.SelectionAction.Copy -> SelectionAction.Copy
+        AceCodeEditor.SelectionAction.Paste -> SelectionAction.Paste
+        AceCodeEditor.SelectionAction.SelectAll -> SelectionAction.SelectAll
+        AceCodeEditor.SelectionAction.DeleteLine -> SelectionAction.DeleteLine
+        AceCodeEditor.SelectionAction.CopyLine -> SelectionAction.CopyLine
+    }
+
+    enum class SelectionAction {
+        Copy,
+        Paste,
+        SelectAll,
+        DeleteLine,
+        CopyLine,
+    }
 
     @Throws(EditorSearchSyntaxException::class)
     private fun findFrom(query: String, options: EditorSearchOptions, start: Int, backwards: Boolean): EditorSearchResult {

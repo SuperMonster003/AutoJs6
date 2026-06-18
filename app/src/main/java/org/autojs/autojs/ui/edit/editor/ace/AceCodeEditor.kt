@@ -1199,26 +1199,31 @@ class AceCodeEditor @JvmOverloads constructor(
                 return when (item.itemId) {
                     ACTION_MODE_COPY -> {
                         copySelectedTextToClipboard()
+                        listener?.onSelectionAction(SelectionAction.Copy)
                         mode.finish()
                         true
                     }
                     ACTION_MODE_PASTE -> {
                         pasteClipboardIntoSelection()
+                        listener?.onSelectionAction(SelectionAction.Paste)
                         mode.finish()
                         true
                     }
                     ACTION_MODE_SELECT_ALL -> {
                         selectRange(0, textSnapshot.length)
+                        listener?.onSelectionAction(SelectionAction.SelectAll)
                         mode.invalidate()
                         true
                     }
                     R.id.action_delete_line -> {
                         deleteLine()
+                        listener?.onSelectionAction(SelectionAction.DeleteLine)
                         mode.finish()
                         true
                     }
                     R.id.action_copy_line -> {
                         copyCurrentLineToClipboard()
+                        listener?.onSelectionAction(SelectionAction.CopyLine)
                         mode.finish()
                         true
                     }
@@ -2118,9 +2123,18 @@ class AceCodeEditor @JvmOverloads constructor(
         fun onTextChanged(text: String, state: AceEditorState) = Unit
         fun onCursorChanged(lineText: String, line: Int, column: Int, state: AceEditorState) = Unit
         fun onBreakpointChanged(line: Int, enabled: Boolean, state: AceEditorState) = Unit
+        fun onSelectionAction(action: SelectionAction) = Unit
         fun onEvent(name: String, payloadJson: String?) = Unit
         fun onError(message: String) = Unit
         fun onFailure(failure: AceFailure) = Unit
+    }
+
+    enum class SelectionAction {
+        Copy,
+        Paste,
+        SelectAll,
+        DeleteLine,
+        CopyLine,
     }
 
     private data class PendingScript(
