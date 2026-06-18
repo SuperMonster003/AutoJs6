@@ -252,6 +252,11 @@ assertIncludes(valuesFor(completer, "device.getB", "getB"), ["getBattery"], "dev
 assertIncludes(valuesFor(completer, "console.lo", "lo"), ["log"], "console.lo");
 assertIncludes(valuesFor(completer, "threads.st", "st"), ["start"], "threads.st");
 assertIncludes(valuesFor(completer, "engines.my", "my"), ["myEngine"], "engines.my");
+assertIncludes(valuesFor(completer, "Object.prototype.", ""), ["hasOwnProperty", "toString"], "Object.prototype.");
+assertIncludes(valuesFor(completer, "Object.", ""), ["assign", "keys", "hasOwn"], "Object.");
+assertIncludes(valuesFor(completer, "obj.has", "has"), ["hasOwnProperty"], "generic object prototype fallback");
+assertIncludes(valuesFor(completer, "Array.prototype.ma", "ma"), ["map"], "Array.prototype.ma");
+assertIncludes(valuesFor(completer, "JSON.str", "str"), ["stringify"], "JSON.str");
 assertDocIncludes(
   completer,
   "app.la",
@@ -266,12 +271,26 @@ assertDocIncludes(
   "launch",
   "launch(app: App | App.Alias | App.PackageName): boolean;",
 );
+assertDocIncludes(
+  completer,
+  "Object.prototype.has",
+  "has",
+  "hasOwnProperty",
+  "Object.prototype.hasOwnProperty(propertyKey: PropertyKey): boolean;",
+);
 assertHoverIncludes(
   completer,
   'app.launch("org.autojs.autojs6");',
   "launch",
   "app.launch",
   "launch(app: App | App.Alias | App.PackageName): boolean;",
+);
+assertHoverIncludes(
+  completer,
+  "Object.prototype.hasOwnProperty.call(obj, key);",
+  "hasOwnProperty",
+  "Object.prototype.hasOwnProperty",
+  "Object.prototype.hasOwnProperty(propertyKey: PropertyKey): boolean;",
 );
 
 const fallbackCompleter = createFallbackCompleter();
@@ -282,6 +301,11 @@ assertNoThrow("missing indices should not throw", () => {
   valuesFor(missingIndicesCompleter, "toast", "toast");
   valuesFor(missingIndicesCompleter, "app.la", "la");
 });
+assertIncludes(
+  valuesFor(missingIndicesCompleter, "Object.prototype.has", "has"),
+  ["hasOwnProperty"],
+  "missing indices ECMAScript builtins",
+);
 assertNoThrow("prototype-like member contexts should not throw", () => {
   valuesFor(completer, "xx.__proto__.", "");
   valuesFor(completer, "xx.constructor.", "");

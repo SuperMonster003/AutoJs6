@@ -530,6 +530,13 @@ if (signatureHelp.includes("fetch(") || signatureHelp.includes("XMLHttpRequest")
 assertIncludes(completer, "modules: Object.create(null)", "ACE completer module map must avoid prototype inheritance");
 assertIncludes(completer, "function membersForModule(source, moduleName)", "ACE completer safe module lookup helper");
 assertIncludes(completer, "Object.prototype.hasOwnProperty.call(source.modules, moduleName)", "ACE completer module lookup must ignore inherited prototype keys");
+assertIncludes(completer, "var ECMASCRIPT_GLOBALS = [", "ACE completer ECMAScript global completion source");
+assertIncludes(completer, "var ECMASCRIPT_MODULES = {", "ACE completer ECMAScript module completion source");
+assertIncludes(completer, '"Object.prototype"', "ACE completer Object prototype completion source");
+assertIncludes(completer, "hasOwnProperty", "ACE completer Object.prototype.hasOwnProperty completion");
+assertIncludes(completer, "function appendEcmascriptBuiltins(source)", "ACE completer merges ECMAScript built-ins");
+assertIncludes(completer, "function membersForContext(source, moduleName)", "ACE completer context member lookup");
+assertIncludes(completer, 'membersForModule(source, "Object.prototype")', "ACE completer object prototype fallback");
 
 assertIncludes(aceCodeEditor, "private fun requestFirstPaintWhenStable()", "native first-paint request hook");
 assertIncludes(aceCodeEditor, 'invokeAce("requestFirstPaint", quote("native_ready"))', "native first-paint bridge call");

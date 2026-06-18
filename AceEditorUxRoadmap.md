@@ -107,11 +107,17 @@ Acceptance:
 
 - [x] Add ECMAScript built-in function parameter/signature help.
 - [x] Prioritize common built-ins such as `Function.prototype.apply`.
+- [x] Add a curated ECMAScript built-in completion layer for common globals,
+  constructors, and prototypes such as `Object.prototype.hasOwnProperty`.
 - [x] Keep static completion working when LSP is disabled or unavailable.
+- [x] Document the future Node.js type-completion plan for the Node engine
+  branch without enabling Node globals in the Rhino/AutoJs6 editor profile.
 
 Acceptance:
 
 - [x] Built-in signature help appears without requiring LSP.
+- [x] Built-in completion appears for common ECMAScript objects and prototypes
+  without requiring LSP.
 - [x] Tooltip/signature failures do not fallback the whole editor.
 
 ## Gate UX-5: ACE Shortcut Panel And Action Favorites
@@ -302,6 +308,17 @@ Notes:
 - The visible wrap-indentation chooser now offers only continuation indent and
   flush continuation. The old `default` key remains accepted for persisted
   compatibility but is no longer offered as a separate option.
+- ECMAScript completion now merges a local built-in layer into the AutoJs6
+  indices, covering common globals, constructors, and prototypes such as
+  `Object`, `Array`, `String`, `Math`, `JSON`, `Promise`,
+  `Function.prototype`, and `Object.prototype.hasOwnProperty`. Unknown plain
+  member contexts such as `obj.` fall back to `Object.prototype` suggestions
+  while concrete AutoJs6 modules keep their indexed members first.
+- Node.js type completion should stay engine-scoped. When the Node engine branch
+  is ready, ingest the selected `@types/node` `.d.ts` set into a separate Node
+  completion profile, gate it by editor/runtime engine, and avoid exposing Node
+  globals such as `process`, `Buffer`, or `require` in the current Rhino/AutoJs6
+  profile.
 
 ## Latest User Feedback Matrix
 
@@ -371,9 +388,9 @@ and updated alongside commits.
 13. ECMAScript and Node.js completion
    - [x] Provide signature help for common built-ins such as
      `Function.prototype.apply`.
-   - [ ] Audit and expand general ECMAScript built-in completions such as
+   - [x] Audit and expand general ECMAScript built-in completions such as
      `Object.prototype.hasOwnProperty`.
-   - [ ] Plan Node.js type completions for the future Node.js engine branch.
+   - [x] Plan Node.js type completions for the future Node.js engine branch.
 
 14. ACE function keyboard layout
    - [x] Match the two-part layout, scrollable symbol area, arrow sizing,
