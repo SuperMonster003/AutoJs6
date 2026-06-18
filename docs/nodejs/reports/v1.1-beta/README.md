@@ -81,6 +81,10 @@ The live OCR provider subgate validates MLKit recognition over scoped
 provider-owned image handles, region handling, `image.recycle()` cleanup,
 unknown-handle denial, and zero active OCR/image resources; it does not promote
 screenshot capture, image transforms, or packaged OCR model assets.
+The live storage/notifications subgate validates Android-backed JSON storage
+persistence, working-directory and package-identity isolation, storage quota
+denial, notification post/cancel or runtime-permission denial, stable channel
+creation, ongoing notification ownership metadata, and owned cleanup.
 
 ## Pass Meaning
 

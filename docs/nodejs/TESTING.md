@@ -463,7 +463,14 @@ Current `storage` bridge v1.1 partial focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest"
 ```
 
-This suite verifies the `storage`/`storages` bridge registry, fake-provider request/response behavior, shadowing protection, `create`/`open` frozen store handles, `get`/`put`/`remove`/`clear`/`keys`/`contains`, JSON-only values, manifest capability denial before dispatch, Android provider persistence, and working-directory namespace isolation.
+Focused live storage/notifications provider gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveStorageNotificationsGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies the `storage`/`storages` bridge registry, fake-provider request/response behavior, shadowing protection, `create`/`open` frozen store handles, `get`/`put`/`remove`/`clear`/`keys`/`contains`, JSON-only values, manifest capability denial before dispatch, Android provider persistence, working-directory namespace isolation, package-identity isolation for packaged apps, and per-value/per-store quota denial.
 
 Current `notifications` bridge v1.1 partial focused instrumentation:
 
@@ -471,7 +478,7 @@ Current `notifications` bridge v1.1 partial focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeNotificationsBridgeInstrumentationTest"
 ```
 
-This suite verifies the `notifications` bridge registry, fake-provider request/response behavior, shadowing protection, `notify`/`cancel`/`cancelAll`, notification option serialization, manifest capability denial before dispatch, Android `POST_NOTIFICATIONS` manifest mapping, Android provider permission-denial or post/cancel smoke, and owned notification resource cleanup on provider destroy.
+This suite verifies the `notifications` bridge registry, fake-provider request/response behavior, shadowing protection, `notify`/`cancel`/`cancelAll`, notification option serialization, manifest capability denial before dispatch, Android `POST_NOTIFICATIONS` manifest mapping, Android provider permission-denial or post/cancel smoke, stable channel IDs, ongoing notification ownership metadata, and owned notification resource cleanup on provider destroy.
 
 Current `sensors` bridge v1.1 partial focused instrumentation:
 

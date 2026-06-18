@@ -307,6 +307,11 @@ val nodeJsLiveOcrGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest#kotlinOcrLiveProviderRecognizesMlKitImageHandle",
     "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest#androidOcrRejectsUnknownImageHandleWithoutLeakingResources",
 )
+val nodeJsLiveStorageNotificationsGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest#androidStorageProviderPersistsAndScopesByWorkingDirectory",
+    "org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest#androidStorageProviderEnforcesQuotaAndPackageIdentityIsolation",
+    "org.autojs.autojs.engine.NodeNotificationsBridgeInstrumentationTest#androidProviderPostsOrReportsNotificationPermissionAndTracksOwnedResource",
+)
 val nodeJsLongRunningGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
@@ -352,6 +357,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeLiveFetchGate" to nodeJsLiveFetchGateInstrumentationClasses,
     "verifyNodeLiveWebSocketGate" to nodeJsLiveWebSocketGateInstrumentationClasses,
     "verifyNodeLiveOcrGate" to nodeJsLiveOcrGateInstrumentationClasses,
+    "verifyNodeLiveStorageNotificationsGate" to nodeJsLiveStorageNotificationsGateInstrumentationClasses,
     "verifyNodeLongRunningGate" to nodeJsLongRunningGateInstrumentationClasses,
     "verifyNodeWorkerGate" to nodeJsWorkerGateInstrumentationClasses,
     "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,

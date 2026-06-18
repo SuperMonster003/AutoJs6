@@ -131,6 +131,19 @@ image handles, bounded region handling, `image.recycle()` cleanup,
 unknown-handle denial, and zero active OCR/image resources. It does not promote
 screenshot capture, image transforms, or packaged OCR model assets.
 
+Storage and notifications live Android coverage share a non-network Phase 7
+subgate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveStorageNotificationsGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+A passing live storage/notifications gate proves Android-backed JSON storage
+persistence, working-directory and package-identity isolation, quota denial,
+notification post/cancel or runtime-permission denial, stable channel creation,
+ongoing notification ownership metadata, and owned cleanup.
+
 ## Exit Criteria
 
 - `:app:verifyNodeV11BetaGate` passes on Sony with `v1_1_beta`.

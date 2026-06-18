@@ -1,5 +1,7 @@
 package org.autojs.autojs.engine
 
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -7,6 +9,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class NodeStorageBridgeInstrumentationTest {
 
@@ -242,6 +246,47 @@ class NodeStorageBridgeInstrumentationTest {
         assertTrue(isolatedResult.stdout.contains("storage.android.other=missing"))
     }
 
+    @Test
+    fun androidStorageProviderEnforcesQuotaAndPackageIdentityIsolation() {
+        val workDir = storageWorkDir("node-bridge-storage-live-package")
+        val hostProvider = storageProvider(
+            id = "storage-host-provider",
+            workDir = workDir,
+            packageName = context.packageName,
+        )
+        val packagedProvider = storageProvider(
+            id = "storage-packaged-provider",
+            workDir = workDir,
+            packageName = "${context.packageName}.packaged.fixture",
+        )
+
+        assertOk(dispatch(hostProvider, "clear", JSONArray().put("settings").toString()))
+        assertOk(dispatch(packagedProvider, "clear", JSONArray().put("settings").toString()))
+
+        assertOk(dispatch(hostProvider, "put", JSONArray().put("settings").put("shared").put("host").toString()))
+        val packagedInitial = dispatch(packagedProvider, "get", JSONArray().put("settings").put("shared").toString())
+        assertTrue(packagedInitial.toString(), packagedInitial.ok)
+        assertFalse(JSONObject(packagedInitial.resultJson.orEmpty()).getBoolean("found"))
+
+        assertOk(dispatch(packagedProvider, "put", JSONArray().put("settings").put("shared").put("packaged").toString()))
+        val hostRead = dispatch(hostProvider, "get", JSONArray().put("settings").put("shared").toString())
+        val packagedRead = dispatch(packagedProvider, "get", JSONArray().put("settings").put("shared").toString())
+        assertEquals("host", JSONObject(hostRead.resultJson.orEmpty()).getString("value"))
+        assertEquals("packaged", JSONObject(packagedRead.resultJson.orEmpty()).getString("value"))
+
+        val chunk = "x".repeat(60 * 1024)
+        repeat(4) { index ->
+            assertOk(dispatch(hostProvider, "put", JSONArray().put("quota").put("k$index").put(chunk).toString()))
+        }
+        val overQuota = dispatch(hostProvider, "put", JSONArray().put("quota").put("overflow").put("y".repeat(30 * 1024)).toString())
+        assertFalse(overQuota.toString(), overQuota.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT, overQuota.error?.code)
+
+        assertOk(dispatch(hostProvider, "clear", JSONArray().put("quota").toString()))
+        assertOk(dispatch(hostProvider, "clear", JSONArray().put("settings").toString()))
+        assertOk(dispatch(packagedProvider, "clear", JSONArray().put("settings").toString()))
+    }
+
     private fun storageWorkDir(name: String): File {
         return File(context.cacheDir, name).apply {
             deleteRecursively()
@@ -257,5 +302,45 @@ class NodeStorageBridgeInstrumentationTest {
                 """.trimIndent(),
             )
         }
+    }
+
+    private fun storageProvider(id: String, workDir: File, packageName: String): AndroidNodeBridgeCapabilityProvider {
+        return AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(
+                context,
+                id = id,
+                sourceName = "$id.cjs",
+                cwd = workDir.absolutePath,
+            ).copy(packageName = packageName),
+        )
+    }
+
+    private fun dispatch(
+        provider: NodeBridgeCapabilityProvider,
+        method: String,
+        argsJson: String,
+    ): NodeBridgeResponse {
+        val latch = CountDownLatch(1)
+        var response: NodeBridgeResponse? = null
+        provider.dispatch(
+            NodeBridgeRequest(
+                id = "storage-${System.nanoTime()}",
+                module = "storage",
+                method = method,
+                argsJson = argsJson,
+                timeoutMs = 5_000L,
+                permissions = listOf("storage"),
+            ),
+        ) { bridgeResponse ->
+            response = bridgeResponse
+            latch.countDown()
+        }
+        assertTrue("Timed out waiting for storage.$method response", latch.await(5, TimeUnit.SECONDS))
+        return checkNotNull(response) { "Missing storage.$method response" }
+    }
+
+    private fun assertOk(response: NodeBridgeResponse) {
+        assertTrue(response.toString(), response.ok)
     }
 }

@@ -1585,6 +1585,16 @@ class AndroidNodeBridgeCapabilityProvider(
                             ),
                         )
                     }
+                    val projectedBytes = storageProjectedBytes(prefs, key, valueJson)
+                    if (projectedBytes > NodeStorageBridgePolicy.MAX_STORE_BYTES) {
+                        throw StorageBridgeException(
+                            NodeBridgeError.resourceLimit(
+                                message = "AutoJs6 storage store exceeded ${NodeStorageBridgePolicy.MAX_STORE_BYTES} bytes.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
                     if (!prefs.edit().putString(key, valueJson).commit()) {
                         throw StorageBridgeException(
                             NodeBridgeError.permissionDenied(
@@ -1645,6 +1655,17 @@ class AndroidNodeBridgeCapabilityProvider(
             )
         }
         return value.trim()
+    }
+
+    private fun storageProjectedBytes(prefs: android.content.SharedPreferences, key: String, valueJson: String): Int {
+        val existingBytes = prefs.all.entries.sumOf { (entryKey, entryValue) ->
+            if (entryKey == key) {
+                0
+            } else {
+                entryKey.toByteArray(Charsets.UTF_8).size + entryValue.toString().toByteArray(Charsets.UTF_8).size
+            }
+        }
+        return existingBytes + key.toByteArray(Charsets.UTF_8).size + valueJson.toByteArray(Charsets.UTF_8).size
     }
 
     private fun storagePreferencesName(storeName: String): String {
@@ -3913,6 +3934,7 @@ private object NodeStorageBridgePolicy {
     const val MAX_STORE_NAME_LENGTH = 128
     const val MAX_KEY_LENGTH = 256
     const val MAX_VALUE_BYTES = 64 * 1024
+    const val MAX_STORE_BYTES = 256 * 1024
     private const val PREFS_PREFIX = "autojs.node.storage"
 
     fun preferencesName(packageName: String, cwd: String, storeName: String): String {

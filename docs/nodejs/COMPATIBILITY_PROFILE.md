@@ -814,8 +814,9 @@ surface, and Phase 7 adds a live Android MLKit OCR provider over provider-owned
 image handles with a scoped `image.readImage()`/`image.recycle()` backend. OCR
 packaged model policy and broader image-provider ownership remain future work.
 Task 173 adds JSON-only `storage`/`storages`
-provider storage, and Task 174 adds post-only `notifications` with Android
-permission gating and owned-notification cleanup. Task 175 adds bounded
+provider storage with package/cwd/store isolation and quota checks, and Task
+174 adds post-only `notifications` with Android permission gating, stable
+channels, and owned-notification cleanup. Task 175 adds bounded
 `sensors` events with controlled subscription cleanup. Task 182 reserves the
 protocol-gated `ui` module with fake-provider tests and an Android fail-closed
 provider path; real Activity-owned UI remains design-gated.
@@ -984,6 +985,7 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - values must be JSON-serializable; `undefined`, functions, symbols, native objects, and circular structures are rejected before dispatch
   - requests require the `storage` capability
   - Android provider data is scoped by package identity, working directory, and storage name in app-private SharedPreferences
+  - Android writes are synchronous and bounded by a 64 KiB per-value quota and 256 KiB per-store quota
   - JavaScript receives frozen store handles only; no raw `SharedPreferences`, database, file, or Android object crosses into Node
 - `notifications`
   - `notify(options, callOptions?): Promise<number>`
@@ -993,6 +995,7 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - requests require the `notifications` capability
   - packaged capability manifests map `notifications` to `android.permission.POST_NOTIFICATIONS`
   - Android provider checks notification runtime permission/app notification state before posting
+  - Android provider creates stable channel ids and records channel/ongoing metadata for owned notification resources
   - the provider tracks notifications owned by the current Node execution and cancels remaining owned notifications on provider destroy
   - JavaScript receives only numeric ids; no raw `Notification`, `NotificationChannel`, `PendingIntent`, `RemoteViews`, or Android object crosses into Node
 - `sensors`

@@ -174,13 +174,16 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 .\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 .\gradlew.bat --console=plain :app:verifyNodeLiveOcrGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveStorageNotificationsGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-`verifyNodePhase7Gate` combines the current focused gate set. These gates select
-existing focused instrumentation classes automatically unless
+`verifyNodePhase7Gate` combines the baseline non-experimental focused gate set.
+Feature-specific live subgates above remain explicit so their opt-in
+requirements and provider assumptions stay visible. These gates select existing
+focused instrumentation classes automatically unless
 `android.testInstrumentationRunnerArguments.class` is supplied explicitly.
 The live-provider gate includes the provider availability registry, Doctor
 provider-health reporting, and current fail-closed/fake-provider classifications;
@@ -195,6 +198,10 @@ timeout/size-limit rejection, raw socket denial, and destroy cleanup.
 provider-owned image handles created by the scoped `image.readImage()` path,
 including region recognition, `image.recycle()`, unknown-handle denial, and
 zero active OCR/image resources after cleanup.
+`verifyNodeLiveStorageNotificationsGate` validates Android-backed JSON storage
+persistence, working-directory and package-identity isolation, storage quota
+denial, notification post/cancel or runtime-permission denial, stable channel
+creation, ongoing notification ownership metadata, and owned cleanup.
 
 ## Release Gate
 

@@ -62,8 +62,8 @@ small set of already-gated features toward practical use.
 | WebSocket | experimental | Controlled bridge surface covers connect, send/receive text and binary messages, close/error events, handler properties, listener aliases, bounded queue/message policy, service-destroy cleanup, and raw socket denial; live provider remains default-off. |
 | Image advanced operations | partial | `require("image")` and `require("images")` expand opaque-handle workflows with grayscale, threshold, template matching, color search, local size snapshots, and save format overloads while keeping Android provider ownership fail-closed. |
 | OCR | partial | `require("ocr")` exposes `recognize`, `recognizeText`, and `detectTextBounds` over opaque image handles with `ocr` + `image` capability checks; Android now has a live MLKit provider over scoped `image.readImage()` handles, while packaged model policy and broader image-provider ownership remain gated. |
-| Storage | partial | `require("storage")` and `require("storages")` expose JSON-only project/package-scoped key-value stores with explicit `storage` capability checks. |
-| Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, and owned-resource cleanup. |
+| Storage | partial | `require("storage")` and `require("storages")` expose JSON-only package/cwd-scoped key-value stores with explicit `storage` capability checks, per-value and per-store quotas, and packaged-app isolation. |
+| Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, stable channel IDs, ongoing ownership metadata, and owned-resource cleanup. |
 | Sensors | partial | `require("sensors")` exposes `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks. |
 | UI bridge protocol | protocol-gated partial | `require("ui")` reserves JSON-only `showLayout`, opaque `UiHandle.on/update/close`, and drained event snapshots with explicit `ui` capability checks; the Android provider remains fail-closed until an Activity-owned provider is accepted. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for long-click, set-text, and scroll while keeping JSON-only snapshots and explicit `accessibility` capability checks. |
@@ -136,12 +136,13 @@ small set of already-gated features toward practical use.
   over scoped provider-owned image handles with cleanup diagnostics.
 - Storage bridge smoke passes for `storage`/`storages` create/open,
   get/put/remove/clear/keys/contains, JSON value policy, manifest denial,
-  Android provider persistence, working-directory namespace isolation, and
-  TypeScript declarations.
+  Android provider persistence, working-directory namespace isolation,
+  package-identity isolation, quota denial, and TypeScript declarations.
 - Notifications bridge smoke passes for `notify`/`cancel`/`cancelAll`,
   fake-provider request serialization, manifest denial, Android
   permission-denial or post/cancel behavior, owned-resource cleanup,
-  `POST_NOTIFICATIONS` manifest mapping, and TypeScript declarations.
+  stable channel IDs, ongoing ownership metadata, `POST_NOTIFICATIONS`
+  manifest mapping, and TypeScript declarations.
 - Sensors bridge smoke passes for `getAvailableSensors`, `once`,
   `subscribe`, fake-provider event draining, manifest denial, Android sensor
   listing, live subscription cleanup when a supported sensor exists, and

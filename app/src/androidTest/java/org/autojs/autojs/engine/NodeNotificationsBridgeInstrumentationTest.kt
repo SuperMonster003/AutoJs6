@@ -1,10 +1,14 @@
 package org.autojs.autojs.engine
 
+import android.app.NotificationManager
+import android.os.Build
+import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -196,8 +200,17 @@ class NodeNotificationsBridgeInstrumentationTest {
             return
         }
         assertEquals(710001, jsonInt(notify.resultJson.orEmpty()))
-        assertEquals("1", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
-        assertEquals(1, activeTypeCount(provider.nativeDiagnostics(), NodeBridgeResourceType.NOTIFICATION))
+        val activeDiagnostics = provider.nativeDiagnostics()
+        assertEquals("1", activeDiagnostics["embedded_script.bridge_resource.active_count"])
+        assertEquals(1, activeTypeCount(activeDiagnostics, NodeBridgeResourceType.NOTIFICATION))
+        assertNotificationResource(activeDiagnostics, channel = "node-test", ongoing = "true")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = context.getSystemService(NotificationManager::class.java)
+            val channel = manager.getNotificationChannel("node-test")
+            assertNotNull(channel)
+            assertEquals("node-test", channel.id)
+            assertEquals(NotificationManager.IMPORTANCE_DEFAULT, channel.importance)
+        }
 
         val cancel = dispatch(
             provider,
@@ -245,6 +258,16 @@ class NodeNotificationsBridgeInstrumentationTest {
 
     private fun activeTypeCount(diagnostics: Map<String, String>, type: NodeBridgeResourceType): Int {
         return JSONObject(diagnostics["embedded_script.bridge_resource.active_types"].orEmpty()).optInt(type.name, 0)
+    }
+
+    private fun assertNotificationResource(diagnostics: Map<String, String>, channel: String, ongoing: String) {
+        val dump = JSONArray(diagnostics["embedded_script.bridge_resource.dump_json"].orEmpty())
+        val record = (0 until dump.length())
+            .map { index -> dump.getJSONObject(index) }
+            .first { item -> item.getString("type") == NodeBridgeResourceType.NOTIFICATION.name }
+        val metadata = record.getJSONObject("metadata")
+        assertEquals(channel, metadata.getString("channel"))
+        assertEquals(ongoing, metadata.getString("ongoing"))
     }
 
     private fun jsonInt(raw: String): Int {
