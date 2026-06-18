@@ -5,6 +5,7 @@ import android.os.Build
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -94,6 +95,7 @@ object NodeDoctorReportGenerator {
         put("selectedAbi", probeResult?.currentAbi ?: Build.SUPPORTED_ABIS.firstOrNull().orEmpty())
         put("androidSdk", Build.VERSION.SDK_INT)
         put("device", listOf(Build.MANUFACTURER, Build.MODEL).filter { it.isNotBlank() }.joinToString(" "))
+        put("compatibilityDescriptor", NodeProjectRuntimeCompatibilityDescriptor.currentJson())
     }
 
     private fun featureFlagsJson() = JSONArray().apply {
@@ -233,6 +235,18 @@ object NodeDoctorReportGenerator {
             appendLine("  observed Node: ${runtime.getString("nodeObservedVersion")}")
             appendLine("  selected ABI: ${runtime.getString("selectedAbi")}")
             appendLine("  supported ABIs: ${runtime.getJSONArray("deviceSupportedAbis").join(", ")}")
+            val compatibilityDescriptor = runtime.getJSONObject("compatibilityDescriptor")
+            val runtimeVersions = compatibilityDescriptor.getJSONObject("versions")
+            appendLine()
+            appendLine("Runtime Compatibility:")
+            appendLine("  schema: ${compatibilityDescriptor.getString("schema")}")
+            appendLine("  profile: ${compatibilityDescriptor.getString("nodeProfile")}")
+            appendLine("  bootstrap: ${runtimeVersions.getString("bootstrap")}")
+            appendLine("  commonjs loader: ${runtimeVersions.getString("commonJsLoader")}")
+            appendLine("  esm loader: ${runtimeVersions.getString("esmLoader")}")
+            appendLine("  dynamic import: ${runtimeVersions.getString("dynamicImport")}")
+            appendLine("  bridge protocol: ${runtimeVersions.getString("bridgeProtocol")}")
+            appendLine("  moduleSources schema: ${runtimeVersions.getString("moduleSourcesSchema")}")
             appendLine()
             appendLine("Native Libraries:")
             appendLine("  native dir: ${nativeLibraries.getString("nativeLibraryDir")}")

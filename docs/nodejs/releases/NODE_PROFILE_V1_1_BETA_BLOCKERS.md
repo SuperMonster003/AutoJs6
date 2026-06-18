@@ -22,8 +22,8 @@ Surface: packaged `.mjs` entry and local dynamic import install-and-run smokes.
 
 Current state: packaged `.mjs`, package `type=module`, local dynamic import,
 source-name stack, disabled builtin denial, scoped escape denial, and runtime
-compatibility descriptor mismatch are covered by the focused production-template
-gate.
+compatibility descriptor version-vector mismatch are covered by the focused
+production-template gate.
 
 Release impact: v1.1 may document packaged ESM and local dynamic import as
 partial capabilities guarded by `:app:verifyNodePackagedEsmGate`.

@@ -282,8 +282,70 @@ val nodeJsPackagedEsmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk",
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
 )
-val nodeJsPackagedEsmGateRequested = taskNames.any { rawTaskName ->
-    rawTaskName.substringAfterLast(':') == "verifyNodePackagedEsmGate"
+val nodeJsLiveProviderGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeNotificationsBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeImageBridgeExpansionInstrumentationTest",
+    "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest",
+)
+val nodeJsLongRunningGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
+    "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
+    "org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest",
+    "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
+)
+val nodeJsWorkerGateInstrumentationClasses = if (nodeJsWorkerThreadsExperimentalEnabled) {
+    listOf(
+        "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
+    )
+} else {
+    listOf("org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest")
+}
+val nodeJsModernCoreGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
+    "org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest",
+    "org.autojs.autojs.engine.NodeFeatureFlagRegistryInstrumentationTest",
+    "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest",
+    "org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest",
+    "org.autojs.autojs.engine.NodeStreamMvpInstrumentationTest",
+    "org.autojs.autojs.engine.NodeZlibBufferInstrumentationTest",
+    "org.autojs.autojs.engine.NodeCryptoExpansionInstrumentationTest",
+    "org.autojs.autojs.engine.NodeProcessSweepInstrumentationTest",
+    "org.autojs.autojs.engine.NodeOsPrivacyInstrumentationTest",
+    "org.autojs.autojs.engine.NodeModuleSafeSubsetInstrumentationTest",
+    "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",
+    "org.autojs.autojs.engine.NodeRawNetworkPolicyInstrumentationTest",
+    "org.autojs.autojs.engine.NodeVmDesignGateInstrumentationTest",
+    "org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest",
+)
+val nodeJsPhase7GateInstrumentationClasses = (
+        nodeJsPackagedEsmGateInstrumentationClasses +
+                nodeJsLiveProviderGateInstrumentationClasses +
+                nodeJsLongRunningGateInstrumentationClasses +
+                nodeJsWorkerGateInstrumentationClasses +
+                nodeJsModernCoreGateInstrumentationClasses
+        ).distinct()
+val nodeJsFocusedGateInstrumentationClasses = mapOf(
+    "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
+    "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
+    "verifyNodeLongRunningGate" to nodeJsLongRunningGateInstrumentationClasses,
+    "verifyNodeWorkerGate" to nodeJsWorkerGateInstrumentationClasses,
+    "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,
+    "verifyNodePhase7Gate" to nodeJsPhase7GateInstrumentationClasses,
+)
+val nodeJsRequestedFocusedGate = taskNames
+    .map { rawTaskName -> rawTaskName.substringAfterLast(':') }
+    .firstOrNull { taskName -> taskName in nodeJsFocusedGateInstrumentationClasses }
+val nodeJsFocusedGateInstrumentationClassArgument = nodeJsRequestedFocusedGate?.let { taskName ->
+    nodeJsFocusedGateInstrumentationClasses.getValue(taskName).joinToString(",")
 }
 val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
     "sony" -> listOf(
@@ -795,8 +857,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val explicitInstrumentationClass =
             providers.gradleProperty("android.testInstrumentationRunnerArguments.class").orNull.isNullOrBlank().not()
-        if (nodeJsPackagedEsmGateRequested && !explicitInstrumentationClass) {
-            testInstrumentationRunnerArguments["class"] = nodeJsPackagedEsmGateInstrumentationClasses.joinToString(",")
+        if (nodeJsFocusedGateInstrumentationClassArgument != null && !explicitInstrumentationClass) {
+            testInstrumentationRunnerArguments["class"] = nodeJsFocusedGateInstrumentationClassArgument
             testInstrumentationRunnerArguments["autojs.nodejs.test.deviceProfile"] = "sony"
         } else if (nodeJsFuzzerReplayRunnerClass != null && !explicitInstrumentationClass) {
             testInstrumentationRunnerArguments["class"] = nodeJsFuzzerReplayRunnerClass

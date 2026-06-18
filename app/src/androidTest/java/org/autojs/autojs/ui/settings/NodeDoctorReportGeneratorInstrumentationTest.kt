@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.settings
 
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeEmbeddedTestHarness
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -29,6 +30,22 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertFalse(json.getJSONObject("privacy").getBoolean("scriptContentsIncluded"))
         assertFalse(json.getJSONObject("privacy").getBoolean("environmentValuesIncluded"))
         assertTrue(json.getJSONObject("privacy").getBoolean("pathsRedacted"))
+        val runtime = json.getJSONObject("runtime")
+        val compatibilityDescriptor = runtime.getJSONObject("compatibilityDescriptor")
+        val descriptorVersions = compatibilityDescriptor.getJSONObject("versions")
+        assertEquals(NodeProjectRuntimeCompatibilityDescriptor.SCHEMA, compatibilityDescriptor.getString("schema"))
+        assertEquals(
+            NodeProjectRuntimeCompatibilityDescriptor.NODE_PROFILE_V1_1,
+            compatibilityDescriptor.getString("nodeProfile"),
+        )
+        assertEquals(
+            NodeProjectRuntimeCompatibilityDescriptor.BOOTSTRAP_VERSION,
+            descriptorVersions.getString("bootstrap"),
+        )
+        assertEquals(
+            NodeProjectRuntimeCompatibilityDescriptor.MODULE_SOURCES_SCHEMA_VERSION,
+            descriptorVersions.getString("moduleSourcesSchema"),
+        )
         val bridgeCapabilities = json.getJSONObject("bridgeCapabilities")
         val networkCapability = bridgeCapabilities.getJSONObject("network")
         assertTrue(bridgeCapabilities.getBoolean("projectManifestSupported"))
@@ -44,6 +61,8 @@ class NodeDoctorReportGeneratorInstrumentationTest {
                 .contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
         )
         assertTrue(text.contains("Bridge Capabilities:"))
+        assertTrue(text.contains("Runtime Compatibility:"))
+        assertTrue(text.contains(NodeProjectRuntimeCompatibilityDescriptor.ESM_LOADER_VERSION))
         assertTrue(text.contains("network capability: requires declaration=true"))
         assertFalse(text.contains(context.filesDir.absolutePath))
         assertFalse(jsonText.contains(context.filesDir.absolutePath))

@@ -90,7 +90,10 @@ $env:ANDROID_SERIAL="QV710AF65F"
 ```
 
 A passing beta gate without this focused gate is a stabilization pass, not a
-packaged ESM release decision.
+packaged ESM release decision. The focused gate validates the packaged runtime
+compatibility descriptor version vector and may reuse unchanged APK fixtures by
+normalized cache key; cached fixtures are still installed and launched on the
+device.
 
 ## Exit Criteria
 
@@ -111,8 +114,7 @@ packaged ESM release decision.
 
 After beta passes, a release-candidate plan may start only if:
 
-- packaged ESM/dynamic import template status is accepted as either default
-  ready or explicitly deferred,
+- packaged ESM/dynamic import template status is accepted as default-ready,
 - controlled network live-provider status remains clearly experimental or is
   separately promoted through a new design gate,
 - long-running mode and worker_threads remain blocked in release docs, and

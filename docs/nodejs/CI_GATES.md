@@ -127,7 +127,11 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.identity=production" "-Pautojs.embeddedNode.expectedAbis=arm64-v8a"
 ```
 
-The task fails unless `autojs.nodejs.test.deviceProfile=v1_1_beta` is explicit.
+The focused gate validates the packaged runtime compatibility descriptor version
+vector and reports packaged fixture cache hit/miss lines while still installing
+and launching the generated APKs on device.
+
+The beta gate fails unless `autojs.nodejs.test.deviceProfile=v1_1_beta` is explicit.
 Keep `ANDROID_SERIAL` pointed at the Sony unattended device when multiple
 devices are attached.
 
@@ -157,6 +161,24 @@ Scope:
 This gate does not create a tag and does not replace `verifyNodeReleaseGate`.
 See [reports/v1.1-rc/README.md](reports/v1.1-rc/README.md) and
 [releases/NODE_PROFILE_V1_1_RC_PLAN.md](releases/NODE_PROFILE_V1_1_RC_PLAN.md).
+
+## Phase 7 Focused Gates
+
+Phase 7 uses focused feature gates instead of expanding every iteration to the
+full release gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+`verifyNodePhase7Gate` combines the current focused gate set. These gates select
+existing focused instrumentation classes automatically unless
+`android.testInstrumentationRunnerArguments.class` is supplied explicitly.
 
 ## Release Gate
 

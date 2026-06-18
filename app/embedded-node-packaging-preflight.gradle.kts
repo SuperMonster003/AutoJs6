@@ -3580,6 +3580,77 @@ val verifyNodePackagedEsmGate = tasks.register("verifyNodePackagedEsmGate") {
     }
 }
 
+val verifyNodeLiveProviderGate = tasks.register("verifyNodeLiveProviderGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 bridge/live-provider readiness gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeLongRunningGate = tasks.register("verifyNodeLongRunningGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 long-running/resource-lifecycle readiness gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeWorkerGate = tasks.register("verifyNodeWorkerGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 worker_threads gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodeModernCoreGate = tasks.register("verifyNodeModernCoreGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 modern-core compatibility gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodePhase7Gate = tasks.register("verifyNodePhase7Gate") {
+    group = "verification"
+    description = "Runs the current focused Node Phase 7 gate set without expanding to the full release gate."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn(
+            verifyNodePackagedEsmGate,
+            verifyNodeLiveProviderGate,
+            verifyNodeLongRunningGate,
+            verifyNodeWorkerGate,
+            verifyNodeModernCoreGate,
+        )
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
     group = "verification"
     description = "Runs the Embedded Node release gate with RC host checks, desktop differential, and explicit heavy device profile."

@@ -32,6 +32,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.util.Base64
 import java.util.zip.GZIPOutputStream
 import java.util.zip.ZipFile
@@ -9080,11 +9081,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                 console.log("packaged.experimental_esm.security=" + security);
                 console.log("packaged.experimental_esm.stack_source=" + stackOk);
             """.trimIndent() + "\n",
-            extraFiles = mapOf(
-                NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAME to packagedRuntimeCompatibilityDescriptor(
+            extraFiles = packagedRuntimeCompatibilityDescriptorFiles(
                     esmPartial = true,
                     dynamicImportLocal = false,
-                ),
+                ) + mapOf(
                 "package.json" to """{"name":"packaged-esm-smoke","version":"1.0.0","type":"module"}""" + "\n",
                 "lib.mjs" to """
                     export default { value: "esm-lib" };
@@ -9155,11 +9155,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                   console.log("packaged.dynamic_import.security=" + securityOk);
                 });
             """.trimIndent() + "\n",
-            extraFiles = mapOf(
-                NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAME to packagedRuntimeCompatibilityDescriptor(
+            extraFiles = packagedRuntimeCompatibilityDescriptorFiles(
                     esmPartial = true,
                     dynamicImportLocal = true,
-                ),
+                ) + mapOf(
                 "package.json" to """{"name":"packaged-dynamic-import-smoke","version":"1.0.0","type":"module"}""" + "\n",
                 "dynamic-target.mjs" to """
                     export default { value: "dynamic-esm" };
@@ -9336,31 +9335,29 @@ class EmbeddedNodePackagedApkSmokeTest {
             .put("launchKind", NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue)
             .put("env", secretEnv)
             .toString()
+        val runtimeDescriptor = NodeProjectRuntimeCompatibilityDescriptor.currentJson(
+            esmPartial = true,
+            dynamicImportLocal = true,
+            workerThreads = false,
+        )
+        runtimeDescriptor.getJSONObject("versions")
+            .put("esmLoader", "stale-autojs6-esm-loader-v0")
         return PackagedLaunchFailureCase(
-            id = "runtime-descriptor-profile-mismatch",
-            projectName = "PackagedNodeRuntimeDescriptorProfileMismatchFailureSmoke",
-            packageName = "org.autojs6.packaged.node.failure.runtimedescriptorprofilemismatch",
-            outputApkName = "PackagedNodeRuntimeDescriptorProfileMismatchFailureSmoke_v1.0.0.apk",
+            id = "runtime-descriptor-version-mismatch",
+            projectName = "PackagedNodeRuntimeDescriptorVersionMismatchFailureSmoke",
+            packageName = "org.autojs6.packaged.node.failure.runtimedescriptorversionmismatch",
+            outputApkName = "PackagedNodeRuntimeDescriptorVersionMismatchFailureSmoke_v1.0.0.apk",
             descriptor = descriptor,
-            extraFiles = mapOf(
-                NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAME to JSONObject()
-                    .put("schema", NodeProjectRuntimeCompatibilityDescriptor.SCHEMA)
-                    .put("nodeProfile", "node-profile-v9.9")
-                    .put("runtimeBackend", "embedded")
-                    .put(
-                        "features",
-                        JSONObject()
-                            .put("esmPartial", true)
-                            .put("dynamicImportLocal", true),
-                    )
-                    .toString() + "\n",
-            ),
-            requiredEntries = listOf(NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAME),
+            extraFiles = packagedRuntimeCompatibilityDescriptorFiles(runtimeDescriptor.toString() + "\n"),
+            requiredEntries = NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES,
             requiredLogMarkers = listOf(
                 NodeProjectLaunchDiagnostics.LAUNCH_FAILURE_MARKER,
                 "stage=descriptor",
                 "requestReady=false",
-                "Unsupported packaged Node runtime compatibility descriptor profile: node-profile-v9.9",
+                NodeProjectRuntimeCompatibilityDescriptor.VERSION_MISMATCH_CODE,
+                "versions.esmLoader",
+                "expected=${NodeProjectRuntimeCompatibilityDescriptor.ESM_LOADER_VERSION}",
+                "actual=stale-autojs6-esm-loader-v0",
                 "errorClass=IllegalArgumentException",
             ),
             verifyDescriptor = false,
@@ -10830,12 +10827,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 writeText(content, StandardCharsets.UTF_8)
             }
         }
-        File(projectDir, PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE).writeText(
-            failureCase.descriptor + "\n",
-            StandardCharsets.UTF_8,
-        )
-        File(projectDir, ProjectConfig.CONFIG_FILE_NAME).writeText(
-            """
+        val projectConfigText = """
             {
               "name": "${failureCase.projectName}",
               "versionName": "1.0.0",
@@ -10858,7 +10850,14 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "runOnBoot": false
               }
             }
-            """.trimIndent() + "\n",
+            """.trimIndent() + "\n"
+
+        File(projectDir, PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE).writeText(
+            failureCase.descriptor + "\n",
+            StandardCharsets.UTF_8,
+        )
+        File(projectDir, ProjectConfig.CONFIG_FILE_NAME).writeText(
+            projectConfigText,
             StandardCharsets.UTF_8,
         )
 
@@ -10887,6 +10886,42 @@ class EmbeddedNodePackagedApkSmokeTest {
             isRunOnBoot = false
         }
 
+        val cacheKey = packagedSmokeFixtureCacheKey(
+            kind = "launch_failure",
+            outputApkName = failureCase.outputApkName,
+            requiredTemplateDexMarkers = failureCase.requiredTemplateDexMarkers,
+            inputs = listOf(
+                "id" to failureCase.id,
+                "projectName" to failureCase.projectName,
+                "packageName" to failureCase.packageName,
+                "projectConfigMainScriptName" to failureCase.projectConfigMainScriptName,
+                "descriptor" to failureCase.descriptor,
+                "mainScriptName" to mainScriptName,
+                "mainScript" to mainScript,
+                "projectConfig" to projectConfigText,
+                "requiredEntries" to failureCase.requiredEntries.sorted().joinToString("\n"),
+                "requiredLogMarkers" to failureCase.requiredLogMarkers.sorted().joinToString("\n"),
+                "forbiddenLogMarkers" to failureCase.forbiddenLogMarkers.sorted().joinToString("\n"),
+            ) + failureCase.extraFiles.toSortedMap().map { (relativePath, content) ->
+                "extra:$relativePath" to content
+            },
+        )
+        restorePackagedSmokeFixtureCache(
+            outputApk = outputApk,
+            cacheKey = cacheKey,
+            label = "launch failure ${failureCase.id}",
+        )?.let { cachedApk ->
+            outputPathFile.writeText(cachedApk.absolutePath, StandardCharsets.UTF_8)
+            assertPackagedApkContainsLaunchFailureSmoke(
+                outputApk = cachedApk,
+                failureCase = failureCase,
+                mainScriptName = mainScriptName,
+                mainScript = mainScript,
+            )
+            exportPackagedSmokeApkForHost(cachedApk)
+            return cachedApk
+        }
+
         openPackagedSmokeTemplate(requiredDexMarkers = failureCase.requiredTemplateDexMarkers).use { templateApk ->
             ApkBuilder(templateApk, outputApk, buildDir.absolutePath)
                 .prepare(context)
@@ -10906,6 +10941,11 @@ class EmbeddedNodePackagedApkSmokeTest {
             failureCase = failureCase,
             mainScriptName = mainScriptName,
             mainScript = mainScript,
+        )
+        storePackagedSmokeFixtureCache(
+            outputApk = outputApk,
+            cacheKey = cacheKey,
+            label = "launch failure ${failureCase.id}",
         )
         exportPackagedSmokeApkForHost(outputApk)
         return outputApk
@@ -11445,12 +11485,8 @@ class EmbeddedNodePackagedApkSmokeTest {
                 writeText(content, StandardCharsets.UTF_8)
             }
         }
-        File(projectDir, "runtime-matrix.expected.txt").writeText(
-            runtimeMarkers.joinToString(separator = "\n", postfix = "\n"),
-            StandardCharsets.UTF_8,
-        )
-        File(projectDir, ProjectConfig.CONFIG_FILE_NAME).writeText(
-            """
+        val runtimeMatrixText = runtimeMarkers.joinToString(separator = "\n", postfix = "\n")
+        val projectConfigText = """
             {
               "name": "$projectName",
               "versionName": "1.0.0",
@@ -11470,7 +11506,14 @@ $nodeConfigJson
                 "runOnBoot": false
               }
             }
-            """.trimIndent() + "\n",
+            """.trimIndent() + "\n"
+
+        File(projectDir, "runtime-matrix.expected.txt").writeText(
+            runtimeMatrixText,
+            StandardCharsets.UTF_8,
+        )
+        File(projectDir, ProjectConfig.CONFIG_FILE_NAME).writeText(
+            projectConfigText,
             StandardCharsets.UTF_8,
         )
 
@@ -11493,6 +11536,44 @@ $nodeConfigJson
             isSplashVisible = false
             isLauncherVisible = true
             isRunOnBoot = false
+        }
+
+        val cacheKey = packagedSmokeFixtureCacheKey(
+            kind = "gate_diagnostics",
+            outputApkName = outputApkName,
+            requiredTemplateDexMarkers = requiredTemplateDexMarkers,
+            inputs = listOf(
+                "rootName" to rootName,
+                "projectName" to projectName,
+                "packageName" to packageName,
+                "mainScriptName" to mainScriptName,
+                "mainScript" to mainScript,
+                "permissions" to permissions.sorted().joinToString("\n"),
+                "nodePermissions" to nodePermissions.sorted().joinToString("\n"),
+                "projectConfig" to projectConfigText,
+                "runtimeMatrix" to runtimeMatrixText,
+            ) + extraFiles.toSortedMap().map { (relativePath, content) ->
+                "extra:$relativePath" to content
+            },
+        )
+        restorePackagedSmokeFixtureCache(
+            outputApk = outputApk,
+            cacheKey = cacheKey,
+            label = "gate diagnostics $packageName",
+        )?.let { cachedApk ->
+            outputPathFile.writeText(cachedApk.absolutePath, StandardCharsets.UTF_8)
+            assertPackagedApkContainsGateDiagnosticsSmoke(
+                outputApk = cachedApk,
+                projectName = projectName,
+                packageName = packageName,
+                mainScriptName = mainScriptName,
+                mainScript = mainScript,
+                extraFiles = extraFiles,
+                nodePermissions = nodePermissions,
+                runtimeMarkers = runtimeMarkers,
+            )
+            exportPackagedSmokeApkForHost(cachedApk)
+            return cachedApk
         }
 
         openPackagedSmokeTemplate(requiredDexMarkers = requiredTemplateDexMarkers).use { templateApk ->
@@ -11518,6 +11599,11 @@ $nodeConfigJson
             extraFiles = extraFiles,
             nodePermissions = nodePermissions,
             runtimeMarkers = runtimeMarkers,
+        )
+        storePackagedSmokeFixtureCache(
+            outputApk = outputApk,
+            cacheKey = cacheKey,
+            label = "gate diagnostics $packageName",
         )
         exportPackagedSmokeApkForHost(outputApk)
         return outputApk
@@ -12190,7 +12276,28 @@ $nodeConfigJson
                     )
                 }
             }
+            if (NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES.any { descriptorName -> descriptorName in extraFiles }) {
+                assertPackagedRuntimeCompatibilityDescriptor(zip)
+            }
             assertPackagedNodeNativeLibEntries(entries)
+        }
+    }
+
+    private fun assertPackagedRuntimeCompatibilityDescriptor(zip: ZipFile) {
+        val entry = NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES
+            .map { descriptorName -> "assets/project/$descriptorName" }
+            .firstOrNull { candidate -> zip.getEntry(candidate) != null }
+            ?: error("Packaged APK is missing runtime compatibility descriptor")
+        val descriptor = JSONObject(readZipText(zip, entry))
+        NodeProjectRuntimeCompatibilityDescriptor.requireCompatible(descriptor, entry)
+        val actualVersions = descriptor.getJSONObject("versions")
+        val expectedVersions = NodeProjectRuntimeCompatibilityDescriptor.currentVersionsJson()
+        expectedVersions.keys().forEach { key ->
+            assertEquals(
+                "Packaged runtime compatibility descriptor versions.$key",
+                expectedVersions.getString(key),
+                actualVersions.getString(key),
+            )
         }
     }
 
@@ -12987,6 +13094,15 @@ $nodeConfigJson
     ): InputStream {
         val source = packagedSmokeTemplateSource(requiredDexMarkers = requiredDexMarkers)
             ?: error("Packaged smoke template is unavailable.\n${packagedSmokeTemplateDiagnostics()}")
+        requirePackagedSmokeTemplateFresh(source, requiredDexMarkers)
+        println("Packaged smoke template source: ${source.summary}")
+        return openPackagedSmokeTemplateSource(source)
+    }
+
+    private fun requirePackagedSmokeTemplateFresh(
+        source: PackagedSmokeTemplateSource,
+        requiredDexMarkers: List<String> = emptyList(),
+    ) {
         val missingDefaultTemplateMarkers = listOf(
             INRT_NODE_PROJECT_RUNNER_TEMPLATE_MARKER,
             INRT_NODE_PROJECT_LAUNCH_SOURCE_TEMPLATE_MARKER,
@@ -13017,8 +13133,6 @@ $nodeConfigJson
                         packagedSmokeTemplateDiagnostics(),
             )
         }
-        println("Packaged smoke template source: ${source.summary}")
-        return openPackagedSmokeTemplateSource(source)
     }
 
     private fun openPackagedSmokeTemplateSource(source: PackagedSmokeTemplateSource): InputStream {
@@ -14053,6 +14167,7 @@ $nodeConfigJson
         )
         private const val PACKAGED_SMOKE_PUBLIC_EXPORT_DIR =
             "/sdcard/Download/AutoJs6/embedded-node-packaged-smoke"
+        private const val PACKAGED_SMOKE_FIXTURE_CACHE_DIR_NAME = "embedded-node-packaged-fixture-cache"
         private const val PACKAGED_SMOKE_SHELL_TIMEOUT_SECONDS = 90L
         private const val PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS = 15L
         private const val PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS = 15L
@@ -14081,25 +14196,132 @@ $nodeConfigJson
         esmPartial: Boolean,
         dynamicImportLocal: Boolean,
     ): String {
-        return JSONObject()
-            .put("schema", NodeProjectRuntimeCompatibilityDescriptor.SCHEMA)
-            .put("nodeProfile", NodeProjectRuntimeCompatibilityDescriptor.NODE_PROFILE_V1_1)
-            .put("runtimeBackend", "embedded")
-            .put(
-                "features",
-                JSONObject()
-                    .put("esmPartial", esmPartial)
-                    .put("dynamicImportLocal", dynamicImportLocal)
-                    .put("nativeAddon", false)
-                    .put("unrestrictedChildProcess", false)
-                    .put("rawNetwork", false)
-                    .put("processBinding", false)
-                    .put("processDlopen", false)
-                    .put("unrestrictedJavaInterop", false)
-                    .put("unrestrictedVm", false)
-                    .put("inspector", false),
-            )
-            .toString() + "\n"
+        return NodeProjectRuntimeCompatibilityDescriptor.currentText(
+            esmPartial = esmPartial,
+            dynamicImportLocal = dynamicImportLocal,
+            workerThreads = false,
+        )
+    }
+
+    private fun packagedRuntimeCompatibilityDescriptorFiles(
+        esmPartial: Boolean,
+        dynamicImportLocal: Boolean,
+    ): Map<String, String> {
+        return packagedRuntimeCompatibilityDescriptorFiles(
+            packagedRuntimeCompatibilityDescriptor(
+                esmPartial = esmPartial,
+                dynamicImportLocal = dynamicImportLocal,
+            ),
+        )
+    }
+
+    private fun packagedRuntimeCompatibilityDescriptorFiles(descriptorText: String): Map<String, String> {
+        return NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES.associateWith { descriptorText }
+    }
+
+    private fun packagedSmokeFixtureCacheKey(
+        kind: String,
+        outputApkName: String,
+        requiredTemplateDexMarkers: List<String>,
+        inputs: List<Pair<String, String>>,
+    ): String {
+        val source = packagedSmokeTemplateSource(requiredDexMarkers = requiredTemplateDexMarkers)
+            ?: error("Packaged smoke template is unavailable for fixture cache.\n${packagedSmokeTemplateDiagnostics()}")
+        requirePackagedSmokeTemplateFresh(source, requiredTemplateDexMarkers)
+        val templateSha256 = openPackagedSmokeTemplateSource(source).use { input -> sha256(input) }
+        val digest = MessageDigest.getInstance("SHA-256")
+        fun update(key: String, value: String) {
+            digest.update(key.toByteArray(StandardCharsets.UTF_8))
+            digest.update(0.toByte())
+            digest.update(value.toByteArray(StandardCharsets.UTF_8))
+            digest.update(0.toByte())
+        }
+        update("cache.schema", "autojs6-packaged-smoke-fixture-cache-v1")
+        update("kind", kind)
+        update("outputApkName", outputApkName)
+        update("template.kind", source.kind.name)
+        update("template.summary", source.summary)
+        update("template.sha256", templateSha256)
+        update("build.versionCode", BuildConfig.VERSION_CODE.toString())
+        update("build.versionName", BuildConfig.VERSION_NAME)
+        update("runtime.backend", BuildConfig.NODEJS_RUNTIME_BACKEND)
+        update("runtime.engine", NodeRuntimeCapabilities.ENGINE_VERSION)
+        update("runtime.descriptor", NodeProjectRuntimeCompatibilityDescriptor.currentJson().toString())
+        requiredTemplateDexMarkers.sorted().forEachIndexed { index, marker ->
+            update("requiredTemplateDexMarker.$index", marker)
+        }
+        inputs.sortedWith(compareBy<Pair<String, String>> { it.first }.thenBy { it.second }).forEach { (key, value) ->
+            update("input.$key", value)
+        }
+        return digest.digest().toHexString()
+    }
+
+    private fun restorePackagedSmokeFixtureCache(
+        outputApk: File,
+        cacheKey: String,
+        label: String,
+    ): File? {
+        val cachedApk = packagedSmokeFixtureCacheApk(outputApk.name, cacheKey)
+        if (!cachedApk.isFile || cachedApk.length() <= 0L) {
+            println("Packaged smoke fixture cache miss: label=$label key=${cacheKey.take(16)}")
+            return null
+        }
+        outputApk.parentFile?.mkdirs()
+        cachedApk.copyTo(outputApk, overwrite = true)
+        println(
+            "Packaged smoke fixture cache hit: label=$label key=${cacheKey.take(16)} " +
+                    "bytes=${outputApk.length()}",
+        )
+        return outputApk
+    }
+
+    private fun storePackagedSmokeFixtureCache(
+        outputApk: File,
+        cacheKey: String,
+        label: String,
+    ) {
+        val target = packagedSmokeFixtureCacheApk(outputApk.name, cacheKey)
+        target.parentFile?.mkdirs()
+        val tmp = File(target.parentFile, "${target.name}.tmp")
+        outputApk.copyTo(tmp, overwrite = true)
+        if (target.exists()) {
+            target.delete()
+        }
+        check(tmp.renameTo(target) || runCatching {
+            tmp.copyTo(target, overwrite = true)
+            tmp.delete()
+            true
+        }.getOrDefault(false)) {
+            "Failed to store packaged smoke fixture cache: ${target.absolutePath}"
+        }
+        println(
+            "Packaged smoke fixture cache stored: label=$label key=${cacheKey.take(16)} " +
+                    "bytes=${target.length()} path=${target.absolutePath}",
+        )
+    }
+
+    private fun packagedSmokeFixtureCacheApk(outputApkName: String, cacheKey: String): File {
+        val baseName = outputApkName.removeSuffix(".apk").replace(Regex("""[^A-Za-z0-9._-]"""), "_")
+        return File(File(context.cacheDir, PACKAGED_SMOKE_FIXTURE_CACHE_DIR_NAME), "$baseName-$cacheKey.apk")
+    }
+
+    private fun sha256(input: InputStream): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) {
+                break
+            }
+            if (read > 0) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().toHexString()
+    }
+
+    private fun ByteArray.toHexString(): String {
+        return joinToString(separator = "") { byte -> "%02x".format(byte.toInt() and 0xff) }
     }
 
     private fun readZipText(zip: ZipFile, entryName: String): String =

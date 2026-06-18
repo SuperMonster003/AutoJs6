@@ -23,6 +23,7 @@ import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor
 import org.autojs.autojs.script.NodeProjectLaunchKind
 import org.autojs.autojs.script.NodeProjectLaunchSource
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.util.IntentUtils.startSafely
 import java.io.File
@@ -171,6 +172,10 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
             )
         }
         val launchOptions = try {
+            NodeProjectRuntimeCompatibilityDescriptor.requireCompatibleAssetOrDefault(
+                assets = mActivity.assets,
+                assetsProjectDir = mAssetsProjectDir,
+            )
             NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot)
         } catch (e: Exception) {
             logNodeProjectLaunchFailure("descriptor", projectRoot, mMainScriptFile, null, null, e)

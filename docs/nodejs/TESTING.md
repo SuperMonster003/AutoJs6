@@ -249,8 +249,8 @@ diagnostic is attached.
 The app UI also exposes `Developer options > Node.js > Node.js Doctor`. It exports privacy-redacted text or JSON reports
 through the system share sheet. Device reports include backend, expected and observed Node version when the native probe
 is available, ABI, feature flags, native library hashes, capability profile, bridge capability manifest status, the
-`network -> android.permission.INTERNET` mapping, packaged template presence, and last-error availability. They do not
-include user script contents or environment values.
+`network -> android.permission.INTERNET` mapping, the current Node runtime compatibility descriptor version vector,
+packaged template presence, and last-error availability. They do not include user script contents or environment values.
 
 Focused device report generator instrumentation:
 
@@ -645,8 +645,11 @@ focused packaged ESM gate covers a `.mjs` entry, package `type=module` `.js`
 modules, local static imports, selected builtin imports, ESM-to-CJS interop,
 top-level await, source-name stack shape, scoped escape denial, disabled builtin
 denial, local dynamic import of `.mjs`, CommonJS, and type-module targets, and
-runtime compatibility descriptor mismatch before script execution. Broader
-dynamic import package graphs remain design-gated follow-ups.
+runtime compatibility descriptor version-vector mismatch before script
+execution. The gate also validates descriptor versions inside packaged APK
+fixtures and prints packaged fixture cache hit/miss lines; cache hits still
+export, install, launch, and assert logcat markers on device. Broader dynamic
+import package graphs remain design-gated follow-ups.
 
 Current GA promotion evaluation: `docs/nodejs/reports/ESM_EXPERIMENTAL_EVALUATION.md`.
 Current v1.1 promotion evaluation: `docs/nodejs/releases/V1_1_ESM_PROMOTION.md`.

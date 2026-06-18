@@ -56,8 +56,12 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Result:
 
 ```text
-2 tests, 0 failures, 0 errors, 0 skipped
+4 tests, 0 failures, 0 errors, 0 skipped
 ```
+
+The packaged focused gate also checks runtime compatibility descriptor
+version-vector drift before script execution and reports APK fixture cache
+hit/miss status.
 
 ## Evidence Matrix
 
