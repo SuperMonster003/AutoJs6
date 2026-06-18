@@ -45,7 +45,7 @@ experimental or blocked features from leaking into a release candidate.
 | --- | --- | --- |
 | ESM and dynamic import | stay `partial` | default `.mjs`, `type=module`, static import, local dynamic import, builtin allowlist, resolver denial paths, packaged focused gate |
 | npm/builtins | stay `partial` | real npm corpus, desktop differential report, Buffer/core/stream/zlib/Web Streams gates |
-| controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial, explicit live fetch/axios loopback subgate |
+| controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial, explicit live fetch/axios and WebSocket loopback subgates |
 | AutoJs bridge modules | stay `partial` or `protocol-gated partial` | provider health registry, Doctor provider status, capability denial, fake provider behavior, Android fail-closed behavior, TypeScript declarations, resource cleanup |
 | packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, focused packaged ESM/dynamic import gate |
 | security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, or bridge bypass |
@@ -106,6 +106,18 @@ $env:ANDROID_SERIAL="QV710AF65F"
 A passing live fetch gate proves the provider-backed loopback smoke and destroy
 cancellation path for the experimental build flag. It does not promote raw
 network modules or make controlled network default-on.
+
+Controlled WebSocket live Android I/O follows the same opt-in model:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+```
+
+A passing live WebSocket gate proves the provider-backed loopback text/binary
+roundtrip, close, timeout/size-limit rejection, and destroy cleanup paths for
+the experimental build flag. It does not promote raw socket modules or make
+controlled WebSocket default-on.
 
 ## Exit Criteria
 

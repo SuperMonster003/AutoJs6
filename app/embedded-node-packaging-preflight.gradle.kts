@@ -3610,6 +3610,23 @@ val verifyNodeLiveFetchGate = tasks.register("verifyNodeLiveFetchGate") {
     }
 }
 
+val verifyNodeLiveWebSocketGate = tasks.register("verifyNodeLiveWebSocketGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 controlled WebSocket live-provider gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
+            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so the Android live network provider is enabled.")
+        }
+    }
+}
+
 val verifyNodeLongRunningGate = tasks.register("verifyNodeLongRunningGate") {
     group = "verification"
     description = "Runs the focused Node Phase 7 long-running/resource-lifecycle readiness gate on a connected Sony/full device profile."

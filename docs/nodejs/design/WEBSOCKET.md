@@ -1,6 +1,6 @@
 # Controlled WebSocket Design Gate
 
-Status: experimental MVP, live provider disabled by default. This document defines the boundary for the controlled WebSocket module without enabling raw `net` or `tls`.
+Status: experimental MVP, live provider disabled by default, explicit live-provider subgate available. This document defines the boundary for the controlled WebSocket module without enabling raw `net` or `tls`.
 
 ## Goal
 
@@ -236,6 +236,20 @@ Covered paths:
 - raw `tls.connect()` remains denied
 - normal Android provider rejects with `ERR_AUTOJS6_NETWORK_DISABLED`
 - packaged verifier reports `android.permission.INTERNET` only when project metadata opts in
+
+Current live-provider instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+```
+
+This explicit experimental subgate uses an on-device loopback WebSocket server
+and the Android OkHttp provider. It covers connect, headers, protocol
+negotiation, text and binary messages, close, inbound message-size rejection,
+connect timeout, raw `net`/`tls` denial, diagnostics, and provider destroy
+cleanup. It does not make controlled WebSocket default-on and does not expose
+raw socket modules.
 
 ## Non-Goals
 

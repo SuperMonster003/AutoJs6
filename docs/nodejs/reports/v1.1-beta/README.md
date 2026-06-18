@@ -73,6 +73,10 @@ The controlled fetch/axios live-provider subgate is separate and must be run
 with `-Pautojs.nodejs.network.experimental=true`; it validates loopback Android
 I/O and provider destroy cancellation while controlled network remains
 experimental and default-off.
+The controlled WebSocket live-provider subgate uses the same explicit flag and
+validates loopback Android text/binary I/O, close, timeout/size-limit rejection,
+raw socket denial, and provider destroy cleanup while WebSocket remains
+experimental and default-off.
 
 ## Pass Meaning
 

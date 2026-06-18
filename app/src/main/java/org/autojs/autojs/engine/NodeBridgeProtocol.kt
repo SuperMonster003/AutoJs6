@@ -2279,12 +2279,14 @@ class AndroidNodeBridgeCapabilityProvider(
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
                 mainHandler.removeCallbacks(timeoutRunnable)
-                websocketSessions.remove(sessionId)
                 if (websocketResource.release("websocket.failure")) {
                     websocketDiagnostics.finishConnection()
                 }
                 session.queueError(NodeRuntimeErrorCodes.NETWORK_TIMEOUT, t.message ?: t.javaClass.name)
+                session.queueClose(1006, t.message ?: t.javaClass.name)
+                session.markTerminal()
                 if (responded.compareAndSet(false, true)) {
+                    websocketSessions.remove(sessionId)
                     websocketDiagnostics.recordTimeout()
                     callback(
                         NodeBridgeResponse.failure(
@@ -2302,7 +2304,7 @@ class AndroidNodeBridgeCapabilityProvider(
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 session.queueClose(code, reason)
-                websocketSessions.remove(sessionId)
+                session.markTerminal()
                 if (websocketResource.release("websocket.closed")) {
                     websocketDiagnostics.finishConnection()
                 }
@@ -2372,7 +2374,11 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.success(request.id, JSONArray().toString()))
             return
         }
-        callback(NodeBridgeResponse.success(request.id, session.drainEvents().toString()))
+        val events = session.drainEvents()
+        if (session.removeAfterDrain()) {
+            websocketSessions.remove(sessionId, session)
+        }
+        callback(NodeBridgeResponse.success(request.id, events.toString()))
     }
 
     private fun websocketMissingSessionResponse(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -4142,6 +4148,8 @@ private class ControlledWebSocketSession(
     private val events = ConcurrentLinkedQueue<JSONObject>()
     @Volatile
     private var webSocket: WebSocket? = null
+    @Volatile
+    private var terminal = false
 
     fun attach(value: WebSocket) {
         webSocket = value
@@ -4179,6 +4187,10 @@ private class ControlledWebSocketSession(
         )
     }
 
+    fun markTerminal() {
+        terminal = true
+    }
+
     fun drainEvents(): JSONArray {
         val result = JSONArray()
         while (true) {
@@ -4187,6 +4199,8 @@ private class ControlledWebSocketSession(
         }
         return result
     }
+
+    fun removeAfterDrain(): Boolean = terminal && events.isEmpty()
 
     fun sendText(text: String): Boolean = webSocket?.send(text) == true
 

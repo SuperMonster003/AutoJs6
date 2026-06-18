@@ -299,6 +299,10 @@ val nodeJsLiveFetchGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled",
     "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#androidFetchProviderCancelsActiveLiveRequestOnDestroy",
 )
+val nodeJsLiveWebSocketGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#jsWebSocketUsesAndroidLiveProviderWhenNetworkExperimentEnabled",
+    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#androidWebSocketProviderClosesActiveLiveConnectionOnDestroy",
+)
 val nodeJsLongRunningGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
@@ -342,6 +346,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodeLiveFetchGate" to nodeJsLiveFetchGateInstrumentationClasses,
+    "verifyNodeLiveWebSocketGate" to nodeJsLiveWebSocketGateInstrumentationClasses,
     "verifyNodeLongRunningGate" to nodeJsLongRunningGateInstrumentationClasses,
     "verifyNodeWorkerGate" to nodeJsWorkerGateInstrumentationClasses,
     "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,

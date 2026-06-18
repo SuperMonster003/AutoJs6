@@ -544,6 +544,15 @@ Current controlled WebSocket bridge focused instrumentation:
 
 This suite verifies the registry/profile experimental state for `websocket`, fake-provider connect/send/receive/close behavior, connect headers/protocols/maxQueueSize descriptors, text and binary send/receive, `on`/`off`, `addEventListener`/`removeEventListener`, `onopen`/`onmessage`/`onerror`/`onclose` handler properties, close event shape, `require("websocket")`, shadowing protection, timeout rejection, unsupported scheme rejection, max connection rejection, message-size budget rejection, service-destroy rejection cleanup, WebSocket diagnostics counters, raw `net`/`tls` denial, pending bridge cleanup, and that normal Android providers reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.network.experimental=false`.
 
+Current controlled WebSocket live-provider subgate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+```
+
+This explicit experimental gate starts an on-device loopback WebSocket server and verifies real OkHttp-backed `websocket.connect()`, headers, protocol negotiation, text and binary roundtrip, close events, inbound message-size rejection, connect timeout rejection, raw `net`/`tls` denial, live diagnostics, and provider destroy cleanup of an active socket. It is intentionally separate from the default live-provider gate because normal builds keep `autojs.nodejs.network.experimental=false`.
+
 Current raw network policy focused instrumentation:
 
 ```powershell

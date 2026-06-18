@@ -172,6 +172,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -186,6 +187,9 @@ it does not promote future Android providers by itself.
 `verifyNodeLiveFetchGate` is an explicit experimental subgate: it fails unless
 `autojs.nodejs.network.experimental=true` is set, then runs loopback
 controlled-fetch/axios Android I/O plus provider destroy cancellation coverage.
+`verifyNodeLiveWebSocketGate` follows the same opt-in rule for controlled
+WebSocket Android I/O, including loopback text/binary roundtrip, close,
+timeout/size-limit rejection, raw socket denial, and destroy cleanup.
 
 ## Release Gate
 
