@@ -355,8 +355,16 @@ assertIncludes(bridge, "session.getFoldLine && session.getFoldLine(row)", "fold 
 assertIncludes(bridge, 'hasClassToken(target, "ace_fold-widget")', "fold placeholder handler excludes gutter fold widget");
 assertIncludes(bridge, "function isFoldPlaceholderTarget(target)", "fold placeholder target helper");
 assertIncludes(bridge, "function expandFoldFromDomEvent(event)", "fold placeholder DOM capture expansion");
+assertIncludes(bridge, "function handleFoldPlaceholderTouch(event)", "fold placeholder touch capture expansion");
+assertIncludes(bridge, "foldPlaceholderTouchExpanded", "fold placeholder touch expansion diagnostics");
+assertIncludes(bridge, '["touchstart", "touchmove", "touchend", "touchcancel"].forEach(function(type)', "fold placeholder touch listener set");
 assertIncludes(bridge, 'editor.container.addEventListener("click", expandFoldFromDomEvent, true)', "fold placeholder click capture listener");
 assertIncludes(bridge, 'editor.on("click", function(event)', "fold placeholder click handler");
+assertIncludes(bridge, "function cancelAceMobileTouchInteraction(reason)", "ACE mobile touch cancellation helper");
+assertIncludes(bridge, "editor.$mouseHandler.isMousePressed = false", "ACE mouse pressed state reset on touch cancel");
+assertIncludes(bridge, "editor.renderer.$isMousePressed = false", "ACE renderer pressed state reset on touch cancel");
+assertIncludes(bridge, 'document.addEventListener("touchcancel", function(event)', "ACE DOM touchcancel cancellation listener");
+assertIncludes(bridge, "cancelTouchInteraction: cancelAceMobileTouchInteraction", "ACE touch cancellation public API");
 assertIncludes(bridge, "setWordWrapEnabled: setWordWrapEnabled", "ACE word wrap runtime API");
 assertIncludes(bridge, "setWordWrapIndentStyle: setWordWrapIndentStyle", "ACE word wrap indentation runtime API");
 assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line number runtime API");
@@ -451,6 +459,7 @@ assertIncludes(aceCodeEditor, "override fun setSelection(start: Int, end: Int)",
 assertIncludes(aceCodeEditor, "not document-absolute offsets", "ACE IME setSelection avoids document-absolute offsets");
 assertMatch(aceCodeEditor, /not document-absolute offsets[\s\S]*return true[\s\S]*\} else/, "ACE IME setSelection suppresses WebView absolute collapsed selection");
 assertIncludes(aceCodeEditor, '"ime_cursor_selection"', "ACE IME setSelection diagnostics event");
+assertIncludes(aceCodeEditor, 'invokeAce("cancelTouchInteraction", quote(reason))', "native pointer guard cancels ACE touch interaction");
 assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_LEFT", "ACE soft-keyboard cursor left key");
 assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_RIGHT", "ACE soft-keyboard cursor right key");
 assertIncludes(aceCodeEditor, "KeyEvent.FLAG_SOFT_KEYBOARD", "ACE soft-keyboard cursor source guard");

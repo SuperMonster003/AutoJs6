@@ -348,6 +348,11 @@ Attempts:
   widgets could no longer collapse code. The current code exempts gutter
   `.ace_fold-widget` hits from the custom breakpoint tap zone and leaves gutter
   folding to ACE's native handler.
+- Added a touch-level folded-placeholder candidate in the AutoJs6 bridge. It
+  tracks `touchstart` on `.ace_fold`, cancels the candidate when movement
+  exceeds touch slop, and expands the fold on `touchend` before relying on a
+  browser/ACE click event. This is a bridge-level compatibility experiment
+  because the packaged ACE asset currently only includes minified core code.
 
 Expected result:
 
@@ -363,6 +368,9 @@ Additional notes:
   internal fold lookup for placeholder widgets. Future work should inspect the
   actual DOM event target/class list and the fold data returned by
   `session.getFoldAt()` / `session.getFoldLine()` at the tap point.
+- If the touch-level bridge candidate still fails on device, the next step
+  should be a maintainable ACE mobile `touch_handler` patch rather than another
+  generic DOM click listener.
 
 ### Sony XQ-AT72 Right-Edge Back Gesture
 
@@ -391,6 +399,12 @@ Attempts:
   actual system gesture edge.
 - Added haptic suppression after detected right-edge guard activity to avoid
   confusing long-press vibration when the app can identify the gesture.
+- Added a bridge-level `cancelTouchInteraction(reason)` path that resets
+  accessible ACE pressed flags, hides transient completion/tooltip/signature
+  UI, suppresses host selection action mode, and records
+  `aceTouchInteractionCancelled`. Native and JavaScript right-edge guards now
+  route detected pointer guards through this cancellation path. The bridge also
+  listens for DOM `touchcancel` and window blur as best-effort cleanup points.
 
 Expected result:
 
@@ -408,3 +422,7 @@ Additional notes:
   Future work should capture full native `MotionEvent` sequences, JS
   `touchstart/touchmove/touchend` timing, system gesture inset values, and ACE
   long-press timing on Sony XQ-AT72 before further tuning.
+- If Sony still triggers long-press after this cleanup path, the likely next
+  change is an ACE mobile `touch_handler` source patch that clears the internal
+  long-touch timer on `touchcancel`/system takeover. A fixed wide right-edge
+  dead zone should remain avoided because it breaks normal editor interaction.

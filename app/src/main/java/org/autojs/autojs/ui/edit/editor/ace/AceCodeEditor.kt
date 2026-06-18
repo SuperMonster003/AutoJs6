@@ -1360,7 +1360,7 @@ class AceCodeEditor @JvmOverloads constructor(
         mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
         finishSelectionActionMode()
         if (isReady) {
-            invokeAce("suppressSelectionActionModeMenu", quote(reason))
+            invokeAce("cancelTouchInteraction", quote(reason))
         }
     }
 

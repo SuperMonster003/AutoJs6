@@ -47,6 +47,7 @@
     var rightEdgeGestureGuardStartX = 0;
     var rightEdgeGestureGuardStartY = 0;
     var rightEdgeGestureGuardTracking = false;
+    var foldTapCandidate = null;
     var DEFAULT_FONT_FAMILY = '"JetBrains Mono", "Source Code Pro", monospace';
     var STATE_NOTIFY_THROTTLE_MS = 100;
     var TEXT_NOTIFY_THROTTLE_MS = 100;
@@ -58,6 +59,7 @@
     var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 24;
     var RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X = 14;
     var RIGHT_EDGE_GESTURE_VERTICAL_SLOP = 24;
+    var FOLD_TAP_TOUCH_SLOP_SQUARED = 100;
 
     function callBridge(name, args) {
         try {
@@ -320,6 +322,43 @@
         }
     }
 
+    function cancelAceMobileTouchInteraction(reason) {
+        reason = String(reason || "touch_cancel");
+        foldTapCandidate = null;
+        try {
+            if (editor && editor.$mouseHandler) {
+                editor.$mouseHandler.isMousePressed = false;
+            }
+            if (editor && editor.renderer) {
+                editor.renderer.$isMousePressed = false;
+            }
+        } catch (ignore) {
+            // Best-effort reset for ACE mobile touch state held inside private handlers.
+        }
+        try {
+            if (editor && editor.completer && editor.completer.detach) {
+                editor.completer.detach();
+            }
+        } catch (ignore2) {
+            // Completion is transient UI; keep touch cancellation non-fatal.
+        }
+        try {
+            if (tooltipController) {
+                tooltipController.hide();
+            }
+            if (signatureHelpController) {
+                signatureHelpController.hide();
+            }
+        } catch (ignore3) {
+            // Tooltip/signature helpers are optional.
+        }
+        suppressSelectionActionModeMenu(reason);
+        callBridge("notifyEvent", [
+            "aceTouchInteractionCancelled",
+            JSON.stringify({ reason: reason })
+        ]);
+    }
+
     function rightEdgeGestureGuardWidth() {
         var viewportWidth = Math.max(
             1,
@@ -403,7 +442,11 @@
             maybeActivateRightEdgeGestureGuard(event);
         }
         if (rightEdgeGestureGuardActive) {
-            suppressSelectionActionModeMenu("right_edge_back_gesture_dom");
+            if (!rightEdgeGestureGuardNotified) {
+                cancelAceMobileTouchInteraction("right_edge_back_gesture_dom");
+            } else {
+                suppressSelectionActionModeMenu("right_edge_back_gesture_dom");
+            }
             stopDomTouchEvent(event);
             if (!rightEdgeGestureGuardNotified) {
                 rightEdgeGestureGuardNotified = true;
@@ -427,6 +470,21 @@
         ["touchstart", "touchmove", "touchend", "touchcancel"].forEach(function(type) {
             document.addEventListener(type, handleRightEdgeGestureGuardTouch, true);
         });
+    }
+
+    function installAceMobileTouchCancellation() {
+        if (!document || !document.addEventListener) {
+            return;
+        }
+        document.addEventListener("touchcancel", function(event) {
+            rememberTouchAnchor(event);
+            cancelAceMobileTouchInteraction("dom_touchcancel");
+        }, true);
+        if (global && global.addEventListener) {
+            global.addEventListener("blur", function() {
+                cancelAceMobileTouchInteraction("window_blur");
+            });
+        }
     }
 
     function getActionModeFallbackRect() {
@@ -1473,6 +1531,78 @@
         return false;
     }
 
+    function beginFoldPlaceholderTouch(event) {
+        if (!editor || !editor.renderer || !isFoldPlaceholderTarget(event && event.target)) {
+            foldTapCandidate = null;
+            return;
+        }
+        var touch = touchFromEvent(event);
+        if (!touch) {
+            foldTapCandidate = null;
+            return;
+        }
+        var position = editor.renderer.screenToTextCoordinates &&
+            editor.renderer.screenToTextCoordinates(touch.clientX, touch.clientY);
+        position = position || editor.getCursorPosition();
+        foldTapCandidate = {
+            startX: Number(touch.clientX),
+            startY: Number(touch.clientY),
+            row: position.row,
+            column: position.column
+        };
+    }
+
+    function updateFoldPlaceholderTouch(event) {
+        if (!foldTapCandidate) {
+            return;
+        }
+        var touch = touchFromEvent(event);
+        if (!touch) {
+            foldTapCandidate = null;
+            return;
+        }
+        var dx = Number(touch.clientX) - foldTapCandidate.startX;
+        var dy = Number(touch.clientY) - foldTapCandidate.startY;
+        if (dx * dx + dy * dy > FOLD_TAP_TOUCH_SLOP_SQUARED) {
+            foldTapCandidate = null;
+        }
+    }
+
+    function finishFoldPlaceholderTouch(event) {
+        var candidate = foldTapCandidate;
+        foldTapCandidate = null;
+        if (!candidate) {
+            return false;
+        }
+        if (expandFoldAt(candidate.row, candidate.column) || expandFoldAt(candidate.row, 0)) {
+            cancelAceMobileTouchInteraction("fold_placeholder_touch");
+            stopFoldPlaceholderClick(event);
+            callBridge("notifyEvent", [
+                "foldPlaceholderTouchExpanded",
+                JSON.stringify({ row: candidate.row, column: candidate.column })
+            ]);
+            return true;
+        }
+        callBridge("notifyEvent", [
+            "foldPlaceholderTouchMissed",
+            JSON.stringify({ row: candidate.row, column: candidate.column })
+        ]);
+        return false;
+    }
+
+    function handleFoldPlaceholderTouch(event) {
+        var type = event && event.type;
+        if (type === "touchstart") {
+            beginFoldPlaceholderTouch(event);
+        } else if (type === "touchmove") {
+            updateFoldPlaceholderTouch(event);
+        } else if (type === "touchend") {
+            finishFoldPlaceholderTouch(event);
+        } else if (type === "touchcancel") {
+            foldTapCandidate = null;
+        }
+    }
+
     function stopFoldPlaceholderClick(event) {
         if (!event) {
             return;
@@ -1506,6 +1636,9 @@
         if (!editor || !editor.container || !editor.container.addEventListener) {
             return;
         }
+        ["touchstart", "touchmove", "touchend", "touchcancel"].forEach(function(type) {
+            editor.container.addEventListener(type, handleFoldPlaceholderTouch, true);
+        });
         editor.container.addEventListener("click", expandFoldFromDomEvent, true);
     }
 
@@ -1535,6 +1668,7 @@
             document.body.classList.add("autojs6-host-selection-action-mode");
         }
         installRightEdgeGestureGuard();
+        installAceMobileTouchCancellation();
         installFoldPlaceholderClickCapture();
         session.setMode("ace/mode/javascript");
         session.setUseWorker(false);
@@ -1641,6 +1775,7 @@
             moveCompletionSelectionOrCursor: moveCompletionSelectionOrCursor,
             handleEscapeKey: handleEscapeKey,
             suppressSelectionActionModeMenu: suppressSelectionActionModeMenu,
+            cancelTouchInteraction: cancelAceMobileTouchInteraction,
             insertAtLine: insertAtLine,
             appendTextChunk: appendTextChunk,
             jumpTo: jumpTo,
