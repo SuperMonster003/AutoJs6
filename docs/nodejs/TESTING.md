@@ -938,6 +938,7 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodePrGate
 .\gradlew.bat --console=plain :app:verifyNodeV11AlphaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_alpha"
 .\gradlew.bat --console=plain :app:verifyNodeV11BetaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
+.\gradlew.bat --console=plain :app:verifyNodeV11RcReadiness "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
@@ -949,6 +950,8 @@ Use these aggregate tasks for local gates:
 requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/README.md](reports/v1.1-alpha/README.md).
 `verifyNodeV11BetaGate` is the v1.1 stabilization gate and requires
 `autojs.nodejs.test.deviceProfile=v1_1_beta`; see [reports/v1.1-beta/README.md](reports/v1.1-beta/README.md).
+`verifyNodeV11RcReadiness` verifies v1.1 beta evidence is ready for release-candidate planning and also requires
+`autojs.nodejs.test.deviceProfile=v1_1_beta`; see [reports/v1.1-rc/README.md](reports/v1.1-rc/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
@@ -963,6 +966,8 @@ reports. Running `verifyNodeV11AlphaGate` finalizes with this summary automatica
 tooling, and device reports. Running `verifyNodeV11BetaGate` finalizes with this summary automatically.
 `verifyNodeV11BetaBlockerRegister` writes `app/build/reports/nodejs/v1.1-beta-blockers.json` and is part of the beta
 gate so RC-blocking experimental, protocol-gated, blocked, and explicit-subgate surfaces stay recorded.
+`verifyNodeV11RcReadiness` writes `app/build/reports/nodejs/v1.1-rc-readiness.json` and requires a clean beta summary,
+ready packaged aggregate, and beta blocker statuses of `deferred` or `closed` before RC planning starts.
 
 `verifyEmbeddedNodeDebug` covers build, native dependency reporting, native symbol archive reporting, and packaging preflight.
 It also runs `verifyNodeCompatibilityProfile` and `embeddedNodeDoctorReport`, which generate compatibility and attachable

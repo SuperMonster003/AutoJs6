@@ -114,3 +114,14 @@ After beta passes, a release-candidate plan may start only if:
   separately promoted through a new design gate,
 - long-running mode and worker_threads remain blocked in release docs, and
 - no new broad feature expansion is added between beta and RC.
+
+The RC readiness path is defined in
+[NODE_PROFILE_V1_1_RC_PLAN.md](NODE_PROFILE_V1_1_RC_PLAN.md). Run:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeV11RcReadiness "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
+```
+
+This task verifies the beta summary, packaged aggregate readiness, and blocker
+decisions before production RC gate planning starts.

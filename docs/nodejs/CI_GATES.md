@@ -130,6 +130,30 @@ devices are attached.
 The beta profile keeps the default normal fuzzer budget. Use
 `-Pautojs.nodejs.fuzzerBudget=extended` only as a separate stress subgate.
 
+## v1.1 RC Readiness Gate
+
+Use `verifyNodeV11RcReadiness` after a passing v1.1 beta gate and before
+production release-candidate gate planning:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeV11RcReadiness "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
+```
+
+Scope:
+
+- regenerates the v1.1 beta summary from current host reports,
+- verifies the beta summary schema, clean git state, and `v1_1_beta` profile,
+- verifies the latest beta connected-test XML has zero failures, errors, and
+  skips,
+- verifies required beta reports and packaged smoke aggregate readiness,
+- verifies all beta blocker statuses are `deferred` or `closed`,
+- writes `app/build/reports/nodejs/v1.1-rc-readiness.json`.
+
+This gate does not create a tag and does not replace `verifyNodeReleaseGate`.
+See [reports/v1.1-rc/README.md](reports/v1.1-rc/README.md) and
+[releases/NODE_PROFILE_V1_1_RC_PLAN.md](releases/NODE_PROFILE_V1_1_RC_PLAN.md).
+
 ## Release Gate
 
 Use `verifyNodeReleaseGate` for release candidates:

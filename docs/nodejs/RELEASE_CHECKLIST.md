@@ -13,6 +13,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `:app:verifyNodeResolverVisualizerFixtures`
 - [ ] `:app:generateNodeProfileReleaseManifest`
 - [ ] `:app:verifyNodePrGate`
+- [ ] v1.1 release candidates use `:app:verifyNodeV11RcReadiness` with `autojs.nodejs.test.deviceProfile=v1_1_beta`
 - [ ] release candidates use `:app:verifyNodeReleaseGate` with `autojs.nodejs.test.deviceProfile=sony` or `full`
 - [ ] `:app:generateNodeNightlyReport` output attached when publishing nightly or release-candidate results
 - [ ] fuzzer failures, if any, have seed JSON files under `build/reports/nodejs/fuzz-seeds/` and replay with `:app:replayNodeFuzzerSeed`

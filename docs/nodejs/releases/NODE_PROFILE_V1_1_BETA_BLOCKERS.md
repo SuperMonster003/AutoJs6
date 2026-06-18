@@ -13,7 +13,7 @@ or scoped-fs relaxation.
 
 ## V11-BETA-PACKAGED-ESM-TEMPLATE
 
-Status: open
+Status: deferred
 
 RC decision: defer unless the refreshed inrt template becomes the default
 packaged template before RC.
@@ -42,7 +42,7 @@ Validation:
 
 ## V11-BETA-NETWORK-LIVE-PROVIDER
 
-Status: open
+Status: deferred
 
 RC decision: keep controlled `fetch` and `axios` experimental unless a separate
 network live-provider promotion gate passes.
@@ -71,7 +71,7 @@ Validation:
 
 ## V11-BETA-WEBSOCKET-LIVE-PROVIDER
 
-Status: open
+Status: deferred
 
 RC decision: keep WebSocket experimental unless a separate WebSocket
 live-provider promotion gate passes.
@@ -99,7 +99,7 @@ Validation:
 
 ## V11-BETA-UI-LIVE-PROVIDER
 
-Status: open
+Status: deferred
 
 RC decision: keep UI as protocol-gated partial with fail-closed Android provider.
 
@@ -126,7 +126,7 @@ Validation:
 
 ## V11-BETA-FLOATY-OVERLAY
 
-Status: open
+Status: deferred
 
 RC decision: keep floaty/overlay blocked for v1.1.
 
@@ -149,7 +149,7 @@ Validation:
 
 ## V11-BETA-LONG-RUNNING
 
-Status: open
+Status: deferred
 
 RC decision: keep long-running/service execution blocked for v1.1.
 
@@ -173,7 +173,7 @@ Validation:
 
 ## V11-BETA-WORKER-THREADS
 
-Status: open
+Status: deferred
 
 RC decision: keep `worker_threads` blocked and default-off.
 
@@ -199,7 +199,7 @@ Validation:
 
 ## V11-BETA-JAVA-INTEROP
 
-Status: open
+Status: deferred
 
 RC decision: keep Java/Android interop experimental and default-off.
 
@@ -224,7 +224,7 @@ Validation:
 
 ## V11-BETA-PLUGIN-RUNTIME
 
-Status: open
+Status: deferred
 
 RC decision: keep plugin support as JS-only local prototype.
 
@@ -250,7 +250,7 @@ Validation:
 
 ## V11-BETA-WORK-MANAGER-EXECUTION
 
-Status: open
+Status: deferred
 
 RC decision: keep `work_manager` at metadata registration partial support.
 

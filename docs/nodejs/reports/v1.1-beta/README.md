@@ -74,6 +74,16 @@ release-candidate planning. It does not promote controlled network live
 providers, long-running mode, worker_threads, floaty/overlay, native addons,
 raw process, or raw network modules.
 
+Before starting RC gate planning, run the v1.1 RC readiness check:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeV11RcReadiness "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
+```
+
+It writes `app/build/reports/nodejs/v1.1-rc-readiness.json` and requires every
+beta blocker to be `deferred` or `closed`.
+
 ## Initial Validation
 
 Validated on 2026-06-18 Asia/Shanghai against Sony XQ-AT72 `QV710AF65F`:
