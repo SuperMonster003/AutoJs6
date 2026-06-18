@@ -8062,6 +8062,8 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_work_manager_policy = Object.freeze({
     maxTasksPerProvider: 64,
     maxDelayMs: 2592000000,
+    defaultTaskTimeoutMs: 30000,
+    maxTaskTimeoutMs: 600000,
     minPeriodicIntervalMs: 900000,
     maxPeriodicIntervalMs: 2592000000,
     allowedConstraints: Object.freeze(["charging", "network", "idle"])
@@ -11470,6 +11472,15 @@ std::string buildEmbeddedScriptExecutionSource(
         "delayMs",
         false
       ),
+      timeoutMs: __autojs6_work_manager_duration_ms(
+        input.taskTimeoutMs,
+        __autojs6_work_manager_policy.defaultTaskTimeoutMs,
+        1,
+        __autojs6_work_manager_policy.maxTaskTimeoutMs,
+        methodName,
+        "taskTimeoutMs",
+        false
+      ),
       constraints: __autojs6_work_manager_constraints(input.constraints, methodName)
     };
     if (path.entryKind === "projectEntry") {
@@ -11517,19 +11528,39 @@ std::string buildEmbeddedScriptExecutionSource(
       packaged: source.packaged === true,
       delayMs: Number(source.delayMs) || 0,
       intervalMs: source.intervalMs === undefined || source.intervalMs === null ? null : Number(source.intervalMs),
+      timeoutMs: Number(source.timeoutMs) || __autojs6_work_manager_policy.defaultTaskTimeoutMs,
       constraints: Object.freeze({
         charging: !!(source.constraints && source.constraints.charging === true),
         network: !!(source.constraints && source.constraints.network === true),
         idle: !!(source.constraints && source.constraints.idle === true)
       }),
       packageName: source.packageName === undefined || source.packageName === null ? "" : String(source.packageName),
-      createdAtEpochMs: Number(source.createdAtEpochMs) || 0
+      createdAtEpochMs: Number(source.createdAtEpochMs) || 0,
+      updatedAtEpochMs: Number(source.updatedAtEpochMs) || 0,
+      lastRunStatus: source.lastRunStatus === undefined || source.lastRunStatus === null ? "" : String(source.lastRunStatus),
+      lastFailure: source.lastFailure === undefined || source.lastFailure === null ? null : String(source.lastFailure),
+      lastRun: source.lastRun && typeof source.lastRun === "object" ? Object.freeze({
+        startedAtEpochMs: Number(source.lastRun.startedAtEpochMs) || 0,
+        finishedAtEpochMs: Number(source.lastRun.finishedAtEpochMs) || 0,
+        elapsedMs: Number(source.lastRun.elapsedMs) || 0,
+        succeeded: source.lastRun.succeeded === true,
+        exitCode: source.lastRun.exitCode === undefined || source.lastRun.exitCode === null ? null : Number(source.lastRun.exitCode),
+        sourceName: source.lastRun.sourceName === undefined || source.lastRun.sourceName === null ? "" : String(source.lastRun.sourceName),
+        errorCode: source.lastRun.errorCode === undefined || source.lastRun.errorCode === null ? null : String(source.lastRun.errorCode),
+        errorName: source.lastRun.errorName === undefined || source.lastRun.errorName === null ? null : String(source.lastRun.errorName),
+        errorMessage: source.lastRun.errorMessage === undefined || source.lastRun.errorMessage === null ? null : String(source.lastRun.errorMessage),
+        timedOut: source.lastRun.timedOut === true,
+        stdout: source.lastRun.stdout === undefined || source.lastRun.stdout === null ? "" : String(source.lastRun.stdout),
+        stderr: source.lastRun.stderr === undefined || source.lastRun.stderr === null ? "" : String(source.lastRun.stderr)
+      }) : undefined
     });
   }
   function __autojs6_work_manager_policy_snapshot() {
     return Object.freeze({
       maxTasksPerProvider: __autojs6_work_manager_policy.maxTasksPerProvider,
       maxDelayMs: __autojs6_work_manager_policy.maxDelayMs,
+      defaultTaskTimeoutMs: __autojs6_work_manager_policy.defaultTaskTimeoutMs,
+      maxTaskTimeoutMs: __autojs6_work_manager_policy.maxTaskTimeoutMs,
       minPeriodicIntervalMs: __autojs6_work_manager_policy.minPeriodicIntervalMs,
       maxPeriodicIntervalMs: __autojs6_work_manager_policy.maxPeriodicIntervalMs,
       allowedConstraints: Object.freeze(__autojs6_work_manager_policy.allowedConstraints.slice())

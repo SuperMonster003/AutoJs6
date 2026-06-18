@@ -214,7 +214,7 @@ object NodeBridgeProviderRegistry {
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
         IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
-        WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.FAKE
+        WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
     }
@@ -232,6 +232,14 @@ object NodeBridgeProviderRegistry {
             "eventDelivery" to "bounded drainEvents JSON snapshots",
             "maxActiveSessionsPerExecution" to "4",
             "statusReason" to "Activity-owned declarative UI MVP",
+        )
+        WORK_MANAGER_PROVIDER -> linkedMapOf(
+            "liveMethods" to "scheduleOnce,schedulePeriodic,cancel,list",
+            "scheduler" to NodeWorkManagerBridgeScheduler.SCHEDULER_NAME,
+            "constraints" to "charging,network,idle",
+            "minimumPeriodicIntervalMs" to ControlledWorkManagerPolicy.MIN_PERIODIC_INTERVAL_MS.toString(),
+            "retryPolicy" to "no implicit retry; workers never return Result.retry",
+            "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
         )
         else -> emptyMap()
     }

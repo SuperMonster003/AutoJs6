@@ -38,7 +38,7 @@ Long-running service mode is not:
 | --- | --- | --- | --- | --- |
 | One-shot embedded script | Implemented | Required | Console/notification while running | directive, file route, project route, packaged route |
 | Execution queue | Implemented | Queue timeout plus per-script timeout | Caller-owned diagnostics | `enqueueScript(...)` |
-| Scheduled Node task | Metadata MVP only | Required per execution | Future task UI/notification | `work_manager` metadata |
+| Scheduled Node task | WorkManager timed MVP | Required per execution | Future task UI/notification | `work_manager` |
 | Long-running Node service | Rejected before user code | Startup timeout plus watchdog policy | Persistent foreground notification | Future explicit service descriptor |
 
 ## Explicit Opt-In

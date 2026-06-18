@@ -1,6 +1,6 @@
 # Work Manager Design And MVP Gate
 
-Status: Tasks 65 and 180 expose `require("work_manager")` as a controlled bridge MVP for scheduled-task metadata registration. It does not launch background Node executions yet. `require("tasks")` remains unavailable to Embedded Node scripts.
+Status: Tasks 65, 180, and S7-15 expose `require("work_manager")` as a controlled bridge MVP for scheduled-task registration. S7-15 promotes the Android provider from metadata-only storage to WorkManager-backed embedded Node execution for scoped one-shot and periodic entries. `require("tasks")` remains unavailable to Embedded Node scripts.
 
 ## Goal
 
@@ -33,7 +33,7 @@ This means the Node design should extend AutoJs6 task descriptors and launch rou
 | Capability | Decision | Reason |
 | --- | --- | --- |
 | Timed metadata | MVP | One-shot and bounded periodic descriptors can be registered through the controlled `work_manager` bridge without exposing Android scheduler objects. |
-| Timed execution | Future MVP | Actual scheduled execution must map to existing AutoJs6 task ownership and be user-visible before it can run in the background. |
+| Timed execution | MVP | The Android provider can now enqueue scoped embedded Node one-shot and periodic work through AndroidX WorkManager. Long-running restart, boot, broadcast, and user-visible task UI flows remain separate gates. |
 | Broadcast tasks | Deferred | Broadcast registration has exported receiver, action allowlist, privacy, and Android background-start implications. |
 | App startup tasks | Deferred | Existing `ACTION_STARTUP` behavior is an intent task; Node should not silently persist app-start execution until prompts and storage are designed. |
 | Boot tasks | Deferred | Boot execution requires manifest permission, user visibility, background-start policy, and packaged opt-in. |
@@ -42,7 +42,7 @@ This means the Node design should extend AutoJs6 task descriptors and launch rou
 
 ## Implemented MVP Scope
 
-The Task 65/180 implementation exposes scheduled-task metadata registration through `require("work_manager")`.
+The Task 65/180/S7-15 implementation exposes scheduled-task registration through `require("work_manager")`.
 
 Current JavaScript shape:
 
@@ -73,6 +73,7 @@ Implemented descriptor fields:
 - `backend`, currently `embedded` only
 - `delayMs`
 - `intervalMs` for periodic tasks
+- `taskTimeoutMs` for the scheduled embedded Node run timeout (`timeoutMs` remains the bridge call timeout)
 - `packaged` for packaged project-entry metadata
 - `constraints.charging`
 - `constraints.network`
@@ -80,12 +81,17 @@ Implemented descriptor fields:
 
 Current behavior:
 
-- descriptors are stored in provider-owned metadata for the current bridge provider instance
+- descriptors are persisted as WorkManager task records under the app-private files directory
+- `scheduleOnce` enqueues a `OneTimeWorkRequest`; `schedulePeriodic` enqueues a `PeriodicWorkRequest`
+- the Worker reads the scoped entry file, launches `NativeNodeEmbeddedScriptService` in one-shot mode, and persists the last run result
+- workers return success or failure only; they do not return `Result.retry`
+- `cancel` cancels the unique WorkManager work and removes the persisted descriptor
+- `list` returns task records for the same package/project working-directory scope
 - the Android provider validates descriptor policy again after JavaScript validation
 - task metadata stores `backend` plus either ordinary `scriptPath` or project `entry` with `entryKind`
 - `scriptPath` and `entry` must be relative, non-empty, NUL-free, and scoped to the working directory
 - non-packaged paths must resolve to an existing file inside the working directory
-- packaged project entries can serialize metadata without requiring a plaintext file path
+- packaged project entries can serialize metadata without requiring a plaintext file path at registration time; live execution requires a readable scoped entry when the WorkManager worker fires
 - periodic intervals are bounded to at least `900000` ms
 - queued host fallback rejects `work_manager` requests with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 
@@ -301,27 +307,29 @@ Task 65/180 coverage:
 - `require("work_manager")` module routing and shadowing protection
 - `require("tasks")` remains unavailable
 - positive once and periodic metadata registration through a fake provider
+- WorkManager-backed one-shot embedded Node execution that writes an observable result
+- cancellation of delayed WorkManager work before execution
+- packaged project-entry metadata execution when a scoped packaged entry file is readable
 - `cancel` and `list`
 - ordinary `scriptPath` versus project `entry` metadata serialization
 - packaged project-entry metadata serialization, including packaged entries without a plaintext file
 - queued fallback rejection
-- Android provider metadata storage
+- Android provider persisted task storage
 - scoped entry path denial for absolute, NUL, `..`, and missing non-packaged files
 - bounded periodic interval denial
 - non-embedded backend denial
 
-Future execution work needs additional coverage:
+Future scheduled-task work needs additional coverage:
 
-- timed task descriptor persistence and migration
-- scoped entry path denial for absolute, NUL, `..`, symlink, and realpath escapes
+- descriptor migration into the user-visible AutoJs6 task database
+- scoped entry path denial for symlink-specific edge cases beyond canonical realpath checks
 - user-denied prompt path
-- provider timeout path
+- provider timeout path beyond one-shot worker result persistence
 - disabled broadcast/boot/package registration paths
-- scheduled run launches embedded Node with expected backend and timeout
 - timeout or crash does not poison the next scheduled run
 - packaged manifest verifier reports task-related permissions and receivers
-- packaged smoke for a timed Node task when packaged task support is enabled
+- full packaged APK smoke for a timed Node task when packaged task support is enabled
 
 ## Current Decision
 
-Tasks 65 and 180 implement `require("work_manager")` as a controlled metadata-registration MVP. The Safe Node Profile still denies direct Android scheduler authority and does not execute scheduled Node work in the background yet. Timed execution remains the only approved next scheduling direction, and it must land through a bridge provider, user-visible registration, descriptor persistence, scoped path validation, packaged manifest verification, and focused tests. Broadcast, startup, boot, and package-event registration remain deferred.
+Tasks 65, 180, and S7-15 implement `require("work_manager")` as a controlled WorkManager-backed scheduling MVP. The Safe Node Profile still denies direct Android scheduler authority: Node receives only serializable task ids and task records, never raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects. S7-15 permits scoped one-shot and bounded periodic embedded Node execution with explicit `work_manager` capability, minimum periodic interval enforcement, stable result/failure records, and no implicit retry. Broadcast, startup, boot, package-event registration, task UI migration, and arbitrary long-running scheduled Node processes remain deferred.

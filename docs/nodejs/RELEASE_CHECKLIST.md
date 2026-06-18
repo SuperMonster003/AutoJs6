@@ -70,9 +70,9 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge smoke verifies `shell` fake provider results, shadowing protection, timeout/cwd/env policy, declared `shell`/`shell.root` capability behavior, explicit root permission tagging, and that `child_process` remains disabled
 - [ ] bridge smoke verifies controlled `fetch` fake-provider GET/POST, timeout, abort, response budget, unsupported scheme, redirect limit, max concurrency, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `http`/`https`/`net`/`tls`/`dns` remain disabled
 - [ ] bridge smoke verifies controlled `websocket` fake-provider connect/send/receive/close, timeout, message budget, max connection, service-destroy cleanup, diagnostics counters, shadowing protection, and that raw `net`/`tls` remain disabled
-- [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable
+- [ ] bridge smoke verifies controlled `work_manager` schedule-once, schedule-periodic, cancel, list, scoped descriptor policy, packaged entry metadata serialization, WorkManager live execution/cancel paths, queued-fallback rejection, shadowing protection, and that `tasks` remains unavailable
 - [ ] bridge conformance verifies stable module exports, Promise-returning bridge calls, provider error shape, capability rejection, handle methods, and zero pending calls after destroy
-- [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` metadata cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
+- [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` registration cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
 - [ ] bridge concurrency limits verify pending-call flood rejection, image-handle quota, shell/network/WebSocket resource limits, accessibility request-rate limiting, safe project overrides, and ignored above-hard-max overrides
 - [ ] bridge RPC fuzzer verifies malformed request parsing, unknown dispatch paths, fake-provider mode, malformed responses, service-destroy rejection, and zero pending calls after cleanup
 - [ ] native addon policy verifies `.node` denial through relative require, `module.createRequire`, package `main`, package `exports`, package `imports`, and package subpath imports with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`
@@ -108,7 +108,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `FOREGROUND_SERVICE` permission exists
 - [ ] `FOREGROUND_SERVICE_SPECIAL_USE` permission exists
 - [ ] packaged scheduled/background task receivers and permissions are absent unless the project explicitly opts in
-- [ ] packaged `work_manager` metadata registration requires live bridge metadata and is not accepted by queued fallback
+- [ ] packaged `work_manager` registration requires live bridge metadata and is not accepted by queued fallback
 - [ ] if packaged timed/boot/package tasks are enabled, manifest verifier reports the exact receivers, permissions, and foreground-service requirements
 - [ ] if packaged controlled network or WebSocket is enabled, manifest verifier reports `android.permission.INTERNET`; if it is not enabled, normal builds keep `autojs.nodejs.network.experimental=false`
 - [ ] if `node.permissions` / `autojs6.node.permissions` is present, missing bridge capabilities reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`

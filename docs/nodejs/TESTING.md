@@ -602,7 +602,13 @@ Current controlled work_manager bridge focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest"
 ```
 
-This suite verifies the `work_manager` bridge registry, fake-provider schedule-once and schedule-periodic descriptors, `require("work_manager")`, shadowing protection, ordinary `scriptPath` versus project `entry` serialization, packaged project-entry metadata serialization, scoped path and missing-file rejection, interval/backend policy rejection, permission tagging, Android provider metadata storage, `cancel()`, `list()`, and that `require("tasks")` remains unavailable. Packaged queued-fallback rejection remains a release/template gate because the normal instrumentation harness injects live bridge metadata.
+Focused live WorkManager gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeLiveWorkManagerGate -Pautojs.nodejs.test.deviceProfile=sony
+```
+
+This suite verifies the `work_manager` bridge registry, fake-provider schedule-once and schedule-periodic descriptors, `require("work_manager")`, shadowing protection, ordinary `scriptPath` versus project `entry` serialization, packaged project-entry metadata serialization, scoped path and missing-file rejection, interval/backend policy rejection, explicit capability tagging, AndroidX WorkManager-backed task persistence, real one-shot embedded Node execution, persisted run result/failure metadata, delayed-task cancellation before execution, `cancel()`, `list()`, and that `require("tasks")` remains unavailable. Packaged queued-fallback rejection remains a release/template gate because the normal instrumentation harness injects live bridge metadata.
 
 Current Java interop allowlist focused instrumentation:
 
@@ -620,7 +626,7 @@ Current bridge resource registry focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest"
 ```
 
-This suite verifies direct registry cleanup for image-handle, screen-capturer, and WebSocket resource types; idempotent close behavior; leaked-resource diagnostics; Android provider cleanup for experimental Java object handles; `work_manager` metadata cancellation and destroy cleanup; and shell timeout cleanup through the live provider resource registry.
+This suite verifies direct registry cleanup for image-handle, screen-capturer, and WebSocket resource types; idempotent close behavior; leaked-resource diagnostics; Android provider cleanup for experimental Java object handles; `work_manager` registration cancellation and destroy cleanup; and shell timeout cleanup through the live provider resource registry.
 
 Current Phase 5 bridge resource leak stress instrumentation:
 

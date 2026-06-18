@@ -278,4 +278,4 @@ Before implementation, add tests for:
 
 ## Current Decision
 
-Task 66 does not implement boot or broadcast-triggered Node tasks. It records the design gate for future work. The only current scheduling runtime surface remains Task 65 `require("work_manager")` metadata registration. Boot, package-event, startup, and custom broadcast execution stay disabled until a later implementation provides user-visible persistence, manifest verification, scoped descriptor storage, rate limits, trigger payload serialization, and focused tests.
+Task 66 does not implement boot or broadcast-triggered Node tasks. It records the design gate for future work. The current scheduling runtime surface is the S7-15 controlled `require("work_manager")` WorkManager timed MVP. Boot, package-event, startup, and custom broadcast execution stay disabled until a later implementation provides user-visible persistence, manifest verification, scoped descriptor storage, rate limits, trigger payload serialization, and focused tests.

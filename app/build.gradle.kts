@@ -333,6 +333,12 @@ val nodeJsLiveUiGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest#androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource",
     "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest#androidUiProviderRejectsUnsupportedDescriptorsAndForeignHandles",
 )
+val nodeJsLiveWorkManagerGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest#androidWorkManagerProviderSchedulesLiveMetadataAndEnforcesPathPolicy",
+    "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest#androidWorkManagerLiveProviderExecutesPackagedProjectEntryAndPersistsResult",
+    "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest#androidWorkManagerLiveProviderCancelPreventsDelayedExecution",
+    "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest#androidWorkManagerProviderRequiresExplicitCapability",
+)
 val nodeJsLongRunningGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
@@ -382,6 +388,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeLiveSensorsGate" to nodeJsLiveSensorsGateInstrumentationClasses,
     "verifyNodeLiveAccessibilityImageGate" to nodeJsLiveAccessibilityImageGateInstrumentationClasses,
     "verifyNodeLiveUiGate" to nodeJsLiveUiGateInstrumentationClasses,
+    "verifyNodeLiveWorkManagerGate" to nodeJsLiveWorkManagerGateInstrumentationClasses,
     "verifyNodeLongRunningGate" to nodeJsLongRunningGateInstrumentationClasses,
     "verifyNodeWorkerGate" to nodeJsWorkerGateInstrumentationClasses,
     "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,

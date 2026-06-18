@@ -1088,11 +1088,11 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `schedulePeriodic(options): Promise<string>`
   - `cancel(taskId, options?): Promise<void>`
   - `list(options?): Promise<readonly TaskInfo[]>`
-  - options: `{ scriptPath?: string, entry?: string, backend?: "embedded", delayMs?: number, intervalMs?: number, packaged?: boolean, constraints?: { charging?: boolean, network?: boolean, idle?: boolean }, timeoutMs?: number }`
-  - current MVP registers provider-owned task metadata only; it does not launch background Node executions yet
-  - `backend` is restricted to `embedded`, task metadata preserves either `scriptPath` or project `entry` plus `entryKind`, paths must stay relative to the scoped working directory, non-packaged entries must exist as files, and periodic intervals are bounded to at least `900000` ms
-  - packaged metadata can mark project entries with `packaged: true` and does not require a plaintext source file in the working directory, but older packaged templates without live bridge metadata do not queue persistent registration
-  - provider-owned task metadata is registered as a bridge resource and is cleared on execution destroy
+  - options: `{ scriptPath?: string, entry?: string, backend?: "embedded", delayMs?: number, intervalMs?: number, packaged?: boolean, constraints?: { charging?: boolean, network?: boolean, idle?: boolean }, taskTimeoutMs?: number, timeoutMs?: number }`; `taskTimeoutMs` controls the scheduled run, while `timeoutMs` remains the bridge call timeout
+  - current MVP persists app-private WorkManager task records and can launch scoped embedded Node one-shot or bounded periodic work through AndroidX WorkManager
+  - `backend` is restricted to `embedded`, task metadata preserves either `scriptPath` or project `entry` plus `entryKind`, paths must stay relative to the scoped working directory, non-packaged entries must exist as files, periodic intervals are bounded to at least `900000` ms, and workers never request implicit retry
+  - packaged metadata can mark project entries with `packaged: true` and does not require a plaintext source file at registration time, but live execution still needs a readable scoped entry when the WorkManager worker fires
+  - provider-owned task registrations are tracked as bridge resources; explicit `cancel()` removes persisted records and cancels the unique WorkManager work
   - raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter objects remain unavailable to JavaScript
 
 Example:
@@ -1169,7 +1169,7 @@ Live bridge diagnostics are recorded in result `nativeValues`:
 - `embedded_script.bridge_resource_limit_rejection_count`
 - `embedded_script.bridge_rate_limited_count`
 
-The current Android provider registers live resources for controlled fetch calls, controlled WebSocket sessions, shell executions, `work_manager` metadata tasks, and experimental Java object handles. The registry also reserves resource types for future image handles, screen capturers, dialogs, UI sessions, and workers so those providers can share the same destroy path when they become live Android capabilities.
+The current Android provider registers live resources for controlled fetch calls, controlled WebSocket sessions, shell executions, WorkManager-backed `work_manager` task registrations, and experimental Java object handles. The registry also reserves resource types for future image handles, screen capturers, dialogs, UI sessions, and workers so those providers can share the same destroy path when they become live Android capabilities.
 
 The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path.
 
@@ -1181,18 +1181,20 @@ Every bridge call must look asynchronous to JavaScript and must reject cleanly o
 
 ## Scheduled And Background Task Status
 
-Node scripts can register controlled scheduled-task metadata through `require("work_manager")`.
+Node scripts can register controlled scheduled Node work through `require("work_manager")`.
 
 Current policy:
 
 - `require("work_manager")` is exposed as a Promise bridge module for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`.
-- Tasks 65 and 180 store provider-owned backend and entry metadata only; they do not execute background Node scripts yet.
+- S7-15 persists scoped descriptors as app-private WorkManager task records and enqueues one-shot or bounded periodic AndroidX WorkManager requests.
 - `work_manager` is a live-bridge capability. Queued host fallback rejects it with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` so older packaged templates cannot create persistent tasks as one-way effects.
-- Registered descriptors accept only `backend: "embedded"`, scoped relative `scriptPath` or project `entry`, bounded delay/interval values, and boolean `charging`, `network`, and `idle` constraints. Non-packaged entries must resolve to files inside the working directory; packaged entries may serialize metadata without a plaintext file.
+- Registered descriptors accept only `backend: "embedded"`, scoped relative `scriptPath` or project `entry`, bounded delay/interval/timeout values, and boolean `charging`, `network`, and `idle` constraints. Non-packaged entries must resolve to files inside the working directory; packaged entries may serialize metadata without a plaintext file at registration time.
+- When a WorkManager task fires, the worker revalidates the scoped entry path, runs the script through `NativeNodeEmbeddedScriptService` in one-shot mode, and stores `lastRun`, `lastRunStatus`, `lastFailure`, stdout/stderr snippets, timeout state, and exit/error metadata.
+- Workers return success or failure only and never request WorkManager retry. Cancel removes the task record and cancels the unique WorkManager work.
 - `require("tasks")` is not exposed in the Embedded Node Safe Node Profile.
 - Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.
 - Existing Rhino task APIs remain unchanged.
-- Future execution of scheduled Node tasks must go through an AutoJs6 bridge provider and the existing task manager/scheduler ownership model.
+- Future migration into the user-visible AutoJs6 task database, packaged receivers, boot/broadcast triggers, restart policies, and arbitrary long-running scheduled Node processes remain separate gates.
 - Future broadcast, startup, boot, and package-event task support is deferred behind `docs/nodejs/design/BROADCAST_TASKS.md` and a user-visible permission flow.
 
 See `docs/nodejs/design/WORK_MANAGER.md` for the current design decision.

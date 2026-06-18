@@ -1,7 +1,7 @@
 ﻿declare module "work_manager" {
   namespace workManager {
     export type WorkType = "once" | "periodic";
-    export type WorkStatus = "registered" | "cancelled" | "failed" | "unknown";
+    export type WorkStatus = "registered" | "enqueued" | "running" | "succeeded" | "cancelled" | "failed" | "unknown";
 
     export interface WorkConstraints {
       charging?: boolean;
@@ -16,6 +16,7 @@
       constraints?: WorkConstraints;
       packaged?: boolean;
       backend?: "embedded";
+      taskTimeoutMs?: number;
     }
 
     export interface SchedulePeriodicDescriptor extends AutoJs6Node.BridgeCallOptions {
@@ -25,6 +26,22 @@
       constraints?: WorkConstraints;
       packaged?: boolean;
       backend?: "embedded";
+      taskTimeoutMs?: number;
+    }
+
+    export interface WorkRun {
+      readonly startedAtEpochMs: number;
+      readonly finishedAtEpochMs: number;
+      readonly elapsedMs: number;
+      readonly succeeded: boolean;
+      readonly exitCode: number | null;
+      readonly sourceName: string;
+      readonly errorCode: string | null;
+      readonly errorName: string | null;
+      readonly errorMessage: string | null;
+      readonly timedOut: boolean;
+      readonly stdout: string;
+      readonly stderr: string;
     }
 
     export interface WorkTask {
@@ -39,14 +56,21 @@
       readonly packaged: boolean;
       readonly delayMs?: number;
       readonly intervalMs?: number | null;
+      readonly timeoutMs?: number;
       readonly constraints: Required<WorkConstraints>;
       readonly packageName?: string;
       readonly createdAtEpochMs?: number;
+      readonly updatedAtEpochMs?: number;
+      readonly lastRunStatus?: WorkStatus;
+      readonly lastFailure?: string | null;
+      readonly lastRun?: WorkRun;
     }
 
     export interface Policy {
       readonly maxTasksPerProvider: number;
       readonly maxDelayMs: number;
+      readonly defaultTaskTimeoutMs: number;
+      readonly maxTaskTimeoutMs: number;
       readonly minPeriodicIntervalMs: number;
       readonly maxPeriodicIntervalMs: number;
       readonly allowedConstraints: readonly (keyof WorkConstraints)[];

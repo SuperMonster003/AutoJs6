@@ -62,7 +62,8 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))
         assertTrue(healthById.getValue("ui").details.getValue("liveMethods").contains("showLayout"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("storage").status)
-        assertEquals(NodeBridgeProviderStatus.FAKE, healthById.getValue("work_manager").status)
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("work_manager").status)
+        assertEquals(NodeWorkManagerBridgeScheduler.SCHEDULER_NAME, healthById.getValue("work_manager").details.getValue("scheduler"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)
         assertTrue(
             healthById.getValue("accessibility").status in setOf(

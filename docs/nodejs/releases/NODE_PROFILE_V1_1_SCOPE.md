@@ -68,7 +68,7 @@ small set of already-gated features toward practical use.
 | UI bridge protocol | protocol-gated partial | `require("ui")` reserves JSON-only `showLayout`, opaque `UiHandle.on/update/close`, and drained event snapshots with explicit `ui` capability checks; the Android provider remains fail-closed until an Activity-owned provider is accepted. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for click, long-click, set-text, and scroll while keeping JSON-only snapshots, explicit `accessibility` capability checks, and an optional live controlled-Activity smoke when the service is pre-enabled. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
-| Work Manager metadata | partial | `require("work_manager")` registers controlled scheduled-task metadata for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`, stores embedded backend plus `scriptPath`/project `entry` metadata, supports packaged entry descriptors, and still does not launch background Node executions. |
+| Work Manager scheduling | partial | `require("work_manager")` registers controlled one-shot and bounded periodic scheduled work for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`, stores embedded backend plus `scriptPath`/project `entry` metadata, supports packaged entry descriptors, and launches scoped embedded Node work through AndroidX WorkManager without exposing raw scheduler authority. |
 | Plugin system | JS-only prototype | `require("plugins")` loads project-local `./plugins/<id>` CommonJS plugins with `autojs6.plugin.permissions`, exact `plugin.<id>` project opt-in, `.node` rejection, and plugin entry path escape denial; installers, signatures, native plugins, Android plugin adapters, and packaged plugin runtime stay gated. |
 | Developer REPL | developer-only partial | `NodeDeveloperRepl` provides a debug-build-only programmatic line-eval session with an isolated temporary `workingDirectory`, normal Safe Node builtin policy, default bridge deny-by-default manifest, and cleanup on close. |
 | Project wizard / validator | developer tooling partial | `tools/nodejs/project/autojs6-node-project.js` generates CommonJS, ESM, automation, screenshot/OCR, and network starter projects, then validates project metadata, entry files, permissions, module type, and sanitized dependency bundles with actionable error codes. |
@@ -210,7 +210,7 @@ small set of already-gated features toward practical use.
 - Packaged APK v1.1 bridge smoke passes for declared `node.permissions`,
   controlled `fetch` fake transport, OCR opaque image handle requests,
   JSON `storage`/`storages` CRUD, UI fake layout/event/update/close,
-  `work_manager` metadata schedule/list/cancel serialization, bridge-module
+  `work_manager` fake-transport schedule/list/cancel serialization, bridge-module
   shadowing protection, and zero pending bridge calls.
 - Compatibility profile marks ESM and dynamic import as `partial`.
 

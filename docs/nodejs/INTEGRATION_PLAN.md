@@ -135,7 +135,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Reject pending bridge calls when the script service stops.
 - Track provider-owned bridge resources per execution and close leaked handles on stop/destroy.
 - Apply per-execution bridge concurrency and resource limits before provider calls can flood the service.
-- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, `work_manager` metadata registration, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, protocol-gated `media_projection`/`image`, and fail-closed protocol-gated `ui`.
+- Current user-facing MVP modules: `toast`, `app`, `engines`, `clipboard`, `device`, `shell`, controlled WorkManager-backed `work_manager` scheduling, protocol-gated `dialogs`, selector-shaped disabled-path `accessibility`, protocol-gated `media_projection`/`image`, and Activity-owned live `ui`.
 
 ### P5 Release Gates
 
@@ -151,7 +151,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 ### P6-P8 Longer-Term Compatibility
 
 - Evaluate `fs.promises`, stream, zlib, ESM, network, workers, Java interop, and native addons one at a time.
-- Keep scheduled/background task execution design-gated; Task 65 permits only controlled `work_manager` metadata registration, and Node must not get raw Android scheduler or broadcast authority.
+- Keep scheduled/background task execution design-gated; S7-15 permits only controlled WorkManager-backed timed Node work through `work_manager`, and Node must not get raw Android scheduler or broadcast authority.
 - Treat controlled `fetch` as the only approved network MVP; live provider enablement remains behind `autojs.nodejs.network.experimental=false` by default.
 - Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; workers must not access AutoJs bridge modules or Android objects.
 - Keep Java/Android interop behind `docs/nodejs/design/JAVA_INTEROP.md` and `autojs.nodejs.javaInterop.experimental=false`; the default product path is explicit AutoJs bridge modules, not raw `java.*`, `android.*`, reflection, class loaders, or Rhino adapter APIs.
@@ -179,7 +179,7 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 3. Treat `project.json node.permissions` and `package.json autojs6.node.permissions` as the bridge capability manifest when present; missing declarations reject with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 3. Treat `project.json node.bridgeLimits` and `package.json autojs6.node.bridgeLimits` as safe bridge limit overrides; above-hard-max values must be ignored with diagnostics.
 3. Design the real accessibility and MediaProjection/image providers before enabling Android-backed actions, screenshot capture, image decoding, or live node/image handles. Accessibility selector descriptors and node snapshots must remain JSON-only.
-4. Keep scheduled/background task execution behind `docs/nodejs/design/WORK_MANAGER.md`; `work_manager` currently registers controlled metadata only, and future timed execution should use a bridge provider, persistent user-visible descriptors, and packaged manifest gates.
+4. Keep scheduled/background task execution behind `docs/nodejs/design/WORK_MANAGER.md`; `work_manager` now has a controlled WorkManager-backed timed MVP, while user-visible task database migration, boot/broadcast triggers, restart policy, and packaged manifest gates remain future work.
 5. Keep ESM constrained by `docs/nodejs/design/ESM.md` and `autojs.nodejs.esm.experimental=true`; `.mjs` is a Node Profile v1.1 partial ESM route, not a full desktop Node loader. Keep dynamic import local-only through `autojs.nodejs.dynamicImport.local=true`; the legacy `autojs.nodejs.dynamicImport.experimental=false` switch remains release-forbidden.
 6. Keep network behind `docs/nodejs/design/NETWORK.md` and `autojs.nodejs.network.experimental=false`; Task 41 provides a controlled fetch wrapper and fake-provider coverage, while live Android network I/O remains disabled in normal builds and raw Node network modules stay denied.
 7. Keep `worker_threads` behind `docs/nodejs/design/WORKER_THREADS.md` and `autojs.nodejs.worker_threads.experimental=false`; Task 42 freezes the worker boundary without enabling worker execution.

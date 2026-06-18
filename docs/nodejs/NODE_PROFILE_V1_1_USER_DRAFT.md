@@ -58,7 +58,7 @@ reach an Android provider.
 | notifications | partial | Controlled post/cancel API with Android notification permission handling. Actions and richer notification layouts are not part of this draft. |
 | sensors | partial | Limited sensor set: accelerometer, gyroscope, and light. Subscriptions are bounded and close on provider destroy. |
 | UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
-| `work_manager` | partial | Metadata registration for scheduled Node work. It stores descriptors; scheduled execution and persistent background Node runtime are future gates. |
+| `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, and raw Android scheduler APIs remain unavailable. |
 | JS-only plugins | experimental | Project-local `./plugins/<id>` loading only. Native plugins, signed archives, installers, and packaged plugin runtime are not enabled. |
 | long-running Node scripts | blocked | Explicit service/long-running mode is rejected before user code. Normal scripts remain one-shot and timeout-bounded. |
 
@@ -392,8 +392,9 @@ The shape is reserved, but normal builds reject it before user code runs:
 }
 ```
 
-Keep scripts one-shot and timeout-bounded. Use notifications and
-`work_manager` metadata only within their current partial limits. A future
+Keep normal scripts one-shot and timeout-bounded. Use notifications and the
+controlled `work_manager` scheduling MVP within their current partial limits:
+scheduled entries remain scoped, bounded, and WorkManager-backed, while a future
 long-running mode still needs foreground notification ownership, user stop
 controls, quotas, restart policy, packaged checks, and lifecycle tests.
 

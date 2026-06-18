@@ -4,6 +4,7 @@ import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NodeBridgeProviderStatus
 import org.autojs.autojs.engine.NodeEmbeddedTestHarness
+import org.autojs.autojs.engine.NodeWorkManagerBridgeScheduler
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.json.JSONArray
 import org.json.JSONObject
@@ -71,7 +72,11 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertEquals(NodeBridgeProviderStatus.AVAILABLE.wireName, providersById.getValue("ocr").getString("status"))
         assertEquals("mlkit-chinese", providersById.getValue("ocr").getJSONObject("details").getString("defaultEngine"))
         assertTrue(text.contains("defaultEngine=mlkit-chinese"))
-        assertEquals(NodeBridgeProviderStatus.FAKE.wireName, providersById.getValue("work_manager").getString("status"))
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE.wireName, providersById.getValue("work_manager").getString("status"))
+        assertEquals(
+            NodeWorkManagerBridgeScheduler.SCHEDULER_NAME,
+            providersById.getValue("work_manager").getJSONObject("details").getString("scheduler"),
+        )
         assertEquals(0, providersById.getValue("shell").getInt("activeResourceCount"))
         assertTrue(text.contains("Bridge Capabilities:"))
         assertTrue(text.contains("Bridge Providers:"))

@@ -2248,7 +2248,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun scheduleWorkManagerTask(request: NodeBridgeRequest, kind: ControlledWorkTaskKind): NodeBridgeResponse {
         val payload = request.firstObjectArg()
             ?: return workManagerPolicyFailure(request, "work_manager.${request.method} requires a JSON task descriptor.")
-        if (workManagerTasks.size >= ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER) {
+        val ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo)
+        val activeTasks = NodeWorkManagerBridgeScheduler.list(appContext, ownerKey)
+        if (activeTasks.length() >= ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER) {
             return workManagerPolicyFailure(
                 request,
                 "AutoJs6 work_manager exceeded ${ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER} registered tasks for this provider.",
@@ -2259,7 +2261,11 @@ class AndroidNodeBridgeCapabilityProvider(
             return NodeBridgeResponse.failure(request.id, parsed.error ?: NodeBridgeError.processDead())
         }
         val id = "node-work-${UUID.randomUUID()}"
-        val task = parsed.value.toJson(id, engineInfo)
+        val scheduled = NodeWorkManagerBridgeScheduler.schedule(appContext, parsed.value.toJson(id, engineInfo))
+        if (scheduled.errorMessage != null || scheduled.taskJson == null) {
+            return workManagerPolicyFailure(request, scheduled.errorMessage ?: "work_manager provider failed to schedule task.")
+        }
+        val task = scheduled.taskJson
         workManagerTasks[id] = task
         resourceRegistry.register(
             type = NodeBridgeResourceType.WORK_MANAGER_TASK,
@@ -2281,6 +2287,14 @@ class AndroidNodeBridgeCapabilityProvider(
         if (id.isBlank()) {
             return workManagerPolicyFailure(request, "work_manager.cancel requires a non-empty task id.")
         }
+        val cancelled = NodeWorkManagerBridgeScheduler.cancel(
+            appContext,
+            id,
+            ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo),
+        )
+        if (cancelled.errorMessage != null) {
+            return workManagerPolicyFailure(request, cancelled.errorMessage)
+        }
         if (!resourceRegistry.close(id, "work_manager.cancel")) {
             workManagerTasks.remove(id)
         }
@@ -2288,12 +2302,13 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun listWorkManagerTasks(request: NodeBridgeRequest): NodeBridgeResponse {
-        val tasks = workManagerTasks.values
-            .map { value -> JSONObject(value.toString()) }
-            .sortedBy { value -> value.optLong("createdAtEpochMs", 0L) }
-        val result = JSONArray()
-        tasks.forEach { task -> result.put(task) }
-        return NodeBridgeResponse.success(request.id, result.toString())
+        return NodeBridgeResponse.success(
+            request.id,
+            NodeWorkManagerBridgeScheduler.list(
+                appContext,
+                ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo),
+            ).toString(),
+        )
     }
 
     private fun workManagerPolicyFailure(request: NodeBridgeRequest, message: String): NodeBridgeResponse {
@@ -3285,16 +3300,18 @@ private data class ShellExecResult(
     }
 }
 
-private enum class ControlledWorkTaskKind(val wireName: String) {
+enum class ControlledWorkTaskKind(val wireName: String) {
     ONCE("once"),
     PERIODIC("periodic"),
 }
 
-private object ControlledWorkManagerPolicy {
+object ControlledWorkManagerPolicy {
     const val MAX_TASKS_PER_PROVIDER = 64
     const val MAX_DELAY_MS = 2_592_000_000L
     const val MIN_PERIODIC_INTERVAL_MS = 900_000L
     const val MAX_PERIODIC_INTERVAL_MS = 2_592_000_000L
+    const val DEFAULT_TASK_TIMEOUT_MS = 30_000L
+    const val MAX_TASK_TIMEOUT_MS = 600_000L
 }
 
 private data class ControlledWorkTaskDescriptor(
@@ -3305,6 +3322,7 @@ private data class ControlledWorkTaskDescriptor(
     val packaged: Boolean,
     val delayMs: Long,
     val intervalMs: Long?,
+    val timeoutMs: Long,
     val constraints: JSONObject,
 ) {
     fun toJson(id: String, engineInfo: NodeBridgeEngineInfo): JSONObject {
@@ -3312,7 +3330,7 @@ private data class ControlledWorkTaskDescriptor(
             put("id", id)
             put("type", kind.wireName)
             put("status", "registered")
-            put("scheduler", "metadata")
+            put("scheduler", NodeWorkManagerBridgeScheduler.SCHEDULER_NAME)
             put("backend", backend)
             put("entryKind", entryKind)
             if (entryKind == "projectEntry") {
@@ -3323,6 +3341,7 @@ private data class ControlledWorkTaskDescriptor(
             put("packaged", packaged)
             put("delayMs", delayMs)
             intervalMs?.let { put("intervalMs", it) }
+            put("timeoutMs", timeoutMs)
             put("constraints", JSONObject(constraints.toString()))
             put("engineId", engineInfo.id)
             put("sourceName", engineInfo.sourceName)
@@ -3407,6 +3426,23 @@ private data class ControlledWorkTaskDescriptor(
                 ?: return ControlledWorkTaskParseResult(
                     error = workTaskError(request, "work_manager constraints may contain only boolean charging, network, and idle fields."),
                 )
+            val timeoutFieldName = if (payload.has("taskTimeoutMs") && !payload.isNull("taskTimeoutMs")) {
+                "taskTimeoutMs"
+            } else {
+                "timeoutMs"
+            }
+            val timeoutMs = parseDuration(
+                payload = payload,
+                name = timeoutFieldName,
+                fallback = ControlledWorkManagerPolicy.DEFAULT_TASK_TIMEOUT_MS,
+                min = 1L,
+                max = ControlledWorkManagerPolicy.MAX_TASK_TIMEOUT_MS,
+            ) ?: return ControlledWorkTaskParseResult(
+                error = workTaskError(
+                    request,
+                    "work_manager $timeoutFieldName must be between 1 and ${ControlledWorkManagerPolicy.MAX_TASK_TIMEOUT_MS}.",
+                ),
+            )
 
             return ControlledWorkTaskParseResult(
                 value = ControlledWorkTaskDescriptor(
@@ -3417,6 +3453,7 @@ private data class ControlledWorkTaskDescriptor(
                     packaged = packaged,
                     delayMs = delayMs,
                     intervalMs = intervalMs,
+                    timeoutMs = timeoutMs,
                     constraints = constraints,
                 ),
             )
