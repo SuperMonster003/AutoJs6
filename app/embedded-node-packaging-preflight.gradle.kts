@@ -3582,14 +3582,18 @@ val verifyNodePackagedEsmGate = tasks.register("verifyNodePackagedEsmGate") {
 
 val verifyNodeLiveProviderGate = tasks.register("verifyNodeLiveProviderGate") {
     group = "verification"
-    description = "Runs the focused Node Phase 7 bridge/live-provider readiness gate on a connected Sony/full device profile."
+    description = "Runs the focused Node Phase 7 live-provider gate and writes build/reports/nodejs/live-provider-summary.json."
 
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false")
     if (deviceProfile in setOf("sony", "full")) {
-        dependsOn("connectedAppDebugAndroidTest")
+        dependsOn("generateNodeLiveProviderSummary")
     }
     doFirst {
         embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (!networkExperimental.get().equals("true", ignoreCase = true)) {
+            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so fetch/websocket live providers are covered.")
+        }
     }
 }
 

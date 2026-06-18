@@ -311,9 +311,9 @@ const off = handle.on("click", async (event) => {
 });
 ```
 
-Current provider status is fail-closed unless an Activity-owned UI provider is
-explicitly connected. Scripts should treat UI as protocol-gated, not as a
-replacement for Rhino UI APIs yet.
+Current provider status is Activity-owned live MVP in the main app. Scripts
+should still treat UI as a constrained declarative bridge, not as a replacement
+for Rhino UI APIs or a raw Android View API.
 
 ## Work Manager
 

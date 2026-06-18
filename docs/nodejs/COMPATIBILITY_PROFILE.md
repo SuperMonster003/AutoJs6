@@ -818,9 +818,10 @@ provider storage with package/cwd/store isolation and quota checks, and Task
 174 adds post-only `notifications` with Android permission gating, stable
 channels, and owned-notification cleanup. Task 175 adds bounded
 `sensors` events with live once/subscribe paths, sampling clamps, subscription
-limits, and controlled cleanup. Task 182 reserves the
-protocol-gated `ui` module with fake-provider tests and an Android fail-closed
-provider path; real Activity-owned UI remains design-gated.
+limits, and controlled cleanup. Task 182 reserves the `ui` protocol and S7-14
+adds the Activity-owned live Android provider for declarative layouts, drained
+events, updates, close, and provider-destroy cleanup while keeping raw
+View/Activity/Context objects out of Node.
 
 Declared capability names:
 

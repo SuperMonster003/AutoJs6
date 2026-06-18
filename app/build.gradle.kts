@@ -1,7 +1,10 @@
 @file:Suppress("SpellCheckingInspection")
 
 import com.android.build.api.variant.FilterConfiguration
+import groovy.json.JsonOutput
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
+import java.time.Instant
+import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.text.RegexOption.IGNORE_CASE
 
 plugins {
@@ -282,19 +285,228 @@ val nodeJsPackagedEsmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk",
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
 )
-val nodeJsLiveProviderGateInstrumentationClasses = listOf(
-    "org.autojs.autojs.engine.NodeBridgeProviderRegistryInstrumentationTest",
-    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest",
-    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest",
-    "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest",
-    "org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest",
-    "org.autojs.autojs.engine.NodeNotificationsBridgeInstrumentationTest",
-    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest",
-    "org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest",
-    "org.autojs.autojs.engine.NodeImageBridgeExpansionInstrumentationTest",
-    "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest",
-    "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest",
+val nodeJsLiveProviderSummaryTaskName = "generateNodeLiveProviderSummary"
+val nodeJsLiveProviderGateCases = listOf(
+    mapOf(
+        "provider" to "registry",
+        "className" to "org.autojs.autojs.engine.NodeBridgeProviderRegistryInstrumentationTest",
+        "methodName" to "providerRegistryDefinesPhase7LiveProviderSurface",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; freezes live provider surface metadata",
+    ),
+    mapOf(
+        "provider" to "registry",
+        "className" to "org.autojs.autojs.engine.NodeBridgeProviderRegistryInstrumentationTest",
+        "methodName" to "androidHealthReflectsCurrentProviderAvailabilityWithoutPromotingFutureProviders",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; records provider health states",
+    ),
+    mapOf(
+        "provider" to "doctor",
+        "className" to "org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest",
+        "methodName" to "generatesPrivacyRedactedTextAndJsonReports",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; records Doctor provider-health reporting",
+    ),
+    mapOf(
+        "provider" to "fetch",
+        "className" to "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest",
+        "methodName" to "jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; pass -Pautojs.nodejs.network.experimental=true",
+    ),
+    mapOf(
+        "provider" to "fetch",
+        "className" to "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest",
+        "methodName" to "androidFetchProviderCancelsActiveLiveRequestOnDestroy",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; pass -Pautojs.nodejs.network.experimental=true",
+    ),
+    mapOf(
+        "provider" to "websocket",
+        "className" to "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest",
+        "methodName" to "jsWebSocketUsesAndroidLiveProviderWhenNetworkExperimentEnabled",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; pass -Pautojs.nodejs.network.experimental=true",
+    ),
+    mapOf(
+        "provider" to "websocket",
+        "className" to "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest",
+        "methodName" to "androidWebSocketProviderClosesActiveLiveConnectionOnDestroy",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; pass -Pautojs.nodejs.network.experimental=true",
+    ),
+    mapOf(
+        "provider" to "ocr",
+        "className" to "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest",
+        "methodName" to "kotlinOcrLiveProviderRecognizesMlKitImageHandle",
+        "interaction" to "none",
+        "skipAllowed" to "true",
+        "skipPolicy" to "may skip only when MLKit OCR provider is unavailable and JUnit records the reason",
+    ),
+    mapOf(
+        "provider" to "ocr",
+        "className" to "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest",
+        "methodName" to "androidOcrRejectsUnknownImageHandleWithoutLeakingResources",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; validates live provider unknown-handle failure",
+    ),
+    mapOf(
+        "provider" to "storage",
+        "className" to "org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest",
+        "methodName" to "androidStorageProviderPersistsAndScopesByWorkingDirectory",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
+    mapOf(
+        "provider" to "storage",
+        "className" to "org.autojs.autojs.engine.NodeStorageBridgeInstrumentationTest",
+        "methodName" to "androidStorageProviderEnforcesQuotaAndPackageIdentityIsolation",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
+    mapOf(
+        "provider" to "notifications",
+        "className" to "org.autojs.autojs.engine.NodeNotificationsBridgeInstrumentationTest",
+        "methodName" to "androidProviderPostsOrReportsNotificationPermissionAndTracksOwnedResource",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; permission-denied path is an explicit pass condition",
+    ),
+    mapOf(
+        "provider" to "sensors",
+        "className" to "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest",
+        "methodName" to "androidProviderListsSensorsAndCleansUpLiveSubscriptionWhenAvailable",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; unavailable sensor path is asserted in-test",
+    ),
+    mapOf(
+        "provider" to "sensors",
+        "className" to "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest",
+        "methodName" to "androidProviderOnceObservesLiveSensorEventWhenAvailable",
+        "interaction" to "none",
+        "skipAllowed" to "true",
+        "skipPolicy" to "may skip only when no supported Android sensor is available and JUnit records the reason",
+    ),
+    mapOf(
+        "provider" to "sensors",
+        "className" to "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest",
+        "methodName" to "androidProviderSubscribeDrainsEventsAndUnsubscribesWhenAvailable",
+        "interaction" to "none",
+        "skipAllowed" to "true",
+        "skipPolicy" to "may skip only when no supported Android sensor is available and JUnit records the reason",
+    ),
+    mapOf(
+        "provider" to "sensors",
+        "className" to "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest",
+        "methodName" to "androidProviderEnforcesLiveSubscriptionLimitWhenAvailable",
+        "interaction" to "none",
+        "skipAllowed" to "true",
+        "skipPolicy" to "may skip only when no supported Android sensor is available and JUnit records the reason",
+    ),
+    mapOf(
+        "provider" to "sensors",
+        "className" to "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest",
+        "methodName" to "androidProviderReportsUnavailableWhenSensorManagerMissing",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; validates explicit unavailable failure",
+    ),
+    mapOf(
+        "provider" to "accessibility",
+        "className" to "org.autojs.autojs.engine.NodeAccessibilityRealDeviceSmokeInstrumentationTest",
+        "methodName" to "providerFindsAndClicksControlledUiWhenAccessibilityServiceIsEnabled",
+        "interaction" to "pre-run setup",
+        "skipAllowed" to "true",
+        "skipPolicy" to "may skip only when the focused accessibility flag or service is not enabled and JUnit records the reason",
+    ),
+    mapOf(
+        "provider" to "accessibility",
+        "className" to "org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest",
+        "methodName" to "androidAccessibilitySelectorV2RejectsUntilProviderIsConnected",
+        "interaction" to "none",
+        "skipAllowed" to "true",
+        "skipPolicy" to "may skip only when the accessibility provider is already connected and the real smoke covers the live path",
+    ),
+    mapOf(
+        "provider" to "image",
+        "className" to "org.autojs.autojs.engine.NodeImageBridgeExpansionInstrumentationTest",
+        "methodName" to "androidImageExpansionRejectsUntilProviderIsConnected",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run; validates fail-closed live image provider behavior",
+    ),
+    mapOf(
+        "provider" to "ui",
+        "className" to "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest",
+        "methodName" to "jsUiModuleUsesAndroidLiveProviderForButtonAndInputEvents",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
+    mapOf(
+        "provider" to "ui",
+        "className" to "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest",
+        "methodName" to "androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
+    mapOf(
+        "provider" to "ui",
+        "className" to "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest",
+        "methodName" to "androidUiProviderRejectsUnsupportedDescriptorsAndForeignHandles",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
+    mapOf(
+        "provider" to "work_manager",
+        "className" to "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest",
+        "methodName" to "androidWorkManagerProviderSchedulesLiveMetadataAndEnforcesPathPolicy",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
+    mapOf(
+        "provider" to "work_manager",
+        "className" to "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest",
+        "methodName" to "androidWorkManagerLiveProviderExecutesPackagedProjectEntryAndPersistsResult",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
+    mapOf(
+        "provider" to "work_manager",
+        "className" to "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest",
+        "methodName" to "androidWorkManagerLiveProviderCancelPreventsDelayedExecution",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
+    mapOf(
+        "provider" to "work_manager",
+        "className" to "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest",
+        "methodName" to "androidWorkManagerProviderRequiresExplicitCapability",
+        "interaction" to "none",
+        "skipAllowed" to "false",
+        "skipPolicy" to "must run",
+    ),
 )
+val nodeJsLiveProviderGateInstrumentationClasses = nodeJsLiveProviderGateCases.map { testCase ->
+    "${testCase.getValue("className")}#${testCase.getValue("methodName")}"
+}
 val nodeJsLiveFetchGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled",
     "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#androidFetchProviderCancelsActiveLiveRequestOnDestroy",
@@ -379,6 +591,7 @@ val nodeJsPhase7GateInstrumentationClasses = (
                 nodeJsModernCoreGateInstrumentationClasses
         ).distinct()
 val nodeJsFocusedGateInstrumentationClasses = mapOf(
+    nodeJsLiveProviderSummaryTaskName to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodeLiveFetchGate" to nodeJsLiveFetchGateInstrumentationClasses,
@@ -399,6 +612,193 @@ val nodeJsRequestedFocusedGate = taskNames
     .firstOrNull { taskName -> taskName in nodeJsFocusedGateInstrumentationClasses }
 val nodeJsFocusedGateInstrumentationClassArgument = nodeJsRequestedFocusedGate?.let { taskName ->
     nodeJsFocusedGateInstrumentationClasses.getValue(taskName).joinToString(",")
+}
+val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTaskName) {
+    group = "verification"
+    description = "Writes build/reports/nodejs/live-provider-summary.json from the focused live-provider gate results."
+
+    dependsOn("connectedAppDebugAndroidTest")
+    outputs.file(layout.buildDirectory.file("reports/nodejs/live-provider-summary.json"))
+    outputs.upToDateWhen { false }
+
+    doFirst {
+        if (!nodeJsNetworkExperimentalEnabled) {
+            throw GradleException("$name requires -Pautojs.nodejs.network.experimental=true so fetch/websocket live providers are covered.")
+        }
+    }
+
+    doLast {
+        val resultDir = layout.buildDirectory
+            .dir("outputs/androidTest-results/connected/debug/flavors/app")
+            .get()
+            .asFile
+        val xmlFiles = resultDir
+            .walkTopDown()
+            .filter { file -> file.isFile && file.name.startsWith("TEST-") && file.extension == "xml" }
+            .sortedBy { file -> file.absolutePath }
+            .toList()
+        if (xmlFiles.isEmpty()) {
+            throw GradleException("No connected Android test XML results found under ${resultDir.absolutePath}.")
+        }
+
+        val parserFactory = DocumentBuilderFactory.newInstance().apply {
+            setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
+            setFeature("http://xml.org/sax/features/external-general-entities", false)
+            setFeature("http://xml.org/sax/features/external-parameter-entities", false)
+            isExpandEntityReferences = false
+        }
+        val results = linkedMapOf<String, Map<String, Any?>>()
+        val devices = linkedSetOf<String>()
+        var totalTests = 0
+        var totalFailures = 0
+        var totalErrors = 0
+        var totalSkipped = 0
+
+        fun firstChild(element: org.w3c.dom.Element, name: String): org.w3c.dom.Element? {
+            val children = element.childNodes
+            for (index in 0 until children.length) {
+                val child = children.item(index)
+                if (child is org.w3c.dom.Element && child.tagName == name) {
+                    return child
+                }
+            }
+            return null
+        }
+
+        fun childMessage(element: org.w3c.dom.Element): String {
+            return element.getAttribute("message")
+                .ifBlank { element.textContent.orEmpty().trim() }
+                .lineSequence()
+                .firstOrNull()
+                .orEmpty()
+        }
+
+        xmlFiles.forEach { xmlFile ->
+            val document = parserFactory.newDocumentBuilder().parse(xmlFile)
+            val root = document.documentElement
+            totalTests += root.getAttribute("tests").toIntOrNull() ?: 0
+            totalFailures += root.getAttribute("failures").toIntOrNull() ?: 0
+            totalErrors += root.getAttribute("errors").toIntOrNull() ?: 0
+            totalSkipped += root.getAttribute("skipped").toIntOrNull() ?: 0
+
+            val properties = document.getElementsByTagName("property")
+            for (index in 0 until properties.length) {
+                val property = properties.item(index) as? org.w3c.dom.Element ?: continue
+                if (property.getAttribute("name") == "device") {
+                    property.getAttribute("value").takeIf { it.isNotBlank() }?.let(devices::add)
+                }
+            }
+
+            val testCases = document.getElementsByTagName("testcase")
+            for (index in 0 until testCases.length) {
+                val testCase = testCases.item(index) as? org.w3c.dom.Element ?: continue
+                val className = testCase.getAttribute("classname")
+                val methodName = testCase.getAttribute("name")
+                val failure = firstChild(testCase, "failure")
+                val error = firstChild(testCase, "error")
+                val skipped = firstChild(testCase, "skipped")
+                val status = when {
+                    failure != null -> "failed"
+                    error != null -> "error"
+                    skipped != null -> "skipped"
+                    else -> "passed"
+                }
+                val message = when {
+                    failure != null -> childMessage(failure)
+                    error != null -> childMessage(error)
+                    skipped != null -> childMessage(skipped)
+                    else -> ""
+                }
+                results["$className#$methodName"] = linkedMapOf(
+                    "status" to status,
+                    "message" to message,
+                    "timeSeconds" to testCase.getAttribute("time").toDoubleOrNull(),
+                )
+            }
+        }
+
+        val policyViolations = mutableListOf<String>()
+        val caseSummaries = nodeJsLiveProviderGateCases.map { testCase ->
+            val key = "${testCase.getValue("className")}#${testCase.getValue("methodName")}"
+            val result = results[key]
+            val status = result?.get("status")?.toString() ?: "missing"
+            val xmlMessage = result?.get("message")?.toString().orEmpty()
+            val skipAllowed = testCase.getValue("skipAllowed").toBooleanStrict()
+            val message = if (status == "skipped" && xmlMessage.isBlank() && skipAllowed) {
+                testCase.getValue("skipPolicy")
+            } else {
+                xmlMessage
+            }
+            val skipReasonSource = when {
+                status != "skipped" -> null
+                xmlMessage.isNotBlank() -> "junit-xml"
+                message.isNotBlank() -> "summary-policy"
+                else -> null
+            }
+            when {
+                status == "missing" -> policyViolations += "$key did not appear in connected test results."
+                status == "failed" || status == "error" -> policyViolations += "$key ended with $status: $message"
+                status == "skipped" && !skipAllowed -> policyViolations += "$key skipped unexpectedly: $message"
+                status == "skipped" && message.isBlank() -> policyViolations += "$key skipped without an explicit reason."
+            }
+            linkedMapOf(
+                "provider" to testCase.getValue("provider"),
+                "className" to testCase.getValue("className"),
+                "methodName" to testCase.getValue("methodName"),
+                "status" to status,
+                "message" to message.ifBlank { null },
+                "xmlMessage" to xmlMessage.ifBlank { null },
+                "skipReasonSource" to skipReasonSource,
+                "timeSeconds" to result?.get("timeSeconds"),
+                "interaction" to testCase.getValue("interaction"),
+                "fakeProviderAllowed" to false,
+                "skipAllowed" to skipAllowed,
+                "skipPolicy" to testCase.getValue("skipPolicy"),
+            )
+        }
+        val coveredProviders = caseSummaries
+            .filter { testCase -> testCase["status"] in setOf("passed", "skipped") }
+            .map { testCase -> testCase.getValue("provider").toString() }
+            .toSortedSet()
+
+        val reportFile = layout.buildDirectory
+            .file("reports/nodejs/live-provider-summary.json")
+            .get()
+            .asFile
+        reportFile.parentFile.mkdirs()
+        val summary = linkedMapOf(
+            "schemaVersion" to 1,
+            "generatedAt" to Instant.now().toString(),
+            "task" to "S7-16 Live Provider Gate",
+            "gate" to "verifyNodeLiveProviderGate",
+            "deviceProfile" to nodeJsTestDeviceProfile,
+            "devices" to devices.toList(),
+            "networkExperimentalRequired" to true,
+            "networkExperimentalEnabled" to nodeJsNetworkExperimentalEnabled,
+            "fakeProvidersAllowed" to false,
+            "skipReasonRequired" to true,
+            "resultXml" to xmlFiles.map { file -> file.relativeTo(projectDir).invariantSeparatorsPath },
+            "totals" to linkedMapOf(
+                "tests" to totalTests,
+                "failures" to totalFailures,
+                "errors" to totalErrors,
+                "skipped" to totalSkipped,
+                "expectedCases" to nodeJsLiveProviderGateCases.size,
+                "coveredProviders" to coveredProviders.toList(),
+            ),
+            "policyViolations" to policyViolations,
+            "cases" to caseSummaries,
+        )
+        reportFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(summary)) + System.lineSeparator())
+        logger.lifecycle("Node live provider summary written to ${reportFile.absolutePath}")
+
+        if (policyViolations.isNotEmpty()) {
+            throw GradleException(
+                "Node live provider summary found ${policyViolations.size} policy violation(s). " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
+    }
 }
 val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
     "sony" -> listOf(

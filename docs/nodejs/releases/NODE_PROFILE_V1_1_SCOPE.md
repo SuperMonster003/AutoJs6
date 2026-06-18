@@ -65,7 +65,7 @@ small set of already-gated features toward practical use.
 | Storage | partial | `require("storage")` and `require("storages")` expose JSON-only package/cwd-scoped key-value stores with explicit `storage` capability checks, per-value and per-store quotas, and packaged-app isolation. |
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, stable channel IDs, ongoing ownership metadata, and owned-resource cleanup. |
 | Sensors | partial | `require("sensors")` exposes Android-backed `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks, sampling clamps, max subscription limits, and destroy cleanup. |
-| UI bridge protocol | protocol-gated partial | `require("ui")` reserves JSON-only `showLayout`, opaque `UiHandle.on/update/close`, and drained event snapshots with explicit `ui` capability checks; the Android provider remains fail-closed until an Activity-owned provider is accepted. |
+| UI bridge | Activity-owned live MVP | `require("ui")` exposes JSON-only `showLayout`, opaque `UiHandle.on/update/close`, drained event snapshots, Button/Input event delivery, update/close, and provider-destroy cleanup with explicit `ui` capability checks; Android views remain Activity-owned and are never exposed to Node. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for click, long-click, set-text, and scroll while keeping JSON-only snapshots, explicit `accessibility` capability checks, and an optional live controlled-Activity smoke when the service is pre-enabled. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
 | Work Manager scheduling | partial | `require("work_manager")` registers controlled one-shot and bounded periodic scheduled work for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`, stores embedded backend plus `scriptPath`/project `entry` metadata, supports packaged entry descriptors, and launches scoped embedded Node work through AndroidX WorkManager without exposing raw scheduler authority. |
@@ -149,11 +149,12 @@ small set of already-gated features toward practical use.
   sampling interval clamp, max subscription denial, missing-provider
   unavailable errors, cleanup when a supported sensor exists, and TypeScript
   declarations.
-- UI bridge protocol smoke passes for `require("ui")`, fake-provider
-  `showLayout`, button/click event drain, `handle.update()`, `handle.close()`,
-  JSON-only invalid descriptor denial before dispatch, shadowing protection,
-  no raw View/Activity property on the handle, Android provider fail-closed
-  behavior, and TypeScript declarations.
+- UI bridge smoke passes for `require("ui")`, fake-provider `showLayout`,
+  button/click event drain, `handle.update()`, `handle.close()`, JSON-only
+  invalid descriptor denial before dispatch, shadowing protection, no raw
+  View/Activity property on the handle, Activity-owned Android live provider
+  Button/Input event delivery, update/close, provider-destroy cleanup, and
+  TypeScript declarations.
 - Accessibility selector v2 smoke passes for regex, clickable/enabled, depth,
   bounds descriptors, `longClick`, `setText`, `scrollForward`,
   `scrollBackward`, timeout/cancellation cleanup, manifest denial, no raw node
@@ -164,11 +165,12 @@ small set of already-gated features toward practical use.
   default timeout changes, non-zero exit, timeout result shape, scoped
   cwd/path/env denial, root capability denial, unsupported Shizuku reporting,
   Android non-root execution, and `child_process` denial.
-- Work Manager metadata smoke passes for schedule-once, schedule-periodic,
-  cancel, list, `work_manager` capability tagging, embedded backend and
-  `scriptPath`/project `entry` metadata, packaged entry descriptors, scoped
-  path and missing-file denial, minimum periodic interval enforcement, and
-  `tasks`/raw scheduler denial.
+- Work Manager live smoke passes for schedule-once, schedule-periodic, cancel,
+  list, `work_manager` capability tagging, embedded backend and
+  `scriptPath`/project `entry` metadata, packaged entry descriptors, AndroidX
+  WorkManager persistence, scoped one-shot embedded Node execution, delayed
+  cancel prevention, scoped path and missing-file denial, minimum periodic
+  interval enforcement, no implicit retry, and `tasks`/raw scheduler denial.
 - Plugin system smoke passes for reserved `require("plugins")`,
   project-local safe plugin loading, exact `plugin.<id>` opt-in, plugin
   requested-permission denial before code execution, `.node` rejection,

@@ -143,6 +143,15 @@ Provider registry and Doctor health instrumentation:
 
 This suite verifies the Phase 7 bridge provider registry for `fetch`/`axios`, `websocket`, OCR, storage, notifications, sensors, accessibility, media projection, image, UI, `work_manager`, and shell. It freezes provider version metadata, required AutoJs capabilities, Android permissions, active resource counts, current `available`/`fake`/`unavailable`/`permission-required`/`degraded` health states, provider detail fields, Doctor JSON/text reporting, and bridge error categories for unavailable, permission-denied, capability-denied, and provider-failed paths while preserving legacy error codes.
 
+Phase 7 S7-16 live-provider gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+```
+
+This gate runs only live-provider or live fail-closed availability tests for `fetch`, `websocket`, OCR, storage, notifications, sensors, accessibility/image, UI, and `work_manager`; fake-provider regression tests are deliberately excluded. It writes `app/build/reports/nodejs/live-provider-summary.json` after connected instrumentation, including each expected test method, provider, interaction requirement, fake-provider policy, skip policy, XML status, skip/failure message, device profile, result XML path, and policy violations. Unexpected skips, missing expected tests, failures, and errors fail the gate. Allowed skips must report a reason; if the Android runner emits an empty `<skipped />`, the summary uses the gate's explicit `skipPolicy` as the recorded reason and marks `skipReasonSource` as `summary-policy`. Fetch and WebSocket are included in this aggregate gate, so it requires `autojs.nodejs.network.experimental=true`; normal release builds still keep live network providers default-off.
+
 Stable bridge API conformance:
 
 ```powershell
@@ -565,7 +574,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
 
-This explicit experimental gate runs only the live Android provider methods. It starts an on-device loopback HTTP server, verifies real OkHttp-backed `fetch` GET/POST, headers, query params, string and `Uint8Array` bodies, `json()`/`arrayBuffer()` responses, redirect follow, response-size rejection, timeout rejection, fetch-backed `axios.get`/`axios.post`, raw `http`/`net` denial, provider diagnostics, and provider destroy cancellation of an active request. It is intentionally separate from the default live-provider gate because normal builds keep `autojs.nodejs.network.experimental=false`.
+This explicit experimental subgate runs only the live Android provider methods and is also included by the S7-16 aggregate live-provider gate. It starts an on-device loopback HTTP server, verifies real OkHttp-backed `fetch` GET/POST, headers, query params, string and `Uint8Array` bodies, `json()`/`arrayBuffer()` responses, redirect follow, response-size rejection, timeout rejection, fetch-backed `axios.get`/`axios.post`, raw `http`/`net` denial, provider diagnostics, and provider destroy cancellation of an active request. Normal release builds still keep `autojs.nodejs.network.experimental=false`.
 
 Current controlled WebSocket bridge focused instrumentation:
 
@@ -582,7 +591,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
 
-This explicit experimental gate starts an on-device loopback WebSocket server and verifies real OkHttp-backed `websocket.connect()`, headers, protocol negotiation, text and binary roundtrip, close events, inbound message-size rejection, connect timeout rejection, raw `net`/`tls` denial, live diagnostics, and provider destroy cleanup of an active socket. It is intentionally separate from the default live-provider gate because normal builds keep `autojs.nodejs.network.experimental=false`.
+This explicit experimental subgate starts an on-device loopback WebSocket server and is also included by the S7-16 aggregate live-provider gate. It verifies real OkHttp-backed `websocket.connect()`, headers, protocol negotiation, text and binary roundtrip, close events, inbound message-size rejection, connect timeout rejection, raw `net`/`tls` denial, live diagnostics, and provider destroy cleanup of an active socket. Normal release builds still keep `autojs.nodejs.network.experimental=false`.
 
 Current raw network policy focused instrumentation:
 
@@ -605,7 +614,7 @@ Current controlled work_manager bridge focused instrumentation:
 Focused live WorkManager gate:
 
 ```powershell
-.\gradlew.bat --console=plain :app:verifyNodeLiveWorkManagerGate -Pautojs.nodejs.test.deviceProfile=sony
+.\gradlew.bat --console=plain :app:verifyNodeLiveWorkManagerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 This suite verifies the `work_manager` bridge registry, fake-provider schedule-once and schedule-periodic descriptors, `require("work_manager")`, shadowing protection, ordinary `scriptPath` versus project `entry` serialization, packaged project-entry metadata serialization, scoped path and missing-file rejection, interval/backend policy rejection, explicit capability tagging, AndroidX WorkManager-backed task persistence, real one-shot embedded Node execution, persisted run result/failure metadata, delayed-task cancellation before execution, `cancel()`, `list()`, and that `require("tasks")` remains unavailable. Packaged queued-fallback rejection remains a release/template gate because the normal instrumentation harness injects live bridge metadata.

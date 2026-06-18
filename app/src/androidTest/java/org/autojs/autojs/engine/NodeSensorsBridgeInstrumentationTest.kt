@@ -8,6 +8,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -234,7 +235,9 @@ class NodeSensorsBridgeInstrumentationTest {
     @Test
     fun androidProviderOnceObservesLiveSensorEventWhenAvailable() {
         val provider = sensorProvider("sensors-once-provider")
-        val type = firstAvailableSensorType(provider) ?: return
+        val type = firstAvailableSensorType(provider)
+        assumeTrue("No supported Android sensor is available for live sensors once gate.", type != null)
+        val sensorType = checkNotNull(type)
 
         val once = dispatch(
             provider,
@@ -242,7 +245,7 @@ class NodeSensorsBridgeInstrumentationTest {
             JSONArray()
                 .put(
                     JSONObject()
-                        .put("type", type)
+                        .put("type", sensorType)
                         .put("samplingIntervalMs", 100)
                         .put("timeoutMs", 5_000),
                 )
@@ -251,7 +254,7 @@ class NodeSensorsBridgeInstrumentationTest {
 
         assertTrue(once.toString(), once.ok)
         val event = JSONObject(once.resultJson.orEmpty())
-        assertEquals(type, event.getString("type"))
+        assertEquals(sensorType, event.getString("type"))
         assertTrue(event.toString(), event.getLong("timestamp") > 0L)
         assertTrue(event.toString(), event.getJSONArray("values").length() >= 1)
         assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
@@ -260,7 +263,9 @@ class NodeSensorsBridgeInstrumentationTest {
     @Test
     fun androidProviderSubscribeDrainsEventsAndUnsubscribesWhenAvailable() {
         val provider = sensorProvider("sensors-subscribe-provider")
-        val type = firstAvailableSensorType(provider) ?: return
+        val type = firstAvailableSensorType(provider)
+        assumeTrue("No supported Android sensor is available for live sensors subscription gate.", type != null)
+        val sensorType = checkNotNull(type)
 
         val subscribe = dispatch(
             provider,
@@ -268,7 +273,7 @@ class NodeSensorsBridgeInstrumentationTest {
             JSONArray()
                 .put(
                     JSONObject()
-                        .put("type", type)
+                        .put("type", sensorType)
                         .put("samplingIntervalMs", 1)
                         .put("maxQueueSize", 2)
                         .put("timeoutMs", 1_000),
@@ -281,13 +286,13 @@ class NodeSensorsBridgeInstrumentationTest {
             return
         }
         val subscription = JSONObject(subscribe.resultJson.orEmpty())
-        assertEquals(type, subscription.getString("type"))
+        assertEquals(sensorType, subscription.getString("type"))
         assertEquals(100, subscription.getInt("samplingIntervalMs"))
         assertEquals(2, subscription.getInt("maxQueueSize"))
         assertEquals("1", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
 
         val event = waitForSensorEvent(provider, subscription.getString("id"))
-        assertEquals(type, event.getString("type"))
+        assertEquals(sensorType, event.getString("type"))
         assertTrue(event.toString(), event.getLong("timestamp") > 0L)
         assertTrue(event.toString(), event.getJSONArray("values").length() >= 1)
 
@@ -303,7 +308,9 @@ class NodeSensorsBridgeInstrumentationTest {
     @Test
     fun androidProviderEnforcesLiveSubscriptionLimitWhenAvailable() {
         val provider = sensorProvider("sensors-limit-provider")
-        val type = firstAvailableSensorType(provider) ?: return
+        val type = firstAvailableSensorType(provider)
+        assumeTrue("No supported Android sensor is available for live sensors limit gate.", type != null)
+        val sensorType = checkNotNull(type)
         val subscriptionIds = mutableListOf<String>()
 
         try {
@@ -314,7 +321,7 @@ class NodeSensorsBridgeInstrumentationTest {
                     JSONArray()
                         .put(
                             JSONObject()
-                                .put("type", type)
+                                .put("type", sensorType)
                                 .put("samplingIntervalMs", 250)
                                 .put("maxQueueSize", 1)
                                 .put("timeoutMs", 1_000 + index),
@@ -331,7 +338,7 @@ class NodeSensorsBridgeInstrumentationTest {
                 JSONArray()
                     .put(
                         JSONObject()
-                            .put("type", type)
+                            .put("type", sensorType)
                             .put("samplingIntervalMs", 250)
                             .put("maxQueueSize", 1)
                             .put("timeoutMs", 1_000),

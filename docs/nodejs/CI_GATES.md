@@ -170,26 +170,32 @@ full release gate:
 ```powershell
 $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodePackagedEsmGate "-Pautojs.nodejs.test.deviceProfile=sony"
-.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 .\gradlew.bat --console=plain :app:verifyNodeLiveFetchGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 .\gradlew.bat --console=plain :app:verifyNodeLiveWebSocketGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 .\gradlew.bat --console=plain :app:verifyNodeLiveOcrGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveStorageNotificationsGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveSensorsGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveAccessibilityImageGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveUiGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveWorkManagerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-`verifyNodePhase7Gate` combines the baseline non-experimental focused gate set.
-Feature-specific live subgates above remain explicit so their opt-in
-requirements and provider assumptions stay visible. These gates select existing
-focused instrumentation classes automatically unless
+`verifyNodePhase7Gate` combines the current focused gate set. Feature-specific
+live subgates above remain explicit so their opt-in requirements and provider
+assumptions stay visible. These gates select existing focused instrumentation
+classes automatically unless
 `android.testInstrumentationRunnerArguments.class` is supplied explicitly.
-The live-provider gate includes the provider availability registry, Doctor
-provider-health reporting, and current fail-closed/fake-provider classifications;
-it does not promote future Android providers by itself.
+The S7-16 live-provider gate runs only live-provider or fail-closed availability
+tests for fetch, WebSocket, OCR, storage, notifications, sensors,
+accessibility/image, UI, and `work_manager`; fake-provider tests are excluded.
+It requires `autojs.nodejs.network.experimental=true` so fetch and WebSocket are
+real Android I/O instead of skipped, and writes
+`app/build/reports/nodejs/live-provider-summary.json` with per-test interaction,
+skip, and status metadata.
 `verifyNodeLiveFetchGate` is an explicit experimental subgate: it fails unless
 `autojs.nodejs.network.experimental=true` is set, then runs loopback
 controlled-fetch/axios Android I/O plus provider destroy cancellation coverage.
@@ -216,6 +222,11 @@ paths. If the AutoJs6 accessibility service is already enabled on the device,
 it also launches a controlled Activity and validates real selector `findOne`
 and selector `click`; otherwise that single real-accessibility smoke is an
 explicit JUnit skip.
+`verifyNodeLiveUiGate` validates the Activity-owned UI provider, JavaScript
+event delivery, provider cleanup, descriptor denial, and foreign-handle denial.
+`verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
+`work_manager` scheduling, real one-shot embedded Node execution, delayed cancel
+prevention, path/capability enforcement, and persisted run metadata.
 
 ## Release Gate
 
