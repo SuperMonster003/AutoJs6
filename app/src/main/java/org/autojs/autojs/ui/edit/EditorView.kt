@@ -511,6 +511,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_ace_editor_font),
                 -> post { themeFontService.applyEditorPreferences() }
             key(R.string.key_editor_theme) -> post { applyCurrentEditorThemePreference() }
+            key(R.string.key_editor_engine) -> post { applyCurrentEditorEnginePreference() }
         }
     }
 
@@ -1950,6 +1951,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .subscribe({ theme -> setTheme(theme) }) { error ->
                 showToast(context, error.message ?: error.toString(), true)
             }
+    }
+
+    private fun applyCurrentEditorEnginePreference() {
+        switchEditorEngine(EditorEnginePreferences.get())
     }
 
     fun onBackPressed(): Boolean {

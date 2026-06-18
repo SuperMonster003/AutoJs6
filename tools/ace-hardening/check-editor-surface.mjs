@@ -651,8 +651,11 @@ assertIncludes(editorView, "editor.notifyDisplayPreferencesChanged()", "editor d
 assertIncludes(editorView, "key(R.string.key_ace_editor_font)", "editor font preference changes apply to current ACE editor");
 assertIncludes(editorView, "key(R.string.key_editor_text_size)", "editor text-size preference changes apply to current editor");
 assertIncludes(editorView, "key(R.string.key_editor_theme)", "editor theme preference changes apply to current editor");
+assertIncludes(editorView, "key(R.string.key_editor_engine)", "editor engine preference changes apply to current editor");
 assertIncludes(editorView, "themeFontService.applyEditorPreferences()", "editor font/text-size live preference applier");
 assertIncludes(editorView, "applyCurrentEditorThemePreference", "editor theme live preference applier");
+assertIncludes(editorView, "applyCurrentEditorEnginePreference", "editor engine live preference applier");
+assertIncludes(editorView, "switchEditorEngine(EditorEnginePreferences.get())", "editor engine live preference switcher");
 assertIncludes(editorView, "toggleAceShortcutReturnPoint", "ACE shortcut TAB return toggle");
 assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dialog");
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");

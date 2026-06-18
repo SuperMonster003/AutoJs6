@@ -433,7 +433,7 @@ and updated alongside commits.
    - [x] Show the editor settings dialog from the editor menu.
    - [x] Use a fragment-safe MaterialDialog host for the in-editor settings
      dialog.
-   - [ ] Apply editor engine changes immediately where feasible.
+   - [x] Apply editor engine changes immediately where feasible.
    - [x] Apply editor theme changes immediately where feasible.
    - [x] Apply editor font changes immediately where feasible.
    - [x] Apply editor font-size changes immediately where feasible.
