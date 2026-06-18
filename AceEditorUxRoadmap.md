@@ -216,6 +216,8 @@ Notes:
   non-empty editor text.
 - [x] Refresh redo state after undoing Clear, including ACE bridge state that
   arrives asynchronously.
+- [x] Suppress transient long selection menus after text mutations such as
+  soft-keyboard Backspace and Clear redo.
 - [x] Extend session read-only mode to Native, suppress ACE read-only keyboard
   activation, and fully hide the shortcut/input bar while read-only is active.
 - [x] Normalize user-visible editor engine names to Ace and JsDroidEditor.
@@ -425,7 +427,7 @@ and updated alongside commits.
 19. Clear undo/redo
    - [x] Make Clear undoable and enable Undo after clearing text.
    - [x] Enable Redo immediately after undoing Clear.
-   - [ ] Suppress the transient long selection menu that appears after redoing
+   - [x] Suppress the transient long selection menu that appears after redoing
      Clear.
 
 20. Editor engine names
@@ -433,7 +435,7 @@ and updated alongside commits.
    - [x] Keep Ace first and default.
 
 21. Input issues
-   - [ ] Suppress the long selection menu flash when deleting characters with
+   - [x] Suppress the long selection menu flash when deleting characters with
      the soft-keyboard Backspace key.
    - [x] Keep `xx.__proto__.` completion/runtime handling from crashing ACE.
 

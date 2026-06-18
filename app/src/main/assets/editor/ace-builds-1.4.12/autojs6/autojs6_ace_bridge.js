@@ -28,6 +28,7 @@
     var lastActionModeSelectedText = "";
     var nativeActionModeActive = false;
     var selectionMenuSuppressed = false;
+    var textMutationSelectionMenuSuppressUntil = 0;
     var lastStateNotifyAt = 0;
     var lastTextNotifyAt = 0;
     var lastCursorNotifyAt = 0;
@@ -55,6 +56,7 @@
     var ACTION_MODE_NOTIFY_THROTTLE_MS = 0;
     var SELECTION_BROWSE_REVEAL_SUPPRESS_MS = 1600;
     var ACTION_MODE_SCROLL_SUPPRESS_GRACE_MS = 650;
+    var TEXT_MUTATION_SELECTION_MENU_SUPPRESS_MS = 700;
     var TOUCH_ANCHOR_MAX_AGE_MS = 2500;
     var RIGHT_EDGE_GESTURE_GUARD_CSS_PX = 24;
     var RIGHT_EDGE_GESTURE_ACTIVATE_DELTA_X = 14;
@@ -320,6 +322,17 @@
                 JSON.stringify({ reason: String(reason || "") })
             ]);
         }
+    }
+
+    function markTextMutationSelectionMenuSuppressed(reason) {
+        textMutationSelectionMenuSuppressUntil = Math.max(
+            textMutationSelectionMenuSuppressUntil,
+            Date.now() + TEXT_MUTATION_SELECTION_MENU_SUPPRESS_MS
+        );
+    }
+
+    function shouldSuppressSelectionActionModeAfterTextMutation() {
+        return Date.now() <= textMutationSelectionMenuSuppressUntil;
     }
 
     function cancelAceMobileTouchInteraction(reason) {
@@ -788,8 +801,13 @@
 
     function notifySelectionChanged() {
         lastSelectionChangedAt = Date.now();
-        setSelectionMenuSuppressed(false);
         var selection = getSelectionState();
+        if (selection.text && shouldSuppressSelectionActionModeAfterTextMutation()) {
+            suppressSelectionActionModeMenu("text_mutation_selection");
+            notifyStateChanged("selectionChanged");
+            return;
+        }
+        setSelectionMenuSuppressed(false);
         if (selection.text || lastActionModeSelectedText) {
             setNativeActionModeActive(true);
             notifyStateChanged("selectionChanged");
@@ -957,7 +975,12 @@
             notifyReadOnlyMutationBlocked(operation);
             return defaultValue;
         }
-        return callback();
+        markTextMutationSelectionMenuSuppressed(operation);
+        try {
+            return callback();
+        } finally {
+            markTextMutationSelectionMenuSuppressed(operation);
+        }
     }
 
     function toggleBreakpoint(row) {
@@ -1727,6 +1750,7 @@
             if (suppressChange) {
                 return;
             }
+            markTextMutationSelectionMenuSuppressed("session_change:" + String(delta && delta.action || ""));
             dirty = true;
             notifyTextChanged(!notifyChangeDelta(delta));
         });
