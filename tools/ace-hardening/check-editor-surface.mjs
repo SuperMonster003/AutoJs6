@@ -614,6 +614,7 @@ assertIncludes(aceActionHistoryStore, "mutatesText", "ACE action history mutatio
 assertIncludes(aceActionHistoryStore, "usageCount", "ACE action history frequency field");
 assertIncludes(aceActionHistoryStore, "lastUsedAt", "ACE action history recency field");
 assertIncludes(aceActionHistoryStore, "manualOrder", "ACE action history manual order field");
+assertIncludes(aceActionHistoryStore, "compareManualOrder(left, right)", "ACE action favorites manual unpinned reorder ranking");
 
 assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT", "ACE action favorites swipe gestures");
 assertIncludes(aceActionFavoritesDialog, "onActionSelected: (AceActionHistoryStore.Action) -> Unit", "ACE action favorites generic callback");

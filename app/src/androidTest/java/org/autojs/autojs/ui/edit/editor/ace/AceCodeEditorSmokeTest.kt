@@ -435,7 +435,28 @@ class AceCodeEditorSmokeTest {
             runOnMainSync {
                 val moveUpAction = AceShortcutPanel.actionOf(AceShortcutPanel.Command.MoveUp)
                     ?: error("Expected ACE shortcut action for up")
+                val moveDownAction = AceShortcutPanel.actionOf(AceShortcutPanel.Command.MoveDown)
+                    ?: error("Expected ACE shortcut action for down")
                 AceActionHistoryStore.record(instrumentation.targetContext, moveUpAction, now = 2_000L)
+                AceActionHistoryStore.record(instrumentation.targetContext, moveDownAction, now = 2_500L)
+                AceActionHistoryStore.applyFavoritesOrder(
+                    instrumentation.targetContext,
+                    orderedIds = listOf(moveDownAction.id, repeatedEntry.id, moveUpAction.id),
+                    pinnedCount = 0,
+                )
+            }
+            val unpinnedReorderedEntries = runOnMainSync {
+                AceActionHistoryStore.getRankedEntries(instrumentation.targetContext)
+            }
+            assertEquals(listOf("Down", "TAB", "Up"), unpinnedReorderedEntries.map { it.label })
+            assertFalse(unpinnedReorderedEntries.any { it.pinned })
+
+            runOnMainSync {
+                val moveDownAction = AceShortcutPanel.actionOf(AceShortcutPanel.Command.MoveDown)
+                    ?: error("Expected ACE shortcut action for down")
+                val moveUpAction = AceShortcutPanel.actionOf(AceShortcutPanel.Command.MoveUp)
+                    ?: error("Expected ACE shortcut action for up")
+                AceActionHistoryStore.delete(instrumentation.targetContext, moveDownAction.id)
                 AceActionHistoryStore.setPinned(instrumentation.targetContext, repeatedEntry.id, true, now = 3_000L)
                 AceActionHistoryStore.applyFavoritesOrder(
                     instrumentation.targetContext,

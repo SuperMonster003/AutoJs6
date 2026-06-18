@@ -94,7 +94,7 @@ object AceActionHistoryStore {
         entries[id] = current.copy(
             pinned = pinned,
             pinnedAt = if (pinned) now else 0L,
-            manualOrder = if (pinned) current.manualOrder else DEFAULT_MANUAL_ORDER,
+            manualOrder = current.manualOrder,
         )
         persistRoot(context, root, entries.values)
     }
@@ -124,7 +124,7 @@ object AceActionHistoryStore {
             entries[id] = current.copy(
                 pinned = pinned,
                 pinnedAt = if (pinned) current.pinnedAt.takeIf { it > 0L } ?: now else 0L,
-                manualOrder = if (pinned) index else DEFAULT_MANUAL_ORDER,
+                manualOrder = if (pinned) index else index - safePinnedCount,
             )
         }
         persistRoot(context, root, entries.values)
@@ -239,10 +239,23 @@ object AceActionHistoryStore {
         val rightIsLast = right.id == lastActionId
         return compareValues(if (leftIsLast) 0 else 1, if (rightIsLast) 0 else 1)
             .takeIf { it != 0 }
+            ?: compareManualOrder(left, right)
             ?: compareValues(right.usageCount, left.usageCount)
             .takeIf { it != 0 }
             ?: compareValues(right.lastUsedAt, left.lastUsedAt).takeIf { it != 0 }
             ?: compareValues(left.label, right.label).takeIf { it != 0 }
             ?: compareValues(left.id, right.id)
+    }
+
+    private fun compareManualOrder(left: Entry, right: Entry): Int? {
+        val leftHasManualOrder = left.manualOrder != DEFAULT_MANUAL_ORDER
+        val rightHasManualOrder = right.manualOrder != DEFAULT_MANUAL_ORDER
+        return when {
+            leftHasManualOrder && rightHasManualOrder ->
+                compareValues(left.manualOrder, right.manualOrder).takeIf { it != 0 }
+            leftHasManualOrder != rightHasManualOrder ->
+                compareValues(if (leftHasManualOrder) 0 else 1, if (rightHasManualOrder) 0 else 1)
+            else -> null
+        }
     }
 }
