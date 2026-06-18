@@ -145,8 +145,7 @@ public class EditorMenu {
     private boolean onJumpOptionsSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_jump_to_line) {
-            jumpToLine();
-            return true;
+            return tryDoing(mEditorView::showJumpToLineDialog);
         }
         if (itemId == R.id.action_jump_to_start) {
             commandDispatcher().jumpToStart();
@@ -177,8 +176,7 @@ public class EditorMenu {
             return true;
         }
         if (itemId == R.id.action_import_java_class) {
-            importJavaPackageOrClass();
-            return true;
+            return tryDoing(mEditorView::showJavaClassSearchDialog);
         }
         if (itemId == R.id.action_ace_read_only_mode) {
             return tryDoing(mEditorView::toggleReadOnlyMode);
@@ -190,16 +188,14 @@ public class EditorMenu {
             return tryDoing(mEditorView::openByOtherApps);
         }
         if (itemId == R.id.action_file_details) {
-            showFileDetails();
-            return true;
+            return tryDoing(mEditorView::showFileDetailsDialog);
         }
         if (itemId == R.id.action_version_history) {
             showHistory();
             return true;
         }
         if (itemId == R.id.action_build_apk) {
-            startBuildApkActivity();
-            return true;
+            return tryDoing(mEditorView::startBuildApkActivity);
         }
         return false;
     }
@@ -288,8 +284,7 @@ public class EditorMenu {
     private boolean onEditOptionsSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_find_or_replace) {
-            findOrReplace();
-            return true;
+            return tryDoing(mEditorView::showFindOrReplaceDialog);
         }
         if (itemId == R.id.action_copy_all) {
             copyAll();

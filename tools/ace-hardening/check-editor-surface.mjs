@@ -530,7 +530,22 @@ assertIncludes(editorView, "fun recordAceActionForMenuItem", "ACE action history
 assertIncludes(editorView, "private fun executeAceHistoryAction", "ACE generic action history executor");
 assertIncludes(editorView, "private fun actionForToolbarItem", "ACE toolbar action history mapping");
 assertIncludes(editorView, "private fun actionForMenuItem", "ACE menu action history mapping");
+assertIncludes(editorView, "fun showFindOrReplaceDialog", "editor action history find/replace dialog launcher");
+assertIncludes(editorView, "fun showJumpToLineDialog", "editor action history jump-to-line dialog launcher");
+assertIncludes(editorView, "fun startBuildApkActivity", "editor action history build APK launcher");
+assertIncludes(editorView, "fun showFileDetailsDialog", "editor action history file details launcher");
+assertIncludes(editorView, "fun showJavaClassSearchDialog", "editor action history Java class search launcher");
+assertIncludes(editorView, "ACTION_FIND_OR_REPLACE", "editor action history find/replace action id");
+assertIncludes(editorView, "ACTION_JUMP_TO_LINE", "editor action history jump-to-line action id");
+assertIncludes(editorView, "ACTION_BUILD_APK", "editor action history build APK action id");
+assertIncludes(editorView, "ACTION_IMPORT_JAVA_CLASS", "editor action history Java class search action id");
+assertIncludes(editorView, "ACTION_FILE_DETAILS", "editor action history file details action id");
 assertIncludes(editorMenu, "mEditorView.recordAceActionForMenuItem(itemId)", "editor overflow menu records ACE actions");
+assertIncludes(editorMenu, "mEditorView::showFindOrReplaceDialog", "editor overflow menu shares find/replace action launcher");
+assertIncludes(editorMenu, "mEditorView::showJumpToLineDialog", "editor overflow menu shares jump-to-line action launcher");
+assertIncludes(editorMenu, "mEditorView::startBuildApkActivity", "editor overflow menu shares build APK launcher");
+assertIncludes(editorMenu, "mEditorView::showFileDetailsDialog", "editor overflow menu shares file details launcher");
+assertIncludes(editorMenu, "mEditorView::showJavaClassSearchDialog", "editor overflow menu shares Java class search launcher");
 
 assertIncludes(codeCompletion, "val iconResId", "code completion optional icon model");
 assertIncludes(codeCompletionBar, "getIconResId(position)", "code completion optional icon lookup");

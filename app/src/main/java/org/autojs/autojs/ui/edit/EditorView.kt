@@ -16,6 +16,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import android.os.SystemClock
+import android.text.InputType
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.Choreographer
@@ -46,6 +47,8 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
+import org.autojs.autojs.model.indices.AndroidClass
+import org.autojs.autojs.model.indices.ClassSearchingItem
 import org.autojs.autojs.model.indices.Module
 import org.autojs.autojs.model.indices.Property
 import org.autojs.autojs.model.script.Scripts.ACTION_ON_EXECUTION_FINISHED
@@ -55,6 +58,7 @@ import org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE
 import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
+import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
@@ -106,11 +110,16 @@ import org.autojs.autojs.ui.edit.toolbar.NormalToolbarFragment
 import org.autojs.autojs.ui.edit.toolbar.SearchToolbarFragment
 import org.autojs.autojs.ui.edit.toolbar.ToolbarFragment
 import org.autojs.autojs.ui.log.LogActivity
+import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
+import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
@@ -2153,6 +2162,114 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         }
     }
 
+    fun showFindOrReplaceDialog() {
+        val preferredQuery = getPreferredSearchQueryForDialogOrNull()
+        val builder = FindOrReplaceDialogBuilder(context, this)
+        if (preferredQuery != null) {
+            builder.setUsingRegex(getPreferredSearchUsingRegexForDialog())
+        }
+        builder.setQueryIfNotEmpty(preferredQuery ?: editor.selectedTextSnapshot)
+        builder.positiveColorRes(R.color.dialog_button_attraction)
+        builder.show()
+    }
+
+    fun showJumpToLineDialog() {
+        val lineCount = editor.lineCountSnapshot
+        val builder = MaterialDialog.Builder(context)
+            .title(R.string.text_jump_to_line)
+            .input("1 - $lineCount", "") { _, input ->
+                if (input.isNullOrEmpty()) {
+                    return@input
+                }
+                val line = input.toString().toIntOrNull() ?: return@input
+                mCommandDispatcher.jumpTo(line.coerceIn(1, lineCount) - 1, 0)
+            }
+            .inputType(InputType.TYPE_CLASS_NUMBER)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .widgetThemeColor()
+        builder.show()
+    }
+
+    fun showFileDetailsDialog() {
+        val path = uri?.path
+        if (path.isNullOrEmpty()) {
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_unable_to_display_file_details_as_current_file_path_is_unknown)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .build()
+            }
+            return
+        }
+        EditableFileInfoDialogManager.showEditableFileInfoDialog(context, File(path)) {
+            editor.text
+        }
+    }
+
+    fun startBuildApkActivity() {
+        val path = uri?.path
+        if (path.isNullOrEmpty()) {
+            DialogUtils.buildAndShowAdaptive {
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.error_unable_to_package_application_as_current_file_path_is_unknown)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .build()
+            }
+            return
+        }
+        BuildActivity.launch(context, path)
+    }
+
+    fun showJavaClassSearchDialog() {
+        ClassSearchDialogBuilder(context)
+            .setQuery(editor.selectedTextSnapshot)
+            .itemClick { dialog, item, _ -> showClassSearchingItem(dialog, item) }
+            .title(R.string.text_find_java_classes)
+            .show()
+    }
+
+    private fun showClassSearchingItem(dialog: MaterialDialog, item: ClassSearchingItem) {
+        val title: String
+        val description: String
+        if (item is ClassSearchingItem.ClassItem) {
+            val androidClass: AndroidClass = item.androidClass
+            title = androidClass.className
+            description = androidClass.fullName
+        } else {
+            title = (item as ClassSearchingItem.PackageItem).packageName
+            description = title
+        }
+        MaterialDialog.Builder(context)
+            .title(title)
+            .content(description)
+            .neutralText(R.string.text_view_docs)
+            .neutralColorRes(R.color.dialog_button_hint)
+            .negativeText(R.string.text_en_import)
+            .negativeColorRes(R.color.dialog_button_hint)
+            .positiveText(R.string.text_copy)
+            .positiveColorRes(R.color.dialog_button_hint)
+            .onPositive { _, _ ->
+                ClipboardUtils.setClip(context, description)
+                showToast(context, R.string.text_already_copied_to_clip)
+                dialog.dismiss()
+            }
+            .onNegative { _, _ ->
+                val executionInfo = JavaScriptFileSource.parseExecutionMode(editor.text)
+                mCommandDispatcher.insert(executionInfo.lineno, item.importText + ";\n")
+            }
+            .onNeutral { _, _ ->
+                IntentUtils.browse(context, item.url, ToastExceptionHolder(context))
+            }
+            .onAny { _, _ -> dialog.dismiss() }
+            .show()
+    }
+
     fun beautifyCode() {
         mCommandDispatcher.beautifyCode()
     }
@@ -2764,6 +2881,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 onSearchStateMaybeChanged()
             }
             ACTION_CANCEL_SEARCH -> true.also { cancelSearch() }
+            ACTION_FIND_OR_REPLACE -> true.also { showFindOrReplaceDialog() }
             ACTION_REPLACE_SELECTION -> true.also {
                 replace()
                 onSearchStateMaybeChanged()
@@ -2775,6 +2893,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_CLEAR -> true.also { mCommandDispatcher.clear() }
             ACTION_TOGGLE_COMMENT -> true.also { mCommandDispatcher.toggleComment() }
             ACTION_BEAUTIFY -> true.also { mCommandDispatcher.beautifyCode() }
+            ACTION_JUMP_TO_LINE -> true.also { showJumpToLineDialog() }
             ACTION_JUMP_TO_START -> true.also { mCommandDispatcher.jumpToStart() }
             ACTION_JUMP_TO_END -> true.also { mCommandDispatcher.jumpToEnd() }
             ACTION_JUMP_TO_LINE_START -> true.also { mCommandDispatcher.jumpToLineStart() }
@@ -2782,9 +2901,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_TOGGLE_BREAKPOINT -> true.also { mCommandDispatcher.addOrRemoveBreakpointAtCurrentLine() }
             ACTION_DEBUG -> true.also { debug() }
             ACTION_REMOVE_ALL_BREAKPOINTS -> true.also { mCommandDispatcher.removeAllBreakpoints() }
+            ACTION_BUILD_APK -> true.also { startBuildApkActivity() }
             ACTION_LOG -> true.also { openEditorLogByPreference() }
             ACTION_SETTINGS -> true.also { EditorSettingsDialogLauncher.show(context) }
             ACTION_CONSOLE -> true.also { showConsole() }
+            ACTION_IMPORT_JAVA_CLASS -> true.also { showJavaClassSearchDialog() }
+            ACTION_FILE_DETAILS -> true.also { showFileDetailsDialog() }
             ACTION_READ_ONLY -> true.also { toggleReadOnlyMode() }
             ACTION_COPY_ACE_DIAGNOSTICS -> true.also { copyAceDiagnosticsToClipboard() }
             ACTION_OPEN_BY_OTHER_APPS -> true.also { openByOtherApps() }
@@ -2822,6 +2944,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun actionForMenuItem(itemId: Int): AceActionHistoryStore.Action? = when (itemId) {
         R.id.action_force_stop -> historyAction(ACTION_FORCE_STOP, R.string.text_force_stop, mutatesText = false)
+        R.id.action_find_or_replace -> historyAction(ACTION_FIND_OR_REPLACE, R.string.text_find_or_replace, mutatesText = true)
         R.id.action_copy_all -> historyAction(ACTION_COPY_ALL, R.string.text_copy_all, mutatesText = false)
         R.id.action_copy_line -> historyAction(ACTION_COPY_LINE, R.string.text_copy_line, mutatesText = false)
         R.id.action_paste -> historyAction(ACTION_PASTE, R.string.text_paste, mutatesText = true)
@@ -2829,6 +2952,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         R.id.action_clear -> historyAction(ACTION_CLEAR, R.string.text_clear, mutatesText = true)
         R.id.action_comment -> historyAction(ACTION_TOGGLE_COMMENT, R.string.text_comment, mutatesText = true)
         R.id.action_beautify -> historyAction(ACTION_BEAUTIFY, R.string.text_code_beautify, mutatesText = true)
+        R.id.action_jump_to_line -> historyAction(ACTION_JUMP_TO_LINE, R.string.text_jump_to_line, mutatesText = false)
         R.id.action_jump_to_start -> historyAction(ACTION_JUMP_TO_START, R.string.text_jump_to_start, mutatesText = false)
         R.id.action_jump_to_end -> historyAction(ACTION_JUMP_TO_END, R.string.text_jump_to_end, mutatesText = false)
         R.id.action_jump_to_line_start -> historyAction(ACTION_JUMP_TO_LINE_START, R.string.text_jump_to_line_start, mutatesText = false)
@@ -2836,9 +2960,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         R.id.action_breakpoint -> historyAction(ACTION_TOGGLE_BREAKPOINT, R.string.text_set_breakpoint, mutatesText = false)
         R.id.action_launch_debugger -> historyAction(ACTION_DEBUG, R.string.text_launch_debugger, mutatesText = false)
         R.id.action_remove_all_breakpoints -> historyAction(ACTION_REMOVE_ALL_BREAKPOINTS, R.string.text_remove_all_breakpoints, mutatesText = false)
+        R.id.action_build_apk -> historyAction(ACTION_BUILD_APK, R.string.text_build_apk, mutatesText = false)
         R.id.action_log -> historyAction(ACTION_LOG, R.string.text_log, mutatesText = false)
         R.id.action_editor_settings -> historyAction(ACTION_SETTINGS, R.string.text_settings, mutatesText = false)
         R.id.action_console -> historyAction(ACTION_CONSOLE, R.string.text_console, mutatesText = false)
+        R.id.action_import_java_class -> historyAction(ACTION_IMPORT_JAVA_CLASS, R.string.text_find_java_classes, mutatesText = true)
+        R.id.action_file_details -> historyAction(ACTION_FILE_DETAILS, R.string.text_file_details, mutatesText = false)
         R.id.action_ace_read_only_mode -> historyAction(ACTION_READ_ONLY, R.string.text_ace_read_only_mode, mutatesText = false)
         R.id.action_copy_ace_diagnostics -> historyAction(ACTION_COPY_ACE_DIAGNOSTICS, R.string.text_copy_ace_diagnostics, mutatesText = false)
         R.id.action_open_by_other_apps -> historyAction(ACTION_OPEN_BY_OTHER_APPS, R.string.text_open_by_other_apps, mutatesText = false)
@@ -3059,6 +3186,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_FIND_NEXT = "editor:find_next"
         private const val ACTION_FIND_PREV = "editor:find_prev"
         private const val ACTION_CANCEL_SEARCH = "editor:cancel_search"
+        private const val ACTION_FIND_OR_REPLACE = "editor:find_or_replace"
         private const val ACTION_REPLACE_SELECTION = "editor:replace_selection"
         private const val ACTION_COPY_ALL = "editor:copy_all"
         private const val ACTION_COPY_LINE = "editor:copy_line"
@@ -3067,6 +3195,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_CLEAR = "editor:clear"
         private const val ACTION_TOGGLE_COMMENT = "editor:toggle_comment"
         private const val ACTION_BEAUTIFY = "editor:beautify"
+        private const val ACTION_JUMP_TO_LINE = "editor:jump_to_line"
         private const val ACTION_JUMP_TO_START = "editor:jump_to_start"
         private const val ACTION_JUMP_TO_END = "editor:jump_to_end"
         private const val ACTION_JUMP_TO_LINE_START = "editor:jump_to_line_start"
@@ -3074,9 +3203,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_TOGGLE_BREAKPOINT = "editor:toggle_breakpoint"
         private const val ACTION_DEBUG = "editor:debug"
         private const val ACTION_REMOVE_ALL_BREAKPOINTS = "editor:remove_all_breakpoints"
+        private const val ACTION_BUILD_APK = "editor:build_apk"
         private const val ACTION_LOG = "editor:log"
         private const val ACTION_SETTINGS = "editor:settings"
         private const val ACTION_CONSOLE = "editor:console"
+        private const val ACTION_IMPORT_JAVA_CLASS = "editor:import_java_class"
+        private const val ACTION_FILE_DETAILS = "editor:file_details"
         private const val ACTION_READ_ONLY = "editor:read_only"
         private const val ACTION_COPY_ACE_DIAGNOSTICS = "editor:copy_ace_diagnostics"
         private const val ACTION_OPEN_BY_OTHER_APPS = "editor:open_by_other_apps"

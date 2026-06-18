@@ -192,8 +192,10 @@ Notes:
   falling back to frequency and recency ranking.
 - [x] Extend action favorites beyond the shortcut panel to top-toolbar actions
   and directly replayable editor overflow actions.
-- [ ] Add parameterized favorites for open-ended actions such as Jump to line,
-  Find / Replace, build packaging, file details, and Java class import.
+- [x] Replay dialog-launch editor actions such as Find / Replace, Jump to line,
+  build packaging, file details, and Java class search.
+- [ ] Add saved parameter payloads for open-ended favorites such as remembered
+  line numbers, search queries, build profiles, and Java class imports.
 - [x] Add a standalone Code editor settings page and an in-editor settings
   dialog using the same content model.
 - [x] Move the in-editor settings dialog to a fragment-safe MaterialDialog path.
@@ -280,6 +282,9 @@ Notes:
   the favorites dialog can replay shortcut-panel commands, toolbar commands,
   and the first batch of direct overflow-menu commands through the same
   ranking, pinning, deletion, and repeat-last-command flow.
+- Dialog-launch editor actions now live on `EditorView`, letting overflow-menu
+  clicks and action-favorite replays share the same Find / Replace, Jump to
+  line, build packaging, file details, and Java class search paths.
 - The in-editor settings dialog now uses a dedicated MaterialDialog host that
   accepts DialogFragment content through a custom view container, avoiding the
   unsupported `MaterialDialog.setContentView()` path.
