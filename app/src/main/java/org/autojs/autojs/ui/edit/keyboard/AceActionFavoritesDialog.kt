@@ -26,7 +26,7 @@ object AceActionFavoritesDialog {
 
     fun show(
         context: Context,
-        onActionSelected: (AceShortcutPanel.Action) -> Unit,
+        onActionSelected: (AceActionHistoryStore.Action) -> Unit,
     ) {
         val entries = AceActionHistoryStore.getRankedEntries(context)
         if (entries.isEmpty()) {
@@ -155,7 +155,7 @@ object AceActionFavoritesDialog {
     private class FavoritesAdapter(
         private val context: Context,
         private val entries: MutableList<AceActionHistoryStore.Entry>,
-        private val onActionSelected: (AceShortcutPanel.Action) -> Unit,
+        private val onActionSelected: (AceActionHistoryStore.Action) -> Unit,
     ) : RecyclerView.Adapter<FavoritesAdapter.VH>() {
 
         var dialog: MaterialDialog? = null
@@ -178,10 +178,14 @@ object AceActionFavoritesDialog {
             )
             holder.icon.imageTintList = ColorStateList.valueOf(context.getColor(R.color.day_night))
             holder.itemView.setOnClickListener {
-                AceShortcutPanel.actionById(entry.id)?.let { action ->
-                    onActionSelected(action)
-                    dialog?.dismiss()
-                }
+                onActionSelected(
+                    AceActionHistoryStore.Action(
+                        id = entry.id,
+                        label = entry.label,
+                        mutatesText = entry.mutatesText,
+                    ),
+                )
+                dialog?.dismiss()
             }
         }
 

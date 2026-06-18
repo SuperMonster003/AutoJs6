@@ -99,20 +99,24 @@ public class EditorMenu {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
+        boolean handled;
         if (itemId == R.id.action_log) {
-            return tryDoing(this::openEditorLogByPreference);
-        }
-        if (itemId == R.id.action_force_stop) {
-            return tryDoing(mEditorView::forceStop);
-        }
-        if (itemId == R.id.action_editor_settings) {
+            handled = tryDoing(this::openEditorLogByPreference);
+        } else if (itemId == R.id.action_force_stop) {
+            handled = tryDoing(mEditorView::forceStop);
+        } else if (itemId == R.id.action_editor_settings) {
             CodeEditorSettingsDialog.show(mContext);
-            return true;
+            handled = true;
+        } else {
+            handled = onEditOptionsSelected(item)
+                    || onJumpOptionsSelected(item)
+                    || onMoreOptionsSelected(item)
+                    || onDebugOptionsSelected(item);
         }
-        return onEditOptionsSelected(item)
-               || onJumpOptionsSelected(item)
-               || onMoreOptionsSelected(item)
-               || onDebugOptionsSelected(item);
+        if (handled) {
+            mEditorView.recordAceActionForMenuItem(itemId);
+        }
+        return handled;
     }
 
     private boolean onDebugOptionsSelected(MenuItem item) {

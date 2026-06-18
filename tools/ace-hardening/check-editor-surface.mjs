@@ -498,6 +498,11 @@ assertIncludes(editorView, "toggleAceShortcutReturnPoint", "ACE shortcut TAB ret
 assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dialog");
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");
 assertIncludes(editorView, "AceActionFavoritesDialog.show", "ACE action favorites dialog integration");
+assertIncludes(editorView, "fun recordAceActionForMenuItem", "ACE action history menu recording entry point");
+assertIncludes(editorView, "private fun executeAceHistoryAction", "ACE generic action history executor");
+assertIncludes(editorView, "private fun actionForToolbarItem", "ACE toolbar action history mapping");
+assertIncludes(editorView, "private fun actionForMenuItem", "ACE menu action history mapping");
+assertIncludes(editorMenu, "mEditorView.recordAceActionForMenuItem(itemId)", "editor overflow menu records ACE actions");
 
 assertIncludes(codeCompletion, "val iconResId", "code completion optional icon model");
 assertIncludes(codeCompletionBar, "getIconResId(position)", "code completion optional icon lookup");
@@ -518,15 +523,19 @@ assertIncludes(aceShortcutPanel, "fun actionOf(command: Command)", "ACE shortcut
 assertIncludes(aceShortcutPanel, "fun actionById", "ACE shortcut stable action lookup");
 
 assertIncludes(aceActionHistoryStore, "fun record(", "ACE action history record API");
+assertIncludes(aceActionHistoryStore, "data class Action", "ACE generic action history model");
 assertIncludes(aceActionHistoryStore, "fun getRankedEntries", "ACE action history ranking API");
 assertIncludes(aceActionHistoryStore, "fun getLastActionId", "ACE action history last action API");
+assertIncludes(aceActionHistoryStore, "fun getLastAction", "ACE generic last action lookup");
 assertIncludes(aceActionHistoryStore, 'entryComparator(root.optString("lastActionId"))', "ACE action favorites latest-action ranking");
 assertIncludes(aceActionHistoryStore, "fun applyFavoritesOrder", "ACE action favorites order API");
+assertIncludes(aceActionHistoryStore, "mutatesText", "ACE action history mutation metadata");
 assertIncludes(aceActionHistoryStore, "usageCount", "ACE action history frequency field");
 assertIncludes(aceActionHistoryStore, "lastUsedAt", "ACE action history recency field");
 assertIncludes(aceActionHistoryStore, "manualOrder", "ACE action history manual order field");
 
 assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT", "ACE action favorites swipe gestures");
+assertIncludes(aceActionFavoritesDialog, "onActionSelected: (AceActionHistoryStore.Action) -> Unit", "ACE action favorites generic callback");
 assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.UP or ItemTouchHelper.DOWN", "ACE action favorites drag reorder");
 assertIncludes(aceActionFavoritesDialog, "R.drawable.ic_thumbtacks", "ACE action favorites thumbtack icon");
 assertIncludes(aceActionFavoritesDialog, "confirmDelete", "ACE action favorites delete confirmation");

@@ -15,6 +15,7 @@ object AceActionHistoryStore {
     data class Entry(
         val id: String,
         val label: String,
+        val mutatesText: Boolean,
         val usageCount: Int,
         val firstUsedAt: Long,
         val lastUsedAt: Long,
@@ -23,10 +24,28 @@ object AceActionHistoryStore {
         val manualOrder: Int = DEFAULT_MANUAL_ORDER,
     )
 
+    data class Action(
+        val id: String,
+        val label: String,
+        val mutatesText: Boolean,
+    )
+
     private fun prefs(context: Context): SharedPreferences =
         context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
     fun record(context: Context, action: AceShortcutPanel.Action, now: Long = System.currentTimeMillis()) {
+        record(
+            context = context,
+            action = Action(
+                id = action.id,
+                label = action.label,
+                mutatesText = action.mutatesText,
+            ),
+            now = now,
+        )
+    }
+
+    fun record(context: Context, action: Action, now: Long = System.currentTimeMillis()) {
         val root = readRoot(context)
         val entries = readEntries(root).toMutableMap()
         val current = entries[action.id]
@@ -34,6 +53,7 @@ object AceActionHistoryStore {
             Entry(
                 id = action.id,
                 label = action.label,
+                mutatesText = action.mutatesText,
                 usageCount = 1,
                 firstUsedAt = now,
                 lastUsedAt = now,
@@ -41,6 +61,7 @@ object AceActionHistoryStore {
         } else {
             current.copy(
                 label = action.label,
+                mutatesText = action.mutatesText,
                 usageCount = current.usageCount + 1,
                 lastUsedAt = now,
             )
@@ -51,6 +72,12 @@ object AceActionHistoryStore {
 
     fun getLastActionId(context: Context): String? {
         return readRoot(context).optString("lastActionId").takeIf { it.isNotBlank() }
+    }
+
+    fun getLastAction(context: Context): Action? {
+        val root = readRoot(context)
+        val id = root.optString("lastActionId").takeIf { it.isNotBlank() } ?: return null
+        return readEntries(root)[id]?.toAction()
     }
 
     fun getRankedEntries(context: Context): List<Entry> {
@@ -146,9 +173,11 @@ object AceActionHistoryStore {
         if (usageCount <= 0) {
             return null
         }
+        val shortcutAction = AceShortcutPanel.actionById(id)
         return Entry(
             id = id,
             label = label,
+            mutatesText = optBoolean("mutatesText", shortcutAction?.mutatesText ?: false),
             usageCount = usageCount,
             firstUsedAt = optLong("firstUsedAt", 0L),
             lastUsedAt = optLong("lastUsedAt", 0L),
@@ -162,6 +191,7 @@ object AceActionHistoryStore {
         return JSONObject().apply {
             put("id", id)
             put("label", label)
+            put("mutatesText", mutatesText)
             put("usageCount", usageCount)
             put("firstUsedAt", firstUsedAt)
             put("lastUsedAt", lastUsedAt)
@@ -170,6 +200,12 @@ object AceActionHistoryStore {
             put("manualOrder", manualOrder)
         }
     }
+
+    private fun Entry.toAction(): Action = Action(
+        id = id,
+        label = label,
+        mutatesText = mutatesText,
+    )
 
     private fun entryComparator(lastActionId: String?) = Comparator<Entry> { left, right ->
         compareValuesBy(left, right) { if (it.pinned) 0 else 1 }

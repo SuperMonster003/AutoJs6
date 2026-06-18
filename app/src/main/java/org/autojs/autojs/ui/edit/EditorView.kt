@@ -24,6 +24,7 @@ import android.widget.ImageView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -111,6 +112,7 @@ import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
@@ -155,6 +157,18 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     fun showLogPanel() {
         mLogPanelCallback?.onShowLogPanel()
+    }
+
+    fun openEditorLogByPreference() {
+        val mode = Pref.getString(
+            R.string.key_editor_log_button_behavior,
+            key(R.string.default_key_editor_log_button_behavior),
+        )
+        if (mode == key(R.string.key_editor_log_button_behavior_fullscreen_page)) {
+            LogActivity.launch(context)
+            return
+        }
+        showLogPanel()
     }
 
     fun setScriptRunningStateListener(listener: ScriptRunningStateListener?) {
@@ -1913,6 +1927,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     override fun onToolbarMenuItemClick(id: Int) {
+        val action = actionForToolbarItem(id)
         when (id) {
             R.id.run -> when {
                 isScriptRunning() -> forceStop()
@@ -1947,6 +1962,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 onSearchStateMaybeChanged()
             }
         }
+        action?.let(::recordAceHistoryAction)
     }
 
     private fun onSearchStateMaybeChanged() {
@@ -2704,17 +2720,149 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun showAceActionHistoryDialog() {
         AceActionFavoritesDialog.show(context) { action ->
-            executeAceShortcutAction(action, record = true)
+            executeAceHistoryAction(action, record = true)
         }
     }
 
     private fun repeatLastAceAction() {
-        val action = AceShortcutPanel.actionById(AceActionHistoryStore.getLastActionId(context))
+        val action = AceActionHistoryStore.getLastAction(context)
         if (action == null) {
             showToast(context, R.string.text_ace_no_last_action)
             return
         }
-        executeAceShortcutAction(action, record = true)
+        executeAceHistoryAction(action, record = true)
+    }
+
+    fun recordAceActionForMenuItem(itemId: Int) {
+        actionForMenuItem(itemId)?.let(::recordAceHistoryAction)
+    }
+
+    private fun executeAceHistoryAction(
+        action: AceActionHistoryStore.Action,
+        record: Boolean,
+    ): Boolean {
+        if (action.mutatesText && editor.isReadOnly) {
+            return true
+        }
+        AceShortcutPanel.actionById(action.id)?.let { shortcutAction ->
+            return executeAceShortcutAction(shortcutAction, record)
+        }
+        val handled = when (action.id) {
+            ACTION_RUN -> true.also { runAndSaveFileIfNeeded() }
+            ACTION_FORCE_STOP -> true.also { forceStop() }
+            ACTION_SAVE -> true.also { saveFile() }
+            ACTION_UNDO -> true.also { undo() }
+            ACTION_REDO -> true.also { redo() }
+            ACTION_FIND_NEXT -> true.also {
+                editor.resetFoundIndexForFindNextFromCursor()
+                findNext()
+                onSearchStateMaybeChanged()
+            }
+            ACTION_FIND_PREV -> true.also {
+                editor.resetFoundIndexForFindPrevFromCursor()
+                findPrev()
+                onSearchStateMaybeChanged()
+            }
+            ACTION_CANCEL_SEARCH -> true.also { cancelSearch() }
+            ACTION_REPLACE_SELECTION -> true.also {
+                replace()
+                onSearchStateMaybeChanged()
+            }
+            ACTION_COPY_ALL -> true.also { copyAllToClipboard() }
+            ACTION_COPY_LINE -> true.also { mCommandDispatcher.copyLine() }
+            ACTION_PASTE -> true.also { pasteFromClipboard() }
+            ACTION_DELETE_LINE -> true.also { mCommandDispatcher.deleteLine() }
+            ACTION_CLEAR -> true.also { mCommandDispatcher.clear() }
+            ACTION_TOGGLE_COMMENT -> true.also { mCommandDispatcher.toggleComment() }
+            ACTION_BEAUTIFY -> true.also { mCommandDispatcher.beautifyCode() }
+            ACTION_JUMP_TO_START -> true.also { mCommandDispatcher.jumpToStart() }
+            ACTION_JUMP_TO_END -> true.also { mCommandDispatcher.jumpToEnd() }
+            ACTION_JUMP_TO_LINE_START -> true.also { mCommandDispatcher.jumpToLineStart() }
+            ACTION_JUMP_TO_LINE_END -> true.also { mCommandDispatcher.jumpToLineEnd() }
+            ACTION_TOGGLE_BREAKPOINT -> true.also { mCommandDispatcher.addOrRemoveBreakpointAtCurrentLine() }
+            ACTION_DEBUG -> true.also { debug() }
+            ACTION_REMOVE_ALL_BREAKPOINTS -> true.also { mCommandDispatcher.removeAllBreakpoints() }
+            ACTION_LOG -> true.also { openEditorLogByPreference() }
+            ACTION_SETTINGS -> true.also { EditorSettingsDialogLauncher.show(context) }
+            ACTION_CONSOLE -> true.also { showConsole() }
+            ACTION_READ_ONLY -> true.also { toggleReadOnlyMode() }
+            ACTION_COPY_ACE_DIAGNOSTICS -> true.also { copyAceDiagnosticsToClipboard() }
+            ACTION_OPEN_BY_OTHER_APPS -> true.also { openByOtherApps() }
+            ACTION_VERSION_HISTORY -> true.also { showVersionHistoryDialog() }
+            else -> false
+        }
+        if (handled && record) {
+            AceActionHistoryStore.record(context, action)
+        }
+        return handled
+    }
+
+    private fun recordAceHistoryAction(action: AceActionHistoryStore.Action) {
+        if (editor.engineType != EditorEngineType.ACE) {
+            return
+        }
+        AceActionHistoryStore.record(context, action)
+    }
+
+    private fun actionForToolbarItem(id: Int): AceActionHistoryStore.Action? = when (id) {
+        R.id.run -> historyAction(
+            if (isScriptRunning()) ACTION_FORCE_STOP else ACTION_RUN,
+            if (isScriptRunning()) R.string.text_force_stop else R.string.text_run,
+            mutatesText = false,
+        )
+        R.id.save -> historyAction(ACTION_SAVE, R.string.text_save, mutatesText = false)
+        R.id.undo -> historyAction(ACTION_UNDO, R.string.text_undo, mutatesText = true)
+        R.id.redo -> historyAction(ACTION_REDO, R.string.text_redo, mutatesText = true)
+        R.id.find_next -> historyAction(ACTION_FIND_NEXT, R.string.text_find_next_simplified, mutatesText = false)
+        R.id.find_prev -> historyAction(ACTION_FIND_PREV, R.string.text_find_prev_simplified, mutatesText = false)
+        R.id.cancel_search -> historyAction(ACTION_CANCEL_SEARCH, R.string.text_cancel, mutatesText = false)
+        R.id.replace -> historyAction(ACTION_REPLACE_SELECTION, R.string.text_replace, mutatesText = true)
+        else -> null
+    }
+
+    private fun actionForMenuItem(itemId: Int): AceActionHistoryStore.Action? = when (itemId) {
+        R.id.action_force_stop -> historyAction(ACTION_FORCE_STOP, R.string.text_force_stop, mutatesText = false)
+        R.id.action_copy_all -> historyAction(ACTION_COPY_ALL, R.string.text_copy_all, mutatesText = false)
+        R.id.action_copy_line -> historyAction(ACTION_COPY_LINE, R.string.text_copy_line, mutatesText = false)
+        R.id.action_paste -> historyAction(ACTION_PASTE, R.string.text_paste, mutatesText = true)
+        R.id.action_delete_line -> historyAction(ACTION_DELETE_LINE, R.string.text_delete_line, mutatesText = true)
+        R.id.action_clear -> historyAction(ACTION_CLEAR, R.string.text_clear, mutatesText = true)
+        R.id.action_comment -> historyAction(ACTION_TOGGLE_COMMENT, R.string.text_comment, mutatesText = true)
+        R.id.action_beautify -> historyAction(ACTION_BEAUTIFY, R.string.text_code_beautify, mutatesText = true)
+        R.id.action_jump_to_start -> historyAction(ACTION_JUMP_TO_START, R.string.text_jump_to_start, mutatesText = false)
+        R.id.action_jump_to_end -> historyAction(ACTION_JUMP_TO_END, R.string.text_jump_to_end, mutatesText = false)
+        R.id.action_jump_to_line_start -> historyAction(ACTION_JUMP_TO_LINE_START, R.string.text_jump_to_line_start, mutatesText = false)
+        R.id.action_jump_to_line_end -> historyAction(ACTION_JUMP_TO_LINE_END, R.string.text_jump_to_line_end, mutatesText = false)
+        R.id.action_breakpoint -> historyAction(ACTION_TOGGLE_BREAKPOINT, R.string.text_set_breakpoint, mutatesText = false)
+        R.id.action_launch_debugger -> historyAction(ACTION_DEBUG, R.string.text_launch_debugger, mutatesText = false)
+        R.id.action_remove_all_breakpoints -> historyAction(ACTION_REMOVE_ALL_BREAKPOINTS, R.string.text_remove_all_breakpoints, mutatesText = false)
+        R.id.action_log -> historyAction(ACTION_LOG, R.string.text_log, mutatesText = false)
+        R.id.action_editor_settings -> historyAction(ACTION_SETTINGS, R.string.text_settings, mutatesText = false)
+        R.id.action_console -> historyAction(ACTION_CONSOLE, R.string.text_console, mutatesText = false)
+        R.id.action_ace_read_only_mode -> historyAction(ACTION_READ_ONLY, R.string.text_ace_read_only_mode, mutatesText = false)
+        R.id.action_copy_ace_diagnostics -> historyAction(ACTION_COPY_ACE_DIAGNOSTICS, R.string.text_copy_ace_diagnostics, mutatesText = false)
+        R.id.action_open_by_other_apps -> historyAction(ACTION_OPEN_BY_OTHER_APPS, R.string.text_open_by_other_apps, mutatesText = false)
+        R.id.action_version_history -> historyAction(ACTION_VERSION_HISTORY, R.string.text_version_history, mutatesText = false)
+        else -> null
+    }
+
+    private fun historyAction(
+        id: String,
+        @StringRes labelResId: Int,
+        mutatesText: Boolean,
+    ) = AceActionHistoryStore.Action(
+        id = id,
+        label = context.getString(labelResId),
+        mutatesText = mutatesText,
+    )
+
+    private fun copyAllToClipboard() {
+        ClipboardUtils.setClip(context, editor.text)
+        showSnack(this, R.string.text_already_copied_to_clip)
+    }
+
+    private fun pasteFromClipboard() {
+        ClipboardUtils.getClip(context)?.let { mCommandDispatcher.insert(it) }
     }
 
     private fun executeAceShortcutAction(
@@ -2902,5 +3050,36 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         const val EXTRA_READ_ONLY = "readOnly"
         const val EXTRA_SAVE_ENABLED = "saveEnabled"
         const val EXTRA_RUN_ENABLED = "runEnabled"
+
+        private const val ACTION_RUN = "editor:run"
+        private const val ACTION_FORCE_STOP = "editor:force_stop"
+        private const val ACTION_SAVE = "editor:save"
+        private const val ACTION_UNDO = "editor:undo"
+        private const val ACTION_REDO = "editor:redo"
+        private const val ACTION_FIND_NEXT = "editor:find_next"
+        private const val ACTION_FIND_PREV = "editor:find_prev"
+        private const val ACTION_CANCEL_SEARCH = "editor:cancel_search"
+        private const val ACTION_REPLACE_SELECTION = "editor:replace_selection"
+        private const val ACTION_COPY_ALL = "editor:copy_all"
+        private const val ACTION_COPY_LINE = "editor:copy_line"
+        private const val ACTION_PASTE = "editor:paste"
+        private const val ACTION_DELETE_LINE = "editor:delete_line"
+        private const val ACTION_CLEAR = "editor:clear"
+        private const val ACTION_TOGGLE_COMMENT = "editor:toggle_comment"
+        private const val ACTION_BEAUTIFY = "editor:beautify"
+        private const val ACTION_JUMP_TO_START = "editor:jump_to_start"
+        private const val ACTION_JUMP_TO_END = "editor:jump_to_end"
+        private const val ACTION_JUMP_TO_LINE_START = "editor:jump_to_line_start"
+        private const val ACTION_JUMP_TO_LINE_END = "editor:jump_to_line_end"
+        private const val ACTION_TOGGLE_BREAKPOINT = "editor:toggle_breakpoint"
+        private const val ACTION_DEBUG = "editor:debug"
+        private const val ACTION_REMOVE_ALL_BREAKPOINTS = "editor:remove_all_breakpoints"
+        private const val ACTION_LOG = "editor:log"
+        private const val ACTION_SETTINGS = "editor:settings"
+        private const val ACTION_CONSOLE = "editor:console"
+        private const val ACTION_READ_ONLY = "editor:read_only"
+        private const val ACTION_COPY_ACE_DIAGNOSTICS = "editor:copy_ace_diagnostics"
+        private const val ACTION_OPEN_BY_OTHER_APPS = "editor:open_by_other_apps"
+        private const val ACTION_VERSION_HISTORY = "editor:version_history"
     }
 }

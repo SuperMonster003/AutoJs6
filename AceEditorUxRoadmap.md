@@ -130,6 +130,8 @@ Acceptance:
 - [x] Replace the Pro-style lower-left figure icon with a star action-favorites
   entry.
 - [x] Track action history by recency and frequency.
+- [x] Generalize action history beyond shortcut-panel commands and record the
+  top toolbar plus first batch of direct editor overflow menu actions.
 - [x] Support pinned actions, manual reorder, left-swipe delete, right-swipe pin
   or unpin, and clear confirmation.
 - [x] Long-press the star to repeat the last command, independent of favorites
@@ -188,6 +190,10 @@ Notes:
   pinned editor actions.
 - [x] Keep the latest unpinned action immediately below pinned favorites before
   falling back to frequency and recency ranking.
+- [x] Extend action favorites beyond the shortcut panel to top-toolbar actions
+  and directly replayable editor overflow actions.
+- [ ] Add parameterized favorites for open-ended actions such as Jump to line,
+  Find / Replace, build packaging, file details, and Java class import.
 - [x] Add a standalone Code editor settings page and an in-editor settings
   dialog using the same content model.
 - [ ] Move the in-editor settings dialog to a fragment-safe MaterialDialog path.
@@ -270,6 +276,10 @@ Notes:
 - Action favorites now use a hollow star entry point and the supplied
   thumbtack icon for pinned actions. The latest unpinned action is ranked first
   below pinned entries, then the existing frequency/recency ranking applies.
+- Action history now stores generic editor actions with mutation metadata, so
+  the favorites dialog can replay shortcut-panel commands, toolbar commands,
+  and the first batch of direct overflow-menu commands through the same
+  ranking, pinning, deletion, and repeat-last-command flow.
 - The visible wrap-indentation chooser now offers only continuation indent and
   flush continuation. The old `default` key remains accepted for persisted
   compatibility but is no longer offered as a separate option.
