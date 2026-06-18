@@ -16,7 +16,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
-import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ContextUtils.findActivity
 import org.autojs.autojs6.R
@@ -57,7 +56,7 @@ class CodeEditorSettingsDialog : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return MaterialDialog.Builder(requireContext()).build().apply {
+        return super.onCreateDialog(savedInstanceState).apply {
             setCanceledOnTouchOutside(true)
         }
     }

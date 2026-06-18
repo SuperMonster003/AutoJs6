@@ -277,7 +277,11 @@ assertIncludes(
   "setPreferenceAvailable(R.string.key_editor_word_wrap_indent_style, aceSelected, R.string.summary_editor_word_wrap_indent_style)",
   "word wrap indentation style disabled outside ACE",
 );
-assertIncludes(FILES.codeEditorSettingsDialog, "MaterialDialog.Builder(requireContext()).build()", "in-editor settings dialog uses MaterialDialog");
+assertNotIncludes(
+  FILES.codeEditorSettingsDialog,
+  "MaterialDialog.Builder(requireContext()).build()",
+  "MaterialDialog cannot back DialogFragment view content directly",
+);
 assertIncludes(FILES.codeEditorSettingsDialog, "CodeEditorSettingsFragment.newInstance(embeddedInDialog = true)", "in-editor settings dialog uses shared settings fragment");
 assertIncludes(FILES.editorMenuHandler, "CodeEditorSettingsDialog.show(mContext)", "editor settings menu opens in-editor settings dialog");
 assertMatch(
