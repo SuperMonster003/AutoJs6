@@ -438,7 +438,7 @@ and updated alongside commits.
    - [x] Apply editor font changes immediately where feasible.
    - [x] Apply editor font-size changes immediately where feasible.
    - [x] Preserve dynamic gutter-width behavior when ACE word wrap is enabled.
-   - [ ] Improve disabled unsupported-option visuals and hints consistently on
+   - [x] Improve disabled unsupported-option visuals and hints consistently on
      both settings surfaces.
 
 19. Clear undo/redo

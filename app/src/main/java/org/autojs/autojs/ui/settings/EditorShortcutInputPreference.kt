@@ -19,6 +19,9 @@ class EditorShortcutInputPreference : MaterialPreference {
     constructor(context: Context) : super(context)
 
     override fun onClick() {
+        if (handleUnavailableClickIfNeeded()) {
+            return
+        }
         Intent(prefContext, SymbolsSettingsActivity::class.java).startSafely(prefContext, true) {
             ViewUtils.showToast(prefContext, it.message, true)
             Unit

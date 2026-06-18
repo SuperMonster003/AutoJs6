@@ -41,6 +41,9 @@ class EditorThemePreference : MaterialPreference {
 
     @SuppressLint("CheckResult")
     override fun onClick() {
+        if (handleUnavailableClickIfNeeded()) {
+            return
+        }
         Themes.getAllThemes(prefContext)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

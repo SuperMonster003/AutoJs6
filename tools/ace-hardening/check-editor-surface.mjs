@@ -119,6 +119,19 @@ const EDITOR_PINCH_TO_ZOOM_PREFERENCE_PATH = path.join(
   "settings",
   "EditorPinchToZoomPreference.kt",
 );
+const MATERIAL_PREFERENCE_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "theme",
+  "preference",
+  "MaterialPreference.kt",
+);
 const CODE_COMPLETION_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -343,6 +356,7 @@ const codeEditText = read(CODE_EDIT_TEXT_PATH);
 const editorMenu = read(EDITOR_MENU_PATH);
 const editorView = read(EDITOR_VIEW_PATH);
 const editorPinchToZoomPreference = read(EDITOR_PINCH_TO_ZOOM_PREFERENCE_PATH);
+const materialPreference = read(MATERIAL_PREFERENCE_PATH);
 const codeCompletion = read(CODE_COMPLETION_PATH);
 const codeCompletionBar = read(CODE_COMPLETION_BAR_PATH);
 const aceShortcutPanel = read(ACE_SHORTCUT_PANEL_PATH);
@@ -736,8 +750,15 @@ assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_
 assertIncludes(codeEditorSettingsFragment, "setPreferenceAvailable(R.string.key_editor_gutter_width_mode, aceSelected", "editor settings disables gutter width mode for non-Ace engines");
 assertIncludes(codeEditorSettingsFragment, "EditorDisplayPreferences.setWordWrapEnabled(false)", "editor settings normalizes native word wrap value");
 assertIncludes(codeEditorSettingsFragment, "EditorDisplayPreferences.setGutterWidthMode(EditorDisplayPreferences.GUTTER_WIDTH_MODE_FIXED)", "editor settings normalizes native gutter width value");
+assertIncludes(codeEditorSettingsFragment, "isEnabled = available || this !is SwitchPreference", "editor settings keep non-switch unavailable items clickable for feedback");
+assertIncludes(codeEditorSettingsFragment, "showUnavailableEditorSettingHint", "editor settings show unavailable-option feedback");
+assertIncludes(codeEditorSettingsFragment, "ViewUtils.showSnack(requireView(), message)", "editor settings dialog uses snackbar for unavailable options");
+assertIncludes(codeEditorSettingsFragment, "ViewUtils.showToast(requireContext(), message)", "standalone editor settings page uses toast for unavailable options");
 assertIncludes(codeEditorSettingsFragment, "recordAceSettingAction", "editor settings records open-ended setting actions");
 assertIncludes(codeEditorSettingsFragment, "EditorSettingActionRegistry.actionIdForPreferenceKey", "editor settings records stable setting action ids");
+assertIncludes(materialPreference, "setAvailableForCurrentContext", "material preference supports contextual unavailable visual state");
+assertIncludes(materialPreference, "holder.itemView.alpha = if (availableForCurrentContext)", "material preference dims unavailable non-switch rows");
+assertIncludes(materialPreference, "handleUnavailableClickIfNeeded", "material preference intercepts unavailable non-switch clicks");
 assertIncludes(editorSettingActionRegistry, "ACTION_ID_PREFIX = \"editor_setting:\"", "editor setting actions use stable id prefix");
 assertIncludes(editorSettingActionRegistry, "R.string.key_editor_engine", "editor engine setting action is registered");
 assertIncludes(editorSettingActionRegistry, "R.string.key_ace_word_wrap_enabled", "word wrap setting action is registered");

@@ -13,6 +13,8 @@ open class MaterialPreference : androidx.preference.Preference, LongClickablePre
     override val prefContext: Context = context
     override var longClickPrompt: CharSequence? = null
     override var longClickPromptMore: CharSequence? = null
+    private var availableForCurrentContext = true
+    private var unavailableClickHandler: (() -> Unit)? = null
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init(context, attrs, defStyleAttr, defStyleRes)
@@ -40,7 +42,25 @@ open class MaterialPreference : androidx.preference.Preference, LongClickablePre
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
+        holder.itemView.alpha = if (availableForCurrentContext) 1f else UNAVAILABLE_ALPHA
         DialogUtils.applyLongClickability(this, holder)
+    }
+
+    fun setAvailableForCurrentContext(
+        available: Boolean,
+        onUnavailableClick: (() -> Unit)? = null,
+    ) {
+        availableForCurrentContext = available
+        unavailableClickHandler = onUnavailableClick
+        notifyChanged()
+    }
+
+    protected fun handleUnavailableClickIfNeeded(): Boolean {
+        if (availableForCurrentContext) {
+            return false
+        }
+        unavailableClickHandler?.invoke()
+        return true
     }
 
     protected fun obtainStyledAttrs(context: Context, set: AttributeSet?, styleableRes: IntArray, defStyleAttr: Int, defStyleRes: Int): TypedArray {
@@ -52,5 +72,9 @@ open class MaterialPreference : androidx.preference.Preference, LongClickablePre
     protected fun getAttrTextArray(a: TypedArray, index: Int): Array<CharSequence>? = a.getTextArray(index)
 
     protected fun getAttrColor(a: TypedArray, index: Int): Int? = a.getColor(index, -1)
+
+    companion object {
+        private const val UNAVAILABLE_ALPHA = 0.58f
+    }
 
 }

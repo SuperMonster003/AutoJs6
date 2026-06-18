@@ -34,6 +34,9 @@ class EditorTextSizePreference : MaterialPreference {
     }
 
     override fun onClick() {
+        if (handleUnavailableClickIfNeeded()) {
+            return
+        }
         DialogUtils.buildAndShowAdaptive {
             TextSizeSettingDialogBuilder(prefContext)
                 .initialValue(currentValue())

@@ -37,6 +37,9 @@ class EditorPinchToZoomPreference : MaterialPreference {
     }
 
     override fun onClick() {
+        if (handleUnavailableClickIfNeeded()) {
+            return
+        }
         val itemKeys = keys()
         val disabledIndices = disabledIndices(itemKeys)
         DialogUtils.buildAndShowAdaptive {

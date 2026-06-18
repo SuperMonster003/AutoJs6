@@ -7,21 +7,25 @@ import android.widget.EdgeEffect
 import androidx.annotation.StringRes
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.preference.MaterialListPreference
+import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 import org.autojs.autojs.ui.edit.keyboard.AceActionHistoryStore
 import org.autojs.autojs.util.StringUtils.key
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
 import org.autojs.autojs6.R
 
 class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var suppressedPreferenceActionKey: String? = null
+    private val unavailablePreferenceKeys = mutableSetOf<String>()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_code_editor_settings, rootKey)
@@ -78,7 +82,11 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         listView.post {
             findPreference<Preference>(preferenceKey)?.let { preference ->
                 scrollToPreference(preference)
-                preference.performClick()
+                if (preferenceKey in unavailablePreferenceKeys && preference !is MaterialPreference) {
+                    showUnavailableEditorSettingHint(getString(R.string.summary_editor_setting_unavailable_for_current_engine))
+                } else {
+                    preference.performClick()
+                }
             }
         }
     }
@@ -92,6 +100,9 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
             return
         }
         val preferenceKey = preference.key ?: return
+        if (preferenceKey in unavailablePreferenceKeys) {
+            return
+        }
         if (!EditorSettingActionRegistry.isKnownPreferenceKey(requireContext(), preferenceKey)) {
             return
         }
@@ -140,19 +151,41 @@ class CodeEditorSettingsFragment : PreferenceFragmentCompat(), SharedPreferences
         @StringRes enabledSummaryRes: Int? = null,
     ) {
         findPreference<Preference>(getString(keyRes))?.apply {
-            isEnabled = available
-            if (enabledSummaryRes != null) {
-                val summaryRes = if (available) enabledSummaryRes else R.string.summary_editor_setting_unavailable_for_current_engine
-                if (this is MaterialListPreference) {
-                    if (available) {
-                        useEntrySummaryProvider()
-                    } else {
-                        useStaticSummaryProvider(getString(summaryRes))
-                    }
-                } else {
-                    summary = getString(summaryRes)
+            val preferenceKey = key ?: return@apply
+            val unavailableSummary = getString(R.string.summary_editor_setting_unavailable_for_current_engine)
+            if (available) {
+                unavailablePreferenceKeys.remove(preferenceKey)
+            } else {
+                unavailablePreferenceKeys.add(preferenceKey)
+            }
+
+            isEnabled = available || this !is SwitchPreference
+            isSelectable = available || this !is SwitchPreference
+            if (this is MaterialPreference) {
+                setAvailableForCurrentContext(available) {
+                    showUnavailableEditorSettingHint(unavailableSummary)
                 }
             }
+
+            if (this is MaterialListPreference) {
+                if (available) {
+                    useEntrySummaryProvider()
+                } else {
+                    useStaticSummaryProvider(unavailableSummary)
+                }
+            } else if (enabledSummaryRes != null) {
+                summary = if (available) getString(enabledSummaryRes) else unavailableSummary
+            } else if (!available) {
+                summary = unavailableSummary
+            }
+        }
+    }
+
+    private fun showUnavailableEditorSettingHint(message: CharSequence) {
+        if (embeddedInDialog) {
+            ViewUtils.showSnack(requireView(), message)
+        } else {
+            ViewUtils.showToast(requireContext(), message)
         }
     }
 
