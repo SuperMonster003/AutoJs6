@@ -503,8 +503,22 @@ assertIncludes(bridge, "setLineNumbersEnabled: setLineNumbersEnabled", "ACE line
 assertIncludes(bridge, "setBreakpointMarkersEnabled: setBreakpointMarkersEnabled", "ACE breakpoint marker runtime API");
 assertIncludes(bridge, "setFoldMarkersEnabled: setFoldMarkersEnabled", "ACE fold marker runtime API");
 assertIncludes(bridge, "setGutterWidthMode: setGutterWidthMode", "ACE gutter width mode runtime API");
+assertIncludes(bridge, "function applyFontSizeSp(size)", "ACE font-size helper without implicit resize");
+assertIncludes(bridge, "function scrollToPosition(scrollLeft, scrollTop)", "ACE programmatic scroll state sync helper");
+assertIncludes(bridge, "session.setScrollLeft(nextLeft)", "ACE focus-preserving zoom syncs horizontal session scroll");
+assertIncludes(bridge, "session.setScrollTop(nextTop)", "ACE focus-preserving zoom syncs vertical session scroll");
+assertIncludes(bridge, "function resizeForFocusPreservingFontSize(reason)", "ACE focus-preserving zoom resize avoids cursor reveal");
 assertIncludes(bridge, "function setFontSizeSpKeepingFocus", "ACE focus-preserving zoom helper");
+assertIncludes(bridge, 'resizeForFocusPreservingFontSize("font_size_focus_before_scroll")', "ACE focus-preserving zoom resizes before anchor scroll");
+assertIncludes(bridge, 'resizeForFocusPreservingFontSize("font_size_focus_after_scroll")', "ACE focus-preserving zoom resizes after anchor scroll");
 assertIncludes(bridge, "setFontSizeSpKeepingFocus: setFontSizeSpKeepingFocus", "ACE focus-preserving zoom public API");
+const focusZoomFunction = bridge.slice(
+  bridge.indexOf("function setFontSizeSpKeepingFocus"),
+  bridge.indexOf("function setFontFamily"),
+);
+if (focusZoomFunction.includes('scheduleResize("font_size_changed")')) {
+  throw new Error("ACE focus-preserving zoom must not schedule cursor-revealing font-size resize");
+}
 assertIncludes(bridge, "function insertTab()", "ACE shortcut TAB helper");
 assertIncludes(bridge, "function isCompletionPopupOpen()", "ACE completion popup state helper");
 assertIncludes(bridge, "function moveCompletionSelectionOrCursor(delta)", "ACE completion selection shortcut helper");

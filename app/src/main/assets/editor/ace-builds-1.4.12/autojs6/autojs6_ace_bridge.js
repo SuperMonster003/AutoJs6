@@ -1292,28 +1292,71 @@
         notifyStateChanged("themeChanged");
     }
 
-    function setFontSizeSp(size) {
+    function applyFontSizeSp(size) {
         var sp = Math.max(8, Math.min(Number(size) || 14, 40));
         editor.setFontSize(sp + "px");
+        return sp;
+    }
+
+    function setFontSizeSp(size) {
+        applyFontSizeSp(size);
         scheduleResize("font_size_changed");
         notifyStateChanged("fontSizeChanged");
+    }
+
+    function currentScrollLeft() {
+        if (session && session.getScrollLeft) {
+            return Number(session.getScrollLeft()) || 0;
+        }
+        return editor && editor.renderer ? (Number(editor.renderer.scrollLeft) || 0) : 0;
+    }
+
+    function currentScrollTop() {
+        if (session && session.getScrollTop) {
+            return Number(session.getScrollTop()) || 0;
+        }
+        return editor && editor.renderer ? (Number(editor.renderer.scrollTop) || 0) : 0;
+    }
+
+    function scrollToPosition(scrollLeft, scrollTop) {
+        if (!editor || !editor.renderer) {
+            return;
+        }
+        var renderer = editor.renderer;
+        var nextLeft = Math.max(0, Number(scrollLeft) || 0);
+        var nextTop = Math.max(0, Number(scrollTop) || 0);
+        programmaticScrollUntil = Date.now() + 300;
+        if (session && session.setScrollLeft) {
+            session.setScrollLeft(nextLeft);
+        } else if (renderer.scrollToX) {
+            renderer.scrollToX(nextLeft);
+        }
+        if (session && session.setScrollTop) {
+            session.setScrollTop(nextTop);
+        } else if (renderer.scrollToY) {
+            renderer.scrollToY(nextTop);
+        }
     }
 
     function scrollByDelta(deltaX, deltaY) {
         if (!editor || !editor.renderer) {
             return;
         }
-        var renderer = editor.renderer;
-        if (renderer.scrollToX) {
-            renderer.scrollToX(Math.max(0, (Number(renderer.scrollLeft) || 0) + (Number(deltaX) || 0)));
+        scrollToPosition(
+            currentScrollLeft() + (Number(deltaX) || 0),
+            currentScrollTop() + (Number(deltaY) || 0)
+        );
+    }
+
+    function resizeForFocusPreservingFontSize(reason) {
+        if (!editor || !editor.resize) {
+            return;
         }
-        var currentTop = session && session.getScrollTop ? session.getScrollTop() : (Number(renderer.scrollTop) || 0);
-        var nextTop = Math.max(0, currentTop + (Number(deltaY) || 0));
-        if (renderer.scrollToY) {
-            renderer.scrollToY(nextTop);
-        } else if (session && session.setScrollTop) {
-            session.setScrollTop(nextTop);
-        }
+        editor.resize(true);
+        callBridge("notifyEvent", [
+            "resizeDone",
+            JSON.stringify({ reason: String(reason || "font_size_focus_changed") })
+        ]);
     }
 
     function setFontSizeSpKeepingFocus(size, focusX, focusY) {
@@ -1329,12 +1372,11 @@
             return;
         }
         var anchor = renderer.screenToTextCoordinates(x, y);
-        setFontSizeSp(size);
-        if (editor.resize) {
-            editor.resize(true);
-        }
+        applyFontSizeSp(size);
+        resizeForFocusPreservingFontSize("font_size_focus_before_scroll");
         var after = renderer.textToScreenCoordinates(anchor.row, anchor.column);
         scrollByDelta(after.pageX - x, after.pageY - y);
+        resizeForFocusPreservingFontSize("font_size_focus_after_scroll");
         notifyStateChanged("fontSizeFocusChanged");
     }
 
