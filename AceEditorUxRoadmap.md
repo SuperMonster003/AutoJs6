@@ -190,6 +190,8 @@ Notes:
   falling back to frequency and recency ranking.
 - [x] Add a standalone Code editor settings page and an in-editor settings
   dialog using the same content model.
+- [x] Back the in-editor settings dialog with AutoJs6 MaterialDialog styling
+  while keeping the settings fragment as the shared content source.
 - [x] Reorganize global settings and editor overflow menus so top-level editor
   settings stay concise and advanced options move into the dedicated page or
   dialog.
@@ -236,7 +238,8 @@ Notes:
   panel, and an All settings entry. The editor overflow menu now keeps only
   common editor actions at the top level and moves advanced editor preferences
   behind the Settings entry; the in-editor settings dialog embeds the same
-  settings fragment as the standalone page.
+  settings fragment as the standalone page and is backed by MaterialDialog for
+  project-consistent dialog styling.
 - Settings labels now avoid exposing the ACE implementation name on the
   dedicated settings surface. Engine-specific preferences stay visible but
   disabled with a current-engine availability hint when they do not apply.
