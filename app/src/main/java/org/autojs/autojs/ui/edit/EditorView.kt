@@ -503,9 +503,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         EditorDisplayPreferences.KEY_GUTTER_WIDTH_MODE,
     )
 
-    private val mEditorDisplayPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key in mEditorDisplayPreferenceKeys) {
-            post { editor.notifyDisplayPreferencesChanged() }
+    private val mEditorPreferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+        when (changedKey) {
+            in mEditorDisplayPreferenceKeys -> post { editor.notifyDisplayPreferencesChanged() }
+            key(R.string.key_editor_text_size),
+            key(R.string.key_ace_editor_font),
+                -> post { themeFontService.applyEditorPreferences() }
+            key(R.string.key_editor_theme) -> post { applyCurrentEditorThemePreference() }
         }
     }
 
@@ -562,7 +566,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED))
         }
         registerFunctionsKeyboardBackHandler()
-        Pref.get().registerOnSharedPreferenceChangeListener(mEditorDisplayPreferenceChangeListener)
+        Pref.get().registerOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
     }
 
     fun handleIntent(intent: Intent): Observable<String> {
@@ -937,7 +941,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         super.onDetachedFromWindow()
         context.unregisterReceiver(mOnRunFinishedReceiver)
         unregisterFunctionsKeyboardBackHandler()
-        Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorDisplayPreferenceChangeListener)
+        Pref.get().unregisterOnSharedPreferenceChangeListener(mEditorPreferenceChangeListener)
     }
 
     fun getPreferredSearchQueryForDialogOrNull(): String? =
@@ -1935,6 +1939,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun setTheme(theme: Theme?) {
         themeFontService.applyTheme(theme)
+    }
+
+    @SuppressLint("CheckResult")
+    private fun applyCurrentEditorThemePreference() {
+        themeFontService.loadCurrentTheme()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ theme -> setTheme(theme) }) { error ->
+                showToast(context, error.message ?: error.toString(), true)
+            }
     }
 
     fun onBackPressed(): Boolean {

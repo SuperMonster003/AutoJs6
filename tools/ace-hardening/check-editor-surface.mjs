@@ -617,6 +617,11 @@ assertIncludes(editorView, "executeAceShortcutAction(it, record = false)", "ACE 
 assertIncludes(editorView, "jumpWithAceShortcutReturnPoint", "ACE shortcut long-press return point");
 assertIncludes(editorView, "EditorDisplayPreferences.KEY_WORD_WRAP_INDENT_STYLE", "editor display preference live listener includes word wrap indentation");
 assertIncludes(editorView, "editor.notifyDisplayPreferencesChanged()", "editor display preference changes apply to current engine");
+assertIncludes(editorView, "key(R.string.key_ace_editor_font)", "editor font preference changes apply to current ACE editor");
+assertIncludes(editorView, "key(R.string.key_editor_text_size)", "editor text-size preference changes apply to current editor");
+assertIncludes(editorView, "key(R.string.key_editor_theme)", "editor theme preference changes apply to current editor");
+assertIncludes(editorView, "themeFontService.applyEditorPreferences()", "editor font/text-size live preference applier");
+assertIncludes(editorView, "applyCurrentEditorThemePreference", "editor theme live preference applier");
 assertIncludes(editorView, "toggleAceShortcutReturnPoint", "ACE shortcut TAB return toggle");
 assertIncludes(editorView, "showAceActionHistoryDialog", "ACE action history dialog");
 assertIncludes(editorView, "repeatLastAceAction", "ACE repeat last action handler");

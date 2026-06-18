@@ -434,9 +434,9 @@ and updated alongside commits.
    - [x] Use a fragment-safe MaterialDialog host for the in-editor settings
      dialog.
    - [ ] Apply editor engine changes immediately where feasible.
-   - [ ] Apply editor theme changes immediately where feasible.
-   - [ ] Apply editor font changes immediately where feasible.
-   - [ ] Apply editor font-size changes immediately where feasible.
+   - [x] Apply editor theme changes immediately where feasible.
+   - [x] Apply editor font changes immediately where feasible.
+   - [x] Apply editor font-size changes immediately where feasible.
    - [ ] Preserve dynamic gutter-width behavior when ACE word wrap is enabled.
    - [ ] Improve disabled unsupported-option visuals and hints consistently on
      both settings surfaces.
