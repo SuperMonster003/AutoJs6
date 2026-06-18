@@ -633,6 +633,16 @@ assertIncludes(aceCodeEditor, "KeyEvent.KEYCODE_DPAD_RIGHT", "ACE soft-keyboard 
 assertIncludes(aceCodeEditor, "KeyEvent.FLAG_SOFT_KEYBOARD", "ACE soft-keyboard cursor source guard");
 assertIncludes(aceCodeEditor, "startingHostSelectionActionMode", "ACE host-owned action-mode guard");
 assertIncludes(aceCodeEditor, "pendingSelectionActionModeRequest", "ACE touch-deferred action mode request");
+assertIncludes(aceCodeEditor, "restoreSelectionActionModeRunnable", "ACE selection action-mode restore runnable");
+assertIncludes(aceCodeEditor, "lastSelectionActionModeRequest", "ACE remembers last selection action-mode request");
+assertIncludes(aceCodeEditor, "selectionActionModeExpectedFinish", "ACE distinguishes expected action-mode finishes");
+assertIncludes(aceCodeEditor, "cancelSelectionActionModeRestore", "ACE cancels stale action-mode restore callbacks");
+assertIncludes(aceCodeEditor, "stabilizeSelectionActionModeAfterTouch", "ACE post-touch action-mode stabilization");
+assertIncludes(aceCodeEditor, "maybeRestoreUnexpectedSelectionActionModeAfterTouch", "ACE unexpected action-mode finish restore guard");
+assertIncludes(aceCodeEditor, "restoreUnexpectedSelectionActionModeAfterTouch", "ACE unexpected action-mode restore helper");
+assertIncludes(aceCodeEditor, '"action_mode_restore_after_touch"', "ACE action-mode restore diagnostics");
+assertIncludes(aceCodeEditor, "ACTION_MODE_POST_TOUCH_STABILIZE_MS", "ACE action-mode post-touch stabilization window");
+assertIncludes(aceCodeEditor, "ACTION_MODE_RESTORE_AFTER_TOUCH_DELAY_MS", "ACE action-mode restore delay");
 assertIncludes(aceCodeEditor, "hasRecentTextTouchAnchor", "ACE touch-anchored action-mode rect");
 assertIncludes(aceCodeEditor, "isProbablyInvalidActionModeRect", "ACE action-mode invalid rect guard");
 assertIncludes(aceCodeEditor, "setFallbackSelectionActionModeRect", "ACE action-mode non-zero fallback rect");

@@ -65,7 +65,7 @@ Acceptance:
 
 Acceptance:
 
-- [ ] Selection-drag menus stay anchored and stable after the user lifts their
+- [x] Selection-drag menus stay anchored and stable after the user lifts their
   finger.
 - [ ] Right-edge system-back gestures close IME or editor without triggering
   ACE long-press selection/haptic feedback on Sony XQ-AT72 when technically
@@ -86,6 +86,11 @@ Notes:
   system-gesture inset so ACE does not start long-press selection from that
   edge sequence; manual Sony verification is still required for the acceptance
   gate.
+- Long-press selection drag now gives Android's floating `ActionMode` a short
+  post-touch stabilization window. If the platform dismisses the menu
+  unexpectedly after finger-up while the ACE selection remains active, AutoJs6
+  restores the host-owned menu once; explicit copy/paste/delete/cancel paths
+  still finish it normally.
 
 ## Gate UX-3: Input, Keyboard, And Read-Only Mode
 
@@ -342,7 +347,7 @@ and updated alongside commits.
    - [x] Suppress short-menu interference during double-tap and long-press.
    - [x] Keep double-tap and normal long-press menus near the selection instead
      of the upper-left editor area.
-   - [ ] Keep the long menu visible after dragging a long-press selection range
+   - [x] Keep the long menu visible after dragging a long-press selection range
      and lifting the finger.
 
 4. Fold placeholder and gutter folding

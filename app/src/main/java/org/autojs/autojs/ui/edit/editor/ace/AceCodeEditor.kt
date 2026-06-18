@@ -92,6 +92,9 @@ class AceCodeEditor @JvmOverloads constructor(
     private val pendingSelectionActionModeRunnable = Runnable {
         flushPendingSelectionActionModeRequest()
     }
+    private val restoreSelectionActionModeRunnable = Runnable {
+        restoreUnexpectedSelectionActionModeAfterTouch()
+    }
     private val imeSettleRunnable = Runnable {
         scheduleAceResize("ime_settle", RESIZE_SETTLE_DELAY_MS)
         healthMonitor.resumeHeartbeat()
@@ -188,6 +191,10 @@ class AceCodeEditor @JvmOverloads constructor(
     private val selectionActionModeRect = Rect()
     private var startingHostSelectionActionMode = false
     private var pendingSelectionActionModeRequest: SelectionActionModeRequest? = null
+    private var lastSelectionActionModeRequest: SelectionActionModeRequest? = null
+    private var selectionActionModeExpectedFinish = false
+    private var selectionActionModeStabilizeUntilUptimeMillis = 0L
+    private var selectionActionModeStabilizeRestarted = false
     private var pendingImeCursorDelta = 0
     private var lastTextTouchX = -1f
     private var lastTextTouchY = -1f
@@ -752,6 +759,8 @@ class AceCodeEditor @JvmOverloads constructor(
         mainHandler.removeCallbacks(mirrorCalibrationRunnable)
         mainHandler.removeCallbacks(scheduledResizeRunnable)
         mainHandler.removeCallbacks(imeSettleRunnable)
+        mainHandler.removeCallbacks(pendingSelectionActionModeRunnable)
+        mainHandler.removeCallbacks(restoreSelectionActionModeRunnable)
         pendingScripts.clear()
         webView.stopLoading()
         runCatching { webView.removeJavascriptInterface(JS_BRIDGE_NAME) }
@@ -1129,6 +1138,8 @@ class AceCodeEditor @JvmOverloads constructor(
             finishSelectionActionMode()
             return
         }
+        lastSelectionActionModeRequest = request
+        selectionActionModeExpectedFinish = false
         actionModeActive = true
         lastActionModeAtUptimeMillis = SystemClock.uptimeMillis()
         healthMonitor.markStateEvent()
@@ -1223,13 +1234,13 @@ class AceCodeEditor @JvmOverloads constructor(
                     ACTION_MODE_COPY -> {
                         copySelectedTextToClipboard()
                         listener?.onSelectionAction(SelectionAction.Copy)
-                        mode.finish()
+                        finishSelectionActionModeForMenuItem(mode)
                         true
                     }
                     ACTION_MODE_PASTE -> {
                         pasteClipboardIntoSelection()
                         listener?.onSelectionAction(SelectionAction.Paste)
-                        mode.finish()
+                        finishSelectionActionModeForMenuItem(mode)
                         true
                     }
                     ACTION_MODE_SELECT_ALL -> {
@@ -1241,13 +1252,13 @@ class AceCodeEditor @JvmOverloads constructor(
                     R.id.action_delete_line -> {
                         deleteLine()
                         listener?.onSelectionAction(SelectionAction.DeleteLine)
-                        mode.finish()
+                        finishSelectionActionModeForMenuItem(mode)
                         true
                     }
                     R.id.action_copy_line -> {
                         copyCurrentLineToClipboard()
                         listener?.onSelectionAction(SelectionAction.CopyLine)
-                        mode.finish()
+                        finishSelectionActionModeForMenuItem(mode)
                         true
                     }
                     else -> false
@@ -1255,7 +1266,9 @@ class AceCodeEditor @JvmOverloads constructor(
             }
 
             override fun onDestroyActionMode(mode: ActionMode) {
-                markSelectionActionModeFinished(mode)
+                val expected = selectionActionModeExpectedFinish
+                selectionActionModeExpectedFinish = false
+                markSelectionActionModeFinished(mode, expected)
             }
 
             override fun onGetContentRect(mode: ActionMode, view: View, outRect: Rect) {
@@ -1364,15 +1377,27 @@ class AceCodeEditor @JvmOverloads constructor(
     private fun finishSelectionActionMode() {
         val mode = selectionActionMode
         if (mode != null) {
+            selectionActionModeExpectedFinish = true
             mode.finish()
             return
         }
-        markSelectionActionModeFinished()
+        markSelectionActionModeFinished(expected = true)
     }
 
-    private fun markSelectionActionModeFinished(mode: ActionMode? = null) {
+    private fun finishSelectionActionModeForMenuItem(mode: ActionMode) {
+        selectionActionModeExpectedFinish = true
+        mode.finish()
+    }
+
+    private fun markSelectionActionModeFinished(mode: ActionMode? = null, expected: Boolean = false) {
         if (mode == null || selectionActionMode === mode) {
             selectionActionMode = null
+        }
+        if (expected) {
+            cancelSelectionActionModeRestore()
+        }
+        if (maybeRestoreUnexpectedSelectionActionModeAfterTouch(expected)) {
+            return
         }
         if (!actionModeActive) {
             return
@@ -1381,6 +1406,56 @@ class AceCodeEditor @JvmOverloads constructor(
         lastActionModeAtUptimeMillis = SystemClock.uptimeMillis()
         healthMonitor.markStateEvent()
         eventHistory.record("action_mode_finished")
+    }
+
+    private fun cancelSelectionActionModeRestore() {
+        mainHandler.removeCallbacks(restoreSelectionActionModeRunnable)
+        selectionActionModeStabilizeUntilUptimeMillis = 0L
+        selectionActionModeStabilizeRestarted = false
+    }
+
+    private fun stabilizeSelectionActionModeAfterTouch() {
+        if (selectedTextSnapshot.isEmpty() && pendingSelectionActionModeRequest == null) {
+            return
+        }
+        selectionActionModeStabilizeUntilUptimeMillis =
+            SystemClock.uptimeMillis() + ACTION_MODE_POST_TOUCH_STABILIZE_MS
+        selectionActionModeStabilizeRestarted = false
+        eventHistory.record(
+            "action_mode_stabilize_after_touch",
+            "selectionLength=${selectedTextSnapshot.length}",
+        )
+    }
+
+    private fun maybeRestoreUnexpectedSelectionActionModeAfterTouch(expected: Boolean): Boolean {
+        val now = SystemClock.uptimeMillis()
+        val request = lastSelectionActionModeRequest
+        if (
+            expected ||
+            userTouching ||
+            selectedTextSnapshot.isEmpty() ||
+            request == null ||
+            selectionActionModeStabilizeRestarted ||
+            now > selectionActionModeStabilizeUntilUptimeMillis
+        ) {
+            return false
+        }
+        selectionActionModeStabilizeRestarted = true
+        eventHistory.record(
+            "action_mode_restore_after_touch",
+            "selectionLength=${selectedTextSnapshot.length},remaining=${selectionActionModeStabilizeUntilUptimeMillis - now}",
+        )
+        mainHandler.removeCallbacks(restoreSelectionActionModeRunnable)
+        mainHandler.postDelayed(restoreSelectionActionModeRunnable, ACTION_MODE_RESTORE_AFTER_TOUCH_DELAY_MS)
+        return true
+    }
+
+    private fun restoreUnexpectedSelectionActionModeAfterTouch() {
+        val request = lastSelectionActionModeRequest ?: return
+        if (userTouching || selectedTextSnapshot.isEmpty() || selectionActionMode != null) {
+            return
+        }
+        startSelectionActionMode(request)
     }
 
     private fun suppressSelectionActionModeForPointerGuard(reason: String) {
@@ -1501,6 +1576,7 @@ class AceCodeEditor @JvmOverloads constructor(
                     -> {
                     recordTextTouch(event)
                     userTouching = false
+                    stabilizeSelectionActionModeAfterTouch()
                     schedulePendingSelectionActionModeAfterTouch()
                 }
             }
@@ -2200,6 +2276,8 @@ class AceCodeEditor @JvmOverloads constructor(
         private const val RIGHT_EDGE_BACK_GESTURE_MAX_WIDTH_RATIO = 0.08f
         private const val RIGHT_EDGE_BACK_GESTURE_HAPTIC_SUPPRESS_MS = 1_500L
         private const val ACTION_MODE_AFTER_TOUCH_DELAY_MS = 48L
+        private const val ACTION_MODE_RESTORE_AFTER_TOUCH_DELAY_MS = 80L
+        private const val ACTION_MODE_POST_TOUCH_STABILIZE_MS = 1_200L
         private const val ACTION_MODE_TOUCH_ANCHOR_MAX_AGE_MS = 2_000L
         private const val ACTION_MODE_TOUCH_ANCHOR_HEIGHT_DP = 24f
         private const val BRIDGE_EVENT_WINDOW_MS = 1_000L
