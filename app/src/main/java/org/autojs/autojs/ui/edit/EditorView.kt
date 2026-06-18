@@ -129,6 +129,7 @@ import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.R.string.text_unknown
 import org.autojs.autojs6.databinding.EditorViewBinding
+import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -2197,26 +2198,48 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun showFindOrReplaceDialog() {
-        val preferredQuery = getPreferredSearchQueryForDialogOrNull()
+        showFindOrReplaceDialog(null)
+    }
+
+    private fun showFindOrReplaceDialog(payload: JSONObject?) {
+        val payloadQuery = payload?.optNonBlankString(PAYLOAD_QUERY)
+        val preferredQuery = payloadQuery ?: getPreferredSearchQueryForDialogOrNull()
         val builder = FindOrReplaceDialogBuilder(context, this)
-        if (preferredQuery != null) {
+        if (payload?.has(PAYLOAD_USING_REGEX) == true) {
+            builder.setUsingRegex(payload.optBoolean(PAYLOAD_USING_REGEX))
+        } else if (preferredQuery != null) {
             builder.setUsingRegex(getPreferredSearchUsingRegexForDialog())
         }
         builder.setQueryIfNotEmpty(preferredQuery ?: editor.selectedTextSnapshot)
+        builder.setReplacement(payload?.optString(PAYLOAD_REPLACEMENT))
+        builder.setReplaceMode(
+            replace = payload?.optBoolean(PAYLOAD_REPLACE, false) == true,
+            replaceAll = payload?.optBoolean(PAYLOAD_REPLACE_ALL, false) == true,
+        )
         builder.positiveColorRes(R.color.dialog_button_attraction)
         builder.show()
     }
 
     fun showJumpToLineDialog() {
-        val lineCount = editor.lineCountSnapshot
+        showJumpToLineDialog(null)
+    }
+
+    private fun showJumpToLineDialog(initialLine: Int?) {
+        val lineCount = editor.lineCountSnapshot.coerceAtLeast(1)
+        val initialInput = initialLine
+            ?.coerceIn(1, lineCount)
+            ?.toString()
+            .orEmpty()
         val builder = MaterialDialog.Builder(context)
             .title(R.string.text_jump_to_line)
-            .input("1 - $lineCount", "") { _, input ->
+            .input("1 - $lineCount", initialInput) { _, input ->
                 if (input.isNullOrEmpty()) {
                     return@input
                 }
                 val line = input.toString().toIntOrNull() ?: return@input
-                mCommandDispatcher.jumpTo(line.coerceIn(1, lineCount) - 1, 0)
+                val targetLine = line.coerceIn(1, lineCount)
+                mCommandDispatcher.jumpTo(targetLine - 1, 0)
+                recordAceJumpToLineHistory(targetLine)
             }
             .inputType(InputType.TYPE_CLASS_NUMBER)
             .positiveColorRes(R.color.dialog_button_attraction)
@@ -2245,7 +2268,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun startBuildApkActivity() {
-        val path = uri?.path
+        startBuildApkActivity(null)
+    }
+
+    private fun startBuildApkActivity(fallbackPath: String?) {
+        val path = uri?.path?.takeIf { it.isNotEmpty() }
+            ?: fallbackPath?.takeIf { it.isNotEmpty() }
         if (path.isNullOrEmpty()) {
             DialogUtils.buildAndShowAdaptive {
                 MaterialDialog.Builder(context)
@@ -2261,8 +2289,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun showJavaClassSearchDialog() {
+        showJavaClassSearchDialog(null)
+    }
+
+    private fun showJavaClassSearchDialog(initialQuery: String?) {
+        val query = initialQuery?.takeIf { it.isNotBlank() } ?: editor.selectedTextSnapshot
         ClassSearchDialogBuilder(context)
-            .setQuery(editor.selectedTextSnapshot)
+            .setQuery(query)
             .itemClick { dialog, item, _ -> showClassSearchingItem(dialog, item) }
             .title(R.string.text_find_java_classes)
             .show()
@@ -2295,6 +2328,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
             .onNegative { _, _ ->
                 val executionInfo = JavaScriptFileSource.parseExecutionMode(editor.text)
+                recordAceJavaClassImportHistory(item, description)
                 mCommandDispatcher.insert(executionInfo.lineno, item.importText + ";\n")
             }
             .onNeutral { _, _ ->
@@ -2932,7 +2966,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 onSearchStateMaybeChanged()
             }
             ACTION_CANCEL_SEARCH -> true.also { cancelSearch() }
-            ACTION_FIND_OR_REPLACE -> true.also { showFindOrReplaceDialog() }
+            ACTION_FIND_OR_REPLACE -> true.also { showFindOrReplaceDialog(action.payloadObject()) }
             ACTION_REPLACE_SELECTION -> true.also {
                 replace()
                 onSearchStateMaybeChanged()
@@ -2948,7 +2982,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_CLEAR -> true.also { mCommandDispatcher.clear() }
             ACTION_TOGGLE_COMMENT -> true.also { mCommandDispatcher.toggleComment() }
             ACTION_BEAUTIFY -> true.also { mCommandDispatcher.beautifyCode() }
-            ACTION_JUMP_TO_LINE -> true.also { showJumpToLineDialog() }
+            ACTION_JUMP_TO_LINE -> true.also { showJumpToLineDialog(action.payloadInt(PAYLOAD_LINE)) }
             ACTION_JUMP_TO_START -> true.also { mCommandDispatcher.jumpToStart() }
             ACTION_JUMP_TO_END -> true.also { mCommandDispatcher.jumpToEnd() }
             ACTION_JUMP_TO_LINE_START -> true.also { mCommandDispatcher.jumpToLineStart() }
@@ -2956,11 +2990,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_TOGGLE_BREAKPOINT -> true.also { mCommandDispatcher.addOrRemoveBreakpointAtCurrentLine() }
             ACTION_DEBUG -> true.also { debug() }
             ACTION_REMOVE_ALL_BREAKPOINTS -> true.also { mCommandDispatcher.removeAllBreakpoints() }
-            ACTION_BUILD_APK -> true.also { startBuildApkActivity() }
+            ACTION_BUILD_APK -> true.also { startBuildApkActivity(action.payloadString(PAYLOAD_PATH)) }
             ACTION_LOG -> true.also { openEditorLogByPreference() }
             ACTION_SETTINGS -> true.also { showEditorSettingsDialog() }
             ACTION_CONSOLE -> true.also { showConsole() }
-            ACTION_IMPORT_JAVA_CLASS -> true.also { showJavaClassSearchDialog() }
+            ACTION_IMPORT_JAVA_CLASS -> true.also {
+                showJavaClassSearchDialog(
+                    action.payloadString(PAYLOAD_QUERY)
+                        ?: action.payloadString(PAYLOAD_IMPORT_TEXT),
+                )
+            }
             ACTION_FILE_DETAILS -> true.also { showFileDetailsDialog() }
             ACTION_READ_ONLY -> true.also { toggleReadOnlyMode() }
             ACTION_COPY_ACE_DIAGNOSTICS -> true.also { copyAceDiagnosticsToClipboard() }
@@ -2970,8 +3009,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             ACTION_JUMP_TO_PREVIOUS_CURSOR -> toggleAceShortcutReturnPoint()
             else -> executeEditorSettingHistoryAction(action)
         }
-        if (handled && record) {
-            AceActionHistoryStore.record(context, action)
+        if (handled && record && !isDeferredParameterizedHistoryAction(action.id)) {
+            AceActionHistoryStore.record(context, actionForHistoryRecord(action))
         }
         return handled
     }
@@ -2993,7 +3032,70 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (editor.engineType != EditorEngineType.ACE) {
             return
         }
+        if (isDeferredParameterizedHistoryAction(action.id) && action.payloadJson.isNullOrBlank()) {
+            return
+        }
         AceActionHistoryStore.record(context, action)
+    }
+
+    fun recordAceFindOrReplaceHistory(
+        keywords: String,
+        replacement: String,
+        usingRegex: Boolean,
+        replace: Boolean,
+        replaceAll: Boolean,
+    ) {
+        val query = keywords.takeIf { it.isNotEmpty() } ?: return
+        val payloadJson = historyPayload(
+            PAYLOAD_QUERY to query,
+            PAYLOAD_REPLACEMENT to replacement,
+            PAYLOAD_USING_REGEX to usingRegex,
+            PAYLOAD_REPLACE to replace,
+            PAYLOAD_REPLACE_ALL to replaceAll,
+        )
+        val payloadSummary = buildSearchPayloadSummary(
+            query = query,
+            replacement = replacement,
+            usingRegex = usingRegex,
+            replace = replace,
+        )
+        recordAceHistoryAction(
+            historyAction(
+                ACTION_FIND_OR_REPLACE,
+                R.string.text_find_or_replace,
+                mutatesText = true,
+                payloadJson = payloadJson,
+                payloadSummary = payloadSummary,
+            ),
+        )
+    }
+
+    private fun recordAceJumpToLineHistory(line: Int) {
+        recordAceHistoryAction(
+            historyAction(
+                ACTION_JUMP_TO_LINE,
+                R.string.text_jump_to_line,
+                mutatesText = false,
+                payloadJson = historyPayload(PAYLOAD_LINE to line),
+                payloadSummary = "#$line",
+            ),
+        )
+    }
+
+    private fun recordAceJavaClassImportHistory(item: ClassSearchingItem, query: String) {
+        val importText = item.importText.takeIf { it.isNotBlank() } ?: return
+        recordAceHistoryAction(
+            historyAction(
+                ACTION_IMPORT_JAVA_CLASS,
+                R.string.text_find_java_classes,
+                mutatesText = true,
+                payloadJson = historyPayload(
+                    PAYLOAD_QUERY to query,
+                    PAYLOAD_IMPORT_TEXT to importText,
+                ),
+                payloadSummary = compactHistorySummary(importText),
+            ),
+        )
     }
 
     private fun actionForToolbarItem(id: Int): AceActionHistoryStore.Action? = when (id) {
@@ -3037,7 +3139,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         R.id.action_breakpoint -> historyAction(ACTION_TOGGLE_BREAKPOINT, R.string.text_set_breakpoint, mutatesText = false)
         R.id.action_launch_debugger -> historyAction(ACTION_DEBUG, R.string.text_launch_debugger, mutatesText = false)
         R.id.action_remove_all_breakpoints -> historyAction(ACTION_REMOVE_ALL_BREAKPOINTS, R.string.text_remove_all_breakpoints, mutatesText = false)
-        R.id.action_build_apk -> historyAction(ACTION_BUILD_APK, R.string.text_build_apk, mutatesText = false)
+        R.id.action_build_apk -> buildApkHistoryAction()
         R.id.action_log -> historyAction(ACTION_LOG, R.string.text_log, mutatesText = false)
         R.id.action_editor_settings -> historyAction(ACTION_SETTINGS, R.string.text_settings, mutatesText = false)
         R.id.action_console -> historyAction(ACTION_CONSOLE, R.string.text_console, mutatesText = false)
@@ -3054,11 +3156,102 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         id: String,
         @StringRes labelResId: Int,
         mutatesText: Boolean,
+        payloadJson: String? = null,
+        payloadSummary: String? = null,
     ) = AceActionHistoryStore.Action(
         id = id,
         label = context.getString(labelResId),
         mutatesText = mutatesText,
+        payloadJson = payloadJson,
+        payloadSummary = payloadSummary,
     )
+
+    private fun buildApkHistoryAction(fallbackPath: String? = null): AceActionHistoryStore.Action {
+        val path = uri?.path?.takeIf { it.isNotEmpty() }
+            ?: fallbackPath?.takeIf { it.isNotEmpty() }
+        return historyAction(
+            ACTION_BUILD_APK,
+            R.string.text_build_apk,
+            mutatesText = false,
+            payloadJson = path?.let { historyPayload(PAYLOAD_PATH to it) },
+            payloadSummary = path?.let { compactHistorySummary(File(it).name.ifBlank { it }) },
+        )
+    }
+
+    private fun actionForHistoryRecord(action: AceActionHistoryStore.Action): AceActionHistoryStore.Action {
+        return when (action.id) {
+            ACTION_BUILD_APK -> buildApkHistoryAction(action.payloadString(PAYLOAD_PATH))
+            else -> action
+        }
+    }
+
+    private fun isDeferredParameterizedHistoryAction(id: String): Boolean {
+        return id == ACTION_FIND_OR_REPLACE ||
+            id == ACTION_JUMP_TO_LINE ||
+            id == ACTION_IMPORT_JAVA_CLASS
+    }
+
+    private fun historyPayload(vararg values: Pair<String, Any?>): String {
+        return JSONObject().apply {
+            values.forEach { (key, value) ->
+                when (value) {
+                    null -> Unit
+                    is Boolean -> put(key, value)
+                    is Number -> put(key, value)
+                    else -> put(key, value.toString())
+                }
+            }
+        }.toString()
+    }
+
+    private fun AceActionHistoryStore.Action.payloadObject(): JSONObject? {
+        val raw = payloadJson?.takeIf { it.isNotBlank() } ?: return null
+        return runCatching { JSONObject(raw) }.getOrNull()
+    }
+
+    private fun AceActionHistoryStore.Action.payloadString(key: String): String? {
+        return payloadObject()?.optNonBlankString(key)
+    }
+
+    private fun AceActionHistoryStore.Action.payloadInt(key: String): Int? {
+        val payload = payloadObject() ?: return null
+        if (!payload.has(key)) {
+            return null
+        }
+        return payload.optInt(key)
+    }
+
+    private fun JSONObject.optNonBlankString(key: String): String? {
+        return optString(key).takeIf { it.isNotBlank() }
+    }
+
+    private fun buildSearchPayloadSummary(
+        query: String,
+        replacement: String,
+        usingRegex: Boolean,
+        replace: Boolean,
+    ): String {
+        val querySummary = compactHistorySummary(
+            if (usingRegex) {
+                "/$query/"
+            } else {
+                "\"$query\""
+            },
+            maxLength = 48,
+        )
+        if (!replace) {
+            return querySummary
+        }
+        return "$querySummary -> ${compactHistorySummary("\"$replacement\"", maxLength = 32)}"
+    }
+
+    private fun compactHistorySummary(value: String, maxLength: Int = 72): String {
+        val compact = value.replace(Regex("\\s+"), " ").trim()
+        if (compact.length <= maxLength) {
+            return compact
+        }
+        return compact.take((maxLength - 3).coerceAtLeast(0)) + "..."
+    }
 
     private fun copyAllToClipboard() {
         ClipboardUtils.setClip(context, editor.text)
@@ -3304,5 +3497,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         private const val ACTION_VERSION_HISTORY = "editor:version_history"
         private const val ACTION_EXIT_EDITOR = "editor:exit"
         private const val ACTION_JUMP_TO_PREVIOUS_CURSOR = "editor:jump_to_previous_cursor"
+
+        private const val PAYLOAD_QUERY = "query"
+        private const val PAYLOAD_REPLACEMENT = "replacement"
+        private const val PAYLOAD_USING_REGEX = "usingRegex"
+        private const val PAYLOAD_REPLACE = "replace"
+        private const val PAYLOAD_REPLACE_ALL = "replaceAll"
+        private const val PAYLOAD_LINE = "line"
+        private const val PAYLOAD_IMPORT_TEXT = "importText"
+        private const val PAYLOAD_PATH = "path"
     }
 }

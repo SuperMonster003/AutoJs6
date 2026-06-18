@@ -106,6 +106,19 @@ const EDITOR_VIEW_PATH = path.join(
   "edit",
   "EditorView.kt",
 );
+const FIND_OR_REPLACE_DIALOG_BUILDER_PATH = path.join(
+  PROJECT_ROOT,
+  "app",
+  "src",
+  "main",
+  "java",
+  "org",
+  "autojs",
+  "autojs",
+  "ui",
+  "edit",
+  "FindOrReplaceDialogBuilder.kt",
+);
 const EDITOR_PINCH_TO_ZOOM_PREFERENCE_PATH = path.join(
   PROJECT_ROOT,
   "app",
@@ -355,6 +368,7 @@ const nativeCodeEditorEngine = read(NATIVE_CODE_EDITOR_ENGINE_PATH);
 const codeEditText = read(CODE_EDIT_TEXT_PATH);
 const editorMenu = read(EDITOR_MENU_PATH);
 const editorView = read(EDITOR_VIEW_PATH);
+const findOrReplaceDialogBuilder = read(FIND_OR_REPLACE_DIALOG_BUILDER_PATH);
 const editorPinchToZoomPreference = read(EDITOR_PINCH_TO_ZOOM_PREFERENCE_PATH);
 const materialPreference = read(MATERIAL_PREFERENCE_PATH);
 const codeCompletion = read(CODE_COMPLETION_PATH);
@@ -722,9 +736,17 @@ assertIncludes(editorView, "ACTION_JUMP_TO_PREVIOUS_CURSOR", "editor action hist
 assertIncludes(editorView, "ACTION_BUILD_APK", "editor action history build APK action id");
 assertIncludes(editorView, "ACTION_IMPORT_JAVA_CLASS", "editor action history Java class search action id");
 assertIncludes(editorView, "ACTION_FILE_DETAILS", "editor action history file details action id");
+assertIncludes(editorView, "recordAceFindOrReplaceHistory", "editor action history records find/replace payloads");
+assertIncludes(editorView, "recordAceJumpToLineHistory", "editor action history records jump-to-line payloads");
+assertIncludes(editorView, "recordAceJavaClassImportHistory", "editor action history records Java import payloads");
+assertIncludes(editorView, "isDeferredParameterizedHistoryAction", "editor action history defers dialog parameter recording until confirmation");
+assertIncludes(editorView, "PAYLOAD_QUERY", "editor action history query payload key");
+assertIncludes(editorView, "PAYLOAD_LINE", "editor action history line payload key");
+assertIncludes(editorView, "PAYLOAD_IMPORT_TEXT", "editor action history Java import payload key");
 assertIncludes(editorView, "executeEditorSettingHistoryAction", "editor action history open-ended setting action replay");
 assertIncludes(editorView, "EditorSettingActionRegistry.preferenceKeyFromActionId", "editor setting action id decoding");
 assertIncludes(editorView, "suppressInitialSettingActionRecord = true", "editor setting action replay avoids duplicate recording");
+assertIncludes(findOrReplaceDialogBuilder, "recordAceFindOrReplaceHistory", "find/replace dialog records ACE action payload after successful confirmation");
 assertIncludes(editorMenu, "mEditorView.recordAceActionForMenuItem(itemId)", "editor overflow menu records ACE actions");
 assertIncludes(editorMenu, "mEditorView.showEditorSettingsDialog()", "editor overflow settings menu enables ACE setting-action tracking");
 assertIncludes(editorMenu, "mEditorView::showFindOrReplaceDialog", "editor overflow menu shares find/replace action launcher");
@@ -769,6 +791,8 @@ assertIncludes(aceActionHistoryStore, 'LEGACY_SHORTCUT_ACTION_PREFIX = "command:
 assertIncludes(aceActionHistoryStore, 'DEPRECATED_CANCEL_SEARCH_ACTION_ID = "editor:cancel_search"', "ACE action favorites filters accidental cancel-search action");
 assertIncludes(aceActionHistoryStore, "fun applyFavoritesOrder", "ACE action favorites order API");
 assertIncludes(aceActionHistoryStore, "mutatesText", "ACE action history mutation metadata");
+assertIncludes(aceActionHistoryStore, "payloadJson", "ACE action history payload metadata");
+assertIncludes(aceActionHistoryStore, "payloadSummary", "ACE action history payload summary metadata");
 assertIncludes(aceActionHistoryStore, "usageCount", "ACE action history frequency field");
 assertIncludes(aceActionHistoryStore, "lastUsedAt", "ACE action history recency field");
 assertIncludes(aceActionHistoryStore, "manualOrder", "ACE action history manual order field");
@@ -779,6 +803,7 @@ assertIncludes(aceActionFavoritesDialog, "onActionSelected: (AceActionHistorySto
 assertIncludes(aceActionFavoritesDialog, "ItemTouchHelper.UP or ItemTouchHelper.DOWN", "ACE action favorites drag reorder");
 assertIncludes(aceActionFavoritesDialog, "R.drawable.ic_thumbtacks", "ACE action favorites thumbtack icon");
 assertIncludes(aceActionFavoritesDialog, 'holder.usageCount.text = "<${entry.usageCount}>"', "ACE action favorites usage count inline");
+assertIncludes(aceActionFavoritesDialog, "payloadSummary", "ACE action favorites show payload summary");
 assertIncludes(aceActionFavoritesDialog, "fun finishDrag()", "ACE action favorites drag finalization");
 assertIncludes(aceActionFavoritesDialog, "confirmDelete", "ACE action favorites delete confirmation");
 assertIncludes(aceActionFavoritesDialog, "confirmClear", "ACE action favorites clear confirmation");

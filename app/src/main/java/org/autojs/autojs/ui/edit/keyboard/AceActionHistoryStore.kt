@@ -18,6 +18,8 @@ object AceActionHistoryStore {
         val id: String,
         val label: String,
         val mutatesText: Boolean,
+        val payloadJson: String? = null,
+        val payloadSummary: String? = null,
         val usageCount: Int,
         val firstUsedAt: Long,
         val lastUsedAt: Long,
@@ -30,6 +32,8 @@ object AceActionHistoryStore {
         val id: String,
         val label: String,
         val mutatesText: Boolean,
+        val payloadJson: String? = null,
+        val payloadSummary: String? = null,
     )
 
     private fun prefs(context: Context): SharedPreferences =
@@ -56,6 +60,8 @@ object AceActionHistoryStore {
                 id = action.id,
                 label = action.label,
                 mutatesText = action.mutatesText,
+                payloadJson = action.payloadJson,
+                payloadSummary = action.payloadSummary,
                 usageCount = 1,
                 firstUsedAt = now,
                 lastUsedAt = now,
@@ -64,6 +70,8 @@ object AceActionHistoryStore {
             current.copy(
                 label = action.label,
                 mutatesText = action.mutatesText,
+                payloadJson = action.payloadJson ?: current.payloadJson,
+                payloadSummary = action.payloadSummary ?: current.payloadSummary,
                 usageCount = current.usageCount + 1,
                 lastUsedAt = now,
             )
@@ -183,6 +191,8 @@ object AceActionHistoryStore {
             id = id,
             label = label,
             mutatesText = optBoolean("mutatesText", shortcutAction?.mutatesText ?: false),
+            payloadJson = optString("payloadJson").takeIf { it.isNotBlank() },
+            payloadSummary = optString("payloadSummary").takeIf { it.isNotBlank() },
             usageCount = usageCount,
             firstUsedAt = optLong("firstUsedAt", 0L),
             lastUsedAt = optLong("lastUsedAt", 0L),
@@ -202,6 +212,8 @@ object AceActionHistoryStore {
             put("id", id)
             put("label", label)
             put("mutatesText", mutatesText)
+            payloadJson?.takeIf { it.isNotBlank() }?.let { put("payloadJson", it) }
+            payloadSummary?.takeIf { it.isNotBlank() }?.let { put("payloadSummary", it) }
             put("usageCount", usageCount)
             put("firstUsedAt", firstUsedAt)
             put("lastUsedAt", lastUsedAt)
@@ -215,6 +227,8 @@ object AceActionHistoryStore {
         id = id,
         label = label,
         mutatesText = mutatesText,
+        payloadJson = payloadJson,
+        payloadSummary = payloadSummary,
     )
 
     private fun entryComparator(lastActionId: String?) = Comparator<Entry> { left, right ->

@@ -214,8 +214,11 @@ Notes:
   and directly replayable editor overflow actions.
 - [x] Replay dialog-launch editor actions such as Find / Replace, Jump to line,
   build packaging, file details, and Java class search.
-- [ ] Add saved parameter payloads for open-ended favorites such as remembered
-  line numbers, search queries, build profiles, and Java class imports.
+- [x] Add saved parameter payloads for open-ended favorites such as remembered
+  line numbers, search queries, build source paths, and Java class imports.
+- [ ] Audit whether BuildActivity-local build profile import/export should expose
+  a replayable editor favorite payload once profile selection becomes an
+  editor-side action.
 - [x] Add a standalone Code editor settings page and an in-editor settings
   dialog using the same content model.
 - [x] Move the in-editor settings dialog to a fragment-safe MaterialDialog path.

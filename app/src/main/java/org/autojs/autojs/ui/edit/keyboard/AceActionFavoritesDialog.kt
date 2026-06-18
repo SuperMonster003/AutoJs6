@@ -39,7 +39,7 @@ object AceActionFavoritesDialog {
             overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dialogListHeight(context, entries.size),
+                dialogListHeight(context, entries),
             )
         }
         val adapter = FavoritesAdapter(context, entries.toMutableList(), onActionSelected)
@@ -146,8 +146,10 @@ object AceActionFavoritesDialog {
         }
     }
 
-    private fun dialogListHeight(context: Context, itemCount: Int): Int {
-        val rowHeight = DisplayUtils.dpToPx(48f).roundToInt()
+    private fun dialogListHeight(context: Context, entries: List<AceActionHistoryStore.Entry>): Int {
+        val itemCount = entries.size
+        val rowHeightDp = if (entries.any { !it.payloadSummary.isNullOrBlank() }) 58f else 48f
+        val rowHeight = DisplayUtils.dpToPx(rowHeightDp).roundToInt()
         val maxHeight = (context.resources.displayMetrics.heightPixels * 0.52f).roundToInt()
         return (rowHeight * itemCount.coerceAtMost(10)).coerceAtMost(maxHeight).coerceAtLeast(rowHeight)
     }
@@ -180,7 +182,13 @@ object AceActionFavoritesDialog {
             holder.title.text = entry.label
             holder.usageCount.visibility = View.VISIBLE
             holder.usageCount.text = "<${entry.usageCount}>"
-            holder.subtitle.visibility = View.GONE
+            val payloadSummary = entry.payloadSummary
+            if (payloadSummary.isNullOrBlank()) {
+                holder.subtitle.visibility = View.GONE
+            } else {
+                holder.subtitle.visibility = View.VISIBLE
+                holder.subtitle.text = payloadSummary
+            }
             holder.icon.setImageResource(
                 if (entry.pinned) R.drawable.ic_thumbtacks else R.drawable.ic_ali_fx,
             )
@@ -191,6 +199,8 @@ object AceActionFavoritesDialog {
                         id = entry.id,
                         label = entry.label,
                         mutatesText = entry.mutatesText,
+                        payloadJson = entry.payloadJson,
+                        payloadSummary = entry.payloadSummary,
                     ),
                 )
                 dialog?.dismiss()
