@@ -80,6 +80,19 @@ object NodeInteractiveLongRunningStatusStore {
             put("pendingTimers", nativeValues["embedded_script.pending_timers"] == "true")
             put("pendingTimerCount", nativeValues["embedded_script.pending_timer_count"]?.toIntOrNull() ?: 0)
             put("pendingAsyncCallbacks", nativeValues["embedded_script.pending_async_callbacks"]?.toIntOrNull() ?: 0)
+            put("runtimeHeartbeatStatus", nativeValues["embedded_script.runtime_heartbeat.status"].orEmpty().ifBlank { "unknown" })
+            put("runtimeHeartbeatSequence", nativeValues["embedded_script.runtime_heartbeat.sequence"]?.toIntOrNull() ?: 0)
+            put(
+                "eventLoopResponsiveness",
+                nativeValues["embedded_script.runtime_heartbeat.event_loop_responsiveness"].orEmpty().ifBlank { "unknown" },
+            )
+            put("runtimeBudgetStatus", nativeValues["embedded_script.runtime_budget.status"].orEmpty().ifBlank { "unknown" })
+            put("runtimeBudgetWithinPolicy", nativeValues["embedded_script.runtime_budget.within_budget"] == "true")
+            put("runtimeBudgetBreachCount", nativeValues["embedded_script.runtime_budget.breach_count"]?.toIntOrNull() ?: 0)
+            put("resourceRegistryActiveCount", nativeValues["embedded_script.bridge_resource.active_count"]?.toIntOrNull() ?: 0)
+            put("activeImageHandles", nativeValues["embedded_script.image_active_handle_count"]?.toIntOrNull() ?: 0)
+            put("activeNetworkRequests", nativeValues["embedded_script.fetch_active_request_count"]?.toIntOrNull() ?: 0)
+            put("activeWebSockets", nativeValues["embedded_script.websocket_active_connection_count"]?.toIntOrNull() ?: 0)
         }
     }
 

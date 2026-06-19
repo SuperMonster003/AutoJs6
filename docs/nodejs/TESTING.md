@@ -85,6 +85,11 @@ denial classification, missing or invalid foreground-service type diagnostics,
 Android 16 WorkManager quota metadata, and a simulated Android 15
 `Service.onTimeout(...)` path that marks the interactive runtime `timed_out`,
 calls the cleanup path, and verifies a later one-shot script can recover.
+`NodeRuntimeBudgetPolicyInstrumentationTest` verifies safe runtime budget
+override parsing, ignored above-hard-max overrides, stale heartbeat
+classification for pending bridge calls, provider quota rejection without
+leaked resources, and interactive long-running status snapshots carrying
+runtime heartbeat, runtime budget, and active resource summaries through stop.
 
 Lifecycle tests must still verify that normal scripts are one-shot executions
 controlled by `timeoutMs`, including timeout recovery, uncleared interval
@@ -680,6 +685,19 @@ Current bridge concurrency and resource-limit focused instrumentation:
 ```
 
 This suite verifies bridge limit parsing from project/package metadata, safe override acceptance, above-hard-max rejection with warnings, JavaScript pending-call flood rejection, JavaScript image-handle quota and recycle/reuse behavior, Android provider accessibility request-rate limiting, shell command resource limiting, and the `require("autojs6:profile").bridgeLimits` report.
+
+Current runtime heartbeat and resource-budget focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRuntimeBudgetPolicyInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies that runtime budget metadata cannot raise bridge-controlled
+resource limits beyond the effective hard caps, heartbeat diagnostics classify
+stale pending bridge work with actionable status fields, provider resource
+quota denial rejects only the offending resource without leaking registry
+entries, and the explicit interactive long-running runtime preserves
+heartbeat/budget diagnostics in app-private running and stopped status records.
 
 Current `worker_threads` design gate focused instrumentation:
 

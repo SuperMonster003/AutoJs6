@@ -33,6 +33,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import java.util.UUID
 import kotlin.system.exitProcess
@@ -53,6 +54,8 @@ class NativeNodeEmbeddedScriptService : Service() {
     private var activeWorkingDirectory: String? = null
     @Volatile
     private var activeStartedAtEpochMs: Long = 0L
+    @Volatile
+    private var activeHeartbeatMonitor: NodeInteractiveHeartbeatMonitor? = null
     private var foregroundServiceCreator: ForegroundServiceCreator? = null
 
     private val foregroundServiceType = when {
@@ -92,10 +95,15 @@ class NativeNodeEmbeddedScriptService : Service() {
             }
             lifecycle.transition(NodeEmbeddedRuntimeState.DESTROYED, "service.onDestroy")
         }
+        val terminalNativeValues = activeHeartbeatMonitor?.nativeValuesSnapshot("destroyed")
+            ?: activeLifecycle?.nativeValues().orEmpty()
+        activeHeartbeatMonitor?.stop("service.onDestroy")
+        activeHeartbeatMonitor = null
         interactiveExecutionId?.let { executionId ->
             val currentStatus = NodeInteractiveLongRunningStatusStore.read(this, executionId)
             val currentState = currentStatus?.optString("state").orEmpty()
             if (currentState !in setOf(
+                    NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
                     NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT,
                     NodeInteractiveLongRunningStatusStore.STATE_FAILED,
                 )
@@ -109,8 +117,8 @@ class NativeNodeEmbeddedScriptService : Service() {
                     startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
                     stopRequested = true,
                     message = "service.onDestroy",
-                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("destroyed", activeLifecycle?.nativeValues().orEmpty()),
-                    nativeValues = activeLifecycle?.nativeValues().orEmpty(),
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("destroyed", terminalNativeValues),
+                    nativeValues = terminalNativeValues,
                 )
             }
         }
@@ -211,6 +219,13 @@ class NativeNodeEmbeddedScriptService : Service() {
         val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
             runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
             workingDirectory,
+        )
+        val runtimeBudget = NodeRuntimeBudgetPolicy.fromRuntimeModuleOrWorkingDirectory(
+            runtimeModuleSources[NodeRuntimeBudgetPolicy.RUNTIME_MODULE_NAME],
+            workingDirectory,
+            executionMode,
+            timeoutMs,
+            bridgeLimits,
         )
         val executionId = serviceRequest.executionId?.takeIf { it.isNotBlank() }
             ?: newExecutionId()
@@ -364,6 +379,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "queueMode=$queueMode queued=${slotLease.queued} queueWaitMs=${slotLease.queueWaitMs} " +
                     "executionMode=$executionMode " +
                     "bridgeLimits=${bridgeLimits.toJson()} " +
+                    "runtimeBudget=${runtimeBudget.toJsonObject()} " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
         try {
@@ -371,7 +387,26 @@ class NativeNodeEmbeddedScriptService : Service() {
             bridgeSession.start()
             timeline?.mark("bridge_transport_ready", mapOf("transport" to "file"))
             lifecycle.transition(NodeEmbeddedRuntimeState.RUNNING, "native.enter")
+            val heartbeatMonitor = if (interactiveSession) {
+                NodeInteractiveHeartbeatMonitor(
+                    context = this,
+                    executionId = executionId,
+                    sourceName = sourceName,
+                    workingDirectory = workingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L } ?: System.currentTimeMillis(),
+                    lifecycle = lifecycle,
+                    runtimeBudget = runtimeBudget,
+                    bridgeSession = bridgeSession,
+                ).also { monitor ->
+                    activeHeartbeatMonitor = monitor
+                    monitor.start()
+                }
+            } else {
+                null
+            }
             if (interactiveSession) {
+                val runningNativeValues = heartbeatMonitor?.nativeValuesSnapshot("running")
+                    ?: (lifecycle.nativeValues() + runtimeBudget.nativeDiagnostics())
                 NodeInteractiveLongRunningStatusStore.write(
                     context = this,
                     executionId = executionId,
@@ -379,8 +414,8 @@ class NativeNodeEmbeddedScriptService : Service() {
                     sourceName = sourceName,
                     workingDirectory = workingDirectory,
                     startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
-                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("running"),
-                    nativeValues = lifecycle.nativeValues(),
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("running", runningNativeValues),
+                    nativeValues = runningNativeValues,
                 )
             }
             timeline?.mark("native_enter")
@@ -391,6 +426,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             timeline?.recordNativeResult(nativeResult)
             val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
                 .withExecutionMode(executionMode, launchSurface)
+                .withRuntimeBudget(runtimeBudget)
             timeline?.recordBridge(result)
             val completed = when {
                 result.succeeded -> {
@@ -474,10 +510,12 @@ class NativeNodeEmbeddedScriptService : Service() {
                     pid = pid,
                     sourceName = sourceName,
                     nativeValues = emptyMap(),
-                ).withLifecycle(lifecycle).withQueueLease(slotLease).withTimeline(timeline).toBundle(),
+                ).withLifecycle(lifecycle).withQueueLease(slotLease).withRuntimeBudget(runtimeBudget).withTimeline(timeline).toBundle(),
             )
         } finally {
             File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursively()
+            activeHeartbeatMonitor?.stop("script.finally")
+            activeHeartbeatMonitor = null
             bridgeSession.stop()
             val queueStatus = releaseExecutionSlot(executionId)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
@@ -774,6 +812,18 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
     }
 
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withRuntimeBudget(
+        runtimeBudget: NodeRuntimeBudgetPolicy.Policy,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val budgetValues = NodeRuntimeBudgetPolicy.completionNativeValues(runtimeBudget, nativeValues, elapsedMs)
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                putAll(budgetValues)
+            },
+        )
+    }
+
     private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withTimeline(
         timeline: NodeEmbeddedRuntimeTimeline?,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
@@ -788,6 +838,88 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
     }
 
+    private class NodeInteractiveHeartbeatMonitor(
+        context: Context,
+        private val executionId: String,
+        private val sourceName: String,
+        private val workingDirectory: String?,
+        private val startedAtEpochMs: Long,
+        private val lifecycle: NodeEmbeddedRuntimeLifecycle,
+        private val runtimeBudget: NodeRuntimeBudgetPolicy.Policy,
+        private val bridgeSession: NodeBridgeFileTransportSession,
+    ) {
+        private val appContext = context.applicationContext
+        private val running = AtomicBoolean(false)
+        private val sequence = AtomicInteger(0)
+        private val thread = Thread {
+            loop()
+        }.apply {
+            name = "AutoJs6NodeRuntimeHeartbeat-$executionId"
+            isDaemon = true
+        }
+
+        fun start() {
+            if (running.compareAndSet(false, true)) {
+                write("running")
+                thread.start()
+            }
+        }
+
+        fun stop(reason: String) {
+            if (running.compareAndSet(true, false)) {
+                runCatching { thread.join(HEARTBEAT_STOP_JOIN_MS) }
+            }
+            Log.i(TAG, "runtime.heartbeat.stop executionId=$executionId reason=$reason sequence=${sequence.get()}")
+        }
+
+        fun nativeValuesSnapshot(status: String): Map<String, String> {
+            val baseValues = linkedMapOf<String, String>().apply {
+                putAll(lifecycle.nativeValues())
+                putAll(bridgeSession.nativeValuesSnapshot())
+                putAll(runtimeBudget.nativeDiagnostics())
+            }
+            val snapshot = NodeRuntimeBudgetPolicy.heartbeatSnapshot(
+                policy = runtimeBudget,
+                nativeValues = baseValues,
+                executionId = executionId,
+                executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                lifecycleState = lifecycle.state.name,
+                sequence = sequence.incrementAndGet(),
+                startedAtEpochMs = startedAtEpochMs,
+                nowEpochMs = System.currentTimeMillis(),
+            )
+            return linkedMapOf<String, String>().apply {
+                putAll(baseValues)
+                putAll(NodeRuntimeBudgetPolicy.heartbeatNativeValues(snapshot))
+                put("embedded_script.runtime_heartbeat.status_label", status)
+            }
+        }
+
+        private fun loop() {
+            while (running.get()) {
+                Thread.sleep(runtimeBudget.heartbeatIntervalMs)
+                if (running.get()) {
+                    write("running")
+                }
+            }
+        }
+
+        private fun write(status: String) {
+            val nativeValues = nativeValuesSnapshot(status)
+            NodeInteractiveLongRunningStatusStore.write(
+                context = appContext,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_RUNNING,
+                sourceName = sourceName,
+                workingDirectory = workingDirectory,
+                startedAtEpochMs = startedAtEpochMs,
+                stopRequested = false,
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary(status, nativeValues),
+                nativeValues = nativeValues,
+            )
+        }
+    }
+
     private class NodeBridgeFileTransportSession(
         root: File,
         private val bridgeLimits: NodeBridgeLimits.Policy,
@@ -800,6 +932,11 @@ class NativeNodeEmbeddedScriptService : Service() {
         private val failed = AtomicInteger(0)
         private val pending = AtomicInteger(0)
         private val resourceLimited = AtomicInteger(0)
+        private val pollCount = AtomicInteger(0)
+        private val lastPollAtEpochMs = AtomicLong(0L)
+        private val lastRequestAtEpochMs = AtomicLong(0L)
+        private val lastResponseAtEpochMs = AtomicLong(0L)
+        private val startedAtEpochMs = System.currentTimeMillis()
         private val seen = mutableSetOf<String>()
         private val responsesLock = Any()
         private val responses = mutableListOf<NodeBridgeResponse>()
@@ -847,28 +984,41 @@ class NativeNodeEmbeddedScriptService : Service() {
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val nativeValues = linkedMapOf<String, String>().apply {
                 putAll(result.nativeValues)
-                put("embedded_script.bridge_live_enabled", "true")
-                put("embedded_script.bridge_live_dispatch_count", completed.get().toString())
-                put("embedded_script.bridge_live_dispatch_failed_count", failed.get().toString())
-                put("embedded_script.bridge_live_dispatch_pending_count", pending.get().coerceAtLeast(0).toString())
-                put("embedded_script.bridge_live_dispatch_pending_limit", bridgeLimits.maxPendingBridgeCalls.toString())
-                put("embedded_script.bridge_live_dispatch_resource_limited_count", resourceLimited.get().toString())
-                put(
-                    "embedded_script.bridge_live_dispatch_status",
-                    if (pending.get() <= 0) "done" else "pending",
-                )
-                put("embedded_script.bridge_live_responses_json", bridgeResponsesJsonSnapshot())
-                putAll(provider.nativeDiagnostics())
+                putAll(nativeValuesSnapshot())
             }
             return result.copy(nativeValues = nativeValues)
         }
 
+        fun nativeValuesSnapshot(): Map<String, String> = linkedMapOf<String, String>().apply {
+            put("embedded_script.bridge_live_enabled", "true")
+            put("embedded_script.bridge_live_dispatch_count", completed.get().toString())
+            put("embedded_script.bridge_live_dispatch_failed_count", failed.get().toString())
+            put("embedded_script.bridge_live_dispatch_pending_count", pending.get().coerceAtLeast(0).toString())
+            put("embedded_script.bridge_live_dispatch_pending_limit", bridgeLimits.maxPendingBridgeCalls.toString())
+            put("embedded_script.bridge_live_dispatch_resource_limited_count", resourceLimited.get().toString())
+            put("embedded_script.bridge_live_dispatch_poll_count", pollCount.get().toString())
+            put("embedded_script.bridge_live_dispatch_started_at_epoch_ms", startedAtEpochMs.toString())
+            put("embedded_script.bridge_live_dispatch_last_poll_at_epoch_ms", lastPollAtEpochMs.get().toString())
+            put("embedded_script.bridge_live_dispatch_last_request_at_epoch_ms", lastRequestAtEpochMs.get().toString())
+            put("embedded_script.bridge_live_dispatch_last_response_at_epoch_ms", lastResponseAtEpochMs.get().toString())
+            put(
+                "embedded_script.bridge_live_dispatch_status",
+                if (pending.get() <= 0) "done" else "pending",
+            )
+            put("embedded_script.bridge_live_responses_json", bridgeResponsesJsonSnapshot())
+            putAll(provider.nativeDiagnostics())
+        }
+
         private fun loop() {
             while (running.get()) {
+                pollCount.incrementAndGet()
+                lastPollAtEpochMs.set(System.currentTimeMillis())
                 drainRequestFiles()
                 Thread.sleep(BRIDGE_LIVE_POLL_INTERVAL_MS)
             }
             repeat(BRIDGE_LIVE_DRAIN_ITERATIONS) {
+                pollCount.incrementAndGet()
+                lastPollAtEpochMs.set(System.currentTimeMillis())
                 drainRequestFiles()
                 if (pending.get() <= 0) {
                     return
@@ -903,6 +1053,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 file.delete()
                 return
             }
+            lastRequestAtEpochMs.set(System.currentTimeMillis())
             val responded = AtomicBoolean(false)
             if (pending.get() >= bridgeLimits.maxPendingBridgeCalls) {
                 resourceLimited.incrementAndGet()
@@ -953,6 +1104,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             synchronized(responsesLock) {
                 responses += response
             }
+            lastResponseAtEpochMs.set(System.currentTimeMillis())
             writeResponse(response)
             completed.incrementAndGet()
             if (!response.ok) {
@@ -1064,6 +1216,10 @@ class NativeNodeEmbeddedScriptService : Service() {
                 lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "interactive.stop")
             }
         }
+        val stoppingNativeValues = activeHeartbeatMonitor?.nativeValuesSnapshot("stopping")
+            ?: activeLifecycle?.nativeValues().orEmpty()
+        activeHeartbeatMonitor?.stop("interactive.stop")
+        activeHeartbeatMonitor = null
         NodeInteractiveLongRunningStatusStore.write(
             context = this,
             executionId = executionId,
@@ -1073,8 +1229,8 @@ class NativeNodeEmbeddedScriptService : Service() {
             startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
             stopRequested = true,
             message = "interactive.stop.requested",
-            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("stopping"),
-            nativeValues = activeLifecycle?.nativeValues().orEmpty(),
+            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("stopping", stoppingNativeValues),
+            nativeValues = stoppingNativeValues,
         )
         NodeInteractiveLongRunningStatusStore.write(
             context = this,
@@ -1085,8 +1241,8 @@ class NativeNodeEmbeddedScriptService : Service() {
             startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
             stopRequested = true,
             message = "interactive.stop.accepted",
-            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("process_exit_scheduled"),
-            nativeValues = activeLifecycle?.nativeValues().orEmpty(),
+            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("process_exit_scheduled", stoppingNativeValues),
+            nativeValues = stoppingNativeValues,
         )
         stopSelf(startId)
         scheduleProcessExit(0)
@@ -1126,8 +1282,12 @@ class NativeNodeEmbeddedScriptService : Service() {
         activeExecutionId
             ?.takeIf { activeExecutionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING }
             ?.let { executionId ->
+                val heartbeatValues = activeHeartbeatMonitor?.nativeValuesSnapshot("foreground_service_timeout")
+                    ?: activeLifecycle?.nativeValues().orEmpty()
+                activeHeartbeatMonitor?.stop("foreground_service_timeout")
+                activeHeartbeatMonitor = null
                 val nativeValues = linkedMapOf<String, String>().apply {
-                    putAll(activeLifecycle?.nativeValues().orEmpty())
+                    putAll(heartbeatValues)
                     putAll(NodeAndroidRuntimePolicy.nativeValues("embedded_script.android_foreground_timeout", diagnostics))
                     put("embedded_script.foreground_service_timeout", "true")
                 }
@@ -1258,6 +1418,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val BRIDGE_LIVE_POLL_INTERVAL_MS = 10L
         private const val BRIDGE_LIVE_STOP_JOIN_MS = 1000L
         private const val BRIDGE_LIVE_DRAIN_ITERATIONS = 25
+        private const val HEARTBEAT_STOP_JOIN_MS = 250L
         private const val RESULT_TRANSPORT_STRING_MAX_CHARS = 32_768
         private const val CLIENT_SERVICE_START_GRACE_MS = 10_000L
         private const val TIMEOUT_EXIT_CODE = 124

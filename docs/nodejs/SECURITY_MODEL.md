@@ -137,6 +137,11 @@ diagnostics for background-start denial, manifest type validation, and
 `Service.onTimeout(...)` cleanup; those diagnostics do not grant background
 launch authority or restart permission. See
 `docs/nodejs/design/LONG_RUNNING_SERVICE.md`.
+S7-20 adds runtime heartbeat and budget diagnostics for the explicit
+interactive runtime. These diagnostics report event-loop responsiveness, last
+bridge progress, active registry/resource counts, and budget breaches, but they
+do not grant new bridge capabilities, raw Android objects, raw network,
+child-process authority, automatic restart, or hidden background execution.
 
 ## Feature Flag Policy
 
@@ -299,6 +304,13 @@ Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activ
 Declaring `network` is required for controlled `fetch`, `axios`, and `websocket` bridge dispatch when a capability manifest is enforced. Packaged builds map that capability to `android.permission.INTERNET`; doctor reports expose the mapping and raw Node network modules remain disabled.
 
 Bridge limit policy is optional and safe by default. Projects may lower or safely raise limits through `node.bridgeLimits` in `project.json` or `autojs6.node.bridgeLimits` in `package.json`; values above the hard maximum are ignored and reported through `profile.bridgeLimits.warnings`. The current policy bounds pending bridge calls, JS image handles, live shell commands, controlled fetch calls, controlled WebSocket sessions, and accessibility requests per second. Resource exhaustion uses `ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`; request-rate exhaustion uses `ERR_AUTOJS6_BRIDGE_RATE_LIMITED`.
+
+Runtime budget policy is a diagnostic and alignment layer over those provider
+limits. Safe `node.runtimeBudget`/`autojs6.node.runtimeBudget` metadata and the
+internal `autojs6:runtime-budget` source may tune reported budgets only within
+the effective bridge hard caps for bridge-owned resources. Above-cap overrides
+are ignored and surfaced as warnings. Provider quota enforcement remains the
+authority that rejects or cleans up the offending resource.
 
 Current `toast` and `app` support uses a private live transport in the main embedded service. The service injects per-execution bridge directories under its private cache, the JavaScript bootstrap writes JSON request files with an internal native filesystem helper, and the service writes JSON responses back for the pending Promise. User scripts are not given the bridge directory paths or raw Android objects.
 

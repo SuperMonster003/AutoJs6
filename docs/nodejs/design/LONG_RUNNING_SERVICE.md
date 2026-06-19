@@ -170,6 +170,18 @@ If startup does not complete before `startupTimeoutMs`, the service should fail 
 
 If stop grace expires, the service process should be force-stopped and diagnostics should record leaked resources.
 
+S7-20 adds the first runtime budget and heartbeat diagnostic layer. The policy
+is derived from the existing bridge limit policy and execution mode: one-shot
+runs keep `timeoutMs` as the maximum execution duration, while
+`interactive_long_running` reports the policy
+`foreground_user_visible_no_automatic_restart`. Interactive sessions now write
+periodic app-private heartbeat snapshots with event-loop responsiveness, last
+bridge request/response progress, active libuv handle diagnostics when native
+values are available, active `NodeBridgeResourceRegistry` entries, and current
+resource-budget usage. A pending bridge call with no timely bridge response is
+reported as `stale_pending_bridge` so stalled runtimes produce actionable
+diagnostics before broader service-mode promotion.
+
 Android 15+ can call `Service.onTimeout(int, int)` for timed-out foreground
 service types. The S7-19 runtime handles both service timeout overloads,
 records foreground timeout diagnostics in the interactive status snapshot,
@@ -241,6 +253,16 @@ Required quota categories:
 Quota failures should use stable `ERR_AUTOJS6_*` or bridge error codes and should be visible in diagnostics.
 
 Quota policy must have hard maximums that project metadata cannot raise.
+
+The S7-20 runtime budget does not grant new resources and does not bypass
+provider enforcement. Safe project/package/runtime overrides may lower or raise
+reported budget values only up to the effective `NodeBridgeLimits` hard caps for
+pending bridge calls, image handles, controlled fetch requests, and controlled
+WebSocket sessions. Resource breaches are surfaced through
+`embedded_script.runtime_budget.*`, heartbeat JSON, and `activeResources`;
+provider-level quota denials such as shell, network, WebSocket, image, sensor,
+UI, and bridge pending-call limits continue to reject or clean up the offending
+resource through their existing fail-closed paths.
 
 ## Network And WebSocket Behavior
 
@@ -368,6 +390,14 @@ directory, state, start/update timestamps, duration, stop-request flag, restart
 policy `never`, `automaticRestart=false`, stop action name, active resource
 summary, policy metadata, and native values.
 
+S7-20 extends those snapshots with runtime heartbeat status, heartbeat sequence,
+event-loop responsiveness, runtime budget status, budget breach count,
+`NodeBridgeResourceRegistry` active count/types, active image handles,
+controlled fetch requests, and controlled WebSocket sessions. Stopping, stopped,
+timed-out, and failed terminal status records preserve the latest runtime budget
+native values so a later diagnostic read does not lose the reason a runtime was
+stalled, over budget, or stopped by the user/system.
+
 ## Tests
 
 The current S7-18 gate covers:
@@ -381,6 +411,9 @@ The current S7-18 gate covers:
 - Android runtime policy diagnostics for foreground service manifest/type,
   background-start denial classification, Android 15 timeout cleanup, and
   Android 16 WorkManager quota reporting
+- runtime budget parsing, heartbeat stale classification, provider resource
+  quota rejection without leaks, and interactive status heartbeat/budget
+  summaries
 - direct script `interactiveLongRunning`/legacy `long_running` rejection before
   user code
 - one-shot interval timeout regression
@@ -399,9 +432,10 @@ Any release with long-running service mode enabled must verify:
 - `NodeEmbeddedLifecycleStressInstrumentationTest` still passes
 - `NodeInteractiveLongRunningInstrumentationTest` passes on the target device
 - `NodeAndroidRuntimePolicyInstrumentationTest` passes on the target device
+- `NodeRuntimeBudgetPolicyInstrumentationTest` passes on the target device
 - foreground service permissions and type are correct
 - status snapshots include duration, restart policy `never`, stop action, and
-  active resource summary
+  active resource summary plus runtime heartbeat/budget diagnostics
 - raw network and dangerous process APIs remain denied
 - service mode is documented as explicit and user-visible
 

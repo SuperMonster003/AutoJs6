@@ -399,8 +399,11 @@ The v1.1 runtime has a controlled interactive foreground entry for host-owned
 launches. It starts a user-visible Node session, posts a persistent notification
 with Stop, reports status/duration/resource summary in app-private storage, and
 uses restart policy `never`. Android foreground-service start/type failures and
-system timeout cleanup are reported through stable diagnostics. It is not a
-packaged service descriptor, scheduler, or hidden background mode.
+system timeout cleanup are reported through stable diagnostics. Status snapshots
+also include runtime heartbeat and budget diagnostics such as event-loop
+responsiveness, last bridge progress, active resource counts, and budget breach
+counts. It is not a packaged service descriptor, scheduler, or hidden background
+mode.
 
 Keep normal scripts one-shot and timeout-bounded. Use notifications and the
 controlled `work_manager` scheduling MVP within their current partial limits:

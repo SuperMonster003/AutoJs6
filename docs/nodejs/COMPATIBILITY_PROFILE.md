@@ -201,6 +201,10 @@ Current behavior remains:
 - Android runtime policy diagnostics cover foreground-service manifest/type
   validation, background-start denial, Android 15 `Service.onTimeout(...)`
   cleanup, and Android 16 WorkManager quota metadata
+- runtime heartbeat/budget diagnostics report event-loop responsiveness, last
+  bridge request/response progress, active resource registry counts, active
+  image/network/WebSocket counts, and budget breach counts in status
+  `nativeValues`/`activeResources`
 - service process exit is expected after one-shot execution settles
 - packaged Node entries remain one-shot unless a future explicit service
   descriptor is implemented

@@ -555,6 +555,7 @@ val nodeJsLongRunningGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeAndroidRuntimePolicyInstrumentationTest",
     "org.autojs.autojs.engine.NodeExecutionModePolicyInstrumentationTest",
     "org.autojs.autojs.engine.NodeInteractiveLongRunningInstrumentationTest",
+    "org.autojs.autojs.engine.NodeRuntimeBudgetPolicyInstrumentationTest",
     "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest",

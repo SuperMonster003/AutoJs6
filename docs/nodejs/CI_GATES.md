@@ -236,8 +236,11 @@ before user code, and runs the explicit interactive session status/foreground
 survival/Stop-action recovery test. S7-19 adds embedded foreground-service
 manifest/type validation, foreground-service start-denial diagnostics, simulated
 Android 15 `Service.onTimeout(...)` cleanup, and Android 16 WorkManager quota
-metadata checks. It also continues lifecycle/resource stress coverage for
-timeouts, queueing, cleanup, and reserved-mode rejection before user code.
+metadata checks. S7-20 adds runtime budget parsing, heartbeat stale diagnostics,
+provider quota rejection without leaked resources, and interactive status
+heartbeat/budget summaries. It also continues lifecycle/resource stress
+coverage for timeouts, queueing, cleanup, and reserved-mode rejection before
+user code.
 
 ## Release Gate
 

@@ -52,6 +52,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeJavaInteropBridgeInstrumentationTest`
 - [ ] `NodeBridgeResourceRegistryInstrumentationTest`
 - [ ] `NodeBridgeConcurrencyLimitsInstrumentationTest`
+- [ ] `NodeRuntimeBudgetPolicyInstrumentationTest`
 - [ ] `NodeBridgeRpcFuzzerInstrumentationTest`
 - [ ] `NodeExampleProjectInstrumentationTest`
 - [ ] timeline trace smoke verifies default-off behavior and required `embedded_script.timeline_json` events when opted in
@@ -74,6 +75,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] bridge conformance verifies stable module exports, Promise-returning bridge calls, provider error shape, capability rejection, handle methods, and zero pending calls after destroy
 - [ ] bridge resource registry verifies leaked image/screen/websocket resource cleanup semantics, Java handle cleanup, `work_manager` registration cleanup, shell timeout cleanup, and `embedded_script.bridge_resource.*` diagnostics
 - [ ] bridge concurrency limits verify pending-call flood rejection, image-handle quota, shell/network/WebSocket resource limits, accessibility request-rate limiting, safe project overrides, and ignored above-hard-max overrides
+- [ ] runtime heartbeat/budget verifies stale bridge-call diagnostics, active registry/resource counts, safe runtime budget overrides, ignored above-hard-max overrides, provider quota rejection without leaks, and terminal status preservation
 - [ ] bridge RPC fuzzer verifies malformed request parsing, unknown dispatch paths, fake-provider mode, malformed responses, service-destroy rejection, and zero pending calls after cleanup
 - [ ] native addon policy verifies `.node` denial through relative require, `module.createRequire`, package `main`, package `exports`, package `imports`, and package subpath imports with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`
 - [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
@@ -207,6 +209,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] explicit embedded execution queue runs a second script after the first, supports queued cancellation, and returns `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full
 - [ ] interactive long-running mode remains explicit, foreground, user-stoppable, restart policy `never`, and unavailable to normal script/package launches unless their dedicated gates are implemented
 - [ ] embedded Node foreground-service start/type/timeout diagnostics are present, and Android timeout cleanup calls the immediate stop path
+- [ ] interactive status snapshots preserve runtime heartbeat/budget diagnostics, including stopped/timed-out terminal records
 
 ## Diagnostics
 
