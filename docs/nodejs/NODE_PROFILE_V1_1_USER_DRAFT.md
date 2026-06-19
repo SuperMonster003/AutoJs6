@@ -293,11 +293,23 @@ The v1.1 UI module uses JSON descriptors and opaque handles. No raw `Activity`,
 "nodejs";
 
 const ui = require("ui");
+const model = ui.state({ title: "Node UI", enabled: true, progress: 25 });
 
 const handle = await ui.showLayout({
   type: "Vertical",
   children: [
-    { type: "Text", id: "title", text: "Node UI" },
+    { type: "Text", id: "title", text: ui.bind(model, "title") },
+    { type: "Switch", id: "enabled", text: "Enabled", checked: ui.bind(model, "enabled") },
+    { type: "Progress", id: "progress", progress: ui.bind(model, "progress"), max: 100 },
+    { type: "List", id: "choices", items: ["One", "Two"] },
+    {
+      type: "Tabs",
+      id: "tabs",
+      tabs: [
+        { id: "first", title: "First", content: { type: "Text", text: "First tab" } },
+        { id: "second", title: "Second", content: { type: "Text", text: "Second tab" } }
+      ]
+    },
     { type: "Button", id: "ok", text: "OK" }
   ]
 });
@@ -305,7 +317,8 @@ const handle = await ui.showLayout({
 const off = handle.on("click", async (event) => {
   if (event.id === "ok") {
     off();
-    await handle.update({ id: "title", text: "Clicked" });
+    model.update({ title: "Clicked", progress: 100 });
+    await handle.batchUpdate([{ id: "enabled", checked: false }]);
     await handle.close();
   }
 });
@@ -314,6 +327,7 @@ const off = handle.on("click", async (event) => {
 Current provider status is Activity-owned live MVP in the main app. Scripts
 should still treat UI as a constrained declarative bridge, not as a replacement
 for Rhino UI APIs or a raw Android View API.
+`WebView` remains unavailable until a separate security gate is completed.
 
 ## Work Manager
 

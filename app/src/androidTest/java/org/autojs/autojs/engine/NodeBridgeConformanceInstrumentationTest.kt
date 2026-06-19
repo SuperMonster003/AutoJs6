@@ -184,9 +184,9 @@ class NodeBridgeConformanceInstrumentationTest {
                     } else if (method === "drainEvents") {
                       result = uiDrained ? [] : [{ type: "click", id: "ok", text: "OK" }];
                       uiDrained = true;
-                    } else if (method === "update" || method === "close") {
-                      result = null;
-                    }
+                  } else if (method === "update" || method === "batchUpdate" || method === "close") {
+                    result = null;
+                  }
                   } else if (moduleName === "work_manager") {
                     if (method === "scheduleOnce") result = "work-once";
                     else if (method === "schedulePeriodic") result = "work-periodic";
@@ -270,7 +270,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("sqlite", sqlite, ["open"]);
               expectExports("notifications", notifications, ["notify", "cancel", "cancelAll"]);
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
-              expectExports("ui", ui, ["showLayout"]);
+             expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
 
               assert.strictEqual(typeof app.packageName, "string");
@@ -391,7 +391,7 @@ class NodeBridgeConformanceInstrumentationTest {
               assert(sensorCallbackCount >= 1, "sensors subscription callback did not run");
               const uiHandle = await expectPromise("ui.showLayout", ui.showLayout({ type: "Vertical", children: [{ type: "Text", id: "title", text: "Node" }, { type: "Button", id: "ok", text: "OK" }] }, { timeoutMs: 1070, drainIntervalMs: 1 }));
               expectFrozen("ui.handle", uiHandle);
-              expectExports("ui.handle", uiHandle, ["on", "update", "close"]);
+             expectExports("ui.handle", uiHandle, ["on", "update", "batchUpdate", "close"]);
               let uiClickCount = 0;
               let uiOff = function() {};
               const uiReady = new Promise((resolve) => {
@@ -635,7 +635,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.SQLITE to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
             NodeBridgeModules.NOTIFICATIONS to setOf("notify", "cancel", "cancelAll"),
             NodeBridgeModules.SENSORS to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
-            NodeBridgeModules.UI to setOf("showLayout", "update", "close", "drainEvents"),
+            NodeBridgeModules.UI to setOf("showLayout", "update", "batchUpdate", "close", "drainEvents"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
         )
     }

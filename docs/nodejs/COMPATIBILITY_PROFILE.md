@@ -1237,12 +1237,16 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - `UiHandle.id: string`
   - `UiHandle.on(event, callback, options?): () => void`
   - `UiHandle.update(patch, options?): Promise<void>`
+  - `UiHandle.batchUpdate(patches, options?): Promise<void>`
   - `UiHandle.close(options?): Promise<void>`
+  - `state(initialJson)` creates an observable JSON state object; `bind(state, key)` provides one-way binding into descriptor properties such as `text`, `checked`, `progress`, `enabled`, and `selectedIndex`
   - layout descriptors and update patches must be JSON-only plain objects; functions, symbols, `bigint`, `undefined`, cycles, non-plain object instances, excessive depth, excessive object keys, excessive array length, and oversized descriptors are rejected before dispatch
+  - binding values are resolved to JSON before `showLayout` dispatch; UI process code never receives JavaScript functions, closures, or executable binding expressions
   - event callbacks receive frozen JSON snapshots with `handleId`; events are delivered by bounded `drainEvents` bridge requests instead of direct Android-to-JavaScript callbacks
   - requests require the `ui` capability
   - current JavaScript API, fake-provider tests, type declarations, and bridge protocol are reserved
-  - Android provider starts an internal Activity and supports `Column`, `Row`, `Text`, `Button`, `Input`, `Image`, and `ScrollView` descriptors, `update`, Button/Input/lifecycle events, state snapshots, `close`, provider-destroy cleanup, and a bounded active UI session count
+  - Android provider starts an internal Activity and supports `Column`, `Row`, `Text`, `Button`, `Input`, `Image`, `ScrollView`, `List`, `Switch`, `Checkbox`, `Progress`, and `Tabs` descriptors, `update`, `batchUpdate`, Button/Input/List/Switch/Checkbox/Tabs/lifecycle events, state snapshots, `close`, provider-destroy cleanup, and a bounded active UI session count
+  - `WebView` descriptors reject with a stable invalid-request error until a separate WebView security gate is designed
   - JavaScript receives only an opaque handle; no raw `Context`, `Activity`, `View`, `Window`, `Fragment`, `Handler`, Rhino `NativeView`, overlay window, Binder, or Java object crosses into Node
 - `clipboard`
   - `getText(options?): Promise<string>`

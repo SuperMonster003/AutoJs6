@@ -15134,6 +15134,164 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return descriptor;
   }
+  const __autojs6_ui_state_type = "autojs6.ui.state";
+  const __autojs6_ui_binding_type = "autojs6.ui.binding";
+  const __autojs6_ui_bindable_properties = Object.freeze({
+    text: true,
+    value: true,
+    checked: true,
+    enabled: true,
+    progress: true,
+    max: true,
+    hint: true,
+    contentDescription: true,
+    selectedIndex: true
+  });
+  function __autojs6_ui_json_clone(value, methodName, path) {
+    return __autojs6_ui_validate_json(value, methodName, path || "value", 0, []);
+  }
+  function __autojs6_ui_is_state(value) {
+    return !!(value && typeof value === "object" && value.__autojs6UiState === __autojs6_ui_state_type);
+  }
+  function __autojs6_ui_is_binding(value) {
+    return !!(value && typeof value === "object" && value.__autojs6UiBinding === __autojs6_ui_binding_type);
+  }
+  function __autojs6_ui_state(initialValue) {
+    const initial = initialValue === undefined ? {} : __autojs6_ui_json_clone(initialValue, "state", "state");
+    if (!initial || typeof initial !== "object" || Array.isArray(initial)) {
+      throw __autojs6_ui_invalid_argument_error("state", "ui.state requires a JSON object initial value.");
+    }
+    const values = JSON.parse(JSON.stringify(initial));
+    const listeners = [];
+    let api = null;
+    function cloneSnapshot() {
+      return Object.freeze(JSON.parse(JSON.stringify(values)));
+    }
+    function notify(keys) {
+      const event = Object.freeze({
+        keys: Object.freeze(keys.slice()),
+        snapshot: cloneSnapshot()
+      });
+      listeners.slice().forEach(function(listener) {
+        listener(event);
+      });
+    }
+    api = {
+      get(key) {
+        const name = key === undefined || key === null ? "" : String(key);
+        if (!Object.prototype.hasOwnProperty.call(values, name)) {
+          return undefined;
+        }
+        return __autojs6_ui_json_clone(values[name], "state", "state." + name);
+      },
+      set(key, value) {
+        const name = key === undefined || key === null ? "" : String(key).trim();
+        if (!name) {
+          throw __autojs6_ui_invalid_argument_error("state", "ui.state.set requires a non-empty key.");
+        }
+        values[name] = __autojs6_ui_json_clone(value, "state", "state." + name);
+        notify([name]);
+        return api;
+      },
+      update(nextValues) {
+        const descriptor = __autojs6_ui_json_clone(nextValues, "state", "state");
+        if (!descriptor || typeof descriptor !== "object" || Array.isArray(descriptor)) {
+          throw __autojs6_ui_invalid_argument_error("state", "ui.state.update requires a JSON object.");
+        }
+        const keys = Object.keys(descriptor);
+        keys.forEach(function(key) {
+          values[key] = descriptor[key];
+        });
+        if (keys.length > 0) {
+          notify(keys);
+        }
+        return api;
+      },
+      snapshot: cloneSnapshot,
+      subscribe(callback) {
+        if (typeof callback !== "function") {
+          throw __autojs6_ui_invalid_argument_error("state", "ui.state.subscribe requires a callback.");
+        }
+        listeners.push(callback);
+        return function unsubscribe() {
+          const index = listeners.indexOf(callback);
+          if (index >= 0) {
+            listeners.splice(index, 1);
+          }
+        };
+      }
+    };
+    Object.defineProperty(api, "__autojs6UiState", {
+      value: __autojs6_ui_state_type
+    });
+    return Object.freeze(api);
+  }
+  function __autojs6_ui_bind(state, key) {
+    if (!__autojs6_ui_is_state(state)) {
+      throw __autojs6_ui_invalid_argument_error("bind", "ui.bind requires a ui.state object.");
+    }
+    const name = key === undefined || key === null ? "" : String(key).trim();
+    if (!name) {
+      throw __autojs6_ui_invalid_argument_error("bind", "ui.bind requires a non-empty state key.");
+    }
+    return Object.freeze({
+      __autojs6UiBinding: __autojs6_ui_binding_type,
+      state,
+      key: name
+    });
+  }
+  function __autojs6_ui_prepare_descriptor(value, methodName) {
+    const bindings = [];
+    function walk(entry, path, componentId, propertyName, depth, seen) {
+      if (__autojs6_ui_is_binding(entry)) {
+        if (!componentId || !propertyName || !__autojs6_ui_bindable_properties[propertyName]) {
+          throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " binding at " + path + " requires a component id and bindable property.");
+        }
+        bindings.push({
+          state: entry.state,
+          key: entry.key,
+          id: componentId,
+          property: propertyName
+        });
+        return entry.state.get(entry.key);
+      }
+      if (entry === null || typeof entry === "string" || typeof entry === "number" || typeof entry === "boolean") {
+        return entry;
+      }
+      if (!entry || typeof entry !== "object") {
+        return entry;
+      }
+      if (seen.indexOf(entry) >= 0) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must not contain cycles.");
+      }
+      if (depth > 16) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor is too deep at " + path + ".");
+      }
+      seen.push(entry);
+      if (Array.isArray(entry)) {
+        const arrayResult = entry.map(function(child, index) {
+          return walk(child, path + "[" + index + "]", componentId, propertyName, depth + 1, seen);
+        });
+        seen.pop();
+        return arrayResult;
+      }
+      const prototype = Object.getPrototypeOf(entry);
+      if (prototype !== Object.prototype && prototype !== null) {
+        throw __autojs6_ui_invalid_argument_error(methodName, "ui." + methodName + " descriptor must use plain JSON objects at " + path + ".");
+      }
+      const currentId = entry.id === undefined || entry.id === null ? componentId : String(entry.id);
+      const objectResult = Object.create(null);
+      Object.keys(entry).forEach(function(key) {
+        objectResult[key] = walk(entry[key], path + "." + key, currentId, key, depth + 1, seen);
+      });
+      seen.pop();
+      return objectResult;
+    }
+    return {
+      descriptor: walk(value, "layout", "", "", 0, []),
+      bindings
+    };
+  }
   function __autojs6_ui_handle_id(value) {
     if (typeof value === "string") {
       return value.trim();
@@ -15143,7 +15301,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return "";
   }
-  function __autojs6_ui_handle(result, moduleOptions) {
+  function __autojs6_ui_handle(result, moduleOptions, bindings) {
     const id = __autojs6_ui_handle_id(result);
     if (!id) {
       throw __autojs6_ui_invalid_argument_error("showLayout", "ui.showLayout provider returned an invalid UI handle.");
@@ -15152,6 +15310,9 @@ std::string buildEmbeddedScriptExecutionSource(
     let closed = false;
     let drainTimer = null;
     let draining = false;
+    let pendingBindingPatches = [];
+    let bindingFlushScheduled = false;
+    const bindingUnsubscribers = [];
     const defaultDrainIntervalMs = Math.max(10, Math.min(1000, Number(moduleOptions.drainIntervalMs) || 50));
     function listenerCount() {
       return Object.keys(listeners).reduce(function(total, key) {
@@ -15244,6 +15405,71 @@ std::string buildEmbeddedScriptExecutionSource(
         return undefined;
       });
     }
+    function batchUpdate(patches, options) {
+      if (closed) {
+        return Promise.resolve(undefined);
+      }
+      if (!Array.isArray(patches)) {
+        return Promise.reject(__autojs6_ui_invalid_argument_error("batchUpdate", "ui.handle.batchUpdate requires an array of patches."));
+      }
+      if (patches.length === 0) {
+        return Promise.resolve(undefined);
+      }
+      if (patches.length > 64) {
+        return Promise.reject(__autojs6_ui_invalid_argument_error("batchUpdate", "ui.handle.batchUpdate patch array exceeds 64 entries."));
+      }
+      let descriptors;
+      try {
+        descriptors = patches.map(function(patch) {
+          return __autojs6_ui_descriptor(patch, "batchUpdate");
+        });
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui",
+        "batchUpdate",
+        [id, descriptors],
+        __autojs6_ui_bridge_options(bridgeOptions, 10000)
+      ).then(function() {
+        return undefined;
+      });
+    }
+    function flushBindingPatches() {
+      bindingFlushScheduled = false;
+      if (closed || pendingBindingPatches.length === 0) {
+        pendingBindingPatches = [];
+        return;
+      }
+      const patches = pendingBindingPatches.slice();
+      pendingBindingPatches = [];
+      batchUpdate(patches, moduleOptions).catch(function() {
+        return undefined;
+      });
+    }
+    function enqueueBindingPatch(patch) {
+      if (closed) {
+        return;
+      }
+      pendingBindingPatches.push(patch);
+      if (!bindingFlushScheduled) {
+        bindingFlushScheduled = true;
+        Promise.resolve().then(flushBindingPatches);
+      }
+    }
+    (Array.isArray(bindings) ? bindings : []).forEach(function(binding) {
+      const off = binding.state.subscribe(function(event) {
+        if (!event || !Array.isArray(event.keys) || event.keys.indexOf(binding.key) < 0) {
+          return;
+        }
+        const patch = Object.create(null);
+        patch.id = binding.id;
+        patch[binding.property] = binding.state.get(binding.key);
+        enqueueBindingPatch(patch);
+      });
+      bindingUnsubscribers.push(off);
+    });
     function close(options) {
       if (closed) {
         return Promise.resolve(undefined);
@@ -15253,6 +15479,10 @@ std::string buildEmbeddedScriptExecutionSource(
         clearInterval(drainTimer);
         drainTimer = null;
       }
+      bindingUnsubscribers.splice(0).forEach(function(unsubscribe) {
+        unsubscribe();
+      });
+      pendingBindingPatches = [];
       const bridgeOptions = __autojs6_ui_options(options || moduleOptions);
       return __autojs6_call_autojs(
         "ui",
@@ -15267,6 +15497,7 @@ std::string buildEmbeddedScriptExecutionSource(
       id,
       on,
       update,
+      batchUpdate,
       close
     });
   }
@@ -15275,9 +15506,11 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_limited_ui_cache;
     }
     function showLayout(layoutJson, options) {
+      let prepared;
       let descriptor;
       try {
-        descriptor = __autojs6_ui_descriptor(layoutJson, "showLayout");
+        prepared = __autojs6_ui_prepare_descriptor(layoutJson, "showLayout");
+        descriptor = __autojs6_ui_descriptor(prepared.descriptor, "showLayout");
       } catch (error) {
         return Promise.reject(error);
       }
@@ -15288,11 +15521,13 @@ std::string buildEmbeddedScriptExecutionSource(
         [descriptor],
         __autojs6_ui_bridge_options(bridgeOptions, 10000)
       ).then(function(result) {
-        return __autojs6_ui_handle(result, bridgeOptions);
+        return __autojs6_ui_handle(result, bridgeOptions, prepared.bindings);
       });
     }
     __autojs6_limited_ui_cache = Object.freeze({
-      showLayout
+      showLayout,
+      state: __autojs6_ui_state,
+      bind: __autojs6_ui_bind
     });
     return __autojs6_limited_ui_cache;
   }

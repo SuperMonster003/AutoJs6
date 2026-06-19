@@ -2,7 +2,12 @@ package org.autojs.autojs.engine
 
 import android.view.View
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.ListView
+import android.widget.ProgressBar
+import android.widget.Switch as AndroidSwitch
 import android.widget.TextView
 import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONArray
@@ -38,7 +43,7 @@ class NodeUiBridgeInstrumentationTest {
 
     @Test
     fun kotlinUiBridgeRegistryManifestAndFakeProviderAreStable() {
-        listOf("showLayout", "update", "close", "drainEvents").forEach { method ->
+        listOf("showLayout", "update", "batchUpdate", "close", "drainEvents").forEach { method ->
             assertTrue(NodeBridgeModules.supports("ui", method))
             assertEquals(
                 listOf(NodeBridgePermissionManifest.UI),
@@ -64,6 +69,12 @@ class NodeUiBridgeInstrumentationTest {
                     assertEquals("Updated", args.getJSONObject(1).getString("text"))
                     NodeBridgeResponse.success(request.id, "null")
                 }
+                "batchUpdate" -> {
+                    val args = JSONArray(request.argsJson)
+                    assertEquals("fake-ui-1", args.getString(0))
+                    assertEquals("Batch", args.getJSONArray(1).getJSONObject(0).getString("text"))
+                    NodeBridgeResponse.success(request.id, "null")
+                }
                 "drainEvents" -> NodeBridgeResponse.success(
                     request.id,
                     JSONArray().put(JSONObject().put("type", "click").put("id", "ok")).toString(),
@@ -82,16 +93,18 @@ class NodeUiBridgeInstrumentationTest {
             argsJson = """[{"type":"Vertical","children":[{"type":"Text","id":"title","text":"Hello"}]}]""",
         )
         val update = dispatch(provider, method = "update", argsJson = """["fake-ui-1",{"id":"title","text":"Updated"}]""")
+        val batch = dispatch(provider, method = "batchUpdate", argsJson = """["fake-ui-1",[{"id":"title","text":"Batch"}]]""")
         val drain = dispatch(provider, method = "drainEvents", argsJson = """["fake-ui-1",{"maxEvents":16}]""")
         val close = dispatch(provider, method = "close", argsJson = """["fake-ui-1"]""")
 
         assertTrue(show.toString(), show.ok)
         assertEquals("fake-ui-1", JSONObject(show.resultJson.orEmpty()).getString("id"))
         assertTrue(update.toString(), update.ok)
+        assertTrue(batch.toString(), batch.ok)
         assertTrue(drain.toString(), drain.ok)
         assertEquals("ok", JSONArray(drain.resultJson.orEmpty()).getJSONObject(0).getString("id"))
         assertTrue(close.toString(), close.ok)
-        assertEquals(listOf("showLayout", "update", "drainEvents", "close"), provider.requests.map { it.method })
+        assertEquals(listOf("showLayout", "update", "batchUpdate", "drainEvents", "close"), provider.requests.map { it.method })
     }
 
     @Test
@@ -145,6 +158,8 @@ class NodeUiBridgeInstrumentationTest {
                   } else if (request.method === "drainEvents") {
                     respond(request, drained ? [] : [{ type: "click", id: "ok", text: "OK" }]);
                     drained = true;
+                  } else if (request.method === "batchUpdate") {
+                    respond(request, { handleId: "ui-fake-1" });
                   } else {
                     respond(request, null);
                   }
@@ -152,10 +167,19 @@ class NodeUiBridgeInstrumentationTest {
               });
 
               const ui = require("ui");
+              const model = ui.state({ title: "Node UI", enabled: true, accepted: false, progress: 25 });
               const handle = await ui.showLayout({
                 type: "Vertical",
                 children: [
-                  { type: "Text", id: "title", text: "Node UI" },
+                  { type: "Text", id: "title", text: ui.bind(model, "title") },
+                  { type: "Switch", id: "enabled", text: "Enabled", checked: ui.bind(model, "enabled") },
+                  { type: "Checkbox", id: "accepted", text: "Accepted", checked: ui.bind(model, "accepted") },
+                  { type: "Progress", id: "progress", progress: ui.bind(model, "progress"), max: 100 },
+                  { type: "List", id: "choices", items: ["One", { text: "Two", value: 2 }] },
+                  { type: "Tabs", id: "tabs", tabs: [
+                    { id: "first", title: "First", content: { type: "Text", id: "tab-label", text: "Tab" } },
+                    { id: "second", title: "Second", content: { type: "Text", id: "tab-label-2", text: "Tab 2" } }
+                  ] },
                   { type: "Button", id: "ok", text: "OK" }
                 ]
               }, { timeoutMs: 777, drainIntervalMs: 1 });
@@ -171,6 +195,14 @@ class NodeUiBridgeInstrumentationTest {
                 }, { drainIntervalMs: 1, timeoutMs: 778 });
               });
               await ready;
+              model.set("title", "Bound");
+              model.set("enabled", false);
+              model.set("progress", 60);
+              await new Promise((resolve) => setTimeout(resolve, 30));
+              await handle.batchUpdate([
+                { id: "title", text: "Batch" },
+                { id: "progress", progress: 75 }
+              ], { timeoutMs: 779 });
               await handle.update({ id: "title", text: "Updated" }, { timeoutMs: 779 });
               await handle.close({ timeoutMs: 780 });
               const beforeInvalid = requests.length;
@@ -180,12 +212,25 @@ class NodeUiBridgeInstrumentationTest {
               } catch (error) {
                 invalidCode = codeOf(error);
               }
+              const showDescriptor = requests[0].args[0];
+              const batchSizes = requests
+                .filter((request) => request.method === "batchUpdate")
+                .map((request) => request.args[1].length)
+                .join(",");
 
               console.log("ui.resolve=" + require.resolve("ui"));
               console.log("ui.shadow=" + (ui.shadow === true));
               console.log("ui.frozen=" + Object.isFrozen(ui));
-              console.log("ui.handle=" + [handle.id, typeof handle.on, typeof handle.update, typeof handle.close, Object.isFrozen(handle)].join("|"));
+              console.log("ui.exports=" + [typeof ui.showLayout, typeof ui.state, typeof ui.bind].join("|"));
+              console.log("ui.handle=" + [handle.id, typeof handle.on, typeof handle.update, typeof handle.batchUpdate, typeof handle.close, Object.isFrozen(handle)].join("|"));
               console.log("ui.clicked=" + clicked + "|" + eventFrozen);
+              console.log("ui.bound_initial=" + [
+                showDescriptor.children[0].text,
+                showDescriptor.children[1].checked,
+                showDescriptor.children[2].checked,
+                showDescriptor.children[3].progress
+              ].join("|"));
+              console.log("ui.batch_sizes=" + batchSizes);
               console.log("ui.requests=" + requests.map((request) => request.module + "." + request.method).join("|"));
               console.log("ui.permissions=" + requests.every((request) => request.permissions.indexOf("ui") >= 0));
               console.log("ui.timeout=" + requests[0].timeoutMs);
@@ -204,9 +249,12 @@ class NodeUiBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("ui.resolve=ui"))
         assertTrue(result.stdout.contains("ui.shadow=false"))
         assertTrue(result.stdout.contains("ui.frozen=true"))
-        assertTrue(result.stdout.contains("ui.handle=ui-fake-1|function|function|function|true"))
+        assertTrue(result.stdout.contains("ui.exports=function|function|function"))
+        assertTrue(result.stdout.contains("ui.handle=ui-fake-1|function|function|function|function|true"))
         assertTrue(result.stdout.contains("ui.clicked=ok:ui-fake-1|true"))
-        assertTrue(result.stdout.contains("ui.requests=ui.showLayout|ui.drainEvents|ui.update|ui.close"))
+        assertTrue(result.stdout.contains("ui.bound_initial=Node UI|true|false|25"))
+        assertTrue(result.stdout.contains("ui.batch_sizes=3,2"))
+        assertTrue(result.stdout.contains("ui.requests=ui.showLayout|ui.drainEvents|ui.batchUpdate|ui.batchUpdate|ui.update|ui.close"))
         assertTrue(result.stdout.contains("ui.permissions=true"))
         assertTrue(result.stdout.contains("ui.timeout=777"))
         assertTrue(result.stdout.contains("ui.no_raw_view=true"))
@@ -336,6 +384,14 @@ class NodeUiBridgeInstrumentationTest {
                         ]},
                         {"type":"ScrollView","id":"scroll","children":[
                           {"type":"Image","id":"logo","alt":"Logo"}
+                        ]},
+                        {"type":"Switch","id":"enabled","text":"Enabled","checked":false},
+                        {"type":"Checkbox","id":"accepted","text":"Accepted","checked":false},
+                        {"type":"Progress","id":"progress","progress":25,"max":100},
+                        {"type":"List","id":"choices","items":["One",{"text":"Two","value":2}]},
+                        {"type":"Tabs","id":"tabs","tabs":[
+                          {"id":"first","title":"First","content":{"type":"Text","id":"tab-first","text":"First tab"}},
+                          {"id":"second","title":"Second","content":{"type":"Text","id":"tab-second","text":"Second tab"}}
                         ]}
                       ]
                     }]
@@ -355,10 +411,22 @@ class NodeUiBridgeInstrumentationTest {
                 (root.findViewWithTag<View>("ok") as Button).performClick()
                 val input = root.findViewWithTag<View>("name") as EditText
                 input.setText("Alice")
+                (root.findViewWithTag<View>("enabled") as AndroidSwitch).isChecked = true
+                (root.findViewWithTag<View>("accepted") as CheckBox).performClick()
+                val list = root.findViewWithTag<View>("choices") as ListView
+                list.performItemClick(null, 1, 1L)
+                val tabs = root.findViewWithTag<View>("tabs") as LinearLayout
+                val tabRow = tabs.getChildAt(0) as LinearLayout
+                (tabRow.getChildAt(1) as Button).performClick()
             }
 
             val events = waitForUiEvents(provider, handleId) { collected ->
-                collected.hasEvent("click", "ok") && collected.hasEvent("input", "name")
+                collected.hasEvent("click", "ok") &&
+                    collected.hasEvent("input", "name") &&
+                    collected.hasEvent("change", "enabled") &&
+                    collected.hasEvent("change", "accepted") &&
+                    collected.hasEvent("select", "choices") &&
+                    collected.hasEvent("tab", "tabs")
             }
             val click = events.firstEvent("click", "ok")
             assertEquals(handleId, click.getString("handleId"))
@@ -373,6 +441,30 @@ class NodeUiBridgeInstrumentationTest {
                     .getJSONObject("name")
                     .getString("value"),
             )
+            assertTrue(events.firstEvent("change", "enabled").getBoolean("checked"))
+            assertTrue(events.firstEvent("change", "accepted").getBoolean("checked"))
+            val select = events.firstEvent("select", "choices")
+            assertEquals(1, select.getInt("selectedIndex"))
+            assertEquals("Two", select.getString("text"))
+            assertEquals(2, select.getInt("value"))
+            val tab = events.firstEvent("tab", "tabs")
+            assertEquals(1, tab.getInt("selectedIndex"))
+            assertEquals("second", tab.getString("tabId"))
+
+            val batchUpdate = dispatch(
+                provider,
+                method = "batchUpdate",
+                argsJson = """["$handleId",[{"id":"progress","progress":90},{"id":"title","text":"Batch Updated"}]]""",
+            )
+            assertTrue(batchUpdate.toString(), batchUpdate.ok)
+            instrumentation.waitForIdleSync()
+            instrumentation.runOnMainSync {
+                assertEquals(90, (activity!!.window.decorView.findViewWithTag<View>("progress") as ProgressBar).progress)
+                assertEquals(
+                    "Batch Updated",
+                    (activity.window.decorView.findViewWithTag<View>("title") as TextView).text.toString(),
+                )
+            }
 
             val update = dispatch(provider, method = "update", argsJson = """["$handleId",{"id":"title","text":"Updated"}]""")
             assertTrue(update.toString(), update.ok)
@@ -425,6 +517,16 @@ class NodeUiBridgeInstrumentationTest {
         assertEquals("ui", response.error?.module)
         assertEquals("showLayout", response.error?.method)
         assertTrue(response.error?.message.orEmpty().contains("unsupported component type"))
+        assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
+
+        val webView = dispatch(
+            provider,
+            method = "showLayout",
+            argsJson = """[{"type":"WebView","id":"web"}]""",
+        )
+        assertFalse(webView.toString(), webView.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, webView.error?.code)
+        assertTrue(webView.error?.message.orEmpty().contains("separate security gate"))
         assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"])
 
         val foreignUpdate = dispatch(

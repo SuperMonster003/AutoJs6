@@ -16,11 +16,17 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.CheckBox
+import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ListView
+import android.widget.ProgressBar
 import android.widget.ScrollView
+import android.widget.Switch as AndroidSwitch
 import android.widget.TextView
 import org.json.JSONArray
 import org.json.JSONObject
@@ -115,6 +121,7 @@ class NodeBridgeUiDispatchService : Service() {
         return when (request.method) {
             "showLayout" -> showLayout(request)
             "update" -> update(request)
+            "batchUpdate" -> batchUpdate(request)
             "drainEvents" -> drainEvents(request)
             "close" -> close(request)
             else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
@@ -157,6 +164,31 @@ class NodeBridgeUiDispatchService : Service() {
                 .put("id", session.id)
                 .put("state", session.snapshot())
                 .toString(),
+        )
+    }
+
+    private fun batchUpdate(request: NodeBridgeRequest): NodeBridgeResponse {
+        val args = request.argsArray()
+        val session = activeSession(request, args) ?: return invalidHandle(request)
+        val patches = args.optJSONArray(1)
+            ?: return invalid(request, "ui.batchUpdate requires a JSON array of patches.")
+        if (patches.length() > MAX_BATCH_PATCHES) {
+            return invalid(request, "ui.batchUpdate patch array exceeds $MAX_BATCH_PATCHES entries.")
+        }
+        val descriptors = mutableListOf<JSONObject>()
+        for (index in 0 until patches.length()) {
+            val patch = patches.optJSONObject(index)
+                ?: return invalid(request, "ui.batchUpdate patches must be JSON object descriptors.")
+            val validation = NodeBridgeUiRenderer.validateDescriptor(patch, requireType = false)
+            if (validation != null) {
+                return invalid(request, validation)
+            }
+            descriptors += patch
+        }
+        session.batchUpdate(descriptors)
+        return NodeBridgeResponse.success(
+            request.id,
+            session.snapshot().toString(),
         )
     }
 
@@ -226,6 +258,7 @@ class NodeBridgeUiDispatchService : Service() {
         private const val RESULT_RESPONSE = 1
         private const val DEFAULT_DRAIN_EVENTS = 16
         private const val MAX_DRAIN_EVENTS = 64
+        private const val MAX_BATCH_PATCHES = 64
 
         fun dispatch(context: Context, request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
             val appContext = context.applicationContext
@@ -346,6 +379,25 @@ class NodeBridgeUiSession(
     }
 
     fun update(patch: JSONObject) {
+        applyOrQueuePatch(patch)
+        enqueueEvent(JSONObject().put("type", "update").put("id", patch.optString("id")))
+    }
+
+    fun batchUpdate(patches: List<JSONObject>) {
+        val ids = JSONArray()
+        patches.forEach { patch ->
+            applyOrQueuePatch(patch)
+            patch.optString("id").takeIf { it.isNotBlank() }?.let(ids::put)
+        }
+        enqueueEvent(
+            JSONObject()
+                .put("type", "batchUpdate")
+                .put("count", patches.size)
+                .put("ids", ids),
+        )
+    }
+
+    private fun applyOrQueuePatch(patch: JSONObject) {
         val activity = activityRef?.get()
         if (activity != null) {
             activity.applyPatch(patch)
@@ -354,7 +406,6 @@ class NodeBridgeUiSession(
                 pendingPatches += JSONObject(patch.toString())
             }
         }
-        enqueueEvent(JSONObject().put("type", "update").put("id", patch.optString("id")))
     }
 
     fun close(reason: String) {
@@ -439,6 +490,12 @@ private class NodeBridgeUiRenderer(
             TYPE_INPUT -> createInput(descriptor)
             TYPE_IMAGE -> createImage(descriptor)
             TYPE_SCROLL_VIEW -> createScrollView(descriptor, isRoot)
+            TYPE_LIST -> createList(descriptor)
+            TYPE_SWITCH -> createSwitch(descriptor)
+            TYPE_CHECKBOX -> createCheckbox(descriptor)
+            TYPE_PROGRESS -> createProgress(descriptor)
+            TYPE_TABS -> createTabs(descriptor)
+            TYPE_TAB -> createTabPlaceholder(descriptor)
             else -> throw IllegalArgumentException("Unsupported ui component type: ${descriptor.optString("type")}")
         }
         if (id.isNotBlank()) {
@@ -455,6 +512,36 @@ private class NodeBridgeUiRenderer(
     fun applyPatch(target: View, patch: JSONObject) {
         val type = componentType(target)
         when (target) {
+            is CompoundButton -> {
+                if (patch.has("text")) {
+                    target.text = patch.optString("text")
+                }
+                if (patch.has("checked") || patch.has("value")) {
+                    target.isChecked = patch.optBoolean("checked", patch.optBoolean("value", target.isChecked))
+                }
+                if (patch.has("enabled")) {
+                    target.isEnabled = patch.optBoolean("enabled", true)
+                }
+            }
+            is ProgressBar -> {
+                if (patch.has("max")) {
+                    target.max = patch.optInt("max", target.max).coerceAtLeast(1)
+                }
+                if (patch.has("progress") || patch.has("value")) {
+                    target.progress = patch.optInt("progress", patch.optInt("value", target.progress)).coerceIn(0, target.max)
+                }
+                if (patch.has("indeterminate")) {
+                    target.isIndeterminate = patch.optBoolean("indeterminate", false)
+                }
+            }
+            is ListView -> {
+                if (patch.has("items")) {
+                    target.adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, listLabels(patch.optJSONArray("items")))
+                }
+                if (patch.has("enabled")) {
+                    target.isEnabled = patch.optBoolean("enabled", true)
+                }
+            }
             is TextView -> {
                 if (target !is EditText && patch.has("text")) {
                     target.text = patch.optString("text")
@@ -589,22 +676,191 @@ private class NodeBridgeUiRenderer(
         return scrollView
     }
 
+    private fun createList(descriptor: JSONObject): ListView {
+        val id = descriptor.optString("id")
+        val items = descriptor.optJSONArray("items") ?: JSONArray()
+        return ListView(activity).apply {
+            adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, listLabels(items))
+            setOnItemClickListener { _, _, position, _ ->
+                val item = listItem(items, position)
+                session.recordState(
+                    id,
+                    JSONObject()
+                        .put("id", id)
+                        .put("type", TYPE_LIST)
+                        .put("selectedIndex", position)
+                        .put("text", item.first)
+                        .put("value", item.second),
+                )
+                session.emitComponentEvent(
+                    "select",
+                    id,
+                    JSONObject()
+                        .put("index", position)
+                        .put("selectedIndex", position)
+                        .put("text", item.first)
+                        .put("value", item.second),
+                )
+            }
+        }
+    }
+
+    private fun createSwitch(descriptor: JSONObject): AndroidSwitch {
+        return AndroidSwitch(activity).apply {
+            configureCompoundButton(descriptor, TYPE_SWITCH, this)
+        }
+    }
+
+    private fun createCheckbox(descriptor: JSONObject): CheckBox {
+        return CheckBox(activity).apply {
+            configureCompoundButton(descriptor, TYPE_CHECKBOX, this)
+        }
+    }
+
+    private fun configureCompoundButton(descriptor: JSONObject, type: String, button: CompoundButton) {
+        val id = descriptor.optString("id")
+        button.text = descriptor.optString("text", id)
+        button.isChecked = descriptor.optBoolean("checked", descriptor.optBoolean("value", false))
+        button.setOnCheckedChangeListener { _, checked ->
+            session.recordState(
+                id,
+                JSONObject()
+                    .put("id", id)
+                    .put("type", type)
+                    .put("checked", checked)
+                    .put("value", checked),
+            )
+            session.emitComponentEvent(
+                "change",
+                id,
+                JSONObject()
+                    .put("checked", checked)
+                    .put("value", checked),
+            )
+        }
+    }
+
+    private fun createProgress(descriptor: JSONObject): ProgressBar {
+        val max = descriptor.optInt("max", 100).coerceAtLeast(1)
+        return ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal).apply {
+            this.max = max
+            isIndeterminate = descriptor.optBoolean("indeterminate", false)
+            progress = descriptor.optInt("progress", descriptor.optInt("value", 0)).coerceIn(0, max)
+            setPadding(0, dp(8), 0, dp(8))
+        }
+    }
+
+    private fun createTabs(descriptor: JSONObject): LinearLayout {
+        val id = descriptor.optString("id")
+        val tabs = descriptor.optJSONArray("tabs") ?: descriptor.optJSONArray("children") ?: JSONArray()
+        val selected = descriptor.optInt("selectedIndex", 0).coerceIn(0, (tabs.length() - 1).coerceAtLeast(0))
+        val layout = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+        val tabRow = LinearLayout(activity).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.START
+        }
+        val content = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, dp(8), 0, 0)
+        }
+        fun renderContent(index: Int) {
+            content.removeAllViews()
+            val tab = tabs.optJSONObject(index) ?: return
+            val tabChildren = tab.optJSONArray("children")
+            val tabContent = tab.optJSONObject("content")
+            if (tabChildren != null) {
+                for (childIndex in 0 until tabChildren.length()) {
+                    val child = tabChildren.optJSONObject(childIndex) ?: continue
+                    content.addView(createView(child), defaultLayoutParams(false))
+                }
+            } else if (tabContent != null) {
+                content.addView(createView(tabContent), defaultLayoutParams(false))
+            }
+        }
+        for (index in 0 until tabs.length()) {
+            val tab = tabs.optJSONObject(index) ?: continue
+            val title = tab.optString("title", tab.optString("text", tab.optString("id", "Tab ${index + 1}")))
+            tabRow.addView(
+                Button(activity).apply {
+                    text = title
+                    isAllCaps = false
+                    setOnClickListener {
+                        renderContent(index)
+                        session.recordState(
+                            id,
+                            JSONObject()
+                                .put("id", id)
+                                .put("type", TYPE_TABS)
+                                .put("selectedIndex", index)
+                                .put("text", title)
+                                .put("value", tab.opt("value") ?: tab.optString("id", title)),
+                        )
+                        session.emitComponentEvent(
+                            "tab",
+                            id,
+                            JSONObject()
+                                .put("index", index)
+                                .put("selectedIndex", index)
+                                .put("tabId", tab.optString("id"))
+                                .put("text", title)
+                                .put("value", tab.opt("value") ?: tab.optString("id", title)),
+                        )
+                    }
+                },
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
+            )
+        }
+        renderContent(selected)
+        layout.addView(tabRow, defaultLayoutParams(false))
+        layout.addView(content, defaultLayoutParams(false))
+        return layout
+    }
+
+    private fun createTabPlaceholder(descriptor: JSONObject): TextView {
+        return TextView(activity).apply {
+            text = descriptor.optString("title", descriptor.optString("text"))
+            textSize = 16f
+            setPadding(0, dp(6), 0, dp(6))
+        }
+    }
+
     private fun componentState(type: String, descriptor: JSONObject, view: View): JSONObject {
         val state = JSONObject()
             .put("id", descriptor.optString("id", (view.tag as? String).orEmpty()))
             .put("type", type)
         when (view) {
+            is CompoundButton -> state
+                .put("text", view.text?.toString().orEmpty())
+                .put("checked", view.isChecked)
+                .put("value", view.isChecked)
+            is ProgressBar -> state
+                .put("progress", view.progress)
+                .put("value", view.progress)
+                .put("max", view.max)
+                .put("indeterminate", view.isIndeterminate)
+            is ListView -> state
+                .put("selectedIndex", descriptor.optInt("selectedIndex", -1))
+                .put("itemCount", descriptor.optJSONArray("items")?.length() ?: 0)
             is EditText -> {
                 val text = view.text?.toString().orEmpty()
                 state.put("text", text).put("value", text)
             }
             is TextView -> state.put("text", view.text?.toString().orEmpty())
             is ImageView -> state.put("contentDescription", view.contentDescription?.toString().orEmpty())
+            is LinearLayout -> if (type == TYPE_TABS) {
+                state.put("selectedIndex", descriptor.optInt("selectedIndex", 0))
+            }
         }
         return state
     }
 
     private fun componentType(view: View): String = when (view) {
+        is AndroidSwitch -> TYPE_SWITCH
+        is CheckBox -> TYPE_CHECKBOX
+        is ProgressBar -> TYPE_PROGRESS
+        is ListView -> TYPE_LIST
         is EditText -> TYPE_INPUT
         is Button -> TYPE_BUTTON
         is TextView -> TYPE_TEXT
@@ -612,6 +868,22 @@ private class NodeBridgeUiRenderer(
         is ScrollView -> TYPE_SCROLL_VIEW
         is LinearLayout -> if (view.orientation == LinearLayout.HORIZONTAL) TYPE_ROW else TYPE_COLUMN
         else -> "View"
+    }
+
+    private fun listLabels(items: JSONArray?): List<String> {
+        if (items == null) {
+            return emptyList()
+        }
+        return (0 until items.length()).map { index -> listItem(items, index).first }
+    }
+
+    private fun listItem(items: JSONArray, index: Int): Pair<String, Any> {
+        val raw = items.opt(index)
+        val item = raw as? JSONObject
+        val text = item?.optString("text", item.optString("label", item.optString("value")))
+            ?: raw?.toString().orEmpty()
+        val value = item?.opt("value") ?: raw?.toString().orEmpty()
+        return text to value
     }
 
     private fun defaultLayoutParams(isRoot: Boolean): ViewGroup.LayoutParams {
@@ -631,6 +903,13 @@ private class NodeBridgeUiRenderer(
         private const val TYPE_INPUT = "Input"
         private const val TYPE_IMAGE = "Image"
         private const val TYPE_SCROLL_VIEW = "ScrollView"
+        private const val TYPE_LIST = "List"
+        private const val TYPE_SWITCH = "Switch"
+        private const val TYPE_CHECKBOX = "Checkbox"
+        private const val TYPE_PROGRESS = "Progress"
+        private const val TYPE_TABS = "Tabs"
+        private const val TYPE_TAB = "Tab"
+        private const val TYPE_WEB_VIEW = "WebView"
 
         private val supportedTypes = setOf(
             TYPE_COLUMN,
@@ -640,6 +919,12 @@ private class NodeBridgeUiRenderer(
             TYPE_INPUT,
             TYPE_IMAGE,
             TYPE_SCROLL_VIEW,
+            TYPE_LIST,
+            TYPE_SWITCH,
+            TYPE_CHECKBOX,
+            TYPE_PROGRESS,
+            TYPE_TABS,
+            TYPE_TAB,
             "Vertical",
             "Horizontal",
         )
@@ -649,7 +934,11 @@ private class NodeBridgeUiRenderer(
             if (requireType && rawType.isBlank()) {
                 return "ui descriptor requires a component type."
             }
-            if (rawType.isNotBlank() && rawType !in supportedTypes) {
+            val normalizedType = normalizeType(rawType)
+            if (normalizedType == TYPE_WEB_VIEW) {
+                return "ui descriptor component type WebView requires a separate security gate."
+            }
+            if (rawType.isNotBlank() && normalizedType !in supportedTypes) {
                 return "ui descriptor uses an unsupported component type: $rawType."
             }
             val children = descriptor.optJSONArray("children")
@@ -660,12 +949,36 @@ private class NodeBridgeUiRenderer(
                     validateDescriptor(child)?.let { return it }
                 }
             }
+            val tabs = descriptor.optJSONArray("tabs")
+            if (tabs != null) {
+                for (index in 0 until tabs.length()) {
+                    val tab = tabs.optJSONObject(index)
+                        ?: return "ui descriptor tabs must be JSON object components."
+                    validateDescriptor(tab, requireType = false)?.let { return it }
+                    val content = tab.optJSONObject("content")
+                    if (content != null) {
+                        validateDescriptor(content)?.let { return it }
+                    }
+                }
+            }
             return null
         }
 
         private fun normalizeType(rawType: String): String = when (rawType) {
-            "Vertical" -> TYPE_COLUMN
-            "Horizontal" -> TYPE_ROW
+            "Vertical", "vertical", "LinearLayout", "linearLayout", "Column", "column" -> TYPE_COLUMN
+            "Horizontal", "horizontal", "Row", "row" -> TYPE_ROW
+            "Text", "text" -> TYPE_TEXT
+            "Button", "button" -> TYPE_BUTTON
+            "Input", "input", "EditText", "editText" -> TYPE_INPUT
+            "Image", "image" -> TYPE_IMAGE
+            "ScrollView", "scrollView" -> TYPE_SCROLL_VIEW
+            "List", "list" -> TYPE_LIST
+            "Switch", "switch" -> TYPE_SWITCH
+            "Checkbox", "CheckBox", "checkbox", "checkBox" -> TYPE_CHECKBOX
+            "Progress", "ProgressBar", "progress", "progressBar" -> TYPE_PROGRESS
+            "Tabs", "tabs" -> TYPE_TABS
+            "Tab", "tab" -> TYPE_TAB
+            "WebView", "webView", "webview" -> TYPE_WEB_VIEW
             else -> rawType
         }
     }

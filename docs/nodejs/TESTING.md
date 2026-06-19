@@ -608,7 +608,7 @@ Current `ui` bridge live-provider focused instrumentation:
 .\gradlew.bat --console=plain :app:verifyNodeLiveUiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This suite verifies the `ui` bridge registry, capability manifest mapping, fake-provider `showLayout`, `drainEvents`, `update`, and `close`, shadowing protection for `require("ui")`, opaque handle shape, fake-provider and Android-live `handle.on` callback delivery through drained JSON snapshots, timeout and permission propagation, JSON-only invalid descriptor rejection before dispatch, absence of raw View/Activity handle properties, live Android Activity show, Button/Input event delivery into Node, state snapshots, update, close, provider-destroy cleanup, unsupported descriptor denial, foreign-handle denial, and active UI session limit denial.
+This suite verifies the `ui` bridge registry, capability manifest mapping, fake-provider `showLayout`, `drainEvents`, `update`, `batchUpdate`, and `close`, shadowing protection for `require("ui")`, `state`/`bind` one-way binding, batched binding updates, opaque handle shape, fake-provider and Android-live `handle.on` callback delivery through drained JSON snapshots, timeout and permission propagation, JSON-only invalid descriptor rejection before dispatch, absence of raw View/Activity handle properties, live Android Activity show, Button/Input/List/Switch/Checkbox/Tabs event delivery into Node, Progress updates through `batchUpdate`, state snapshots, update, close, provider-destroy cleanup, unsupported descriptor denial, WebView security-gate denial, foreign-handle denial, and active UI session limit denial.
 
 Current JS-only plugin manager focused instrumentation:
 

@@ -66,7 +66,7 @@ small set of already-gated features toward practical use.
 | Database / SQLite bridge | partial | `require("database")` and `require("sqlite")` expose an AutoJs6-owned SQLite bridge for `open`, `exec`, `run`, `get`, `all`, `transaction`, and `close` with explicit `database` capability checks. Files are app-private and scoped by package identity, working directory, and database name; `node:sqlite`, extension loading, path escapes, and `ATTACH`/`DETACH` remain denied. |
 | Notifications | partial | `require("notifications")` exposes post-only `notify`, `cancel`, and `cancelAll` with explicit `notifications` capability checks, Android `POST_NOTIFICATIONS` permission mapping, stable channel IDs, ongoing ownership metadata, and owned-resource cleanup. |
 | Sensors | partial | `require("sensors")` exposes Android-backed `getAvailableSensors`, `once`, and bounded callback subscriptions for `accelerometer`, `gyroscope`, and `light` with explicit `sensors` capability checks, sampling clamps, max subscription limits, and destroy cleanup. |
-| UI bridge | Activity-owned live MVP | `require("ui")` exposes JSON-only `showLayout`, opaque `UiHandle.on/update/close`, drained event snapshots, Button/Input event delivery, update/close, and provider-destroy cleanup with explicit `ui` capability checks; Android views remain Activity-owned and are never exposed to Node. |
+| UI bridge | Activity-owned live MVP | `require("ui")` exposes JSON-only `showLayout`, opaque `UiHandle.on/update/batchUpdate/close`, `state`/`bind` one-way binding, drained event snapshots, Button/Input/List/Switch/Checkbox/Tabs event delivery, Progress batch updates, WebView gate denial, and provider-destroy cleanup with explicit `ui` capability checks; Android views remain Activity-owned and are never exposed to Node. |
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for click, long-click, set-text, and scroll while keeping JSON-only snapshots, explicit `accessibility` capability checks, and an optional live controlled-Activity smoke when the service is pre-enabled. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
 | Work Manager scheduling | partial | `require("work_manager")` registers controlled one-shot and bounded periodic scheduled work for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`, stores embedded backend plus `scriptPath`/project `entry` metadata, supports packaged entry descriptors, records Android 16 quota diagnostics, and launches scoped CJS/ESM embedded Node work through AndroidX WorkManager's dedicated `scheduled_runner` surface without exposing raw scheduler authority. Task records expose `lastRun` and bounded `runHistory`. |
@@ -151,11 +151,13 @@ small set of already-gated features toward practical use.
   unavailable errors, cleanup when a supported sensor exists, and TypeScript
   declarations.
 - UI bridge smoke passes for `require("ui")`, fake-provider `showLayout`,
-  button/click event drain, `handle.update()`, `handle.close()`, JSON-only
+  button/click event drain, `handle.update()`, `handle.batchUpdate()`,
+  `handle.close()`, `ui.state()`/`ui.bind()` one-way binding, JSON-only
   invalid descriptor denial before dispatch, shadowing protection, no raw
   View/Activity property on the handle, Activity-owned Android live provider
-  Button/Input event delivery, update/close, provider-destroy cleanup, and
-  TypeScript declarations.
+  Button/Input/List/Switch/Checkbox/Tabs event delivery, Progress batch update,
+  WebView security-gate denial, provider-destroy cleanup, and TypeScript
+  declarations.
 - Accessibility selector v2 smoke passes for regex, clickable/enabled, depth,
   bounds descriptors, `longClick`, `setText`, `scrollForward`,
   `scrollBackward`, timeout/cancellation cleanup, manifest denial, no raw node

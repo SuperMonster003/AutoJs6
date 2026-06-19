@@ -613,7 +613,7 @@ object NodeBridgeModules {
     val databaseMethods = setOf("open", "exec", "run", "get", "all", "transaction", "close")
     val notificationsMethods = setOf("notify", "cancel", "cancelAll")
     val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
-    val uiMethods = setOf("showLayout", "update", "close", "drainEvents")
+    val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")
@@ -921,7 +921,7 @@ class AndroidNodeBridgeCapabilityProvider(
         when (request.method) {
             "showLayout" -> dispatchUiShowLayout(request, callback)
             "close" -> dispatchOwnedUiRequest(request, releaseOnClose = true, callback = callback)
-            "update", "drainEvents" -> dispatchOwnedUiRequest(request, releaseOnClose = false, callback = callback)
+            "update", "batchUpdate", "drainEvents" -> dispatchOwnedUiRequest(request, releaseOnClose = false, callback = callback)
             else -> callback(unavailable(request))
         }
     }

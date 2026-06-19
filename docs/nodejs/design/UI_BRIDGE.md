@@ -1,9 +1,10 @@
 # Node UI Bridge Design Gate
 
-Status: Task S7-14 activates the first Activity-owned `require("ui")` live
-provider MVP. The JavaScript wrapper, capability manifest entry, fake-provider
-event protocol, TypeScript declarations, Android Activity provider, and focused
-live gate now exist.
+Status: Task S7-14 activated the first Activity-owned `require("ui")` live
+provider MVP. Task S7-44 expands the same Activity-owned provider with basic
+form/list/navigation components, one-way JSON state binding, batched updates,
+TypeScript declarations, and focused live gates while keeping WebView blocked
+behind a separate security gate.
 
 ## Goal
 
@@ -23,17 +24,19 @@ Node Profile v1.1.
 
 The current module accepts JSON-only layout descriptors through
 `showLayout(layoutJson, options?)`, returns an opaque `UiHandle`, supports
-`handle.on(event, callback)`, `handle.update(patch)`, and `handle.close()`, and
-routes event delivery through bounded `drainEvents` bridge calls. The Android
-provider now starts an internal, non-exported Activity and supports `Column`,
-`Row`, `Text`, `Button`, `Input`, `Image`, and `ScrollView` descriptors.
-Button/input/lifecycle/update events are serialized JSON snapshots; raw Android
-objects never cross into JavaScript.
+`handle.on(event, callback)`, `handle.update(patch)`,
+`handle.batchUpdate(patches)`, and `handle.close()`, and routes event delivery
+through bounded `drainEvents` bridge calls. `ui.state(initialJson)` and
+`ui.bind(state, key)` provide one-way binding for JSON descriptor properties;
+binding values are resolved before provider dispatch, so the UI process never
+receives executable JavaScript.
 
-The next implementation step is component/data-binding expansion behind the
-same `ui` capability and focused tests. It must not expose raw Android
-`Context`, `Activity`, `View`, `Fragment`, `Window`, `Handler`, Rhino
-`NativeView`, or Java objects to Node scripts.
+The Android provider starts an internal, non-exported Activity and supports
+`Column`, `Row`, `Text`, `Button`, `Input`, `Image`, `ScrollView`, `List`,
+`Switch`, `Checkbox`, `Progress`, and `Tabs` descriptors. Component,
+lifecycle, update, and batch-update events are serialized JSON snapshots; raw
+Android objects never cross into JavaScript. `WebView` descriptors reject until
+a separate WebView security gate is designed.
 
 Existing bridge modules remain the UI-adjacent surface for now:
 
@@ -208,11 +211,14 @@ Task 182 reserves this JavaScript shape:
 
 ```js
 const ui = require("ui");
+const model = ui.state({ name: "", ready: false });
 
 const handle = await ui.showLayout({
   type: "Vertical",
   children: [
     { id: "name", type: "Input", hint: "Name" },
+    { id: "ready", type: "Switch", text: "Ready", checked: ui.bind(model, "ready") },
+    { id: "progress", type: "Progress", progress: 0, max: 100 },
     { id: "ok", type: "Button", text: "OK" }
   ]
 }, {
@@ -222,7 +228,11 @@ const handle = await ui.showLayout({
 const off = handle.on("click", async (event) => {
   if (event.type === "click" && event.id === "ok") {
     off();
-    await handle.update({ id: "ok", text: "Done" });
+    model.set("ready", true);
+    await handle.batchUpdate([
+      { id: "progress", progress: 100 },
+      { id: "ok", text: "Done" }
+    ]);
     await handle.close();
   }
 });
@@ -231,11 +241,13 @@ const off = handle.on("click", async (event) => {
 Required properties if this shape is selected:
 
 - `ui.showLayout(layoutJson, options?)` returns an opaque `UiHandle`
+- `ui.state()` and `ui.bind()` are one-way JSON helpers, not UI-process code
 - descriptors are JSON only and schema-validated before dispatch
 - event draining has bounded request size and listener cleanup
 - `handle.close()` is idempotent
+- `handle.batchUpdate()` applies bounded JSON patch batches
 - all widget ids are scoped to the handle/session
-- state reads, if later added, return JSON snapshots only
+- state reads and event snapshots return JSON only
 - no raw View or Activity object crosses into Node
 
 ## WebView Option
@@ -292,22 +304,24 @@ Any future implementation must enforce:
 
 ## Test Gate
 
-Task S7-14 tests now cover:
+Task S7-14 and S7-44 tests now cover:
 
 - Kotlin registry and permission manifest coverage for `ui`
-- fake-provider `showLayout`, `update`, `drainEvents`, and `close`
+- fake-provider `showLayout`, `update`, `batchUpdate`, `drainEvents`, and
+  `close`
 - JavaScript shadowing protection for `require("ui")`
+- `ui.state()` / `ui.bind()` one-way binding and batched binding updates
 - fake-provider and Android-live event callback delivery through drained JSON
   snapshots
 - JSON-only invalid descriptor rejection before dispatch
 - no raw View/Activity property on the JavaScript handle
-- Android live Activity show, Button/Input event delivery, update, close, and
-  destroy cleanup
-- unsupported descriptor and foreign handle denial
+- Android live Activity show, Button/Input/List/Switch/Checkbox/Tabs event
+  delivery, Progress batch update, update, close, and destroy cleanup
+- unsupported descriptor, WebView security-gate, and foreign handle denial
 - active UI session limit denial
 - TypeScript declaration smoke
 
-Minimum tests before expanding the Android UI provider:
+Minimum tests before promoting packaged live UI or WebView:
 
 - schema parser unit tests for layout descriptors
 - fake-provider success, failure, timeout, cancellation, and destroy tests
@@ -315,6 +329,8 @@ Minimum tests before expanding the Android UI provider:
 - Activity instrumentation for Back and configuration-change policy
 - rotation or explicit configuration-change policy test
 - packaged APK smoke for UI entry, Back, crash, and relaunch behavior
+- WebView local asset, URL, JavaScript bridge, and storage isolation tests if
+  WebView support is introduced
 - leak test for Activity, View, session, and event listener cleanup
 - bridge limit tests for max sessions, widgets, descriptor size, and event queue
 - accessibility smoke for basic labels and focus order if native widgets are used

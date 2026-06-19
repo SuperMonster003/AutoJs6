@@ -235,8 +235,8 @@ object NodeBridgeProviderRegistry {
             "statusReason" to "partial image-handle backend for OCR live provider",
         )
         UI_PROVIDER -> linkedMapOf(
-            "liveMethods" to "showLayout,update,drainEvents,close",
-            "components" to "Column,Row,Text,Button,Input,Image,ScrollView",
+            "liveMethods" to "showLayout,update,batchUpdate,drainEvents,close",
+            "components" to "Column,Row,Text,Button,Input,Image,ScrollView,List,Switch,Checkbox,Progress,Tabs",
             "eventDelivery" to "bounded drainEvents JSON snapshots",
             "maxActiveSessionsPerExecution" to "4",
             "statusReason" to "Activity-owned declarative UI MVP",
