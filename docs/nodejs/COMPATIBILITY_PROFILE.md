@@ -186,8 +186,12 @@ debug-only hot reload path; calls without `debug: true` reject with
 registers an already-present sanitized local package for the current execution.
 `disable()` blocks future loads, stops the plugin if needed, releases owned
 resources, and unloads cached plugin modules. This is a local JS-only manager,
-not a signed archive verifier, Android plugin adapter, packaged APK plugin
-runtime, native provider model, or isolated process/context.
+not a signed archive verifier, Android plugin adapter, native provider model,
+isolated process/context, download installer, update channel, or marketplace
+runtime. The packaged APK smoke covers only already-packaged project-local
+JS-only plugins with explicit `plugin.<id>` and declared bridge capabilities;
+it does not enable remote installs, native plugin archives, or Android provider
+plugin adapters.
 
 ## Execution Queue
 
@@ -949,7 +953,7 @@ Packaged Node APKs require:
 - `android.permission.FOREGROUND_SERVICE_SPECIAL_USE`
 - `android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE`
 - Node project metadata and module source entries within the `64` module, `262144` byte per-module, and `524288` byte total budgets
-- packaged smoke coverage for the current user-facing `toast`, `app`, `clipboard`, and `device` bridge modules, plus v1.1 fake-provider packaged coverage for controlled `fetch`, `ocr`, `storage`/`storages`, `ui`, and `work_manager`
+- packaged smoke coverage for the current user-facing `toast`, `app`, `clipboard`, and `device` bridge modules, plus v1.1 fake-provider packaged coverage for controlled `fetch`, `ocr`, `storage`/`storages`, `notifications`, `ui`, `work_manager`, and project-local JS-only plugins using isolated capabilities and resources
 
 Release packaging profile:
 

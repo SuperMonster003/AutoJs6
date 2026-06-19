@@ -233,17 +233,19 @@ RC decision: keep plugin support as JS-only local prototype.
 Surface: `require("plugins")`.
 
 Current state: project-local CommonJS plugins load from `./plugins/<id>` only
-with exact `plugin.<id>` opt-in. Native `.node`, installers, signatures,
-Android plugin adapters, archives, updates, and packaged plugin runtime are not
-enabled.
+with exact `plugin.<id>` opt-in. Already-packaged project-local JS-only plugin
+files are covered by the packaged APK smoke with explicit bridge capabilities.
+Native `.node`, installers, signatures, Android plugin adapters, archives,
+updates, and marketplace/runtime distribution are not enabled.
 
 Release impact: v1.1 RC must not imply a general plugin marketplace or native
 plugin runtime.
 
 Unblock condition:
 
-- installer/signature/update model, packaged runtime behavior, Android adapter
-  policy, and native plugin denial/allowlist policy are designed and gated.
+- installer/signature/update model, packaged distribution behavior beyond
+  project-local assets, Android adapter policy, and native plugin
+  denial/allowlist policy are designed and gated.
 
 Validation:
 

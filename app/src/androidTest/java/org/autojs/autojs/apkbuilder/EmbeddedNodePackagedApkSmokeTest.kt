@@ -11255,9 +11255,12 @@ class EmbeddedNodePackagedApkSmokeTest {
               const { Buffer } = require("buffer");
               const requests = [];
               const stores = Object.create(null);
+              const notifications = new Map();
               const tasks = new Map();
               let workSequence = 0;
-              let uiDrained = false;
+              let notificationSequence = 9100;
+              let uiSequence = 0;
+              const uiDrained = Object.create(null);
 
               function respond(request, ok, result, error) {
                 setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
@@ -11318,12 +11321,29 @@ class EmbeddedNodePackagedApkSmokeTest {
                     }
                     return;
                   }
+                  if (request.module === "notifications") {
+                    if (request.method === "notify") {
+                      const descriptor = args[0] || {};
+                      const id = descriptor.id || ++notificationSequence;
+                      notifications.set(id, Object.assign({ id }, descriptor));
+                      respond(request, true, id);
+                    } else if (request.method === "cancel") {
+                      notifications.delete(args[0]);
+                      respond(request, true, null);
+                    } else if (request.method === "cancelAll") {
+                      notifications.clear();
+                      respond(request, true, null);
+                    }
+                    return;
+                  }
                   if (request.module === "ui") {
                     if (request.method === "showLayout") {
-                      respond(request, true, { id: "packaged-ui-1" });
+                      uiSequence += 1;
+                      respond(request, true, { id: "packaged-ui-" + uiSequence });
                     } else if (request.method === "drainEvents") {
-                      respond(request, true, uiDrained ? [] : [{ type: "click", id: "ok", text: "OK" }]);
-                      uiDrained = true;
+                      const handleId = args[0];
+                      respond(request, true, uiDrained[handleId] ? [] : [{ type: "click", id: "ok", text: "OK" }]);
+                      uiDrained[handleId] = true;
                     } else {
                       respond(request, true, null);
                     }
@@ -11385,6 +11405,14 @@ class EmbeddedNodePackagedApkSmokeTest {
               const storageKeys = await alias.keys({ timeoutMs: 1000 });
               await store.remove("mode", { timeoutMs: 1000 });
 
+              const notificationsModule = require("notifications");
+              const notificationId = await notificationsModule.notify({
+                id: 9301,
+                title: "Packaged v1.1",
+                text: "Bridge smoke"
+              }, { timeoutMs: 1000 });
+              await notificationsModule.cancel(notificationId, { timeoutMs: 1000 });
+
               const ui = require("ui");
               const handle = await ui.showLayout({
                 type: "Vertical",
@@ -11416,6 +11444,17 @@ class EmbeddedNodePackagedApkSmokeTest {
               await work.cancel(workId, { timeoutMs: 1000 });
               const workAfter = await work.list({ timeoutMs: 1000 });
 
+              const plugins = require("plugins");
+              const pluginManifest = plugins.manifest("org.example.packaged");
+              const pluginStart = plugins.start("org.example.packaged");
+              const plugin = plugins.load("org.example.packaged");
+              const pluginResult = await plugin.run({ label: "packaged-plugin" });
+              const pluginStatus = plugins.status("org.example.packaged");
+              const pluginStop = plugins.stop("org.example.packaged");
+              const pluginLifecycle = plugin.lifecycle();
+              const pluginUnloaded = plugins.unload("org.example.packaged");
+              const pluginFinal = plugins.status("org.example.packaged");
+
               const fetchOk = require.resolve("fetch") === "fetch" &&
                 fetchModule.shadow !== true &&
                 fetchResult.status === 200 &&
@@ -11433,6 +11472,10 @@ class EmbeddedNodePackagedApkSmokeTest {
                 stored.count === 11 &&
                 storageContains === true &&
                 storageKeys.join(",") === "mode";
+              const notificationsOk = require.resolve("notifications") === "notifications" &&
+                notificationsModule.shadow !== true &&
+                notificationId === 9301 &&
+                notifications.size === 0;
               const uiOk = require.resolve("ui") === "ui" &&
                 ui.shadow !== true &&
                 handle.id === "packaged-ui-1" &&
@@ -11444,6 +11487,27 @@ class EmbeddedNodePackagedApkSmokeTest {
                 workBefore[0].scriptPath === "main.js" &&
                 workBefore[0].constraints.network === true &&
                 workAfter.length === 0;
+              const pluginCapabilities = pluginStatus.capabilities.join(",");
+              const pluginOk = require.resolve("plugins") === "plugins" &&
+                plugins.shadow !== true &&
+                pluginManifest.id === "org.example.packaged" &&
+                pluginManifest.capability === "plugin.org.example.packaged" &&
+                pluginManifest.permissions.join(",") === "storage,notifications,ui,network" &&
+                pluginStart.resources.total === 1 &&
+                pluginStart.capabilities.join(",") === "plugin.org.example.packaged,storage,notifications,ui,network" &&
+                pluginResult.label === "packaged-plugin" &&
+                pluginResult.stored === "packaged-plugin" &&
+                pluginResult.clicked === "ok:packaged-ui-2" &&
+                pluginResult.fetchText === "packaged-fetch" &&
+                pluginResult.notificationId === 9302 &&
+                pluginResult.uiFrozen === true &&
+                pluginCapabilities === "plugin.org.example.packaged,storage,notifications,ui,network" &&
+                pluginStatus.resources.total === 1 &&
+                pluginStop.resources.total === 0 &&
+                pluginLifecycle.cleanup === true &&
+                pluginUnloaded === true &&
+                pluginFinal.loaded === false &&
+                pluginFinal.resources.total === 0;
               const requiredPermissionsOk = requests.every((request) => {
                 if (request.module === "fetch") {
                   return request.permissions.indexOf("network") >= 0;
@@ -11454,6 +11518,9 @@ class EmbeddedNodePackagedApkSmokeTest {
                 if (request.module === "storage" || request.module === "storages") {
                   return request.permissions.indexOf("storage") >= 0;
                 }
+                if (request.module === "notifications") {
+                  return request.permissions.indexOf("notifications") >= 0;
+                }
                 if (request.module === "ui") {
                   return request.permissions.indexOf("ui") >= 0;
                 }
@@ -11462,16 +11529,18 @@ class EmbeddedNodePackagedApkSmokeTest {
                 }
                 return false;
               });
-              const noShadowOk = [fetchModule, ocr, storage, storages, ui, work].every((module) => module.shadow !== true);
-              const ready = fetchOk && ocrOk && storageOk && uiOk && workOk && requiredPermissionsOk &&
+              const noShadowOk = [fetchModule, ocr, storage, storages, notificationsModule, ui, work, plugins].every((module) => module.shadow !== true);
+              const ready = fetchOk && ocrOk && storageOk && notificationsOk && uiOk && workOk && pluginOk && requiredPermissionsOk &&
                 noShadowOk && bridge.__test.pendingCount() === 0;
 
               console.log("packaged.v1_1_bridge.ready=" + ready);
               console.log("packaged.v1_1_bridge.fetch=" + fetchOk);
               console.log("packaged.v1_1_bridge.ocr=" + ocrOk);
               console.log("packaged.v1_1_bridge.storage=" + storageOk);
+              console.log("packaged.v1_1_bridge.notifications=" + notificationsOk);
               console.log("packaged.v1_1_bridge.ui=" + uiOk);
               console.log("packaged.v1_1_bridge.work_manager=" + workOk);
+              console.log("packaged.v1_1_bridge.plugin=" + pluginOk);
               console.log("packaged.v1_1_bridge.permissions=" + requiredPermissionsOk);
               console.log("packaged.v1_1_bridge.no_shadow=" + noShadowOk);
               console.log("packaged.v1_1_bridge.pending=" + bridge.__test.pendingCount());
@@ -11494,9 +11563,100 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "node_modules/ocr/index.js" to """module.exports = { shadow: true };""" + "\n",
                 "node_modules/storage/index.js" to """module.exports = { shadow: true };""" + "\n",
                 "node_modules/storages/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/notifications/index.js" to """module.exports = { shadow: true };""" + "\n",
                 "node_modules/ui/index.js" to """module.exports = { shadow: true };""" + "\n",
                 "node_modules/work_manager/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/plugins/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "plugins/org.example.packaged/package.json" to """
+                    {
+                      "name": "org.example.packaged",
+                      "version": "1.0.0",
+                      "main": "index.cjs",
+                      "autojs6": {
+                        "plugin": {
+                          "id": "org.example.packaged",
+                          "permissions": ["storage", "notifications", "ui", "network"],
+                          "dependencies": [],
+                          "exports": {}
+                        }
+                      }
+                    }
+                """.trimIndent() + "\n",
+                "plugins/org.example.packaged/index.cjs" to """
+                    let lifecycle = { cleanup: false };
+
+                    exports.start = function(ctx) {
+                      lifecycle = {
+                        cleanup: false,
+                        namespace: ctx.namespace,
+                        capabilities: ctx.capabilities.join(","),
+                        permissions: ctx.permissions.join(",")
+                      };
+                      ctx.resources.addCleanup(function() {
+                        lifecycle.cleanup = true;
+                      });
+                    };
+
+                    exports.lifecycle = function() {
+                      return lifecycle;
+                    };
+
+                    exports.run = async function(input) {
+                      const storage = require("storage");
+                      const notifications = require("notifications");
+                      const ui = require("ui");
+
+                      const store = storage.create("plugin");
+                      await store.put("label", { value: input.label }, { timeoutMs: 1000 });
+                      const stored = await store.get("label", null, { timeoutMs: 1000 });
+
+                      const notificationId = await notifications.notify({
+                        id: 9302,
+                        title: "Packaged plugin",
+                        text: stored.value
+                      }, { timeoutMs: 1000 });
+
+                      const model = ui.state({ title: "Plugin UI", done: false });
+                      const handle = await ui.showLayout({
+                        type: "Vertical",
+                        children: [
+                          { type: "Text", id: "title", text: ui.bind(model, "title") },
+                          { type: "Checkbox", id: "done", text: "Done", checked: ui.bind(model, "done") },
+                          { type: "Button", id: "ok", text: "OK" }
+                        ]
+                      }, { timeoutMs: 1000, drainIntervalMs: 1 });
+                      let clicked = "";
+                      await new Promise((resolve) => {
+                        const off = handle.on("click", (event) => {
+                          clicked = event.id + ":" + event.handleId;
+                          off();
+                          resolve();
+                        }, { timeoutMs: 1000, drainIntervalMs: 1 });
+                      });
+                      model.update({ title: "Plugin Done", done: true });
+                      await new Promise((resolve) => setTimeout(resolve, 30));
+                      await handle.batchUpdate([{ id: "title", text: "Plugin Done" }], { timeoutMs: 1000 });
+                      await handle.close({ timeoutMs: 1000 });
+
+                      const fetchResult = await fetch("https://example.invalid/plugin", {
+                        timeoutMs: 1000,
+                        maxResponseBytes: 1024
+                      });
+                      const fetchText = await fetchResult.text();
+                      await notifications.cancel(notificationId, { timeoutMs: 1000 });
+
+                      return {
+                        label: input.label,
+                        stored: stored.value,
+                        clicked,
+                        fetchText,
+                        notificationId,
+                        uiFrozen: Object.isFrozen(handle)
+                      };
+                    };
+                """.trimIndent() + "\n",
             ),
+            extraPermissions = listOf("android.permission.POST_NOTIFICATIONS"),
             nodePermissions = V11_BRIDGE_NODE_PERMISSIONS,
             runtimeMarkers = V11_BRIDGE_RUNTIME_MARKERS,
         )
@@ -13999,16 +14159,20 @@ $nodeConfigJson
             "ocr",
             "image",
             "storage",
+            "notifications",
             "ui",
             "work_manager",
+            "plugin.org.example.packaged",
         )
         private val V11_BRIDGE_RUNTIME_MARKERS = listOf(
             "packaged.v1_1_bridge.ready=true",
             "packaged.v1_1_bridge.fetch=true",
             "packaged.v1_1_bridge.ocr=true",
             "packaged.v1_1_bridge.storage=true",
+            "packaged.v1_1_bridge.notifications=true",
             "packaged.v1_1_bridge.ui=true",
             "packaged.v1_1_bridge.work_manager=true",
+            "packaged.v1_1_bridge.plugin=true",
             "packaged.v1_1_bridge.permissions=true",
             "packaged.v1_1_bridge.no_shadow=true",
             "packaged.v1_1_bridge.pending=0",

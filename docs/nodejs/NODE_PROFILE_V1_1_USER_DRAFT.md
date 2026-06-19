@@ -59,7 +59,7 @@ reach an Android provider.
 | sensors | partial | Limited sensor set: accelerometer, gyroscope, and light. Subscriptions are bounded and close on provider destroy. |
 | UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
 | `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, CJS/ESM fired entries run through the dedicated scheduled runner, and raw Android scheduler APIs remain unavailable. |
-| JS-only plugins | experimental | Project-local `./plugins/<id>` manager with local install registration, enable/disable, config, dependency metadata, named exports, status/capability reporting, `start`/`stop` lifecycle hooks, owned resource cleanup, unload, and explicit debug-only reload. Native plugins, signed archives, download installers, updates, Android provider adapters, and packaged plugin runtime are not enabled. |
+| JS-only plugins | experimental | Project-local `./plugins/<id>` manager with local install registration, enable/disable, config, dependency metadata, named exports, status/capability reporting, `start`/`stop` lifecycle hooks, owned resource cleanup, unload, and explicit debug-only reload. Packaged APK support is limited to already-packaged project-local JS-only plugins with explicit capabilities. Native plugins, signed archives, download installers, updates, Android provider adapters, and marketplace/runtime distribution are not enabled. |
 | execution modes beyond `one_shot` | partial | `interactive_long_running` is available only through the explicit interactive foreground runtime with a persistent Stop notification, `autojs6:lifecycle` checkpoint/explicit-restore hooks, and restart policy `never`. `scheduled` is available only through the controlled WorkManager scheduled runner. Direct script requests still reject before user code, and `worker_computation` remains reserved. Normal scripts remain one-shot and timeout-bounded. |
 
 ## ESM Scripts
@@ -409,8 +409,10 @@ the plugin namespace, effective capability subset, frozen config, and
 registered timers plus tracked provider/UI/socket/image handles. `reload()`
 requires `{ debug: true }` and is intended for local development only. Native
 addons, signed plugin archives, download installers, updates, Java provider
-expansion, Android provider adapters, and packaged plugin runtime are not
-enabled.
+expansion, Android provider adapters, and marketplace/runtime distribution are
+not enabled. Packaged APK coverage is limited to already-packaged
+project-local JS-only plugin files with explicit `plugin.<id>` and bridge
+capabilities.
 
 ## Long-running Node Scripts
 
@@ -471,11 +473,13 @@ feature's provider status:
 
 - packaged CommonJS, dependency, fs, stream, zlib, and bridge routing smokes are
   covered
-- packaged v1.1 bridge smoke covers controlled `fetch`, OCR, storage, UI, and
-  `work_manager` through fake transport
+- packaged v1.1 bridge smoke covers controlled `fetch`, OCR, storage,
+  notifications, UI, `work_manager`, and an already-packaged project-local
+  JS-only plugin through fake transport
 - packaged `.mjs`, package `type=module`, and local dynamic import smokes run
   against the default production inrt template through `:app:verifyNodePackagedEsmGate`
-- packaged plugins and packaged long-running service mode are not enabled
+- remote plugin install/update flows, native plugins, Android provider plugin
+  adapters, and packaged long-running service mode are not enabled
 
 ## See Also
 

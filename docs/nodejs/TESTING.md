@@ -165,7 +165,7 @@ Focused packaged v1.1 bridge smoke:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunV11BridgeEmbeddedNodePackagedApk" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This smoke proves the v1.1 bridge modules are not main-app-only by packaging fake-provider coverage for controlled `fetch`, OCR opaque image handles, JSON storage, UI handles/events, and `work_manager` metadata serialization without granting live Android provider authority.
+This smoke proves the v1.1 bridge modules are not main-app-only by packaging fake-provider coverage for controlled `fetch`, OCR opaque image handles, JSON storage, notifications, UI handles/events/update/batch update, `work_manager` metadata serialization, and a project-local JS-only plugin that uses storage, notifications, UI, and controlled fetch. It also verifies declared `node.permissions` including `plugin.<id>`, bridge-module shadowing denial, plugin resource cleanup/unload isolation, and zero pending bridge calls without granting live Android provider authority.
 
 Current bridge protocol instrumentation:
 
@@ -629,6 +629,11 @@ timer/provider/UI/socket/image/generic resource cleanup on stop, debug-only
 reload denial and allow path, module-cache clearing on unload/reload, `.node`
 rejection with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`, plugin entry path escape
 denial, plugin-root relative resolution, and TypeScript declaration coverage.
+Packaged plugin/UI smoke is covered by
+`EmbeddedNodePackagedApkSmokeTest#installAndRunV11BridgeEmbeddedNodePackagedApk`
+with an already-packaged local JS-only plugin, explicit `plugin.<id>` and
+bridge capabilities, declarative UI, notifications, storage, controlled fetch,
+resource cleanup, unload isolation, and `node_modules/plugins` shadow denial.
 
 Current Node developer REPL focused instrumentation:
 
