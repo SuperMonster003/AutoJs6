@@ -107,11 +107,18 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
             if (validateReport["ok"] != true) {
                 throw GradleException("Generated Node project template '$template' failed validation: $validateReport")
             }
+            val compatibility = validateReport["compatibility"] as? Map<*, *>
+                ?: throw GradleException("Generated Node project template '$template' did not include compatibility analysis.")
+            val compatibilityStatus = compatibility["status"]?.toString().orEmpty()
+            if (compatibilityStatus in setOf("unsafe", "unsupported")) {
+                throw GradleException("Generated Node project template '$template' has blocking compatibility status: $compatibility")
+            }
             rows += linkedMapOf(
                 "template" to template,
                 "project" to projectDir.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
                 "files" to createReport["files"],
                 "issueCount" to validateReport["issueCount"],
+                "compatibilityStatus" to compatibilityStatus,
             )
         }
 
@@ -215,6 +222,66 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
             "NATIVE_ADDON_DISABLED",
         )
 
+        val unsupportedSource = workRoot.resolve("invalid/unsupported-source")
+        nodeProjectWizardJson(
+            tool,
+            listOf(
+                "create",
+                "--template", "commonjs-app",
+                "--out", unsupportedSource.absolutePath,
+                "--name", "unsupported-source",
+                "--force",
+            ),
+        )
+        unsupportedSource.resolve("main.cjs").appendText(
+            """
+            const net = require("net");
+            const childProcess = require("child_process");
+            void net;
+            void childProcess;
+            """.trimIndent() + "\n",
+        )
+        val unsupportedSourceReport = nodeProjectWizardJson(
+            tool,
+            listOf("validate", unsupportedSource.absolutePath),
+            expectSuccess = false,
+        )
+        assertNodeProjectWizardIssueCodes(unsupportedSourceReport, "CAPABILITY_DECLARATION_MISSING")
+        val unsupportedCompatibility = unsupportedSourceReport["compatibility"] as? Map<*, *>
+            ?: throw GradleException("Unsupported source fixture did not include compatibility analysis.")
+        if (unsupportedCompatibility["status"] != "unsupported") {
+            throw GradleException("Unsupported source fixture should report unsupported compatibility: $unsupportedCompatibility")
+        }
+
+        val unsafeFsSource = workRoot.resolve("invalid/unsafe-fs-source")
+        nodeProjectWizardJson(
+            tool,
+            listOf(
+                "create",
+                "--template", "commonjs-app",
+                "--out", unsafeFsSource.absolutePath,
+                "--name", "unsafe-fs-source",
+                "--force",
+            ),
+        )
+        unsafeFsSource.resolve("main.cjs").appendText(
+            """
+            const fs = require("fs");
+            fs.readFileSync("../outside.txt", "utf8");
+            """.trimIndent() + "\n",
+        )
+        val unsafeFsSourceReport = nodeProjectWizardJson(
+            tool,
+            listOf("validate", unsafeFsSource.absolutePath),
+            expectSuccess = false,
+        )
+        assertNodeProjectWizardIssueCodes(unsafeFsSourceReport, "FS_OUTSIDE_SCOPE")
+        val unsafeFsCompatibility = unsafeFsSourceReport["compatibility"] as? Map<*, *>
+            ?: throw GradleException("Unsafe fs fixture did not include compatibility analysis.")
+        if (unsafeFsCompatibility["status"] != "unsafe") {
+            throw GradleException("Unsafe fs fixture should report unsafe compatibility: $unsafeFsCompatibility")
+        }
+
         val report = linkedMapOf<String, Any?>(
             "schema" to "autojs6-node-project-wizard-report-v1",
             "tool" to tool.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
@@ -225,6 +292,8 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
                 linkedMapOf("name" to "unknown-permission", "issueCodes" to unknownPermissionReport.nodeProjectWizardIssueCodes().sorted()),
                 linkedMapOf("name" to "invalid-package-name", "issueCodes" to invalidPackageNameReport.nodeProjectWizardIssueCodes().sorted()),
                 linkedMapOf("name" to "unsafe-dependency", "issueCodes" to unsafeDependencyReport.nodeProjectWizardIssueCodes().sorted()),
+                linkedMapOf("name" to "unsupported-source", "issueCodes" to unsupportedSourceReport.nodeProjectWizardIssueCodes().sorted()),
+                linkedMapOf("name" to "unsafe-fs-source", "issueCodes" to unsafeFsSourceReport.nodeProjectWizardIssueCodes().sorted()),
             ),
         )
         jsonReport.get().asFile.apply {
@@ -240,7 +309,7 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
                     appendLine("| Template | Project | Issue count |")
                     appendLine("| --- | --- | ---: |")
                     rows.forEach { row ->
-                        appendLine("| ${row["template"]} | ${row["project"]} | ${row["issueCount"]} |")
+                        appendLine("| ${row["template"]} | ${row["project"]} | ${row["issueCount"]} (${row["compatibilityStatus"]}) |")
                     }
                     appendLine()
                     appendLine("Invalid fixture issue codes:")

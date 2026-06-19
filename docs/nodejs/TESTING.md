@@ -29,7 +29,10 @@ This gate runs `tools/nodejs/project/autojs6-node-project.js` against all
 checked templates (`commonjs-app`, `esm-app`, `automation-script`,
 `screenshot-ocr-script`, `network-fetch-script`) and invalid fixtures for
 missing entries, invalid package names, unknown permissions, and unsafe
-dependency bundles.
+dependency bundles. The JSON output includes a compatibility analyzer status
+(`compatible`, `compatible with capability`, `experimental`, `unsupported`, or
+`unsafe`) plus required builtins, capability requirements, dependency graph
+size, package export-condition usage, and APK-builder preflight metadata.
 
 ## Device Instrumentation
 
@@ -298,23 +301,26 @@ Current dependency bundler verification:
 ```
 
 `bundleNodeDependencies` validates an existing project root with `package.json` and `node_modules`, then writes a
-sanitized bundle plus `dependency-manifest.json`, `dependency-sbom-lite.json`, `dependency-size-report.txt`, and
-`dependency-rejections.txt`. Reports include a deterministic normalized bundle hash, content-addressed cache key,
-package/version, integrity, license, file count, total bytes, unsupported capability usage, and AutoJs6 compatibility
-score. Successful bundles are cached under `app/build/nodejs/dependency-cache/<bundle-hash>/project/`.
+sanitized bundle plus `dependency-manifest.json`, `dependency-sbom-lite.json`, `dependency-compatibility.json`,
+`dependency-size-report.txt`, and `dependency-rejections.txt`. Reports include a deterministic normalized bundle hash,
+content-addressed cache key, package/version, integrity, license, file count, total bytes, unsupported capability usage,
+AutoJs6 compatibility score, required builtins, capability requirements, ESM/CJS format, package export-condition usage,
+and expected packaged graph size. Successful bundles are cached under
+`app/build/nodejs/dependency-cache/<bundle-hash>/project/`.
 `prepareNodeNpmCiDependencies` validates a host-side project with `package.json` and required `package-lock.json`, copies
 it to a temporary working directory, runs `npm ci --ignore-scripts --no-bin-links --install-links --no-audit
 --fund=false`, then feeds the installed `node_modules` through the same sanitizer. The default fixture is
 `sample/nodejs/npm-ci-pure-js`, which uses local `vendor/` file dependencies so the verification path does not require
 registry access. The sanitized output is written to `app/build/nodejs/npm-ci-bundle/project/`; reports are written to
 `app/build/reports/nodejs/npm-ci/` and record npm version, lockfile hash, install-options hash, command flags, safety
-controls, bundle hash, and cache entry.
+controls, bundle hash, cache entry, and dependency compatibility status.
 `verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes, the sanitized bundle can be used as
 the packaged APK `assets/project` layout, the desktop `npm ci` fixture installs without lifecycle scripts, `.bin` links,
 or native addons, and unsafe fixtures are rejected for native addon, node-gyp build artifacts, lifecycle script, unchecked
 `.bin` entries, npm cache/postinstall artifacts, suspicious executables, absolute or escaping package metadata
 references, oversized files/packages/trees, and unsupported package-manager layouts such as PnP or pnpm-style nested
-stores. Native addon binaries are reported as
+stores. The packaged-layout verifier rejects analyzer `unsafe` and `unsupported` statuses before APK builder gates run.
+Native addon binaries are reported as
 `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` files are reported as
 `NODE_GYP_ARTIFACT_UNSUPPORTED`.
 

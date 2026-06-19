@@ -44,6 +44,7 @@ const CAPABILITY_ALIASES = new Map([
 
 const SUPPORTED_ENTRY_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
 const MAX_DEPENDENCY_SCAN_ENTRIES = 5000;
+const MAX_COMPATIBILITY_SOURCE_BYTES = 256 * 1024;
 const UNSAFE_DEPENDENCY_SCRIPT_NAMES = new Set([
   "preinstall",
   "install",
@@ -53,6 +54,95 @@ const UNSAFE_DEPENDENCY_SCRIPT_NAMES = new Set([
   "postpack"
 ]);
 const NATIVE_EXTENSIONS = new Set([".node", ".so", ".dll", ".dylib", ".a", ".o"]);
+const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
+const KNOWN_NODE_BUILTINS = new Set([
+  "assert",
+  "assert/strict",
+  "async_hooks",
+  "buffer",
+  "child_process",
+  "cluster",
+  "console",
+  "constants",
+  "crypto",
+  "dgram",
+  "diagnostics_channel",
+  "dns",
+  "dns/promises",
+  "events",
+  "fs",
+  "fs/promises",
+  "http",
+  "https",
+  "inspector",
+  "module",
+  "net",
+  "os",
+  "path",
+  "perf_hooks",
+  "process",
+  "punycode",
+  "querystring",
+  "readline",
+  "repl",
+  "stream",
+  "stream/consumers",
+  "stream/promises",
+  "stream/web",
+  "string_decoder",
+  "test",
+  "timers",
+  "timers/promises",
+  "tls",
+  "tty",
+  "url",
+  "util",
+  "util/types",
+  "v8",
+  "vm",
+  "wasi",
+  "worker_threads",
+  "zlib"
+]);
+const COMPATIBILITY_STATUS_RANK = new Map([
+  ["compatible", 0],
+  ["compatible with capability", 1],
+  ["experimental", 2],
+  ["unsupported", 3],
+  ["unsafe", 4]
+]);
+const NODE_BUILTIN_CAPABILITIES = new Map([
+  ["http", "raw_network"],
+  ["https", "raw_network"],
+  ["net", "raw_network"],
+  ["tls", "raw_network"],
+  ["dns", "raw_network"],
+  ["dns/promises", "raw_network"],
+  ["dgram", "raw_network"],
+  ["child_process", "child_process"],
+  ["worker_threads", "worker_threads"],
+  ["vm", "vm"],
+  ["inspector", "inspector"]
+]);
+const BRIDGE_MODULE_CAPABILITIES = new Map([
+  ["toast", "toast"],
+  ["app", "app"],
+  ["dialogs", "dialogs"],
+  ["engines", "engines"],
+  ["accessibility", "accessibility"],
+  ["image", "image"],
+  ["images", "image"],
+  ["ocr", "ocr"],
+  ["storage", "storage"],
+  ["storages", "storage"],
+  ["notifications", "notifications"],
+  ["sensors", "sensors"],
+  ["ui", "ui"],
+  ["clipboard", "clipboard"],
+  ["device", "device"],
+  ["shell", "shell"],
+  ["work_manager", "work_manager"]
+]);
 
 const TEMPLATES = {
   "commonjs-app": {
@@ -284,14 +374,17 @@ function validateProject(projectRoot) {
   validatePackageJson(packageJson, packageJsonFile, issues);
   validateEntry(root, projectJson, packageJson, issues);
   validatePermissions(projectJson, packageJson, issues);
-  validateDependencyBundle(root, issues);
+  const dependencyScan = validateDependencyBundle(root, issues);
+  const compatibility = analyzeCompatibility(root, projectJson, packageJson, dependencyScan);
+  addCompatibilityValidationIssues(compatibility, issues);
 
   return {
     schema: "autojs6-node-project-validation-v1",
     ok: issues.filter((issue) => issue.severity === "error").length === 0,
     root,
     issueCount: issues.length,
-    issues
+    issues,
+    compatibility
   };
 }
 
@@ -412,8 +505,36 @@ function validatePermissions(projectJson, packageJson, issues) {
 }
 
 function validateDependencyBundle(root, issues) {
+  const scan = {
+    installed: false,
+    packageCount: 0,
+    fileCount: 0,
+    totalBytes: 0,
+    nativeAddonCount: 0,
+    lifecycleScriptCount: 0,
+    packageExportsCount: 0,
+    packageImportsCount: 0,
+    packageExportConditions: new Set(),
+    packageFormats: new Map(),
+    unsupportedPackageManagerLayout: false
+  };
   const nodeModules = path.join(root, "node_modules");
-  if (!fs.existsSync(nodeModules)) return;
+  if (fs.existsSync(path.join(root, ".pnp.cjs")) ||
+      fs.existsSync(path.join(root, ".pnp.loader.mjs")) ||
+      fs.existsSync(path.join(root, ".yarn", "install-state.gz")) ||
+      fs.existsSync(path.join(nodeModules, ".pnpm")) ||
+      fs.existsSync(path.join(nodeModules, ".store"))) {
+    scan.unsupportedPackageManagerLayout = true;
+    issue(
+      issues,
+      "UNSUPPORTED_PACKAGE_MANAGER_LAYOUT",
+      root,
+      "Project uses an unsupported package-manager layout such as Yarn Plug'n'Play or pnpm virtual store.",
+      "Use a flat npm node_modules layout prepared with the Safe Node Profile npm ci gate."
+    );
+  }
+  if (!fs.existsSync(nodeModules)) return scan;
+  scan.installed = true;
   walk(nodeModules, issues, (file, stat) => {
     const relative = path.relative(root, file).replace(/\\/g, "/");
     if (stat.isSymbolicLink()) {
@@ -427,28 +548,43 @@ function validateDependencyBundle(root, issues) {
     if (stat.isFile()) {
       const name = path.basename(file);
       const extension = path.extname(name).toLowerCase();
+      scan.fileCount += 1;
+      scan.totalBytes += stat.size;
       if (NATIVE_EXTENSIONS.has(extension)) {
+        scan.nativeAddonCount += 1;
         issue(issues, "NATIVE_ADDON_DISABLED", file, "Dependency bundle contains native file " + relative + ".", "Use pure JavaScript dependencies only; .node and native libraries are disabled.");
       }
       if (name === "binding.gyp") {
         issue(issues, "NODE_GYP_ARTIFACT_UNSUPPORTED", file, "Dependency bundle contains binding.gyp.", "Remove native addon packages or replace them with pure JavaScript alternatives.");
       }
       if (name === "package.json") {
-        validateDependencyPackageJson(file, issues);
+        validateDependencyPackageJson(file, issues, scan);
       }
     }
     return true;
   });
+  return scan;
 }
 
-function validateDependencyPackageJson(file, issues) {
+function validateDependencyPackageJson(file, issues, scan) {
   const json = readJson(file, "dependency package.json", issues, false);
   if (!json) return;
+  scan.packageCount += 1;
+  recordPackageFormat(scan, json);
+  if (json.exports !== undefined) {
+    scan.packageExportsCount += 1;
+    collectPackageExportConditions(json.exports, scan.packageExportConditions);
+  }
+  if (json.imports !== undefined) {
+    scan.packageImportsCount += 1;
+    collectPackageExportConditions(json.imports, scan.packageExportConditions);
+  }
   const scripts = json.scripts && typeof json.scripts === "object" && !Array.isArray(json.scripts)
     ? json.scripts
     : {};
   for (const scriptName of Object.keys(scripts)) {
     if (UNSAFE_DEPENDENCY_SCRIPT_NAMES.has(scriptName)) {
+      scan.lifecycleScriptCount += 1;
       issue(
         issues,
         "DEPENDENCY_LIFECYCLE_SCRIPT_UNSUPPORTED",
@@ -461,6 +597,317 @@ function validateDependencyPackageJson(file, issues) {
   if (json.gypfile === true) {
     issue(issues, "NODE_GYP_ARTIFACT_UNSUPPORTED", file, "Dependency package declares gypfile=true.", "Use pure JavaScript dependencies only.");
   }
+}
+
+function analyzeCompatibility(root, projectJson, packageJson, dependencyScan) {
+  const declaredCapabilities = collectDeclaredCapabilities(projectJson, packageJson);
+  const signals = [];
+  const requiredBuiltins = new Map();
+  const capabilityRequirements = new Map();
+  const entry = analyzeEntryFormat(root, projectJson, packageJson, signals);
+  const sourceFiles = collectCompatibilitySourceFiles(root, signals);
+
+  for (const file of sourceFiles) {
+    const text = readSourcePrefix(file);
+    const relative = path.relative(root, file).replace(/\\/g, "/");
+    analyzeSourceText(text, relative, requiredBuiltins, capabilityRequirements, signals);
+  }
+
+  if (dependencyScan.nativeAddonCount > 0) {
+    signal(signals, "native-addon", "unsafe", "NATIVE_ADDON_DISABLED", "node_modules", "Dependency graph contains native addon or native binary files.");
+  }
+  if (dependencyScan.lifecycleScriptCount > 0) {
+    signal(signals, "postinstall", "unsafe", "DEPENDENCY_LIFECYCLE_SCRIPT_UNSUPPORTED", "node_modules", "Dependency graph contains install/postinstall lifecycle scripts.");
+  }
+  if (dependencyScan.unsupportedPackageManagerLayout) {
+    signal(signals, "package-manager-layout", "unsupported", "UNSUPPORTED_PACKAGE_MANAGER_LAYOUT", root, "Dependency graph uses an unsupported package-manager layout.");
+  }
+  if (dependencyScan.packageExportsCount > 0 || dependencyScan.packageImportsCount > 0) {
+    signal(
+      signals,
+      "package-exports",
+      "experimental",
+      "PACKAGE_EXPORTS_CONDITIONS_PARTIAL",
+      "node_modules",
+      "Dependency graph uses package exports/imports conditions covered by the v1.1 partial resolver gate."
+    );
+  }
+  if (dependencyScan.fileCount > MAX_DEPENDENCY_SCAN_ENTRIES) {
+    signal(signals, "graph-size", "unsupported", "DEPENDENCY_BUNDLE_TOO_LARGE", "node_modules", "Dependency graph exceeds the project wizard scan budget.");
+  }
+
+  for (const [capability, modules] of capabilityRequirements) {
+    const declared = declaredCapabilities.has(capability);
+    const baseStatus = capability === "raw_network" || capability === "child_process" || capability === "vm" || capability === "inspector"
+      ? "unsupported"
+      : capability === "worker_threads"
+        ? "experimental"
+        : "compatible with capability";
+    const status = !declared && baseStatus === "compatible with capability" ? "unsupported" : baseStatus;
+    signal(
+      signals,
+      "capability",
+      status,
+      declared ? "CAPABILITY_REQUIRED" : "CAPABILITY_DECLARATION_MISSING",
+      root,
+      "Project requires capability '" + capability + "' from " + Array.from(modules).sort().join(", ") + ".",
+      { capability, declared, modules: Array.from(modules).sort() }
+    );
+  }
+
+  const status = signals.reduce(
+    (current, item) => worseCompatibilityStatus(current, item.status),
+    "compatible"
+  );
+  const packageFormats = {};
+  for (const [format, count] of dependencyScan.packageFormats) {
+    packageFormats[format] = count;
+  }
+  return {
+    schema: "autojs6-node-dependency-compatibility-v1",
+    status,
+    entry,
+    declaredCapabilities: Array.from(declaredCapabilities).sort(),
+    requiredBuiltins: Array.from(requiredBuiltins.values())
+      .map((item) => ({
+        name: item.name,
+        files: Array.from(item.files).sort()
+      }))
+      .sort((left, right) => left.name.localeCompare(right.name)),
+    capabilityRequirements: Array.from(capabilityRequirements.entries())
+      .map(([capability, modules]) => ({
+        capability,
+        declared: declaredCapabilities.has(capability),
+        modules: Array.from(modules).sort()
+      }))
+      .sort((left, right) => left.capability.localeCompare(right.capability)),
+    dependencyGraph: {
+      installed: dependencyScan.installed,
+      packageCount: dependencyScan.packageCount,
+      fileCount: dependencyScan.fileCount,
+      totalBytes: dependencyScan.totalBytes,
+      packageFormats,
+      packageExportsCount: dependencyScan.packageExportsCount,
+      packageImportsCount: dependencyScan.packageImportsCount,
+      packageExportConditions: Array.from(dependencyScan.packageExportConditions).sort()
+    },
+    apkBuilder: {
+      gate: "validate-before-directory-packaging",
+      packagedAssetRoot: "assets/project",
+      reportFile: "dependency-compatibility.json"
+    },
+    signals: signals.sort((left, right) => {
+      const statusDelta = COMPATIBILITY_STATUS_RANK.get(right.status) - COMPATIBILITY_STATUS_RANK.get(left.status);
+      return statusDelta || left.code.localeCompare(right.code) || String(left.file).localeCompare(String(right.file));
+    })
+  };
+}
+
+function analyzeEntryFormat(root, projectJson, packageJson, signals) {
+  const entryValue = projectJson && nonEmptyString(projectJson.main)
+    ? projectJson.main
+    : packageJson && nonEmptyString(packageJson.main)
+      ? packageJson.main
+      : "";
+  const extension = path.extname(String(entryValue || "")).toLowerCase();
+  const packageType = packageJson && packageJson.type === "module" ? "module" : "commonjs";
+  const format = extension === ".mjs" || (extension === ".js" && packageType === "module")
+    ? "esm"
+    : extension === ".cjs" || extension === ".js"
+      ? "cjs"
+      : "unknown";
+  if (format === "esm") {
+    signal(signals, "module-format", "experimental", "ESM_ENTRY_PARTIAL", entryValue || root, "ESM entry support is partial in Node Profile v1.1.");
+  }
+  return {
+    path: entryValue,
+    extension,
+    packageType,
+    format
+  };
+}
+
+function analyzeSourceText(text, relative, requiredBuiltins, capabilityRequirements, signals) {
+  const moduleNames = new Set();
+  const requirePattern = /require\s*\(\s*["'](?:node:)?([^"']+)["']\s*\)/g;
+  const importFromPattern = /(?:from|import)\s*["'](?:node:)?([^"']+)["']/g;
+  let match;
+  while ((match = requirePattern.exec(text)) !== null) {
+    moduleNames.add(match[1]);
+  }
+  while ((match = importFromPattern.exec(text)) !== null) {
+    moduleNames.add(match[1]);
+  }
+  for (const moduleName of moduleNames) {
+    if (KNOWN_NODE_BUILTINS.has(moduleName) || NODE_BUILTIN_CAPABILITIES.has(moduleName)) {
+      mapAddSet(requiredBuiltins, moduleName, "name", "files", relative);
+    }
+    if (NODE_BUILTIN_CAPABILITIES.has(moduleName)) {
+      const capability = NODE_BUILTIN_CAPABILITIES.get(moduleName);
+      mapAddSet(capabilityRequirements, capability, null, null, moduleName);
+    }
+    if (BRIDGE_MODULE_CAPABILITIES.has(moduleName)) {
+      const capability = BRIDGE_MODULE_CAPABILITIES.get(moduleName);
+      mapAddSet(capabilityRequirements, capability, null, null, moduleName);
+    }
+  }
+  if (/\bfetch\s*\(/.test(text)) {
+    mapAddSet(capabilityRequirements, "network", null, null, "fetch");
+  }
+  if (/\bprocess\.(binding|dlopen)\s*\(/.test(text)) {
+    signal(signals, "native-process-api", "unsafe", "PROCESS_NATIVE_API_DISABLED", relative, "process.binding/process.dlopen are disabled.");
+  }
+  if (/\.node["']/.test(text)) {
+    signal(signals, "native-addon", "unsafe", "NATIVE_ADDON_DISABLED", relative, "Source references a native .node addon.");
+  }
+  const fsOutsideScopePattern = /(?:\b(?:fs|fsp)\s*|require\s*\(\s*["'](?:node:)?fs(?:\/promises)?["']\s*\))\.\s*(?:readFile|readFileSync|writeFile|writeFileSync|open|openSync|mkdir|mkdirSync|readdir|readdirSync|stat|statSync)\s*\(\s*["'](?:\/|\\|[A-Za-z]:|\.\.\/|\.\.\\)/;
+  if (fsOutsideScopePattern.test(text)) {
+    signal(signals, "fs-scope", "unsafe", "FS_OUTSIDE_SCOPE", relative, "Source contains a direct fs call with an absolute or escaping literal path.");
+  }
+}
+
+function addCompatibilityValidationIssues(compatibility, issues) {
+  for (const item of compatibility.signals) {
+    if (item.status !== "unsafe" && item.status !== "unsupported") {
+      continue;
+    }
+    if (item.code === "CAPABILITY_REQUIRED") {
+      continue;
+    }
+    if (issues.some((existing) => existing.code === item.code && existing.file === String(item.file))) {
+      continue;
+    }
+    issue(
+      issues,
+      item.code,
+      item.file,
+      item.message,
+      item.hint || "Use a Safe Node Profile compatible dependency or declare a supported bridge capability."
+    );
+  }
+}
+
+function collectDeclaredCapabilities(projectJson, packageJson) {
+  const values = [];
+  function addPermissions(value) {
+    if (Array.isArray(value)) {
+      value.forEach((item) => values.push(normalizeCapability(item)));
+    }
+  }
+  if (projectJson && projectJson.node && typeof projectJson.node === "object") {
+    addPermissions(projectJson.node.permissions);
+    addPermissions(projectJson.node.bridgePermissions);
+  }
+  const autojs6 = packageJson && packageJson.autojs6 && typeof packageJson.autojs6 === "object"
+    ? packageJson.autojs6
+    : null;
+  if (autojs6) {
+    addPermissions(autojs6.permissions);
+    addPermissions(autojs6.bridgePermissions);
+    if (autojs6.node && typeof autojs6.node === "object") {
+      addPermissions(autojs6.node.permissions);
+      addPermissions(autojs6.node.bridgePermissions);
+    }
+  }
+  return new Set(values.filter(Boolean));
+}
+
+function collectCompatibilitySourceFiles(root, signals) {
+  const files = [];
+  walk(root, [], (file, stat) => {
+    const name = path.basename(file);
+    if (stat.isDirectory() && (name === ".git" || name === "build" || name === ".gradle")) {
+      return false;
+    }
+    if (stat.isFile() && JAVASCRIPT_SOURCE_EXTENSIONS.has(path.extname(name).toLowerCase())) {
+      files.push(file);
+    }
+    return true;
+  });
+  if (files.length > MAX_DEPENDENCY_SCAN_ENTRIES) {
+    signal(signals, "graph-size", "unsupported", "DEPENDENCY_BUNDLE_TOO_LARGE", root, "Project source scan exceeded " + MAX_DEPENDENCY_SCAN_ENTRIES + " JavaScript entries.");
+  }
+  return files.slice(0, MAX_DEPENDENCY_SCAN_ENTRIES);
+}
+
+function readSourcePrefix(file) {
+  const stat = fs.statSync(file);
+  const bytes = Math.min(stat.size, MAX_COMPATIBILITY_SOURCE_BYTES);
+  const fd = fs.openSync(file, "r");
+  try {
+    const buffer = Buffer.alloc(bytes);
+    fs.readSync(fd, buffer, 0, bytes, 0);
+    return buffer.toString("utf8");
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+function recordPackageFormat(scan, json) {
+  const format = json.type === "module" ? "esm" : "cjs";
+  scan.packageFormats.set(format, (scan.packageFormats.get(format) || 0) + 1);
+}
+
+function collectPackageExportConditions(value, output) {
+  if (!value || typeof value !== "object") {
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectPackageExportConditions(item, output));
+    return;
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (!key.startsWith(".") && !key.startsWith("#") && key !== "types") {
+      output.add(key);
+    }
+    collectPackageExportConditions(child, output);
+  }
+}
+
+function signal(signals, category, status, code, file, message, extra) {
+  signals.push({
+    category,
+    status,
+    code,
+    file: String(file),
+    message,
+    hint: compatibilityHint(code, status),
+    ...(extra || {})
+  });
+}
+
+function mapAddSet(map, key, objectKey, setKey, value) {
+  if (objectKey && setKey) {
+    if (!map.has(key)) {
+      map.set(key, { [objectKey]: key, [setKey]: new Set() });
+    }
+    map.get(key)[setKey].add(value);
+    return;
+  }
+  if (!map.has(key)) {
+    map.set(key, new Set());
+  }
+  map.get(key).add(value);
+}
+
+function worseCompatibilityStatus(left, right) {
+  return COMPATIBILITY_STATUS_RANK.get(right) > COMPATIBILITY_STATUS_RANK.get(left) ? right : left;
+}
+
+function compatibilityHint(code, status) {
+  if (code === "CAPABILITY_DECLARATION_MISSING") {
+    return "Declare the required Safe Node Profile capability in project.json or package.json.";
+  }
+  if (code === "ESM_ENTRY_PARTIAL" || code === "PACKAGE_EXPORTS_CONDITIONS_PARTIAL") {
+    return "Keep this project on the v1.1 partial support gate and retain CommonJS fallback coverage where possible.";
+  }
+  if (status === "unsafe") {
+    return "Remove the unsafe native/process/fs behavior before packaging.";
+  }
+  if (status === "unsupported") {
+    return "Replace this dependency or API use with a Safe Node Profile supported surface.";
+  }
+  return "No action required unless the target gate disallows this compatibility level.";
 }
 
 function walk(root, issues, visitor) {

@@ -211,6 +211,7 @@ Outputs:
 - `app/build/nodejs/npm-ci-bundle/project/`
 - `app/build/nodejs/dependency-cache/<bundle-hash>/project/`
 - `app/build/reports/nodejs/dependencies/dependency-manifest.json`
+- `app/build/reports/nodejs/dependencies/dependency-compatibility.json`
 - `app/build/reports/nodejs/npm-ci/dependency-manifest.json`
 - `app/build/reports/nodejs/dependencies/dependency-size-report.txt`
 - `app/build/reports/nodejs/dependencies/dependency-rejections.txt`
@@ -228,3 +229,10 @@ working directories and cache paths are not part of the hash. Identical lockfile
 produce the same bundle hash. Package entries include package/version, integrity or content hash fallback, license,
 file count, total bytes, unsupported capability usage, and an AutoJs6 compatibility score. The SBOM-lite report mirrors
 the package identity, integrity, license, size, capability, and score fields for packaged APK review.
+
+`dependency-compatibility.json` is the v1.1 dependency compatibility analyzer output. It classifies the installed project
+as `compatible`, `compatible with capability`, `experimental`, `unsupported`, or `unsafe`; records ESM/CJS entry format,
+required builtins, declared and required capabilities, native/lifecycle/raw-network/process/fs-scope signals,
+package exports/imports conditions, and expected packaged graph size; and is summarized from
+`dependency-manifest.json` so APK-builder preflight gates can reject `unsafe` and `unsupported` bundles before copying
+`assets/project`.

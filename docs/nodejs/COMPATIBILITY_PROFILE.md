@@ -126,8 +126,12 @@ dependency bundle shape.
 Validator failures are actionable JSON issues with a stable `code`, `file`,
 `message`, and `hint`. The tool rejects unsafe entry paths, unknown bridge
 capabilities, native addon files, `binding.gyp`, lifecycle scripts, symlinks,
-and generated `.bin` shims before users try to run or package the project. See
-[PROJECT_WIZARD.md](PROJECT_WIZARD.md).
+generated `.bin` shims, raw network/process requirements, and fs literal path
+escapes before users try to run or package the project. The validator also
+returns a dependency compatibility analyzer object with `compatible`,
+`compatible with capability`, `experimental`, `unsupported`, or `unsafe`
+status, required builtins, capability requirements, package export-condition
+usage, and APK-builder preflight metadata. See [PROJECT_WIZARD.md](PROJECT_WIZARD.md).
 
 ## JS-Only Plugin Prototype
 

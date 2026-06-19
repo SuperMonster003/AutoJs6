@@ -55,13 +55,28 @@ node tools/nodejs/project/autojs6-node-project.js validate D:\work\my-node-app -
 ```
 
 The JSON report uses schema `autojs6-node-project-validation-v1` and returns
-`ok`, `issueCount`, and an `issues` array. Each issue has:
+`ok`, `issueCount`, an `issues` array, and a `compatibility` object. Each issue has:
 
 - `severity`
 - `code`
 - `file`
 - `message`
 - `hint`
+
+The compatibility object uses schema
+`autojs6-node-dependency-compatibility-v1` and classifies the installed project
+as one of:
+
+- `compatible`
+- `compatible with capability`
+- `experimental`
+- `unsupported`
+- `unsafe`
+
+It records the entry format, required Node builtins, declared bridge
+capabilities, capability requirements, package format/export-condition usage,
+expected packaged graph size, and signals used by the APK builder preflight
+gate. `unsupported` and `unsafe` signals are surfaced as validator issues.
 
 ## Validator Coverage
 
@@ -78,6 +93,9 @@ The validator checks:
 - `node_modules` dependency bundles do not contain `.node` files, common native
   library/object files, `binding.gyp`, unsafe lifecycle scripts, symlinks, or
   generated `.bin` shims.
+- Source analysis classifies ESM/CJS entry format, required builtins, raw
+  network, `child_process`, `worker_threads`, fs literal path escapes, and
+  bridge capability requirements before packaging.
 
 Common actionable error codes:
 
@@ -97,12 +115,17 @@ Common actionable error codes:
 - `DEPENDENCY_SYMLINK_UNSUPPORTED`
 - `DEPENDENCY_BIN_ENTRY_UNSUPPORTED`
 - `DEPENDENCY_BUNDLE_TOO_LARGE`
+- `CAPABILITY_DECLARATION_MISSING`
+- `FS_OUTSIDE_SCOPE`
+- `UNSUPPORTED_PACKAGE_MANAGER_LAYOUT`
 
 ## Verification
 
 The checked-in Gradle gate exercises every template and representative invalid
 projects for missing entries, invalid package names, unknown permissions, and
-unsafe dependency bundles:
+unsafe dependency bundles. It also verifies every template has a non-blocking
+compatibility status and exercises source-level unsupported/unsafe analyzer
+fixtures:
 
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodeProjectWizard
