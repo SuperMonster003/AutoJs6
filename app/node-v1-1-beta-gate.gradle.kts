@@ -158,6 +158,7 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
         "embeddedNodeDoctorReport",
         "generateNodeCompatibilityProfile",
         "generateDesktopNodeDifferentialReport",
+        "generateNodeModernCoreDifferentialReport",
         "verifyNodeErrorCatalog",
         "verifyNodeProjectWizard",
         "verifyAutoJs6NodeTypeDeclarations",
@@ -219,6 +220,8 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
                 "status" to "required",
                 "tests" to listOf(
                     "NodeEsmExperimentalInstrumentationTest",
+                    "NodeModernCoreDifferentialInstrumentationTest",
+                    "generateNodeModernCoreDifferentialReport",
                     "NodeRealNpmCompatInstrumentationTest",
                     "NodeFetchBridgeInstrumentationTest",
                     "NodeWebSocketBridgeInstrumentationTest",
@@ -317,6 +320,10 @@ val generateNodeV11BetaSummary = tasks.register("generateNodeV11BetaSummary") {
                     rootReportsRoot.resolve("nodejs/differential/desktop-node-differential.json"),
                     rootDir,
                 ),
+                "modernCoreDifferential" to nodeV11BetaReportReference(
+                    rootReportsRoot.resolve("nodejs/differential/modern-core-differential.json"),
+                    rootDir,
+                ),
                 "npmCompat" to nodeV11BetaReportReference(
                     rootReportsRoot.resolve("nodejs/npm-compat-v1.1.md"),
                     rootDir,
@@ -381,6 +388,7 @@ tasks.register("verifyNodeV11BetaGate") {
             "verifyEmbeddedNodeDebug",
             "verifyEmbeddedNodePackagedDebug",
             "generateDesktopNodeDifferentialReport",
+            "generateNodeModernCoreDifferentialReport",
             "verifyNodeErrorCatalog",
             "verifyNodeProjectWizard",
             "verifyAutoJs6NodeTypeDeclarations",

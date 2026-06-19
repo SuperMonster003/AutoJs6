@@ -74,6 +74,7 @@ val generateNodeV11AlphaSummary = tasks.register("generateNodeV11AlphaSummary") 
         "embeddedNodeDoctorReport",
         "generateNodeCompatibilityProfile",
         "generateDesktopNodeDifferentialReport",
+        "generateNodeModernCoreDifferentialReport",
     )
     mustRunAfter("connectedAppDebugAndroidTest", "collectNodeFuzzerSeeds")
 
@@ -130,6 +131,8 @@ val generateNodeV11AlphaSummary = tasks.register("generateNodeV11AlphaSummary") 
                     "NodeEsmExperimentalInstrumentationTest",
                     "NodeSourceMapStackTraceInstrumentationTest",
                     "NodeCompatCorpusInstrumentationTest",
+                    "NodeModernCoreDifferentialInstrumentationTest",
+                    "generateNodeModernCoreDifferentialReport",
                 ),
             ),
             linkedMapOf(
@@ -237,6 +240,10 @@ val generateNodeV11AlphaSummary = tasks.register("generateNodeV11AlphaSummary") 
                     rootReportsRoot.resolve("nodejs/differential/desktop-node-differential.json"),
                     rootDir,
                 ),
+                "modernCoreDifferential" to nodeV11AlphaReportReference(
+                    rootReportsRoot.resolve("nodejs/differential/modern-core-differential.json"),
+                    rootDir,
+                ),
                 "npmCompat" to nodeV11AlphaReportReference(
                     rootReportsRoot.resolve("nodejs/npm-compat-v1.1.md"),
                     rootDir,
@@ -286,6 +293,7 @@ tasks.register("verifyNodeV11AlphaGate") {
             "verifyNodePrGate",
             "verifyEmbeddedNodeDebug",
             "generateDesktopNodeDifferentialReport",
+            "generateNodeModernCoreDifferentialReport",
             "connectedAppDebugAndroidTest",
         )
     }

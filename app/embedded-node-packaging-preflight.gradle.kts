@@ -3532,6 +3532,17 @@ val generateDesktopNodeDifferentialReport = tasks.register(
     commandLine("node", rootProject.projectDir.resolve("tools/nodejs/differential/run-differential-tests.js").absolutePath)
 }
 
+val generateNodeModernCoreDifferentialReport = tasks.register(
+    "generateNodeModernCoreDifferentialReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Runs the desktop Node differential harness for modern core capability probes."
+
+    workingDir(rootProject.projectDir)
+    commandLine("node", rootProject.projectDir.resolve("tools/nodejs/differential/run-modern-core-differential.js").absolutePath)
+}
+
 val verifyNodePrGate = tasks.register("verifyNodePrGate") {
     group = "verification"
     description = "Runs fast host-side Embedded Node PR checks without connected-device stress or packaged smoke launch."
@@ -3545,6 +3556,7 @@ val verifyNodePrGate = tasks.register("verifyNodePrGate") {
         "verifyNodeCompatibilityProfile",
         "verifyNodeResolverVisualizerFixtures",
         "verifyNodeDependencyBundlerFixtures",
+        generateNodeModernCoreDifferentialReport,
     )
 }
 
@@ -3557,6 +3569,7 @@ val verifyNodeNightlyGate = tasks.register("verifyNodeNightlyGate") {
         dependsOn(
             verifyNodePrGate,
             generateDesktopNodeDifferentialReport,
+            generateNodeModernCoreDifferentialReport,
             verifyEmbeddedNodeDebug,
             verifyEmbeddedNodePackagedDebug,
             "connectedAppDebugAndroidTest",
@@ -3776,6 +3789,7 @@ val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
         dependsOn(
             "generateNodeProfileReleaseManifest",
             generateDesktopNodeDifferentialReport,
+            generateNodeModernCoreDifferentialReport,
             "verifyEmbeddedNodeReleaseCandidate",
             "connectedAppDebugAndroidTest",
         )

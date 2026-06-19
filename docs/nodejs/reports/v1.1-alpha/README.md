@@ -19,7 +19,7 @@ build/reports/nodejs/v1.1-alpha-summary.json
 Required coverage:
 
 - ESM partial tests and source-map stack shape.
-- v1.1 npm corpus and desktop differential report.
+- v1.1 npm corpus, desktop differential report, and modern core differential classification.
 - Controlled `fetch` and WebSocket bridge tests.
 - Expanded AutoJs bridge suites for OCR, image, storage, notifications, sensors, UI, shell, accessibility selector, and `work_manager`.
 - Packaged APK v1.1 bridge smoke for controlled `fetch`, OCR, storage, UI, and `work_manager`.

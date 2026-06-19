@@ -45,6 +45,7 @@ experimental or blocked features from leaking into a release candidate.
 | --- | --- | --- |
 | ESM and dynamic import | stay `partial` | default `.mjs`, `type=module`, static import, local dynamic import, builtin allowlist, resolver denial paths, packaged focused gate |
 | npm/builtins | stay `partial` | real npm corpus, desktop differential report, Buffer/core/stream/zlib/Web Streams gates |
+| modern core differential | classified per area | S7-36 corpus covering ESM, `process.permission`, `AsyncLocalStorage`, `perf_hooks`, `diagnostics_channel`, `node:test`, promise timers/streams, WebCrypto, and database bridge restriction |
 | controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial, explicit live fetch/axios and WebSocket loopback subgates |
 | AutoJs bridge modules | stay `partial` or `protocol-gated partial` | provider health registry, Doctor provider status, capability denial, fake provider behavior, Android live/fail-closed behavior by module, TypeScript declarations, resource cleanup |
 | packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, focused packaged ESM/dynamic import gate |
@@ -72,6 +73,8 @@ fs promises, native-addon denial, resolver fuzzer, and scoped-fs fuzzer
 coverage. It keeps the default normal fuzzer budget; extended fuzzer budget runs
 remain separate stress subgates. The beta aggregate also runs packaged host
 verification and tooling checks through task dependencies.
+It also runs `generateNodeModernCoreDifferentialReport` so the beta summary can
+link the modern core exact/partial/restriction classification report.
 
 The beta gate also verifies
 [NODE_PROFILE_V1_1_BETA_BLOCKERS.md](NODE_PROFILE_V1_1_BETA_BLOCKERS.md) so

@@ -263,6 +263,13 @@ JSON/Markdown report under `build/reports/nodejs/differential/`, the v1.1 npm su
 `NodeRealNpmCompatInstrumentationTest`, it compares normalized stdout, exit code, error code, and error message pattern,
 then classifies differences as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
 
+`tools/nodejs/differential/run-modern-core-differential.js` runs the fixed S7-36 modern core corpus under desktop Node
+24 and writes `build/reports/nodejs/differential/modern-core-differential.json` plus Markdown. When supplied with
+`moderncore.differential.result=...` lines emitted by `NodeModernCoreDifferentialInstrumentationTest`, it classifies
+ESM, `process.permission`, `AsyncLocalStorage`, `perf_hooks`, `diagnostics_channel`, `node:test`, `timers/promises`,
+`stream/promises`, WebCrypto, and the database compatibility module as `exact match`, `intentional AutoJs6 restriction`,
+`partial`, or `bug`.
+
 `:app:bundleNodeDependencies` is the host-side dependency bundling gate. It consumes a project that already has
 `package.json` and `node_modules`, validates the tree without running package code, copies a sanitized bundle to
 `app/build/nodejs/dependency-bundle/project/`, and writes a manifest plus size/rejection reports under

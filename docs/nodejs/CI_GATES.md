@@ -58,7 +58,7 @@ Scope:
 - PR gate
 - debug host gate
 - packaged host gate
-- desktop Node differential harness
+- desktop Node differential harnesses for real npm and modern core probes
 - connected device instrumentation selected by `sony` or `full`
 - lifecycle and memory stress through the selected device profile
 - fuzzers and real npm corpus through the selected device profile
@@ -89,7 +89,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Scope:
 
 - PR host gate and debug host gate
-- desktop Node differential harness
+- desktop Node differential harnesses for real npm and modern core probes
 - v1.1 ESM, npm, controlled network, WebSocket, expanded bridge, security, resource stress, memory stress, worker design-gate, and packaged v1.1 smoke instrumentation
 - JSON summary at `build/reports/nodejs/v1.1-alpha-summary.json`
 
@@ -263,11 +263,14 @@ native Worker surface or stable `ERR_AUTOJS6_WORKER_DISABLED` diagnostics. When
 creation and resource stress classes remain promotion gates; they are skipped
 with an explicit native-availability reason on the current Embedded Node build
 instead of weakening the contract with a same-thread fallback.
-`verifyNodeModernCoreGate` covers the S7-31 through S7-34 modern core surface:
+`verifyNodeModernCoreGate` covers the S7-31 through S7-36 modern core surface:
 `AsyncLocalStorage` propagation, diagnostics channel runtime telemetry,
 `perf_hooks`, single-runtime `node:test`, promise-based timers/streams/readline,
 `AbortSignal` helpers, `structuredClone`, and the limited global/WebCrypto
-surface with negative security cases.
+surface with negative security cases. It also runs the modern core differential
+corpus for ESM, `process.permission`, `AsyncLocalStorage`, `perf_hooks`,
+`diagnostics_channel`, `node:test`, `timers/promises`, `stream/promises`,
+WebCrypto, and the separately classified controlled database bridge.
 
 ## Release Gate
 
@@ -281,7 +284,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Scope:
 
 - release manifest generation
-- desktop Node differential harness
+- desktop Node differential harnesses for real npm and modern core probes
 - `verifyEmbeddedNodeReleaseCandidate`
 - connected device instrumentation selected by `sony` or `full`
 

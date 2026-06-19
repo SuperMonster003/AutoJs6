@@ -269,6 +269,25 @@ classified as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
 also groups the fixed fixtures by the Task 188 capability areas: ESM packages, stream packages, zlib packages, fetch
 packages, and buffer packages.
 
+Modern core differential harness:
+
+```powershell
+node tools/nodejs/differential/run-modern-core-differential.js
+```
+
+This host-side script runs the fixed `node_modern_core_differential` corpus under desktop Node 24 and writes:
+
+```text
+build/reports/nodejs/differential/modern-core-differential.json
+build/reports/nodejs/differential/modern-core-differential.md
+```
+
+`NodeModernCoreDifferentialInstrumentationTest` emits `moderncore.differential.result=...` JSON lines for the same
+fixtures. Pass the connected-test logcat file to the harness with `--autojs-log <file>` to compare AutoJs6 with the
+desktop baseline. The S7-36 categories are `exact match`, `intentional AutoJs6 restriction`, `partial`, and `bug`.
+The corpus covers ESM, `process.permission`, `AsyncLocalStorage`, `perf_hooks`, `diagnostics_channel`, `node:test`,
+`timers/promises`, `stream/promises`, WebCrypto, and the separately classified controlled database bridge.
+
 Current dependency bundler verification:
 
 ```powershell

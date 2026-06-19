@@ -239,6 +239,7 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest",
     "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
     "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+    "org.autojs.autojs.engine.NodeModernCoreDifferentialInstrumentationTest",
     "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest",
     "org.autojs.autojs.engine.NodeStreamMvpInstrumentationTest",
     "org.autojs.autojs.engine.NodeZlibBufferInstrumentationTest",
@@ -586,6 +587,7 @@ val nodeJsModernCoreGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest",
     "org.autojs.autojs.engine.NodeFeatureFlagRegistryInstrumentationTest",
     "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest",
+    "org.autojs.autojs.engine.NodeModernCoreDifferentialInstrumentationTest",
     "org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest",
     "org.autojs.autojs.engine.NodeStreamMvpInstrumentationTest",
     "org.autojs.autojs.engine.NodeZlibBufferInstrumentationTest",
@@ -857,6 +859,7 @@ val nodeJsTestDeviceProfileClasses = when (nodeJsTestDeviceProfile) {
         "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",
         "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
         "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+        "org.autojs.autojs.engine.NodeModernCoreDifferentialInstrumentationTest",
         "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
     ) + if (nodeJsWorkerThreadsExperimentalEnabled) {
         listOf("org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest")

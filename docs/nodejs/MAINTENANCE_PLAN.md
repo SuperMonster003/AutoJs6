@@ -58,7 +58,7 @@ to the nightly record. If the final tag commit differs from the latest green nig
 Run monthly when Node bundling or compatibility corpus work is active:
 
 ```powershell
-.\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures :app:generateDesktopNodeDifferentialReport
+.\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures :app:generateDesktopNodeDifferentialReport :app:generateNodeModernCoreDifferentialReport
 ```
 
 Review:
@@ -68,6 +68,7 @@ Review:
 - lifecycle script, postinstall, `.bin`, executable, and npm cache rejection coverage;
 - dependency size limits and SBOM-lite output;
 - fixed real npm corpus drift against desktop Node.
+- modern core exact/partial/restriction classification drift against desktop Node.
 
 No runtime `npm install`, lifecycle script execution, unchecked `.bin`, or native build step is allowed in v1.x.
 
