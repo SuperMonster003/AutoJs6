@@ -111,6 +111,7 @@ The failed stress cases were:
 | --- | --- | --- |
 | S7-24 default `verifyNodeWorkerGate` | Pass | Sony default gate ran bootstrap/design coverage, 3 tests, 0 failures. |
 | S7-24 experimental `verifyNodeWorkerGate` | Pass with skips | Sony experimental gate ran bootstrap/preflight and skipped runnable/stress promotion tests because native workers remain unavailable, 0 failures. |
+| S7-25 CJS/ESM worker entry gate | Prepared, skipped on Sony | Worker loader now has promotion coverage for `worker.cjs`, `worker.mjs`, `type=module` `.js`, local CJS/JSON and partial-ESM dependencies, allowed builtins, path escape denial, raw network denial, bridge denial, and native addon denial. Sony still skips runnable smoke because native workers remain unavailable. |
 | default build flag | Pass | `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false` in normal builds. |
 | capability registry default | Pass | Kotlin and JavaScript profiles report worker threads disabled. |
 | bare `require("worker_threads")` denial | Pass | Default path rejects before local shadowing. |
@@ -146,7 +147,11 @@ Before reconsidering release opt-in status, add or prove:
 
 - a libnode build with native `process.getBuiltinModule("worker_threads")`
   availability;
-- focused Worker creation success for local CommonJS worker scripts;
+- focused Worker creation success for local CommonJS and partial-ESM worker
+  scripts;
+- `worker.cjs`, `worker.mjs`, and `package.json` `type=module` `.js` entry
+  smoke on a native-worker-capable Embedded Node build;
+- local worker dependency smoke for CJS/JSON and partial ESM graphs;
 - `workerData`, `parentPort.postMessage`, `worker.postMessage`, and
   `worker.terminate()` behavior;
 - worker-local denial of AutoJs bridge modules, Android/Java interop, `fs`, raw

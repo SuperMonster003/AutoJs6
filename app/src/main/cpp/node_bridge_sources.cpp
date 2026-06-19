@@ -10668,15 +10668,32 @@ std::string buildEmbeddedScriptExecutionSource(
       lastPolicyRejection: __autojs6_worker_threads_diagnostics.lastPolicyRejection
     };
   }
-  function __autojs6_assert_worker_source_supported(source, sourceName) {
-    const extension = __autojs6_source_extension(sourceName);
-    if (__autojs6_is_esm_extension(extension)) {
-      throw __autojs6_worker_threads_policy_error(
-        "AutoJs6 experimental worker_threads accepts CommonJS worker scripts only: " + sourceName,
-        "esm_worker",
-        "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
-      );
+  function __autojs6_worker_threads_entry_kind(resolved) {
+    const extension = __autojs6_source_extension(resolved);
+    if (__autojs6_is_esm_extension(extension)) return "esm";
+    if (extension === ".js" && __autojs6_package_type_module_for_file(resolved)) return "esm";
+    if (extension === ".js" || extension === ".cjs") return "cjs";
+    return "";
+  }
+  function __autojs6_worker_threads_module_sources_snapshot(entryFilename, entryRecord) {
+    const snapshot = Object.create(null);
+    for (const resolved of Object.keys(__autojs6_module_sources)) {
+      const record = __autojs6_module_sources[resolved];
+      if (!record || typeof record.source !== "string") continue;
+      snapshot[resolved] = {
+        source: record.source,
+        sourceURL: record.sourceURL || resolved
+      };
     }
+    if (entryFilename && entryRecord && typeof entryRecord.source === "string") {
+      snapshot[entryFilename] = {
+        source: entryRecord.source,
+        sourceURL: entryRecord.sourceURL || entryFilename
+      };
+    }
+    return snapshot;
+  }
+  function __autojs6_assert_worker_source_supported(source, sourceName, entryKind) {
     const sourceText = String(source || "");
     const masked = __autojs6_mask_non_code(sourceText);
     if (__autojs6_contains_dynamic_import(sourceText)) {
@@ -10685,6 +10702,9 @@ std::string buildEmbeddedScriptExecutionSource(
         "dynamic_import",
         "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED"
       );
+    }
+    if (entryKind === "esm") {
+      return;
     }
     if (/(^|[\r\n;{}])\s*import\b\s*(["'{*]|[A-Za-z_$])/.test(masked) ||
         /(^|[\r\n;{}])\s*export\b\s*([{*]|default\b|class\b|function\b|const\b|let\b|var\b|[A-Za-z_$])/.test(masked)) {
@@ -10696,6 +10716,19 @@ std::string buildEmbeddedScriptExecutionSource(
     }
   }
   function __autojs6_worker_threads_resolve_script(filename, parentFilename) {
+    const path = __autojs6_path_module();
+    if (
+      !path ||
+      typeof path.resolve !== "function" ||
+      typeof path.extname !== "function" ||
+      typeof path.isAbsolute !== "function"
+    ) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads needs the allowlisted path module.",
+        "path_module",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
     const name = filename === undefined || filename === null ? "" : String(filename);
     if (!name || !__autojs6_is_relative_module_name(name)) {
       throw __autojs6_worker_threads_policy_error(
@@ -10704,25 +10737,62 @@ std::string buildEmbeddedScriptExecutionSource(
         "ERR_AUTOJS6_FS_SCOPED_PATH"
       );
     }
-    let resolved;
-    try {
-      resolved = __autojs6_resolve_local_module(name, parentFilename || __autojs6_source_name);
-    } catch (error) {
+    if (name.indexOf("\u0000") >= 0) {
       throw __autojs6_worker_threads_policy_error(
-        error && error.message ? error.message : "AutoJs6 experimental worker_threads script path is outside the working directory.",
-        "script_path",
-        error && (error.autojs6Code || error.code) ? (error.autojs6Code || error.code) : "ERR_AUTOJS6_FS_PATH_ESCAPE"
+        "AutoJs6 experimental worker_threads rejects NUL worker script paths.",
+        "nul_script",
+        "ERR_AUTOJS6_FS_NUL_BYTE"
       );
     }
-    const extension = __autojs6_source_extension(resolved);
-    if (extension !== ".js" && extension !== ".cjs") {
+    if (path.isAbsolute(name)) {
       throw __autojs6_worker_threads_policy_error(
-        "AutoJs6 experimental worker_threads accepts only .js and .cjs worker scripts: " + name,
+        "AutoJs6 experimental worker_threads rejects absolute worker scripts: " + name,
+        "absolute_script",
+        "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED"
+      );
+    }
+    const root = __autojs6_module_resolution_root(parentFilename || __autojs6_source_name);
+    const parentDir = __autojs6_module_dirname(parentFilename || __autojs6_source_name);
+    const base = path.resolve(parentDir || root, name);
+    if (!__autojs6_path_within_root(base, root) || __autojs6_sensitive_path(base)) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads script path is outside the working directory: " + name,
+        "script_path",
+        "ERR_AUTOJS6_FS_PATH_ESCAPE"
+      );
+    }
+    const extension = __autojs6_normalized_extension(path.extname(base));
+    __autojs6_throw_if_native_addon_extension(
+      extension,
+      name,
+      "AutoJs6 experimental worker_threads script",
+      "Unsupported AutoJs6 experimental worker script extension: " + name
+    );
+    if (extension && extension !== ".js" && extension !== ".cjs" && extension !== ".mjs") {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads accepts only .js, .cjs, and .mjs worker scripts: " + name,
         "unsupported_extension",
         "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
       );
     }
-    const record = __autojs6_module_record(resolved, false);
+    const candidates = extension ? [base] : [base, base + ".js", base + ".cjs", base + ".mjs"];
+    let resolved;
+    let record;
+    for (const candidate of candidates) {
+      const candidateResolved = path.resolve(candidate);
+      if (!__autojs6_path_within_root(candidateResolved, root) || __autojs6_sensitive_path(candidateResolved)) {
+        throw __autojs6_worker_threads_policy_error(
+          "AutoJs6 experimental worker_threads script path is outside the working directory: " + name,
+          "script_path",
+          "ERR_AUTOJS6_FS_PATH_ESCAPE"
+        );
+      }
+      record = __autojs6_module_record(candidateResolved, true);
+      if (record && typeof record.source === "string") {
+        resolved = candidateResolved;
+        break;
+      }
+    }
     if (!record || typeof record.source !== "string") {
       throw __autojs6_worker_threads_policy_error(
         "Cannot find AutoJs6 experimental worker script: " + name,
@@ -10730,91 +10800,652 @@ std::string buildEmbeddedScriptExecutionSource(
         "ERR_AUTOJS6_MODULE_NOT_FOUND"
       );
     }
-    __autojs6_assert_worker_source_supported(record.source, resolved);
+    const entryKind = __autojs6_worker_threads_entry_kind(resolved);
+    if (!entryKind) {
+      throw __autojs6_worker_threads_policy_error(
+        "AutoJs6 experimental worker_threads accepts only CommonJS or partial ESM worker scripts: " + name,
+        "unsupported_entry_kind",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
+    __autojs6_assert_worker_source_supported(record.source, resolved, entryKind);
     return {
+      root,
       filename: resolved,
       dirname: __autojs6_module_dirname(resolved),
+      format: entryKind,
       source: record.source,
-      sourceURL: record.sourceURL || resolved
+      sourceURL: record.sourceURL || resolved,
+      moduleSources: __autojs6_worker_threads_module_sources_snapshot(
+        resolved,
+        {
+          source: record.source,
+          sourceURL: record.sourceURL || resolved
+        }
+      )
     };
   }
   function __autojs6_worker_threads_bootstrap_source(descriptor) {
-    const filename = descriptor.filename;
-    const dirname = descriptor.dirname;
-    const sourceURL = String(descriptor.sourceURL || filename).replace(/[\r\n]/g, " ");
-    return [
-      "\"use strict\";",
-      "(function() {",
-      "  const __nativeRequire = require;",
-      "  const __workerThreads = __nativeRequire(\"worker_threads\");",
-      "  const __parentPort = __workerThreads.parentPort;",
-      "  const __workerDataEnvelope = __workerThreads.workerData || {};",
-      "  const __workerData = __workerDataEnvelope.__autojs6UserWorkerData;",
-      "  function __error(message, code) {",
-      "    const error = new Error(message);",
-      "    Object.defineProperty(error, \"code\", { value: code, enumerable: true, configurable: true });",
-      "    Object.defineProperty(error, \"autojs6Code\", { value: code, enumerable: true, configurable: true });",
-      "    return error;",
-      "  }",
-      "  function __deny(moduleName) {",
-      "    throw __error(\"AutoJs6 experimental worker_threads denies module '\" + moduleName + \"' in workers.\", \"ERR_AUTOJS6_WORKER_BRIDGE_DENIED\");",
-      "  }",
-      "  function __disabledProcess(name) {",
-      "    return function() {",
-      "      throw __error(\"AutoJs6 experimental worker_threads disables process.\" + name + \" in workers.\", \"ERR_AUTOJS6_PROCESS_API_DISABLED\");",
-      "    };",
-      "  }",
-      "  if (typeof process === \"object\" && process) {",
-      "    [\"binding\", \"_linkedBinding\", \"dlopen\", \"getBuiltinModule\", \"chdir\", \"exit\", \"abort\", \"kill\"].forEach(function(name) {",
-      "      try { Object.defineProperty(process, name, { value: __disabledProcess(name), configurable: true, writable: false }); } catch (_) { try { process[name] = __disabledProcess(name); } catch (_) {} }",
-      "    });",
-      "  }",
-      "  const __allowed = Object.freeze({",
-      "    assert: \"assert\",",
-      "    \"assert/strict\": \"assert/strict\",",
-      "    buffer: \"buffer\",",
-      "    events: \"events\",",
-      "    path: \"path\",",
-      "    \"path/posix\": \"path/posix\",",
-      "    \"path/win32\": \"path/win32\",",
-      "    querystring: \"querystring\",",
-      "    string_decoder: \"string_decoder\",",
-      "    timers: \"timers\",",
-      "    url: \"url\",",
-      "    util: \"util\",",
-      "    \"util/types\": \"util/types\"",
-      "  });",
-      "  const __limitedWorkerThreads = Object.freeze({",
-      "    isMainThread: false,",
-      "    parentPort: __parentPort,",
-      "    workerData: __workerData,",
-      "    threadId: __workerThreads.threadId,",
-      "    Worker: function Worker() { throw __error(\"Nested AutoJs6 worker_threads workers are disabled.\", \"ERR_AUTOJS6_WORKER_DISABLED\"); }",
-      "  });",
-      "  function __restrictedRequire(request) {",
-      "    const raw = String(request || \"\");",
-      "    const name = raw.indexOf(\"node:\") === 0 ? raw.slice(5) : raw;",
-      "    if (name === \"worker_threads\") return __limitedWorkerThreads;",
-      "    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __nativeRequire(__allowed[name]);",
-      "    return __deny(raw);",
-      "  }",
-      "  __restrictedRequire.resolve = function(request) {",
-      "    const raw = String(request || \"\");",
-      "    const name = raw.indexOf(\"node:\") === 0 ? raw.slice(5) : raw;",
-      "    if (name === \"worker_threads\") return \"worker_threads\";",
-      "    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __allowed[name];",
-      "    return __deny(raw);",
-      "  };",
-      "  const module = { id: " + JSON.stringify(filename) + ", filename: " + JSON.stringify(filename) + ", dirname: " + JSON.stringify(dirname) + ", exports: {}, loaded: false };",
-      "  module.require = __restrictedRequire;",
-      "  const exports = module.exports;",
-      "  const Buffer = __nativeRequire(\"buffer\").Buffer;",
-      "  const __run = new Function(\"require\", \"exports\", \"module\", \"__filename\", \"__dirname\", \"parentPort\", \"workerData\", \"Buffer\", " +
-        JSON.stringify("\"use strict\";\n" + descriptor.source + "\n//# sourceURL=" + sourceURL) + ");",
-      "  __run(__restrictedRequire, exports, module, module.filename, module.dirname, __parentPort, __workerData, Buffer);",
-      "  module.loaded = true;",
-      "})();"
-    ].join("\n");
+    const descriptorLiteral = JSON.stringify({
+      root: descriptor.root,
+      filename: descriptor.filename,
+      dirname: descriptor.dirname,
+      format: descriptor.format,
+      moduleSources: descriptor.moduleSources || Object.create(null)
+    });
+    return "\"use strict\";\n" +
+      "(function() {\n" +
+      "  const __descriptor = " + descriptorLiteral + ";\n" +
+      String.raw`
+  const __nativeRequire = require;
+  const __workerThreads = __nativeRequire("worker_threads");
+  const __fs = __nativeRequire("fs");
+  const __path = __nativeRequire("path");
+  const __parentPort = __workerThreads.parentPort;
+  const __workerDataEnvelope = __workerThreads.workerData || {};
+  const __workerData = __workerDataEnvelope.__autojs6UserWorkerData;
+  const __moduleSources = __descriptor.moduleSources || Object.create(null);
+  const __moduleCache = Object.create(null);
+  const __esmModuleCache = Object.create(null);
+  const __root = __path.resolve(__descriptor.root || ".");
+  const __entryFilename = __path.resolve(__descriptor.filename);
+  const __AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
+  function __defineErrorProperty(error, name, value) {
+    try {
+      Object.defineProperty(error, name, { value, enumerable: true, configurable: true });
+    } catch (_) {
+      try { error[name] = value; } catch (_) {}
+    }
+  }
+  function __error(message, code, legacyCode) {
+    const error = new Error(message);
+    __defineErrorProperty(error, "code", legacyCode || code);
+    __defineErrorProperty(error, "autojs6Code", code);
+    return error;
+  }
+  function __deny(moduleName) {
+    throw __error("AutoJs6 experimental worker_threads denies module '" + moduleName + "' in workers.", "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+  }
+  function __nativeAddonDisabled(moduleName) {
+    throw __error(
+      "Native addon loading is disabled in AutoJs6 experimental worker_threads: " + moduleName,
+      "ERR_AUTOJS6_NATIVE_ADDON_DISABLED"
+    );
+  }
+  function __requireEsmUnsupported(moduleName) {
+    throw __error(
+      "CommonJS require() cannot load AutoJs6 partial ESM worker module: " + moduleName,
+      "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED"
+    );
+  }
+  function __dynamicImportUnsupported(filename) {
+    throw __error(
+      "AutoJs6 experimental worker_threads disables dynamic import in workers: " + filename,
+      "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED"
+    );
+  }
+  function __esmUnsupported(message) {
+    throw __error(message, "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED");
+  }
+  function __disabledProcess(name) {
+    return function() {
+      throw __error("AutoJs6 experimental worker_threads disables process." + name + " in workers.", "ERR_AUTOJS6_PROCESS_API_DISABLED");
+    };
+  }
+  if (typeof process === "object" && process) {
+    ["binding", "_linkedBinding", "dlopen", "getBuiltinModule", "chdir", "exit", "abort", "kill"].forEach(function(name) {
+      try { Object.defineProperty(process, name, { value: __disabledProcess(name), configurable: true, writable: false }); }
+      catch (_) { try { process[name] = __disabledProcess(name); } catch (_) {} }
+    });
+  }
+  const __allowed = Object.freeze({
+    assert: "assert",
+    "assert/strict": "assert/strict",
+    buffer: "buffer",
+    events: "events",
+    path: "path",
+    "path/posix": "path/posix",
+    "path/win32": "path/win32",
+    querystring: "querystring",
+    string_decoder: "string_decoder",
+    timers: "timers",
+    url: "url",
+    util: "util",
+    "util/types": "util/types"
+  });
+  const __limitedWorkerThreads = Object.freeze({
+    isMainThread: false,
+    parentPort: __parentPort,
+    workerData: __workerData,
+    threadId: __workerThreads.threadId,
+    Worker: function Worker() { throw __error("Nested AutoJs6 worker_threads workers are disabled.", "ERR_AUTOJS6_WORKER_DISABLED"); }
+  });
+  function __normalBuiltinName(request) {
+    const raw = String(request || "");
+    return raw.indexOf("node:") === 0 ? raw.slice(5) : raw;
+  }
+  function __builtinAllowed(request) {
+    const name = __normalBuiltinName(request);
+    return name === "worker_threads" || Object.prototype.hasOwnProperty.call(__allowed, name);
+  }
+  function __loadBuiltin(request) {
+    const raw = String(request || "");
+    const name = __normalBuiltinName(raw);
+    if (name === "worker_threads") return __limitedWorkerThreads;
+    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __nativeRequire(__allowed[name]);
+    return __deny(raw);
+  }
+  function __resolveBuiltin(request) {
+    const raw = String(request || "");
+    const name = __normalBuiltinName(raw);
+    if (name === "worker_threads") return "worker_threads";
+    if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __allowed[name];
+    return __deny(raw);
+  }
+  function __isRelativeModuleName(name) {
+    return name === "." || name === ".." || name.indexOf("./") === 0 || name.indexOf("../") === 0;
+  }
+  function __normalizedExtension(filename) {
+    return String(__path.extname(filename || "") || "").toLowerCase();
+  }
+  function __sensitivePath(pathValue) {
+    const normalized = String(pathValue || "").replace(/\\/g, "/");
+    return normalized === "/proc" || normalized.indexOf("/proc/") === 0 ||
+      normalized === "/sys" || normalized.indexOf("/sys/") === 0 ||
+      normalized === "/dev" || normalized.indexOf("/dev/") === 0;
+  }
+  function __withinRoot(pathValue, root) {
+    const relative = __path.relative(root, pathValue);
+    return relative === "" || (!!relative && relative.indexOf("..") !== 0 && !__path.isAbsolute(relative));
+  }
+  function __validatePath(resolved, label) {
+    const absolute = __path.resolve(resolved);
+    if (!__withinRoot(absolute, __root) || __sensitivePath(absolute)) {
+      throw __error(
+        "AutoJs6 experimental worker_threads " + label + " escapes working directory: " + resolved,
+        "ERR_AUTOJS6_FS_PATH_ESCAPE"
+      );
+    }
+    return absolute;
+  }
+  function __supportedSourceExtension(extension, allowEsm) {
+    return extension === ".js" || extension === ".cjs" || extension === ".json" || (allowEsm && extension === ".mjs");
+  }
+  function __embeddedRecord(resolved) {
+    if (!Object.prototype.hasOwnProperty.call(__moduleSources, resolved)) return null;
+    const record = __moduleSources[resolved];
+    if (!record || typeof record.source !== "string") return null;
+    return {
+      source: String(record.source),
+      sourceURL: record.sourceURL ? String(record.sourceURL) : resolved
+    };
+  }
+  function __recordExists(resolved, allowEsm) {
+    const absolute = __validatePath(resolved, "module path");
+    const extension = __normalizedExtension(absolute);
+    if (extension === ".node") __nativeAddonDisabled(absolute);
+    if (!__supportedSourceExtension(extension, allowEsm)) return false;
+    if (__embeddedRecord(absolute)) return true;
+    try {
+      const stat = __fs.statSync(absolute);
+      return !!(stat && typeof stat.isFile === "function" && stat.isFile());
+    } catch (_) {
+      return false;
+    }
+  }
+  function __moduleRecord(resolved, allowEsm) {
+    const absolute = __validatePath(resolved, "module path");
+    const extension = __normalizedExtension(absolute);
+    if (extension === ".node") __nativeAddonDisabled(absolute);
+    if (!__supportedSourceExtension(extension, allowEsm)) {
+      throw __error(
+        "Unsupported AutoJs6 experimental worker module extension: " + absolute,
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
+    const embedded = __embeddedRecord(absolute);
+    if (embedded) return embedded;
+    try {
+      return {
+        source: String(__fs.readFileSync(absolute, "utf8")),
+        sourceURL: absolute
+      };
+    } catch (error) {
+      throw __error(
+        "Cannot find AutoJs6 experimental worker module: " + absolute,
+        "ERR_AUTOJS6_MODULE_NOT_FOUND",
+        error && error.code ? error.code : undefined
+      );
+    }
+  }
+  function __packageJsonRecord(packageJsonPath) {
+    const absolute = __validatePath(packageJsonPath, "package.json path");
+    const embedded = __embeddedRecord(absolute);
+    if (embedded) return embedded;
+    try {
+      const stat = __fs.statSync(absolute);
+      if (!stat || typeof stat.isFile !== "function" || !stat.isFile()) return null;
+      return {
+        source: String(__fs.readFileSync(absolute, "utf8")),
+        sourceURL: absolute
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+  function __packageTypeModuleForFile(filename) {
+    let current = __path.resolve(__path.dirname(filename));
+    while (__withinRoot(current, __root) && !__sensitivePath(current)) {
+      const record = __packageJsonRecord(__path.resolve(current, "package.json"));
+      if (record) {
+        let data;
+        try {
+          data = JSON.parse(record.source);
+        } catch (error) {
+          throw __error(
+            "Invalid AutoJs6 experimental worker package.json: " + record.sourceURL,
+            "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+          );
+        }
+        return !!(data && typeof data === "object" && data.type === "module");
+      }
+      if (current === __root) break;
+      const parent = __path.dirname(current);
+      if (!parent || parent === current) break;
+      current = parent;
+    }
+    return false;
+  }
+  function __moduleKind(resolved) {
+    const extension = __normalizedExtension(resolved);
+    if (extension === ".mjs") return "esm";
+    if (extension === ".js" && __packageTypeModuleForFile(resolved)) return "esm";
+    if (extension === ".js" || extension === ".cjs" || extension === ".json") return "cjs";
+    return "";
+  }
+  function __resolveLocal(request, parentFilename, mode) {
+    const raw = String(request || "");
+    if (!raw || raw.indexOf("\u0000") >= 0) {
+      throw __error("AutoJs6 experimental worker_threads rejects invalid local module path: " + raw, "ERR_AUTOJS6_FS_NUL_BYTE");
+    }
+    if (!__isRelativeModuleName(raw)) {
+      return __deny(raw);
+    }
+    if (__path.isAbsolute(raw)) {
+      throw __error("AutoJs6 experimental worker_threads rejects absolute local module path: " + raw, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+    }
+    if (/^[A-Za-z][A-Za-z0-9+.-]*:/.test(raw)) {
+      throw __error("AutoJs6 experimental worker_threads rejects protocol module path: " + raw, "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+    }
+    const parentDir = __path.dirname(parentFilename || __entryFilename);
+    const base = __validatePath(__path.resolve(parentDir, raw), "local module path");
+    const extension = __normalizedExtension(base);
+    if (extension === ".node") __nativeAddonDisabled(raw);
+    if (extension && !__supportedSourceExtension(extension, true)) {
+      throw __error("Unsupported AutoJs6 experimental worker module extension: " + raw, "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+    }
+    const candidates = extension ? [base] : [base, base + ".js", base + ".cjs", base + ".mjs", base + ".json"];
+    for (const candidate of candidates) {
+      const resolved = __validatePath(candidate, "local module path");
+      const kind = __moduleKind(resolved);
+      if (!kind) continue;
+      if (!__recordExists(resolved, true)) continue;
+      if (mode === "cjs" && kind === "esm") __requireEsmUnsupported(raw);
+      return { resolved, kind };
+    }
+    throw __error(
+      "Cannot find AutoJs6 experimental worker module '" + raw + "' from '" + parentFilename + "'.",
+      "ERR_AUTOJS6_MODULE_NOT_FOUND"
+    );
+  }
+  function __isWhitespace(ch) {
+    return ch === " " || ch === "\t" || ch === "\n" || ch === "\r" || ch === "\f" || ch === "\v";
+  }
+  function __isIdentifierStart(ch) {
+    return !!ch && /[A-Za-z_$]/.test(ch);
+  }
+  function __isIdentifierPart(ch) {
+    return !!ch && /[A-Za-z0-9_$]/.test(ch);
+  }
+  function __skipWhitespace(text, index) {
+    let cursor = index;
+    while (cursor < text.length && __isWhitespace(text.charAt(cursor))) cursor += 1;
+    return cursor;
+  }
+  function __isIdentifierTokenAt(text, index, token) {
+    if (text.slice(index, index + token.length) !== token) return false;
+    const before = index > 0 ? text.charAt(index - 1) : "";
+    const after = text.charAt(index + token.length);
+    if (before === "." || __isIdentifierPart(before)) return false;
+    return !__isIdentifierPart(after);
+  }
+  function __regexLiteralAllowed(previous) {
+    return !previous || "([{=:;,!&|?+-*~^<>".indexOf(previous) >= 0;
+  }
+  function __maskNonCode(source) {
+    const text = String(source || "");
+    const templateQuote = String.fromCharCode(96);
+    let masked = "";
+    let state = "normal";
+    let previous = "";
+    let escaped = false;
+    for (let index = 0; index < text.length; index += 1) {
+      const ch = text.charAt(index);
+      const next = text.charAt(index + 1);
+      if (state === "line_comment") {
+        if (ch === "\n" || ch === "\r") { masked += ch; state = "normal"; } else { masked += " "; }
+        continue;
+      }
+      if (state === "block_comment") {
+        if (ch === "*" && next === "/") { masked += "  "; index += 1; state = "normal"; } else { masked += (ch === "\n" || ch === "\r") ? ch : " "; }
+        continue;
+      }
+      if (state === "string") {
+        masked += (ch === "\n" || ch === "\r") ? ch : " ";
+        if (escaped) { escaped = false; continue; }
+        if (ch === "\\") { escaped = true; continue; }
+        if (ch === previous) state = "normal";
+        continue;
+      }
+      if (state === "template") {
+        masked += (ch === "\n" || ch === "\r") ? ch : " ";
+        if (escaped) { escaped = false; continue; }
+        if (ch === "\\") { escaped = true; continue; }
+        if (ch === templateQuote) state = "normal";
+        continue;
+      }
+      if (state === "regex") {
+        masked += (ch === "\n" || ch === "\r") ? ch : " ";
+        if (escaped) { escaped = false; continue; }
+        if (ch === "\\") { escaped = true; continue; }
+        if (ch === "/") state = "normal";
+        continue;
+      }
+      if (ch === "/" && next === "/") { masked += "  "; index += 1; state = "line_comment"; continue; }
+      if (ch === "/" && next === "*") { masked += "  "; index += 1; state = "block_comment"; continue; }
+      if (ch === "\"" || ch === "'") { masked += " "; previous = ch; state = "string"; escaped = false; continue; }
+      if (ch === templateQuote) { masked += " "; state = "template"; escaped = false; continue; }
+      if (ch === "/" && __regexLiteralAllowed(previous)) { masked += " "; state = "regex"; escaped = false; continue; }
+      masked += ch;
+      if (!__isWhitespace(ch)) previous = ch;
+    }
+    return masked;
+  }
+  function __containsDynamicImport(source) {
+    const masked = __maskNonCode(source);
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__isIdentifierTokenAt(masked, index, "import")) continue;
+      const nextIndex = __skipWhitespace(masked, index + "import".length);
+      if (masked.charAt(nextIndex) === "(") return true;
+    }
+    return false;
+  }
+  function __assertCjsSourceSupported(source, filename) {
+    const sourceText = String(source || "");
+    if (__containsDynamicImport(sourceText)) __dynamicImportUnsupported(filename);
+    const masked = __maskNonCode(sourceText);
+    if (/(^|[\r\n;{}])\s*import\b\s*(["'{*]|[A-Za-z_$])/.test(masked) ||
+        /(^|[\r\n;{}])\s*export\b\s*([{*]|default\b|class\b|function\b|const\b|let\b|var\b|[A-Za-z_$])/.test(masked)) {
+      __esmUnsupported("AutoJs6 experimental worker_threads disables ESM syntax in CommonJS workers: " + filename);
+    }
+  }
+  function __createRequire(parentModule) {
+    const parentFilename = parentModule ? parentModule.filename : __entryFilename;
+    function workerRequire(request) {
+      const raw = String(request || "");
+      if (__builtinAllowed(raw)) return __loadBuiltin(raw);
+      if (__isRelativeModuleName(raw)) {
+        const resolved = __resolveLocal(raw, parentFilename, "cjs");
+        return __loadCjsModule(resolved.resolved, parentModule);
+      }
+      return __deny(raw);
+    }
+    workerRequire.resolve = function(request) {
+      const raw = String(request || "");
+      if (__builtinAllowed(raw)) return __resolveBuiltin(raw);
+      if (__isRelativeModuleName(raw)) return __resolveLocal(raw, parentFilename, "cjs").resolved;
+      return __deny(raw);
+    };
+    return workerRequire;
+  }
+  function __loadCjsModule(resolved, parentModule) {
+    const filename = __validatePath(resolved, "CommonJS module path");
+    if (Object.prototype.hasOwnProperty.call(__moduleCache, filename)) {
+      return __moduleCache[filename].exports;
+    }
+    const kind = __moduleKind(filename);
+    if (kind === "esm") __requireEsmUnsupported(filename);
+    const record = __moduleRecord(filename, false);
+    const module = {
+      id: filename,
+      filename,
+      dirname: __path.dirname(filename),
+      exports: {},
+      loaded: false,
+      parent: parentModule || null,
+      children: []
+    };
+    if (parentModule && parentModule.children) parentModule.children.push(module);
+    __moduleCache[filename] = module;
+    if (__normalizedExtension(filename) === ".json") {
+      try {
+        module.exports = JSON.parse(record.source);
+      } catch (error) {
+        throw new SyntaxError("Invalid AutoJs6 experimental worker JSON module '" + filename + "': " + (error && error.message ? error.message : String(error)));
+      }
+      module.loaded = true;
+      return module.exports;
+    }
+    __assertCjsSourceSupported(record.source, filename);
+    const workerRequire = __createRequire(module);
+    module.require = workerRequire;
+    const sourceURL = String(record.sourceURL || filename).replace(/[\r\n]/g, " ");
+    const run = new Function(
+      "require",
+      "exports",
+      "module",
+      "__filename",
+      "__dirname",
+      "parentPort",
+      "workerData",
+      "Buffer",
+      "\"use strict\";\n" + record.source + "\n//# sourceURL=" + sourceURL
+    );
+    run(workerRequire, module.exports, module, module.filename, module.dirname, __parentPort, __workerData, __nativeRequire("buffer").Buffer);
+    module.loaded = true;
+    return module.exports;
+  }
+  function __splitNamedList(sourceName, text) {
+    const parts = String(text || "").split(",");
+    const output = [];
+    for (const rawPart of parts) {
+      const part = rawPart.trim();
+      if (!part) continue;
+      const match = /^([A-Za-z_$][0-9A-Za-z_$]*)(?:\s+as\s+([A-Za-z_$][0-9A-Za-z_$]*))?$/.exec(part);
+      if (!match) __esmUnsupported("Unsupported AutoJs6 worker ESM named binding in " + sourceName + ": " + part);
+      output.push({ exported: match[1], local: match[2] || match[1] });
+    }
+    return output;
+  }
+  function __parseImportBindings(bindingText, importVar, sourceName) {
+    let text = String(bindingText || "").trim();
+    const lines = [];
+    function bindDefault(value) {
+      const name = value.trim();
+      if (!/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(name)) __esmUnsupported("Unsupported AutoJs6 worker ESM default import binding in " + sourceName + ": " + value);
+      lines.push("const " + name + " = " + importVar + "[\"default\"];");
+    }
+    function bindNamespace(value) {
+      const match = /^\*\s+as\s+([A-Za-z_$][0-9A-Za-z_$]*)$/.exec(value.trim());
+      if (!match) __esmUnsupported("Unsupported AutoJs6 worker ESM namespace import binding in " + sourceName + ": " + value);
+      lines.push("const " + match[1] + " = " + importVar + ";");
+    }
+    function bindNamed(value) {
+      const body = value.trim();
+      if (body.charAt(0) !== "{" || body.charAt(body.length - 1) !== "}") {
+        __esmUnsupported("Unsupported AutoJs6 worker ESM import binding in " + sourceName + ": " + value);
+      }
+      for (const item of __splitNamedList(sourceName, body.slice(1, -1))) {
+        lines.push("const " + item.local + " = " + importVar + "[" + JSON.stringify(item.exported) + "];");
+      }
+    }
+    const comma = text.indexOf(",");
+    if (comma >= 0 && text.charAt(0) !== "{" && text.charAt(0) !== "*") {
+      bindDefault(text.slice(0, comma));
+      text = text.slice(comma + 1).trim();
+    }
+    if (!text) return lines;
+    if (text.charAt(0) === "{") bindNamed(text);
+    else if (text.charAt(0) === "*") bindNamespace(text);
+    else bindDefault(text);
+    return lines;
+  }
+  function __transformExports(source, sourceName) {
+    let body = String(source || "");
+    const namedExports = [];
+    let hasDefault = false;
+    const masked = __maskNonCode(body);
+    if (/(^|[\r\n;{}])\s*export\s+(?:\*|\{[^}]*\}\s+from\b)/.test(masked)) {
+      __esmUnsupported("AutoJs6 worker partial ESM does not support re-export syntax in " + sourceName + ".");
+    }
+    body = body.replace(/\bexport\s+default\s+/g, function() {
+      if (hasDefault) __esmUnsupported("AutoJs6 worker partial ESM module has more than one default export: " + sourceName);
+      hasDefault = true;
+      return "const __autojs6_esm_default = ";
+    });
+    body = body.replace(/\bexport\s+(const|let|var)\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, kind, name) {
+      namedExports.push({ exported: name, local: name });
+      return kind + " " + name;
+    });
+    body = body.replace(/\bexport\s+(async\s+)?function\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, name) {
+      namedExports.push({ exported: name, local: name });
+      return (asyncPrefix || "") + "function " + name + "(";
+    });
+    body = body.replace(/\bexport\s+class\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, name) {
+      namedExports.push({ exported: name, local: name });
+      return "class " + name;
+    });
+    body = body.replace(/(^|[\r\n;{}])\s*export\s*\{([^}]*)\}\s*;?/g, function(match, prefix, list) {
+      for (const item of __splitNamedList(sourceName, list)) namedExports.push(item);
+      return prefix || "";
+    });
+    const tail = [];
+    if (hasDefault) tail.push("__autojs6_esm_namespace[\"default\"] = __autojs6_esm_default;");
+    for (const item of namedExports) tail.push("__autojs6_esm_namespace[" + JSON.stringify(item.exported) + "] = " + item.local + ";");
+    return { body, tail: tail.join("\n") };
+  }
+  function __transformEsmSource(source, filename) {
+    const sourceText = String(source || "");
+    const masked = __maskNonCode(sourceText);
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__isIdentifierTokenAt(masked, index, "import")) continue;
+      const nextIndex = __skipWhitespace(masked, index + "import".length);
+      const next = masked.charAt(nextIndex);
+      if (next === "(") __dynamicImportUnsupported(filename);
+      if (next === "." && masked.slice(nextIndex, nextIndex + 5) === ".meta") {
+        __esmUnsupported("import.meta is disabled for AutoJs6 worker partial ESM module '" + filename + "'.");
+      }
+    }
+    const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3\s*;?/g;
+    const bindingLines = [];
+    let body = "";
+    let cursor = 0;
+    let importIndex = 0;
+    let match;
+    while ((match = importPattern.exec(sourceText)) !== null) {
+      const statementStart = match.index + match[1].length;
+      const statementEnd = importPattern.lastIndex;
+      body += sourceText.slice(cursor, statementStart);
+      cursor = statementEnd;
+      const importVar = "__autojs6_esm_import_" + importIndex++;
+      const specifier = match[4];
+      bindingLines.push(
+        "const " + importVar + " = await __autojs6_load_esm_module(" +
+          JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ");"
+      );
+      const specifierText = match[2] === undefined ? "" : match[2];
+      Array.prototype.push.apply(bindingLines, __parseImportBindings(specifierText, importVar, filename));
+    }
+    body += sourceText.slice(cursor);
+    const exportTransform = __transformExports(body, filename);
+    const remaining = __maskNonCode(exportTransform.body);
+    if (/(^|[\r\n;{}])\s*import\b/.test(remaining) || /(^|[\r\n;{}])\s*export\b/.test(remaining)) {
+      __esmUnsupported("AutoJs6 worker partial ESM found unsupported import/export syntax in " + filename + ".");
+    }
+    return bindingLines.join("\n") + "\n" + exportTransform.body + "\n" + exportTransform.tail;
+  }
+  function __namespaceFromCommonJs(value) {
+    const namespace = Object.create(null);
+    namespace.default = value;
+    if (value !== null && (typeof value === "object" || typeof value === "function")) {
+      for (const key of Object.getOwnPropertyNames(value)) {
+        if (key === "default") continue;
+        try { namespace[key] = value[key]; } catch (_) {}
+      }
+    }
+    return Object.freeze(namespace);
+  }
+  function __loadEsmModule(specifier, parentFilename) {
+    const raw = String(specifier || "");
+    if (__builtinAllowed(raw)) return Promise.resolve(__namespaceFromCommonJs(__loadBuiltin(raw)));
+    if (!__isRelativeModuleName(raw)) return Promise.reject(__error(
+      "AutoJs6 experimental worker_threads ESM imports only local worker dependencies and allowed builtins: " + raw,
+      "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+    ));
+    const resolved = __resolveLocal(raw, parentFilename, "esm");
+    if (resolved.kind === "cjs") {
+      return Promise.resolve(__namespaceFromCommonJs(__loadCjsModule(resolved.resolved, null)));
+    }
+    return __executeEsmModule(resolved.resolved);
+  }
+  function __executeEsmModule(resolved) {
+    const filename = __validatePath(resolved, "ESM module path");
+    if (Object.prototype.hasOwnProperty.call(__esmModuleCache, filename)) {
+      return __esmModuleCache[filename].promise;
+    }
+    const record = __moduleRecord(filename, true);
+    const namespace = Object.create(null);
+    const cacheRecord = { namespace, promise: null };
+    __esmModuleCache[filename] = cacheRecord;
+    cacheRecord.promise = (async function() {
+      const transformed = __transformEsmSource(record.source, filename);
+      const sourceURL = String(record.sourceURL || filename).replace(/[\r\n]/g, " ");
+      const moduleFunction = __AsyncFunction(
+        "__autojs6_load_esm_module",
+        "__autojs6_esm_namespace",
+        "require",
+        "exports",
+        "module",
+        "__filename",
+        "__dirname",
+        "\"use strict\";\n" + transformed + "\n//# sourceURL=" + sourceURL
+      );
+      await moduleFunction.call(
+        undefined,
+        __loadEsmModule,
+        namespace,
+        undefined,
+        undefined,
+        undefined,
+        filename,
+        __path.dirname(filename)
+      );
+      return Object.freeze(namespace);
+    })();
+    return cacheRecord.promise;
+  }
+  if (__descriptor.format === "esm") {
+    __executeEsmModule(__entryFilename).then(
+      function() {},
+      function(error) {
+        setImmediate(function() { throw error; });
+      }
+    );
+  } else {
+    __loadCjsModule(__entryFilename, null);
+  }
+})();
+`;
   }
   function __autojs6_limited_worker_threads() {
     if (__autojs6_limited_worker_threads_cache) {

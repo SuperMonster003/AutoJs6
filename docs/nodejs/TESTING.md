@@ -736,11 +736,15 @@ Current experimental worker_threads focused instrumentation:
 
 This suite verifies the default disabled path when the build-level flag is off,
 then enables the request-local experimental flag to cover local CommonJS worker
-scripts, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker
-rejection, scoped path escape rejection, shadowing protection, Worker
-diagnostics counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and
-nested workers inside worker scope. It is a native-availability promotion gate:
-on the current Sony S7-24 recheck, worker creation is skipped with an explicit
+scripts, local CJS/JSON dependencies, `workerData`,
+`parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path
+escape rejection, shadowing protection, Worker diagnostics counters, and denial
+of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker
+scope. S7-25 extends the same native-availability promotion gate with
+`worker.cjs`, `worker.mjs`, `package.json` `type=module` worker entries, local
+partial-ESM dependencies, allowed worker builtins, native addon denial, raw
+network denial, bridge denial, and worker entry path escape denial. On the
+current Sony S7-25 recheck, runnable worker creation is skipped with an explicit
 preflight reason because native `worker_threads` is unavailable.
 
 Current experimental worker_threads resource stress instrumentation:

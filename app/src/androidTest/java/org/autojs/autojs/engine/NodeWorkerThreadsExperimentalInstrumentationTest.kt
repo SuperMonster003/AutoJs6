@@ -66,15 +66,30 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             check(mkdirs()) { "Failed to create worker experimental work dir: $absolutePath" }
         }
         try {
+            File(workDir, "math.cjs").writeText(
+                """
+                    exports.add = function add(left, right) {
+                      return left + right;
+                    };
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+            File(workDir, "payload.json").writeText(
+                """{"suffix":"json-dep"}""" + "\n",
+                StandardCharsets.UTF_8,
+            )
             File(workDir, "compute.js").writeText(
                 """
                     const { parentPort, workerData, isMainThread } = require("worker_threads");
                     const assert = require("assert");
+                    const math = require("./math.cjs");
+                    const payload = require("./payload.json");
                     assert.strictEqual(isMainThread, false);
                     parentPort.postMessage({
                       kind: "compute",
-                      value: workerData.left + workerData.right,
-                      data: workerData.label
+                      value: math.add(workerData.left, workerData.right),
+                      data: workerData.label,
+                      suffix: payload.suffix
                     });
                 """.trimIndent(),
                 StandardCharsets.UTF_8,
@@ -169,7 +184,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                       });
                       const computeExit = once(compute, "exit");
                       const computeMessage = await once(compute, "message");
-                      console.log("worker.compute=" + [computeMessage.value, computeMessage.data].join("|"));
+                      console.log("worker.compute=" + [computeMessage.value, computeMessage.data, computeMessage.suffix].join("|"));
                       console.log("worker.computeExit=" + await computeExit);
 
                       const hold = new Worker("./hold.js");
@@ -228,7 +243,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("worker.resolve=worker_threads|worker_threads"))
             assertTrue(result.stdout, result.stdout.contains("worker.shadow=false"))
             assertTrue(result.stdout, result.stdout.contains("worker.policy=1|5000|true"))
-            assertTrue(result.stdout, result.stdout.contains("worker.compute=12|worker-data"))
+            assertTrue(result.stdout, result.stdout.contains("worker.compute=12|worker-data|json-dep"))
             assertTrue(result.stdout, result.stdout.contains("worker.computeExit=0"))
             assertTrue(result.stdout, result.stdout.contains("worker.limit=${NodeRuntimeErrorCodes.WORKER_LIMIT_EXCEEDED}"))
             assertTrue(result.stdout, result.stdout.contains("worker.terminate="))
@@ -240,6 +255,192 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             )
             assertTrue(result.stdout, result.stdout.contains("worker.escape=${NodeRuntimeErrorCodes.FS_PATH_ESCAPE}"))
             assertTrue(result.stdout, result.stdout.contains("worker.diagnostics=0|1|"))
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
+            assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun experimentalWorkerThreadsSupportCjsAndEsmEntries() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads CJS/ESM entry")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads CJS/ESM entry")
+
+        val workDir = File(context.cacheDir, "node-worker-entry-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create worker entry work dir: $absolutePath" }
+        }
+        try {
+            File(workDir, "dep.cjs").writeText(
+                """
+                    module.exports = {
+                      base: 10,
+                      label: "cjs-dep"
+                    };
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+            File(workDir, "data.json").writeText(
+                """{"extra":2,"label":"json-dep"}""" + "\n",
+                StandardCharsets.UTF_8,
+            )
+            File(workDir, "worker.cjs").writeText(
+                """
+                    const { parentPort, workerData, isMainThread } = require("worker_threads");
+                    const assert = require("assert/strict");
+                    const path = require("path");
+                    const dep = require("./dep.cjs");
+                    const data = require("./data.json");
+                    assert.equal(isMainThread, false);
+                    assert.equal(path.basename(__filename), "worker.cjs");
+                    parentPort.postMessage({
+                      kind: "cjs",
+                      value: dep.base + workerData.delta + data.extra,
+                      label: data.label
+                    });
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+            File(workDir, "esm-dep.mjs").writeText(
+                """
+                    export const extra = 4;
+                    export function tag(value) {
+                      return "esm-" + value;
+                    }
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+            File(workDir, "worker.mjs").writeText(
+                """
+                    import { parentPort, workerData, isMainThread } from "worker_threads";
+                    import assert from "assert/strict";
+                    import dep from "./dep.cjs";
+                    import { extra, tag } from "./esm-dep.mjs";
+
+                    assert.equal(isMainThread, false);
+                    parentPort.postMessage({
+                      kind: "mjs",
+                      value: dep.base + workerData.delta + extra,
+                      label: tag(workerData.label)
+                    });
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+            File(workDir, "pkg").apply {
+                mkdirs()
+                File(this, "package.json").writeText(
+                    """{"type":"module"}""" + "\n",
+                    StandardCharsets.UTF_8,
+                )
+                File(this, "helper.js").writeText(
+                    """
+                        export const bump = 6;
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+                File(this, "worker.js").writeText(
+                    """
+                        import { parentPort, workerData } from "worker_threads";
+                        import { bump } from "./helper.js";
+
+                        parentPort.postMessage({
+                          kind: "type-module",
+                          value: workerData.seed + bump
+                        });
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
+            }
+            File(workDir, "native.node").writeBytes(ByteArray(0))
+            File(workDir, "denied.cjs").writeText(
+                """
+                    const { parentPort } = require("worker_threads");
+                    function codeOf(error) {
+                      return String(error && (error.autojs6Code || error.code || error.name || ""));
+                    }
+                    const codes = [];
+                    function denied(action) {
+                      try {
+                        action();
+                        codes.push("allowed");
+                      } catch (error) {
+                        codes.push(codeOf(error));
+                      }
+                    }
+                    denied(() => require("toast"));
+                    denied(() => require("net"));
+                    denied(() => require("./native.node"));
+                    parentPort.postMessage({ codes });
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const { Worker } = require("worker_threads");
+                      function codeOf(error) {
+                        return String(error && (error.autojs6Code || error.code || error.name || ""));
+                      }
+                      function run(file, workerData) {
+                        return new Promise((resolve, reject) => {
+                          const worker = new Worker(file, { workerData });
+                          let message;
+                          worker.once("message", (value) => {
+                            message = value;
+                          });
+                          worker.once("error", reject);
+                          worker.once("exit", (code) => {
+                            if (code !== 0) {
+                              reject(new Error("worker " + file + " exited with " + code));
+                            } else {
+                              resolve(message);
+                            }
+                          });
+                        });
+                      }
+
+                      const cjs = await run("./worker.cjs", { delta: 5 });
+                      console.log("worker.entry.cjs=" + [cjs.kind, cjs.value, cjs.label].join("|"));
+
+                      const mjs = await run("./worker.mjs", { delta: 3, label: "ok" });
+                      console.log("worker.entry.mjs=" + [mjs.kind, mjs.value, mjs.label].join("|"));
+
+                      const typeModule = await run("./pkg/worker.js", { seed: 7 });
+                      console.log("worker.entry.typeModule=" + [typeModule.kind, typeModule.value].join("|"));
+
+                      const denied = await run("./denied.cjs", {});
+                      console.log("worker.entry.denied=" + denied.codes.join("|"));
+
+                      let escapeCode = "";
+                      try {
+                        new Worker("../outside.cjs");
+                      } catch (error) {
+                        escapeCode = codeOf(error);
+                      }
+                      console.log("worker.entry.escape=" + escapeCode);
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-worker-entry.js>",
+                workingDirectory = workDir,
+                timeoutMs = 15_000L,
+                workerThreadsExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("worker_threads CJS/ESM entry", result)
+            assertTrue(result.stdout, result.stdout.contains("worker.entry.cjs=cjs|17|json-dep"))
+            assertTrue(result.stdout, result.stdout.contains("worker.entry.mjs=mjs|17|esm-ok"))
+            assertTrue(result.stdout, result.stdout.contains("worker.entry.typeModule=type-module|13"))
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "worker.entry.denied=${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.NATIVE_ADDON_DISABLED}",
+                ),
+            )
+            assertTrue(result.stdout, result.stdout.contains("worker.entry.escape=${NodeRuntimeErrorCodes.FS_PATH_ESCAPE}"))
             assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
             assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
             assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])

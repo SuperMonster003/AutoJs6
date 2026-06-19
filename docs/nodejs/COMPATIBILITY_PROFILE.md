@@ -654,7 +654,9 @@ Current GA evaluation: `docs/nodejs/reports/NETWORK_EVALUATION.md`.
 `worker_threads` remains disabled by default. AutoJs6 has an experimental pure-JS worker design path, but Task 122 found
 that worker execution is blocked in the current Embedded Node build because native `worker_threads` is unavailable even
 when the experimental flag is enabled. S7-24 adds a focused bootstrap/native-availability preflight to the worker gate so
-this blocked state is verified explicitly without advertising runnable worker support. The explicit gate flag is:
+this blocked state is verified explicitly without advertising runnable worker support. S7-25 prepares the native-available
+entry path for CJS and partial-ESM workers, but the current build still skips runnable worker smoke tests until native
+`worker_threads` exists. The explicit gate flag is:
 
 ```properties
 autojs.nodejs.worker_threads.experimental=false
@@ -677,9 +679,12 @@ On the current Embedded Node build, that preflight reports
 same-thread fallback.
 
 When the experimental request flag is enabled in a build that exposes native `worker_threads`, the intended limited module
-for local CommonJS worker scripts inside `workingDirectory` is:
+for local worker scripts inside `workingDirectory` is:
 
-- `new Worker("./worker.js", { workerData })`
+- `new Worker("./worker.js" | "./worker.cjs" | "./worker.mjs", { workerData })`
+- `package.json` `type=module` `.js` worker entries
+- local CJS/JSON worker dependencies
+- local partial-ESM worker dependencies from `.mjs` or `type=module` `.js`
 - `worker.on("message" | "error" | "exit" | "online", listener)`
 - `worker.postMessage(value)`
 - `worker.terminate(): Promise<number>`
@@ -690,7 +695,7 @@ for local CommonJS worker scripts inside `workingDirectory` is:
 - `policy`
 - `diagnostics()`
 
-The intended MVP loads worker source through the parent scoped resolver, then executes it in a native Node Worker with a worker-local restricted `require`. Worker-local `require("worker_threads")` exposes only `parentPort`, `workerData`, `isMainThread`, `threadId`, and a disabled nested `Worker`. Worker-local `require` denies AutoJs bridge modules, `autojs6:bridge`, `fs`, raw network, `shell`, `child_process`, native addons, `vm`, inspector, and nested workers. The first policy allows one active worker, a `5000` ms startup timeout, and safe pure-JS builtins only.
+The intended MVP loads worker source through the parent scoped resolver, then executes it in a native Node Worker with a worker-local restricted loader. Worker-local `require("worker_threads")` exposes only `parentPort`, `workerData`, `isMainThread`, `threadId`, and a disabled nested `Worker`. Worker-local CJS and partial-ESM imports can load local worker dependencies and the safe worker builtin allowlist only. Worker-local loading denies AutoJs bridge modules, `autojs6:bridge`, `fs`, raw network, `shell`, `child_process`, native addons, `vm`, inspector, and nested workers. The first policy allows one active worker, a `5000` ms startup timeout, and safe pure-JS builtins only.
 
 Worker instances are tracked per execution when the native module is available. Parent success/failure cleanup performs best-effort termination of any active worker before writing the result envelope, and exposes pending-worker and cleanup counters through native diagnostics. See `docs/nodejs/design/WORKER_THREADS.md` and `docs/nodejs/reports/WORKER_EXPERIMENTAL_EVALUATION.md` for worker count, timeout, memory, packaged APK, bridge-denial, lifecycle policy, and the current GA blocking status.
 
