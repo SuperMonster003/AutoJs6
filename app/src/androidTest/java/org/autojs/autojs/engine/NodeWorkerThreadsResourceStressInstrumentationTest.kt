@@ -28,6 +28,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     @Test
     fun createAndTerminateWorkersSequentiallyDoesNotGrowResourceCounters() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads resource stress")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads sequential resource stress")
 
         val before = resourceSnapshot("before")
         val workDir = createWorkDir("node-worker-resource-sequence")
@@ -99,6 +100,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     @Test
     fun workerExceptionDoesNotPoisonNextRun() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads exception lifecycle")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads exception lifecycle")
 
         val workDir = createWorkDir("node-worker-resource-exception")
         try {
@@ -156,6 +158,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     @Test
     fun infiniteLoopWorkerTimeoutDoesNotPoisonNextRun() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads timeout lifecycle")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads timeout lifecycle")
 
         val workDir = createWorkDir("node-worker-resource-timeout")
         try {
@@ -204,6 +207,7 @@ class NodeWorkerThreadsResourceStressInstrumentationTest {
     @Test
     fun pendingWorkerMessageIsRejectedDuringParentCompletionCleanup() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads completion cleanup")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads completion cleanup")
 
         val workDir = createWorkDir("node-worker-resource-cleanup")
         try {

@@ -74,7 +74,7 @@ small set of already-gated features toward practical use.
 | Project wizard / validator | developer tooling partial | `tools/nodejs/project/autojs6-node-project.js` generates CommonJS, ESM, automation, screenshot/OCR, and network starter projects, then validates project metadata, entry files, permissions, module type, and sanitized dependency bundles with actionable error codes. |
 | Execution queue policy | partial | Embedded Node remains one active execution per `:nodejs_embedded` process; explicit caller-side enqueue supports one queued execution, queue status, cancellation, queue timeout, and stable busy/full/timeout/cancelled errors. |
 | Execution mode state machine | partial | Request protocol carries `executionMode`; Phase 7 canonicalizes `one_shot`, `interactive_long_running`, `scheduled`, and `worker_computation`. Normal script launches execute only `one_shot`. `interactive_long_running` executes only through the explicit interactive session launch surface with persistent notification, Stop action, status/duration/resource summary, runtime heartbeat/budget diagnostics, cooperative `autojs6:lifecycle` checkpoint/explicit-restore hooks, Android foreground-service timeout cleanup, and restart policy `never`; `scheduled` executes only through the WorkManager-owned `scheduled_runner` launch surface. Direct script requests for non-`one_shot` modes and `worker_computation` reject before user code with policy metadata. |
-| Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. |
+| Worker threads | blocked | Disabled by default. Task 170 rechecked the pure-JS worker target, but the current Embedded Node build still lacks native `worker_threads`; no runnable v1.1 partial support is advertised. S7-24 adds a bootstrap/native-availability preflight so the focused worker gate verifies default denial and stable `ERR_AUTOJS6_WORKER_DISABLED` without a same-thread fallback. |
 | Native addon | unsupported | Must remain disabled. |
 | Child process | disabled | Use controlled `shell` bridge instead. |
 
@@ -207,7 +207,9 @@ small set of already-gated features toward practical use.
   scripts still time out.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
-  execution/stress suites pass on Sony.
+  execution/stress suites pass on Sony. The S7-24 worker bootstrap gate must
+  keep proving default denial, shadowing protection, native availability
+  preflight, and zero active workers when native support is unavailable.
 - fs stream smoke passes for read/write/pipe, scoped escape denial,
   `/proc`/`/sys`/`/dev` absolute path denial, active stream timeout cleanup,
   and packaged APK markers.

@@ -4,6 +4,8 @@ Date: 2026-06-16
 
 Latest v1.1 recheck: 2026-06-17
 
+Latest S7-24 bootstrap recheck: 2026-06-19
+
 Device: Sony XQ-AT72 (`QV710AF65F`), Android 12
 
 Branch/package identity: initial GA evaluation on `feature/nodejs-runtime`, `org.autojs.autojs6.nodejs`; v1.1 recheck on `feature/nodejs-runtime-v1.1`.
@@ -24,6 +26,12 @@ AutoJs6 experimental worker_threads is unavailable in this Embedded Node build.
 Until a libnode build exposes a usable native `worker_threads` module and the focused worker suites pass on the Sony gate
 device, the release contract should treat workers as unavailable, not as a supported or advertised experimental runtime
 surface.
+
+S7-24 does not change that release decision. It adds an explicit
+`NodeWorkerThreadsBootstrapInstrumentationTest` and a native-availability
+preflight to `verifyNodeWorkerGate`: normal builds verify default denial and
+shadowing protection, while experimental builds skip runnable creation/stress
+promotion tests when the preflight reports `ERR_AUTOJS6_WORKER_DISABLED`.
 
 For Task 170, the v1.1 target remains blocked rather than downgraded to a same-thread fallback. Worker semantics require
 real native Worker isolation, and packaged workers must not silently fall back to Rhino, parent-thread execution, or
@@ -100,6 +108,9 @@ The default-disabled gate is supported and passed on the Sony device:
 - `require("node:worker_threads")` rejects
 - `require.resolve("worker_threads")` rejects before local package shadowing
 - a local `node_modules/worker_threads` package cannot override the builtin denial
+- S7-24 default `verifyNodeWorkerGate` passes with bootstrap/design coverage
+- S7-24 experimental `verifyNodeWorkerGate` passes with runnable/stress
+  promotion tests skipped because native workers are unavailable
 
 No worker execution case was proven supported in this Embedded Node build.
 

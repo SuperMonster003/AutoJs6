@@ -249,6 +249,16 @@ checkpoint, one-shot recovery, and provider-destroy cleanup of owned
 notification, sensor, UI, shell, and WebSocket counters. It also continues
 lifecycle/resource stress coverage for timeouts, queueing, cleanup, and
 reserved-mode rejection before user code.
+`verifyNodeWorkerGate` covers the S7-24 worker bootstrap boundary. In normal
+builds it runs `NodeWorkerThreadsBootstrapInstrumentationTest` and
+`NodeWorkerThreadsDesignGateInstrumentationTest`: default `worker_threads`
+requires and resolves stay denied before local shadow packages, profile flags
+remain false, and a request-local experimental preflight reports either a usable
+native Worker surface or stable `ERR_AUTOJS6_WORKER_DISABLED` diagnostics. When
+`autojs.nodejs.worker_threads.experimental=true` is supplied, runnable worker
+creation and resource stress classes remain promotion gates; they are skipped
+with an explicit native-availability reason on the current Embedded Node build
+instead of weakening the contract with a same-thread fallback.
 
 ## Release Gate
 

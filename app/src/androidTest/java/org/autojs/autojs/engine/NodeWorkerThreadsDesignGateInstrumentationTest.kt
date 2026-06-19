@@ -4,6 +4,7 @@ import org.autojs.autojs6.BuildConfig
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -26,6 +27,10 @@ class NodeWorkerThreadsDesignGateInstrumentationTest {
     @Test
     fun workerThreadsRemainDesignGatedAndDisabledByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads design gate")
+        assumeTrue(
+            "Default worker_threads design gate runs only when the build-level experimental flag is disabled.",
+            !BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        )
         assertFalse(BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED)
         assertTrue(
             NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY] == false,

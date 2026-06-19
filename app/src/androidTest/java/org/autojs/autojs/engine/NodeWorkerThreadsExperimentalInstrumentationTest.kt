@@ -5,6 +5,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -27,6 +28,10 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
     @Test
     fun workerThreadsRemainDisabledByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads default gate")
+        assumeTrue(
+            "Default worker_threads denial gate runs only when the build-level experimental flag is disabled.",
+            !BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        )
         assertFalse(BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED)
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
@@ -54,6 +59,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
     @Test
     fun experimentalWorkerThreadsRunPureJsWorkersOnly() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads experimental")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads experimental runnable smoke")
 
         val workDir = File(context.cacheDir, "node-worker-experimental-${System.nanoTime()}").apply {
             deleteRecursively()

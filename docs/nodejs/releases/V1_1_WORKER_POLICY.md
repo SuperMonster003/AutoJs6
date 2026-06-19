@@ -2,6 +2,8 @@
 
 Date: 2026-06-17
 
+Latest S7-24 bootstrap recheck: 2026-06-19
+
 Branch: `feature/nodejs-runtime-v1.1`
 
 Device: Sony XQ-AT72 `QV710AF65F`, Android 12
@@ -27,6 +29,13 @@ user-visible experimental runtime surface. A future promotion can reconsider the
 policy only after a libnode build exposes usable native `worker_threads` and the
 worker creation, isolation, lifecycle, and resource stress suites pass on the
 Sony gate device.
+
+S7-24 adds `NodeWorkerThreadsBootstrapInstrumentationTest` and changes the
+focused worker gate contract: normal builds verify default denial and
+request-local native availability preflight; experimental builds skip runnable
+creation/stress promotion tests when that preflight reports
+`ERR_AUTOJS6_WORKER_DISABLED`, instead of treating a native-unavailable build as
+failed runnable support.
 
 Normal builds must continue to keep:
 
@@ -100,6 +109,8 @@ The failed stress cases were:
 
 | Gate | Status | Notes |
 | --- | --- | --- |
+| S7-24 default `verifyNodeWorkerGate` | Pass | Sony default gate ran bootstrap/design coverage, 3 tests, 0 failures. |
+| S7-24 experimental `verifyNodeWorkerGate` | Pass with skips | Sony experimental gate ran bootstrap/preflight and skipped runnable/stress promotion tests because native workers remain unavailable, 0 failures. |
 | default build flag | Pass | `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false` in normal builds. |
 | capability registry default | Pass | Kotlin and JavaScript profiles report worker threads disabled. |
 | bare `require("worker_threads")` denial | Pass | Default path rejects before local shadowing. |
@@ -107,7 +118,7 @@ The failed stress cases were:
 | `require.resolve("worker_threads")` denial | Pass | Resolution rejects before local `node_modules` shadowing. |
 | profile immutability | Pass | `profile.experimentalFlags` remains frozen. |
 | experimental flag delivery | Pass | Native diagnostics report the request flag and worker gate as enabled. |
-| native Worker availability | Blocked | `require("worker_threads")` fails with `ERR_AUTOJS6_WORKER_DISABLED`. |
+| native Worker availability | Blocked | Bootstrap preflight reports `ERR_AUTOJS6_WORKER_DISABLED` and zero active workers. |
 | pure JS Worker creation | Blocked | No Worker is constructed; created count remains `0`. |
 | worker data and parentPort messaging | Blocked | Cannot run because Worker creation fails. |
 | worker-local AutoJs bridge denial | Blocked | Intended test cannot execute inside a running worker. |

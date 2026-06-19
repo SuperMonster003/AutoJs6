@@ -232,7 +232,14 @@ autojs.nodejs.worker_threads.experimental=false
 
 With the flag off, `require("worker_threads")` and `require("node:worker_threads")` reject with the disabled-builtin error shape. A local `node_modules/worker_threads` package must not shadow that denial.
 
-With the experimental request flag on, workers are pure JavaScript compute workers with a smaller capability set than the parent script. Worker source is resolved and read by the parent scoped resolver, then executed through a worker-local restricted `require`. Worker scripts must not access:
+With the experimental request flag on, the bootstrap first checks whether the
+Embedded Node build exposes a usable native `worker_threads` module. If it does
+not, the request fails closed with `ERR_AUTOJS6_WORKER_DISABLED`, zero active
+workers, and no same-thread fallback. When native workers are available, workers
+are pure JavaScript compute workers with a smaller capability set than the
+parent script. Worker source is resolved and read by the parent scoped resolver,
+then executed through a worker-local restricted `require`. Worker scripts must
+not access:
 
 - AutoJs bridge modules or `autojs6:bridge`
 - Android `Context`
@@ -244,7 +251,12 @@ With the experimental request flag on, workers are pure JavaScript compute worke
 - inspector
 - unrestricted filesystem APIs
 
-Bridge ownership remains in the parent script. Workers may exchange pure data with the parent through `parentPort.postMessage`, `worker.postMessage`, and `workerData`; the worker itself may not call bridge modules. The MVP allows one active worker, uses a startup timeout, denies nested workers, tracks active workers per execution, and terminates active workers during parent success/failure cleanup. Packaged worker source graphs remain follow-up work.
+Bridge ownership remains in the parent script. Workers may exchange pure data
+with the parent through `parentPort.postMessage`, `worker.postMessage`, and
+`workerData`; the worker itself may not call bridge modules. The MVP allows one
+active worker, exposes `threadId`, uses a startup timeout, denies nested workers,
+tracks active workers per execution, and terminates active workers during parent
+success/failure cleanup. Packaged worker source graphs remain follow-up work.
 
 See `docs/nodejs/design/WORKER_THREADS.md` for the current worker boundary.
 

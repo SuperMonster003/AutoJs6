@@ -708,13 +708,21 @@ quota denial rejects only the offending resource without leaking registry
 entries, and the explicit interactive long-running runtime preserves
 heartbeat/budget diagnostics in app-private running and stopped status records.
 
-Current `worker_threads` design gate focused instrumentation:
+Current `worker_threads` bootstrap/design gate focused instrumentation:
 
 ```powershell
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This suite verifies `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false`, the Kotlin capability registry, JavaScript profile flags, bare and `node:` `worker_threads` denial, `require.resolve("worker_threads")` denial, frozen profile flags, and shadowing protection against `node_modules/worker_threads`.
+This suite runs `NodeWorkerThreadsBootstrapInstrumentationTest` and
+`NodeWorkerThreadsDesignGateInstrumentationTest` in normal builds. It verifies
+request-local default denial, JavaScript profile flags, bare and `node:`
+`worker_threads` denial, `require.resolve("worker_threads")` denial before
+`node_modules/worker_threads` shadowing, frozen profile flags, and the
+request-local experimental preflight. The preflight must report either a usable
+native Worker bootstrap surface (`Worker`, `isMainThread`, `parentPort`,
+`workerData`, `threadId`, policy, diagnostics) or stable
+`ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero active workers.
 
 Task 122 GA evaluation report: [reports/WORKER_EXPERIMENTAL_EVALUATION.md](reports/WORKER_EXPERIMENTAL_EVALUATION.md).
 
@@ -726,7 +734,14 @@ Current experimental worker_threads focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest"
 ```
 
-This suite verifies the default disabled path, then enables the request-local experimental flag to cover local CommonJS worker scripts, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path escape rejection, shadowing protection, Worker diagnostics counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope. It is currently an unblock gate: on the Task 122 Sony GA evaluation build, worker creation fails before these semantics run because native `worker_threads` is unavailable.
+This suite verifies the default disabled path when the build-level flag is off,
+then enables the request-local experimental flag to cover local CommonJS worker
+scripts, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker
+rejection, scoped path escape rejection, shadowing protection, Worker
+diagnostics counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and
+nested workers inside worker scope. It is a native-availability promotion gate:
+on the current Sony S7-24 recheck, worker creation is skipped with an explicit
+preflight reason because native `worker_threads` is unavailable.
 
 Current experimental worker_threads resource stress instrumentation:
 
@@ -734,7 +749,13 @@ Current experimental worker_threads resource stress instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest"
 ```
 
-This suite verifies 50 sequential worker create/terminate cycles, worker exception recovery, infinite-loop worker timeout recovery, parent-completion cleanup for pending worker messages, worker cleanup diagnostics counters, and coarse RSS/thread-count snapshots around the sequential stress case. It must pass on the Sony gate device before workers can be advertised as a runnable experiment.
+This suite verifies 50 sequential worker create/terminate cycles, worker
+exception recovery, infinite-loop worker timeout recovery, parent-completion
+cleanup for pending worker messages, worker cleanup diagnostics counters, and
+coarse RSS/thread-count snapshots around the sequential stress case. It is
+skipped when the S7-24 native-availability preflight reports
+`ERR_AUTOJS6_WORKER_DISABLED`, and it must pass on the Sony gate device before
+workers can be advertised as a runnable experiment.
 
 Current feature flag registry focused instrumentation:
 

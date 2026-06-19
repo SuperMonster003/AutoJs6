@@ -46,6 +46,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `NodeDeviceBridgeInstrumentationTest`
 - [ ] `NodeShellBridgeInstrumentationTest`
 - [ ] `NodeFetchBridgeInstrumentationTest`
+- [ ] `NodeWorkerThreadsBootstrapInstrumentationTest`
 - [ ] `NodeWorkerThreadsDesignGateInstrumentationTest`
 - [ ] `NodeRawNetworkPolicyInstrumentationTest`
 - [ ] `NodeWorkerThreadsExperimentalInstrumentationTest`
@@ -78,8 +79,8 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] runtime heartbeat/budget verifies stale bridge-call diagnostics, active registry/resource counts, safe runtime budget overrides, ignored above-hard-max overrides, provider quota rejection without leaks, and terminal status preservation
 - [ ] bridge RPC fuzzer verifies malformed request parsing, unknown dispatch paths, fake-provider mode, malformed responses, service-destroy rejection, and zero pending calls after cleanup
 - [ ] native addon policy verifies `.node` denial through relative require, `module.createRequire`, package `main`, package `exports`, package `imports`, and package subpath imports with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`
-- [ ] worker gate verifies `worker_threads` stays disabled, cannot be shadowed, and reports `experimentalFlags.workerThreads=false`
-- [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access
+- [ ] worker gate verifies `worker_threads` stays disabled by default, cannot be shadowed, reports `experimentalFlags.workerThreads=false`, and records experimental native-availability preflight as either usable native Worker bootstrap or stable `ERR_AUTOJS6_WORKER_DISABLED`
+- [ ] experimental worker smoke verifies pure-JS worker computation, `workerData`, `parentPort.postMessage`, `threadId`, `terminate()`, max-worker rejection, scoped path denial, and denied AutoJs bridge/raw network/fs/nested-worker access when native workers are available; otherwise the promotion gate is explicitly skipped, not passed as runnable support
 - [ ] `:app:verifyNodeExamples` passes and generated example report matches `sample/nodejs/examples.json`
 - [ ] `:app:verifyAutoJs6NodeTypeDeclarations` passes and `sample/nodejs/typescript-smoke` type-checks when `tsc` is available
 - [ ] checked-in main-app examples `hello-node`, `cjs-package`, `fs-scoped`, `fs-promises`, `npm-pure-js-cjs`, `toast-app`, `accessibility-click-text`, `screenshot-find-image`, and `disabled-features-demo` still run from `sample/nodejs`

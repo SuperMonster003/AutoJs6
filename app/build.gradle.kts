@@ -263,12 +263,16 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunV11BridgeEmbeddedNodePackagedApk",
 ) + if (nodeJsWorkerThreadsExperimentalEnabled) {
     listOf(
+        "org.autojs.autojs.engine.NodeWorkerThreadsBootstrapInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
     )
 } else {
-    listOf("org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest")
+    listOf(
+        "org.autojs.autojs.engine.NodeWorkerThreadsBootstrapInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
+    )
 }
 val nodeJsV11BetaInstrumentationClasses = (
         listOf(
@@ -564,12 +568,16 @@ val nodeJsLongRunningGateInstrumentationClasses = listOf(
 )
 val nodeJsWorkerGateInstrumentationClasses = if (nodeJsWorkerThreadsExperimentalEnabled) {
     listOf(
+        "org.autojs.autojs.engine.NodeWorkerThreadsBootstrapInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
     )
 } else {
-    listOf("org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest")
+    listOf(
+        "org.autojs.autojs.engine.NodeWorkerThreadsBootstrapInstrumentationTest",
+        "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
+    )
 }
 val nodeJsModernCoreGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",

@@ -116,7 +116,7 @@ Risk: Worker threads bypass parent restrictions, access bridge modules, leak res
 
 Mitigation: Disabled by default; experimental workers use parent-scoped resolution, smaller builtin set, no bridge modules, one-worker limit, startup timeout, nested-worker denial, parent cleanup.
 
-Tests: `NodeWorkerThreadsDesignGateInstrumentationTest`, `NodeWorkerThreadsExperimentalInstrumentationTest`, `NodeWorkerThreadsResourceStressInstrumentationTest`.
+Tests: `NodeWorkerThreadsBootstrapInstrumentationTest`, `NodeWorkerThreadsDesignGateInstrumentationTest`, `NodeWorkerThreadsExperimentalInstrumentationTest`, `NodeWorkerThreadsResourceStressInstrumentationTest`.
 
 Remaining risk: Packaged worker source graphs and stronger memory limits remain follow-up work.
 
@@ -156,6 +156,7 @@ Remaining risk: Android platform policy changes can invalidate foreground-servic
 | `NodeFetchBridgeInstrumentationTest` | TM-Controlled-Network, TM-Bridge-RPC |
 | `NodeWebSocketBridgeInstrumentationTest` | TM-Controlled-Network, TM-Bridge-RPC |
 | `NodeJavaInteropBridgeInstrumentationTest` | TM-Java-Interop, TM-Feature-Flags |
+| `NodeWorkerThreadsBootstrapInstrumentationTest` | TM-Worker, TM-Feature-Flags |
 | `NodeWorkerThreadsDesignGateInstrumentationTest` | TM-Worker, TM-Feature-Flags |
 | `NodeWorkerThreadsExperimentalInstrumentationTest` | TM-Worker |
 | `NodeWorkerThreadsResourceStressInstrumentationTest` | TM-Worker, bridge resources asset |

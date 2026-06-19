@@ -10951,6 +10951,7 @@ std::string buildEmbeddedScriptExecutionSource(
       isMainThread: true,
       parentPort: null,
       workerData: undefined,
+      threadId: nativeModule.threadId,
       policy: __autojs6_worker_threads_policy_snapshot(),
       diagnostics: __autojs6_worker_threads_diagnostics_snapshot
     });

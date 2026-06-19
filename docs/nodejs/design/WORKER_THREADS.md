@@ -1,6 +1,6 @@
 # Worker Threads Design Gate v1
 
-Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason.
+Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support.
 
 ## Goal
 
@@ -15,7 +15,7 @@ Workers are high risk in AutoJs6 because they multiply:
 - access-control surfaces for AutoJs bridge modules
 - packaged APK compatibility state
 
-Task 42 froze the boundary. Task 63 added a request-local experimental path intended to run local CommonJS worker scripts with a smaller capability set than the parent script. Task 122 blocked publishing that path as runnable for GA because native `worker_threads` is unavailable in the evaluated Embedded Node build. Task 170 kept the same decision for v1.1: the default denial and design gates remain valid, but runnable worker partial support cannot be claimed until a libnode build exposes native workers and the focused execution and stress suites pass.
+Task 42 froze the boundary. Task 63 added a request-local experimental path intended to run local CommonJS worker scripts with a smaller capability set than the parent script. Task 122 blocked publishing that path as runnable for GA because native `worker_threads` is unavailable in the evaluated Embedded Node build. Task 170 kept the same decision for v1.1: the default denial and design gates remain valid, but runnable worker partial support cannot be claimed until a libnode build exposes native workers and the focused execution and stress suites pass. S7-24 keeps that decision and adds an explicit native-availability preflight in `verifyNodeWorkerGate`.
 
 ## Feature Flag
 
@@ -56,6 +56,7 @@ When the request-local experimental flag is enabled and the Embedded Node build 
 - `parentPort.postMessage(...)`
 - `worker.postMessage(...)`
 - `worker.terminate()`
+- `threadId`
 - safe pure-JS builtins such as `buffer`, `path`, `util`, `events`, `assert`, `querystring`, `string_decoder`, `timers`, and `url`
 - explicit startup timeout and worker count limits
 - parent-owned lifecycle and cancellation through `terminate()`
@@ -192,12 +193,18 @@ Experimental worker-specific errors:
 
 Current gates:
 
-- `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection.
-- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope.
-- `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots.
+- `NodeWorkerThreadsBootstrapInstrumentationTest` verifies request-local default
+  denial before shadowing and experimental native-availability preflight. The
+  preflight requires either a usable limited `worker_threads` surface
+  (`Worker`, `isMainThread`, `parentPort`, `workerData`, `threadId`, policy, and
+  diagnostics) or stable `ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero
+  active workers.
+- `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection in normal builds.
+- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope. Runnable coverage is skipped when the preflight reports native workers unavailable.
+- `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots. Stress coverage is skipped when the preflight reports native workers unavailable.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
-Current evaluation: [../reports/WORKER_EXPERIMENTAL_EVALUATION.md](../reports/WORKER_EXPERIMENTAL_EVALUATION.md). The default design gate passes, but worker execution/stress suites are blocked by native module availability. The 2026-06-17 v1.1 recheck confirmed that Task 170 cannot graduate workers to runnable partial support without changing the Embedded Node native build.
+Current evaluation: [../reports/WORKER_EXPERIMENTAL_EVALUATION.md](../reports/WORKER_EXPERIMENTAL_EVALUATION.md). The default design gate passes, but worker execution/stress suites are blocked by native module availability. The 2026-06-17 v1.1 recheck confirmed that Task 170 cannot graduate workers to runnable partial support without changing the Embedded Node native build. The 2026-06-19 S7-24 recheck added bootstrap/preflight coverage and verified the experimental gate fails closed with skips, not false runnable support, on the current native build.
 
 Follow-up gates should add:
 

@@ -653,7 +653,8 @@ Current GA evaluation: `docs/nodejs/reports/NETWORK_EVALUATION.md`.
 
 `worker_threads` remains disabled by default. AutoJs6 has an experimental pure-JS worker design path, but Task 122 found
 that worker execution is blocked in the current Embedded Node build because native `worker_threads` is unavailable even
-when the experimental flag is enabled. The explicit gate flag is:
+when the experimental flag is enabled. S7-24 adds a focused bootstrap/native-availability preflight to the worker gate so
+this blocked state is verified explicitly without advertising runnable worker support. The explicit gate flag is:
 
 ```properties
 autojs.nodejs.worker_threads.experimental=false
@@ -668,6 +669,13 @@ With the flag off:
 
 Current `require("autojs6:profile")` reports `workerThreads=false`, `highRiskCapabilities.workerThreads=false`, and `experimentalFlags.workerThreads=false`.
 
+Current `verifyNodeWorkerGate` normal builds also run
+`NodeWorkerThreadsBootstrapInstrumentationTest`, which verifies request-local
+default denial, shadowing protection, and request-local experimental preflight.
+On the current Embedded Node build, that preflight reports
+`ERR_AUTOJS6_WORKER_DISABLED`, `embedded_script.worker_active_count=0`, and no
+same-thread fallback.
+
 When the experimental request flag is enabled in a build that exposes native `worker_threads`, the intended limited module
 for local CommonJS worker scripts inside `workingDirectory` is:
 
@@ -678,6 +686,7 @@ for local CommonJS worker scripts inside `workingDirectory` is:
 - `isMainThread`
 - `parentPort`
 - `workerData`
+- `threadId`
 - `policy`
 - `diagnostics()`
 
