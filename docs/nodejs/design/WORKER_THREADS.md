@@ -59,13 +59,14 @@ When the request-local experimental flag is enabled and the Embedded Node build 
 - `MessagePort.postMessage(value, transferList?)`
 - ArrayBuffer transfer detachment, typed array delivery, and structured-clone-safe values
 - DataCloneError-compatible failures for unsupported clone and transfer values
+- scoped worker `fs` and `fs/promises` read/write helpers rooted at `workingDirectory`
 - `worker.terminate()`
 - `threadId`
 - safe pure-JS builtins such as `buffer`, `path`, `util`, `events`, `assert`, `querystring`, `string_decoder`, `timers`, and `url`
 - explicit startup timeout and worker count limits
 - parent-owned lifecycle and cancellation through `terminate()`
 
-Workers are loaded by the parent scoped resolver and executed from a generated native Worker `eval` wrapper. Worker scripts do not get the parent AutoJs6 loader or bridge.
+Workers are loaded by the parent scoped resolver and executed from a generated native Worker `eval` wrapper. Worker scripts do not get the parent AutoJs6 loader or bridge. S7-27 adds a separate worker profile: workers get only scoped filesystem read/write wrappers and do not inherit main-script bridge, network, shell, Java, or inspector authority.
 
 The first version does not allow workers to spawn more workers.
 
@@ -99,6 +100,8 @@ Current first allowlist:
 - `assert`
 - `buffer`
 - `events`
+- `fs` as an AutoJs6 scoped worker wrapper
+- `fs/promises` as an AutoJs6 scoped worker wrapper
 - `path`
 - `querystring`
 - `string_decoder`
@@ -124,7 +127,10 @@ Denied in workers:
 - `worker_threads` nested spawning
 - native `.node` addons
 
-`fs` remains denied in the first worker version. Worker source loading is parent-owned and scoped to the working directory.
+Worker `fs` is not native Node `fs`. It exposes a minimal read/write subset
+rooted at `workingDirectory`; every path is checked lexically and, for existing
+paths or parents, by realpath before the native operation runs. Worker source
+loading remains parent-owned and scoped to the working directory.
 
 ## Limits
 
@@ -134,6 +140,7 @@ Current defaults:
 - default worker startup timeout: 5000 ms
 - maximum message size: 65536 bytes per worker/port message estimate
 - maximum queued messages: 32 per parent/port sender before the next event-loop turn
+- worker filesystem profile: read/write limited to `workingDirectory`; no inherited main-thread filesystem expansion
 - default worker run timeout: parent script timeout remains the outer guard; per-worker execution timeout is Task 64 work
 - per-worker memory budget: design before implementation; do not rely on V8 defaults alone
 - maximum worker source size: reuse module source budgets unless a lower worker-specific budget is set
@@ -207,7 +214,7 @@ Current gates:
   `workerData`, `threadId`, policy, and diagnostics) or stable
   `ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero active workers.
 - `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection in normal builds.
-- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, limited `MessageChannel`/`MessagePort`, ArrayBuffer transfer detachment, transfer-list validation, message size/queue limits, DataCloneError-compatible failures, MessagePort cleanup counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope. Runnable coverage is skipped when the preflight reports native workers unavailable.
+- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, limited `MessageChannel`/`MessagePort`, ArrayBuffer transfer detachment, transfer-list validation, message size/queue limits, DataCloneError-compatible failures, MessagePort cleanup counters, scoped worker `fs`/`fs.promises`, and denial of AutoJs bridge modules, `toast`, `accessibility`, `image`, `shell`, `java`, `inspector`, raw `net`, and nested workers inside worker scope. Runnable coverage is skipped when the preflight reports native workers unavailable.
 - `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots. Stress coverage is skipped when the preflight reports native workers unavailable.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
@@ -228,7 +235,7 @@ The MVP does not enable:
 - AutoJs bridge access from workers
 - Android Context access from workers
 - packaged worker source graphs
-- worker access to `fs`
+- worker access to unrestricted native `fs`
 - worker access to raw network
 - worker access to full parent Safe Node builtins
 - unrestricted service-destroy worker cleanup guarantees beyond the current process-isolation and focused timeout recovery gates

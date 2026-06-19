@@ -8100,13 +8100,26 @@ std::string buildEmbeddedScriptExecutionSource(
       "assert",
       "buffer",
       "events",
+      "fs",
+      "fs/promises",
       "path",
       "querystring",
       "string_decoder",
       "timers",
       "url",
       "util"
-    ])
+    ]),
+    workerProfile: Object.freeze({
+      fs: Object.freeze({
+        read: "workingDirectory",
+        write: "workingDirectory"
+      }),
+      network: "denied",
+      autoJsBridge: "denied",
+      shell: "denied",
+      javaInterop: "denied",
+      inspector: "denied"
+    })
   });
   const __autojs6_worker_threads_diagnostics = {
     activeWorkerCount: 0,
@@ -10805,12 +10818,24 @@ std::string buildEmbeddedScriptExecutionSource(
     }
   }
   function __autojs6_worker_threads_policy_snapshot() {
+    const workerProfile = __autojs6_worker_threads_policy.workerProfile;
     return Object.freeze({
       maxWorkers: __autojs6_worker_threads_policy.maxWorkers,
       startupTimeoutMs: __autojs6_worker_threads_policy.startupTimeoutMs,
       maxMessageBytes: __autojs6_worker_threads_policy.maxMessageBytes,
       maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages,
-      allowedBuiltins: Object.freeze(__autojs6_worker_threads_policy.allowedBuiltins.slice())
+      allowedBuiltins: Object.freeze(__autojs6_worker_threads_policy.allowedBuiltins.slice()),
+      workerProfile: Object.freeze({
+        fs: Object.freeze({
+          read: workerProfile.fs.read,
+          write: workerProfile.fs.write
+        }),
+        network: workerProfile.network,
+        autoJsBridge: workerProfile.autoJsBridge,
+        shell: workerProfile.shell,
+        javaInterop: workerProfile.javaInterop,
+        inspector: workerProfile.inspector
+      })
     });
   }
   function __autojs6_worker_threads_diagnostics_snapshot() {
@@ -10999,7 +11024,8 @@ std::string buildEmbeddedScriptExecutionSource(
       format: descriptor.format,
       policy: {
         maxMessageBytes: __autojs6_worker_threads_policy.maxMessageBytes,
-        maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages
+        maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages,
+        workerProfile: __autojs6_worker_threads_policy_snapshot().workerProfile
       },
       moduleSources: descriptor.moduleSources || Object.create(null)
     });
@@ -11073,6 +11099,8 @@ std::string buildEmbeddedScriptExecutionSource(
     "assert/strict": "assert/strict",
     buffer: "buffer",
     events: "events",
+    fs: "fs",
+    "fs/promises": "fs/promises",
     path: "path",
     "path/posix": "path/posix",
     "path/win32": "path/win32",
@@ -11087,6 +11115,20 @@ std::string buildEmbeddedScriptExecutionSource(
     maxMessageBytes: (__descriptor.policy && __descriptor.policy.maxMessageBytes) || 65536,
     maxQueuedMessages: (__descriptor.policy && __descriptor.policy.maxQueuedMessages) || 32
   });
+  const __profilePolicy = (__descriptor.policy && __descriptor.policy.workerProfile) || {};
+  const __workerProfile = Object.freeze({
+    fs: Object.freeze({
+      read: (__profilePolicy.fs && __profilePolicy.fs.read) || "workingDirectory",
+      write: (__profilePolicy.fs && __profilePolicy.fs.write) || "workingDirectory"
+    }),
+    network: __profilePolicy.network || "denied",
+    autoJsBridge: __profilePolicy.autoJsBridge || "denied",
+    shell: __profilePolicy.shell || "denied",
+    javaInterop: __profilePolicy.javaInterop || "denied",
+    inspector: __profilePolicy.inspector || "denied"
+  });
+  let __limitedFsCache = null;
+  let __limitedFsPromisesCache = null;
   const __parentPortQueueState = Object.create(null);
   function __dataCloneError(message) {
     let error;
@@ -11204,6 +11246,7 @@ std::string buildEmbeddedScriptExecutionSource(
     threadId: __workerThreads.threadId,
     MessageChannel: __workerThreads.MessageChannel,
     MessagePort: __workerThreads.MessagePort,
+    workerProfile: __workerProfile,
     Worker: function Worker() { throw __error("Nested AutoJs6 worker_threads workers are disabled.", "ERR_AUTOJS6_WORKER_DISABLED"); }
   });
   function __normalBuiltinName(request) {
@@ -11218,6 +11261,8 @@ std::string buildEmbeddedScriptExecutionSource(
     const raw = String(request || "");
     const name = __normalBuiltinName(raw);
     if (name === "worker_threads") return __limitedWorkerThreads;
+    if (name === "fs") return __limitedFsModule();
+    if (name === "fs/promises") return __limitedFsPromisesModule();
     if (Object.prototype.hasOwnProperty.call(__allowed, name)) return __nativeRequire(__allowed[name]);
     return __deny(raw);
   }
@@ -11253,6 +11298,160 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     return absolute;
+  }
+  function __workerFsPath(pathValue, label) {
+    if (typeof pathValue !== "string") {
+      throw __error(
+        "AutoJs6 experimental worker_threads " + label + " requires a string path.",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
+    if (pathValue.indexOf("\u0000") >= 0) {
+      throw __error(
+        "AutoJs6 experimental worker_threads rejects NUL byte in " + label + ": " + pathValue,
+        "ERR_AUTOJS6_FS_NUL_BYTE"
+      );
+    }
+    const absolute = __path.isAbsolute(pathValue) ? __path.resolve(pathValue) : __path.resolve(__root, pathValue);
+    return __validatePath(absolute, label);
+  }
+  function __workerFsRealpath(pathValue) {
+    if (__fs.realpathSync && typeof __fs.realpathSync.native === "function") {
+      return __fs.realpathSync.native(pathValue);
+    }
+    return __fs.realpathSync(pathValue);
+  }
+  function __workerFsReadablePath(pathValue, label) {
+    const absolute = __workerFsPath(pathValue, label);
+    const real = __workerFsRealpath(absolute);
+    return __validatePath(real, label + " real path");
+  }
+  function __workerFsNearestExistingParent(absolute, label) {
+    let current = __path.dirname(absolute);
+    while (__withinRoot(current, __root) && !__sensitivePath(current)) {
+      try {
+        const stat = __fs.statSync(current);
+        if (stat && typeof stat.isDirectory === "function" && stat.isDirectory()) {
+          return current;
+        }
+        throw __error(
+          "AutoJs6 experimental worker_threads " + label + " parent is not a directory: " + current,
+          "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+        );
+      } catch (error) {
+        if (!error || error.code !== "ENOENT") throw error;
+      }
+      if (current === __root) break;
+      const parent = __path.dirname(current);
+      if (!parent || parent === current) break;
+      current = parent;
+    }
+    throw __error(
+      "AutoJs6 experimental worker_threads " + label + " escapes working directory: " + absolute,
+      "ERR_AUTOJS6_FS_PATH_ESCAPE"
+    );
+  }
+  function __workerFsWritablePath(pathValue, label) {
+    const absolute = __workerFsPath(pathValue, label);
+    try {
+      const real = __workerFsRealpath(absolute);
+      return __validatePath(real, label + " real path");
+    } catch (error) {
+      if (!error || error.code !== "ENOENT") throw error;
+    }
+    const parent = __workerFsNearestExistingParent(absolute, label);
+    const realParent = __workerFsRealpath(parent);
+    __validatePath(realParent, label + " parent real path");
+    return absolute;
+  }
+  function __limitedFsPromisesModule() {
+    if (__limitedFsPromisesCache) return __limitedFsPromisesCache;
+    const promises = Object.freeze({
+      readFile: function(pathValue, options) {
+        return __fs.promises.readFile(__workerFsReadablePath(pathValue, "fs.promises.readFile"), options);
+      },
+      writeFile: function(pathValue, data, options) {
+        return __fs.promises.writeFile(__workerFsWritablePath(pathValue, "fs.promises.writeFile"), data, options);
+      },
+      appendFile: function(pathValue, data, options) {
+        return __fs.promises.appendFile(__workerFsWritablePath(pathValue, "fs.promises.appendFile"), data, options);
+      },
+      mkdir: function(pathValue, options) {
+        return __fs.promises.mkdir(__workerFsWritablePath(pathValue, "fs.promises.mkdir"), options);
+      },
+      rm: function(pathValue, options) {
+        return __fs.promises.rm(__workerFsWritablePath(pathValue, "fs.promises.rm"), options);
+      },
+      unlink: function(pathValue) {
+        return __fs.promises.unlink(__workerFsWritablePath(pathValue, "fs.promises.unlink"));
+      },
+      stat: function(pathValue, options) {
+        return __fs.promises.stat(__workerFsReadablePath(pathValue, "fs.promises.stat"), options);
+      },
+      readdir: function(pathValue, options) {
+        return __fs.promises.readdir(__workerFsReadablePath(pathValue, "fs.promises.readdir"), options);
+      },
+      copyFile: function(source, destination, mode) {
+        return __fs.promises.copyFile(
+          __workerFsReadablePath(source, "fs.promises.copyFile source"),
+          __workerFsWritablePath(destination, "fs.promises.copyFile destination"),
+          mode
+        );
+      }
+    });
+    __limitedFsPromisesCache = promises;
+    return promises;
+  }
+  function __limitedFsModule() {
+    if (__limitedFsCache) return __limitedFsCache;
+    const limitedFs = {
+      constants: Object.freeze(Object.assign(Object.create(null), __fs.constants || {})),
+      readFileSync: function(pathValue, options) {
+        return __fs.readFileSync(__workerFsReadablePath(pathValue, "fs.readFileSync"), options);
+      },
+      writeFileSync: function(pathValue, data, options) {
+        return __fs.writeFileSync(__workerFsWritablePath(pathValue, "fs.writeFileSync"), data, options);
+      },
+      appendFileSync: function(pathValue, data, options) {
+        return __fs.appendFileSync(__workerFsWritablePath(pathValue, "fs.appendFileSync"), data, options);
+      },
+      existsSync: function(pathValue) {
+        const absolute = __workerFsPath(pathValue, "fs.existsSync");
+        if (!__fs.existsSync(absolute)) return false;
+        __workerFsReadablePath(absolute, "fs.existsSync");
+        return true;
+      },
+      statSync: function(pathValue, options) {
+        return __fs.statSync(__workerFsReadablePath(pathValue, "fs.statSync"), options);
+      },
+      readdirSync: function(pathValue, options) {
+        return __fs.readdirSync(__workerFsReadablePath(pathValue, "fs.readdirSync"), options);
+      },
+      mkdirSync: function(pathValue, options) {
+        return __fs.mkdirSync(__workerFsWritablePath(pathValue, "fs.mkdirSync"), options);
+      },
+      rmSync: function(pathValue, options) {
+        return __fs.rmSync(__workerFsWritablePath(pathValue, "fs.rmSync"), options);
+      },
+      unlinkSync: function(pathValue) {
+        return __fs.unlinkSync(__workerFsWritablePath(pathValue, "fs.unlinkSync"));
+      },
+      copyFileSync: function(source, destination, mode) {
+        return __fs.copyFileSync(
+          __workerFsReadablePath(source, "fs.copyFileSync source"),
+          __workerFsWritablePath(destination, "fs.copyFileSync destination"),
+          mode
+        );
+      }
+    };
+    Object.defineProperty(limitedFs, "promises", {
+      value: __limitedFsPromisesModule(),
+      enumerable: true,
+      configurable: false,
+      writable: false
+    });
+    __limitedFsCache = Object.freeze(limitedFs);
+    return __limitedFsCache;
   }
   function __supportedSourceExtension(extension, allowEsm) {
     return extension === ".js" || extension === ".cjs" || extension === ".json" || (allowEsm && extension === ".mjs");

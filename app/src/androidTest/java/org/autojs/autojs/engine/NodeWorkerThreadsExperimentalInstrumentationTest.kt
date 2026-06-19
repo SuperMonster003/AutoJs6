@@ -110,7 +110,9 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                     }
                     denied("toast", () => require("toast"));
                     denied("accessibility", () => require("accessibility"));
-                    denied("fs", () => require("fs"));
+                    denied("image", () => require("image"));
+                    denied("shell", () => require("shell"));
+                    denied("java", () => require("java"));
                     denied("net", () => require("net"));
                     denied("nested", () => new (require("worker_threads").Worker)("./compute.js"));
                     parentPort.postMessage({ label: "done", code: "done" });
@@ -209,7 +211,9 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                       console.log("worker.restricted=" + [
                         restrictedCodes.toast,
                         restrictedCodes.accessibility,
-                        restrictedCodes.fs,
+                        restrictedCodes.image,
+                        restrictedCodes.shell,
+                        restrictedCodes.java,
                         restrictedCodes.net,
                         restrictedCodes.nested
                       ].join("|"));
@@ -250,7 +254,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "worker.restricted=${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_DISABLED}",
+                    "worker.restricted=${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_DISABLED}",
                 ),
             )
             assertTrue(result.stdout, result.stdout.contains("worker.escape=${NodeRuntimeErrorCodes.FS_PATH_ESCAPE}"))
@@ -445,6 +449,145 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
             assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
         } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun experimentalWorkerThreadsUseIsolatedWorkerProfile() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads capability isolation")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads capability isolation")
+
+        val workDir = File(context.cacheDir, "node-worker-profile-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create worker profile work dir: $absolutePath" }
+        }
+        val outsideFile = File(workDir.parentFile, "node-worker-profile-outside-${System.nanoTime()}.txt")
+        try {
+            outsideFile.writeText("outside", StandardCharsets.UTF_8)
+            File(workDir, "profile-worker.cjs").writeText(
+                """
+                    (async function main() {
+                      const { parentPort, workerData, workerProfile } = require("worker_threads");
+                      const fs = require("fs");
+                      const fsp = require("fs/promises");
+
+                      function codeOf(error) {
+                        return String(error && (error.autojs6Code || error.code || error.name || ""));
+                      }
+                      function denied(action) {
+                        try {
+                          action();
+                          return "allowed";
+                        } catch (error) {
+                          return codeOf(error);
+                        }
+                      }
+
+                      fs.writeFileSync("./sync.txt", "sync", "utf8");
+                      const syncRead = fs.readFileSync("./sync.txt", "utf8");
+                      await fsp.writeFile("./async.txt", "async", "utf8");
+                      const asyncRead = await fsp.readFile("./async.txt", "utf8");
+                      const statIsFile = fs.statSync("./sync.txt").isFile();
+
+                      const moduleCodes = [
+                        "toast",
+                        "accessibility",
+                        "image",
+                        "shell",
+                        "java",
+                        "inspector",
+                        "net"
+                      ].map((name) => denied(() => require(name)));
+
+                      const escapeCodes = [];
+                      escapeCodes.push(denied(() => fs.readFileSync(workerData.outsideRelative, "utf8")));
+                      escapeCodes.push(denied(() => fs.writeFileSync(workerData.outsideRelative, "bad", "utf8")));
+                      try {
+                        await fsp.readFile(workerData.outsideAbsolute, "utf8");
+                        escapeCodes.push("allowed");
+                      } catch (error) {
+                        escapeCodes.push(codeOf(error));
+                      }
+
+                      parentPort.postMessage({
+                        profile: [
+                          workerProfile.fs.read,
+                          workerProfile.fs.write,
+                          workerProfile.network,
+                          workerProfile.autoJsBridge,
+                          workerProfile.shell,
+                          workerProfile.javaInterop,
+                          workerProfile.inspector
+                        ].join("|"),
+                        io: [syncRead, asyncRead, statIsFile].join("|"),
+                        moduleCodes,
+                        escapeCodes
+                      });
+                    })().catch((error) => {
+                      require("worker_threads").parentPort.postMessage({
+                        error: String(error && (error.stack || error.message || error))
+                      });
+                    });
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const { Worker } = require("worker_threads");
+                      const worker = new Worker("./profile-worker.cjs", {
+                        workerData: {
+                          outsideRelative: "../${outsideFile.name}",
+                          outsideAbsolute: ${jsString(outsideFile.absolutePath)}
+                        }
+                      });
+                      const message = await new Promise((resolve, reject) => {
+                        worker.once("message", resolve);
+                        worker.once("error", reject);
+                      });
+                      const exitCode = await new Promise((resolve) => {
+                        worker.once("exit", resolve);
+                      });
+                      if (message && message.error) {
+                        throw new Error(message.error);
+                      }
+                      console.log("worker.profile.fs=" + message.profile);
+                      console.log("worker.profile.io=" + message.io);
+                      console.log("worker.profile.modules=" + message.moduleCodes.join("|"));
+                      console.log("worker.profile.escape=" + message.escapeCodes.join("|"));
+                      console.log("worker.profile.exit=" + exitCode);
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-worker-profile.js>",
+                workingDirectory = workDir,
+                timeoutMs = 15_000L,
+                workerThreadsExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("worker_threads capability isolation", result)
+            assertTrue(result.stdout, result.stdout.contains("worker.profile.fs=workingDirectory|workingDirectory|denied|denied|denied|denied|denied"))
+            assertTrue(result.stdout, result.stdout.contains("worker.profile.io=sync|async|true"))
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "worker.profile.modules=${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}|${NodeRuntimeErrorCodes.WORKER_BRIDGE_DENIED}",
+                ),
+            )
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "worker.profile.escape=${NodeRuntimeErrorCodes.FS_PATH_ESCAPE}|${NodeRuntimeErrorCodes.FS_PATH_ESCAPE}|${NodeRuntimeErrorCodes.FS_PATH_ESCAPE}",
+                ),
+            )
+            assertTrue(result.stdout, result.stdout.contains("worker.profile.exit=0"))
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
+            assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
+        } finally {
+            outsideFile.delete()
             workDir.deleteRecursively()
         }
     }
@@ -667,6 +810,23 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             assertEquals("0", result.nativeValues["embedded_script.worker_message_port_active_count"])
         } finally {
             workDir.deleteRecursively()
+        }
+    }
+
+    private fun jsString(value: String): String {
+        return buildString {
+            append('"')
+            value.forEach { char ->
+                when (char) {
+                    '\\' -> append("\\\\")
+                    '"' -> append("\\\"")
+                    '\n' -> append("\\n")
+                    '\r' -> append("\\r")
+                    '\t' -> append("\\t")
+                    else -> append(char)
+                }
+            }
+            append('"')
         }
     }
 }

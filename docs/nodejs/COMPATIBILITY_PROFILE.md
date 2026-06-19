@@ -658,7 +658,10 @@ this blocked state is verified explicitly without advertising runnable worker su
 entry path for CJS and partial-ESM workers, but the current build still skips runnable worker smoke tests until native
 `worker_threads` exists. S7-26 prepares the native-available messaging path for
 limited `MessageChannel`/`MessagePort` and transfer lists, but it remains behind
-the same experimental gate and native-availability preflight. The explicit gate
+the same experimental gate and native-availability preflight. S7-27 defines the
+separate worker capability profile: workers get only scoped `fs`/`fs/promises`
+read/write helpers rooted at their working directory and do not inherit main
+script bridge, network, shell, Java, or inspector authority. The explicit gate
 flag is:
 
 ```properties
@@ -697,6 +700,7 @@ for local worker scripts inside `workingDirectory` is:
 - `MessagePort.postMessage(value, transferList?)`
 - ArrayBuffer transfer detachment, typed array delivery, and structured-clone-safe values
 - DataCloneError-compatible failures for unsupported clone/transfer values
+- scoped worker `fs` and `fs/promises` helpers for read/write operations inside `workingDirectory`
 - `isMainThread`
 - `parentPort`
 - `workerData`
@@ -704,7 +708,7 @@ for local worker scripts inside `workingDirectory` is:
 - `policy`
 - `diagnostics()`
 
-The intended MVP loads worker source through the parent scoped resolver, then executes it in a native Node Worker with a worker-local restricted loader. Worker-local `require("worker_threads")` exposes only `parentPort`, `workerData`, `isMainThread`, `threadId`, limited native-available `MessageChannel`/`MessagePort`, and a disabled nested `Worker`. Worker-local CJS and partial-ESM imports can load local worker dependencies and the safe worker builtin allowlist only. Worker-local loading denies AutoJs bridge modules, `autojs6:bridge`, `fs`, raw network, `shell`, `child_process`, native addons, `vm`, inspector, and nested workers. The first policy allows one active worker, a `5000` ms startup timeout, `65536` byte messages, `32` queued messages per parent/port sender, and safe pure-JS builtins only.
+The intended MVP loads worker source through the parent scoped resolver, then executes it in a native Node Worker with a worker-local restricted loader. Worker-local `require("worker_threads")` exposes only `parentPort`, `workerData`, `isMainThread`, `threadId`, limited native-available `MessageChannel`/`MessagePort`, `workerProfile`, and a disabled nested `Worker`. Worker-local CJS and partial-ESM imports can load local worker dependencies and the safe worker builtin allowlist only. Worker-local `fs` and `fs/promises` are AutoJs6 wrappers, not native Node `fs`; they validate lexical paths and real paths against the worker root before read/write operations. Worker-local loading denies AutoJs bridge modules, `autojs6:bridge`, raw network, `shell`, `child_process`, native addons, `vm`, inspector, Java/Android interop, and nested workers. The first policy allows one active worker, a `5000` ms startup timeout, `65536` byte messages, `32` queued messages per parent/port sender, scoped worker fs read/write in `workingDirectory`, and safe pure-JS builtins only.
 
 Worker and parent-side MessagePort instances are tracked per execution when the native module is available. Parent success/failure cleanup performs best-effort termination of any active worker and closes tracked ports before writing the result envelope, and exposes pending-worker, message-port, rejected-message, and cleanup counters through native diagnostics. See `docs/nodejs/design/WORKER_THREADS.md` and `docs/nodejs/reports/WORKER_EXPERIMENTAL_EVALUATION.md` for worker count, timeout, memory, packaged APK, bridge-denial, lifecycle policy, and the current GA blocking status.
 

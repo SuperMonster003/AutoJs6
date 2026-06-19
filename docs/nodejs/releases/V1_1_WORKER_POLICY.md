@@ -2,7 +2,7 @@
 
 Date: 2026-06-17
 
-Latest S7-26 messaging gate update: 2026-06-19
+Latest S7-27 capability-isolation gate update: 2026-06-19
 
 Branch: `feature/nodejs-runtime-v1.1`
 
@@ -43,6 +43,12 @@ validation, maximum message-size and queued-message limits, DataCloneError
 compatible failures, and parent-side MessagePort cleanup diagnostics. This does
 not change the release recommendation while the current Embedded Node build
 still lacks usable native workers.
+
+S7-27 defines a separate worker capability profile. Native-available worker
+tests now expect scoped `fs`/`fs.promises` read/write helpers rooted at the
+worker working directory, plus denial of AutoJs bridge modules, `toast`,
+`accessibility`, `image`, `shell`, Java interop, inspector, raw network, and
+nested workers. Workers do not inherit main-script capabilities.
 
 Normal builds must continue to keep:
 
@@ -120,6 +126,7 @@ The failed stress cases were:
 | S7-24 experimental `verifyNodeWorkerGate` | Pass with skips | Sony experimental gate ran bootstrap/preflight and skipped runnable/stress promotion tests because native workers remain unavailable, 0 failures. |
 | S7-25 CJS/ESM worker entry gate | Prepared, skipped on Sony | Worker loader now has promotion coverage for `worker.cjs`, `worker.mjs`, `type=module` `.js`, local CJS/JSON and partial-ESM dependencies, allowed builtins, path escape denial, raw network denial, bridge denial, and native addon denial. Sony still skips runnable smoke because native workers remain unavailable. |
 | S7-26 MessageChannel/transferList gate | Prepared, skipped on Sony | Limited `MessageChannel`, `MessagePort`, ArrayBuffer transfer detachment, typed array delivery, structured-clone-safe value checks, DataCloneError-compatible failures, message-size/queue limits, and MessagePort cleanup counters are covered when the native preflight is available. Sony still skips runnable smoke because native workers remain unavailable. |
+| S7-27 worker capability isolation gate | Prepared, skipped on Sony | Worker profile now separates scoped worker `fs`/`fs.promises` from main-script capabilities and verifies denial of AutoJs bridge modules, `toast`, `accessibility`, `image`, `shell`, Java interop, inspector, raw network, and nested workers. Sony still skips runnable smoke because native workers remain unavailable. |
 | default build flag | Pass | `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false` in normal builds. |
 | capability registry default | Pass | Kotlin and JavaScript profiles report worker threads disabled. |
 | bare `require("worker_threads")` denial | Pass | Default path rejects before local shadowing. |
@@ -130,9 +137,10 @@ The failed stress cases were:
 | native Worker availability | Blocked | Bootstrap preflight reports `ERR_AUTOJS6_WORKER_DISABLED` and zero active workers. |
 | pure JS Worker creation | Blocked | No Worker is constructed; created count remains `0`. |
 | worker data and parentPort messaging | Blocked | Cannot run because Worker creation fails. |
-| worker-local AutoJs bridge denial | Blocked | Intended test cannot execute inside a running worker. |
-| worker-local Android Context denial | Blocked by design | No Context is exposed, but the stronger running-worker proof cannot execute yet. |
-| nested worker denial | Blocked | Intended worker-local nested Worker denial cannot execute. |
+| worker-local AutoJs bridge denial | Prepared, skipped on Sony | Native-available gate denies bridge modules and user-facing AutoJs modules in worker scope. |
+| worker-local Android Context / Java denial | Prepared, skipped on Sony | Worker profile denies Java interop and exposes no Android Context. |
+| worker scoped fs escape denial | Prepared, skipped on Sony | Worker `fs`/`fs.promises` wrappers validate lexical paths and real paths against `workingDirectory`. |
+| nested worker denial | Prepared, skipped on Sony | Worker-local nested `Worker` construction is denied by the limited module when native workers are available. |
 | parent stop/completion cleanup | Blocked | Stress cleanup tests fail before worker creation. |
 | sequential create/terminate stress | Blocked | 50-cycle stress cannot start. |
 | exception and timeout recovery | Blocked | Recovery tests fail before worker creation. |
@@ -165,7 +173,9 @@ Before reconsidering release opt-in status, add or prove:
 - `MessageChannel`, `MessagePort`, ArrayBuffer transfer detachment,
   transfer-list validation, DataCloneError-compatible message failures, and
   MessagePort cleanup counters;
-- worker-local denial of AutoJs bridge modules, Android/Java interop, `fs`, raw
+- worker-local scoped `fs`/`fs.promises` read/write behavior and path escape
+  denial;
+- worker-local denial of AutoJs bridge modules, Android/Java interop, raw
   network, `shell`, `child_process`, native addons, `vm`, inspector, and nested
   workers;
 - parent stop and script completion cleanup for active workers;

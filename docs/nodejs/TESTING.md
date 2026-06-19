@@ -754,6 +754,12 @@ typed array delivery, structured-clone-safe value checks, maximum message size,
 maximum queued messages, DataCloneError-compatible failures, and result-envelope
 MessagePort cleanup counters. The current Sony build still skips this runnable
 coverage through the same native-availability preflight.
+S7-27 adds the worker capability-isolation gate: worker-local
+`require("fs")` and `require("fs/promises")` expose only scoped read/write
+helpers rooted at the worker working directory, while `toast`, `accessibility`,
+`image`, `shell`, `java`, `inspector`, raw network, AutoJs bridge modules, and
+nested workers remain denied. The same native-availability preflight skips this
+coverage on the current Sony build.
 
 Current experimental worker_threads resource stress instrumentation:
 
