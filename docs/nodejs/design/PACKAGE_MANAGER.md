@@ -209,6 +209,7 @@ Outputs:
 
 - `app/build/nodejs/dependency-bundle/project/`
 - `app/build/nodejs/npm-ci-bundle/project/`
+- `app/build/nodejs/dependency-cache/<bundle-hash>/project/`
 - `app/build/reports/nodejs/dependencies/dependency-manifest.json`
 - `app/build/reports/nodejs/npm-ci/dependency-manifest.json`
 - `app/build/reports/nodejs/dependencies/dependency-size-report.txt`
@@ -218,5 +219,12 @@ The direct bundler task does not execute package code. The desktop-assisted npm 
 the project to a temporary host work directory, runs `npm ci --ignore-scripts --no-bin-links --install-links --no-audit
 --fund=false`, verifies `package.json` and `package-lock.json` were not mutated, rejects generated `.bin` entries, and
 then runs the same sanitizer. Both routes reject native addon files, lifecycle scripts, unsupported `.bin` entries,
-symlinks, path escapes, oversized files/packages/trees, excessive package counts, and default-profile ESM-only package
-metadata.
+symlinks, path escapes, unsupported package-manager layouts, oversized files/packages/trees, excessive package counts, and
+default-profile ESM-only package metadata.
+
+The dependency manifest records a normalized sanitized-project bundle hash and uses that hash as the content-addressed
+cache key. The hash covers `package.json`, optional `package-lock.json`, and `node_modules` file paths/content only; host
+working directories and cache paths are not part of the hash. Identical lockfiles and install options should therefore
+produce the same bundle hash. Package entries include package/version, integrity or content hash fallback, license,
+file count, total bytes, unsupported capability usage, and an AutoJs6 compatibility score. The SBOM-lite report mirrors
+the package identity, integrity, license, size, capability, and score fields for packaged APK review.

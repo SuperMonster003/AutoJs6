@@ -2,11 +2,13 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.security.MessageDigest
 
 private val nodeDependencyBundlerProjectRootProperty = "autojs.nodejs.bundle.projectRoot"
 private val nodeDependencyBundlerOutputDirProperty = "autojs.nodejs.bundle.outputDir"
 private val nodeDependencyBundlerReportDirProperty = "autojs.nodejs.bundle.reportDir"
+private val nodeDependencyBundlerCacheDirProperty = "autojs.nodejs.bundle.cacheDir"
 private val nodeDependencyBundlerMaxFileBytesProperty = "autojs.nodejs.bundle.maxFileBytes"
 private val nodeDependencyBundlerMaxPackageBytesProperty = "autojs.nodejs.bundle.maxPackageBytes"
 private val nodeDependencyBundlerMaxTotalBytesProperty = "autojs.nodejs.bundle.maxTotalBytes"
@@ -16,6 +18,7 @@ private val nodeDependencyNpmCiProjectRootProperty = "autojs.nodejs.npmCi.projec
 private val nodeDependencyNpmCiWorkDirProperty = "autojs.nodejs.npmCi.workDir"
 private val nodeDependencyNpmCiOutputDirProperty = "autojs.nodejs.npmCi.outputDir"
 private val nodeDependencyNpmCiReportDirProperty = "autojs.nodejs.npmCi.reportDir"
+private val nodeDependencyNpmCiCacheDirProperty = "autojs.nodejs.npmCi.cacheDir"
 private val nodeDependencyNpmCiExecutableProperty = "autojs.nodejs.npmCi.executable"
 
 private val nodeDependencyBundlerForbiddenScripts = setOf("preinstall", "install", "postinstall", "prepare")
@@ -45,6 +48,14 @@ private val nodeDependencyBundlerSuspiciousExecutableExtensions = setOf(
     "so",
 )
 private val nodeDependencyBundlerProtocolOrWindowsDrivePattern = Regex("^[A-Za-z][A-Za-z0-9+.-]*:")
+private val nodeDependencyBundlerCapabilityBuiltins = linkedMapOf(
+    "raw_network" to listOf("http", "https", "net", "tls", "dns", "dns/promises", "dgram"),
+    "child_process" to listOf("child_process"),
+    "worker_threads" to listOf("worker_threads"),
+    "vm" to listOf("vm"),
+    "inspector" to listOf("inspector"),
+    "java_interop" to listOf("java"),
+)
 
 private data class NodeDependencyBundlePolicy(
     val maxFileBytes: Long,
@@ -60,8 +71,12 @@ private data class NodeDependencyPackageInfo(
     val license: String,
     val relativePath: String,
     val packageJsonSha256: String,
+    val contentSha256: String,
+    val integrity: String,
     val fileCount: Int,
     val sizeBytes: Long,
+    val unsupportedCapabilities: List<String>,
+    val autoJs6CompatibilityScore: Int,
 )
 
 private data class NodeDependencyBundleIssue(
@@ -74,6 +89,7 @@ private data class NodeDependencyBundleScanResult(
     val packages: List<NodeDependencyPackageInfo>,
     val totalFiles: Int,
     val totalBytes: Long,
+    val bundleHash: String,
     val issues: List<NodeDependencyBundleIssue>,
 )
 
@@ -94,6 +110,57 @@ private fun File.nodeDependencyBundlerSha256(): String {
     }
     return digest.digest().joinToString("") { "%02x".format(it) }
 }
+
+private fun String.nodeDependencyBundlerSha256(): String =
+    MessageDigest.getInstance("SHA-256")
+        .digest(toByteArray(Charsets.UTF_8))
+        .joinToString("") { "%02x".format(it) }
+
+private fun nodeDependencyBundlerDigestTree(root: File, files: List<File>): String {
+    val rootFile = root.canonicalFile
+    val digest = MessageDigest.getInstance("SHA-256")
+    files
+        .map { file -> file.canonicalFile }
+        .sortedBy { file -> file.nodeDependencyBundlerRelativeTo(rootFile) }
+        .forEach { file ->
+            val relativePath = file.nodeDependencyBundlerRelativeTo(rootFile)
+            val fileHash = file.nodeDependencyBundlerSha256()
+            digest.update("file\u0000$relativePath\u0000${file.length()}\u0000$fileHash\n".toByteArray(Charsets.UTF_8))
+        }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+private fun nodeDependencyBundlerPackageContentSha256(packageDir: File): String {
+    if (!packageDir.isDirectory) {
+        return ""
+    }
+    val files = Files.walk(packageDir.toPath()).use { stream ->
+        stream
+            .filter { Files.isRegularFile(it, LinkOption.NOFOLLOW_LINKS) }
+            .map { it.toFile() }
+            .toList()
+    }
+    return nodeDependencyBundlerDigestTree(packageDir, files)
+}
+
+private fun nodeDependencyBundlerSanitizedProjectFiles(projectRoot: File): List<File> {
+    val files = mutableListOf<File>()
+    projectRoot.resolve("package.json").takeIf(File::isFile)?.let(files::add)
+    projectRoot.resolve("package-lock.json").takeIf(File::isFile)?.let(files::add)
+    val nodeModules = projectRoot.resolve("node_modules")
+    if (nodeModules.isDirectory) {
+        Files.walk(nodeModules.toPath()).use { stream ->
+            stream
+                .filter { Files.isRegularFile(it, LinkOption.NOFOLLOW_LINKS) }
+                .map { it.toFile() }
+                .forEach(files::add)
+        }
+    }
+    return files
+}
+
+private fun nodeDependencyBundlerSanitizedBundleHash(projectRoot: File): String =
+    nodeDependencyBundlerDigestTree(projectRoot, nodeDependencyBundlerSanitizedProjectFiles(projectRoot))
 
 private fun nodeDependencyBundlerHostExecutable(executable: String): String {
     val trimmed = executable.trim().ifBlank { "npm" }
@@ -237,6 +304,75 @@ private fun nodeDependencyBundlerAuditPackageJsonPathReferences(
 private fun nodeDependencyBundlerReadJsonObject(file: File): Map<*, *>? =
     runCatching { JsonSlurper().parse(file) as? Map<*, *> }.getOrNull()
 
+private fun nodeDependencyBundlerLockPackageEntries(projectRoot: File): Map<String, Map<*, *>> {
+    val lock = nodeDependencyBundlerReadJsonObject(projectRoot.resolve("package-lock.json")) ?: return emptyMap()
+    val packages = lock["packages"] as? Map<*, *> ?: return emptyMap()
+    return packages.mapNotNull { (key, value) ->
+        val path = key?.toString() ?: return@mapNotNull null
+        val entry = value as? Map<*, *> ?: return@mapNotNull null
+        path to entry
+    }.toMap()
+}
+
+private fun nodeDependencyBundlerUnsupportedCapabilities(packageDir: File, packageJson: Map<*, *>): List<String> {
+    val capabilities = linkedSetOf<String>()
+    val scripts = packageJson["scripts"] as? Map<*, *>
+    if (nodeDependencyBundlerForbiddenScripts.any { scripts?.containsKey(it) == true }) {
+        capabilities += "lifecycle_scripts"
+    }
+    if (packageJson["type"] == "module") {
+        capabilities += "esm_only"
+    }
+    if (packageJson.containsKey("bin")) {
+        capabilities += "bin_entries"
+    }
+
+    val requirePattern = Regex("""require\s*\(\s*["'](?:node:)?([^"']+)["']\s*\)""")
+    val importPattern = Regex("""(?:from|import)\s*["'](?:node:)?([^"']+)["']""")
+    val jsExtensions = setOf("js", "cjs", "mjs")
+    if (packageDir.isDirectory) {
+        Files.walk(packageDir.toPath()).use { stream ->
+            stream
+                .filter { Files.isRegularFile(it, LinkOption.NOFOLLOW_LINKS) }
+                .map { it.toFile() }
+                .filter { it.extension.lowercase() in jsExtensions }
+                .forEach { file ->
+                    val text = runCatching { file.readText() }.getOrDefault("")
+                    if (text.contains("process.binding") || text.contains("process.dlopen")) {
+                        capabilities += "native_process_api"
+                    }
+                    (requirePattern.findAll(text).map { it.groupValues[1] } +
+                            importPattern.findAll(text).map { it.groupValues[1] })
+                        .forEach { moduleName ->
+                            nodeDependencyBundlerCapabilityBuiltins.forEach { (capability, modules) ->
+                                if (moduleName in modules) {
+                                    capabilities += capability
+                                }
+                            }
+                        }
+                    if (text.contains(".node")) {
+                        capabilities += "native_addon"
+                    }
+                }
+        }
+    }
+    return capabilities.sorted()
+}
+
+private fun nodeDependencyBundlerCompatibilityScore(
+    packageInfoIssues: Int,
+    unsupportedCapabilities: List<String>,
+    license: String,
+): Int {
+    var score = 100
+    score -= unsupportedCapabilities.size * 15
+    score -= packageInfoIssues * 20
+    if (license.isBlank()) {
+        score -= 5
+    }
+    return score.coerceIn(0, 100)
+}
+
 private fun nodeDependencyBundlerPackageSize(packageDir: File): Pair<Int, Long> {
     var count = 0
     var bytes = 0L
@@ -280,6 +416,7 @@ private fun scanNodeDependencyBundle(projectRoot: File, policy: NodeDependencyBu
     val root = projectRoot.canonicalFile
     val rootPackageJson = root.resolve("package.json")
     val nodeModules = root.resolve("node_modules")
+    val packageLockEntries = nodeDependencyBundlerLockPackageEntries(root)
     val issues = mutableListOf<NodeDependencyBundleIssue>()
     val packages = mutableListOf<NodeDependencyPackageInfo>()
 
@@ -294,13 +431,33 @@ private fun scanNodeDependencyBundle(projectRoot: File, policy: NodeDependencyBu
     if (!nodeModules.isDirectory) {
         issue("NODE_MODULES_MISSING", nodeModules, "Project root must contain node_modules.")
     }
-    if (issues.isNotEmpty()) {
-        return NodeDependencyBundleScanResult(emptyList(), 0, 0L, issues)
+    val missingRequiredInputIssues = issues.size
+    listOf(".pnp.cjs", ".pnp.loader.mjs", ".yarn/install-state.gz").forEach { relativePath ->
+        val marker = root.resolve(relativePath)
+        if (marker.exists()) {
+            issue("UNSUPPORTED_PACKAGE_MANAGER_LAYOUT", marker, "Yarn Plug'n'Play/package-manager layout is not supported.")
+        }
+    }
+    listOf(".pnpm", ".store").forEach { relativePath ->
+        val marker = nodeModules.resolve(relativePath)
+        if (marker.exists()) {
+            issue("UNSUPPORTED_PACKAGE_MANAGER_LAYOUT", marker, "Non-flat package-manager node_modules layout is not supported.")
+        }
+    }
+    if (missingRequiredInputIssues > 0) {
+        return NodeDependencyBundleScanResult(
+            emptyList(),
+            0,
+            0L,
+            bundleHash = runCatching { nodeDependencyBundlerSanitizedBundleHash(root) }.getOrDefault(""),
+            issues = issues,
+        )
     }
 
     var totalFiles = 0
     var totalBytes = 0L
     fun auditPackageJson(packageJson: File, includePackageInfo: Boolean) {
+        val packageIssueStart = issues.size
         val json = nodeDependencyBundlerReadJsonObject(packageJson)
         if (json == null) {
             issue("PACKAGE_JSON_INVALID", packageJson, "Unable to parse package.json.")
@@ -326,14 +483,26 @@ private fun scanNodeDependencyBundle(projectRoot: File, policy: NodeDependencyBu
         if (sizeBytes > policy.maxPackageBytes) {
             issue("PACKAGE_SIZE_LIMIT", packageDir, "Package exceeds maxPackageBytes=${policy.maxPackageBytes}.")
         }
+        val relativePath = packageDir.nodeDependencyBundlerRelativeTo(root)
+        val contentSha256 = nodeDependencyBundlerPackageContentSha256(packageDir)
+        val lockIntegrity = packageLockEntries[relativePath]?.get("integrity")?.toString()?.takeIf(String::isNotBlank)
+        val unsupportedCapabilities = nodeDependencyBundlerUnsupportedCapabilities(packageDir, json)
         packages += NodeDependencyPackageInfo(
             name = json["name"]?.toString().orEmpty(),
             version = json["version"]?.toString().orEmpty(),
             license = json["license"]?.toString().orEmpty(),
-            relativePath = packageDir.nodeDependencyBundlerRelativeTo(root),
+            relativePath = relativePath,
             packageJsonSha256 = packageJson.nodeDependencyBundlerSha256(),
+            contentSha256 = contentSha256,
+            integrity = lockIntegrity ?: "sha256:$contentSha256",
             fileCount = fileCount,
             sizeBytes = sizeBytes,
+            unsupportedCapabilities = unsupportedCapabilities,
+            autoJs6CompatibilityScore = nodeDependencyBundlerCompatibilityScore(
+                packageInfoIssues = issues.size - packageIssueStart,
+                unsupportedCapabilities = unsupportedCapabilities,
+                license = json["license"]?.toString().orEmpty(),
+            ),
         )
     }
 
@@ -400,6 +569,7 @@ private fun scanNodeDependencyBundle(projectRoot: File, policy: NodeDependencyBu
         packages = packages.sortedBy { it.relativePath },
         totalFiles = totalFiles,
         totalBytes = totalBytes,
+        bundleHash = nodeDependencyBundlerSanitizedBundleHash(root),
         issues = issues,
     )
 }
@@ -411,12 +581,27 @@ private fun writeNodeDependencyBundleReports(
     policy: NodeDependencyBundlePolicy,
     scan: NodeDependencyBundleScanResult,
     installMetadata: Map<String, Any?> = emptyMap(),
+    cacheInfo: Map<String, Any?> = emptyMap(),
 ) {
     reportDir.mkdirs()
+    val capabilitySummary = scan.packages
+        .flatMap { pkg -> pkg.unsupportedCapabilities }
+        .groupingBy { it }
+        .eachCount()
+        .toSortedMap()
+    val compatibilityScore = scan.packages
+        .map { it.autoJs6CompatibilityScore }
+        .minOrNull()
+        ?: 100
     val manifest = linkedMapOf<String, Any?>(
         "schema" to "autojs6-node-dependency-bundle-v1",
         "projectRoot" to projectRoot.canonicalPath,
         "sanitizedBundle" to bundleDir.canonicalPath,
+        "bundle" to linkedMapOf(
+            "hashAlgorithm" to "sha256-normalized-sanitized-project-v1",
+            "hash" to scan.bundleHash,
+        ),
+        "cache" to cacheInfo.takeIf { it.isNotEmpty() },
         "policy" to linkedMapOf(
             "maxFileBytes" to policy.maxFileBytes,
             "maxPackageBytes" to policy.maxPackageBytes,
@@ -437,6 +622,11 @@ private fun writeNodeDependencyBundleReports(
             "files" to scan.totalFiles,
             "bytes" to scan.totalBytes,
         ),
+        "unsupportedCapabilityUsage" to capabilitySummary,
+        "autoJs6Compatibility" to linkedMapOf(
+            "score" to compatibilityScore,
+            "packageScoreMode" to "minimum",
+        ),
         "packages" to scan.packages.map {
             linkedMapOf(
                 "name" to it.name,
@@ -444,8 +634,12 @@ private fun writeNodeDependencyBundleReports(
                 "license" to it.license,
                 "relativePath" to it.relativePath,
                 "packageJsonSha256" to it.packageJsonSha256,
+                "contentSha256" to it.contentSha256,
+                "integrity" to it.integrity,
                 "fileCount" to it.fileCount,
                 "sizeBytes" to it.sizeBytes,
+                "unsupportedCapabilities" to it.unsupportedCapabilities,
+                "autoJs6CompatibilityScore" to it.autoJs6CompatibilityScore,
             )
         },
         "issues" to scan.issues.map {
@@ -468,14 +662,18 @@ private fun writeNodeDependencyBundleReports(
             "files" to scan.totalFiles,
             "bytes" to scan.totalBytes,
         ),
+        "bundleHash" to scan.bundleHash,
         "packages" to scan.packages.map {
             linkedMapOf(
                 "name" to it.name,
                 "version" to it.version,
+                "integrity" to it.integrity,
                 "license" to it.license.ifBlank { "UNKNOWN" },
                 "fileCount" to it.fileCount,
                 "totalSizeBytes" to it.sizeBytes,
                 "relativePath" to it.relativePath,
+                "unsupportedCapabilities" to it.unsupportedCapabilities,
+                "autoJs6CompatibilityScore" to it.autoJs6CompatibilityScore,
             )
         },
     )
@@ -485,11 +683,17 @@ private fun writeNodeDependencyBundleReports(
             appendLine("AutoJs6 Node Dependency Bundle Size Report")
             appendLine("projectRoot=${projectRoot.canonicalPath}")
             appendLine("sanitizedBundle=${bundleDir.canonicalPath}")
+            appendLine("bundleHash=${scan.bundleHash}")
+            appendLine("cacheKey=${cacheInfo["cacheKey"] ?: "unavailable"}")
             appendLine("packages=${scan.packages.size}")
             appendLine("files=${scan.totalFiles}")
             appendLine("bytes=${scan.totalBytes}")
             scan.packages.forEach { pkg ->
-                appendLine("${pkg.relativePath} files=${pkg.fileCount} bytes=${pkg.sizeBytes} license=${pkg.license.ifBlank { "unknown" }}")
+                appendLine(
+                    "${pkg.relativePath} files=${pkg.fileCount} bytes=${pkg.sizeBytes} " +
+                            "license=${pkg.license.ifBlank { "unknown" }} score=${pkg.autoJs6CompatibilityScore} " +
+                            "integrity=${pkg.integrity}"
+                )
             }
         }
     )
@@ -529,6 +733,22 @@ private fun verifyNodeDependencyBundlerPackagedLayout(
     ) {
         throw GradleException("Dependency manifest does not record a sanitized packaged APK layout: $packagedLayout")
     }
+    val bundle = manifest["bundle"] as? Map<*, *>
+    val bundleHash = bundle?.get("hash")?.toString().orEmpty()
+    if (bundleHash.isBlank()) {
+        throw GradleException("Dependency manifest does not record a deterministic bundle hash: $bundle")
+    }
+    if (bundleHash != scan.bundleHash) {
+        throw GradleException("Dependency bundle hash mismatch. manifest=$bundleHash actual=${scan.bundleHash}")
+    }
+    val cache = manifest["cache"] as? Map<*, *>
+    if (cache?.get("cacheKey") != bundleHash) {
+        throw GradleException("Dependency manifest cache key does not match bundle hash: $cache")
+    }
+    val cacheProjectDir = cache?.get("projectDir")?.toString()?.let(::File)
+    if (cacheProjectDir?.isDirectory != true) {
+        throw GradleException("Dependency cache project directory is missing: ${cacheProjectDir?.absolutePath}")
+    }
     val sbom = nodeDependencyBundlerReadJsonObject(sbomFile)
     if (sbom?.get("schema") != "autojs6-node-dependency-sbom-lite-v1") {
         throw GradleException("Dependency SBOM-lite schema missing or invalid: ${sbom?.get("schema")}")
@@ -536,6 +756,70 @@ private fun verifyNodeDependencyBundlerPackagedLayout(
     val packages = sbom["packages"] as? List<*>
     if (packages.isNullOrEmpty()) {
         throw GradleException("Dependency SBOM-lite must list bundled packages.")
+    }
+    val manifestPackages = manifest["packages"] as? List<*>
+    if (manifestPackages.isNullOrEmpty()) {
+        throw GradleException("Dependency manifest must list bundled packages.")
+    }
+    manifestPackages.forEach { entry ->
+        val pkg = entry as? Map<*, *> ?: throw GradleException("Dependency manifest package entry is invalid: $entry")
+        if (pkg["integrity"]?.toString().isNullOrBlank() ||
+            pkg["contentSha256"]?.toString().isNullOrBlank() ||
+            pkg["autoJs6CompatibilityScore"] !is Number ||
+            pkg["unsupportedCapabilities"] !is List<*>
+        ) {
+            throw GradleException("Dependency manifest package entry is missing S7-40 fields: $pkg")
+        }
+    }
+}
+
+private fun copyNodeDependencyBundlerSanitizedProject(sourceRoot: File, bundleDir: File) {
+    bundleDir.deleteRecursively()
+    bundleDir.mkdirs()
+    project.copy {
+        from(sourceRoot.resolve("node_modules"))
+        into(bundleDir.resolve("node_modules"))
+        includeEmptyDirs = false
+    }
+    sourceRoot.resolve("package.json").copyTo(bundleDir.resolve("package.json"), overwrite = true)
+    sourceRoot.resolve("package-lock.json")
+        .takeIf(File::isFile)
+        ?.copyTo(bundleDir.resolve("package-lock.json"), overwrite = true)
+}
+
+private fun nodeDependencyBundlerCacheInfo(cacheRoot: File, scan: NodeDependencyBundleScanResult): Map<String, Any?> {
+    val cacheProjectDir = cacheRoot.resolve(scan.bundleHash).resolve("project")
+    return linkedMapOf(
+        "enabled" to true,
+        "cacheKey" to scan.bundleHash,
+        "cacheRoot" to cacheRoot.absolutePath,
+        "projectDir" to cacheProjectDir.absolutePath,
+        "hit" to cacheProjectDir.isDirectory,
+    )
+}
+
+private fun writeNodeDependencyBundlerCache(
+    projectRoot: File,
+    cacheRoot: File,
+    scan: NodeDependencyBundleScanResult,
+) {
+    if (scan.bundleHash.isBlank()) {
+        return
+    }
+    val cacheEntryDir = cacheRoot.resolve(scan.bundleHash)
+    val cacheProjectDir = cacheEntryDir.resolve("project")
+    if (!cacheProjectDir.isDirectory) {
+        copyNodeDependencyBundlerSanitizedProject(projectRoot, cacheProjectDir)
+        cacheEntryDir.resolve("cache-metadata.json").writeText(
+            nodeDependencyBundlerJson(
+                linkedMapOf(
+                    "schema" to "autojs6-node-dependency-cache-entry-v1",
+                    "cacheKey" to scan.bundleHash,
+                    "bundleHash" to scan.bundleHash,
+                    "hashAlgorithm" to "sha256-normalized-sanitized-project-v1",
+                )
+            ) + "\n"
+        )
     }
 }
 
@@ -553,10 +837,14 @@ val bundleNodeDependencies = tasks.register("bundleNodeDependencies") {
     val reportDirProvider = providers.gradleProperty(nodeDependencyBundlerReportDirProperty)
         .map(::File)
         .orElse(layout.buildDirectory.dir("reports/nodejs/dependencies").map { it.asFile })
+    val cacheDirProvider = providers.gradleProperty(nodeDependencyBundlerCacheDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("nodejs/dependency-cache").map { it.asFile })
 
     inputs.dir(projectRootProvider)
     outputs.dir(outputDirProvider)
     outputs.dir(reportDirProvider)
+    outputs.dir(cacheDirProvider)
     outputs.upToDateWhen { false }
 
     doLast {
@@ -564,24 +852,20 @@ val bundleNodeDependencies = tasks.register("bundleNodeDependencies") {
         val outputDir = outputDirProvider.get().canonicalFile
         val bundleDir = outputDir.resolve("project")
         val reportDir = reportDirProvider.get().canonicalFile
+        val cacheDir = cacheDirProvider.get().canonicalFile
         val policy = nodeDependencyBundlerPolicy()
         val scan = scanNodeDependencyBundle(projectRoot, policy)
+        val cacheInfo = nodeDependencyBundlerCacheInfo(cacheDir, scan)
 
-        writeNodeDependencyBundleReports(projectRoot, bundleDir, reportDir, policy, scan)
+        writeNodeDependencyBundleReports(projectRoot, bundleDir, reportDir, policy, scan, cacheInfo = cacheInfo)
         if (scan.issues.isNotEmpty()) {
             throw GradleException(
                 "Node dependency bundle rejected ${scan.issues.size} issue(s). See ${reportDir.resolve("dependency-rejections.txt").absolutePath}"
             )
         }
 
-        bundleDir.deleteRecursively()
-        bundleDir.mkdirs()
-        project.copy {
-            from(projectRoot.resolve("node_modules"))
-            into(bundleDir.resolve("node_modules"))
-            includeEmptyDirs = false
-        }
-        projectRoot.resolve("package.json").copyTo(bundleDir.resolve("package.json"), overwrite = true)
+        copyNodeDependencyBundlerSanitizedProject(projectRoot, bundleDir)
+        writeNodeDependencyBundlerCache(projectRoot, cacheDir, scan)
         logger.lifecycle("Sanitized Node dependency bundle written to ${bundleDir.absolutePath}")
         logger.lifecycle("Node dependency manifest written to ${reportDir.resolve("dependency-manifest.json").absolutePath}")
     }
@@ -604,11 +888,15 @@ val prepareNodeNpmCiDependencies = tasks.register("prepareNodeNpmCiDependencies"
     val reportDirProvider = providers.gradleProperty(nodeDependencyNpmCiReportDirProperty)
         .map(::File)
         .orElse(layout.buildDirectory.dir("reports/nodejs/npm-ci").map { it.asFile })
+    val cacheDirProvider = providers.gradleProperty(nodeDependencyNpmCiCacheDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("nodejs/dependency-cache").map { it.asFile })
     val npmExecutableProvider = providers.gradleProperty(nodeDependencyNpmCiExecutableProperty).orElse("npm")
 
     inputs.dir(projectRootProvider)
     outputs.dir(outputDirProvider)
     outputs.dir(reportDirProvider)
+    outputs.dir(cacheDirProvider)
     outputs.upToDateWhen { false }
 
     doLast {
@@ -663,13 +951,22 @@ val prepareNodeNpmCiDependencies = tasks.register("prepareNodeNpmCiDependencies"
         val outputDir = outputDirProvider.get().canonicalFile
         val bundleDir = outputDir.resolve("project")
         val reportDir = reportDirProvider.get().canonicalFile
+        val cacheDir = cacheDirProvider.get().canonicalFile
         val policy = nodeDependencyBundlerPolicy()
         val scan = scanNodeDependencyBundle(workDir, policy)
+        val cacheInfo = nodeDependencyBundlerCacheInfo(cacheDir, scan)
         val installMetadata = linkedMapOf<String, Any?>(
             "manager" to "npm",
             "managerVersion" to npmVersion,
             "command" to "npm ${npmArgs.joinToString(" ")}",
             "flags" to npmArgs.drop(1),
+            "installOptionsSha256" to nodeDependencyBundlerJson(
+                linkedMapOf(
+                    "packageJsonSha256" to packageJsonHashBefore,
+                    "packageLockSha256" to lockHashBefore,
+                    "flags" to npmArgs.drop(1),
+                )
+            ).nodeDependencyBundlerSha256(),
             "sourceProjectRoot" to sourceRoot.canonicalPath,
             "workDir" to workDir.canonicalPath,
             "packageJsonSha256" to packageJsonHashBefore,
@@ -679,7 +976,15 @@ val prepareNodeNpmCiDependencies = tasks.register("prepareNodeNpmCiDependencies"
             "binLinksDisabled" to true,
             "fileDependenciesInstalledAsCopies" to true,
         )
-        writeNodeDependencyBundleReports(workDir, bundleDir, reportDir, policy, scan, installMetadata)
+        writeNodeDependencyBundleReports(
+            workDir,
+            bundleDir,
+            reportDir,
+            policy,
+            scan,
+            installMetadata,
+            cacheInfo,
+        )
         if (scan.issues.isNotEmpty()) {
             throw GradleException(
                 "Desktop npm ci dependency bundle rejected ${scan.issues.size} issue(s). " +
@@ -687,15 +992,8 @@ val prepareNodeNpmCiDependencies = tasks.register("prepareNodeNpmCiDependencies"
             )
         }
 
-        bundleDir.deleteRecursively()
-        bundleDir.mkdirs()
-        project.copy {
-            from(workDir.resolve("node_modules"))
-            into(bundleDir.resolve("node_modules"))
-            includeEmptyDirs = false
-        }
-        workPackageJson.copyTo(bundleDir.resolve("package.json"), overwrite = true)
-        workLockFile.copyTo(bundleDir.resolve("package-lock.json"), overwrite = true)
+        copyNodeDependencyBundlerSanitizedProject(workDir, bundleDir)
+        writeNodeDependencyBundlerCache(workDir, cacheDir, scan)
         logger.lifecycle("Desktop npm ci sanitized bundle written to ${bundleDir.absolutePath}")
         logger.lifecycle("Desktop npm ci dependency manifest written to ${reportDir.resolve("dependency-manifest.json").absolutePath}")
     }
@@ -774,7 +1072,9 @@ val verifyNodeDependencyBundlerFixtures = tasks.register("verifyNodeDependencyBu
         unsafeRoot.deleteRecursively()
         unsafeRoot.resolve("node_modules/unsafe-package").mkdirs()
         unsafeRoot.resolve("node_modules/.bin").mkdirs()
+        unsafeRoot.resolve("node_modules/.pnpm").mkdirs()
         unsafeRoot.resolve("package.json").writeText("""{"name":"unsafe-root","version":"1.0.0"}""" + "\n")
+        unsafeRoot.resolve(".pnp.cjs").writeText("// unsupported package manager layout\n")
         unsafeRoot.resolve("node_modules/unsafe-package/package.json").writeText(
             """
             {
@@ -821,6 +1121,7 @@ val verifyNodeDependencyBundlerFixtures = tasks.register("verifyNodeDependencyBu
             "SUSPICIOUS_EXECUTABLE_UNSUPPORTED",
             "PACKAGE_ABSOLUTE_PATH_REFERENCE",
             "PACKAGE_PATH_ESCAPE_REFERENCE",
+            "UNSUPPORTED_PACKAGE_MANAGER_LAYOUT",
         )
         val missingCodes = requiredCodes - rejectionCodes
         if (missingCodes.isNotEmpty()) {
