@@ -149,9 +149,13 @@ plugins.install("org.example.demo", {
 const info = plugins.manifest("org.example.demo");
 const entryPath = plugins.resolve("org.example.demo", "helper");
 const demo = plugins.load("org.example.demo");
+plugins.start("org.example.demo");
+const status = plugins.status("org.example.demo");
+plugins.stop("org.example.demo");
 plugins.disable("org.example.demo");
 plugins.enable("org.example.demo");
 plugins.unload("org.example.demo");
+plugins.reload("org.example.demo", { debug: true });
 ```
 
 The manager registers only project-local directories under `./plugins/<id>`.
@@ -168,11 +172,22 @@ are exposed.
 Only `.js` and `.cjs` plugin entries are accepted. Plugin-relative `require()`
 uses the plugin directory as its resolver root, so plugin code cannot use
 relative package resolution to escape into sibling project files.
+Each plugin receives a path-rooted namespace such as
+`plugin:org.example.demo`, an explicit effective capability subset, and
+`load`/`start`/`stop`/`unload` state. `plugins.start(id)` calls
+`exports.start(ctx)` when present; `plugins.stop(id)` calls
+`exports.stop(ctx)` when present and then releases resources registered through
+`ctx.resources`. The resource registry owns timers and explicitly tracked
+`provider`, `ui`, `socket`, `image`, and `generic` handles for the current
+plugin execution. `plugins.reload(id, { debug: true })` is an explicit
+debug-only hot reload path; calls without `debug: true` reject with
+`ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`.
 `install()` does not download, copy, or persist packages; it validates and
 registers an already-present sanitized local package for the current execution.
-`disable()` blocks future loads and unloads cached plugin modules. This is a
-local JS-only manager, not a signed archive verifier, Android plugin adapter,
-packaged APK plugin runtime, native provider model, or isolated process/context.
+`disable()` blocks future loads, stops the plugin if needed, releases owned
+resources, and unloads cached plugin modules. This is a local JS-only manager,
+not a signed archive verifier, Android plugin adapter, packaged APK plugin
+runtime, native provider model, or isolated process/context.
 
 ## Execution Queue
 
@@ -247,6 +262,7 @@ Unsupported or rejected module source forms:
   plugin-requested capabilities
 - plugin entry paths that are absolute, protocol-based, NUL-containing, or
   escape the plugin directory
+- `plugins.reload(id)` unless `options.debug === true`
 - static ESM import execution only from ESM entries and ESM graph modules
 - dynamic import from `eval`, `Function`, URL/protocol specifiers, absolute paths, or outside `workingDirectory`
 - package export/import targets that escape the package root

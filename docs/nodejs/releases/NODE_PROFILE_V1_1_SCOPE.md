@@ -70,7 +70,7 @@ small set of already-gated features toward practical use.
 | Accessibility selector v2 | partial | `require("accessibility")` expands selector descriptors with regex, clickable/enabled, depth, and bounds fields plus selector actions for click, long-click, set-text, and scroll while keeping JSON-only snapshots, explicit `accessibility` capability checks, and an optional live controlled-Activity smoke when the service is pre-enabled. |
 | Shell controls | partial | `require("shell")` remains the only child_process alternative and adds `execFile`, `checkAccess`, and `setDefaultTimeout` over the same controlled `exec` bridge while keeping Shizuku unsupported. |
 | Work Manager scheduling | partial | `require("work_manager")` registers controlled one-shot and bounded periodic scheduled work for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`, stores embedded backend plus `scriptPath`/project `entry` metadata, supports packaged entry descriptors, records Android 16 quota diagnostics, and launches scoped CJS/ESM embedded Node work through AndroidX WorkManager's dedicated `scheduled_runner` surface without exposing raw scheduler authority. Task records expose `lastRun` and bounded `runHistory`. |
-| Plugin system | JS-only manager v1 | `require("plugins")` registers and loads project-local `./plugins/<id>` CommonJS plugins with `autojs6.plugin.permissions`, dependency declarations, named JS module exports, in-execution enable/disable/config/version/unload/list, exact `plugin.<id>` project opt-in, `.node` rejection, and plugin entry path escape denial; download installers, signatures, native plugins, Android plugin adapters, update channels, and packaged plugin runtime stay gated. |
+| Plugin system | JS-only lifecycle manager | `require("plugins")` registers and loads project-local `./plugins/<id>` CommonJS plugins with `autojs6.plugin.permissions`, dependency declarations, named JS module exports, in-execution enable/disable/config/version/status/capabilities/start/stop/unload/list/reload, exact `plugin.<id>` project opt-in, path-rooted namespace metadata, plugin-owned timer/provider/UI/socket/image resource cleanup on stop, debug-only reload, `.node` rejection, and plugin entry path escape denial; download installers, signatures, native plugins, Android plugin adapters, update channels, and packaged plugin runtime stay gated. |
 | Developer REPL | developer-only partial | `NodeDeveloperRepl` provides a debug-build-only programmatic line-eval session with an isolated temporary `workingDirectory`, normal Safe Node builtin policy, default bridge deny-by-default manifest, and cleanup on close. |
 | Project wizard / validator | developer tooling partial | `tools/nodejs/project/autojs6-node-project.js` generates CommonJS, ESM, automation, screenshot/OCR, and network starter projects, then validates project metadata, entry files, permissions, module type, and sanitized dependency bundles with actionable error codes. |
 | Execution queue policy | partial | Embedded Node remains one active execution per `:nodejs_embedded` process; explicit caller-side enqueue supports one queued execution, queue status, cancellation, queue timeout, and stable busy/full/timeout/cancelled errors. |
@@ -175,10 +175,12 @@ small set of already-gated features toward practical use.
   no implicit retry, and `tasks`/raw scheduler denial.
 - Plugin system smoke passes for reserved `require("plugins")`,
   project-local safe plugin loading, manager install/enable/disable/config/
-  version/dependencies/exports/unload/list, exact `plugin.<id>` opt-in,
-  plugin requested-permission denial before code execution, `.node` rejection,
-  plugin entry path escape denial, `node_modules/plugins` shadow denial, and
-  TypeScript declarations.
+  version/dependencies/exports/status/capabilities/start/stop/unload/list/
+  reload, exact `plugin.<id>` opt-in, plugin requested-permission denial before
+  code execution, namespace metadata, plugin-owned resource cleanup on stop,
+  debug-only reload denial/allow path, `.node` rejection, plugin entry path
+  escape denial, `node_modules/plugins` shadow denial, and TypeScript
+  declarations.
 - Developer REPL smoke passes for debug-build availability, expression eval,
   console capture, allowed `path` builtin require, `child_process` denial,
   default bridge deny-by-default behavior, explicit bridge capability opt-in,

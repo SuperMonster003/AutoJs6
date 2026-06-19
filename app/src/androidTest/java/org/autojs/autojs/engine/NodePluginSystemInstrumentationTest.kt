@@ -334,6 +334,131 @@ class NodePluginSystemInstrumentationTest {
         }
     }
 
+    @Test
+    fun pluginLifecycleResourcesAndDebugReload() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node JS-only plugin lifecycle manager")
+        val workDir = freshWorkDir("node-plugin-lifecycle")
+        try {
+            writePlugin(
+                workDir = workDir,
+                id = "org.example.lifecycle",
+                permissions = listOf("toast"),
+                source = """
+                    let starts = 0;
+                    let stops = 0;
+                    const closed = [];
+                    exports.start = function(ctx) {
+                      starts += 1;
+                      ctx.resources.setInterval(function() {
+                        globalThis.__autojs6LifecyclePluginTick = (globalThis.__autojs6LifecyclePluginTick || 0) + 1;
+                      }, 1000);
+                      ctx.resources.track("provider", { close: function() { closed.push("provider"); } });
+                      ctx.resources.track("ui", { close: function() { closed.push("ui"); } });
+                      ctx.resources.track("socket", { close: function() { closed.push("socket"); } });
+                      ctx.resources.track("image", { recycle: function() { closed.push("image"); } });
+                      ctx.resources.addCleanup(function() { closed.push("generic"); });
+                      globalThis.__autojs6LifecycleContext = [
+                        ctx.id,
+                        ctx.namespace,
+                        ctx.owner,
+                        ctx.phase,
+                        ctx.config.mode,
+                        ctx.capabilities.join(","),
+                        ctx.permissions.join(",")
+                      ].join(";");
+                    };
+                    exports.stop = function(ctx) {
+                      stops += 1;
+                      closed.push("stop:" + ctx.phase);
+                    };
+                    exports.state = function() {
+                      return {
+                        starts,
+                        stops,
+                        closed: closed.slice().sort().join(","),
+                        context: globalThis.__autojs6LifecycleContext || ""
+                      };
+                    };
+                """.trimIndent(),
+            )
+            val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(
+                listOf("plugin.org.example.lifecycle", "toast"),
+            )
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const plugins = require("plugins");
+                    plugins.install("org.example.lifecycle", {
+                      source: "./plugins/org.example.lifecycle",
+                      config: { mode: "lifecycle" }
+                    });
+                    const startStatus = plugins.start("org.example.lifecycle");
+                    const runningStatus = plugins.status("org.example.lifecycle");
+                    const loaded = plugins.load("org.example.lifecycle");
+                    const beforeStop = loaded.state();
+                    const stopStatus = plugins.stop("org.example.lifecycle");
+                    const afterStop = loaded.state();
+                    let reloadDenied = "";
+                    try {
+                      plugins.reload("org.example.lifecycle");
+                    } catch (error) {
+                      reloadDenied = error.code;
+                    }
+                    const reloaded = plugins.reload("org.example.lifecycle", { debug: true });
+                    const reloadStatus = plugins.status("org.example.lifecycle");
+                    const restarted = plugins.start("org.example.lifecycle");
+                    const afterRestart = plugins.load("org.example.lifecycle").state();
+                    const unloaded = plugins.unload("org.example.lifecycle");
+                    const finalStatus = plugins.status("org.example.lifecycle");
+                    console.log("plugins.lifecycle=" + [
+                      startStatus.state,
+                      startStatus.started,
+                      runningStatus.resources.total,
+                      runningStatus.resources.timers,
+                      runningStatus.resources.providers,
+                      runningStatus.resources.ui,
+                      runningStatus.resources.sockets,
+                      runningStatus.resources.images,
+                      plugins.capabilities("org.example.lifecycle").join(","),
+                      beforeStop.starts,
+                      beforeStop.context,
+                      stopStatus.state,
+                      stopStatus.started,
+                      stopStatus.resources.total,
+                      afterStop.stops,
+                      afterStop.closed,
+                      reloadDenied,
+                      reloaded.reloadCount,
+                      reloadStatus.loaded,
+                      restarted.state,
+                      restarted.startCount,
+                      afterRestart.starts,
+                      unloaded,
+                      finalStatus.loaded,
+                      finalStatus.started,
+                      finalStatus.resources.total
+                    ].join("|"));
+                """.trimIndent(),
+                sourceName = File(workDir, "main.js").absolutePath,
+                workingDirectory = workDir,
+                runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("Node JS-only plugin lifecycle manager", result)
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "plugins.lifecycle=started|true|6|1|1|1|1|1|plugin.org.example.lifecycle,toast|1|" +
+                            "org.example.lifecycle;plugin:org.example.lifecycle;plugin:org.example.lifecycle;start;lifecycle;plugin.org.example.lifecycle,toast;toast|" +
+                            "stopped|false|0|1|generic,image,provider,socket,stop:stop,ui|" +
+                            "${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|1|false|started|1|1|true|false|false|0",
+                ),
+            )
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
     private fun freshWorkDir(name: String): File =
         File(context.cacheDir, "$name-${System.nanoTime()}").apply {
             deleteRecursively()

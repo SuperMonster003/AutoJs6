@@ -348,6 +348,21 @@ When the live transport configuration is absent, such as in older packaged inrt 
 
 Any provider-owned resource created through the bridge must be registered with the current execution id before JavaScript receives or depends on its handle. Registry records include an id, type, creation timestamp, owner execution id, metadata, and an idempotent close/recycle callback. On execution stop or service destroy, the provider closes all remaining registry entries, clears stale handle maps, and logs a leaked-resource summary through `embedded_script.bridge_resource.*` diagnostics. Current live registrations cover controlled fetch calls, controlled WebSocket sessions, shell executions, WorkManager-backed `work_manager` task registrations, notifications owned by the current Node execution, bounded sensor subscriptions, and experimental Java object handles; image handles, screen capturers, dialogs, UI sessions, and workers must use the same registry and limit policy when their Android providers become live.
 
+The JS-only plugin manager has a separate per-plugin owner registry for
+resources that plugin lifecycle code explicitly registers through
+`ctx.resources`. It tracks timers plus provider/UI/socket/image/generic handles
+inside the current Node execution and releases them on `plugins.stop()`,
+`plugins.unload()`, and `plugins.disable()`. This registry is not a substitute
+for Android provider-owned bridge resources: real provider handles must still be
+registered and audited by the bridge provider before crossing into JavaScript.
+Plugin lifecycle contexts expose only the effective capability subset
+(`plugin.<id>` plus plugin-requested permissions), frozen JSON config, namespace
+metadata, and registry helpers; they do not expose raw `Context`, `Activity`,
+`View`, Binder, filesystem authority, Java objects, native pointers, sockets,
+or unrestricted Node builtins. Debug hot reload remains explicit through
+`plugins.reload(id, { debug: true })` and cannot be invoked as the default
+release lifecycle path.
+
 The `app` bridge exposes JSON-only intent descriptors and read-only package metadata. It does not expose raw Android `Intent`, `Context`, `PackageManager`, or `Activity` objects to JavaScript. Invalid intent descriptors must fail with a stable bridge policy error.
 
 The `engines` bridge exposes only serialized engine and execution snapshots. It does not expose raw `ScriptEngine`, `ScriptExecution`, `ScriptRuntime`, thread, or process control objects. `execScript()` and `execScriptFile()` are routed through a non-exported main-process dispatch service so script startup still goes through AutoJs6's script manager rather than the isolated Node service process. Spawning requires an explicit `timeoutMs`, scoped `cwd`/path validation, JSON-primitive arguments, and a bounded spawn depth. Nested embedded Node child scripts are rejected until multi-instance embedded lifecycle ownership is designed. `execAutoFile` remains unsupported in the Safe Node Profile.

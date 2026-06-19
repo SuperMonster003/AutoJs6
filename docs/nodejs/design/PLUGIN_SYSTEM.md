@@ -1,10 +1,13 @@
 # Node Plugin System JS-Only Manager
 
-Status: S7-42 implements a local JS-only manager through `require("plugins")`.
+Status: S7-43 implements a local JS-only manager through `require("plugins")`.
 `plugins.install(id, options?)` registers an already-present sanitized package
-under `./plugins/<id>` for the current execution only. There is still no
-download installer, signed archive verifier, update channel, Android plugin
-adapter, native provider, native plugin loader, or packaged APK plugin runtime.
+under `./plugins/<id>` for the current execution only. The manager now also has
+per-plugin namespace metadata, explicit capability subsets,
+`load`/`start`/`stop`/`unload` lifecycle state, a plugin-owned resource
+registry, and explicit debug-only hot reload. There is still no download
+installer, signed archive verifier, update channel, Android plugin adapter,
+native provider, native plugin loader, or packaged APK plugin runtime.
 
 ## Goal
 
@@ -35,9 +38,13 @@ const status = plugins.install("org.example.demo", {
 const info = plugins.manifest("org.example.demo");
 const entryPath = plugins.resolve("org.example.demo", "helper");
 const demo = plugins.load("org.example.demo");
+const started = plugins.start("org.example.demo");
+const current = plugins.status("org.example.demo");
+plugins.stop("org.example.demo");
 plugins.disable("org.example.demo");
 plugins.enable("org.example.demo");
 plugins.unload("org.example.demo");
+plugins.reload("org.example.demo", { debug: true });
 ```
 
 Manager rules:
@@ -55,15 +62,30 @@ Manager rules:
 - plugin entry must be `.js` or `.cjs` and stay inside the plugin directory
 - plugin-relative and plugin package resolution use the plugin directory as the
   resolver root
+- each plugin record has a path-rooted namespace such as
+  `plugin:org.example.demo`; this is module-resolution isolation, not a
+  separate process or VM context
+- `plugins.capabilities(id)` and lifecycle contexts expose the effective
+  capability subset: exact `plugin.<id>` plus plugin-requested permissions
+- `plugins.start(id)` loads the main export and calls `exports.start(ctx)` when
+  present; `plugins.stop(id)` calls `exports.stop(ctx)` when present, then
+  releases all plugin-owned resources
+- lifecycle `ctx.resources` can own timers and tracked provider/UI/socket/image
+  handles; stop/unload/disable release registered resources even when a plugin
+  forgets to release them explicitly
+- `plugins.reload(id, { debug: true })` unloads cached modules and refreshes the
+  local package descriptor; calls without `debug: true` fail with
+  `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 - `.node` files anywhere below the plugin directory reject with
   `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`; common native library/object file
   extensions are rejected by the JS-only plugin policy
 - plugin symlinks are rejected
-- `install()` does not copy files, download packages, run lifecycle scripts, or
-  persist global state; it validates and registers the local package for the
-  current embedded Node execution
-- `disable()` blocks future loads and unloads cached plugin modules; previously
-  returned JavaScript object references cannot be revoked
+- `install()` does not copy files, download packages, run package-manager
+  lifecycle scripts, or persist global state; it validates and registers the
+  local package for the current embedded Node execution
+- `disable()` blocks future loads, stops the plugin if needed, releases owned
+  resources, and unloads cached plugin modules; previously returned JavaScript
+  object references cannot be revoked
 
 Illustrative project metadata:
 
@@ -114,7 +136,7 @@ capabilities and tests.
 
 ## Prototype Package Format
 
-The S7-42 manager registers unpacked project-local directories only:
+The S7-43 manager registers unpacked project-local directories only:
 
 ```text
 project/
@@ -256,10 +278,51 @@ Rules:
 - `shell.root`, `ui.overlay`, native code, Java interop, and network remain
   explicit high-risk declarations
 - missing declarations reject before code execution or provider dispatch
-- the S7-42 manager treats `plugin.<id>` as an exact declaration; a generic
+- the S7-43 manager treats `plugin.<id>` as an exact declaration; a generic
   `plugin` permission does not grant access to every plugin id
 - legacy compatibility mode does not apply to `plugins.load()`; no enforced
   project/package capability manifest means the plugin load is denied
+
+## Lifecycle And Resources
+
+Lifecycle hooks are ordinary CommonJS exports:
+
+```js
+exports.start = function(ctx) {
+  ctx.resources.setInterval(tick, 1000);
+  ctx.resources.track("ui", uiHandle);
+  ctx.resources.track("image", imageHandle);
+};
+
+exports.stop = function(ctx) {
+  // Optional cooperative shutdown. The manager still releases registered
+  // resources after this hook returns.
+};
+```
+
+The lifecycle context contains:
+
+- `id`, `namespace`, and `owner`
+- `phase`, either `start` or `stop`
+- frozen `config`
+- frozen effective `capabilities`
+- frozen plugin-declared `permissions`
+- `resources`, the plugin-owned registry
+
+The registry supports `track(kind, handle, cleanup?)`, `release(token)`,
+`addCleanup(cleanup)`, `snapshot()`, and owned timer helpers. Supported tracked
+resource kinds are `timer`, `provider`, `ui`, `socket`, `image`, and `generic`.
+When no cleanup function is supplied, the manager looks for common safe cleanup
+methods such as `close()`, `destroy()`, `dispose()`, `unsubscribe()`,
+`cancel()`, or `recycle()` depending on the resource kind. This gives JS-only
+plugins a common owner boundary while Android bridge providers remain
+provider-owned and governed by the normal bridge resource registry.
+
+`plugins.stop(id)`, `plugins.unload(id)`, and `plugins.disable(id)` release
+registered resources. Hook or cleanup functions may return promises; in that
+case the manager method that triggered cleanup, including `install`, `disable`,
+`start`, `stop`, `reload`, or `unload`, returns a promise. Synchronous plugins
+retain the synchronous behavior introduced by the first manager cut.
 
 Example project metadata:
 
@@ -385,9 +448,9 @@ Rules:
 - plugin package dependencies are vendored or resolved inside the plugin archive
 - a future signed archive runtime must keep plugin code from reaching outside
   its scoped plugin unpack directory
-- the S7-42 manager reserves only `require("plugins")`; it does not make
+- the S7-43 manager reserves only `require("plugins")`; it does not make
   plugin ids directly require-able as package names
-- the S7-42 manager enforces plugin-directory resolution for plugin
+- the S7-43 manager enforces plugin-directory resolution for plugin
   `require()` calls, but it is not a separate process, context, or filesystem
   authority
 
@@ -461,7 +524,7 @@ Before any implementation, add tests for:
 
 ## Recommendation
 
-Keep the S7-42 implementation as a local JS-only manager, not a full plugin
+Keep the S7-43 implementation as a local JS-only lifecycle manager, not a full plugin
 system. The first shippable direction beyond this manager should still be
 manifested pure JavaScript plugins with signed archives, explicit project
 opt-in, no native code, no Java interop expansion, and no packaged APK runtime

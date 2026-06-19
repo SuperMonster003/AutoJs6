@@ -17872,6 +17872,253 @@ std::string buildEmbeddedScriptExecutionSource(
       nativeAddons: false
     });
   }
+  function __autojs6_plugin_capability_subset(descriptor) {
+    const output = [];
+    const seen = Object.create(null);
+    const required = [descriptor.capability].concat(descriptor.permissions || []);
+    for (const value of required) {
+      const normalized = __autojs6_bridge_normalize_capability(value);
+      if (normalized && !seen[normalized]) {
+        seen[normalized] = true;
+        output.push(normalized);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_plugin_resource_registry() {
+    return {
+      sequence: 0,
+      entries: new Map(),
+      cleanupErrors: 0
+    };
+  }
+  function __autojs6_plugin_resource_kind(value, methodName) {
+    const kind = String(value === undefined || value === null ? "generic" : value).trim().toLowerCase();
+    if (
+      kind !== "timer" &&
+      kind !== "provider" &&
+      kind !== "ui" &&
+      kind !== "socket" &&
+      kind !== "image" &&
+      kind !== "generic"
+    ) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " rejects unsupported plugin resource kind: " + String(value)
+      );
+    }
+    return kind;
+  }
+  function __autojs6_plugin_default_cleanup(kind, handle) {
+    if (!handle || (typeof handle !== "object" && typeof handle !== "function")) {
+      return null;
+    }
+    const names = kind === "image"
+      ? ["recycle", "close", "dispose"]
+      : kind === "socket"
+        ? ["close", "destroy", "dispose"]
+        : kind === "ui"
+          ? ["close", "destroy", "dispose"]
+          : kind === "provider"
+            ? ["close", "stop", "destroy", "dispose"]
+            : ["close", "dispose", "destroy", "unsubscribe", "cancel"];
+    for (const name of names) {
+      if (typeof handle[name] === "function") {
+        return function() {
+          return handle[name]();
+        };
+      }
+    }
+    return null;
+  }
+  function __autojs6_plugin_resource_token(record, entry) {
+    return Object.freeze({
+      id: entry.id,
+      kind: entry.kind,
+      owner: record.namespace
+    });
+  }
+  function __autojs6_plugin_resource_id(token, methodName) {
+    if (typeof token === "number" && Number.isFinite(token)) {
+      return Math.floor(token);
+    }
+    if (token && typeof token === "object" && typeof token.id === "number" && Number.isFinite(token.id)) {
+      return Math.floor(token.id);
+    }
+    throw __autojs6_plugins_invalid_request(
+      methodName,
+      "plugins." + methodName + " requires a plugin resource token returned by context.resources."
+    );
+  }
+  function __autojs6_plugin_resource_snapshot(record) {
+    const counts = {
+      timer: 0,
+      provider: 0,
+      ui: 0,
+      socket: 0,
+      image: 0,
+      generic: 0
+    };
+    record.resources.entries.forEach(function(entry) {
+      counts[entry.kind] = (counts[entry.kind] || 0) + 1;
+    });
+    const total = counts.timer + counts.provider + counts.ui + counts.socket + counts.image + counts.generic;
+    return Object.freeze({
+      owner: record.namespace,
+      total,
+      timers: counts.timer,
+      providers: counts.provider,
+      ui: counts.ui,
+      sockets: counts.socket,
+      images: counts.image,
+      generic: counts.generic,
+      cleanupErrors: record.resources.cleanupErrors
+    });
+  }
+  function __autojs6_plugin_track_resource(record, kindValue, handle, cleanup, methodName) {
+    const kind = __autojs6_plugin_resource_kind(kindValue, methodName || "track");
+    if (cleanup !== undefined && cleanup !== null && typeof cleanup !== "function") {
+      throw __autojs6_plugins_invalid_request(
+        methodName || "track",
+        "plugins." + (methodName || "track") + " requires resource cleanup as a function when provided."
+      );
+    }
+    const cleanupFn = typeof cleanup === "function" ? cleanup : __autojs6_plugin_default_cleanup(kind, handle);
+    record.resources.sequence += 1;
+    const entry = {
+      id: record.resources.sequence,
+      kind,
+      handle,
+      cleanup: cleanupFn,
+      createdAt: Date.now()
+    };
+    record.resources.entries.set(entry.id, entry);
+    return __autojs6_plugin_resource_token(record, entry);
+  }
+  function __autojs6_plugin_release_resource_entry(record, entry) {
+    if (!entry || !record.resources.entries.has(entry.id)) {
+      return false;
+    }
+    record.resources.entries.delete(entry.id);
+    if (typeof entry.cleanup !== "function") {
+      return true;
+    }
+    try {
+      return entry.cleanup(entry.handle);
+    } catch (error) {
+      record.resources.cleanupErrors += 1;
+      throw error;
+    }
+  }
+  function __autojs6_plugin_release_resource_token(record, token, methodName) {
+    const id = __autojs6_plugin_resource_id(token, methodName || "release");
+    const entry = record.resources.entries.get(id);
+    if (!entry) {
+      return false;
+    }
+    return __autojs6_plugin_release_resource_entry(record, entry);
+  }
+  function __autojs6_plugin_release_all_resources(record) {
+    const entries = Array.from(record.resources.entries.values()).reverse();
+    let chain = null;
+    const releaseOne = function(entry) {
+      return __autojs6_plugin_release_resource_entry(record, entry);
+    };
+    for (const entry of entries) {
+      if (chain) {
+        chain = chain.then(function() {
+          return releaseOne(entry);
+        });
+        continue;
+      }
+      const result = releaseOne(entry);
+      if (result && typeof result.then === "function") {
+        chain = Promise.resolve(result);
+      }
+    }
+    return chain || true;
+  }
+  function __autojs6_plugin_resource_api(record) {
+    function track(kind, handle, cleanup) {
+      return __autojs6_plugin_track_resource(record, kind, handle, cleanup, "track");
+    }
+    function release(token) {
+      return __autojs6_plugin_release_resource_token(record, token, "release");
+    }
+    function addCleanup(cleanup) {
+      return __autojs6_plugin_track_resource(record, "generic", null, cleanup, "addCleanup");
+    }
+    function snapshot() {
+      return __autojs6_plugin_resource_snapshot(record);
+    }
+    function setTimeoutOwned(callback, delay) {
+      const args = Array.prototype.slice.call(arguments, 2);
+      let token = null;
+      const handle = setTimeout(function() {
+        if (token) {
+          try {
+            __autojs6_plugin_release_resource_token(record, token, "setTimeout");
+          } catch (_) {}
+        }
+        if (typeof callback === "function") {
+          return callback.apply(this, args);
+        }
+        return undefined;
+      }, delay);
+      token = __autojs6_plugin_track_resource(record, "timer", handle, function() {
+        clearTimeout(handle);
+      }, "setTimeout");
+      return token;
+    }
+    function clearTimeoutOwned(token) {
+      return __autojs6_plugin_release_resource_token(record, token, "clearTimeout");
+    }
+    function setIntervalOwned(callback, delay) {
+      const args = Array.prototype.slice.call(arguments, 2);
+      const handle = setInterval(function() {
+        if (typeof callback === "function") {
+          return callback.apply(this, args);
+        }
+        return undefined;
+      }, delay);
+      return __autojs6_plugin_track_resource(record, "timer", handle, function() {
+        clearInterval(handle);
+      }, "setInterval");
+    }
+    function clearIntervalOwned(token) {
+      return __autojs6_plugin_release_resource_token(record, token, "clearInterval");
+    }
+    return Object.freeze({
+      track,
+      release,
+      addCleanup,
+      snapshot,
+      setTimeout: setTimeoutOwned,
+      clearTimeout: clearTimeoutOwned,
+      setInterval: setIntervalOwned,
+      clearInterval: clearIntervalOwned
+    });
+  }
+  function __autojs6_plugin_create_record(descriptor, options) {
+    const opts = options || {};
+    const namespace = "plugin:" + descriptor.id;
+    return {
+      id: descriptor.id,
+      descriptor,
+      namespace,
+      capabilities: __autojs6_plugin_capability_subset(descriptor),
+      enabled: opts.enabled === false ? false : true,
+      loaded: false,
+      started: false,
+      state: "installed",
+      startCount: 0,
+      stopCount: 0,
+      reloadCount: Math.max(0, Number(opts.reloadCount) || 0),
+      config: __autojs6_plugin_config_value(opts.config, opts.methodName || "install"),
+      loadedPaths: new Set(),
+      resources: __autojs6_plugin_resource_registry()
+    };
+  }
   function __autojs6_plugin_record(idValue, methodName, autoInstall) {
     const id = __autojs6_plugin_id(idValue, methodName);
     if (__autojs6_plugin_registry.has(id)) {
@@ -17881,22 +18128,23 @@ std::string buildEmbeddedScriptExecutionSource(
       throw __autojs6_module_not_found("AutoJs6 JS plugin '" + id + "' has not been installed in this execution.");
     }
     const descriptor = __autojs6_plugin_descriptor(id, methodName);
-    const record = {
-      id,
-      descriptor,
-      enabled: true,
-      loaded: false,
-      config: Object.freeze({}),
-      loadedPaths: new Set()
-    };
+    const record = __autojs6_plugin_create_record(descriptor, { methodName, config: Object.freeze({}) });
     __autojs6_plugin_registry.set(id, record);
     return record;
   }
   function __autojs6_plugin_status(record) {
     const manifest = __autojs6_plugin_public_manifest(record.descriptor);
     return Object.freeze(Object.assign({}, manifest, {
+      namespace: record.namespace,
+      capabilities: record.capabilities,
       enabled: record.enabled === true,
       loaded: record.loaded === true,
+      started: record.started === true,
+      state: record.state,
+      startCount: record.startCount,
+      stopCount: record.stopCount,
+      reloadCount: record.reloadCount,
+      resources: __autojs6_plugin_resource_snapshot(record),
       config: record.config
     }));
   }
@@ -17907,6 +18155,127 @@ std::string buildEmbeddedScriptExecutionSource(
         "AutoJs6 JS plugin '" + record.id + "' is disabled."
       );
     }
+  }
+  function __autojs6_plugin_lifecycle_context(record, phase, options) {
+    return Object.freeze({
+      id: record.id,
+      namespace: record.namespace,
+      owner: record.namespace,
+      phase,
+      capabilities: record.capabilities,
+      permissions: Object.freeze(record.descriptor.permissions.slice()),
+      config: record.config,
+      options: options && typeof options === "object" ? Object.freeze(Object.assign({}, options)) : Object.freeze({}),
+      resources: __autojs6_plugin_resource_api(record)
+    });
+  }
+  function __autojs6_plugin_main_exports(record) {
+    const moduleRecord = __autojs6_module_cache[record.descriptor.entryPath];
+    return moduleRecord && moduleRecord.exports !== undefined ? moduleRecord.exports : null;
+  }
+  function __autojs6_plugin_call_lifecycle_hook(record, exported, hookName, options) {
+    if (!exported || typeof exported !== "object" && typeof exported !== "function") {
+      return undefined;
+    }
+    const hook = exported[hookName];
+    if (typeof hook !== "function") {
+      return undefined;
+    }
+    return hook(__autojs6_plugin_lifecycle_context(record, hookName, options));
+  }
+  function __autojs6_plugin_finish_start(record) {
+    record.started = true;
+    record.state = "started";
+    record.startCount += 1;
+    return __autojs6_plugin_status(record);
+  }
+  function __autojs6_plugin_fail_start(record, error) {
+    const cleanup = __autojs6_plugin_release_all_resources(record);
+    record.started = false;
+    record.state = record.loaded ? "loaded" : "stopped";
+    if (cleanup && typeof cleanup.then === "function") {
+      return Promise.resolve(cleanup).then(function() {
+        throw error;
+      });
+    }
+    throw error;
+  }
+  function __autojs6_plugin_start_record(record, options, loadMain) {
+    if (record.started) {
+      return __autojs6_plugin_status(record);
+    }
+    record.state = "starting";
+    const exported = loadMain();
+    let result;
+    try {
+      result = __autojs6_plugin_call_lifecycle_hook(record, exported, "start", options);
+    } catch (error) {
+      return __autojs6_plugin_fail_start(record, error);
+    }
+    if (result && typeof result.then === "function") {
+      return Promise.resolve(result).then(function() {
+        return __autojs6_plugin_finish_start(record);
+      }, function(error) {
+        return __autojs6_plugin_fail_start(record, error);
+      });
+    }
+    return __autojs6_plugin_finish_start(record);
+  }
+  function __autojs6_plugin_finish_stop(record, wasStarted) {
+    const cleanup = __autojs6_plugin_release_all_resources(record);
+    const finish = function() {
+      record.started = false;
+      record.state = "stopped";
+      if (wasStarted) {
+        record.stopCount += 1;
+      }
+      return __autojs6_plugin_status(record);
+    };
+    if (cleanup && typeof cleanup.then === "function") {
+      return Promise.resolve(cleanup).then(finish);
+    }
+    return finish();
+  }
+  function __autojs6_plugin_stop_record(record, options) {
+    const wasStarted = record.started === true;
+    if (!wasStarted && record.resources.entries.size === 0) {
+      record.state = record.loaded ? "loaded" : "stopped";
+      return __autojs6_plugin_status(record);
+    }
+    record.state = "stopping";
+    const exported = __autojs6_plugin_main_exports(record);
+    let result;
+    try {
+      result = wasStarted
+        ? __autojs6_plugin_call_lifecycle_hook(record, exported, "stop", options)
+        : undefined;
+    } catch (error) {
+      const cleanup = __autojs6_plugin_release_all_resources(record);
+      record.started = false;
+      record.state = "stopped";
+      if (cleanup && typeof cleanup.then === "function") {
+        return Promise.resolve(cleanup).then(function() {
+          throw error;
+        });
+      }
+      throw error;
+    }
+    if (result && typeof result.then === "function") {
+      return Promise.resolve(result).then(function() {
+        return __autojs6_plugin_finish_stop(record, wasStarted);
+      }, function(error) {
+        const cleanup = __autojs6_plugin_release_all_resources(record);
+        record.started = false;
+        record.state = "stopped";
+        if (cleanup && typeof cleanup.then === "function") {
+          return Promise.resolve(cleanup).then(function() {
+            throw error;
+          });
+        }
+        throw error;
+      });
+    }
+    return __autojs6_plugin_finish_stop(record, wasStarted);
   }
   function __autojs6_plugin_validate_source_option(descriptor, sourceValue, methodName) {
     if (sourceValue === undefined || sourceValue === null) {
@@ -17936,7 +18305,7 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
   }
-  function __autojs6_plugin_unload_record(record) {
+  function __autojs6_plugin_clear_module_cache(record) {
     const descriptor = record.descriptor;
     const keys = Object.keys(__autojs6_module_cache);
     for (const key of keys) {
@@ -17946,7 +18315,17 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     record.loaded = false;
     record.loadedPaths.clear();
+    record.state = record.started ? record.state : "stopped";
     return true;
+  }
+  function __autojs6_plugin_unload_record(record) {
+    const stopped = __autojs6_plugin_stop_record(record, { reason: "unload" });
+    if (stopped && typeof stopped.then === "function") {
+      return Promise.resolve(stopped).then(function() {
+        return __autojs6_plugin_clear_module_cache(record);
+      });
+    }
+    return __autojs6_plugin_clear_module_cache(record);
   }
   function __autojs6_limited_plugins() {
     if (__autojs6_limited_plugins_cache) {
@@ -17963,16 +18342,23 @@ std::string buildEmbeddedScriptExecutionSource(
       const descriptor = __autojs6_plugin_descriptor(id, "install");
       __autojs6_plugin_validate_source_option(descriptor, opts.source, "install");
       __autojs6_plugins_assert_capabilities(descriptor, "install");
-      const record = {
-        id: descriptor.id,
-        descriptor,
-        enabled: opts.enabled === false ? false : true,
-        loaded: false,
-        config: __autojs6_plugin_config_value(opts.config, "install"),
-        loadedPaths: new Set()
+      const finishInstall = function() {
+        const record = __autojs6_plugin_create_record(descriptor, {
+          methodName: "install",
+          enabled: opts.enabled,
+          config: opts.config
+        });
+        __autojs6_plugin_registry.set(descriptor.id, record);
+        return __autojs6_plugin_status(record);
       };
-      __autojs6_plugin_registry.set(descriptor.id, record);
-      return __autojs6_plugin_status(record);
+      const existing = __autojs6_plugin_registry.get(descriptor.id);
+      if (existing) {
+        const unloaded = __autojs6_plugin_unload_record(existing);
+        if (unloaded && typeof unloaded.then === "function") {
+          return Promise.resolve(unloaded).then(finishInstall);
+        }
+      }
+      return finishInstall();
     }
     function resolve(id, exportName) {
       const record = __autojs6_plugin_record(id, "resolve", true);
@@ -17992,6 +18378,19 @@ std::string buildEmbeddedScriptExecutionSource(
       record.loadedPaths.add(entryPath);
       return exported;
     }
+    function start(id, options) {
+      const record = __autojs6_plugin_record(id, "start", true);
+      __autojs6_plugin_assert_enabled(record, "start");
+      __autojs6_plugins_assert_capabilities(record.descriptor, "start");
+      return __autojs6_plugin_start_record(record, __autojs6_plugin_options(options, "start"), function() {
+        return load(id);
+      });
+    }
+    function stop(id, options) {
+      const record = __autojs6_plugin_record(id, "stop", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "stop");
+      return __autojs6_plugin_stop_record(record, __autojs6_plugin_options(options, "stop"));
+    }
     function enable(id) {
       const record = __autojs6_plugin_record(id, "enable", true);
       __autojs6_plugins_assert_capabilities(record.descriptor, "enable");
@@ -18002,7 +18401,12 @@ std::string buildEmbeddedScriptExecutionSource(
       const record = __autojs6_plugin_record(id, "disable", true);
       __autojs6_plugins_assert_capabilities(record.descriptor, "disable");
       record.enabled = false;
-      __autojs6_plugin_unload_record(record);
+      const unloaded = __autojs6_plugin_unload_record(record);
+      if (unloaded && typeof unloaded.then === "function") {
+        return Promise.resolve(unloaded).then(function() {
+          return __autojs6_plugin_status(record);
+        });
+      }
       return __autojs6_plugin_status(record);
     }
     function isEnabled(id) {
@@ -18031,6 +18435,49 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_plugins_assert_capabilities(record.descriptor, "unload");
       return __autojs6_plugin_unload_record(record);
     }
+    function reload(id, options) {
+      const opts = __autojs6_plugin_options(options, "reload");
+      if (opts.debug !== true) {
+        throw __autojs6_plugins_permission_denied(
+          "reload",
+          "plugins.reload is debug-only and requires options.debug === true."
+        );
+      }
+      const pluginId = __autojs6_plugin_id(id, "reload");
+      const previous = __autojs6_plugin_registry.get(pluginId) || null;
+      const wasStarted = previous && previous.started === true;
+      const previousReloadCount = previous ? previous.reloadCount : 0;
+      const previousEnabled = previous ? previous.enabled : true;
+      const previousConfig = previous ? previous.config : Object.freeze({});
+      const finishReload = function() {
+        const descriptor = __autojs6_plugin_descriptor(pluginId, "reload");
+        __autojs6_plugins_assert_capabilities(descriptor, "reload");
+        const record = __autojs6_plugin_create_record(descriptor, {
+          methodName: "reload",
+          enabled: opts.enabled === undefined ? previousEnabled : opts.enabled,
+          config: opts.config === undefined ? previousConfig : opts.config,
+          reloadCount: previousReloadCount + 1
+        });
+        __autojs6_plugin_registry.set(pluginId, record);
+        if (wasStarted && record.enabled) {
+          return start(pluginId, opts);
+        }
+        return __autojs6_plugin_status(record);
+      };
+      if (previous) {
+        const unloaded = __autojs6_plugin_unload_record(previous);
+        if (unloaded && typeof unloaded.then === "function") {
+          return Promise.resolve(unloaded).then(finishReload);
+        }
+      }
+      return finishReload();
+    }
+    function status(id) {
+      return __autojs6_plugin_status(__autojs6_plugin_record(id, "status", true));
+    }
+    function capabilities(id) {
+      return __autojs6_plugin_record(id, "capabilities", true).capabilities;
+    }
     function list() {
       const output = [];
       __autojs6_plugin_registry.forEach(function(record) {
@@ -18048,6 +18495,11 @@ std::string buildEmbeddedScriptExecutionSource(
       version,
       dependencies,
       exports: exportsOf,
+      capabilities,
+      status,
+      start,
+      stop,
+      reload,
       unload,
       list,
       load,

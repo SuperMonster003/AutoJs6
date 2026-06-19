@@ -616,7 +616,19 @@ Current JS-only plugin manager focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePluginSystemInstrumentationTest"
 ```
 
-This suite verifies reserved `require("plugins")` and `require.resolve("plugins")`, local `node_modules/plugins` shadowing denial, project-local `./plugins/<id>` package loading, `plugins.install`, `enable`, `disable`, `isEnabled`, `configure`, `config`, `version`, `dependencies`, named `exports`, `resolve`, `load`, `unload`, and `list`, `autojs6.plugin.permissions` / `dependencies` / `exports` metadata, exact `plugin.<id>` opt-in, plugin-requested permission denial before code execution, disabled-load denial, module-cache clearing on unload, `.node` rejection with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`, plugin entry path escape denial, plugin-root relative resolution, and TypeScript declaration coverage.
+This suite verifies reserved `require("plugins")` and
+`require.resolve("plugins")`, local `node_modules/plugins` shadowing denial,
+project-local `./plugins/<id>` package loading, `plugins.install`, `enable`,
+`disable`, `isEnabled`, `configure`, `config`, `version`, `dependencies`,
+named `exports`, `resolve`, `load`, `status`, `capabilities`, `start`, `stop`,
+`reload`, `unload`, and `list`, `autojs6.plugin.permissions` /
+`dependencies` / `exports` metadata, exact `plugin.<id>` opt-in,
+plugin-requested permission denial before code execution, disabled-load denial,
+path-rooted namespace metadata, lifecycle context capability subset,
+timer/provider/UI/socket/image/generic resource cleanup on stop, debug-only
+reload denial and allow path, module-cache clearing on unload/reload, `.node`
+rejection with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`, plugin entry path escape
+denial, plugin-root relative resolution, and TypeScript declaration coverage.
 
 Current Node developer REPL focused instrumentation:
 

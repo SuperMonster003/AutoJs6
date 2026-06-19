@@ -59,7 +59,7 @@ reach an Android provider.
 | sensors | partial | Limited sensor set: accelerometer, gyroscope, and light. Subscriptions are bounded and close on provider destroy. |
 | UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
 | `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, CJS/ESM fired entries run through the dedicated scheduled runner, and raw Android scheduler APIs remain unavailable. |
-| JS-only plugins | experimental | Project-local `./plugins/<id>` manager with local install registration, enable/disable, config, dependency metadata, named exports, and unload. Native plugins, signed archives, download installers, updates, and packaged plugin runtime are not enabled. |
+| JS-only plugins | experimental | Project-local `./plugins/<id>` manager with local install registration, enable/disable, config, dependency metadata, named exports, status/capability reporting, `start`/`stop` lifecycle hooks, owned resource cleanup, unload, and explicit debug-only reload. Native plugins, signed archives, download installers, updates, Android provider adapters, and packaged plugin runtime are not enabled. |
 | execution modes beyond `one_shot` | partial | `interactive_long_running` is available only through the explicit interactive foreground runtime with a persistent Stop notification, `autojs6:lifecycle` checkpoint/explicit-restore hooks, and restart policy `never`. `scheduled` is available only through the controlled WorkManager scheduled runner. Direct script requests still reject before user code, and `worker_computation` remains reserved. Normal scripts remain one-shot and timeout-bounded. |
 
 ## ESM Scripts
@@ -380,15 +380,23 @@ plugins.install("org.example.demo", {
 console.log(plugins.manifest("org.example.demo"));
 console.log(plugins.version("org.example.demo"));
 const demo = plugins.load("org.example.demo");
+plugins.start("org.example.demo");
+console.log(plugins.status("org.example.demo"));
+plugins.stop("org.example.demo");
 console.log(demo);
 plugins.unload("org.example.demo");
 ```
 
 Only JavaScript plugin entries are in scope. `install()` registers an
 already-present sanitized local package for the current execution; it does not
-download, copy, or persist packages. Native addons, signed plugin archives,
-download installers, updates, Java provider expansion, and packaged plugin
-runtime are not enabled.
+download, copy, or persist packages. `start()` passes a lifecycle context with
+the plugin namespace, effective capability subset, frozen config, and
+`ctx.resources` registry. `stop()`, `unload()`, and `disable()` release
+registered timers plus tracked provider/UI/socket/image handles. `reload()`
+requires `{ debug: true }` and is intended for local development only. Native
+addons, signed plugin archives, download installers, updates, Java provider
+expansion, Android provider adapters, and packaged plugin runtime are not
+enabled.
 
 ## Long-running Node Scripts
 
