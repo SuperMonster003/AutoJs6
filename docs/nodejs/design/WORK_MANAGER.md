@@ -33,7 +33,7 @@ This means the Node design should extend AutoJs6 task descriptors and launch rou
 | Capability | Decision | Reason |
 | --- | --- | --- |
 | Timed metadata | MVP | One-shot and bounded periodic descriptors can be registered through the controlled `work_manager` bridge without exposing Android scheduler objects. |
-| Timed execution | MVP | The Android provider can now enqueue scoped embedded Node one-shot and periodic work through AndroidX WorkManager. Long-running restart, boot, broadcast, and user-visible task UI flows remain separate gates. |
+| Timed execution | MVP | The Android provider can now enqueue scoped embedded Node one-shot and periodic work through AndroidX WorkManager. Long-running restart, boot, broadcast, and user-visible task UI flows remain separate gates. S7-19 records Android 16 JobScheduler quota diagnostics for WorkManager-backed Node tasks. |
 | Broadcast tasks | Deferred | Broadcast registration has exported receiver, action allowlist, privacy, and Android background-start implications. |
 | App startup tasks | Deferred | Existing `ACTION_STARTUP` behavior is an intent task; Node should not silently persist app-start execution until prompts and storage are designed. |
 | Boot tasks | Deferred | Boot execution requires manifest permission, user visibility, background-start policy, and packaged opt-in. |
@@ -258,6 +258,8 @@ During execution:
 - long-running work must use a foreground notification when required by Android policy
 - user stop must route through the unified lifecycle stop path
 - task failures must be recorded with task id, entry, backend, error code, and trigger source
+- Android 16+ WorkManager/JobScheduler quota risk must be visible in task
+  records and last-run diagnostics
 
 Policy limits should include:
 
@@ -332,4 +334,4 @@ Future scheduled-task work needs additional coverage:
 
 ## Current Decision
 
-Tasks 65, 180, and S7-15 implement `require("work_manager")` as a controlled WorkManager-backed scheduling MVP. The Safe Node Profile still denies direct Android scheduler authority: Node receives only serializable task ids and task records, never raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects. S7-15 permits scoped one-shot and bounded periodic embedded Node execution with explicit `work_manager` capability, minimum periodic interval enforcement, stable result/failure records, and no implicit retry. Broadcast, startup, boot, package-event registration, task UI migration, and arbitrary long-running scheduled Node processes remain deferred.
+Tasks 65, 180, and S7-15 implement `require("work_manager")` as a controlled WorkManager-backed scheduling MVP. The Safe Node Profile still denies direct Android scheduler authority: Node receives only serializable task ids and task records, never raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects. S7-15 permits scoped one-shot and bounded periodic embedded Node execution with explicit `work_manager` capability, minimum periodic interval enforcement, stable result/failure records, and no implicit retry. S7-19 adds Android API-level policy diagnostics so WorkManager task records expose whether Android 16+ long-running workers share JobScheduler quota and how quota exhaustion should be handled. Broadcast, startup, boot, package-event registration, task UI migration, and arbitrary long-running scheduled Node processes remain deferred.

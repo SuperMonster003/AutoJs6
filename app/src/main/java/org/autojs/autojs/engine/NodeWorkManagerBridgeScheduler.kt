@@ -58,6 +58,7 @@ object NodeWorkManagerBridgeScheduler {
             put("lastFailure", JSONObject.NULL)
             put("workManagerUniqueName", uniqueName(id))
             put("workManagerTag", taskTag(id))
+            put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
         }
         val constraints = buildConstraints(record)
             ?: return ScheduleOutcome(errorMessage = "work_manager idle constraint requires Android 6.0 or newer.")
@@ -128,6 +129,7 @@ object NodeWorkManagerBridgeScheduler {
             record.put("updatedAtEpochMs", System.currentTimeMillis())
             record.put("lastRunStatus", STATUS_RUNNING)
             record.put("runAttemptCount", record.optInt("runAttemptCount", 0) + 1)
+            record.put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
         } ?: return androidx.work.ListenableWorker.Result.failure()
 
         if (running.optString("status") == STATUS_CANCELLED) {
@@ -298,6 +300,7 @@ object NodeWorkManagerBridgeScheduler {
                 put("timedOut", result?.timedOut ?: false)
                 put("stdout", result?.stdout.orEmpty().limitChars(RESULT_STDOUT_MAX_CHARS))
                 put("stderr", result?.stderr.orEmpty().limitChars(RESULT_STDERR_MAX_CHARS))
+                put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
             },
         )
     }

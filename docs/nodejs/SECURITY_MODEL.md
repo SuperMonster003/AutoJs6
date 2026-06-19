@@ -132,7 +132,11 @@ action, and `scheduled`/`worker_computation` remain reserved. Interactive
 long-running status records restart policy `never`, `automaticRestart=false`,
 duration, active resources, and the Stop action; packaged service mode,
 automatic restart, service descriptors, broader quotas, and script-level
-cooperative stop remain gated. See `docs/nodejs/design/LONG_RUNNING_SERVICE.md`.
+cooperative stop remain gated. S7-19 adds Android foreground-service
+diagnostics for background-start denial, manifest type validation, and
+`Service.onTimeout(...)` cleanup; those diagnostics do not grant background
+launch authority or restart permission. See
+`docs/nodejs/design/LONG_RUNNING_SERVICE.md`.
 
 ## Feature Flag Policy
 
@@ -336,7 +340,7 @@ The `fetch` bridge is the controlled AutoJs6 replacement for Node raw network mo
 
 The `websocket` bridge is the controlled AutoJs6 replacement for raw WebSocket sockets. JavaScript receives a Promise-based `connect()` API plus connection `send()`, `close()`, `on()`, `off()`, `addEventListener()`, and `removeEventListener()` methods with `onopen`/`onmessage`/`onclose`/`onerror` handler properties. Request descriptors are JSON-serialized, limited to `ws:` and `wss:`, bounded by `timeoutMs`, `maxMessageBytes`, `maxQueueSize`, and max active connection count, and may be cancelled through `AbortController.signal`. Binary frames cross the bridge as Base64. Event callbacks are drained through the bridge and must not call into JavaScript directly from OkHttp callbacks. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy closes tracked WebSocket sessions and must not call back into a destroyed Node environment.
 
-The `work_manager` bridge is a controlled scheduled-task surface, not direct Android scheduler access. JavaScript can call `scheduleOnce()`, `schedulePeriodic()`, `cancel()`, and `list()` through `require("work_manager")`; descriptors are JSON-only, `backend` is restricted to `embedded`, entries must be scoped relative paths, non-packaged entries must resolve to files inside the working directory, packaged entries may serialize metadata without a plaintext file at registration time, and periodic intervals are bounded. The S7-15 live provider persists task records under app-private storage, enqueues AndroidX WorkManager one-shot or periodic requests, revalidates the scoped entry when the worker fires, launches embedded Node in one-shot mode, stores stable last-run/failure metadata, and never returns WorkManager retry. Queued host fallback rejects work-manager requests so packaged templates without live bridge metadata cannot create persistent tasks as one-way effects. Raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, IntentFilter, exact-alarm, boot, package-event, and custom broadcast authority remain denied.
+The `work_manager` bridge is a controlled scheduled-task surface, not direct Android scheduler access. JavaScript can call `scheduleOnce()`, `schedulePeriodic()`, `cancel()`, and `list()` through `require("work_manager")`; descriptors are JSON-only, `backend` is restricted to `embedded`, entries must be scoped relative paths, non-packaged entries must resolve to files inside the working directory, packaged entries may serialize metadata without a plaintext file at registration time, and periodic intervals are bounded. The S7-15 live provider persists task records under app-private storage, enqueues AndroidX WorkManager one-shot or periodic requests, revalidates the scoped entry when the worker fires, launches embedded Node in one-shot mode, stores stable last-run/failure metadata, and never returns WorkManager retry. S7-19 records Android 16 JobScheduler quota diagnostics for WorkManager-backed Node tasks, but still does not expose raw quota controls or scheduler objects. Queued host fallback rejects work-manager requests so packaged templates without live bridge metadata cannot create persistent tasks as one-way effects. Raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, IntentFilter, exact-alarm, boot, package-event, and custom broadcast authority remain denied.
 
 ## Scheduled Background Task Policy
 

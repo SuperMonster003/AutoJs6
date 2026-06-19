@@ -79,6 +79,12 @@ checks recovery after the isolated Node process exits. The status snapshot must
 include `executionMode=interactive_long_running`,
 `launchSurface=interactive_session`, runtime duration, active resource summary,
 restart policy `never`, `automaticRestart=false`, and the Stop action name.
+`NodeAndroidRuntimePolicyInstrumentationTest` verifies the embedded Node service
+manifest/type/permission diagnostics, background foreground-service start
+denial classification, missing or invalid foreground-service type diagnostics,
+Android 16 WorkManager quota metadata, and a simulated Android 15
+`Service.onTimeout(...)` path that marks the interactive runtime `timed_out`,
+calls the cleanup path, and verifies a later one-shot script can recover.
 
 Lifecycle tests must still verify that normal scripts are one-shot executions
 controlled by `timeoutMs`, including timeout recovery, uncleared interval
@@ -634,7 +640,7 @@ Focused live WorkManager gate:
 .\gradlew.bat --console=plain :app:verifyNodeLiveWorkManagerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-This suite verifies the `work_manager` bridge registry, fake-provider schedule-once and schedule-periodic descriptors, `require("work_manager")`, shadowing protection, ordinary `scriptPath` versus project `entry` serialization, packaged project-entry metadata serialization, scoped path and missing-file rejection, interval/backend policy rejection, explicit capability tagging, AndroidX WorkManager-backed task persistence, real one-shot embedded Node execution, persisted run result/failure metadata, delayed-task cancellation before execution, `cancel()`, `list()`, and that `require("tasks")` remains unavailable. Packaged queued-fallback rejection remains a release/template gate because the normal instrumentation harness injects live bridge metadata.
+This suite verifies the `work_manager` bridge registry, fake-provider schedule-once and schedule-periodic descriptors, `require("work_manager")`, shadowing protection, ordinary `scriptPath` versus project `entry` serialization, packaged project-entry metadata serialization, scoped path and missing-file rejection, interval/backend policy rejection, explicit capability tagging, AndroidX WorkManager-backed task persistence, Android 16 JobScheduler quota diagnostics in task records, real one-shot embedded Node execution, persisted run result/failure metadata, delayed-task cancellation before execution, `cancel()`, `list()`, and that `require("tasks")` remains unavailable. Packaged queued-fallback rejection remains a release/template gate because the normal instrumentation harness injects live bridge metadata.
 
 Current Java interop allowlist focused instrumentation:
 

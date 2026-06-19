@@ -239,6 +239,7 @@ object NodeBridgeProviderRegistry {
             "constraints" to "charging,network,idle",
             "minimumPeriodicIntervalMs" to ControlledWorkManagerPolicy.MIN_PERIODIC_INTERVAL_MS.toString(),
             "retryPolicy" to "no implicit retry; workers never return Result.retry",
+            "android16JobQuotaPolicy" to NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics().optString("quotaState"),
             "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
         )
         else -> emptyMap()

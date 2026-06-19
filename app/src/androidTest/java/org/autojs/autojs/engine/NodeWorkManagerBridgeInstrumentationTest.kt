@@ -291,6 +291,11 @@ class NodeWorkManagerBridgeInstrumentationTest {
         assertEquals("scriptPath", onceTask.getString("entryKind"))
         assertEquals("main.cjs", onceTask.getString("scriptPath"))
         assertFalse(onceTask.has("entry"))
+        assertEquals(
+            NodeWorkManagerBridgeScheduler.SCHEDULER_NAME,
+            onceTask.getJSONObject("androidPolicy").getString("scheduler"),
+        )
+        assertTrue(onceTask.getJSONObject("androidPolicy").has("quotaState"))
         val periodicTask = taskById(tasks, periodicId)
         assertEquals("projectEntry", periodicTask.getString("entryKind"))
         assertEquals("main.cjs", periodicTask.getString("entry"))

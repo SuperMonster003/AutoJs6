@@ -335,9 +335,11 @@ console.log(await workManager.list());
 await workManager.cancel(id);
 ```
 
-The current module stores bounded task metadata. It does not yet guarantee
-background execution of Node scripts after process death or reboot. `tasks` is
-not exposed in the Safe Node Profile.
+The current module stores bounded task metadata and records Android
+WorkManager/JobScheduler quota diagnostics for scheduled Node tasks. It is not
+an unlimited background runtime and does not yet guarantee background execution
+of Node scripts after process death or reboot. `tasks` is not exposed in the
+Safe Node Profile.
 
 ## JS-only Plugins
 
@@ -396,8 +398,9 @@ shape is rejected before user code runs:
 The v1.1 runtime has a controlled interactive foreground entry for host-owned
 launches. It starts a user-visible Node session, posts a persistent notification
 with Stop, reports status/duration/resource summary in app-private storage, and
-uses restart policy `never`. It is not a packaged service descriptor, scheduler,
-or hidden background mode.
+uses restart policy `never`. Android foreground-service start/type failures and
+system timeout cleanup are reported through stable diagnostics. It is not a
+packaged service descriptor, scheduler, or hidden background mode.
 
 Keep normal scripts one-shot and timeout-bounded. Use notifications and the
 controlled `work_manager` scheduling MVP within their current partial limits:

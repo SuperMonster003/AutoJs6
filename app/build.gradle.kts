@@ -552,6 +552,7 @@ val nodeJsLiveWorkManagerGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest#androidWorkManagerProviderRequiresExplicitCapability",
 )
 val nodeJsLongRunningGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeAndroidRuntimePolicyInstrumentationTest",
     "org.autojs.autojs.engine.NodeExecutionModePolicyInstrumentationTest",
     "org.autojs.autojs.engine.NodeInteractiveLongRunningInstrumentationTest",
     "org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest",

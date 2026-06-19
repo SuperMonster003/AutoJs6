@@ -226,15 +226,18 @@ explicit JUnit skip.
 event delivery, provider cleanup, descriptor denial, and foreign-handle denial.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real one-shot embedded Node execution, delayed cancel
-prevention, path/capability enforcement, and persisted run metadata.
+prevention, path/capability enforcement, persisted run metadata, and Android 16
+JobScheduler quota diagnostics in task records.
 `verifyNodeLongRunningGate` keeps normal long-running activation fail-closed
 while covering the S7-18 interactive foreground MVP. It freezes the Phase 7
 execution-mode state machine, verifies ordinary script launches still execute
 only `one_shot`, rejects direct `interactiveLongRunning`/legacy `long_running`
 before user code, and runs the explicit interactive session status/foreground
-survival/Stop-action recovery test. It also continues lifecycle/resource stress
-coverage for timeouts, queueing, cleanup, and reserved-mode rejection before
-user code.
+survival/Stop-action recovery test. S7-19 adds embedded foreground-service
+manifest/type validation, foreground-service start-denial diagnostics, simulated
+Android 15 `Service.onTimeout(...)` cleanup, and Android 16 WorkManager quota
+metadata checks. It also continues lifecycle/resource stress coverage for
+timeouts, queueing, cleanup, and reserved-mode rejection before user code.
 
 ## Release Gate
 

@@ -138,7 +138,17 @@ Required notification properties:
 
 The notification must not be reused as a generic script notification. Service mode needs a distinct channel/category so users can identify persistent Node work.
 
-Android 14+ foreground service type requirements still apply. The current `specialUse` service type can cover only valid special-use cases and must keep its subtype property and Play review explanation accurate.
+Android 14+ foreground service type requirements still apply. The current
+`specialUse` service type can cover only valid special-use cases and must keep
+its subtype property and Play review explanation accurate. S7-19 adds an
+Android runtime policy diagnostic that verifies the embedded Node service
+manifest, foreground-service permissions, requested service type, and API-level
+policy flags before focused gates promote a long-running change.
+
+Foreground service start failures must be visible. Android background-start
+denials are reported as `ERR_AUTOJS6_FOREGROUND_SERVICE_START_NOT_ALLOWED`;
+missing or mismatched foreground-service types are reported as
+`ERR_AUTOJS6_FOREGROUND_SERVICE_TYPE_INVALID`.
 
 ## Timeout And Watchdog Policy
 
@@ -159,6 +169,19 @@ Long-running services should not use the same per-script completion timeout beca
 If startup does not complete before `startupTimeoutMs`, the service should fail as a service-start error, not as a normal script timeout.
 
 If stop grace expires, the service process should be force-stopped and diagnostics should record leaked resources.
+
+Android 15+ can call `Service.onTimeout(int, int)` for timed-out foreground
+service types. The S7-19 runtime handles both service timeout overloads,
+records foreground timeout diagnostics in the interactive status snapshot,
+marks the runtime timed out, calls `stopSelf()` immediately, stops foreground
+notification ownership, and schedules the isolated Node process to exit. This
+path exists to avoid platform `RemoteServiceException` when Android grants only
+a short timeout grace window.
+
+Android 16+ WorkManager long-running workers can consume JobScheduler quota.
+The controlled `work_manager` provider remains bounded one-shot/periodic task
+execution, not arbitrary service mode, and now records quota diagnostics in task
+records and last-run metadata.
 
 ## User Stop Controls
 
@@ -355,6 +378,9 @@ The current S7-18 gate covers:
 - runtime duration and active resource summary fields
 - app UI leaving foreground while the script remains alive
 - notification/client Stop path and recovery after process teardown
+- Android runtime policy diagnostics for foreground service manifest/type,
+  background-start denial classification, Android 15 timeout cleanup, and
+  Android 16 WorkManager quota reporting
 - direct script `interactiveLongRunning`/legacy `long_running` rejection before
   user code
 - one-shot interval timeout regression
@@ -372,6 +398,7 @@ Any release with long-running service mode enabled must verify:
 - normal one-shot timeout tests still pass
 - `NodeEmbeddedLifecycleStressInstrumentationTest` still passes
 - `NodeInteractiveLongRunningInstrumentationTest` passes on the target device
+- `NodeAndroidRuntimePolicyInstrumentationTest` passes on the target device
 - foreground service permissions and type are correct
 - status snapshots include duration, restart policy `never`, stop action, and
   active resource summary

@@ -350,6 +350,30 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: shorten the active script, increase the queue timeout where supported, or avoid queueing.
 - Related docs: [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md), [TESTING.md](TESTING.md).
 
+## ERR_AUTOJS6_FOREGROUND_SERVICE_START_NOT_ALLOWED
+
+- Meaning: Android denied starting the embedded Node foreground service from the current app state.
+- Common cause: background foreground-service start restrictions on Android 12+.
+- Example: launching an interactive Node runtime while the app is not allowed to start a foreground service.
+- How to fix: start from a user-visible app surface or retry when Android permits foreground service launch.
+- Related docs: [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_FOREGROUND_SERVICE_TYPE_INVALID
+
+- Meaning: the embedded Node foreground service type is missing or does not match the manifest.
+- Common cause: stale packaged template, missing `android:foregroundServiceType`, or missing foreground-service permission.
+- Example: requesting the `specialUse` foreground-service type from a service manifest that declares no compatible type.
+- How to fix: refresh the packaged template or manifest so the embedded Node service declares the expected type and permissions.
+- Related docs: [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md), [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
+
+## ERR_AUTOJS6_WORK_MANAGER_QUOTA_EXHAUSTED
+
+- Meaning: Android WorkManager/JobScheduler quota is exhausted for a scheduled Node task path.
+- Common cause: Android 16+ counts long-running WorkManager foreground workers against JobScheduler quota.
+- Example: repeated long-running WorkManager jobs consume the quota window before the next Node task can run.
+- How to fix: keep scheduled Node tasks bounded, defer work, or use the explicit user-visible foreground runtime for user-initiated long work.
+- Related docs: [design/WORK_MANAGER.md](design/WORK_MANAGER.md), [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
+
 ## ERR_AUTOJS6_PROCESS_API_DISABLED
 
 - Meaning: a dangerous `process` API is disabled.

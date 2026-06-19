@@ -3,6 +3,7 @@
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -63,6 +64,15 @@ class NativeNodeEmbeddedScriptService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.i(
+            TAG,
+            "android.policy.embedded_service " +
+                    NodeAndroidRuntimePolicy.embeddedServiceDiagnostics(
+                        this,
+                        NativeNodeEmbeddedScriptService::class.java,
+                        foregroundServiceType,
+                    ),
+        )
         startScriptForeground()
         Log.i(TAG, "PROCESS STARTED processName=${currentProcessName()} pid=${Process.myPid()}")
     }
@@ -83,18 +93,26 @@ class NativeNodeEmbeddedScriptService : Service() {
             lifecycle.transition(NodeEmbeddedRuntimeState.DESTROYED, "service.onDestroy")
         }
         interactiveExecutionId?.let { executionId ->
-            NodeInteractiveLongRunningStatusStore.write(
-                context = this,
-                executionId = executionId,
-                state = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
-                sourceName = activeSourceName,
-                workingDirectory = activeWorkingDirectory,
-                startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
-                stopRequested = true,
-                message = "service.onDestroy",
-                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("destroyed"),
-                nativeValues = activeLifecycle?.nativeValues().orEmpty(),
-            )
+            val currentStatus = NodeInteractiveLongRunningStatusStore.read(this, executionId)
+            val currentState = currentStatus?.optString("state").orEmpty()
+            if (currentState !in setOf(
+                    NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT,
+                    NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                )
+            ) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                    sourceName = activeSourceName,
+                    workingDirectory = activeWorkingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    stopRequested = true,
+                    message = "service.onDestroy",
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("destroyed", activeLifecycle?.nativeValues().orEmpty()),
+                    nativeValues = activeLifecycle?.nativeValues().orEmpty(),
+                )
+            }
         }
         activeLifecycle = null
         clearActiveInteractiveSession(interactiveExecutionId)
@@ -119,11 +137,35 @@ class NativeNodeEmbeddedScriptService : Service() {
                 stopInteractiveLongRunning(intent, startId)
                 START_NOT_STICKY
             }
+            ACTION_SIMULATE_FOREGROUND_TIMEOUT -> {
+                handleForegroundServiceTimeout(
+                    startId = startId,
+                    foregroundServiceType = intent.getIntExtra(EXTRA_FOREGROUND_SERVICE_TYPE, foregroundServiceType),
+                    source = "test.simulated",
+                )
+                START_NOT_STICKY
+            }
             else -> {
                 stopSelf(startId)
                 START_NOT_STICKY
             }
         }
+    }
+
+    override fun onTimeout(startId: Int) {
+        handleForegroundServiceTimeout(
+            startId = startId,
+            foregroundServiceType = foregroundServiceType,
+            source = "system.onTimeout",
+        )
+    }
+
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        handleForegroundServiceTimeout(
+            startId = startId,
+            foregroundServiceType = fgsType,
+            source = "system.onTimeout",
+        )
     }
 
     private fun runScript(intent: Intent, startId: Int) {
@@ -1050,6 +1092,63 @@ class NativeNodeEmbeddedScriptService : Service() {
         scheduleProcessExit(0)
     }
 
+    private fun handleForegroundServiceTimeout(
+        startId: Int,
+        foregroundServiceType: Int,
+        source: String,
+    ) {
+        val diagnostics = NodeAndroidRuntimePolicy.foregroundServiceTimeoutDiagnostics(
+            startId = startId,
+            foregroundServiceType = foregroundServiceType,
+            serviceClassName = NativeNodeEmbeddedScriptService::class.java.name,
+        )
+        Log.w(TAG, "android.policy.foreground_timeout source=$source diagnostics=$diagnostics")
+        cancelAllQueuedExecutionsInService()
+        activeLifecycle?.let { lifecycle ->
+            if (lifecycle.state !in setOf(
+                    NodeEmbeddedRuntimeState.TIMED_OUT,
+                    NodeEmbeddedRuntimeState.STOPPING,
+                    NodeEmbeddedRuntimeState.STOPPED,
+                    NodeEmbeddedRuntimeState.DESTROYED,
+                )
+            ) {
+                lifecycle.transition(NodeEmbeddedRuntimeState.TIMED_OUT, source)
+            }
+            if (lifecycle.state !in setOf(
+                    NodeEmbeddedRuntimeState.STOPPING,
+                    NodeEmbeddedRuntimeState.STOPPED,
+                    NodeEmbeddedRuntimeState.DESTROYED,
+                )
+            ) {
+                lifecycle.transition(NodeEmbeddedRuntimeState.STOPPING, "$source.cleanup")
+            }
+        }
+        activeExecutionId
+            ?.takeIf { activeExecutionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING }
+            ?.let { executionId ->
+                val nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(activeLifecycle?.nativeValues().orEmpty())
+                    putAll(NodeAndroidRuntimePolicy.nativeValues("embedded_script.android_foreground_timeout", diagnostics))
+                    put("embedded_script.foreground_service_timeout", "true")
+                }
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = this,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_TIMED_OUT,
+                    sourceName = activeSourceName,
+                    workingDirectory = activeWorkingDirectory,
+                    startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    stopRequested = true,
+                    message = "$source foreground service timeout; stopSelf cleanup requested",
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("foreground_service_timeout", nativeValues),
+                    nativeValues = nativeValues,
+                )
+            }
+        foregroundServiceCreator?.stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf(startId)
+        scheduleProcessExit(0)
+    }
+
     private fun updateInteractiveForeground(executionId: String, sourceName: String) {
         ForegroundServiceUtils.createNotificationChannelIfNeeded(
             this,
@@ -1118,6 +1217,8 @@ class NativeNodeEmbeddedScriptService : Service() {
         private val CANCELLED_QUEUED_EXECUTION_IDS = mutableSetOf<String>()
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
         private const val ACTION_STOP_INTERACTIVE = NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME
+        private const val ACTION_SIMULATE_FOREGROUND_TIMEOUT =
+            "org.autojs.autojs.engine.action.SIMULATE_NATIVE_NODE_FOREGROUND_TIMEOUT"
         private const val EXTRA_RESULT_RECEIVER = "result_receiver"
         private const val EXTRA_SOURCE = "source"
         private const val EXTRA_SOURCE_NAME = "source_name"
@@ -1131,6 +1232,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED = "java_interop_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_EXECUTION_ID = "execution_id"
+        private const val EXTRA_FOREGROUND_SERVICE_TYPE = "foreground_service_type"
         private const val EXTRA_ENV_NAMES = "env_names"
         private const val EXTRA_ENV_VALUES = "env_values"
         private const val EXTRA_MODULE_SOURCE_NAMES = "module_source_names"
@@ -1265,15 +1367,13 @@ class NativeNodeEmbeddedScriptService : Service() {
             try {
                 requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, requestForService)
                 intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
-                component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    appContext.startForegroundService(intent)
-                } else {
-                    appContext.startService(intent)
-                } ?: return processCrashedOrTimedOut(
+                val startOutcome = startEmbeddedScriptService(appContext, intent)
+                component = startOutcome.component ?: return serviceStartFailureResult(
                     request = request,
                     message = "Failed to start embedded script service.",
                     startedAt = startedAt,
                     executionId = executionId,
+                    startOutcome = startOutcome,
                 )
                 val completed = completion.await(clientAwaitTimeoutMs(request.timeoutMs), TimeUnit.MILLISECONDS)
                 if (!completed) {
@@ -1383,17 +1483,14 @@ class NativeNodeEmbeddedScriptService : Service() {
                     putExtra(EXTRA_EXECUTION_ID, executionId)
                     putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
                 }
-                val component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    appContext.startForegroundService(intent)
-                } else {
-                    appContext.startService(intent)
-                }
-                if (component == null) {
-                    val failure = processCrashedOrTimedOut(
+                val startOutcome = startEmbeddedScriptService(appContext, intent)
+                if (startOutcome.component == null) {
+                    val failure = serviceStartFailureResult(
                         request = requestForService,
                         message = "Failed to start interactive embedded script service.",
                         startedAt = startedAt,
                         executionId = executionId,
+                        startOutcome = startOutcome,
                     )
                     val status = NodeInteractiveLongRunningStatusStore.write(
                         context = appContext,
@@ -1454,17 +1551,155 @@ class NativeNodeEmbeddedScriptService : Service() {
                 action = ACTION_STOP_INTERACTIVE
                 putExtra(EXTRA_EXECUTION_ID, executionId)
             }
-            return runCatching {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    appContext.startForegroundService(intent)
-                } else {
-                    appContext.startService(intent)
-                } != null
-            }.getOrDefault(false)
+            val startOutcome = startEmbeddedScriptService(appContext, intent, foreground = false)
+            if (startOutcome.component == null) {
+                NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = current?.optString("sourceName").orEmpty().ifBlank { DEFAULT_SOURCE_NAME },
+                    workingDirectory = current?.optString("workingDirectory")?.takeIf { it.isNotBlank() },
+                    startedAtEpochMs = current?.optLong("startedAtEpochMs")?.takeIf { it > 0L },
+                    stopRequested = true,
+                    message = startOutcome.diagnostics.optString("message").ifBlank {
+                        "client.stop.service_start_failed"
+                    },
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("client_stop_failed"),
+                    nativeValues = startOutcome.nativeValues(),
+                )
+            }
+            return startOutcome.component != null
         }
 
         fun interactiveLongRunningStatus(context: Context, executionId: String): JSONObject? {
             return NodeInteractiveLongRunningStatusStore.read(context.applicationContext, executionId)
+        }
+
+        fun simulateForegroundServiceTimeoutForTest(
+            context: Context,
+            executionId: String,
+            foregroundServiceType: Int = embeddedForegroundServiceTypeForCurrentSdk(),
+        ): Boolean {
+            val appContext = context.applicationContext
+            val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
+                action = ACTION_SIMULATE_FOREGROUND_TIMEOUT
+                putExtra(EXTRA_EXECUTION_ID, executionId)
+                putExtra(EXTRA_FOREGROUND_SERVICE_TYPE, foregroundServiceType)
+            }
+            return runCatching { appContext.startService(intent) != null }.getOrDefault(false)
+        }
+
+        private data class ServiceStartOutcome(
+            val component: ComponentName?,
+            val diagnostics: JSONObject,
+            val serviceDiagnostics: JSONObject,
+            val throwable: Throwable? = null,
+        ) {
+            fun nativeValues(): Map<String, String> {
+                return linkedMapOf<String, String>().apply {
+                    putAll(NodeAndroidRuntimePolicy.nativeValues("embedded_script.android_service_start", diagnostics))
+                    putAll(NodeAndroidRuntimePolicy.nativeValues("embedded_script.android_service", serviceDiagnostics))
+                    put("embedded_script.service_start_failed", (component == null).toString())
+                }
+            }
+        }
+
+        private fun startEmbeddedScriptService(
+            appContext: Context,
+            intent: Intent,
+            foreground: Boolean = true,
+        ): ServiceStartOutcome {
+            val serviceDiagnostics = NodeAndroidRuntimePolicy.embeddedServiceDiagnostics(
+                appContext,
+                NativeNodeEmbeddedScriptService::class.java,
+                embeddedForegroundServiceTypeForCurrentSdk(),
+            )
+            return try {
+                val component = if (foreground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    appContext.startForegroundService(intent)
+                } else {
+                    appContext.startService(intent)
+                }
+                val diagnostics = if (component == null) {
+                    NodeAndroidRuntimePolicy.serviceStartFailureDiagnosticsForClass(
+                        className = "android.content.ComponentName:null",
+                        message = "Context.startService returned null.",
+                        serviceClassName = NativeNodeEmbeddedScriptService::class.java.name,
+                        sdkInt = Build.VERSION.SDK_INT,
+                    )
+                } else {
+                    JSONObject().apply {
+                        put("sdkInt", Build.VERSION.SDK_INT)
+                        put("serviceName", NativeNodeEmbeddedScriptService::class.java.name)
+                        put("reason", "started")
+                        put("componentName", component.flattenToShortString())
+                    }
+                }
+                ServiceStartOutcome(component, diagnostics, serviceDiagnostics)
+            } catch (e: Throwable) {
+                ServiceStartOutcome(
+                    component = null,
+                    diagnostics = NodeAndroidRuntimePolicy.serviceStartFailureDiagnostics(
+                        throwable = e,
+                        serviceClassName = NativeNodeEmbeddedScriptService::class.java.name,
+                    ),
+                    serviceDiagnostics = serviceDiagnostics,
+                    throwable = e,
+                )
+            }
+        }
+
+        private fun serviceStartFailureResult(
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            message: String,
+            startedAt: Long,
+            executionId: String,
+            startOutcome: ServiceStartOutcome,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val diagnostics = startOutcome.diagnostics
+            val processName = currentProcessNameCompat()
+            val pid = Process.myPid()
+            val sourceName = request.sourceName.ifBlank { DEFAULT_SOURCE_NAME }
+            val elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L)
+            val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
+                .apply { transition(NodeEmbeddedRuntimeState.FAILED, "client.foreground_service_start_failed") }
+            val errorCode = diagnostics.optString("errorCode")
+                .ifBlank { NodeRuntimeErrorCodes.EMBEDDED_NODE_INVALID_STATE }
+            val errorName = diagnostics.optString("errorName")
+                .ifBlank { "EmbeddedNodeForegroundServiceStartError" }
+            val androidMessage = diagnostics.optString("androidExceptionMessage")
+                .takeIf { it.isNotBlank() }
+                ?.let { "\nAndroid: $it" }
+                .orEmpty()
+            val nativeValues = linkedMapOf<String, String>().apply {
+                putAll(startOutcome.nativeValues())
+                put("embedded_script.error_code", errorCode)
+                put("embedded_script.error_name", errorName)
+            }
+            return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+                succeeded = false,
+                exitCode = 1,
+                resultText = null,
+                stdout = "",
+                stderr = "",
+                errorName = errorName,
+                errorMessage = diagnostics.optString("message").ifBlank { message } + androidMessage,
+                errorStack = startOutcome.throwable?.stackTraceToString(),
+                errorCode = errorCode,
+                elapsedMs = elapsedMs,
+                processName = processName,
+                pid = pid,
+                sourceName = sourceName,
+                nativeValues = nativeValues,
+                workingDirectory = request.workingDirectory,
+            ).withLifecycle(lifecycle)
+        }
+
+        private fun embeddedForegroundServiceTypeForCurrentSdk(): Int {
+            return when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                else -> FOREGROUND_SERVICE_TYPE_UNKNOWN
+            }
         }
 
         private fun acquireExecutionSlot(

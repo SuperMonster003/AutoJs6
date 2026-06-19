@@ -198,6 +198,9 @@ Current behavior remains:
   profile, stop semantics, launch surface, and supported launch surfaces
 - interactive status snapshots include runtime duration, Stop action, active
   resource summary, restart policy `never`, and `automaticRestart=false`
+- Android runtime policy diagnostics cover foreground-service manifest/type
+  validation, background-start denial, Android 15 `Service.onTimeout(...)`
+  cleanup, and Android 16 WorkManager quota metadata
 - service process exit is expected after one-shot execution settles
 - packaged Node entries remain one-shot unless a future explicit service
   descriptor is implemented
@@ -1206,7 +1209,7 @@ Current policy:
 - S7-15 persists scoped descriptors as app-private WorkManager task records and enqueues one-shot or bounded periodic AndroidX WorkManager requests.
 - `work_manager` is a live-bridge capability. Queued host fallback rejects it with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` so older packaged templates cannot create persistent tasks as one-way effects.
 - Registered descriptors accept only `backend: "embedded"`, scoped relative `scriptPath` or project `entry`, bounded delay/interval/timeout values, and boolean `charging`, `network`, and `idle` constraints. Non-packaged entries must resolve to files inside the working directory; packaged entries may serialize metadata without a plaintext file at registration time.
-- When a WorkManager task fires, the worker revalidates the scoped entry path, runs the script through `NativeNodeEmbeddedScriptService` in one-shot mode, and stores `lastRun`, `lastRunStatus`, `lastFailure`, stdout/stderr snippets, timeout state, and exit/error metadata.
+- When a WorkManager task fires, the worker revalidates the scoped entry path, runs the script through `NativeNodeEmbeddedScriptService` in one-shot mode, and stores `lastRun`, `lastRunStatus`, `lastFailure`, stdout/stderr snippets, timeout state, exit/error metadata, and Android quota policy diagnostics.
 - Workers return success or failure only and never request WorkManager retry. Cancel removes the task record and cancels the unique WorkManager work.
 - `require("tasks")` is not exposed in the Embedded Node Safe Node Profile.
 - Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.
