@@ -211,6 +211,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] scheduled execution mode remains unavailable to direct script/package launches and is accepted only for WorkManager-owned scheduled runner executions
 - [ ] embedded Node foreground-service start/type/timeout diagnostics are present, and Android timeout cleanup calls the immediate stop path
 - [ ] interactive status snapshots preserve runtime heartbeat/budget diagnostics, including stopped/timed-out terminal records
+- [ ] interactive lifecycle checkpoints are JSON-only, size-limited, project-scoped, atomically persisted, explicitly restored, and never enable automatic restart
 
 ## Diagnostics
 
@@ -271,5 +272,5 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] `docs/nodejs/design/JAVA_INTEROP.md` when Java/Android interop, Rhino compatibility shims, or Java allowlist policy changes
 - [ ] `docs/nodejs/design/RHINO_SHIM.md` when `require("rhino")`, old global API installation, or mixed Rhino/Node migration behavior changes
 - [ ] `docs/nodejs/design/EXECUTION_QUEUE.md` when embedded execution queue behavior changes
-- [ ] `docs/nodejs/design/LONG_RUNNING_SERVICE.md` when long-running service behavior, foreground service policy, or restart policy changes
+- [ ] `docs/nodejs/design/LONG_RUNNING_SERVICE.md` when long-running service behavior, foreground service policy, checkpoint/restore behavior, or restart policy changes
 - [ ] packaged APK user docs or examples if packaging behavior changed

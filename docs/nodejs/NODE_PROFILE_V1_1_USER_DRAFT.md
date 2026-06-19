@@ -60,7 +60,7 @@ reach an Android provider.
 | UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
 | `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, CJS/ESM fired entries run through the dedicated scheduled runner, and raw Android scheduler APIs remain unavailable. |
 | JS-only plugins | experimental | Project-local `./plugins/<id>` loading only. Native plugins, signed archives, installers, and packaged plugin runtime are not enabled. |
-| execution modes beyond `one_shot` | partial | `interactive_long_running` is available only through the explicit interactive foreground runtime with a persistent Stop notification and restart policy `never`. `scheduled` is available only through the controlled WorkManager scheduled runner. Direct script requests still reject before user code, and `worker_computation` remains reserved. Normal scripts remain one-shot and timeout-bounded. |
+| execution modes beyond `one_shot` | partial | `interactive_long_running` is available only through the explicit interactive foreground runtime with a persistent Stop notification, `autojs6:lifecycle` checkpoint/explicit-restore hooks, and restart policy `never`. `scheduled` is available only through the controlled WorkManager scheduled runner. Direct script requests still reject before user code, and `worker_computation` remains reserved. Normal scripts remain one-shot and timeout-bounded. |
 
 ## ESM Scripts
 
@@ -407,6 +407,25 @@ also include runtime heartbeat and budget diagnostics such as event-loop
 responsiveness, last bridge progress, active resource counts, and budget breach
 counts. It is not a packaged service descriptor, scheduler, or hidden background
 mode.
+
+Interactive sessions can use `require("autojs6:lifecycle")`:
+
+```js
+const lifecycle = require("autojs6:lifecycle");
+
+lifecycle.onStop(async (reason) => {
+  await lifecycle.checkpoint({ reason, cursor: 42 }, { reason: "user.stop" });
+});
+
+await lifecycle.onRestore((checkpoint) => {
+  console.log(checkpoint.cursor);
+});
+```
+
+Checkpoint data must be JSON-serializable and is limited to 64 KiB. It is stored
+under app-private project-scoped storage and restored only when the script calls
+`onRestore()` or `readCheckpoint()`. AutoJs6 does not restart a script
+automatically from a checkpoint.
 
 Keep normal scripts one-shot and timeout-bounded. Use notifications and the
 controlled `work_manager` scheduling MVP within their current partial limits:

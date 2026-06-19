@@ -240,7 +240,11 @@ manifest/type validation, foreground-service start-denial diagnostics, simulated
 Android 15 `Service.onTimeout(...)` cleanup, and Android 16 WorkManager quota
 metadata checks. S7-20 adds runtime budget parsing, heartbeat stale diagnostics,
 provider quota rejection without leaked resources, and interactive status
-heartbeat/budget summaries. It also continues lifecycle/resource stress
+heartbeat/budget summaries. S7-22 adds cooperative `autojs6:lifecycle`
+checkpoint/restore coverage: an interactive stop hook writes a JSON-only
+project-scoped checkpoint, stopped status exposes metadata, a settled later
+interactive session restores explicitly, and automatic restart remains disabled.
+It also continues lifecycle/resource stress
 coverage for timeouts, queueing, cleanup, and reserved-mode rejection before
 user code.
 

@@ -90,6 +90,10 @@ override parsing, ignored above-hard-max overrides, stale heartbeat
 classification for pending bridge calls, provider quota rejection without
 leaked resources, and interactive long-running status snapshots carrying
 runtime heartbeat, runtime budget, and active resource summaries through stop.
+The interactive long-running suite also verifies the S7-22 lifecycle protocol:
+`onStop()` can write a JSON checkpoint during the stop grace window, terminal
+status exposes only checkpoint metadata, a settled later service process can
+explicitly `onRestore()` that checkpoint, and `automaticRestart` remains false.
 
 Lifecycle tests must still verify that normal scripts are one-shot executions
 controlled by `timeoutMs`, including timeout recovery, uncleared interval
@@ -1020,6 +1024,7 @@ Current lifecycle diagnostics:
 - result `nativeValues` include `embedded_script.lifecycle_transitions`
 - opt-in timeline trace uses `embedded_script.timeline_json`
 - bridge live transport diagnostics use `embedded_script.bridge_live_*`
+- interactive checkpoint diagnostics use `embedded_script.lifecycle_checkpoint.*`
 - logcat uses `node.runtime.state executionId=<id> FROM -> TO`
 - normal completion should include `CREATED -> STARTING -> RUNNING -> DRAINING -> STOPPED`
 - service destruction should add `DESTROYED` in logcat
@@ -1035,6 +1040,8 @@ Current lifecycle stress cases:
 - nested callbacks drain before success
 - stdout and stderr close after run
 - concurrent embedded execution rejects with `ERR_AUTOJS6_NODE_ENGINE_BUSY` and a later run succeeds
+- interactive stop writes a project-scoped checkpoint and a later explicit
+  restore reads it without automatic restart
 
 Planned lifecycle stress cases:
 

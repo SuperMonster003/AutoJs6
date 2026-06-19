@@ -56,6 +56,8 @@ class NativeNodeEmbeddedScriptService : Service() {
     private var activeStartedAtEpochMs: Long = 0L
     @Volatile
     private var activeHeartbeatMonitor: NodeInteractiveHeartbeatMonitor? = null
+    @Volatile
+    private var activeLifecycleStopRequestFile: File? = null
     private var foregroundServiceCreator: ForegroundServiceCreator? = null
 
     private val foregroundServiceType = when {
@@ -295,11 +297,23 @@ class NativeNodeEmbeddedScriptService : Service() {
             id = executionId,
             sourceName = sourceName,
             cwd = workingDirectory.orEmpty(),
+            executionMode = executionMode,
+            launchSurface = launchSurface,
             spawnDepth = spawnDepth,
             processName = processName,
             pid = pid,
             startedAt = System.currentTimeMillis(),
         )
+        val lifecycleStopRequestFile = if (interactiveSession) {
+            File(cacheDir, "embedded-node-lifecycle/$executionId/stop-request.json")
+        } else {
+            null
+        }
+        if (interactiveSession) {
+            lifecycleStopRequestFile?.parentFile?.deleteRecursively()
+            lifecycleStopRequestFile?.parentFile?.mkdirs()
+            activeLifecycleStopRequestFile = lifecycleStopRequestFile
+        }
         val bridgeSession = NodeBridgeFileTransportSession(
             root = File(cacheDir, "embedded-node-bridge/$executionId"),
             bridgeLimits = bridgeLimits,
@@ -317,6 +331,15 @@ class NativeNodeEmbeddedScriptService : Service() {
             .withBridgePermissionManifest(workingDirectory)
             .withBridgeLimitPolicy(bridgeLimits)
             .withBridgeLiveConfig(bridgeSession.configJson())
+            .withLifecycleConfig(
+                NodeLifecycleCheckpointStore.runtimeModuleSource(
+                    context = this,
+                    engineInfo = engineInfo,
+                    executionMode = executionMode,
+                    launchSurface = launchSurface,
+                    stopRequestFile = lifecycleStopRequestFile,
+                ),
+            )
         val request = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
             source = source,
             sourceName = sourceName,
@@ -516,6 +539,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursively()
             activeHeartbeatMonitor?.stop("script.finally")
             activeHeartbeatMonitor = null
+            lifecycleStopRequestFile?.parentFile?.deleteRecursively()
             bridgeSession.stop()
             val queueStatus = releaseExecutionSlot(executionId)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
@@ -695,6 +719,13 @@ class NativeNodeEmbeddedScriptService : Service() {
         return linkedMapOf<String, String>().apply {
             putAll(this@withBridgeLiveConfig)
             put(BRIDGE_LIVE_CONFIG_RUNTIME_MODULE_NAME, configJson)
+        }
+    }
+
+    private fun Map<String, String>.withLifecycleConfig(configJson: String): Map<String, String> {
+        return linkedMapOf<String, String>().apply {
+            putAll(this@withLifecycleConfig)
+            put(NodeLifecycleCheckpointStore.RUNTIME_MODULE_NAME, configJson)
         }
     }
 
@@ -1220,6 +1251,11 @@ class NativeNodeEmbeddedScriptService : Service() {
             ?: activeLifecycle?.nativeValues().orEmpty()
         activeHeartbeatMonitor?.stop("interactive.stop")
         activeHeartbeatMonitor = null
+        NodeLifecycleCheckpointStore.writeStopRequest(
+            file = activeLifecycleStopRequestFile,
+            executionId = executionId,
+            reason = "interactive.stop.requested",
+        )
         NodeInteractiveLongRunningStatusStore.write(
             context = this,
             executionId = executionId,
@@ -1232,20 +1268,25 @@ class NativeNodeEmbeddedScriptService : Service() {
             activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("stopping", stoppingNativeValues),
             nativeValues = stoppingNativeValues,
         )
-        NodeInteractiveLongRunningStatusStore.write(
-            context = this,
-            executionId = executionId,
-            state = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
-            sourceName = activeSourceName,
-            workingDirectory = activeWorkingDirectory,
-            startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
-            stopRequested = true,
-            message = "interactive.stop.accepted",
-            activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("process_exit_scheduled", stoppingNativeValues),
-            nativeValues = stoppingNativeValues,
-        )
-        stopSelf(startId)
-        scheduleProcessExit(0)
+        val sourceName = activeSourceName
+        val workingDirectory = activeWorkingDirectory
+        val startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L }
+        Handler(Looper.getMainLooper()).postDelayed({
+            NodeInteractiveLongRunningStatusStore.write(
+                context = this,
+                executionId = executionId,
+                state = NodeInteractiveLongRunningStatusStore.STATE_STOPPED,
+                sourceName = sourceName,
+                workingDirectory = workingDirectory,
+                startedAtEpochMs = startedAtEpochMs,
+                stopRequested = true,
+                message = "interactive.stop.accepted",
+                activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("process_exit_scheduled", stoppingNativeValues),
+                nativeValues = stoppingNativeValues,
+            )
+            stopSelf(startId)
+            scheduleProcessExit(0)
+        }, NodeLifecycleCheckpointStore.STOP_GRACE_MS)
     }
 
     private fun handleForegroundServiceTimeout(
@@ -1365,6 +1406,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         activeSourceName = DEFAULT_SOURCE_NAME
         activeWorkingDirectory = null
         activeStartedAtEpochMs = 0L
+        activeLifecycleStopRequestFile = null
     }
 
     companion object {

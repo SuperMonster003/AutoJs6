@@ -456,6 +456,8 @@ data class NodeBridgeEngineInfo(
     val backend: String = "embedded",
     val sourceName: String = "",
     val cwd: String = "",
+    val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+    val launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
     val spawnDepth: Int = 0,
     val processName: String = "",
     val pid: Int = Process.myPid(),
@@ -470,6 +472,8 @@ data class NodeBridgeEngineInfo(
         put("backend", backend)
         put("sourceName", sourceName)
         put("cwd", cwd)
+        put("executionMode", executionMode)
+        put("launchSurface", launchSurface)
         put("spawnDepth", spawnDepth)
         put("processName", processName)
         put("pid", pid)
@@ -487,6 +491,8 @@ data class NodeBridgeEngineInfo(
             id: String = "",
             sourceName: String = "",
             cwd: String = "",
+            executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+            launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
             spawnDepth: Int = 0,
             processName: String = "",
             pid: Int = Process.myPid(),
@@ -514,6 +520,8 @@ data class NodeBridgeEngineInfo(
                 id = id,
                 sourceName = sourceName,
                 cwd = cwd,
+                executionMode = executionMode,
+                launchSurface = launchSurface,
                 spawnDepth = spawnDepth.coerceIn(0, MAX_SPAWN_DEPTH),
                 processName = processName,
                 pid = pid,
@@ -726,6 +734,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, callback)
             request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, callback)
             request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, callback)
+            request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, callback)
             request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, callback)
             else -> callback(unavailable(request))
         }
@@ -738,6 +747,7 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.image_active_handle_count", imageHandles.size.toString())
         put("embedded_script.ocr_active_operation_count", ocrOperations.size.toString())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
+        putAll(NodeLifecycleCheckpointStore.nativeDiagnostics(appContext, engineInfo))
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
         putAll(resourceRegistry.nativeDiagnostics())
         putAll(bridgeLimits.nativeDiagnostics())
@@ -2320,6 +2330,49 @@ class AndroidNodeBridgeCapabilityProvider(
                 method = request.method,
             ),
         )
+    }
+
+    private fun dispatchLifecycle(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = runCatching {
+            when (request.method) {
+                NodeLifecycleCheckpointStore.METHOD_CHECKPOINT -> {
+                    val payload = request.firstObjectArg()
+                        ?: throw NodeLifecycleCheckpointException(
+                            NodeBridgeError.invalidRequest(
+                                message = "AutoJs6 lifecycle.checkpoint requires a JSON descriptor.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    val checkpoint = if (payload.has("checkpoint")) payload.opt("checkpoint") else JSONObject.NULL
+                    val record = NodeLifecycleCheckpointStore.writeCheckpoint(
+                        context = appContext,
+                        engineInfo = engineInfo,
+                        reason = payload.optString("reason", "manual"),
+                        checkpoint = checkpoint,
+                    )
+                    NodeBridgeResponse.success(request.id, record.toString())
+                }
+                NodeLifecycleCheckpointStore.METHOD_READ_CHECKPOINT -> {
+                    val record = NodeLifecycleCheckpointStore.readCheckpoint(appContext, engineInfo)
+                    NodeBridgeResponse.success(request.id, record?.toString() ?: "null")
+                }
+                NodeLifecycleCheckpointStore.METHOD_CLEAR_CHECKPOINT -> {
+                    val result = NodeLifecycleCheckpointStore.clearCheckpoint(appContext, engineInfo)
+                    NodeBridgeResponse.success(request.id, result.toString())
+                }
+                else -> unavailable(request)
+            }
+        }.getOrElse { error ->
+            val bridgeError = (error as? NodeLifecycleCheckpointException)?.bridgeError
+                ?: NodeBridgeError.invalidRequest(
+                    message = error.message ?: "AutoJs6 lifecycle request failed.",
+                    module = request.module,
+                    method = request.method,
+                )
+            NodeBridgeResponse.failure(request.id, bridgeError)
+        }
+        callback(response)
     }
 
     private fun dispatchJava(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {

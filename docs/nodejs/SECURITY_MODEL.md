@@ -135,7 +135,13 @@ Interactive
 long-running status records restart policy `never`, `automaticRestart=false`,
 duration, active resources, and the Stop action; packaged service mode,
 automatic restart, service descriptors, broader quotas, and script-level
-cooperative stop remain gated. S7-19 adds Android foreground-service
+cooperative stop beyond the interactive lifecycle module remain gated. S7-22
+adds `require("autojs6:lifecycle")` for interactive sessions only:
+checkpoints are JSON-only, limited to 64 KiB, app-private, project-scoped by
+package plus canonical working directory, atomically persisted, and restored
+only by an explicit script call. Status snapshots expose checkpoint metadata but
+not the full payload, and the restart policy remains `never`. S7-19 adds Android
+foreground-service
 diagnostics for background-start denial, manifest type validation, and
 `Service.onTimeout(...)` cleanup; those diagnostics do not grant background
 launch authority or restart permission. See
@@ -432,3 +438,5 @@ Every Node release candidate must verify:
 - direct Java/Android interop, reflection, class loaders, native library loading, and raw Android objects remain unavailable
 - packaged APK verifier passes
 - lifecycle timeout does not poison the next run
+- lifecycle checkpoints cannot trigger automatic restart or escape their
+  project-scoped app-private store

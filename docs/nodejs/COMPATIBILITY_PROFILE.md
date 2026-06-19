@@ -200,6 +200,14 @@ Current behavior remains:
   profile, stop semantics, launch surface, and supported launch surfaces
 - interactive status snapshots include runtime duration, Stop action, active
   resource summary, restart policy `never`, and `automaticRestart=false`
+- `require("autojs6:lifecycle")` is available only inside the explicit
+  interactive long-running runtime and supports JSON-only
+  `checkpoint()`/`readCheckpoint()`/`clearCheckpoint()`, `onCheckpoint()`,
+  explicit `onRestore()`, and cooperative `onStop()`
+- checkpoints are app-private, project-scoped by package plus canonical working
+  directory, atomically written, limited to 64 KiB, and surfaced in status
+  snapshots only as metadata; AutoJs6 does not automatically restart or replay a
+  checkpoint
 - Android runtime policy diagnostics cover foreground-service manifest/type
   validation, background-start denial, Android 15 `Service.onTimeout(...)`
   cleanup, and Android 16 WorkManager quota metadata
@@ -703,6 +711,13 @@ Disabled or controlled:
 - report writing
 
 Scripts should use AutoJs6 lifecycle controls instead of forcing process exit.
+
+Interactive long-running scripts can use `require("autojs6:lifecycle")` for
+cooperative checkpoint and restore. `onStop(handler)` receives a bounded stop
+reason and can persist JSON checkpoint data before the service exits.
+`onRestore(handler)` is an explicit application call in a later interactive
+session; it never runs automatically during process startup and never grants a
+restart policy beyond `never`.
 
 ## Embedded Execution Lifecycle
 

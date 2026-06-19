@@ -33,6 +33,7 @@ object NodeInteractiveLongRunningStatusStore {
         val resolvedResources = activeResources
             ?: previous?.optJSONObject("activeResources")?.copy()
             ?: JSONObject()
+        val resolvedStopRequested = stopRequested || previous?.optBoolean("stopRequested") == true
         val status = JSONObject().apply {
             put("schemaVersion", 1)
             put("executionId", executionId)
@@ -44,11 +45,12 @@ object NodeInteractiveLongRunningStatusStore {
             put("startedAtEpochMs", resolvedStartedAt)
             put("updatedAtEpochMs", now)
             put("durationMs", (now - resolvedStartedAt).coerceAtLeast(0L))
-            put("stopRequested", stopRequested)
+            put("stopRequested", resolvedStopRequested)
             put("restartPolicy", "never")
             put("automaticRestart", false)
             put("stopAction", STOP_ACTION_NAME)
             put("activeResources", resolvedResources)
+            put("checkpoint", NodeLifecycleCheckpointStore.statusSnapshot(context, workingDirectory))
             put("policy", JSONObject(NodeExecutionModePolicy.nativeValues(
                 NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
                 NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,

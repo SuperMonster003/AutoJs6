@@ -37,6 +37,14 @@ duration and active resource summary fields, and supports a notification/client
 Stop path that schedules clean Node process teardown. It deliberately does not
 enable implicit service mode for ordinary script execution.
 
+Task S7-22 adds a cooperative checkpoint and explicit restore protocol for the
+same interactive runtime. `require("autojs6:lifecycle")` exposes
+`checkpoint()`, `readCheckpoint()`, `clearCheckpoint()`, `onCheckpoint()`,
+`onRestore()`, and `onStop()` only through the explicit interactive session
+surface. Checkpoints are JSON-serializable data only, size-limited to 64 KiB,
+stored atomically under app-private project-scoped storage, and never trigger an
+automatic restart.
+
 ## Goal
 
 AutoJs6 currently treats Embedded Node scripts as bounded one-shot automation executions. Long-running Node scripts need a separate product and lifecycle model so they do not weaken the Safe Node Profile.
@@ -209,8 +217,15 @@ The S7-18 MVP implements the foreground notification Stop action and the
 programmatic client stop path
 `NativeNodeEmbeddedScriptService.stopInteractiveLongRunning(context,
 executionId)`. Stop requests mark the interactive status as stopping/stopped and
-schedule the isolated embedded Node process to exit. Console UI, script-level
-cooperative stop callbacks, and packaged app stop controls remain future gates.
+schedule the isolated embedded Node process to exit. Console UI and packaged app
+stop controls remain future gates.
+
+S7-22 adds the script-level cooperative stop callback for the interactive
+session surface. `lifecycle.onStop(handler)` receives a bounded stop reason, can
+call `lifecycle.checkpoint(data, { reason })`, and runs during a 1500 ms stop
+grace window before the isolated process is allowed to exit. The stop path
+preserves `stopRequested=true` in terminal status snapshots when the script
+drains voluntarily after a stop request.
 
 Stop must route through the same lifecycle controller. JavaScript should
 eventually receive a cooperative shutdown signal before force stop, but force
@@ -229,6 +244,23 @@ onStopRequested(async () => {
   // close controlled resources here
 });
 ```
+
+Current S7-22 JavaScript shape:
+
+```js
+const lifecycle = require("autojs6:lifecycle");
+
+lifecycle.onStop(async (reason) => {
+  await lifecycle.checkpoint({ reason, cursor: 42 }, { reason: "user.stop" });
+});
+
+await lifecycle.onRestore((checkpoint, record) => {
+  console.log(record.restartPolicy, checkpoint.cursor);
+});
+```
+
+`onRestore()` is explicit and application-owned. AutoJs6 does not silently
+restart the previous script or replay arbitrary code from a checkpoint.
 
 This `service` module is a future design item. It must not appear in the Safe Node Profile until implementation and tests exist.
 
@@ -398,6 +430,12 @@ timed-out, and failed terminal status records preserve the latest runtime budget
 native values so a later diagnostic read does not lose the reason a runtime was
 stalled, over budget, or stopped by the user/system.
 
+S7-22 adds checkpoint metadata to the same status snapshots. The status file
+records whether a project-scoped checkpoint exists plus its reason, byte count,
+and timestamps; it does not duplicate the full checkpoint payload. Full payloads
+remain in the app-private checkpoint store and are returned only through the
+explicit lifecycle read/restore APIs.
+
 ## Tests
 
 The current S7-18 gate covers:
@@ -414,6 +452,8 @@ The current S7-18 gate covers:
 - runtime budget parsing, heartbeat stale classification, provider resource
   quota rejection without leaks, and interactive status heartbeat/budget
   summaries
+- cooperative `onStop()` checkpoint write, project-scoped metadata in stopped
+  status, service-settled explicit `onRestore()`, and restart policy `never`
 - direct script `interactiveLongRunning`/legacy `long_running` rejection before
   user code
 - one-shot interval timeout regression
@@ -435,7 +475,9 @@ Any release with long-running service mode enabled must verify:
 - `NodeRuntimeBudgetPolicyInstrumentationTest` passes on the target device
 - foreground service permissions and type are correct
 - status snapshots include duration, restart policy `never`, stop action, and
-  active resource summary plus runtime heartbeat/budget diagnostics
+  active resource summary plus runtime heartbeat/budget/checkpoint diagnostics
+- checkpoint payloads remain JSON-only, app-private, project-scoped,
+  size-limited, and explicit-restore only
 - raw network and dangerous process APIs remain denied
 - service mode is documented as explicit and user-visible
 

@@ -8017,6 +8017,12 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_axios_cache = null;
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
+  let __autojs6_limited_lifecycle_cache = null;
+  let __autojs6_lifecycle_config_cache = undefined;
+  const __autojs6_lifecycle_checkpoint_handlers = [];
+  const __autojs6_lifecycle_stop_handlers = [];
+  let __autojs6_lifecycle_stop_poll_timer = null;
+  let __autojs6_lifecycle_stop_seen_id = "";
   let __autojs6_limited_plugins_cache = null;
   let __autojs6_limited_java_cache = null;
   let __autojs6_limited_worker_threads_cache = null;
@@ -11590,6 +11596,361 @@ std::string buildEmbeddedScriptExecutionSource(
       maxPeriodicIntervalMs: __autojs6_work_manager_policy.maxPeriodicIntervalMs,
       allowedConstraints: Object.freeze(__autojs6_work_manager_policy.allowedConstraints.slice())
     });
+  }
+  function __autojs6_lifecycle_config() {
+    if (__autojs6_lifecycle_config_cache !== undefined) {
+      return __autojs6_lifecycle_config_cache;
+    }
+    const fallback = Object.freeze({
+      schemaVersion: 1,
+      executionId: "",
+      sourceName: "",
+      packageName: "",
+      workingDirectory: "",
+      projectKey: "",
+      executionMode: "one_shot",
+      launchSurface: "script",
+      checkpoint: Object.freeze({
+        enabled: false,
+        maxBytes: 65536,
+        automaticRestart: false,
+        restartPolicy: "never"
+      }),
+      stop: Object.freeze({
+        enabled: false,
+        requestPath: "",
+        pollIntervalMs: 50,
+        graceMs: 1500
+      })
+    });
+    try {
+      const record = __autojs6_runtime_module_embedded_sources["autojs6:lifecycle-config"];
+      if (!record || typeof record.source !== "string") {
+        __autojs6_lifecycle_config_cache = fallback;
+        return fallback;
+      }
+      const parsed = JSON.parse(record.source);
+      if (!parsed || typeof parsed !== "object") {
+        __autojs6_lifecycle_config_cache = fallback;
+        return fallback;
+      }
+      const checkpoint = parsed.checkpoint && typeof parsed.checkpoint === "object" ? parsed.checkpoint : {};
+      const stop = parsed.stop && typeof parsed.stop === "object" ? parsed.stop : {};
+      __autojs6_lifecycle_config_cache = Object.freeze({
+        schemaVersion: Number(parsed.schemaVersion) || 1,
+        executionId: parsed.executionId === undefined || parsed.executionId === null ? "" : String(parsed.executionId),
+        sourceName: parsed.sourceName === undefined || parsed.sourceName === null ? "" : String(parsed.sourceName),
+        packageName: parsed.packageName === undefined || parsed.packageName === null ? "" : String(parsed.packageName),
+        workingDirectory: parsed.workingDirectory === undefined || parsed.workingDirectory === null ? "" : String(parsed.workingDirectory),
+        projectKey: parsed.projectKey === undefined || parsed.projectKey === null ? "" : String(parsed.projectKey),
+        executionMode: parsed.executionMode === undefined || parsed.executionMode === null ? "one_shot" : String(parsed.executionMode),
+        launchSurface: parsed.launchSurface === undefined || parsed.launchSurface === null ? "script" : String(parsed.launchSurface),
+        checkpoint: Object.freeze({
+          enabled: checkpoint.enabled === true,
+          maxBytes: Math.max(0, Number(checkpoint.maxBytes) || 65536),
+          automaticRestart: false,
+          restartPolicy: "never"
+        }),
+        stop: Object.freeze({
+          enabled: stop.enabled === true,
+          requestPath: stop.requestPath === undefined || stop.requestPath === null ? "" : String(stop.requestPath),
+          pollIntervalMs: Math.max(10, Math.min(Number(stop.pollIntervalMs) || 50, 1000)),
+          graceMs: Math.max(0, Number(stop.graceMs) || 0)
+        })
+      });
+      return __autojs6_lifecycle_config_cache;
+    } catch (_) {
+      __autojs6_lifecycle_config_cache = fallback;
+      return fallback;
+    }
+  }
+  function __autojs6_lifecycle_policy_snapshot() {
+    const config = __autojs6_lifecycle_config();
+    return Object.freeze({
+      schemaVersion: config.schemaVersion,
+      executionId: config.executionId,
+      sourceName: config.sourceName,
+      packageName: config.packageName,
+      workingDirectory: config.workingDirectory,
+      projectKey: config.projectKey,
+      executionMode: config.executionMode,
+      launchSurface: config.launchSurface,
+      checkpoint: Object.freeze(Object.assign({}, config.checkpoint)),
+      stop: Object.freeze(Object.assign({}, config.stop)),
+      automaticRestart: false,
+      restartPolicy: "never"
+    });
+  }
+  function __autojs6_lifecycle_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_lifecycle_reason(value, fallback) {
+    if (typeof value === "string") {
+      return value.trim() || fallback;
+    }
+    const options = __autojs6_lifecycle_options(value);
+    if (typeof options.reason === "string" && options.reason.trim()) {
+      return options.reason.trim();
+    }
+    return fallback;
+  }
+  function __autojs6_lifecycle_timeout_from_options(options, fallback) {
+    const value = Number(options && options.timeoutMs);
+    if (!Number.isFinite(value) || value <= 0) {
+      return fallback;
+    }
+    return Math.max(1, Math.min(Math.floor(value), 30000));
+  }
+  function __autojs6_lifecycle_json_clone(value, methodName) {
+    let json;
+    try {
+      json = JSON.stringify(value === undefined ? null : value);
+    } catch (error) {
+      throw __autojs6_bridge_error(
+        "autojs6:lifecycle." + methodName + " requires JSON-serializable checkpoint data.",
+        "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+        "lifecycle",
+        methodName
+      );
+    }
+    if (json === undefined) {
+      throw __autojs6_bridge_error(
+        "autojs6:lifecycle." + methodName + " requires JSON-serializable checkpoint data.",
+        "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+        "lifecycle",
+        methodName
+      );
+    }
+    const maxBytes = __autojs6_lifecycle_config().checkpoint.maxBytes || 65536;
+    if (json.length > maxBytes) {
+      throw __autojs6_bridge_error(
+        "autojs6:lifecycle." + methodName + " checkpoint exceeded " + maxBytes + " bytes.",
+        "ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT",
+        "lifecycle",
+        methodName
+      );
+    }
+    return JSON.parse(json);
+  }
+  function __autojs6_lifecycle_deep_freeze(value) {
+    if (!value || typeof value !== "object" || Object.isFrozen(value)) {
+      return value;
+    }
+    Object.keys(value).forEach(function(key) {
+      __autojs6_lifecycle_deep_freeze(value[key]);
+    });
+    return Object.freeze(value);
+  }
+  function __autojs6_lifecycle_record(value) {
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+    const record = {
+      schemaVersion: Number(value.schemaVersion) || 1,
+      projectKey: value.projectKey === undefined || value.projectKey === null ? "" : String(value.projectKey),
+      packageName: value.packageName === undefined || value.packageName === null ? "" : String(value.packageName),
+      workingDirectory: value.workingDirectory === undefined || value.workingDirectory === null ? "" : String(value.workingDirectory),
+      executionId: value.executionId === undefined || value.executionId === null ? "" : String(value.executionId),
+      sourceName: value.sourceName === undefined || value.sourceName === null ? "" : String(value.sourceName),
+      executionMode: value.executionMode === undefined || value.executionMode === null ? "" : String(value.executionMode),
+      launchSurface: value.launchSurface === undefined || value.launchSurface === null ? "" : String(value.launchSurface),
+      reason: value.reason === undefined || value.reason === null ? "" : String(value.reason),
+      checkpointBytes: Number(value.checkpointBytes) || 0,
+      createdAtEpochMs: Number(value.createdAtEpochMs) || 0,
+      updatedAtEpochMs: Number(value.updatedAtEpochMs) || 0,
+      automaticRestart: value.automaticRestart === true,
+      restartPolicy: value.restartPolicy === undefined || value.restartPolicy === null ? "never" : String(value.restartPolicy),
+      checkpoint: __autojs6_lifecycle_deep_freeze(value.checkpoint === undefined ? null : value.checkpoint)
+    };
+    return Object.freeze(record);
+  }
+  function __autojs6_lifecycle_checkpoint(data, options) {
+    let checkpoint;
+    try {
+      checkpoint = __autojs6_lifecycle_json_clone(data, "checkpoint");
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    const input = typeof options === "string" ? { reason: options } : __autojs6_lifecycle_options(options);
+    const reason = __autojs6_lifecycle_reason(input, "manual");
+    return __autojs6_call_autojs(
+      "lifecycle",
+      "checkpoint",
+      [{ reason, checkpoint }],
+      {
+        timeoutMs: __autojs6_lifecycle_timeout_from_options(input, 5000),
+        permissions: [],
+        signal: __autojs6_bridge_signal_from_options(input)
+      }
+    ).then(function(result) {
+      const record = __autojs6_lifecycle_record(result);
+      __autojs6_lifecycle_checkpoint_handlers.slice().forEach(function(handler) {
+        try {
+          handler(reason, record);
+        } catch (error) {
+          setImmediate(function() {
+            throw error;
+          });
+        }
+      });
+      return record;
+    });
+  }
+  function __autojs6_lifecycle_read_checkpoint(options) {
+    const input = __autojs6_lifecycle_options(options);
+    return __autojs6_call_autojs(
+      "lifecycle",
+      "readCheckpoint",
+      [],
+      {
+        timeoutMs: __autojs6_lifecycle_timeout_from_options(input, 5000),
+        permissions: [],
+        signal: __autojs6_bridge_signal_from_options(input)
+      }
+    ).then(__autojs6_lifecycle_record);
+  }
+  function __autojs6_lifecycle_clear_checkpoint(options) {
+    const input = __autojs6_lifecycle_options(options);
+    return __autojs6_call_autojs(
+      "lifecycle",
+      "clearCheckpoint",
+      [],
+      {
+        timeoutMs: __autojs6_lifecycle_timeout_from_options(input, 5000),
+        permissions: [],
+        signal: __autojs6_bridge_signal_from_options(input)
+      }
+    ).then(function(result) {
+      return __autojs6_lifecycle_deep_freeze(result && typeof result === "object" ? result : {});
+    });
+  }
+  function __autojs6_lifecycle_on_checkpoint(handler) {
+    if (typeof handler !== "function") {
+      throw new TypeError("autojs6:lifecycle.onCheckpoint requires a function.");
+    }
+    __autojs6_lifecycle_checkpoint_handlers.push(handler);
+    return function unsubscribeLifecycleCheckpoint() {
+      const index = __autojs6_lifecycle_checkpoint_handlers.indexOf(handler);
+      if (index >= 0) {
+        __autojs6_lifecycle_checkpoint_handlers.splice(index, 1);
+      }
+    };
+  }
+  function __autojs6_lifecycle_on_restore(handler, options) {
+    if (typeof handler !== "function") {
+      return Promise.reject(new TypeError("autojs6:lifecycle.onRestore requires a function."));
+    }
+    return __autojs6_lifecycle_read_checkpoint(options).then(function(record) {
+      if (!record) {
+        return null;
+      }
+      try {
+        return Promise.resolve(handler(record.checkpoint, record)).then(function() {
+          return record;
+        });
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    });
+  }
+  function __autojs6_lifecycle_read_stop_request(config) {
+    const fs = __autojs6_fs_module();
+    if (!fs || typeof fs.readFileSync !== "function") {
+      return null;
+    }
+    try {
+      const text = fs.readFileSync(config.stop.requestPath, "utf8");
+      const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+      const id = parsed.id === undefined || parsed.id === null ? "" : String(parsed.id);
+      if (!id || id === __autojs6_lifecycle_stop_seen_id) {
+        return null;
+      }
+      __autojs6_lifecycle_stop_seen_id = id;
+      return Object.freeze({
+        id,
+        executionId: parsed.executionId === undefined || parsed.executionId === null ? "" : String(parsed.executionId),
+        reason: parsed.reason === undefined || parsed.reason === null ? "stop.requested" : String(parsed.reason),
+        requestedAtEpochMs: Number(parsed.requestedAtEpochMs) || Date.now()
+      });
+    } catch (error) {
+      if (error && (error.code === "ENOENT" || error.code === "ENOTDIR")) {
+        return null;
+      }
+      return null;
+    }
+  }
+  function __autojs6_lifecycle_dispatch_stop(request) {
+    if (__autojs6_lifecycle_stop_poll_timer) {
+      clearInterval(__autojs6_lifecycle_stop_poll_timer);
+      __autojs6_lifecycle_stop_poll_timer = null;
+    }
+    const handlers = __autojs6_lifecycle_stop_handlers.slice();
+    let chain = Promise.resolve();
+    handlers.forEach(function(handler) {
+      chain = chain.then(function() {
+        return handler(request.reason, request);
+      });
+    });
+    chain.catch(function(error) {
+      setImmediate(function() {
+        throw error;
+      });
+    });
+  }
+  function __autojs6_lifecycle_poll_stop() {
+    const config = __autojs6_lifecycle_config();
+    if (!config.stop.enabled || !config.stop.requestPath) {
+      return;
+    }
+    const request = __autojs6_lifecycle_read_stop_request(config);
+    if (request) {
+      __autojs6_lifecycle_dispatch_stop(request);
+    }
+  }
+  function __autojs6_lifecycle_start_stop_poll() {
+    const config = __autojs6_lifecycle_config();
+    if (!config.stop.enabled || !config.stop.requestPath || __autojs6_lifecycle_stop_poll_timer) {
+      return;
+    }
+    __autojs6_lifecycle_stop_poll_timer = setInterval(__autojs6_lifecycle_poll_stop, config.stop.pollIntervalMs);
+    if (__autojs6_lifecycle_stop_poll_timer && typeof __autojs6_lifecycle_stop_poll_timer.unref === "function") {
+      __autojs6_lifecycle_stop_poll_timer.unref();
+    }
+  }
+  function __autojs6_lifecycle_on_stop(handler) {
+    if (typeof handler !== "function") {
+      throw new TypeError("autojs6:lifecycle.onStop requires a function.");
+    }
+    __autojs6_lifecycle_stop_handlers.push(handler);
+    __autojs6_lifecycle_start_stop_poll();
+    return function unsubscribeLifecycleStop() {
+      const index = __autojs6_lifecycle_stop_handlers.indexOf(handler);
+      if (index >= 0) {
+        __autojs6_lifecycle_stop_handlers.splice(index, 1);
+      }
+      if (__autojs6_lifecycle_stop_handlers.length === 0 && __autojs6_lifecycle_stop_poll_timer) {
+        clearInterval(__autojs6_lifecycle_stop_poll_timer);
+        __autojs6_lifecycle_stop_poll_timer = null;
+      }
+    };
+  }
+  function __autojs6_limited_lifecycle() {
+    if (__autojs6_limited_lifecycle_cache) {
+      return __autojs6_limited_lifecycle_cache;
+    }
+    __autojs6_limited_lifecycle_cache = Object.freeze({
+      checkpoint: __autojs6_lifecycle_checkpoint,
+      readCheckpoint: __autojs6_lifecycle_read_checkpoint,
+      clearCheckpoint: __autojs6_lifecycle_clear_checkpoint,
+      onCheckpoint: __autojs6_lifecycle_on_checkpoint,
+      onRestore: __autojs6_lifecycle_on_restore,
+      onStop: __autojs6_lifecycle_on_stop,
+      policy: __autojs6_lifecycle_policy_snapshot()
+    });
+    return __autojs6_limited_lifecycle_cache;
   }
   function __autojs6_limited_work_manager() {
     if (__autojs6_limited_work_manager_cache) {
@@ -29429,6 +29790,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "autojs6:bridge") {
       return "autojs6:bridge";
     }
+    if (name === "autojs6:lifecycle") {
+      return "autojs6:lifecycle";
+    }
     if (name === "toast") {
       return "toast";
     }
@@ -29673,6 +30037,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "autojs6:bridge") {
       return __autojs6_bridge_module();
+    }
+    if (name === "autojs6:lifecycle") {
+      return __autojs6_limited_lifecycle();
     }
     if (name === "toast") {
       return __autojs6_limited_toast();

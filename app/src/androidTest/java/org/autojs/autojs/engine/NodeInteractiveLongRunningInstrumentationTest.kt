@@ -91,6 +91,102 @@ class NodeInteractiveLongRunningInstrumentationTest {
         )
     }
 
+    @Test
+    fun interactiveRuntimeCheckpointsOnStopAndRestoresOnlyWhenExplicitlyRequested() {
+        val workingDirectory = File(context.cacheDir, "node-interactive-checkpoint-${System.nanoTime()}").apply {
+            deleteRecursively()
+            mkdirs()
+        }
+        val aliveFile = File(workingDirectory, "checkpoint-runtime-alive.txt")
+        val checkpointStopFile = File(workingDirectory, "checkpoint-stop.txt")
+        val restoreFile = File(workingDirectory, "checkpoint-restored.json")
+
+        val source = """
+            const fs = require("fs");
+            const lifecycle = require("autojs6:lifecycle");
+            let ticks = 0;
+            const timer = setInterval(() => { ticks += 1; }, 50);
+            lifecycle.onStop(async (reason) => {
+              await lifecycle.checkpoint({
+                ticks,
+                reason,
+                source: "stop-hook"
+              }, { reason: "interactive.stop" });
+              fs.writeFileSync("./checkpoint-stop.txt", reason);
+              clearInterval(timer);
+            });
+            fs.writeFileSync("./checkpoint-runtime-alive.txt", "running");
+        """.trimIndent()
+
+        val session = NativeNodeEmbeddedScriptService.startInteractiveLongRunning(
+            context,
+            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                source = source,
+                sourceName = "interactive-checkpoint-stop.js",
+                workingDirectory = workingDirectory.absolutePath,
+                timeoutMs = 60_000L,
+            ),
+        )
+        activeExecutionId = session.executionId
+        assertTrue("interactive checkpoint session failed to start: ${session.error}", session.started)
+        waitForRunningStatus(session.executionId)
+        waitUntil("checkpoint runtime marker") { aliveFile.isFile }
+
+        assertTrue(NativeNodeEmbeddedScriptService.stopInteractiveLongRunning(context, session.executionId))
+        waitUntil("onStop checkpoint marker") { checkpointStopFile.isFile }
+        val stopped = waitForStatus(session.executionId) {
+            it.optString("state") == NodeInteractiveLongRunningStatusStore.STATE_STOPPED
+        }
+        assertTrue(stopped.optBoolean("stopRequested"))
+        val checkpointStatus = stopped.getJSONObject("checkpoint")
+        assertTrue("checkpoint status=$checkpointStatus", checkpointStatus.getBoolean("exists"))
+        assertEquals("interactive.stop", checkpointStatus.getString("reason"))
+        activeExecutionId = null
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val restoreSource = """
+            const fs = require("fs");
+            const lifecycle = require("autojs6:lifecycle");
+            setTimeout(async () => {
+              await lifecycle.onRestore((checkpoint, record) => {
+                fs.writeFileSync("./checkpoint-restored.json", JSON.stringify({
+                  checkpoint,
+                  recordReason: record.reason,
+                  executionMode: record.executionMode,
+                  launchSurface: record.launchSurface,
+                  automaticRestart: lifecycle.policy.automaticRestart,
+                  restartPolicy: lifecycle.policy.restartPolicy
+                }));
+              });
+            }, 0);
+        """.trimIndent()
+        val restoreSession = NativeNodeEmbeddedScriptService.startInteractiveLongRunning(
+            context,
+            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+                source = restoreSource,
+                sourceName = "interactive-checkpoint-restore.js",
+                workingDirectory = workingDirectory.absolutePath,
+                timeoutMs = 20_000L,
+            ),
+        )
+        activeExecutionId = restoreSession.executionId
+        assertTrue("interactive restore session failed to start: ${restoreSession.error}", restoreSession.started)
+        waitUntil("explicit restore output") { restoreFile.isFile }
+        val restored = JSONObject(restoreFile.readText())
+        assertEquals("interactive.stop", restored.getString("recordReason"))
+        assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, restored.getString("executionMode"))
+        assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION, restored.getString("launchSurface"))
+        assertFalse(restored.getBoolean("automaticRestart"))
+        assertEquals("never", restored.getString("restartPolicy"))
+        assertEquals("stop-hook", restored.getJSONObject("checkpoint").getString("source"))
+        assertEquals("interactive.stop.requested", restored.getJSONObject("checkpoint").getString("reason"))
+        val restoreStopped = waitForStatus(restoreSession.executionId) {
+            it.optString("state") == NodeInteractiveLongRunningStatusStore.STATE_STOPPED
+        }
+        assertFalse(restoreStopped.optBoolean("automaticRestart", true))
+        activeExecutionId = null
+    }
+
     private fun runRecoveryAfterStop(
         workingDirectory: File,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
