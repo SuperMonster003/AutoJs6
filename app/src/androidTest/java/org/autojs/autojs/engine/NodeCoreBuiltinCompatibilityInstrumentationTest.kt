@@ -536,6 +536,241 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
     }
 
     @Test
+    fun nodeTestEmbeddedSubsetRunsSingleRuntimeTap() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("node:test embedded subset")
+        val workDir = freshWorkDir("node-test-subset")
+        writeShadow(workDir, "test/index.js")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                const nodeTest = require("node:test");
+                const assert = require("assert/strict");
+                const moduleBuiltin = require("module");
+                const userTestPackage = require("test");
+                const order = [];
+
+                function denied(action) {
+                  try {
+                    action();
+                    return "allowed";
+                  } catch (error) {
+                    return [
+                      error.code,
+                      error.autojs6Code,
+                      String(error.message).includes("node:test")
+                    ].join("/");
+                  }
+                }
+
+                console.log("node_test.surface=" + [
+                  Object.isFrozen(nodeTest),
+                  nodeTest === nodeTest.test,
+                  typeof nodeTest.describe,
+                  typeof nodeTest.it,
+                  typeof nodeTest.before,
+                  typeof nodeTest.afterEach,
+                  typeof nodeTest.run,
+                  typeof nodeTest.mock,
+                  typeof nodeTest.snapshot,
+                  typeof nodeTest.watch,
+                  typeof nodeTest.coverage,
+                  nodeTest.reporter,
+                  nodeTest.assert === assert
+                ].join("|"));
+                console.log("node_test.module=" + [
+                  moduleBuiltin.isBuiltin("node:test"),
+                  moduleBuiltin.isBuiltin("test"),
+                  moduleBuiltin.builtinModules.includes("node:test"),
+                  moduleBuiltin.builtinModules.includes("test"),
+                  require.resolve("node:test"),
+                  userTestPackage.shadow === true,
+                  require.resolve("test").replace(/\\/g, "/").includes("/node_modules/test/index.js")
+                ].join("|"));
+                console.log("node_test.denied=" + [
+                  denied(() => process.getBuiltinModule("node:test")),
+                  denied(() => require("node:test/reporters"))
+                ].join("|"));
+
+                nodeTest.describe("suite", () => {
+                  nodeTest.before(() => {
+                    order.push("before");
+                  });
+                  nodeTest.after(() => {
+                    console.log("node_test.order=" + order.join(">"));
+                  });
+                  nodeTest.beforeEach((t) => {
+                    order.push("beforeEach:" + t.name);
+                  });
+                  nodeTest.afterEach((t) => {
+                    order.push("afterEach:" + t.name);
+                  });
+                  nodeTest.test("sync pass", (t) => {
+                    assert.strictEqual(t.name, "sync pass");
+                    t.diagnostic("diag-ok");
+                    order.push("sync");
+                  });
+                  nodeTest.it("async pass", async () => {
+                    await new Promise((resolve) => setTimeout(resolve, 0));
+                    order.push("async");
+                  });
+                  nodeTest.skip("skipped", { skip: "reason" }, () => {
+                    throw new Error("skip body should not run");
+                  });
+                  nodeTest.todo("todo item", { todo: "later" }, () => {
+                    throw new Error("todo body should not run");
+                  });
+                  nodeTest.test("context skip", (t) => {
+                    t.skip("runtime");
+                  });
+                  nodeTest.test("context todo", (t) => {
+                    t.todo("runtime");
+                  });
+                });
+            """.trimIndent(),
+            sourceName = File(workDir, "main.js").absolutePath,
+            workingDirectory = workDir,
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("node:test embedded subset", result)
+        assertTrue(
+            result.stdout,
+            result.stdout.contains("node_test.surface=true|true|function|function|function|function|undefined|undefined|undefined|undefined|undefined|tap|true"),
+        )
+        assertTrue(result.stdout, result.stdout.contains("node_test.module=true|false|true|false|node:test|true|true"))
+        assertTrue(
+            result.stdout,
+            result.stdout.contains("node_test.denied=${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true|${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/true"),
+        )
+        assertTrue(result.stdout, result.stdout.contains("TAP version 13"))
+        assertTrue(result.stdout, result.stdout.contains("# diag-ok"))
+        assertTrue(result.stdout, result.stdout.contains("ok 3 - skipped # SKIP reason"))
+        assertTrue(result.stdout, result.stdout.contains("ok 4 - todo item # TODO later"))
+        assertTrue(result.stdout, result.stdout.contains("ok 5 - context skip # SKIP runtime"))
+        assertTrue(result.stdout, result.stdout.contains("ok 6 - context todo # TODO runtime"))
+        assertTrue(result.stdout, result.stdout.contains("# tests 6"))
+        assertTrue(result.stdout, result.stdout.contains("# pass 2"))
+        assertTrue(result.stdout, result.stdout.contains("# fail 0"))
+        assertTrue(result.stdout, result.stdout.contains("# skipped 2"))
+        assertTrue(result.stdout, result.stdout.contains("# todo 2"))
+        assertTrue(
+            result.stdout,
+            result.stdout.contains(
+                "node_test.order=before>beforeEach:sync pass>sync>afterEach:sync pass>" +
+                    "beforeEach:async pass>async>afterEach:async pass>" +
+                    "beforeEach:context skip>afterEach:context skip>" +
+                    "beforeEach:context todo>afterEach:context todo",
+            ),
+        )
+        assertTrue(result.nativeValues["embedded_script.pending_node_test_callbacks"], result.nativeValues["embedded_script.pending_node_test_callbacks"] == "0")
+    }
+
+    @Test
+    fun nodeTestEmbeddedSubsetReportsFailuresTimeoutsAndLateAsyncActivity() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("node:test embedded subset failure reporting")
+        val workDir = freshWorkDir("node-test-failures")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                const test = require("node:test");
+                const assert = require("assert/strict");
+
+                test("assertion failure", () => {
+                  assert.strictEqual(1, 2);
+                });
+                test("timeout failure", { timeout: 1 }, async () => {
+                  await new Promise(() => {});
+                });
+                test("late timer failure", () => {
+                  setTimeout(() => {}, 25);
+                });
+            """.trimIndent(),
+            sourceName = File(workDir, "main.js").absolutePath,
+            workingDirectory = workDir,
+            timeoutMs = 10_000L,
+        )
+
+        assertTrue(NodeEmbeddedTestHarness.describeResult("node:test failures should fail script", result), !result.succeeded)
+        assertTrue(result.stdout, result.stdout.contains("not ok 1 - assertion failure"))
+        assertTrue(result.stdout, result.stdout.contains("ERR_ASSERTION"))
+        assertTrue(result.stdout, result.stdout.contains("not ok 2 - timeout failure"))
+        assertTrue(result.stdout, result.stdout.contains("ERR_AUTOJS6_NODE_TEST_TIMEOUT"))
+        assertTrue(result.stdout, result.stdout.contains("not ok 3 - late timer failure"))
+        assertTrue(result.stdout, result.stdout.contains("ERR_AUTOJS6_NODE_TEST_ASYNC_ACTIVITY"))
+        assertTrue(result.stdout, result.stdout.contains("# fail 3"))
+        assertTrue(result.errorCode, result.errorCode == "ERR_AUTOJS6_NODE_TEST_FAILURE")
+        assertTrue(result.nativeValues["embedded_script.pending_node_test_callbacks"], result.nativeValues["embedded_script.pending_node_test_callbacks"] == "0")
+    }
+
+    @Test
+    fun partialEsmImportsNodeTestEmbeddedSubset() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("node:test partial ESM import")
+        val workDir = freshWorkDir("node-test-esm")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import nodeTestDefault, { test, describe, it, before, after, beforeEach, afterEach, assert as testAssert, reporter } from "node:test";
+                import assert from "assert/strict";
+
+                const order = [];
+                console.log("node_test.esm.surface=" + [
+                  typeof nodeTestDefault,
+                  nodeTestDefault === test,
+                  typeof describe,
+                  typeof it,
+                  typeof before,
+                  typeof afterEach,
+                  testAssert === assert,
+                  reporter
+                ].join("|"));
+
+                describe("esm suite", () => {
+                  before(() => {
+                    order.push("before");
+                  });
+                  after(() => {
+                    console.log("node_test.esm.order=" + order.join(">"));
+                  });
+                  beforeEach((t) => {
+                    order.push("beforeEach:" + t.name);
+                  });
+                  afterEach((t) => {
+                    order.push("afterEach:" + t.name);
+                  });
+                  test("esm named pass", async (t) => {
+                    await Promise.resolve();
+                    assert.strictEqual(t.name, "esm named pass");
+                    order.push("named");
+                  });
+                  it("esm it pass", () => {
+                    assert.strictEqual(nodeTestDefault.reporter, "tap");
+                    order.push("it");
+                  });
+                });
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("node:test partial ESM import", result)
+        assertTrue(result.stdout, result.stdout.contains("node_test.esm.surface=function|true|function|function|function|function|true|tap"))
+        assertTrue(result.stdout, result.stdout.contains("# tests 2"))
+        assertTrue(result.stdout, result.stdout.contains("# pass 2"))
+        assertTrue(result.stdout, result.stdout.contains("# fail 0"))
+        assertTrue(
+            result.stdout,
+            result.stdout.contains(
+                "node_test.esm.order=before>beforeEach:esm named pass>named>afterEach:esm named pass>" +
+                    "beforeEach:esm it pass>it>afterEach:esm it pass",
+            ),
+        )
+    }
+
+    @Test
     fun partialEsmImportsSameCoreBuiltinWrappers() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("core builtin ESM compatibility")
         val workDir = freshWorkDir("node-core-builtins-esm")

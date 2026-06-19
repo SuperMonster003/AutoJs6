@@ -311,6 +311,13 @@ Direct allowlist currently includes:
 - `diagnostics_channel`
 - `perf_hooks`
 
+Node-only limited builtins currently include:
+
+- `node:test`
+
+`node:test` intentionally has no bare `test` alias; `require("test")` remains
+ordinary package resolution.
+
 Limited builtin map currently includes:
 
 - `assert`
@@ -397,6 +404,16 @@ are expected to be cleared after `AsyncLocalStorage.run()` completes. Where
 native workers are available, the worker-pool parent promise boundary preserves
 the parent context; worker runtimes still use their separate restricted profile
 and do not receive implicit AutoJs bridge authority.
+
+`node:test` exposes an AutoJs6 embedded subset rather than Node's full desktop
+test runner. It supports single-runtime `test`, `describe`/`suite`, `it`,
+`before`/`after`, `beforeEach`/`afterEach`, `skip`, `todo`, per-test timeout
+options, assertion failure reporting, and a TAP reporter. The subset does not
+support process-isolated test files, file discovery, watch mode, coverage,
+native runner `run()`, mocks, or snapshots. Tests run sequentially in the owning
+Node runtime, and completed tests are checked for newly pending timer activity
+so late async work is reported as a test failure. `node:test/reporters` remains
+disabled.
 
 The `stream` wrapper is a partial compatibility surface for pure-JS packages. It
 exposes the standard constructors, `Readable.from()`, callback

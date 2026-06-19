@@ -7954,6 +7954,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_util_cache = null;
   let __autojs6_limited_async_hooks_cache = null;
   let __autojs6_limited_diagnostics_channel_cache = null;
+  let __autojs6_limited_node_test_cache = null;
   let __autojs6_limited_dns_cache = null;
   let __autojs6_limited_dns_promises_cache = null;
   let __autojs6_limited_events_cache = null;
@@ -19988,6 +19989,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_pending_crypto_callbacks = 0;
   let __autojs6_pending_dns_callbacks = 0;
   let __autojs6_pending_zlib_callbacks = 0;
+  let __autojs6_pending_node_test_callbacks = 0;
   let __autojs6_pending_scoped_fs_streams = [];
   let __autojs6_pending_zlib_streams = [];
   let __autojs6_scoped_watch_file_records = [];
@@ -20001,7 +20003,8 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_pending_crypto_callbacks +
       __autojs6_pending_dns_callbacks +
       __autojs6_pending_zlib_callbacks +
-      __autojs6_pending_zlib_streams.length;
+      __autojs6_pending_zlib_streams.length +
+      __autojs6_pending_node_test_callbacks;
   }
   function __autojs6_schedule_task(callback) {
     if (typeof setImmediate === "function") {
@@ -20062,6 +20065,9 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_schedule_zlib_callback(callback, action) {
     __autojs6_schedule_pending_callback("zlib", action);
+  }
+  function __autojs6_adjust_pending_node_test(delta) {
+    __autojs6_pending_node_test_callbacks = Math.max(0, __autojs6_pending_node_test_callbacks + delta);
   }
   function __autojs6_track_zlib_stream(stream) {
     if (!stream || typeof stream.once !== "function") {
@@ -27516,6 +27522,536 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_limited_assert_strict() {
     return __autojs6_limited_assert().strict;
   }
+  function __autojs6_limited_node_test() {
+    if (__autojs6_limited_node_test_cache) {
+      return __autojs6_limited_node_test_cache;
+    }
+    const assertStrict = __autojs6_limited_assert_strict();
+    const rootSuite = {
+      kind: "suite",
+      name: "",
+      mode: "run",
+      reason: "",
+      parent: null,
+      children: [],
+      before: [],
+      after: [],
+      beforeEach: [],
+      afterEach: [],
+      setupPromise: null,
+      setupError: null
+    };
+    const state = {
+      scheduled: false,
+      running: false,
+      completed: false,
+      pendingCounted: false,
+      nextId: 1,
+      tests: 0,
+      suites: 0,
+      pass: 0,
+      fail: 0,
+      skipped: 0,
+      todo: 0,
+      startMs: 0,
+      endMs: 0
+    };
+    let currentSuite = rootSuite;
+    function tapText(value) {
+      return String(value === undefined || value === null ? "" : value).replace(/[\r\n]+/g, " ").trim();
+    }
+    function optionReason(value) {
+      return typeof value === "string" ? value : "";
+    }
+    function isPlainOptions(value) {
+      return !!value && typeof value === "object" && !Array.isArray(value);
+    }
+    function timeoutFromOptions(options, label) {
+      if (!options || !__autojs6_has_own(options, "timeout") || options.timeout === undefined) {
+        return 0;
+      }
+      const timeout = Number(options.timeout);
+      if (!Number.isFinite(timeout) || timeout < 0) {
+        throw __autojs6_invalid_arg_value("node:test " + label + " timeout must be a non-negative finite number.");
+      }
+      return Math.min(Math.floor(timeout), 2147483647);
+    }
+    function normalizeRegistration(args, fallbackName, forcedMode) {
+      const values = Array.prototype.slice.call(args);
+      let name = "";
+      let options = Object.create(null);
+      let fn = null;
+      if (typeof values[0] === "string") {
+        name = String(values.shift());
+      } else if (typeof values[0] === "function") {
+        fn = values.shift();
+        name = fn.name || fallbackName;
+      } else if (isPlainOptions(values[0])) {
+        options = values.shift();
+        if (options.name !== undefined) {
+          name = String(options.name);
+        }
+      } else if (values[0] !== undefined) {
+        name = String(values.shift());
+      }
+      if (!fn && isPlainOptions(values[0])) {
+        options = values.shift();
+        if (!name && options.name !== undefined) {
+          name = String(options.name);
+        }
+      }
+      if (!fn && typeof values[0] === "function") {
+        fn = values.shift();
+        if (!name) {
+          name = fn.name || fallbackName;
+        }
+      }
+      if (!name) {
+        name = fallbackName;
+      }
+      const skip = forcedMode === "skip" || options.skip === true || typeof options.skip === "string";
+      const todo = !skip && (forcedMode === "todo" || options.todo === true || typeof options.todo === "string");
+      return {
+        name: tapText(name || fallbackName),
+        fn,
+        mode: skip ? "skip" : todo ? "todo" : "run",
+        reason: forcedMode === "skip" ? optionReason(options.skip) :
+          forcedMode === "todo" ? optionReason(options.todo) :
+          skip ? optionReason(options.skip) :
+          todo ? optionReason(options.todo) : "",
+        timeoutMs: timeoutFromOptions(options, fallbackName),
+        options
+      };
+    }
+    function normalizeHook(args, label) {
+      const values = Array.prototype.slice.call(args);
+      let options = Object.create(null);
+      let fn = null;
+      if (typeof values[0] === "function") {
+        fn = values.shift();
+      } else if (isPlainOptions(values[0])) {
+        options = values.shift();
+        if (typeof values[0] === "function") {
+          fn = values.shift();
+        }
+      }
+      if (!fn && typeof values[0] === "function") {
+        fn = values.shift();
+      }
+      if (typeof fn !== "function") {
+        throw __autojs6_invalid_arg_type("node:test " + label + " hook must be a function.");
+      }
+      return {
+        name: label,
+        fn,
+        timeoutMs: timeoutFromOptions(options, label)
+      };
+    }
+    function scheduleRun() {
+      if (state.scheduled || state.running || state.completed) {
+        return;
+      }
+      state.scheduled = true;
+      state.pendingCounted = true;
+      __autojs6_adjust_pending_node_test(1);
+      __autojs6_schedule_task(function() {
+        Promise.resolve().then(runAll).then(function() {
+          finishRun(null);
+        }, function(error) {
+          finishRun(error);
+        });
+      });
+    }
+    function registerTest(args, forcedMode, fallbackName) {
+      const registration = normalizeRegistration(args, fallbackName, forcedMode);
+      const record = {
+        kind: "test",
+        name: registration.name,
+        fn: registration.fn,
+        mode: registration.mode,
+        reason: registration.reason,
+        timeoutMs: registration.timeoutMs,
+        parent: currentSuite
+      };
+      currentSuite.children.push(record);
+      scheduleRun();
+      return record;
+    }
+    function registerSuite(args, forcedMode, fallbackName) {
+      const registration = normalizeRegistration(args, fallbackName, forcedMode);
+      const suite = {
+        kind: "suite",
+        name: registration.name,
+        fn: registration.fn,
+        mode: registration.mode,
+        reason: registration.reason,
+        timeoutMs: registration.timeoutMs,
+        parent: currentSuite,
+        children: [],
+        before: [],
+        after: [],
+        beforeEach: [],
+        afterEach: [],
+        setupPromise: null,
+        setupError: null
+      };
+      currentSuite.children.push(suite);
+      state.suites += 1;
+      if (suite.mode === "run" && typeof suite.fn === "function") {
+        const previous = currentSuite;
+        currentSuite = suite;
+        try {
+          const result = suite.fn.call(undefined);
+          if (result && typeof result.then === "function") {
+            suite.setupPromise = Promise.resolve(result).catch(function(error) {
+              suite.setupError = error;
+            });
+          }
+        } catch (error) {
+          suite.setupError = error;
+        } finally {
+          currentSuite = previous;
+        }
+      }
+      scheduleRun();
+      return suite;
+    }
+    function registerHook(target, args) {
+      currentSuite[target].push(normalizeHook(args, target));
+      scheduleRun();
+    }
+    function nodeTest() {
+      return registerTest(arguments, "", "test");
+    }
+    nodeTest.skip = function() {
+      return registerTest(arguments, "skip", "test");
+    };
+    nodeTest.todo = function() {
+      return registerTest(arguments, "todo", "test");
+    };
+    function describe() {
+      return registerSuite(arguments, "", "suite");
+    }
+    describe.skip = function() {
+      return registerSuite(arguments, "skip", "suite");
+    };
+    describe.todo = function() {
+      return registerSuite(arguments, "todo", "suite");
+    };
+    function it() {
+      return registerTest(arguments, "", "test");
+    }
+    it.skip = function() {
+      return registerTest(arguments, "skip", "test");
+    };
+    it.todo = function() {
+      return registerTest(arguments, "todo", "test");
+    };
+    function before() {
+      registerHook("before", arguments);
+    }
+    function after() {
+      registerHook("after", arguments);
+    }
+    function beforeEach() {
+      registerHook("beforeEach", arguments);
+    }
+    function afterEach() {
+      registerHook("afterEach", arguments);
+    }
+    function control(kind, reason) {
+      const error = new Error(kind === "skip" ? "test skipped" : "test todo");
+      error.__autojs6NodeTestControl = kind;
+      error.reason = tapText(reason || "");
+      return error;
+    }
+    function controlKind(error) {
+      return error && error.__autojs6NodeTestControl ? String(error.__autojs6NodeTestControl) : "";
+    }
+    function testContext(record) {
+      const context = Object.create(null);
+      Object.defineProperties(context, {
+        name: { value: record.name, enumerable: true },
+        skip: {
+          value: function(reason) {
+            throw control("skip", reason);
+          },
+          enumerable: true
+        },
+        todo: {
+          value: function(reason) {
+            throw control("todo", reason);
+          },
+          enumerable: true
+        },
+        diagnostic: {
+          value: function(message) {
+            console.log("# " + tapText(message));
+          },
+          enumerable: true
+        },
+        timeout: {
+          value: function(timeoutMs) {
+            record.timeoutMs = timeoutFromOptions({ timeout: timeoutMs }, "test context");
+          },
+          enumerable: true
+        }
+      });
+      return Object.freeze(context);
+    }
+    function timeoutError(label, timeoutMs) {
+      return __autojs6_with_error_code(
+        new Error("node:test embedded test timed out after " + timeoutMs + "ms: " + label),
+        "ERR_AUTOJS6_NODE_TEST_TIMEOUT"
+      );
+    }
+    function runFunction(fn, context, timeoutMs, label) {
+      const work = Promise.resolve().then(function() {
+        return fn.call(undefined, context);
+      });
+      if (!timeoutMs) {
+        return work;
+      }
+      let timer = null;
+      let settled = false;
+      return new Promise(function(resolve, reject) {
+        timer = setTimeout(function() {
+          if (settled) return;
+          settled = true;
+          reject(timeoutError(label, timeoutMs));
+        }, timeoutMs);
+        work.then(function(value) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          resolve(value);
+        }, function(error) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          reject(error);
+        });
+      });
+    }
+    function settleOneTick() {
+      return new Promise(function(resolve) {
+        __autojs6_schedule_task(resolve);
+      });
+    }
+    function inheritedBeforeEach(suite) {
+      const hooks = [];
+      let current = suite;
+      while (current && current !== rootSuite) {
+        hooks.unshift.apply(hooks, current.beforeEach);
+        current = current.parent;
+      }
+      hooks.unshift.apply(hooks, rootSuite.beforeEach);
+      return hooks;
+    }
+    function inheritedAfterEach(suite) {
+      const hooks = [];
+      let current = suite;
+      while (current && current !== rootSuite) {
+        hooks.push.apply(hooks, current.afterEach);
+        current = current.parent;
+      }
+      hooks.push.apply(hooks, rootSuite.afterEach);
+      return hooks;
+    }
+    async function runHooks(hooks, context) {
+      for (const hook of hooks) {
+        await runFunction(hook.fn, context, hook.timeoutMs, hook.name);
+      }
+    }
+    function emitOk(record, suffix) {
+      const id = state.nextId++;
+      console.log("ok " + id + " - " + tapText(record.name) + (suffix ? " " + suffix : ""));
+    }
+    function emitFailure(record, error, durationMs) {
+      const id = state.nextId++;
+      const message = error && error.message ? String(error.message) : String(error);
+      const name = error && error.name ? String(error.name) : "Error";
+      const code = error && (error.code || error.autojs6Code) ? String(error.code || error.autojs6Code) : "";
+      console.log("not ok " + id + " - " + tapText(record.name));
+      console.log("  ---");
+      console.log("  duration_ms: " + Math.max(0, Number(durationMs || 0)));
+      console.log("  error:");
+      console.log("    name: " + JSON.stringify(name));
+      console.log("    message: " + JSON.stringify(message));
+      if (code) {
+        console.log("    code: " + JSON.stringify(code));
+      }
+      console.log("  ...");
+      state.fail += 1;
+    }
+    function asyncActivityError(beforeCount, afterCount) {
+      return __autojs6_with_error_code(
+        new Error("node:test embedded subset detected async activity after test completion: pending timers changed from " + beforeCount + " to " + afterCount + "."),
+        "ERR_AUTOJS6_NODE_TEST_ASYNC_ACTIVITY"
+      );
+    }
+    async function runTest(record) {
+      state.tests += 1;
+      if (record.mode === "skip") {
+        state.skipped += 1;
+        emitOk(record, "# SKIP" + (record.reason ? " " + tapText(record.reason) : ""));
+        return;
+      }
+      if (record.mode === "todo") {
+        state.todo += 1;
+        emitOk(record, "# TODO" + (record.reason ? " " + tapText(record.reason) : ""));
+        return;
+      }
+      if (typeof record.fn !== "function") {
+        state.todo += 1;
+        emitOk(record, "# TODO no callback");
+        return;
+      }
+      const startedAt = Date.now();
+      const beforeTimerCount = __autojs6_pending_timer_total();
+      const context = testContext(record);
+      let failure = null;
+      let controlled = "";
+      try {
+        await runHooks(inheritedBeforeEach(record.parent), context);
+        await runFunction(record.fn, context, record.timeoutMs, record.name);
+      } catch (error) {
+        controlled = controlKind(error);
+        failure = error;
+      }
+      try {
+        await runHooks(inheritedAfterEach(record.parent), context);
+      } catch (error) {
+        if (!failure) {
+          failure = error;
+        }
+      }
+      await settleOneTick();
+      const durationMs = Date.now() - startedAt;
+      if (controlled === "skip") {
+        state.skipped += 1;
+        emitOk(record, "# SKIP" + (failure.reason ? " " + tapText(failure.reason) : ""));
+        return;
+      }
+      if (controlled === "todo") {
+        state.todo += 1;
+        emitOk(record, "# TODO" + (failure.reason ? " " + tapText(failure.reason) : ""));
+        return;
+      }
+      if (failure) {
+        emitFailure(record, failure, durationMs);
+        return;
+      }
+      const afterTimerCount = __autojs6_pending_timer_total();
+      if (afterTimerCount > beforeTimerCount) {
+        emitFailure(record, asyncActivityError(beforeTimerCount, afterTimerCount), durationMs);
+        return;
+      }
+      state.pass += 1;
+      emitOk(record, "(" + durationMs + "ms)");
+    }
+    async function runSuite(suite) {
+      if (suite.mode === "skip") {
+        state.skipped += 1;
+        emitOk(suite, "# SKIP" + (suite.reason ? " " + tapText(suite.reason) : ""));
+        return;
+      }
+      if (suite.mode === "todo") {
+        state.todo += 1;
+        emitOk(suite, "# TODO" + (suite.reason ? " " + tapText(suite.reason) : ""));
+        return;
+      }
+      if (suite.setupPromise) {
+        await suite.setupPromise;
+      }
+      if (suite.setupError) {
+        emitFailure({ name: suite.name + " setup" }, suite.setupError, 0);
+        return;
+      }
+      try {
+        await runHooks(suite.before, testContext(suite));
+      } catch (error) {
+        emitFailure({ name: suite.name ? suite.name + " before" : "before" }, error, 0);
+        return;
+      }
+      let index = 0;
+      while (index < suite.children.length) {
+        const child = suite.children[index++];
+        if (child.kind === "suite") {
+          await runSuite(child);
+        } else {
+          await runTest(child);
+        }
+      }
+      try {
+        await runHooks(suite.after, testContext(suite));
+      } catch (error) {
+        emitFailure({ name: suite.name ? suite.name + " after" : "after" }, error, 0);
+      }
+    }
+    async function runAll() {
+      if (state.running || state.completed) {
+        return;
+      }
+      state.running = true;
+      state.startMs = Date.now();
+      console.log("TAP version 13");
+      await runSuite(rootSuite);
+      state.endMs = Date.now();
+      state.completed = true;
+    }
+    function emitSummary() {
+      const total = state.pass + state.fail + state.skipped + state.todo;
+      console.log("1.." + total);
+      console.log("# tests " + state.tests);
+      console.log("# suites " + state.suites);
+      console.log("# pass " + state.pass);
+      console.log("# fail " + state.fail);
+      console.log("# skipped " + state.skipped);
+      console.log("# todo " + state.todo);
+      console.log("# duration_ms " + Math.max(0, state.endMs - state.startMs));
+    }
+    function nodeTestFailureError() {
+      return __autojs6_with_error_code(
+        new Error("AutoJs6 node:test embedded subset failed: " + state.fail + " failed, " + state.pass + " passed."),
+        "ERR_AUTOJS6_NODE_TEST_FAILURE"
+      );
+    }
+    function finishRun(error) {
+      if (state.pendingCounted) {
+        state.pendingCounted = false;
+        __autojs6_adjust_pending_node_test(-1);
+      }
+      try {
+        emitSummary();
+      } catch (_) {}
+      if (error) {
+        __autojs6_finish_error(error);
+      } else if (state.fail > 0) {
+        __autojs6_finish_error(nodeTestFailureError());
+      } else {
+        __autojs6_try_finish_deferred_success();
+      }
+    }
+    Object.defineProperties(nodeTest, {
+      test: { value: nodeTest, enumerable: true },
+      describe: { value: describe, enumerable: true },
+      suite: { value: describe, enumerable: true },
+      it: { value: it, enumerable: true },
+      before: { value: before, enumerable: true },
+      after: { value: after, enumerable: true },
+      beforeEach: { value: beforeEach, enumerable: true },
+      afterEach: { value: afterEach, enumerable: true },
+      skip: { value: nodeTest.skip, enumerable: true },
+      todo: { value: nodeTest.todo, enumerable: true },
+      assert: { value: assertStrict, enumerable: true },
+      reporter: { value: "tap", enumerable: true }
+    });
+    Object.freeze(describe);
+    Object.freeze(it);
+    __autojs6_limited_node_test_cache = Object.freeze(nodeTest);
+    return __autojs6_limited_node_test_cache;
+  }
   function __autojs6_limited_punycode() {
     if (__autojs6_limited_punycode_cache) {
       return __autojs6_limited_punycode_cache;
@@ -29926,6 +30462,9 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_limited_module_is_builtin(name) {
     const key = name === undefined ? "" : String(name);
+    if (key === "node:test") {
+      return true;
+    }
     if (__autojs6_worker_threads_experimental_enabled && (key === "worker_threads" || key === "node:worker_threads")) {
       return true;
     }
@@ -29949,11 +30488,14 @@ std::string buildEmbeddedScriptExecutionSource(
         enumerable: true
       },
       builtinModules: {
-        value: Object.freeze(
-          __autojs6_worker_threads_experimental_enabled
-            ? __autojs6_limited_builtin_module_names.concat(["worker_threads"])
-            : __autojs6_limited_builtin_module_names.slice()
-        ),
+        value: Object.freeze((function() {
+          const names = __autojs6_limited_builtin_module_names.slice();
+          names.push("node:test");
+          if (__autojs6_worker_threads_experimental_enabled) {
+            names.push("worker_threads");
+          }
+          return names;
+        })()),
         enumerable: true
       },
       syncBuiltinESMExports: {
@@ -31457,7 +31999,8 @@ std::string buildEmbeddedScriptExecutionSource(
     return lines;
   }
   function __autojs6_esm_builtin_specifier(name) {
-    return __autojs6_has_own(__autojs6_require_builtin_allowlist, name) ||
+    return name === "node:test" ||
+      __autojs6_has_own(__autojs6_require_builtin_allowlist, name) ||
       __autojs6_has_own(__autojs6_limited_builtin_module_map, name) ||
       __autojs6_denied_builtin_module_name(name);
   }
@@ -32183,6 +32726,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return "worker_threads";
     }
+    if (name === "node:test") {
+      return "node:test";
+    }
     if (name === "fs" || name === "node:fs") {
       return "fs";
     }
@@ -32428,6 +32974,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return __autojs6_limited_worker_threads();
     }
+    if (name === "node:test") {
+      return __autojs6_limited_node_test();
+    }
     if (name === "fs" || name === "node:fs") {
       return __autojs6_scoped_fs();
     }
@@ -32656,6 +33205,7 @@ std::string buildEmbeddedScriptExecutionSource(
       pendingCryptoCallbacks: __autojs6_pending_crypto_callbacks,
       pendingDnsCallbacks: __autojs6_pending_dns_callbacks,
       pendingZlibCallbacks: __autojs6_pending_zlib_callbacks,
+      pendingNodeTestCallbacks: __autojs6_pending_node_test_callbacks,
       pendingZlibStreams: __autojs6_pending_zlib_streams.length > 0,
       pendingZlibStreamCount: __autojs6_pending_zlib_streams.length,
       pendingAsyncCallbacks,
@@ -32696,6 +33246,7 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.pendingCryptoCallbacks = summary.pendingCryptoCallbacks;
     fields.pendingDnsCallbacks = summary.pendingDnsCallbacks;
     fields.pendingZlibCallbacks = summary.pendingZlibCallbacks;
+    fields.pendingNodeTestCallbacks = summary.pendingNodeTestCallbacks;
     fields.pendingZlibStreams = summary.pendingZlibStreams;
     fields.pendingZlibStreamCount = summary.pendingZlibStreamCount;
     fields.pendingAsyncCallbacks = summary.pendingAsyncCallbacks;
