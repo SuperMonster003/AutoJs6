@@ -213,6 +213,158 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
     }
 
     @Test
+    fun asyncLocalStoragePropagatesAcrossSafeAsyncBoundariesAndCleansUp() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("async_hooks context propagation")
+        val workDir = freshWorkDir("node-async-context")
+        File(workDir, "data.txt").writeText("data\n")
+        writeShadow(workDir, "async_hooks/index.js")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                (async function main() {
+                  const asyncHooks = require("async_hooks");
+                  const nodeAsyncHooks = require("node:async_hooks");
+                  const fs = require("fs");
+                  const fsp = require("fs/promises");
+                  const bridge = require("autojs6:bridge");
+                  const fetchModule = require("fetch");
+                  const { Buffer } = require("buffer");
+                  const timerPromises = require("timers/promises");
+                  const asyncLocalStorage = new asyncHooks.AsyncLocalStorage();
+                  const requests = [];
+
+                  function storeLabel() {
+                    const store = asyncLocalStorage.getStore();
+                    return store && store.id ? String(store.id) : "none";
+                  }
+
+                  function readFileCallback() {
+                    return new Promise((resolve, reject) => {
+                      fs.readFile("data.txt", "utf8", (error, text) => {
+                        if (error) {
+                          reject(error);
+                          return;
+                        }
+                        resolve(storeLabel() + ":" + String(text).trim());
+                      });
+                    });
+                  }
+
+                  bridge.__test.setTransport({
+                    postMessage(message) {
+                      const request = JSON.parse(message);
+                      requests.push(request.module + ":" + request.method + ":" + storeLabel());
+                      setImmediate(() => {
+                        const callbackStore = storeLabel();
+                        if (request.module === "fetch") {
+                          const body = "fetch:" + callbackStore;
+                          bridge.__test.receiveMessage(JSON.stringify({
+                            id: request.id,
+                            ok: true,
+                            result: {
+                              url: request.args[0].url,
+                              status: 200,
+                              statusText: "OK",
+                              headers: [["content-type", "text/plain"], ["x-context", callbackStore]],
+                              bodyBase64: Buffer.from(body).toString("base64"),
+                              bodyBytes: body.length
+                            }
+                          }));
+                          return;
+                        }
+                        bridge.__test.receiveMessage(JSON.stringify({
+                          id: request.id,
+                          ok: true,
+                          result: {
+                            store: callbackStore,
+                            argStore: request.args[0] && request.args[0].store
+                          }
+                        }));
+                      });
+                    }
+                  });
+
+                  const summary = await asyncLocalStorage.run({ id: "ctx" }, async () => {
+                    const promiseValue = await Promise.resolve().then(storeLabel);
+                    const nextTickValue = await new Promise((resolve) => process.nextTick(() => resolve(storeLabel())));
+                    const microtaskValue = await new Promise((resolve) => queueMicrotask(() => resolve(storeLabel())));
+                    const timeoutValue = await new Promise((resolve) => setTimeout(() => resolve(storeLabel()), 0));
+                    const immediateValue = await new Promise((resolve) => setImmediate(() => resolve(storeLabel())));
+                    await timerPromises.setTimeout(0);
+                    const timerPromiseValue = storeLabel();
+                    const fsCallbackValue = await readFileCallback();
+                    const fsPromiseValue = String(await fsp.readFile("data.txt", "utf8")).trim() + ":" + storeLabel();
+                    const bridgeValue = await bridge.callAutoJs(
+                      "toast",
+                      "toast",
+                      [{ store: storeLabel() }],
+                      { timeoutMs: 1000, permissions: ["toast"] }
+                    );
+                    const fetchResponse = await fetchModule("https://example.invalid/context", { timeoutMs: 1000 });
+                    const fetchText = await fetchResponse.text();
+                    const asyncResource = new asyncHooks.AsyncResource("autojs6.s7-31");
+                    const resourceValue = await new Promise((resolve) => {
+                      asyncResource.runInAsyncScope(() => resolve(storeLabel()));
+                    });
+                    asyncResource.emitDestroy();
+                    return [
+                      promiseValue,
+                      nextTickValue,
+                      microtaskValue,
+                      timeoutValue,
+                      immediateValue,
+                      timerPromiseValue,
+                      fsCallbackValue,
+                      fsPromiseValue,
+                      bridgeValue.store + ":" + bridgeValue.argStore + ":" + storeLabel(),
+                      fetchResponse.headers.get("x-context") + ":" + fetchText + ":" + storeLabel(),
+                      resourceValue
+                    ].join("|");
+                  });
+
+                  let mutationBlocked = false;
+                  try {
+                    asyncHooks.createHook = function() {};
+                  } catch (_) {
+                    mutationBlocked = true;
+                  }
+
+                  console.log("async.context.summary=" + summary);
+                  console.log("async.context.requests=" + requests.join("|"));
+                  console.log("async.context.cleanup=" + [
+                    storeLabel(),
+                    bridge.__test.pendingCount(),
+                    Object.isFrozen(asyncHooks),
+                    asyncHooks === nodeAsyncHooks,
+                    asyncHooks.shadow === true,
+                    typeof asyncHooks.createHook,
+                    mutationBlocked || typeof asyncHooks.createHook === "undefined",
+                    typeof asyncHooks.executionAsyncId,
+                    typeof asyncHooks.executionAsyncResource,
+                    typeof asyncHooks.asyncWrapProviders
+                  ].join("|"));
+                })().catch((error) => {
+                  console.error("async.context.error=" + (error && (error.stack || error.message) || error));
+                  process.exitCode = 1;
+                });
+            """.trimIndent(),
+            sourceName = File(workDir, "main.js").absolutePath,
+            workingDirectory = workDir,
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("async_hooks context propagation", result)
+        assertTrue(
+            result.stdout,
+            result.stdout.contains("async.context.summary=ctx|ctx|ctx|ctx|ctx|ctx|ctx:data|data:ctx|ctx:ctx:ctx|ctx:fetch:ctx:ctx|ctx"),
+        )
+        assertTrue(result.stdout, result.stdout.contains("async.context.requests=toast:toast:ctx|fetch:request:ctx"))
+        assertTrue(result.stdout, result.stdout.contains("async.context.cleanup=none|0|true|true|false|undefined|true|undefined|undefined|undefined"))
+        assertTrue(result.nativeValues["embedded_script.pending_scoped_fs_callbacks"], result.nativeValues["embedded_script.pending_scoped_fs_callbacks"] == "0")
+    }
+
+    @Test
     fun partialEsmImportsSameCoreBuiltinWrappers() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("core builtin ESM compatibility")
         val workDir = freshWorkDir("node-core-builtins-esm")

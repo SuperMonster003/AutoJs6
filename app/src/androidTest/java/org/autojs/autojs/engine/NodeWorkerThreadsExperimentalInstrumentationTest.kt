@@ -643,6 +643,8 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                     (async function main() {
                       const workerThreads = require("worker_threads");
                       const { WorkerPool } = workerThreads;
+                      const { AsyncLocalStorage } = require("async_hooks");
+                      const asyncLocalStorage = new AsyncLocalStorage();
                       function codeOf(error) {
                         return String(error && (error.autojs6Code || error.code || error.name || ""));
                       }
@@ -668,13 +670,25 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
                         }
                       });
 
-                      const first = await pool.run({ n: 3 });
+                      const first = await asyncLocalStorage.run({ id: "pool-ctx" }, async () => {
+                        const parentBefore = asyncLocalStorage.getStore().id;
+                        const value = await pool.run({ n: 3 });
+                        return Object.assign({}, value, {
+                          parentBefore,
+                          parentAfter: asyncLocalStorage.getStore().id
+                        });
+                      });
                       const second = await pool.run({ n: 4 });
                       console.log("worker.pool.reuse=" + [
                         first.result,
                         second.result,
                         first.threadId === second.threadId,
                         first.label
+                      ].join("|"));
+                      console.log("worker.pool.async_context=" + [
+                        first.parentBefore,
+                        first.parentAfter,
+                        asyncLocalStorage.getStore() === undefined
                       ].join("|"));
 
                       const running = pool.run({ kind: "delay", ms: 200 });
@@ -728,6 +742,7 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             NodeEmbeddedTestHarness.assertSucceeded("worker_threads WorkerPool", result)
             assertTrue(result.stdout, result.stdout.contains("worker.pool.policy=function|1|8|64"))
             assertTrue(result.stdout, result.stdout.contains("worker.pool.reuse=9|16|true|pool-data"))
+            assertTrue(result.stdout, result.stdout.contains("worker.pool.async_context=pool-ctx|pool-ctx|true"))
             assertTrue(result.stdout, result.stdout.contains("worker.pool.queue=${NodeRuntimeErrorCodes.WORKER_POOL_QUEUE_FULL}"))
             assertTrue(result.stdout, result.stdout.contains("worker.pool.cancel=true|${NodeRuntimeErrorCodes.WORKER_POOL_TASK_CANCELLED}"))
             assertTrue(result.stdout, result.stdout.contains("worker.pool.running=delay"))

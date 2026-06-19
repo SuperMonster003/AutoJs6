@@ -364,6 +364,18 @@ are ignored, and `process.getBuiltinModule()` remains disabled so scripts cannot
 `EventEmitterAsyncResource` or `EventTarget`; Web-style `EventTarget` remains a global. `diagnostics_channel` exposes a
 bounded publish/subscribe/tracing surface without raw subscriber internals.
 
+`async_hooks` exposes only `AsyncLocalStorage` and `AsyncResource`. It does not
+expose `createHook`, async-id introspection, provider tables, or raw execution
+resources. The S7-31 compatibility gate locks context propagation across
+Promise chains, `process.nextTick`, `queueMicrotask`, timers,
+`timers/promises`, scoped `fs` callbacks, `fs/promises`, AutoJs bridge RPC, and
+controlled fetch's bridge transport path. Querying or using async context does
+not grant bridge, network, filesystem, worker, or Android permissions. Stores
+are expected to be cleared after `AsyncLocalStorage.run()` completes. Where
+native workers are available, the worker-pool parent promise boundary preserves
+the parent context; worker runtimes still use their separate restricted profile
+and do not receive implicit AutoJs bridge authority.
+
 The `stream` wrapper is a partial compatibility surface for pure-JS packages. It
 exposes the standard constructors, `Readable.from()`, callback
 `pipeline()`/`finished()`, `stream/promises` `pipeline()`/`finished()`, selected

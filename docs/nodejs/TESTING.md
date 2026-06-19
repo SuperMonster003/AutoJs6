@@ -409,10 +409,11 @@ Current core builtin compatibility focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest"
 ```
 
-This suite verifies `constants`, `util/types`, `events`, and `diagnostics_channel` bare/`node:` aliases, shadowing
-protection, CJS and partial ESM import paths, frozen wrappers, the `events`/global `EventTarget` boundary,
-`diagnostics_channel` publish/subscribe behavior, `process.getBuiltinModule()` denial, and unchanged denial for disabled
-builtins such as `child_process`, `vm`, and `dgram`.
+This suite verifies `constants`, `util/types`, `events`, `diagnostics_channel`, and `async_hooks` bare/`node:` aliases,
+shadowing protection, CJS and partial ESM import paths, frozen wrappers, the `events`/global `EventTarget` boundary,
+`diagnostics_channel` publish/subscribe behavior, S7-31 `AsyncLocalStorage` propagation across Promise/timer/fs/bridge/fetch
+boundaries plus cleanup, `process.getBuiltinModule()` denial, and unchanged denial for disabled builtins such as
+`child_process`, `vm`, and `dgram`.
 
 Current `vm` design gate focused instrumentation:
 
