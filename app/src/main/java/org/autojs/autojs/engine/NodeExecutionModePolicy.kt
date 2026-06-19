@@ -9,6 +9,7 @@ object NodeExecutionModePolicy {
 
     const val LAUNCH_SURFACE_SCRIPT = "script"
     const val LAUNCH_SURFACE_INTERACTIVE_SESSION = "interactive_session"
+    const val LAUNCH_SURFACE_SCHEDULED_RUNNER = "scheduled_runner"
 
     // Legacy request aliases retained for stable rejection diagnostics.
     const val MODE_LONG_RUNNING = "long_running"
@@ -186,8 +187,8 @@ object NodeExecutionModePolicy {
         ),
         Definition(
             mode = MODE_SCHEDULED,
-            status = "reserved",
-            supportedLaunchSurfaces = emptySet(),
+            status = "partial",
+            supportedLaunchSurfaces = setOf(LAUNCH_SURFACE_SCHEDULED_RUNNER),
             timeoutPolicy = "required_task_timeout",
             foregroundRequirement = "workmanager_policy_dependent",
             notificationRequirement = "task_visibility_required_before_promotion",
@@ -202,7 +203,7 @@ object NodeExecutionModePolicy {
             restartPolicy = "never_no_implicit_retry",
             resourceQuotaProfile = "scheduled_task_strict",
             stopSemantics = "cancel_work_then_destroy_runtime",
-            unsupportedReason = "Scheduled Node execution still uses bounded one-shot WorkManager launches until the dedicated scheduled runner gate.",
+            unsupportedReason = "Scheduled Node execution is available only through the controlled WorkManager scheduled runner launch surface; direct script launches remain one-shot.",
         ),
         Definition(
             mode = MODE_WORKER_COMPUTATION,

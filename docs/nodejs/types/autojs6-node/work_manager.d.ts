@@ -34,6 +34,12 @@
       readonly finishedAtEpochMs: number;
       readonly elapsedMs: number;
       readonly succeeded: boolean;
+      readonly trigger: string;
+      readonly runnerVersion: number;
+      readonly attempt: number;
+      readonly executionId: string;
+      readonly executionMode: "scheduled" | string;
+      readonly launchSurface: "scheduled_runner" | string;
       readonly exitCode: number | null;
       readonly sourceName: string;
       readonly errorCode: string | null;
@@ -42,6 +48,7 @@
       readonly timedOut: boolean;
       readonly stdout: string;
       readonly stderr: string;
+      readonly nativeValues: Readonly<Record<string, string>>;
     }
 
     export interface WorkTask {
@@ -64,6 +71,7 @@
       readonly lastRunStatus?: WorkStatus;
       readonly lastFailure?: string | null;
       readonly lastRun?: WorkRun;
+      readonly runHistory: readonly WorkRun[];
     }
 
     export interface Policy {

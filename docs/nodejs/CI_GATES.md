@@ -225,9 +225,11 @@ explicit JUnit skip.
 `verifyNodeLiveUiGate` validates the Activity-owned UI provider, JavaScript
 event delivery, provider cleanup, descriptor denial, and foreign-handle denial.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
-`work_manager` scheduling, real one-shot embedded Node execution, delayed cancel
-prevention, path/capability enforcement, persisted run metadata, and Android 16
-JobScheduler quota diagnostics in task records.
+`work_manager` scheduling, real scheduled-runner embedded Node execution for
+CommonJS and ESM entries, delayed cancel prevention, path/capability
+enforcement, persisted `lastRun`/`runHistory` metadata, scheduled task
+environment values, and Android 16 JobScheduler quota diagnostics in task
+records.
 `verifyNodeLongRunningGate` keeps normal long-running activation fail-closed
 while covering the S7-18 interactive foreground MVP. It freezes the Phase 7
 execution-mode state machine, verifies ordinary script launches still execute

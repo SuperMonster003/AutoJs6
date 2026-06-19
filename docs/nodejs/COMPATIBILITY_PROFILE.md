@@ -190,8 +190,10 @@ Current behavior remains:
 - `interactive_long_running` is supported only by the explicit
   `interactive_session` launch surface used by
   `NativeNodeEmbeddedScriptService.startInteractiveLongRunning(...)`
+- `scheduled` is supported only by the WorkManager-owned
+  `scheduled_runner` launch surface used for fired `work_manager` tasks
 - direct script `interactiveLongRunning`, legacy `long_running`/`service`,
-  `scheduled`, and `workerComputation` requests are rejected before user code
+  `scheduled`, and `workerComputation` requests still reject before user code
   runs with `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`
 - rejection native values include timeout policy, foreground requirement,
   notification requirement, allowed-provider list, restart policy, quota
@@ -1116,6 +1118,9 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - current MVP persists app-private WorkManager task records and can launch scoped embedded Node one-shot or bounded periodic work through AndroidX WorkManager
   - `backend` is restricted to `embedded`, task metadata preserves either `scriptPath` or project `entry` plus `entryKind`, paths must stay relative to the scoped working directory, non-packaged entries must exist as files, periodic intervals are bounded to at least `900000` ms, and workers never request implicit retry
   - packaged metadata can mark project entries with `packaged: true` and does not require a plaintext source file at registration time, but live execution still needs a readable scoped entry when the WorkManager worker fires
+  - fired work runs through the dedicated `scheduled_runner` launch surface with `executionMode=scheduled`; direct scripts cannot request that mode
+  - scheduled runner entries support CJS and ESM source names through the same scoped source resolver used by embedded Node project launches
+  - task records expose `lastRun` plus bounded `runHistory` with trigger, runner version, attempt, execution id, execution mode, launch surface, stdout/stderr snippets, exit/error metadata, timeout state, Android quota policy, and selected embedded native values
   - provider-owned task registrations are tracked as bridge resources; explicit `cancel()` removes persisted records and cancels the unique WorkManager work
   - raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter objects remain unavailable to JavaScript
 
@@ -1211,9 +1216,11 @@ Current policy:
 
 - `require("work_manager")` is exposed as a Promise bridge module for `scheduleOnce`, `schedulePeriodic`, `cancel`, and `list`.
 - S7-15 persists scoped descriptors as app-private WorkManager task records and enqueues one-shot or bounded periodic AndroidX WorkManager requests.
+- S7-21 executes fired tasks through the WorkManager-owned `scheduled_runner` launch surface with `executionMode=scheduled`; default script launches that request `scheduled` still reject before user code.
 - `work_manager` is a live-bridge capability. Queued host fallback rejects it with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED` so older packaged templates cannot create persistent tasks as one-way effects.
 - Registered descriptors accept only `backend: "embedded"`, scoped relative `scriptPath` or project `entry`, bounded delay/interval/timeout values, and boolean `charging`, `network`, and `idle` constraints. Non-packaged entries must resolve to files inside the working directory; packaged entries may serialize metadata without a plaintext file at registration time.
-- When a WorkManager task fires, the worker revalidates the scoped entry path, runs the script through `NativeNodeEmbeddedScriptService` in one-shot mode, and stores `lastRun`, `lastRunStatus`, `lastFailure`, stdout/stderr snippets, timeout state, exit/error metadata, and Android quota policy diagnostics.
+- When a WorkManager task fires, the worker revalidates the scoped entry path, runs the script through `NativeNodeEmbeddedScriptService` as a scheduled runner task, and stores `lastRun`, `runHistory`, `lastRunStatus`, `lastFailure`, stdout/stderr snippets, timeout state, exit/error metadata, execution id, attempt, launch surface, selected native values, and Android quota policy diagnostics.
+- Scheduled runs receive `AUTOJS6_NODE_SCHEDULED_TASK_ID`, `AUTOJS6_NODE_SCHEDULED_TASK_TYPE`, and `AUTOJS6_NODE_SCHEDULED_TASK_ATTEMPT` environment values.
 - Workers return success or failure only and never request WorkManager retry. Cancel removes the task record and cancels the unique WorkManager work.
 - `require("tasks")` is not exposed in the Embedded Node Safe Node Profile.
 - Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.

@@ -1490,9 +1490,10 @@ class NativeNodeEmbeddedScriptService : Service() {
         fun runScript(
             context: Context,
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
-            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(request)?.let {
+            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(request, launchSurface)?.let {
                 return it.withLifecycle(preflightFailureLifecycle(executionId, request))
             }
             val startedAt = android.os.SystemClock.elapsedRealtime()
@@ -1516,6 +1517,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_SOURCE_NAME, request.sourceName)
                 putExtra(EXTRA_WORKING_DIRECTORY, request.workingDirectory)
                 putExtra(EXTRA_EXECUTION_MODE, request.executionMode)
+                putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
                 putExtra(EXTRA_TIMEOUT_MS, request.timeoutMs.coerceAtLeast(1L))
                 putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, request.esmExperimentalEnabled)
                 putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, request.dynamicImportExperimentalEnabled)

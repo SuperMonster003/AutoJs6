@@ -49,7 +49,14 @@ class NodeExecutionModePolicyInstrumentationTest {
         assertTrue(interactive.unsupportedReason.orEmpty().contains("explicit interactive session"))
 
         val scheduled = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_SCHEDULED)
-        assertFalse(scheduled.supported)
+        assertTrue(scheduled.supported)
+        assertFalse(NodeExecutionModePolicy.isSupported(NodeExecutionModePolicy.MODE_SCHEDULED))
+        assertTrue(
+            NodeExecutionModePolicy.isSupported(
+                NodeExecutionModePolicy.MODE_SCHEDULED,
+                NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+            ),
+        )
         assertEquals("never_no_implicit_retry", scheduled.restartPolicy)
         assertTrue(scheduled.allowedProviders.contains("work_manager"))
 
@@ -111,8 +118,17 @@ class NodeExecutionModePolicyInstrumentationTest {
 
         val scheduled = NodeExecutionModePolicy.nativeValues("scheduled")
         assertEquals("false", scheduled["embedded_script.execution_mode_supported"])
+        assertEquals(
+            NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+            scheduled["embedded_script.execution_mode_supported_launch_surfaces"],
+        )
         assertEquals("false", scheduled["embedded_script.long_running_requested"])
         assertEquals("required_task_timeout", scheduled["embedded_script.execution_mode_timeout_policy"])
+        val scheduledRunner = NodeExecutionModePolicy.nativeValues(
+            "scheduled",
+            NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+        )
+        assertEquals("true", scheduledRunner["embedded_script.execution_mode_supported"])
 
         val worker = NodeExecutionModePolicy.nativeValues("workerComputation")
         assertEquals("none", worker["embedded_script.execution_mode_allowed_providers"])

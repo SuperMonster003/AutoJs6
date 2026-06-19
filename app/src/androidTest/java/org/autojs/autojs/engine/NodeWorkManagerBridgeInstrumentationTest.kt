@@ -387,7 +387,89 @@ class NodeWorkManagerBridgeInstrumentationTest {
         assertEquals("projectEntry", task.getString("entryKind"))
         assertTrue(task.getBoolean("packaged"))
         assertEquals(NodeWorkManagerBridgeScheduler.STATUS_SUCCEEDED, task.getString("lastRunStatus"))
-        assertTrue(task.getJSONObject("lastRun").getString("stdout").contains("work-manager-live-packaged-ran"))
+        val lastRun = task.getJSONObject("lastRun")
+        assertEquals(NodeExecutionModePolicy.MODE_SCHEDULED, lastRun.getString("executionMode"))
+        assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER, lastRun.getString("launchSurface"))
+        assertEquals("work_manager", lastRun.getString("trigger"))
+        assertEquals(1, lastRun.getInt("attempt"))
+        assertTrue(lastRun.getString("executionId").startsWith("node-work-run-$taskId-"))
+        assertTrue(lastRun.getString("stdout").contains("work-manager-live-packaged-ran"))
+        assertEquals(
+            NodeExecutionModePolicy.MODE_SCHEDULED,
+            lastRun.getJSONObject("nativeValues").getString("embedded_script.execution_mode"),
+        )
+        assertEquals(
+            NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+            lastRun.getJSONObject("nativeValues").getString("embedded_script.execution_mode_launch_surface"),
+        )
+        assertEquals("true", lastRun.getJSONObject("nativeValues").getString("embedded_script.execution_mode_supported"))
+        assertEquals(1, task.getJSONArray("runHistory").length())
+        assertEquals(lastRun.getString("executionId"), task.getJSONArray("runHistory").getJSONObject(0).getString("executionId"))
+
+        assertTrue(dispatch(provider, "cancel", JSONArray().put(taskId).toString()).ok)
+    }
+
+    @Test
+    fun androidWorkManagerScheduledRunnerExecutesEsmEntryAndPersistsHistory() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node work_manager scheduled runner ESM execution")
+
+        val workDir = File(context.cacheDir, "node-bridge-work-manager-scheduled-esm").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create work_manager scheduled ESM directory: $absolutePath" }
+        }
+        val resultFile = File(workDir, "wm-esm-result.json")
+        File(workDir, "main.mjs").writeText(
+            """
+            import { writeFileSync } from "node:fs";
+            await Promise.resolve();
+            writeFileSync("./wm-esm-result.json", JSON.stringify({
+              ok: true,
+              taskId: process.env.AUTOJS6_NODE_SCHEDULED_TASK_ID,
+              type: process.env.AUTOJS6_NODE_SCHEDULED_TASK_TYPE,
+              attempt: process.env.AUTOJS6_NODE_SCHEDULED_TASK_ATTEMPT,
+              cwd: process.cwd()
+            }));
+            console.log("work-manager-scheduled-esm-ran");
+            """.trimIndent(),
+        )
+        val provider = androidProvider("work-manager-scheduled-esm-provider", workDir)
+
+        val scheduled = dispatch(
+            provider,
+            "scheduleOnce",
+            """[{"scriptPath":"main.mjs","delayMs":0,"timeoutMs":20000}]""",
+            timeoutMs = 10_000L,
+        )
+        assertTrue(scheduled.toString(), scheduled.ok)
+        val taskId = jsonString(scheduled.resultJson.orEmpty())
+
+        waitUntil("scheduled ESM Node task should execute and persist history", timeoutMs = 60_000L) {
+            val task = taskById(JSONArray(dispatch(provider, "list", "[]", timeoutMs = 10_000L).resultJson.orEmpty()), taskId)
+            if (
+                task.optString("status") == NodeWorkManagerBridgeScheduler.STATUS_FAILED ||
+                task.optString("lastRunStatus") == NodeWorkManagerBridgeScheduler.STATUS_FAILED
+            ) {
+                throw AssertionError("scheduled ESM Node task failed: $task")
+            }
+            resultFile.isFile && task.optString("status") == NodeWorkManagerBridgeScheduler.STATUS_SUCCEEDED
+        }
+
+        val result = JSONObject(resultFile.readText())
+        assertTrue(result.getBoolean("ok"))
+        assertEquals(taskId, result.getString("taskId"))
+        assertEquals("once", result.getString("type"))
+        assertEquals("1", result.getString("attempt"))
+        val task = taskById(JSONArray(dispatch(provider, "list", "[]").resultJson.orEmpty()), taskId)
+        val lastRun = task.getJSONObject("lastRun")
+        assertEquals("main.mjs", lastRun.getString("sourceName"))
+        assertEquals(NodeExecutionModePolicy.MODE_SCHEDULED, lastRun.getString("executionMode"))
+        assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER, lastRun.getString("launchSurface"))
+        assertTrue(lastRun.getString("stdout").contains("work-manager-scheduled-esm-ran"))
+        assertEquals(1, task.getJSONArray("runHistory").length())
+        assertEquals(
+            NodeExecutionModePolicy.MODE_SCHEDULED,
+            task.getJSONArray("runHistory").getJSONObject(0).getString("executionMode"),
+        )
 
         assertTrue(dispatch(provider, "cancel", JSONArray().put(taskId).toString()).ok)
     }

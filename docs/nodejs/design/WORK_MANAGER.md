@@ -1,6 +1,6 @@
 # Work Manager Design And MVP Gate
 
-Status: Tasks 65, 180, and S7-15 expose `require("work_manager")` as a controlled bridge MVP for scheduled-task registration. S7-15 promotes the Android provider from metadata-only storage to WorkManager-backed embedded Node execution for scoped one-shot and periodic entries. `require("tasks")` remains unavailable to Embedded Node scripts.
+Status: Tasks 65, 180, S7-15, and S7-21 expose `require("work_manager")` as a controlled bridge MVP for scheduled-task registration and execution. S7-15 promotes the Android provider from metadata-only storage to WorkManager-backed embedded Node execution for scoped one-shot and periodic entries. S7-21 routes fired work through a dedicated `scheduled_runner` launch surface with `executionMode=scheduled`, CJS/ESM entry support, persisted `lastRun`/`runHistory`, and stable runner diagnostics. `require("tasks")` remains unavailable to Embedded Node scripts.
 
 ## Goal
 
@@ -33,7 +33,7 @@ This means the Node design should extend AutoJs6 task descriptors and launch rou
 | Capability | Decision | Reason |
 | --- | --- | --- |
 | Timed metadata | MVP | One-shot and bounded periodic descriptors can be registered through the controlled `work_manager` bridge without exposing Android scheduler objects. |
-| Timed execution | MVP | The Android provider can now enqueue scoped embedded Node one-shot and periodic work through AndroidX WorkManager. Long-running restart, boot, broadcast, and user-visible task UI flows remain separate gates. S7-19 records Android 16 JobScheduler quota diagnostics for WorkManager-backed Node tasks. |
+| Timed execution | MVP | The Android provider can now enqueue scoped embedded Node one-shot and periodic work through AndroidX WorkManager, then launch fired work through the controlled scheduled-runner surface. Long-running restart, boot, broadcast, and user-visible task UI flows remain separate gates. S7-19 records Android 16 JobScheduler quota diagnostics for WorkManager-backed Node tasks, and S7-21 persists execution history and scheduled-runner native values. |
 | Broadcast tasks | Deferred | Broadcast registration has exported receiver, action allowlist, privacy, and Android background-start implications. |
 | App startup tasks | Deferred | Existing `ACTION_STARTUP` behavior is an intent task; Node should not silently persist app-start execution until prompts and storage are designed. |
 | Boot tasks | Deferred | Boot execution requires manifest permission, user visibility, background-start policy, and packaged opt-in. |
@@ -42,7 +42,7 @@ This means the Node design should extend AutoJs6 task descriptors and launch rou
 
 ## Implemented MVP Scope
 
-The Task 65/180/S7-15 implementation exposes scheduled-task registration through `require("work_manager")`.
+The Task 65/180/S7-15/S7-21 implementation exposes scheduled-task registration and controlled execution through `require("work_manager")`.
 
 Current JavaScript shape:
 
@@ -83,7 +83,7 @@ Current behavior:
 
 - descriptors are persisted as WorkManager task records under the app-private files directory
 - `scheduleOnce` enqueues a `OneTimeWorkRequest`; `schedulePeriodic` enqueues a `PeriodicWorkRequest`
-- the Worker reads the scoped entry file, launches `NativeNodeEmbeddedScriptService` in one-shot mode, and persists the last run result
+- the Worker reads the scoped entry file, launches `NativeNodeEmbeddedScriptService` with `executionMode=scheduled` and `launchSurface=scheduled_runner`, and persists the last run result plus bounded history
 - workers return success or failure only; they do not return `Result.retry`
 - `cancel` cancels the unique WorkManager work and removes the persisted descriptor
 - `list` returns task records for the same package/project working-directory scope
@@ -92,14 +92,19 @@ Current behavior:
 - `scriptPath` and `entry` must be relative, non-empty, NUL-free, and scoped to the working directory
 - non-packaged paths must resolve to an existing file inside the working directory
 - packaged project entries can serialize metadata without requiring a plaintext file path at registration time; live execution requires a readable scoped entry when the WorkManager worker fires
+- fired work supports both CommonJS and ESM source names when the scoped entry and project metadata select those formats
+- scheduled runs receive stable task environment variables: `AUTOJS6_NODE_SCHEDULED_TASK_ID`, `AUTOJS6_NODE_SCHEDULED_TASK_TYPE`, and `AUTOJS6_NODE_SCHEDULED_TASK_ATTEMPT`
+- `lastRun` and `runHistory` expose trigger, runner version, attempt, execution id, execution mode, launch surface, stdout/stderr snippets, exit/error metadata, timeout state, Android quota policy, and selected embedded native values
 - periodic intervals are bounded to at least `900000` ms
 - queued host fallback rejects `work_manager` requests with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 
 MVP exclusions:
 
-- no background execution launch
+- no unrestricted background execution process
 - no persisted task database entry yet
 - no user-visible task UI entry yet
+- no interactive UI from a scheduled background run
+- no automatic restart or retry policy beyond the explicit WorkManager schedule cadence
 - no `createBroadcastTask`
 - no boot task registration
 - no package event task registration
@@ -183,6 +188,9 @@ Required launch properties:
 - timeout and stop use the embedded lifecycle controller
 - stdout, stderr, result, bridge diagnostics, and error shape are captured like manual runs
 - the task id and schedule trigger are included in diagnostics
+- fired WorkManager tasks must use `executionMode=scheduled` only through the `scheduled_runner` launch surface; direct script launches with `scheduled` still reject before user code
+- each fired run gets a generated execution id tied to the task id and attempt count
+- task records must append a bounded execution history instead of replacing all prior diagnostics
 
 Timed task completion must update scheduler state only after the launch request has been accepted by AutoJs6. A later runtime failure should be visible in logs and notifications, not silently swallowed by the scheduler.
 
@@ -310,6 +318,9 @@ Task 65/180 coverage:
 - `require("tasks")` remains unavailable
 - positive once and periodic metadata registration through a fake provider
 - WorkManager-backed one-shot embedded Node execution that writes an observable result
+- WorkManager-backed scheduled runner uses `executionMode=scheduled` and `launchSurface=scheduled_runner`
+- CommonJS and ESM scheduled entries execute through the controlled runner and persist queryable results
+- `lastRun` and bounded `runHistory` preserve attempt, trigger, execution id, launch surface, native values, stdout/stderr, exit/error, timeout, and Android quota diagnostics
 - cancellation of delayed WorkManager work before execution
 - packaged project-entry metadata execution when a scoped packaged entry file is readable
 - `cancel` and `list`
@@ -329,9 +340,10 @@ Future scheduled-task work needs additional coverage:
 - provider timeout path beyond one-shot worker result persistence
 - disabled broadcast/boot/package registration paths
 - timeout or crash does not poison the next scheduled run
+- scheduled task recovery after full process death and OS-delayed periodic cadence
 - packaged manifest verifier reports task-related permissions and receivers
 - full packaged APK smoke for a timed Node task when packaged task support is enabled
 
 ## Current Decision
 
-Tasks 65, 180, and S7-15 implement `require("work_manager")` as a controlled WorkManager-backed scheduling MVP. The Safe Node Profile still denies direct Android scheduler authority: Node receives only serializable task ids and task records, never raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects. S7-15 permits scoped one-shot and bounded periodic embedded Node execution with explicit `work_manager` capability, minimum periodic interval enforcement, stable result/failure records, and no implicit retry. S7-19 adds Android API-level policy diagnostics so WorkManager task records expose whether Android 16+ long-running workers share JobScheduler quota and how quota exhaustion should be handled. Broadcast, startup, boot, package-event registration, task UI migration, and arbitrary long-running scheduled Node processes remain deferred.
+Tasks 65, 180, S7-15, and S7-21 implement `require("work_manager")` as a controlled WorkManager-backed scheduling MVP. The Safe Node Profile still denies direct Android scheduler authority: Node receives only serializable task ids and task records, never raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects. S7-15 permits scoped one-shot and bounded periodic embedded Node execution with explicit `work_manager` capability, minimum periodic interval enforcement, stable result/failure records, and no implicit retry. S7-21 permits `executionMode=scheduled` only through the WorkManager-owned `scheduled_runner` launch surface, adds CJS/ESM scheduled entry coverage, records runner attempt/execution id/env metadata, and exposes bounded execution history through `lastRun`/`runHistory`. S7-19 adds Android API-level policy diagnostics so WorkManager task records expose whether Android 16+ long-running workers share JobScheduler quota and how quota exhaustion should be handled. Broadcast, startup, boot, package-event registration, task UI migration, unrestricted periodic Node processes, and interactive UI from background scheduled tasks remain deferred.

@@ -11511,6 +11511,43 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return id;
   }
+  function __autojs6_work_manager_native_values(value) {
+    if (!value || typeof value !== "object") {
+      return Object.freeze({});
+    }
+    const result = {};
+    Object.keys(value).forEach(function(key) {
+      const nativeValue = value[key];
+      if (nativeValue !== undefined && nativeValue !== null) {
+        result[String(key)] = String(nativeValue);
+      }
+    });
+    return Object.freeze(result);
+  }
+  function __autojs6_work_manager_run_info(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      startedAtEpochMs: Number(source.startedAtEpochMs) || 0,
+      finishedAtEpochMs: Number(source.finishedAtEpochMs) || 0,
+      elapsedMs: Number(source.elapsedMs) || 0,
+      succeeded: source.succeeded === true,
+      trigger: source.trigger === undefined || source.trigger === null ? "" : String(source.trigger),
+      runnerVersion: Number(source.runnerVersion) || 0,
+      attempt: Number(source.attempt) || 0,
+      executionId: source.executionId === undefined || source.executionId === null ? "" : String(source.executionId),
+      executionMode: source.executionMode === undefined || source.executionMode === null ? "" : String(source.executionMode),
+      launchSurface: source.launchSurface === undefined || source.launchSurface === null ? "" : String(source.launchSurface),
+      exitCode: source.exitCode === undefined || source.exitCode === null ? null : Number(source.exitCode),
+      sourceName: source.sourceName === undefined || source.sourceName === null ? "" : String(source.sourceName),
+      errorCode: source.errorCode === undefined || source.errorCode === null ? null : String(source.errorCode),
+      errorName: source.errorName === undefined || source.errorName === null ? null : String(source.errorName),
+      errorMessage: source.errorMessage === undefined || source.errorMessage === null ? null : String(source.errorMessage),
+      timedOut: source.timedOut === true,
+      stdout: source.stdout === undefined || source.stdout === null ? "" : String(source.stdout),
+      stderr: source.stderr === undefined || source.stderr === null ? "" : String(source.stderr),
+      nativeValues: __autojs6_work_manager_native_values(source.nativeValues)
+    });
+  }
   function __autojs6_work_manager_task_info(value) {
     const source = value && typeof value === "object" ? value : {};
     const entryKind = source.entryKind === undefined || source.entryKind === null ? "" : String(source.entryKind);
@@ -11539,20 +11576,8 @@ std::string buildEmbeddedScriptExecutionSource(
       updatedAtEpochMs: Number(source.updatedAtEpochMs) || 0,
       lastRunStatus: source.lastRunStatus === undefined || source.lastRunStatus === null ? "" : String(source.lastRunStatus),
       lastFailure: source.lastFailure === undefined || source.lastFailure === null ? null : String(source.lastFailure),
-      lastRun: source.lastRun && typeof source.lastRun === "object" ? Object.freeze({
-        startedAtEpochMs: Number(source.lastRun.startedAtEpochMs) || 0,
-        finishedAtEpochMs: Number(source.lastRun.finishedAtEpochMs) || 0,
-        elapsedMs: Number(source.lastRun.elapsedMs) || 0,
-        succeeded: source.lastRun.succeeded === true,
-        exitCode: source.lastRun.exitCode === undefined || source.lastRun.exitCode === null ? null : Number(source.lastRun.exitCode),
-        sourceName: source.lastRun.sourceName === undefined || source.lastRun.sourceName === null ? "" : String(source.lastRun.sourceName),
-        errorCode: source.lastRun.errorCode === undefined || source.lastRun.errorCode === null ? null : String(source.lastRun.errorCode),
-        errorName: source.lastRun.errorName === undefined || source.lastRun.errorName === null ? null : String(source.lastRun.errorName),
-        errorMessage: source.lastRun.errorMessage === undefined || source.lastRun.errorMessage === null ? null : String(source.lastRun.errorMessage),
-        timedOut: source.lastRun.timedOut === true,
-        stdout: source.lastRun.stdout === undefined || source.lastRun.stdout === null ? "" : String(source.lastRun.stdout),
-        stderr: source.lastRun.stderr === undefined || source.lastRun.stderr === null ? "" : String(source.lastRun.stderr)
-      }) : undefined
+      lastRun: source.lastRun && typeof source.lastRun === "object" ? __autojs6_work_manager_run_info(source.lastRun) : undefined,
+      runHistory: Object.freeze(Array.isArray(source.runHistory) ? source.runHistory.map(__autojs6_work_manager_run_info) : [])
     });
   }
   function __autojs6_work_manager_policy_snapshot() {

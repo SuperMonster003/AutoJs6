@@ -28,6 +28,7 @@ object NodeWorkManagerBridgeScheduler {
     const val STATUS_SUCCEEDED = "succeeded"
     const val STATUS_FAILED = "failed"
     const val STATUS_CANCELLED = "cancelled"
+    const val SCHEDULED_RUNNER_VERSION = 1
 
     private const val TAG = "NodeWorkManagerBridge"
     private const val WORK_TAG_ALL = "autojs6-node-work-manager"
@@ -35,6 +36,7 @@ object NodeWorkManagerBridgeScheduler {
     private const val KEY_TASK_ID = "taskId"
     private const val RESULT_STDOUT_MAX_CHARS = 8192
     private const val RESULT_STDERR_MAX_CHARS = 8192
+    private const val RUN_HISTORY_MAX_ENTRIES = 8
 
     fun ownerKey(engineInfo: NodeBridgeEngineInfo): String {
         val packageName = engineInfo.packageName.ifBlank { "unknown-package" }
@@ -54,8 +56,12 @@ object NodeWorkManagerBridgeScheduler {
             put("scheduler", SCHEDULER_NAME)
             put("status", STATUS_ENQUEUED)
             put("noImplicitRetry", true)
+            put("scheduledRunnerVersion", SCHEDULED_RUNNER_VERSION)
+            put("executionMode", NodeExecutionModePolicy.MODE_SCHEDULED)
+            put("launchSurface", NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER)
             put("updatedAtEpochMs", now)
             put("lastFailure", JSONObject.NULL)
+            put("runHistory", JSONArray())
             put("workManagerUniqueName", uniqueName(id))
             put("workManagerTag", taskTag(id))
             put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
@@ -128,7 +134,10 @@ object NodeWorkManagerBridgeScheduler {
             record.put("status", STATUS_RUNNING)
             record.put("updatedAtEpochMs", System.currentTimeMillis())
             record.put("lastRunStatus", STATUS_RUNNING)
-            record.put("runAttemptCount", record.optInt("runAttemptCount", 0) + 1)
+            val nextAttempt = record.optInt("runAttemptCount", 0) + 1
+            record.put("runAttemptCount", nextAttempt)
+            record.put("lastTrigger", "work_manager")
+            record.put("lastExecutionId", runExecutionId(id, nextAttempt))
             record.put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
         } ?: return androidx.work.ListenableWorker.Result.failure()
 
@@ -149,13 +158,19 @@ object NodeWorkManagerBridgeScheduler {
                 source = entry.source,
                 sourceName = entry.entryPath,
                 workingDirectory = running.optString("workingDirectory").takeIf { it.isNotBlank() },
-                executionId = "node-work-run-$id",
-                executionMode = NodeExecutionModePolicy.MODE_ONE_SHOT,
+                executionId = running.optString("lastExecutionId").takeIf { it.isNotBlank() } ?: runExecutionId(id, running.optInt("runAttemptCount", 1)),
+                executionMode = NodeExecutionModePolicy.MODE_SCHEDULED,
                 timeoutMs = running.optLong("timeoutMs", ControlledWorkManagerPolicy.DEFAULT_TASK_TIMEOUT_MS)
                     .coerceAtLeast(1L),
                 captureStdout = true,
                 captureStderr = true,
+                env = mapOf(
+                    "AUTOJS6_NODE_SCHEDULED_TASK_ID" to id,
+                    "AUTOJS6_NODE_SCHEDULED_TASK_TYPE" to running.optString("type"),
+                    "AUTOJS6_NODE_SCHEDULED_TASK_ATTEMPT" to running.optInt("runAttemptCount", 1).toString(),
+                ),
             ),
+            launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
         )
 
         markCompleted(appContext, id, running, startedAt, result)
@@ -287,22 +302,79 @@ object NodeWorkManagerBridgeScheduler {
         target.put("lastFailure", failureReason ?: JSONObject.NULL)
         target.put(
             "lastRun",
-            JSONObject().apply {
-                put("startedAtEpochMs", startedAt)
-                put("finishedAtEpochMs", finishedAt)
-                put("elapsedMs", result?.elapsedMs ?: (finishedAt - startedAt).coerceAtLeast(0L))
-                put("succeeded", succeeded)
-                put("exitCode", result?.exitCode ?: JSONObject.NULL)
-                put("sourceName", result?.sourceName ?: entryPath(original))
-                put("errorCode", result?.errorCode ?: JSONObject.NULL)
-                put("errorName", result?.errorName ?: JSONObject.NULL)
-                put("errorMessage", failureReason ?: JSONObject.NULL)
-                put("timedOut", result?.timedOut ?: false)
-                put("stdout", result?.stdout.orEmpty().limitChars(RESULT_STDOUT_MAX_CHARS))
-                put("stderr", result?.stderr.orEmpty().limitChars(RESULT_STDERR_MAX_CHARS))
-                put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
-            },
+            scheduledRunRecord(
+                original = original,
+                startedAt = startedAt,
+                finishedAt = finishedAt,
+                succeeded = succeeded,
+                failureReason = failureReason,
+                result = result,
+            ),
         )
+        appendRunHistory(target, target.getJSONObject("lastRun"))
+    }
+
+    private fun scheduledRunRecord(
+        original: JSONObject,
+        startedAt: Long,
+        finishedAt: Long,
+        succeeded: Boolean,
+        failureReason: String?,
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?,
+    ): JSONObject {
+        return JSONObject().apply {
+            put("startedAtEpochMs", startedAt)
+            put("finishedAtEpochMs", finishedAt)
+            put("elapsedMs", result?.elapsedMs ?: (finishedAt - startedAt).coerceAtLeast(0L))
+            put("succeeded", succeeded)
+            put("trigger", original.optString("lastTrigger").ifBlank { "work_manager" })
+            put("runnerVersion", original.optInt("scheduledRunnerVersion", SCHEDULED_RUNNER_VERSION))
+            put("attempt", original.optInt("runAttemptCount", 0))
+            put("executionId", original.optString("lastExecutionId"))
+            put("executionMode", NodeExecutionModePolicy.MODE_SCHEDULED)
+            put("launchSurface", NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER)
+            put("exitCode", result?.exitCode ?: JSONObject.NULL)
+            put("sourceName", result?.sourceName ?: entryPath(original))
+            put("errorCode", result?.errorCode ?: JSONObject.NULL)
+            put("errorName", result?.errorName ?: JSONObject.NULL)
+            put("errorMessage", failureReason ?: JSONObject.NULL)
+            put("timedOut", result?.timedOut ?: false)
+            put("stdout", result?.stdout.orEmpty().limitChars(RESULT_STDOUT_MAX_CHARS))
+            put("stderr", result?.stderr.orEmpty().limitChars(RESULT_STDERR_MAX_CHARS))
+            put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
+            put("nativeValues", scheduledNativeValues(result))
+        }
+    }
+
+    private fun appendRunHistory(record: JSONObject, runRecord: JSONObject) {
+        val existing = record.optJSONArray("runHistory") ?: JSONArray()
+        val retained = JSONArray()
+        val start = (existing.length() - (RUN_HISTORY_MAX_ENTRIES - 1)).coerceAtLeast(0)
+        for (index in start until existing.length()) {
+            retained.put(existing.get(index))
+        }
+        retained.put(JSONObject(runRecord.toString()))
+        record.put("runHistory", retained)
+    }
+
+    private fun scheduledNativeValues(result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?): JSONObject {
+        val nativeValues = result?.nativeValues.orEmpty()
+        return JSONObject().apply {
+            listOf(
+                "embedded_script.execution_mode",
+                "embedded_script.execution_mode_launch_surface",
+                "embedded_script.execution_mode_supported",
+                "embedded_script.execution_mode_timeout_policy",
+                "embedded_script.execution_mode_restart_policy",
+                "embedded_script.execution_mode_resource_quota_profile",
+                "embedded_script.runtime_budget.status",
+                "embedded_script.runtime_budget.breach_count",
+                "embedded_script.bridge_live_dispatch_status",
+                "embedded_script.bridge_resource.active_count",
+            ).forEach { key ->
+                nativeValues[key]?.let { put(key, it) }
+            }
+        }
     }
 
     private fun resolveEntry(record: JSONObject): EntryResolution {
@@ -396,6 +468,8 @@ object NodeWorkManagerBridgeScheduler {
     private fun uniqueName(id: String): String = "autojs6-node-work-$id"
 
     private fun taskTag(id: String): String = "autojs6-node-work-id-$id"
+
+    private fun runExecutionId(id: String, attempt: Int): String = "node-work-run-$id-$attempt"
 
     private fun entryPath(record: JSONObject): String {
         return when (record.optString("entryKind")) {

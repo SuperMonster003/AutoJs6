@@ -58,9 +58,9 @@ reach an Android provider.
 | notifications | partial | Controlled post/cancel API with Android notification permission handling. Actions and richer notification layouts are not part of this draft. |
 | sensors | partial | Limited sensor set: accelerometer, gyroscope, and light. Subscriptions are bounded and close on provider destroy. |
 | UI MVP | partial | JSON layout descriptors and opaque handles only. The current live Activity-owned provider is still gated, so normal scripts must handle provider denial. |
-| `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, and raw Android scheduler APIs remain unavailable. |
+| `work_manager` | partial | Controlled one-shot and bounded periodic scheduled Node work through AndroidX WorkManager. Entries stay scoped to the project root, periodic intervals are bounded, CJS/ESM fired entries run through the dedicated scheduled runner, and raw Android scheduler APIs remain unavailable. |
 | JS-only plugins | experimental | Project-local `./plugins/<id>` loading only. Native plugins, signed archives, installers, and packaged plugin runtime are not enabled. |
-| execution modes beyond `one_shot` | partial | `interactive_long_running` is available only through the explicit interactive foreground runtime with a persistent Stop notification and restart policy `never`. Direct script requests still reject before user code; `scheduled` and `worker_computation` remain reserved. Normal scripts remain one-shot and timeout-bounded. |
+| execution modes beyond `one_shot` | partial | `interactive_long_running` is available only through the explicit interactive foreground runtime with a persistent Stop notification and restart policy `never`. `scheduled` is available only through the controlled WorkManager scheduled runner. Direct script requests still reject before user code, and `worker_computation` remains reserved. Normal scripts remain one-shot and timeout-bounded. |
 
 ## ESM Scripts
 
@@ -335,11 +335,14 @@ console.log(await workManager.list());
 await workManager.cancel(id);
 ```
 
-The current module stores bounded task metadata and records Android
-WorkManager/JobScheduler quota diagnostics for scheduled Node tasks. It is not
-an unlimited background runtime and does not yet guarantee background execution
-of Node scripts after process death or reboot. `tasks` is not exposed in the
-Safe Node Profile.
+The current module stores bounded task metadata, launches fired CJS/ESM entries
+through `executionMode=scheduled` on the `scheduled_runner` surface, and records
+Android WorkManager/JobScheduler quota diagnostics for scheduled Node tasks.
+Queryable task records include `lastRun` and bounded `runHistory` entries with
+attempt, execution id, stdout/stderr snippets, error metadata, and selected
+native diagnostics. It is not an unlimited background runtime, and boot/reboot
+recovery remains a separate gate. `tasks` is not exposed in the Safe Node
+Profile.
 
 ## JS-only Plugins
 
@@ -407,9 +410,10 @@ mode.
 
 Keep normal scripts one-shot and timeout-bounded. Use notifications and the
 controlled `work_manager` scheduling MVP within their current partial limits:
-scheduled entries remain scoped, bounded, and WorkManager-backed. The reserved
-`scheduled` and `workerComputation` execution modes are policy descriptors only
-until their dedicated gates are implemented.
+scheduled entries remain scoped, bounded, WorkManager-backed, and routed through
+the dedicated scheduled runner. Direct scripts cannot request `scheduled`
+execution, and `workerComputation` remains a policy descriptor until its
+dedicated gate is implemented.
 
 ## Packaging Notes
 
