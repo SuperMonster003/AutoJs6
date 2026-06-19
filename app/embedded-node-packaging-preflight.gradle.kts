@@ -3543,6 +3543,50 @@ val generateNodeModernCoreDifferentialReport = tasks.register(
     commandLine("node", rootProject.projectDir.resolve("tools/nodejs/differential/run-modern-core-differential.js").absolutePath)
 }
 
+val generateNode24PatchUpgradeFeasibilityReport = tasks.register(
+    "generateNode24PatchUpgradeFeasibilityReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the Node 24.x patch upgrade feasibility report without changing the default runtime."
+
+    workingDir(rootProject.projectDir)
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-node24-patch-feasibility.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateJniLibs").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-jni-libs", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateHeaders").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-headers", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateCompatibilityProfile").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-compatibility-profile", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidatePerformanceReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-performance-report", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateDifferentialReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-differential-report", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidatePackagedReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-packaged-report", it)) }
+    providers.gradleProperty("autojs.nodejs.patchFailOnNoGo").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-no-go") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
 val verifyNodePrGate = tasks.register("verifyNodePrGate") {
     group = "verification"
     description = "Runs fast host-side Embedded Node PR checks without connected-device stress or packaged smoke launch."

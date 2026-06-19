@@ -1017,6 +1017,25 @@ ABI size and distribution report:
 
 This writes `app/build/reports/nodejs/abi-size-report.md` with APK artifact sizes, packaged template size, per-ABI native payload, APK native entry compression, and `nodeFull` / `nodeMini` / `rhinoOnly` payload comparison.
 
+Node 24.x patch upgrade feasibility report:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNode24PatchUpgradeFeasibilityReport
+.\gradlew.bat --console=plain :app:generateNode24PatchUpgradeFeasibilityReport "-Pautojs.nodejs.patchTargetVersion=24.17.0" "-Pautojs.nodejs.patchCandidateJniLibs=D:\path\to\jniLibs" "-Pautojs.nodejs.patchCandidateHeaders=D:\path\to\include\node"
+```
+
+This writes `build/reports/nodejs/patch-upgrade/node24-patch-upgrade-feasibility.json` and `.md`. Without candidate
+Android `libnode.so` artifacts and headers, the task succeeds as an informational report but records a `no-go` decision.
+The default runtime must remain unchanged until the same fork/toolchain provides candidate artifacts for `arm64-v8a`,
+`armeabi-v7a`, and `x86_64`, plus candidate compatibility, performance, CJS/ESM differential, and packaged APK evidence.
+Optional evidence properties are:
+
+- `autojs.nodejs.patchCandidateCompatibilityProfile`
+- `autojs.nodejs.patchCandidatePerformanceReport`
+- `autojs.nodejs.patchCandidateDifferentialReport`
+- `autojs.nodejs.patchCandidatePackagedReport`
+- `autojs.nodejs.patchFailOnNoGo=true`
+
 See `docs/nodejs/ROLLBACK_PLAYBOOK.md` for when to use this path and what release notes must record.
 
 ## Security Negative Tests
