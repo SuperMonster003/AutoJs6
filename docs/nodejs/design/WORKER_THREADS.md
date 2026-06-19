@@ -60,6 +60,7 @@ When the request-local experimental flag is enabled and the Embedded Node build 
 - ArrayBuffer transfer detachment, typed array delivery, and structured-clone-safe values
 - DataCloneError-compatible failures for unsupported clone and transfer values
 - scoped worker `fs` and `fs/promises` read/write helpers rooted at `workingDirectory`
+- AutoJs6 `WorkerPool` extension for explicit task-message workers
 - `worker.terminate()`
 - `threadId`
 - safe pure-JS builtins such as `buffer`, `path`, `util`, `events`, `assert`, `querystring`, `string_decoder`, `timers`, and `url`
@@ -67,6 +68,12 @@ When the request-local experimental flag is enabled and the Embedded Node build 
 - parent-owned lifecycle and cancellation through `terminate()`
 
 Workers are loaded by the parent scoped resolver and executed from a generated native Worker `eval` wrapper. Worker scripts do not get the parent AutoJs6 loader or bridge. S7-27 adds a separate worker profile: workers get only scoped filesystem read/write wrappers and do not inherit main-script bridge, network, shell, Java, or inspector authority.
+
+S7-28 adds a controlled WorkerPool extension. It is intentionally not presented
+as a Node standard API. Pool workers receive `{ __autojs6PoolTaskId, value }`
+messages and must reply with `{ __autojs6PoolTaskId, value }` or
+`{ __autojs6PoolTaskId, error }`. The pool owns queueing, cancellation, task
+timeouts, idle termination, and shutdown.
 
 The first version does not allow workers to spawn more workers.
 
@@ -141,6 +148,8 @@ Current defaults:
 - maximum message size: 65536 bytes per worker/port message estimate
 - maximum queued messages: 32 per parent/port sender before the next event-loop turn
 - worker filesystem profile: read/write limited to `workingDirectory`; no inherited main-thread filesystem expansion
+- worker pool default policy: `minWorkers=0`, `maxWorkers=1`, `idleTimeoutMs=1000`, `taskTimeoutMs=5000`, `queueLimit=8`
+- worker `resourceLimits` caps: old generation 64 MB, young generation 16 MB, code range 32 MB, stack 8 MB
 - default worker run timeout: parent script timeout remains the outer guard; per-worker execution timeout is Task 64 work
 - per-worker memory budget: design before implementation; do not rely on V8 defaults alone
 - maximum worker source size: reuse module source budgets unless a lower worker-specific budget is set
@@ -201,6 +210,11 @@ Experimental worker-specific errors:
 - `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`
 - `ERR_AUTOJS6_WORKER_TIMEOUT`
 - `ERR_AUTOJS6_WORKER_TERMINATED`
+- `ERR_AUTOJS6_WORKER_POOL_CLOSED`
+- `ERR_AUTOJS6_WORKER_POOL_QUEUE_FULL`
+- `ERR_AUTOJS6_WORKER_POOL_TASK_TIMEOUT`
+- `ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED`
+- `ERR_AUTOJS6_WORKER_POOL_TASK_FAILED`
 - `DataCloneError` for clone/transfer-list/message-budget failures, with `autojs6Code=ERR_AUTOJS6_WORKER_BRIDGE_DENIED` when the error is raised by the AutoJs6 worker wrapper
 
 ## Test Gate
@@ -210,11 +224,11 @@ Current gates:
 - `NodeWorkerThreadsBootstrapInstrumentationTest` verifies request-local default
   denial before shadowing and experimental native-availability preflight. The
   preflight requires either a usable limited `worker_threads` surface
-  (`Worker`, `MessageChannel`, `MessagePort`, `isMainThread`, `parentPort`,
+  (`Worker`, `WorkerPool`, `MessageChannel`, `MessagePort`, `isMainThread`, `parentPort`,
   `workerData`, `threadId`, policy, and diagnostics) or stable
   `ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero active workers.
 - `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection in normal builds.
-- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, limited `MessageChannel`/`MessagePort`, ArrayBuffer transfer detachment, transfer-list validation, message size/queue limits, DataCloneError-compatible failures, MessagePort cleanup counters, scoped worker `fs`/`fs.promises`, and denial of AutoJs bridge modules, `toast`, `accessibility`, `image`, `shell`, `java`, `inspector`, raw `net`, and nested workers inside worker scope. Runnable coverage is skipped when the preflight reports native workers unavailable.
+- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, limited `MessageChannel`/`MessagePort`, ArrayBuffer transfer detachment, transfer-list validation, message size/queue limits, DataCloneError-compatible failures, MessagePort cleanup counters, scoped worker `fs`/`fs.promises`, controlled `WorkerPool` reuse/queue/cancel/timeout/shutdown behavior, and denial of AutoJs bridge modules, `toast`, `accessibility`, `image`, `shell`, `java`, `inspector`, raw `net`, and nested workers inside worker scope. Runnable coverage is skipped when the preflight reports native workers unavailable.
 - `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots. Stress coverage is skipped when the preflight reports native workers unavailable.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
@@ -236,6 +250,7 @@ The MVP does not enable:
 - Android Context access from workers
 - packaged worker source graphs
 - worker access to unrestricted native `fs`
+- unbounded worker pools or background detached pool workers
 - worker access to raw network
 - worker access to full parent Safe Node builtins
 - unrestricted service-destroy worker cleanup guarantees beyond the current process-isolation and focused timeout recovery gates

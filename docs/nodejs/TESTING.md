@@ -760,6 +760,12 @@ helpers rooted at the worker working directory, while `toast`, `accessibility`,
 `image`, `shell`, `java`, `inspector`, raw network, AutoJs bridge modules, and
 nested workers remain denied. The same native-availability preflight skips this
 coverage on the current Sony build.
+S7-28 adds the controlled `WorkerPool` promotion gate: repeated CPU tasks must
+reuse the bounded worker, queue overflow must reject, queued tasks can be
+cancelled, running tasks can time out, resourceLimits are capped, and
+`pool.close()` must leave zero active workers and zero active pools. This
+coverage is also skipped on the current Sony build until native workers are
+available.
 
 Current experimental worker_threads resource stress instrumentation:
 

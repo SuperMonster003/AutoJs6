@@ -8119,6 +8119,19 @@ std::string buildEmbeddedScriptExecutionSource(
       shell: "denied",
       javaInterop: "denied",
       inspector: "denied"
+    }),
+    workerPool: Object.freeze({
+      minWorkers: 0,
+      maxWorkers: 1,
+      idleTimeoutMs: 1000,
+      taskTimeoutMs: 5000,
+      queueLimit: 8
+    }),
+    resourceLimits: Object.freeze({
+      maxOldGenerationSizeMb: 64,
+      maxYoungGenerationSizeMb: 16,
+      codeRangeSizeMb: 32,
+      stackSizeMb: 8
     })
   });
   const __autojs6_worker_threads_diagnostics = {
@@ -8137,11 +8150,20 @@ std::string buildEmbeddedScriptExecutionSource(
     messagePortCreatedCount: 0,
     messagePortClosedCount: 0,
     messageRejectedCount: 0,
+    activeWorkerPoolCount: 0,
+    maxActiveWorkerPoolCount: 0,
+    workerPoolCreatedCount: 0,
+    workerPoolClosedCount: 0,
+    workerPoolTaskCompletedCount: 0,
+    workerPoolTaskCancelledCount: 0,
+    workerPoolTaskTimeoutCount: 0,
+    workerPoolQueueRejectedCount: 0,
     lastPolicyRejection: "",
     lastMessageRejection: ""
   };
   const __autojs6_worker_threads_records = new Set();
   const __autojs6_worker_message_port_records = new Set();
+  const __autojs6_worker_pool_records = new Set();
   let __autojs6_worker_threads_shutdown_reason = "";
   function __autojs6_has_own(object, key) {
     return Object.prototype.hasOwnProperty.call(object, key);
@@ -10728,6 +10750,20 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_worker_threads_close_message_port_record(record);
     }
   }
+  function __autojs6_close_all_worker_pools(reason) {
+    const pools = Array.from(__autojs6_worker_pool_records);
+    if (pools.length === 0) return;
+    __autojs6_worker_threads_diagnostics.cleanupRequestedCount += pools.length;
+    for (const pool of pools) {
+      try {
+        if (pool && typeof pool.__autojs6ClosePool === "function") {
+          pool.__autojs6ClosePool(String(reason || "runtime shutdown"));
+        }
+      } catch (_) {
+        __autojs6_worker_threads_diagnostics.cleanupErrorCount += 1;
+      }
+    }
+  }
   function __autojs6_worker_threads_try_start() {
     if (__autojs6_worker_threads_diagnostics.activeWorkerCount >= __autojs6_worker_threads_policy.maxWorkers) {
       __autojs6_worker_threads_record_policy_rejection("max_workers");
@@ -10790,6 +10826,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const workers = Array.from(__autojs6_worker_threads_records).filter(function(worker) {
       return worker && !worker.__autojs6Finished;
     });
+    __autojs6_close_all_worker_pools(shutdownReason);
     __autojs6_close_all_worker_message_ports(shutdownReason);
     if (workers.length === 0) {
       return;
@@ -10819,6 +10856,8 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_worker_threads_policy_snapshot() {
     const workerProfile = __autojs6_worker_threads_policy.workerProfile;
+    const workerPool = __autojs6_worker_threads_policy.workerPool;
+    const resourceLimits = __autojs6_worker_threads_policy.resourceLimits;
     return Object.freeze({
       maxWorkers: __autojs6_worker_threads_policy.maxWorkers,
       startupTimeoutMs: __autojs6_worker_threads_policy.startupTimeoutMs,
@@ -10835,6 +10874,19 @@ std::string buildEmbeddedScriptExecutionSource(
         shell: workerProfile.shell,
         javaInterop: workerProfile.javaInterop,
         inspector: workerProfile.inspector
+      }),
+      workerPool: Object.freeze({
+        minWorkers: workerPool.minWorkers,
+        maxWorkers: workerPool.maxWorkers,
+        idleTimeoutMs: workerPool.idleTimeoutMs,
+        taskTimeoutMs: workerPool.taskTimeoutMs,
+        queueLimit: workerPool.queueLimit
+      }),
+      resourceLimits: Object.freeze({
+        maxOldGenerationSizeMb: resourceLimits.maxOldGenerationSizeMb,
+        maxYoungGenerationSizeMb: resourceLimits.maxYoungGenerationSizeMb,
+        codeRangeSizeMb: resourceLimits.codeRangeSizeMb,
+        stackSizeMb: resourceLimits.stackSizeMb
       })
     });
   }
@@ -10855,6 +10907,14 @@ std::string buildEmbeddedScriptExecutionSource(
       messagePortCreatedCount: __autojs6_worker_threads_diagnostics.messagePortCreatedCount,
       messagePortClosedCount: __autojs6_worker_threads_diagnostics.messagePortClosedCount,
       messageRejectedCount: __autojs6_worker_threads_diagnostics.messageRejectedCount,
+      activeWorkerPoolCount: __autojs6_worker_threads_diagnostics.activeWorkerPoolCount,
+      maxActiveWorkerPoolCount: __autojs6_worker_threads_diagnostics.maxActiveWorkerPoolCount,
+      workerPoolCreatedCount: __autojs6_worker_threads_diagnostics.workerPoolCreatedCount,
+      workerPoolClosedCount: __autojs6_worker_threads_diagnostics.workerPoolClosedCount,
+      workerPoolTaskCompletedCount: __autojs6_worker_threads_diagnostics.workerPoolTaskCompletedCount,
+      workerPoolTaskCancelledCount: __autojs6_worker_threads_diagnostics.workerPoolTaskCancelledCount,
+      workerPoolTaskTimeoutCount: __autojs6_worker_threads_diagnostics.workerPoolTaskTimeoutCount,
+      workerPoolQueueRejectedCount: __autojs6_worker_threads_diagnostics.workerPoolQueueRejectedCount,
       lastPolicyRejection: __autojs6_worker_threads_diagnostics.lastPolicyRejection,
       lastMessageRejection: __autojs6_worker_threads_diagnostics.lastMessageRejection
     };
@@ -12153,6 +12213,46 @@ std::string buildEmbeddedScriptExecutionSource(
         throw error;
       }
     }
+    function __autojs6_worker_threads_normalize_resource_limits(resourceLimits, label) {
+      if (resourceLimits === undefined || resourceLimits === null) return undefined;
+      if (typeof resourceLimits !== "object" || Array.isArray(resourceLimits)) {
+        throw __autojs6_worker_threads_policy_error(
+          "AutoJs6 experimental worker_threads " + label + " resourceLimits must be an object.",
+          "invalid_resource_limits"
+        );
+      }
+      const caps = __autojs6_worker_threads_policy.resourceLimits;
+      const allowed = Object.freeze({
+        maxOldGenerationSizeMb: caps.maxOldGenerationSizeMb,
+        maxYoungGenerationSizeMb: caps.maxYoungGenerationSizeMb,
+        codeRangeSizeMb: caps.codeRangeSizeMb,
+        stackSizeMb: caps.stackSizeMb
+      });
+      const output = {};
+      for (const key of Object.keys(resourceLimits)) {
+        if (!__autojs6_has_own(allowed, key)) {
+          throw __autojs6_worker_threads_policy_error(
+            "AutoJs6 experimental worker_threads " + label + " rejects resourceLimits." + key + ".",
+            "unknown_resource_limit"
+          );
+        }
+        const value = Number(resourceLimits[key]);
+        if (!Number.isFinite(value) || value <= 0) {
+          throw __autojs6_worker_threads_policy_error(
+            "AutoJs6 experimental worker_threads " + label + " resourceLimits." + key + " must be positive.",
+            "invalid_resource_limit"
+          );
+        }
+        if (value > allowed[key]) {
+          throw __autojs6_worker_threads_policy_error(
+            "AutoJs6 experimental worker_threads " + label + " resourceLimits." + key + " exceeds " + allowed[key] + ".",
+            "resource_limit_too_large"
+          );
+        }
+        output[key] = Math.floor(value);
+      }
+      return Object.keys(output).length > 0 ? output : undefined;
+    }
     Object.defineProperties(AutoJs6MessagePort.prototype, {
       constructor: { value: AutoJs6MessagePort, configurable: true },
       onmessage: {
@@ -12331,13 +12431,21 @@ std::string buildEmbeddedScriptExecutionSource(
         );
         __autojs6_worker_threads_validate_message_budget(opts.workerData, "Worker workerData");
         const nativeWorkerData = __autojs6_worker_threads_to_native_message(opts.workerData);
+        const nativeResourceLimits = __autojs6_worker_threads_normalize_resource_limits(
+          opts.resourceLimits,
+          "Worker options"
+        );
+        const nativeOptions = {
+          eval: true,
+          workerData: { __autojs6UserWorkerData: nativeWorkerData },
+          transferList: workerDataTransfer.nativeList
+        };
+        if (nativeResourceLimits) {
+          nativeOptions.resourceLimits = nativeResourceLimits;
+        }
         nativeWorker = new nativeModule.Worker(
           __autojs6_worker_threads_bootstrap_source(descriptor),
-          {
-            eval: true,
-            workerData: { __autojs6UserWorkerData: nativeWorkerData },
-            transferList: workerDataTransfer.nativeList
-          }
+          nativeOptions
         );
         __autojs6_worker_threads_finalize_port_transfers(workerDataTransfer.portRecords);
         this.__autojs6NativeWorker = nativeWorker;
@@ -12429,8 +12537,455 @@ std::string buildEmbeddedScriptExecutionSource(
         return code;
       });
     };
+    function __autojs6_worker_pool_error(message, code) {
+      return __autojs6_worker_threads_error(message, code || "ERR_AUTOJS6_WORKER_POOL_TASK_FAILED");
+    }
+    function __autojs6_worker_pool_int(value, fallback, min, max, label) {
+      if (value === undefined || value === null) return fallback;
+      const number = Number(value);
+      if (!Number.isFinite(number) || Math.floor(number) !== number || number < min || number > max) {
+        throw __autojs6_worker_threads_policy_error(
+          "AutoJs6 experimental worker_threads WorkerPool " + label + " must be an integer between " + min + " and " + max + ".",
+          "invalid_worker_pool_option"
+        );
+      }
+      return number;
+    }
+    function __autojs6_worker_pool_normalize_options(options) {
+      const input = options && typeof options === "object" ? options : {};
+      const policy = __autojs6_worker_threads_policy.workerPool;
+      const maxWorkers = __autojs6_worker_pool_int(
+        input.maxWorkers,
+        policy.maxWorkers,
+        1,
+        policy.maxWorkers,
+        "maxWorkers"
+      );
+      const minWorkers = __autojs6_worker_pool_int(
+        input.minWorkers,
+        policy.minWorkers,
+        0,
+        maxWorkers,
+        "minWorkers"
+      );
+      return {
+        minWorkers,
+        maxWorkers,
+        idleTimeoutMs: __autojs6_worker_pool_int(input.idleTimeoutMs, policy.idleTimeoutMs, 0, 60000, "idleTimeoutMs"),
+        taskTimeoutMs: __autojs6_worker_pool_int(input.taskTimeoutMs, policy.taskTimeoutMs, 1, 60000, "taskTimeoutMs"),
+        queueLimit: __autojs6_worker_pool_int(input.queueLimit, policy.queueLimit, 0, 128, "queueLimit"),
+        workerData: input.workerData,
+        resourceLimits: __autojs6_worker_threads_normalize_resource_limits(input.resourceLimits, "WorkerPool options")
+      };
+    }
+    function __autojs6_worker_pool_mark_closed(pool) {
+      if (pool.__autojs6PoolClosedRecorded) return;
+      pool.__autojs6PoolClosedRecorded = true;
+      __autojs6_worker_pool_records.delete(pool);
+      __autojs6_worker_threads_diagnostics.activeWorkerPoolCount = Math.max(
+        0,
+        __autojs6_worker_threads_diagnostics.activeWorkerPoolCount - 1
+      );
+      __autojs6_worker_threads_diagnostics.workerPoolClosedCount += 1;
+    }
+    function __autojs6_worker_pool_remove_record(pool, record) {
+      if (!record || record.removed) return;
+      record.removed = true;
+      if (record.idleTimer !== null) {
+        try { clearTimeout(record.idleTimer); } catch (_) {}
+        record.idleTimer = null;
+      }
+      if (record.task && record.task.timeoutTimer !== null) {
+        try { clearTimeout(record.task.timeoutTimer); } catch (_) {}
+        record.task.timeoutTimer = null;
+      }
+      const index = pool.__autojs6PoolWorkers.indexOf(record);
+      if (index >= 0) pool.__autojs6PoolWorkers.splice(index, 1);
+    }
+    function __autojs6_worker_pool_reject_task(pool, task, error, reason) {
+      if (!task || task.settled) return;
+      task.settled = true;
+      if (task.timeoutTimer !== null) {
+        try { clearTimeout(task.timeoutTimer); } catch (_) {}
+        task.timeoutTimer = null;
+      }
+      if (reason === "cancelled") {
+        pool.__autojs6PoolCancelledTaskCount += 1;
+        __autojs6_worker_threads_diagnostics.workerPoolTaskCancelledCount += 1;
+      } else if (reason === "timeout") {
+        pool.__autojs6PoolTimedOutTaskCount += 1;
+        __autojs6_worker_threads_diagnostics.workerPoolTaskTimeoutCount += 1;
+      }
+      task.reject(error);
+    }
+    function __autojs6_worker_pool_finish_task(pool, record, task, value) {
+      if (!task || task.settled) return;
+      task.settled = true;
+      if (task.timeoutTimer !== null) {
+        try { clearTimeout(task.timeoutTimer); } catch (_) {}
+        task.timeoutTimer = null;
+      }
+      record.busy = false;
+      record.task = null;
+      task.record = null;
+      pool.__autojs6PoolCompletedTaskCount += 1;
+      __autojs6_worker_threads_diagnostics.workerPoolTaskCompletedCount += 1;
+      task.resolve(value);
+      __autojs6_worker_pool_schedule_idle(pool, record);
+      __autojs6_worker_pool_drain(pool);
+    }
+    function __autojs6_worker_pool_terminate_record(pool, record, reason) {
+      if (!record || record.removed) return Promise.resolve(0);
+      const task = record.task;
+      if (task && !task.settled) {
+        __autojs6_worker_pool_reject_task(
+          pool,
+          task,
+          __autojs6_worker_pool_error(
+            "AutoJs6 experimental worker_threads WorkerPool task ended during " + reason + ".",
+            "ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED"
+          ),
+          reason === "timeout" ? "timeout" : "cancelled"
+        );
+      }
+      record.task = null;
+      record.busy = false;
+      __autojs6_worker_pool_remove_record(pool, record);
+      let termination;
+      try {
+        termination = Promise.resolve(record.worker.terminate());
+      } catch (error) {
+        termination = Promise.reject(error);
+      }
+      const trackedTermination = termination.then(
+        function(value) {
+          const index = pool.__autojs6PoolTerminations.indexOf(trackedTermination);
+          if (index >= 0) pool.__autojs6PoolTerminations.splice(index, 1);
+          return value;
+        },
+        function(error) {
+          const index = pool.__autojs6PoolTerminations.indexOf(trackedTermination);
+          if (index >= 0) pool.__autojs6PoolTerminations.splice(index, 1);
+          throw error;
+        }
+      );
+      pool.__autojs6PoolTerminations.push(trackedTermination);
+      return trackedTermination;
+    }
+    function __autojs6_worker_pool_schedule_idle(pool, record) {
+      if (pool.__autojs6PoolClosed || !record || record.removed || record.busy) return;
+      if (record.idleTimer !== null) {
+        try { clearTimeout(record.idleTimer); } catch (_) {}
+        record.idleTimer = null;
+      }
+      if (pool.__autojs6PoolWorkers.length <= pool.__autojs6PoolMinWorkers) return;
+      if (pool.__autojs6PoolIdleTimeoutMs <= 0) return;
+      record.idleTimer = setTimeout(function() {
+        record.idleTimer = null;
+        if (pool.__autojs6PoolClosed || record.busy || pool.__autojs6PoolWorkers.length <= pool.__autojs6PoolMinWorkers) return;
+        __autojs6_worker_pool_terminate_record(pool, record, "idle timeout");
+      }, pool.__autojs6PoolIdleTimeoutMs);
+    }
+    function __autojs6_worker_pool_create_worker(pool) {
+      const workerOptions = {
+        workerData: pool.__autojs6PoolWorkerData,
+        resourceLimits: pool.__autojs6PoolResourceLimits
+      };
+      const worker = new AutoJs6Worker(pool.__autojs6PoolFilename, workerOptions);
+      const record = {
+        worker,
+        ready: false,
+        busy: false,
+        removed: false,
+        task: null,
+        idleTimer: null,
+        workerIndex: ++pool.__autojs6PoolNextWorkerIndex
+      };
+      pool.__autojs6PoolWorkers.push(record);
+      pool.__autojs6PoolCreatedWorkerCount += 1;
+      worker.on("online", function() {
+        if (pool.__autojs6PoolClosed || record.removed) return;
+        record.ready = true;
+        __autojs6_worker_pool_schedule_idle(pool, record);
+        __autojs6_worker_pool_drain(pool);
+      });
+      worker.on("message", function(message) {
+        if (!message || typeof message !== "object" || !__autojs6_has_own(message, "__autojs6PoolTaskId")) return;
+        const task = record.task;
+        if (!task || task.id !== message.__autojs6PoolTaskId) return;
+        if (__autojs6_has_own(message, "error") && message.error !== undefined && message.error !== null) {
+          const errorMessage = typeof message.error === "string"
+            ? message.error
+            : String(message.error && (message.error.message || message.error.code) || message.error);
+          __autojs6_worker_pool_reject_task(
+            pool,
+            task,
+            __autojs6_worker_pool_error(errorMessage, "ERR_AUTOJS6_WORKER_POOL_TASK_FAILED"),
+            "failed"
+          );
+          record.busy = false;
+          record.task = null;
+          task.record = null;
+          __autojs6_worker_pool_schedule_idle(pool, record);
+          __autojs6_worker_pool_drain(pool);
+          return;
+        }
+        __autojs6_worker_pool_finish_task(pool, record, task, message.value);
+      });
+      worker.on("error", function(error) {
+        if (record.task && !record.task.settled) {
+          __autojs6_worker_pool_reject_task(
+            pool,
+            record.task,
+            error || __autojs6_worker_pool_error("AutoJs6 experimental worker_threads WorkerPool worker failed.", "ERR_AUTOJS6_WORKER_POOL_TASK_FAILED"),
+            "failed"
+          );
+          record.task = null;
+        }
+        __autojs6_worker_pool_remove_record(pool, record);
+        if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool);
+      });
+      worker.on("exit", function() {
+        if (record.task && !record.task.settled) {
+          __autojs6_worker_pool_reject_task(
+            pool,
+            record.task,
+            __autojs6_worker_pool_error("AutoJs6 experimental worker_threads WorkerPool worker exited before task completion.", "ERR_AUTOJS6_WORKER_POOL_TASK_FAILED"),
+            "failed"
+          );
+          record.task = null;
+        }
+        __autojs6_worker_pool_remove_record(pool, record);
+        if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool);
+      });
+      return record;
+    }
+    function __autojs6_worker_pool_dispatch(pool, record, task) {
+      if (record.idleTimer !== null) {
+        try { clearTimeout(record.idleTimer); } catch (_) {}
+        record.idleTimer = null;
+      }
+      record.busy = true;
+      record.task = task;
+      task.record = record;
+      if (task.timeoutMs > 0) {
+        task.timeoutTimer = setTimeout(function() {
+          if (task.settled) return;
+          __autojs6_worker_pool_reject_task(
+            pool,
+            task,
+            __autojs6_worker_pool_error(
+              "AutoJs6 experimental worker_threads WorkerPool task timed out.",
+              "ERR_AUTOJS6_WORKER_POOL_TASK_TIMEOUT"
+            ),
+            "timeout"
+          );
+          __autojs6_worker_pool_terminate_record(pool, record, "timeout").then(
+            function() { if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool); },
+            function() { if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool); }
+          );
+        }, task.timeoutMs);
+      }
+      try {
+        record.worker.postMessage({
+          __autojs6PoolTaskId: task.id,
+          value: task.value
+        }, task.transferList);
+      } catch (error) {
+        record.busy = false;
+        record.task = null;
+        task.record = null;
+        __autojs6_worker_pool_reject_task(pool, task, error, "failed");
+        __autojs6_worker_pool_schedule_idle(pool, record);
+      }
+    }
+    function __autojs6_worker_pool_drain(pool) {
+      if (!pool || pool.__autojs6PoolClosed) return;
+      while (pool.__autojs6PoolQueue.length > 0) {
+        let record = pool.__autojs6PoolWorkers.find(function(candidate) {
+          return candidate.ready && !candidate.busy && !candidate.removed;
+        });
+        if (!record && pool.__autojs6PoolWorkers.length < pool.__autojs6PoolMaxWorkers) {
+          record = __autojs6_worker_pool_create_worker(pool);
+        }
+        if (!record || !record.ready || record.busy) return;
+        const task = pool.__autojs6PoolQueue.shift();
+        if (!task || task.settled) continue;
+        __autojs6_worker_pool_dispatch(pool, record, task);
+      }
+    }
+    function AutoJs6WorkerPool(filename, options) {
+      if (!(this instanceof AutoJs6WorkerPool)) {
+        return new AutoJs6WorkerPool(filename, options);
+      }
+      if (__autojs6_worker_threads_shutdown_reason) {
+        throw __autojs6_worker_threads_error(
+          "AutoJs6 experimental worker_threads WorkerPool creation is disabled during " +
+            __autojs6_worker_threads_shutdown_reason + ".",
+          "ERR_AUTOJS6_WORKER_TERMINATED"
+        );
+      }
+      const normalized = __autojs6_worker_pool_normalize_options(options);
+      this.__autojs6PoolFilename = filename;
+      this.__autojs6PoolMinWorkers = normalized.minWorkers;
+      this.__autojs6PoolMaxWorkers = normalized.maxWorkers;
+      this.__autojs6PoolIdleTimeoutMs = normalized.idleTimeoutMs;
+      this.__autojs6PoolTaskTimeoutMs = normalized.taskTimeoutMs;
+      this.__autojs6PoolQueueLimit = normalized.queueLimit;
+      this.__autojs6PoolWorkerData = normalized.workerData;
+      this.__autojs6PoolResourceLimits = normalized.resourceLimits;
+      this.__autojs6PoolQueue = [];
+      this.__autojs6PoolWorkers = [];
+      this.__autojs6PoolTerminations = [];
+      this.__autojs6PoolNextTaskId = 0;
+      this.__autojs6PoolNextWorkerIndex = 0;
+      this.__autojs6PoolCreatedWorkerCount = 0;
+      this.__autojs6PoolCompletedTaskCount = 0;
+      this.__autojs6PoolCancelledTaskCount = 0;
+      this.__autojs6PoolTimedOutTaskCount = 0;
+      this.__autojs6PoolClosed = false;
+      this.__autojs6PoolClosedRecorded = false;
+      this.__autojs6PoolClosePromise = null;
+      __autojs6_worker_pool_records.add(this);
+      __autojs6_worker_threads_diagnostics.activeWorkerPoolCount += 1;
+      __autojs6_worker_threads_diagnostics.workerPoolCreatedCount += 1;
+      if (__autojs6_worker_threads_diagnostics.activeWorkerPoolCount > __autojs6_worker_threads_diagnostics.maxActiveWorkerPoolCount) {
+        __autojs6_worker_threads_diagnostics.maxActiveWorkerPoolCount = __autojs6_worker_threads_diagnostics.activeWorkerPoolCount;
+      }
+      try {
+        for (let index = 0; index < this.__autojs6PoolMinWorkers; index += 1) {
+          __autojs6_worker_pool_create_worker(this);
+        }
+      } catch (error) {
+        this.__autojs6ClosePool("constructor failure");
+        throw error;
+      }
+    }
+    AutoJs6WorkerPool.prototype.run = function(value, options) {
+      if (this.__autojs6PoolClosed) {
+        throw __autojs6_worker_pool_error(
+          "AutoJs6 experimental worker_threads WorkerPool is closed.",
+          "ERR_AUTOJS6_WORKER_POOL_CLOSED"
+        );
+      }
+      if (this.__autojs6PoolQueue.length >= this.__autojs6PoolQueueLimit) {
+        __autojs6_worker_threads_diagnostics.workerPoolQueueRejectedCount += 1;
+        throw __autojs6_worker_pool_error(
+          "AutoJs6 experimental worker_threads WorkerPool queue is full.",
+          "ERR_AUTOJS6_WORKER_POOL_QUEUE_FULL"
+        );
+      }
+      const input = options && typeof options === "object" ? options : {};
+      const task = {
+        id: ++this.__autojs6PoolNextTaskId,
+        value,
+        transferList: input.transferList,
+        timeoutMs: __autojs6_worker_pool_int(input.timeoutMs, this.__autojs6PoolTaskTimeoutMs, 1, 60000, "task timeoutMs"),
+        resolve: null,
+        reject: null,
+        settled: false,
+        record: null,
+        timeoutTimer: null
+      };
+      const pool = this;
+      const promise = new Promise(function(resolve, reject) {
+        task.resolve = resolve;
+        task.reject = reject;
+      });
+      Object.defineProperty(promise, "cancel", {
+        value: function() {
+          if (task.settled) return false;
+          const queuedIndex = pool.__autojs6PoolQueue.indexOf(task);
+          if (queuedIndex >= 0) {
+            pool.__autojs6PoolQueue.splice(queuedIndex, 1);
+            __autojs6_worker_pool_reject_task(
+              pool,
+              task,
+              __autojs6_worker_pool_error(
+                "AutoJs6 experimental worker_threads WorkerPool task was cancelled.",
+                "ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED"
+              ),
+              "cancelled"
+            );
+            return true;
+          }
+          if (task.record) {
+            __autojs6_worker_pool_reject_task(
+              pool,
+              task,
+              __autojs6_worker_pool_error(
+                "AutoJs6 experimental worker_threads WorkerPool running task was cancelled.",
+                "ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED"
+              ),
+              "cancelled"
+            );
+            __autojs6_worker_pool_terminate_record(pool, task.record, "cancellation").then(
+              function() { if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool); },
+              function() { if (!pool.__autojs6PoolClosed) __autojs6_worker_pool_drain(pool); }
+            );
+            return true;
+          }
+          return false;
+        },
+        enumerable: false
+      });
+      this.__autojs6PoolQueue.push(task);
+      __autojs6_worker_pool_drain(this);
+      return promise;
+    };
+    AutoJs6WorkerPool.prototype.diagnostics = function() {
+      const idle = this.__autojs6PoolWorkers.filter(function(record) {
+        return record.ready && !record.busy && !record.removed;
+      }).length;
+      const busy = this.__autojs6PoolWorkers.filter(function(record) {
+        return record.busy && !record.removed;
+      }).length;
+      return {
+        closed: this.__autojs6PoolClosed,
+        workerCount: this.__autojs6PoolWorkers.length,
+        idleWorkerCount: idle,
+        busyWorkerCount: busy,
+        queuedTaskCount: this.__autojs6PoolQueue.length,
+        createdWorkerCount: this.__autojs6PoolCreatedWorkerCount,
+        completedTaskCount: this.__autojs6PoolCompletedTaskCount,
+        cancelledTaskCount: this.__autojs6PoolCancelledTaskCount,
+        timedOutTaskCount: this.__autojs6PoolTimedOutTaskCount
+      };
+    };
+    AutoJs6WorkerPool.prototype.close = function() {
+      return this.__autojs6ClosePool("close");
+    };
+    AutoJs6WorkerPool.prototype.shutdown = AutoJs6WorkerPool.prototype.close;
+    AutoJs6WorkerPool.prototype.__autojs6ClosePool = function(reason) {
+      if (this.__autojs6PoolClosePromise) return this.__autojs6PoolClosePromise;
+      this.__autojs6PoolClosed = true;
+      __autojs6_worker_pool_mark_closed(this);
+      while (this.__autojs6PoolQueue.length > 0) {
+        const task = this.__autojs6PoolQueue.shift();
+        __autojs6_worker_pool_reject_task(
+          this,
+          task,
+          __autojs6_worker_pool_error(
+            "AutoJs6 experimental worker_threads WorkerPool task rejected during " + reason + ".",
+            "ERR_AUTOJS6_WORKER_POOL_CLOSED"
+          ),
+          "cancelled"
+        );
+      }
+      const pendingTerminations = this.__autojs6PoolTerminations.slice();
+      const terminations = this.__autojs6PoolWorkers.slice().map((record) => {
+        return __autojs6_worker_pool_terminate_record(this, record, reason);
+      });
+      this.__autojs6PoolClosePromise = Promise.allSettled(pendingTerminations.concat(terminations)).then(function() {
+        return undefined;
+      });
+      return this.__autojs6PoolClosePromise;
+    };
+    Object.freeze(AutoJs6WorkerPool.prototype);
+    Object.freeze(AutoJs6WorkerPool);
     __autojs6_limited_worker_threads_cache = Object.freeze({
       Worker: AutoJs6Worker,
+      WorkerPool: AutoJs6WorkerPool,
       MessageChannel: AutoJs6MessageChannel,
       MessagePort: AutoJs6MessagePort,
       isMainThread: true,
@@ -31919,6 +32474,14 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.workerMessagePortCreatedCount = __autojs6_worker_threads_diagnostics.messagePortCreatedCount;
     fields.workerMessagePortClosedCount = __autojs6_worker_threads_diagnostics.messagePortClosedCount;
     fields.workerMessageRejectedCount = __autojs6_worker_threads_diagnostics.messageRejectedCount;
+    fields.workerPoolActiveCount = __autojs6_worker_threads_diagnostics.activeWorkerPoolCount;
+    fields.workerPoolMaxActiveCount = __autojs6_worker_threads_diagnostics.maxActiveWorkerPoolCount;
+    fields.workerPoolCreatedCount = __autojs6_worker_threads_diagnostics.workerPoolCreatedCount;
+    fields.workerPoolClosedCount = __autojs6_worker_threads_diagnostics.workerPoolClosedCount;
+    fields.workerPoolTaskCompletedCount = __autojs6_worker_threads_diagnostics.workerPoolTaskCompletedCount;
+    fields.workerPoolTaskCancelledCount = __autojs6_worker_threads_diagnostics.workerPoolTaskCancelledCount;
+    fields.workerPoolTaskTimeoutCount = __autojs6_worker_threads_diagnostics.workerPoolTaskTimeoutCount;
+    fields.workerPoolQueueRejectedCount = __autojs6_worker_threads_diagnostics.workerPoolQueueRejectedCount;
     fields.workerLastPolicyRejection = __autojs6_worker_threads_diagnostics.lastPolicyRejection;
     fields.workerLastMessageRejection = __autojs6_worker_threads_diagnostics.lastMessageRejection;
     fields.sourceMapEnabled = __autojs6_source_map_diagnostics.enabled;

@@ -2,7 +2,7 @@
 
 Date: 2026-06-17
 
-Latest S7-27 capability-isolation gate update: 2026-06-19
+Latest S7-28 worker-pool gate update: 2026-06-19
 
 Branch: `feature/nodejs-runtime-v1.1`
 
@@ -49,6 +49,12 @@ tests now expect scoped `fs`/`fs.promises` read/write helpers rooted at the
 worker working directory, plus denial of AutoJs bridge modules, `toast`,
 `accessibility`, `image`, `shell`, Java interop, inspector, raw network, and
 nested workers. Workers do not inherit main-script capabilities.
+
+S7-28 adds a controlled AutoJs6 `WorkerPool` extension for native-available
+worker builds. It covers bounded min/max worker counts, idle timeout, task
+timeout, queue limit, queued-task cancellation, capped Worker `resourceLimits`,
+and shutdown diagnostics. The current policy still keeps this behind the
+internal experimental gate because Sony remains native-worker-unavailable.
 
 Normal builds must continue to keep:
 
@@ -127,6 +133,7 @@ The failed stress cases were:
 | S7-25 CJS/ESM worker entry gate | Prepared, skipped on Sony | Worker loader now has promotion coverage for `worker.cjs`, `worker.mjs`, `type=module` `.js`, local CJS/JSON and partial-ESM dependencies, allowed builtins, path escape denial, raw network denial, bridge denial, and native addon denial. Sony still skips runnable smoke because native workers remain unavailable. |
 | S7-26 MessageChannel/transferList gate | Prepared, skipped on Sony | Limited `MessageChannel`, `MessagePort`, ArrayBuffer transfer detachment, typed array delivery, structured-clone-safe value checks, DataCloneError-compatible failures, message-size/queue limits, and MessagePort cleanup counters are covered when the native preflight is available. Sony still skips runnable smoke because native workers remain unavailable. |
 | S7-27 worker capability isolation gate | Prepared, skipped on Sony | Worker profile now separates scoped worker `fs`/`fs.promises` from main-script capabilities and verifies denial of AutoJs bridge modules, `toast`, `accessibility`, `image`, `shell`, Java interop, inspector, raw network, and nested workers. Sony still skips runnable smoke because native workers remain unavailable. |
+| S7-28 WorkerPool/resource-limits gate | Prepared, skipped on Sony | AutoJs6 `WorkerPool` now covers repeated task reuse, queue rejection, queued cancellation, task timeout, capped Worker `resourceLimits`, and `close()` cleanup counters. Sony still skips runnable smoke because native workers remain unavailable. |
 | default build flag | Pass | `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false` in normal builds. |
 | capability registry default | Pass | Kotlin and JavaScript profiles report worker threads disabled. |
 | bare `require("worker_threads")` denial | Pass | Default path rejects before local shadowing. |
@@ -175,6 +182,8 @@ Before reconsidering release opt-in status, add or prove:
   MessagePort cleanup counters;
 - worker-local scoped `fs`/`fs.promises` read/write behavior and path escape
   denial;
+- controlled `WorkerPool` reuse, queue limit, cancellation, task timeout,
+  capped Worker `resourceLimits`, and shutdown cleanup counters;
 - worker-local denial of AutoJs bridge modules, Android/Java interop, raw
   network, `shell`, `child_process`, native addons, `vm`, inspector, and nested
   workers;

@@ -593,6 +593,160 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
     }
 
     @Test
+    fun experimentalWorkerThreadsSupportControlledWorkerPool() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads WorkerPool")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads WorkerPool")
+
+        val workDir = File(context.cacheDir, "node-worker-pool-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create worker pool work dir: $absolutePath" }
+        }
+        try {
+            File(workDir, "pool-worker.cjs").writeText(
+                """
+                    const { parentPort, threadId, workerData } = require("worker_threads");
+
+                    parentPort.on("message", (task) => {
+                      const id = task && task.__autojs6PoolTaskId;
+                      const value = task && task.value || {};
+                      if (value.kind === "never") {
+                        return;
+                      }
+                      if (value.kind === "delay") {
+                        setTimeout(() => {
+                          parentPort.postMessage({
+                            __autojs6PoolTaskId: id,
+                            value: {
+                              kind: "delay",
+                              threadId
+                            }
+                          });
+                        }, value.ms);
+                        return;
+                      }
+                      parentPort.postMessage({
+                        __autojs6PoolTaskId: id,
+                        value: {
+                          result: value.n * value.n,
+                          threadId,
+                          label: workerData.label
+                        }
+                      });
+                    });
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const workerThreads = require("worker_threads");
+                      const { WorkerPool } = workerThreads;
+                      function codeOf(error) {
+                        return String(error && (error.autojs6Code || error.code || error.name || ""));
+                      }
+
+                      console.log("worker.pool.policy=" + [
+                        typeof WorkerPool,
+                        workerThreads.policy.workerPool.maxWorkers,
+                        workerThreads.policy.workerPool.queueLimit,
+                        workerThreads.policy.resourceLimits.maxOldGenerationSizeMb
+                      ].join("|"));
+
+                      const pool = new WorkerPool("./pool-worker.cjs", {
+                        minWorkers: 1,
+                        maxWorkers: 1,
+                        idleTimeoutMs: 5000,
+                        taskTimeoutMs: 1000,
+                        queueLimit: 1,
+                        resourceLimits: {
+                          maxOldGenerationSizeMb: 16
+                        },
+                        workerData: {
+                          label: "pool-data"
+                        }
+                      });
+
+                      const first = await pool.run({ n: 3 });
+                      const second = await pool.run({ n: 4 });
+                      console.log("worker.pool.reuse=" + [
+                        first.result,
+                        second.result,
+                        first.threadId === second.threadId,
+                        first.label
+                      ].join("|"));
+
+                      const running = pool.run({ kind: "delay", ms: 200 });
+                      const queued = pool.run({ n: 5 });
+                      let queueCode = "";
+                      try {
+                        pool.run({ n: 6 });
+                      } catch (error) {
+                        queueCode = codeOf(error);
+                      }
+                      console.log("worker.pool.queue=" + queueCode);
+
+                      let cancelCode = "";
+                      const queuedHandled = queued.catch((error) => {
+                        cancelCode = codeOf(error);
+                        return "cancelled";
+                      });
+                      const cancelResult = queued.cancel();
+                      await queuedHandled;
+                      console.log("worker.pool.cancel=" + [cancelResult, cancelCode].join("|"));
+
+                      const runningResult = await running;
+                      console.log("worker.pool.running=" + runningResult.kind);
+
+                      let timeoutCode = "";
+                      try {
+                        await pool.run({ kind: "never" }, { timeoutMs: 50 });
+                      } catch (error) {
+                        timeoutCode = codeOf(error);
+                      }
+                      console.log("worker.pool.timeout=" + timeoutCode);
+
+                      await pool.close();
+                      const diagnostics = workerThreads.diagnostics();
+                      console.log("worker.pool.shutdown=" + [
+                        diagnostics.activeWorkerCount,
+                        diagnostics.activeWorkerPoolCount,
+                        diagnostics.workerPoolTaskCompletedCount,
+                        diagnostics.workerPoolTaskCancelledCount,
+                        diagnostics.workerPoolTaskTimeoutCount,
+                        diagnostics.workerPoolQueueRejectedCount
+                      ].join("|"));
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-worker-pool.js>",
+                workingDirectory = workDir,
+                timeoutMs = 20_000L,
+                workerThreadsExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("worker_threads WorkerPool", result)
+            assertTrue(result.stdout, result.stdout.contains("worker.pool.policy=function|1|8|64"))
+            assertTrue(result.stdout, result.stdout.contains("worker.pool.reuse=9|16|true|pool-data"))
+            assertTrue(result.stdout, result.stdout.contains("worker.pool.queue=${NodeRuntimeErrorCodes.WORKER_POOL_QUEUE_FULL}"))
+            assertTrue(result.stdout, result.stdout.contains("worker.pool.cancel=true|${NodeRuntimeErrorCodes.WORKER_POOL_TASK_CANCELLED}"))
+            assertTrue(result.stdout, result.stdout.contains("worker.pool.running=delay"))
+            assertTrue(result.stdout, result.stdout.contains("worker.pool.timeout=${NodeRuntimeErrorCodes.WORKER_POOL_TASK_TIMEOUT}"))
+            assertTrue(result.stdout, result.stdout.contains("worker.pool.shutdown=0|0|3|1|1|1"))
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
+            assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
+            assertEquals("0", result.nativeValues["embedded_script.worker_pool_active_count"])
+            assertEquals("3", result.nativeValues["embedded_script.worker_pool_task_completed_count"])
+            assertEquals("1", result.nativeValues["embedded_script.worker_pool_task_cancelled_count"])
+            assertEquals("1", result.nativeValues["embedded_script.worker_pool_task_timeout_count"])
+            assertEquals("1", result.nativeValues["embedded_script.worker_pool_queue_rejected_count"])
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun experimentalWorkerThreadsSupportMessageChannelAndTransferList() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads MessageChannel transferList")
         NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads MessageChannel transferList")

@@ -94,6 +94,14 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.worker_message_port_closed_count", jsonNumberField(text, "workerMessagePortClosedCount"));
     putPayload(payload, "embedded_script.worker_message_rejected_count", jsonNumberField(text, "workerMessageRejectedCount"));
     putPayload(payload, "embedded_script.worker_last_message_rejection", jsonStringField(text, "workerLastMessageRejection"));
+    putPayload(payload, "embedded_script.worker_pool_active_count", jsonNumberField(text, "workerPoolActiveCount"));
+    putPayload(payload, "embedded_script.worker_pool_max_active_count", jsonNumberField(text, "workerPoolMaxActiveCount"));
+    putPayload(payload, "embedded_script.worker_pool_created_count", jsonNumberField(text, "workerPoolCreatedCount"));
+    putPayload(payload, "embedded_script.worker_pool_closed_count", jsonNumberField(text, "workerPoolClosedCount"));
+    putPayload(payload, "embedded_script.worker_pool_task_completed_count", jsonNumberField(text, "workerPoolTaskCompletedCount"));
+    putPayload(payload, "embedded_script.worker_pool_task_cancelled_count", jsonNumberField(text, "workerPoolTaskCancelledCount"));
+    putPayload(payload, "embedded_script.worker_pool_task_timeout_count", jsonNumberField(text, "workerPoolTaskTimeoutCount"));
+    putPayload(payload, "embedded_script.worker_pool_queue_rejected_count", jsonNumberField(text, "workerPoolQueueRejectedCount"));
     putPayload(payload, "embedded_script.worker_last_policy_rejection", jsonStringField(text, "workerLastPolicyRejection"));
     putPayload(payload, "embedded_script.source_map_enabled", jsonBooleanField(text, "sourceMapEnabled"));
     putPayload(payload, "embedded_script.source_map_loaded_count", jsonNumberField(text, "sourceMapLoadedCount"));
