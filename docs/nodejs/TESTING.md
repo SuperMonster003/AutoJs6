@@ -292,16 +292,25 @@ Current dependency bundler verification:
 
 ```powershell
 .\gradlew.bat --console=plain :app:bundleNodeDependencies
+.\gradlew.bat --console=plain :app:prepareNodeNpmCiDependencies
+.\gradlew.bat --console=plain :app:verifyNodeNpmCiFixtures
 .\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
 ```
 
 `bundleNodeDependencies` validates an existing project root with `package.json` and `node_modules`, then writes a
 sanitized bundle plus `dependency-manifest.json`, `dependency-sbom-lite.json`, `dependency-size-report.txt`, and
 `dependency-rejections.txt`.
+`prepareNodeNpmCiDependencies` validates a host-side project with `package.json` and required `package-lock.json`, copies
+it to a temporary working directory, runs `npm ci --ignore-scripts --no-bin-links --install-links --no-audit
+--fund=false`, then feeds the installed `node_modules` through the same sanitizer. The default fixture is
+`sample/nodejs/npm-ci-pure-js`, which uses local `vendor/` file dependencies so the verification path does not require
+registry access. The sanitized output is written to `app/build/nodejs/npm-ci-bundle/project/`; reports are written to
+`app/build/reports/nodejs/npm-ci/` and record npm version, lockfile hash, command flags, and safety controls.
 `verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes, the sanitized bundle can be used as
-the packaged APK `assets/project` layout, and unsafe fixtures are rejected for native addon, node-gyp build artifacts,
-lifecycle script, unchecked `.bin` entries, npm cache/postinstall artifacts, suspicious executables, absolute or
-escaping package metadata references, and oversized files/packages/trees. Native addon binaries are reported as
+the packaged APK `assets/project` layout, the desktop `npm ci` fixture installs without lifecycle scripts, `.bin` links,
+or native addons, and unsafe fixtures are rejected for native addon, node-gyp build artifacts, lifecycle script, unchecked
+`.bin` entries, npm cache/postinstall artifacts, suspicious executables, absolute or escaping package metadata
+references, and oversized files/packages/trees. Native addon binaries are reported as
 `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` files are reported as
 `NODE_GYP_ARTIFACT_UNSUPPORTED`.
 

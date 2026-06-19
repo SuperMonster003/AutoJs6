@@ -1,0 +1,8 @@
+{
+  "name": "npm-ci-pure-js",
+  "main": "main.cjs",
+  "node": {
+    "enabled": true,
+    "backend": "embedded"
+  }
+}

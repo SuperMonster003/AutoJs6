@@ -12,6 +12,11 @@ private val nodeDependencyBundlerMaxPackageBytesProperty = "autojs.nodejs.bundle
 private val nodeDependencyBundlerMaxTotalBytesProperty = "autojs.nodejs.bundle.maxTotalBytes"
 private val nodeDependencyBundlerMaxPackageCountProperty = "autojs.nodejs.bundle.maxPackageCount"
 private val nodeDependencyBundlerAllowSuspiciousExecutablesProperty = "autojs.nodejs.bundle.allowSuspiciousExecutables"
+private val nodeDependencyNpmCiProjectRootProperty = "autojs.nodejs.npmCi.projectRoot"
+private val nodeDependencyNpmCiWorkDirProperty = "autojs.nodejs.npmCi.workDir"
+private val nodeDependencyNpmCiOutputDirProperty = "autojs.nodejs.npmCi.outputDir"
+private val nodeDependencyNpmCiReportDirProperty = "autojs.nodejs.npmCi.reportDir"
+private val nodeDependencyNpmCiExecutableProperty = "autojs.nodejs.npmCi.executable"
 
 private val nodeDependencyBundlerForbiddenScripts = setOf("preinstall", "install", "postinstall", "prepare")
 private val nodeDependencyBundlerPathReferenceFields = setOf(
@@ -89,6 +94,41 @@ private fun File.nodeDependencyBundlerSha256(): String {
     }
     return digest.digest().joinToString("") { "%02x".format(it) }
 }
+
+private fun nodeDependencyBundlerHostExecutable(executable: String): String {
+    val trimmed = executable.trim().ifBlank { "npm" }
+    val fileName = File(trimmed).name
+    val hasExtension = fileName.contains('.')
+    val looksLikePath = trimmed.contains('/') || trimmed.contains('\\')
+    val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
+    return if (isWindows && !looksLikePath && !hasExtension) {
+        "$trimmed.cmd"
+    } else {
+        trimmed
+    }
+}
+
+private fun runNodeDependencyBundlerCommand(workingDir: File, command: List<String>): String {
+    val process = ProcessBuilder(command)
+        .directory(workingDir)
+        .redirectErrorStream(true)
+        .start()
+    val output = process.inputStream.bufferedReader().readText()
+    val exitCode = process.waitFor()
+    if (exitCode != 0) {
+        throw GradleException(
+            "Command failed with exit=$exitCode in ${workingDir.absolutePath}: ${command.joinToString(" ")}\n$output"
+        )
+    }
+    return output
+}
+
+private fun String.nodeDependencyBundlerLastVersionLine(): String =
+    lineSequence()
+        .map { it.trim() }
+        .filter { it.matches(Regex("""\d+(?:\.\d+){1,3}.*""")) }
+        .lastOrNull()
+        ?: trim()
 
 private fun File.nodeDependencyBundlerCanonicalInside(root: File): Boolean {
     val rootPath = root.canonicalFile.toPath()
@@ -370,6 +410,7 @@ private fun writeNodeDependencyBundleReports(
     reportDir: File,
     policy: NodeDependencyBundlePolicy,
     scan: NodeDependencyBundleScanResult,
+    installMetadata: Map<String, Any?> = emptyMap(),
 ) {
     reportDir.mkdirs()
     val manifest = linkedMapOf<String, Any?>(
@@ -384,6 +425,7 @@ private fun writeNodeDependencyBundleReports(
             "allowSuspiciousExecutables" to policy.allowSuspiciousExecutables,
         ),
         "sbomLite" to "dependency-sbom-lite.json",
+        "install" to installMetadata.takeIf { it.isNotEmpty() },
         "packagedLayout" to linkedMapOf(
             "sanitized" to scan.issues.isEmpty(),
             "assetRoot" to "assets/project",
@@ -545,11 +587,169 @@ val bundleNodeDependencies = tasks.register("bundleNodeDependencies") {
     }
 }
 
+val prepareNodeNpmCiDependencies = tasks.register("prepareNodeNpmCiDependencies") {
+    group = "verification"
+    description = "Runs desktop npm ci with Safe Node Profile flags and writes a sanitized dependency bundle."
+
+    val defaultProjectRoot = rootProject.projectDir.resolve("sample/nodejs/npm-ci-pure-js")
+    val projectRootProvider = providers.gradleProperty(nodeDependencyNpmCiProjectRootProperty)
+        .map(::File)
+        .orElse(defaultProjectRoot)
+    val workDirProvider = providers.gradleProperty(nodeDependencyNpmCiWorkDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("tmp/nodejs/npm-ci/work").map { it.asFile })
+    val outputDirProvider = providers.gradleProperty(nodeDependencyNpmCiOutputDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("nodejs/npm-ci-bundle").map { it.asFile })
+    val reportDirProvider = providers.gradleProperty(nodeDependencyNpmCiReportDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("reports/nodejs/npm-ci").map { it.asFile })
+    val npmExecutableProvider = providers.gradleProperty(nodeDependencyNpmCiExecutableProperty).orElse("npm")
+
+    inputs.dir(projectRootProvider)
+    outputs.dir(outputDirProvider)
+    outputs.dir(reportDirProvider)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val sourceRoot = projectRootProvider.get().canonicalFile
+        val sourcePackageJson = sourceRoot.resolve("package.json")
+        val sourceLockFile = sourceRoot.resolve("package-lock.json")
+        if (!sourcePackageJson.isFile) {
+            throw GradleException("Desktop npm ci project root must contain package.json: ${sourcePackageJson.absolutePath}")
+        }
+        if (!sourceLockFile.isFile) {
+            throw GradleException("Desktop npm ci requires package-lock.json: ${sourceLockFile.absolutePath}")
+        }
+
+        val workDir = workDirProvider.get().canonicalFile
+        workDir.deleteRecursively()
+        workDir.mkdirs()
+        project.copy {
+            from(sourceRoot) {
+                exclude("node_modules/**")
+                exclude(".git/**")
+            }
+            into(workDir)
+            includeEmptyDirs = false
+        }
+
+        val workPackageJson = workDir.resolve("package.json")
+        val workLockFile = workDir.resolve("package-lock.json")
+        val packageJsonHashBefore = workPackageJson.nodeDependencyBundlerSha256()
+        val lockHashBefore = workLockFile.nodeDependencyBundlerSha256()
+        val npmExecutable = nodeDependencyBundlerHostExecutable(npmExecutableProvider.get())
+        val npmVersion = runNodeDependencyBundlerCommand(workDir, listOf(npmExecutable, "--version"))
+            .nodeDependencyBundlerLastVersionLine()
+        val npmArgs = listOf(
+            "ci",
+            "--ignore-scripts",
+            "--no-bin-links",
+            "--install-links",
+            "--no-audit",
+            "--fund=false",
+        )
+        runNodeDependencyBundlerCommand(workDir, listOf(npmExecutable) + npmArgs)
+        if (workPackageJson.nodeDependencyBundlerSha256() != packageJsonHashBefore) {
+            throw GradleException("npm ci mutated package.json in the working copy.")
+        }
+        if (workLockFile.nodeDependencyBundlerSha256() != lockHashBefore) {
+            throw GradleException("npm ci mutated package-lock.json in the working copy.")
+        }
+        if (workDir.resolve("node_modules/.bin").exists()) {
+            throw GradleException("npm ci produced node_modules/.bin despite --no-bin-links.")
+        }
+
+        val outputDir = outputDirProvider.get().canonicalFile
+        val bundleDir = outputDir.resolve("project")
+        val reportDir = reportDirProvider.get().canonicalFile
+        val policy = nodeDependencyBundlerPolicy()
+        val scan = scanNodeDependencyBundle(workDir, policy)
+        val installMetadata = linkedMapOf<String, Any?>(
+            "manager" to "npm",
+            "managerVersion" to npmVersion,
+            "command" to "npm ${npmArgs.joinToString(" ")}",
+            "flags" to npmArgs.drop(1),
+            "sourceProjectRoot" to sourceRoot.canonicalPath,
+            "workDir" to workDir.canonicalPath,
+            "packageJsonSha256" to packageJsonHashBefore,
+            "packageLockSha256" to lockHashBefore,
+            "lockfileRequired" to true,
+            "scriptsIgnored" to true,
+            "binLinksDisabled" to true,
+            "fileDependenciesInstalledAsCopies" to true,
+        )
+        writeNodeDependencyBundleReports(workDir, bundleDir, reportDir, policy, scan, installMetadata)
+        if (scan.issues.isNotEmpty()) {
+            throw GradleException(
+                "Desktop npm ci dependency bundle rejected ${scan.issues.size} issue(s). " +
+                        "See ${reportDir.resolve("dependency-rejections.txt").absolutePath}"
+            )
+        }
+
+        bundleDir.deleteRecursively()
+        bundleDir.mkdirs()
+        project.copy {
+            from(workDir.resolve("node_modules"))
+            into(bundleDir.resolve("node_modules"))
+            includeEmptyDirs = false
+        }
+        workPackageJson.copyTo(bundleDir.resolve("package.json"), overwrite = true)
+        workLockFile.copyTo(bundleDir.resolve("package-lock.json"), overwrite = true)
+        logger.lifecycle("Desktop npm ci sanitized bundle written to ${bundleDir.absolutePath}")
+        logger.lifecycle("Desktop npm ci dependency manifest written to ${reportDir.resolve("dependency-manifest.json").absolutePath}")
+    }
+}
+
+val verifyNodeNpmCiFixtures = tasks.register("verifyNodeNpmCiFixtures") {
+    group = "verification"
+    description = "Verifies desktop npm ci installs through the sanitizer without lifecycle scripts or native addons."
+
+    dependsOn(prepareNodeNpmCiDependencies)
+
+    doLast {
+        val outputDir = providers.gradleProperty(nodeDependencyNpmCiOutputDirProperty)
+            .map(::File)
+            .orElse(layout.buildDirectory.dir("nodejs/npm-ci-bundle").map { it.asFile })
+            .get()
+            .canonicalFile
+        val reportDir = providers.gradleProperty(nodeDependencyNpmCiReportDirProperty)
+            .map(::File)
+            .orElse(layout.buildDirectory.dir("reports/nodejs/npm-ci").map { it.asFile })
+            .get()
+            .canonicalFile
+        val policy = nodeDependencyBundlerPolicy()
+        verifyNodeDependencyBundlerPackagedLayout(outputDir, reportDir, policy)
+        val projectDir = outputDir.resolve("project")
+        if (!projectDir.resolve("package-lock.json").isFile) {
+            throw GradleException("Desktop npm ci sanitized bundle must retain package-lock.json.")
+        }
+        if (projectDir.resolve("node_modules/.bin").exists()) {
+            throw GradleException("Desktop npm ci sanitized bundle must not include node_modules/.bin.")
+        }
+        val manifest = nodeDependencyBundlerReadJsonObject(reportDir.resolve("dependency-manifest.json"))
+        val install = manifest?.get("install") as? Map<*, *>
+            ?: throw GradleException("Desktop npm ci manifest is missing install metadata.")
+        val flags = (install["flags"] as? List<*>)?.map { it.toString() }.orEmpty()
+        val requiredFlags = setOf("--ignore-scripts", "--no-bin-links", "--install-links")
+        val missingFlags = requiredFlags - flags.toSet()
+        if (missingFlags.isNotEmpty()) {
+            throw GradleException("Desktop npm ci manifest is missing required flag(s): $missingFlags")
+        }
+        if (install["lockfileRequired"] != true ||
+            install["scriptsIgnored"] != true ||
+            install["binLinksDisabled"] != true
+        ) {
+            throw GradleException("Desktop npm ci manifest does not record required safety controls: $install")
+        }
+    }
+}
+
 val verifyNodeDependencyBundlerFixtures = tasks.register("verifyNodeDependencyBundlerFixtures") {
     group = "verification"
     description = "Verifies the Node dependency bundler accepts safe fixtures and rejects unsafe fixtures."
 
-    dependsOn(bundleNodeDependencies)
+    dependsOn(bundleNodeDependencies, verifyNodeNpmCiFixtures)
 
     doLast {
         val policy = nodeDependencyBundlerPolicy()

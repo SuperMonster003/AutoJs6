@@ -194,6 +194,7 @@ Task 76 adds the first build-time dependency bundler:
 
 ```powershell
 .\gradlew.bat --console=plain :app:bundleNodeDependencies
+.\gradlew.bat --console=plain :app:prepareNodeNpmCiDependencies
 .\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
 ```
 
@@ -201,13 +202,21 @@ Default input is `sample/nodejs/npm-pure-js-cjs`. Override with:
 
 ```powershell
 .\gradlew.bat --console=plain :app:bundleNodeDependencies "-Pautojs.nodejs.bundle.projectRoot=D:\path\to\project"
+.\gradlew.bat --console=plain :app:prepareNodeNpmCiDependencies "-Pautojs.nodejs.npmCi.projectRoot=D:\path\to\project"
 ```
 
 Outputs:
 
 - `app/build/nodejs/dependency-bundle/project/`
+- `app/build/nodejs/npm-ci-bundle/project/`
 - `app/build/reports/nodejs/dependencies/dependency-manifest.json`
+- `app/build/reports/nodejs/npm-ci/dependency-manifest.json`
 - `app/build/reports/nodejs/dependencies/dependency-size-report.txt`
 - `app/build/reports/nodejs/dependencies/dependency-rejections.txt`
 
-The task does not execute package code. It rejects native addon files, lifecycle scripts, unsupported `.bin` entries, symlinks, path escapes, oversized files/packages/trees, excessive package counts, and default-profile ESM-only package metadata.
+The direct bundler task does not execute package code. The desktop-assisted npm route requires `package-lock.json`, copies
+the project to a temporary host work directory, runs `npm ci --ignore-scripts --no-bin-links --install-links --no-audit
+--fund=false`, verifies `package.json` and `package-lock.json` were not mutated, rejects generated `.bin` entries, and
+then runs the same sanitizer. Both routes reject native addon files, lifecycle scripts, unsupported `.bin` entries,
+symlinks, path escapes, oversized files/packages/trees, excessive package counts, and default-profile ESM-only package
+metadata.
