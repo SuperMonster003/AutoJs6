@@ -664,7 +664,11 @@ read/write helpers rooted at their working directory and do not inherit main
 script bridge, network, shell, Java, or inspector authority. S7-28 prepares a
 controlled `WorkerPool` extension with bounded worker count, queueing,
 cancellation, task timeout, idle timeout, capped resource limits, and shutdown
-diagnostics. The explicit gate flag is:
+diagnostics. S7-29 extends that promotion path with 100-job stress, WorkerPool
+failure, transfer, cancellation, timeout recovery, parent-completion cleanup,
+and a single packaged APK `.mjs` worker smoke selected by `verifyNodeWorkerGate`.
+Those runnable checks remain skipped on Sony while native workers are
+unavailable. The explicit gate flag is:
 
 ```properties
 autojs.nodejs.worker_threads.experimental=false
@@ -714,6 +718,11 @@ for local worker scripts inside `workingDirectory` is:
 The intended MVP loads worker source through the parent scoped resolver, then executes it in a native Node Worker with a worker-local restricted loader. Worker-local `require("worker_threads")` exposes only `parentPort`, `workerData`, `isMainThread`, `threadId`, limited native-available `MessageChannel`/`MessagePort`, `workerProfile`, and a disabled nested `Worker`. Worker-local CJS and partial-ESM imports can load local worker dependencies and the safe worker builtin allowlist only. Worker-local `fs` and `fs/promises` are AutoJs6 wrappers, not native Node `fs`; they validate lexical paths and real paths against the worker root before read/write operations. Worker-local loading denies AutoJs bridge modules, `autojs6:bridge`, raw network, `shell`, `child_process`, native addons, `vm`, inspector, Java/Android interop, and nested workers. The first policy allows one active worker, a `5000` ms startup timeout, `65536` byte messages, `32` queued messages per parent/port sender, scoped worker fs read/write in `workingDirectory`, and safe pure-JS builtins only.
 
 `WorkerPool` is an AutoJs6 experimental extension, not a Node standard export. Pool workers use an explicit message protocol: the parent sends `{ __autojs6PoolTaskId, value }`, and the worker replies with `{ __autojs6PoolTaskId, value }` or `{ __autojs6PoolTaskId, error }`. Worker and parent-side MessagePort instances are tracked per execution when the native module is available. Parent success/failure cleanup performs best-effort termination of any active worker and pool and closes tracked ports before writing the result envelope, and exposes pending-worker, worker-pool, message-port, rejected-message, and cleanup counters through native diagnostics. See `docs/nodejs/design/WORKER_THREADS.md` and `docs/nodejs/reports/WORKER_EXPERIMENTAL_EVALUATION.md` for worker count, timeout, memory, packaged APK, bridge-denial, lifecycle policy, and the current GA blocking status.
+Packaged worker support is still limited to the S7-29 internal smoke: a
+packaged CJS entry starts a local `.mjs` worker and verifies workerData,
+parentPort, threadId, builtin import, source graph packaging, and exit cleanup.
+It is not a user-visible packaged worker guarantee while the default profile
+keeps `worker_threads` disabled.
 
 ## Process Profile
 

@@ -2,7 +2,7 @@
 
 Date: 2026-06-17
 
-Latest S7-28 worker-pool gate update: 2026-06-19
+Latest S7-29 worker-stress/packaged-smoke gate update: 2026-06-19
 
 Branch: `feature/nodejs-runtime-v1.1`
 
@@ -55,6 +55,14 @@ worker builds. It covers bounded min/max worker counts, idle timeout, task
 timeout, queue limit, queued-task cancellation, capped Worker `resourceLimits`,
 and shutdown diagnostics. The current policy still keeps this behind the
 internal experimental gate because Sony remains native-worker-unavailable.
+
+S7-29 expands the internal worker promotion gate with 100 sequential worker
+jobs, WorkerPool failure recovery, queued cancellation, ArrayBuffer transfer,
+timeout recovery while a previous worker termination is still pending,
+parent-completion pool cleanup, and a single packaged APK `.mjs` worker smoke.
+The packaged smoke is selected as one focused
+`EmbeddedNodePackagedApkSmokeTest` method and skips before APK construction
+when the native-worker preflight reports unavailable.
 
 Normal builds must continue to keep:
 
@@ -113,16 +121,23 @@ $env:ANDROID_SERIAL="QV710AF65F"
 Result:
 
 ```text
-4 tests, 4 failures, 0 errors, 0 skipped
-all failures: ERR_AUTOJS6_WORKER_DISABLED
+6 tests, 0 failures, 0 errors, 6 skipped
+all skips: ERR_AUTOJS6_WORKER_DISABLED native-availability preflight
 ```
 
-The failed stress cases were:
+The skipped stress cases are:
 
 - `createAndTerminateWorkersSequentiallyDoesNotGrowResourceCounters`
+- `workerPoolStressDoesNotLeakAfterFailuresTimeoutsAndTransfers`
+- `workerPoolIsClosedDuringParentCompletionCleanup`
 - `workerExceptionDoesNotPoisonNextRun`
 - `infiniteLoopWorkerTimeoutDoesNotPoisonNextRun`
 - `pendingWorkerMessageIsRejectedDuringParentCompletionCleanup`
+
+The focused `verifyNodeWorkerGate` also selects
+`EmbeddedNodePackagedApkSmokeTest#installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk`;
+that packaged smoke skips before APK construction when the same preflight is
+native-unavailable.
 
 ## Evidence Matrix
 
@@ -134,6 +149,7 @@ The failed stress cases were:
 | S7-26 MessageChannel/transferList gate | Prepared, skipped on Sony | Limited `MessageChannel`, `MessagePort`, ArrayBuffer transfer detachment, typed array delivery, structured-clone-safe value checks, DataCloneError-compatible failures, message-size/queue limits, and MessagePort cleanup counters are covered when the native preflight is available. Sony still skips runnable smoke because native workers remain unavailable. |
 | S7-27 worker capability isolation gate | Prepared, skipped on Sony | Worker profile now separates scoped worker `fs`/`fs.promises` from main-script capabilities and verifies denial of AutoJs bridge modules, `toast`, `accessibility`, `image`, `shell`, Java interop, inspector, raw network, and nested workers. Sony still skips runnable smoke because native workers remain unavailable. |
 | S7-28 WorkerPool/resource-limits gate | Prepared, skipped on Sony | AutoJs6 `WorkerPool` now covers repeated task reuse, queue rejection, queued cancellation, task timeout, capped Worker `resourceLimits`, and `close()` cleanup counters. Sony still skips runnable smoke because native workers remain unavailable. |
+| S7-29 worker stress/packaged smoke gate | Prepared, skipped on Sony | Worker stress now covers 100 sequential jobs, WorkerPool failure/cancel/timeout/transfer recovery, parent-completion pool cleanup, and packaged APK `.mjs` worker graph smoke. Sony still skips runnable smoke before APK construction because native workers remain unavailable. |
 | default build flag | Pass | `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false` in normal builds. |
 | capability registry default | Pass | Kotlin and JavaScript profiles report worker threads disabled. |
 | bare `require("worker_threads")` denial | Pass | Default path rejects before local shadowing. |
@@ -148,9 +164,10 @@ The failed stress cases were:
 | worker-local Android Context / Java denial | Prepared, skipped on Sony | Worker profile denies Java interop and exposes no Android Context. |
 | worker scoped fs escape denial | Prepared, skipped on Sony | Worker `fs`/`fs.promises` wrappers validate lexical paths and real paths against `workingDirectory`. |
 | nested worker denial | Prepared, skipped on Sony | Worker-local nested `Worker` construction is denied by the limited module when native workers are available. |
-| parent stop/completion cleanup | Blocked | Stress cleanup tests fail before worker creation. |
-| sequential create/terminate stress | Blocked | 50-cycle stress cannot start. |
-| exception and timeout recovery | Blocked | Recovery tests fail before worker creation. |
+| parent stop/completion cleanup | Prepared, skipped on Sony | Worker and WorkerPool cleanup tests are wired, but native worker creation is unavailable. |
+| sequential create/terminate stress | Prepared, skipped on Sony | 100-cycle stress cannot start until native workers are available. |
+| exception, timeout, and WorkerPool recovery | Prepared, skipped on Sony | Recovery tests are wired, but native worker creation is unavailable. |
+| packaged APK `.mjs` worker smoke | Prepared, skipped on Sony | The focused packaged smoke skips before APK construction when native worker preflight is unavailable. |
 
 ## Policy Decision
 
@@ -162,7 +179,8 @@ For Node Profile v1.1:
 - keep the experimental flag available only as an internal unblock/debug gate;
 - do not advertise pure-JS workers until native availability and resource stress
   gates pass;
-- do not add packaged worker graph support yet.
+- do not expose packaged worker graph support outside the bounded internal
+  S7-29 smoke.
 
 ## Required Promotion Evidence
 
@@ -184,10 +202,11 @@ Before reconsidering release opt-in status, add or prove:
   denial;
 - controlled `WorkerPool` reuse, queue limit, cancellation, task timeout,
   capped Worker `resourceLimits`, and shutdown cleanup counters;
+- WorkerPool failure recovery, ArrayBuffer transfer, timeout recovery after
+  pending termination, and parent-completion pool cleanup;
 - worker-local denial of AutoJs bridge modules, Android/Java interop, raw
   network, `shell`, `child_process`, native addons, `vm`, inspector, and nested
   workers;
 - parent stop and script completion cleanup for active workers;
-- bounded thread/RSS growth in repeated create/terminate stress;
-- packaged APK policy for worker source graphs, if packaged workers are ever in
-  scope.
+- bounded thread/RSS growth in repeated create/terminate and WorkerPool stress;
+- packaged APK `.mjs` worker source graph smoke and policy documentation.

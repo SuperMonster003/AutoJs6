@@ -766,6 +766,14 @@ cancelled, running tasks can time out, resourceLimits are capped, and
 `pool.close()` must leave zero active workers and zero active pools. This
 coverage is also skipped on the current Sony build until native workers are
 available.
+S7-29 expands the same focused gate with worker stress and packaged smoke
+coverage: 100 sequential worker jobs, WorkerPool failure recovery, timeout
+recovery while a previous worker termination is still pending, ArrayBuffer
+transfer through `WorkerPool.run`, parent-completion pool cleanup, and one
+packaged APK `.mjs` worker entry smoke. The packaged worker smoke is selected
+as a single `EmbeddedNodePackagedApkSmokeTest` method inside
+`verifyNodeWorkerGate`; it skips before APK construction when the S7-24 native
+worker preflight reports unavailable.
 
 Current experimental worker_threads resource stress instrumentation:
 
@@ -773,11 +781,12 @@ Current experimental worker_threads resource stress instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest"
 ```
 
-This suite verifies 50 sequential worker create/terminate cycles, worker
-exception recovery, infinite-loop worker timeout recovery, parent-completion
-cleanup for pending worker messages, worker cleanup diagnostics counters, and
-coarse RSS/thread-count snapshots around the sequential stress case. It is
-skipped when the S7-24 native-availability preflight reports
+This suite verifies 100 sequential worker create/terminate cycles, WorkerPool
+stress across 100 jobs plus failure/cancel/timeout/transfer recovery,
+parent-completion cleanup for pending worker messages and active pools, worker
+cleanup diagnostics counters, and coarse RSS/thread-count snapshots around the
+sequential and pool stress cases. It is skipped when the S7-24
+native-availability preflight reports
 `ERR_AUTOJS6_WORKER_DISABLED`, and it must pass on the Sony gate device before
 workers can be advertised as a runnable experiment.
 

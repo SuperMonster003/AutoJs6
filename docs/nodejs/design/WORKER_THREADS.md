@@ -1,6 +1,6 @@
 # Worker Threads Design Gate v1
 
-Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds, but it does not promote workers to a user-visible release surface.
+Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds. S7-29 adds stress and packaged `.mjs` worker smoke coverage to the same internal gate, but it does not promote workers to a user-visible release surface.
 
 ## Goal
 
@@ -229,15 +229,14 @@ Current gates:
   `ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero active workers.
 - `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection in normal builds.
 - `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, limited `MessageChannel`/`MessagePort`, ArrayBuffer transfer detachment, transfer-list validation, message size/queue limits, DataCloneError-compatible failures, MessagePort cleanup counters, scoped worker `fs`/`fs.promises`, controlled `WorkerPool` reuse/queue/cancel/timeout/shutdown behavior, and denial of AutoJs bridge modules, `toast`, `accessibility`, `image`, `shell`, `java`, `inspector`, raw `net`, and nested workers inside worker scope. Runnable coverage is skipped when the preflight reports native workers unavailable.
-- `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots. Stress coverage is skipped when the preflight reports native workers unavailable.
+- `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for 100 sequential create/terminate jobs, WorkerPool 100-job reuse, worker and pool exception recovery, queued cancellation, ArrayBuffer transfer, infinite-loop and pool task timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots. Stress coverage is skipped when the preflight reports native workers unavailable.
+- `EmbeddedNodePackagedApkSmokeTest#installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk` is selected by the experimental `verifyNodeWorkerGate` as the packaged `.mjs` worker smoke. It skips before APK construction when native worker preflight is unavailable.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
 Current evaluation: [../reports/WORKER_EXPERIMENTAL_EVALUATION.md](../reports/WORKER_EXPERIMENTAL_EVALUATION.md). The default design gate passes, but worker execution/stress suites are blocked by native module availability. The 2026-06-17 v1.1 recheck confirmed that Task 170 cannot graduate workers to runnable partial support without changing the Embedded Node native build. The 2026-06-19 S7-24 recheck added bootstrap/preflight coverage and verified the experimental gate fails closed with skips, not false runnable support, on the current native build.
 
-Follow-up gates should add:
-
-- packaged APK worker source graph and verifier behavior
-- stronger native handle/thread leak diagnostics once worker support graduates beyond experimental mode
+Follow-up gates should add stronger native handle/thread leak diagnostics once
+worker support graduates beyond experimental mode.
 
 ## Non-Goals
 
@@ -248,7 +247,7 @@ The MVP does not enable:
 - unrestricted native-handle transfer or `MessageChannel` behavior beyond the bounded S7-26 native-available gate
 - AutoJs bridge access from workers
 - Android Context access from workers
-- packaged worker source graphs
+- packaged worker source graphs outside the bounded S7-29 experimental smoke
 - worker access to unrestricted native `fs`
 - unbounded worker pools or background detached pool workers
 - worker access to raw network

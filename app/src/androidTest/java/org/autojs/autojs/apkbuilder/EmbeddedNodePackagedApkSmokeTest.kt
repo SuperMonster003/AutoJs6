@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.engine.EmbeddedNodeFixtureCorpus
 import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
+import org.autojs.autojs.engine.NodeWorkerThreadsTestSupport
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
 import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
@@ -9183,6 +9184,84 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged worker_threads ESM smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+        assumeTrue(
+            "Embedded Node.js packaged worker_threads ESM smoke requires worker_threads experimental build support.",
+            BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        )
+        assumeTrue(
+            "Embedded Node.js packaged worker_threads ESM smoke requires Node Profile v1.1 ESM to be enabled.",
+            BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
+        )
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("packaged worker_threads ESM smoke")
+
+        assumePackagedSmokeTemplateAvailable("Packaged worker_threads ESM install-and-run smoke")
+
+        val outputApk = buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-worker-threads-esm-smoke",
+            outputApkName = WORKER_THREADS_ESM_APK_NAME,
+            projectName = WORKER_THREADS_ESM_PROJECT_NAME,
+            packageName = WORKER_THREADS_ESM_PACKAGE_NAME,
+            mainScriptName = "main.js",
+            mainScript = """
+                "nodejs";
+                return (async function main() {
+                  const { Worker } = require("worker_threads");
+                  const worker = new Worker("./packaged-worker.mjs", {
+                    workerData: {
+                      value: 21
+                    }
+                  });
+                  const exitPromise = new Promise((resolve) => worker.once("exit", resolve));
+                  const message = await new Promise((resolve, reject) => {
+                    worker.once("error", reject);
+                    worker.once("message", resolve);
+                  });
+                  const exitCode = await exitPromise;
+                  const ready = message.value === 42 &&
+                    message.isMainThread === false &&
+                    message.threadIdOk === true &&
+                    message.filenameOk === true &&
+                    message.builtinOk === true &&
+                    exitCode === 0;
+                  console.log("packaged.worker_threads.esm.ready=" + ready);
+                  console.log("packaged.worker_threads.esm.value=" + (message.value === 42));
+                  console.log("packaged.worker_threads.esm.thread=" + (message.isMainThread === false && message.threadIdOk === true));
+                  console.log("packaged.worker_threads.esm.filename=" + message.filenameOk);
+                  console.log("packaged.worker_threads.esm.builtin=" + message.builtinOk);
+                  console.log("packaged.worker_threads.esm.exit=" + exitCode);
+                })();
+            """.trimIndent() + "\n",
+            extraFiles = packagedRuntimeCompatibilityDescriptorFiles(
+                    esmPartial = true,
+                    dynamicImportLocal = false,
+                    workerThreads = true,
+                ) + mapOf(
+                "package.json" to """{"name":"packaged-worker-threads-esm-smoke","version":"1.0.0"}""" + "\n",
+                "packaged-worker.mjs" to """
+                    import path from "path";
+                    import { parentPort, workerData, isMainThread, threadId } from "worker_threads";
+
+                    parentPort.postMessage({
+                      value: workerData.value * 2,
+                      isMainThread,
+                      threadIdOk: Number.isInteger(threadId),
+                      filenameOk: typeof __filename === "string" && __filename.endsWith("/packaged-worker.mjs"),
+                      builtinOk: path.basename("/safe/packaged-worker.mjs") === "packaged-worker.mjs"
+                    });
+                """.trimIndent() + "\n",
+            ),
+            runtimeMarkers = WORKER_THREADS_ESM_RUNTIME_MARKERS,
+            requiredTemplateDexMarkers = WORKER_THREADS_ESM_TEMPLATE_DEX_MARKERS,
+        )
+        assertInstallAndRunPackagedWorkerThreadsEsmSmoke(outputApk)
+    }
+
+    @Test
     fun installAndRunTimeoutDiagnosticsEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged timeout diagnostics install-and-run smoke requires embedded script execution build support.",
@@ -12838,6 +12917,16 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedWorkerThreadsEsmSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = WORKER_THREADS_ESM_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-worker-threads-esm-smoke.apk",
+            label = "packaged worker_threads ESM smoke",
+            requiredMarkers = WORKER_THREADS_ESM_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedTimeoutDiagnosticsSmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -13606,6 +13695,11 @@ $nodeConfigJson
             "org.autojs6.packaged.node.dynamicimport.diagnostics.smoke"
         private const val DYNAMIC_IMPORT_DIAGNOSTICS_APK_NAME =
             "PackagedNodeDynamicImportDiagnosticsSmoke_v1.0.0.apk"
+        private const val WORKER_THREADS_ESM_PROJECT_NAME = "PackagedNodeWorkerThreadsEsmSmoke"
+        private const val WORKER_THREADS_ESM_PACKAGE_NAME =
+            "org.autojs6.packaged.node.workerthreads.esm.smoke"
+        private const val WORKER_THREADS_ESM_APK_NAME =
+            "PackagedNodeWorkerThreadsEsmSmoke_v1.0.0.apk"
         private const val TIMEOUT_DIAGNOSTICS_PROJECT_NAME = "PackagedNodeTimeoutDiagnosticsSmoke"
         private const val TIMEOUT_DIAGNOSTICS_PACKAGE_NAME = "org.autojs6.packaged.node.timeout.diagnostics.smoke"
         private const val TIMEOUT_DIAGNOSTICS_APK_NAME = "PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk"
@@ -14155,6 +14249,18 @@ $nodeConfigJson
         private val DYNAMIC_IMPORT_TEMPLATE_DEX_MARKERS = listOf(
             "dynamicImportLocalEnabled=",
         )
+        private val WORKER_THREADS_ESM_RUNTIME_MARKERS = listOf(
+            "packaged.worker_threads.esm.ready=true",
+            "packaged.worker_threads.esm.value=true",
+            "packaged.worker_threads.esm.thread=true",
+            "packaged.worker_threads.esm.filename=true",
+            "packaged.worker_threads.esm.builtin=true",
+            "packaged.worker_threads.esm.exit=0",
+        )
+        private val WORKER_THREADS_ESM_TEMPLATE_DEX_MARKERS =
+            EXPERIMENTAL_ESM_TEMPLATE_DEX_MARKERS + listOf(
+                "workerThreadsExperimentalEnabled=",
+            )
         private val TIMEOUT_DIAGNOSTICS_RUNTIME_MARKERS = listOf(
             "packaged.diagnostics.timeout.code=ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",
             "packaged.diagnostics.timeout.timedOut=true",
@@ -14195,22 +14301,25 @@ $nodeConfigJson
     private fun packagedRuntimeCompatibilityDescriptor(
         esmPartial: Boolean,
         dynamicImportLocal: Boolean,
+        workerThreads: Boolean = false,
     ): String {
         return NodeProjectRuntimeCompatibilityDescriptor.currentText(
             esmPartial = esmPartial,
             dynamicImportLocal = dynamicImportLocal,
-            workerThreads = false,
+            workerThreads = workerThreads,
         )
     }
 
     private fun packagedRuntimeCompatibilityDescriptorFiles(
         esmPartial: Boolean,
         dynamicImportLocal: Boolean,
+        workerThreads: Boolean = false,
     ): Map<String, String> {
         return packagedRuntimeCompatibilityDescriptorFiles(
             packagedRuntimeCompatibilityDescriptor(
                 esmPartial = esmPartial,
                 dynamicImportLocal = dynamicImportLocal,
+                workerThreads = workerThreads,
             ),
         )
     }

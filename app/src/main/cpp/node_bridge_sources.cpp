@@ -12806,6 +12806,9 @@ std::string buildEmbeddedScriptExecutionSource(
           return candidate.ready && !candidate.busy && !candidate.removed;
         });
         if (!record && pool.__autojs6PoolWorkers.length < pool.__autojs6PoolMaxWorkers) {
+          if (__autojs6_worker_threads_diagnostics.activeWorkerCount >= __autojs6_worker_threads_policy.maxWorkers) {
+            return;
+          }
           record = __autojs6_worker_pool_create_worker(pool);
         }
         if (!record || !record.ready || record.busy) return;

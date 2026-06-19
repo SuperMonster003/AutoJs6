@@ -267,6 +267,7 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
         "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
+        "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk",
     )
 } else {
     listOf(
@@ -572,6 +573,7 @@ val nodeJsWorkerGateInstrumentationClasses = if (nodeJsWorkerThreadsExperimental
         "org.autojs.autojs.engine.NodeWorkerThreadsDesignGateInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest",
         "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
+        "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunWorkerThreadsEsmEmbeddedNodePackagedApk",
     )
 } else {
     listOf(
