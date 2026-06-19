@@ -454,15 +454,20 @@ The current S7-18 gate covers:
   summaries
 - cooperative `onStop()` checkpoint write, project-scoped metadata in stopped
   status, service-settled explicit `onRestore()`, and restart policy `never`
+- repeated interactive stop/checkpoint/recovery cycles with periodic timer
+  cleanup and bounded memory pressure
+- provider destroy cleanup for owned notification, sensor, UI, shell, and
+  WebSocket counters, with zero active provider resources and close errors
 - direct script `interactiveLongRunning`/legacy `long_running` rejection before
   user code
 - one-shot interval timeout regression
 
 Before broader service mode promotion, add focused tests for startup ready
 signals, console stop, cooperative stop drain, force stop after grace timeout,
-service destroy rejection for pending bridge calls, controlled fetch/WebSocket
-cleanup, quota exceeded paths, packaged manifest verification, packaged service
-smoke, crash without restart, and bounded restart policy if implemented.
+service destroy rejection for pending bridge calls, live controlled
+fetch/WebSocket cleanup, quota exceeded paths, packaged manifest verification,
+packaged service smoke, crash without restart, and bounded restart policy if
+implemented.
 
 ## Release Gate
 
@@ -471,6 +476,7 @@ Any release with long-running service mode enabled must verify:
 - normal one-shot timeout tests still pass
 - `NodeEmbeddedLifecycleStressInstrumentationTest` still passes
 - `NodeInteractiveLongRunningInstrumentationTest` passes on the target device
+- `NodeLongRunningStressInstrumentationTest` passes on the target device
 - `NodeAndroidRuntimePolicyInstrumentationTest` passes on the target device
 - `NodeRuntimeBudgetPolicyInstrumentationTest` passes on the target device
 - foreground service permissions and type are correct
@@ -479,6 +485,8 @@ Any release with long-running service mode enabled must verify:
 - checkpoint payloads remain JSON-only, app-private, project-scoped,
   size-limited, and explicit-restore only
 - raw network and dangerous process APIs remain denied
+- provider destroy leaves no active provider resources, shell commands,
+  WebSocket counters, or close errors
 - service mode is documented as explicit and user-visible
 
 Packaged service mode still remains disabled until packaged manifest, template,

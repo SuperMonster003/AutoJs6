@@ -212,6 +212,7 @@ Use this checklist for any release that includes the Embedded Node runtime or pa
 - [ ] embedded Node foreground-service start/type/timeout diagnostics are present, and Android timeout cleanup calls the immediate stop path
 - [ ] interactive status snapshots preserve runtime heartbeat/budget diagnostics, including stopped/timed-out terminal records
 - [ ] interactive lifecycle checkpoints are JSON-only, size-limited, project-scoped, atomically persisted, explicitly restored, and never enable automatic restart
+- [ ] long-running stress gate repeats interactive stop/checkpoint/recovery and provider destroy leaves no active resources, shell commands, WebSocket counters, or close errors
 
 ## Diagnostics
 

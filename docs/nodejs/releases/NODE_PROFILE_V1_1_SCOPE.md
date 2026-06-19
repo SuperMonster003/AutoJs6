@@ -201,9 +201,10 @@ small set of already-gated features toward practical use.
 - Interactive long-running foreground mode passes status, foreground survival,
   Stop action, runtime heartbeat/budget diagnostics, Android
   foreground-service timeout cleanup, cooperative checkpoint-on-stop,
-  explicit restore after service settle, and recovery coverage while direct
-  script long-running requests still reject before user code and normal
-  interval scripts still time out.
+  explicit restore after service settle, repeated stop/checkpoint/recovery
+  stress, and provider-destroy resource cleanup while direct script
+  long-running requests still reject before user code and normal interval
+  scripts still time out.
 - Worker threads remain default-off and blocked for v1.1 runnable partial
   support until native `worker_threads` availability changes and the focused
   execution/stress suites pass on Sony.

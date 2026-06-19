@@ -144,7 +144,10 @@ not the full payload, and the restart policy remains `never`. S7-19 adds Android
 foreground-service
 diagnostics for background-start denial, manifest type validation, and
 `Service.onTimeout(...)` cleanup; those diagnostics do not grant background
-launch authority or restart permission. See
+launch authority or restart permission. S7-23 stress coverage requires
+interactive stop/checkpoint/recovery to remain repeatable and provider destroy
+to close owned notification, sensor, UI, shell, and WebSocket counters without
+active resources or close errors. See
 `docs/nodejs/design/LONG_RUNNING_SERVICE.md`.
 S7-20 adds runtime heartbeat and budget diagnostics for the explicit
 interactive runtime. These diagnostics report event-loop responsiveness, last

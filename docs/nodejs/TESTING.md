@@ -94,6 +94,11 @@ The interactive long-running suite also verifies the S7-22 lifecycle protocol:
 `onStop()` can write a JSON checkpoint during the stop grace window, terminal
 status exposes only checkpoint metadata, a settled later service process can
 explicitly `onRestore()` that checkpoint, and `automaticRestart` remains false.
+`NodeLongRunningStressInstrumentationTest` extends the same gate with repeated
+interactive stop/checkpoint/recovery cycles and provider-destroy cleanup for
+owned notification, sensor, UI, shell, and WebSocket counters. Normal builds
+still keep WebSocket live I/O feature-gated or denied, and packaged service
+mode remains unavailable.
 
 Lifecycle tests must still verify that normal scripts are one-shot executions
 controlled by `timeoutMs`, including timeout recovery, uncleared interval
@@ -1042,10 +1047,13 @@ Current lifecycle stress cases:
 - concurrent embedded execution rejects with `ERR_AUTOJS6_NODE_ENGINE_BUSY` and a later run succeeds
 - interactive stop writes a project-scoped checkpoint and a later explicit
   restore reads it without automatic restart
+- repeated interactive stop drains timers, writes checkpoints, and leaves the
+  settled service process able to run a later one-shot script
+- provider destroy closes owned notification, sensor, UI, shell, and WebSocket
+  counters without active resources or close errors
 
 Planned lifecycle stress cases:
 
-- run and stop repeatedly with an explicit user stop path
 - service stops after script exit
 - packaged app lifecycle smoke
 

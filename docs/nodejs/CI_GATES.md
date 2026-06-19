@@ -244,9 +244,11 @@ heartbeat/budget summaries. S7-22 adds cooperative `autojs6:lifecycle`
 checkpoint/restore coverage: an interactive stop hook writes a JSON-only
 project-scoped checkpoint, stopped status exposes metadata, a settled later
 interactive session restores explicitly, and automatic restart remains disabled.
-It also continues lifecycle/resource stress
-coverage for timeouts, queueing, cleanup, and reserved-mode rejection before
-user code.
+S7-23 adds long-running stress coverage for repeated interactive stop,
+checkpoint, one-shot recovery, and provider-destroy cleanup of owned
+notification, sensor, UI, shell, and WebSocket counters. It also continues
+lifecycle/resource stress coverage for timeouts, queueing, cleanup, and
+reserved-mode rejection before user code.
 
 ## Release Gate
 
