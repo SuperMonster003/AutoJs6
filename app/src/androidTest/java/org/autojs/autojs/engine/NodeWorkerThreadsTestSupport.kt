@@ -21,15 +21,20 @@ internal object NodeWorkerThreadsTestSupport {
                   console.log("worker.preflight.status=available");
                   console.log("worker.preflight.api=" + [
                     typeof workerThreads.Worker,
+                    typeof workerThreads.MessageChannel,
+                    typeof workerThreads.MessagePort,
                     workerThreads.isMainThread === true,
                     workerThreads.parentPort === null,
                     workerThreads.workerData === undefined,
                     Number.isInteger(workerThreads.threadId),
                     workerThreads.policy.maxWorkers,
                     workerThreads.policy.startupTimeoutMs,
+                    workerThreads.policy.maxMessageBytes,
+                    workerThreads.policy.maxQueuedMessages,
                     workerThreads.policy.allowedBuiltins.includes("assert"),
                     diagnostics.activeWorkerCount,
-                    diagnostics.createdCount
+                    diagnostics.createdCount,
+                    diagnostics.activeMessagePortCount
                   ].join("|"));
                 } catch (error) {
                   const message = String(error && error.message || "");
@@ -52,7 +57,7 @@ internal object NodeWorkerThreadsTestSupport {
             result.stdout.contains("worker.preflight.status=available") -> {
                 assertTrue(
                     result.stdout,
-                    result.stdout.contains("worker.preflight.api=function|true|true|true|true|1|5000|true|0|0"),
+                    result.stdout.contains("worker.preflight.api=function|function|function|true|true|true|true|1|5000|65536|32|true|0|0|0"),
                 )
                 NativeWorkerThreadsProbe(available = true, stdout = result.stdout)
             }

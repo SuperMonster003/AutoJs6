@@ -448,4 +448,225 @@ class NodeWorkerThreadsExperimentalInstrumentationTest {
             workDir.deleteRecursively()
         }
     }
+
+    @Test
+    fun experimentalWorkerThreadsSupportMessageChannelAndTransferList() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("worker_threads MessageChannel transferList")
+        NodeWorkerThreadsTestSupport.assumeNativeWorkerThreadsAvailable("worker_threads MessageChannel transferList")
+
+        val workDir = File(context.cacheDir, "node-worker-message-channel-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create worker message channel work dir: $absolutePath" }
+        }
+        try {
+            File(workDir, "message-worker.cjs").writeText(
+                """
+                    const { parentPort, MessageChannel, MessagePort } = require("worker_threads");
+
+                    parentPort.on("message", (message) => {
+                      if (message.kind === "buffer") {
+                        const view = new Uint8Array(message.buffer);
+                        parentPort.postMessage({
+                          kind: "buffer",
+                          length: message.buffer.byteLength,
+                          first: view[0]
+                        });
+                        return;
+                      }
+                      if (message.kind === "port") {
+                        const port = message.port;
+                        port.on("message", (portMessage) => {
+                          const view = new Uint8Array(portMessage.buffer);
+                          port.postMessage({
+                            kind: "port-reply",
+                            length: portMessage.buffer.byteLength,
+                            first: view[0],
+                            isPort: port instanceof MessagePort
+                          }, [portMessage.buffer]);
+                        });
+                        if (typeof port.start === "function") {
+                          port.start();
+                        }
+                        parentPort.postMessage({
+                          kind: "port-ready",
+                          isPort: port instanceof MessagePort
+                        });
+                        return;
+                      }
+                      if (message.kind === "worker-channel") {
+                        const channel = new MessageChannel();
+                        channel.port1.on("message", (value) => {
+                          parentPort.postMessage({
+                            kind: "worker-channel",
+                            value: value && value.value,
+                            portCheck: channel.port1 instanceof MessagePort && channel.port2 instanceof MessagePort
+                          });
+                          channel.port1.close();
+                          channel.port2.close();
+                        });
+                        channel.port2.postMessage({ value: "inside-worker" });
+                        if (typeof channel.port1.start === "function") {
+                          channel.port1.start();
+                        }
+                      }
+                    });
+                """.trimIndent(),
+                StandardCharsets.UTF_8,
+            )
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async function main() {
+                      const workerThreads = require("worker_threads");
+                      const { Worker, MessageChannel, MessagePort } = workerThreads;
+
+                      function once(emitter, eventName) {
+                        return new Promise((resolve, reject) => {
+                          emitter.once("error", reject);
+                          emitter.once(eventName, resolve);
+                        });
+                      }
+                      function waitFor(worker, expectedKind) {
+                        return new Promise((resolve, reject) => {
+                          function onMessage(message) {
+                            if (message && message.kind === expectedKind) {
+                              worker.off("message", onMessage);
+                              resolve(message);
+                            }
+                          }
+                          worker.on("message", onMessage);
+                          worker.once("error", reject);
+                        });
+                      }
+                      function codeOf(error) {
+                        return String(error && (error.name || error.autojs6Code || error.code || ""));
+                      }
+
+                      console.log("worker.message.policy=" + [
+                        workerThreads.policy.maxMessageBytes,
+                        workerThreads.policy.maxQueuedMessages,
+                        typeof MessageChannel,
+                        typeof MessagePort
+                      ].join("|"));
+
+                      const worker = new Worker("./message-worker.cjs");
+                      await once(worker, "online");
+
+                      const buffer = new ArrayBuffer(8);
+                      new Uint8Array(buffer)[0] = 17;
+                      worker.postMessage({ kind: "buffer", buffer }, [buffer]);
+                      console.log("worker.message.detached=" + buffer.byteLength);
+                      const bufferReply = await waitFor(worker, "buffer");
+                      console.log("worker.message.buffer=" + [
+                        bufferReply.length,
+                        bufferReply.first
+                      ].join("|"));
+
+                      const channel = new MessageChannel();
+                      console.log("worker.message.channelInstance=" + [
+                        channel.port1 instanceof MessagePort,
+                        channel.port2 instanceof MessagePort
+                      ].join("|"));
+                      worker.postMessage({ kind: "port", port: channel.port2 }, [channel.port2]);
+                      const ready = await waitFor(worker, "port-ready");
+                      console.log("worker.message.portReady=" + ready.isPort);
+
+                      const portReplyPromise = once(channel.port1, "message");
+                      const portBuffer = new ArrayBuffer(4);
+                      new Uint8Array(portBuffer)[0] = 23;
+                      channel.port1.postMessage({ buffer: portBuffer }, [portBuffer]);
+                      console.log("worker.message.portDetached=" + portBuffer.byteLength);
+                      const portReply = await portReplyPromise;
+                      console.log("worker.message.portReply=" + [
+                        portReply.kind,
+                        portReply.length,
+                        portReply.first,
+                        portReply.isPort
+                      ].join("|"));
+                      channel.port1.close();
+
+                      worker.postMessage({ kind: "worker-channel" });
+                      const workerChannel = await waitFor(worker, "worker-channel");
+                      console.log("worker.message.workerChannel=" + [
+                        workerChannel.value,
+                        workerChannel.portCheck
+                      ].join("|"));
+
+                      let cloneError = "";
+                      try {
+                        worker.postMessage({ value: function denied() {} });
+                      } catch (error) {
+                        cloneError = codeOf(error);
+                      }
+                      console.log("worker.message.cloneError=" + cloneError);
+
+                      let largeError = "";
+                      try {
+                        worker.postMessage({ value: "x".repeat(workerThreads.policy.maxMessageBytes + 1) });
+                      } catch (error) {
+                        largeError = codeOf(error);
+                      }
+                      console.log("worker.message.largeError=" + largeError);
+
+                      let invalidTransferError = "";
+                      try {
+                        worker.postMessage({ value: 1 }, 7);
+                      } catch (error) {
+                        invalidTransferError = codeOf(error);
+                      }
+                      console.log("worker.message.invalidTransferError=" + invalidTransferError);
+
+                      const burst = new MessageChannel();
+                      let queueError = "";
+                      try {
+                        for (let index = 0; index <= workerThreads.policy.maxQueuedMessages; index += 1) {
+                          burst.port1.postMessage({ index });
+                        }
+                      } catch (error) {
+                        queueError = codeOf(error);
+                      }
+                      console.log("worker.message.queueError=" + queueError);
+
+                      const leaked = new MessageChannel();
+                      leaked.port1.unref();
+                      leaked.port2.unref();
+
+                      await worker.terminate();
+                      console.log("worker.message.diagnostics=" + [
+                        workerThreads.diagnostics().activeWorkerCount,
+                        workerThreads.diagnostics().activeMessagePortCount,
+                        workerThreads.diagnostics().messageRejectedCount,
+                        workerThreads.diagnostics().lastMessageRejection
+                      ].join("|"));
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-worker-message-channel.js>",
+                workingDirectory = workDir,
+                timeoutMs = 20_000L,
+                workerThreadsExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("worker_threads MessageChannel transferList", result)
+            assertTrue(result.stdout, result.stdout.contains("worker.message.policy=65536|32|function|function"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.detached=0"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.buffer=8|17"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.channelInstance=true|true"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.portReady=true"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.portDetached=0"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.portReply=port-reply|4|23|true"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.workerChannel=inside-worker|true"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.cloneError=DataCloneError"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.largeError=DataCloneError"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.invalidTransferError=DataCloneError"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.queueError=DataCloneError"))
+            assertTrue(result.stdout, result.stdout.contains("worker.message.diagnostics=0|"))
+            assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
+            assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
+            assertEquals("0", result.nativeValues["embedded_script.worker_message_port_active_count"])
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
 }

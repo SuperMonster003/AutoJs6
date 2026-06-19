@@ -8094,6 +8094,8 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_worker_threads_policy = Object.freeze({
     maxWorkers: 1,
     startupTimeoutMs: 5000,
+    maxMessageBytes: 65536,
+    maxQueuedMessages: 32,
     allowedBuiltins: Object.freeze([
       "assert",
       "buffer",
@@ -8117,9 +8119,16 @@ std::string buildEmbeddedScriptExecutionSource(
     cleanupTerminateRequestedCount: 0,
     cleanupErrorCount: 0,
     cleanupPendingMessageRejectedCount: 0,
-    lastPolicyRejection: ""
+    activeMessagePortCount: 0,
+    maxActiveMessagePortCount: 0,
+    messagePortCreatedCount: 0,
+    messagePortClosedCount: 0,
+    messageRejectedCount: 0,
+    lastPolicyRejection: "",
+    lastMessageRejection: ""
   };
   const __autojs6_worker_threads_records = new Set();
+  const __autojs6_worker_message_port_records = new Set();
   let __autojs6_worker_threads_shutdown_reason = "";
   function __autojs6_has_own(object, key) {
     return Object.prototype.hasOwnProperty.call(object, key);
@@ -10558,6 +10567,154 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_worker_threads_record_policy_rejection(reason || code || "policy");
     return __autojs6_worker_threads_error(message, code || "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
   }
+  function __autojs6_worker_threads_record_message_rejection(reason) {
+    __autojs6_worker_threads_diagnostics.messageRejectedCount += 1;
+    __autojs6_worker_threads_diagnostics.lastMessageRejection = String(reason || "");
+  }
+  function __autojs6_worker_threads_data_clone_error(message, reason) {
+    __autojs6_worker_threads_record_message_rejection(reason || "data_clone");
+    let error;
+    if (typeof DOMException === "function") {
+      error = new DOMException(message, "DataCloneError");
+    } else {
+      error = new Error(message);
+      try {
+        error.name = "DataCloneError";
+      } catch (_) {}
+      try {
+        Object.defineProperty(error, "code", { value: 25, enumerable: true, configurable: true });
+      } catch (_) {}
+    }
+    __autojs6_define_error_property(error, "autojs6Code", "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+    return error;
+  }
+  function __autojs6_worker_threads_estimate_message_bytes(value) {
+    const seen = new Set();
+    function estimate(input, depth) {
+      if (input === undefined || input === null) return 4;
+      const valueType = typeof input;
+      if (valueType === "string") return input.length * 2;
+      if (valueType === "number" || valueType === "bigint") return 8;
+      if (valueType === "boolean") return 4;
+      if (valueType === "function" || valueType === "symbol") {
+        throw __autojs6_worker_threads_data_clone_error(
+          "AutoJs6 experimental worker_threads message cannot clone " + valueType + " values.",
+          "uncloneable_" + valueType
+        );
+      }
+      if (depth > 32) return 0;
+      if (seen.has(input)) return 0;
+      seen.add(input);
+      if (typeof ArrayBuffer === "function" && input instanceof ArrayBuffer) {
+        return input.byteLength;
+      }
+      if (typeof ArrayBuffer === "function" && typeof ArrayBuffer.isView === "function" && ArrayBuffer.isView(input)) {
+        return input.byteLength || 0;
+      }
+      if (input && typeof input === "object") {
+        const tag = Object.prototype.toString.call(input);
+        if (tag === "[object Date]") return 16;
+        if (tag === "[object MessagePort]") return 64;
+        if (typeof Map === "function" && input instanceof Map) {
+          let total = 0;
+          for (const entry of input) {
+            total += estimate(entry[0], depth + 1) + estimate(entry[1], depth + 1);
+          }
+          return total;
+        }
+        if (typeof Set === "function" && input instanceof Set) {
+          let total = 0;
+          for (const item of input) {
+            total += estimate(item, depth + 1);
+          }
+          return total;
+        }
+        let total = 0;
+        for (const key of Object.keys(input)) {
+          total += String(key).length * 2;
+          total += estimate(input[key], depth + 1);
+        }
+        return total;
+      }
+      return 0;
+    }
+    return estimate(value, 0);
+  }
+  function __autojs6_worker_threads_validate_message_budget(message, label) {
+    const size = __autojs6_worker_threads_estimate_message_bytes(message);
+    if (size > __autojs6_worker_threads_policy.maxMessageBytes) {
+      throw __autojs6_worker_threads_data_clone_error(
+        "AutoJs6 experimental worker_threads " + label + " exceeds " +
+          __autojs6_worker_threads_policy.maxMessageBytes + " bytes.",
+        "message_too_large"
+      );
+    }
+    return size;
+  }
+  function __autojs6_worker_threads_try_queue_message(queueState, label) {
+    const state = queueState || {};
+    const queued = Math.max(0, Number(state.__autojs6QueuedMessages) || 0);
+    if (queued >= __autojs6_worker_threads_policy.maxQueuedMessages) {
+      throw __autojs6_worker_threads_data_clone_error(
+        "AutoJs6 experimental worker_threads " + label + " exceeded " +
+          __autojs6_worker_threads_policy.maxQueuedMessages + " queued messages.",
+        "message_queue_limit"
+      );
+    }
+    state.__autojs6QueuedMessages = queued + 1;
+    const decrement = function() {
+      state.__autojs6QueuedMessages = Math.max(0, (Number(state.__autojs6QueuedMessages) || 0) - 1);
+    };
+    try {
+      if (typeof setImmediate === "function") {
+        setImmediate(decrement);
+      } else {
+        setTimeout(decrement, 0);
+      }
+    } catch (_) {
+      decrement();
+    }
+  }
+  function __autojs6_worker_threads_register_message_port_record(record) {
+    if (!record || record.__autojs6Closed) return;
+    if (__autojs6_worker_message_port_records.has(record)) return;
+    __autojs6_worker_message_port_records.add(record);
+    __autojs6_worker_threads_diagnostics.activeMessagePortCount += 1;
+    __autojs6_worker_threads_diagnostics.messagePortCreatedCount += 1;
+    if (__autojs6_worker_threads_diagnostics.activeMessagePortCount > __autojs6_worker_threads_diagnostics.maxActiveMessagePortCount) {
+      __autojs6_worker_threads_diagnostics.maxActiveMessagePortCount = __autojs6_worker_threads_diagnostics.activeMessagePortCount;
+    }
+  }
+  function __autojs6_worker_threads_unregister_message_port_record(record) {
+    if (!record || record.__autojs6Closed) return;
+    record.__autojs6Closed = true;
+    if (__autojs6_worker_message_port_records.delete(record)) {
+      __autojs6_worker_threads_diagnostics.activeMessagePortCount = Math.max(
+        0,
+        __autojs6_worker_threads_diagnostics.activeMessagePortCount - 1
+      );
+      __autojs6_worker_threads_diagnostics.messagePortClosedCount += 1;
+    }
+  }
+  function __autojs6_worker_threads_close_message_port_record(record) {
+    if (!record || record.__autojs6Closed) return;
+    try {
+      if (record.nativePort && typeof record.nativePort.close === "function") {
+        record.nativePort.close();
+      }
+    } catch (_) {
+      __autojs6_worker_threads_diagnostics.cleanupErrorCount += 1;
+    }
+    __autojs6_worker_threads_unregister_message_port_record(record);
+  }
+  function __autojs6_close_all_worker_message_ports(reason) {
+    const records = Array.from(__autojs6_worker_message_port_records);
+    if (records.length === 0) return;
+    __autojs6_worker_threads_diagnostics.cleanupRequestedCount += records.length;
+    for (const record of records) {
+      __autojs6_worker_threads_close_message_port_record(record);
+    }
+  }
   function __autojs6_worker_threads_try_start() {
     if (__autojs6_worker_threads_diagnostics.activeWorkerCount >= __autojs6_worker_threads_policy.maxWorkers) {
       __autojs6_worker_threads_record_policy_rejection("max_workers");
@@ -10620,6 +10777,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const workers = Array.from(__autojs6_worker_threads_records).filter(function(worker) {
       return worker && !worker.__autojs6Finished;
     });
+    __autojs6_close_all_worker_message_ports(shutdownReason);
     if (workers.length === 0) {
       return;
     }
@@ -10650,6 +10808,8 @@ std::string buildEmbeddedScriptExecutionSource(
     return Object.freeze({
       maxWorkers: __autojs6_worker_threads_policy.maxWorkers,
       startupTimeoutMs: __autojs6_worker_threads_policy.startupTimeoutMs,
+      maxMessageBytes: __autojs6_worker_threads_policy.maxMessageBytes,
+      maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages,
       allowedBuiltins: Object.freeze(__autojs6_worker_threads_policy.allowedBuiltins.slice())
     });
   }
@@ -10665,7 +10825,13 @@ std::string buildEmbeddedScriptExecutionSource(
       cleanupTerminateRequestedCount: __autojs6_worker_threads_diagnostics.cleanupTerminateRequestedCount,
       cleanupErrorCount: __autojs6_worker_threads_diagnostics.cleanupErrorCount,
       cleanupPendingMessageRejectedCount: __autojs6_worker_threads_diagnostics.cleanupPendingMessageRejectedCount,
-      lastPolicyRejection: __autojs6_worker_threads_diagnostics.lastPolicyRejection
+      activeMessagePortCount: __autojs6_worker_threads_diagnostics.activeMessagePortCount,
+      maxActiveMessagePortCount: __autojs6_worker_threads_diagnostics.maxActiveMessagePortCount,
+      messagePortCreatedCount: __autojs6_worker_threads_diagnostics.messagePortCreatedCount,
+      messagePortClosedCount: __autojs6_worker_threads_diagnostics.messagePortClosedCount,
+      messageRejectedCount: __autojs6_worker_threads_diagnostics.messageRejectedCount,
+      lastPolicyRejection: __autojs6_worker_threads_diagnostics.lastPolicyRejection,
+      lastMessageRejection: __autojs6_worker_threads_diagnostics.lastMessageRejection
     };
   }
   function __autojs6_worker_threads_entry_kind(resolved) {
@@ -10831,6 +10997,10 @@ std::string buildEmbeddedScriptExecutionSource(
       filename: descriptor.filename,
       dirname: descriptor.dirname,
       format: descriptor.format,
+      policy: {
+        maxMessageBytes: __autojs6_worker_threads_policy.maxMessageBytes,
+        maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages
+      },
       moduleSources: descriptor.moduleSources || Object.create(null)
     });
     return "\"use strict\";\n" +
@@ -10913,11 +11083,127 @@ std::string buildEmbeddedScriptExecutionSource(
     util: "util",
     "util/types": "util/types"
   });
+  const __messagePolicy = Object.freeze({
+    maxMessageBytes: (__descriptor.policy && __descriptor.policy.maxMessageBytes) || 65536,
+    maxQueuedMessages: (__descriptor.policy && __descriptor.policy.maxQueuedMessages) || 32
+  });
+  const __parentPortQueueState = Object.create(null);
+  function __dataCloneError(message) {
+    let error;
+    if (typeof DOMException === "function") {
+      error = new DOMException(message, "DataCloneError");
+    } else {
+      error = new Error(message);
+      try { error.name = "DataCloneError"; } catch (_) {}
+    }
+    __defineErrorProperty(error, "autojs6Code", "ERR_AUTOJS6_WORKER_BRIDGE_DENIED");
+    return error;
+  }
+  function __estimateMessageBytes(value, seen, depth) {
+    if (value === undefined || value === null) return 4;
+    const valueType = typeof value;
+    if (valueType === "string") return value.length * 2;
+    if (valueType === "number" || valueType === "bigint") return 8;
+    if (valueType === "boolean") return 4;
+    if (valueType === "function" || valueType === "symbol") {
+      throw __dataCloneError("AutoJs6 experimental worker_threads cannot clone " + valueType + " values.");
+    }
+    const visited = seen || new Set();
+    const currentDepth = depth || 0;
+    if (currentDepth > 32 || visited.has(value)) return 0;
+    visited.add(value);
+    if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) return value.byteLength;
+    if (typeof ArrayBuffer === "function" && typeof ArrayBuffer.isView === "function" && ArrayBuffer.isView(value)) return value.byteLength || 0;
+    if (Object.prototype.toString.call(value) === "[object MessagePort]") return 64;
+    if (typeof Map === "function" && value instanceof Map) {
+      let total = 0;
+      for (const entry of value) total += __estimateMessageBytes(entry[0], visited, currentDepth + 1) + __estimateMessageBytes(entry[1], visited, currentDepth + 1);
+      return total;
+    }
+    if (typeof Set === "function" && value instanceof Set) {
+      let total = 0;
+      for (const item of value) total += __estimateMessageBytes(item, visited, currentDepth + 1);
+      return total;
+    }
+    let total = 0;
+    for (const key of Object.keys(value)) {
+      total += String(key).length * 2;
+      total += __estimateMessageBytes(value[key], visited, currentDepth + 1);
+    }
+    return total;
+  }
+  function __validateMessage(message, label) {
+    const size = __estimateMessageBytes(message);
+    if (size > __messagePolicy.maxMessageBytes) {
+      throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " exceeds " + __messagePolicy.maxMessageBytes + " bytes.");
+    }
+  }
+  function __prepareTransferList(transferList, label) {
+    if (transferList === undefined || transferList === null) return [];
+    let list;
+    try {
+      list = Array.isArray(transferList) ? transferList : Array.from(transferList);
+    } catch (_) {
+      throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " must be an iterable transfer list.");
+    }
+    const output = [];
+    const seen = new Set();
+    for (const value of list) {
+      if (seen.has(value)) {
+        throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " contains duplicate transfer entries.");
+      }
+      seen.add(value);
+      if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) {
+        output.push(value);
+        continue;
+      }
+      if (__workerThreads.MessagePort && value instanceof __workerThreads.MessagePort) {
+        output.push(value);
+        continue;
+      }
+      throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " accepts only ArrayBuffer and MessagePort transfer entries.");
+    }
+    return output;
+  }
+  function __tryQueueMessage(queueState, label) {
+    const queued = Math.max(0, Number(queueState.queued) || 0);
+    if (queued >= __messagePolicy.maxQueuedMessages) {
+      throw __dataCloneError("AutoJs6 experimental worker_threads " + label + " exceeded " + __messagePolicy.maxQueuedMessages + " queued messages.");
+    }
+    queueState.queued = queued + 1;
+    const decrement = function() {
+      queueState.queued = Math.max(0, (Number(queueState.queued) || 0) - 1);
+    };
+    if (typeof setImmediate === "function") setImmediate(decrement);
+    else setTimeout(decrement, 0);
+  }
+  const __limitedParentPort = Object.freeze({
+    postMessage: function(message, transferList) {
+      __validateMessage(message, "parentPort.postMessage");
+      __tryQueueMessage(__parentPortQueueState, "parentPort.postMessage");
+      return __parentPort.postMessage(message, __prepareTransferList(transferList, "parentPort.postMessage transferList"));
+    },
+    on: function(eventName, listener) { __parentPort.on(eventName, listener); return this; },
+    once: function(eventName, listener) { __parentPort.once(eventName, listener); return this; },
+    off: function(eventName, listener) {
+      if (typeof __parentPort.off === "function") __parentPort.off(eventName, listener);
+      else if (typeof __parentPort.removeListener === "function") __parentPort.removeListener(eventName, listener);
+      return this;
+    },
+    addListener: function(eventName, listener) { return this.on(eventName, listener); },
+    removeListener: function(eventName, listener) { return this.off(eventName, listener); },
+    start: function() { return typeof __parentPort.start === "function" ? __parentPort.start() : undefined; },
+    close: function() { return typeof __parentPort.close === "function" ? __parentPort.close() : undefined; },
+    ref: function() { if (typeof __parentPort.ref === "function") __parentPort.ref(); return this; },
+    unref: function() { if (typeof __parentPort.unref === "function") __parentPort.unref(); return this; }
+  });
   const __limitedWorkerThreads = Object.freeze({
     isMainThread: false,
-    parentPort: __parentPort,
+    parentPort: __limitedParentPort,
     workerData: __workerData,
     threadId: __workerThreads.threadId,
+    MessageChannel: __workerThreads.MessageChannel,
+    MessagePort: __workerThreads.MessagePort,
     Worker: function Worker() { throw __error("Nested AutoJs6 worker_threads workers are disabled.", "ERR_AUTOJS6_WORKER_DISABLED"); }
   });
   function __normalBuiltinName(request) {
@@ -11456,12 +11742,365 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const nativeModule = __autojs6_builtin_module("worker_threads");
     const eventsModule = __autojs6_events_module();
-    if (!nativeModule || typeof nativeModule.Worker !== "function" || !eventsModule || typeof eventsModule.EventEmitter !== "function") {
+    if (
+      !nativeModule ||
+      typeof nativeModule.Worker !== "function" ||
+      typeof nativeModule.MessageChannel !== "function" ||
+      typeof nativeModule.MessagePort !== "function" ||
+      !eventsModule ||
+      typeof eventsModule.EventEmitter !== "function"
+    ) {
       throw __autojs6_worker_threads_error(
         "AutoJs6 experimental worker_threads is unavailable in this Embedded Node build.",
         "ERR_AUTOJS6_WORKER_DISABLED"
       );
     }
+    const nativeMessagePortCtor = nativeModule.MessagePort;
+    const workerPortStates = new WeakMap();
+    const nativeToWrappedPort = new WeakMap();
+    function AutoJs6MessagePort() {
+      throw __autojs6_worker_threads_error(
+        "AutoJs6 experimental worker_threads MessagePort cannot be constructed directly.",
+        "ERR_AUTOJS6_WORKER_BRIDGE_DENIED"
+      );
+    }
+    function __autojs6_worker_threads_message_port_state(port, operation) {
+      if (port && (typeof port === "object" || typeof port === "function") && workerPortStates.has(port)) {
+        return workerPortStates.get(port);
+      }
+      throw new TypeError("Illegal invocation of MessagePort." + operation);
+    }
+    function __autojs6_worker_threads_is_native_message_port(value) {
+      return !!(
+        value &&
+        (typeof value === "object" || typeof value === "function") &&
+        nativeMessagePortCtor &&
+        value instanceof nativeMessagePortCtor
+      );
+    }
+    function __autojs6_worker_threads_wrap_message_port(nativePort) {
+      if (!__autojs6_worker_threads_is_native_message_port(nativePort)) {
+        throw __autojs6_worker_threads_data_clone_error(
+          "AutoJs6 experimental worker_threads expected a native MessagePort.",
+          "invalid_message_port"
+        );
+      }
+      if (nativeToWrappedPort.has(nativePort)) {
+        return nativeToWrappedPort.get(nativePort);
+      }
+      const wrapper = Object.create(AutoJs6MessagePort.prototype);
+      const record = {
+        nativePort,
+        __autojs6Closed: false
+      };
+      const state = {
+        nativePort,
+        record,
+        queued: Object.create(null),
+        onmessage: null,
+        onmessageWrapper: null,
+        onmessageerror: null,
+        onmessageerrorWrapper: null
+      };
+      workerPortStates.set(wrapper, state);
+      nativeToWrappedPort.set(nativePort, wrapper);
+      __autojs6_worker_threads_register_message_port_record(record);
+      return wrapper;
+    }
+    function __autojs6_worker_threads_native_port_from_transfer(value, label) {
+      if (workerPortStates.has(value)) {
+        const state = workerPortStates.get(value);
+        if (state.record.__autojs6Closed) {
+          throw __autojs6_worker_threads_data_clone_error(
+            "AutoJs6 experimental worker_threads cannot transfer a closed MessagePort.",
+            "closed_message_port"
+          );
+        }
+        return {
+          nativePort: state.nativePort,
+          record: state.record
+        };
+      }
+      if (__autojs6_worker_threads_is_native_message_port(value)) {
+        return {
+          nativePort: value,
+          record: null
+        };
+      }
+      return null;
+    }
+    function __autojs6_worker_threads_prepare_transfer_list(transferList, label) {
+      if (transferList === undefined || transferList === null) {
+        return {
+          nativeList: [],
+          portRecords: []
+        };
+      }
+      let rawList;
+      try {
+        rawList = Array.isArray(transferList) ? transferList : Array.from(transferList);
+      } catch (_) {
+        throw __autojs6_worker_threads_data_clone_error(
+          "AutoJs6 experimental worker_threads " + label + " must be an iterable transfer list.",
+          "invalid_transfer_list"
+        );
+      }
+      const nativeList = [];
+      const portRecords = [];
+      const seen = new Set();
+      for (const value of rawList) {
+        if (seen.has(value)) {
+          throw __autojs6_worker_threads_data_clone_error(
+            "AutoJs6 experimental worker_threads " + label + " contains duplicate transfer entries.",
+            "duplicate_transfer"
+          );
+        }
+        seen.add(value);
+        const portTransfer = __autojs6_worker_threads_native_port_from_transfer(value, label);
+        if (portTransfer) {
+          nativeList.push(portTransfer.nativePort);
+          if (portTransfer.record) {
+            portRecords.push(portTransfer.record);
+          }
+          continue;
+        }
+        if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) {
+          nativeList.push(value);
+          continue;
+        }
+        throw __autojs6_worker_threads_data_clone_error(
+          "AutoJs6 experimental worker_threads " + label + " accepts only ArrayBuffer and MessagePort transfer entries.",
+          "unsupported_transfer"
+        );
+      }
+      return {
+        nativeList,
+        portRecords
+      };
+    }
+    function __autojs6_worker_threads_to_native_message(value, seen) {
+      if (workerPortStates.has(value)) {
+        const state = workerPortStates.get(value);
+        if (state.record.__autojs6Closed) {
+          throw __autojs6_worker_threads_data_clone_error(
+            "AutoJs6 experimental worker_threads cannot clone a closed MessagePort.",
+            "closed_message_port"
+          );
+        }
+        return state.nativePort;
+      }
+      if (value === null || value === undefined) return value;
+      const valueType = typeof value;
+      if (valueType !== "object") return value;
+      if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) return value;
+      if (typeof ArrayBuffer === "function" && typeof ArrayBuffer.isView === "function" && ArrayBuffer.isView(value)) return value;
+      if (typeof Date === "function" && value instanceof Date) return new Date(value.getTime());
+      const seenMap = seen || new Map();
+      if (seenMap.has(value)) {
+        return seenMap.get(value);
+      }
+      if (typeof Map === "function" && value instanceof Map) {
+        const clonedMap = new Map();
+        seenMap.set(value, clonedMap);
+        for (const entry of value) {
+          clonedMap.set(
+            __autojs6_worker_threads_to_native_message(entry[0], seenMap),
+            __autojs6_worker_threads_to_native_message(entry[1], seenMap)
+          );
+        }
+        return clonedMap;
+      }
+      if (typeof Set === "function" && value instanceof Set) {
+        const clonedSet = new Set();
+        seenMap.set(value, clonedSet);
+        for (const item of value) {
+          clonedSet.add(__autojs6_worker_threads_to_native_message(item, seenMap));
+        }
+        return clonedSet;
+      }
+      if (Array.isArray(value)) {
+        const clonedArray = [];
+        seenMap.set(value, clonedArray);
+        for (let index = 0; index < value.length; index += 1) {
+          clonedArray[index] = __autojs6_worker_threads_to_native_message(value[index], seenMap);
+        }
+        return clonedArray;
+      }
+      const clonedObject = Object.create(null);
+      seenMap.set(value, clonedObject);
+      for (const key of Object.keys(value)) {
+        clonedObject[key] = __autojs6_worker_threads_to_native_message(value[key], seenMap);
+      }
+      return clonedObject;
+    }
+    function __autojs6_worker_threads_finalize_port_transfers(portRecords) {
+      for (const record of portRecords || []) {
+        __autojs6_worker_threads_unregister_message_port_record(record);
+      }
+    }
+    function __autojs6_worker_threads_post_native_message(nativeTarget, queueState, message, transferList, label) {
+      const prepared = __autojs6_worker_threads_prepare_transfer_list(transferList, label + " transferList");
+      __autojs6_worker_threads_validate_message_budget(message, label);
+      __autojs6_worker_threads_try_queue_message(queueState, label);
+      const nativeMessage = __autojs6_worker_threads_to_native_message(message);
+      try {
+        const result = nativeTarget.postMessage(nativeMessage, prepared.nativeList);
+        __autojs6_worker_threads_finalize_port_transfers(prepared.portRecords);
+        return result;
+      } catch (error) {
+        if (error && error.name === "DataCloneError") {
+          __autojs6_worker_threads_record_message_rejection("native_data_clone");
+        }
+        throw error;
+      }
+    }
+    Object.defineProperties(AutoJs6MessagePort.prototype, {
+      constructor: { value: AutoJs6MessagePort, configurable: true },
+      onmessage: {
+        get: function() {
+          return __autojs6_worker_threads_message_port_state(this, "onmessage").onmessage;
+        },
+        set: function(listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "onmessage");
+          if (state.onmessageWrapper && typeof state.nativePort.off === "function") {
+            try {
+              state.nativePort.off("message", state.onmessageWrapper);
+            } catch (_) {}
+          }
+          state.onmessage = typeof listener === "function" ? listener : null;
+          state.onmessageWrapper = state.onmessage
+            ? function(value) {
+                state.onmessage.call(this, { type: "message", data: value, target: this, currentTarget: this });
+              }.bind(this)
+            : null;
+          if (state.onmessageWrapper && typeof state.nativePort.on === "function") {
+            state.nativePort.on("message", state.onmessageWrapper);
+          }
+        },
+        enumerable: true
+      },
+      onmessageerror: {
+        get: function() {
+          return __autojs6_worker_threads_message_port_state(this, "onmessageerror").onmessageerror;
+        },
+        set: function(listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "onmessageerror");
+          if (state.onmessageerrorWrapper && typeof state.nativePort.off === "function") {
+            try {
+              state.nativePort.off("messageerror", state.onmessageerrorWrapper);
+            } catch (_) {}
+          }
+          state.onmessageerror = typeof listener === "function" ? listener : null;
+          state.onmessageerrorWrapper = state.onmessageerror
+            ? function(value) {
+                state.onmessageerror.call(this, { type: "messageerror", data: value, target: this, currentTarget: this });
+              }.bind(this)
+            : null;
+          if (state.onmessageerrorWrapper && typeof state.nativePort.on === "function") {
+            state.nativePort.on("messageerror", state.onmessageerrorWrapper);
+          }
+        },
+        enumerable: true
+      },
+      postMessage: {
+        value: function(message, transferList) {
+          const state = __autojs6_worker_threads_message_port_state(this, "postMessage");
+          if (state.record.__autojs6Closed) return undefined;
+          return __autojs6_worker_threads_post_native_message(
+            state.nativePort,
+            state.queued,
+            message,
+            transferList,
+            "MessagePort.postMessage"
+          );
+        },
+        enumerable: true
+      },
+      start: {
+        value: function() {
+          const state = __autojs6_worker_threads_message_port_state(this, "start");
+          return typeof state.nativePort.start === "function" ? state.nativePort.start() : undefined;
+        },
+        enumerable: true
+      },
+      close: {
+        value: function() {
+          const state = __autojs6_worker_threads_message_port_state(this, "close");
+          __autojs6_worker_threads_close_message_port_record(state.record);
+          return undefined;
+        },
+        enumerable: true
+      },
+      ref: {
+        value: function() {
+          const state = __autojs6_worker_threads_message_port_state(this, "ref");
+          if (typeof state.nativePort.ref === "function") state.nativePort.ref();
+          return this;
+        },
+        enumerable: true
+      },
+      unref: {
+        value: function() {
+          const state = __autojs6_worker_threads_message_port_state(this, "unref");
+          if (typeof state.nativePort.unref === "function") state.nativePort.unref();
+          return this;
+        },
+        enumerable: true
+      },
+      on: {
+        value: function(eventName, listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "on");
+          state.nativePort.on(eventName, listener);
+          return this;
+        },
+        enumerable: true
+      },
+      once: {
+        value: function(eventName, listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "once");
+          state.nativePort.once(eventName, listener);
+          return this;
+        },
+        enumerable: true
+      },
+      off: {
+        value: function(eventName, listener) {
+          const state = __autojs6_worker_threads_message_port_state(this, "off");
+          if (typeof state.nativePort.off === "function") state.nativePort.off(eventName, listener);
+          else if (typeof state.nativePort.removeListener === "function") state.nativePort.removeListener(eventName, listener);
+          return this;
+        },
+        enumerable: true
+      },
+      addListener: {
+        value: function(eventName, listener) {
+          return this.on(eventName, listener);
+        },
+        enumerable: true
+      },
+      removeListener: {
+        value: function(eventName, listener) {
+          return this.off(eventName, listener);
+        },
+        enumerable: true
+      },
+      [Symbol.toStringTag]: { value: "MessagePort" }
+    });
+    Object.freeze(AutoJs6MessagePort.prototype);
+    Object.freeze(AutoJs6MessagePort);
+    function AutoJs6MessageChannel() {
+      if (!(this instanceof AutoJs6MessageChannel)) {
+        return new AutoJs6MessageChannel();
+      }
+      const nativeChannel = new nativeModule.MessageChannel();
+      Object.defineProperties(this, {
+        port1: { value: __autojs6_worker_threads_wrap_message_port(nativeChannel.port1), enumerable: true },
+        port2: { value: __autojs6_worker_threads_wrap_message_port(nativeChannel.port2), enumerable: true }
+      });
+      Object.freeze(this);
+    }
+    Object.freeze(AutoJs6MessageChannel.prototype);
+    Object.freeze(AutoJs6MessageChannel);
     function AutoJs6Worker(filename, options) {
       if (!(this instanceof AutoJs6Worker)) {
         return new AutoJs6Worker(filename, options);
@@ -11487,13 +12126,21 @@ std::string buildEmbeddedScriptExecutionSource(
       let nativeWorker = null;
       try {
         const descriptor = __autojs6_worker_threads_resolve_script(filename, __autojs6_source_name);
+        const workerDataTransfer = __autojs6_worker_threads_prepare_transfer_list(
+          opts.transferList,
+          "Worker options.transferList"
+        );
+        __autojs6_worker_threads_validate_message_budget(opts.workerData, "Worker workerData");
+        const nativeWorkerData = __autojs6_worker_threads_to_native_message(opts.workerData);
         nativeWorker = new nativeModule.Worker(
           __autojs6_worker_threads_bootstrap_source(descriptor),
           {
             eval: true,
-            workerData: { __autojs6UserWorkerData: opts.workerData }
+            workerData: { __autojs6UserWorkerData: nativeWorkerData },
+            transferList: workerDataTransfer.nativeList
           }
         );
+        __autojs6_worker_threads_finalize_port_transfers(workerDataTransfer.portRecords);
         this.__autojs6NativeWorker = nativeWorker;
         __autojs6_worker_threads_records.add(this);
         try {
@@ -11557,14 +12204,20 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     AutoJs6Worker.prototype = Object.create(eventsModule.EventEmitter.prototype);
     AutoJs6Worker.prototype.constructor = AutoJs6Worker;
-    AutoJs6Worker.prototype.postMessage = function(message) {
+    AutoJs6Worker.prototype.postMessage = function(message, transferList) {
       if (!this.__autojs6NativeWorker || this.__autojs6Finished) {
         throw __autojs6_worker_threads_error(
           "AutoJs6 experimental worker_threads worker is already terminated.",
           "ERR_AUTOJS6_WORKER_TERMINATED"
         );
       }
-      return this.__autojs6NativeWorker.postMessage(message);
+      return __autojs6_worker_threads_post_native_message(
+        this.__autojs6NativeWorker,
+        this,
+        message,
+        transferList,
+        "Worker.postMessage"
+      );
     };
     AutoJs6Worker.prototype.terminate = function() {
       if (!this.__autojs6NativeWorker || this.__autojs6Finished) {
@@ -11579,6 +12232,8 @@ std::string buildEmbeddedScriptExecutionSource(
     };
     __autojs6_limited_worker_threads_cache = Object.freeze({
       Worker: AutoJs6Worker,
+      MessageChannel: AutoJs6MessageChannel,
+      MessagePort: AutoJs6MessagePort,
       isMainThread: true,
       parentPort: null,
       workerData: undefined,
@@ -31060,7 +31715,13 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.workerCleanupTerminateRequestedCount = __autojs6_worker_threads_diagnostics.cleanupTerminateRequestedCount;
     fields.workerCleanupErrorCount = __autojs6_worker_threads_diagnostics.cleanupErrorCount;
     fields.workerCleanupPendingMessageRejectedCount = __autojs6_worker_threads_diagnostics.cleanupPendingMessageRejectedCount;
+    fields.workerMessagePortActiveCount = __autojs6_worker_threads_diagnostics.activeMessagePortCount;
+    fields.workerMessagePortMaxActiveCount = __autojs6_worker_threads_diagnostics.maxActiveMessagePortCount;
+    fields.workerMessagePortCreatedCount = __autojs6_worker_threads_diagnostics.messagePortCreatedCount;
+    fields.workerMessagePortClosedCount = __autojs6_worker_threads_diagnostics.messagePortClosedCount;
+    fields.workerMessageRejectedCount = __autojs6_worker_threads_diagnostics.messageRejectedCount;
     fields.workerLastPolicyRejection = __autojs6_worker_threads_diagnostics.lastPolicyRejection;
+    fields.workerLastMessageRejection = __autojs6_worker_threads_diagnostics.lastMessageRejection;
     fields.sourceMapEnabled = __autojs6_source_map_diagnostics.enabled;
     fields.sourceMapLoadedCount = __autojs6_source_map_diagnostics.loadedCount;
     fields.sourceMapMappedFrameCount = __autojs6_source_map_diagnostics.mappedFrameCount;

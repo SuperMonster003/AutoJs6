@@ -2,7 +2,7 @@
 
 Date: 2026-06-17
 
-Latest S7-24 bootstrap recheck: 2026-06-19
+Latest S7-26 messaging gate update: 2026-06-19
 
 Branch: `feature/nodejs-runtime-v1.1`
 
@@ -36,6 +36,13 @@ request-local native availability preflight; experimental builds skip runnable
 creation/stress promotion tests when that preflight reports
 `ERR_AUTOJS6_WORKER_DISABLED`, instead of treating a native-unavailable build as
 failed runnable support.
+
+S7-26 extends the native-available promotion target with limited
+`MessageChannel`/`MessagePort`, ArrayBuffer transfer detachment, transfer-list
+validation, maximum message-size and queued-message limits, DataCloneError
+compatible failures, and parent-side MessagePort cleanup diagnostics. This does
+not change the release recommendation while the current Embedded Node build
+still lacks usable native workers.
 
 Normal builds must continue to keep:
 
@@ -112,6 +119,7 @@ The failed stress cases were:
 | S7-24 default `verifyNodeWorkerGate` | Pass | Sony default gate ran bootstrap/design coverage, 3 tests, 0 failures. |
 | S7-24 experimental `verifyNodeWorkerGate` | Pass with skips | Sony experimental gate ran bootstrap/preflight and skipped runnable/stress promotion tests because native workers remain unavailable, 0 failures. |
 | S7-25 CJS/ESM worker entry gate | Prepared, skipped on Sony | Worker loader now has promotion coverage for `worker.cjs`, `worker.mjs`, `type=module` `.js`, local CJS/JSON and partial-ESM dependencies, allowed builtins, path escape denial, raw network denial, bridge denial, and native addon denial. Sony still skips runnable smoke because native workers remain unavailable. |
+| S7-26 MessageChannel/transferList gate | Prepared, skipped on Sony | Limited `MessageChannel`, `MessagePort`, ArrayBuffer transfer detachment, typed array delivery, structured-clone-safe value checks, DataCloneError-compatible failures, message-size/queue limits, and MessagePort cleanup counters are covered when the native preflight is available. Sony still skips runnable smoke because native workers remain unavailable. |
 | default build flag | Pass | `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false` in normal builds. |
 | capability registry default | Pass | Kotlin and JavaScript profiles report worker threads disabled. |
 | bare `require("worker_threads")` denial | Pass | Default path rejects before local shadowing. |
@@ -154,6 +162,9 @@ Before reconsidering release opt-in status, add or prove:
 - local worker dependency smoke for CJS/JSON and partial ESM graphs;
 - `workerData`, `parentPort.postMessage`, `worker.postMessage`, and
   `worker.terminate()` behavior;
+- `MessageChannel`, `MessagePort`, ArrayBuffer transfer detachment,
+  transfer-list validation, DataCloneError-compatible message failures, and
+  MessagePort cleanup counters;
 - worker-local denial of AutoJs bridge modules, Android/Java interop, `fs`, raw
   network, `shell`, `child_process`, native addons, `vm`, inspector, and nested
   workers;

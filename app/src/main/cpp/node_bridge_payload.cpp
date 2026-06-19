@@ -88,6 +88,12 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.worker_cleanup_terminate_requested_count", jsonNumberField(text, "workerCleanupTerminateRequestedCount"));
     putPayload(payload, "embedded_script.worker_cleanup_error_count", jsonNumberField(text, "workerCleanupErrorCount"));
     putPayload(payload, "embedded_script.worker_cleanup_pending_message_rejected_count", jsonNumberField(text, "workerCleanupPendingMessageRejectedCount"));
+    putPayload(payload, "embedded_script.worker_message_port_active_count", jsonNumberField(text, "workerMessagePortActiveCount"));
+    putPayload(payload, "embedded_script.worker_message_port_max_active_count", jsonNumberField(text, "workerMessagePortMaxActiveCount"));
+    putPayload(payload, "embedded_script.worker_message_port_created_count", jsonNumberField(text, "workerMessagePortCreatedCount"));
+    putPayload(payload, "embedded_script.worker_message_port_closed_count", jsonNumberField(text, "workerMessagePortClosedCount"));
+    putPayload(payload, "embedded_script.worker_message_rejected_count", jsonNumberField(text, "workerMessageRejectedCount"));
+    putPayload(payload, "embedded_script.worker_last_message_rejection", jsonStringField(text, "workerLastMessageRejection"));
     putPayload(payload, "embedded_script.worker_last_policy_rejection", jsonStringField(text, "workerLastPolicyRejection"));
     putPayload(payload, "embedded_script.source_map_enabled", jsonBooleanField(text, "sourceMapEnabled"));
     putPayload(payload, "embedded_script.source_map_loaded_count", jsonNumberField(text, "sourceMapLoadedCount"));

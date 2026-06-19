@@ -1,6 +1,6 @@
 # Worker Threads Design Gate v1
 
-Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support.
+Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds, but it does not promote workers to a user-visible release surface.
 
 ## Goal
 
@@ -15,7 +15,7 @@ Workers are high risk in AutoJs6 because they multiply:
 - access-control surfaces for AutoJs bridge modules
 - packaged APK compatibility state
 
-Task 42 froze the boundary. Task 63 added a request-local experimental path intended to run local CommonJS worker scripts with a smaller capability set than the parent script. Task 122 blocked publishing that path as runnable for GA because native `worker_threads` is unavailable in the evaluated Embedded Node build. Task 170 kept the same decision for v1.1: the default denial and design gates remain valid, but runnable worker partial support cannot be claimed until a libnode build exposes native workers and the focused execution and stress suites pass. S7-24 keeps that decision and adds an explicit native-availability preflight in `verifyNodeWorkerGate`.
+Task 42 froze the boundary. Task 63 added a request-local experimental path intended to run local CommonJS worker scripts with a smaller capability set than the parent script. Task 122 blocked publishing that path as runnable for GA because native `worker_threads` is unavailable in the evaluated Embedded Node build. Task 170 kept the same decision for v1.1: the default denial and design gates remain valid, but runnable worker partial support cannot be claimed until a libnode build exposes native workers and the focused execution and stress suites pass. S7-24 keeps that decision and adds an explicit native-availability preflight in `verifyNodeWorkerGate`. S7-26 extends the native-available target with bounded cross-thread messaging and port cleanup proof.
 
 ## Feature Flag
 
@@ -54,7 +54,11 @@ When the request-local experimental flag is enabled and the Embedded Node build 
 - pure JavaScript CPU work
 - JSON-serializable `workerData`
 - `parentPort.postMessage(...)`
-- `worker.postMessage(...)`
+- `worker.postMessage(value, transferList?)`
+- limited `MessageChannel` and `MessagePort`
+- `MessagePort.postMessage(value, transferList?)`
+- ArrayBuffer transfer detachment, typed array delivery, and structured-clone-safe values
+- DataCloneError-compatible failures for unsupported clone and transfer values
 - `worker.terminate()`
 - `threadId`
 - safe pure-JS builtins such as `buffer`, `path`, `util`, `events`, `assert`, `querystring`, `string_decoder`, `timers`, and `url`
@@ -128,6 +132,8 @@ Current defaults:
 
 - `maxWorkers`: 1 per script execution
 - default worker startup timeout: 5000 ms
+- maximum message size: 65536 bytes per worker/port message estimate
+- maximum queued messages: 32 per parent/port sender before the next event-loop turn
 - default worker run timeout: parent script timeout remains the outer guard; per-worker execution timeout is Task 64 work
 - per-worker memory budget: design before implementation; do not rely on V8 defaults alone
 - maximum worker source size: reuse module source budgets unless a lower worker-specific budget is set
@@ -143,7 +149,7 @@ Current MVP defines:
 - explicit parent-side `worker.terminate()`
 - uncaught worker exception rejects or emits through the parent according to documented Node-compatible behavior
 - worker termination is idempotent
-- diagnostics for active, max active, created, terminated, startup timeout, and policy rejection counts
+- diagnostics for active, max active, created, terminated, startup timeout, policy rejection, MessagePort lifecycle, and message rejection counts
 
 Task 64 hardens the MVP with:
 
@@ -188,6 +194,7 @@ Experimental worker-specific errors:
 - `ERR_AUTOJS6_WORKER_BRIDGE_DENIED`
 - `ERR_AUTOJS6_WORKER_TIMEOUT`
 - `ERR_AUTOJS6_WORKER_TERMINATED`
+- `DataCloneError` for clone/transfer-list/message-budget failures, with `autojs6Code=ERR_AUTOJS6_WORKER_BRIDGE_DENIED` when the error is raised by the AutoJs6 worker wrapper
 
 ## Test Gate
 
@@ -196,11 +203,11 @@ Current gates:
 - `NodeWorkerThreadsBootstrapInstrumentationTest` verifies request-local default
   denial before shadowing and experimental native-availability preflight. The
   preflight requires either a usable limited `worker_threads` surface
-  (`Worker`, `isMainThread`, `parentPort`, `workerData`, `threadId`, policy, and
-  diagnostics) or stable `ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero
-  active workers.
+  (`Worker`, `MessageChannel`, `MessagePort`, `isMainThread`, `parentPort`,
+  `workerData`, `threadId`, policy, and diagnostics) or stable
+  `ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero active workers.
 - `NodeWorkerThreadsDesignGateInstrumentationTest` verifies the BuildConfig flag, Kotlin registry, JavaScript profile, bare and `node:` require denial, `require.resolve` denial, and shadowing protection in normal builds.
-- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope. Runnable coverage is skipped when the preflight reports native workers unavailable.
+- `NodeWorkerThreadsExperimentalInstrumentationTest` verifies the default disabled path and is the promotion gate for request-local experimental enablement, local worker script loading, `workerData`, `parentPort.postMessage`, `terminate()`, max worker rejection, scoped path escape denial, Worker diagnostics, limited `MessageChannel`/`MessagePort`, ArrayBuffer transfer detachment, transfer-list validation, message size/queue limits, DataCloneError-compatible failures, MessagePort cleanup counters, and denial of AutoJs bridge modules, `fs`, raw `net`, and nested workers inside worker scope. Runnable coverage is skipped when the preflight reports native workers unavailable.
 - `NodeWorkerThreadsResourceStressInstrumentationTest` is the promotion gate for sequential create/terminate behavior, worker exception recovery, infinite-loop timeout recovery, parent-completion cleanup, cleanup diagnostics, and coarse RSS/thread snapshots. Stress coverage is skipped when the preflight reports native workers unavailable.
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
@@ -217,7 +224,7 @@ The MVP does not enable:
 
 - nested workers
 - shared memory or `SharedArrayBuffer`
-- `MessageChannel` compatibility beyond what already exists elsewhere
+- unrestricted native-handle transfer or `MessageChannel` behavior beyond the bounded S7-26 native-available gate
 - AutoJs bridge access from workers
 - Android Context access from workers
 - packaged worker source graphs

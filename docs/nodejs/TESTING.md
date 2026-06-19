@@ -721,7 +721,8 @@ request-local default denial, JavaScript profile flags, bare and `node:`
 `node_modules/worker_threads` shadowing, frozen profile flags, and the
 request-local experimental preflight. The preflight must report either a usable
 native Worker bootstrap surface (`Worker`, `isMainThread`, `parentPort`,
-`workerData`, `threadId`, policy, diagnostics) or stable
+`workerData`, `threadId`, `MessageChannel`, `MessagePort`, bounded messaging
+policy, diagnostics) or stable
 `ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero active workers.
 
 Task 122 GA evaluation report: [reports/WORKER_EXPERIMENTAL_EVALUATION.md](reports/WORKER_EXPERIMENTAL_EVALUATION.md).
@@ -746,6 +747,13 @@ partial-ESM dependencies, allowed worker builtins, native addon denial, raw
 network denial, bridge denial, and worker entry path escape denial. On the
 current Sony S7-25 recheck, runnable worker creation is skipped with an explicit
 preflight reason because native `worker_threads` is unavailable.
+S7-26 extends the native-available promotion gate with limited
+`MessageChannel`/`MessagePort`, `Worker.postMessage(value, transferList)`,
+`MessagePort.postMessage(value, transferList)`, ArrayBuffer transfer detachment,
+typed array delivery, structured-clone-safe value checks, maximum message size,
+maximum queued messages, DataCloneError-compatible failures, and result-envelope
+MessagePort cleanup counters. The current Sony build still skips this runnable
+coverage through the same native-availability preflight.
 
 Current experimental worker_threads resource stress instrumentation:
 
