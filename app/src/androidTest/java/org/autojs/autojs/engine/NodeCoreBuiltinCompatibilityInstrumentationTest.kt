@@ -771,6 +771,349 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
     }
 
     @Test
+    fun promiseAndWebPlatformSweepMatchesNode24SupportedSubset() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("promise and web platform sweep")
+        val workDir = freshWorkDir("node-modern-core-web-platform")
+        writeShadow(workDir, "timers/promises.js")
+        writeShadow(workDir, "stream/promises.js")
+        writeShadow(workDir, "readline/promises.js")
+        writeShadow(workDir, "crypto/index.js")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                return (async () => {
+                  const { Buffer } = require("buffer");
+                  const { Readable, Writable, PassThrough } = require("stream");
+                  const timersPromises = require("timers/promises");
+                  const nodeTimersPromises = require("node:timers/promises");
+                  const streamPromises = require("stream/promises");
+                  const nodeStreamPromises = require("node:stream/promises");
+                  const readlinePromises = require("readline/promises");
+                  const nodeReadlinePromises = require("node:readline/promises");
+                  const crypto = require("crypto");
+                  const nodeCrypto = require("node:crypto");
+
+                  function codeName(error) {
+                    return [error && error.name, error && error.code].join(":");
+                  }
+
+                  const output = [];
+                  function emit(line) {
+                    output.push(line);
+                    console.log(line);
+                  }
+
+                  function hex(value) {
+                    return Buffer.from(value).toString("hex");
+                  }
+
+                  async function captureRejection(action) {
+                    try {
+                      await action();
+                      return "allowed";
+                    } catch (error) {
+                      return codeName(error);
+                    }
+                  }
+
+                  function captureThrow(action) {
+                    try {
+                      action();
+                      return "allowed";
+                    } catch (error) {
+                      return codeName(error);
+                    }
+                  }
+
+                  const aliases =
+                    timersPromises === nodeTimersPromises &&
+                    streamPromises === nodeStreamPromises &&
+                    readlinePromises === nodeReadlinePromises &&
+                    crypto === nodeCrypto &&
+                    crypto.webcrypto === globalThis.crypto &&
+                    crypto.subtle === globalThis.crypto.subtle &&
+                    require.resolve("timers/promises") === "timers/promises" &&
+                    require.resolve("node:timers/promises") === "timers/promises" &&
+                    require.resolve("stream/promises") === "stream/promises" &&
+                    require.resolve("node:stream/promises") === "stream/promises" &&
+                    require.resolve("readline/promises") === "readline/promises" &&
+                    require.resolve("node:readline/promises") === "readline/promises";
+
+                  const shadowsIgnored =
+                    timersPromises.shadow !== true &&
+                    streamPromises.shadow !== true &&
+                    readlinePromises.shadow !== true &&
+                    crypto.shadow !== true;
+                  emit("modern.promise_web.aliases=" + aliases);
+                  emit("modern.promise_web.shadow=" + shadowsIgnored);
+
+                  const timeoutValue = await timersPromises.setTimeout(1, "timeout");
+                  const immediateValue = await timersPromises.setImmediate("immediate");
+                  await timersPromises.scheduler.wait(1);
+                  await timersPromises.scheduler.yield();
+                  const abortController = new AbortController();
+                  const abortValuePromise = timersPromises
+                    .setTimeout(50, "late", { signal: abortController.signal })
+                    .then(() => "resolved", codeName);
+                  abortController.abort("stop");
+                  const abortValue = await abortValuePromise;
+                  const intervalController = new AbortController();
+                  const intervalValues = [];
+                  let intervalAbort = "none";
+                  try {
+                    for await (const value of timersPromises.setInterval(1, "tick", { signal: intervalController.signal })) {
+                      intervalValues.push(value);
+                      if (intervalValues.length === 2) {
+                        intervalController.abort("done");
+                      }
+                    }
+                  } catch (error) {
+                    intervalAbort = codeName(error);
+                  }
+                  emit("modern.promise_web.timers=" + [
+                    timeoutValue,
+                    immediateValue,
+                    typeof timersPromises.scheduler.wait,
+                    typeof timersPromises.scheduler.yield,
+                    abortValue,
+                    intervalValues.join(","),
+                    intervalAbort
+                  ].join("|"));
+
+                  const pipelineChunks = [];
+                  await streamPromises.pipeline(
+                    Readable.from(["a", "b"]),
+                    new Writable({
+                      write(chunk, encoding, callback) {
+                        pipelineChunks.push(chunk.toString());
+                        callback();
+                      }
+                    })
+                  );
+                  const pass = new PassThrough();
+                  const finishedValuePromise = streamPromises.finished(pass).then(() => "finished");
+                  pass.end("x");
+                  pass.resume();
+                  const finishedValue = await finishedValuePromise;
+                  emit("modern.promise_web.streams=" + [
+                    pipelineChunks.join(""),
+                    finishedValue,
+                    typeof streamPromises.pipeline,
+                    typeof streamPromises.finished
+                  ].join("|"));
+
+                  const readlineOutput = new Writable({
+                    write(chunk, encoding, callback) {
+                      callback();
+                    }
+                  });
+                  const readline = readlinePromises.createInterface({
+                    input: Readable.from(["answer\n"]),
+                    output: readlineOutput,
+                    terminal: false
+                  });
+                  const readlineAnswer = await readline.question("prompt");
+                  readline.close();
+                  emit("modern.promise_web.readline=" + [
+                    readlineAnswer,
+                    typeof readlinePromises.Interface,
+                    typeof readlinePromises.Readline,
+                    typeof readlinePromises.createInterface
+                  ].join("|"));
+
+                  const immediateAbort = AbortSignal.abort("already");
+                  const anyImmediate = AbortSignal.any([immediateAbort]);
+                  const delayedAbortController = new AbortController();
+                  const anyDelayed = AbortSignal.any([delayedAbortController.signal]);
+                  let anyDelayedReason = "none";
+                  anyDelayed.addEventListener("abort", () => {
+                    anyDelayedReason = anyDelayed.reason;
+                  }, { once: true });
+                  delayedAbortController.abort("later");
+                  await Promise.resolve();
+                  const timeoutSignal = AbortSignal.timeout(1);
+                  const timeoutKeepAlive = setTimeout(() => {}, 20);
+                  try {
+                    await new Promise((resolve) => timeoutSignal.addEventListener("abort", resolve, { once: true }));
+                  } finally {
+                    clearTimeout(timeoutKeepAlive);
+                  }
+                  const abortInvalid = captureThrow(() => AbortSignal.any([{}]));
+                  const timeoutInvalid = captureThrow(() => AbortSignal.timeout(-1));
+                  emit("modern.promise_web.abort=" + [
+                    immediateAbort.aborted,
+                    immediateAbort.reason,
+                    anyImmediate.aborted,
+                    anyImmediate.reason,
+                    anyDelayed.aborted,
+                    anyDelayedReason,
+                    timeoutSignal.aborted,
+                    timeoutSignal.reason && timeoutSignal.reason.name,
+                    abortInvalid,
+                    timeoutInvalid
+                  ].join("|"));
+
+                  const cloneSource = {
+                    nested: { value: 7 },
+                    list: [{ item: "ok" }],
+                    bytes: new Uint8Array([1, 2, 3]).buffer
+                  };
+                  const cloned = structuredClone(cloneSource);
+                  new Uint8Array(cloned.bytes)[0] = 9;
+                  const cloneOk =
+                    cloned !== cloneSource &&
+                    cloned.nested !== cloneSource.nested &&
+                    cloned.list[0] !== cloneSource.list[0] &&
+                    cloned.nested.value === 7 &&
+                    new Uint8Array(cloneSource.bytes)[0] === 1 &&
+                    new Uint8Array(cloned.bytes)[0] === 9;
+                  const cloneInvalid = captureThrow(() => structuredClone(function nope() {}));
+                  emit("modern.promise_web.clone=" + [cloneOk, cloneInvalid].join("|"));
+
+                  const webCrypto = globalThis.crypto;
+                  const randomBytes = new Uint8Array(16);
+                  const randomValuesOk =
+                    webCrypto.getRandomValues(randomBytes) === randomBytes &&
+                    randomBytes.some((value) => value !== 0);
+                  const uuidOk = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(webCrypto.randomUUID());
+                  const digestSummary = [
+                    hex(await webCrypto.subtle.digest("SHA-1", new TextEncoder().encode("abc"))),
+                    hex(await webCrypto.subtle.digest("SHA-256", new TextEncoder().encode("abc"))),
+                    hex(await webCrypto.subtle.digest("SHA-384", new TextEncoder().encode("abc"))).slice(0, 32),
+                    hex(await webCrypto.subtle.digest("SHA-512", new TextEncoder().encode("abc"))).slice(0, 32)
+                  ].join("|");
+                  const hmacKey = await webCrypto.subtle.importKey(
+                    "raw",
+                    new TextEncoder().encode("key"),
+                    { name: "HMAC", hash: "SHA-384" },
+                    true,
+                    ["sign", "verify"]
+                  );
+                  const hmacSignature = await webCrypto.subtle.sign("HMAC", hmacKey, new TextEncoder().encode("abc"));
+                  const hmacVerified = await webCrypto.subtle.verify("HMAC", hmacKey, hmacSignature, new TextEncoder().encode("abc"));
+                  const hmacRejected = await webCrypto.subtle.verify("HMAC", hmacKey, hmacSignature, new TextEncoder().encode("abd"));
+                  const hmacJwk = await webCrypto.subtle.exportKey("jwk", hmacKey);
+                  const hmacRaw = await webCrypto.subtle.exportKey("raw", hmacKey);
+                  const hmacSha1Key = await webCrypto.subtle.importKey(
+                    "raw",
+                    new TextEncoder().encode("key"),
+                    { name: "HMAC", hash: "SHA-1" },
+                    true,
+                    ["sign"]
+                  );
+                  const hmacSha1Jwk = await webCrypto.subtle.exportKey("jwk", hmacSha1Key);
+                  const nonExtractableKey = await webCrypto.subtle.importKey(
+                    "raw",
+                    new Uint8Array([1, 2, 3]),
+                    { name: "HMAC", hash: "SHA-256" },
+                    false,
+                    ["sign"]
+                  );
+                  const randomFloatError = captureThrow(() => webCrypto.getRandomValues(new Float32Array(1)));
+                  const randomQuotaError = captureThrow(() => webCrypto.getRandomValues(new Uint8Array(65537)));
+                  const digestError = await captureRejection(() => webCrypto.subtle.digest("MD5", new Uint8Array([1])));
+                  const hmacUsageError = await captureRejection(() => webCrypto.subtle.importKey(
+                    "raw",
+                    new Uint8Array([1]),
+                    { name: "HMAC", hash: "SHA-256" },
+                    false,
+                    []
+                  ));
+                  const hmacAlgError = await captureRejection(() => webCrypto.subtle.importKey(
+                    "raw",
+                    new Uint8Array([1]),
+                    { name: "HMAC", hash: "SHA-224" },
+                    false,
+                    ["sign"]
+                  ));
+                  const hmacExportError = await captureRejection(() => webCrypto.subtle.exportKey("raw", nonExtractableKey));
+                  const asymmetricAbsent =
+                    typeof crypto.generateKeyPair === "undefined" &&
+                    typeof crypto.createPrivateKey === "undefined" &&
+                    typeof webCrypto.subtle.generateKey === "undefined" &&
+                    typeof webCrypto.subtle.deriveBits === "undefined";
+                  let getBuiltinDenied = "allowed";
+                  try {
+                    process.getBuiltinModule("crypto");
+                  } catch (error) {
+                    getBuiltinDenied = [error.code, error.autojs6Code].join(":");
+                  }
+
+                  emit("modern.promise_web.crypto_random=" + [randomValuesOk, uuidOk].join("|"));
+                  emit("modern.promise_web.crypto_digest=" + digestSummary);
+                  emit("modern.promise_web.crypto_hmac=" + [
+                    hmacVerified,
+                    hmacRejected,
+                    hmacJwk.alg,
+                    hmacJwk.kty,
+                    hmacJwk.key_ops.join(","),
+                    Buffer.from(hmacRaw).toString("hex"),
+                    hmacSha1Jwk.alg
+                  ].join("|"));
+                  emit("modern.promise_web.crypto_denied=" + [
+                    randomFloatError,
+                    randomQuotaError,
+                    digestError,
+                    hmacUsageError,
+                    hmacAlgError,
+                    hmacExportError,
+                    asymmetricAbsent,
+                    getBuiltinDenied
+                  ].join("|"));
+                  return output.join("\n");
+                })().catch((error) => {
+                  console.error("modern.promise_web.error=" + (error && (error.stack || error.message) || error));
+                  throw error;
+                });
+            """.trimIndent(),
+            sourceName = File(workDir, "main.js").absolutePath,
+            workingDirectory = workDir,
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("promise and web platform sweep", result)
+        val output = result.stdout.ifBlank { result.resultText.orEmpty() }
+        assertTrue(
+            NodeEmbeddedTestHarness.describeResult("promise and web platform sweep", result),
+            output.contains("modern.promise_web.aliases=true"),
+        )
+        assertTrue(output, output.contains("modern.promise_web.shadow=true"))
+        assertTrue(
+            output,
+            output.contains("modern.promise_web.timers=timeout|immediate|function|function|AbortError:ABORT_ERR|tick,tick|AbortError:ABORT_ERR"),
+        )
+        assertTrue(output, output.contains("modern.promise_web.streams=ab|finished|function|function"))
+        assertTrue(output, output.contains("modern.promise_web.readline=answer|function|function|function"))
+        assertTrue(
+            output,
+            output.contains("modern.promise_web.abort=true|already|true|already|true|later|true|TimeoutError|TypeError:ERR_INVALID_ARG_TYPE|RangeError:ERR_OUT_OF_RANGE"),
+        )
+        assertTrue(output, output.contains("modern.promise_web.clone=true|DataCloneError:25"))
+        assertTrue(output, output.contains("modern.promise_web.crypto_random=true|true"))
+        assertTrue(
+            output,
+            output.contains(
+                    "modern.promise_web.crypto_digest=" +
+                    "a9993e364706816aba3e25717850c26c9cd0d89d|" +
+                    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad|" +
+                    "cb00753f45a35e8bb5a03d699ac65007|" +
+                    "ddaf35a193617abacc417349ae204131"
+            ),
+        )
+        assertTrue(output, output.contains("modern.promise_web.crypto_hmac=true|false|HS384|oct|sign,verify|6b6579|HS1"))
+        assertTrue(
+            output,
+            output.contains(
+                "modern.promise_web.crypto_denied=" +
+                    "TypeMismatchError:17|QuotaExceededError:22|NotSupportedError:9|SyntaxError:12|NotSupportedError:9|InvalidAccessError:15|true|" +
+                    "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED:ERR_AUTOJS6_PROCESS_API_DISABLED"
+            ),
+        )
+        assertTrue(result.nativeValues["embedded_script.pending_timer_count"], result.nativeValues["embedded_script.pending_timer_count"] == "0")
+    }
+
+    @Test
     fun partialEsmImportsSameCoreBuiltinWrappers() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("core builtin ESM compatibility")
         val workDir = freshWorkDir("node-core-builtins-esm")

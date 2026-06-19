@@ -414,8 +414,10 @@ bare/`node:` aliases, shadowing protection, CJS and partial ESM import paths, fr
 `EventTarget` boundary, `diagnostics_channel` publish/subscribe behavior, S7-31 `AsyncLocalStorage` propagation across
 Promise/timer/fs/bridge/fetch boundaries plus cleanup, S7-32 frozen primitive diagnostics messages for bridge/fetch
 runtime telemetry, safe `performance.eventLoopUtilization()` snapshots, S7-33 single-runtime `node:test` TAP reporting,
-hooks/skip/todo/timeout/failure handling, late async activity detection, `process.getBuiltinModule()` denial, and unchanged
-denial for disabled builtins such as `child_process`, `vm`, and `dgram`.
+hooks/skip/todo/timeout/failure handling, late async activity detection, S7-34 `timers/promises`, `stream/promises`,
+`readline/promises`, `AbortSignal`, `structuredClone`, and limited global/WebCrypto coverage including random values,
+UUIDs, SHA digest, HMAC sign/verify/export, and negative cases, `process.getBuiltinModule()` denial, and unchanged denial
+for disabled builtins such as `child_process`, `vm`, and `dgram`.
 
 Current `vm` design gate focused instrumentation:
 

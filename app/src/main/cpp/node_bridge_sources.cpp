@@ -6218,12 +6218,30 @@ std::string buildEmbeddedScriptExecutionSource(
       typeof nodeV8.serialize === "function" &&
       typeof nodeV8.deserialize === "function"
     ) {
-      return nodeV8.deserialize(nodeV8.serialize(value));
+      try {
+        return nodeV8.deserialize(nodeV8.serialize(value));
+      } catch (error) {
+        throw __autojs6_dom_exception(
+          error && error.message ? error.message : "The object could not be cloned.",
+          "DataCloneError"
+        );
+      }
     }
     if (value === undefined) {
       return undefined;
     }
-    return JSON.parse(JSON.stringify(value));
+    try {
+      const serialized = JSON.stringify(value);
+      if (serialized === undefined) {
+        throw new Error("The object could not be cloned.");
+      }
+      return JSON.parse(serialized);
+    } catch (error) {
+      throw __autojs6_dom_exception(
+        error && error.message ? error.message : "The object could not be cloned.",
+        "DataCloneError"
+      );
+    }
   }
   function __autojs6_create_limited_navigator() {
     if (typeof navigator === "object" && navigator) {
@@ -24263,6 +24281,8 @@ std::string buildEmbeddedScriptExecutionSource(
         return "sha1";
       case "SHA-256":
         return "sha256";
+      case "SHA-384":
+        return "sha384";
       case "SHA-512":
         return "sha512";
       default:
@@ -24274,8 +24294,12 @@ std::string buildEmbeddedScriptExecutionSource(
       ? hash
       : (hash && typeof hash === "object" && hash.name !== undefined ? hash.name : "");
     switch (String(name).toUpperCase()) {
+      case "SHA-1":
+        return { node: "sha1", web: "SHA-1" };
       case "SHA-256":
         return { node: "sha256", web: "SHA-256" };
+      case "SHA-384":
+        return { node: "sha384", web: "SHA-384" };
       case "SHA-512":
         return { node: "sha512", web: "SHA-512" };
       default:
@@ -24351,6 +24375,20 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     throw __autojs6_dom_exception("Only raw and jwk HMAC keys are supported", "NotSupportedError");
   }
+  function __autojs6_web_crypto_hmac_jwk_alg(hashName) {
+    switch (hashName) {
+      case "SHA-1":
+        return "HS1";
+      case "SHA-256":
+        return "HS256";
+      case "SHA-384":
+        return "HS384";
+      case "SHA-512":
+        return "HS512";
+      default:
+        return "HS256";
+    }
+  }
   function __autojs6_digest_buffer_to_array_buffer(buffer) {
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   }
@@ -24388,6 +24426,7 @@ std::string buildEmbeddedScriptExecutionSource(
         type: "secret",
         extractable: !!record.extractable,
         hashNode: record.hashNode,
+        hashWeb: record.hashWeb,
         algorithm: Object.freeze({
           name: "HMAC",
           hash: Object.freeze({ name: record.hashWeb }),
@@ -24502,7 +24541,7 @@ std::string buildEmbeddedScriptExecutionSource(
                 resolve(Object.freeze({
                   kty: "oct",
                   k: __autojs6_crypto_base64_url(Buffer.from(record.material)),
-                  alg: record.hashWeb === "SHA-512" ? "HS512" : "HS256",
+                  alg: __autojs6_web_crypto_hmac_jwk_alg(record.hashWeb),
                   ext: true,
                   key_ops: record.usages.slice()
                 }));

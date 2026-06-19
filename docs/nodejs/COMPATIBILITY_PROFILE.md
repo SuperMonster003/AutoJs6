@@ -415,6 +415,18 @@ Node runtime, and completed tests are checked for newly pending timer activity
 so late async work is reported as a test failure. `node:test/reporters` remains
 disabled.
 
+S7-34 locks a promise and Web Platform sweep for the supported Node 24 subset.
+`timers/promises` supports `setTimeout`, `setImmediate`, `setInterval`,
+`scheduler.wait`, and `scheduler.yield`, including AbortSignal rejection
+semantics. `stream/promises` supports `pipeline()` and `finished()` over
+already permitted streams. `readline/promises` supports `Interface`,
+`Readline`, and `createInterface()` over already permitted streams. The Web
+Platform sweep covers `AbortSignal.abort()`, `AbortSignal.timeout()`,
+`AbortSignal.any()`, `structuredClone()`, and the limited global `crypto`
+surface. `process.getBuiltinModule()` remains disabled, builtin shadows remain
+ignored, and these APIs do not grant raw network, process, native addon,
+Android, or unscoped filesystem authority.
+
 The `stream` wrapper is a partial compatibility surface for pure-JS packages. It
 exposes the standard constructors, `Readable.from()`, callback
 `pipeline()`/`finished()`, `stream/promises` `pipeline()`/`finished()`, selected
@@ -855,7 +867,9 @@ Supported or limited:
 - `crypto.createSecretKey` and secret `KeyObject`
 - `crypto.timingSafeEqual`
 - bounded PBKDF2, scrypt, and HKDF helpers where covered by tests
-- limited `crypto.webcrypto` / `crypto.subtle` for random values, digest, and HMAC key/sign/verify flows
+- limited global `crypto`, `crypto.webcrypto`, and `crypto.subtle` for
+  `getRandomValues`, `randomUUID`, SHA-1/SHA-256/SHA-384/SHA-512 digest, and
+  HMAC SHA-1/SHA-256/SHA-384/SHA-512 key import/export/sign/verify flows
 
 Disabled or absent:
 
@@ -863,6 +877,9 @@ Disabled or absent:
 - signing and verification streams such as `createSign` and `createVerify`
 - certificate and X.509 APIs
 - native key-store or Android keystore access
+- WebCrypto asymmetric generation/import, key derivation, unsupported digest or
+  HMAC algorithms, invalid random-value typed arrays, oversized random-value
+  buffers, empty HMAC usages, and non-extractable key export
 
 The original Task 29 text expected `webcrypto` to stay absent, but the checked-in runtime already exposes a limited WebCrypto surface with regression coverage. Future work should narrow or expand that surface only with an explicit compatibility and security review.
 
