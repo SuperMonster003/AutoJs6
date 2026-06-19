@@ -9199,6 +9199,34 @@ std::string buildEmbeddedScriptExecutionSource(
       source
     );
   }
+  function __autojs6_bridge_diagnostics_message(record, status, error) {
+    const request = record && record.request ? record.request : {};
+    const startedAtMs = record && Number.isFinite(record.startedAtMs) ? record.startedAtMs : Date.now();
+    const message = {
+      id: record && record.id ? String(record.id) : "",
+      module: request.module === undefined ? "" : String(request.module),
+      method: request.method === undefined ? "" : String(request.method),
+      status,
+      timeoutMs: Number(request.timeoutMs || 0),
+      durationMs: Math.max(0, Date.now() - startedAtMs),
+      pendingCount: __autojs6_bridge_pending.size
+    };
+    if (Array.isArray(request.permissions)) {
+      message.permissions = request.permissions.map(String);
+    }
+    if (error) {
+      message.code = String(error.autojs6Code || error.code || error.name || "Error");
+      message.category = String(error.category || __autojs6_bridge_error_category(message.code, error));
+    }
+    return message;
+  }
+  function __autojs6_bridge_publish_diagnostics(record, status, error) {
+    const suffix = status === "error" ? "error" : status === "start" ? "start" : "end";
+    __autojs6_diagnostics_publish(
+      "autojs6.bridge.rpc." + suffix,
+      __autojs6_bridge_diagnostics_message(record, status, error)
+    );
+  }
   function __autojs6_bridge_reject_pending(record, error) {
     if (!record) return;
     if (record.timeout !== null) {
@@ -9210,6 +9238,7 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (_) {}
     }
     __autojs6_bridge_pending.delete(record.id);
+    __autojs6_bridge_publish_diagnostics(record, "error", error);
     record.reject(error);
   }
   function __autojs6_bridge_resolve_pending(record, value) {
@@ -9223,6 +9252,7 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (_) {}
     }
     __autojs6_bridge_pending.delete(record.id);
+    __autojs6_bridge_publish_diagnostics(record, "end", null);
     record.resolve(value);
   }
   function __autojs6_bridge_receive_message(message) {
@@ -9902,6 +9932,40 @@ std::string buildEmbeddedScriptExecutionSource(
       redirectCount: request.redirectCount + 1
     });
   }
+  function __autojs6_fetch_url_scheme(value) {
+    const match = String(value || "").match(/^([a-z][a-z0-9+.-]*:)/i);
+    return match ? match[1].toLowerCase() : "";
+  }
+  function __autojs6_fetch_diagnostics_message(request, phase, response, error, startedAtMs) {
+    const descriptor = request && request.descriptor ? request.descriptor : {};
+    const httpStatus = response && typeof response === "object" ? Number(response.status || 0) : 0;
+    const message = {
+      phase,
+      method: descriptor.method === undefined ? "" : String(descriptor.method),
+      urlScheme: __autojs6_fetch_url_scheme(descriptor.url),
+      timeoutMs: Number(request && request.bridgeTimeoutMs || 0),
+      maxResponseBytes: Number(request && request.maxResponseBytes || 0),
+      redirectMode: request && request.redirectMode === undefined ? "" : String(request && request.redirectMode || ""),
+      redirectCount: Number(request && request.redirectCount || 0),
+      durationMs: Math.max(0, Date.now() - (Number.isFinite(startedAtMs) ? startedAtMs : Date.now())),
+      activeRequestCount: __autojs6_fetch_diagnostics.activeRequestCount
+    };
+    if (response && typeof response === "object") {
+      message.httpStatus = httpStatus;
+      message.ok = httpStatus >= 200 && httpStatus < 300;
+    }
+    if (error) {
+      message.code = String(error.autojs6Code || error.code || error.name || "Error");
+    }
+    return message;
+  }
+  function __autojs6_fetch_publish_diagnostics(request, phase, response, error, startedAtMs) {
+    const suffix = phase === "error" ? "error" : phase === "start" ? "start" : "end";
+    __autojs6_diagnostics_publish(
+      "autojs6.fetch.request." + suffix,
+      __autojs6_fetch_diagnostics_message(request, phase, response, error, startedAtMs)
+    );
+  }
   function __autojs6_fetch_normalize_error(error) {
     __autojs6_fetch_record_error(error);
     const code = error && (error.autojs6Code || error.code);
@@ -9965,15 +10029,19 @@ std::string buildEmbeddedScriptExecutionSource(
           "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
         );
       }
+      const fetchStartedAtMs = Date.now();
+      __autojs6_fetch_publish_diagnostics(request, "start", null, null, fetchStartedAtMs);
       return __autojs6_fetch_dispatch(request).then(function(result) {
         return __autojs6_fetch_to_response(result, request.maxResponseBytes);
       }).then(function(response) {
         __autojs6_fetch_diagnostics.completedCount += 1;
         __autojs6_fetch_finish_request();
+        __autojs6_fetch_publish_diagnostics(request, "end", response, null, fetchStartedAtMs);
         return response;
       }, function(error) {
         const normalized = __autojs6_fetch_normalize_error(error);
         __autojs6_fetch_finish_request();
+        __autojs6_fetch_publish_diagnostics(request, "error", null, normalized, fetchStartedAtMs);
         throw normalized;
       });
     }).catch(function(error) {
@@ -16962,7 +17030,8 @@ std::string buildEmbeddedScriptExecutionSource(
         resolve,
         reject,
         timeout: null,
-        cleanup: null
+        cleanup: null,
+        startedAtMs: Date.now()
       };
       if (signal && typeof signal.addEventListener === "function") {
         const abortListener = function() {
@@ -17001,6 +17070,7 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       }, timeoutMs);
       __autojs6_bridge_pending.set(request.id, record);
+      __autojs6_bridge_publish_diagnostics(record, "start", null);
       try {
         const requestMessage = JSON.stringify(request);
         if (!__autojs6_bridge_transport || typeof __autojs6_bridge_transport.postMessage !== "function") {
@@ -26356,6 +26426,56 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_limited_diagnostics_channel_cache = Object.freeze(limitedDiagnosticsChannel);
     return __autojs6_limited_diagnostics_channel_cache;
   }
+  function __autojs6_diagnostics_safe_value(value) {
+    const type = typeof value;
+    if (
+      value === null ||
+      type === "string" ||
+      type === "number" ||
+      type === "boolean"
+    ) {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(value.map(__autojs6_diagnostics_safe_value).filter(function(item) {
+        return item !== undefined;
+      }));
+    }
+    return undefined;
+  }
+  function __autojs6_diagnostics_safe_message(message) {
+    const result = Object.create(null);
+    const source = message && typeof message === "object" ? message : {};
+    Object.keys(source).forEach(function(key) {
+      const safe = __autojs6_diagnostics_safe_value(source[key]);
+      if (safe !== undefined) {
+        result[key] = safe;
+      }
+    });
+    return Object.freeze(result);
+  }
+  function __autojs6_diagnostics_publish(name, message) {
+    const diagnostics = __autojs6_limited_diagnostics_channel_cache;
+    if (!diagnostics || typeof diagnostics.channel !== "function") {
+      return;
+    }
+    let channel;
+    try {
+      channel = diagnostics.channel(name);
+    } catch (_) {
+      return;
+    }
+    if (!channel || channel.hasSubscribers !== true || typeof channel.publish !== "function") {
+      return;
+    }
+    try {
+      channel.publish(__autojs6_diagnostics_safe_message(message));
+    } catch (error) {
+      if (typeof setImmediate === "function") {
+        setImmediate(function() { throw error; });
+      }
+    }
+  }
   function __autojs6_limited_perf_hooks() {
     if (__autojs6_limited_perf_hooks_cache) {
       return __autojs6_limited_perf_hooks_cache;
@@ -26378,6 +26498,17 @@ std::string buildEmbeddedScriptExecutionSource(
       throw new Error("require is restricted in Embedded Node.js MVP; allowlisted module 'perf_hooks' is unavailable.");
     }
     const allowedEntryTypes = Object.freeze(["mark", "measure"]);
+    const nativeEventLoopUtilization = typeof nativePerformance.eventLoopUtilization === "function"
+      ? nativePerformance.eventLoopUtilization.bind(nativePerformance)
+      : null;
+    function freezeEventLoopUtilization(value) {
+      const source = value && typeof value === "object" ? value : {};
+      return Object.freeze({
+        idle: Number(source.idle || 0),
+        active: Number(source.active || 0),
+        utilization: Number(source.utilization || 0)
+      });
+    }
     function validateEntryType(value) {
       if (typeof value !== "string" || allowedEntryTypes.indexOf(value) < 0) {
         throw __autojs6_invalid_arg_value("perf_hooks PerformanceObserver entry type is not supported: " + value);
@@ -26463,6 +26594,14 @@ std::string buildEmbeddedScriptExecutionSource(
         enumerable: true
       }
     });
+    if (nativeEventLoopUtilization) {
+      Object.defineProperty(limitedPerformance, "eventLoopUtilization", {
+        value: function(utilization1, utilization2) {
+          return freezeEventLoopUtilization(nativeEventLoopUtilization(utilization1, utilization2));
+        },
+        enumerable: true
+      });
+    }
     const limitedPerfHooks = Object.create(null);
     const descriptors = {
       performance: { value: Object.freeze(limitedPerformance), enumerable: true },

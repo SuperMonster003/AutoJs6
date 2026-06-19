@@ -365,6 +365,177 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
     }
 
     @Test
+    fun perfHooksAndDiagnosticsChannelExposeSafeRuntimeTelemetry() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("perf_hooks diagnostics_channel runtime telemetry")
+        val workDir = freshWorkDir("node-runtime-telemetry")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                (async function main() {
+                  const diagnostics = require("diagnostics_channel");
+                  const perfHooks = require("perf_hooks");
+                  const bridge = require("autojs6:bridge");
+                  const fetchModule = require("fetch");
+                  const { Buffer } = require("buffer");
+                  const timerPromises = require("timers/promises");
+                  const performance = perfHooks.performance;
+
+                  const channelNames = [
+                    "autojs6.bridge.rpc.start",
+                    "autojs6.bridge.rpc.end",
+                    "autojs6.bridge.rpc.error",
+                    "autojs6.fetch.request.start",
+                    "autojs6.fetch.request.end",
+                    "autojs6.fetch.request.error"
+                  ];
+                  const events = [];
+                  let safeMessages = true;
+
+                  function codeOf(error) {
+                    return String(error && (error.autojs6Code || error.code || error.name || ""));
+                  }
+
+                  function record(message, name) {
+                    if (!Object.isFrozen(message)) {
+                      safeMessages = false;
+                    }
+                    if (
+                      message.args !== undefined ||
+                      message.url !== undefined ||
+                      message.headers !== undefined ||
+                      message.bodyBase64 !== undefined ||
+                      message.bodyText !== undefined ||
+                      message.result !== undefined ||
+                      message.androidObject !== undefined
+                    ) {
+                      safeMessages = false;
+                    }
+                    events.push({
+                      name,
+                      phase: message.phase || message.status || "",
+                      module: message.module || "",
+                      method: message.method || "",
+                      scheme: message.urlScheme || "",
+                      status: message.httpStatus || 0,
+                      code: message.code || "",
+                      durationType: typeof message.durationMs,
+                      permissionsArray: Array.isArray(message.permissions)
+                    });
+                  }
+
+                  channelNames.forEach((name) => diagnostics.subscribe(name, record));
+                  const hasBefore = channelNames.every((name) => diagnostics.hasSubscribers(name));
+
+                  bridge.__test.setTransport({
+                    postMessage(message) {
+                      const request = JSON.parse(message);
+                      setImmediate(() => {
+                        if (request.module === "fetch") {
+                          const payload = request.args[0];
+                          if (String(payload.url).indexOf("/fail") >= 0) {
+                            bridge.__test.receiveMessage(JSON.stringify({
+                              id: request.id,
+                              ok: false,
+                              error: {
+                                code: "ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED",
+                                message: "controlled provider failed",
+                                module: "fetch",
+                                method: "request"
+                              }
+                            }));
+                            return;
+                          }
+                          bridge.__test.receiveMessage(JSON.stringify({
+                            id: request.id,
+                            ok: true,
+                            result: {
+                              url: payload.url,
+                              status: 200,
+                              statusText: "OK",
+                              headers: [["content-type", "text/plain"]],
+                              bodyBase64: Buffer.from("ok").toString("base64"),
+                              bodyBytes: 2
+                            }
+                          }));
+                          return;
+                        }
+                        bridge.__test.receiveMessage(JSON.stringify({
+                          id: request.id,
+                          ok: true,
+                          result: { accepted: true }
+                        }));
+                      });
+                    }
+                  });
+
+                  const eluBefore = performance.eventLoopUtilization();
+                  await timerPromises.setTimeout(1);
+                  const eluDelta = performance.eventLoopUtilization(eluBefore);
+
+                  await bridge.callAutoJs("toast", "toast", [], { timeoutMs: 1000, permissions: ["toast"] });
+                  const response = await fetchModule("https://example.invalid/diag", { timeoutMs: 1000 });
+                  await response.text();
+
+                  let fetchErrorCode = "";
+                  try {
+                    await fetchModule("https://example.invalid/fail", { timeoutMs: 1000 });
+                  } catch (error) {
+                    fetchErrorCode = codeOf(error);
+                  }
+
+                  const beforeUnsubscribeCount = events.length;
+                  channelNames.forEach((name) => diagnostics.unsubscribe(name, record));
+                  const hasAfter = channelNames.some((name) => diagnostics.hasSubscribers(name));
+                  await bridge.callAutoJs("toast", "toast", [], { timeoutMs: 1000, permissions: ["toast"] });
+                  const afterUnsubscribeCount = events.length;
+
+                  console.log("perf_hooks.runtime_elu=" + [
+                    typeof performance.eventLoopUtilization,
+                    Object.isFrozen(eluBefore),
+                    Object.isFrozen(eluDelta),
+                    typeof eluBefore.idle,
+                    typeof eluDelta.active,
+                    typeof eluDelta.utilization
+                  ].join("|"));
+                  console.log("diagnostics.runtime.names=" + events.map((event) => event.name).join("|"));
+                  console.log("diagnostics.runtime.safe=" + safeMessages);
+                  console.log("diagnostics.runtime.subscribers=" + [hasBefore, hasAfter].join("|"));
+                  console.log("diagnostics.runtime.unsubscribe=" + (beforeUnsubscribeCount === afterUnsubscribeCount));
+                  console.log("diagnostics.runtime.fetch_error=" + fetchErrorCode);
+                  console.log("diagnostics.runtime.fetch_messages=" + events
+                    .filter((event) => event.name.indexOf("autojs6.fetch") === 0)
+                    .map((event) => [event.name, event.phase, event.method, event.scheme, event.status, event.code, event.durationType].join(","))
+                    .join("|"));
+                  console.log("diagnostics.runtime.bridge_permissions=" + events
+                    .filter((event) => event.name === "autojs6.bridge.rpc.start")
+                    .every((event) => event.permissionsArray));
+                })().catch((error) => {
+                  console.error("diagnostics.runtime.error=" + (error && (error.stack || error.message) || error));
+                  process.exitCode = 1;
+                });
+            """.trimIndent(),
+            sourceName = File(workDir, "main.js").absolutePath,
+            workingDirectory = workDir,
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("perf_hooks diagnostics_channel runtime telemetry", result)
+        assertTrue(result.stdout, result.stdout.contains("perf_hooks.runtime_elu=function|true|true|number|number|number"))
+        assertTrue(result.stdout, result.stdout.contains("diagnostics.runtime.safe=true"))
+        assertTrue(result.stdout, result.stdout.contains("diagnostics.runtime.subscribers=true|false"))
+        assertTrue(result.stdout, result.stdout.contains("diagnostics.runtime.unsubscribe=true"))
+        assertTrue(result.stdout, result.stdout.contains("diagnostics.runtime.fetch_error=${NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED}"))
+        assertTrue(result.stdout, result.stdout.contains("autojs6.bridge.rpc.start"))
+        assertTrue(result.stdout, result.stdout.contains("autojs6.bridge.rpc.end"))
+        assertTrue(result.stdout, result.stdout.contains("autojs6.bridge.rpc.error"))
+        assertTrue(result.stdout, result.stdout.contains("autojs6.fetch.request.start,start,GET,https:,0,,number"))
+        assertTrue(result.stdout, result.stdout.contains("autojs6.fetch.request.end,end,GET,https:,200,,number"))
+        assertTrue(result.stdout, result.stdout.contains("autojs6.fetch.request.error,error,GET,https:,0,${NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED},number"))
+        assertTrue(result.stdout, result.stdout.contains("diagnostics.runtime.bridge_permissions=true"))
+    }
+
+    @Test
     fun partialEsmImportsSameCoreBuiltinWrappers() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("core builtin ESM compatibility")
         val workDir = freshWorkDir("node-core-builtins-esm")

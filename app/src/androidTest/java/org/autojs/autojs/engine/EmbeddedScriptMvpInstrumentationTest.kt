@@ -2503,6 +2503,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 return observed.then((observedSummary) => {
                   const nowB = performance.now();
                   const json = performance.toJSON();
+                  const eluBefore = performance.eventLoopUtilization();
+                  const eluDelta = performance.eventLoopUtilization(eluBefore);
                   console.log("perf_hooks.same=" + (perfHooks === nodePerfHooks));
                   console.log("perf_hooks.shadow=" + (perfHooks.shadow === true));
                   console.log("perf_hooks.frozen=" + Object.isFrozen(perfHooks));
@@ -2521,6 +2523,14 @@ class EmbeddedScriptMvpInstrumentationTest {
                     Object.isFrozen(perfHooks.PerformanceObserver.supportedEntryTypes) &&
                     perfHooks.PerformanceObserver.supportedEntryTypes.join(",")
                   ));
+                  console.log("perf_hooks.elu=" + [
+                    typeof performance.eventLoopUtilization,
+                    Object.isFrozen(eluBefore),
+                    Object.isFrozen(eluDelta),
+                    typeof eluBefore.idle,
+                    typeof eluDelta.active,
+                    typeof eluDelta.utilization
+                  ].join(","));
                   console.log("perf_hooks.helpers=" + [
                     typeof perfHooks.performance,
                     typeof performance.now,
@@ -2543,7 +2553,6 @@ class EmbeddedScriptMvpInstrumentationTest {
                     typeof perfHooks.timerify,
                     typeof perfHooks.eventLoopUtilization,
                     typeof performance.timerify,
-                    typeof performance.eventLoopUtilization,
                     typeof performance.nodeTiming,
                     typeof performance.markResourceTiming
                   ].join(","));
@@ -2574,8 +2583,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("perf_hooks.entries=true"))
             assertTrue(result.stdout.contains("perf_hooks.observer=true"))
             assertTrue(result.stdout.contains("perf_hooks.supported=mark,measure"))
+            assertTrue(result.stdout.contains("perf_hooks.elu=function,true,true,number,number,number"))
             assertTrue(result.stdout.contains("perf_hooks.helpers=object,function,function,function,function,function,function,function,function,number,function,function,function,function"))
-            assertTrue(result.stdout.contains("perf_hooks.hidden=undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined"))
+            assertTrue(result.stdout.contains("perf_hooks.hidden=undefined,undefined,undefined,undefined,undefined,undefined,undefined"))
             assertTrue(result.stdout.contains("perf_hooks.toJSON=true"))
             assertTrue(result.stdout.contains("perf_hooks.resolve=perf_hooks|perf_hooks"))
         } finally {

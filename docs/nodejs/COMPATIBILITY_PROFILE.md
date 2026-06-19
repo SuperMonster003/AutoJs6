@@ -363,6 +363,28 @@ are ignored, and `process.getBuiltinModule()` remains disabled so scripts cannot
 `events` wrapper exposes `EventEmitter` and helper functions such as `once()`/`on()`, but does not expose
 `EventEmitterAsyncResource` or `EventTarget`; Web-style `EventTarget` remains a global. `diagnostics_channel` exposes a
 bounded publish/subscribe/tracing surface without raw subscriber internals.
+S7-32 adds execution-scoped runtime telemetry channels for bridge RPC and
+controlled fetch:
+
+- `autojs6.bridge.rpc.start`
+- `autojs6.bridge.rpc.end`
+- `autojs6.bridge.rpc.error`
+- `autojs6.fetch.request.start`
+- `autojs6.fetch.request.end`
+- `autojs6.fetch.request.error`
+
+Runtime-published diagnostics messages are frozen and contain only primitive
+fields or primitive arrays, such as module, method, phase/status, timeout,
+duration, policy counters, HTTP status, URL scheme, and error code. They do not
+publish bridge args, headers, full URLs, request/response bodies, result
+objects, Android objects, or provider-owned resources.
+
+`perf_hooks` exposes `performance.now`, mark/measure entry APIs,
+`PerformanceObserver` for `mark`/`measure`, and a safe
+`performance.eventLoopUtilization()` wrapper when the embedded Node runtime
+provides it. Event-loop utilization returns a frozen numeric snapshot. Histogram,
+timerify, node timing, resource timing, and event-loop delay monitoring remain
+hidden.
 
 `async_hooks` exposes only `AsyncLocalStorage` and `AsyncResource`. It does not
 expose `createHook`, async-id introspection, provider tables, or raw execution
