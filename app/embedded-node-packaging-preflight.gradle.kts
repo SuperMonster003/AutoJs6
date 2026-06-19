@@ -3587,6 +3587,85 @@ val generateNode24PatchUpgradeFeasibilityReport = tasks.register(
     outputs.upToDateWhen { false }
 }
 
+val generateNodeDualRuntimeABReport = tasks.register(
+    "generateNodeDualRuntimeABReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the build-only Node 24 dual-runtime A/B gate report."
+
+    workingDir(rootProject.projectDir)
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-dual-runtime-ab-gate.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.runtimeSlot").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--runtime-slot", it)) }
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateJniLibs").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-jni-libs", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateHeaders").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-headers", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateCompatibilityProfile").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-compatibility", it)) }
+    providers.gradleProperty("autojs.nodejs.abCandidateSecurityReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-security", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidatePackagedReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-packaged", it)) }
+    providers.gradleProperty("autojs.nodejs.abCandidateMemoryReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-memory", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidatePerformanceReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-performance", it)) }
+    providers.gradleProperty("autojs.nodejs.abFailOnBlocked").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-blocked") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val verifyNodeDualRuntimeABGate = tasks.register("verifyNodeDualRuntimeABGate") {
+    group = "verification"
+    description = "Fails unless the Node 24 dual-runtime A/B gate report has complete evidence for both slots."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn(generateNodeDualRuntimeABReport)
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+    doLast {
+        val reportFile = rootProject.layout.buildDirectory
+            .file("reports/nodejs/patch-upgrade/node-dual-runtime-ab-gate.json")
+            .get()
+            .asFile
+        if (!reportFile.isFile) {
+            throw GradleException("Node dual-runtime A/B gate report is missing: ${reportFile.absolutePath}")
+        }
+        val reportJson = JsonSlurper().parse(reportFile) as Map<*, *>
+        val decision = reportJson["decision"] as? Map<*, *>
+        if (decision?.get("status") != "ready") {
+            throw GradleException(
+                "Node dual-runtime A/B gate is not ready. See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
 val verifyNodePrGate = tasks.register("verifyNodePrGate") {
     group = "verification"
     description = "Runs fast host-side Embedded Node PR checks without connected-device stress or packaged smoke launch."

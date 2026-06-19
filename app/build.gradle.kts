@@ -39,6 +39,17 @@ val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
 val buildActionAssemble = "assemble"
 
+fun normalizeNodeJsHeaderDir(root: File): File {
+    return listOf(
+        root,
+        root.resolve("include/node"),
+        root.resolve("include"),
+        root.resolve("node"),
+    ).firstOrNull { it.resolve("node.h").isFile } ?: root
+}
+
+fun File.nodeJsCmakePath(): String = absolutePath.replace('\\', '/')
+
 val taskNames: List<String> = gradle.startParameter.taskNames
 val nodeJsIdentityProfile = providers.gradleProperty("autojs.nodejs.identity").orElse("production").get()
     .trim()
@@ -84,6 +95,66 @@ val nodeJsReleaseFlavor = providers.gradleProperty("autojs.nodejs.releaseFlavor"
     }
 val nodeJsReleaseSupportedAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
 val nodeJsReleaseKnownAbis = nodeJsReleaseSupportedAbis + "x86"
+val nodeJsRuntimeSlot = providers.gradleProperty("autojs.nodejs.runtimeSlot").orElse("node24_5").get()
+    .trim()
+    .lowercase()
+    .replace('-', '_')
+    .let { requested ->
+        when (requested) {
+            "node24_5" -> "node24_5"
+            "node24_current" -> "node24_current"
+            else -> throw GradleException(
+                "Unsupported Embedded Node runtime slot '$requested'. Use node24_5 or node24_current."
+            )
+        }
+    }
+val nodeJsRuntimeSlotTargetVersion = when (nodeJsRuntimeSlot) {
+    "node24_current" -> providers.gradleProperty("autojs.nodejs.patchTargetVersion").orElse("24.17.0").get()
+        .trim()
+        .removePrefix("v")
+    else -> "24.5.0"
+}
+val nodeJsPatchCandidateJniLibsDir = providers.gradleProperty("autojs.nodejs.patchCandidateJniLibs").orNull
+    ?.trim()
+    ?.takeIf(String::isNotEmpty)
+    ?.let(::file)
+val nodeJsPatchCandidateHeadersDir = providers.gradleProperty("autojs.nodejs.patchCandidateHeaders").orNull
+    ?.trim()
+    ?.takeIf(String::isNotEmpty)
+    ?.let { normalizeNodeJsHeaderDir(file(it)) }
+val nodeJsRuntimeSlotJniLibsSourceDir = when (nodeJsRuntimeSlot) {
+    "node24_current" -> nodeJsPatchCandidateJniLibsDir
+        ?: throw GradleException(
+            "autojs.nodejs.runtimeSlot=node24_current requires " +
+                    "-Pautojs.nodejs.patchCandidateJniLibs=<dir>."
+        )
+    else -> file("src/main/jniLibs")
+}
+val nodeJsRuntimeSlotHeaderDir = when (nodeJsRuntimeSlot) {
+    "node24_current" -> nodeJsPatchCandidateHeadersDir
+        ?: throw GradleException(
+            "autojs.nodejs.runtimeSlot=node24_current requires " +
+                    "-Pautojs.nodejs.patchCandidateHeaders=<dir>."
+        )
+    else -> file("src/main/cpp/node-v24.5.0/include/node")
+}
+if (nodeJsRuntimeSlot == "node24_current") {
+    val missingCandidateAbis = nodeJsReleaseSupportedAbis
+        .filterNot { nodeJsRuntimeSlotJniLibsSourceDir.resolve("$it/libnode.so").isFile }
+    if (missingCandidateAbis.isNotEmpty()) {
+        throw GradleException(
+            "autojs.nodejs.runtimeSlot=node24_current requires candidate libnode.so for ABI(s): " +
+                    missingCandidateAbis.joinToString() +
+                    ". Candidate root: ${nodeJsRuntimeSlotJniLibsSourceDir.absolutePath}"
+        )
+    }
+    if (!nodeJsRuntimeSlotHeaderDir.resolve("node.h").isFile) {
+        throw GradleException(
+            "autojs.nodejs.runtimeSlot=node24_current requires Node headers containing node.h. " +
+                    "Resolved header dir: ${nodeJsRuntimeSlotHeaderDir.absolutePath}"
+        )
+    }
+}
 val nodeJsReleaseRequestedAbis = providers.gradleProperty("autojs.nodejs.releaseAbis").orNull
     ?.split(',')
     ?.map { it.trim() }
@@ -110,9 +181,9 @@ if (nodeJsReleaseUnsupportedAbis.isNotEmpty()) {
                 ". Supported Embedded Node ABIs are ${nodeJsReleaseSupportedAbis.joinToString()}; x86 is unsupported."
     )
 }
-if (file("src/main/jniLibs/x86/libnode.so").isFile) {
+if (nodeJsRuntimeSlotJniLibsSourceDir.resolve("x86/libnode.so").isFile) {
     throw GradleException(
-        "Unsupported Embedded Node x86 runtime detected at app/src/main/jniLibs/x86/libnode.so. " +
+        "Unsupported Embedded Node x86 runtime detected at ${nodeJsRuntimeSlotJniLibsSourceDir.resolve("x86/libnode.so").absolutePath}. " +
                 "x86 must remain fail-fast until libnode.so, libautojs6-node.so, and device coverage are explicitly supported."
     )
 }
@@ -873,7 +944,7 @@ val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").or
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val isNodeJsNativeRuntimeRequested = effectiveNodeJsRuntimeBackend in setOf("native", "embedded", "auto")
 val nodeJsAvailableNativeRuntimeAbis = nodeJsReleaseKnownAbis
-    .filter { file("src/main/jniLibs/$it/libnode.so").isFile }
+    .filter { nodeJsRuntimeSlotJniLibsSourceDir.resolve("$it/libnode.so").isFile }
 val nodeJsNativeRuntimeAbis = if (isNodeJsNativeRuntimeRequested) {
     nodeJsReleaseExpectedAbis.filter { it in nodeJsAvailableNativeRuntimeAbis }
 } else {
@@ -890,6 +961,37 @@ if (nodeJsMissingReleaseAbis.isNotEmpty()) {
                 nodeJsMissingReleaseAbis.joinToString() +
                 ". Adjust -Pautojs.nodejs.releaseAbis or provide libnode.so for the selected ABI set."
     )
+}
+val nodeJsRuntimeSlotGeneratedJniLibsDir = layout.buildDirectory
+    .dir("generated/nodejs/runtime-slot/$nodeJsRuntimeSlot/jniLibs")
+val prepareNodeJsRuntimeSlotJniLibs = tasks.register(
+    "prepareNodeJsRuntimeSlotJniLibs",
+    org.gradle.api.tasks.Copy::class,
+) {
+    group = "build"
+    description = "Prepares build-only Embedded Node native runtime slot jniLibs."
+
+    val outputDirProvider = nodeJsRuntimeSlotGeneratedJniLibsDir
+    from(file("src/main/jniLibs")) {
+        exclude("*/libnode.so")
+    }
+    from(nodeJsRuntimeSlotJniLibsSourceDir) {
+        include("*/libnode.so")
+    }
+    into(outputDirProvider)
+    outputs.dir(outputDirProvider)
+    doFirst {
+        delete(outputDirProvider.get().asFile)
+    }
+}
+tasks.matching { task ->
+    task.name != "prepareNodeJsRuntimeSlotJniLibs" && (
+            task.name == "preBuild" ||
+            task.name.contains("JniLib", ignoreCase = true) ||
+            task.name.contains("NativeLib", ignoreCase = true)
+            )
+}.configureEach {
+    dependsOn(prepareNodeJsRuntimeSlotJniLibs)
 }
 
 utils.registerTemplateApkCopy(project)
@@ -1368,6 +1470,9 @@ android {
                     abiFilters += nodeJsNativeRuntimeAbis
                     arguments += "-DAUTOJS6_NODE_ENABLE_EMBEDDED_LIFECYCLE_PROBE=${if (nodeJsEmbeddedProbeLifecycleEnabled) "ON" else "OFF"}"
                     arguments += "-DAUTOJS6_NODE_ENABLE_EMBEDDED_SCRIPT_EXECUTION=${if (nodeJsEmbeddedScriptEnabled) "ON" else "OFF"}"
+                    arguments += "-DAUTOJS6_NODE_RUNTIME_SLOT=$nodeJsRuntimeSlot"
+                    arguments += "-DAUTOJS6_NODE_INCLUDE_DIR=${nodeJsRuntimeSlotHeaderDir.nodeJsCmakePath()}"
+                    arguments += "-DAUTOJS6_NODE_LIBRARY_ROOT=${nodeJsRuntimeSlotJniLibsSourceDir.nodeJsCmakePath()}"
                     cppFlags += "-std=c++20"
                 }
             }
@@ -1378,6 +1483,10 @@ android {
         buildConfigField("String", "NODEJS_IDENTITY_PROFILE", "\"$nodeJsIdentityProfile\"")
         buildConfigField("String", "NODEJS_APPLICATION_ID_SUFFIX", "\"$nodeJsApplicationIdSuffix\"")
         buildConfigField("String", "NODEJS_RUNTIME_BACKEND", "\"$effectiveNodeJsRuntimeBackend\"")
+        buildConfigField("String", "NODEJS_RUNTIME_SLOT", "\"$nodeJsRuntimeSlot\"")
+        buildConfigField("String", "NODEJS_RUNTIME_SLOT_TARGET_VERSION", "\"$nodeJsRuntimeSlotTargetVersion\"")
+        buildConfigField("boolean", "NODEJS_RUNTIME_SLOT_BUILD_ONLY", "true")
+        buildConfigField("boolean", "NODEJS_RUNTIME_SLOT_USER_SELECTABLE", "false")
         buildConfigField("String", "NODEJS_RELEASE_FLAVOR", "\"$nodeJsReleaseFlavor\"")
         buildConfigField("int", "NODEJS_EMBEDDED_PROBE_LEVEL", "$nodeJsEmbeddedProbeLevel")
         buildConfigField("long", "NODEJS_EMBEDDED_PROBE_TIMEOUT_MS", "${nodeJsEmbeddedProbeTimeoutMs}L")
@@ -1509,6 +1618,7 @@ android {
         //  !
         getByName("main") {
             assets.directories.add("src/main/assets")
+            jniLibs.setSrcDirs(listOf(nodeJsRuntimeSlotGeneratedJniLibsDir.get().asFile))
         }
         getByName("release") {
             java.directories.add("src/release/java")

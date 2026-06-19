@@ -1036,6 +1036,20 @@ Optional evidence properties are:
 - `autojs.nodejs.patchCandidatePackagedReport`
 - `autojs.nodejs.patchFailOnNoGo=true`
 
+Node 24.x dual-runtime A/B report and gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodeDualRuntimeABReport
+.\gradlew.bat --console=plain :app:verifyNodeDualRuntimeABGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+The build-only selector is `autojs.nodejs.runtimeSlot` and accepts only `node24_5` and `node24_current`. User projects,
+`project.json`, and packaged APK metadata cannot select arbitrary native runtimes. `node24_5` is the default. Selecting
+`node24_current` requires explicit candidate `jniLibs` and headers through the patch-candidate properties above; otherwise
+Gradle fails during configuration instead of silently packaging the default runtime. The A/B report compares the required
+evidence slots for compatibility corpus, security corpus, packaged smoke, memory stress, and performance benchmark. The
+report task is informational; `verifyNodeDualRuntimeABGate` fails until both runtime slots have complete matching evidence.
+
 See `docs/nodejs/ROLLBACK_PLAYBOOK.md` for when to use this path and what release notes must record.
 
 ## Security Negative Tests
