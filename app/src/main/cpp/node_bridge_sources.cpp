@@ -8047,6 +8047,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_lifecycle_stop_poll_timer = null;
   let __autojs6_lifecycle_stop_seen_id = "";
   let __autojs6_limited_plugins_cache = null;
+  const __autojs6_plugin_registry = new Map();
   let __autojs6_limited_java_cache = null;
   let __autojs6_limited_worker_threads_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
@@ -17488,6 +17489,106 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return Object.freeze(output);
   }
+  function __autojs6_plugin_string_list(value, id, fieldName, methodName) {
+    if (value === undefined) {
+      return Object.freeze([]);
+    }
+    if (!Array.isArray(value)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' requires autojs6.plugin." + fieldName + " as a string array when present."
+      );
+    }
+    const output = [];
+    const seen = Object.create(null);
+    for (let i = 0; i < value.length; i += 1) {
+      const item = value[i];
+      if (typeof item !== "string" || item.trim().length === 0) {
+        throw __autojs6_plugins_invalid_request(
+          methodName,
+          "AutoJs6 JS plugin '" + id + "' has a non-string " + fieldName + " entry at index " + i + "."
+        );
+      }
+      const normalized = item.trim();
+      if (!seen[normalized]) {
+        seen[normalized] = true;
+        output.push(normalized);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_plugin_exports(plugin, entry, id, methodName) {
+    const output = Object.create(null);
+    const source = plugin.exports === undefined ? { ".": entry } : plugin.exports;
+    if (typeof source === "string") {
+      output["."] = source;
+      return Object.freeze(output);
+    }
+    if (!source || typeof source !== "object" || Array.isArray(source)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + id + "' requires autojs6.plugin.exports as an object map when present."
+      );
+    }
+    const names = Object.keys(source);
+    if (names.length === 0) {
+      output["."] = entry;
+      return Object.freeze(output);
+    }
+    for (const name of names) {
+      if (typeof name !== "string" || !/^(?:\.|[A-Za-z0-9][A-Za-z0-9_.-]{0,127})$/.test(name)) {
+        throw __autojs6_plugins_invalid_request(
+          methodName,
+          "AutoJs6 JS plugin '" + id + "' rejects unsafe export name: " + String(name)
+        );
+      }
+      const target = source[name];
+      if (typeof target !== "string" || target.trim().length === 0) {
+        throw __autojs6_plugins_invalid_request(
+          methodName,
+          "AutoJs6 JS plugin '" + id + "' export '" + name + "' must target a relative module path."
+        );
+      }
+      output[name] = target.trim();
+    }
+    if (output["."] === undefined) {
+      output["."] = entry;
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_plugin_config_value(value, methodName) {
+    if (value === undefined) {
+      return Object.freeze({});
+    }
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " requires plugin configuration as a JSON object."
+      );
+    }
+    let cloned;
+    try {
+      cloned = JSON.parse(JSON.stringify(value));
+    } catch (error) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " requires JSON-serializable plugin configuration."
+      );
+    }
+    return Object.freeze(cloned && typeof cloned === "object" && !Array.isArray(cloned) ? cloned : {});
+  }
+  function __autojs6_plugin_options(value, methodName) {
+    if (value === undefined || value === null) {
+      return Object.freeze({});
+    }
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " requires an options object when options are provided."
+      );
+    }
+    return value;
+  }
   function __autojs6_plugin_package_descriptor(id, methodName) {
     const scope = __autojs6_plugins_scope(methodName);
     const path = scope.path;
@@ -17540,6 +17641,8 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const permissions = __autojs6_plugin_permissions(plugin, id, methodName);
     const entry = plugin.entry !== undefined ? plugin.entry : (packageData.main !== undefined ? packageData.main : "index.cjs");
+    const dependencies = __autojs6_plugin_string_list(plugin.dependencies, id, "dependencies", methodName);
+    const exportsMap = __autojs6_plugin_exports(plugin, entry, id, methodName);
     return {
       scope,
       id,
@@ -17547,6 +17650,8 @@ std::string buildEmbeddedScriptExecutionSource(
       version: typeof packageData.version === "string" ? packageData.version : "",
       plugin,
       permissions,
+      dependencies,
+      exports: exportsMap,
       entry,
       pluginDir,
       realPluginDir
@@ -17684,6 +17789,37 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return base;
   }
+  function __autojs6_plugin_export_name(value, methodName) {
+    if (value === undefined || value === null) {
+      return ".";
+    }
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " requires the plugin export name as a string when provided."
+      );
+    }
+    const name = value.trim();
+    if (!/^(?:\.|[A-Za-z0-9][A-Za-z0-9_.-]{0,127})$/.test(name)) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins." + methodName + " rejects unsafe plugin export name: " + String(value)
+      );
+    }
+    return name;
+  }
+  function __autojs6_plugin_export_entry_path(descriptor, methodName, exportNameValue) {
+    const exportName = __autojs6_plugin_export_name(exportNameValue, methodName);
+    const target = descriptor.exports[exportName];
+    if (target === undefined) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "AutoJs6 JS plugin '" + descriptor.id + "' does not export module '" + exportName + "'."
+      );
+    }
+    const exportDescriptor = Object.assign({}, descriptor, { entry: target });
+    return __autojs6_plugin_entry_path(exportDescriptor, methodName);
+  }
   function __autojs6_plugin_required_capabilities(descriptor) {
     return Object.freeze(["plugin." + descriptor.id].concat(descriptor.permissions));
   }
@@ -17730,30 +17866,190 @@ std::string buildEmbeddedScriptExecutionSource(
       entry: descriptor.entry,
       entryPath: descriptor.entryPath,
       permissions: Object.freeze(descriptor.permissions.slice()),
+      dependencies: Object.freeze(descriptor.dependencies.slice()),
+      exports: Object.freeze(Object.assign({}, descriptor.exports)),
       jsOnly: true,
       nativeAddons: false
     });
+  }
+  function __autojs6_plugin_record(idValue, methodName, autoInstall) {
+    const id = __autojs6_plugin_id(idValue, methodName);
+    if (__autojs6_plugin_registry.has(id)) {
+      return __autojs6_plugin_registry.get(id);
+    }
+    if (!autoInstall) {
+      throw __autojs6_module_not_found("AutoJs6 JS plugin '" + id + "' has not been installed in this execution.");
+    }
+    const descriptor = __autojs6_plugin_descriptor(id, methodName);
+    const record = {
+      id,
+      descriptor,
+      enabled: true,
+      loaded: false,
+      config: Object.freeze({}),
+      loadedPaths: new Set()
+    };
+    __autojs6_plugin_registry.set(id, record);
+    return record;
+  }
+  function __autojs6_plugin_status(record) {
+    const manifest = __autojs6_plugin_public_manifest(record.descriptor);
+    return Object.freeze(Object.assign({}, manifest, {
+      enabled: record.enabled === true,
+      loaded: record.loaded === true,
+      config: record.config
+    }));
+  }
+  function __autojs6_plugin_assert_enabled(record, methodName) {
+    if (record.enabled !== true) {
+      throw __autojs6_plugins_permission_denied(
+        methodName,
+        "AutoJs6 JS plugin '" + record.id + "' is disabled."
+      );
+    }
+  }
+  function __autojs6_plugin_validate_source_option(descriptor, sourceValue, methodName) {
+    if (sourceValue === undefined || sourceValue === null) {
+      return;
+    }
+    if (typeof sourceValue !== "string" || sourceValue.trim().length === 0) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins.install source must be a non-empty local path when provided."
+      );
+    }
+    const path = descriptor.scope.path;
+    const fs = descriptor.scope.fs;
+    const sourcePath = path.resolve(descriptor.scope.root, sourceValue.trim());
+    if (!__autojs6_path_within_root(sourcePath, descriptor.scope.root) || __autojs6_sensitive_path(sourcePath)) {
+      throw __autojs6_plugins_path_escape(
+        methodName,
+        "plugins.install source path escapes the project working directory.",
+        sourceValue
+      );
+    }
+    const realSource = fs.realpathSync(sourcePath);
+    if (realSource !== descriptor.realPluginDir) {
+      throw __autojs6_plugins_invalid_request(
+        methodName,
+        "plugins.install source must point at ./plugins/" + descriptor.id + " for the JS-only local manager."
+      );
+    }
+  }
+  function __autojs6_plugin_unload_record(record) {
+    const descriptor = record.descriptor;
+    const keys = Object.keys(__autojs6_module_cache);
+    for (const key of keys) {
+      if (__autojs6_path_within_root(key, descriptor.pluginDir)) {
+        delete __autojs6_module_cache[key];
+      }
+    }
+    record.loaded = false;
+    record.loadedPaths.clear();
+    return true;
   }
   function __autojs6_limited_plugins() {
     if (__autojs6_limited_plugins_cache) {
       return __autojs6_limited_plugins_cache;
     }
     function manifest(id) {
-      const descriptor = __autojs6_plugin_descriptor(id, "manifest");
-      return __autojs6_plugin_public_manifest(descriptor);
+      const record = __autojs6_plugin_registry.has(__autojs6_plugin_id(id, "manifest"))
+        ? __autojs6_plugin_record(id, "manifest", false)
+        : { descriptor: __autojs6_plugin_descriptor(id, "manifest"), enabled: true, loaded: false, config: Object.freeze({}) };
+      return __autojs6_plugin_public_manifest(record.descriptor);
     }
-    function resolve(id) {
-      const descriptor = __autojs6_plugin_descriptor(id, "resolve");
-      __autojs6_plugins_assert_capabilities(descriptor, "resolve");
-      return descriptor.entryPath;
+    function install(id, options) {
+      const opts = __autojs6_plugin_options(options, "install");
+      const descriptor = __autojs6_plugin_descriptor(id, "install");
+      __autojs6_plugin_validate_source_option(descriptor, opts.source, "install");
+      __autojs6_plugins_assert_capabilities(descriptor, "install");
+      const record = {
+        id: descriptor.id,
+        descriptor,
+        enabled: opts.enabled === false ? false : true,
+        loaded: false,
+        config: __autojs6_plugin_config_value(opts.config, "install"),
+        loadedPaths: new Set()
+      };
+      __autojs6_plugin_registry.set(descriptor.id, record);
+      return __autojs6_plugin_status(record);
     }
-    function load(id) {
-      const descriptor = __autojs6_plugin_descriptor(id, "load");
+    function resolve(id, exportName) {
+      const record = __autojs6_plugin_record(id, "resolve", true);
+      __autojs6_plugin_assert_enabled(record, "resolve");
+      __autojs6_plugins_assert_capabilities(record.descriptor, "resolve");
+      return __autojs6_plugin_export_entry_path(record.descriptor, "resolve", exportName);
+    }
+    function load(id, exportName) {
+      const record = __autojs6_plugin_record(id, "load", true);
+      __autojs6_plugin_assert_enabled(record, "load");
+      const descriptor = record.descriptor;
       __autojs6_plugins_assert_capabilities(descriptor, "load");
+      const entryPath = __autojs6_plugin_export_entry_path(descriptor, "load", exportName);
       __autojs6_plugin_module_roots[descriptor.pluginDir] = true;
-      return __autojs6_load_local_module(descriptor.entryPath, null);
+      const exported = __autojs6_load_local_module(entryPath, null);
+      record.loaded = true;
+      record.loadedPaths.add(entryPath);
+      return exported;
+    }
+    function enable(id) {
+      const record = __autojs6_plugin_record(id, "enable", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "enable");
+      record.enabled = true;
+      return __autojs6_plugin_status(record);
+    }
+    function disable(id) {
+      const record = __autojs6_plugin_record(id, "disable", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "disable");
+      record.enabled = false;
+      __autojs6_plugin_unload_record(record);
+      return __autojs6_plugin_status(record);
+    }
+    function isEnabled(id) {
+      return __autojs6_plugin_record(id, "isEnabled", true).enabled === true;
+    }
+    function configure(id, config) {
+      const record = __autojs6_plugin_record(id, "configure", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "configure");
+      record.config = __autojs6_plugin_config_value(config, "configure");
+      return record.config;
+    }
+    function config(id) {
+      return __autojs6_plugin_record(id, "config", true).config;
+    }
+    function version(id) {
+      return __autojs6_plugin_record(id, "version", true).descriptor.version;
+    }
+    function dependencies(id) {
+      return Object.freeze(__autojs6_plugin_record(id, "dependencies", true).descriptor.dependencies.slice());
+    }
+    function exportsOf(id) {
+      return Object.freeze(Object.assign({}, __autojs6_plugin_record(id, "exports", true).descriptor.exports));
+    }
+    function unload(id) {
+      const record = __autojs6_plugin_record(id, "unload", true);
+      __autojs6_plugins_assert_capabilities(record.descriptor, "unload");
+      return __autojs6_plugin_unload_record(record);
+    }
+    function list() {
+      const output = [];
+      __autojs6_plugin_registry.forEach(function(record) {
+        output.push(__autojs6_plugin_status(record));
+      });
+      return Object.freeze(output);
     }
     __autojs6_limited_plugins_cache = Object.freeze({
+      install,
+      enable,
+      disable,
+      isEnabled,
+      configure,
+      config,
+      version,
+      dependencies,
+      exports: exportsOf,
+      unload,
+      list,
       load,
       resolve,
       manifest

@@ -1,9 +1,10 @@
-# Node Plugin System JS-Only Prototype
+# Node Plugin System JS-Only Manager
 
-Status: Task 184 implements a local JS-only prototype through
-`require("plugins")`. There is still no plugin installer, signed archive
-verifier, update channel, Android plugin adapter, native provider, native
-plugin loader, or packaged APK plugin runtime.
+Status: S7-42 implements a local JS-only manager through `require("plugins")`.
+`plugins.install(id, options?)` registers an already-present sanitized package
+under `./plugins/<id>` for the current execution only. There is still no
+download installer, signed archive verifier, update channel, Android plugin
+adapter, native provider, native plugin loader, or packaged APK plugin runtime.
 
 ## Goal
 
@@ -23,22 +24,33 @@ ordinary pure JavaScript npm packages and named AutoJs bridge modules only.
 
 ## Current Decision
 
-Expose only a project-local, JS-only prototype in v1.1:
+Expose only a project-local, JS-only manager in v1.1:
 
 ```js
 const plugins = require("plugins");
+const status = plugins.install("org.example.demo", {
+  source: "./plugins/org.example.demo",
+  config: { mode: "safe" }
+});
 const info = plugins.manifest("org.example.demo");
-const entryPath = plugins.resolve("org.example.demo");
+const entryPath = plugins.resolve("org.example.demo", "helper");
 const demo = plugins.load("org.example.demo");
+plugins.disable("org.example.demo");
+plugins.enable("org.example.demo");
+plugins.unload("org.example.demo");
 ```
 
-Prototype rules:
+Manager rules:
 
 - plugin id resolves from `./plugins/<id>` under the Node working directory
 - `package.json` must contain `autojs6.plugin`
 - `autojs6.plugin.permissions` must be a string array
+- `autojs6.plugin.dependencies` may declare string plugin dependency ids for
+  diagnostics; it does not auto-load dependencies
+- `autojs6.plugin.exports` may map named exports to `.js` or `.cjs` module
+  paths under the plugin directory
 - project metadata must declare exact `plugin.<id>` capability and every
-  plugin-requested capability before plugin code executes
+  plugin-requested capability before install/load/enable/configure/unload
 - local `node_modules/plugins` cannot shadow `require("plugins")`
 - plugin entry must be `.js` or `.cjs` and stay inside the plugin directory
 - plugin-relative and plugin package resolution use the plugin directory as the
@@ -46,7 +58,12 @@ Prototype rules:
 - `.node` files anywhere below the plugin directory reject with
   `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`; common native library/object file
   extensions are rejected by the JS-only plugin policy
-- plugin symlinks are rejected in this prototype
+- plugin symlinks are rejected
+- `install()` does not copy files, download packages, run lifecycle scripts, or
+  persist global state; it validates and registers the local package for the
+  current embedded Node execution
+- `disable()` blocks future loads and unloads cached plugin modules; previously
+  returned JavaScript object references cannot be revoked
 
 Illustrative project metadata:
 
@@ -97,7 +114,7 @@ capabilities and tests.
 
 ## Prototype Package Format
 
-The Task 184 prototype loads unpacked project-local directories only:
+The S7-42 manager registers unpacked project-local directories only:
 
 ```text
 project/
@@ -121,7 +138,12 @@ Minimum package metadata:
   "autojs6": {
     "plugin": {
       "id": "org.example.demo",
-      "permissions": ["toast"]
+      "permissions": ["toast"],
+      "dependencies": ["org.example.shared"],
+      "exports": {
+        ".": "index.cjs",
+        "helper": "lib/helper.cjs"
+      }
     }
   }
 }
@@ -129,7 +151,9 @@ Minimum package metadata:
 
 `autojs6.plugin.id` must match the requested id. If the id field is omitted,
 `package.json name` must match. `autojs6.plugin.entry` may override `main`, but
-the target must remain a `.js` or `.cjs` file under the plugin directory.
+the target must remain a `.js` or `.cjs` file under the plugin directory. Named
+exports use the same path policy, and dependency ids are declarative metadata
+only.
 
 ## Future Package Format
 
@@ -232,7 +256,7 @@ Rules:
 - `shell.root`, `ui.overlay`, native code, Java interop, and network remain
   explicit high-risk declarations
 - missing declarations reject before code execution or provider dispatch
-- the Task 184 prototype treats `plugin.<id>` as an exact declaration; a generic
+- the S7-42 manager treats `plugin.<id>` as an exact declaration; a generic
   `plugin` permission does not grant access to every plugin id
 - legacy compatibility mode does not apply to `plugins.load()`; no enforced
   project/package capability manifest means the plugin load is denied
@@ -361,9 +385,9 @@ Rules:
 - plugin package dependencies are vendored or resolved inside the plugin archive
 - a future signed archive runtime must keep plugin code from reaching outside
   its scoped plugin unpack directory
-- the Task 184 prototype reserves only `require("plugins")`; it does not make
+- the S7-42 manager reserves only `require("plugins")`; it does not make
   plugin ids directly require-able as package names
-- the Task 184 prototype enforces plugin-directory resolution for plugin
+- the S7-42 manager enforces plugin-directory resolution for plugin
   `require()` calls, but it is not a separate process, context, or filesystem
   authority
 
@@ -437,8 +461,8 @@ Before any implementation, add tests for:
 
 ## Recommendation
 
-Keep the Task 184 implementation as a local JS-only prototype, not a full plugin
-system. The first shippable direction beyond this prototype should still be
+Keep the S7-42 implementation as a local JS-only manager, not a full plugin
+system. The first shippable direction beyond this manager should still be
 manifested pure JavaScript plugins with signed archives, explicit project
 opt-in, no native code, no Java interop expansion, and no packaged APK runtime
 downloads.

@@ -138,28 +138,41 @@ usage, and APK-builder preflight metadata. See [PROJECT_WIZARD.md](PROJECT_WIZAR
 `require("plugins")` is reserved by the Safe Node Profile and cannot be
 shadowed by `node_modules/plugins`.
 
-Prototype API:
+Manager API:
 
 ```js
 const plugins = require("plugins");
+plugins.install("org.example.demo", {
+  source: "./plugins/org.example.demo",
+  config: { mode: "safe" }
+});
 const info = plugins.manifest("org.example.demo");
-const entryPath = plugins.resolve("org.example.demo");
+const entryPath = plugins.resolve("org.example.demo", "helper");
 const demo = plugins.load("org.example.demo");
+plugins.disable("org.example.demo");
+plugins.enable("org.example.demo");
+plugins.unload("org.example.demo");
 ```
 
-The prototype loads only project-local directories under `./plugins/<id>`.
+The manager registers only project-local directories under `./plugins/<id>`.
 Each plugin must provide `package.json` metadata with `autojs6.plugin` and an
-`autojs6.plugin.permissions` string array. `plugins.load(id)` requires an
-enforced project/package capability manifest that declares the exact
-`plugin.<id>` capability and every capability requested by the plugin manifest
-before plugin code executes.
+`autojs6.plugin.permissions` string array. `autojs6.plugin.dependencies`
+declares plugin dependency ids for diagnostics only, and
+`autojs6.plugin.exports` maps named exported Node modules to plugin-local
+`.js` or `.cjs` files. `plugins.install`, `load`, `resolve`, `enable`,
+`configure`, and `unload` require an enforced project/package capability
+manifest that declares the exact `plugin.<id>` capability and every capability
+requested by the plugin manifest before plugin code executes or cached modules
+are exposed.
 
 Only `.js` and `.cjs` plugin entries are accepted. Plugin-relative `require()`
 uses the plugin directory as its resolver root, so plugin code cannot use
-relative package resolution to escape into sibling project files. This is a
-local JS-only prototype, not an installer, signed archive verifier, Android
-plugin adapter, packaged APK plugin runtime, native provider model, or isolated
-process/context.
+relative package resolution to escape into sibling project files.
+`install()` does not download, copy, or persist packages; it validates and
+registers an already-present sanitized local package for the current execution.
+`disable()` blocks future loads and unloads cached plugin modules. This is a
+local JS-only manager, not a signed archive verifier, Android plugin adapter,
+packaged APK plugin runtime, native provider model, or isolated process/context.
 
 ## Execution Queue
 

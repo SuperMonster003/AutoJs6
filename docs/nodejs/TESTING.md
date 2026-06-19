@@ -610,13 +610,13 @@ Current `ui` bridge live-provider focused instrumentation:
 
 This suite verifies the `ui` bridge registry, capability manifest mapping, fake-provider `showLayout`, `drainEvents`, `update`, and `close`, shadowing protection for `require("ui")`, opaque handle shape, fake-provider and Android-live `handle.on` callback delivery through drained JSON snapshots, timeout and permission propagation, JSON-only invalid descriptor rejection before dispatch, absence of raw View/Activity handle properties, live Android Activity show, Button/Input event delivery into Node, state snapshots, update, close, provider-destroy cleanup, unsupported descriptor denial, foreign-handle denial, and active UI session limit denial.
 
-Current JS-only plugin prototype focused instrumentation:
+Current JS-only plugin manager focused instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePluginSystemInstrumentationTest"
 ```
 
-This suite verifies reserved `require("plugins")` and `require.resolve("plugins")`, local `node_modules/plugins` shadowing denial, project-local `./plugins/<id>` package loading, `autojs6.plugin.permissions` metadata, exact `plugin.<id>` opt-in, plugin-requested permission denial before code execution, `.node` rejection with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`, plugin entry path escape denial, plugin-root relative resolution, and TypeScript declaration coverage.
+This suite verifies reserved `require("plugins")` and `require.resolve("plugins")`, local `node_modules/plugins` shadowing denial, project-local `./plugins/<id>` package loading, `plugins.install`, `enable`, `disable`, `isEnabled`, `configure`, `config`, `version`, `dependencies`, named `exports`, `resolve`, `load`, `unload`, and `list`, `autojs6.plugin.permissions` / `dependencies` / `exports` metadata, exact `plugin.<id>` opt-in, plugin-requested permission denial before code execution, disabled-load denial, module-cache clearing on unload, `.node` rejection with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED`, plugin entry path escape denial, plugin-root relative resolution, and TypeScript declaration coverage.
 
 Current Node developer REPL focused instrumentation:
 

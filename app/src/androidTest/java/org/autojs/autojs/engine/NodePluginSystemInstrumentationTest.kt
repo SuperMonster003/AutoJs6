@@ -247,6 +247,93 @@ class NodePluginSystemInstrumentationTest {
         }
     }
 
+    @Test
+    fun pluginManagerInstallEnableConfigureExportsAndUnload() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node JS-only plugin manager v1")
+        val workDir = freshWorkDir("node-plugin-manager")
+        try {
+            writePlugin(
+                workDir = workDir,
+                id = "org.example.manager",
+                permissions = listOf("toast"),
+                version = "1.2.3",
+                dependencies = listOf("org.example.dependency"),
+                exports = mapOf("helper" to "lib/helper.cjs"),
+                source = """
+                    globalThis.__autojs6ManagerPluginLoads = (globalThis.__autojs6ManagerPluginLoads || 0) + 1;
+                    const plugins = require("plugins");
+                    exports.count = globalThis.__autojs6ManagerPluginLoads;
+                    exports.mode = plugins.config("org.example.manager").mode;
+                """.trimIndent(),
+            )
+            File(workDir, "plugins/org.example.manager/lib").mkdirs()
+            File(workDir, "plugins/org.example.manager/lib/helper.cjs").writeText(
+                """exports.name = "helper-export";""",
+                StandardCharsets.UTF_8,
+            )
+            val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(
+                listOf("plugin.org.example.manager", "toast"),
+            )
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const plugins = require("plugins");
+                    const installed = plugins.install("org.example.manager", {
+                      source: "./plugins/org.example.manager",
+                      config: { mode: "configured" }
+                    });
+                    const helper = plugins.load("org.example.manager", "helper");
+                    const main = plugins.load("org.example.manager");
+                    const mainAgain = plugins.load("org.example.manager");
+                    const beforeUnloadSame = main === mainAgain;
+                    const unloaded = plugins.unload("org.example.manager");
+                    const reloaded = plugins.load("org.example.manager");
+                    const disabled = plugins.disable("org.example.manager");
+                    let disabledCode = "";
+                    try {
+                      plugins.load("org.example.manager");
+                    } catch (error) {
+                      disabledCode = error.code;
+                    }
+                    const enabled = plugins.enable("org.example.manager");
+                    const configured = plugins.configure("org.example.manager", { mode: "updated" });
+                    console.log("plugins.manager=" + [
+                      installed.version,
+                      plugins.version("org.example.manager"),
+                      plugins.dependencies("org.example.manager").join(","),
+                      plugins.exports("org.example.manager").helper,
+                      helper.name,
+                      main.count,
+                      main.mode,
+                      beforeUnloadSame,
+                      unloaded,
+                      reloaded.count,
+                      disabled.enabled,
+                      plugins.isEnabled("org.example.manager"),
+                      disabledCode,
+                      enabled.enabled,
+                      configured.mode,
+                      plugins.list().length
+                    ].join("|"));
+                """.trimIndent(),
+                sourceName = File(workDir, "main.js").absolutePath,
+                workingDirectory = workDir,
+                runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("Node JS-only plugin manager v1", result)
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "plugins.manager=1.2.3|1.2.3|org.example.dependency|lib/helper.cjs|helper-export|" +
+                            "1|configured|true|true|2|false|true|${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED}|true|updated|1",
+                ),
+            )
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
     private fun freshWorkDir(name: String): File =
         File(context.cacheDir, "$name-${System.nanoTime()}").apply {
             deleteRecursively()
@@ -258,22 +345,31 @@ class NodePluginSystemInstrumentationTest {
         id: String,
         permissions: List<String>,
         entry: String = "index.cjs",
+        version: String = "1.0.0",
+        dependencies: List<String> = emptyList(),
+        exports: Map<String, String> = emptyMap(),
         source: String,
     ) {
         val pluginDir = File(workDir, "plugins/$id").apply {
             check(mkdirs()) { "Failed to create plugin dir: $absolutePath" }
         }
         val permissionsJson = permissions.joinToString(prefix = "[", postfix = "]") { "\"$it\"" }
+        val dependenciesJson = dependencies.joinToString(prefix = "[", postfix = "]") { "\"$it\"" }
+        val exportsJson = exports.entries.joinToString(prefix = "{", postfix = "}") { (name, target) ->
+            "\"$name\": \"$target\""
+        }
         File(pluginDir, "package.json").writeText(
             """
             {
               "name": "$id",
-              "version": "1.0.0",
+              "version": "$version",
               "main": "$entry",
               "autojs6": {
                 "plugin": {
                   "id": "$id",
-                  "permissions": $permissionsJson
+                  "permissions": $permissionsJson,
+                  "dependencies": $dependenciesJson,
+                  "exports": $exportsJson
                 }
               }
             }
