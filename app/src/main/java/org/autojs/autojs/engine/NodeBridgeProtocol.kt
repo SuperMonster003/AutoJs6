@@ -10,6 +10,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
+import android.database.sqlite.SQLiteStatement
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
@@ -63,6 +67,9 @@ import java.security.MessageDigest
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -550,6 +557,8 @@ object NodeBridgeModules {
     const val OCR = "ocr"
     const val STORAGE = "storage"
     const val STORAGES = "storages"
+    const val DATABASE = "database"
+    const val SQLITE = "sqlite"
     const val NOTIFICATIONS = "notifications"
     const val SENSORS = "sensors"
     const val UI = "ui"
@@ -600,6 +609,8 @@ object NodeBridgeModules {
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val storageModules = setOf(STORAGE, STORAGES)
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
+    val databaseModules = setOf(DATABASE, SQLITE)
+    val databaseMethods = setOf("open", "exec", "run", "get", "all", "transaction", "close")
     val notificationsMethods = setOf("notify", "cancel", "cancelAll")
     val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
     val uiMethods = setOf("showLayout", "update", "close", "drainEvents")
@@ -623,6 +634,8 @@ object NodeBridgeModules {
         OCR to ocrMethods,
         STORAGE to storageMethods,
         STORAGES to storageMethods,
+        DATABASE to databaseMethods,
+        SQLITE to databaseMethods,
         NOTIFICATIONS to notificationsMethods,
         SENSORS to sensorsMethods,
         UI to uiMethods,
@@ -693,6 +706,12 @@ class AndroidNodeBridgeCapabilityProvider(
     private val bridgePermissionManifest by lazy {
         NodeBridgePermissionManifest.fromWorkingDirectory(engineInfo.cwd)
     }
+    private val databaseHandles = ConcurrentHashMap<String, ControlledDatabaseHandle>()
+    private val databaseHandleCounter = AtomicInteger(1)
+    private val databaseDestroyed = AtomicBoolean(false)
+    private val databaseExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "AutoJs6NodeDatabase").apply { isDaemon = true }
+    }
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
     private val javaHandles = ConcurrentHashMap<String, Any>()
     private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
@@ -725,6 +744,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, callback)
             request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, callback)
             request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, callback)
+            request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, callback)
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, callback)
             request.module == NodeBridgeModules.SENSORS && request.method in NodeBridgeModules.sensorsMethods -> dispatchSensors(request, callback)
             request.module == NodeBridgeModules.UI && request.method in NodeBridgeModules.uiMethods -> dispatchUi(request, callback)
@@ -746,6 +766,7 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(ocrDiagnostics.nativeValues())
         put("embedded_script.image_active_handle_count", imageHandles.size.toString())
         put("embedded_script.ocr_active_operation_count", ocrOperations.size.toString())
+        put("embedded_script.database_active_handle_count", databaseHandles.size.toString())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
         putAll(NodeLifecycleCheckpointStore.nativeDiagnostics(appContext, engineInfo))
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
@@ -766,6 +787,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "websocket" to websocketSessions.size,
                 "ocr" to ocrOperations.size,
                 "image" to imageHandles.size,
+                "database" to databaseHandles.size,
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
                 "ui" to uiSessionIds.size,
@@ -782,11 +804,14 @@ class AndroidNodeBridgeCapabilityProvider(
         ocrDiagnostics.recordServiceDestroyCancellation(ocrOperations.size)
         ocrOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
         ocrOperations.clear()
+        databaseDestroyed.set(true)
+        databaseExecutor.shutdownNow()
         resourceRegistry.closeAll(destroyReason)
         networkCalls.values.forEach { call -> runCatching { call.cancel() } }
         networkCalls.clear()
         websocketSessions.clear()
         imageHandles.clear()
+        databaseHandles.clear()
         runCatching {
             if (ocrRecognizerDelegate.isInitialized()) {
                 ocrRecognizer.close()
@@ -1805,6 +1830,229 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun storagePreferencesName(storeName: String): String {
         val packageName = engineInfo.packageName.ifBlank { appContext.packageName }
         return NodeStorageBridgePolicy.preferencesName(packageName, engineInfo.cwd, storeName)
+    }
+
+    private fun dispatchDatabase(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (databaseDestroyed.get()) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.processDead("AutoJs6 database bridge provider is destroyed."),
+                ),
+            )
+            return
+        }
+        try {
+            databaseExecutor.execute {
+                val response = runCatching {
+                    if (databaseDestroyed.get()) {
+                        throw DatabaseBridgeException(
+                            NodeBridgeError.processDead("AutoJs6 database bridge provider is destroyed."),
+                        )
+                    }
+                    val args = JSONArray(request.argsJson.ifBlank { "[]" })
+                    when (request.method) {
+                        "open" -> databaseOpen(request, args)
+                        "exec" -> databaseExec(request, args)
+                        "run" -> databaseRun(request, args)
+                        "get" -> databaseGet(request, args)
+                        "all" -> databaseAll(request, args)
+                        "transaction" -> databaseTransaction(request, args)
+                        "close" -> databaseClose(request, args)
+                        else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+                    }
+                }.getOrElse { error ->
+                    NodeBridgeResponse.failure(request.id, databaseError(request, error))
+                }
+                callback(response)
+            }
+        } catch (error: RejectedExecutionException) {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.processDead("AutoJs6 database bridge executor is not available."),
+                ),
+            )
+        }
+    }
+
+    private fun databaseOpen(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        if (databaseHandles.size >= NodeDatabaseBridgePolicy.MAX_OPEN_HANDLES) {
+            bridgeResourceLimitRejections.incrementAndGet()
+            throw DatabaseBridgeException(
+                NodeBridgeError.resourceLimit(
+                    message = "AutoJs6 database bridge reached the open handle limit.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val name = NodeDatabaseBridgePolicy.openName(request, args.opt(0))
+        val databaseFile = NodeDatabaseBridgePolicy.databaseFile(appContext, engineInfo, name)
+        val parent = databaseFile.parentFile
+        if (parent == null || (!parent.exists() && !parent.mkdirs())) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 database bridge could not create the scoped database directory.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val database = SQLiteDatabase.openOrCreateDatabase(databaseFile, null)
+        database.setForeignKeyConstraintsEnabled(true)
+        if (databaseDestroyed.get()) {
+            runCatching { database.close() }
+            throw DatabaseBridgeException(
+                NodeBridgeError.processDead("AutoJs6 database bridge provider is destroyed."),
+            )
+        }
+        val handleId = "database-${databaseHandleCounter.getAndIncrement()}-${UUID.randomUUID()}"
+        val resource = resourceRegistry.register(
+            type = NodeBridgeResourceType.DATABASE_HANDLE,
+            id = handleId,
+            metadata = mapOf(
+                "name" to name,
+                "path" to databaseFile.absolutePath,
+            ),
+        ) {
+            databaseHandles.remove(handleId)
+            runCatching { database.close() }
+        }
+        databaseHandles[handleId] = ControlledDatabaseHandle(
+            id = handleId,
+            name = name,
+            file = databaseFile,
+            database = database,
+            resource = resource,
+        )
+        val result = JSONObject()
+            .put("id", handleId)
+            .put("name", name)
+        return NodeBridgeResponse.success(request.id, result.toString())
+    }
+
+    private fun databaseExec(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val sql = NodeDatabaseBridgePolicy.sql(request, args.optString(1, ""))
+        val params = NodeDatabaseBridgePolicy.params(request, args.opt(2))
+        handle.exec(request, sql, params)
+        return NodeBridgeResponse.success(request.id, "null")
+    }
+
+    private fun databaseRun(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val sql = NodeDatabaseBridgePolicy.sql(request, args.optString(1, ""))
+        val params = NodeDatabaseBridgePolicy.params(request, args.opt(2))
+        return NodeBridgeResponse.success(request.id, handle.run(request, sql, params).toString())
+    }
+
+    private fun databaseGet(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val sql = NodeDatabaseBridgePolicy.sql(request, args.optString(1, ""))
+        val params = NodeDatabaseBridgePolicy.params(request, args.opt(2))
+        val row = handle.query(request, sql, params)
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(row))
+    }
+
+    private fun databaseAll(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val sql = NodeDatabaseBridgePolicy.sql(request, args.optString(1, ""))
+        val params = NodeDatabaseBridgePolicy.params(request, args.opt(2))
+        return NodeBridgeResponse.success(request.id, handle.queryAll(request, sql, params).toString())
+    }
+
+    private fun databaseTransaction(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handle = databaseHandle(request, args)
+        val operations = args.optJSONArray(1)
+            ?: throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database.transaction requires an array of operations.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        if (operations.length() > NodeDatabaseBridgePolicy.MAX_TRANSACTION_OPERATIONS) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.resourceLimit(
+                    message = "AutoJs6 database.transaction exceeded ${NodeDatabaseBridgePolicy.MAX_TRANSACTION_OPERATIONS} operations.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val results = JSONArray()
+        handle.database.beginTransaction()
+        try {
+            for (index in 0 until operations.length()) {
+                val operation = operations.optJSONObject(index)
+                    ?: throw DatabaseBridgeException(
+                        NodeBridgeError.invalidRequest(
+                            message = "AutoJs6 database.transaction operation must be an object.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                val type = operation.optString("type", operation.optString("method", "")).trim().lowercase(Locale.US)
+                val sql = NodeDatabaseBridgePolicy.sql(request, operation.optString("sql", ""))
+                val params = NodeDatabaseBridgePolicy.params(request, operation.opt("params"))
+                val result = when (type) {
+                    "exec" -> {
+                        handle.exec(request, sql, params)
+                        JSONObject.NULL
+                    }
+                    "run" -> handle.run(request, sql, params)
+                    "get" -> handle.query(request, sql, params) ?: JSONObject.NULL
+                    "all" -> handle.queryAll(request, sql, params)
+                    else -> throw DatabaseBridgeException(
+                        NodeBridgeError.invalidRequest(
+                            message = "AutoJs6 database.transaction supports only exec, run, get, and all operations.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+                results.put(result)
+            }
+            handle.database.setTransactionSuccessful()
+        } finally {
+            handle.database.endTransaction()
+        }
+        return NodeBridgeResponse.success(request.id, results.toString())
+    }
+
+    private fun databaseClose(request: NodeBridgeRequest, args: JSONArray): NodeBridgeResponse {
+        val handleId = NodeDatabaseBridgePolicy.handleId(request, args.opt(0))
+        val closed = resourceRegistry.close(handleId, "database.close")
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(closed))
+    }
+
+    private fun databaseHandle(request: NodeBridgeRequest, args: JSONArray): ControlledDatabaseHandle {
+        val handleId = NodeDatabaseBridgePolicy.handleId(request, args.opt(0))
+        return databaseHandles[handleId]
+            ?: throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database handle is not open.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+    }
+
+    private fun databaseError(request: NodeBridgeRequest, error: Throwable): NodeBridgeError {
+        return when (error) {
+            is DatabaseBridgeException -> error.bridgeError
+            is SQLiteException -> NodeBridgeError.invalidRequest(
+                message = "AutoJs6 database request failed: ${error.message ?: error.javaClass.name}",
+                module = request.module,
+                method = request.method,
+            )
+            else -> NodeBridgeError.invalidRequest(
+                message = error.message ?: "AutoJs6 database request failed.",
+                module = request.module,
+                method = request.method,
+            )
+        }
     }
 
     private fun dispatchNotifications(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -4176,6 +4424,364 @@ private object NodeStorageBridgePolicy {
 }
 
 private class StorageBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
+
+private data class ControlledDatabaseHandle(
+    val id: String,
+    val name: String,
+    val file: File,
+    val database: SQLiteDatabase,
+    val resource: NodeBridgeResourceHandle,
+) {
+    fun exec(request: NodeBridgeRequest, sql: String, params: List<Any?>) {
+        ensureOpen(request)
+        val statement = database.compileStatement(sql)
+        try {
+            NodeDatabaseBridgePolicy.bind(statement, params)
+            statement.execute()
+        } finally {
+            statement.close()
+        }
+    }
+
+    fun run(request: NodeBridgeRequest, sql: String, params: List<Any?>): JSONObject {
+        ensureOpen(request)
+        val command = NodeDatabaseBridgePolicy.command(sql)
+        val statement = database.compileStatement(sql)
+        try {
+            NodeDatabaseBridgePolicy.bind(statement, params)
+            return when (command) {
+                "INSERT", "REPLACE" -> {
+                    val insertId = statement.executeInsert()
+                    JSONObject()
+                        .put("rowsAffected", if (insertId >= 0L) 1 else 0)
+                        .put("insertId", if (insertId >= 0L) insertId else JSONObject.NULL)
+                }
+                "UPDATE", "DELETE" -> JSONObject()
+                    .put("rowsAffected", statement.executeUpdateDelete())
+                    .put("insertId", JSONObject.NULL)
+                else -> {
+                    statement.execute()
+                    JSONObject()
+                        .put("rowsAffected", JSONObject.NULL)
+                        .put("insertId", JSONObject.NULL)
+                }
+            }
+        } finally {
+            statement.close()
+        }
+    }
+
+    fun query(
+        request: NodeBridgeRequest,
+        sql: String,
+        params: List<Any?>,
+    ): JSONObject? {
+        ensureOpen(request)
+        val cursor = database.rawQuery(sql, NodeDatabaseBridgePolicy.queryArgs(params))
+        try {
+            if (!cursor.moveToFirst()) {
+                return null
+            }
+            val row = NodeDatabaseBridgePolicy.cursorRow(cursor)
+            val bytes = row.toString().toByteArray(Charsets.UTF_8).size
+            if (bytes > NodeDatabaseBridgePolicy.MAX_RESULT_BYTES) {
+                throw DatabaseBridgeException(
+                    NodeBridgeError.resourceLimit(
+                        message = "AutoJs6 database result exceeded ${NodeDatabaseBridgePolicy.MAX_RESULT_BYTES} bytes.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            return row
+        } finally {
+            cursor.close()
+        }
+    }
+
+    fun queryAll(request: NodeBridgeRequest, sql: String, params: List<Any?>): JSONArray {
+        val rows = queryRows(request, sql, params, maxRows = NodeDatabaseBridgePolicy.MAX_RESULT_ROWS)
+        return JSONArray().apply { rows.forEach(::put) }
+    }
+
+    private fun queryRows(
+        request: NodeBridgeRequest,
+        sql: String,
+        params: List<Any?>,
+        maxRows: Int,
+    ): List<JSONObject> {
+        ensureOpen(request)
+        val rows = mutableListOf<JSONObject>()
+        val cursor = database.rawQuery(sql, NodeDatabaseBridgePolicy.queryArgs(params))
+        try {
+            var projectedBytes = 2
+            while (cursor.moveToNext()) {
+                if (rows.size >= maxRows) {
+                    throw DatabaseBridgeException(
+                        NodeBridgeError.resourceLimit(
+                            message = "AutoJs6 database result exceeded $maxRows rows.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+                val row = NodeDatabaseBridgePolicy.cursorRow(cursor)
+                projectedBytes += row.toString().toByteArray(Charsets.UTF_8).size + 1
+                if (projectedBytes > NodeDatabaseBridgePolicy.MAX_RESULT_BYTES) {
+                    throw DatabaseBridgeException(
+                        NodeBridgeError.resourceLimit(
+                            message = "AutoJs6 database result exceeded ${NodeDatabaseBridgePolicy.MAX_RESULT_BYTES} bytes.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    )
+                }
+                rows += row
+            }
+        } finally {
+            cursor.close()
+        }
+        return rows
+    }
+
+    private fun ensureOpen(request: NodeBridgeRequest) {
+        if (!database.isOpen) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database handle is closed.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+    }
+}
+
+private object NodeDatabaseBridgePolicy {
+    const val MAX_OPEN_HANDLES = 4
+    const val MAX_NAME_LENGTH = 64
+    const val MAX_SQL_BYTES = 16 * 1024
+    const val MAX_PARAMS = 128
+    const val MAX_TRANSACTION_OPERATIONS = 64
+    const val MAX_RESULT_ROWS = 200
+    const val MAX_RESULT_BYTES = 256 * 1024
+
+    private const val DATABASE_DIR = "node-databases"
+    private val namePattern = Regex("^[A-Za-z0-9_.-]+$")
+    private val forbiddenSqlPattern = Regex("(?i)(^|[^A-Za-z0-9_])(load_extension|attach|detach)($|[^A-Za-z0-9_])")
+
+    fun openName(request: NodeBridgeRequest, value: Any?): String {
+        val rawName = when (value) {
+            is String -> value
+            is JSONObject -> value.optString("name", value.optString("path", ""))
+            else -> ""
+        }.trim()
+        if (rawName.isBlank() || rawName.length > MAX_NAME_LENGTH || '\u0000' in rawName) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database.open requires a non-empty database name up to $MAX_NAME_LENGTH characters.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        val normalized = rawName.replace('\\', '/')
+        if (
+            normalized.startsWith("/") ||
+            normalized.contains("/") ||
+            normalized.contains(":") ||
+            normalized == "." ||
+            normalized == ".." ||
+            normalized.contains("..") ||
+            !namePattern.matches(normalized)
+        ) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 database.open only accepts scoped database names, not paths.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return normalized
+    }
+
+    fun databaseFile(context: Context, engineInfo: NodeBridgeEngineInfo, name: String): File {
+        val packagePart = sanitize(engineInfo.packageName.ifBlank { context.packageName }).ifBlank { "unknown" }
+        val cwdPart = sha256(engineInfo.cwd.ifBlank { "default" }).take(16)
+        val base = File(context.filesDir, "$DATABASE_DIR/$packagePart/$cwdPart").canonicalFile
+        val fileName = sanitize(name).ifBlank { "database" }.let { sanitized ->
+            if (sanitized.endsWith(".db", ignoreCase = true)) sanitized else "$sanitized.db"
+        }
+        val candidate = File(base, fileName).canonicalFile
+        val basePath = base.path.trimEnd(File.separatorChar)
+        val candidatePath = candidate.path
+        if (candidatePath != basePath && !candidatePath.startsWith(basePath + File.separator)) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 database path escaped the scoped database directory.",
+                    module = NodeBridgeModules.DATABASE,
+                    method = "open",
+                ),
+            )
+        }
+        return candidate
+    }
+
+    fun handleId(request: NodeBridgeRequest, value: Any?): String {
+        val text = (value as? String).orEmpty().trim()
+        if (text.isBlank() || '\u0000' in text || text.length > 128) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database handle id is invalid.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return text
+    }
+
+    fun sql(request: NodeBridgeRequest, value: String): String {
+        val text = value.trim()
+        val bytes = text.toByteArray(Charsets.UTF_8).size
+        if (text.isBlank() || '\u0000' in text || bytes > MAX_SQL_BYTES) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database SQL must be non-empty and at most $MAX_SQL_BYTES bytes.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        if (forbiddenSqlPattern.containsMatchIn(text)) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.permissionDenied(
+                    message = "AutoJs6 database SQL denied by policy.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return text
+    }
+
+    fun params(request: NodeBridgeRequest, value: Any?): List<Any?> {
+        if (value == null || value == JSONObject.NULL) {
+            return emptyList()
+        }
+        val array = value as? JSONArray
+            ?: throw DatabaseBridgeException(
+                NodeBridgeError.invalidRequest(
+                    message = "AutoJs6 database SQL parameters must be an array.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        if (array.length() > MAX_PARAMS) {
+            throw DatabaseBridgeException(
+                NodeBridgeError.resourceLimit(
+                    message = "AutoJs6 database SQL parameters exceeded $MAX_PARAMS entries.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return (0 until array.length()).map { index ->
+            when (val item = array.opt(index)) {
+                null, JSONObject.NULL -> null
+                is String -> item
+                is Boolean -> item
+                is Int -> item.toLong()
+                is Long -> item
+                is Number -> {
+                    val number = item.toDouble()
+                    if (!number.isFinite()) {
+                        throw DatabaseBridgeException(
+                            NodeBridgeError.invalidRequest(
+                                message = "AutoJs6 database SQL parameter must be finite.",
+                                module = request.module,
+                                method = request.method,
+                            ),
+                        )
+                    }
+                    number
+                }
+                else -> throw DatabaseBridgeException(
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 database SQL parameters must be JSON primitive values.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+        }
+    }
+
+    fun bind(statement: SQLiteStatement, params: List<Any?>) {
+        params.forEachIndexed { index, value ->
+            val position = index + 1
+            when (value) {
+                null -> statement.bindNull(position)
+                is Boolean -> statement.bindLong(position, if (value) 1L else 0L)
+                is Long -> statement.bindLong(position, value)
+                is Int -> statement.bindLong(position, value.toLong())
+                is Number -> statement.bindDouble(position, value.toDouble())
+                else -> statement.bindString(position, value.toString())
+            }
+        }
+    }
+
+    fun queryArgs(params: List<Any?>): Array<String> {
+        return params.map { value ->
+            when (value) {
+                null -> ""
+                is Boolean -> if (value) "1" else "0"
+                else -> value.toString()
+            }
+        }.toTypedArray()
+    }
+
+    fun cursorRow(cursor: Cursor): JSONObject {
+        val row = JSONObject()
+        for (index in 0 until cursor.columnCount) {
+            val name = cursor.getColumnName(index)
+            val value: Any = when (cursor.getType(index)) {
+                Cursor.FIELD_TYPE_NULL -> JSONObject.NULL
+                Cursor.FIELD_TYPE_INTEGER -> cursor.getLong(index)
+                Cursor.FIELD_TYPE_FLOAT -> cursor.getDouble(index)
+                Cursor.FIELD_TYPE_BLOB -> JSONObject()
+                    .put("base64", Base64.encodeToString(cursor.getBlob(index), Base64.NO_WRAP))
+                else -> cursor.getString(index) ?: JSONObject.NULL
+            }
+            row.put(name, value)
+        }
+        return row
+    }
+
+    fun command(sql: String): String {
+        return sql.trimStart()
+            .takeWhile { !it.isWhitespace() && it != '(' }
+            .uppercase(Locale.US)
+    }
+
+    private fun sanitize(value: String): String {
+        return value.map { char ->
+            when {
+                char.isLetterOrDigit() -> char.lowercaseChar()
+                char == '.' || char == '_' || char == '-' -> char
+                else -> '_'
+            }
+        }.joinToString("")
+    }
+
+    private fun sha256(value: String): String {
+        val bytes = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
+        return bytes.joinToString("") { byte -> String.format(Locale.US, "%02x", byte.toInt() and 0xff) }
+    }
+}
+
+private class DatabaseBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
 
 private data class ControlledImageHandle(
     val id: String,

@@ -131,6 +131,17 @@ class NodeBridgePermissionManifestInstrumentationTest {
                 NodeBridgePermissionManifest.requiredCapabilitiesFor(module, "put"),
             )
         }
+        listOf("database", "sqlite").forEach { module ->
+            assertEquals(
+                listOf(NodeBridgePermissionManifest.DATABASE),
+                NodeBridgePermissionManifest.requiredCapabilitiesFor(module, "open"),
+            )
+            assertEquals(
+                listOf(NodeBridgePermissionManifest.DATABASE),
+                NodeBridgePermissionManifest.requiredCapabilitiesFor(module, "transaction"),
+            )
+        }
+        assertEquals(NodeBridgePermissionManifest.DATABASE, NodeBridgePermissionManifest.normalizeCapability("sqlite"))
         assertEquals(
             listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "notify"),

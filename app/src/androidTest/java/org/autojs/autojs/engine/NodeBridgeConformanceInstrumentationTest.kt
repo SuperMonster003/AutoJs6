@@ -156,6 +156,14 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "keys") result = ["alpha"];
                     else if (method === "contains") result = true;
                     else result = null;
+                  } else if (moduleName === "database" || moduleName === "sqlite") {
+                    if (method === "open") result = { id: moduleName + "-handle", name: request.args[0].name };
+                    else if (method === "run") result = { rowsAffected: 1, insertId: 7 };
+                    else if (method === "get") result = { name: "alpha", value: 1 };
+                    else if (method === "all") result = [{ name: "alpha", value: 1 }];
+                    else if (method === "transaction") result = [{ rowsAffected: 1, insertId: 8 }];
+                    else if (method === "close") result = true;
+                    else result = null;
                   } else if (moduleName === "notifications") {
                     result = method === "notify" ? (request.args[0].id || 9001) : null;
                   } else if (moduleName === "sensors") {
@@ -214,6 +222,8 @@ class NodeBridgeConformanceInstrumentationTest {
               const ocr = require("ocr");
               const storage = require("storage");
               const storages = require("storages");
+              const database = require("database");
+              const sqlite = require("sqlite");
               const notifications = require("notifications");
               const sensors = require("sensors");
               const ui = require("ui");
@@ -234,6 +244,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["ocr", ocr],
                 ["storage", storage],
                 ["storages", storages],
+                ["database", database],
+                ["sqlite", sqlite],
                 ["notifications", notifications],
                 ["sensors", sensors],
                 ["ui", ui],
@@ -254,6 +266,8 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("ocr", ocr, ["recognize", "recognizeText", "detectTextBounds"]);
               expectExports("storage", storage, ["create", "open"]);
               expectExports("storages", storages, ["create", "open"]);
+              expectExports("database", database, ["open"]);
+              expectExports("sqlite", sqlite, ["open"]);
               expectExports("notifications", notifications, ["notify", "cancel", "cancelAll"]);
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
               expectExports("ui", ui, ["showLayout"]);
@@ -343,6 +357,18 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("storage.contains", store.contains("alpha", { timeoutMs: 1060 })), true);
               await expectPromise("storage.remove", store.remove("alpha", { timeoutMs: 1061 }));
               await expectPromise("storage.clear", storages.open("settings").clear({ timeoutMs: 1062 }));
+              const db = await expectPromise("database.open", database.open("conformance", { timeoutMs: 1062 }));
+              expectFrozen("database.handle", db);
+              expectExports("database.handle", db, ["exec", "run", "get", "all", "transaction", "close"]);
+              await expectPromise("database.exec", db.exec("CREATE TABLE items(name TEXT, value INTEGER)", [], { timeoutMs: 1062 }));
+              assert.strictEqual((await expectPromise("database.run", db.run("INSERT INTO items(name,value) VALUES(?,?)", ["alpha", 1], { timeoutMs: 1062 }))).rowsAffected, 1);
+              assert.strictEqual((await expectPromise("database.get", db.get("SELECT name,value FROM items WHERE name=?", ["alpha"], { timeoutMs: 1062 }))).name, "alpha");
+              assert.strictEqual((await expectPromise("database.all", db.all("SELECT name,value FROM items", [], { timeoutMs: 1062 })))[0].value, 1);
+              assert.strictEqual((await expectPromise("database.transaction", db.transaction([{ type: "run", sql: "INSERT INTO items(name,value) VALUES(?,?)", params: ["beta", 2] }], { timeoutMs: 1062 })))[0].rowsAffected, 1);
+              assert.strictEqual(await expectPromise("database.close", db.close({ timeoutMs: 1062 })), true);
+              const sqliteDb = await expectPromise("sqlite.open", sqlite.open({ name: "alias" }, { timeoutMs: 1062 }));
+              assert.strictEqual(sqliteDb.name, "alias");
+              assert.strictEqual(await expectPromise("sqlite.close", sqliteDb.close({ timeoutMs: 1062 })), true);
               const notificationId = await expectPromise("notifications.notify", notifications.notify({ id: 9001, title: "Node", text: "running", channel: "conformance", ongoing: true, priority: "low" }, { timeoutMs: 1063 }));
               assert.strictEqual(notificationId, 9001);
               await expectPromise("notifications.cancel", notifications.cancel(notificationId, { timeoutMs: 1064 }));
@@ -408,6 +434,9 @@ class NodeBridgeConformanceInstrumentationTest {
                 "ocr.detectTextBounds",
                 "storage.put",
                 "storages.clear",
+                "database.open",
+                "database.transaction",
+                "sqlite.open",
                 "notifications.notify",
                 "notifications.cancelAll",
                 "sensors.once",
@@ -602,6 +631,8 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
             NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
+            NodeBridgeModules.DATABASE to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
+            NodeBridgeModules.SQLITE to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
             NodeBridgeModules.NOTIFICATIONS to setOf("notify", "cancel", "cancelAll"),
             NodeBridgeModules.SENSORS to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             NodeBridgeModules.UI to setOf("showLayout", "update", "close", "drainEvents"),

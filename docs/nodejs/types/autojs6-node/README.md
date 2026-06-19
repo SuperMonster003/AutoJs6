@@ -16,6 +16,8 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `ocr`
 - `storage`
 - `storages`
+- `database`
+- `sqlite`
 - `notifications`
 - `sensors`
 - `ui`

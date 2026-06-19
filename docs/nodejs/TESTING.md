@@ -532,6 +532,14 @@ $env:ANDROID_SERIAL="QV710AF65F"
 
 This suite verifies the `storage`/`storages` bridge registry, fake-provider request/response behavior, shadowing protection, `create`/`open` frozen store handles, `get`/`put`/`remove`/`clear`/`keys`/`contains`, JSON-only values, manifest capability denial before dispatch, Android provider persistence, working-directory namespace isolation, package-identity isolation for packaged apps, and per-value/per-store quota denial.
 
+Current `database`/`sqlite` bridge v1.1 partial focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeDatabaseBridgeInstrumentationTest"
+```
+
+This suite verifies the `database`/`sqlite` bridge registry, fake-provider request/response behavior, shadowing protection, `open` frozen handles, `exec`/`run`/`get`/`all`/`transaction`/`close`, manifest capability denial before dispatch, `node:sqlite` denial, Android SQLite transaction and persistence behavior, scoped database-name denial for path escapes, `ATTACH`/`load_extension` denial, and owned database-handle resource cleanup through the bridge resource registry.
+
 Current `notifications` bridge v1.1 partial focused instrumentation:
 
 ```powershell

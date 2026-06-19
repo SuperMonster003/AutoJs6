@@ -997,6 +997,7 @@ Declared capability names:
 - `image`
 - `ocr`
 - `storage`
+- `database` (`sqlite` is accepted as an alias)
 - `notifications`
 - `sensors`
 - `ui`
@@ -1154,6 +1155,21 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - Android provider data is scoped by package identity, working directory, and storage name in app-private SharedPreferences
   - Android writes are synchronous and bounded by a 64 KiB per-value quota and 256 KiB per-store quota
   - JavaScript receives frozen store handles only; no raw `SharedPreferences`, database, file, or Android object crosses into Node
+- `database` / `sqlite`
+  - `open(name | { name }, options?): Promise<DatabaseHandle>`
+  - `DatabaseHandle.exec(sql, params?, options?): Promise<void>`
+  - `DatabaseHandle.run(sql, params?, options?): Promise<{ rowsAffected, insertId }>`
+  - `DatabaseHandle.get(sql, params?, options?): Promise<Row | null>`
+  - `DatabaseHandle.all(sql, params?, options?): Promise<readonly Row[]>`
+  - `DatabaseHandle.transaction(operations, options?): Promise<readonly TransactionResult[]>`
+  - `DatabaseHandle.close(options?): Promise<boolean>`
+  - requests require the `database` capability; `sqlite` normalizes to the same capability
+  - this is an AutoJs6 controlled bridge module, not Node's `node:sqlite`; `require("node:sqlite")` remains denied
+  - database files live under app-private storage and are scoped by package identity, working directory, and database name
+  - database names are single scoped names, not paths; absolute paths, separators, `..`, and NUL bytes are rejected before dispatch
+  - SQL is bounded and rejects `load_extension`, `ATTACH`, and `DETACH`; native extension loading and cross-database path attachment remain unavailable
+  - parameters must be JSON primitive arrays and are bound through prepared statements; query results are bounded JSON row snapshots
+  - JavaScript receives frozen opaque handles only; no raw `SQLiteDatabase`, `Cursor`, file path authority, or Android object crosses into Node
 - `notifications`
   - `notify(options, callOptions?): Promise<number>`
   - `cancel(id, options?): Promise<void>`
@@ -1336,7 +1352,7 @@ Live bridge diagnostics are recorded in result `nativeValues`:
 - `embedded_script.bridge_resource_limit_rejection_count`
 - `embedded_script.bridge_rate_limited_count`
 
-The current Android provider registers live resources for controlled fetch calls, controlled WebSocket sessions, shell executions, WorkManager-backed `work_manager` task registrations, and experimental Java object handles. The registry also reserves resource types for future image handles, screen capturers, dialogs, UI sessions, and workers so those providers can share the same destroy path when they become live Android capabilities.
+The current Android provider registers live resources for controlled fetch calls, controlled WebSocket sessions, database handles, shell executions, WorkManager-backed `work_manager` task registrations, and experimental Java object handles. The registry also reserves resource types for future image handles, screen capturers, dialogs, UI sessions, and workers so those providers can share the same destroy path when they become live Android capabilities.
 
 The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path.
 

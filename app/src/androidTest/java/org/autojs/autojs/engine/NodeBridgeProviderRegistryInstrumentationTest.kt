@@ -14,7 +14,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(12, definitions.size)
+        assertEquals(13, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -29,6 +29,11 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             id = "ocr",
             modules = listOf(NodeBridgeModules.OCR),
             capabilities = listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
+        )
+        assertProvider(
+            id = "database",
+            modules = listOf(NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE),
+            capabilities = listOf(NodeBridgePermissionManifest.DATABASE),
         )
         assertProvider(
             id = "work_manager",
@@ -62,6 +67,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))
         assertTrue(healthById.getValue("ui").details.getValue("liveMethods").contains("showLayout"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("storage").status)
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("database").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("work_manager").status)
         assertEquals(NodeWorkManagerBridgeScheduler.SCHEDULER_NAME, healthById.getValue("work_manager").details.getValue("scheduler"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)

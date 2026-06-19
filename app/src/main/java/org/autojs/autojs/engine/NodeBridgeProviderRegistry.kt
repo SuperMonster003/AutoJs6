@@ -70,6 +70,7 @@ object NodeBridgeProviderRegistry {
     private const val WEBSOCKET_PROVIDER = "websocket"
     private const val OCR_PROVIDER = "ocr"
     private const val STORAGE_PROVIDER = "storage"
+    private const val DATABASE_PROVIDER = "database"
     private const val NOTIFICATIONS_PROVIDER = "notifications"
     private const val SENSORS_PROVIDER = "sensors"
     private const val ACCESSIBILITY_PROVIDER = "accessibility"
@@ -100,6 +101,12 @@ object NodeBridgeProviderRegistry {
             id = STORAGE_PROVIDER,
             modules = listOf(NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES),
             capabilities = listOf(NodeBridgePermissionManifest.STORAGE),
+        ),
+        provider(
+            id = DATABASE_PROVIDER,
+            displayName = "database/sqlite",
+            modules = listOf(NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE),
+            capabilities = listOf(NodeBridgePermissionManifest.DATABASE),
         ),
         provider(
             id = NOTIFICATIONS_PROVIDER,
@@ -208,6 +215,7 @@ object NodeBridgeProviderRegistry {
         }
         OCR_PROVIDER -> if (mlKitOcrAvailable()) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
         SENSORS_PROVIDER -> sensorsStatus(context)
         ACCESSIBILITY_PROVIDER -> accessibilityStatus()

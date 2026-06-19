@@ -210,6 +210,10 @@ zero active OCR/image resources after cleanup.
 persistence, working-directory and package-identity isolation, storage quota
 denial, notification post/cancel or runtime-permission denial, stable channel
 creation, ongoing notification ownership metadata, and owned cleanup.
+`NodeDatabaseBridgeInstrumentationTest` is the S7-35 focused database bridge
+gate for controlled `database`/`sqlite` SQLite open/exec/run/get/all/transaction
+behavior, scoped path denial, `ATTACH`/`load_extension` denial, persistence,
+manifest denial, and resource-registry cleanup.
 `verifyNodeLiveSensorsGate` validates Android-backed sensor listing, live
 one-shot events, live subscribe/drain/unsubscribe behavior, sampling interval
 clamping, maximum subscription denial, missing-provider unavailable errors, and

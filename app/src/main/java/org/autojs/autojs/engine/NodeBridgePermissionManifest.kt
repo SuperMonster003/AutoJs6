@@ -23,6 +23,7 @@ object NodeBridgePermissionManifest {
     const val IMAGE = "image"
     const val OCR = "ocr"
     const val STORAGE = "storage"
+    const val DATABASE = "database"
     const val NOTIFICATIONS = "notifications"
     const val SENSORS = "sensors"
     const val UI = "ui"
@@ -56,6 +57,7 @@ object NodeBridgePermissionManifest {
         IMAGE,
         OCR,
         STORAGE,
+        DATABASE,
         NOTIFICATIONS,
         SENSORS,
         UI,
@@ -79,6 +81,7 @@ object NodeBridgePermissionManifest {
         "engine.exec" to ENGINES_EXEC,
         "shell:root" to SHELL_ROOT,
         "storages" to STORAGE,
+        "sqlite" to DATABASE,
         "java" to JAVA_INTEROP,
     )
 
@@ -213,6 +216,7 @@ object NodeBridgePermissionManifest {
             }
             NodeBridgeModules.OCR -> listOf(OCR, IMAGE)
             NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
+            NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE -> listOf(DATABASE)
             NodeBridgeModules.NOTIFICATIONS -> listOf(NOTIFICATIONS)
             NodeBridgeModules.SENSORS -> listOf(SENSORS)
             NodeBridgeModules.UI -> listOf(UI)
