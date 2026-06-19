@@ -735,6 +735,8 @@ Supported or limited:
 - `process.cwd()`
 - controlled `process.chdir()` for project bootstrap use
 - `process.nextTick`; tests lock its ordering before Promise/`queueMicrotask` callbacks and before timer callbacks
+- read-only `process.permission.has(scope, reference?)` compatibility facade for `fs.read`, `fs.write`,
+  `network`, `worker`, `shell`, `accessibility`, `screen_capture`, `notifications`, `sensors`, and `ocr`
 - warning and event-emitter style process APIs where covered by tests
 
 Disabled or controlled:
@@ -750,6 +752,20 @@ Disabled or controlled:
 - report writing
 
 Scripts should use AutoJs6 lifecycle controls instead of forcing process exit.
+
+`process.permission` is an AutoJs6 compatibility view, not an exact desktop
+Node Permission Model implementation and not a sandbox boundary. `fs.read` and
+`fs.write` reference checks reuse the scoped filesystem policy, so absolute
+host paths, NUL paths, `..` escapes, sensitive roots, symlink escapes, and
+realpath escapes return `false`. Bridge-style scopes reflect the current
+capability manifest: an enforced manifest requires the matching declared
+capability, while legacy non-enforced runs keep their historical bridge
+compatibility behavior. `network` remains `false` in the default Safe Node
+Profile because raw network modules and live controlled-network providers are
+not enabled by default. `worker` reflects only the explicit worker_threads
+feature flag. Querying never grants a capability, never contacts Android
+providers, and `process.permission.query()` returns a frozen AutoJs6 snapshot;
+`autojs6:profile.processPermission` exposes the same read-only view.
 
 Interactive long-running scripts can use `require("autojs6:lifecycle")` for
 cooperative checkpoint and restore. `onStop(handler)` receives a bounded stop

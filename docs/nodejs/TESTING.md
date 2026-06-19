@@ -393,7 +393,7 @@ Current process focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeProcessSweepInstrumentationTest"
 ```
 
-This suite verifies `process.nextTick` ordering, warning listeners, event-emitter helpers, inert `allowedNodeEnvironmentFlags`, writable `process.exitCode`, scoped `chdir` rejection, and dangerous process API denial.
+This suite verifies `process.nextTick` ordering, warning listeners, event-emitter helpers, inert `allowedNodeEnvironmentFlags`, writable `process.exitCode`, scoped `chdir` rejection, dangerous process API denial, and the S7-30 read-only `process.permission` facade. The permission facade coverage checks scoped-fs references, manifest-declared and manifest-denied bridge-style scopes, default-denied `network`/`worker` states, frozen query snapshots, `autojs6:profile.processPermission`, and that permission queries leave the bridge pending count at zero.
 
 Current `node:module` safe subset focused instrumentation:
 

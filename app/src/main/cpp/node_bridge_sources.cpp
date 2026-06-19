@@ -7559,6 +7559,7 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_define_process_property("dlopen", __autojs6_disabled_process_api("dlopen"), false);
     __autojs6_define_process_property("cwd", __autojs6_scoped_process_cwd, false);
     __autojs6_define_process_property("chdir", __autojs6_scoped_process_chdir, false);
+    __autojs6_define_process_property("permission", __autojs6_create_process_permission(), false);
     __autojs6_define_process_property("report", __autojs6_create_process_report(), false);
   }
   function __autojs6_limited_tty_color_depth() {
@@ -7984,6 +7985,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_v8_cache = null;
   let __autojs6_limited_tty_cache = null;
   let __autojs6_profile_cache = null;
+  let __autojs6_process_permission_cache = null;
   let __autojs6_bridge_cache = null;
   let __autojs6_bridge_transport = null;
   let __autojs6_bridge_live_config_cache = undefined;
@@ -8644,6 +8646,7 @@ std::string buildEmbeddedScriptExecutionSource(
       javaInterop: __autojs6_java_interop_experimental_enabled,
       nativeAddon: false,
       scopedFs: true,
+      processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
       limitedBuiltins: __autojs6_freeze_sorted_copy(
         __autojs6_worker_threads_experimental_enabled
@@ -8940,6 +8943,135 @@ std::string buildEmbeddedScriptExecutionSource(
       return declared.indexOf(required.slice(0, dotIndex)) >= 0;
     }
     return false;
+  }
+  function __autojs6_process_permission_normalize_scope(scope) {
+    const text = String(scope === undefined || scope === null ? "" : scope)
+      .trim()
+      .toLowerCase()
+      .replace(/:/g, ".")
+      .replace(/-/g, "_");
+    if (!text) return "";
+    if (text === "fs" || text === "fs.read" || text === "filesystem.read" || text === "file.read") return "fs.read";
+    if (text === "fs.write" || text === "filesystem.write" || text === "file.write") return "fs.write";
+    if (text === "worker" || text === "workers" || text === "worker_threads" || text === "workerthreads") return "worker";
+    if (text === "network" || text === "net" || text === "http" || text === "https") return "network";
+    if (text === "shell") return "shell";
+    if (text === "accessibility") return "accessibility";
+    if (
+      text === "screen_capture" ||
+      text === "screen.capture" ||
+      text === "screencapture" ||
+      text === "media_projection" ||
+      text === "media.projection"
+    ) return "screen_capture";
+    if (text === "notification" || text === "notifications") return "notifications";
+    if (text === "sensor" || text === "sensors") return "sensors";
+    if (text === "ocr") return "ocr";
+    return text;
+  }
+  function __autojs6_process_permission_manifest_allows(capability) {
+    const manifest = __autojs6_bridge_permission_manifest();
+    if (!manifest.enforced) {
+      return true;
+    }
+    return __autojs6_bridge_declares_capability(
+      manifest.normalizedPermissions,
+      __autojs6_bridge_normalize_capability(capability)
+    );
+  }
+  function __autojs6_process_permission_has_fs(scope, referenceProvided, reference) {
+    try {
+      const operation = "process.permission.has(" + scope + ")";
+      if (!referenceProvided) {
+        __autojs6_validate_fs_path(".", operation, { mustExist: true });
+        return true;
+      }
+      __autojs6_validate_fs_path(
+        reference,
+        operation,
+        scope === "fs.write" ? { checkParent: true } : {}
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+  function __autojs6_process_permission_has(scope, reference) {
+    if (typeof scope !== "string") {
+      throw __autojs6_invalid_arg_type("process.permission.has scope must be a string.");
+    }
+    const normalizedScope = __autojs6_process_permission_normalize_scope(scope);
+    if (normalizedScope === "fs.read" || normalizedScope === "fs.write") {
+      return __autojs6_process_permission_has_fs(
+        normalizedScope,
+        arguments.length > 1,
+        reference
+      );
+    }
+    if (normalizedScope === "worker") {
+      return __autojs6_worker_threads_experimental_enabled === true;
+    }
+    if (normalizedScope === "network") {
+      return false;
+    }
+    if (
+      normalizedScope === "shell" ||
+      normalizedScope === "accessibility" ||
+      normalizedScope === "screen_capture" ||
+      normalizedScope === "notifications" ||
+      normalizedScope === "sensors" ||
+      normalizedScope === "ocr"
+    ) {
+      return __autojs6_process_permission_manifest_allows(normalizedScope);
+    }
+    return false;
+  }
+  function __autojs6_process_permission_query() {
+    const scopeNames = [
+      "fs.read",
+      "fs.write",
+      "network",
+      "worker",
+      "shell",
+      "accessibility",
+      "screen_capture",
+      "notifications",
+      "sensors",
+      "ocr"
+    ];
+    const scopes = Object.create(null);
+    scopeNames.forEach(function(scope) {
+      scopes[scope] = __autojs6_process_permission_has(scope);
+    });
+    return Object.freeze({
+      version: 1,
+      model: "autojs6-readonly-capability-query",
+      exactNodePermissionModel: false,
+      readOnly: true,
+      scopeNames: Object.freeze(scopeNames.slice()),
+      scopes: Object.freeze(scopes),
+      scopedFs: Object.freeze({
+        root: __autojs6_resolved_sandbox_root(__autojs6_path_module()),
+        cwd: __autojs6_scoped_process_cwd(),
+        read: scopes["fs.read"],
+        write: scopes["fs.write"]
+      }),
+      manifest: __autojs6_bridge_permission_report()
+    });
+  }
+  function __autojs6_create_process_permission() {
+    if (__autojs6_process_permission_cache) {
+      return __autojs6_process_permission_cache;
+    }
+    const permission = Object.create(null);
+    Object.defineProperties(permission, {
+      has: { value: __autojs6_process_permission_has, enumerable: true },
+      query: { value: __autojs6_process_permission_query, enumerable: true },
+      model: { value: "autojs6-readonly-capability-query", enumerable: true },
+      exactNodePermissionModel: { value: false, enumerable: true }
+    });
+    __autojs6_process_permission_cache = Object.freeze(permission);
+    return __autojs6_process_permission_cache;
   }
   function __autojs6_bridge_missing_capabilities(requiredPermissions) {
     const manifest = __autojs6_bridge_permission_manifest();

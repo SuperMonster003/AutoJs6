@@ -186,7 +186,7 @@ class NodeModuleSafeSubsetInstrumentationTest {
         assertTrue(result.stdout.contains("module.safe.createRequire.escape.code=EPERM"))
         assertTrue(result.stdout.contains("module.safe.createRequire.absolute.code=EPERM"))
         assertTrue(result.stdout.contains("module.safe.createRequire.native.message=true"))
-        assertTrue(result.stdout.contains("module.safe.createRequire.esm.code=${NodeRuntimeErrorCodes.EMBEDDED_NODE_ESM_UNSUPPORTED}"))
+        assertTrue(result.stdout.contains("module.safe.createRequire.esm.code=${NodeRuntimeErrorCodes.REQUIRE_ESM_UNSUPPORTED}"))
         assertFalse(result.stdout.contains(".unexpected=true"))
         assertTrue(result.nativeValues["embedded_script.create_require_failure_reason"].orEmpty().contains("module.createRequire"))
     }
