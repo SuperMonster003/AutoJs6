@@ -322,6 +322,7 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeStreamMvpInstrumentationTest",
     "org.autojs.autojs.engine.NodeZlibBufferInstrumentationTest",
     "org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest",
+    "org.autojs.autojs.engine.NodeFdApiInstrumentationTest",
     "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest",
     "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeConformanceInstrumentationTest",
