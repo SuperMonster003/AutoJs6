@@ -13,7 +13,7 @@ experimental or blocked features from leaking into a release candidate.
 - Node Profile v1.1 alpha gate exists and has passed on Sony XQ-AT72
   `QV710AF65F`.
 - ESM, npm corpus, controlled network, WebSocket, bridge expansion, packaged
-  v1.1 smoke, security corpus, and bridge resource stress have alpha coverage.
+  v1.1 smoke, security corpus, and Phase 7 resource stress have alpha coverage.
 - Packaged `.mjs`, package `type=module`, and local dynamic import install-and-run
   smokes have a focused production-template gate.
 
@@ -50,6 +50,7 @@ experimental or blocked features from leaking into a release candidate.
 | AutoJs bridge modules | stay `partial` or `protocol-gated partial` | provider health registry, Doctor provider status, capability denial, fake provider behavior, Android live/fail-closed behavior by module, TypeScript declarations, resource cleanup |
 | packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, focused packaged ESM/dynamic import gate |
 | security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, bridge, WorkManager, database, packaged descriptor, or dependency sanitizer bypass |
+| resource stress | required | `verifyNodePhase7ResourceStressGate`: RSS/native heap/Java heap/thread/fd/libuv/bridge diagnostics, long-running stress, live provider cleanup, database transaction/close loop, WorkManager scheduled execution cleanup, plugin load/unload cleanup, worker stress when native workers are available |
 | DX/tooling | required | error catalog, project wizard, TypeScript declarations, doctor/compatibility/provider-health reports |
 | blocker register | required | [NODE_PROFILE_V1_1_BETA_BLOCKERS.md](NODE_PROFILE_V1_1_BETA_BLOCKERS.md), verified by `:app:verifyNodeV11BetaBlockerRegister` |
 

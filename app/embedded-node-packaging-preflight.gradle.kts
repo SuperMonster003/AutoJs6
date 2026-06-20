@@ -3884,6 +3884,19 @@ val verifyNodeModernCoreGate = tasks.register("verifyNodeModernCoreGate") {
     }
 }
 
+val verifyNodePhase7ResourceStressGate = tasks.register("verifyNodePhase7ResourceStressGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 7 runtime/provider resource stress gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodePhase7Gate = tasks.register("verifyNodePhase7Gate") {
     group = "verification"
     description = "Runs the current focused Node Phase 7 gate set without expanding to the full release gate."
@@ -3896,6 +3909,7 @@ val verifyNodePhase7Gate = tasks.register("verifyNodePhase7Gate") {
             verifyNodeLongRunningGate,
             verifyNodeWorkerGate,
             verifyNodeModernCoreGate,
+            verifyNodePhase7ResourceStressGate,
         )
     }
     doFirst {

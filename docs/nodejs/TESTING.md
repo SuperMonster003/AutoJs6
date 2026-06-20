@@ -749,18 +749,28 @@ Current bridge resource registry focused instrumentation:
 
 This suite verifies direct registry cleanup for image-handle, screen-capturer, and WebSocket resource types; idempotent close behavior; leaked-resource diagnostics; Android provider cleanup for experimental Java object handles; `work_manager` registration cancellation and destroy cleanup; and shell timeout cleanup through the live provider resource registry.
 
-Current Phase 5 bridge resource leak stress instrumentation:
+Current Phase 7 bridge/resource stress instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest" "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.bridgeStress.iterations=8"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePhase7ResourceStressInstrumentationTest" "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.phase7Resource.providerIterations=3" "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.phase7Resource.workManagerIterations=1" "-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.phase7Resource.pluginIterations=8"
+.\gradlew.bat --console=plain :app:verifyNodePhase7ResourceStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 This suite loops the v1.1 bridge module surface through JS fake transport and Android provider paths. It covers repeated
 OCR calls, storage CRUD, notifications post/cancel or permission-denied cleanup, sensors subscribe/unsubscribe when a
 supported sensor is available, accessibility selector queries, image operations and recycle calls, UI show/close,
-shell timeout cleanup, and WebSocket open/close or default-disabled provider denial. It asserts JS pending calls drain to
-zero and Android diagnostics report no active bridge resources, shell commands, WebSocket connections, leaked resources,
-or resource close errors. Use `autojs.nodejs.bridgeStress.iterations` to scale the loop for local triage or nightly gates.
+shell timeout cleanup, and WebSocket open/close or default-disabled provider denial. S7-47 adds
+`NodePhase7ResourceStressInstrumentationTest`, which records RSS, Java heap, native heap, thread count, fd count,
+test-only libuv handle counts, and bridge diagnostics while stressing database open/transaction/close, real
+WorkManager scheduled task execution/cancel cleanup, and JS-only plugin lifecycle load/start/stop/unload cleanup.
+It asserts JS pending calls drain to zero and Android diagnostics report no active bridge resources, shell commands,
+database handles, WorkManager registrations, WebSocket connections, leaked resources, or resource close errors.
+Use `autojs.nodejs.bridgeStress.iterations`, `autojs.nodejs.phase7Resource.providerIterations`,
+`autojs.nodejs.phase7Resource.workManagerIterations`, and `autojs.nodejs.phase7Resource.pluginIterations` to scale the
+loop for local triage or nightly gates. `verifyNodePhase7ResourceStressGate` also selects the existing long-running
+stress, live fetch/WebSocket destroy cleanup, live OCR/sensor/UI/WorkManager resource cleanup, and worker resource
+stress classes; live network cases still require `autojs.nodejs.network.experimental=true` to run instead of skip.
 
 Current bridge concurrency and resource-limit focused instrumentation:
 

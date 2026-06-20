@@ -182,6 +182,7 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase7ResourceStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 `verifyNodePhase7Gate` combines the current focused gate set. Feature-specific
@@ -271,6 +272,15 @@ surface with negative security cases. It also runs the modern core differential
 corpus for ESM, `process.permission`, `AsyncLocalStorage`, `perf_hooks`,
 `diagnostics_channel`, `node:test`, `timers/promises`, `stream/promises`,
 WebCrypto, and the separately classified controlled database bridge.
+`verifyNodePhase7ResourceStressGate` is the S7-47 stress subset. It records RSS,
+native heap, Java heap, thread count, fd count, test-only libuv handle counts,
+and bridge resource diagnostics while combining long-running stress, bridge
+resource leak loops, live fetch/WebSocket destroy cleanup, OCR/sensor/UI/
+WorkManager cleanup, database open/transaction/close stress, WorkManager
+scheduled execution cleanup, plugin load/unload lifecycle cleanup, and worker
+resource stress when native workers are available. Live network entries still
+require `autojs.nodejs.network.experimental=true`; otherwise those tests skip
+with the same explicit opt-in reason as the live provider gates.
 
 ## Release Gate
 
@@ -295,6 +305,8 @@ The release gate still relies on packaged smoke APK artifacts being current when
 Some checks remain explicit because they need a prepared device, a recently exported APK, or a failure-specific budget:
 
 - reduced/full `NodeEmbeddedMemoryLeakStressInstrumentationTest`
+- focused `verifyNodePhase7ResourceStressGate` with increased iteration
+  arguments
 - worker resource stress
 - packaged APK output verifier with `-Pautojs.embeddedNode.packagedApk=<apk>`
 - `verifyRhinoOnlyBuild` rollback verification

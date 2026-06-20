@@ -671,12 +671,25 @@ val nodeJsModernCoreGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeVmDesignGateInstrumentationTest",
     "org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest",
 )
+val nodeJsPhase7ResourceStressGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodePhase7ResourceStressInstrumentationTest",
+    "org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest",
+    "org.autojs.autojs.engine.NodeLongRunningStressInstrumentationTest",
+    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#androidFetchProviderCancelsActiveLiveRequestOnDestroy",
+    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#androidWebSocketProviderClosesActiveLiveConnectionOnDestroy",
+    "org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest#kotlinOcrLiveProviderRecognizesMlKitImageHandle",
+    "org.autojs.autojs.engine.NodeSensorsBridgeInstrumentationTest#androidProviderSubscribeDrainsEventsAndUnsubscribesWhenAvailable",
+    "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest#androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource",
+    "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest#androidWorkManagerLiveProviderExecutesPackagedProjectEntryAndPersistsResult",
+    "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
+)
 val nodeJsPhase7GateInstrumentationClasses = (
         nodeJsPackagedEsmGateInstrumentationClasses +
                 nodeJsLiveProviderGateInstrumentationClasses +
                 nodeJsLongRunningGateInstrumentationClasses +
                 nodeJsWorkerGateInstrumentationClasses +
-                nodeJsModernCoreGateInstrumentationClasses
+                nodeJsModernCoreGateInstrumentationClasses +
+                nodeJsPhase7ResourceStressGateInstrumentationClasses
         ).distinct()
 val nodeJsFocusedGateInstrumentationClasses = mapOf(
     nodeJsLiveProviderSummaryTaskName to nodeJsLiveProviderGateInstrumentationClasses,
@@ -693,6 +706,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeLongRunningGate" to nodeJsLongRunningGateInstrumentationClasses,
     "verifyNodeWorkerGate" to nodeJsWorkerGateInstrumentationClasses,
     "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,
+    "verifyNodePhase7ResourceStressGate" to nodeJsPhase7ResourceStressGateInstrumentationClasses,
     "verifyNodePhase7Gate" to nodeJsPhase7GateInstrumentationClasses,
 )
 val nodeJsRequestedFocusedGate = taskNames
