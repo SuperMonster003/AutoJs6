@@ -43,7 +43,7 @@ small set of already-gated features toward practical use.
 | Feature | v1.1 target | Notes |
 | --- | --- | --- |
 | CommonJS/npm subset | stable | Existing v1.0 contract remains first-class. |
-| Real npm corpus | partial | v1.1 expands the fixed offline corpus with ESM-only dependency, hybrid CJS/ESM, Buffer, fetch wrapper fallback, and assertion helper fixtures while retaining no-install/no-native safety checks. |
+| Real npm corpus | partial | v1.1 expands the fixed offline corpus from 7 to 13 fixtures with ESM-only dependency, hybrid CJS/ESM, Buffer, fetch wrapper fallback, assertion helper, `AsyncLocalStorage`, `stream/promises`, WebCrypto, worker CPU fallback, test-runner, and database-abstraction coverage while retaining no-install/no-native safety checks. |
 | Scoped fs | stable | No policy loosening. |
 | ESM entry | partial | `.mjs` and `type=module` entries run by default in v1.1. |
 | ESM builtin import | partial | Only allowed builtins and limited wrappers. |
@@ -82,7 +82,7 @@ small set of already-gated features toward practical use.
 ## Success Criteria
 
 - `.mjs` entry smoke passes without a per-test ESM opt-in.
-- Fixed real npm corpus increases from the v1.0 CommonJS-only baseline and
+- Fixed real npm corpus increases from the v1.0 CommonJS-only baseline to 13 fixtures and
   produces `build/reports/nodejs/npm-compat-v1.1.md` and `build/reports/nodejs/v1.1-differential.md`.
 - Package `type=module` entry smoke passes.
 - Local static import, named export, default export, and top-level await pass.

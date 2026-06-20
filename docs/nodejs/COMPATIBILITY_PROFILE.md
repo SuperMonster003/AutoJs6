@@ -278,7 +278,8 @@ future builtin and bridge work.
 
 The fixed real package corpus lives under `app/src/androidTest/assets/npm_compat_real/` and is executed by
 `NodeRealNpmCompatInstrumentationTest`. It vendors offline, license-noted CommonJS package snapshots that cover tested
-patterns rather than broad npm compatibility claims:
+patterns rather than broad npm compatibility claims. The S7-48 expansion grows the measurable corpus from 7 to 13
+fixtures:
 
 - small utility and nested dependency packages
 - semver parsing plus querystring/URL utility use
@@ -287,6 +288,11 @@ patterns rather than broad npm compatibility claims:
 - core builtin feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`
 - ESM-only dependency import and hybrid CJS/ESM package condition selection
 - Buffer utility, fetch wrapper fallback, and assertion helper patterns
+- `AsyncLocalStorage` propagation across promise and timer boundaries
+- `stream/promises` pipeline through a transform package
+- WebCrypto digest helper use through `crypto.webcrypto.subtle`
+- worker CPU package behavior with graceful fallback while `worker_threads` stays default-disabled
+- test-runner and database-abstraction package patterns
 
 These fixtures are intentionally checked in. Tests must not fetch packages from the network, run install/postinstall
 scripts, or load native addons. Fixture runners remain CommonJS `test.cjs` files; v1.1 permits ESM-only dependency

@@ -53,6 +53,54 @@
         "fetch wrapper fallback",
         "assertion/test helper"
       ]
+    },
+    {
+      "name": "async-context",
+      "patterns": [
+        "AsyncLocalStorage",
+        "async context propagation",
+        "promise and timer boundaries"
+      ]
+    },
+    {
+      "name": "stream-promises",
+      "patterns": [
+        "streams/promises",
+        "pipeline promise",
+        "transform stream package"
+      ]
+    },
+    {
+      "name": "webcrypto-digest",
+      "patterns": [
+        "WebCrypto",
+        "crypto.webcrypto.subtle",
+        "digest helper package"
+      ]
+    },
+    {
+      "name": "worker-cpu-package",
+      "patterns": [
+        "worker CPU package",
+        "worker_threads graceful fallback",
+        "pure JavaScript CPU task"
+      ]
+    },
+    {
+      "name": "test-runner-package",
+      "patterns": [
+        "test-runner package",
+        "assertion aggregation",
+        "async test case"
+      ]
+    },
+    {
+      "name": "database-abstraction",
+      "patterns": [
+        "database abstraction package",
+        "in-memory adapter",
+        "SQL-like query helper"
+      ]
     }
   ]
 }

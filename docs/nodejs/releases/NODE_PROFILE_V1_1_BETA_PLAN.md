@@ -44,7 +44,7 @@ experimental or blocked features from leaking into a release candidate.
 | Track | Beta target | Required evidence |
 | --- | --- | --- |
 | ESM and dynamic import | stay `partial` | default `.mjs`, `type=module`, static import, local dynamic import, builtin allowlist, resolver denial paths, packaged focused gate |
-| npm/builtins | stay `partial` | real npm corpus, desktop differential report, Buffer/core/stream/zlib/Web Streams gates |
+| npm/builtins | stay `partial` | S7-48 real npm corpus expanded from 7 to 13 fixtures, desktop differential report, Buffer/core/stream/zlib/Web Streams gates |
 | modern core differential | classified per area | S7-36 corpus covering ESM, `process.permission`, `AsyncLocalStorage`, `perf_hooks`, `diagnostics_channel`, `node:test`, promise timers/streams, WebCrypto, and database bridge restriction |
 | controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial, explicit live fetch/axios and WebSocket loopback subgates |
 | AutoJs bridge modules | stay `partial` or `protocol-gated partial` | provider health registry, Doctor provider status, capability denial, fake provider behavior, Android live/fail-closed behavior by module, TypeScript declarations, resource cleanup |

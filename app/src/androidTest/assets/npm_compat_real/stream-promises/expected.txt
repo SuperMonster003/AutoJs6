@@ -1,0 +1,1 @@
+realnpm.stream-promises=pipeline:AUTO-JS-6:9
