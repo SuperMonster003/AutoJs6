@@ -72,6 +72,83 @@
       "packagedCompatible": true
     },
     {
+      "name": "packaged-esm",
+      "status": "partial",
+      "tags": ["phase7", "packaged", "esm"],
+      "mainAppSmoke": false,
+      "packagedCompatible": true
+    },
+    {
+      "name": "packaged-dynamic-import",
+      "status": "partial",
+      "tags": ["phase7", "packaged", "esm", "dynamic-import"],
+      "mainAppSmoke": false,
+      "packagedCompatible": true
+    },
+    {
+      "name": "live-fetch",
+      "status": "experimental",
+      "tags": ["phase7", "main-app", "bridge", "network"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "live-websocket",
+      "status": "experimental",
+      "tags": ["phase7", "main-app", "bridge", "network", "websocket"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "ocr-automation",
+      "status": "partial",
+      "tags": ["phase7", "main-app", "bridge", "ocr", "requires-image", "permission-optional"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "long-running-service",
+      "status": "partial",
+      "tags": ["phase7", "main-app", "long-running"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "scheduled-node-task",
+      "status": "partial",
+      "tags": ["phase7", "main-app", "bridge", "scheduled-task"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "worker-cpu",
+      "status": "experimental",
+      "tags": ["phase7", "main-app", "worker"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "node-test-project",
+      "status": "partial",
+      "tags": ["phase7", "main-app", "node-test"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "database",
+      "status": "partial",
+      "tags": ["phase7", "main-app", "bridge", "database"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "js-plugin-ui",
+      "status": "partial",
+      "tags": ["phase7", "main-app", "packaged", "bridge", "plugin", "ui"],
+      "mainAppSmoke": false,
+      "packagedCompatible": true
+    },
+    {
       "name": "typescript-smoke",
       "status": "stable",
       "tags": ["typescript", "bridge"],

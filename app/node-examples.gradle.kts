@@ -4,6 +4,7 @@ import org.gradle.api.tasks.Exec
 import java.io.File
 
 private val nodeExampleKnownStatuses = setOf("stable", "partial", "experimental")
+private val nodeExampleIgnoredDirectories = setOf("npm-ci-pure-js")
 private val nodeExampleKnownTags = setOf(
     "main-app",
     "packaged",
@@ -23,6 +24,19 @@ private val nodeExampleKnownTags = setOf(
     "security",
     "disabled-features",
     "typescript",
+    "phase7",
+    "esm",
+    "dynamic-import",
+    "network",
+    "websocket",
+    "ocr",
+    "long-running",
+    "scheduled-task",
+    "worker",
+    "node-test",
+    "database",
+    "plugin",
+    "ui",
 )
 
 private val nodeTypeDeclarationModules = listOf(
@@ -95,7 +109,10 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
         if (duplicateNames.isNotEmpty()) {
             throw GradleException("Duplicate Node example manifest entries: ${duplicateNames.joinToString()}")
         }
-        val directoryNames = examplesRoot.listFiles(File::isDirectory).orEmpty().map(File::getName).sorted()
+        val directoryNames = examplesRoot.listFiles(File::isDirectory).orEmpty()
+            .map(File::getName)
+            .filterNot(nodeExampleIgnoredDirectories::contains)
+            .sorted()
         val missingManifest = directoryNames - manifestNames.toSet()
         val missingDirectory = manifestNames.toSet() - directoryNames.toSet()
         if (missingManifest.isNotEmpty() || missingDirectory.isNotEmpty()) {
@@ -135,6 +152,26 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
             }
             if (projectJson["main"] != "main.cjs") {
                 throw GradleException("Node example '$name' project.json must use main.cjs as main.")
+            }
+            if ("phase7" in tags) {
+                val exampleMetadata = projectJson["example"] as? Map<*, *>
+                    ?: throw GradleException("Phase 7 Node example '$name' must declare project.json example metadata.")
+                val capabilities = nodeExampleList(exampleMetadata["capabilities"])
+                val limitations = nodeExampleList(exampleMetadata["securityLimitations"])
+                val expectedProvider = exampleMetadata["expectedProvider"]?.toString().orEmpty()
+                val packagedSupport = exampleMetadata["packagedSupport"]?.toString().orEmpty()
+                if (capabilities.isEmpty()) {
+                    throw GradleException("Phase 7 Node example '$name' must declare example.capabilities.")
+                }
+                if (expectedProvider.isBlank()) {
+                    throw GradleException("Phase 7 Node example '$name' must declare example.expectedProvider.")
+                }
+                if (packagedSupport.isBlank()) {
+                    throw GradleException("Phase 7 Node example '$name' must declare example.packagedSupport.")
+                }
+                if (limitations.isEmpty()) {
+                    throw GradleException("Phase 7 Node example '$name' must declare example.securityLimitations.")
+                }
             }
             val packageJson = nodeExampleReadJsonObject(dir.resolve("package.json"))
             val packageName = packageJson["name"]?.toString().orEmpty()

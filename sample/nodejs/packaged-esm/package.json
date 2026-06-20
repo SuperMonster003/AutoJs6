@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/packaged-esm",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

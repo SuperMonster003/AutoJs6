@@ -1,0 +1,6 @@
+{
+  "name": "@autojs6-sample/scheduled-node-task",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.cjs"
+}

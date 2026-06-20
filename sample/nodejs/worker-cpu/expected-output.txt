@@ -1,0 +1,3 @@
+sample.worker-cpu.mode=<worker or fallback>
+sample.worker-cpu.sum=1548136
+sample.worker-cpu=PASS

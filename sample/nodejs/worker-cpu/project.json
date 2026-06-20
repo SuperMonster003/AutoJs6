@@ -1,0 +1,16 @@
+{
+  "name": "worker-cpu",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["worker_computation"],
+    "expectedProvider": "native worker_threads when explicitly enabled; in-process fallback otherwise",
+    "packagedSupport": "blocked until native worker execution and packaged source graph verification are promoted",
+    "securityLimitations": ["workers are default-disabled", "bridge authority is denied in workers", "no same-thread fallback is used by the runtime"]
+  }
+}

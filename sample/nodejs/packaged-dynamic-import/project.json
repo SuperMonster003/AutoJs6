@@ -1,0 +1,16 @@
+{
+  "name": "packaged-dynamic-import",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["dynamic_import", "esm"],
+    "expectedProvider": "packaged Embedded Node local dynamic import loader",
+    "packagedSupport": "supported for relative local files",
+    "securityLimitations": ["URL imports denied", "absolute paths denied", "project escape denied"]
+  }
+}

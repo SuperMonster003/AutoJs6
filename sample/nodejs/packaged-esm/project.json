@@ -1,0 +1,16 @@
+{
+  "name": "packaged-esm",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["esm"],
+    "expectedProvider": "packaged Embedded Node ESM loader",
+    "packagedSupport": "supported for local project files",
+    "securityLimitations": ["local project graph only", "no remote imports", "disabled builtins remain denied"]
+  }
+}

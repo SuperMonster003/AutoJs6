@@ -134,8 +134,9 @@ Checked-in example project smoke:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeExampleProjectInstrumentationTest"
 ```
 
-`verifyNodeExamples` validates `sample/nodejs/examples.json`, required files, metadata, Node directives, and PASS markers,
-then writes `app/build/reports/nodejs/examples.json` and `.md`.
+`verifyNodeExamples` validates `sample/nodejs/examples.json`, required files, metadata, Node directives, PASS markers,
+and Phase 7 example capability/provider/security declarations, then writes `app/build/reports/nodejs/examples.json`
+and `.md`.
 
 The instrumentation smoke runs `hello-node`, `cjs-package`, `fs-scoped`, `fs-promises`, `npm-pure-js-cjs`, `toast-app`,
 `accessibility-click-text`, `screenshot-find-image`, and `disabled-features-demo` from the `androidTest` asset source set.

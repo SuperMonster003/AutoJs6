@@ -43,6 +43,17 @@ node tools/nodejs/project/autojs6-node-project.js validate D:\work\my-node-app
 - `screenshot-find-image`: screenshot/image flow that exits cleanly when screen capture permission is unavailable.
 - `packaged-node-apk`: packaged APK smoke entry point.
 - `disabled-features-demo`: Safe Node Profile denied-capability examples.
+- `packaged-esm`: packaged local ESM module graph.
+- `packaged-dynamic-import`: packaged local dynamic import graph.
+- `live-fetch`: controlled live fetch provider shape.
+- `live-websocket`: controlled WebSocket provider shape.
+- `ocr-automation`: OCR/image opaque-handle boundary.
+- `long-running-service`: interactive long-running lifecycle checkpoint pattern.
+- `scheduled-node-task`: WorkManager scheduled Node task pattern.
+- `worker-cpu`: worker CPU task with Safe Node fallback documentation.
+- `node-test-project`: small `node:test` style project.
+- `database`: scoped SQLite bridge pattern.
+- `js-plugin-ui`: local JS-only plugin that returns a UI layout descriptor.
 - `typescript-smoke`: compile-time smoke for the checked-in AutoJs6 Node bridge declarations.
 
 ## Smoke Coverage
@@ -56,7 +67,8 @@ Instrumentation smoke currently runs:
 ```
 
 `verifyNodeExamples` validates the checked-in manifest, required files, `project.json`, `package.json`, Node directives,
-PASS markers, and writes:
+PASS markers, and Phase 7 example metadata. Phase 7 examples must declare capabilities, expected provider, packaged
+support, and security limitations in `project.json`. The task writes:
 
 - `app/build/reports/nodejs/examples.json`
 - `app/build/reports/nodejs/examples.md`
@@ -83,17 +95,22 @@ The instrumentation smoke copies examples from `sample/nodejs` into the device c
 `typescript-smoke` is type-check only and is not part of the device instrumentation smoke list.
 
 The examples are also added to the `androidTest` asset source set so tests exercise the checked-in sample files directly.
+`sample/nodejs/npm-ci-pure-js` is intentionally excluded from the examples manifest because it is a host-side dependency
+sanitizer fixture, not a user-facing runnable example.
 
 ## Runtime Notes
 
-The examples target AutoJs6 Safe Node Profile. They avoid:
+The stable examples target AutoJs6 Safe Node Profile and generally avoid:
 
-- ESM by default
 - `npm install`
 - native addons
 - `child_process`
 - raw Node network modules
 - unrestricted filesystem access
+
+Phase 7 examples that use ESM, dynamic import, live providers, workers, long-running mode, scheduled tasks, database,
+or plugin/UI surfaces declare those capabilities explicitly and include graceful unavailable-provider paths where a
+permission, experimental flag, or hardware provider may be absent.
 
 Examples that use Android capabilities such as accessibility or media projection are written to handle unavailable permissions without crashing.
 

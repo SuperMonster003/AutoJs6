@@ -1,0 +1,16 @@
+{
+  "name": "node-test-project",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["node:test"],
+    "expectedProvider": "Safe Node Profile node:test subset",
+    "packagedSupport": "source files can be packaged; automated test execution remains a developer workflow",
+    "securityLimitations": ["same scoped filesystem as app code", "disabled builtins remain denied", "no inspector or unrestricted vm"]
+  }
+}

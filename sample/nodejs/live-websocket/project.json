@@ -1,0 +1,16 @@
+{
+  "name": "live-websocket",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 15000,
+    "permissions": ["network"]
+  },
+  "example": {
+    "capabilities": ["network", "websocket"],
+    "expectedProvider": "Android controlled WebSocket provider",
+    "packagedSupport": "requires explicit packaged network capability and INTERNET permission mapping",
+    "securityLimitations": ["raw sockets remain denied", "connection and message budgets apply"]
+  }
+}

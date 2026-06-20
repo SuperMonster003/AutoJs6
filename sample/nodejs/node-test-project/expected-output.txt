@@ -1,0 +1,3 @@
+sample.node-test-project.runner=<node:test or fallback>
+sample.node-test-project.tests=2/2
+sample.node-test-project=PASS

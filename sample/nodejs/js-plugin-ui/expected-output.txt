@@ -1,0 +1,4 @@
+sample.js-plugin-ui.provider=js-plugin-manager
+sample.js-plugin-ui.layout=Column/2
+sample.js-plugin-ui.closed=<true or UI unavailable marker>
+sample.js-plugin-ui=PASS
