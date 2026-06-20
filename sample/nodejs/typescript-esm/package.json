@@ -1,0 +1,8 @@
+{
+  "name": "@autojs6-sample/typescript-esm",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "main.mts"
+}
+

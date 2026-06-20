@@ -84,6 +84,23 @@ class NodeExampleProjectInstrumentationTest {
         }
     }
 
+    @Test
+    fun typeScriptRuntimeExamplesRun() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node TypeScript example smoke")
+
+        listOf(
+            "typescript-cjs",
+            "typescript-esm",
+        ).forEach { exampleName ->
+            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+            val result = runExample(exampleName)
+
+            NodeEmbeddedTestHarness.assertSucceeded("$exampleName example", result)
+            assertTrue(result.stdout, result.stdout.contains("sample.$exampleName=PASS"))
+            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        }
+    }
+
     private fun runExample(exampleName: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val projectDir = File(context.cacheDir, "node-example-$exampleName-${System.nanoTime()}").apply {
             deleteRecursively()
@@ -91,9 +108,9 @@ class NodeExampleProjectInstrumentationTest {
         }
         return try {
             NodeEmbeddedTestHarness.copyAssetTree(exampleName, projectDir)
-            val main = File(projectDir, "main.cjs")
+            val main = exampleMainFile(projectDir)
             val timeoutMs = exampleTimeoutMs(projectDir)
-            check(main.isFile) { "Node example $exampleName is missing main.cjs" }
+            check(main.isFile) { "Node example $exampleName is missing declared main file: ${main.absolutePath}" }
             NodeEmbeddedTestHarness.runEmbeddedScript(
                 source = main.readText(),
                 sourceName = main.absolutePath,
@@ -103,6 +120,16 @@ class NodeExampleProjectInstrumentationTest {
         } finally {
             projectDir.deleteRecursively()
         }
+    }
+
+    private fun exampleMainFile(projectDir: File): File {
+        val projectJson = JSONObject(File(projectDir, "project.json").readText())
+        val entry = projectJson.optString("main", "main.cjs")
+        val file = File(projectDir, entry)
+        val canonicalFile = file.canonicalFile
+        val root = projectDir.canonicalFile
+        check(canonicalFile.toPath().startsWith(root.toPath())) { "Node example main escapes project root: $entry" }
+        return file
     }
 
     private fun exampleTimeoutMs(projectDir: File): Long {

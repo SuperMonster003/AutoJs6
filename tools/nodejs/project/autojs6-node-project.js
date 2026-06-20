@@ -232,6 +232,183 @@ console.log("entry=" + path.basename("main.mjs"));
   process.exitCode = 1;
 });
 `
+  },
+  "typescript-cjs": {
+    description: "Lightweight TypeScript CommonJS app using .cts",
+    entry: "main.cts",
+    packageType: "commonjs",
+    permissions: [],
+    source: (name) => `"nodejs";
+
+type Label = string;
+interface Payload {
+  label: Label;
+  count: number;
+}
+
+const payload: Payload = { label: "${name}", count: 1 };
+
+function format<T>(value: T): string {
+  return String(value);
+}
+
+console.log("typescript.cjs=" + format(payload.label) + ":" + payload.count);
+`
+  },
+  "typescript-esm": {
+    description: "Lightweight TypeScript ESM app using .mts",
+    entry: "main.mts",
+    packageType: "module",
+    permissions: [],
+    source: (name) => `type Label = string;
+
+const value: Label = await Promise.resolve("${name}");
+
+export const marker: Label = value;
+console.log("typescript.esm=" + marker);
+`
+  },
+  "typescript-automation": {
+    description: "TypeScript automation starter with toast/app capabilities",
+    entry: "main.ts",
+    packageType: "commonjs",
+    permissions: ["toast", "app"],
+    source: (name) => `"nodejs";
+
+type ToastModule = {
+  showToast(message: string): Promise<void>;
+};
+type AppModule = {
+  packageName: string;
+  versionName: string;
+};
+
+(async () => {
+  const toast = require("toast") as ToastModule;
+  const app = require("app") as AppModule;
+
+  await toast.showToast("${name} ready");
+  console.log("host=" + app.packageName);
+  console.log("version=" + app.versionName);
+})().catch((error: Error) => {
+  console.error(error && (error.stack || error.message) || error);
+  process.exitCode = 1;
+});
+`
+  },
+  "typescript-ocr": {
+    description: "TypeScript screen capture plus OCR bridge starter",
+    entry: "main.ts",
+    packageType: "commonjs",
+    permissions: ["image", "screen_capture", "ocr"],
+    source: () => `"nodejs";
+
+type ImageHandle = {
+  recycle?: () => Promise<void>;
+};
+
+(async () => {
+  const image = require("image");
+  const ocr = require("ocr");
+
+  const screen = await image.captureScreen() as ImageHandle;
+  try {
+    const text = await ocr.recognizeText(screen);
+    console.log(text);
+  } finally {
+    if (screen && typeof screen.recycle === "function") {
+      await screen.recycle();
+    }
+  }
+})().catch((error: Error) => {
+  console.error(error && (error.stack || error.message) || error);
+  process.exitCode = 1;
+});
+`
+  },
+  "typescript-long-running-task": {
+    description: "TypeScript long-running task starter with explicit cleanup",
+    entry: "main.cts",
+    packageType: "commonjs",
+    permissions: [],
+    source: () => `"nodejs";
+
+type TimerHandle = ReturnType<typeof setInterval>;
+
+let ticks = 0;
+const timer: TimerHandle = setInterval(() => {
+  ticks += 1;
+  console.log("long-running.tick=" + ticks);
+}, 1000);
+
+function stop(): void {
+  clearInterval(timer);
+  console.log("long-running.stopped=true");
+}
+
+process.once("SIGTERM", stop);
+process.once("SIGINT", stop);
+`
+  },
+  "compiled-tsx": {
+    description: "Build-time TSX project that runs compiled JavaScript only",
+    entry: "main.cjs",
+    packageType: "commonjs",
+    permissions: [],
+    scripts: {
+      build: "tsc -p tsconfig.json"
+    },
+    devDependencies: {
+      typescript: "^5.9.0"
+    },
+    source: () => `"nodejs";
+
+require("./dist/view.js");
+`,
+    extraFiles: () => ({
+      "src/view.tsx": `type Props = {
+  text: string;
+};
+
+declare namespace JSX {
+  interface IntrinsicElements {
+    label: Props;
+  }
+}
+
+function h(tag: string, props: Props): { tag: string; props: Props } {
+  return { tag, props };
+}
+
+const view = <label text="compiled-tsx" />;
+console.log("compiled.tsx.tag=" + view.tag);
+console.log("compiled.tsx.text=" + view.props.text);
+`,
+      "dist/view.js": `"use strict";
+
+function h(tag, props) {
+  return { tag, props };
+}
+
+const view = h("label", { text: "compiled-tsx" });
+console.log("compiled.tsx.tag=" + view.tag);
+console.log("compiled.tsx.text=" + view.props.text);
+`,
+      "tsconfig.json": `{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "jsx": "react",
+    "jsxFactory": "h",
+    "outDir": "dist",
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.tsx"]
+}
+`
+    })
   }
 };
 
@@ -291,6 +468,19 @@ function writeJson(file, value) {
   fs.writeFileSync(file, JSON.stringify(value, null, 2) + "\n", "utf8");
 }
 
+function templateExtraFiles(template, projectName) {
+  if (!template.extraFiles) {
+    return {};
+  }
+  return typeof template.extraFiles === "function" ? template.extraFiles(projectName) : template.extraFiles;
+}
+
+function writeTemplateFile(root, relativePath, contents) {
+  const target = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, contents, "utf8");
+}
+
 function createProject(args) {
   const templateName = args.template;
   const template = TEMPLATES[templateName];
@@ -318,7 +508,7 @@ function createProject(args) {
       permissions: template.permissions
     }
   });
-  writeJson(path.join(outDir, "package.json"), {
+  const packageJson = {
     name: packageNameFor(projectName),
     version: "0.1.0",
     private: true,
@@ -329,8 +519,19 @@ function createProject(args) {
         permissions: template.permissions
       }
     }
+  };
+  if (template.scripts) {
+    packageJson.scripts = template.scripts;
+  }
+  if (template.devDependencies) {
+    packageJson.devDependencies = template.devDependencies;
+  }
+  writeJson(path.join(outDir, "package.json"), packageJson);
+  writeTemplateFile(outDir, template.entry, template.source(projectName));
+  const extraFiles = templateExtraFiles(template, projectName);
+  Object.entries(extraFiles).forEach(([relativePath, contents]) => {
+    writeTemplateFile(outDir, relativePath, contents);
   });
-  fs.writeFileSync(path.join(outDir, template.entry), template.source(projectName), "utf8");
   fs.writeFileSync(
     path.join(outDir, "README.md"),
     [
@@ -358,7 +559,7 @@ function createProject(args) {
     template: templateName,
     name: projectName,
     root: outDir,
-    files: ["project.json", "package.json", template.entry, "README.md"]
+    files: ["project.json", "package.json", template.entry, ...Object.keys(extraFiles).sort(), "README.md"]
   };
 }
 
@@ -1007,7 +1208,8 @@ function printTemplates(json) {
     description: template.description,
     entry: template.entry,
     packageType: template.packageType,
-    permissions: template.permissions
+    permissions: template.permissions,
+    files: ["project.json", "package.json", template.entry, ...Object.keys(templateExtraFiles(template, name)).sort(), "README.md"]
   }));
   if (json) {
     console.log(JSON.stringify({ schema: "autojs6-node-project-templates-v1", templates: rows }, null, 2));

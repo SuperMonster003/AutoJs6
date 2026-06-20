@@ -9,6 +9,26 @@ private val nodeProjectWizardTemplates = listOf(
     "automation-script",
     "screenshot-ocr-script",
     "network-fetch-script",
+    "typescript-cjs",
+    "typescript-esm",
+    "typescript-automation",
+    "typescript-ocr",
+    "typescript-long-running-task",
+    "compiled-tsx",
+)
+
+private val nodeProjectWizardExpectedEntryFormats = mapOf(
+    "commonjs-app" to "cjs",
+    "esm-app" to "esm",
+    "automation-script" to "cjs",
+    "screenshot-ocr-script" to "cjs",
+    "network-fetch-script" to "cjs",
+    "typescript-cjs" to "cjs",
+    "typescript-esm" to "esm",
+    "typescript-automation" to "cjs",
+    "typescript-ocr" to "cjs",
+    "typescript-long-running-task" to "cjs",
+    "compiled-tsx" to "cjs",
 )
 
 private fun nodeProjectWizardReadJsonObject(text: String): Map<*, *> =
@@ -113,12 +133,20 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
             if (compatibilityStatus in setOf("unsafe", "unsupported")) {
                 throw GradleException("Generated Node project template '$template' has blocking compatibility status: $compatibility")
             }
+            val entry = compatibility["entry"] as? Map<*, *>
+                ?: throw GradleException("Generated Node project template '$template' did not include entry analysis.")
+            val expectedFormat = nodeProjectWizardExpectedEntryFormats[template]
+                ?: throw GradleException("Missing expected entry format for Node project wizard template '$template'.")
+            if (entry["format"] != expectedFormat) {
+                throw GradleException("Generated Node project template '$template' should be '$expectedFormat': $entry")
+            }
             rows += linkedMapOf(
                 "template" to template,
                 "project" to projectDir.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
                 "files" to createReport["files"],
                 "issueCount" to validateReport["issueCount"],
                 "compatibilityStatus" to compatibilityStatus,
+                "entryFormat" to entry["format"],
             )
         }
 
@@ -282,6 +310,29 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
             throw GradleException("Unsafe fs fixture should report unsafe compatibility: $unsafeFsCompatibility")
         }
 
+        val unsupportedTsxEntry = workRoot.resolve("invalid/unsupported-tsx-entry")
+        nodeProjectWizardJson(
+            tool,
+            listOf(
+                "create",
+                "--template", "commonjs-app",
+                "--out", unsupportedTsxEntry.absolutePath,
+                "--name", "unsupported-tsx-entry",
+                "--force",
+            ),
+        )
+        val unsupportedTsxProjectJsonFile = unsupportedTsxEntry.resolve("project.json")
+        val unsupportedTsxProjectJson = nodeProjectWizardReadJsonFile(unsupportedTsxProjectJsonFile).toMutableMap()
+        unsupportedTsxProjectJson["main"] = "main.tsx"
+        unsupportedTsxProjectJsonFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(unsupportedTsxProjectJson)) + "\n")
+        unsupportedTsxEntry.resolve("main.tsx").writeText("""export default <View />;""" + "\n")
+        val unsupportedTsxReport = nodeProjectWizardJson(
+            tool,
+            listOf("validate", unsupportedTsxEntry.absolutePath),
+            expectSuccess = false,
+        )
+        assertNodeProjectWizardIssueCodes(unsupportedTsxReport, "ENTRY_TYPESCRIPT_TSX_UNSUPPORTED")
+
         val report = linkedMapOf<String, Any?>(
             "schema" to "autojs6-node-project-wizard-report-v1",
             "tool" to tool.relativeTo(rootProject.projectDir).invariantSeparatorsPath,
@@ -294,6 +345,7 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
                 linkedMapOf("name" to "unsafe-dependency", "issueCodes" to unsafeDependencyReport.nodeProjectWizardIssueCodes().sorted()),
                 linkedMapOf("name" to "unsupported-source", "issueCodes" to unsupportedSourceReport.nodeProjectWizardIssueCodes().sorted()),
                 linkedMapOf("name" to "unsafe-fs-source", "issueCodes" to unsafeFsSourceReport.nodeProjectWizardIssueCodes().sorted()),
+                linkedMapOf("name" to "unsupported-tsx-entry", "issueCodes" to unsupportedTsxReport.nodeProjectWizardIssueCodes().sorted()),
             ),
         )
         jsonReport.get().asFile.apply {
@@ -306,10 +358,10 @@ val verifyNodeProjectWizard = tasks.register("verifyNodeProjectWizard") {
                 buildString {
                     appendLine("# AutoJs6 Node Project Wizard Validation")
                     appendLine()
-                    appendLine("| Template | Project | Issue count |")
-                    appendLine("| --- | --- | ---: |")
+                    appendLine("| Template | Project | Entry format | Issue count |")
+                    appendLine("| --- | --- | --- | ---: |")
                     rows.forEach { row ->
-                        appendLine("| ${row["template"]} | ${row["project"]} | ${row["issueCount"]} (${row["compatibilityStatus"]}) |")
+                        appendLine("| ${row["template"]} | ${row["project"]} | ${row["entryFormat"]} | ${row["issueCount"]} (${row["compatibilityStatus"]}) |")
                     }
                     appendLine()
                     appendLine("Invalid fixture issue codes:")

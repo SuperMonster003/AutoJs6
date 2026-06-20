@@ -37,7 +37,11 @@ private val nodeExampleKnownTags = setOf(
     "database",
     "plugin",
     "ui",
+    "phase8",
+    "tsx",
 )
+
+private val nodeExampleSupportedEntryExtensions = setOf("js", "cjs", "mjs", "ts", "cts", "mts")
 
 private val nodeTypeDeclarationModules = listOf(
     "toast",
@@ -79,6 +83,26 @@ private fun nodeExampleMainHasNodeDirective(file: File): Boolean {
             firstMeaningful == "'nodejs';" ||
             firstMeaningful == "\"node\";" ||
             firstMeaningful == "'node';"
+}
+
+private fun nodeExampleEntryFile(dir: File, name: String, projectJson: Map<*, *>): File {
+    val entry = projectJson["main"]?.toString().orEmpty()
+    if (entry.isBlank()) {
+        throw GradleException("Node example '$name' project.json must declare a main entry.")
+    }
+    if (entry.contains('\u0000') || entry.startsWith("/") || entry.startsWith("\\") || Regex("""^[A-Za-z]:""").containsMatchIn(entry)) {
+        throw GradleException("Node example '$name' project.json main must be a safe relative path: $entry")
+    }
+    val file = dir.resolve(entry).canonicalFile
+    val root = dir.canonicalFile
+    if (file != root && !file.toPath().startsWith(root.toPath())) {
+        throw GradleException("Node example '$name' project.json main escapes the example directory: $entry")
+    }
+    val extension = file.extension.lowercase()
+    if (extension !in nodeExampleSupportedEntryExtensions) {
+        throw GradleException("Node example '$name' project.json main uses unsupported extension '.$extension'.")
+    }
+    return file
 }
 
 val verifyNodeExamples = tasks.register("verifyNodeExamples") {
@@ -137,7 +161,7 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
                 throw GradleException("Node example '$name' has unknown tags: ${unknownTags.joinToString()}")
             }
             val dir = examplesRoot.resolve(name)
-            val requiredFiles = listOf("README.md", "project.json", "package.json", "main.cjs", "expected-output.txt")
+            val requiredFiles = listOf("README.md", "project.json", "package.json", "expected-output.txt")
             val missingFiles = requiredFiles.filterNot { dir.resolve(it).isFile }
             if (missingFiles.isNotEmpty()) {
                 throw GradleException("Node example '$name' is missing files: ${missingFiles.joinToString()}")
@@ -150,8 +174,9 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
             if (projectJson["name"] != name || projectJson["type"] != "node") {
                 throw GradleException("Node example '$name' project.json must declare name='$name' and type='node'.")
             }
-            if (projectJson["main"] != "main.cjs") {
-                throw GradleException("Node example '$name' project.json must use main.cjs as main.")
+            val mainFile = nodeExampleEntryFile(dir, name, projectJson)
+            if (!mainFile.isFile) {
+                throw GradleException("Node example '$name' is missing declared main entry: ${mainFile.relativeTo(dir)}")
             }
             if ("phase7" in tags) {
                 val exampleMetadata = projectJson["example"] as? Map<*, *>
@@ -178,9 +203,8 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
             if (!packageName.startsWith("@autojs6-sample/")) {
                 throw GradleException("Node example '$name' package.json name must use @autojs6-sample/ scope.")
             }
-            val mainFile = dir.resolve("main.cjs")
-            if (!nodeExampleMainHasNodeDirective(mainFile)) {
-                throw GradleException("Node example '$name' main.cjs must start with a node directive.")
+            if (mainFile.extension.lowercase() !in setOf("mjs", "mts") && !nodeExampleMainHasNodeDirective(mainFile)) {
+                throw GradleException("Node example '$name' ${mainFile.name} must start with a node directive.")
             }
             val expectedOutput = dir.resolve("expected-output.txt").readText()
             val passMarker = "sample.$name=PASS"
@@ -188,7 +212,7 @@ val verifyNodeExamples = tasks.register("verifyNodeExamples") {
                 throw GradleException("Node example '$name' expected-output.txt must contain '$passMarker'.")
             }
             if (!mainFile.readText().contains(passMarker)) {
-                throw GradleException("Node example '$name' main.cjs must print '$passMarker'.")
+                throw GradleException("Node example '$name' ${mainFile.name} must print '$passMarker'.")
             }
             if (packagedCompatible && "packaged" !in tags) {
                 throw GradleException("Node example '$name' is packagedCompatible but is missing the packaged tag.")

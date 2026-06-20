@@ -125,6 +125,40 @@ class NodeTypeScriptInstrumentationTest {
     }
 
     @Test
+    fun packagedModuleSourcesStripTsAndMtsGraph() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("TypeScript packaged moduleSources graph")
+        val workDir = freshWorkDir("ts-module-sources")
+        File(workDir, "package.json").writeText("""{"type":"module"}""")
+        val depTs = File(workDir, "dep.ts")
+        val dynamicMts = File(workDir, "dynamic.mts")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import { value } from "./dep.ts";
+                type Label = string;
+                const dynamic = await import("./dynamic.mts");
+                const marker: Label = value + ":" + dynamic.suffix;
+                console.log("ts.module_sources=" + marker);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mts").absolutePath,
+            workingDirectory = workDir,
+            moduleSources = mapOf(
+                depTs.absolutePath to """
+                    export type Label = string;
+                    export const value: Label = "ts";
+                """.trimIndent(),
+                dynamicMts.absolutePath to """
+                    type Suffix = string;
+                    export const suffix: Suffix = "mts";
+                """.trimIndent(),
+            ),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("TypeScript packaged moduleSources graph", result)
+        assertTrue(result.stdout.contains("ts.module_sources=ts:mts"))
+    }
+
+    @Test
     fun tsxEntryFailsWithExplicitUnsupportedExtension() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("TypeScript .tsx unsupported extension")
         val workDir = freshWorkDir("ts-tsx")

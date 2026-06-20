@@ -149,6 +149,27 @@
       "packagedCompatible": true
     },
     {
+      "name": "typescript-cjs",
+      "status": "partial",
+      "tags": ["phase8", "main-app", "typescript", "commonjs"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "typescript-esm",
+      "status": "partial",
+      "tags": ["phase8", "main-app", "typescript", "esm"],
+      "mainAppSmoke": true,
+      "packagedCompatible": false
+    },
+    {
+      "name": "packaged-typescript",
+      "status": "partial",
+      "tags": ["phase8", "packaged", "typescript", "esm", "dynamic-import"],
+      "mainAppSmoke": false,
+      "packagedCompatible": true
+    },
+    {
       "name": "typescript-smoke",
       "status": "stable",
       "tags": ["typescript", "bridge"],
