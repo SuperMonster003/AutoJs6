@@ -1215,6 +1215,25 @@ measures the supported `compile-cache-only` mode and the separate
 modes as unavailable with policy reasons instead of adding temporary runtime
 switches.
 
+Current inspector design-gate focused instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeInspectorDesignGateInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies the S8-37 disabled inspector boundary: the `inspector`
+feature flag is high-risk, release-forbidden, and has no build, project, or
+packaged APK override path; `require("inspector")`, `node:inspector`,
+`require.resolve`, `process.getBuiltinModule`, and local
+`node_modules/inspector` shadowing all remain denied; `process._debugProcess`,
+`process.execArgv`, `process.allowedNodeEnvironmentFlags`, and
+`process.features.inspector` stay inert; and `NODE_OPTIONS` /
+`NODE_INSPECT_RESUME_ON_START` are filtered from script-visible `process.env`.
+No endpoint, port binding, ADB forwarding target, or active-session
+notification exists while the design gate remains disabled. See
+`docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`.
+
 Current Embedded Node memory leak stress gate:
 
 ```powershell

@@ -318,6 +318,14 @@ Current Batch F implementation status:
   `no-cache-no-snapshot`, `snapshot-only`, and `compile-cache-plus-snapshot` as
   unavailable with policy reasons. No runtime cache-disable switch or startup
   snapshot path is added.
+- S8-37 is complete as a debug-only inspector design gate in the current
+  disabled state. No inspector endpoint is opened, no port is bound, and no
+  ADB forwarding target exists. The focused gate proves that metadata cannot
+  enable the `inspector` feature flag, script-visible inspector APIs remain
+  disabled, `node_modules/inspector` cannot shadow the builtin policy,
+  process debugging surfaces stay inert, and `NODE_OPTIONS` /
+  `NODE_INSPECT_RESUME_ON_START` are filtered from script-visible
+  `process.env`.
 
 Focused gates:
 
@@ -326,6 +334,7 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeModuleCompileCacheInstrumentationTest,org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRuntimePrewarmPoolInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePerformanceMatrixInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeInspectorDesignGateInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
 ```
 
@@ -335,3 +344,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/BOOTSTRAP_STARTUP_SNAPSHOT.md`
 - `docs/nodejs/reports/phase8/RUNTIME_PREWARM_POOL.md`
 - `docs/nodejs/reports/phase8/PERFORMANCE_MATRIX.md`
+- `docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`

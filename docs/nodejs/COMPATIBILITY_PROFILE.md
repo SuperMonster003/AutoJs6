@@ -759,7 +759,7 @@ Network-related limited builtins may exist for feature detection and stable deni
 
 `vm` is intentionally disabled, including local `node_modules/vm` shadowing, until a future design gate explicitly proves a safe subset. See `docs/nodejs/design/VM.md`.
 
-`inspector` is intentionally disabled, including debugger port binding and script-visible inspector APIs, until a future debug-build-only design gate explicitly proves user consent, loopback binding, lifecycle close, and packaged APK denial. See `docs/nodejs/design/INSPECTOR.md`.
+`inspector` is intentionally disabled, including debugger port binding and script-visible inspector APIs. S8-37 adds a focused disabled-state gate that proves metadata cannot enable the feature flag, `node_modules/inspector` cannot shadow the policy, process debugging APIs remain inert, and `NODE_OPTIONS` / `NODE_INSPECT_RESUME_ON_START` are filtered from script-visible `process.env`. A future positive implementation must be debug-build-only and must prove explicit user action, loopback binding, visible/revocable active-session state, lifecycle close, and packaged APK denial. See `docs/nodejs/design/INSPECTOR.md` and `docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`.
 
 ## ESM Status
 

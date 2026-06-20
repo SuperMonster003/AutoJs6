@@ -20,9 +20,17 @@ The current runtime keeps inspector disabled:
 - `require("inspector")` and `require("node:inspector")` reject with the disabled-builtin error shape.
 - `require.resolve("inspector")` rejects before `node_modules/inspector` can shadow the disabled builtin.
 - `process._debugProcess` is disabled.
+- `process.execArgv` is empty, `process.allowedNodeEnvironmentFlags` is frozen and empty, and `process.features.inspector` / `process.features.debug` are false.
+- Script-visible `process.env` filters `NODE_OPTIONS` and `NODE_INSPECT_RESUME_ON_START`.
 - `NodeRuntimeCapabilities.featureFlagsById["inspector"]` is `status=disabled`, `securityLevel=high`, and has no build, project, or packaged APK override.
 - No embedded Node service binds an inspector TCP or WebSocket port.
 - Packaged APK verification does not accept inspector metadata.
+
+## S8-37 Design Gate
+
+S8-37 adds `NodeInspectorDesignGateInstrumentationTest` as a focused negative gate for the disabled policy. It verifies the registry-disabled feature flag, build/project/package override denial, script-visible builtin denial, local `node_modules/inspector` shadowing denial, inert process debugging APIs, startup/debugger env filtering, and absence of inspector diagnostics while disabled.
+
+The gate does not enable inspector support. A future task that opens a debug endpoint must add positive attach tests and the lifecycle/security coverage listed under Future Acceptance Gate.
 
 ## Risk Model
 
