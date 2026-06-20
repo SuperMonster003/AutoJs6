@@ -6,6 +6,7 @@ import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import org.autojs.autojs.App
+import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -230,6 +231,18 @@ object NativeNodeEmbeddedRuntimeBridge {
     private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_BYTES
     private const val EMBEDDED_SCRIPT_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
     private const val EMBEDDED_SCRIPT_MODULE_SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
+    const val COMPILE_CACHE_SCHEMA_VERSION = "autojs6-node-compile-cache-v1"
+    const val COMPILE_CACHE_DIR_NAME = "node-compile-cache"
+    const val COMPILE_CACHE_MAX_BYTES = 16L * 1024L * 1024L
+    const val COMPILE_CACHE_MAX_PROJECT_DIRS = 32
+    const val COMPILE_CACHE_ENV_ENABLED = "AUTOJS6_NODE_COMPILE_CACHE_ENABLED"
+    const val COMPILE_CACHE_ENV_DIR = "AUTOJS6_NODE_COMPILE_CACHE_DIR"
+    const val COMPILE_CACHE_ENV_KEY = "AUTOJS6_NODE_COMPILE_CACHE_KEY"
+    const val COMPILE_CACHE_ENV_RUNTIME_KEY = "AUTOJS6_NODE_COMPILE_CACHE_RUNTIME_KEY"
+    const val COMPILE_CACHE_ENV_PROJECT_KEY = "AUTOJS6_NODE_COMPILE_CACHE_PROJECT_KEY"
+    const val COMPILE_CACHE_ENV_LOADER = "AUTOJS6_NODE_COMPILE_CACHE_LOADER"
+    const val COMPILE_CACHE_ENV_SCHEMA = "AUTOJS6_NODE_COMPILE_CACHE_SCHEMA"
+    const val COMPILE_CACHE_ENV_PREPARE_ERROR = "AUTOJS6_NODE_COMPILE_CACHE_PREPARE_ERROR"
     const val PROBE_LEVEL_KOTLIN_ROUND_TRIP = 0
     private const val PROBE_LEVEL_BRIDGE_PING = 1
     private const val PROBE_LEVEL_LOAD_LIBNODE = 2
@@ -493,7 +506,7 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
 
-        val preparedRequest = try {
+        var preparedRequest = try {
             prepareEmbeddedScriptRequest(request)
         } catch (error: Throwable) {
             return embeddedScriptRequestPreparationFailure(
@@ -516,6 +529,7 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
         validateEmbeddedScriptModuleSources(preparedRequest, processName, pid, startedAt)?.let { return it }
+        preparedRequest = withCompileCacheEnv(context, preparedRequest)
 
         val loadStartedAt = SystemClock.elapsedRealtime()
         val libcxxLoad = loadLibrary("c++_shared")
@@ -787,6 +801,159 @@ object NativeNodeEmbeddedRuntimeBridge {
                 runtimeModuleSources = runtimeModuleSources,
             )
         }
+    }
+
+    fun compileCacheBaseDir(context: Context): File {
+        val appContext = context.applicationContext
+        val codeCacheDir = runCatching { appContext.codeCacheDir }.getOrNull()
+            ?: File(appContext.cacheDir, "code_cache")
+        return File(codeCacheDir, COMPILE_CACHE_DIR_NAME)
+    }
+
+    private fun withCompileCacheEnv(
+        context: Context,
+        request: EmbeddedScriptRequest,
+    ): EmbeddedScriptRequest {
+        val env = LinkedHashMap<String, String>(request.env)
+        val runtimeKey = compileCacheRuntimeKey(request)
+        val projectKey = compileCacheProjectKey(request)
+        env[COMPILE_CACHE_ENV_ENABLED] = "1"
+        env[COMPILE_CACHE_ENV_SCHEMA] = COMPILE_CACHE_SCHEMA_VERSION
+        env[COMPILE_CACHE_ENV_RUNTIME_KEY] = runtimeKey
+        env[COMPILE_CACHE_ENV_PROJECT_KEY] = projectKey
+        env[COMPILE_CACHE_ENV_KEY] = compileCacheContentKey(request, runtimeKey, projectKey)
+        env[COMPILE_CACHE_ENV_LOADER] = compileCacheLoaderVersion()
+        val directory = runCatching {
+            val root = compileCacheBaseDir(context)
+            val cacheDir = File(File(root, runtimeKey), projectKey)
+            if (!cacheDir.isDirectory && !cacheDir.mkdirs() && !cacheDir.isDirectory) {
+                error("Failed to create compile cache directory: ${cacheDir.absolutePath}")
+            }
+            pruneCompileCacheDirectory(root)
+            cacheDir
+        }.getOrElse { error ->
+            env[COMPILE_CACHE_ENV_ENABLED] = "0"
+            env[COMPILE_CACHE_ENV_PREPARE_ERROR] = error.message ?: error.javaClass.name
+            null
+        }
+        env[COMPILE_CACHE_ENV_DIR] = directory?.absolutePath.orEmpty()
+        return request.copy(env = env)
+    }
+
+    private fun compileCacheRuntimeKey(request: EmbeddedScriptRequest): String = sha256Hex {
+        updatePart(COMPILE_CACHE_SCHEMA_VERSION)
+        updatePart(NodeRuntimeCapabilities.ENGINE_VERSION)
+        updatePart(NodeRuntimeCapabilities.NODE_HEADER_VERSION)
+        updatePart(NodeRuntimeCapabilities.NODE_VERSION_EXPECTED_PREFIX)
+        updatePart(BuildConfig.NODEJS_RUNTIME_BACKEND)
+        updatePart(BuildConfig.NODEJS_RUNTIME_SLOT)
+        updatePart(BuildConfig.NODEJS_RUNTIME_SLOT_TARGET_VERSION)
+        updatePart(Build.SUPPORTED_ABIS.joinToString(","))
+        updatePart(Build.VERSION.SDK_INT.toString())
+        updatePart(compileCacheLoaderVersion())
+        updatePart(request.esmExperimentalEnabled.toString())
+        updatePart(request.dynamicImportExperimentalEnabled.toString())
+        updatePart(request.workerThreadsExperimentalEnabled.toString())
+        updatePart(request.javaInteropExperimentalEnabled.toString())
+    }.take(32)
+
+    private fun compileCacheProjectKey(request: EmbeddedScriptRequest): String = sha256Hex {
+        updatePart(COMPILE_CACHE_SCHEMA_VERSION)
+        updatePart(request.workingDirectory?.takeIf { it.isNotBlank() } ?: File(request.sourceName).parent.orEmpty())
+    }.take(24)
+
+    private fun compileCacheContentKey(
+        request: EmbeddedScriptRequest,
+        runtimeKey: String,
+        projectKey: String,
+    ): String = sha256Hex {
+        updatePart(runtimeKey)
+        updatePart(projectKey)
+        updatePart(request.sourceName)
+        updatePart(sha256Utf8(request.source))
+        updatePart("moduleSources")
+        request.moduleSources.keys.sorted().forEach { sourceName ->
+            updatePart(sourceName)
+            updatePart(sha256Utf8(request.moduleSources.getValue(sourceName)))
+        }
+        updatePart("runtimeModuleSources")
+        request.runtimeModuleSources.keys.sorted().forEach { sourceName ->
+            updatePart(sourceName)
+            updatePart(sha256Utf8(request.runtimeModuleSources.getValue(sourceName)))
+        }
+    }.take(48)
+
+    private fun compileCacheLoaderVersion(): String = listOf(
+        NodeProjectRuntimeCompatibilityDescriptor.BOOTSTRAP_VERSION,
+        NodeProjectRuntimeCompatibilityDescriptor.COMMONJS_LOADER_VERSION,
+        NodeProjectRuntimeCompatibilityDescriptor.ESM_LOADER_VERSION,
+        NodeProjectRuntimeCompatibilityDescriptor.DYNAMIC_IMPORT_VERSION,
+        NodeProjectRuntimeCompatibilityDescriptor.MODULE_SOURCES_SCHEMA_VERSION,
+    ).joinToString("|")
+
+    private fun pruneCompileCacheDirectory(root: File) {
+        if (!root.isDirectory || root.name != COMPILE_CACHE_DIR_NAME) {
+            return
+        }
+        val projectDirs = root.listFiles().orEmpty()
+            .filter { it.isDirectory }
+            .flatMap { runtimeDir -> runtimeDir.listFiles().orEmpty().filter { it.isDirectory } }
+        projectDirs
+            .sortedByDescending { it.lastModified() }
+            .drop(COMPILE_CACHE_MAX_PROJECT_DIRS)
+            .forEach { it.safeDeleteRecursivelyUnder(root) }
+        var totalBytes = root.recursiveSizeBytes()
+        if (totalBytes <= COMPILE_CACHE_MAX_BYTES) {
+            return
+        }
+        projectDirs.sortedBy { it.lastModified() }.forEach { projectDir ->
+            if (totalBytes <= COMPILE_CACHE_MAX_BYTES) {
+                return
+            }
+            val bytes = projectDir.recursiveSizeBytes()
+            if (projectDir.safeDeleteRecursivelyUnder(root)) {
+                totalBytes -= bytes
+            }
+        }
+    }
+
+    private fun File.recursiveSizeBytes(): Long {
+        if (!exists()) {
+            return 0L
+        }
+        if (isFile) {
+            return length()
+        }
+        return listFiles().orEmpty().sumOf { it.recursiveSizeBytes() }
+    }
+
+    private fun File.safeDeleteRecursivelyUnder(root: File): Boolean {
+        return runCatching {
+            val canonicalRoot = root.canonicalFile
+            val canonicalTarget = canonicalFile
+            val rootPath = canonicalRoot.path
+            val targetPath = canonicalTarget.path
+            if (targetPath == rootPath || !targetPath.startsWith(rootPath + File.separator)) {
+                return false
+            }
+            deleteRecursively()
+        }.getOrDefault(false)
+    }
+
+    private fun sha256Utf8(value: String): String = sha256Hex {
+        updatePart(value)
+    }
+
+    private fun sha256Hex(block: MessageDigest.() -> Unit): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.block()
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    private fun MessageDigest.updatePart(value: String?) {
+        val bytes = (value ?: "<null>").toByteArray(StandardCharsets.UTF_8)
+        update(bytes)
+        update(0.toByte())
     }
 
     fun embeddedScriptRequestPreparationFailure(

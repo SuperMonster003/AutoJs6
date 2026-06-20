@@ -5561,6 +5561,27 @@ std::string buildEmbeddedScriptExecutionSource(
     lastMap: "",
     lastError: ""
   };
+  const __autojs6_compile_cache_diagnostics = {
+    requested: false,
+    enabled: false,
+    status: "not_requested",
+    statusCode: "",
+    directory: "",
+    key: "",
+    runtimeKey: "",
+    projectKey: "",
+    loader: "",
+    schema: "",
+    message: "",
+    v8Version: "",
+    flushSupported: false,
+    flushAttempted: false,
+    flushed: false,
+    customLoader: true,
+    hitCount: 0,
+    missCount: 0,
+    hitMissStatus: "unavailable"
+  };
   const __autojs6_source_map_cache = Object.create(null);
   let __autojs6_runtime_module_accounting = null;
   const __autojs6_native_function = Function;
@@ -7514,6 +7535,9 @@ std::string buildEmbeddedScriptExecutionSource(
       if (!key || key.indexOf("\u0000") >= 0) {
         continue;
       }
+      if (__autojs6_internal_compile_cache_env_key(key)) {
+        continue;
+      }
       const record = __autojs6_request_env_sources[key];
       const value = record && record.source !== undefined && record.source !== null
         ? String(record.source)
@@ -7608,6 +7632,121 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     } catch (_) {}
     return null;
+  }
+  function __autojs6_internal_request_env_value(key) {
+    try {
+      const record = __autojs6_request_env_sources && __autojs6_request_env_sources[key];
+      if (record && record.source !== undefined && record.source !== null) {
+        return String(record.source);
+      }
+    } catch (_) {}
+    return "";
+  }
+  function __autojs6_internal_compile_cache_env_key(key) {
+    return typeof key === "string" && (
+      key.indexOf("AUTOJS6_NODE_COMPILE_CACHE_") === 0 ||
+      key === "NODE_COMPILE_CACHE" ||
+      key === "NODE_DISABLE_COMPILE_CACHE"
+    );
+  }
+  function __autojs6_compile_cache_status_name(status, constants) {
+    if (constants && typeof constants === "object") {
+      for (const key of Object.keys(constants)) {
+        if (constants[key] === status) {
+          return key;
+        }
+      }
+    }
+    return status === undefined || status === null ? "" : String(status);
+  }
+  function __autojs6_install_compile_cache() {
+    const diagnostics = __autojs6_compile_cache_diagnostics;
+    diagnostics.schema = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_SCHEMA");
+    diagnostics.directory = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_DIR");
+    diagnostics.key = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_KEY");
+    diagnostics.runtimeKey = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_RUNTIME_KEY");
+    diagnostics.projectKey = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_PROJECT_KEY");
+    diagnostics.loader = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_LOADER");
+    diagnostics.message = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_PREPARE_ERROR");
+    diagnostics.v8Version = typeof process === "object" && process && process.versions
+      ? String(process.versions.v8 || "")
+      : "";
+    const enabled = __autojs6_internal_request_env_value("AUTOJS6_NODE_COMPILE_CACHE_ENABLED");
+    diagnostics.requested = enabled !== "0" && diagnostics.directory.length > 0;
+    if (!diagnostics.requested) {
+      diagnostics.status = diagnostics.message ? "PREPARE_FAILED" : "disabled";
+      return;
+    }
+    try {
+      const moduleBuiltin = __autojs6_builtin_module("module");
+      if (!moduleBuiltin || typeof moduleBuiltin.enableCompileCache !== "function") {
+        diagnostics.status = "unavailable";
+        diagnostics.message = "node:module.enableCompileCache is unavailable in this runtime.";
+        return;
+      }
+      const constants = moduleBuiltin.constants && moduleBuiltin.constants.compileCacheStatus;
+      const result = moduleBuiltin.enableCompileCache(diagnostics.directory);
+      const status = result && result.status !== undefined ? result.status : undefined;
+      diagnostics.statusCode = status === undefined || status === null ? "" : String(status);
+      diagnostics.status = __autojs6_compile_cache_status_name(status, constants) || "unknown";
+      if (result && result.directory) {
+        diagnostics.directory = String(result.directory);
+      }
+      if (result && result.message) {
+        diagnostics.message = String(result.message);
+      }
+      diagnostics.enabled = diagnostics.status === "ENABLED" || diagnostics.status === "ALREADY_ENABLED";
+      diagnostics.flushSupported = typeof moduleBuiltin.flushCompileCache === "function";
+      diagnostics.hitMissStatus = "unavailable_custom_loader";
+    } catch (error) {
+      diagnostics.enabled = false;
+      diagnostics.status = "FAILED";
+      diagnostics.message = error && error.message ? String(error.message) : String(error);
+    }
+  }
+  function __autojs6_flush_compile_cache(reason) {
+    const diagnostics = __autojs6_compile_cache_diagnostics;
+    if (!diagnostics.flushSupported) {
+      return;
+    }
+    diagnostics.flushAttempted = true;
+    try {
+      const moduleBuiltin = __autojs6_builtin_module("module");
+      if (moduleBuiltin && typeof moduleBuiltin.flushCompileCache === "function") {
+        moduleBuiltin.flushCompileCache();
+        diagnostics.flushed = true;
+        diagnostics.message = diagnostics.message || String(reason || "");
+      }
+    } catch (error) {
+      diagnostics.flushed = false;
+      diagnostics.message = error && error.message ? String(error.message) : String(error);
+    }
+  }
+  function __autojs6_compile_cache_profile_snapshot() {
+    const diagnostics = __autojs6_compile_cache_diagnostics;
+    return Object.freeze({
+      requested: diagnostics.requested,
+      enabled: diagnostics.enabled,
+      status: diagnostics.status,
+      statusCode: diagnostics.statusCode,
+      directory: diagnostics.directory,
+      key: diagnostics.key,
+      runtimeKey: diagnostics.runtimeKey,
+      projectKey: diagnostics.projectKey,
+      loader: diagnostics.loader,
+      schema: diagnostics.schema,
+      message: diagnostics.message,
+      v8Version: diagnostics.v8Version,
+      flushSupported: diagnostics.flushSupported,
+      flushAttempted: diagnostics.flushAttempted,
+      flushed: diagnostics.flushed,
+      customLoader: diagnostics.customLoader,
+      hitCount: diagnostics.hitCount,
+      missCount: diagnostics.missCount,
+      hitMissStatus: diagnostics.hitMissStatus,
+      userControlExposed: false,
+      appPrivateOnly: true
+    });
   }
   function __autojs6_install_safe_globals() {
     const bufferModule = typeof Buffer === "function" ? null : __autojs6_builtin_module("buffer");
@@ -8725,6 +8864,7 @@ std::string buildEmbeddedScriptExecutionSource(
         nativeAddonDisabled: "ERR_AUTOJS6_NATIVE_ADDON_DISABLED",
         legacyAliases: Object.freeze(legacyAliases)
       }),
+      compileCache: __autojs6_compile_cache_profile_snapshot(),
       bridgePermissions: __autojs6_bridge_permission_report(),
       bridgeLimits: __autojs6_bridge_limits_report()
     });
@@ -35731,6 +35871,25 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.sourceMapLastSource = __autojs6_source_map_diagnostics.lastSource;
     fields.sourceMapLastMap = __autojs6_source_map_diagnostics.lastMap;
     fields.sourceMapLastError = __autojs6_source_map_diagnostics.lastError;
+    fields.compileCacheRequested = __autojs6_compile_cache_diagnostics.requested;
+    fields.compileCacheEnabled = __autojs6_compile_cache_diagnostics.enabled;
+    fields.compileCacheStatus = __autojs6_compile_cache_diagnostics.status;
+    fields.compileCacheStatusCode = __autojs6_compile_cache_diagnostics.statusCode;
+    fields.compileCacheDirectory = __autojs6_compile_cache_diagnostics.directory;
+    fields.compileCacheKey = __autojs6_compile_cache_diagnostics.key;
+    fields.compileCacheRuntimeKey = __autojs6_compile_cache_diagnostics.runtimeKey;
+    fields.compileCacheProjectKey = __autojs6_compile_cache_diagnostics.projectKey;
+    fields.compileCacheLoader = __autojs6_compile_cache_diagnostics.loader;
+    fields.compileCacheSchema = __autojs6_compile_cache_diagnostics.schema;
+    fields.compileCacheMessage = __autojs6_compile_cache_diagnostics.message;
+    fields.compileCacheV8Version = __autojs6_compile_cache_diagnostics.v8Version;
+    fields.compileCacheFlushSupported = __autojs6_compile_cache_diagnostics.flushSupported;
+    fields.compileCacheFlushAttempted = __autojs6_compile_cache_diagnostics.flushAttempted;
+    fields.compileCacheFlushed = __autojs6_compile_cache_diagnostics.flushed;
+    fields.compileCacheCustomLoader = __autojs6_compile_cache_diagnostics.customLoader;
+    fields.compileCacheHitCount = __autojs6_compile_cache_diagnostics.hitCount;
+    fields.compileCacheMissCount = __autojs6_compile_cache_diagnostics.missCount;
+    fields.compileCacheHitMissStatus = __autojs6_compile_cache_diagnostics.hitMissStatus;
     return fields;
   }
   function __autojs6_finish_success(value) {
@@ -35741,6 +35900,7 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
     __autojs6_close_all_scoped_fds();
+    __autojs6_flush_compile_cache("script success");
     __autojs6_finished = true;
     globalThis.__autojs6_probe_result = JSON.stringify(__autojs6_result_envelope({
       succeeded: true,
@@ -35760,6 +35920,7 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_close_all_scoped_fs_watches();
     __autojs6_close_all_scoped_watch_files();
     __autojs6_close_all_scoped_fds();
+    __autojs6_flush_compile_cache("script failure");
     __autojs6_finished = true;
     globalThis.__autojs6_probe_result = JSON.stringify(__autojs6_result_envelope({
       succeeded: false,
@@ -35792,6 +35953,7 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_install_safe_globals();
     __autojs6_install_timer_diagnostics();
     __autojs6_install_process_mvp();
+    __autojs6_install_compile_cache();
     __autojs6_install_output_capture();
     __autojs6_install_tty_stdio_helpers();
     const __autojs6_main_module = __autojs6_create_module(__autojs6_source_name, null);

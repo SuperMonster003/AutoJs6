@@ -51,6 +51,7 @@ object NodeDoctorReportGenerator {
             put("privacy", privacyJson())
             put("app", appJson(context))
             put("runtime", runtimeJson(probeResult))
+            put("compileCache", compileCacheJson(context))
             put("featureFlags", featureFlagsJson())
             put("nativeLibraries", nativeLibrariesJson(context, probeResult))
             put("capabilityProfile", capabilityProfileJson())
@@ -102,6 +103,21 @@ object NodeDoctorReportGenerator {
         put("androidSdk", Build.VERSION.SDK_INT)
         put("device", listOf(Build.MANUFACTURER, Build.MODEL).filter { it.isNotBlank() }.joinToString(" "))
         put("compatibilityDescriptor", NodeProjectRuntimeCompatibilityDescriptor.currentJson())
+    }
+
+    private fun compileCacheJson(context: Context) = JSONObject().apply {
+        put("schema", NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_SCHEMA_VERSION)
+        put("status", if (BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED) "enabled" else "disabled")
+        put("defaultEnabled", BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED)
+        put("appPrivateOnly", true)
+        put("userControlExposed", false)
+        put("baseDir", NativeNodeEmbeddedRuntimeBridge.compileCacheBaseDir(context).absolutePath.redactPath(context))
+        put("maxBytes", NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_MAX_BYTES)
+        put("maxProjectDirs", NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_MAX_PROJECT_DIRS)
+        put("runtimeApi", "node:module.enableCompileCache")
+        put("location", "app-private-code-cache")
+        put("hitMissStatus", "embedded-script diagnostics report status; custom-loader hit/miss counters are unavailable")
+        put("diagnosticPrefix", "embedded_script.compile_cache")
     }
 
     private fun featureFlagsJson() = JSONArray().apply {
@@ -221,6 +237,7 @@ object NodeDoctorReportGenerator {
 
     private fun buildText(context: Context, generatedAt: String, json: JSONObject): String {
         val runtime = json.getJSONObject("runtime")
+        val compileCache = json.getJSONObject("compileCache")
         val nativeLibraries = json.getJSONObject("nativeLibraries")
         val packagedTemplate = json.getJSONObject("packagedTemplate")
         val lastNodeError = json.getJSONObject("lastNodeError")
@@ -257,6 +274,14 @@ object NodeDoctorReportGenerator {
             appendLine("  dynamic import: ${runtimeVersions.getString("dynamicImport")}")
             appendLine("  bridge protocol: ${runtimeVersions.getString("bridgeProtocol")}")
             appendLine("  moduleSources schema: ${runtimeVersions.getString("moduleSourcesSchema")}")
+            appendLine()
+            appendLine("Compile Cache:")
+            appendLine("  status: ${compileCache.getString("status")}")
+            appendLine("  app-private only: ${compileCache.getBoolean("appPrivateOnly")}")
+            appendLine("  user control exposed: ${compileCache.getBoolean("userControlExposed")}")
+            appendLine("  base dir: ${compileCache.getString("baseDir")}")
+            appendLine("  quota: ${compileCache.getLong("maxBytes")} bytes / ${compileCache.getInt("maxProjectDirs")} project dirs")
+            appendLine("  hit/miss: ${compileCache.getString("hitMissStatus")}")
             appendLine()
             appendLine("Native Libraries:")
             appendLine("  native dir: ${nativeLibraries.getString("nativeLibraryDir")}")

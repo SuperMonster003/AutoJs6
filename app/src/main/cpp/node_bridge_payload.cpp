@@ -111,6 +111,25 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.source_map_last_source", jsonStringField(text, "sourceMapLastSource"));
     putPayload(payload, "embedded_script.source_map_last_map", jsonStringField(text, "sourceMapLastMap"));
     putPayload(payload, "embedded_script.source_map_last_error", jsonStringField(text, "sourceMapLastError"));
+    putPayload(payload, "embedded_script.compile_cache.requested", jsonBooleanField(text, "compileCacheRequested"));
+    putPayload(payload, "embedded_script.compile_cache.enabled", jsonBooleanField(text, "compileCacheEnabled"));
+    putPayload(payload, "embedded_script.compile_cache.status", jsonStringField(text, "compileCacheStatus"));
+    putPayload(payload, "embedded_script.compile_cache.status_code", jsonStringField(text, "compileCacheStatusCode"));
+    putPayload(payload, "embedded_script.compile_cache.directory", jsonStringField(text, "compileCacheDirectory"));
+    putPayload(payload, "embedded_script.compile_cache.key", jsonStringField(text, "compileCacheKey"));
+    putPayload(payload, "embedded_script.compile_cache.runtime_key", jsonStringField(text, "compileCacheRuntimeKey"));
+    putPayload(payload, "embedded_script.compile_cache.project_key", jsonStringField(text, "compileCacheProjectKey"));
+    putPayload(payload, "embedded_script.compile_cache.loader", jsonStringField(text, "compileCacheLoader"));
+    putPayload(payload, "embedded_script.compile_cache.schema", jsonStringField(text, "compileCacheSchema"));
+    putPayload(payload, "embedded_script.compile_cache.message", jsonStringField(text, "compileCacheMessage"));
+    putPayload(payload, "embedded_script.compile_cache.v8_version", jsonStringField(text, "compileCacheV8Version"));
+    putPayload(payload, "embedded_script.compile_cache.flush_supported", jsonBooleanField(text, "compileCacheFlushSupported"));
+    putPayload(payload, "embedded_script.compile_cache.flush_attempted", jsonBooleanField(text, "compileCacheFlushAttempted"));
+    putPayload(payload, "embedded_script.compile_cache.flushed", jsonBooleanField(text, "compileCacheFlushed"));
+    putPayload(payload, "embedded_script.compile_cache.custom_loader", jsonBooleanField(text, "compileCacheCustomLoader"));
+    putPayload(payload, "embedded_script.compile_cache.hit_count", jsonNumberField(text, "compileCacheHitCount"));
+    putPayload(payload, "embedded_script.compile_cache.miss_count", jsonNumberField(text, "compileCacheMissCount"));
+    putPayload(payload, "embedded_script.compile_cache.hit_miss_status", jsonStringField(text, "compileCacheHitMissStatus"));
 }
 
 void putLifecycleSkippedPayload(

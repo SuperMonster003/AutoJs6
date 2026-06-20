@@ -4,6 +4,7 @@ import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NodeBridgeProviderStatus
 import org.autojs.autojs.engine.NodeEmbeddedTestHarness
+import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
 import org.autojs.autojs.engine.NodeWorkManagerBridgeScheduler
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.json.JSONArray
@@ -50,6 +51,14 @@ class NodeDoctorReportGeneratorInstrumentationTest {
             NodeProjectRuntimeCompatibilityDescriptor.MODULE_SOURCES_SCHEMA_VERSION,
             descriptorVersions.getString("moduleSourcesSchema"),
         )
+        val compileCache = json.getJSONObject("compileCache")
+        assertEquals(NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_SCHEMA_VERSION, compileCache.getString("schema"))
+        assertTrue(compileCache.getBoolean("appPrivateOnly"))
+        assertFalse(compileCache.getBoolean("userControlExposed"))
+        assertEquals(NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_MAX_BYTES, compileCache.getLong("maxBytes"))
+        assertEquals(NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_MAX_PROJECT_DIRS, compileCache.getInt("maxProjectDirs"))
+        assertTrue(compileCache.getString("baseDir").contains(NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_DIR_NAME))
+        assertTrue(compileCache.getString("diagnosticPrefix").contains("embedded_script.compile_cache"))
         val bridgeCapabilities = json.getJSONObject("bridgeCapabilities")
         val networkCapability = bridgeCapabilities.getJSONObject("network")
         assertTrue(bridgeCapabilities.getBoolean("projectManifestSupported"))
@@ -82,6 +91,9 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertTrue(text.contains("Bridge Providers:"))
         assertTrue(text.contains("fetch/axios: status="))
         assertTrue(text.contains("Runtime Compatibility:"))
+        assertTrue(text.contains("Compile Cache:"))
+        assertTrue(text.contains("app-private only: true"))
+        assertTrue(text.contains("custom-loader hit/miss counters are unavailable"))
         assertTrue(text.contains(NodeProjectRuntimeCompatibilityDescriptor.ESM_LOADER_VERSION))
         assertTrue(text.contains("network capability: requires declaration=true"))
         assertFalse(text.contains(context.filesDir.absolutePath))
