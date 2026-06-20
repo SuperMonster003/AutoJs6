@@ -30756,6 +30756,60 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return { options, callback };
   }
+  function __autojs6_limited_https_policy_error(optionName) {
+    return __autojs6_fetch_policy_error(
+      "AutoJs6 controlled HTTPS client rejects TLS option '" + optionName + "'. Certificate customization requires a separate design gate.",
+      "https_" + optionName,
+      "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    );
+  }
+  function __autojs6_limited_https_validate_options(options) {
+    if (!options || typeof options !== "object") {
+      return;
+    }
+    if (options.rejectUnauthorized === false) {
+      throw __autojs6_limited_https_policy_error("rejectUnauthorized");
+    }
+    const denied = [
+      "ca",
+      "cert",
+      "key",
+      "pfx",
+      "passphrase",
+      "secureContext",
+      "secureOptions",
+      "secureProtocol",
+      "ciphers",
+      "minVersion",
+      "maxVersion",
+      "checkServerIdentity",
+      "session",
+      "requestCert",
+      "clientCertEngine",
+      "crl",
+      "ecdhCurve",
+      "honorCipherOrder",
+      "sigalgs",
+      "createConnection"
+    ];
+    for (const name of denied) {
+      if (__autojs6_has_own(options, name) && options[name] !== undefined && options[name] !== null) {
+        throw __autojs6_limited_https_policy_error(name);
+      }
+    }
+    const agent = options.agent;
+    if (agent && typeof agent === "object") {
+      const agentOptions = agent.options && typeof agent.options === "object" ? agent.options : agent;
+      __autojs6_limited_https_validate_options(agentOptions);
+      if (
+        __autojs6_has_own(agent, "createConnection") &&
+        typeof agent.createConnection === "function" &&
+        !agent.__autojs6LimitedAgent
+      ) {
+        throw __autojs6_limited_https_policy_error("agent.createConnection");
+      }
+    }
+  }
   function __autojs6_limited_http_request_options(protocol, options) {
     const defaults = {
       protocol: protocol + ":",
@@ -30902,6 +30956,9 @@ std::string buildEmbeddedScriptExecutionSource(
       constructor(options, callback, autoDispatch) {
         super();
         const normalized = __autojs6_limited_http_request_options(protocol, options);
+        if (isHttps) {
+          __autojs6_limited_https_validate_options(normalized);
+        }
         this.aborted = false;
         this.agent = normalized.agent || limitedModule.globalAgent;
         this.method = normalized.method;
@@ -31170,6 +31227,13 @@ std::string buildEmbeddedScriptExecutionSource(
       constructor(options) {
         super();
         const opts = options && typeof options === "object" ? options : Object.create(null);
+        if (isHttps) {
+          __autojs6_limited_https_validate_options(opts);
+        }
+        Object.defineProperty(this, "__autojs6LimitedAgent", {
+          value: true,
+          enumerable: false
+        });
         this.options = Object.freeze(Object.assign(Object.create(null), opts));
         this.requests = Object.create(null);
         this.sockets = Object.create(null);
