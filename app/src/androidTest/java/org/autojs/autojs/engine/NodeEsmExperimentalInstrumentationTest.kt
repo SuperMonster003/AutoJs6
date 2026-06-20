@@ -242,21 +242,37 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
-    fun experimentalCommonJsRequireMjsFailsWithRequireEsmCode() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("CJS require ESM boundary")
+    fun experimentalCommonJsRequireMjsSupportsSyncGraphAndRejectsAsyncGraph() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("CJS require ESM sync boundary")
         val workDir = freshWorkDir("cjs-require-esm")
         File(workDir, "dep.mjs").writeText("""export const value = "esm";""")
+        File(workDir, "async-dep.mjs").writeText("""export const value = await Promise.resolve("esm");""")
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
-            source = """require("./dep.mjs");""",
+            source = """
+                const dep = require("./dep.mjs");
+                console.log("cjs.require.esm=" + dep.value);
+            """.trimIndent(),
             sourceName = File(workDir, "main.cjs").absolutePath,
             workingDirectory = workDir,
             esmExperimentalEnabled = true,
         )
 
-        assertFalse(NodeEmbeddedTestHarness.describeResult("cjs require mjs", result), result.succeeded)
-        assertEquals(NodeRuntimeErrorCodes.REQUIRE_ESM_UNSUPPORTED, result.errorCode)
-        assertTrue(result.errorMessage.orEmpty().contains("CommonJS require() cannot load AutoJs6 partial ESM modules"))
+        NodeEmbeddedTestHarness.assertSucceeded("cjs require sync mjs", result)
+        assertTrue(result.stdout.contains("cjs.require.esm=esm"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val asyncResult = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """require("./async-dep.mjs");""",
+            sourceName = File(workDir, "main.cjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        assertFalse(NodeEmbeddedTestHarness.describeResult("cjs require async mjs", asyncResult), asyncResult.succeeded)
+        assertEquals("ERR_REQUIRE_ASYNC_MODULE", asyncResult.errorCode)
+        assertTrue(asyncResult.errorMessage.orEmpty().contains("cannot synchronously load"))
     }
 
     @Test

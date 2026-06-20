@@ -20351,7 +20351,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log(label + ".message=" + String(error.message).includes(label === "module.createRequire.target.esm" ? "ESM/import" : "Unsupported Embedded Node local module extension"));
                   }
                 }
-                check("module.createRequire.target.esm", () => req("./esm.mjs"));
+                console.log("module.createRequire.target.esm.default=" + req("./esm.mjs").default);
                 check("module.createRequire.target.native", () => req("./native.node"));
                 const target = "./preferred";
                 console.log("module.createRequire.precedence=" + req(target));
@@ -20361,10 +20361,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                 moduleSources = mapOf(preferred.canonicalPath to """module.exports = "preloaded";"""),
             )
             assertTrue(precedence.errorMessage.orEmpty(), precedence.succeeded)
-            assertTrue(precedence.stdout.contains("module.createRequire.target.esm.code=ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED"))
+            assertTrue(precedence.stdout.contains("module.createRequire.target.esm.default=1"))
             assertTrue(precedence.stdout.contains("module.createRequire.target.native.message=true"))
             assertTrue(precedence.stdout.contains("module.createRequire.precedence=preloaded"))
-            assertEquals("0", precedence.nativeValues["embedded_script.dynamic_require_fallback_loaded_count"])
+            assertEquals("1", precedence.nativeValues["embedded_script.dynamic_require_fallback_loaded_count"])
 
             settleEmbeddedScriptServiceProcess()
 
@@ -24904,6 +24904,19 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """.trimIndent(),
                 StandardCharsets.UTF_8,
             )
+            File(workspace, "tool.config.mjs").writeText(
+                """
+                export default {
+                  name: "AutoJs6",
+                  plugin: "config-tool-plugin-alpha",
+                  scopedPlugin: "@autojs6/config-plugin-scoped",
+                  localPlugin: "./plugins/local-plugin",
+                  formatter: "json",
+                  output: "dist/result-mjs.json"
+                };
+                """.trimIndent() + "\n",
+                StandardCharsets.UTF_8,
+            )
             File(workspace, "plugins/local-plugin.js").writeText(
                 """
                 const processBuiltin = require("process");
@@ -24983,6 +24996,34 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(jsonResult.stdout.contains("config.cli.local=true"))
             assertTrue(jsonResult.stdout.contains("config.cli.output=true"))
             assertConfigToolOutput(File(workspace, "dist/result-json.json"))
+
+            settleEmbeddedScriptServiceProcess()
+
+            val mjsResult = runEmbeddedPackageBin(
+                projectDir = scriptDir,
+                packageDir = toolDir,
+                binName = "config-tool",
+                args = listOf(
+                    "--cwd",
+                    "workspace",
+                    "--config",
+                    "tool.config.mjs",
+                    "--out",
+                    "dist/result-mjs.json",
+                    "--format",
+                    "json",
+                ),
+            )
+
+            assertTrue(mjsResult.errorMessage.orEmpty(), mjsResult.succeeded)
+            assertTrue(mjsResult.stdout.contains("config.cli.ready=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.config_mjs=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.create_require=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.plugin=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.scoped=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.local=true"))
+            assertTrue(mjsResult.stdout.contains("config.cli.output=true"))
+            assertConfigToolOutput(File(workspace, "dist/result-mjs.json"))
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -25055,8 +25096,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 """.trimIndent() + "\n",
                 StandardCharsets.UTF_8,
             )
-            File(workspace, "tool.config.mjs").writeText(
-                "export default { name: 'AutoJs6' };\n",
+            File(workspace, "tool.async.config.mjs").writeText(
+                "export default await Promise.resolve({ name: 'AutoJs6' });\n",
                 StandardCharsets.UTF_8,
             )
             File(workspace, "plugins/local-plugin.js").writeText(
@@ -25160,10 +25201,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             settleEmbeddedScriptServiceProcess()
 
             val esmConfig = runDeny(
-                listOf("--cwd", ".", "--config", "tool.config.mjs", "--out", "dist/result.json"),
+                listOf("--cwd", ".", "--config", "tool.async.config.mjs", "--out", "dist/result.json"),
             )
             assertFalse(esmConfig.succeeded)
-            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", esmConfig.errorCode)
+            assertEquals("ERR_REQUIRE_ASYNC_MODULE", esmConfig.errorCode)
 
             settleEmbeddedScriptServiceProcess()
 
@@ -25194,6 +25235,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             val rcWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-rc", "rc-json")
             val jsWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-js", "js")
             val packageWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-pkg", "package-json")
+            val mjsWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-mjs", "mjs")
 
             fun runDiscovery(workspace: File, outName: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
                 return runEmbeddedPackageBin(
@@ -25244,6 +25286,18 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(packageResult.stdout.contains("discovery.cli.package_json=true"))
             assertTrue(packageResult.stdout.contains("discovery.cli.output=true"))
             assertDiscoveryOutput(File(packageWorkspace, "dist/package-result.json"), "package-json")
+
+            settleEmbeddedScriptServiceProcess()
+
+            val mjsResult = runDiscovery(mjsWorkspace, "mjs-result.json")
+            assertTrue(mjsResult.errorMessage.orEmpty(), mjsResult.succeeded)
+            assertTrue(mjsResult.stdout.contains("discovery.cli.ready=true"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.type=mjs"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.plugin=true"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.scoped=true"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.package_json=false"))
+            assertTrue(mjsResult.stdout.contains("discovery.cli.output=true"))
+            assertDiscoveryOutput(File(mjsWorkspace, "dist/mjs-result.json"), "mjs")
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -25360,6 +25414,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             settleEmbeddedScriptServiceProcess()
 
             val mjsWorkspace = writeDiscoveryWorkspace(scriptDir, "workspace-mjs", "mjs")
+            File(mjsWorkspace, "discovertool.config.mjs").writeText(
+                "export default await Promise.resolve({ name: 'AutoJs6' });\n",
+                StandardCharsets.UTF_8,
+            )
             val mjsConfig = runDeny(
                 mjsWorkspace,
                 listOf(
@@ -25372,7 +25430,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 ),
             )
             assertFalse(mjsConfig.succeeded)
-            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", mjsConfig.errorCode)
+            assertEquals("ERR_REQUIRE_ASYNC_MODULE", mjsConfig.errorCode)
 
             settleEmbeddedScriptServiceProcess()
 
@@ -26169,6 +26227,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 writeText("""module.exports = require("dgram");""", StandardCharsets.UTF_8)
             }
             File(scriptDir, "esm.mjs").writeText("""export default 1;""", StandardCharsets.UTF_8)
+            File(scriptDir, "async-esm.mjs").writeText("""export default await Promise.resolve(1);""", StandardCharsets.UTF_8)
             File(scriptDir, "native.node").writeText("native", StandardCharsets.UTF_8)
 
             fun runFailure(source: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
@@ -26284,9 +26343,18 @@ class EmbeddedScriptMvpInstrumentationTest {
                 "referrer='${needsDgram.canonicalPath}'",
             )
 
-            val esm = runFailure("""const target = "./esm.mjs"; require(target);""")
-            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", esm.errorCode)
-            assertMessageContains(esm, "CommonJS require() cannot load AutoJs6 partial ESM modules", "./esm.mjs", "request='./esm.mjs'")
+            val esm = runEmbeddedScript(
+                source = """const target = "./esm.mjs"; console.log("diagnostics.esm.default=" + require(target).default);""",
+                sourceName = main.canonicalPath,
+                workingDirectory = scriptDir.canonicalPath,
+            )
+            assertTrue(esm.errorMessage.orEmpty(), esm.succeeded)
+            assertTrue(esm.stdout.contains("diagnostics.esm.default=1"))
+            settleEmbeddedScriptServiceProcess()
+
+            val asyncEsm = runFailure("""const target = "./async-esm.mjs"; require(target);""")
+            assertEquals("ERR_REQUIRE_ASYNC_MODULE", asyncEsm.errorCode)
+            assertMessageContains(asyncEsm, "cannot synchronously load", "./async-esm.mjs", "request='./async-esm.mjs'")
 
             val native = runFailure("""const target = "./native.node"; require(target);""")
             assertMessageContains(native, "Unsupported Embedded Node local module extension", "./native.node", "request='./native.node'")
@@ -27090,7 +27158,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun commonJsDynamicRequireFallbackRejectsMissingEscapeAbsoluteNativeAndMjs() {
+    fun commonJsDynamicRequireFallbackRejectsMissingEscapeAbsoluteNativeAndLoadsSyncMjs() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val scriptDir = File(context.cacheDir, "embedded-dynamic-require-deny-${System.nanoTime()}").apply {
@@ -27154,14 +27222,12 @@ class EmbeddedScriptMvpInstrumentationTest {
             settleEmbeddedScriptServiceProcess()
 
             val esm = runEmbeddedScript(
-                source = """const target = "./esm.mjs"; require(target);""",
+                source = """const target = "./esm.mjs"; console.log("fallback.esm.default=" + require(target).default);""",
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
             )
-            assertFalse(esm.succeeded)
-            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", esm.errorCode)
-            assertTrue(esm.errorMessage.orEmpty().contains("CommonJS require() cannot load AutoJs6 partial ESM modules"))
-            assertTrue(esm.errorMessage.orEmpty().contains(".mjs"))
+            assertTrue(esm.errorMessage.orEmpty(), esm.succeeded)
+            assertTrue(esm.stdout.contains("fallback.esm.default=1"))
         } finally {
             outsideFile.delete()
             scriptDir.deleteRecursively()
@@ -27690,11 +27756,10 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun esmPartialSupportsMjsEntrypointsAndKeepsCommonJsRequireBoundary() {
+    fun esmPartialSupportsMjsEntrypointsAndCommonJsRequireSyncBoundary() {
         assumeEmbeddedScriptExecutionEnabled()
 
         assertTrue(BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED)
-        val requireEsmCode = "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED"
         val scriptDir = File(context.cacheDir, "embedded-esm-gate-${System.nanoTime()}").apply {
             check(mkdirs()) { "Failed to create ESM gate test dir: $absolutePath" }
         }
@@ -27721,11 +27786,18 @@ class EmbeddedScriptMvpInstrumentationTest {
                     "nodejs";
                     function capture(label, fn) {
                       try {
-                        console.log(label + "=" + fn());
+                        const value = fn();
+                        console.log(label + ".ok=true");
+                        if (value && typeof value === "object") {
+                          console.log(label + ".default=" + value.default);
+                          if ("value" in value) console.log(label + ".value=" + value.value);
+                        } else {
+                          console.log(label + "=" + value);
+                        }
                       } catch (error) {
                         console.log(label + ".code=" + error.code);
                         const message = String(error.message).replace(/\s+/g, " ");
-                        console.log(label + ".message=" + message.includes("CommonJS require() cannot load AutoJs6 partial ESM modules"));
+                        console.log(label + ".asyncMessage=" + message.includes("cannot synchronously load"));
                         console.log(label + ".mjsMessage=" + message.includes(".mjs"));
                       }
                     }
@@ -27735,6 +27807,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     capture("mainMjs", () => require("pkg-main-mjs"));
                     capture("exportsMjs", () => require("pkg-export-mjs"));
                     capture("importsMjs", () => require("#esm"));
+                    capture("tlaMjs", () => require("./tla.mjs"));
                     """.trimIndent(),
                     StandardCharsets.UTF_8,
                 )
@@ -27751,12 +27824,15 @@ class EmbeddedScriptMvpInstrumentationTest {
             val relativeMjs = File(scriptDir, "esm.mjs").apply {
                 writeText("""export default "esm";""", StandardCharsets.UTF_8)
             }
+            val tlaMjs = File(scriptDir, "tla.mjs").apply {
+                writeText("""export default await Promise.resolve("tla");""", StandardCharsets.UTF_8)
+            }
             val typeModulePackageJson = File(scriptDir, "node_modules/pkg-type-module-js/package.json").apply {
                 parentFile?.mkdirs()
                 writeText("""{"type":"module","main":"index.js"}""", StandardCharsets.UTF_8)
             }
             val typeModuleIndex = File(scriptDir, "node_modules/pkg-type-module-js/index.js").apply {
-                writeText("""exports.value = "type-module-js-cjs";""", StandardCharsets.UTF_8)
+                writeText("""export const value = "type-module-js-esm";""", StandardCharsets.UTF_8)
             }
             val mainMjsPackageJson = File(scriptDir, "node_modules/pkg-main-mjs/package.json").apply {
                 parentFile?.mkdirs()
@@ -27782,6 +27858,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     depCjs,
                     innerCjs,
                     relativeMjs,
+                    tlaMjs,
                     typeModulePackageJson,
                     typeModuleIndex,
                     mainMjsPackageJson,
@@ -27793,14 +27870,19 @@ class EmbeddedScriptMvpInstrumentationTest {
 
             assertTrue(result.errorMessage.orEmpty(), result.succeeded)
             assertTrue(result.stdout, result.stdout.contains("cjs=inner+dep"))
-            assertTrue(result.stdout, result.stdout.contains("typeModuleJs=type-module-js-cjs"))
-            listOf("relativeMjs", "mainMjs", "exportsMjs", "importsMjs").forEach { label ->
-                assertTrue(result.stdout, result.stdout.contains("$label.code=$requireEsmCode"))
-                assertTrue(result.stdout, result.stdout.contains("$label.message=true"))
-                assertTrue(result.stdout, result.stdout.contains("$label.mjsMessage=true"))
-            }
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs=type-module-js-esm"))
+            assertTrue(result.stdout, result.stdout.contains("relativeMjs.ok=true"))
+            assertTrue(result.stdout, result.stdout.contains("relativeMjs.default=esm"))
+            assertTrue(result.stdout, result.stdout.contains("mainMjs.ok=true"))
+            assertTrue(result.stdout, result.stdout.contains("mainMjs.default=main-mjs"))
+            assertTrue(result.stdout, result.stdout.contains("exportsMjs.ok=true"))
+            assertTrue(result.stdout, result.stdout.contains("exportsMjs.default=exports-mjs"))
+            assertTrue(result.stdout, result.stdout.contains("importsMjs.ok=true"))
+            assertTrue(result.stdout, result.stdout.contains("importsMjs.default=esm"))
+            assertTrue(result.stdout, result.stdout.contains("tlaMjs.code=ERR_REQUIRE_ASYNC_MODULE"))
+            assertTrue(result.stdout, result.stdout.contains("tlaMjs.asyncMessage=true"))
             assertEquals(
-                "type=module ignored by Embedded Node CommonJS MVP",
+                "type=module accepted by Embedded Node partial ESM",
                 result.nativeValues["embedded_script.package_type_module_policy"],
             )
             assertTrue(
@@ -28229,6 +28311,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 const importsDual = require("#dual").mode;
                 const selfDual = require("self-browser-dual").value;
                 const scoped = require("@autojs6/scoped-dual").value;
+                const mainMjs = require("main-mjs-pkg").default;
                 console.log("dual.fields.main=" + mainField);
                 console.log("dual.fields.index=" + indexFallback);
                 console.log("dual.fields.main_missing_index=" + mainMissing);
@@ -28239,6 +28322,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("dual.createRequire.cache=" + (dual === dualAgain));
                 console.log("dual.self.require=" + selfDual);
                 console.log("dual.scoped.ignored=" + scoped);
+                console.log("dual.main_mjs.default=" + mainMjs);
                 console.log("dual.package.ready=" + (
                   mainField === "main-cjs" &&
                   indexFallback === "index-fallback" &&
@@ -28248,7 +28332,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                   exportsDefault === "exports-default-only" &&
                   importsDual === "root-require" &&
                   selfDual === "self-sub-cjs" &&
-                  scoped === "scoped-main"
+                  scoped === "scoped-main" &&
+                  mainMjs === "main-mjs"
                 ));
                 console.log("dual.package.main=" + (mainField === "main-cjs" && mainMissing === "main-missing-index"));
                 console.log("dual.package.exports_require=" + (dual.mode === "exports-require"));
@@ -28267,6 +28352,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(success.stdout, success.stdout.contains("dual.createRequire.cache=true"))
             assertTrue(success.stdout, success.stdout.contains("dual.self.require=self-sub-cjs"))
             assertTrue(success.stdout, success.stdout.contains("dual.scoped.ignored=scoped-main"))
+            assertTrue(success.stdout, success.stdout.contains("dual.main_mjs.default=main-mjs"))
             assertTrue(success.stdout, success.stdout.contains("dual.package.ready=true"))
             assertTrue(success.stdout, success.stdout.contains("dual.package.main=true"))
             assertTrue(success.stdout, success.stdout.contains("dual.package.exports_require=true"))
@@ -28318,21 +28404,6 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(importOnly.errorMessage.orEmpty().contains("condition keys=import"))
             assertTrue(importOnly.errorMessage.orEmpty().contains("unsupported condition ignored"))
             assertEquals("import", importOnly.nativeValues["embedded_script.package_resolution_ignored_conditions"])
-
-            settleEmbeddedScriptServiceProcess()
-
-            val mainMjs = run(
-                """
-                "nodejs";
-                require("main-mjs-pkg");
-                """
-            )
-            assertFalse(mainMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", mainMjs.errorCode)
-            assertTrue(mainMjs.errorMessage.orEmpty().contains("main-mjs-pkg"))
-            assertTrue(mainMjs.errorMessage.orEmpty().contains("target='./esm.mjs'"))
-            assertTrue(mainMjs.errorMessage.orEmpty().contains("ignoredFields='module|browser|types'"))
-            assertEquals("module|browser|types", mainMjs.nativeValues["embedded_script.package_resolution_ignored_fields"])
 
             settleEmbeddedScriptServiceProcess()
 
@@ -28822,15 +28893,12 @@ class EmbeddedScriptMvpInstrumentationTest {
             val createRequireMjs = run(
                 """
                 "nodejs";
-                require("module").createRequire(__filename)("require-mjs-pkg");
+                const value = require("module").createRequire(__filename)("require-mjs-pkg").default;
+                console.log("esm.diag.require_mjs=" + value);
                 """
             )
-            assertFalse(createRequireMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", createRequireMjs.errorCode)
-            assertTrue(createRequireMjs.errorMessage.orEmpty().contains("require-mjs-pkg"))
-            assertTrue(createRequireMjs.errorMessage.orEmpty().contains("target='./esm.mjs'"))
-            assertTrue(createRequireMjs.errorMessage.orEmpty().contains("conditionKeys='import|require'"))
-            assertTrue(createRequireMjs.errorMessage.orEmpty().contains("selectedCondition='require'"))
+            assertTrue(createRequireMjs.errorMessage.orEmpty(), createRequireMjs.succeeded)
+            assertTrue(createRequireMjs.stdout.contains("esm.diag.require_mjs=require-mjs"))
             assertEquals("exports", createRequireMjs.nativeValues["embedded_script.package_resolution_field"])
             assertEquals("import|require", createRequireMjs.nativeValues["embedded_script.package_resolution_condition_keys"])
             assertEquals("require", createRequireMjs.nativeValues["embedded_script.package_resolution_selected_condition"])
@@ -28840,14 +28908,11 @@ class EmbeddedScriptMvpInstrumentationTest {
             val importsDefaultMjs = run(
                 """
                 "nodejs";
-                require("#default-mjs");
+                console.log("esm.diag.imports_default_mjs=" + require("#default-mjs").default);
                 """
             )
-            assertFalse(importsDefaultMjs.succeeded)
-            assertEquals("ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED", importsDefaultMjs.errorCode)
-            assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("#default-mjs"))
-            assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("field='imports'"))
-            assertTrue(importsDefaultMjs.errorMessage.orEmpty().contains("selectedCondition='default'"))
+            assertTrue(importsDefaultMjs.errorMessage.orEmpty(), importsDefaultMjs.succeeded)
+            assertTrue(importsDefaultMjs.stdout.contains("esm.diag.imports_default_mjs=root-esm"))
             assertEquals("imports", importsDefaultMjs.nativeValues["embedded_script.package_resolution_field"])
             assertEquals("default", importsDefaultMjs.nativeValues["embedded_script.package_resolution_selected_condition"])
             assertEquals("./root-esm.mjs", importsDefaultMjs.nativeValues["embedded_script.package_resolution_target"])
@@ -31737,7 +31802,13 @@ class EmbeddedScriptMvpInstrumentationTest {
 
             function configRequire(configFile) {
               const req = createRequire(configFile);
-              return { req, config: req("./" + path.basename(configFile)) };
+              const loaded = req("./" + path.basename(configFile));
+              return {
+                req,
+                config: loaded && typeof loaded === "object" && Object.prototype.hasOwnProperty.call(loaded, "default")
+                  ? loaded.default
+                  : loaded
+              };
             }
 
             async function parseJsonFile(file, label) {
@@ -32155,6 +32226,7 @@ class EmbeddedScriptMvpInstrumentationTest {
               console.log("config.cli.ready=" + ready);
               console.log("config.cli.config_js=" + (loaded.type === "js"));
               console.log("config.cli.config_json=" + (loaded.type === "json"));
+              console.log("config.cli.config_mjs=" + (loaded.type === "mjs"));
               console.log("config.cli.argv=" + argvOk);
               console.log("config.cli.chdir=" + cwdOk);
               console.log("config.cli.require_main=" + requireMainOk);
@@ -32192,7 +32264,10 @@ class EmbeddedScriptMvpInstrumentationTest {
             const { createRequire } = require("module");
 
             function requireConfig(configRequire, configFile) {
-              return configRequire("./" + path.basename(configFile));
+              const loaded = configRequire("./" + path.basename(configFile));
+              return loaded && typeof loaded === "object" && Object.prototype.hasOwnProperty.call(loaded, "default")
+                ? loaded.default
+                : loaded;
             }
 
             exports.value = "loader";
@@ -32209,13 +32284,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                   config: JSON.parse(await fsp.readFile(configArg, "utf8"))
                 };
               }
-              if (lower.endsWith(".mjs")) {
-                const configRequire = createRequire(path.resolve("package.json"));
-                requireConfig(configRequire, configFile);
-              }
               const configRequire = createRequire(configFile);
               return {
-                type: "js",
+                type: lower.endsWith(".mjs") ? "mjs" : "js",
                 configFile,
                 require: configRequire,
                 createRequire: true,

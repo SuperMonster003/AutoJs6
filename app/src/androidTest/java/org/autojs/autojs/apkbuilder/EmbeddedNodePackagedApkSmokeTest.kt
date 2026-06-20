@@ -530,15 +530,11 @@ class EmbeddedNodePackagedApkSmokeTest {
                   return error && error.code || String(error && error.message || error);
                 }
               }
-              function isSafeEsmRequireRejection(code) {
-                return code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" ||
-                  code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
-              }
-
               const resolver = require("resolver-edge-pkg");
               const feature = require("resolver-edge-pkg/feature/a");
               const condition = require("resolver-edge-pkg/condition");
               const imports = require("imports-edge-pkg");
+              const resolverEsm = require("resolver-edge-pkg/esm");
               const scopedSelf = require("@scope/resolver-self-pkg");
               const fallback = require("fallback-main-pkg");
               const resolverAgain = require("resolver-edge-pkg");
@@ -560,8 +556,8 @@ class EmbeddedNodePackagedApkSmokeTest {
                   resolverAgain === resolver,
                 blocked: errorCodeOf(() => require("resolver-edge-pkg/private/secret")) === "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
                   imports.blocked === "ERR_PACKAGE_IMPORT_NOT_DEFINED",
-                esmRejected: isSafeEsmRequireRejection(errorCodeOf(() => require("resolver-edge-pkg/esm"))) &&
-                  isSafeEsmRequireRejection(imports.esm)
+                esmLoaded: resolverEsm.default === "should-not-load" &&
+                  imports.esm === "should-not-load"
               };
               console.log("packaged.cjs.resolver.ready=true");
               console.log("packaged.cjs.resolver.ok=" + Object.values(checks).every(Boolean));
@@ -571,7 +567,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.cjs.scoped_self_reference=" + checks.scopedSelfReference);
               console.log("packaged.cjs.require_resolve=" + (checks.requireResolve && checks.cache && checks.fallback));
               console.log("packaged.cjs.blocked=" + checks.blocked);
-              console.log("packaged.cjs.esm_rejected=" + checks.esmRejected);
+              console.log("packaged.cjs.esm_loaded=" + checks.esmLoaded);
             }
 
             function runDependencyResolutionCorpus() {
@@ -664,7 +660,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 "packaged.cjs.scoped_self_reference=true",
                 "packaged.cjs.require_resolve=true",
                 "packaged.cjs.blocked=true",
-                "packaged.cjs.esm_rejected=true",
+                "packaged.cjs.esm_loaded=true",
                 "packaged.cjs.dependency_resolution.ready=true",
                 "packaged.cjs.dependency_resolution.ok=true",
                 "packaged.cjs.builtin_precedence=true",
@@ -8773,13 +8769,6 @@ class EmbeddedNodePackagedApkSmokeTest {
               }
             }
 
-            function hasLegacySafeEsmMessage(error) {
-              return error &&
-                error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
-                typeof error.message === "string" &&
-                error.message.length > 0;
-            }
-
             const disabledBuiltin = capture(() => require("child_process"));
             console.log("packaged.diagnostics.disabled_builtin.code=" + disabledBuiltin.code);
             console.log("packaged.diagnostics.disabled_builtin.message=" + String(disabledBuiltin.message).includes("child_process"));
@@ -8801,31 +8790,23 @@ class EmbeddedNodePackagedApkSmokeTest {
             console.log("packaged.diagnostics.cjs_stack.message=" + String(cjsBoom.message).includes("packaged diagnostic boom"));
             console.log("packaged.diagnostics.cjs_stack.source=" + /node_modules[\/\\]diagnostic-boom[\/\\]index\.js/.test(cjsStack));
 
-            const typeModuleMain = capture(() => require("diagnostic-type-module"));
-            const typeModuleMessage = String(typeModuleMain.message);
-            const hasRichTypeModuleMessage = (
-              typeModuleMain.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
-              typeModuleMessage.includes("diagnostic-type-module") &&
-              typeModuleMessage.includes("package.json") &&
-              typeModuleMessage.includes("field='main'") &&
-              typeModuleMessage.includes("target='index.mjs'")
-            );
-            console.log("packaged.diagnostics.esm.type_module.message=" + (
-              hasRichTypeModuleMessage || hasLegacySafeEsmMessage(typeModuleMain)
+            const typeModuleMain = require("diagnostic-type-module");
+            console.log("packaged.diagnostics.esm.type_module.value=" + (
+              typeModuleMain.default === "diagnostic-type-module-sync"
             ));
 
-            const exportsContext = capture(() => require("diagnostic-esm-export-context"));
-            const exportsContextMessage = String(exportsContext.message);
-            const hasRichExportsContextMessage = (
-              exportsContext.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
-              exportsContextMessage.includes("diagnostic-esm-export-context") &&
-              exportsContextMessage.includes("field='exports'") &&
-              exportsContextMessage.includes("conditionKeys='import|require'") &&
-              exportsContextMessage.includes("selectedCondition='require'") &&
-              exportsContextMessage.includes("target='./esm.mjs'")
-            );
+            const exportsContext = require("diagnostic-esm-export-context");
             console.log("packaged.diagnostics.esm.exports_context=" + (
-              hasRichExportsContextMessage || hasLegacySafeEsmMessage(exportsContext)
+              exportsContext.default === "diagnostic-esm-export-context-sync"
+            ));
+
+            const asyncModule = capture(() => require("diagnostic-async-esm"));
+            const asyncMessage = String(asyncModule.message);
+            console.log("packaged.diagnostics.esm.async_code=" + asyncModule.code);
+            console.log("packaged.diagnostics.esm.async_message=" + (
+              asyncModule.code === "ERR_REQUIRE_ASYNC_MODULE" &&
+              asyncMessage.includes("cannot synchronously load") &&
+              asyncMessage.includes("diagnostic-async-esm")
             ));
 
             fs.writeFileSync("./after-diagnostics.txt", "ok", "utf8");
@@ -8983,24 +8964,12 @@ class EmbeddedNodePackagedApkSmokeTest {
             mainScriptName = "main.js",
             mainScript = """
                 "nodejs";
-                try {
-                  require("./esm-entry.mjs");
-                  console.log("packaged.diagnostics.esm.unexpected=true");
-                } catch (error) {
-                  const esmDenied = error.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" ||
-                    error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
-                  const esmMessage = String(error.message);
-                  const hasRichEsmMessage = error.code === "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED" &&
-                    esmMessage.includes("CommonJS require() cannot load AutoJs6 partial ESM modules");
-                  const hasLegacySafeEsmMessage = error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED" &&
-                    typeof error.message === "string" &&
-                    error.message.length > 0;
-                  console.log("packaged.diagnostics.esm.code=" + error.code);
-                  console.log("packaged.diagnostics.esm.message=" + (esmDenied && (hasRichEsmMessage || hasLegacySafeEsmMessage)));
-                }
+                const esm = require("./esm-entry.mjs");
+                console.log("packaged.diagnostics.esm.code=ok");
+                console.log("packaged.diagnostics.esm.message=" + (esm.default === "packaged-esm-sync"));
             """.trimIndent() + "\n",
             extraFiles = mapOf(
-                "esm-entry.mjs" to """console.log("packaged.diagnostics.esm.entry.unexpected=true");""" + "\n",
+                "esm-entry.mjs" to """export default "packaged-esm-sync";""" + "\n",
             ),
             runtimeMarkers = ESM_DIAGNOSTICS_MARKERS,
         )
@@ -12558,7 +12527,7 @@ $nodeConfigJson
             """{"name":"diagnostic-type-module","version":"1.0.0","type":"module","main":"index.mjs"}""",
             mapOf(
                 "index.mjs" to """
-                export default "should-not-run";
+                export default "diagnostic-type-module-sync";
                 """.trimIndent(),
             ),
         )
@@ -12579,7 +12548,17 @@ $nodeConfigJson
             """.trimIndent(),
             mapOf(
                 "esm.mjs" to """
-                export default "should-not-run";
+                export default "diagnostic-esm-export-context-sync";
+                """.trimIndent(),
+            ),
+        )
+        EmbeddedNodeFixtureCorpus.writeNpmPackage(
+            projectDir,
+            "diagnostic-async-esm",
+            """{"name":"diagnostic-async-esm","version":"1.0.0","type":"module","main":"index.mjs"}""",
+            mapOf(
+                "index.mjs" to """
+                export default await Promise.resolve("diagnostic-async-esm");
                 """.trimIndent(),
             ),
         )
@@ -12901,6 +12880,7 @@ $nodeConfigJson
             "assets/project/node_modules/diagnostic-boom/package.json",
             "assets/project/node_modules/diagnostic-type-module/package.json",
             "assets/project/node_modules/diagnostic-esm-export-context/package.json",
+            "assets/project/node_modules/diagnostic-async-esm/package.json",
         ).forEach { packageJsonEntry ->
             assertTrue("Diagnostics APK is missing diagnostic package metadata", packageJsonEntry in entries)
             assertTrue(
@@ -12919,6 +12899,7 @@ $nodeConfigJson
             "node_modules/diagnostic-boom/index.js",
             "node_modules/diagnostic-type-module/index.mjs",
             "node_modules/diagnostic-esm-export-context/esm.mjs",
+            "node_modules/diagnostic-async-esm/index.mjs",
         ).forEach { relativePath ->
             val entry = "assets/project/$relativePath"
             assertTrue("Diagnostics APK is missing JavaScript diagnostic source: $entry", entry in entries)
@@ -14359,10 +14340,12 @@ $nodeConfigJson
             "packaged.diagnostics.fs_absolute.message=true",
             "packaged.diagnostics.cjs_stack.message=true",
             "packaged.diagnostics.cjs_stack.source=true",
-            "packaged.diagnostics.esm.type_module.message=true",
+            "packaged.diagnostics.esm.type_module.value=true",
             "packaged.diagnostics.esm.exports_context=true",
+            "packaged.diagnostics.esm.async_code=ERR_REQUIRE_ASYNC_MODULE",
+            "packaged.diagnostics.esm.async_message=true",
             "packaged.diagnostics.after_failure.ok=true",
-            "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
+            "packaged.diagnostics.esm.code=ok",
             "packaged.dynamic_import.ready=true",
             "packaged.dynamic_import.mjs=true",
             "packaged.dynamic_import.cjs=true",
@@ -14378,12 +14361,14 @@ $nodeConfigJson
             "packaged.diagnostics.fs_absolute.message=true",
             "packaged.diagnostics.cjs_stack.message=true",
             "packaged.diagnostics.cjs_stack.source=true",
-            "packaged.diagnostics.esm.type_module.message=true",
+            "packaged.diagnostics.esm.type_module.value=true",
             "packaged.diagnostics.esm.exports_context=true",
+            "packaged.diagnostics.esm.async_code=ERR_REQUIRE_ASYNC_MODULE",
+            "packaged.diagnostics.esm.async_message=true",
             "packaged.diagnostics.after_failure.ok=true",
         )
         private val ESM_DIAGNOSTICS_MARKERS = listOf(
-            "packaged.diagnostics.esm.code=ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
+            "packaged.diagnostics.esm.code=ok",
             "packaged.diagnostics.esm.message=true",
         )
         private val EXPERIMENTAL_ESM_RUNTIME_MARKERS = listOf(
