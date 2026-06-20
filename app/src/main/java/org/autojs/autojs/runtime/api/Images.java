@@ -119,8 +119,11 @@ public class Images {
     private volatile ScreenCapturer.OnScreenCaptureAvailableListener mOnScreenCaptureAvailableListener;
     private Image mPreCapture;
     private ImageWrapper mPreCaptureImage;
-    private ScreenCapturer mScreenCapturer;
+    private volatile ScreenCapturer mScreenCapturer;
     private ScreenCaptureRequester mScreenCaptureRequester;
+    private final List<ScriptPromiseAdapter> mScreenCaptureRequestWaiters = new ArrayList<>();
+    private boolean mScreenCaptureRequestInFlight;
+    private long mScreenCaptureRequestEpoch;
 
     public Images(Context context, ScriptRuntime scriptRuntime) {
         mContext = context;
@@ -241,54 +244,124 @@ public class Images {
     }
 
     public ScriptPromiseAdapter requestScreenCapture(int orientation, int width, int height, boolean isAsync) {
-        ScriptPromiseAdapter promiseAdapter = new ScriptPromiseAdapter();
-        if (mScreenCapturer == null) {
-            Handler handler = isAsync ? new Handler(Looper.getMainLooper()) : new Handler(mScriptRuntime.loopers.getServantLooper());
-            Context contextForRequest = mScriptRuntime.app.getCurrentActivity();
-            if (contextForRequest == null) contextForRequest = mContext;
-            mScreenCaptureRequester = new ScreenCaptureRequester();
-            mScreenCaptureRequester.request(contextForRequest, new ScreenCaptureRequester.Callback() {
+        final ScriptPromiseAdapter waiter = new ScriptPromiseAdapter();
+        final ScreenCapturer.Options options = new ScreenCapturer.Options(
+                width, height, orientation, ScreenMetrics.getDeviceScreenDensity(), isAsync
+        );
+        final long requestEpoch;
+
+        synchronized (this) {
+            if (mScreenCapturer != null && !mScreenCapturer.isReleased()) {
+                return alreadyGrantedScreenCaptureRequest();
+            }
+
+            if (mScreenCapturer != null && mScreenCapturer.isReleased()) {
+                mScreenCapturer = null;
+                mScreenCaptureReadyUptimeMillis = 0L;
+                releasePreCaptureLocked();
+            }
+
+            mScreenCaptureRequestWaiters.add(waiter);
+
+            if (mScreenCaptureRequestInFlight) {
+                return waiter;
+            }
+
+            mScreenCaptureRequestInFlight = true;
+            requestEpoch = ++mScreenCaptureRequestEpoch;
+        }
+
+        final Handler handler = isAsync ? new Handler(Looper.getMainLooper()) : new Handler(mScriptRuntime.loopers.getServantLooper());
+        Context contextForRequest = mScriptRuntime.app.getCurrentActivity();
+        if (contextForRequest == null) contextForRequest = mContext;
+
+        final ScreenCaptureRequester requester = new ScreenCaptureRequester();
+        synchronized (this) {
+            if (requestEpoch != mScreenCaptureRequestEpoch) {
+                return waiter;
+            }
+            mScreenCaptureRequester = requester;
+        }
+
+        try {
+            requester.request(contextForRequest, new ScreenCaptureRequester.Callback() {
                 @Override
                 public void onRequestResult(int resultCode, @Nullable Intent intent) {
-                    if (resultCode == RESULT_OK && intent != null) {
-                        try {
-                            ScreenCapturer.Options options = new ScreenCapturer.Options(
-                                    width, height, orientation, ScreenMetrics.getDeviceScreenDensity(), isAsync
-                            );
-                            mScreenCapturer = new ScreenCapturer(mContext, intent, options, handler);
-                            mScreenCapturer.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
-
-                            int delayMs = Pref.getScreenCaptureRequestDelay();
-                            if (delayMs < mScreenCaptureRequestDelayMin) delayMs = mScreenCaptureRequestDelayMin;
-                            if (delayMs > mScreenCaptureRequestDelayMax) delayMs = mScreenCaptureRequestDelayMax;
-
-                            mScreenCaptureReadyUptimeMillis = SystemClock.uptimeMillis() + delayMs;
-
-                            // @Caution by JetBrains AI Assistant (GPT-5.2) on Jan 19, 2025.
-                            //  ! Resolve immediately to avoid breaking ResultAdapter.wait semantics.
-                            //  ! zh-CN: 必须立即 resolve, 避免破坏 ResultAdapter.wait 的语义/线程模型.
-                            promiseAdapter.resolve(true);
-                        } catch (SecurityException ex) {
-                            promiseAdapter.reject(ex);
+                    synchronized (Images.this) {
+                        if (requestEpoch != mScreenCaptureRequestEpoch) {
+                            return;
                         }
-                    } else {
-                        promiseAdapter.resolve(false);
                     }
+
+                    if (resultCode != RESULT_OK || intent == null) {
+                        completeScreenCaptureRequest(requestEpoch, false, null);
+                        return;
+                    }
+
+                    final ScreenCapturer candidate;
+                    try {
+                        candidate = new ScreenCapturer(mContext, intent, options, handler);
+                        candidate.setOnMediaProjectionStopListener(() -> onScreenCapturerStopped(candidate));
+                        candidate.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
+                    } catch (Throwable t) {
+                        completeScreenCaptureRequest(requestEpoch, false, t);
+                        return;
+                    }
+
+                    int delayMs = Pref.getScreenCaptureRequestDelay();
+                    if (delayMs < mScreenCaptureRequestDelayMin) delayMs = mScreenCaptureRequestDelayMin;
+                    if (delayMs > mScreenCaptureRequestDelayMax) delayMs = mScreenCaptureRequestDelayMax;
+
+                    boolean installed = false;
+                    boolean active;
+                    synchronized (Images.this) {
+                        if (requestEpoch == mScreenCaptureRequestEpoch && mScreenCapturer == null && !candidate.isReleased()) {
+                            mScreenCapturer = candidate;
+                            mScreenCaptureReadyUptimeMillis = SystemClock.uptimeMillis() + delayMs;
+                            installed = true;
+                        }
+                        active = requestEpoch == mScreenCaptureRequestEpoch && mScreenCapturer != null && !mScreenCapturer.isReleased();
+                    }
+
+                    if (!installed) {
+                        candidate.release();
+                    }
+
+                    completeScreenCaptureRequest(requestEpoch, active, null);
                 }
 
                 @Override
                 public void onRequestError(@NonNull Throwable t) {
-                    promiseAdapter.reject(t);
+                    completeScreenCaptureRequest(requestEpoch, false, t);
                 }
             });
+        } catch (Throwable t) {
+            completeScreenCaptureRequest(requestEpoch, false, t);
         }
-        return promiseAdapter;
+
+        return waiter;
+    }
+
+    public synchronized boolean hasActiveScreenCapturer() {
+        return mScreenCapturer != null && !mScreenCapturer.isReleased();
+    }
+
+    private ScriptPromiseAdapter alreadyGrantedScreenCaptureRequest() {
+        final ScriptPromiseAdapter waiter = new ScriptPromiseAdapter();
+        new Handler(Looper.getMainLooper()).post(() -> waiter.resolve(true));
+        return waiter;
     }
 
     @Nullable
     public ImageWrapper captureScreen() {
         synchronized (this) {
-            if (mScreenCapturer == null) {
+            ScreenCapturer screenCapturer = mScreenCapturer;
+            if (screenCapturer == null || screenCapturer.isReleased()) {
+                if (screenCapturer != null) {
+                    mScreenCapturer = null;
+                    mScreenCaptureReadyUptimeMillis = 0L;
+                    releasePreCaptureLocked();
+                }
                 throw new SecurityException(mContext.getString(R.string.error_no_screen_capture_permission));
             }
 
@@ -307,7 +380,7 @@ public class Images {
             // zh-CN: 在 Java 层做重试, 避免把短暂的 null 帧暴露给 JS 层.
             Image capture = null;
             for (int i = 0; i < 6; i++) {
-                capture = mScreenCapturer.capture();
+                capture = screenCapturer.capture();
                 if (capture != null) break;
                 try {
                     Thread.sleep(40);
@@ -326,7 +399,7 @@ public class Images {
                     Thread.currentThread().interrupt();
                 }
                 for (int i = 0; i < 2; i++) {
-                    capture = mScreenCapturer.capture();
+                    capture = screenCapturer.capture();
                     if (capture != null) break;
                     try {
                         Thread.sleep(40);
@@ -652,30 +725,89 @@ public class Images {
             if (SystemClock.uptimeMillis() < mScreenCaptureReadyUptimeMillis) return;
             onScreenCaptureAvailableListener.onCaptureAvailable(imageWrapper);
         });
-        if (mScreenCapturer != null) {
-            mScreenCapturer.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
+        ScreenCapturer screenCapturer = mScreenCapturer;
+        if (screenCapturer != null && !screenCapturer.isReleased()) {
+            screenCapturer.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
+        }
+    }
+
+    private void completeScreenCaptureRequest(long requestEpoch, boolean granted, @Nullable Throwable error) {
+        final List<ScriptPromiseAdapter> waiters;
+
+        synchronized (this) {
+            if (requestEpoch != mScreenCaptureRequestEpoch) {
+                return;
+            }
+
+            mScreenCaptureRequestInFlight = false;
+            waiters = new ArrayList<>(mScreenCaptureRequestWaiters);
+            mScreenCaptureRequestWaiters.clear();
+
+            if (!granted) {
+                releaseScreenCaptureRequester();
+            }
+        }
+
+        for (ScriptPromiseAdapter waiter : waiters) {
+            if (error == null) {
+                waiter.resolve(granted);
+            } else {
+                waiter.reject(error);
+            }
+        }
+    }
+
+    private void onScreenCapturerStopped(@NonNull ScreenCapturer screenCapturer) {
+        synchronized (this) {
+            if (mScreenCapturer != screenCapturer) {
+                return;
+            }
+            mScreenCapturer = null;
+            mScreenCaptureReadyUptimeMillis = 0L;
+            releasePreCaptureLocked();
+            releaseScreenCaptureRequester();
         }
     }
 
     public void releaseScreenCapturer() {
+        final ScreenCapturer screenCapturer;
+        final List<ScriptPromiseAdapter> cancelledWaiters;
+
         synchronized (this) {
-            if (mScreenCapturer != null) {
-                mScreenCapturer.release();
-                mScreenCapturer = null;
-            }
+            ++mScreenCaptureRequestEpoch;
+            mScreenCaptureRequestInFlight = false;
+
+            cancelledWaiters = new ArrayList<>(mScreenCaptureRequestWaiters);
+            mScreenCaptureRequestWaiters.clear();
+
+            screenCapturer = mScreenCapturer;
+            mScreenCapturer = null;
+
             // Reset gate.
             // zh-CN: 重置延迟门闩.
             mScreenCaptureReadyUptimeMillis = 0L;
 
-            if (mPreCapture != null) {
-                mPreCapture.close();
-                mPreCapture = null;
-            }
-            if (mPreCaptureImage != null) {
-                mPreCaptureImage.recycle();
-                mPreCaptureImage = null;
-            }
+            releasePreCaptureLocked();
             releaseScreenCaptureRequester();
+        }
+
+        if (screenCapturer != null) {
+            screenCapturer.release();
+        }
+
+        for (ScriptPromiseAdapter waiter : cancelledWaiters) {
+            waiter.resolve(false);
+        }
+    }
+
+    private void releasePreCaptureLocked() {
+        if (mPreCapture != null) {
+            mPreCapture.close();
+            mPreCapture = null;
+        }
+        if (mPreCaptureImage != null) {
+            mPreCaptureImage.recycle();
+            mPreCaptureImage = null;
         }
     }
 

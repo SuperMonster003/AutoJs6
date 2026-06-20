@@ -11,7 +11,6 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
@@ -25,7 +24,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.text.MessageFormat;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,6 +78,17 @@ public class ScreenCapturer {
     private int mPixelFormat = PixelFormat.RGBA_8888;
     private volatile boolean mImageAvailable = false;
     private boolean mShouldRefreshVirtualDisplayOnNextCapture = false;
+    private volatile boolean mReleased = false;
+    private boolean mDisplayListenerRegistered = false;
+    private boolean mEventBusRegistered = false;
+    private Runnable mOnMediaProjectionStopListener;
+
+    private final MediaProjection.Callback mMediaProjectionCallback = new MediaProjection.Callback() {
+        @Override
+        public void onStop() {
+            handleMediaProjectionStop();
+        }
+    };
 
     public ScreenCapturer(Context context, Intent data, Options options, Handler handler) {
         mOptions = options;
@@ -119,19 +128,27 @@ public class ScreenCapturer {
             }
         };
 
-        // Register on a non-blocking handler.
-        // zh-CN: 使用不易被阻塞的 handler 注册监听.
-        mDisplayManager.registerDisplayListener(mDisplayListener, mImageCallbackHandler);
+        try {
+            // Register on a non-blocking handler.
+            // zh-CN: 使用不易被阻塞的 handler 注册监听.
+            mDisplayManager.registerDisplayListener(mDisplayListener, mImageCallbackHandler);
+            mDisplayListenerRegistered = true;
 
-        mMediaProjection = ((MediaProjectionManager) context.getSystemService(Context.MEDIA_PROJECTION_SERVICE))
-                .getMediaProjection(Activity.RESULT_OK, (Intent) data.clone());
-        mScreenDensity = options.density;
-        mOrientation = options.orientation;
+            mMediaProjection = ((MediaProjectionManager) context.getSystemService(Context.MEDIA_PROJECTION_SERVICE))
+                    .getMediaProjection(Activity.RESULT_OK, (Intent) data.clone());
+            mMediaProjection.registerCallback(mMediaProjectionCallback, mHandler);
+            mScreenDensity = options.density;
+            mOrientation = options.orientation;
 
-        refreshDetectedOrientation();
-        refreshVirtualDisplay(mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation, true);
+            refreshDetectedOrientation();
+            refreshVirtualDisplay(mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation, true);
 
-        EventBus.getDefault().register(this);
+            EventBus.getDefault().register(this);
+            mEventBusRegistered = true;
+        } catch (RuntimeException | Error t) {
+            release(true);
+            throw t;
+        }
     }
 
     private void refreshDetectedOrientation() {
@@ -170,6 +187,10 @@ public class ScreenCapturer {
     }
 
     private Image acquireLatestImage(long deadlineUptimeMillis) {
+        if (mReleased || mImageReader == null) {
+            return null;
+        }
+
         // Always wait for a fresh frame in sync mode.
         // zh-CN: 同步模式下每次都等待一帧新图.
         if (!mOptions.isAsync) {
@@ -188,7 +209,9 @@ public class ScreenCapturer {
             waitForImageAvailable(Math.min(IMAGE_AVAILABLE_WAIT_SLICE_MS, remain));
 
             try {
-                Image img = mImageReader.acquireLatestImage();
+                ImageReader imageReader = mImageReader;
+                if (mReleased || imageReader == null) return null;
+                Image img = imageReader.acquireLatestImage();
                 if (img != null) return img;
             } catch (UnsupportedOperationException ex) {
                 Integer pixelFormat = getPixelFormat(ex);
@@ -201,6 +224,9 @@ public class ScreenCapturer {
                     }
                     continue;
                 }
+                throw ex;
+            } catch (IllegalStateException ex) {
+                if (mReleased) return null;
                 throw ex;
             }
 
@@ -246,12 +272,13 @@ public class ScreenCapturer {
     }
 
     private void initVirtualDisplay(int width, int height, int screenDensity) {
-        refreshImageReader(width, height);
+        if (mReleased || mMediaProjection == null) {
+            return;
+        }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            mMediaProjection.registerCallback(new MediaProjection.Callback() {
-                /* Empty body. */
-            }, mHandler);
+        refreshImageReader(width, height);
+        if (mReleased || mImageReader == null) {
+            return;
         }
 
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(
@@ -267,6 +294,10 @@ public class ScreenCapturer {
     }
 
     private void refreshImageReader(int width, int height) {
+        if (mReleased) {
+            return;
+        }
+
         if (mImageReader != null) {
             mImageReader.close();
         }
@@ -282,46 +313,36 @@ public class ScreenCapturer {
     }
 
     private void refreshVirtualDisplay(int orientation, boolean isInit) {
-        AtomicInteger width = new AtomicInteger();
-        AtomicInteger height = new AtomicInteger();
-        if (orientation == ORIENTATION_NONE) {
-            width.set(mOptions.width);
-            height.set(mOptions.height);
-        } else {
-            width.set(ScreenMetrics.getOrientationAwareScreenWidth(orientation));
-            height.set(ScreenMetrics.getOrientationAwareScreenHeight(orientation));
+        if (mReleased) {
+            return;
         }
 
-        // Recreate VirtualDisplay when orientation changes in AUTO mode.
-        // VirtualDisplay.resize(...) may not reliably switch output orientation on some devices,
-        // causing canvas size to mismatch content orientation.
-        // zh-CN:
-        // AUTO 模式下只要方向发生变化, 就直接重建 VirtualDisplay.
-        // 部分设备上 VirtualDisplay.resize(...) 可能无法可靠切换输出方向, 从而导致画布尺寸与内容方向错配.
-        boolean shouldRecreate = !isInit
-                && mVirtualDisplay != null
-                && mOrientation == ORIENTATION_AUTO
-                && orientation != mAppliedOrientation;
+        int width;
+        int height;
+        if (orientation == ORIENTATION_NONE) {
+            width = mOptions.width;
+            height = mOptions.height;
+        } else {
+            width = ScreenMetrics.getOrientationAwareScreenWidth(orientation);
+            height = ScreenMetrics.getOrientationAwareScreenHeight(orientation);
+        }
 
+        // Reuse the same VirtualDisplay for the lifetime of this MediaProjection.
+        // Android 14+ rejects creating a second VirtualDisplay on one projection.
         if (mVirtualDisplay == null) {
             if (isInit) {
-                initVirtualDisplay(width.get(), height.get(), mScreenDensity);
+                initVirtualDisplay(width, height, mScreenDensity);
                 mAppliedOrientation = orientation;
             }
             return;
         }
 
-        if (shouldRecreate) {
-            mVirtualDisplay.release();
-            mVirtualDisplay = null;
-            initVirtualDisplay(width.get(), height.get(), mScreenDensity);
-            mAppliedOrientation = orientation;
+        refreshImageReader(width, height);
+        if (mReleased || mImageReader == null || mVirtualDisplay == null) {
             return;
         }
-
-        refreshImageReader(width.get(), height.get());
+        mVirtualDisplay.resize(width, height, mScreenDensity);
         mVirtualDisplay.setSurface(mImageReader.getSurface());
-        mVirtualDisplay.resize(width.get(), height.get(), mScreenDensity);
         mAppliedOrientation = orientation;
     }
 
@@ -357,13 +378,23 @@ public class ScreenCapturer {
     }
 
     private void setPixelFormat(int pixelFormat) {
+        if (mReleased || mImageReader == null || mVirtualDisplay == null) {
+            return;
+        }
+
         mPixelFormat = pixelFormat;
         refreshImageReader(mImageReader.getWidth(), mImageReader.getHeight());
-        mVirtualDisplay.setSurface(mImageReader.getSurface());
+        if (mImageReader != null && mVirtualDisplay != null) {
+            mVirtualDisplay.setSurface(mImageReader.getSurface());
+        }
     }
 
     @Nullable
     public Image capture() {
+        if (mReleased) {
+            return null;
+        }
+
         if (mOptions.isAsync) {
             throw new IllegalStateException("capture() is not available in async mode");
         }
@@ -428,16 +459,10 @@ public class ScreenCapturer {
             return mUnderUsingImage;
         }
 
-        // If timed out, force a best-effort rebuild once to recover from "no-frame" bad state.
-        // zh-CN: 若超时, 尝试强制重建一次以从 "无帧" 坏状态中自愈.
+        // If timed out, refresh the existing display once to recover from "no-frame" bad state.
         if (mOrientation == ORIENTATION_AUTO) {
             refreshDetectedOrientation();
-            if (mVirtualDisplay != null) {
-                mVirtualDisplay.release();
-                mVirtualDisplay = null;
-            }
-            initVirtualDisplay(getExpectedWidthByDetectedOrientation(), getExpectedHeightByDetectedOrientation(), mScreenDensity);
-            mAppliedOrientation = mDetectedOrientation;
+            refreshVirtualDisplay(mDetectedOrientation, false);
             mShouldRefreshVirtualDisplayOnNextCapture = false;
         }
 
@@ -465,29 +490,91 @@ public class ScreenCapturer {
     }
 
     public void release() {
-        if (mMediaProjection != null) {
-            mMediaProjection.stop();
+        release(true);
+    }
+
+    public boolean isReleased() {
+        return mReleased;
+    }
+
+    public void setOnMediaProjectionStopListener(@Nullable Runnable listener) {
+        mOnMediaProjectionStopListener = listener;
+    }
+
+    private void handleMediaProjectionStop() {
+        if (!release(false)) {
+            return;
+        }
+
+        Runnable listener = mOnMediaProjectionStopListener;
+        if (listener != null) {
+            listener.run();
+        }
+    }
+
+    private boolean release(boolean stopMediaProjection) {
+        final MediaProjection mediaProjection;
+        final VirtualDisplay virtualDisplay;
+        final ImageReader imageReader;
+        final Image underUsingImage;
+        final boolean unregisterDisplayListener;
+        final boolean unregisterEventBus;
+
+        synchronized (this) {
+            if (mReleased) {
+                return false;
+            }
+
+            mReleased = true;
+            mediaProjection = mMediaProjection;
             mMediaProjection = null;
-        }
-        if (mVirtualDisplay != null) {
-            mVirtualDisplay.release();
-        }
-        if (mImageReader != null) {
-            mImageReader.close();
-        }
-        if (mUnderUsingImage != null) {
-            mUnderUsingImage.close();
+            virtualDisplay = mVirtualDisplay;
+            mVirtualDisplay = null;
+            imageReader = mImageReader;
+            mImageReader = null;
+            underUsingImage = mUnderUsingImage;
+            mUnderUsingImage = null;
+            unregisterDisplayListener = mDisplayListenerRegistered;
+            mDisplayListenerRegistered = false;
+            unregisterEventBus = mEventBusRegistered;
+            mEventBusRegistered = false;
         }
 
-        // Unregister display listener to avoid leaks.
-        // zh-CN: 反注册 DisplayListener 以避免泄漏.
-        mDisplayManager.unregisterDisplayListener(mDisplayListener);
+        if (mediaProjection != null) {
+            try {
+                mediaProjection.unregisterCallback(mMediaProjectionCallback);
+            } catch (Throwable ignored) {
+                /* Ignored. */
+            }
+            if (stopMediaProjection) {
+                try {
+                    mediaProjection.stop();
+                } catch (Throwable ignored) {
+                    /* Ignored. */
+                }
+            }
+        }
 
-        // Quit callback thread to avoid leaks.
-        // zh-CN: 退出回调线程以避免泄漏.
+        if (virtualDisplay != null) {
+            virtualDisplay.release();
+        }
+        if (imageReader != null) {
+            imageReader.close();
+        }
+        if (underUsingImage != null) {
+            underUsingImage.close();
+        }
+        if (unregisterDisplayListener) {
+            mDisplayManager.unregisterDisplayListener(mDisplayListener);
+        }
+
         mImageCallbackThread.quitSafely();
 
-        EventBus.getDefault().unregister(this);
+        if (unregisterEventBus) {
+            EventBus.getDefault().unregister(this);
+        }
+
+        return true;
     }
 
     public void setImageCaptureCallback(OnScreenCaptureAvailableListener onScreenCaptureAvailableListener) {

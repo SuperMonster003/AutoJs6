@@ -312,29 +312,35 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             require(!isUiThread()) {
                 "requestScreenCapture() called in ui thread, please use requestScreenCaptureAsync() instead"
             }
-            val requestScreenCaptureBadge = scriptRuntime.threads.atomic(0)
-            when {
-                requestScreenCaptureBadge.get() > 0 -> true
-                else -> {
-                    requestScreenCaptureBadge.incrementAndGet()
-                    val result = callFunction(scriptRuntime, scriptRuntime.js_ResultAdapter, "wait", arrayOf(run {
-                        stopScreenCapture(scriptRuntime, emptyArray<Any?>())
-                        requestScreenCaptureInternal(scriptRuntime, *argList)
-                    })) as Boolean
-                    requestScreenCaptureBadge.decrementAndGet()
-                    result
-                }
+            if (scriptRuntime.images.hasActiveScreenCapturer()) {
+                return@ensureArgumentsAtMost true
             }
+            callFunction(
+                scriptRuntime,
+                scriptRuntime.js_ResultAdapter,
+                "wait",
+                arrayOf(requestScreenCaptureInternal(scriptRuntime, *argList)),
+            ) as Boolean
         }
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun requestScreenCaptureAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsAtMost(args, 2) { argList ->
-            callFunction(scriptRuntime, scriptRuntime.js_ResultAdapter, "promise", arrayOf(run {
-                stopScreenCapture(scriptRuntime, emptyArray())
-                requestScreenCaptureInternal(scriptRuntime, *argList)
-            })) as NativeObject
+            if (scriptRuntime.images.hasActiveScreenCapturer()) {
+                return@ensureArgumentsAtMost callFunction(
+                    scriptRuntime,
+                    scriptRuntime.js_Promise,
+                    "resolve",
+                    arrayOf(true),
+                ) as NativeObject
+            }
+            callFunction(
+                scriptRuntime,
+                scriptRuntime.js_ResultAdapter,
+                "promise",
+                arrayOf(requestScreenCaptureInternal(scriptRuntime, *argList)),
+            ) as NativeObject
         }
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
