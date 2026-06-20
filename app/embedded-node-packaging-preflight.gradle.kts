@@ -4108,6 +4108,19 @@ val verifyNodeTypeScriptGate = tasks.register("verifyNodeTypeScriptGate") {
     }
 }
 
+val verifyNodePhase8SecurityStressGate = tasks.register("verifyNodePhase8SecurityStressGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 8 security and stress expansion gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodePhase7ResourceStressGate = tasks.register("verifyNodePhase7ResourceStressGate") {
     group = "verification"
     description = "Runs the focused Node Phase 7 runtime/provider resource stress gate on a connected Sony/full device profile."
@@ -4135,6 +4148,23 @@ val verifyNodePhase7Gate = tasks.register("verifyNodePhase7Gate") {
             verifyNodeModernCoreGate,
             verifyNodePhase7ResourceStressGate,
             "generateNodePhase7Summary",
+        )
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
+val verifyNodePhase8Gate = tasks.register("verifyNodePhase8Gate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 8 capability expansion gate and writes the Phase 8 summary report."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn(
+            verifyNodeTypeScriptGate,
+            verifyNodePhase8SecurityStressGate,
+            "generateNodePhase8Summary",
         )
     }
     doFirst {
