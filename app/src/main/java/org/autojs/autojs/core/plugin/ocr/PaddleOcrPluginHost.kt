@@ -24,11 +24,13 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
+import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
@@ -60,6 +62,7 @@ object PaddleOcrPluginHost {
     private const val EXTRA_RAW_STRIDE = "rawStride"
     private const val EXTRA_RAW_CONFIG = "rawConfig"
     private const val IDLE_UNBIND_MS = 30_000L
+    private const val RETRY_WAKE_DELAY_MS = 300L
     private val pluginPermission = "${BuildConfig.APPLICATION_ID}.permission.PLUGIN"
 
     private val externalServiceFlag = runCatching { ServiceInfo::class.java.getField("FLAG_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
@@ -110,14 +113,10 @@ object PaddleOcrPluginHost {
         }
         ensureRawSupport(target, options)
         val start = uptimeMillis()
-        return createTempPfd(bitmap, options).use { pfd ->
-            withService(context, target.serviceInfo, DEFAULT_BIND_TIMEOUT_MS) { proxy ->
-                val remain = callTimeoutMs - (uptimeMillis() - start)
-                if (remain <= 0) error("AIDL call timeout in ${callTimeoutMs / 1000} seconds")
-                val lines = proxy.recognizeText(pfd, options)
-                Log.i(TAG, "recognizeTextAidl: got ${lines.size} lines")
-                lines
-            }
+        return withImagePfdService(context, target.serviceInfo, bitmap, options, callTimeoutMs, start) { proxy, pfd ->
+            val lines = proxy.recognizeText(pfd, options)
+            Log.i(TAG, "recognizeTextAidl: got ${lines.size} lines")
+            lines
         }
     }
 
@@ -133,14 +132,10 @@ object PaddleOcrPluginHost {
         }
         ensureRawSupport(target, options)
         val start = uptimeMillis()
-        return createTempPfd(bitmap, options).use { pfd ->
-            withService(context, target.serviceInfo, DEFAULT_BIND_TIMEOUT_MS) { proxy ->
-                val remain = callTimeoutMs - (uptimeMillis() - start)
-                if (remain <= 0) error("AIDL call timeout")
-                val results = proxy.detect(pfd, options)
-                Log.i(TAG, "detectAidl: got ${results.size} items")
-                results
-            }
+        return withImagePfdService(context, target.serviceInfo, bitmap, options, callTimeoutMs, start) { proxy, pfd ->
+            val results = proxy.detect(pfd, options)
+            Log.i(TAG, "detectAidl: got ${results.size} items")
+            results
         }
     }
 
@@ -153,7 +148,23 @@ object PaddleOcrPluginHost {
         // e.g. "v5"
         variant: String? = null,
     ): Discovered? {
-        val list = discover(context)
+        val discovered = discover(context)
+        selectFrom(discovered, context, engineId, engine, variant)?.let { return it }
+        if (discovered.any { it.error != null }) {
+            recoverFailedDiscoveries(context, discovered)
+            selectFrom(discover(context), context, engineId, engine, variant)?.let { return it }
+        }
+        return null
+    }
+
+    private fun selectFrom(
+        discovered: List<Discovered>,
+        context: Context,
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+    ): Discovered? {
+        val list = discovered
             .filter { it.pluginInfo != null }
             .filter { PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true) }
             .filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
@@ -240,6 +251,59 @@ object PaddleOcrPluginHost {
                 ?: PluginVariantPriorityStore.normalizeFamilyKey(candidate.pluginInfo?.engine)
         }.distinct()
         return families.singleOrNull()
+    }
+
+    private suspend fun recoverFailedDiscoveries(context: Context, discovered: List<Discovered>) {
+        var didWake = false
+        discovered
+            .filter { it.error != null }
+            .forEach { item ->
+                invalidateService(item.serviceInfo, item.error!!)
+                didWake = PluginWakeManager.tryAutoWakeIfNeeded(context, item.serviceInfo.packageName) || didWake
+            }
+        if (didWake) {
+            delay(RETRY_WAKE_DELAY_MS)
+        }
+    }
+
+    private suspend fun <T> withImagePfdService(
+        context: Context,
+        serviceInfo: ServiceInfo,
+        bitmap: Bitmap,
+        options: OcrOptions,
+        callTimeoutMs: Long,
+        start: Long,
+        block: suspend (IOcrPlugin, ParcelFileDescriptor) -> T,
+    ): T {
+        return try {
+            withImagePfdServiceOnce(context, serviceInfo, bitmap, options, callTimeoutMs, start, block)
+        } catch (e: RemoteException) {
+            invalidateService(serviceInfo, e)
+            try {
+                withImagePfdServiceOnce(context, serviceInfo, bitmap, options, callTimeoutMs, start, block)
+            } catch (retryError: RemoteException) {
+                invalidateService(serviceInfo, retryError)
+                throw retryError
+            }
+        }
+    }
+
+    private suspend fun <T> withImagePfdServiceOnce(
+        context: Context,
+        serviceInfo: ServiceInfo,
+        bitmap: Bitmap,
+        options: OcrOptions,
+        callTimeoutMs: Long,
+        start: Long,
+        block: suspend (IOcrPlugin, ParcelFileDescriptor) -> T,
+    ): T {
+        return createTempPfd(bitmap, options).use { pfd ->
+            withService(context, serviceInfo, DEFAULT_BIND_TIMEOUT_MS, retryOnRemoteException = false) { proxy ->
+                val remain = callTimeoutMs - (uptimeMillis() - start)
+                if (remain <= 0) error("AIDL call timeout in ${callTimeoutMs / 1000} seconds")
+                block(proxy, pfd)
+            }
+        }
     }
 
     // Convert temporary file to read-only FD.
@@ -425,6 +489,7 @@ object PaddleOcrPluginHost {
         context: Context,
         serviceInfo: ServiceInfo,
         bindTimeoutMs: Long = DEFAULT_BIND_TIMEOUT_MS,
+        retryOnRemoteException: Boolean = true,
         block: suspend (IOcrPlugin) -> T,
     ): T {
         val appCtx = context.applicationContext
@@ -433,9 +498,21 @@ object PaddleOcrPluginHost {
         return try {
             block(proxy)
         } catch (e: RemoteException) {
-            retryAfterBinderFailure(entry, bindTimeoutMs, e, block)
+            if (retryOnRemoteException) {
+                retryAfterBinderFailure(entry, bindTimeoutMs, e, block)
+            } else {
+                throw e
+            }
         } finally {
             touch(entry)
+        }
+    }
+
+    private fun invalidateService(serviceInfo: ServiceInfo, error: Throwable) {
+        val cn = ComponentName(serviceInfo.packageName, serviceInfo.name)
+        val entry = synchronized(poolLock) { connectionPool[cn] }
+        if (entry != null) {
+            invalidateEntry(entry, error)
         }
     }
 
@@ -447,7 +524,12 @@ object PaddleOcrPluginHost {
     ): T {
         invalidateEntry(entry, error)
         val proxy = awaitProxy(entry, bindTimeoutMs)
-        return block(proxy)
+        return try {
+            block(proxy)
+        } catch (retryError: RemoteException) {
+            invalidateEntry(entry, retryError)
+            throw retryError
+        }
     }
 
     private fun touch(entry: PooledConnection) {
@@ -464,9 +546,12 @@ object PaddleOcrPluginHost {
                 entry.lastUsed = uptimeMillis()
                 cancelIdleUnbindLocked(entry)
                 val existing = entry.proxy
-                if (existing != null && entry.bound) {
+                if (existing != null && entry.bound && entry.isBinderAliveLocked()) {
                     cont.resume(existing)
                     return@suspendCancellableCoroutine
+                }
+                if (existing != null) {
+                    entry.clearConnectionLocked()
                 }
                 entry.waiters.add(cont)
                 if (!entry.connecting) {
@@ -548,8 +633,7 @@ object PaddleOcrPluginHost {
 
     private fun invalidateEntry(entry: PooledConnection, error: Throwable) {
         val shouldUnbind = synchronized(entry.lock) {
-            entry.proxy = null
-            entry.bound = false
+            entry.clearConnectionLocked()
             entry.connecting = false
             entry.bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
             entry.bindTimeoutRunnable = null
@@ -590,8 +674,7 @@ object PaddleOcrPluginHost {
             if (shouldUnbind) {
                 runCatching { entry.appCtx.unbindService(entry.connection) }
                 synchronized(entry.lock) {
-                    entry.proxy = null
-                    entry.bound = false
+                    entry.clearConnectionLocked()
                 }
             }
         }
@@ -624,17 +707,50 @@ object PaddleOcrPluginHost {
         val lock = Any()
         val waiters = ArrayList<CancellableContinuation<IOcrPlugin>>()
         var proxy: IOcrPlugin? = null
+        var binder: IBinder? = null
+        var deathRecipient: IBinder.DeathRecipient? = null
         var bound: Boolean = false
         var connecting: Boolean = false
         var lastUsed: Long = 0L
         var idleRunnable: Runnable? = null
         var bindTimeoutRunnable: Runnable? = null
 
+        fun isBinderAliveLocked(): Boolean {
+            val activeBinder = binder ?: proxy?.asBinder()
+            return activeBinder?.isBinderAlive == true
+        }
+
+        fun clearConnectionLocked() {
+            val currentBinder = binder
+            val currentDeathRecipient = deathRecipient
+            if (currentBinder != null && currentDeathRecipient != null) {
+                runCatching { currentBinder.unlinkToDeath(currentDeathRecipient, 0) }
+            }
+            binder = null
+            deathRecipient = null
+            proxy = null
+            bound = false
+        }
+
         val connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 Log.i(TAG, "onServiceConnected: $name")
                 val proxy = IOcrPlugin.Stub.asInterface(binder)
+                val deathRecipient = IBinder.DeathRecipient {
+                    Log.w(TAG, "binderDied: $name")
+                    handleDisconnect(name, "binderDied", shouldUnbind = true)
+                }
+                try {
+                    binder.linkToDeath(deathRecipient, 0)
+                } catch (e: RemoteException) {
+                    Log.w(TAG, "linkToDeath failed: $name", e)
+                    handleDisconnect(name, "linkToDeath", shouldUnbind = true)
+                    return
+                }
                 val pending = synchronized(lock) {
+                    clearConnectionLocked()
+                    this@PooledConnection.binder = binder
+                    this@PooledConnection.deathRecipient = deathRecipient
                     this@PooledConnection.proxy = proxy
                     bound = true
                     connecting = false
@@ -654,27 +770,28 @@ object PaddleOcrPluginHost {
 
             override fun onServiceDisconnected(name: ComponentName) {
                 Log.w(TAG, "onServiceDisconnected: $name")
-                handleDisconnect(name, "onServiceDisconnected")
+                handleDisconnect(name, "onServiceDisconnected", shouldUnbind = true)
             }
 
             override fun onBindingDied(name: ComponentName) {
                 Log.w(TAG, "onBindingDied: $name")
-                handleDisconnect(name, "onBindingDied")
+                handleDisconnect(name, "onBindingDied", shouldUnbind = true)
             }
 
             override fun onNullBinding(name: ComponentName) {
                 Log.w(TAG, "onNullBinding: $name")
-                handleDisconnect(name, "onNullBinding")
+                handleDisconnect(name, "onNullBinding", shouldUnbind = true)
             }
         }
 
-        private fun handleDisconnect(name: ComponentName, reason: String) {
+        private fun handleDisconnect(name: ComponentName, reason: String, shouldUnbind: Boolean = false) {
             val pending = synchronized(lock) {
-                proxy = null
-                bound = false
+                clearConnectionLocked()
                 connecting = false
                 bindTimeoutRunnable?.let { poolHandler.removeCallbacks(it) }
                 bindTimeoutRunnable = null
+                idleRunnable?.let { poolHandler.removeCallbacks(it) }
+                idleRunnable = null
                 val list = waiters.toList()
                 waiters.clear()
                 list
@@ -685,6 +802,11 @@ object PaddleOcrPluginHost {
                     if (!waiter.isCompleted) {
                         waiter.resumeWithException(error)
                     }
+                }
+            }
+            if (shouldUnbind) {
+                poolHandler.post {
+                    runCatching { appCtx.unbindService(connection) }
                 }
             }
         }
