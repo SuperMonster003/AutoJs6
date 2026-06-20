@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.UUID
 import kotlin.system.exitProcess
 
-class NativeNodeEmbeddedScriptService : Service() {
+open class NativeNodeEmbeddedScriptService : Service() {
 
     @Volatile
     private var exitScheduled = false
@@ -83,7 +83,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             "android.policy.embedded_service " +
                     NodeAndroidRuntimePolicy.embeddedServiceDiagnostics(
                         this,
-                        NativeNodeEmbeddedScriptService::class.java,
+                        javaClass,
                         foregroundServiceType,
                     ),
         )
@@ -267,6 +267,12 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
         val executionId = preparedServiceRequest.executionId?.takeIf { it.isNotBlank() }
             ?: newExecutionId()
+        val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
+            context = this,
+            executionMode = executionMode,
+            launchSurface = launchSurface,
+            currentServiceClassName = javaClass.name,
+        )
         val interactiveSession = executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
             launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
         if (interactiveSession) {
@@ -306,7 +312,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
                     message = slotDecision.failure.errorMessage,
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("queue_rejected"),
-                    nativeValues = mapOf(
+                    nativeValues = processPoolPlan.nativeValues() + mapOf(
                         "embedded_script.error_code" to slotDecision.failure.errorCode,
                         "embedded_script.queue_rejected" to "true",
                     ),
@@ -322,7 +328,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     startedAt = startedAt,
                     processName = processName,
                     pid = pid,
-                ).withPrewarmLease(prewarmLease).toBundle(),
+                ).withProcessPoolPlan(processPoolPlan).withPrewarmLease(prewarmLease).toBundle(),
             )
             stopServiceIfQueueIdle(startId)
             return
@@ -437,6 +443,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +
                     "queueMode=$queueMode queued=${slotLease.queued} queueWaitMs=${slotLease.queueWaitMs} " +
                     "executionMode=$executionMode " +
+                    "processPool=${processPoolPlan.mode}/${processPoolPlan.selectedSlot.id} " +
                     "bridgeLimits=${bridgeLimits.toJson()} " +
                     "runtimeBudget=${runtimeBudget.toJsonObject()} " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
@@ -486,6 +493,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             val result = dispatchQueuedBridgeRequests(bridgeSession.appendNativeValues(nativeResult))
                 .withExecutionMode(executionMode, launchSurface)
                 .withRuntimeBudget(runtimeBudget)
+                .withProcessPoolPlan(processPoolPlan)
             timeline?.recordBridge(result)
             val completed = when {
                 result.succeeded -> {
@@ -1876,11 +1884,20 @@ class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 putExtra(EXTRA_EXECUTION_ID, executionId)
             }
+            val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
+                context = appContext,
+                executionMode = requestForService.executionMode,
+                launchSurface = launchSurface,
+            )
             var component: android.content.ComponentName? = null
             try {
                 requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, requestForService)
                 intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
-                val startOutcome = startEmbeddedScriptService(appContext, intent)
+                val startOutcome = startEmbeddedScriptService(
+                    appContext,
+                    intent,
+                    serviceClass = processPoolPlan.selectedSlot.serviceClass,
+                )
                 component = startOutcome.component ?: return serviceStartFailureResult(
                     request = request,
                     message = "Failed to start embedded script service.",
@@ -2144,11 +2161,13 @@ class NativeNodeEmbeddedScriptService : Service() {
         private fun startEmbeddedScriptService(
             appContext: Context,
             intent: Intent,
+            serviceClass: Class<out NativeNodeEmbeddedScriptService> = NativeNodeEmbeddedScriptService::class.java,
             foreground: Boolean = true,
         ): ServiceStartOutcome {
+            intent.setClass(appContext, serviceClass)
             val serviceDiagnostics = NodeAndroidRuntimePolicy.embeddedServiceDiagnostics(
                 appContext,
-                NativeNodeEmbeddedScriptService::class.java,
+                serviceClass,
                 embeddedForegroundServiceTypeForCurrentSdk(),
             )
             return try {
@@ -2161,13 +2180,13 @@ class NativeNodeEmbeddedScriptService : Service() {
                     NodeAndroidRuntimePolicy.serviceStartFailureDiagnosticsForClass(
                         className = "android.content.ComponentName:null",
                         message = "Context.startService returned null.",
-                        serviceClassName = NativeNodeEmbeddedScriptService::class.java.name,
+                        serviceClassName = serviceClass.name,
                         sdkInt = Build.VERSION.SDK_INT,
                     )
                 } else {
                     JSONObject().apply {
                         put("sdkInt", Build.VERSION.SDK_INT)
-                        put("serviceName", NativeNodeEmbeddedScriptService::class.java.name)
+                        put("serviceName", serviceClass.name)
                         put("reason", "started")
                         put("componentName", component.flattenToShortString())
                     }
@@ -2178,7 +2197,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     component = null,
                     diagnostics = NodeAndroidRuntimePolicy.serviceStartFailureDiagnostics(
                         throwable = e,
-                        serviceClassName = NativeNodeEmbeddedScriptService::class.java.name,
+                        serviceClassName = serviceClass.name,
                     ),
                     serviceDiagnostics = serviceDiagnostics,
                     throwable = e,
@@ -2558,6 +2577,17 @@ class NativeNodeEmbeddedScriptService : Service() {
                     put("embedded_script.queue_wait_ms", lease.queueWaitMs.toString())
                     put("embedded_script.queue_position", lease.queuePosition.toString())
                     put("embedded_script.queue_max_queued_executions", lease.maxQueuedExecutions.toString())
+                },
+            )
+        }
+
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withProcessPoolPlan(
+            plan: NodeEmbeddedProcessPoolPolicy.ProcessPoolPlan,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    putAll(plan.nativeValues())
                 },
             )
         }
@@ -3157,6 +3187,10 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RESULT_NATIVE_PAYLOAD = "result_native_payload"
     }
 }
+
+class NativeNodeEmbeddedScriptServiceSlot1 : NativeNodeEmbeddedScriptService()
+
+class NativeNodeEmbeddedScriptServiceSlot2 : NativeNodeEmbeddedScriptService()
 
 private fun NodeBridgeRequest.dispatchExceptionResponse(error: Throwable): NodeBridgeResponse {
     return NodeBridgeResponse.failure(

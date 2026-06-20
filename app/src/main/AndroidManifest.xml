@@ -470,6 +470,28 @@
         </service>
 
         <service
+            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedScriptServiceSlot1"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:process=":nodejs_embedded_1">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Reserved embedded Node process-pool slot for explicit long-running sessions" />
+        </service>
+
+        <service
+            android:name="org.autojs.autojs.engine.NativeNodeEmbeddedScriptServiceSlot2"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:process=":nodejs_embedded_2">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Reserved embedded Node process-pool overflow slot for isolated script execution" />
+        </service>
+
+        <service
             android:name="org.autojs.autojs.engine.NativeNodeSandboxedScriptService"
             android:exported="false"
             android:isolatedProcess="true"
