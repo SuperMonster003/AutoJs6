@@ -64,6 +64,7 @@ small set of already-gated features toward practical use.
 | Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
 | HTTP client facade | experimental controlled client | `http.request()`, `http.get()`, `https.request()`, and `https.get()` expose a controlled fetch-backed client facade only when an enforced manifest declares `network`; default sync denial, no server/listen/raw sockets/CONNECT/upgrades, and explicit-only redirect follow remain enforced. |
 | HTTPS client facade policy | experimental controlled client | HTTPS uses the same controlled client facade while keeping certificate validation provider-owned; `rejectUnauthorized=false`, custom TLS/OpenSSL context, client certificate fields, request-level `createConnection`, and unsafe agent TLS options are rejected, with pinning/client certificates left design-gated. |
+| HTTP stream semantics | experimental controlled client | `ClientRequest` and `IncomingMessage` stream compatibility now has focused coverage for writable request chunks, readable `data`/`end`/`close`, `pipe()` backpressure smoke, request-level `AbortSignal`, `maxResponseBytes`, service-destroy cancellation, and pending cleanup without exposing raw sockets. |
 | Controlled axios | experimental | `require("axios")` exposes an AutoJs6-owned fetch-backed compatibility adapter for `get`/`post`/`request`, `baseURL`, params, headers, timeout, response types, and Axios-like errors while denying custom adapter/agent/proxy/raw transport paths. |
 | WebSocket | experimental | Controlled bridge surface covers connect, send/receive text and binary messages, close/error events, handler properties, listener aliases, bounded queue/message policy, service-destroy cleanup, and raw socket denial; live provider remains default-off. |
 | Image advanced operations | partial | `require("image")` and `require("images")` expand opaque-handle workflows with grayscale, threshold, template matching, color search, local size snapshots, and save format overloads while keeping Android provider ownership fail-closed except for scoped `readImage()`/`recycle()` used by OCR. |
@@ -149,6 +150,10 @@ small set of already-gated features toward practical use.
   customization including `rejectUnauthorized=false`, custom secure contexts,
   client certificate fields, request-level `createConnection`, and unsafe agent
   TLS options.
+- Controlled HTTP stream semantics smoke passes for writable request body
+  chunks, readable response `data` / `end` / `close`, `pipe()` backpressure
+  smoke, request-level `AbortSignal`, pre-aborted signal no-dispatch,
+  `maxResponseBytes`, service-destroy cancellation, and pending cleanup.
 - Controlled axios smoke passes for reserved `require("axios")`, fake-provider
   get/post/request, `baseURL`, params serialization, headers, timeout,
   json/text/arraybuffer response types, Axios-like error shape, custom

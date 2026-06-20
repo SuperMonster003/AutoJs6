@@ -284,6 +284,19 @@ permission tagging, pending-call cleanup, and fail-closed TLS customization:
 request-level `createConnection`, and unsafe agent TLS options all reject with
 `ERR_AUTOJS6_NETWORK_POLICY_DENIED`.
 
+Focused HTTP stream semantics instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpStreamSemanticsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-23 gate verifies the `ClientRequest` / `IncomingMessage` stream subset
+over the controlled client facade. It covers writable request body chunks,
+readable response `data` / `end` / `close`, `pipe()` with a backpressure-style
+destination, request-level `AbortSignal`, pre-aborted signal no-dispatch,
+`maxResponseBytes` rejection, service-destroy cancellation, and pending-call
+cleanup.
+
 Current fixed real npm corpus instrumentation:
 
 ```powershell
