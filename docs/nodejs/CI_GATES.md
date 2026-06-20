@@ -230,15 +230,17 @@ Phase 9 Batch A starts with host-side native modernization preflights:
 ```powershell
 .\gradlew.bat --console=plain :app:generateNodeNativeSymbolUsageReport
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterAbi
+.\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterExport
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeBuildPlan
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 ```
 
 These tasks generate the native symbol usage map, verify the versioned C
-runtime adapter ABI header, and validate the reproducible Android runtime build
-plan skeleton. They do not promote Node 24.17 and do not change the default
-runtime slot. See [reports/phase9/README.md](reports/phase9/README.md) and
-[native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md).
+runtime adapter ABI header, verify the adapter export and artifact metadata
+across built app debug ABIs, and validate the reproducible Android runtime
+build plan skeleton. They do not promote Node 24.17 and do not change the
+default runtime slot. See [reports/phase9/README.md](reports/phase9/README.md)
+and [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md).
 
 ## Phase 7 Focused Gates
 

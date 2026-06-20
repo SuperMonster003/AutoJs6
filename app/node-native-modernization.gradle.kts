@@ -5,6 +5,8 @@ val nodeNativeSymbolUsageJson = nodeNativeModernizationReportDir.map { it.file("
 val nodeNativeSymbolUsageMarkdown = nodeNativeModernizationReportDir.map { it.file("native-symbol-usage.md") }
 val nodeRuntimeAdapterAbiJson = nodeNativeModernizationReportDir.map { it.file("runtime-adapter-abi-v1.json") }
 val nodeRuntimeAdapterAbiMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-adapter-abi-v1.md") }
+val nodeRuntimeAdapterExportJson = nodeNativeModernizationReportDir.map { it.file("runtime-adapter-export.json") }
+val nodeRuntimeAdapterExportMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-adapter-export.md") }
 val nodeRuntimeBuildPlanJson = nodeNativeModernizationReportDir.map { it.file("runtime-build-plan.json") }
 val nodeRuntimeBuildPlanMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-build-plan.md") }
 
@@ -79,6 +81,27 @@ tasks.register<Exec>("verifyNodeRuntimeBuildPlan") {
     )
 }
 
+tasks.register<Exec>("verifyNodeRuntimeAdapterExport") {
+    group = "verification"
+    description = "Verifies the Phase 9 runtime adapter ABI export across built app debug native ABIs."
+
+    dependsOn("externalNativeBuildAppDebug")
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-export.js")
+    inputs.file(scriptFile)
+    inputs.dir(project.layout.buildDirectory.dir("intermediates/cxx"))
+    outputs.files(nodeRuntimeAdapterExportJson, nodeRuntimeAdapterExportMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -86,6 +109,7 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
     dependsOn(
         "generateNodeNativeSymbolUsageReport",
         "verifyNodeRuntimeAdapterAbi",
+        "verifyNodeRuntimeAdapterExport",
         "verifyNodeRuntimeBuildPlan",
     )
 }

@@ -7,12 +7,15 @@ Host-side verification:
 
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterAbi
+.\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterExport
 ```
 
 Outputs:
 
 - `build/reports/nodejs/runtime-adapter-abi-v1.json`
 - `build/reports/nodejs/runtime-adapter-abi-v1.md`
+- `build/reports/nodejs/runtime-adapter-export.json`
+- `build/reports/nodejs/runtime-adapter-export.md`
 
 ## ABI v1
 
@@ -55,3 +58,6 @@ code has not yet been migrated behind this adapter, and Node 24.17 is not
 promoted. The current Node 24.5 adapter source exports the ABI table and runtime
 descriptor with unavailable execution stubs so the native export can be compiled
 and verified before the legacy JNI execution path is moved behind it.
+`verifyNodeRuntimeAdapterExport` builds the app debug native outputs and records
+the adapter export, SHA-256, and Build ID for `arm64-v8a`, `armeabi-v7a`, and
+`x86_64`.

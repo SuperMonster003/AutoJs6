@@ -10,6 +10,7 @@ Current Batch A host-side tasks:
 ```powershell
 .\gradlew.bat --console=plain :app:generateNodeNativeSymbolUsageReport
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterAbi
+.\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterExport
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeBuildPlan
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 ```
@@ -20,6 +21,8 @@ Generated outputs:
 - `build/reports/nodejs/native-symbol-usage.md`
 - `build/reports/nodejs/runtime-adapter-abi-v1.json`
 - `build/reports/nodejs/runtime-adapter-abi-v1.md`
+- `build/reports/nodejs/runtime-adapter-export.json`
+- `build/reports/nodejs/runtime-adapter-export.md`
 - `build/reports/nodejs/runtime-build-plan.json`
 - `build/reports/nodejs/runtime-build-plan.md`
 

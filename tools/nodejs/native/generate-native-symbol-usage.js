@@ -432,10 +432,14 @@ function findAndroidSdk(repoRoot) {
   if (fs.existsSync(localProperties)) {
     const match = fs.readFileSync(localProperties, "utf8").match(/^sdk\.dir=(.+)$/m);
     if (match) {
-      return match[1].trim().replace(/\\:/g, ":");
+      return decodeJavaPropertiesPath(match[1]);
     }
   }
   return process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT || null;
+}
+
+function decodeJavaPropertiesPath(value) {
+  return value.trim().replace(/\\:/g, ":").replace(/\\\\/g, "\\");
 }
 
 function summarizeTools(tools) {
