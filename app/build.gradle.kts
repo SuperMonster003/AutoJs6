@@ -366,6 +366,7 @@ val nodeJsV11BetaInstrumentationClasses = (
             "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",
             "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest",
             "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
+            "org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest",
         ) + nodeJsV11AlphaInstrumentationClasses
         ).distinct()
 val nodeJsPackagedEsmGateInstrumentationClasses = listOf(
