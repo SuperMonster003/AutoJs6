@@ -172,6 +172,10 @@ Current Batch D implementation status:
   controlled fetch bridge, Web Platform constructors are reused, and
   `Dispatcher` / `Agent` / `MockAgent` expose safe package-compatibility shapes
   without raw connector, socket, proxy, upgrade, or pipeline authority.
+- S8-26 is complete for the offline HTTP npm compatibility corpus. Six
+  npm-shaped fixtures cover packages using `http.get()`, `https.request()`,
+  `IncomingMessage` stream consumption, form-style POST bodies, request-level
+  `AbortSignal`, and safe Agent options through the controlled client facade.
 - Default scripts still get the existing synchronous disabled error for
   `http.request()` / `https.request()`, and raw `net`/`tls`/`dns`/`dgram`,
   servers, `CONNECT`, and socket upgrades remain unavailable.
@@ -186,6 +190,7 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpStreamSemanticsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpAgentFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeUndiciFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpNpmCorpusInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
@@ -196,3 +201,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/HTTP_STREAM_SEMANTICS.md`
 - `docs/nodejs/reports/phase8/HTTP_AGENT_FACADE.md`
 - `docs/nodejs/reports/phase8/UNDICI_FACADE.md`
+- `docs/nodejs/reports/phase8/HTTP_NPM_CORPUS.md`

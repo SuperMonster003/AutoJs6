@@ -391,6 +391,10 @@ Before live network capability is enabled in release builds, tests must cover:
   custom connector/dispatcher/proxy/socket denial, and
   `node_modules/undici` shadow denial: covered by
   `NodeUndiciFacadeInstrumentationTest`
+- offline HTTP npm-shaped fixtures for packages using `http.get()`,
+  `https.request()`, `IncomingMessage` `data` / `end`, form-style POST
+  bodies, request-level `AbortSignal`, and safe Agent options: covered by
+  `NodeHttpNpmCorpusInstrumentationTest`
 - explicit live Android fetch/axios smoke: covered by `verifyNodeLiveFetchGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback server and the Android OkHttp provider
 - explicit live Android WebSocket smoke: covered by `verifyNodeLiveWebSocketGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback WebSocket server and the Android OkHttp provider
 - raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests

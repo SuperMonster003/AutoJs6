@@ -325,6 +325,20 @@ cleanup, and fail-closed denial for raw connectors, dispatcher injection,
 `socketPath`, proxy/tunnel options, `connect()`, `stream()`, and direct
 dispatcher dispatch.
 
+Focused HTTP npm compatibility corpus instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpNpmCorpusInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-26 gate copies `app/src/androidTest/assets/http_compat_corpus/` into a
+scoped working directory and runs six offline npm-shaped fixtures through the
+controlled `node:http` / `node:https` client facade. It covers packages using
+`http.get()`, `https.request()`, `IncomingMessage` `data` / `end`
+consumption, form-style POST bodies, request-level `AbortSignal`, safe Agent
+options, fixture metadata completeness, native-addon absence, lifecycle-script
+absence, bridge permission tagging, and pending cleanup.
+
 Current fixed real npm corpus instrumentation:
 
 ```powershell

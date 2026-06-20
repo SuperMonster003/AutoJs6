@@ -303,6 +303,17 @@ scripts, or load native addons. Fixture runners remain CommonJS `test.cjs` files
 packages below `node_modules` so the corpus can exercise partial ESM package import without converting the runner itself
 to ESM.
 
+The fixed HTTP compatibility corpus lives under
+`app/src/androidTest/assets/http_compat_corpus/` and is executed by
+`NodeHttpNpmCorpusInstrumentationTest`. It adds six offline npm-shaped
+fixtures for packages that use the controlled `node:http` / `node:https`
+client facade: `http.get()`, `https.request()`, `IncomingMessage` stream
+consumption, `application/x-www-form-urlencoded` POST bodies, request-level
+`AbortSignal`, and safe `http.Agent` / `https.Agent` options. The corpus runs
+with a fake controlled fetch bridge transport and an enforced `network`
+manifest; it does not install packages, use live network I/O, load native
+addons, or expose raw sockets.
+
 `tools/nodejs/differential/run-differential-tests.js` runs the same fixed fixtures under desktop Node 24 and writes a
 JSON/Markdown report under `build/reports/nodejs/differential/`, the v1.1 npm summary report
 `build/reports/nodejs/npm-compat-v1.1.md`, and the Task 188 measurement report
