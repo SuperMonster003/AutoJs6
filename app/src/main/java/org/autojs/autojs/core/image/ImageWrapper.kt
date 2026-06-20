@@ -91,10 +91,15 @@ open class ImageWrapper : Shootable<ImageWrapper> {
             throw AssertionError("Both bitmap and image are null")
         }
 
-    val bgrMat
-        get() = Mat().also {
-            Imgproc.cvtColor(mat, it, Imgproc.COLOR_BGRA2BGR)
-            mBgrMat = it
+    val bgrMat: Mat
+        get() {
+            ensureNotRecycled()
+            mBgrMat?.let { return it }
+            return Mat().also {
+                Imgproc.cvtColor(mat, it, Imgproc.COLOR_BGRA2BGR)
+                mBgrMat = it
+                addToList(it)
+            }
         }
 
     var plane: Image.Plane?
@@ -341,7 +346,9 @@ open class ImageWrapper : Shootable<ImageWrapper> {
             val bitmap = createBitmap(image.width + rowPadding / pixelStride, image.height).apply { copyPixelsFromBuffer(buffer) }
             return when (rowPadding == 0) {
                 true -> bitmap
-                else -> Bitmap.createBitmap(bitmap, 0, 0, image.width, image.height)
+                else -> Bitmap.createBitmap(bitmap, 0, 0, image.width, image.height).also {
+                    bitmap.recycle()
+                }
             }
         }
 

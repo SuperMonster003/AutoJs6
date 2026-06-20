@@ -205,15 +205,24 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         super.onDestroy()
         Log.d(LOG_TAG, "onDestroy")
 
+        mRuntime?.loopers?.waitWhenIdle(false)
+
         if (::mScriptEngine.isInitialized) {
-            mScriptEngine.put("activity", null)
-            mScriptEngine.setTag("activity", null)
-            mScriptEngine.destroy()
+            try {
+                mScriptEngine.put("activity", null)
+                mScriptEngine.setTag("activity", null)
+                mScriptEngine.destroy()
+            } finally {
+                if (::mScriptExecution.isInitialized) {
+                    mScriptExecution.clearEngine(mScriptEngine)
+                }
+            }
         }
 
-        mRuntime?.run {
-            loopers.waitWhenIdle(false)
-        }
+        mRuntime = null
+        mExecutionListener = null
+        mScriptSource = null
+        mResult = null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -286,6 +295,8 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         task: ScriptExecutionTask?,
     ) : AbstractScriptExecution(task) {
         private var mScriptEngine: ScriptEngine<*>? = null
+        var isActivityStarted = false
+            private set
 
         @Suppress("unused", "UNUSED_PARAMETER")
         fun createEngine(activity: Activity?): ScriptEngine<*> {
@@ -293,6 +304,16 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
             return mScriptEngineManager.createEngineOfSourceOrThrow(source, id)
                 .apply { setTag(ExecutionConfig.tag, config) }
                 .also { mScriptEngine = it }
+        }
+
+        fun markActivityStarted() {
+            isActivityStarted = true
+        }
+
+        fun clearEngine(engine: ScriptEngine<*>? = null) {
+            if (engine == null || mScriptEngine === engine) {
+                mScriptEngine = null
+            }
         }
 
         override fun getEngine() = mScriptEngine
@@ -305,10 +326,13 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         @JvmStatic
         fun execute(context: Context, manager: ScriptEngineManager, task: ScriptExecutionTask): ActivityScriptExecution {
             val execution = ActivityScriptExecution(manager, task)
-            Intent(context, ScriptExecuteActivity::class.java)
+            val started = Intent(context, ScriptExecuteActivity::class.java)
                 .putExtra(EXTRA_EXECUTION_ID, execution.id)
                 .addFlags(task.config.intentFlags)
                 .startSafely(context)
+            if (started) {
+                execution.markActivityStarted()
+            }
             return execution
         }
     }

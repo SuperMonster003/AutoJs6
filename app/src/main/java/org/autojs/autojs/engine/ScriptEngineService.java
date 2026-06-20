@@ -147,8 +147,15 @@ public class ScriptEngineService {
 
     public ScriptExecution execute(ScriptExecutionTask task) {
         ScriptExecution execution = executeInternal(task);
-        mScriptExecutions.put(execution.getId(), execution);
+        if (shouldTrackExecution(execution)) {
+            mScriptExecutions.put(execution.getId(), execution);
+        }
         return execution;
+    }
+
+    private boolean shouldTrackExecution(ScriptExecution execution) {
+        return !(execution instanceof ScriptExecuteActivity.ActivityScriptExecution activityExecution)
+                || activityExecution.isActivityStarted();
     }
 
     private ScriptExecution executeInternal(ScriptExecutionTask task) {

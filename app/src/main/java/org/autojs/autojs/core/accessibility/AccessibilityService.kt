@@ -28,6 +28,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     val onKeyObserver = OnKeyListener.Observer()
     val keyInterrupterObserver = KeyInterceptor.Observer()
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
+        private set
     var bridge: AccessibilityBridge? = null
 
     // eventType -> (ownerId -> callback)
@@ -39,6 +40,20 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     private var mEventExecutor: ExecutorService? = null
     private val eventExecutor: ExecutorService
         get() = mEventExecutor ?: Executors.newSingleThreadExecutor().also { mEventExecutor = it }
+
+    private fun updateFastRootInActiveWindow(root: AccessibilityNodeInfo) {
+        if (fastRootInActiveWindow === root) return
+        recycleFastRootInActiveWindow()
+        fastRootInActiveWindow = root
+    }
+
+    @Suppress("DEPRECATION")
+    private fun recycleFastRootInActiveWindow() {
+        fastRootInActiveWindow?.let { root ->
+            runCatching { root.recycle() }
+        }
+        fastRootInActiveWindow = null
+    }
 
     private fun eventNameToType(event: String): Int {
         return try {
@@ -107,7 +122,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         if (containsAllEventTypes || eventTypes.contains(type)) {
             if (type == TYPE_WINDOW_STATE_CHANGED || type == TYPE_VIEW_FOCUSED) {
-                rootInActiveWindow?.also { fastRootInActiveWindow = it }
+                rootInActiveWindow?.let { updateFastRootInActiveWindow(it) }
             }
             for ((_, delegate) in delegates) {
                 val types = delegate.eventTypes
@@ -152,10 +167,15 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         instance = null
         bridge = null
+        recycleFastRootInActiveWindow()
+        synchronized(eventBoxLock) {
+            eventBox.clear()
+        }
 
         resetOperationalState()
 
         mEventExecutor?.shutdownNow()
+        mEventExecutor = null
         callback?.onDisconnected()
         EventBus.getDefault().post(object : AccessibilityServiceStateChangedEvent {})
 

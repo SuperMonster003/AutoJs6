@@ -413,7 +413,7 @@ public class ScreenCapturer {
             // ImageReader size represents the "canvas" size of VirtualDisplay.
             // zh-CN: ImageReader 尺寸代表 VirtualDisplay 的 "画布" 尺寸.
             if (mImageReader != null
-                    && (mImageReader.getWidth() != expectedWidth || mImageReader.getHeight() != expectedHeight)) {
+                && (mImageReader.getWidth() != expectedWidth || mImageReader.getHeight() != expectedHeight)) {
                 refreshVirtualDisplay(mDetectedOrientation, false);
             }
         }
