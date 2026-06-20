@@ -312,6 +312,12 @@ Current Batch F implementation status:
   no Node/V8 environment, bridge provider, user module, env, cwd, permission,
   or open resource is created during prewarm. The next script consumes the
   prewarm once and still runs through normal bootstrap.
+- S8-36 is complete for the current performance matrix evidence. The focused
+  matrix report measures `compile-cache-only` and the separate
+  `compile-cache-plus-process-prewarm` axis, while recording
+  `no-cache-no-snapshot`, `snapshot-only`, and `compile-cache-plus-snapshot` as
+  unavailable with policy reasons. No runtime cache-disable switch or startup
+  snapshot path is added.
 
 Focused gates:
 
@@ -319,6 +325,7 @@ Focused gates:
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeModuleCompileCacheInstrumentationTest,org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRuntimePrewarmPoolInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePerformanceMatrixInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
 ```
 
@@ -327,3 +334,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/MODULE_COMPILE_CACHE.md`
 - `docs/nodejs/reports/phase8/BOOTSTRAP_STARTUP_SNAPSHOT.md`
 - `docs/nodejs/reports/phase8/RUNTIME_PREWARM_POOL.md`
+- `docs/nodejs/reports/phase8/PERFORMANCE_MATRIX.md`

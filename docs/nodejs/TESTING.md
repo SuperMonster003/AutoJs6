@@ -1201,6 +1201,20 @@ one-shot script consumes the prewarmed process while still receiving a clean
 cwd/env/bootstrap; and that an expired prewarm does not contaminate a later
 execution.
 
+Current Phase 8 performance matrix instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePerformanceMatrixInstrumentationTest"
+.\gradlew.bat --console=plain :app:pullNodeEmbeddedPerformanceReports
+```
+
+This suite writes `autojs6-node-phase8-performance-matrix-v1` JSON reports. It
+measures the supported `compile-cache-only` mode and the separate
+`compile-cache-plus-process-prewarm` axis, and records the S8-36
+`no-cache-no-snapshot`, `snapshot-only`, and `compile-cache-plus-snapshot`
+modes as unavailable with policy reasons instead of adding temporary runtime
+switches.
+
 Current Embedded Node memory leak stress gate:
 
 ```powershell

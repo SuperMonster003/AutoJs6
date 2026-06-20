@@ -156,25 +156,41 @@ S8-35 adds an explicit process-only prewarm. It may reduce Android service
 process cold-start cost, but it does not preload Node/V8 or user modules and
 does not replace the snapshot modes below.
 
-When startup snapshots are implemented, S8-36 must compare these modes on the
-same device, ABI, runtime slot, and app identity:
+S8-36 records the current available performance matrix with:
+
+```powershell
+$env:ANDROID_SERIAL = "QV710AF65F"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePerformanceMatrixInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:pullNodeEmbeddedPerformanceReports
+```
+
+Reports use schema `autojs6-node-phase8-performance-matrix-v1` and compare
+only modes that the current runtime can truthfully execute. Unavailable modes
+are included in the JSON with an explicit reason.
+
+The current mode matrix is:
 
 | Mode | Current v1.1 status | Notes |
 | --- | --- | --- |
-| no cache / no snapshot | supported | Baseline normal bootstrap |
+| no cache / no snapshot | unavailable | Compile cache is an internal default after S8-33; no user or instrumentation switch disables it. |
 | compile cache only | supported | Internal app-private module compile cache |
 | snapshot only | unavailable | Requires S8-34 runtime implementation |
 | compile cache plus snapshot | unavailable | Requires S8-34 runtime implementation |
+| compile cache plus process prewarm | supported separate axis | S8-35 explicit process-only prewarm; not a snapshot substitute |
 
-Each mode should record native load, environment creation, bootstrap, first
-module, first bridge call, packaged startup, RSS, and cache size. Until the
-snapshot gate is implemented, performance reports must not infer snapshot
-benefits from warm runs or compile-cache results.
+Measured rows record native load, environment creation, bootstrap, first local
+module, first fake-transport bridge call, RSS snapshots, compile-cache size,
+and runtime timeline event count. `packagedStartupMs` is recorded as
+`not_measured_in_embedded_instrumentation` until packaged smoke exports a
+launch-to-marker metric.
 
 Measure process-only prewarm as a separate axis: prewarm off versus explicit
 prewarm consumed. Report `embedded_script.prewarm_pool.status`, process id
 reuse, wall time, native load timing, and RSS so service-process wins are not
 confused with V8 or module-cache wins.
+
+Detailed S8-36 coverage is recorded in
+`docs/nodejs/reports/phase8/PERFORMANCE_MATRIX.md`.
 
 ## Memory Leak Stress
 

@@ -141,10 +141,12 @@ optimization because it does not replace isolate, context, or environment
 creation. Startup snapshot support changes the native environment creation path
 and therefore remains behind this design gate.
 
-S8-36 should keep measuring the current modes as:
+S8-36 should keep reporting the current modes as:
 
-- no cache / no snapshot
+- no cache / no snapshot: unavailable while S8-33 compile cache remains an
+  internal default with no disable switch
 - compile cache only
 - snapshot only: unavailable until this gate is implemented
 - compile cache plus snapshot: unavailable until this gate is implemented
-
+- compile cache plus process prewarm: measured as a separate S8-35 axis, not
+  as a snapshot substitute
