@@ -202,3 +202,30 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/HTTP_AGENT_FACADE.md`
 - `docs/nodejs/reports/phase8/UNDICI_FACADE.md`
 - `docs/nodejs/reports/phase8/HTTP_NPM_CORPUS.md`
+
+## Batch E Advanced Scoped FS
+
+Current Batch E implementation status:
+
+- S8-27 is complete for advanced scoped `FileHandle` behavior.
+  `fs.promises.open()` returns execution-owned managed handles supporting
+  read/write, `readFile()`, `writeFile()`, `appendFile()`, `truncate()`,
+  `stat()`, `datasync()`, `sync()`, `close()`, and promise-level
+  `readFile(fileHandle)` / `appendFile(fileHandle, data)` helpers.
+- Relative escapes and absolute outside paths keep stable scoped-fs denial
+  codes, while closed handles and non-owned numeric descriptors reject with
+  `EBADF`.
+- Timeout cleanup with an unclosed handle is covered so a failed execution does
+  not poison the next embedded Node run.
+
+Focused gates:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+Detailed coverage is recorded in:
+
+- `docs/nodejs/reports/phase8/FILEHANDLE_ADVANCED.md`

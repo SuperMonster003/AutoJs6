@@ -530,6 +530,15 @@ such as `/proc`, `/sys`, and `/dev` remain denied. Active scoped fs streams are
 tracked in runtime diagnostics and are destroyed during runtime cleanup so a
 timed-out or stopped service does not poison the next execution.
 
+The scoped `fs.promises.open()` surface returns AutoJs6-managed `FileHandle`
+objects. The v1.1 S8-27 gate covers `read()`, `write()`, `readFile()`,
+`writeFile()`, `appendFile()`, `truncate()`, `stat()`, `datasync()`, `sync()`,
+and `close()`, plus promise-level `readFile(fileHandle)` and
+`appendFile(fileHandle, data)`. FileHandle access stays execution-owned:
+closed handles and non-owned numeric descriptors reject with `EBADF`, path
+escapes keep scoped-fs denial codes, and timeout cleanup prevents unclosed
+handles from poisoning the next embedded Node execution.
+
 The `zlib` wrapper exposes bounded transform streams for `createGzip()`,
 `createGunzip()`, `createDeflate()`, `createInflate()`, raw deflate/inflate,
 and Brotli compression/decompression. Active zlib transform tracking starts
@@ -1505,6 +1514,8 @@ Examples:
 - disabled process API: `code=ERR_AUTOJS6_PROCESS_API_DISABLED`, `autojs6Code=ERR_AUTOJS6_PROCESS_API_DISABLED`
 - disabled fetch/network: `code=ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED`, `autojs6Code=ERR_AUTOJS6_NETWORK_DISABLED`
 - scoped fs escape: `code=EPERM`, `autojs6Code=ERR_AUTOJS6_FS_PATH_ESCAPE`
+- scoped fs absolute outside path: canonical `autojs6Code=ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED`
+- closed or non-owned scoped FileHandle descriptor: `code=EBADF`
 - undeclared bridge capability: `code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 - cancelled bridge call: `code=ERR_AUTOJS6_BRIDGE_CANCELLED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CANCELLED`
 - malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`

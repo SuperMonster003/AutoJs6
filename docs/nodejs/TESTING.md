@@ -529,6 +529,21 @@ Current `fs.promises` focused instrumentation:
 
 This suite verifies scoped `fs.promises` and `fs/promises` aliases, FileHandle operations, `fs.createReadStream`, file URL helpers, builtin shadowing protection, promise drain behavior, and negative paths for absolute, escaping, NUL, and missing files.
 
+Current FileHandle advanced focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest"
+```
+
+For Sony unattended gates, pin the device and profile:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-27 suite verifies the advanced managed `FileHandle` surface from `fs.promises.open()`: read/write, `readFile`, `writeFile`, `appendFile`, `truncate`, `stat`, `datasync`, `sync`, `close`, promise-level `readFile(fileHandle)` / `appendFile(fileHandle, data)`, scoped path denial, closed-handle `EBADF`, non-owned fd denial, and timeout recovery after an unclosed handle. Pair it with `NodeFsPromisesInstrumentationTest` when validating scoped fs regressions.
+
 Current stream focused instrumentation:
 
 ```powershell
