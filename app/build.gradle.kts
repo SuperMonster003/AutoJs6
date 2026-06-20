@@ -365,6 +365,7 @@ val nodeJsV11BetaInstrumentationClasses = (
             "org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest",
             "org.autojs.autojs.engine.NodeNativeAddonPolicyInstrumentationTest",
             "org.autojs.autojs.engine.NodeModuleCompileCacheInstrumentationTest",
+            "org.autojs.autojs.engine.NodeRuntimePrewarmPoolInstrumentationTest",
             "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest",
             "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
             "org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest",

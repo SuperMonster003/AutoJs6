@@ -3,6 +3,7 @@
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
+import android.content.ComponentCallbacks2
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -58,7 +59,15 @@ class NativeNodeEmbeddedScriptService : Service() {
     private var activeHeartbeatMonitor: NodeInteractiveHeartbeatMonitor? = null
     @Volatile
     private var activeLifecycleStopRequestFile: File? = null
+    @Volatile
+    private var prewarmActive = false
+    @Volatile
+    private var prewarmStartedAtElapsedMs = 0L
+    @Volatile
+    private var prewarmStartId = 0
     private var foregroundServiceCreator: ForegroundServiceCreator? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var prewarmStopRunnable: Runnable? = null
 
     private val foregroundServiceType = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> FOREGROUND_SERVICE_TYPE_SPECIAL_USE
@@ -85,6 +94,7 @@ class NativeNodeEmbeddedScriptService : Service() {
     override fun onDestroy() {
         val interactiveExecutionId = activeExecutionId
             ?.takeIf { activeExecutionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING }
+        clearPrewarmState("service.onDestroy")
         cancelAllQueuedExecutionsInService()
         activeLifecycle?.let { lifecycle ->
             if (lifecycle.state !in setOf(
@@ -134,6 +144,10 @@ class NativeNodeEmbeddedScriptService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return when (intent?.action) {
+            ACTION_PREWARM_RUNTIME -> {
+                handlePrewarmRuntime(intent, startId)
+                START_NOT_STICKY
+            }
             ACTION_RUN_SCRIPT -> {
                 Thread {
                     runScript(intent, startId)
@@ -178,7 +192,16 @@ class NativeNodeEmbeddedScriptService : Service() {
         )
     }
 
+    @Suppress("DEPRECATION")
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+            expirePrewarm("low_memory_$level", prewarmStartId)
+        }
+    }
+
     private fun runScript(intent: Intent, startId: Int) {
+        val prewarmLease = consumePrewarmForExecution()
         val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
         val startedAt = android.os.SystemClock.elapsedRealtime()
         val serviceRequest = try {
@@ -191,7 +214,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     intent = intent,
                     throwable = e,
                     startedAt = startedAt,
-                ).toBundle(),
+                ).withPrewarmLease(prewarmLease).toBundle(),
             )
             stopServiceIfQueueIdle(startId)
             return
@@ -203,6 +226,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 RESULT_SCRIPT,
                 NativeNodeEmbeddedRuntimeBridge
                     .embeddedScriptRequestPreparationFailure(serviceRequest, e, startedAt)
+                    .withPrewarmLease(prewarmLease)
                     .toBundle(),
             )
             stopServiceIfQueueIdle(startId)
@@ -212,7 +236,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             ?.takeIf { it.isNotBlank() }
             ?: NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT
         NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(preparedServiceRequest, launchSurface)?.let { failure ->
-            receiver?.send(RESULT_SCRIPT, failure.toBundle())
+            receiver?.send(RESULT_SCRIPT, failure.withPrewarmLease(prewarmLease).toBundle())
             stopServiceIfQueueIdle(startId)
             return
         }
@@ -298,7 +322,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     startedAt = startedAt,
                     processName = processName,
                     pid = pid,
-                ).toBundle(),
+                ).withPrewarmLease(prewarmLease).toBundle(),
             )
             stopServiceIfQueueIdle(startId)
             return
@@ -503,7 +527,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 )
             }
             timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
-            receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).withQueueLease(slotLease).withTimeline(timeline).toBundle())
+            receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).withQueueLease(slotLease).withPrewarmLease(prewarmLease).withTimeline(timeline).toBundle())
         } catch (e: Throwable) {
             timeline?.mark(
                 "stop_requested",
@@ -545,7 +569,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                     pid = pid,
                     sourceName = sourceName,
                     nativeValues = emptyMap(),
-                ).withLifecycle(lifecycle).withQueueLease(slotLease).withRuntimeBudget(runtimeBudget).withTimeline(timeline).toBundle(),
+                ).withLifecycle(lifecycle).withQueueLease(slotLease).withPrewarmLease(prewarmLease).withRuntimeBudget(runtimeBudget).withTimeline(timeline).toBundle(),
             )
         } finally {
             File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursively()
@@ -574,6 +598,165 @@ class NativeNodeEmbeddedScriptService : Service() {
                 clearActiveInteractiveSession(executionId)
             }
         }
+    }
+
+    @Synchronized
+    private fun handlePrewarmRuntime(intent: Intent, startId: Int) {
+        val receiver = intent.resultReceiverExtra(EXTRA_RESULT_RECEIVER)
+        val ttlMs = normalizedPrewarmTtlMs(intent.getLongExtra(EXTRA_PREWARM_TTL_MS, DEFAULT_PREWARM_TTL_MS))
+        val queueStatus = queueStatusSnapshot()
+        if (!queueStatus.idle) {
+            receiver?.send(
+                RESULT_PREWARM,
+                prewarmResultBundle(
+                    started = false,
+                    status = "busy",
+                    ttlMs = ttlMs,
+                    reason = "active_or_queued_execution",
+                ),
+            )
+            return
+        }
+        prewarmStopRunnable?.let(mainHandler::removeCallbacks)
+        prewarmActive = true
+        prewarmStartedAtElapsedMs = android.os.SystemClock.elapsedRealtime()
+        prewarmStartId = startId
+        val runnable = Runnable {
+            expirePrewarm("ttl_expired", startId)
+        }
+        prewarmStopRunnable = runnable
+        mainHandler.postDelayed(runnable, ttlMs)
+        Log.i(TAG, "prewarm.ready processName=${currentProcessName()} pid=${Process.myPid()} ttlMs=$ttlMs")
+        receiver?.send(
+            RESULT_PREWARM,
+            prewarmResultBundle(
+                started = true,
+                status = "ready",
+                ttlMs = ttlMs,
+                reason = "process_prewarmed",
+            ),
+        )
+    }
+
+    @Synchronized
+    private fun consumePrewarmForExecution(): PrewarmLease {
+        if (!prewarmActive) {
+            return PrewarmLease(
+                status = "not_requested",
+                consumed = false,
+                ageMs = 0L,
+            )
+        }
+        val now = android.os.SystemClock.elapsedRealtime()
+        val ageMs = (now - prewarmStartedAtElapsedMs).coerceAtLeast(0L)
+        prewarmStopRunnable?.let(mainHandler::removeCallbacks)
+        prewarmStopRunnable = null
+        prewarmActive = false
+        prewarmStartedAtElapsedMs = 0L
+        prewarmStartId = 0
+        Log.i(TAG, "prewarm.consumed processName=${currentProcessName()} pid=${Process.myPid()} ageMs=$ageMs")
+        return PrewarmLease(
+            status = "consumed",
+            consumed = true,
+            ageMs = ageMs,
+        )
+    }
+
+    @Synchronized
+    private fun expirePrewarm(reason: String, startId: Int) {
+        if (!prewarmActive) {
+            return
+        }
+        val ageMs = (android.os.SystemClock.elapsedRealtime() - prewarmStartedAtElapsedMs).coerceAtLeast(0L)
+        clearPrewarmState(reason)
+        Log.i(TAG, "prewarm.expired reason=$reason processName=${currentProcessName()} pid=${Process.myPid()} ageMs=$ageMs")
+        if (queueStatusSnapshot().idle) {
+            stopSelf(startId)
+            scheduleProcessExit(0)
+        }
+    }
+
+    @Synchronized
+    private fun clearPrewarmState(reason: String) {
+        prewarmStopRunnable?.let(mainHandler::removeCallbacks)
+        prewarmStopRunnable = null
+        if (prewarmActive) {
+            Log.i(TAG, "prewarm.clear reason=$reason processName=${currentProcessName()} pid=${Process.myPid()}")
+        }
+        prewarmActive = false
+        prewarmStartedAtElapsedMs = 0L
+        prewarmStartId = 0
+    }
+
+    private fun prewarmResultBundle(
+        started: Boolean,
+        status: String,
+        ttlMs: Long,
+        reason: String,
+    ): Bundle {
+        return Bundle().apply {
+            putBoolean(EXTRA_PREWARM_STARTED, started)
+            putString(EXTRA_PREWARM_STATUS, status)
+            putString(EXTRA_PREWARM_REASON, reason)
+            putLong(EXTRA_PREWARM_TTL_MS, ttlMs)
+            putLong(EXTRA_PREWARM_STARTED_AT_ELAPSED_MS, prewarmStartedAtElapsedMs)
+            putString(EXTRA_PREWARM_PROCESS_NAME, currentProcessName())
+            putInt(EXTRA_PREWARM_PID, Process.myPid())
+            putBoolean(EXTRA_PREWARM_PROCESS_ONLY, true)
+            putBoolean(EXTRA_PREWARM_RUNTIME_LOADED, false)
+            putStringArray(
+                EXTRA_PREWARM_NATIVE_PAYLOAD,
+                prewarmNativeValues(
+                    started = started,
+                    status = status,
+                    ttlMs = ttlMs,
+                    reason = reason,
+                    ageMs = 0L,
+                ).map { (key, value) -> "$key=$value" }.toTypedArray(),
+            )
+        }
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withPrewarmLease(
+        lease: PrewarmLease,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                putAll(
+                    prewarmNativeValues(
+                        started = lease.consumed,
+                        status = lease.status,
+                        ttlMs = 0L,
+                        reason = if (lease.consumed) "consumed_by_execution" else "no_active_prewarm",
+                        ageMs = lease.ageMs,
+                    ),
+                )
+            },
+        )
+    }
+
+    private fun prewarmNativeValues(
+        started: Boolean,
+        status: String,
+        ttlMs: Long,
+        reason: String,
+        ageMs: Long,
+    ): Map<String, String> {
+        return linkedMapOf(
+            "embedded_script.prewarm_pool.enabled" to "true",
+            "embedded_script.prewarm_pool.status" to status,
+            "embedded_script.prewarm_pool.started" to started.toString(),
+            "embedded_script.prewarm_pool.consumed" to (status == "consumed").toString(),
+            "embedded_script.prewarm_pool.process_only" to "true",
+            "embedded_script.prewarm_pool.runtime_loaded_before_execution" to "false",
+            "embedded_script.prewarm_pool.capabilities_granted" to "false",
+            "embedded_script.prewarm_pool.user_modules_loaded" to "false",
+            "embedded_script.prewarm_pool.ttl_ms" to ttlMs.toString(),
+            "embedded_script.prewarm_pool.age_ms" to ageMs.toString(),
+            "embedded_script.prewarm_pool.reason" to reason,
+            "embedded_script.prewarm_pool.policy" to "single-use-process-only",
+        )
     }
 
     private fun requestTransportFailureResult(
@@ -1238,6 +1421,12 @@ class NativeNodeEmbeddedScriptService : Service() {
         val maxQueuedExecutions: Int,
     )
 
+    private data class PrewarmLease(
+        val status: String,
+        val consumed: Boolean,
+        val ageMs: Long,
+    )
+
     private fun stopInteractiveLongRunning(intent: Intent, startId: Int) {
         val requestedExecutionId = intent.getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() }
         val executionId = activeExecutionId
@@ -1429,6 +1618,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private val EXECUTION_QUEUE_LOCK = Object()
         private val QUEUED_EXECUTION_IDS = ArrayDeque<String>()
         private val CANCELLED_QUEUED_EXECUTION_IDS = mutableSetOf<String>()
+        private const val ACTION_PREWARM_RUNTIME = "org.autojs.autojs.engine.action.PREWARM_NATIVE_NODE_RUNTIME"
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
         private const val ACTION_STOP_INTERACTIVE = NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME
         private const val ACTION_SIMULATE_FOREGROUND_TIMEOUT =
@@ -1447,6 +1637,7 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_EXECUTION_ID = "execution_id"
         private const val EXTRA_FOREGROUND_SERVICE_TYPE = "foreground_service_type"
+        private const val EXTRA_PREWARM_TTL_MS = "prewarm_ttl_ms"
         private const val EXTRA_ENV_NAMES = "env_names"
         private const val EXTRA_ENV_VALUES = "env_values"
         private const val EXTRA_MODULE_SOURCE_NAMES = "module_source_names"
@@ -1462,10 +1653,13 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val REQUEST_SPOOL_FILE_NAME = "request.json"
         private const val REQUEST_SPOOL_VERSION = 1
         private const val RESULT_SCRIPT = 1
+        private const val RESULT_PREWARM = 2
         private const val NOTIFICATION_ID = 0xA6E4
         private const val INTERACTIVE_CONTENT_REQUEST_CODE = 0xA6E5
         private const val INTERACTIVE_STOP_REQUEST_CODE = 0xA6E6
         private const val PROCESS_EXIT_DELAY_MS = 250L
+        private const val DEFAULT_PREWARM_TTL_MS = 5_000L
+        private const val MAX_PREWARM_TTL_MS = 30_000L
         private const val DEFAULT_INTERACTIVE_TIMEOUT_MS = 3_600_000L
         private const val CLIENT_QUEUE_PROCESS_SETTLE_MS = 650L
         private const val BRIDGE_DISPATCH_WAIT_MS = 1000L
@@ -1479,6 +1673,15 @@ class NativeNodeEmbeddedScriptService : Service() {
         private const val TIMEOUT_ERROR_CODE = NodeRuntimeErrorCodes.LEGACY_SCRIPT_TIMEOUT
         private const val DEFAULT_SOURCE_NAME = "<embedded-script>"
         private const val DEFAULT_TIMEOUT_MS = 3000L
+        private const val EXTRA_PREWARM_STARTED = "prewarm_started"
+        private const val EXTRA_PREWARM_STATUS = "prewarm_status"
+        private const val EXTRA_PREWARM_REASON = "prewarm_reason"
+        private const val EXTRA_PREWARM_STARTED_AT_ELAPSED_MS = "prewarm_started_at_elapsed_ms"
+        private const val EXTRA_PREWARM_PROCESS_NAME = "prewarm_process_name"
+        private const val EXTRA_PREWARM_PID = "prewarm_pid"
+        private const val EXTRA_PREWARM_PROCESS_ONLY = "prewarm_process_only"
+        private const val EXTRA_PREWARM_RUNTIME_LOADED = "prewarm_runtime_loaded"
+        private const val EXTRA_PREWARM_NATIVE_PAYLOAD = "prewarm_native_payload"
         private val TIMER_SOURCE_HINT_PATTERN = Regex("""\bset(?:Timeout|Interval|Immediate)\s*\(""")
         private val FS_CALLBACK_SOURCE_HINT_PATTERN = Regex("""\bfs\.[A-Za-z_$][\w$]*\s*\([^)]*,\s*(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)""")
         private val FS_STREAM_SOURCE_HINT_PATTERN = Regex("""\b(?:fs|nodeFs)\.create(?:Read|Write)Stream\s*\(""")
@@ -1539,6 +1742,92 @@ class NativeNodeEmbeddedScriptService : Service() {
             timeoutMs: Long = NodeExecutionQueuePolicy.CONTROL_TIMEOUT_MS,
         ): Boolean {
             return cancelQueuedExecutionInService(executionId)
+        }
+
+        data class PrewarmRuntimeResult(
+            val started: Boolean,
+            val status: String,
+            val reason: String,
+            val ttlMs: Long,
+            val processName: String,
+            val pid: Int,
+            val processOnly: Boolean,
+            val runtimeLoaded: Boolean,
+            val nativeValues: Map<String, String>,
+        )
+
+        fun prewarmRuntime(
+            context: Context,
+            ttlMs: Long = DEFAULT_PREWARM_TTL_MS,
+            timeoutMs: Long = NodeExecutionQueuePolicy.CONTROL_TIMEOUT_MS,
+        ): PrewarmRuntimeResult {
+            val appContext = context.applicationContext
+            val completion = CountDownLatch(1)
+            val result = AtomicReference<PrewarmRuntimeResult>()
+            val receiver = object : ResultReceiver(null) {
+                override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                    if (resultCode != RESULT_PREWARM) {
+                        return
+                    }
+                    result.set(resultData.toPrewarmRuntimeResult())
+                    completion.countDown()
+                }
+            }
+            val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
+                action = ACTION_PREWARM_RUNTIME
+                putExtra(EXTRA_RESULT_RECEIVER, receiver)
+                putExtra(EXTRA_PREWARM_TTL_MS, normalizedPrewarmTtlMs(ttlMs))
+            }
+            val startOutcome = startEmbeddedScriptService(appContext, intent)
+            if (startOutcome.component == null) {
+                return PrewarmRuntimeResult(
+                    started = false,
+                    status = "start_failed",
+                    reason = startOutcome.diagnostics.optString("message").ifBlank { "service_start_failed" },
+                    ttlMs = normalizedPrewarmTtlMs(ttlMs),
+                    processName = currentProcessNameCompat(),
+                    pid = Process.myPid(),
+                    processOnly = true,
+                    runtimeLoaded = false,
+                    nativeValues = startOutcome.nativeValues(),
+                )
+            }
+            val completed = runCatching {
+                completion.await(timeoutMs.coerceAtLeast(1L), TimeUnit.MILLISECONDS)
+            }.getOrElse { error ->
+                if (error is InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
+                false
+            }
+            if (!completed) {
+                return PrewarmRuntimeResult(
+                    started = false,
+                    status = "timeout",
+                    reason = "prewarm_result_timeout",
+                    ttlMs = normalizedPrewarmTtlMs(ttlMs),
+                    processName = currentProcessNameCompat(),
+                    pid = Process.myPid(),
+                    processOnly = true,
+                    runtimeLoaded = false,
+                    nativeValues = mapOf(
+                        "embedded_script.prewarm_pool.enabled" to "true",
+                        "embedded_script.prewarm_pool.status" to "timeout",
+                        "embedded_script.prewarm_pool.reason" to "prewarm_result_timeout",
+                    ),
+                )
+            }
+            return result.get() ?: PrewarmRuntimeResult(
+                started = false,
+                status = "missing_result",
+                reason = "prewarm_result_missing",
+                ttlMs = normalizedPrewarmTtlMs(ttlMs),
+                processName = currentProcessNameCompat(),
+                pid = Process.myPid(),
+                processOnly = true,
+                runtimeLoaded = false,
+                nativeValues = emptyMap(),
+            )
         }
 
         fun runScript(
@@ -1948,6 +2237,41 @@ class NativeNodeEmbeddedScriptService : Service() {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> FOREGROUND_SERVICE_TYPE_SPECIAL_USE
                 else -> FOREGROUND_SERVICE_TYPE_UNKNOWN
             }
+        }
+
+        private fun normalizedPrewarmTtlMs(ttlMs: Long): Long {
+            return when {
+                ttlMs <= 0L -> DEFAULT_PREWARM_TTL_MS
+                else -> ttlMs.coerceAtMost(MAX_PREWARM_TTL_MS)
+            }
+        }
+
+        private fun Bundle?.toPrewarmRuntimeResult(): PrewarmRuntimeResult {
+            val nativeValues = nativePayloadMap(this?.getStringArray(EXTRA_PREWARM_NATIVE_PAYLOAD))
+            return PrewarmRuntimeResult(
+                started = this?.getBoolean(EXTRA_PREWARM_STARTED) ?: false,
+                status = this?.getString(EXTRA_PREWARM_STATUS).orEmpty().ifBlank { "unknown" },
+                reason = this?.getString(EXTRA_PREWARM_REASON).orEmpty(),
+                ttlMs = this?.getLong(EXTRA_PREWARM_TTL_MS) ?: 0L,
+                processName = this?.getString(EXTRA_PREWARM_PROCESS_NAME).orEmpty(),
+                pid = this?.getInt(EXTRA_PREWARM_PID) ?: -1,
+                processOnly = this?.getBoolean(EXTRA_PREWARM_PROCESS_ONLY) ?: true,
+                runtimeLoaded = this?.getBoolean(EXTRA_PREWARM_RUNTIME_LOADED) ?: false,
+                nativeValues = nativeValues,
+            )
+        }
+
+        private fun nativePayloadMap(payload: Array<String>?): Map<String, String> {
+            return payload.orEmpty()
+                .mapNotNull { item ->
+                    val separator = item.indexOf('=')
+                    if (separator <= 0) {
+                        null
+                    } else {
+                        item.substring(0, separator) to item.substring(separator + 1)
+                    }
+                }
+                .toMap(linkedMapOf())
         }
 
         private fun acquireExecutionSlot(
