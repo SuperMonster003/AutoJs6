@@ -307,12 +307,18 @@ Current Batch F implementation status:
 - Startup snapshot promotion requires a future bootstrap split between an
   immutable snapshot prelude and a request install layer. The current fallback
   and active v1.1 behavior remains normal bootstrap.
+- S8-35 is complete as a process-only runtime prewarm MVP. Callers may
+  explicitly start one bounded `:nodejs_embedded` foreground service prewarm;
+  no Node/V8 environment, bridge provider, user module, env, cwd, permission,
+  or open resource is created during prewarm. The next script consumes the
+  prewarm once and still runs through normal bootstrap.
 
 Focused gates:
 
 ```powershell
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeModuleCompileCacheInstrumentationTest,org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRuntimePrewarmPoolInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
 ```
 
@@ -320,3 +326,4 @@ Detailed coverage is recorded in:
 
 - `docs/nodejs/reports/phase8/MODULE_COMPILE_CACHE.md`
 - `docs/nodejs/reports/phase8/BOOTSTRAP_STARTUP_SNAPSHOT.md`
+- `docs/nodejs/reports/phase8/RUNTIME_PREWARM_POOL.md`

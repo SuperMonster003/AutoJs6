@@ -100,6 +100,14 @@ contents, open resources, or project module cache entries. Snapshot load
 failure must fall back to normal bootstrap without skipping scoped fs, builtin,
 bridge capability, env filtering, module policy, or resource cleanup checks.
 
+Runtime prewarm is process-only in v1.1. It may keep the
+`:nodejs_embedded` foreground service process alive briefly, but it must not
+create or reuse a V8 isolate, Node environment, bridge provider, capability
+grant, cwd, env, module graph, module cache, execution id, timer, watcher, fd,
+or other script-owned resource. The next script consumes the prewarm once and
+then runs normal bootstrap and cleanup. Unused prewarm expires on TTL or
+low-memory signals.
+
 Runtime package installation is not a Safe Node Profile capability. Projects may vendor pure JavaScript CommonJS dependencies, and future tooling may sanitize them at build time, but AutoJs6 must not run package lifecycle scripts, native addon builds, arbitrary `.bin` commands, or registry downloads inside the Android runtime. See `docs/nodejs/design/PACKAGE_MANAGER.md`.
 The host dependency bundler rejects unsafe dependency trees before packaging. `.node` files are reported as `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` artifacts are reported as `NODE_GYP_ARTIFACT_UNSUPPORTED`. It also rejects every blocked lifecycle script variant (`preinstall`, `install`, `postinstall`, `prepare`), unchecked `.bin` entries, npm cache/log artifacts, symlink/path escapes, suspicious executable/native binaries, unsupported package-manager layouts, oversized files/packages/trees, and package metadata path references that are absolute, protocol-based, NUL-containing, or escape through `..`. A sanitized bundle is copied only after the scan reports zero issues, and the dependency report includes an SBOM-lite file, dependency compatibility analyzer status, deterministic bundle hash, and content-addressed cache key for packaged APK review. APK-builder preflight gates reject analyzer `unsafe` and `unsupported` statuses.
 

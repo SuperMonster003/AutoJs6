@@ -1188,6 +1188,19 @@ Future snapshot promotion must add fallback, stale/corrupt manifest, isolation,
 packaged graph, compile-cache interaction, and startup/RSS matrix coverage
 before any runtime behavior changes.
 
+Current runtime prewarm process-only focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRuntimePrewarmPoolInstrumentationTest"
+```
+
+This suite verifies the S8-35 explicit process-only prewarm path. It checks that
+prewarm starts the `:nodejs_embedded` service process without loading Node/V8,
+without granting capabilities, and without loading user modules; that the next
+one-shot script consumes the prewarmed process while still receiving a clean
+cwd/env/bootstrap; and that an expired prewarm does not contaminate a later
+execution.
+
 Current Embedded Node memory leak stress gate:
 
 ```powershell

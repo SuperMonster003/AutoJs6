@@ -681,6 +681,23 @@ dynamic import, packaged graph, compile-cache interaction, and cross-execution
 isolation tests with snapshot enabled. See
 `docs/nodejs/design/BOOTSTRAP_STARTUP_SNAPSHOT.md`.
 
+## Runtime Prewarm Pool
+
+Node Profile v1.1 includes an explicit process-only prewarm MVP for the
+embedded service process. `NativeNodeEmbeddedScriptService.prewarmRuntime()`
+starts one bounded `:nodejs_embedded` foreground service prewarm, then the next
+script consumes it once.
+
+This is not a pooled Node runtime. Prewarm loads no V8 isolate, Node
+environment, user source, module graph, runtime module source, bridge provider,
+permission, cwd, env, or execution-owned resource. The consuming script still
+uses the normal request preparation, validation, scoped fs, env filtering,
+bridge setup, native bootstrap, and process-exit cleanup path.
+
+Current diagnostics are under `embedded_script.prewarm_pool.*`. Reusable
+V8/Node environment pooling remains deferred until isolation and cleanup tests
+prove no cross-script leakage.
+
 ## Java Interop Experimental Allowlist
 
 Direct Java and Android interop is disabled by default. Normal builds keep:

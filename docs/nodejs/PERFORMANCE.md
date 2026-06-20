@@ -152,6 +152,10 @@ S8-34 keeps bootstrap startup snapshots disabled behind a design gate. The
 current runtime does not generate, package, load, or request a snapshot blob;
 normal bootstrap remains the active path and the required fallback path.
 
+S8-35 adds an explicit process-only prewarm. It may reduce Android service
+process cold-start cost, but it does not preload Node/V8 or user modules and
+does not replace the snapshot modes below.
+
 When startup snapshots are implemented, S8-36 must compare these modes on the
 same device, ABI, runtime slot, and app identity:
 
@@ -166,6 +170,11 @@ Each mode should record native load, environment creation, bootstrap, first
 module, first bridge call, packaged startup, RSS, and cache size. Until the
 snapshot gate is implemented, performance reports must not infer snapshot
 benefits from warm runs or compile-cache results.
+
+Measure process-only prewarm as a separate axis: prewarm off versus explicit
+prewarm consumed. Report `embedded_script.prewarm_pool.status`, process id
+reuse, wall time, native load timing, and RSS so service-process wins are not
+confused with V8 or module-cache wins.
 
 ## Memory Leak Stress
 
