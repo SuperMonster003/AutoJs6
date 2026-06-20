@@ -7538,6 +7538,9 @@ std::string buildEmbeddedScriptExecutionSource(
       if (__autojs6_internal_compile_cache_env_key(key)) {
         continue;
       }
+      if (__autojs6_node_startup_env_key(key)) {
+        continue;
+      }
       const record = __autojs6_request_env_sources[key];
       const value = record && record.source !== undefined && record.source !== null
         ? String(record.source)
@@ -7647,6 +7650,12 @@ std::string buildEmbeddedScriptExecutionSource(
       key.indexOf("AUTOJS6_NODE_COMPILE_CACHE_") === 0 ||
       key === "NODE_COMPILE_CACHE" ||
       key === "NODE_DISABLE_COMPILE_CACHE"
+    );
+  }
+  function __autojs6_node_startup_env_key(key) {
+    return typeof key === "string" && (
+      key === "NODE_OPTIONS" ||
+      key === "NODE_INSPECT_RESUME_ON_START"
     );
   }
   function __autojs6_compile_cache_status_name(status, constants) {
