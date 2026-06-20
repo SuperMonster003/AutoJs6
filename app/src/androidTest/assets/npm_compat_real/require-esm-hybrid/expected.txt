@@ -1,0 +1,1 @@
+realnpm.require-esm-hybrid=sync-esm/require-esm/cjs-bridge

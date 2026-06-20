@@ -101,6 +101,62 @@
         "in-memory adapter",
         "SQL-like query helper"
       ]
+    },
+    {
+      "name": "typescript-source-package",
+      "patterns": [
+        "native TypeScript source project",
+        "checked TypeScript source package",
+        "lightweight type stripping"
+      ]
+    },
+    {
+      "name": "require-esm-hybrid",
+      "patterns": [
+        "hybrid require(esm)",
+        "synchronous ESM namespace",
+        "CommonJS bridge to ESM package"
+      ]
+    },
+    {
+      "name": "http-client-package",
+      "patterns": [
+        "package using node:http client",
+        "default raw network denial",
+        "HTTP Agent compatibility shape"
+      ]
+    },
+    {
+      "name": "formdata-fetch-package",
+      "patterns": [
+        "package using FormData/fetch",
+        "Web Platform FormData",
+        "default fetch denial"
+      ]
+    },
+    {
+      "name": "filehandle-package",
+      "patterns": [
+        "package using FileHandle",
+        "fs.promises.open",
+        "managed scoped file descriptor"
+      ]
+    },
+    {
+      "name": "fs-watch-package",
+      "patterns": [
+        "package using fs.watch",
+        "scoped watcher lifecycle",
+        "watcher cleanup"
+      ]
+    },
+    {
+      "name": "compile-cache-package",
+      "patterns": [
+        "package benefiting from compile cache",
+        "large reusable module graph",
+        "module cache repeat load"
+      ]
     }
   ]
 }

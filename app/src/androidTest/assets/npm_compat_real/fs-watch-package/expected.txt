@@ -1,0 +1,1 @@
+realnpm.fs-watch-package=fswatch:

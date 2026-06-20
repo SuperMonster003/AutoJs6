@@ -1,0 +1,1 @@
+realnpm.typescript-source-package=ts:source/autojs/6/12

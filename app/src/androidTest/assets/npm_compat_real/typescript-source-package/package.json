@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/typescript-source-package-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "ts-source-probe": "1.0.0"
+  }
+}

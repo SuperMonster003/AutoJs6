@@ -30,8 +30,8 @@ class NodeRealNpmCompatInstrumentationTest {
             val corpusRoot = File(workDir, CORPUS_ASSET_DIR)
             val fixtures = readFixtures(corpusRoot)
             assertEquals("unexpected real npm fixture count", EXPECTED_FIXTURE_COUNT, fixtures.size)
-            assertTrue("real npm corpus should grow beyond the v1.1 baseline", fixtures.size > BASELINE_FIXTURE_COUNT)
-            assertEquals(EXPECTED_FIXTURE_COUNT - BASELINE_FIXTURE_COUNT, fixtures.size - BASELINE_FIXTURE_COUNT)
+            assertTrue("real npm corpus should grow beyond the Phase 7 baseline", fixtures.size > PHASE7_FIXTURE_COUNT)
+            assertEquals(EXPECTED_FIXTURE_COUNT - PHASE7_FIXTURE_COUNT, fixtures.size - PHASE7_FIXTURE_COUNT)
             assertRequiredPatternsPresent(fixtures)
 
             fixtures.forEach { fixture ->
@@ -99,6 +99,7 @@ class NodeRealNpmCompatInstrumentationTest {
                     }
                     const captured = [];
                     const originalLog = console.log;
+                    const originalError = console.error;
                     console.log = function captureFixtureLog() {
                       const line = Array.prototype.map.call(arguments, String).join(" ");
                       captured.push(line);
@@ -116,7 +117,7 @@ class NodeRealNpmCompatInstrumentationTest {
                         originalLog(stdout);
                       }
                       originalLog("realnpm.fixture." + name + "=PASS");
-                      originalLog("realnpm.differential.result=" + JSON.stringify({
+                      originalError("realnpm.differential.result=" + JSON.stringify({
                         runtime: "autojs6",
                         fixture: name,
                         exitCode: 0,
@@ -128,7 +129,7 @@ class NodeRealNpmCompatInstrumentationTest {
                       if (stdout.length > 0) {
                         originalLog(stdout);
                       }
-                      originalLog("realnpm.differential.result=" + JSON.stringify({
+                      originalError("realnpm.differential.result=" + JSON.stringify({
                         runtime: "autojs6",
                         fixture: name,
                         exitCode: 1,
@@ -139,9 +140,11 @@ class NodeRealNpmCompatInstrumentationTest {
                       throw error;
                     }
                   }
-                  console.log("realnpm.corpus.baseline=$BASELINE_FIXTURE_COUNT");
+                  console.log("realnpm.corpus.baseline=$V1_0_BASELINE_FIXTURE_COUNT");
+                  console.log("realnpm.corpus.phase7=$PHASE7_FIXTURE_COUNT");
                   console.log("realnpm.corpus.total=" + fixtures.length);
-                  console.log("realnpm.corpus.delta=" + (fixtures.length - $BASELINE_FIXTURE_COUNT));
+                  console.log("realnpm.corpus.delta=" + (fixtures.length - $V1_0_BASELINE_FIXTURE_COUNT));
+                  console.log("realnpm.corpus.phase8_delta=" + (fixtures.length - $PHASE7_FIXTURE_COUNT));
                 })().catch((error) => {
                   console.error("realnpm.corpus.error=" + (error && (error.stack || error.message) || error));
                   process.exitCode = 1;
@@ -156,6 +159,7 @@ class NodeRealNpmCompatInstrumentationTest {
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("real npm compatibility corpus", result)
+            val diagnosticOutput = result.stdout + "\n" + result.stderr
             fixtures.forEach { fixture ->
                 val expected = File(corpusRoot, "${fixture.name}/expected.txt").readText().trim()
                 assertTrue(
@@ -168,14 +172,16 @@ class NodeRealNpmCompatInstrumentationTest {
                 )
                 assertTrue(
                     NodeEmbeddedTestHarness.describeResult("missing differential JSON for ${fixture.name}", result),
-                    result.stdout.contains("\"runtime\":\"autojs6\",\"fixture\":\"${fixture.name}\""),
+                    diagnosticOutput.contains("\"runtime\":\"autojs6\",\"fixture\":\"${fixture.name}\""),
                 )
             }
-            assertTrue(result.stdout.contains("realnpm.corpus.baseline=$BASELINE_FIXTURE_COUNT"))
+            assertTrue(result.stdout.contains("realnpm.corpus.baseline=$V1_0_BASELINE_FIXTURE_COUNT"))
+            assertTrue(result.stdout.contains("realnpm.corpus.phase7=$PHASE7_FIXTURE_COUNT"))
             assertTrue(result.stdout.contains("realnpm.corpus.total=${fixtures.size}"))
-            assertTrue(result.stdout.contains("realnpm.corpus.delta=${fixtures.size - BASELINE_FIXTURE_COUNT}"))
+            assertTrue(result.stdout.contains("realnpm.corpus.delta=${fixtures.size - V1_0_BASELINE_FIXTURE_COUNT}"))
+            assertTrue(result.stdout.contains("realnpm.corpus.phase8_delta=${fixtures.size - PHASE7_FIXTURE_COUNT}"))
 
-            result.stdout.lineSequence()
+            diagnosticOutput.lineSequence()
                 .filter { it.startsWith("realnpm.differential.result=") }
                 .forEach(::println)
         } finally {
@@ -207,8 +213,8 @@ class NodeRealNpmCompatInstrumentationTest {
 
     private fun assertRequiredPatternsPresent(fixtures: List<RealNpmFixture>) {
         val patterns = fixtures.flatMap { it.patterns }.toSet()
-        REQUIRED_S7_48_PATTERNS.forEach { pattern ->
-            assertTrue("missing S7-48 real npm pattern: $pattern in $patterns", pattern in patterns)
+        REQUIRED_REAL_NPM_PATTERNS.forEach { pattern ->
+            assertTrue("missing real npm pattern: $pattern in $patterns", pattern in patterns)
         }
     }
 
@@ -239,10 +245,11 @@ class NodeRealNpmCompatInstrumentationTest {
 
     companion object {
         private const val CORPUS_ASSET_DIR = "npm_compat_real"
-        private const val BASELINE_FIXTURE_COUNT = 7
-        private const val EXPECTED_FIXTURE_COUNT = 13
+        private const val V1_0_BASELINE_FIXTURE_COUNT = 7
+        private const val PHASE7_FIXTURE_COUNT = 13
+        private const val EXPECTED_FIXTURE_COUNT = 20
         private val FORBIDDEN_PACKAGE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")
-        private val REQUIRED_S7_48_PATTERNS = setOf(
+        private val REQUIRED_REAL_NPM_PATTERNS = setOf(
             "ESM-only small package",
             "hybrid CJS/ESM package",
             "AsyncLocalStorage",
@@ -252,6 +259,13 @@ class NodeRealNpmCompatInstrumentationTest {
             "worker CPU package",
             "test-runner package",
             "database abstraction package",
+            "native TypeScript source project",
+            "hybrid require(esm)",
+            "package using node:http client",
+            "package using FormData/fetch",
+            "package using FileHandle",
+            "package using fs.watch",
+            "package benefiting from compile cache",
         )
     }
 }
