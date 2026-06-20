@@ -44,6 +44,7 @@ add_library(
         node_bridge_payload.cpp
         node_bridge_lifecycle.cpp
         node_bridge_jni.cpp
+        node_runtime_adapter_24_5.cpp
         node_bridge/embedded_inline_probe_payload.cpp
         node_bridge/embedded_probe_metadata.cpp
         node_bridge/embedded_probe_payload_utils.cpp

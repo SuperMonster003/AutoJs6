@@ -29,6 +29,9 @@ The Batch A start is intentionally conservative:
 
 - S9-01 documents and reports the existing direct native boundary.
 - S9-02 defines the versioned C ABI for runtime adapters.
+- S9-03 has a first native surface increment: the Node 24.5 adapter source now
+  exports `AutoJsNodeRuntimeApiV1`, but execution still routes through the
+  legacy JNI path until the lifecycle implementation is migrated.
 - S9-04 records the reproducible build skeleton for future Node 24.17 Android
   artifacts.
 

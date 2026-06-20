@@ -20,6 +20,10 @@ Header:
 
 - `app/src/main/cpp/node_runtime_api_v1.h`
 
+Current adapter surface:
+
+- `app/src/main/cpp/node_runtime_adapter_24_5.cpp`
+
 Export:
 
 - `autojs_node_get_runtime_api_v1`
@@ -48,5 +52,6 @@ fields without breaking older hosts.
 
 The ABI header and verifier are checked in first. Existing Node 24.5 bridge
 code has not yet been migrated behind this adapter, and Node 24.17 is not
-promoted. S9-03 should introduce the Node 24.5 adapter implementation behind
-this contract before a second runtime slot becomes selectable.
+promoted. The current Node 24.5 adapter source exports the ABI table and runtime
+descriptor with unavailable execution stubs so the native export can be compiled
+and verified before the legacy JNI execution path is moved behind it.
