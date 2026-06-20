@@ -31012,11 +31012,19 @@ std::string buildEmbeddedScriptExecutionSource(
           method: this.method,
           headers: this.getHeaders(),
           timeoutMs: this.__autojs6TimeoutMs,
-          maxResponseBytes: this.__autojs6Options.maxResponseBytes,
-          maxRedirects: this.__autojs6Options.maxRedirects,
-          redirect: this.__autojs6Options.redirect,
           signal: this.__autojs6AbortController && this.__autojs6AbortController.signal
         };
+        fetchInit.maxResponseBytes = this.__autojs6Options.maxResponseBytes;
+        if (__autojs6_has_own(this.__autojs6Options, "redirect")) {
+          fetchInit.redirect = this.__autojs6Options.redirect;
+          fetchInit.maxRedirects = this.__autojs6Options.maxRedirects;
+        } else if (__autojs6_has_own(this.__autojs6Options, "maxRedirects")) {
+          fetchInit.redirect = "follow";
+          fetchInit.maxRedirects = this.__autojs6Options.maxRedirects;
+        } else {
+          fetchInit.redirect = "manual";
+          fetchInit.maxRedirects = 0;
+        }
         if (body.length > 0 || this.method === "POST") {
           fetchInit.body = body;
         }

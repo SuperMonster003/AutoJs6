@@ -109,6 +109,33 @@ class NodeHttpClientFacadeInstrumentationTest {
                             bodyBytes: 5
                           };
                         }
+                        if (path.indexOf("/redirect-follow") === 0) {
+                          return {
+                            url: payload.url,
+                            status: 302,
+                            statusText: "Found",
+                            headers: [["location", "/redirect-target"]],
+                            bodyBase64: Buffer.from("redirect-follow").toString("base64")
+                          };
+                        }
+                        if (path.indexOf("/redirect-target") === 0) {
+                          return {
+                            url: payload.url,
+                            status: 200,
+                            statusText: "OK",
+                            headers: [["content-type", "text/plain"]],
+                            bodyBase64: Buffer.from("followed").toString("base64")
+                          };
+                        }
+                        if (path.indexOf("/redirect") === 0) {
+                          return {
+                            url: payload.url,
+                            status: 302,
+                            statusText: "Found",
+                            headers: [["location", "/redirect-target"]],
+                            bodyBase64: Buffer.from("manual-redirect").toString("base64")
+                          };
+                        }
                         return {
                           url: payload.url,
                           status: 404,
@@ -210,6 +237,16 @@ class NodeHttpClientFacadeInstrumentationTest {
                         { method: "POST", timeout: 1000 },
                         "secure"
                       );
+                      const redirectResult = await readWithDataEvents(
+                        http,
+                        "http://example.invalid/redirect",
+                        { timeout: 1000 }
+                      );
+                      const followResult = await readWithDataEvents(
+                        http,
+                        "http://example.invalid/redirect-follow",
+                        { timeout: 1000, maxRedirects: 1 }
+                      );
 
                       const timeoutResult = await new Promise((resolve) => {
                         let timeoutSeen = false;
@@ -252,6 +289,17 @@ class NodeHttpClientFacadeInstrumentationTest {
                         httpsResult.headers["x-secure"],
                         httpsResult.body
                       ].join("|"));
+                      console.log("httpfacade.redirect=" + [
+                        redirectResult.statusCode,
+                        redirectResult.statusMessage,
+                        redirectResult.headers.location,
+                        redirectResult.body
+                      ].join("|"));
+                      console.log("httpfacade.follow=" + [
+                        followResult.statusCode,
+                        followResult.statusMessage,
+                        followResult.body
+                      ].join("|"));
                       console.log("httpfacade.events=" + [timeoutResult, abortResult].join("|"));
                       console.log("httpfacade.requests=" + requests.map((request) => {
                         const payload = request.args[0];
@@ -276,11 +324,13 @@ class NodeHttpClientFacadeInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("httpfacade.post=201|Created|POST|payload|text/plain|post"))
             assertTrue(result.stdout, result.stdout.contains("httpfacade.pipe=pipe-body"))
             assertTrue(result.stdout, result.stdout.contains("httpfacade.https=202|Accepted|yes|HTTPS"))
+            assertTrue(result.stdout, result.stdout.contains("httpfacade.redirect=302|Found|/redirect-target|manual-redirect"))
+            assertTrue(result.stdout, result.stdout.contains("httpfacade.follow=200|OK|followed"))
             assertTrue(result.stdout, result.stdout.contains("httpfacade.events=ERR_AUTOJS6_NETWORK_TIMEOUT/true|ERR_AUTOJS6_NETWORK_ABORTED"))
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "httpfacade.requests=GET:/get?x=1|POST:/post|GET:/pipe|POST:/secure|GET:/timeout|GET:/abort",
+                    "httpfacade.requests=GET:/get?x=1|POST:/post|GET:/pipe|POST:/secure|GET:/redirect|GET:/redirect-follow|GET:/redirect-target|GET:/timeout|GET:/abort",
                 ),
             )
             assertTrue(result.stdout, result.stdout.contains("httpfacade.permissions=true"))
