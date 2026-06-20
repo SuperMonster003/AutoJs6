@@ -30973,10 +30973,13 @@ std::string buildEmbeddedScriptExecutionSource(
           normalized.timeoutMs === undefined ? normalized.timeout : normalized.timeoutMs
         );
         this.__autojs6AbortController = typeof AbortController === "function" ? new AbortController() : null;
+        this.__autojs6ExternalSignal = normalized.signal || null;
+        this.__autojs6ExternalAbortListener = null;
         __autojs6_limited_http_apply_headers(this, normalized.headers);
         if (typeof callback === "function") {
           this.once("response", callback);
         }
+        this.__autojs6AttachSignal();
       }
       write(chunk, encoding, callback) {
         if (typeof encoding === "function") {
@@ -31032,6 +31035,7 @@ std::string buildEmbeddedScriptExecutionSource(
             this.__autojs6AbortController.abort();
           } catch (_) {}
         }
+        this.__autojs6DetachSignal();
         this.emit("abort");
         this.emit("close");
         return this;
@@ -31106,6 +31110,7 @@ std::string buildEmbeddedScriptExecutionSource(
             __autojs6_schedule_task(function() {
               self.emit("response", incoming);
               incoming.__autojs6EmitBody(result.body);
+              self.__autojs6DetachSignal();
               self.emit("close");
             });
           })
@@ -31117,9 +31122,70 @@ std::string buildEmbeddedScriptExecutionSource(
             if (code === "ERR_AUTOJS6_NETWORK_TIMEOUT" || code === "ERR_AUTOJS6_BRIDGE_TIMEOUT") {
               self.emit("timeout");
             }
+            self.__autojs6DetachSignal();
             self.emit("error", error);
             self.emit("close");
           });
+      }
+      __autojs6AttachSignal() {
+        const signal = this.__autojs6ExternalSignal;
+        if (!signal) {
+          return;
+        }
+        if (!__autojs6_is_abort_signal(signal)) {
+          throw __autojs6_invalid_arg_type("Embedded Node limited " + protocol + ".request signal must be an AbortSignal.");
+        }
+        const self = this;
+        const listener = function() {
+          self.__autojs6AbortFromSignal();
+        };
+        this.__autojs6ExternalAbortListener = listener;
+        if (signal.aborted === true) {
+          const error = this.__autojs6AbortError();
+          this.aborted = true;
+          this.destroyed = true;
+          __autojs6_limited_http_schedule_callback(function() {
+            self.__autojs6DetachSignal();
+            self.emit("error", error);
+            self.emit("close");
+          });
+        } else {
+          signal.addEventListener("abort", listener, { once: true });
+        }
+      }
+      __autojs6DetachSignal() {
+        const signal = this.__autojs6ExternalSignal;
+        const listener = this.__autojs6ExternalAbortListener;
+        if (signal && listener && typeof signal.removeEventListener === "function") {
+          try {
+            signal.removeEventListener("abort", listener);
+          } catch (_) {}
+        }
+        this.__autojs6ExternalAbortListener = null;
+      }
+      __autojs6AbortFromSignal() {
+        if (this.aborted || this.destroyed) {
+          return;
+        }
+        const error = this.__autojs6AbortError();
+        this.aborted = true;
+        this.destroyed = true;
+        if (this.__autojs6AbortController) {
+          try {
+            this.__autojs6AbortController.abort();
+          } catch (_) {}
+        }
+        if (!this.__autojs6Started) {
+          this.__autojs6DetachSignal();
+          this.emit("error", error);
+          this.emit("close");
+        }
+      }
+      __autojs6AbortError() {
+        return __autojs6_fetch_error(
+          "AutoJs6 controlled HTTP request was aborted.",
+          "ERR_AUTOJS6_NETWORK_ABORTED"
+        );
       }
     }
     class LimitedIncomingMessage extends nodeEvents.EventEmitter {
