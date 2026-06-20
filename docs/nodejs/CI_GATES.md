@@ -223,6 +223,23 @@ tooling/report gates, and writes
 instrumentation selectors and records known design-gated inputs separately.
 See [reports/phase8/README.md](reports/phase8/README.md).
 
+## Phase 9 Native Modernization Gates
+
+Phase 9 Batch A starts with host-side native modernization preflights:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodeNativeSymbolUsageReport
+.\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterAbi
+.\gradlew.bat --console=plain :app:verifyNodeRuntimeBuildPlan
+.\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
+```
+
+These tasks generate the native symbol usage map, verify the versioned C
+runtime adapter ABI header, and validate the reproducible Android runtime build
+plan skeleton. They do not promote Node 24.17 and do not change the default
+runtime slot. See [reports/phase9/README.md](reports/phase9/README.md) and
+[native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md).
+
 ## Phase 7 Focused Gates
 
 Phase 7 uses focused feature gates instead of expanding every iteration to the

@@ -1,0 +1,52 @@
+# Runtime Adapter ABI
+
+S9-02 defines a versioned C ABI between the AutoJs6 host bridge and
+Node-version-specific runtime adapters.
+
+Host-side verification:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterAbi
+```
+
+Outputs:
+
+- `build/reports/nodejs/runtime-adapter-abi-v1.json`
+- `build/reports/nodejs/runtime-adapter-abi-v1.md`
+
+## ABI v1
+
+Header:
+
+- `app/src/main/cpp/node_runtime_api_v1.h`
+
+Export:
+
+- `autojs_node_get_runtime_api_v1`
+
+Core table:
+
+- `AutoJsNodeRuntimeApiV1`
+- `get_node_version`
+- `get_runtime_descriptor`
+- `create`
+- `start`
+- `execute`
+- `request_stop`
+- `destroy`
+- `post_bridge_result`
+- `get_diagnostics`
+
+The ABI carries primitive values, opaque handles, UTF-8 JSON descriptors, and
+byte views only. It intentionally excludes C++ standard library types, JNI
+objects, and runtime-specific embedder handles from the host/adapter boundary.
+
+Every public structure starts with `struct_size` so later revisions can add
+fields without breaking older hosts.
+
+## Current Status
+
+The ABI header and verifier are checked in first. Existing Node 24.5 bridge
+code has not yet been migrated behind this adapter, and Node 24.17 is not
+promoted. S9-03 should introduce the Node 24.5 adapter implementation behind
+this contract before a second runtime slot becomes selectable.

@@ -1645,6 +1645,7 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodeV11RcReadiness "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
 .\gradlew.bat --console=plain :app:verifyNodePhase8SecurityStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase8Gate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
@@ -1662,6 +1663,9 @@ requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/
 `verifyNodePhase8Gate` runs the Phase 8 aggregate capability gate, host tooling/report checks, and
 `generateNodePhase8Summary`, which writes `app/build/reports/nodejs/phase8-summary.json`; see
 [reports/phase8/README.md](reports/phase8/README.md).
+`verifyNodePhase9NativeModernizationPlan` runs the Phase 9 Batch A host-side
+native boundary, runtime adapter ABI, and runtime build-plan checks; see
+[reports/phase9/README.md](reports/phase9/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
