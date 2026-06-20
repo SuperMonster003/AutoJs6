@@ -45,6 +45,22 @@ class LaunchConfig : FuzzyDeserializer.OriginalJsonKeyAware {
     )
     var isLauncherVisible = true
 
+    @SerializedName("logShortcutVisible")
+    @field:SerializedNameCompatible(
+        With(value = "showLogShortcut"),
+        With(value = "hideLogShortcut", isReversed = true),
+        With(value = "displayLogShortcut"),
+    )
+    var isLogShortcutVisible = false
+
+    @SerializedName("settingsShortcutVisible")
+    @field:SerializedNameCompatible(
+        With(value = "showSettingsShortcut"),
+        With(value = "hideSettingsShortcut", isReversed = true),
+        With(value = "displaySettingsShortcut"),
+    )
+    var isSettingsShortcutVisible = false
+
     @SerializedName("runOnBoot")
     @field:SerializedNameCompatible(
         With(value = "bootRun"),

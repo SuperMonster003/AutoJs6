@@ -253,6 +253,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     CheckBox mLaunchLogsVisibleView;
     CheckBox mLaunchSplashVisibleView;
     CheckBox mLaunchLauncherVisibleView;
+    CheckBox mLaunchLogShortcutVisibleView;
+    CheckBox mLaunchSettingsShortcutVisibleView;
     CheckBox mLaunchRunOnBootView;
     EditText mLaunchSlugView;
 
@@ -411,6 +413,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mLaunchLogsVisibleView = binding.checkboxLaunchLogsVisible;
         mLaunchSplashVisibleView = binding.checkboxLaunchSplashVisible;
         mLaunchLauncherVisibleView = binding.checkboxLaunchLauncherVisible;
+        mLaunchLogShortcutVisibleView = binding.checkboxLaunchLogShortcutVisible;
+        mLaunchSettingsShortcutVisibleView = binding.checkboxLaunchSettingsShortcutVisible;
         mLaunchRunOnBootView = binding.checkboxLaunchRunOnBoot;
         mLaunchSlugView = binding.launchSlug;
 
@@ -418,6 +422,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mLaunchLogsVisibleView.setChecked(defaultLaunchConfig.isLogsVisible());
         mLaunchSplashVisibleView.setChecked(defaultLaunchConfig.isSplashVisible());
         mLaunchLauncherVisibleView.setChecked(defaultLaunchConfig.isLauncherVisible());
+        mLaunchLogShortcutVisibleView.setChecked(defaultLaunchConfig.isLogShortcutVisible());
+        mLaunchSettingsShortcutVisibleView.setChecked(defaultLaunchConfig.isSettingsShortcutVisible());
         mLaunchRunOnBootView.setChecked(defaultLaunchConfig.isRunOnBoot());
         mLaunchSlugView.setText(defaultLaunchConfig.getSlug());
 
@@ -705,6 +711,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             state.launchLogsVisible = launchConfig.isLogsVisible();
             state.launchSplashVisible = launchConfig.isSplashVisible();
             state.launchLauncherVisible = launchConfig.isLauncherVisible();
+            state.launchLogShortcutVisible = launchConfig.isLogShortcutVisible();
+            state.launchSettingsShortcutVisible = launchConfig.isSettingsShortcutVisible();
             state.launchRunOnBoot = launchConfig.isRunOnBoot();
             state.launchSlug = Objects.requireNonNullElse(launchConfig.getSlug(), "");
         }
@@ -728,6 +736,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (policy.fixedLaunchLogsVisible) out.launchLogsVisible = fixedState.launchLogsVisible;
         if (policy.fixedLaunchSplashVisible) out.launchSplashVisible = fixedState.launchSplashVisible;
         if (policy.fixedLaunchLauncherVisible) out.launchLauncherVisible = fixedState.launchLauncherVisible;
+        if (policy.fixedLaunchLogShortcutVisible) out.launchLogShortcutVisible = fixedState.launchLogShortcutVisible;
+        if (policy.fixedLaunchSettingsShortcutVisible) out.launchSettingsShortcutVisible = fixedState.launchSettingsShortcutVisible;
         if (policy.fixedLaunchRunOnBoot) out.launchRunOnBoot = fixedState.launchRunOnBoot;
         if (policy.fixedLaunchSlug) out.launchSlug = fixedState.launchSlug;
         if (policy.fixedAbis && !fixedState.abis.isEmpty()) out.abis = new ArrayList<>(fixedState.abis);
@@ -767,6 +777,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mLaunchLogsVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
         mLaunchSplashVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
         mLaunchLauncherVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
+        mLaunchLogShortcutVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
+        mLaunchSettingsShortcutVisibleView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
         mLaunchRunOnBootView.setOnCheckedChangeListener((buttonView, isChecked) -> onBuildUiControlChanged());
 
         AdapterView.OnItemSelectedListener stateSpinnerListener = new AdapterView.OnItemSelectedListener() {
@@ -1178,6 +1190,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         CheckBox launchLogsVisible = createFieldPolicyCheckBox(container, R.string.text_launch_logs_visible, initialPolicy.fixedLaunchLogsVisible, true);
         CheckBox launchSplashVisible = createFieldPolicyCheckBox(container, R.string.text_launch_splash_visible, initialPolicy.fixedLaunchSplashVisible, true);
         CheckBox launchLauncherVisible = createFieldPolicyCheckBox(container, R.string.text_launch_launcher_visible, initialPolicy.fixedLaunchLauncherVisible, true);
+        CheckBox launchLogShortcutVisible = createFieldPolicyCheckBox(container, R.string.text_launch_log_shortcut_visible, initialPolicy.fixedLaunchLogShortcutVisible, true);
+        CheckBox launchSettingsShortcutVisible = createFieldPolicyCheckBox(container, R.string.text_launch_settings_shortcut_visible, initialPolicy.fixedLaunchSettingsShortcutVisible, true);
         CheckBox launchSlug = createFieldPolicyCheckBox(container, R.string.text_launch_slug, initialPolicy.fixedLaunchSlug, true);
         addFieldPolicyDivider(container);
 
@@ -1207,6 +1221,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     selected.fixedLaunchLogsVisible = launchLogsVisible.isChecked();
                     selected.fixedLaunchSplashVisible = launchSplashVisible.isChecked();
                     selected.fixedLaunchLauncherVisible = launchLauncherVisible.isChecked();
+                    selected.fixedLaunchLogShortcutVisible = launchLogShortcutVisible.isChecked();
+                    selected.fixedLaunchSettingsShortcutVisible = launchSettingsShortcutVisible.isChecked();
                     selected.fixedLaunchSlug = launchSlug.isChecked();
                     selected.fixedAbis = abis.isChecked();
                     selected.fixedLibs = libs.isChecked();
@@ -1501,6 +1517,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             setCheckedIfChanged(mLaunchLogsVisibleView, state.launchLogsVisible);
             setCheckedIfChanged(mLaunchSplashVisibleView, state.launchSplashVisible);
             setCheckedIfChanged(mLaunchLauncherVisibleView, state.launchLauncherVisible);
+            setCheckedIfChanged(mLaunchLogShortcutVisibleView, state.launchLogShortcutVisible);
+            setCheckedIfChanged(mLaunchSettingsShortcutVisibleView, state.launchSettingsShortcutVisible);
             setCheckedIfChanged(mLaunchRunOnBootView, state.launchRunOnBoot);
             setTextIfChanged(mLaunchSlugView, state.launchSlug);
 
@@ -1625,6 +1643,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         state.launchLogsVisible = mLaunchLogsVisibleView.isChecked();
         state.launchSplashVisible = mLaunchSplashVisibleView.isChecked();
         state.launchLauncherVisible = mLaunchLauncherVisibleView.isChecked();
+        state.launchLogShortcutVisible = mLaunchLogShortcutVisibleView.isChecked();
+        state.launchSettingsShortcutVisible = mLaunchSettingsShortcutVisibleView.isChecked();
         state.launchRunOnBoot = mLaunchRunOnBootView.isChecked();
         state.launchSlug = mLaunchSlugView.getText() == null ? "" : mLaunchSlugView.getText().toString();
         state.abis = collectCheckedItems(mFlexboxAbisView);
@@ -2132,6 +2152,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 mLaunchLogsVisibleView.setChecked(launchConfig.isLogsVisible());
                 mLaunchSplashVisibleView.setChecked(launchConfig.isSplashVisible());
                 mLaunchLauncherVisibleView.setChecked(launchConfig.isLauncherVisible());
+                mLaunchLogShortcutVisibleView.setChecked(launchConfig.isLogShortcutVisible());
+                mLaunchSettingsShortcutVisibleView.setChecked(launchConfig.isSettingsShortcutVisible());
                 mLaunchRunOnBootView.setChecked(launchConfig.isRunOnBoot());
                 mLaunchSlugView.setText(launchConfig.getSlug());
             }
@@ -2432,6 +2454,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         launchConfig.setLogsVisible(state.launchLogsVisible);
         launchConfig.setSplashVisible(state.launchSplashVisible);
         launchConfig.setLauncherVisible(state.launchLauncherVisible);
+        launchConfig.setLogShortcutVisible(state.launchLogShortcutVisible);
+        launchConfig.setSettingsShortcutVisible(state.launchSettingsShortcutVisible);
         launchConfig.setRunOnBoot(state.launchRunOnBoot);
         launchConfig.setSlug(state.launchSlug);
 
@@ -2910,6 +2934,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         boolean fixedLaunchLogsVisible = false;
         boolean fixedLaunchSplashVisible = false;
         boolean fixedLaunchLauncherVisible = false;
+        boolean fixedLaunchLogShortcutVisible = false;
+        boolean fixedLaunchSettingsShortcutVisible = false;
         boolean fixedLaunchRunOnBoot = false;
         boolean fixedLaunchSlug = false;
         boolean fixedAbis = false;
@@ -2936,6 +2962,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             policy.fixedLaunchLogsVisible = true;
             policy.fixedLaunchSplashVisible = true;
             policy.fixedLaunchLauncherVisible = true;
+            policy.fixedLaunchLogShortcutVisible = true;
+            policy.fixedLaunchSettingsShortcutVisible = true;
             policy.fixedLaunchRunOnBoot = true;
             policy.fixedLaunchSlug = true;
             policy.fixedAbis = true;
@@ -2959,6 +2987,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             copied.fixedLaunchLogsVisible = fixedLaunchLogsVisible;
             copied.fixedLaunchSplashVisible = fixedLaunchSplashVisible;
             copied.fixedLaunchLauncherVisible = fixedLaunchLauncherVisible;
+            copied.fixedLaunchLogShortcutVisible = fixedLaunchLogShortcutVisible;
+            copied.fixedLaunchSettingsShortcutVisible = fixedLaunchSettingsShortcutVisible;
             copied.fixedLaunchRunOnBoot = fixedLaunchRunOnBoot;
             copied.fixedLaunchSlug = fixedLaunchSlug;
             copied.fixedAbis = fixedAbis;
@@ -2983,6 +3013,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_LOGS_VISIBLE, fixedLaunchLogsVisible);
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_SPLASH_VISIBLE, fixedLaunchSplashVisible);
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE, fixedLaunchLauncherVisible);
+                out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, fixedLaunchLogShortcutVisible);
+                out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, fixedLaunchSettingsShortcutVisible);
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_RUN_ON_BOOT, fixedLaunchRunOnBoot);
                 out.put(BuildConfigStore.FIELD_FIXED_LAUNCH_SLUG, fixedLaunchSlug);
                 out.put(BuildConfigStore.FIELD_FIXED_ABIS, fixedAbis);
@@ -3010,6 +3042,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             policy.fixedLaunchLogsVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_LOGS_VISIBLE, policy.fixedLaunchLogsVisible);
             policy.fixedLaunchSplashVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_SPLASH_VISIBLE, policy.fixedLaunchSplashVisible);
             policy.fixedLaunchLauncherVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE, policy.fixedLaunchLauncherVisible);
+            policy.fixedLaunchLogShortcutVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, policy.fixedLaunchLogShortcutVisible);
+            policy.fixedLaunchSettingsShortcutVisible = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, policy.fixedLaunchSettingsShortcutVisible);
             policy.fixedLaunchRunOnBoot = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_RUN_ON_BOOT, policy.fixedLaunchRunOnBoot);
             policy.fixedLaunchSlug = json.optBoolean(BuildConfigStore.FIELD_FIXED_LAUNCH_SLUG, policy.fixedLaunchSlug);
             policy.fixedAbis = json.optBoolean(BuildConfigStore.FIELD_FIXED_ABIS, policy.fixedAbis);
@@ -3031,6 +3065,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         boolean launchLogsVisible = true;
         boolean launchSplashVisible = true;
         boolean launchLauncherVisible = true;
+        boolean launchLogShortcutVisible = false;
+        boolean launchSettingsShortcutVisible = false;
         boolean launchRunOnBoot = false;
         String launchSlug = "";
         String signatureScheme = "";
@@ -3051,6 +3087,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             copied.launchLogsVisible = launchLogsVisible;
             copied.launchSplashVisible = launchSplashVisible;
             copied.launchLauncherVisible = launchLauncherVisible;
+            copied.launchLogShortcutVisible = launchLogShortcutVisible;
+            copied.launchSettingsShortcutVisible = launchSettingsShortcutVisible;
             copied.launchRunOnBoot = launchRunOnBoot;
             copied.launchSlug = launchSlug;
             copied.signatureScheme = signatureScheme;
@@ -3074,6 +3112,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 json.put(BuildConfigStore.STATE_LAUNCH_LOGS_VISIBLE, launchLogsVisible);
                 json.put(BuildConfigStore.STATE_LAUNCH_SPLASH_VISIBLE, launchSplashVisible);
                 json.put(BuildConfigStore.STATE_LAUNCH_LAUNCHER_VISIBLE, launchLauncherVisible);
+                json.put(BuildConfigStore.STATE_LAUNCH_LOG_SHORTCUT_VISIBLE, launchLogShortcutVisible);
+                json.put(BuildConfigStore.STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, launchSettingsShortcutVisible);
                 json.put(BuildConfigStore.STATE_LAUNCH_RUN_ON_BOOT, launchRunOnBoot);
                 json.put(BuildConfigStore.STATE_LAUNCH_SLUG, launchSlug);
                 json.put(BuildConfigStore.STATE_SIGNATURE_SCHEME, signatureScheme);
@@ -3099,6 +3139,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             state.launchLogsVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_LOGS_VISIBLE, true);
             state.launchSplashVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_SPLASH_VISIBLE, true);
             state.launchLauncherVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_LAUNCHER_VISIBLE, true);
+            state.launchLogShortcutVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_LOG_SHORTCUT_VISIBLE, false);
+            state.launchSettingsShortcutVisible = json.optBoolean(BuildConfigStore.STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, false);
             state.launchRunOnBoot = json.optBoolean(BuildConfigStore.STATE_LAUNCH_RUN_ON_BOOT, false);
             state.launchSlug = json.optString(BuildConfigStore.STATE_LAUNCH_SLUG, "");
             state.signatureScheme = json.optString(BuildConfigStore.STATE_SIGNATURE_SCHEME, "");
@@ -3138,6 +3180,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                    && launchLogsVisible == that.launchLogsVisible
                    && launchSplashVisible == that.launchSplashVisible
                    && launchLauncherVisible == that.launchLauncherVisible
+                   && launchLogShortcutVisible == that.launchLogShortcutVisible
+                   && launchSettingsShortcutVisible == that.launchSettingsShortcutVisible
                    && launchRunOnBoot == that.launchRunOnBoot
                    && Objects.equals(launchSlug, that.launchSlug)
                    && Objects.equals(signatureScheme, that.signatureScheme)
@@ -3159,6 +3203,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     launchLogsVisible,
                     launchSplashVisible,
                     launchLauncherVisible,
+                    launchLogShortcutVisible,
+                    launchSettingsShortcutVisible,
                     launchRunOnBoot,
                     launchSlug,
                     signatureScheme,

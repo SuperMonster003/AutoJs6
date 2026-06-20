@@ -364,6 +364,22 @@
                         android:paddingStart="4dp"
                         android:paddingEnd="4dp" />
 
+                    <CheckBox
+                        android:id="@+id/checkbox_launch_log_shortcut_visible"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_launch_log_shortcut_visible"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp" />
+
+                    <CheckBox
+                        android:id="@+id/checkbox_launch_settings_shortcut_visible"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_launch_settings_shortcut_visible"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp" />
+
                     <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/launch_slug_parent"
                         android:layout_width="match_parent"

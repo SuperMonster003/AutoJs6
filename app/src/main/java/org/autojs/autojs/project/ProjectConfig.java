@@ -328,6 +328,14 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         Pattern launchConfigSplashVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("splashVisible"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigDisplayLauncherPattern = Pattern.compile(booleanPatternWithKeyCapture("displayLauncher"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigLauncherVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("launcherVisible"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigHideLogShortcutPattern = Pattern.compile(booleanPatternWithKeyCapture("hideLogShortcut"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigShowLogShortcutPattern = Pattern.compile(booleanPatternWithKeyCapture("showLogShortcut"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigDisplayLogShortcutPattern = Pattern.compile(booleanPatternWithKeyCapture("displayLogShortcut"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigLogShortcutVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("logShortcutVisible"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigHideSettingsShortcutPattern = Pattern.compile(booleanPatternWithKeyCapture("hideSettingsShortcut"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigShowSettingsShortcutPattern = Pattern.compile(booleanPatternWithKeyCapture("showSettingsShortcut"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigDisplaySettingsShortcutPattern = Pattern.compile(booleanPatternWithKeyCapture("displaySettingsShortcut"), Pattern.CASE_INSENSITIVE);
+        Pattern launchConfigSettingsShortcutVisiblePattern = Pattern.compile(booleanPatternWithKeyCapture("settingsShortcutVisible"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigAutoRunOnBootPattern = Pattern.compile(booleanPatternWithKeyCapture("autoRunOnBoot"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigRunOnBootPattern = Pattern.compile(booleanPatternWithKeyCapture("runOnBoot"), Pattern.CASE_INSENSITIVE);
         Pattern launchConfigSlugTextPattern = Pattern.compile(stringPatternWithKeyCapture("slugText"), Pattern.CASE_INSENSITIVE);
@@ -364,6 +372,14 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         setFieldForBooleanIfMatchesWithKey(launchConfigSplashVisiblePattern, s, "splashVisible", launchConfig::setSplashVisible, launchConfig, detectConflicts); /* 优先. */
         setFieldForBooleanIfMatchesWithKey(launchConfigDisplayLauncherPattern, s, "launcherVisible", launchConfig::setLauncherVisible, launchConfig, detectConflicts);
         setFieldForBooleanIfMatchesWithKey(launchConfigLauncherVisiblePattern, s, "launcherVisible", launchConfig::setLauncherVisible, launchConfig, detectConflicts); /* 优先. */
+        setFieldForBooleanIfMatchesWithKey(launchConfigHideLogShortcutPattern, s, "logShortcutVisible", value -> launchConfig.setLogShortcutVisible(!value), launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigShowLogShortcutPattern, s, "logShortcutVisible", launchConfig::setLogShortcutVisible, launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigDisplayLogShortcutPattern, s, "logShortcutVisible", launchConfig::setLogShortcutVisible, launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigLogShortcutVisiblePattern, s, "logShortcutVisible", launchConfig::setLogShortcutVisible, launchConfig, detectConflicts); /* 优先. */
+        setFieldForBooleanIfMatchesWithKey(launchConfigHideSettingsShortcutPattern, s, "settingsShortcutVisible", value -> launchConfig.setSettingsShortcutVisible(!value), launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigShowSettingsShortcutPattern, s, "settingsShortcutVisible", launchConfig::setSettingsShortcutVisible, launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigDisplaySettingsShortcutPattern, s, "settingsShortcutVisible", launchConfig::setSettingsShortcutVisible, launchConfig, detectConflicts);
+        setFieldForBooleanIfMatchesWithKey(launchConfigSettingsShortcutVisiblePattern, s, "settingsShortcutVisible", launchConfig::setSettingsShortcutVisible, launchConfig, detectConflicts); /* 优先. */
         setFieldForBooleanIfMatchesWithKey(launchConfigAutoRunOnBootPattern, s, "runOnBoot", launchConfig::setRunOnBoot, launchConfig, detectConflicts);
         setFieldForBooleanIfMatchesWithKey(launchConfigRunOnBootPattern, s, "runOnBoot", launchConfig::setRunOnBoot, launchConfig, detectConflicts); /* 优先. */
         setFieldIfMatchesWithKey(launchConfigSlugTextPattern, s, "slug", launchConfig::setSlug, launchConfig, detectConflicts);

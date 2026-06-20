@@ -1272,8 +1272,10 @@
     <string name="text_launch_config">Launch config</string>
     <string name="text_launch_debugger">Launch debugger</string>
     <string name="text_launch_launcher_visible">Show app icon in launcher</string>
+    <string name="text_launch_log_shortcut_visible">Show Log in launcher shortcuts</string>
     <string name="text_launch_logs_visible">Show logs on launch</string>
     <string name="text_launch_run_on_boot">Run script on boot</string>
+    <string name="text_launch_settings_shortcut_visible">Show Settings in launcher shortcuts</string>
     <string name="text_launch_slug">Splash slug text</string>
     <string name="text_launch_splash_visible">Show splash screen on launch</string>
     <string name="text_launcher_icon_title">Launcher icon</string>

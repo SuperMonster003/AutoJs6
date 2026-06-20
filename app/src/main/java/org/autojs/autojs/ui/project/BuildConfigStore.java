@@ -46,6 +46,8 @@ public final class BuildConfigStore {
     public static final String STATE_LAUNCH_LOGS_VISIBLE = "launchLogsVisible";
     public static final String STATE_LAUNCH_SPLASH_VISIBLE = "launchSplashVisible";
     public static final String STATE_LAUNCH_LAUNCHER_VISIBLE = "launchLauncherVisible";
+    public static final String STATE_LAUNCH_LOG_SHORTCUT_VISIBLE = "launchLogShortcutVisible";
+    public static final String STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE = "launchSettingsShortcutVisible";
     public static final String STATE_LAUNCH_RUN_ON_BOOT = "launchRunOnBoot";
     public static final String STATE_LAUNCH_SLUG = "launchSlug";
     public static final String STATE_SIGNATURE_SCHEME = "signatureScheme";
@@ -64,6 +66,8 @@ public final class BuildConfigStore {
     public static final String FIELD_FIXED_LAUNCH_LOGS_VISIBLE = "fixedLaunchLogsVisible";
     public static final String FIELD_FIXED_LAUNCH_SPLASH_VISIBLE = "fixedLaunchSplashVisible";
     public static final String FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE = "fixedLaunchLauncherVisible";
+    public static final String FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE = "fixedLaunchLogShortcutVisible";
+    public static final String FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE = "fixedLaunchSettingsShortcutVisible";
     public static final String FIELD_FIXED_LAUNCH_RUN_ON_BOOT = "fixedLaunchRunOnBoot";
     public static final String FIELD_FIXED_LAUNCH_SLUG = "fixedLaunchSlug";
     public static final String FIELD_FIXED_ABIS = "fixedAbis";
@@ -337,6 +341,8 @@ public final class BuildConfigStore {
                || object.has(STATE_LAUNCH_LOGS_VISIBLE)
                || object.has(STATE_LAUNCH_SPLASH_VISIBLE)
                || object.has(STATE_LAUNCH_LAUNCHER_VISIBLE)
+               || object.has(STATE_LAUNCH_LOG_SHORTCUT_VISIBLE)
+               || object.has(STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE)
                || object.has(STATE_LAUNCH_RUN_ON_BOOT)
                || object.has(STATE_LAUNCH_SLUG)
                || object.has(STATE_SIGNATURE_SCHEME)
@@ -360,6 +366,8 @@ public final class BuildConfigStore {
         putSafely(out, STATE_LAUNCH_LOGS_VISIBLE, src.optBoolean(STATE_LAUNCH_LOGS_VISIBLE, true));
         putSafely(out, STATE_LAUNCH_SPLASH_VISIBLE, src.optBoolean(STATE_LAUNCH_SPLASH_VISIBLE, true));
         putSafely(out, STATE_LAUNCH_LAUNCHER_VISIBLE, src.optBoolean(STATE_LAUNCH_LAUNCHER_VISIBLE, true));
+        putSafely(out, STATE_LAUNCH_LOG_SHORTCUT_VISIBLE, src.optBoolean(STATE_LAUNCH_LOG_SHORTCUT_VISIBLE, false));
+        putSafely(out, STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, src.optBoolean(STATE_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, false));
         putSafely(out, STATE_LAUNCH_RUN_ON_BOOT, src.optBoolean(STATE_LAUNCH_RUN_ON_BOOT, false));
         putSafely(out, STATE_LAUNCH_SLUG, src.optString(STATE_LAUNCH_SLUG, ""));
         putSafely(out, STATE_SIGNATURE_SCHEME, src.optString(STATE_SIGNATURE_SCHEME, ""));
@@ -385,6 +393,8 @@ public final class BuildConfigStore {
         putSafely(out, FIELD_FIXED_LAUNCH_LOGS_VISIBLE, false);
         putSafely(out, FIELD_FIXED_LAUNCH_SPLASH_VISIBLE, false);
         putSafely(out, FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE, false);
+        putSafely(out, FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, false);
+        putSafely(out, FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, false);
         putSafely(out, FIELD_FIXED_LAUNCH_RUN_ON_BOOT, false);
         putSafely(out, FIELD_FIXED_LAUNCH_SLUG, false);
         putSafely(out, FIELD_FIXED_ABIS, false);
@@ -411,6 +421,8 @@ public final class BuildConfigStore {
         putSafely(out, FIELD_FIXED_LAUNCH_LOGS_VISIBLE, src.optBoolean(FIELD_FIXED_LAUNCH_LOGS_VISIBLE, defaults.optBoolean(FIELD_FIXED_LAUNCH_LOGS_VISIBLE, false)));
         putSafely(out, FIELD_FIXED_LAUNCH_SPLASH_VISIBLE, src.optBoolean(FIELD_FIXED_LAUNCH_SPLASH_VISIBLE, defaults.optBoolean(FIELD_FIXED_LAUNCH_SPLASH_VISIBLE, false)));
         putSafely(out, FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE, src.optBoolean(FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE, defaults.optBoolean(FIELD_FIXED_LAUNCH_LAUNCHER_VISIBLE, false)));
+        putSafely(out, FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, src.optBoolean(FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, defaults.optBoolean(FIELD_FIXED_LAUNCH_LOG_SHORTCUT_VISIBLE, false)));
+        putSafely(out, FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, src.optBoolean(FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, defaults.optBoolean(FIELD_FIXED_LAUNCH_SETTINGS_SHORTCUT_VISIBLE, false)));
         putSafely(out, FIELD_FIXED_LAUNCH_RUN_ON_BOOT, src.optBoolean(FIELD_FIXED_LAUNCH_RUN_ON_BOOT, defaults.optBoolean(FIELD_FIXED_LAUNCH_RUN_ON_BOOT, false)));
         putSafely(out, FIELD_FIXED_LAUNCH_SLUG, src.optBoolean(FIELD_FIXED_LAUNCH_SLUG, defaults.optBoolean(FIELD_FIXED_LAUNCH_SLUG, false)));
         putSafely(out, FIELD_FIXED_ABIS, src.optBoolean(FIELD_FIXED_ABIS, defaults.optBoolean(FIELD_FIXED_ABIS, false)));
