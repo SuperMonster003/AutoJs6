@@ -212,6 +212,11 @@ Current Batch E implementation status:
   read/write, `readFile()`, `writeFile()`, `appendFile()`, `truncate()`,
   `stat()`, `datasync()`, `sync()`, `close()`, and promise-level
   `readFile(fileHandle)` / `appendFile(fileHandle, data)` helpers.
+- S8-28 is complete for callback and sync fd APIs. `fs.open()` /
+  `openSync()`, `close()` / `closeSync()`, `read()` / `readSync()`,
+  `write()` / `writeSync()`, `fstat()` / `fstatSync()`, and
+  `ftruncate()` / `ftruncateSync()` are covered as scoped, execution-owned
+  descriptor operations.
 - Relative escapes and absolute outside paths keep stable scoped-fs denial
   codes, while closed handles and non-owned numeric descriptors reject with
   `EBADF`.
@@ -224,8 +229,11 @@ Focused gates:
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFdApiInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
 
 - `docs/nodejs/reports/phase8/FILEHANDLE_ADVANCED.md`
+- `docs/nodejs/reports/phase8/FD_API.md`

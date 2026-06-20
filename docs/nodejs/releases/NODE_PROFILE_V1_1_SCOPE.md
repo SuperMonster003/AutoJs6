@@ -61,6 +61,7 @@ small set of already-gated features toward practical use.
 | Web Platform globals | partial | `Headers`, `Request`, `Response`, `FormData`, `Blob`, `File`, `URLPattern`, `DOMException`, `EventTarget`, `MessageEvent`, `CompressionStream`, and `DecompressionStream` are aligned by a focused S8-20 gate as a compatibility prelude to controlled HTTP client facades. |
 | fs streams | partial | Scoped read/write streams support read, write, pipe, stable denial paths, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | FileHandle advanced scoped fs | partial | `fs.promises.open()` returns execution-owned scoped handles with read/write, `readFile`, `writeFile`, `appendFile`, `truncate`, `stat`, `datasync`, `sync`, `close`, promise-level handle helpers, closed-handle `EBADF`, scoped path denial, and timeout recovery. |
+| Callback/sync fd APIs | partial | `fs.open`/`openSync`, `close`/`closeSync`, `read`/`readSync`, `write`/`writeSync`, `fstat`/`fstatSync`, and `ftruncate`/`ftruncateSync` operate only on AutoJs6-managed scoped descriptors, with path denial, closed/non-owned fd `EBADF`, and timeout recovery. |
 | zlib streams | partial | Bounded transform streams support gzip/gunzip and deflate/inflate pipelines, scoped fs pipeline smoke, invalid input errors, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
 | HTTP client facade | experimental controlled client | `http.request()`, `http.get()`, `https.request()`, and `https.get()` expose a controlled fetch-backed client facade only when an enforced manifest declares `network`; default sync denial, no server/listen/raw sockets/CONNECT/upgrades, and explicit-only redirect follow remain enforced. |
@@ -287,6 +288,11 @@ small set of already-gated features toward practical use.
   read/write helpers, promise-level handle helpers, scoped path denial, closed
   handle/non-owned descriptor `EBADF`, and timeout recovery after an unclosed
   handle.
+- Callback/sync fd API smoke passes for managed `fs.open`/`openSync`,
+  `close`/`closeSync`, `read`/`readSync`, `write`/`writeSync`,
+  `fstat`/`fstatSync`, `ftruncate`/`ftruncateSync`, scoped path denial,
+  closed/non-owned descriptor `EBADF`, and timeout recovery after an unclosed
+  sync fd.
 - zlib stream smoke passes for gzip/gunzip, deflate/inflate, scoped fs
   read->gzip->write, invalid gzip error propagation, active stream timeout
   cleanup, and packaged APK markers.

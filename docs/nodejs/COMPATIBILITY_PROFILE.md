@@ -539,6 +539,13 @@ closed handles and non-owned numeric descriptors reject with `EBADF`, path
 escapes keep scoped-fs denial codes, and timeout cleanup prevents unclosed
 handles from poisoning the next embedded Node execution.
 
+The callback and sync fd API subset is also scoped and execution-owned. S8-28
+covers `open`/`openSync`, `close`/`closeSync`, `read`/`readSync`,
+`write`/`writeSync`, `fstat`/`fstatSync`, and
+`ftruncate`/`ftruncateSync`. Numeric fd values are compatibility tokens backed
+by the scoped descriptor registry; invalid, closed, or foreign descriptors
+reject with `EBADF` before raw native fd access.
+
 The `zlib` wrapper exposes bounded transform streams for `createGzip()`,
 `createGunzip()`, `createDeflate()`, `createInflate()`, raw deflate/inflate,
 and Brotli compression/decompression. Active zlib transform tracking starts
