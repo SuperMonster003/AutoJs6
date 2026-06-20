@@ -21,7 +21,7 @@ The current runtime keeps inspector disabled:
 - `require.resolve("inspector")` rejects before `node_modules/inspector` can shadow the disabled builtin.
 - `process._debugProcess` is disabled.
 - `process.execArgv` is empty, `process.allowedNodeEnvironmentFlags` is frozen and empty, and `process.features.inspector` / `process.features.debug` are false.
-- Script-visible `process.env` filters `NODE_OPTIONS` and `NODE_INSPECT_RESUME_ON_START`.
+- Request startup env strips Node debugger/cache keys before native Node initialization, and script-visible `process.env` filters the same startup/debugger keys.
 - `NodeRuntimeCapabilities.featureFlagsById["inspector"]` is `status=disabled`, `securityLevel=high`, and has no build, project, or packaged APK override.
 - No embedded Node service binds an inspector TCP or WebSocket port.
 - Packaged APK verification does not accept inspector metadata.
@@ -31,6 +31,12 @@ The current runtime keeps inspector disabled:
 S8-37 adds `NodeInspectorDesignGateInstrumentationTest` as a focused negative gate for the disabled policy. It verifies the registry-disabled feature flag, build/project/package override denial, script-visible builtin denial, local `node_modules/inspector` shadowing denial, inert process debugging APIs, startup/debugger env filtering, and absence of inspector diagnostics while disabled.
 
 The gate does not enable inspector support. A future task that opens a debug endpoint must add positive attach tests and the lifecycle/security coverage listed under Future Acceptance Gate.
+
+## S8-40 Security Gate
+
+S8-40 adds `NodeInspectorSecurityGateInstrumentationTest` as a focused hardening gate for hostile startup input while the inspector remains disabled. It verifies release/project/package metadata denial, non-loopback and loopback `NODE_OPTIONS=--inspect` attempts, port cleanup after normal script stop and timeout, and absence of inspector profile artifacts or sensitive marker leaks.
+
+The runtime also strips `NODE_OPTIONS`, `NODE_INSPECT_RESUME_ON_START`, `NODE_COMPILE_CACHE`, and `NODE_DISABLE_COMPILE_CACHE` at the embedded request boundary before native startup. Native initialization disables `NODE_OPTIONS` parsing and global debug variable parsing. These changes preserve the disabled result: no inspector endpoint, no active session, no profiler channel, and no script-visible authority.
 
 ## Risk Model
 

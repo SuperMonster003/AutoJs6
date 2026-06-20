@@ -51,7 +51,8 @@ $env:ANDROID_SERIAL='QV710AF65F'
   `process.allowedNodeEnvironmentFlags`, and `process.features` remain inert;
 - script-visible `process.env` filters `NODE_OPTIONS` and
   `NODE_INSPECT_RESUME_ON_START` so user-provided startup/debugger env values
-  cannot be observed as an implied inspector contract;
+  cannot be observed as an implied inspector contract, and S8-40 extends this
+  to the embedded request/native startup boundary;
 - disabled runs do not emit inspector native diagnostics.
 
 ## Runtime Change
@@ -64,9 +65,12 @@ NODE_OPTIONS
 NODE_INSPECT_RESUME_ON_START
 ```
 
-The filter applies to the script-visible `process.env` snapshot. It does not
-add a Node startup env control surface, and it does not enable `--inspect`,
-`--inspect-brk`, or inspector resume behavior.
+The original S8-37 filter applies to the script-visible `process.env`
+snapshot. S8-40 additionally strips Node startup/debugger/cache keys before
+the request reaches native startup and initializes embedded Node with
+`NODE_OPTIONS` parsing disabled. This does not add a Node startup env control
+surface, and it does not enable `--inspect`, `--inspect-brk`, or inspector
+resume behavior.
 
 ## Safety Boundary
 

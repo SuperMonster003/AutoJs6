@@ -354,12 +354,21 @@ Current Batch G implementation status:
 - S8-39 is deferred by the disabled inspector gate. The runtime does not
   generate `.cpuprofile`, `.heapsnapshot`, allocation sampling, or
   inspector-owned profiling exports.
+- S8-40 is complete as a disabled-state inspector security gate. Release,
+  project, and packaged metadata cannot enable inspector; request startup env
+  strips Node debugger/cache keys before native initialization; hostile
+  non-loopback and loopback `NODE_OPTIONS=--inspect` attempts remain inert and
+  leave no checked listener after normal stop or timeout; and profile artifact
+  / sensitive-metadata checks stay absent. The focused gate settles the current
+  one-shot `:nodejs_embedded` process between attempts because the service does
+  not guarantee repeated libnode/V8/libuv startups in one process.
 
 Focused gates:
 
 ```powershell
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeInspectorDesignGateInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeInspectorSecurityGateInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
 ```
 
@@ -368,3 +377,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`
 - `docs/nodejs/reports/phase8/DEVTOOLS_ADB_FORWARD_GATE.md`
 - `docs/nodejs/reports/phase8/INSPECTOR_PROFILING_GATE.md`
+- `docs/nodejs/reports/phase8/INSPECTOR_SECURITY_GATE.md`

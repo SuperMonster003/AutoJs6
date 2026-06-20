@@ -1234,6 +1234,21 @@ No endpoint, port binding, ADB forwarding target, or active-session
 notification exists while the design gate remains disabled. See
 `docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`.
 
+Current inspector security-gate focused instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeInspectorSecurityGateInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies the S8-40 disabled-state hardening: release, project, and
+packaged metadata cannot enable inspector; Node startup/debugger env keys are
+stripped before native startup and from script-visible `process.env`; hostile
+`NODE_OPTIONS=--inspect` host/port attempts remain inert; checked ports are not
+left listening after normal script stop or timeout; and no inspector profile
+artifacts or project-sensitive marker data leak through captured results. See
+`docs/nodejs/reports/phase8/INSPECTOR_SECURITY_GATE.md`.
+
 S8-38 ADB forwarding and Chrome DevTools attach are currently deferred by the
 disabled inspector gate. There is no `start inspector`, `retrieve port/url`,
 `adb forward`, DevTools attach, or `stop inspector` test command because no
