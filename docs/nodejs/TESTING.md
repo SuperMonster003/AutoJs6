@@ -589,6 +589,29 @@ $env:ANDROID_SERIAL='QV710AF65F'
 
 This S8-30 suite verifies scoped `fs.watch`, `fs.promises.watch`, `fs.watchFile`, and `fs.unwatchFile` behavior. It covers callback, event-emitter, async-iterator, AbortSignal, close/ref/unref, buffer filename, scoped file URL and Buffer path inputs, polling stats, listener-specific unwatch, watcher quota, event-rate limiting, path denial, unsupported recursive watch, and timeout cleanup after a leaked watcher. Android file events may be coalesced, so the gate accepts `change` or `rename` and nullable filenames while still enforcing the AutoJs6 watcher wrapper and resource boundary. Pair it with the other Batch E classes for the advanced scoped fs regression set.
 
+Current safe file operations focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSafeFileOperationsInstrumentationTest"
+```
+
+For Sony unattended gates, pin the device and profile:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSafeFileOperationsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-31 suite verifies scoped `fs.cp`, `fs.cpSync`, `fs.promises.cp`,
+`fs.mkdtemp`, `fs.mkdtempSync`, `fs.promises.mkdtemp`, disposable temporary
+directories, `fs.statfs`, `fs.statfsSync`, `fs.promises.statfs`, `fs.glob`,
+`fs.globSync`, and `fs.promises.glob`. It covers callback, sync, promise,
+path-like inputs, URL paths, Buffer paths, safe `cp` and `glob` option shapes,
+statfs bigint output, scoped denial paths, `glob` `followSymlinks` denial, and
+bounded policy checks for `link`, `chmod`, `chown`, `symlink`, and
+Android/device roots. Pair it with the other Batch E classes for the advanced
+scoped fs regression set.
+
 Current stream focused instrumentation:
 
 ```powershell

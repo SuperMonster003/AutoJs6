@@ -563,6 +563,17 @@ and may report `change`, `rename`, or a null filename; scripts should treat
 watchers as notification hints and re-read scoped state when exact contents
 matter.
 
+The scoped safe file operations subset covers `fs.cp`/`cpSync`,
+`fs.mkdtemp`/`mkdtempSync`, `fs.statfs`/`statfsSync`, and the constrained
+`glob` surface. S8-31 verifies callback, sync, and promise forms for copy,
+temporary-directory, filesystem-stat, and glob operations while preserving
+scoped path validation for relative escapes, absolute outside paths, NUL paths,
+external symlinks, and Android/device roots. `glob` stays limited to safe local
+patterns and rejects parent-segment, absolute, protocol, invalid exclude, and
+`followSymlinks` forms. `link`, `chmod`, `chown`, and `symlink` are not promoted
+by S8-31; existing wrappers remain bounded by scoped path policy and platform
+permission failures.
+
 The `zlib` wrapper exposes bounded transform streams for `createGzip()`,
 `createGunzip()`, `createDeflate()`, `createInflate()`, raw deflate/inflate,
 and Brotli compression/decompression. Active zlib transform tracking starts

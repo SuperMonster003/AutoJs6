@@ -226,6 +226,12 @@ Current Batch E implementation status:
   scoped path-like inputs, AbortSignal, close/ref/unref paths, polling stats,
   listener-specific unwatch, watcher quota, event-rate limiting, timeout
   cleanup, and documented Android event coalescing behavior.
+- S8-31 is complete for additional safe scoped file operations. `fs.cp()` /
+  `cpSync()`, `fs.mkdtemp()` / `mkdtempSync()`, `fs.statfs()` /
+  `statfsSync()`, and the constrained `glob` subset cover callback, sync, and
+  promise forms, path-like inputs, safe option shapes, scoped denial paths, and
+  bounded policy checks for `link`, `chmod`, `chown`, `symlink`, and
+  Android/device roots.
 - Relative escapes and absolute outside paths keep stable scoped-fs denial
   codes, while closed handles and non-owned numeric descriptors reject with
   `EBADF`.
@@ -247,6 +253,8 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest,org.autojs.autojs.engine.NodeOpendirInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsWatchInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest,org.autojs.autojs.engine.NodeOpendirInstrumentationTest,org.autojs.autojs.engine.NodeFsWatchInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSafeFileOperationsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest,org.autojs.autojs.engine.NodeOpendirInstrumentationTest,org.autojs.autojs.engine.NodeFsWatchInstrumentationTest,org.autojs.autojs.engine.NodeSafeFileOperationsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
@@ -255,3 +263,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/FD_API.md`
 - `docs/nodejs/reports/phase8/OPENDIR_DIR.md`
 - `docs/nodejs/reports/phase8/FS_WATCH.md`
+- `docs/nodejs/reports/phase8/SAFE_FILE_OPERATIONS.md`
