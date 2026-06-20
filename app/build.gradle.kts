@@ -2484,6 +2484,7 @@ apply(from = "node-project-wizard.gradle.kts")
 apply(from = "node-v1-1-alpha-gate.gradle.kts")
 apply(from = "node-v1-1-beta-gate.gradle.kts")
 apply(from = "node-v1-1-rc-gate.gradle.kts")
+apply(from = "node-native-modernization.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {

@@ -1,0 +1,103 @@
+{
+  "schema": "autojs6-node-runtime-build-lock-v1",
+  "node": {
+    "currentVersion": "24.5.0",
+    "targetVersion": "24.17.0",
+    "sourceUrl": "https://nodejs.org/dist/v24.17.0/node-v24.17.0.tar.xz",
+    "sourceCommit": "EXTERNAL",
+    "nodejsMobileForkCommit": "EXTERNAL",
+    "sourceSha256": "EXTERNAL",
+    "patchSeries": "TBD",
+    "patchSet": "TBD"
+  },
+  "toolchain": {
+    "host": "linux-x86_64",
+    "ndkVersion": "26.1.10909125",
+    "clangVersion": "17.0.2",
+    "pythonVersion": "3.11.9",
+    "cmakeVersion": "3.22.1",
+    "minSdk": 24,
+    "pageSizeBytes": [
+      4096,
+      16384
+    ],
+    "containerImage": "autojs6-node-runtime-builder:TBD",
+    "dockerfile": "tools/nodejs/runtime-build/container/Dockerfile"
+  },
+  "runtimeConfig": {
+    "icu": "small-icu",
+    "openssl": "bundled-node-openssl",
+    "libuv": "bundled-node-libuv",
+    "snapshot": "disabled-until-snapshot-batch",
+    "npm": "disabled",
+    "corepack": "disabled"
+  },
+  "configureArgs": [
+    "--dest-cpu=$AUTOJS6_NODE_TARGET_CPU",
+    "--dest-os=android",
+    "--cross-compiling",
+    "--shared",
+    "--without-npm",
+    "--without-corepack",
+    "--openssl-no-asm"
+  ],
+  "abis": {
+    "arm64-v8a": {
+      "targetCpu": "arm64",
+      "clangTarget": "aarch64-linux-android24",
+      "cflags": [
+        "-fPIC",
+        "-ffunction-sections",
+        "-fdata-sections"
+      ],
+      "ldflags": [
+        "-Wl,--gc-sections",
+        "-Wl,--build-id=sha1",
+        "-Wl,-z,max-page-size=16384"
+      ],
+      "expectedLibnodeSha256": "EXTERNAL",
+      "expectedBuildId": "EXTERNAL"
+    },
+    "armeabi-v7a": {
+      "targetCpu": "arm",
+      "clangTarget": "armv7a-linux-androideabi24",
+      "cflags": [
+        "-fPIC",
+        "-ffunction-sections",
+        "-fdata-sections"
+      ],
+      "ldflags": [
+        "-Wl,--gc-sections",
+        "-Wl,--build-id=sha1"
+      ],
+      "expectedLibnodeSha256": "EXTERNAL",
+      "expectedBuildId": "EXTERNAL"
+    },
+    "x86_64": {
+      "targetCpu": "x64",
+      "clangTarget": "x86_64-linux-android24",
+      "cflags": [
+        "-fPIC",
+        "-ffunction-sections",
+        "-fdata-sections"
+      ],
+      "ldflags": [
+        "-Wl,--gc-sections",
+        "-Wl,--build-id=sha1",
+        "-Wl,-z,max-page-size=16384"
+      ],
+      "expectedLibnodeSha256": "EXTERNAL",
+      "expectedBuildId": "EXTERNAL"
+    }
+  },
+  "linker": {
+    "visibility": "hidden-by-default",
+    "versionScript": "tools/nodejs/runtime-build/libnode.exports.map",
+    "buildId": "sha1"
+  },
+  "outputs": {
+    "manifest": "build/reports/nodejs/runtime-build-manifest.json",
+    "libraryName": "libnode.so",
+    "headerArchive": "node-v24.17.0-headers.tar.zst"
+  }
+}
