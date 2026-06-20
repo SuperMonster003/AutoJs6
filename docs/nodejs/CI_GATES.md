@@ -183,10 +183,15 @@ $env:ANDROID_SERIAL="QV710AF65F"
 .\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeModernCoreGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase7ResourceStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase7Gate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
 
-`verifyNodePhase7Gate` combines the current focused gate set. Feature-specific
-live subgates above remain explicit so their opt-in requirements and provider
+`verifyNodePhase7Gate` combines the current focused gate set, the dependency
+sanitizer host gate, desktop differential reports, the expanded real npm corpus,
+the Phase 7 security corpus, and the plugin/UI gate. It writes
+`build/reports/nodejs/phase7-summary.json`; see
+[reports/phase7/README.md](reports/phase7/README.md). Feature-specific live
+subgates above remain explicit so their opt-in requirements and provider
 assumptions stay visible. These gates select existing focused instrumentation
 classes automatically unless
 `android.testInstrumentationRunnerArguments.class` is supplied explicitly.

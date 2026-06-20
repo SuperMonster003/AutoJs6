@@ -3910,6 +3910,7 @@ val verifyNodePhase7Gate = tasks.register("verifyNodePhase7Gate") {
             verifyNodeWorkerGate,
             verifyNodeModernCoreGate,
             verifyNodePhase7ResourceStressGate,
+            "generateNodePhase7Summary",
         )
     }
     doFirst {

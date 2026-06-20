@@ -51,6 +51,7 @@ experimental or blocked features from leaking into a release candidate.
 | packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, focused packaged ESM/dynamic import gate |
 | security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, bridge, WorkManager, database, packaged descriptor, or dependency sanitizer bypass |
 | resource stress | required | `verifyNodePhase7ResourceStressGate`: RSS/native heap/Java heap/thread/fd/libuv/bridge diagnostics, long-running stress, live provider cleanup, database transaction/close loop, WorkManager scheduled execution cleanup, plugin load/unload cleanup, worker stress when native workers are available |
+| Phase 7 functional gate | required pre-beta evidence | `verifyNodePhase7Gate` plus `phase7-summary.json`: packaged ESM/dynamic import, live providers, long-running, worker, modern core, dependency sanitizer, plugin/UI, security corpus, stress subset, and real npm corpus |
 | DX/tooling | required | error catalog, project wizard, TypeScript declarations, doctor/compatibility/provider-health reports |
 | blocker register | required | [NODE_PROFILE_V1_1_BETA_BLOCKERS.md](NODE_PROFILE_V1_1_BETA_BLOCKERS.md), verified by `:app:verifyNodeV11BetaBlockerRegister` |
 

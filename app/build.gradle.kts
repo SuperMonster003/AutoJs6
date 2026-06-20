@@ -683,15 +683,49 @@ val nodeJsPhase7ResourceStressGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeWorkManagerBridgeInstrumentationTest#androidWorkManagerLiveProviderExecutesPackagedProjectEntryAndPersistsResult",
     "org.autojs.autojs.engine.NodeWorkerThreadsResourceStressInstrumentationTest",
 )
+val nodeJsSecurityGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest",
+)
+val nodeJsRealNpmGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+)
+val nodeJsPluginUiGateInstrumentationClasses = (
+        listOf(
+            "org.autojs.autojs.engine.NodePluginSystemInstrumentationTest",
+            "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunV11BridgeEmbeddedNodePackagedApk",
+        ) + nodeJsLiveUiGateInstrumentationClasses
+        ).distinct()
 val nodeJsPhase7GateInstrumentationClasses = (
         nodeJsPackagedEsmGateInstrumentationClasses +
                 nodeJsLiveProviderGateInstrumentationClasses +
                 nodeJsLongRunningGateInstrumentationClasses +
                 nodeJsWorkerGateInstrumentationClasses +
                 nodeJsModernCoreGateInstrumentationClasses +
-                nodeJsPhase7ResourceStressGateInstrumentationClasses
+                nodeJsPhase7ResourceStressGateInstrumentationClasses +
+                nodeJsSecurityGateInstrumentationClasses +
+                nodeJsRealNpmGateInstrumentationClasses +
+                nodeJsPluginUiGateInstrumentationClasses
         ).distinct()
+val nodeJsPhase7HostGateNames = listOf(
+    "generateDesktopNodeDifferentialReport",
+    "generateNodeModernCoreDifferentialReport",
+    "verifyNodeDependencyBundlerFixtures",
+)
+val nodeJsPhase7SummaryTaskName = "generateNodePhase7Summary"
+val nodeJsPhase7GateCoverageGroups = listOf(
+    "packaged_esm_dynamic" to nodeJsPackagedEsmGateInstrumentationClasses,
+    "live_providers" to nodeJsLiveProviderGateInstrumentationClasses,
+    "long_running" to nodeJsLongRunningGateInstrumentationClasses,
+    "worker" to nodeJsWorkerGateInstrumentationClasses,
+    "modern_core" to nodeJsModernCoreGateInstrumentationClasses,
+    "dependency_sanitizer" to emptyList(),
+    "plugin_ui" to nodeJsPluginUiGateInstrumentationClasses,
+    "security_corpus" to nodeJsSecurityGateInstrumentationClasses,
+    "stress_subset" to nodeJsPhase7ResourceStressGateInstrumentationClasses,
+    "real_npm_corpus" to nodeJsRealNpmGateInstrumentationClasses,
+)
 val nodeJsFocusedGateInstrumentationClasses = mapOf(
+    nodeJsPhase7SummaryTaskName to nodeJsPhase7GateInstrumentationClasses,
     nodeJsLiveProviderSummaryTaskName to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
@@ -897,6 +931,195 @@ val generateNodeLiveProviderSummary = tasks.register(nodeJsLiveProviderSummaryTa
         if (policyViolations.isNotEmpty()) {
             throw GradleException(
                 "Node live provider summary found ${policyViolations.size} policy violation(s). " +
+                        "See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+val generateNodePhase7Summary = tasks.register(nodeJsPhase7SummaryTaskName) {
+    group = "verification"
+    description = "Writes build/reports/nodejs/phase7-summary.json from the focused Phase 7 gate results."
+
+    dependsOn("connectedAppDebugAndroidTest")
+    nodeJsPhase7HostGateNames.forEach { taskName -> dependsOn(taskName) }
+    outputs.file(layout.buildDirectory.file("reports/nodejs/phase7-summary.json"))
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val resultDir = layout.buildDirectory
+            .dir("outputs/androidTest-results/connected/debug/flavors/app")
+            .get()
+            .asFile
+        val xmlFiles = resultDir
+            .walkTopDown()
+            .filter { file -> file.isFile && file.name.startsWith("TEST-") && file.extension == "xml" }
+            .sortedBy { file -> file.absolutePath }
+            .toList()
+        if (xmlFiles.isEmpty()) {
+            throw GradleException("No connected Android test XML results found under ${resultDir.absolutePath}.")
+        }
+
+        val parserFactory = DocumentBuilderFactory.newInstance().apply {
+            setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
+            setFeature("http://xml.org/sax/features/external-general-entities", false)
+            setFeature("http://xml.org/sax/features/external-parameter-entities", false)
+            isExpandEntityReferences = false
+        }
+        val devices = linkedSetOf<String>()
+        val testResults = linkedMapOf<String, MutableList<Map<String, Any?>>>()
+        var totalTests = 0
+        var totalFailures = 0
+        var totalErrors = 0
+        var totalSkipped = 0
+
+        fun firstChild(element: org.w3c.dom.Element, name: String): org.w3c.dom.Element? {
+            val children = element.childNodes
+            for (index in 0 until children.length) {
+                val child = children.item(index)
+                if (child is org.w3c.dom.Element && child.tagName == name) {
+                    return child
+                }
+            }
+            return null
+        }
+
+        fun childMessage(element: org.w3c.dom.Element): String {
+            return element.getAttribute("message")
+                .ifBlank { element.textContent.orEmpty().trim() }
+                .lineSequence()
+                .firstOrNull()
+                .orEmpty()
+        }
+
+        xmlFiles.forEach { xmlFile ->
+            val document = parserFactory.newDocumentBuilder().parse(xmlFile)
+            val root = document.documentElement
+            totalTests += root.getAttribute("tests").toIntOrNull() ?: 0
+            totalFailures += root.getAttribute("failures").toIntOrNull() ?: 0
+            totalErrors += root.getAttribute("errors").toIntOrNull() ?: 0
+            totalSkipped += root.getAttribute("skipped").toIntOrNull() ?: 0
+
+            val properties = document.getElementsByTagName("property")
+            for (index in 0 until properties.length) {
+                val property = properties.item(index) as? org.w3c.dom.Element ?: continue
+                if (property.getAttribute("name") == "device") {
+                    property.getAttribute("value").takeIf { it.isNotBlank() }?.let(devices::add)
+                }
+            }
+
+            val testCases = document.getElementsByTagName("testcase")
+            for (index in 0 until testCases.length) {
+                val testCase = testCases.item(index) as? org.w3c.dom.Element ?: continue
+                val className = testCase.getAttribute("classname")
+                val methodName = testCase.getAttribute("name")
+                val failure = firstChild(testCase, "failure")
+                val error = firstChild(testCase, "error")
+                val skipped = firstChild(testCase, "skipped")
+                val status = when {
+                    failure != null -> "failed"
+                    error != null -> "error"
+                    skipped != null -> "skipped"
+                    else -> "passed"
+                }
+                val message = when {
+                    failure != null -> childMessage(failure)
+                    error != null -> childMessage(error)
+                    skipped != null -> childMessage(skipped)
+                    else -> ""
+                }
+                testResults.getOrPut(className) { mutableListOf() } += linkedMapOf(
+                    "selector" to "$className#$methodName",
+                    "className" to className,
+                    "methodName" to methodName,
+                    "status" to status,
+                    "message" to message.ifBlank { null },
+                    "timeSeconds" to testCase.getAttribute("time").toDoubleOrNull(),
+                )
+            }
+        }
+
+        fun selectorStatus(selector: String): Map<String, Any?> {
+            val className = selector.substringBefore("#")
+            val methodName = selector.substringAfter("#", "")
+            val matches = if (methodName.isBlank()) {
+                testResults[className].orEmpty()
+            } else {
+                testResults[className].orEmpty().filter { result -> result["methodName"] == methodName }
+            }
+            val status = when {
+                matches.isEmpty() -> "missing"
+                matches.any { it["status"] == "failed" } -> "failed"
+                matches.any { it["status"] == "error" } -> "error"
+                matches.all { it["status"] == "skipped" } -> "skipped"
+                else -> "passed"
+            }
+            return linkedMapOf(
+                "selector" to selector,
+                "status" to status,
+                "tests" to matches.size,
+                "failed" to matches.count { it["status"] == "failed" },
+                "errors" to matches.count { it["status"] == "error" },
+                "skipped" to matches.count { it["status"] == "skipped" },
+                "messages" to matches.mapNotNull { it["message"] as? String }.filter { it.isNotBlank() }.distinct(),
+            )
+        }
+
+        val coverageGroups = nodeJsPhase7GateCoverageGroups.map { (area, selectors) ->
+            val selectorSummaries = selectors.map(::selectorStatus)
+            linkedMapOf(
+                "area" to area,
+                "kind" to if (area == "dependency_sanitizer") "host" else "instrumentation",
+                "expectedSelectors" to selectors.size,
+                "coveredSelectors" to selectorSummaries.count { it["status"] in setOf("passed", "skipped") },
+                "missingSelectors" to selectorSummaries.filter { it["status"] == "missing" }.map { it["selector"] },
+                "failedSelectors" to selectorSummaries.filter { it["status"] in setOf("failed", "error") }.map { it["selector"] },
+                "skippedSelectors" to selectorSummaries.filter { it["status"] == "skipped" }.map { it["selector"] },
+                "selectors" to selectorSummaries,
+            )
+        }
+        val policyViolations = coverageGroups.flatMap { group ->
+            val area = group["area"].toString()
+            (group["missingSelectors"] as List<*>).map { selector -> "$area missing $selector" } +
+                    (group["failedSelectors"] as List<*>).map { selector -> "$area failed $selector" }
+        }
+
+        val reportFile = layout.buildDirectory
+            .file("reports/nodejs/phase7-summary.json")
+            .get()
+            .asFile
+        reportFile.parentFile.mkdirs()
+        val summary = linkedMapOf(
+            "schemaVersion" to 1,
+            "generatedAt" to Instant.now().toString(),
+            "task" to "S7-49 Phase 7 Functional Gate",
+            "gate" to "verifyNodePhase7Gate",
+            "deviceProfile" to nodeJsTestDeviceProfile,
+            "networkExperimentalEnabled" to nodeJsNetworkExperimentalEnabled,
+            "workerThreadsExperimentalEnabled" to nodeJsWorkerThreadsExperimentalEnabled,
+            "devices" to devices.toList(),
+            "resultXml" to xmlFiles.map { file -> file.relativeTo(projectDir).invariantSeparatorsPath },
+            "hostGates" to nodeJsPhase7HostGateNames.map { taskName ->
+                linkedMapOf(
+                    "task" to taskName,
+                    "status" to "passed_if_summary_was_generated",
+                )
+            },
+            "totals" to linkedMapOf(
+                "tests" to totalTests,
+                "failures" to totalFailures,
+                "errors" to totalErrors,
+                "skipped" to totalSkipped,
+                "expectedInstrumentationSelectors" to nodeJsPhase7GateInstrumentationClasses.size,
+            ),
+            "coverageGroups" to coverageGroups,
+            "policyViolations" to policyViolations,
+        )
+        reportFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(summary)) + System.lineSeparator())
+        logger.lifecycle("Node Phase 7 summary written to ${reportFile.absolutePath}")
+
+        if (policyViolations.isNotEmpty()) {
+            throw GradleException(
+                "Node Phase 7 summary found ${policyViolations.size} policy violation(s). " +
                         "See ${reportFile.absolutePath}"
             )
         }

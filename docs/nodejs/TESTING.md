@@ -293,6 +293,21 @@ desktop baseline. The S7-36 categories are `exact match`, `intentional AutoJs6 r
 The corpus covers ESM, `process.permission`, `AsyncLocalStorage`, `perf_hooks`, `diagnostics_channel`, `node:test`,
 `timers/promises`, `stream/promises`, WebCrypto, and the separately classified controlled database bridge.
 
+Phase 7 functional gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodePhase7Gate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
+```
+
+This gate selects the Phase 7 focused instrumentation set and writes
+`build/reports/nodejs/phase7-summary.json`. It covers packaged ESM/dynamic import,
+live providers, long-running runtime, worker bootstrap/default-denial behavior,
+modern core probes, plugin/UI, security corpus, resource stress subset, real npm
+corpus, desktop differential reports, and dependency sanitizer fixtures. The
+summary records expected, missing, failed, and skipped selectors by coverage
+group. See [reports/phase7/README.md](reports/phase7/README.md).
+
 Current dependency bundler verification:
 
 ```powershell
