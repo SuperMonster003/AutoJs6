@@ -33504,6 +33504,88 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return output + sourceText.slice(cursor);
   }
+  function __autojs6_esm_empty_import_attributes() {
+    return { type: "" };
+  }
+  function __autojs6_esm_parse_static_import_attributes(kind, body, sourceName, specifier) {
+    if (!kind) {
+      return __autojs6_esm_empty_import_attributes();
+    }
+    if (kind !== "with") {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM import assertions are not supported in " +
+          sourceName + " for '" + specifier + "'. Use import attributes with { type: \"json\" } for JSON."
+      );
+    }
+    const text = String(body || "").trim();
+    const match = /^type\s*:\s*(["'])json\1\s*,?$/.exec(text);
+    if (!match) {
+      throw __autojs6_esm_error(
+        "Unsupported Embedded Node partial ESM import attributes in " +
+          sourceName + " for '" + specifier + "'. Only with { type: \"json\" } is supported."
+      );
+    }
+    return { type: "json" };
+  }
+  function __autojs6_esm_parse_dynamic_import_attributes(options, parentFilename, specifier) {
+    if (options === undefined || options === null) {
+      return __autojs6_esm_empty_import_attributes();
+    }
+    if (typeof options !== "object") {
+      throw __autojs6_esm_error(
+        "Embedded Node local dynamic import attributes must be an object for '" + specifier + "' from '" + parentFilename + "'."
+      );
+    }
+    const optionKeys = Object.keys(options);
+    if (optionKeys.length !== 1 || optionKeys[0] !== "with") {
+      throw __autojs6_esm_error(
+        "Unsupported Embedded Node local dynamic import options for '" + specifier + "' from '" + parentFilename +
+          "'. Only { with: { type: \"json\" } } is supported."
+      );
+    }
+    const withAttributes = options.with;
+    if (!withAttributes || typeof withAttributes !== "object" || Array.isArray(withAttributes)) {
+      throw __autojs6_esm_error(
+        "Embedded Node local dynamic import attributes must use { with: { type: \"json\" } } for '" +
+          specifier + "' from '" + parentFilename + "'."
+      );
+    }
+    const attributeKeys = Object.keys(withAttributes);
+    if (attributeKeys.length !== 1 || attributeKeys[0] !== "type" || withAttributes.type !== "json") {
+      throw __autojs6_esm_error(
+        "Unsupported Embedded Node local dynamic import attributes for '" + specifier + "' from '" + parentFilename +
+          "'. Only { with: { type: \"json\" } } is supported."
+      );
+    }
+    return { type: "json" };
+  }
+  function __autojs6_esm_validate_import_attributes(resolved, attributes, specifier, parentFilename) {
+    const attributeType = attributes && attributes.type ? String(attributes.type) : "";
+    if (resolved.kind === "builtin") {
+      if (attributeType) {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM import attributes are only supported for JSON modules: " + specifier
+        );
+      }
+      return;
+    }
+    const extension = __autojs6_source_extension(resolved.resolved);
+    const isJson = extension === ".json";
+    if (isJson) {
+      if (attributeType !== "json") {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM JSON import requires with { type: \"json\" } for '" +
+            specifier + "' from '" + parentFilename + "'."
+        );
+      }
+      return;
+    }
+    if (attributeType) {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM import attributes are only supported for JSON modules: " + specifier
+      );
+    }
+  }
   function __autojs6_esm_transform_module_source(source, filename, syncMode) {
     const sourceText = String(source || "");
     if (syncMode && __autojs6_contains_await_token(sourceText)) {
@@ -33535,7 +33617,7 @@ std::string buildEmbeddedScriptExecutionSource(
         throw __autojs6_esm_error("import.meta is disabled for partial ESM module '" + filename + "'.");
       }
     }
-    const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3\s*;?/g;
+    const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3(?:\s+(with|assert)\s*\{([^}]*)\})?\s*;?/g;
     const bindingLines = [];
     let body = "";
     let cursor = 0;
@@ -33548,9 +33630,10 @@ std::string buildEmbeddedScriptExecutionSource(
       cursor = statementEnd;
       const importVar = "__autojs6_esm_import_" + importIndex++;
       const specifier = match[4];
+      const attributes = __autojs6_esm_parse_static_import_attributes(match[5], match[6], filename, specifier);
       bindingLines.push(
         "const " + importVar + " = " + (syncMode ? "__autojs6_load_esm_module_sync" : "await __autojs6_load_esm_module") + "(" +
-          JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ");"
+          JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ", " + JSON.stringify(attributes) + ");"
       );
       const specifierText = match[2] === undefined ? "" : match[2];
       Array.prototype.push.apply(
@@ -33567,8 +33650,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return bindingLines.join("\n") + "\n" + transformedBody + "\n" + exportTransform.tail;
   }
-  function __autojs6_load_esm_module_sync(specifier, parentFilename) {
+  function __autojs6_load_esm_module_sync(specifier, parentFilename, importAttributes) {
     const resolved = __autojs6_resolve_esm_module(specifier, parentFilename);
+    __autojs6_esm_validate_import_attributes(resolved, importAttributes, specifier, parentFilename);
     if (resolved.kind === "builtin") {
       return __autojs6_esm_namespace_from_commonjs(__autojs6_restricted_require(resolved.name, null));
     }
@@ -33577,8 +33661,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return __autojs6_execute_esm_module_sync(resolved.resolved, null);
   }
-  function __autojs6_load_esm_module(specifier, parentFilename) {
+  function __autojs6_load_esm_module(specifier, parentFilename, importAttributes) {
     const resolved = __autojs6_resolve_esm_module(specifier, parentFilename);
+    __autojs6_esm_validate_import_attributes(resolved, importAttributes, specifier, parentFilename);
     if (resolved.kind === "builtin") {
       return Promise.resolve(__autojs6_esm_namespace_from_commonjs(__autojs6_restricted_require(resolved.name, null)));
     }
@@ -33587,7 +33672,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return __autojs6_execute_esm_module(resolved.resolved, null);
   }
-  function __autojs6_dynamic_import(parentFilename, specifier) {
+  function __autojs6_dynamic_import(parentFilename, specifier, options) {
     return Promise.resolve().then(function() {
       if (!__autojs6_dynamic_import_experimental_enabled) {
         throw __autojs6_dynamic_import_unsupported(
@@ -33600,6 +33685,7 @@ std::string buildEmbeddedScriptExecutionSource(
         );
       }
       const name = specifier === undefined || specifier === null ? "" : String(specifier);
+      const importAttributes = __autojs6_esm_parse_dynamic_import_attributes(options, parentFilename || __autojs6_source_name, name);
       if (name.indexOf("\0") >= 0) {
         throw __autojs6_esm_error("Embedded Node local dynamic import rejects NUL byte in specifier.", "ERR_AUTOJS6_FS_NUL_BYTE");
       }
@@ -33615,7 +33701,7 @@ std::string buildEmbeddedScriptExecutionSource(
         }
         throw __autojs6_dynamic_import_unsupported("Embedded Node local dynamic import rejects URL/protocol imports: " + name);
       }
-      return __autojs6_load_esm_module(name, parentFilename || __autojs6_source_name);
+      return __autojs6_load_esm_module(name, parentFilename || __autojs6_source_name, importAttributes);
     });
   }
   function __autojs6_execute_esm_module(resolved, entryRecord) {

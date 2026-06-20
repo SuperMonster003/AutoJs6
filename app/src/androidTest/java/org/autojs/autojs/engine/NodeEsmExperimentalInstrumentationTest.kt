@@ -276,6 +276,100 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun experimentalEsmJsonImportAttributesUseCommonJsJsonCache() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM JSON import attributes")
+        val workDir = freshWorkDir("esm-json-attributes")
+        File(workDir, "config.json").writeText("""{"name":"local-json","count":2}""")
+        File(workDir, "dynamic.json").writeText("""{"name":"dynamic-json"}""")
+        val packageDir = File(workDir, "node_modules/json-config-pkg").apply { mkdirs() }
+        File(packageDir, "package.json").writeText(
+            """
+            {
+              "name": "json-config-pkg",
+              "exports": {
+                ".": {
+                  "import": "./config.json",
+                  "require": "./config.json"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(packageDir, "config.json").writeText("""{"name":"package-json"}""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import { createRequire } from "node:module";
+                import localConfig from "./config.json" with { type: "json" };
+                import packageConfig from "json-config-pkg" with { type: "json" };
+                const req = createRequire(__filename);
+                const requiredConfig = req("./config.json");
+                localConfig.seenFromEsm = true;
+                const dynamicConfig = await import("./dynamic.json", { with: { type: "json" } });
+                console.log("esm.json.local=" + localConfig.name + "/" + localConfig.count);
+                console.log("esm.json.cache=" + (requiredConfig === localConfig && req("./config.json").seenFromEsm === true));
+                console.log("esm.json.package=" + packageConfig.name);
+                console.log("esm.json.dynamic=" + dynamicConfig.default.name);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("ESM JSON import attributes", result)
+        assertTrue(result.stdout.contains("esm.json.local=local-json/2"))
+        assertTrue(result.stdout.contains("esm.json.cache=true"))
+        assertTrue(result.stdout.contains("esm.json.package=package-json"))
+        assertTrue(result.stdout.contains("esm.json.dynamic=dynamic-json"))
+    }
+
+    @Test
+    fun experimentalEsmJsonImportAttributesRejectMissingAndUnknownAttributes() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM JSON import attribute denial")
+        val workDir = freshWorkDir("esm-json-attribute-denial")
+        File(workDir, "config.json").writeText("""{"name":"local-json"}""")
+
+        fun runDenied(label: String, source: String, messageToken: String) {
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = source,
+                sourceName = File(workDir, "$label.mjs").absolutePath,
+                workingDirectory = workDir,
+                esmExperimentalEnabled = true,
+            )
+            assertFalse(NodeEmbeddedTestHarness.describeResult(label, result), result.succeeded)
+            assertEquals(NodeRuntimeErrorCodes.EMBEDDED_NODE_ESM_UNSUPPORTED, result.errorCode)
+            assertTrue(result.errorMessage.orEmpty(), result.errorMessage.orEmpty().contains(messageToken))
+            NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+        }
+
+        runDenied(
+            label = "missing-json-attribute",
+            source = """import config from "./config.json"; console.log(config);""",
+            messageToken = """requires with { type: "json" }""",
+        )
+        runDenied(
+            label = "unknown-json-attribute",
+            source = """import config from "./config.json" with { type: "text" }; console.log(config);""",
+            messageToken = "Only with",
+        )
+        runDenied(
+            label = "legacy-json-assertion",
+            source = """import config from "./config.json" assert { type: "json" }; console.log(config);""",
+            messageToken = "import assertions are not supported",
+        )
+        runDenied(
+            label = "dynamic-missing-json-attribute",
+            source = """await import("./config.json");""",
+            messageToken = """requires with { type: "json" }""",
+        )
+        runDenied(
+            label = "dynamic-unknown-json-attribute",
+            source = """await import("./config.json", { with: { type: "text" } });""",
+            messageToken = """Only { with: { type: "json" } } is supported""",
+        )
+    }
+
+    @Test
     fun experimentalPackageExportsConditionsSplitByImporterMode() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package condition selection")
         val workDir = freshWorkDir("esm-package-conditions")
