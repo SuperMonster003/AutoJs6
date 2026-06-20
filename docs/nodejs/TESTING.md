@@ -297,6 +297,19 @@ destination, request-level `AbortSignal`, pre-aborted signal no-dispatch,
 `maxResponseBytes` rejection, service-destroy cancellation, and pending-call
 cleanup.
 
+Focused HTTP Agent facade instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpAgentFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-24 gate verifies the limited `http.Agent` / `https.Agent` facade. It
+covers safe shape fields (`keepAlive`, `maxSockets`, `maxFreeSockets`,
+`defaultPort`, `protocol`, `getName()`, and `destroy()`), `ClientRequest.agent`
+binding, empty compatibility pool objects, request permission tagging, pending
+cleanup, and fail-closed denial for request-level `createConnection`,
+`socketPath`, and custom agent connector methods.
+
 Current fixed real npm corpus instrumentation:
 
 ```powershell

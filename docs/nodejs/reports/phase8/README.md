@@ -162,6 +162,11 @@ Current Batch D implementation status:
   `data`/`end`/`close`, `pipe()` backpressure smoke, request-level
   `AbortSignal`, `maxResponseBytes`, service-destroy cancellation, and pending
   cleanup now have a dedicated Sony regression test.
+- S8-24 is complete for the limited Agent compatibility facade. `http.Agent`
+  and `https.Agent` preserve safe shape fields such as `keepAlive`,
+  `maxSockets`, `maxFreeSockets`, `defaultPort`, `protocol`, `getName()`, and
+  `destroy()`, while request-level raw socket options and custom connector
+  agents reject fail-closed.
 - Default scripts still get the existing synchronous disabled error for
   `http.request()` / `https.request()`, and raw `net`/`tls`/`dns`/`dgram`,
   servers, `CONNECT`, and socket upgrades remain unavailable.
@@ -174,6 +179,7 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpClientFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpsClientFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpStreamSemanticsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpAgentFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
@@ -182,3 +188,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/HTTP_CLIENT_FACADE.md`
 - `docs/nodejs/reports/phase8/HTTPS_CLIENT_FACADE.md`
 - `docs/nodejs/reports/phase8/HTTP_STREAM_SEMANTICS.md`
+- `docs/nodejs/reports/phase8/HTTP_AGENT_FACADE.md`
