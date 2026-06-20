@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/abort-signal-client-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "abort-signal-wrapper": "1.0.0"
+  }
+}
