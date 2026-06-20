@@ -612,6 +612,28 @@ bounded policy checks for `link`, `chmod`, `chown`, `symlink`, and
 Android/device roots. Pair it with the other Batch E classes for the advanced
 scoped fs regression set.
 
+Current FileHandle / watcher lifecycle fuzzer:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest" "-Pautojs.nodejs.fuzzerBudget=quick"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest" "-Pautojs.nodejs.fuzzerBudget=normal"
+```
+
+For Sony unattended gates, pin the device and profile:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+```
+
+This S8-32 fuzzer verifies lifecycle edge cases across managed FileHandle,
+numeric fd, and watcher resources: close races, cancellation, service timeout
+cleanup, path rename during watch, symlink replacement, fd reuse, long paths,
+Unicode paths, and watcher quota exhaustion. It prints replay seed metadata on
+failure and is part of the v1.1 beta instrumentation profile. Pair it with
+`NodeResolverFuzzerInstrumentationTest` and `NodeScopedFsFuzzerInstrumentationTest`
+for the current fuzzer regression set.
+
 Current stream focused instrumentation:
 
 ```powershell

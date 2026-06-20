@@ -232,6 +232,10 @@ Current Batch E implementation status:
   promise forms, path-like inputs, safe option shapes, scoped denial paths, and
   bounded policy checks for `link`, `chmod`, `chown`, `symlink`, and
   Android/device roots.
+- S8-32 is complete for FileHandle / watcher lifecycle fuzzing. The new beta
+  fuzzer covers close races, cancellation, service timeout cleanup, watched path
+  rename, symlink replacement, fd reuse, long paths, Unicode paths, and watcher
+  quota exhaustion.
 - Relative escapes and absolute outside paths keep stable scoped-fs denial
   codes, while closed handles and non-owned numeric descriptors reject with
   `EBADF`.
@@ -255,6 +259,9 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest,org.autojs.autojs.engine.NodeOpendirInstrumentationTest,org.autojs.autojs.engine.NodeFsWatchInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSafeFileOperationsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest,org.autojs.autojs.engine.NodeOpendirInstrumentationTest,org.autojs.autojs.engine.NodeFsWatchInstrumentationTest,org.autojs.autojs.engine.NodeSafeFileOperationsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=quick"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=normal"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest,org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.fuzzerBudget=quick"
 ```
 
 Detailed coverage is recorded in:
@@ -264,3 +271,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/OPENDIR_DIR.md`
 - `docs/nodejs/reports/phase8/FS_WATCH.md`
 - `docs/nodejs/reports/phase8/SAFE_FILE_OPERATIONS.md`
+- `docs/nodejs/reports/phase8/FILEHANDLE_WATCHER_FUZZER.md`
