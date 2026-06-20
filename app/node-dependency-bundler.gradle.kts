@@ -20,6 +20,12 @@ private val nodeDependencyNpmCiOutputDirProperty = "autojs.nodejs.npmCi.outputDi
 private val nodeDependencyNpmCiReportDirProperty = "autojs.nodejs.npmCi.reportDir"
 private val nodeDependencyNpmCiCacheDirProperty = "autojs.nodejs.npmCi.cacheDir"
 private val nodeDependencyNpmCiExecutableProperty = "autojs.nodejs.npmCi.executable"
+private val nodeDependencyManagerProjectRootProperty = "autojs.nodejs.dependencyManager.projectRoot"
+private val nodeDependencyManagerWorkDirProperty = "autojs.nodejs.dependencyManager.workDir"
+private val nodeDependencyManagerOutputDirProperty = "autojs.nodejs.dependencyManager.outputDir"
+private val nodeDependencyManagerReportDirProperty = "autojs.nodejs.dependencyManager.reportDir"
+private val nodeDependencyManagerCacheDirProperty = "autojs.nodejs.dependencyManager.cacheDir"
+private val nodeDependencyManagerNpmExecutableProperty = "autojs.nodejs.dependencyManager.npmExecutable"
 
 private val nodeDependencyBundlerForbiddenScripts = setOf("preinstall", "install", "postinstall", "prepare")
 private val nodeDependencyBundlerPathReferenceFields = setOf(
@@ -286,6 +292,15 @@ private fun String.nodeDependencyBundlerLastVersionLine(): String =
         .filter { it.matches(Regex("""\d+(?:\.\d+){1,3}.*""")) }
         .lastOrNull()
         ?: trim()
+
+private fun nodeDependencyBundlerNpmCiArgs(): List<String> = listOf(
+    "ci",
+    "--ignore-scripts",
+    "--no-bin-links",
+    "--install-links",
+    "--no-audit",
+    "--fund=false",
+)
 
 private fun File.nodeDependencyBundlerCanonicalInside(root: File): Boolean {
     val rootPath = root.canonicalFile.toPath()
@@ -1321,6 +1336,124 @@ private fun writeNodeDependencyBundlerCache(
     }
 }
 
+private fun writeNodeDependencyManagerReport(
+    sourceProjectRoot: File,
+    installedProjectRoot: File,
+    bundleDir: File,
+    reportDir: File,
+    scan: NodeDependencyBundleScanResult,
+    installMetadata: Map<String, Any?>,
+    cacheInfo: Map<String, Any?>,
+) {
+    reportDir.mkdirs()
+    val compatibilityReport = nodeDependencyCompatibilityReport(installedProjectRoot, scan, nodeDependencyBundlerPolicy())
+    val compatibilityStatus = compatibilityReport["status"]?.toString().orEmpty()
+    val blockingCompatibility = compatibilityStatus in setOf("unsafe", "unsupported")
+    val ok = scan.issues.isEmpty() && !blockingCompatibility
+    val projectPackageJson = nodeDependencyBundlerReadJsonObject(sourceProjectRoot.resolve("package.json"))
+    val lockFile = sourceProjectRoot.resolve("package-lock.json")
+    val managerReport = linkedMapOf<String, Any?>(
+        "schema" to "autojs6-node-dependency-manager-v1",
+        "ok" to ok,
+        "project" to linkedMapOf(
+            "root" to sourceProjectRoot.canonicalPath,
+            "name" to projectPackageJson?.get("name")?.toString().orEmpty(),
+            "version" to projectPackageJson?.get("version")?.toString().orEmpty(),
+            "lockfile" to lockFile.takeIf(File::isFile)?.canonicalPath,
+        ),
+        "action" to linkedMapOf(
+            "name" to "install-from-lockfile-validate-sanitize-cache-report-bundle",
+            "entryPoint" to ":app:manageNodeDependencies",
+            "hostSideOnly" to true,
+            "androidRuntimeInstall" to false,
+        ),
+        "safetyControls" to linkedMapOf(
+            "packageLifecycleScriptsExecuted" to false,
+            "scriptsIgnoredByDefault" to true,
+            "binLinksDisabled" to true,
+            "auditDisabled" to true,
+            "fundingPromptsDisabled" to true,
+            "nativeAddonsDisabled" to true,
+            "rawPackageManagerRuntimeDisabled" to true,
+        ),
+        "install" to installMetadata,
+        "steps" to listOf(
+            linkedMapOf(
+                "name" to "install from lockfile",
+                "status" to "passed",
+                "tool" to installMetadata["manager"],
+                "toolVersion" to installMetadata["managerVersion"],
+                "command" to installMetadata["command"],
+                "lockfileRequired" to installMetadata["lockfileRequired"],
+                "scriptsIgnored" to installMetadata["scriptsIgnored"],
+            ),
+            linkedMapOf(
+                "name" to "validate",
+                "status" to if (scan.issues.isEmpty() && !blockingCompatibility) "passed" else "failed",
+                "issues" to scan.issues.size,
+                "compatibilityStatus" to compatibilityStatus,
+            ),
+            linkedMapOf(
+                "name" to "sanitize",
+                "status" to if (scan.issues.isEmpty()) "passed" else "failed",
+                "output" to bundleDir.canonicalPath,
+            ),
+            linkedMapOf(
+                "name" to "cache",
+                "status" to "passed",
+                "cacheKey" to cacheInfo["cacheKey"],
+                "cacheHit" to cacheInfo["hit"],
+                "projectDir" to cacheInfo["projectDir"],
+            ),
+            linkedMapOf(
+                "name" to "generate SBOM",
+                "status" to "passed",
+                "report" to "dependency-sbom-lite.json",
+            ),
+            linkedMapOf(
+                "name" to "generate compatibility report",
+                "status" to if (blockingCompatibility) "failed" else "passed",
+                "report" to "dependency-compatibility.json",
+                "compatibilityStatus" to compatibilityStatus,
+            ),
+            linkedMapOf(
+                "name" to "bundle for APK",
+                "status" to if (ok) "passed" else "blocked",
+                "output" to bundleDir.canonicalPath,
+                "assetRoot" to "assets/project",
+            ),
+        ),
+        "reports" to linkedMapOf(
+            "manifest" to "dependency-manifest.json",
+            "sbomLite" to "dependency-sbom-lite.json",
+            "compatibility" to "dependency-compatibility.json",
+            "size" to "dependency-size-report.txt",
+            "rejections" to "dependency-rejections.txt",
+            "manager" to "dependency-manager-report.json",
+        ),
+        "bundle" to linkedMapOf(
+            "hashAlgorithm" to "sha256-normalized-sanitized-project-v1",
+            "hash" to scan.bundleHash,
+            "output" to bundleDir.canonicalPath,
+            "apkAssetRoot" to "assets/project",
+        ),
+        "cache" to cacheInfo,
+        "totals" to linkedMapOf(
+            "packages" to scan.packages.size,
+            "files" to scan.totalFiles,
+            "bytes" to scan.totalBytes,
+        ),
+        "issues" to scan.issues.map {
+            linkedMapOf(
+                "code" to it.code,
+                "path" to it.path,
+                "message" to it.message,
+            )
+        },
+    )
+    reportDir.resolve("dependency-manager-report.json").writeText(nodeDependencyBundlerJson(managerReport) + "\n")
+}
+
 val bundleNodeDependencies = tasks.register("bundleNodeDependencies") {
     group = "verification"
     description = "Validates and copies a sanitized Safe Node Profile node_modules dependency bundle."
@@ -1427,14 +1560,7 @@ val prepareNodeNpmCiDependencies = tasks.register("prepareNodeNpmCiDependencies"
         val npmExecutable = nodeDependencyBundlerHostExecutable(npmExecutableProvider.get())
         val npmVersion = runNodeDependencyBundlerCommand(workDir, listOf(npmExecutable, "--version"))
             .nodeDependencyBundlerLastVersionLine()
-        val npmArgs = listOf(
-            "ci",
-            "--ignore-scripts",
-            "--no-bin-links",
-            "--install-links",
-            "--no-audit",
-            "--fund=false",
-        )
+        val npmArgs = nodeDependencyBundlerNpmCiArgs()
         runNodeDependencyBundlerCommand(workDir, listOf(npmExecutable) + npmArgs)
         if (workPackageJson.nodeDependencyBundlerSha256() != packageJsonHashBefore) {
             throw GradleException("npm ci mutated package.json in the working copy.")
@@ -1541,11 +1667,224 @@ val verifyNodeNpmCiFixtures = tasks.register("verifyNodeNpmCiFixtures") {
     }
 }
 
+val manageNodeDependencies = tasks.register("manageNodeDependencies") {
+    group = "verification"
+    description = "Runs the integrated Safe Node Profile dependency manager action for a lockfile project."
+
+    val defaultProjectRoot = rootProject.projectDir.resolve("sample/nodejs/npm-ci-pure-js")
+    val projectRootProvider = providers.gradleProperty(nodeDependencyManagerProjectRootProperty)
+        .map(::File)
+        .orElse(defaultProjectRoot)
+    val workDirProvider = providers.gradleProperty(nodeDependencyManagerWorkDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("tmp/nodejs/dependency-manager/work").map { it.asFile })
+    val outputDirProvider = providers.gradleProperty(nodeDependencyManagerOutputDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("nodejs/dependency-manager").map { it.asFile })
+    val reportDirProvider = providers.gradleProperty(nodeDependencyManagerReportDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("reports/nodejs/dependency-manager").map { it.asFile })
+    val cacheDirProvider = providers.gradleProperty(nodeDependencyManagerCacheDirProperty)
+        .map(::File)
+        .orElse(layout.buildDirectory.dir("nodejs/dependency-cache").map { it.asFile })
+    val npmExecutableProvider = providers.gradleProperty(nodeDependencyManagerNpmExecutableProperty).orElse("npm")
+
+    inputs.dir(projectRootProvider)
+    outputs.dir(outputDirProvider)
+    outputs.dir(reportDirProvider)
+    outputs.dir(cacheDirProvider)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val sourceRoot = projectRootProvider.get().canonicalFile
+        val sourcePackageJson = sourceRoot.resolve("package.json")
+        val sourceLockFile = sourceRoot.resolve("package-lock.json")
+        if (!sourcePackageJson.isFile) {
+            throw GradleException("Dependency manager project root must contain package.json: ${sourcePackageJson.absolutePath}")
+        }
+        if (!sourceLockFile.isFile) {
+            throw GradleException("Dependency manager requires package-lock.json: ${sourceLockFile.absolutePath}")
+        }
+
+        val workDir = workDirProvider.get().canonicalFile
+        workDir.deleteRecursively()
+        workDir.mkdirs()
+        project.copy {
+            from(sourceRoot) {
+                exclude("node_modules/**")
+                exclude(".git/**")
+            }
+            into(workDir)
+            includeEmptyDirs = false
+        }
+
+        val workPackageJson = workDir.resolve("package.json")
+        val workLockFile = workDir.resolve("package-lock.json")
+        val packageJsonHashBefore = workPackageJson.nodeDependencyBundlerSha256()
+        val lockHashBefore = workLockFile.nodeDependencyBundlerSha256()
+        val npmExecutable = nodeDependencyBundlerHostExecutable(npmExecutableProvider.get())
+        val npmVersion = runNodeDependencyBundlerCommand(workDir, listOf(npmExecutable, "--version"))
+            .nodeDependencyBundlerLastVersionLine()
+        val npmArgs = nodeDependencyBundlerNpmCiArgs()
+        runNodeDependencyBundlerCommand(workDir, listOf(npmExecutable) + npmArgs)
+        if (workPackageJson.nodeDependencyBundlerSha256() != packageJsonHashBefore) {
+            throw GradleException("Dependency manager npm ci mutated package.json in the working copy.")
+        }
+        if (workLockFile.nodeDependencyBundlerSha256() != lockHashBefore) {
+            throw GradleException("Dependency manager npm ci mutated package-lock.json in the working copy.")
+        }
+        if (workDir.resolve("node_modules/.bin").exists()) {
+            throw GradleException("Dependency manager npm ci produced node_modules/.bin despite --no-bin-links.")
+        }
+
+        val outputDir = outputDirProvider.get().canonicalFile
+        val bundleDir = outputDir.resolve("project")
+        val reportDir = reportDirProvider.get().canonicalFile
+        val cacheDir = cacheDirProvider.get().canonicalFile
+        val policy = nodeDependencyBundlerPolicy()
+        val scan = scanNodeDependencyBundle(workDir, policy)
+        val cacheInfo = nodeDependencyBundlerCacheInfo(cacheDir, scan)
+        val installMetadata = linkedMapOf<String, Any?>(
+            "manager" to "npm",
+            "managerVersion" to npmVersion,
+            "command" to "npm ${npmArgs.joinToString(" ")}",
+            "flags" to npmArgs.drop(1),
+            "installOptionsSha256" to nodeDependencyBundlerJson(
+                linkedMapOf(
+                    "packageJsonSha256" to packageJsonHashBefore,
+                    "packageLockSha256" to lockHashBefore,
+                    "flags" to npmArgs.drop(1),
+                )
+            ).nodeDependencyBundlerSha256(),
+            "sourceProjectRoot" to sourceRoot.canonicalPath,
+            "workDir" to workDir.canonicalPath,
+            "packageJsonSha256" to packageJsonHashBefore,
+            "packageLockSha256" to lockHashBefore,
+            "lockfileRequired" to true,
+            "scriptsIgnored" to true,
+            "binLinksDisabled" to true,
+            "fileDependenciesInstalledAsCopies" to true,
+        )
+        writeNodeDependencyBundleReports(
+            workDir,
+            bundleDir,
+            reportDir,
+            policy,
+            scan,
+            installMetadata,
+            cacheInfo,
+        )
+        if (scan.issues.isNotEmpty()) {
+            writeNodeDependencyManagerReport(sourceRoot, workDir, bundleDir, reportDir, scan, installMetadata, cacheInfo)
+            throw GradleException(
+                "Dependency manager rejected ${scan.issues.size} issue(s). " +
+                        "See ${reportDir.resolve("dependency-manager-report.json").absolutePath}"
+            )
+        }
+
+        copyNodeDependencyBundlerSanitizedProject(workDir, bundleDir)
+        writeNodeDependencyBundlerCache(workDir, cacheDir, scan)
+        writeNodeDependencyManagerReport(sourceRoot, workDir, bundleDir, reportDir, scan, installMetadata, cacheInfo)
+        verifyNodeDependencyBundlerPackagedLayout(outputDir, reportDir, policy)
+        logger.lifecycle("Safe Node dependency manager bundle written to ${bundleDir.absolutePath}")
+        logger.lifecycle("Safe Node dependency manager report written to ${reportDir.resolve("dependency-manager-report.json").absolutePath}")
+    }
+}
+
+val verifyNodeDependencyManagerFixture = tasks.register("verifyNodeDependencyManagerFixture") {
+    group = "verification"
+    description = "Verifies the integrated dependency manager action and its safety report."
+
+    dependsOn(manageNodeDependencies)
+
+    doLast {
+        val outputDir = providers.gradleProperty(nodeDependencyManagerOutputDirProperty)
+            .map(::File)
+            .orElse(layout.buildDirectory.dir("nodejs/dependency-manager").map { it.asFile })
+            .get()
+            .canonicalFile
+        val reportDir = providers.gradleProperty(nodeDependencyManagerReportDirProperty)
+            .map(::File)
+            .orElse(layout.buildDirectory.dir("reports/nodejs/dependency-manager").map { it.asFile })
+            .get()
+            .canonicalFile
+        val policy = nodeDependencyBundlerPolicy()
+        verifyNodeDependencyBundlerPackagedLayout(outputDir, reportDir, policy)
+
+        val managerReport = nodeDependencyBundlerReadJsonObject(reportDir.resolve("dependency-manager-report.json"))
+            ?: throw GradleException("Dependency manager report is missing or malformed.")
+        if (managerReport["schema"] != "autojs6-node-dependency-manager-v1" || managerReport["ok"] != true) {
+            throw GradleException("Dependency manager report schema/status is invalid: $managerReport")
+        }
+        val action = managerReport["action"] as? Map<*, *>
+            ?: throw GradleException("Dependency manager report is missing action metadata.")
+        if (action["entryPoint"] != ":app:manageNodeDependencies" || action["androidRuntimeInstall"] != false) {
+            throw GradleException("Dependency manager action metadata is invalid: $action")
+        }
+        val safetyControls = managerReport["safetyControls"] as? Map<*, *>
+            ?: throw GradleException("Dependency manager report is missing safety controls.")
+        if (safetyControls["packageLifecycleScriptsExecuted"] != false ||
+            safetyControls["scriptsIgnoredByDefault"] != true ||
+            safetyControls["binLinksDisabled"] != true ||
+            safetyControls["nativeAddonsDisabled"] != true
+        ) {
+            throw GradleException("Dependency manager safety controls are invalid: $safetyControls")
+        }
+        val install = managerReport["install"] as? Map<*, *>
+            ?: throw GradleException("Dependency manager report is missing install metadata.")
+        val flags = (install["flags"] as? List<*>)?.map { it.toString() }.orEmpty()
+        val requiredFlags = setOf("--ignore-scripts", "--no-bin-links", "--install-links")
+        val missingFlags = requiredFlags - flags.toSet()
+        if (missingFlags.isNotEmpty() ||
+            install["lockfileRequired"] != true ||
+            install["scriptsIgnored"] != true
+        ) {
+            throw GradleException("Dependency manager install metadata does not record required controls: $install")
+        }
+        val reports = managerReport["reports"] as? Map<*, *>
+            ?: throw GradleException("Dependency manager report is missing report index.")
+        val requiredReports = setOf(
+            "dependency-manifest.json",
+            "dependency-sbom-lite.json",
+            "dependency-compatibility.json",
+            "dependency-size-report.txt",
+            "dependency-rejections.txt",
+            "dependency-manager-report.json",
+        )
+        val actualReports = reports.values.map { it.toString() }.toSet()
+        val missingReports = requiredReports - actualReports
+        if (missingReports.isNotEmpty()) {
+            throw GradleException("Dependency manager report index is incomplete: $missingReports; actual=$actualReports")
+        }
+        requiredReports.forEach { reportName ->
+            if (!reportDir.resolve(reportName).isFile) {
+                throw GradleException("Dependency manager expected report file is missing: $reportName")
+            }
+        }
+        val steps = managerReport["steps"] as? List<*>
+            ?: throw GradleException("Dependency manager report is missing steps.")
+        val stepNames = steps.mapNotNull { (it as? Map<*, *>)?.get("name")?.toString() }.toSet()
+        val requiredSteps = setOf(
+            "install from lockfile",
+            "validate",
+            "sanitize",
+            "cache",
+            "generate SBOM",
+            "generate compatibility report",
+            "bundle for APK",
+        )
+        val missingSteps = requiredSteps - stepNames
+        if (missingSteps.isNotEmpty()) {
+            throw GradleException("Dependency manager report is missing step(s): $missingSteps; actual=$stepNames")
+        }
+    }
+}
+
 val verifyNodeDependencyBundlerFixtures = tasks.register("verifyNodeDependencyBundlerFixtures") {
     group = "verification"
     description = "Verifies the Node dependency bundler accepts safe fixtures and rejects unsafe fixtures."
 
-    dependsOn(bundleNodeDependencies, verifyNodeNpmCiFixtures)
+    dependsOn(bundleNodeDependencies, verifyNodeNpmCiFixtures, verifyNodeDependencyManagerFixture)
 
     doLast {
         val policy = nodeDependencyBundlerPolicy()

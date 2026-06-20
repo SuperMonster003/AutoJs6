@@ -45,6 +45,7 @@ small set of already-gated features toward practical use.
 | --- | --- | --- |
 | CommonJS/npm subset | stable | Existing v1.0 contract remains first-class. |
 | Real npm corpus | partial | v1.1 expands the fixed offline corpus from 7 to 13 fixtures with ESM-only dependency, hybrid CJS/ESM, Buffer, fetch wrapper fallback, assertion helper, `AsyncLocalStorage`, `stream/promises`, WebCrypto, worker CPU fallback, test-runner, and database-abstraction coverage while retaining no-install/no-native safety checks. |
+| Dependency manager | host-side project action | S8-45 integrates lockfile install, validation, sanitizer, content-addressed cache, SBOM-lite, compatibility report, and APK bundle layout verification through `:app:manageNodeDependencies` while keeping Android runtime install and package lifecycle scripts disabled. |
 | Scoped fs | stable | No policy loosening. |
 | ESM entry | partial | `.mjs` and `type=module` entries run by default in v1.1. |
 | ESM builtin import | partial | Only allowed builtins and limited wrappers. |

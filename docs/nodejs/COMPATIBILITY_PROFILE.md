@@ -360,6 +360,13 @@ ESM, `process.permission`, `AsyncLocalStorage`, `perf_hooks`, `diagnostics_chann
 `app/build/nodejs/dependency-bundle/project/`, and writes a manifest plus size/rejection reports under
 `app/build/reports/nodejs/dependencies/`. The report set includes `dependency-manifest.json`,
 `dependency-sbom-lite.json`, `dependency-size-report.txt`, and `dependency-rejections.txt`.
+`:app:manageNodeDependencies` is the S8-45 integrated dependency manager action for lockfile projects. It runs
+host-side `npm ci --ignore-scripts --no-bin-links --install-links --no-audit --fund=false` in a clean work directory,
+requires `package-lock.json`, verifies `package.json` and the lockfile are not mutated, feeds the installed tree through
+the same sanitizer, writes the manifest, SBOM-lite, compatibility, size, rejection, and
+`dependency-manager-report.json` files under `app/build/reports/nodejs/dependency-manager/`, updates the
+content-addressed dependency cache, and verifies the result can be packaged as `assets/project`. The manager report
+schema is `autojs6-node-dependency-manager-v1` and records `packageLifecycleScriptsExecuted=false`.
 Native addon binaries are rejected as `NATIVE_ADDON_DISABLED`; node-gyp build traces such as `binding.gyp` and
 `build/{Release,Debug}` artifacts are rejected as `NODE_GYP_ARTIFACT_UNSUPPORTED`. The bundler also rejects lifecycle
 scripts, unchecked `.bin` entries, npm install/cache artifacts, suspicious executable files, absolute or escaping

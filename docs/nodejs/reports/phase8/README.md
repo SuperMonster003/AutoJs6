@@ -429,3 +429,30 @@ Detailed coverage is recorded in:
 - `docs/nodejs/design/PROCESS_POOL.md`
 - `docs/nodejs/reports/phase8/PROCESS_POOL_POLICY_GATE.md`
 - `docs/nodejs/reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md`
+
+## Batch I npm Project Experience
+
+Current Batch I implementation status:
+
+- S8-45 is complete for the integrated dependency manager action.
+  `:app:manageNodeDependencies` now consumes a lockfile project, runs
+  host-side `npm ci` with lifecycle scripts disabled, validates and sanitizes
+  the installed dependency tree, writes manifest/SBOM-lite/compatibility/size
+  and rejection reports, updates the content-addressed cache, emits
+  `dependency-manager-report.json`, and verifies the sanitized output is ready
+  for packaged APK `assets/project`.
+- Android runtime install remains unsupported. The manager is host-side only
+  and records `packageLifecycleScriptsExecuted=false`.
+
+Focused gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:manageNodeDependencies
+.\gradlew.bat --console=plain :app:verifyNodeDependencyManagerFixture
+.\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
+```
+
+Detailed coverage is recorded in:
+
+- `docs/nodejs/design/PACKAGE_MANAGER.md`
+- `docs/nodejs/reports/phase8/DEPENDENCY_MANAGER.md`

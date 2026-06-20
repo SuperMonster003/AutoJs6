@@ -462,6 +462,8 @@ Current dependency bundler verification:
 .\gradlew.bat --console=plain :app:bundleNodeDependencies
 .\gradlew.bat --console=plain :app:prepareNodeNpmCiDependencies
 .\gradlew.bat --console=plain :app:verifyNodeNpmCiFixtures
+.\gradlew.bat --console=plain :app:manageNodeDependencies
+.\gradlew.bat --console=plain :app:verifyNodeDependencyManagerFixture
 .\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
 ```
 
@@ -479,6 +481,13 @@ it to a temporary working directory, runs `npm ci --ignore-scripts --no-bin-link
 registry access. The sanitized output is written to `app/build/nodejs/npm-ci-bundle/project/`; reports are written to
 `app/build/reports/nodejs/npm-ci/` and record npm version, lockfile hash, install-options hash, command flags, safety
 controls, bundle hash, cache entry, and dependency compatibility status.
+`manageNodeDependencies` is the S8-45 integrated project action. It requires `package-lock.json`, installs in a clean
+host work directory with the same lifecycle-script-disabled npm flags, validates and sanitizes the installed tree,
+writes `dependency-manifest.json`, `dependency-sbom-lite.json`, `dependency-compatibility.json`,
+`dependency-size-report.txt`, `dependency-rejections.txt`, and `dependency-manager-report.json`, updates the
+content-addressed cache, and verifies the resulting `project/` directory can be consumed as packaged APK
+`assets/project`. `verifyNodeDependencyManagerFixture` checks the manager report schema, action chain, report index,
+required npm flags, cache metadata, and `packageLifecycleScriptsExecuted=false`.
 `verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes, the sanitized bundle can be used as
 the packaged APK `assets/project` layout, the desktop `npm ci` fixture installs without lifecycle scripts, `.bin` links,
 or native addons, and unsafe fixtures are rejected for native addon, node-gyp build artifacts, every blocked lifecycle

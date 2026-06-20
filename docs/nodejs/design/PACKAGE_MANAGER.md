@@ -195,6 +195,8 @@ Task 76 adds the first build-time dependency bundler:
 ```powershell
 .\gradlew.bat --console=plain :app:bundleNodeDependencies
 .\gradlew.bat --console=plain :app:prepareNodeNpmCiDependencies
+.\gradlew.bat --console=plain :app:manageNodeDependencies
+.\gradlew.bat --console=plain :app:verifyNodeDependencyManagerFixture
 .\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
 ```
 
@@ -203,16 +205,19 @@ Default input is `sample/nodejs/npm-pure-js-cjs`. Override with:
 ```powershell
 .\gradlew.bat --console=plain :app:bundleNodeDependencies "-Pautojs.nodejs.bundle.projectRoot=D:\path\to\project"
 .\gradlew.bat --console=plain :app:prepareNodeNpmCiDependencies "-Pautojs.nodejs.npmCi.projectRoot=D:\path\to\project"
+.\gradlew.bat --console=plain :app:manageNodeDependencies "-Pautojs.nodejs.dependencyManager.projectRoot=D:\path\to\project"
 ```
 
 Outputs:
 
 - `app/build/nodejs/dependency-bundle/project/`
 - `app/build/nodejs/npm-ci-bundle/project/`
+- `app/build/nodejs/dependency-manager/project/`
 - `app/build/nodejs/dependency-cache/<bundle-hash>/project/`
 - `app/build/reports/nodejs/dependencies/dependency-manifest.json`
 - `app/build/reports/nodejs/dependencies/dependency-compatibility.json`
 - `app/build/reports/nodejs/npm-ci/dependency-manifest.json`
+- `app/build/reports/nodejs/dependency-manager/dependency-manager-report.json`
 - `app/build/reports/nodejs/dependencies/dependency-size-report.txt`
 - `app/build/reports/nodejs/dependencies/dependency-rejections.txt`
 
@@ -236,3 +241,12 @@ required builtins, declared and required capabilities, native/lifecycle/raw-netw
 package exports/imports conditions, and expected packaged graph size; and is summarized from
 `dependency-manifest.json` so APK-builder preflight gates can reject `unsafe` and `unsupported` bundles before copying
 `assets/project`.
+
+Task S8-45 adds `:app:manageNodeDependencies` as the integrated host-side dependency manager action. The action requires
+`package.json` plus `package-lock.json`, copies the source project to a clean work directory, runs
+`npm ci --ignore-scripts --no-bin-links --install-links --no-audit --fund=false`, verifies the package and lockfile were
+not mutated, validates the installed tree, writes the sanitized bundle, updates the content-addressed cache, emits
+SBOM-lite and compatibility reports, and verifies the output is ready for packaged APK `assets/project`. The default
+fixture stays offline through local `file:` dependencies. The manager report uses schema
+`autojs6-node-dependency-manager-v1` and records each step, the report index, the bundle hash, the cache key, and safety
+controls including `packageLifecycleScriptsExecuted=false`.

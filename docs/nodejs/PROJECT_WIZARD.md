@@ -134,6 +134,20 @@ Common actionable error codes:
 - `FS_OUTSIDE_SCOPE`
 - `UNSUPPORTED_PACKAGE_MANAGER_LAYOUT`
 
+## Dependency Manager
+
+Lockfile-based dependency installation remains a host-side project action:
+
+```powershell
+.\gradlew.bat --console=plain :app:manageNodeDependencies "-Pautojs.nodejs.dependencyManager.projectRoot=D:\work\my-node-app"
+```
+
+The action requires `package-lock.json`, runs desktop `npm ci` with lifecycle
+scripts ignored by default, validates and sanitizes the installed tree,
+generates SBOM-lite and compatibility reports, updates the dependency cache,
+and writes an APK-ready `assets/project` layout. It does not enable runtime
+package installation on Android.
+
 ## Verification
 
 The checked-in Gradle gate exercises every template and representative invalid
