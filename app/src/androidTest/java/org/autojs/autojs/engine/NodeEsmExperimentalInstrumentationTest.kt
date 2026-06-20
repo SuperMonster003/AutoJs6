@@ -626,6 +626,158 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun experimentalPackageAutojs6ConditionPreservesPackageKeyOrderAndPolicy() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package autojs6 condition")
+        val workDir = freshWorkDir("esm-package-autojs6-condition")
+        File(workDir, "package.json").writeText(
+            """
+            {
+              "imports": {
+                "#auto-alias": {
+                  "autojs6": "./auto-alias.mjs",
+                  "import": "./import-alias.mjs",
+                  "default": "./default-alias.mjs"
+                },
+                "#env-alias": {
+                  "development": "./development-alias.mjs",
+                  "production": "./production-alias.mjs",
+                  "default": "./default-env-alias.mjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(workDir, "auto-alias.mjs").writeText("""export default { value: "alias-autojs6" };""")
+        File(workDir, "import-alias.mjs").writeText("""export default { value: "alias-import" };""")
+        File(workDir, "default-alias.mjs").writeText("""export default { value: "alias-default" };""")
+        File(workDir, "development-alias.mjs").writeText("""export default { value: "alias-development" };""")
+        File(workDir, "production-alias.mjs").writeText("""export default { value: "alias-production" };""")
+        File(workDir, "default-env-alias.mjs").writeText("""export default { value: "alias-env-default" };""")
+
+        val autoFirstPackage = File(workDir, "node_modules/auto-first-pkg").apply { mkdirs() }
+        File(autoFirstPackage, "package.json").writeText(
+            """
+            {
+              "name": "auto-first-pkg",
+              "exports": {
+                ".": {
+                  "autojs6": "./auto.mjs",
+                  "import": "./import.mjs",
+                  "default": "./default.mjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(autoFirstPackage, "auto.mjs").writeText("""export default { value: "pkg-autojs6" };""")
+        File(autoFirstPackage, "import.mjs").writeText("""export default { value: "pkg-import" };""")
+        File(autoFirstPackage, "default.mjs").writeText("""export default { value: "pkg-default" };""")
+
+        val importFirstPackage = File(workDir, "node_modules/import-first-pkg").apply { mkdirs() }
+        File(importFirstPackage, "package.json").writeText(
+            """
+            {
+              "name": "import-first-pkg",
+              "exports": {
+                ".": {
+                  "import": "./import.mjs",
+                  "autojs6": "./auto.mjs",
+                  "default": "./default.mjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(importFirstPackage, "auto.mjs").writeText("""export default { value: "pkg-autojs6-late" };""")
+        File(importFirstPackage, "import.mjs").writeText("""export default { value: "pkg-import-first" };""")
+        File(importFirstPackage, "default.mjs").writeText("""export default { value: "pkg-default" };""")
+
+        val cjsPackage = File(workDir, "node_modules/cjs-auto-first-pkg").apply { mkdirs() }
+        File(cjsPackage, "package.json").writeText(
+            """
+            {
+              "name": "cjs-auto-first-pkg",
+              "exports": {
+                ".": {
+                  "autojs6": "./auto.cjs",
+                  "require": "./require.cjs",
+                  "default": "./default.cjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(cjsPackage, "auto.cjs").writeText("""module.exports = { value: "cjs-autojs6" };""")
+        File(cjsPackage, "require.cjs").writeText("""module.exports = { value: "cjs-require" };""")
+        File(cjsPackage, "default.cjs").writeText("""module.exports = { value: "cjs-default" };""")
+
+        val nativeAddonPackage = File(workDir, "node_modules/native-addon-auto-pkg").apply { mkdirs() }
+        File(nativeAddonPackage, "package.json").writeText(
+            """
+            {
+              "name": "native-addon-auto-pkg",
+              "exports": {
+                ".": {
+                  "autojs6": "./addon.node",
+                  "default": "./safe.mjs"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(nativeAddonPackage, "addon.node").writeText("")
+        File(nativeAddonPackage, "safe.mjs").writeText("""export default { value: "safe" };""")
+
+        val esm = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import autoFirst from "auto-first-pkg";
+                import importFirst from "import-first-pkg";
+                import autoAlias from "#auto-alias";
+                import envAlias from "#env-alias";
+                let nativeAddonDenied = false;
+                try {
+                  await import("native-addon-auto-pkg");
+                } catch (error) {
+                  nativeAddonDenied = error && error.code === "ERR_AUTOJS6_NATIVE_ADDON_DISABLED";
+                }
+                console.log("esm.package.autojs6=" + autoFirst.value + "/" + importFirst.value + "/" + autoAlias.value + "/" + envAlias.value);
+                console.log("esm.package.autojs6.denied=" + nativeAddonDenied);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("esm package autojs6 condition", esm)
+        assertTrue(esm.stdout.contains("esm.package.autojs6=pkg-autojs6/pkg-import-first/alias-autojs6/alias-env-default"))
+        assertTrue(esm.stdout.contains("esm.package.autojs6.denied=true"))
+        assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"autojs6\""))
+        assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"import\""))
+        assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"default\""))
+        assertTrue(esm.stderr, esm.stderr.contains("ignoredConditions=\"development|production\""))
+        assertEquals("autojs6", esm.nativeValues["embedded_script.package_resolution_selected_condition"])
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val cjs = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const pkg = require("cjs-auto-first-pkg");
+                console.log("cjs.package.autojs6=" + pkg.value);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.cjs").absolutePath,
+            workingDirectory = workDir,
+            env = mapOf("AUTOJS6_NODE_RESOLVE_TRACE" to "1"),
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("cjs package autojs6 condition", cjs)
+        assertTrue(cjs.stdout.contains("cjs.package.autojs6=cjs-autojs6"))
+        assertTrue(cjs.stderr, cjs.stderr.contains("selectedCondition=\"autojs6\""))
+        assertEquals("autojs6", cjs.nativeValues["embedded_script.package_resolution_selected_condition"])
+    }
+
+    @Test
     fun experimentalNestedPackageImportAndSelfReferenceUseEsmConditions() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM nested package import and self-reference")
         val workDir = freshWorkDir("esm-nested-self-reference")

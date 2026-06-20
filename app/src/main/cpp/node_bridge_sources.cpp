@@ -19597,8 +19597,8 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_package_active_conditions(mode) {
     return __autojs6_package_condition_mode(mode) === "esm"
-      ? ["import", "node", "default"]
-      : ["require", "node", "default"];
+      ? ["autojs6", "import", "node", "default"]
+      : ["autojs6", "require", "node", "default"];
   }
   function __autojs6_package_mode_label(mode) {
     return __autojs6_package_condition_mode(mode) === "esm" ? "ESM" : "CommonJS";
@@ -19619,6 +19619,7 @@ std::string buildEmbeddedScriptExecutionSource(
       key === "node" ||
       key === "default" ||
       key === "import" ||
+      key === "autojs6" ||
       key === "browser" ||
       key === "development" ||
       key === "production" ||
@@ -19848,7 +19849,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (entry && typeof entry === "object" && !Array.isArray(entry)) {
       const conditionKeys = __autojs6_package_condition_keys(entry);
       const ignoredConditions = __autojs6_unsupported_package_conditions(entry, mode);
-      for (const condition of __autojs6_package_active_conditions(mode)) {
+      const activeConditions = __autojs6_package_active_conditions(mode);
+      for (const condition of Object.keys(entry)) {
+        if (activeConditions.indexOf(condition) < 0) continue;
         if (__autojs6_has_own(entry, condition)) {
           const target = __autojs6_package_condition_target(entry[condition], moduleName, fieldName, mode);
           if (target !== null) {
