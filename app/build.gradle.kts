@@ -369,6 +369,7 @@ val nodeJsV11BetaInstrumentationClasses = (
             "org.autojs.autojs.engine.NodePerformanceMatrixInstrumentationTest",
             "org.autojs.autojs.engine.NodeInspectorDesignGateInstrumentationTest",
             "org.autojs.autojs.engine.NodeInspectorSecurityGateInstrumentationTest",
+            "org.autojs.autojs.engine.NodeHardenedIsolatedRuntimePocInstrumentationTest",
             "org.autojs.autojs.engine.NodeResolverFuzzerInstrumentationTest",
             "org.autojs.autojs.engine.NodeScopedFsFuzzerInstrumentationTest",
             "org.autojs.autojs.engine.NodeFileHandleWatcherFuzzerInstrumentationTest",

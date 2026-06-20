@@ -15,6 +15,7 @@ class NodeExecutionModePolicyInstrumentationTest {
                 NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
                 NodeExecutionModePolicy.MODE_SCHEDULED,
                 NodeExecutionModePolicy.MODE_WORKER_COMPUTATION,
+                NodeExecutionModePolicy.MODE_NODE_SANDBOXED,
             ),
             NodeExecutionModePolicy.canonicalModes(),
         )
@@ -64,6 +65,13 @@ class NodeExecutionModePolicyInstrumentationTest {
         assertFalse(worker.supported)
         assertEquals("not_applicable", worker.foregroundRequirement)
         assertTrue(worker.allowedProviders.isEmpty())
+
+        val sandboxed = NodeExecutionModePolicy.definition(NodeExecutionModePolicy.MODE_NODE_SANDBOXED)
+        assertFalse(sandboxed.supported)
+        assertEquals("design_gated", sandboxed.status)
+        assertEquals("host_owned_visibility_required", sandboxed.foregroundRequirement)
+        assertEquals("hardened_sandbox_broker_only", sandboxed.resourceQuotaProfile)
+        assertTrue(sandboxed.allowedProviders.isEmpty())
     }
 
     @Test
@@ -89,6 +97,14 @@ class NodeExecutionModePolicyInstrumentationTest {
         assertEquals(
             NodeExecutionModePolicy.MODE_WORKER_COMPUTATION,
             NodeExecutionModePolicy.normalize("workerComputation"),
+        )
+        assertEquals(
+            NodeExecutionModePolicy.MODE_NODE_SANDBOXED,
+            NodeExecutionModePolicy.normalize("nodeSandboxed"),
+        )
+        assertEquals(
+            NodeExecutionModePolicy.MODE_NODE_SANDBOXED,
+            NodeExecutionModePolicy.normalize("sandbox"),
         )
     }
 
@@ -133,6 +149,15 @@ class NodeExecutionModePolicyInstrumentationTest {
         val worker = NodeExecutionModePolicy.nativeValues("workerComputation")
         assertEquals("none", worker["embedded_script.execution_mode_allowed_providers"])
         assertEquals("worker_computation_restricted", worker["embedded_script.execution_mode_resource_quota_profile"])
+
+        val sandboxed = NodeExecutionModePolicy.nativeValues("nodeSandboxed")
+        assertEquals(NodeExecutionModePolicy.MODE_NODE_SANDBOXED, sandboxed["embedded_script.execution_mode"])
+        assertEquals("design_gated", sandboxed["embedded_script.execution_mode_status"])
+        assertEquals("none", sandboxed["embedded_script.execution_mode_supported_launch_surfaces"])
+        assertEquals("false", sandboxed["embedded_script.execution_mode_supported"])
+        assertEquals("true", sandboxed["embedded_script.sandboxed_runtime_requested"])
+        assertEquals("false", sandboxed["embedded_script.sandboxed_runtime_supported"])
+        assertEquals("hardened_sandbox_broker_only", sandboxed["embedded_script.execution_mode_resource_quota_profile"])
 
         val unknown = NodeExecutionModePolicy.nativeValues("daemon")
         assertEquals("daemon", unknown["embedded_script.execution_mode"])

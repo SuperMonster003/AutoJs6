@@ -469,6 +469,12 @@
                 android:value="Run isolated embedded Node scripts without touching the main app process" />
         </service>
 
+        <service
+            android:name="org.autojs.autojs.engine.NativeNodeSandboxedScriptService"
+            android:exported="false"
+            android:isolatedProcess="true"
+            android:process=":nodejs_sandboxed" />
+
         <activity android:name="org.autojs.autojs.external.tasker.TaskPrefEditActivity" />
 
         <service

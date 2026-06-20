@@ -6,6 +6,7 @@ object NodeExecutionModePolicy {
     const val MODE_INTERACTIVE_LONG_RUNNING = "interactive_long_running"
     const val MODE_SCHEDULED = "scheduled"
     const val MODE_WORKER_COMPUTATION = "worker_computation"
+    const val MODE_NODE_SANDBOXED = "node_sandboxed"
 
     const val LAUNCH_SURFACE_SCRIPT = "script"
     const val LAUNCH_SURFACE_INTERACTIVE_SESSION = "interactive_session"
@@ -56,6 +57,12 @@ object NodeExecutionModePolicy {
             "worker.computation",
             "worker",
             -> MODE_WORKER_COMPUTATION
+            "nodesandboxed",
+            "node_sandboxed",
+            "node.sandboxed",
+            "sandboxed",
+            "sandbox",
+            -> MODE_NODE_SANDBOXED
             else -> normalized
         }
     }
@@ -109,6 +116,10 @@ object NodeExecutionModePolicy {
             "embedded_script.long_running_requested" to isLongRunningRequest(definition.mode).toString(),
             "embedded_script.long_running_supported" to (
                 definition.mode == MODE_INTERACTIVE_LONG_RUNNING && definition.supports(launchSurface)
+                ).toString(),
+            "embedded_script.sandboxed_runtime_requested" to (definition.mode == MODE_NODE_SANDBOXED).toString(),
+            "embedded_script.sandboxed_runtime_supported" to (
+                definition.mode == MODE_NODE_SANDBOXED && definition.supports(launchSurface)
                 ).toString(),
         )
     }
@@ -217,6 +228,19 @@ object NodeExecutionModePolicy {
             resourceQuotaProfile = "worker_computation_restricted",
             stopSemantics = "terminate_worker_then_release_ports",
             unsupportedReason = "Worker computation mode remains behind the worker_threads capability isolation gates.",
+        ),
+        Definition(
+            mode = MODE_NODE_SANDBOXED,
+            status = "design_gated",
+            supportedLaunchSurfaces = emptySet(),
+            timeoutPolicy = "broker_startup_and_script_timeout",
+            foregroundRequirement = "host_owned_visibility_required",
+            notificationRequirement = "host_owned_stop_action_required",
+            allowedProviders = emptyList(),
+            restartPolicy = "never",
+            resourceQuotaProfile = "hardened_sandbox_broker_only",
+            stopSemantics = "broker_stop_then_isolated_process_destroy",
+            unsupportedReason = "Hardened isolated runtime mode is a Phase 8 manifest POC and requires a Binder capability broker before execution.",
         ),
     )
 
