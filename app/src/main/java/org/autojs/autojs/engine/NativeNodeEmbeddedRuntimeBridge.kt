@@ -11,6 +11,7 @@ import org.autojs.autojs6.BuildConfig
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.util.Locale
 
 object NativeNodeEmbeddedRuntimeBridge {
 
@@ -243,6 +244,12 @@ object NativeNodeEmbeddedRuntimeBridge {
     const val COMPILE_CACHE_ENV_LOADER = "AUTOJS6_NODE_COMPILE_CACHE_LOADER"
     const val COMPILE_CACHE_ENV_SCHEMA = "AUTOJS6_NODE_COMPILE_CACHE_SCHEMA"
     const val COMPILE_CACHE_ENV_PREPARE_ERROR = "AUTOJS6_NODE_COMPILE_CACHE_PREPARE_ERROR"
+    private val NODE_STARTUP_ENV_NAMES = setOf(
+        "NODE_OPTIONS",
+        "NODE_INSPECT_RESUME_ON_START",
+        "NODE_COMPILE_CACHE",
+        "NODE_DISABLE_COMPILE_CACHE",
+    )
     const val PROBE_LEVEL_KOTLIN_ROUND_TRIP = 0
     private const val PROBE_LEVEL_BRIDGE_PING = 1
     private const val PROBE_LEVEL_LOAD_LIBNODE = 2
@@ -792,15 +799,38 @@ object NativeNodeEmbeddedRuntimeBridge {
         val entry = NodeTypeScriptStripper.stripIfTypeScript(request.sourceName, request.source)
         val moduleSources = stripTypeScriptSourceMap(request.moduleSources)
         val runtimeModuleSources = stripTypeScriptSourceMap(request.runtimeModuleSources)
-        return if (!entry.stripped && moduleSources === request.moduleSources && runtimeModuleSources === request.runtimeModuleSources) {
+        val env = stripNodeStartupEnv(request.env)
+        return if (
+            !entry.stripped &&
+            moduleSources === request.moduleSources &&
+            runtimeModuleSources === request.runtimeModuleSources &&
+            env === request.env
+        ) {
             request
         } else {
             request.copy(
                 source = entry.source,
+                env = env,
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
             )
         }
+    }
+
+    private fun stripNodeStartupEnv(env: Map<String, String>): Map<String, String> {
+        if (env.isEmpty()) {
+            return env
+        }
+        var stripped = false
+        val sanitized = LinkedHashMap<String, String>(env.size)
+        env.forEach { (name, value) ->
+            if (NODE_STARTUP_ENV_NAMES.contains(name.uppercase(Locale.ROOT))) {
+                stripped = true
+            } else {
+                sanitized[name] = value
+            }
+        }
+        return if (stripped) sanitized else env
     }
 
     fun compileCacheBaseDir(context: Context): File {

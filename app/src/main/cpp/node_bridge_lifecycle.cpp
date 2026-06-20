@@ -4,6 +4,23 @@ namespace autojs6::node_bridge::internal {
 
 using namespace autojs6::node_bridge;
 
+node::ProcessInitializationFlags::Flags embeddedNodeInitializationFlags(bool enableStdioInitialization) {
+    uint32_t flags =
+            static_cast<uint32_t>(node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior) |
+            static_cast<uint32_t>(node::ProcessInitializationFlags::kDisableNodeOptionsEnv) |
+            static_cast<uint32_t>(node::ProcessInitializationFlags::kNoParseGlobalDebugVariables);
+    if (enableStdioInitialization) {
+        flags &= ~static_cast<uint32_t>(node::ProcessInitializationFlags::kNoStdioInitialization);
+    }
+    return static_cast<node::ProcessInitializationFlags::Flags>(flags);
+}
+
+const char* embeddedNodeInitializationFlagsName(bool enableStdioInitialization) {
+    return enableStdioInitialization
+           ? "kLegacyInitializeNodeWithArgsBehavior_without_kNoStdioInitialization|kDisableNodeOptionsEnv|kNoParseGlobalDebugVariables"
+           : "kLegacyInitializeNodeWithArgsBehavior|kDisableNodeOptionsEnv|kNoParseGlobalDebugVariables";
+}
+
 void appendEmbeddedLifecycleProbePayload(std::vector<std::string>& payload, void* handle) {
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "lifecycle.start");
     const auto lifecycleStartedAt = Clock::now();
@@ -55,16 +72,18 @@ void appendEmbeddedLifecycleProbePayload(std::vector<std::string>& payload, void
             reinterpret_cast<NodeTearDownOncePerProcess>(teardownLookup.address);
 
     std::vector<std::string> args = {"autojs6-embedded-lifecycle-probe"};
-    const auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+    const auto flags = embeddedNodeInitializationFlags(false);
+    const char* flagsName = embeddedNodeInitializationFlagsName(false);
     putPayload(payload, "initialize.symbol", initializeLookup.symbol);
-    putPayload(payload, "initialize.flags", "kLegacyInitializeNodeWithArgsBehavior");
+    putPayload(payload, "initialize.flags", flagsName);
     putPayload(payload, "teardown.symbol", teardownLookup.symbol);
 
     __android_log_print(
             ANDROID_LOG_INFO,
             kLogTag,
-            "initialize.start symbol=%s flags=kLegacyInitializeNodeWithArgsBehavior",
-            initializeLookup.symbol.c_str()
+            "initialize.start symbol=%s flags=%s",
+            initializeLookup.symbol.c_str(),
+            flagsName
     );
     const auto initializeStartedAt = Clock::now();
     bool initialized = false;
@@ -239,9 +258,10 @@ void appendEmbeddedV8LifecycleProbePayload(std::vector<std::string>& payload, vo
 
     const int buildConfiguration = v8BuildConfiguration();
     std::vector<std::string> args = {"autojs6-embedded-v8-lifecycle-probe"};
-    const auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+    const auto flags = embeddedNodeInitializationFlags(false);
+    const char* flagsName = embeddedNodeInitializationFlagsName(false);
     putPayload(payload, "initialize.symbol", initializeLookup.symbol);
-    putPayload(payload, "initialize.flags", "kLegacyInitializeNodeWithArgsBehavior");
+    putPayload(payload, "initialize.flags", flagsName);
     putPayload(payload, "teardown.symbol", teardownLookup.symbol);
     putPayload(payload, "platform.create.symbol", platformCreateLookup.symbol);
     putPayload(payload, "v8.initialize_platform.symbol", v8InitializePlatformLookup.symbol);
@@ -259,8 +279,9 @@ void appendEmbeddedV8LifecycleProbePayload(std::vector<std::string>& payload, vo
     __android_log_print(
             ANDROID_LOG_INFO,
             kLogTag,
-            "initialize.start symbol=%s flags=kLegacyInitializeNodeWithArgsBehavior",
-            initializeLookup.symbol.c_str()
+            "initialize.start symbol=%s flags=%s",
+            initializeLookup.symbol.c_str(),
+            flagsName
     );
     const auto initializeStartedAt = Clock::now();
     try {
@@ -3448,20 +3469,10 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
                     ? "autojs6-embedded-v8-uv-diagnostics-probe"
                     : "autojs6-embedded-v8-uv-isolate-probe"
     };
-    const auto flags = stdoutCapture
-            ? static_cast<node::ProcessInitializationFlags::Flags>(
-                    static_cast<uint32_t>(node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior) &
-                    ~static_cast<uint32_t>(node::ProcessInitializationFlags::kNoStdioInitialization)
-            )
-            : node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+    const auto flags = embeddedNodeInitializationFlags(stdoutCapture);
+    const char* flagsName = embeddedNodeInitializationFlagsName(stdoutCapture);
     putPayload(payload, "initialize.symbol", initializeLookup.symbol);
-    putPayload(
-            payload,
-            "initialize.flags",
-            stdoutCapture
-                    ? "kLegacyInitializeNodeWithArgsBehavior_without_kNoStdioInitialization"
-                    : "kLegacyInitializeNodeWithArgsBehavior"
-    );
+    putPayload(payload, "initialize.flags", flagsName);
     putPayload(payload, "teardown.symbol", teardownLookup.symbol);
     putPayload(payload, "platform.create.symbol", platformCreateLookup.symbol);
     putPayload(payload, "v8.initialize_platform.symbol", v8InitializePlatformLookup.symbol);
@@ -6956,9 +6967,7 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
             kLogTag,
             "initialize.start symbol=%s flags=%s",
             initializeLookup.symbol.c_str(),
-            stdoutCapture
-                    ? "kLegacyInitializeNodeWithArgsBehavior_without_kNoStdioInitialization"
-                    : "kLegacyInitializeNodeWithArgsBehavior"
+            flagsName
     );
     const auto initializeStartedAt = Clock::now();
     try {
@@ -19787,13 +19796,14 @@ void appendEmbeddedIsolateLifecycleProbePayload(
     std::vector<std::string> args = {
             useUvLoop ? "autojs6-embedded-uv-isolate-probe" : "autojs6-embedded-isolate-probe"
     };
-    const auto flags = node::ProcessInitializationFlags::kLegacyInitializeNodeWithArgsBehavior;
+    const auto flags = embeddedNodeInitializationFlags(false);
+    const char* flagsName = embeddedNodeInitializationFlagsName(false);
     if (useUvLoop) {
         putPayload(payload, "uv.loop.init.symbol", uvLoopInitLookup.symbol);
         putPayload(payload, "uv.loop.close.symbol", uvLoopCloseLookup.symbol);
     }
     putPayload(payload, "initialize.symbol", initializeLookup.symbol);
-    putPayload(payload, "initialize.flags", "kLegacyInitializeNodeWithArgsBehavior");
+    putPayload(payload, "initialize.flags", flagsName);
     putPayload(payload, "teardown.symbol", teardownLookup.symbol);
     putPayload(payload, "platform.create.symbol", platformCreateLookup.symbol);
     putPayload(payload, "allocator.create.symbol", allocatorCreateLookup.symbol);
@@ -19852,8 +19862,9 @@ void appendEmbeddedIsolateLifecycleProbePayload(
         __android_log_print(
                 ANDROID_LOG_INFO,
                 kLogTag,
-                "initialize.start symbol=%s flags=kLegacyInitializeNodeWithArgsBehavior",
-                initializeLookup.symbol.c_str()
+                "initialize.start symbol=%s flags=%s",
+                initializeLookup.symbol.c_str(),
+                flagsName
         );
         const auto initializeStartedAt = Clock::now();
         try {
