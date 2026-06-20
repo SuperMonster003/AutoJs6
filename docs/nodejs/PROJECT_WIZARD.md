@@ -32,13 +32,26 @@ Available templates:
   bridge metadata.
 - `network-fetch-script`: starter with controlled `fetch` and `network`
   bridge metadata.
+- `typescript-cjs`: lightweight TypeScript CommonJS starter using `.cts`.
+- `typescript-esm`: lightweight TypeScript ESM starter using `.mts`.
+- `typescript-automation`: TypeScript bridge starter with `toast` and `app`
+  metadata.
+- `typescript-ocr`: TypeScript screen capture plus OCR bridge starter.
+- `typescript-long-running-task`: TypeScript long-running task starter with
+  explicit signal cleanup.
+- `compiled-tsx`: build-time TSX starter that runs generated JavaScript only.
 
 Each template writes:
 
 - `project.json`
 - `package.json`
-- `main.cjs` or `main.mjs`
+- an entry such as `main.cjs`, `main.mjs`, `main.cts`, `main.mts`, or `main.ts`
 - `README.md`
+
+Some templates also write build-time support files. For example,
+`compiled-tsx` writes `src/view.tsx`, `tsconfig.json`, and a prebuilt
+`dist/view.js` entry target. Runtime TSX is still unsupported; TSX must be
+compiled on the desktop/build stage.
 
 ## Validate
 
@@ -87,7 +100,8 @@ The validator checks:
 - `package.json` exists, parses, has a package name, and uses only supported
   `type` values.
 - The declared entry file exists, stays inside the project root, and uses a
-  supported `.js`, `.cjs`, or `.mjs` extension.
+  supported `.js`, `.cjs`, `.mjs`, `.ts`, `.cts`, or `.mts` extension. `.tsx`
+  entries are rejected with an explicit diagnostic.
 - Bridge permission arrays are JSON string arrays and use known Safe Node
   Profile capabilities or explicit `plugin.<id>` capabilities.
 - `node_modules` dependency bundles do not contain `.node` files, common native
@@ -106,6 +120,7 @@ Common actionable error codes:
 - `ENTRY_DECLARATION_MISSING`
 - `ENTRY_FILE_MISSING`
 - `ENTRY_EXTENSION_UNSUPPORTED`
+- `ENTRY_TYPESCRIPT_TSX_UNSUPPORTED`
 - `ENTRY_PATH_UNSAFE`
 - `PERMISSIONS_SHAPE`
 - `UNKNOWN_PERMISSION`
@@ -122,10 +137,10 @@ Common actionable error codes:
 ## Verification
 
 The checked-in Gradle gate exercises every template and representative invalid
-projects for missing entries, invalid package names, unknown permissions, and
-unsafe dependency bundles. It also verifies every template has a non-blocking
-compatibility status and exercises source-level unsupported/unsafe analyzer
-fixtures:
+projects for missing entries, invalid package names, unknown permissions,
+unsupported TSX entries, and unsafe dependency bundles. It also verifies every
+template has a non-blocking compatibility status, checks the analyzed entry
+format, and exercises source-level unsupported/unsafe analyzer fixtures:
 
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodeProjectWizard

@@ -11,7 +11,7 @@ Each example contains:
 - `README.md`
 - `project.json`
 - `package.json`
-- `main.cjs`
+- the `project.json.main` entry, usually `main.cjs`, `main.cts`, or `main.mts`
 - `expected-output.txt`
 
 The suite manifest lives at `sample/nodejs/examples.json`. It records each example status, tags, whether it is included in
@@ -54,6 +54,9 @@ node tools/nodejs/project/autojs6-node-project.js validate D:\work\my-node-app
 - `node-test-project`: small `node:test` style project.
 - `database`: scoped SQLite bridge pattern.
 - `js-plugin-ui`: local JS-only plugin that returns a UI layout descriptor.
+- `typescript-cjs`: lightweight `.cts` CommonJS runtime smoke.
+- `typescript-esm`: lightweight `.mts` ESM runtime smoke.
+- `packaged-typescript`: packaged-compatible `.mts`/`.ts` graph with local dynamic import.
 - `typescript-smoke`: compile-time smoke for the checked-in AutoJs6 Node bridge declarations.
 
 ## Smoke Coverage
@@ -91,8 +94,14 @@ The instrumentation smoke copies examples from `sample/nodejs` into the device c
 - `accessibility-click-text`
 - `screenshot-find-image`
 - `disabled-features-demo`
+- `typescript-cjs`
+- `typescript-esm`
 
-`typescript-smoke` is type-check only and is not part of the device instrumentation smoke list.
+`typescript-smoke` remains type-check only; runtime TypeScript coverage comes from
+`typescript-cjs`, `typescript-esm`, and the focused `:app:verifyNodeTypeScriptGate`
+instrumentation suite. `packaged-typescript` documents the packaged-compatible
+`.mts`/`.ts` graph shape; injected TypeScript moduleSources are covered by the
+focused TypeScript gate.
 
 The examples are also added to the `androidTest` asset source set so tests exercise the checked-in sample files directly.
 `sample/nodejs/npm-ci-pure-js` is intentionally excluded from the examples manifest because it is a host-side dependency
@@ -108,9 +117,9 @@ The stable examples target AutoJs6 Safe Node Profile and generally avoid:
 - raw Node network modules
 - unrestricted filesystem access
 
-Phase 7 examples that use ESM, dynamic import, live providers, workers, long-running mode, scheduled tasks, database,
-or plugin/UI surfaces declare those capabilities explicitly and include graceful unavailable-provider paths where a
-permission, experimental flag, or hardware provider may be absent.
+Phase 7 and later examples that use ESM, dynamic import, TypeScript, live providers, workers, long-running mode,
+scheduled tasks, database, or plugin/UI surfaces declare those capabilities explicitly and include graceful
+unavailable-provider paths where a permission, experimental flag, or hardware provider may be absent.
 
 Examples that use Android capabilities such as accessibility or media projection are written to handle unavailable permissions without crashing.
 

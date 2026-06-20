@@ -57,3 +57,34 @@ The security probe source plan is present in
 `NodeSecurityRegressionInstrumentationTest#phase8Node2417SecurityFixProbesStaySafe`.
 It covers NUL hostname rejection, raw TLS/HTTP2 denial, credential redaction on
 denied HTTPS URLs, WebCrypto quota rejection, and scoped FileHandle behavior.
+
+## Batch B TypeScript
+
+Current Batch B implementation status:
+
+- `.ts`, `.mts`, and `.cts` route to Embedded Node with host-side lightweight
+  type stripping before native execution.
+- `.mts` is ESM, `.cts` is CommonJS, and `.ts` follows package `type`.
+- `.tsx` is explicitly rejected with
+  `ERR_AUTOJS6_TYPESCRIPT_UNSUPPORTED_EXTENSION`.
+- Transform-required TypeScript syntax is rejected before launch with
+  `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX` and diagnostics for source, syntax kind,
+  line, and column.
+- Injected `moduleSources` and runtime module sources are stripped before the
+  request reaches native Node.
+- Project wizard templates now cover CommonJS TypeScript, ESM TypeScript,
+  automation, OCR, long-running task, and build-time-only TSX.
+- Checked examples now include `typescript-cjs`, `typescript-esm`, and
+  `packaged-typescript`.
+
+Focused gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeTypeScriptGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeProjectWizard
+.\gradlew.bat --console=plain :app:verifyNodeExamples
+```
+
+The current packaged TypeScript evidence is project/moduleSources compatible.
+Full exported APK installation smoke remains part of the broader packaged gate
+before TypeScript can be treated as a release-complete Phase 8 capability.

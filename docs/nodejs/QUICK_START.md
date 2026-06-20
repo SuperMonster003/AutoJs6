@@ -25,12 +25,18 @@ Stable Node routing accepts:
 - `.node.js`
 - `.cjs`
 - `.mjs` as a Node route
+- `.ts`, `.mts`, and `.cts` in the v1.1 lightweight TypeScript profile
 - `project.json` with `type: "node"` or `projectType: "node"`
 - encrypted script metadata that marks the script as a Node entry
 
 `.mjs` preserves user intent and routes to Node. In Node Profile v1.1, `.mjs` runs through the partial ESM path by
 default. CommonJS remains the widest-compatibility path. Dynamic `import()` is available only through the local-only
 profile for relative modules, allowed builtins, and scoped packages.
+
+`.mts` is always ESM, `.cts` is always CommonJS, and `.ts` follows the nearest
+`package.json` `type`. AutoJs6 lightweight TypeScript strips erasable type
+syntax only; it does not type-check, read `tsconfig.json`, compile TSX, or
+transform enums/decorators/parameter properties.
 
 ## Project Shape
 
@@ -95,8 +101,22 @@ await showToast(`package: ${app.packageName}`);
 
 Bridge calls are Promise-based and must remain asynchronous from JavaScript's perspective.
 
-TypeScript declarations for AutoJs6 bridge modules live under [types/autojs6-node](types/autojs6-node). See the
-`sample/nodejs/typescript-smoke` project for a minimal type-check setup.
+## TypeScript
+
+Use the project wizard for lightweight runtime TypeScript starters:
+
+```powershell
+node tools/nodejs/project/autojs6-node-project.js create --template typescript-cjs --out D:\work\my-ts-cjs
+node tools/nodejs/project/autojs6-node-project.js create --template typescript-esm --out D:\work\my-ts-esm
+```
+
+Runtime-supported extensions are `.ts`, `.mts`, and `.cts`. `.tsx` is a
+build-time-only path; use the `compiled-tsx` template when TSX should compile
+to JavaScript before packaging.
+
+TypeScript declarations for AutoJs6 bridge modules live under [types/autojs6-node](types/autojs6-node). See
+`sample/nodejs/typescript-smoke` for type-check wiring and `sample/nodejs/typescript-cjs`,
+`sample/nodejs/typescript-esm`, and `sample/nodejs/packaged-typescript` for runtime examples.
 
 ## Scoped Filesystem
 

@@ -27,12 +27,15 @@ Host-side project wizard and validator gate:
 
 This gate runs `tools/nodejs/project/autojs6-node-project.js` against all
 checked templates (`commonjs-app`, `esm-app`, `automation-script`,
-`screenshot-ocr-script`, `network-fetch-script`) and invalid fixtures for
-missing entries, invalid package names, unknown permissions, and unsafe
-dependency bundles. The JSON output includes a compatibility analyzer status
-(`compatible`, `compatible with capability`, `experimental`, `unsupported`, or
-`unsafe`) plus required builtins, capability requirements, dependency graph
-size, package export-condition usage, and APK-builder preflight metadata.
+`screenshot-ocr-script`, `network-fetch-script`, `typescript-cjs`,
+`typescript-esm`, `typescript-automation`, `typescript-ocr`,
+`typescript-long-running-task`, `compiled-tsx`) and invalid fixtures for
+missing entries, invalid package names, unknown permissions, unsupported TSX
+entries, and unsafe dependency bundles. The JSON output includes a
+compatibility analyzer status (`compatible`, `compatible with capability`,
+`experimental`, `unsupported`, or `unsafe`) plus required builtins, capability
+requirements, dependency graph size, package export-condition usage, entry
+format, and APK-builder preflight metadata.
 
 ## Device Instrumentation
 
