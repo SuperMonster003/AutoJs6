@@ -272,3 +272,43 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/FS_WATCH.md`
 - `docs/nodejs/reports/phase8/SAFE_FILE_OPERATIONS.md`
 - `docs/nodejs/reports/phase8/FILEHANDLE_WATCHER_FUZZER.md`
+
+## Batch F Debugging And Performance
+
+Current Batch F implementation status:
+
+- S8-33 is complete for internal module compile-cache enablement and
+  diagnostics.
+- The embedded bootstrap enables Node's compile cache through the internal
+  `node:module.enableCompileCache(cacheDir)` API before user code starts.
+- CJS, ESM, and TypeScript-after-stripping executions all receive the same
+  app-private, project-scoped compile-cache policy.
+- The cache directory is under app-private code cache only:
+  `<app code cache>/node-compile-cache/<runtime-key>/<project-key>`.
+- Runtime, ABI, profile, feature-flag, loader-version, and module-content
+  hashes are included in the diagnostics key material.
+- Incompatible runtime or loader changes create a new runtime key; old cache
+  directories are pruned by the app-private quota policy.
+- Cache failures are fail-soft and are reported through
+  `embedded_script.compile_cache.*` native values.
+- `require("module")` / `require("node:module")` still expose only the safe
+  subset; compile-cache enable/flush controls remain internal.
+- User-visible env filters hide `AUTOJS6_NODE_COMPILE_CACHE_*`,
+  `NODE_COMPILE_CACHE`, and `NODE_DISABLE_COMPILE_CACHE`.
+- Doctor reports include compile-cache status, app-private location, quota, and
+  hit/miss status notes.
+- Custom AutoJs6 loader paths do not expose reliable Node hit/miss counters, so
+  diagnostics report `hitMissStatus=unavailable_custom_loader` instead of
+  fabricating counts.
+
+Focused gates:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeModuleCompileCacheInstrumentationTest,org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
+```
+
+Detailed coverage is recorded in:
+
+- `docs/nodejs/reports/phase8/MODULE_COMPILE_CACHE.md`

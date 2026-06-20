@@ -605,6 +605,9 @@ The following Node loader internals are not exposed:
 - `globalPaths`
 - `register`
 - `registerHooks`
+- `enableCompileCache`
+- `flushCompileCache`
+- `constants.compileCacheStatus`
 - custom loader hooks
 
 Design notes for the broadest limited builtins:
@@ -622,6 +625,43 @@ Design notes for the broadest limited builtins:
 - worker threads: `docs/nodejs/design/WORKER_THREADS.md`
 - Java interop: `docs/nodejs/design/JAVA_INTEROP.md`
 - Rhino shim: `docs/nodejs/design/RHINO_SHIM.md`
+
+## Module Compile Cache
+
+Node Profile v1.1 enables Node's module compile cache internally for embedded
+script executions. AutoJs6 calls the real internal
+`node:module.enableCompileCache(cacheDir)` from the bootstrap before user code
+starts, but this API is not exposed through the Safe Node `module` wrapper.
+
+The cache directory is app-private only:
+
+```text
+<app code cache>/node-compile-cache/<runtime-key>/<project-key>
+```
+
+Runtime key material includes the Node/header/runtime slot identity, Android
+ABI list, AutoJs6 runtime profile version, effective feature flags, and loader
+versions. Content key diagnostics include the entry source hash plus sorted
+`moduleSources` and runtime module source hashes after TypeScript stripping.
+Incompatible runtime or loader upgrades produce a new runtime key, and old
+directories are pruned by the app-private quota policy.
+
+Cache failure is fail-soft. Directory preparation errors, unavailable Node API
+state, or enable/flush errors are recorded in `embedded_script.compile_cache.*`
+native values and must not change script correctness. The Doctor report exposes
+the compile-cache schema, default status, app-private base directory, quota,
+diagnostic prefix, and hit/miss status note.
+
+`require("autojs6:profile").compileCache` is a frozen diagnostic snapshot with
+`appPrivateOnly=true` and `userControlExposed=false`. User scripts cannot
+redirect or disable the internal cache through `process.env`: AutoJs6 filters
+`AUTOJS6_NODE_COMPILE_CACHE_*`, `NODE_COMPILE_CACHE`, and
+`NODE_DISABLE_COMPILE_CACHE` from the controlled environment.
+
+AutoJs6 still uses its scoped custom loader for user-managed CJS, ESM, and
+moduleSources graphs. Node does not expose reliable per-module hit/miss counters
+for that custom-loader path, so diagnostics report
+`hitMissStatus=unavailable_custom_loader` instead of fabricated counts.
 
 ## Java Interop Experimental Allowlist
 

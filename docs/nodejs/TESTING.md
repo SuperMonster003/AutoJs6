@@ -464,7 +464,8 @@ The app UI also exposes `Developer options > Node.js > Node.js Doctor`. It expor
 through the system share sheet. Device reports include backend, expected and observed Node version when the native probe
 is available, ABI, feature flags, native library hashes, capability profile, bridge capability manifest status, the
 `network -> android.permission.INTERNET` mapping, the current Node runtime compatibility descriptor version vector,
-packaged template presence, and last-error availability. They do not include user script contents or environment values.
+module compile-cache status/quota/app-private location policy, packaged template presence, and last-error availability.
+They do not include user script contents or environment values.
 
 Focused device report generator instrumentation:
 
@@ -673,6 +674,21 @@ Current `node:module` safe subset focused instrumentation:
 ```
 
 This suite verifies the partial `module`/`node:module` surface, shadowing protection, filtered `builtinModules`, scoped `createRequire` loading for local and package dependencies, `child_process` denial through created require functions, and unsafe base or target rejection.
+
+Current module compile-cache focused instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeModuleCompileCacheInstrumentationTest,org.autojs.autojs.ui.settings.NodeDoctorReportGeneratorInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies internal Node module compile-cache enablement for CJS, ESM,
+and TypeScript-after-stripping module graphs, app-private project-scoped cache
+directories, runtime/content/loader diagnostic keys, custom-loader hit/miss
+status reporting, safe-subset denial for script-visible
+`node:module.enableCompileCache` / `flushCompileCache` controls, filtering of
+compile-cache env variables from `process.env`, user-env override denial, and
+Doctor report JSON/text coverage.
 
 Current core builtin compatibility focused instrumentation:
 
