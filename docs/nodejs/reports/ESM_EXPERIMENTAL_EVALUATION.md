@@ -99,9 +99,12 @@ This is still not enough for promotion because package-condition coverage is syn
 
 ## Real Package Corpus Status
 
-The available real npm corpus has no ESM subset.
+At the time of this evaluation, the available real npm corpus had no ESM
+subset. Later v1.1 work changes the current corpus state: S7-48 adds ESM-only
+dependency and hybrid CJS/ESM fixtures, and S8-46 adds a CJS `require(esm)`
+fixture while preserving CommonJS `test.cjs` runners.
 
-`NodeRealNpmCompatInstrumentationTest#fixtureMetadataIsCompleteAndSafe` enforces:
+At that time, `NodeRealNpmCompatInstrumentationTest#fixtureMetadataIsCompleteAndSafe` enforced:
 
 - fixture count is 4
 - no native `.node` addons

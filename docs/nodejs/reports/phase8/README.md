@@ -443,6 +443,12 @@ Current Batch I implementation status:
   for packaged APK `assets/project`.
 - Android runtime install remains unsupported. The manager is host-side only
   and records `packageLifecycleScriptsExecuted=false`.
+- S8-46 is complete for the Phase 8 real npm corpus expansion. The fixed
+  offline corpus now grows from the Phase 7 13-fixture baseline to 20 fixtures,
+  adding TypeScript-source, CJS `require(esm)`, default-denied `node:http`,
+  `FormData`/`fetch`, `FileHandle`, `fs.watch`, and compile-cache-shaped
+  package coverage. The Sony gate passes 20/20, so the pass-rate remains 100%
+  with a `+7` fixture delta from Phase 7.
 
 Focused gates:
 
@@ -450,9 +456,12 @@ Focused gates:
 .\gradlew.bat --console=plain :app:manageNodeDependencies
 .\gradlew.bat --console=plain :app:verifyNodeDependencyManagerFixture
 .\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
 
 - `docs/nodejs/design/PACKAGE_MANAGER.md`
 - `docs/nodejs/reports/phase8/DEPENDENCY_MANAGER.md`
+- `docs/nodejs/reports/phase8/REAL_NPM_CORPUS_PHASE8.md`

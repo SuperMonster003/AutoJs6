@@ -83,7 +83,7 @@ hit/miss status.
 | dynamic import | Pass as partial | Local `.mjs`/CJS, allowed builtin, and scoped package imports pass; disabled builtin, URL, absolute, escape, eval, and Function paths remain denied. |
 | `import.meta` | Pass as partial | S8-17 covers `url`, `filename`, `dirname`, `main`, scoped `resolve()` for local/package/allowed-builtin specifiers, and disabled builtin denial. |
 | source maps | Pass after fix | Inline and scoped external maps now map result `errorStack`; external escapes remain denied. |
-| real npm corpus | Insufficient | Existing corpus is CommonJS-only and explicitly excludes `type=module`. |
+| real npm corpus | Initially insufficient; later expanded | This promotion run predated the S7-48 and S8-46 corpus expansions. Current v1.1 evidence now includes ESM-only dependency, hybrid CJS/ESM, and CJS `require(esm)` package fixtures while keeping CommonJS `test.cjs` runners. |
 | packaged APK | Partial | `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; packaged dynamic import covers local `.mjs` and CJS targets, while broad package graphs are not supported. |
 
 ## Source Map Finding

@@ -392,12 +392,15 @@ Current fixed real npm corpus instrumentation:
 This suite copies `app/src/androidTest/assets/npm_compat_real/` into a scoped working directory and runs fixed, offline,
 license-noted CommonJS package snapshots. It covers small utilities, nested dependencies, semver parsing,
 querystring/URL utilities, glob/path matching, crypto hashing, stream utilities, zlib buffer utilities, and core builtin
-feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`. The v1.1/S7-48 corpus grows from
-7 to 13 fixtures and also covers an ESM-only dependency, a hybrid CJS/ESM package, Buffer helpers, fetch-wrapper fallback
+feature detection for `constants`, `util/types`, `events`, and `diagnostics_channel`. The v1.1/S7-48 corpus grew from
+7 to 13 fixtures and added an ESM-only dependency, a hybrid CJS/ESM package, Buffer helpers, fetch-wrapper fallback
 behavior, assertion/test helper patterns, `AsyncLocalStorage`, `stream/promises`, WebCrypto digest helpers, worker CPU
 package fallback behavior while `worker_threads` remains default-disabled, a tiny test-runner package, and a database
-abstraction package. It also checks that the corpus contains no native addons, no install/postinstall scripts, and no
-ESM root runner; ESM-only package metadata is allowed only below fixture `node_modules`.
+abstraction package. S8-46 grows the corpus from 13 to 20 fixtures while keeping the pass rate at 100%: it adds native
+TypeScript source project shape, CJS `require(esm)`, default-denied `node:http`, `FormData`/`fetch`, scoped
+`FileHandle`, `fs.watch()` lifecycle, and compile-cache-shaped package coverage. It also checks that the corpus contains
+no native addons, no install/postinstall scripts, and no ESM root runner; ESM-only package metadata is allowed only below
+fixture `node_modules`.
 
 Desktop Node differential harness:
 
@@ -414,8 +417,8 @@ build/reports/nodejs/npm-compat-v1.1.md
 build/reports/nodejs/v1.1-differential.md
 ```
 
-`NodeRealNpmCompatInstrumentationTest` emits `realnpm.differential.result=...` JSON lines for each fixture. The Android
-Gradle plugin stores these lines in the connected test logcat output, for example under
+`NodeRealNpmCompatInstrumentationTest` emits `realnpm.differential.result=...` JSON lines for each fixture through
+connected-test diagnostics/logcat. The Android Gradle plugin stores these lines in the connected test logcat output, for example under
 `app/build/outputs/androidTest-results/connected/.../logcat-org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest-realPureJavaScriptPackageCorpusPasses.txt`.
 Pass that file to the harness with `--autojs-log <file>` to compare AutoJs6 against the desktop baseline. Differences are
 classified as matched, expected AutoJs6 restriction, unsupported, flaky, or bug. The `v1.1-differential.md` report
