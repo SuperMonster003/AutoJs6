@@ -350,12 +350,13 @@ function classifySourceToken(token) {
 
 function classifySymbolName(symbol) {
   if (!symbol) {
-    return "unclassified";
+    return "external_binary_symbol_review_required";
   }
+  const baseSymbol = symbol.replace(/@.+$/, "");
   if (symbol.startsWith("Java_") || symbol.includes("JNI")) {
     return "jni_only_symbol";
   }
-  if (symbol.startsWith("uv_")) {
+  if (baseSymbol.startsWith("uv_")) {
     return "libuv_public_api";
   }
   if (symbol.startsWith("_ZN4node") || symbol.includes("node")) {
@@ -367,13 +368,37 @@ function classifySymbolName(symbol) {
   if (symbol.startsWith("_ZN2v8") || symbol.includes("v8")) {
     return "v8_public_api";
   }
-  if (symbol.startsWith("__android") || symbol.startsWith("android_") || symbol.startsWith("dl")) {
+  if (isAndroidDynamicLoaderSymbol(baseSymbol)) {
+    return "android_dynamic_loader";
+  }
+  if (isAndroidThreadingSymbol(baseSymbol)) {
+    return "android_threading_api";
+  }
+  if (isAndroidLibcSymbol(baseSymbol, symbol)) {
+    return "android_bionic_libc_api";
+  }
+  if (symbol.startsWith("__android") || symbol.startsWith("android_")) {
     return "android_platform_api";
   }
   if (symbol.includes("__ndk1") || symbol.startsWith("__cxa") || symbol.startsWith("_Z")) {
     return "cxx_runtime_symbol";
   }
-  return "unclassified";
+  return "external_binary_symbol_review_required";
+}
+
+function isAndroidDynamicLoaderSymbol(symbol) {
+  return /^(dlopen|dlsym|dlerror|dlclose|dladdr|android_dlopen_ext)$/.test(symbol);
+}
+
+function isAndroidThreadingSymbol(symbol) {
+  return /^pthread_/.test(symbol);
+}
+
+function isAndroidLibcSymbol(symbol, originalSymbol) {
+  if (/@LIBC(?:_|$)/.test(originalSymbol)) {
+    return true;
+  }
+  return /^(abort|btowc|calloc|chdir|clock_gettime|close|closelog|dup|dup2|fclose|fflush|fopen|fprintf|fputc|fread|free|freelocale|fseek|fseeko|ftello|fwrite|getauxval|getcwd|iswalpha_l|iswblank_l|iswcntrl_l|iswdigit_l|iswlower_l|iswprint_l|iswpunct_l|iswspace_l|iswupper_l|iswxdigit_l|localeconv|malloc|mbrlen|mbrtowc|mbsnrtowcs|mbsrtowcs|mbtowc|memchr|memcmp|memcpy|memfd_create|memmove|memset|nanosleep|newlocale|openlog|pipe|posix_memalign|read|realloc|setlocale|setvbuf|snprintf|sscanf|stderr|stdout|strcmp|strcoll_l|strerror|strerror_r|strftime_l|strlen|strncmp|strtod|strtof|strtol|strtold|strtold_l|strtoll|strtoll_l|strtoul|strtoull|strtoull_l|strxfrm_l|swprintf|syscall|sysconf|syslog|towlower_l|towupper_l|uselocale|vasprintf|vfprintf|vsnprintf|vsscanf|wcrtomb|wcscoll_l|wcslen|wcsnrtombs|wcstod|wcstof|wcstol|wcstold|wcstoll|wcstoul|wcstoull|wcsxfrm_l|wctob|wmemchr|wmemcmp|__ctype_get_mb_cur_max|__errno|__getcwd_chk|__read_chk|__register_atfork|__sF|__stack_chk_fail|__stack_chk_guard|__strlen_chk|__system_property_get|__vsnprintf_chk)$/.test(symbol);
 }
 
 function findAndroidTools(repoRoot) {

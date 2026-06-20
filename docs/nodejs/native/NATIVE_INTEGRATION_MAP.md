@@ -27,6 +27,7 @@ The boundary map classifies references into:
 - public libuv API references
 - JNI-only bridge references
 - Android dynamic loader references
+- Android Bionic/libc and pthread references
 - private or unstable Node/V8 boundary references
 - binary imports and exports found in built native libraries
 
