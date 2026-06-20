@@ -103,6 +103,11 @@ Current Batch C implementation status:
   `ERR_REQUIRE_ASYNC_MODULE`.
 - Native addons, raw loader hooks, raw network, disabled builtins, scoped fs
   escapes, and unrestricted `node:module` authority remain denied.
+- Static JSON ESM imports require `with { type: "json" }`.
+- Dynamic JSON imports require `{ with: { type: "json" } }`.
+- JSON ESM imports reuse the existing CommonJS JSON parser/cache; missing
+  attributes, unknown attributes, and legacy `assert { type: "json" }` syntax
+  reject with the partial ESM unsupported error.
 
 Focused gates:
 

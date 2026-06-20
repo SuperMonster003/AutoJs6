@@ -114,9 +114,9 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 ## ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED
 
 - Meaning: ESM execution is not enabled for this path, or the requested ESM syntax is outside the partial profile.
-- Common cause: ESM was explicitly disabled for a diagnostic run, static `import`/`export` syntax was used in a CommonJS entry, or an unsupported ESM form such as `import.meta` was used.
-- Example: `import.meta.url` in a v1.1 partial ESM module.
-- How to fix: use supported partial ESM syntax, move static imports into a `.mjs` or `type=module` entry, or keep CommonJS syntax in `.cjs`/CommonJS files.
+- Common cause: ESM was explicitly disabled for a diagnostic run, static `import`/`export` syntax was used in a CommonJS entry, JSON import attributes were missing/unknown, or an unsupported ESM form such as `import.meta` was used.
+- Example: `import.meta.url` in a v1.1 partial ESM module, or `import data from "./data.json"` without `with { type: "json" }`.
+- How to fix: use supported partial ESM syntax, add `with { type: "json" }` for JSON imports, move static imports into a `.mjs` or `type=module` entry, or keep CommonJS syntax in `.cjs`/CommonJS files.
 - Related docs: [design/ESM.md](design/ESM.md), [QUICK_START.md](QUICK_START.md).
 
 ## ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED

@@ -660,14 +660,15 @@ Node Profile v1.1 partial ESM supports:
 - package `exports`/`imports` targets that point to `.mjs` files inside the package root
 - nested package imports and package self-reference under ESM mode
 - CommonJS `require()` of synchronous partial ESM targets, returning the ESM namespace object while preserving CommonJS package condition order
+- ESM JSON imports with `with { type: "json" }`, sharing the CommonJS JSON cache object
 - simple named exports
 - simple top-level await
 
 CommonJS package condition order remains `require`, `node`, `default`.
 
-Partial ESM still rejects `import.meta`, CJS `require()` of asynchronous ESM graphs containing `await` or dynamic `import()`, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
+Partial ESM still rejects `import.meta`, CJS `require()` of asynchronous ESM graphs containing `await` or dynamic `import()`, legacy ESM JSON import assertions, missing/unknown import attributes, import attributes on non-JSON modules, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
 
-Dynamic `import()` is local-only partial support. It allows local relative `.mjs` and CommonJS modules, allowed builtins, and packages resolved inside `workingDirectory` with ESM package condition order. It rejects disabled builtins, absolute paths, `file:`/`data:` URLs, network URLs, path escapes, loader hooks, and dynamic-code sources such as `eval` and `Function` with stable AutoJs6 errors.
+Dynamic `import()` is local-only partial support. It allows local relative `.mjs`, CommonJS, and JSON modules, allowed builtins, and packages resolved inside `workingDirectory` with ESM package condition order. Dynamic JSON imports require `{ with: { type: "json" } }`. It rejects disabled builtins, absolute paths, `file:`/`data:` URLs, network URLs, path escapes, loader hooks, and dynamic-code sources such as `eval` and `Function` with stable AutoJs6 errors.
 
 Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, `esmModuleGraphModules`, and `dynamicImportEnabled` in the embedded script result envelope.
 

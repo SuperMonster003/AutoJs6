@@ -64,6 +64,7 @@ Default behavior:
 - `import.meta` fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
 - CommonJS `require()` can synchronously load `.mjs`, `.mts`, and `type=module` `.js` targets when the partial ESM graph has no `await` token and no dynamic `import()`.
 - CommonJS `require()` of an asynchronous partial ESM graph fails with `ERR_REQUIRE_ASYNC_MODULE`.
+- JSON ESM imports require import attributes: `import config from "./config.json" with { type: "json" }`.
 
 Explicitly setting `autojs.nodejs.esm.experimental=false` or an internal request
 flag to false preserves the previous fail-closed path for diagnostics.
@@ -80,6 +81,7 @@ flag to false preserves the previous fail-closed path for diagnostics.
 - ESM package `exports` and `imports` may target `.mjs` files inside the package root.
 - ESM self-reference and nested package imports use the ESM condition set.
 - CommonJS `require()` may load synchronous partial ESM targets without changing CommonJS package condition order.
+- ESM may import scoped JSON modules only with `with { type: "json" }`; the resulting default export shares the existing CommonJS JSON cache object.
 - simple named exports are supported for local `.mjs` modules.
 - top-level await is supported because the partial ESM graph is evaluated through an async runner.
 - diagnostics are emitted in the result envelope:
@@ -96,7 +98,8 @@ Still unsupported in v1:
 
 - `import.meta`
 - CJS `require()` of asynchronous ESM graphs that contain `await` or dynamic `import()`; this fails with `ERR_REQUIRE_ASYNC_MODULE`
-- ESM JSON import assertions; JSON may only be reached through the CommonJS interop path
+- legacy ESM JSON import assertions (`assert { type: "json" }`); use import attributes instead
+- unknown import attributes or import attributes on non-JSON modules
 - custom loaders and `node:module` loader hooks
 - network, `file:`, `data:`, or other URL imports
 - imports outside `workingDirectory`
@@ -166,7 +169,10 @@ ESM importing CJS:
 CommonJS importing JSON:
 
 - Remains supported.
-- Future ESM JSON import assertions are out of scope for v1.
+- ESM JSON imports are supported through import attributes:
+  `import data from "./data.json" with { type: "json" }`.
+- Missing or unknown import attributes reject with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
+- The ESM default export shares the same parsed object and cache entry as CommonJS `require("./data.json")`.
 
 ## Top-Level Await
 
