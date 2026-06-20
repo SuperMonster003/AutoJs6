@@ -397,9 +397,11 @@ object NodeRuntimeCapabilities {
 
     val backendSwitches = setOf("rhino", "native", "embedded", "auto")
 
-    val nodeRouteFileSuffixes = setOf(".node.js", ".cjs", ".mjs")
-    val commonJsModuleExtensions = setOf("js", "cjs", "json")
-    val commonJsRecursiveSourceExtensions = setOf("js", "cjs")
+    val nodeRouteFileSuffixes = setOf(".node.js", ".cjs", ".mjs", ".ts", ".mts", ".cts", ".tsx")
+    val commonJsModuleExtensions = setOf("js", "cjs", "cts", "ts", "json")
+    val commonJsRecursiveSourceExtensions = setOf("js", "cjs", "cts", "ts")
+    val typeScriptModuleExtensions = setOf("ts", "mts", "cts")
+    val unsupportedTypeScriptModuleExtensions = setOf("tsx")
     val packageJsonExportConditions = listOf("require", "node", "default")
 
     val directBuiltinAliases = mapOf(

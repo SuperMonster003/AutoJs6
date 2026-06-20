@@ -493,17 +493,29 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
 
-        val sourceBytes = request.source.toByteArray(StandardCharsets.UTF_8).size
+        val preparedRequest = try {
+            prepareEmbeddedScriptRequest(request)
+        } catch (error: Throwable) {
+            return embeddedScriptRequestPreparationFailure(
+                request = request,
+                throwable = error,
+                startedAt = startedAt,
+                processName = processName,
+                pid = pid,
+            )
+        }
+
+        val sourceBytes = preparedRequest.source.toByteArray(StandardCharsets.UTF_8).size
         if (sourceBytes > EMBEDDED_SCRIPT_SOURCE_MAX_BYTES) {
             return failureEmbeddedScriptResult(
-                request = request,
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = embeddedScriptSourceTooLargeMessage(request.sourceName, sourceBytes),
+                message = embeddedScriptSourceTooLargeMessage(preparedRequest.sourceName, sourceBytes),
             )
         }
-        validateEmbeddedScriptModuleSources(request, processName, pid, startedAt)?.let { return it }
+        validateEmbeddedScriptModuleSources(preparedRequest, processName, pid, startedAt)?.let { return it }
 
         val loadStartedAt = SystemClock.elapsedRealtime()
         val libcxxLoad = loadLibrary("c++_shared")
@@ -526,7 +538,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         }
         if (loadError != null) {
             return failureEmbeddedScriptResult(
-                request = request,
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
@@ -536,42 +548,42 @@ object NativeNodeEmbeddedRuntimeBridge {
         }
 
         val nativeCall = runCatching {
-            val payload = if (request.runtimeModuleSources.isEmpty()) {
+            val payload = if (preparedRequest.runtimeModuleSources.isEmpty()) {
                 nativeRunEmbeddedScriptLifecycleWithModulesV2(
-                    request.source,
-                    request.sourceName,
-                    request.workingDirectory,
-                    request.moduleSources.keys.toTypedArray(),
-                    request.moduleSources.values.toTypedArray(),
-                    request.env.keys.toTypedArray(),
-                    request.env.values.toTypedArray(),
-                    request.esmExperimentalEnabled,
-                    request.dynamicImportExperimentalEnabled,
-                    request.workerThreadsExperimentalEnabled,
-                    request.javaInteropExperimentalEnabled,
+                    preparedRequest.source,
+                    preparedRequest.sourceName,
+                    preparedRequest.workingDirectory,
+                    preparedRequest.moduleSources.keys.toTypedArray(),
+                    preparedRequest.moduleSources.values.toTypedArray(),
+                    preparedRequest.env.keys.toTypedArray(),
+                    preparedRequest.env.values.toTypedArray(),
+                    preparedRequest.esmExperimentalEnabled,
+                    preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.javaInteropExperimentalEnabled,
                 )
             } else {
                 nativeRunEmbeddedScriptLifecycleWithRuntimeModulesV2(
-                    request.source,
-                    request.sourceName,
-                    request.workingDirectory,
-                    request.moduleSources.keys.toTypedArray(),
-                    request.moduleSources.values.toTypedArray(),
-                    request.runtimeModuleSources.keys.toTypedArray(),
-                    request.runtimeModuleSources.values.toTypedArray(),
-                    request.env.keys.toTypedArray(),
-                    request.env.values.toTypedArray(),
-                    request.esmExperimentalEnabled,
-                    request.dynamicImportExperimentalEnabled,
-                    request.workerThreadsExperimentalEnabled,
-                    request.javaInteropExperimentalEnabled,
+                    preparedRequest.source,
+                    preparedRequest.sourceName,
+                    preparedRequest.workingDirectory,
+                    preparedRequest.moduleSources.keys.toTypedArray(),
+                    preparedRequest.moduleSources.values.toTypedArray(),
+                    preparedRequest.runtimeModuleSources.keys.toTypedArray(),
+                    preparedRequest.runtimeModuleSources.values.toTypedArray(),
+                    preparedRequest.env.keys.toTypedArray(),
+                    preparedRequest.env.values.toTypedArray(),
+                    preparedRequest.esmExperimentalEnabled,
+                    preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.javaInteropExperimentalEnabled,
                 )
             }
             payload ?: emptyArray()
         }
         val nativePayload = nativeCall.getOrElse { throwable ->
             return failureEmbeddedScriptResult(
-                request = request,
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
@@ -583,7 +595,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val nativeValues = parseNativePayload(nativePayload).toMutableMap()
         nativeValues["load.duration.ms"] = loadDurationMs.toString()
         return parseEmbeddedScriptResult(
-            request = request,
+            request = preparedRequest,
             processName = processName,
             pid = pid,
             startedAt = startedAt,
@@ -722,10 +734,21 @@ object NativeNodeEmbeddedRuntimeBridge {
                 errorCode = NodeRuntimeErrorCodes.NODE_DISABLED,
             )
         }
+        val preparedRequest = try {
+            prepareEmbeddedScriptRequest(request)
+        } catch (error: Throwable) {
+            return embeddedScriptRequestPreparationFailure(
+                request = request,
+                throwable = error,
+                startedAt = startedAt,
+                processName = processName,
+                pid = pid,
+            )
+        }
         val executionMode = NodeExecutionModePolicy.normalize(request.executionMode)
         if (!NodeExecutionModePolicy.isSupported(executionMode, launchSurface)) {
             return failureEmbeddedScriptResult(
-                request = request,
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
@@ -737,18 +760,78 @@ object NativeNodeEmbeddedRuntimeBridge {
                 errorCode = NodeRuntimeErrorCodes.EMBEDDED_NODE_UNSUPPORTED_OPTION,
             )
         }
-        val sourceBytes = request.source.toByteArray(StandardCharsets.UTF_8).size
+        val sourceBytes = preparedRequest.source.toByteArray(StandardCharsets.UTF_8).size
         if (sourceBytes > EMBEDDED_SCRIPT_SOURCE_MAX_BYTES) {
             return failureEmbeddedScriptResult(
-                request = request,
+                request = preparedRequest,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = embeddedScriptSourceTooLargeMessage(request.sourceName, sourceBytes),
+                message = embeddedScriptSourceTooLargeMessage(preparedRequest.sourceName, sourceBytes),
             )
         }
-        validateEmbeddedScriptModuleSources(request, processName, pid, startedAt)?.let { return it }
+        validateEmbeddedScriptModuleSources(preparedRequest, processName, pid, startedAt)?.let { return it }
         return null
+    }
+
+    fun prepareEmbeddedScriptRequest(request: EmbeddedScriptRequest): EmbeddedScriptRequest {
+        val entry = NodeTypeScriptStripper.stripIfTypeScript(request.sourceName, request.source)
+        val moduleSources = stripTypeScriptSourceMap(request.moduleSources)
+        val runtimeModuleSources = stripTypeScriptSourceMap(request.runtimeModuleSources)
+        return if (!entry.stripped && moduleSources === request.moduleSources && runtimeModuleSources === request.runtimeModuleSources) {
+            request
+        } else {
+            request.copy(
+                source = entry.source,
+                moduleSources = moduleSources,
+                runtimeModuleSources = runtimeModuleSources,
+            )
+        }
+    }
+
+    fun embeddedScriptRequestPreparationFailure(
+        request: EmbeddedScriptRequest,
+        throwable: Throwable,
+        startedAt: Long = SystemClock.elapsedRealtime(),
+        processName: String = currentProcessName(),
+        pid: Int = Process.myPid(),
+    ): EmbeddedScriptResult {
+        val typeScriptError = throwable as? NodeTypeScriptStripper.UnsupportedTypeScriptException
+        val message = throwable.message ?: throwable.javaClass.name
+        return failureEmbeddedScriptResult(
+            request = request,
+            processName = processName,
+            pid = pid,
+            startedAt = startedAt,
+            message = message,
+            nativeError = throwable,
+            nativeValues = typeScriptError?.let(::typeScriptFailureNativeValues).orEmpty(),
+            errorCode = typeScriptError?.errorCode,
+        )
+    }
+
+    private fun stripTypeScriptSourceMap(sources: Map<String, String>): Map<String, String> {
+        var changed = false
+        val stripped = linkedMapOf<String, String>()
+        sources.forEach { (sourceName, source) ->
+            val result = NodeTypeScriptStripper.stripIfTypeScript(sourceName, source)
+            changed = changed || result.stripped
+            stripped[sourceName] = result.source
+        }
+        return if (changed) stripped else sources
+    }
+
+    private fun typeScriptFailureNativeValues(
+        error: NodeTypeScriptStripper.UnsupportedTypeScriptException,
+    ): Map<String, String> {
+        return mapOf(
+            "embedded_script.error_code" to error.errorCode,
+            "embedded_script.typescript.error" to "true",
+            "embedded_script.typescript.source" to error.sourceName,
+            "embedded_script.typescript.syntax_kind" to error.syntaxKind,
+            "embedded_script.typescript.line" to error.line.toString(),
+            "embedded_script.typescript.column" to error.column.toString(),
+        )
     }
 
     private fun validateEmbeddedScriptModuleSources(

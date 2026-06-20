@@ -19403,10 +19403,11 @@ std::string buildEmbeddedScriptExecutionSource(
     return "ESM/import is not supported in Embedded Node.js MVP" + (detail ? ": " + detail : ".");
   }
   function __autojs6_mjs_unsupported_detail(detail) {
-    return ".mjs routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile." + (detail ? " " + detail : "");
+    return ".mjs/.mts routes to Node backend, but ESM is not enabled in AutoJs6 Safe Node Profile." + (detail ? " " + detail : "");
   }
   function __autojs6_is_esm_extension(extension) {
-    return __autojs6_normalized_extension(extension) === ".mjs";
+    const normalized = __autojs6_normalized_extension(extension);
+    return normalized === ".mjs" || normalized === ".mts";
   }
   function __autojs6_is_native_addon_extension(extension) {
     return __autojs6_normalized_extension(extension) === ".node";
@@ -19430,7 +19431,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_throw_if_esm_extension(extension, moduleName, context) {
     if (__autojs6_is_esm_extension(extension)) {
-      const detail = context + " resolves to an .mjs module for '" + moduleName + "'.";
+      const detail = context + " resolves to an ESM module for '" + moduleName + "'.";
       if (__autojs6_esm_experimental_enabled) {
         throw __autojs6_require_esm_unsupported(
           "CommonJS require() cannot load AutoJs6 partial ESM modules in AutoJs6 Safe Node Profile: " + detail
@@ -19459,7 +19460,11 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_supported_local_module_extension(extension) {
     const normalized = __autojs6_normalized_extension(extension);
-    return normalized === ".js" || normalized === ".cjs" || normalized === ".json";
+    return normalized === ".js" ||
+      normalized === ".cjs" ||
+      normalized === ".cts" ||
+      normalized === ".ts" ||
+      normalized === ".json";
   }
   function __autojs6_denied_builtin_module_name(name) {
     return name.indexOf("node:") === 0 || __autojs6_has_own(__autojs6_require_builtin_denylist, name);
@@ -19760,8 +19765,8 @@ std::string buildEmbeddedScriptExecutionSource(
     const candidates = extension
       ? [base]
       : allowEsm
-        ? [base, base + ".mjs", base + ".js", base + ".cjs", base + ".json"]
-        : [base, base + ".js", base + ".cjs", base + ".json"];
+        ? [base, base + ".mts", base + ".ts", base + ".mjs", base + ".js", base + ".cts", base + ".cjs", base + ".json"]
+        : [base, base + ".js", base + ".cjs", base + ".cts", base + ".ts", base + ".json"];
     const resolved = __autojs6_first_local_module_candidate(candidates, root, moduleName, allowEsm);
     if (resolved && __autojs6_path_within_root(resolved, packageDir)) {
       return resolved;
@@ -20159,10 +20164,28 @@ std::string buildEmbeddedScriptExecutionSource(
         }
       }
     }
+    const indexCandidates = __autojs6_package_condition_mode(mode) === "esm"
+      ? [
+          path.resolve(packageDir, "index.mts"),
+          path.resolve(packageDir, "index.ts"),
+          path.resolve(packageDir, "index.mjs"),
+          path.resolve(packageDir, "index.js"),
+          path.resolve(packageDir, "index.cts"),
+          path.resolve(packageDir, "index.cjs"),
+          path.resolve(packageDir, "index.json")
+        ]
+      : [
+          path.resolve(packageDir, "index.js"),
+          path.resolve(packageDir, "index.cjs"),
+          path.resolve(packageDir, "index.cts"),
+          path.resolve(packageDir, "index.ts"),
+          path.resolve(packageDir, "index.json")
+        ];
     const indexResolved = __autojs6_first_local_module_candidate(
-      [path.resolve(packageDir, "index.js"), path.resolve(packageDir, "index.cjs"), path.resolve(packageDir, "index.json")],
+      indexCandidates,
       root,
-      moduleName
+      moduleName,
+      __autojs6_package_condition_mode(mode) === "esm"
     );
     if (indexResolved && packageData) {
       __autojs6_resolve_trace("index matched", {
@@ -20220,7 +20243,7 @@ std::string buildEmbeddedScriptExecutionSource(
       throw new Error("Unsupported Embedded Node local module extension in MVP: " + moduleName);
     }
     const fileResolved = __autojs6_first_local_module_candidate(
-      extension ? [base] : [base, base + ".js", base + ".cjs", base + ".json"],
+      extension ? [base] : [base, base + ".js", base + ".cjs", base + ".cts", base + ".ts", base + ".json"],
       root,
       moduleName
     );
@@ -20417,7 +20440,7 @@ std::string buildEmbeddedScriptExecutionSource(
       throw new Error("Unsupported Embedded Node node_modules module extension in MVP: " + moduleName);
     }
     const fileResolved = __autojs6_first_local_module_candidate(
-      extension ? [base] : [base, base + ".js", base + ".cjs", base + ".json"],
+      extension ? [base] : [base, base + ".js", base + ".cjs", base + ".cts", base + ".ts", base + ".json"],
       root,
       moduleName
     );
@@ -33105,6 +33128,14 @@ std::string buildEmbeddedScriptExecutionSource(
         value: __autojs6_disabled_require_extension,
         enumerable: true
       },
+      ".cts": {
+        value: __autojs6_disabled_require_extension,
+        enumerable: true
+      },
+      ".ts": {
+        value: __autojs6_disabled_require_extension,
+        enumerable: true
+      },
       ".json": {
         value: __autojs6_disabled_require_extension,
         enumerable: true
@@ -33177,7 +33208,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const entry = __autojs6_esm_entry_filename();
     const extension = __autojs6_source_extension(entry);
     return __autojs6_is_esm_extension(extension) ||
-      (extension === ".js" && __autojs6_package_type_module_for_file(entry));
+      ((extension === ".js" || extension === ".ts") && __autojs6_package_type_module_for_file(entry));
   }
   function __autojs6_esm_validate_identifier(name, context) {
     const value = String(name || "").trim();
@@ -33260,7 +33291,7 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_esm_module_kind(resolved) {
     const extension = __autojs6_source_extension(resolved);
     if (__autojs6_is_esm_extension(extension)) return "esm";
-    if (extension === ".js" && __autojs6_package_type_module_for_file(resolved)) return "esm";
+    if ((extension === ".js" || extension === ".ts") && __autojs6_package_type_module_for_file(resolved)) return "esm";
     if (__autojs6_supported_local_module_extension(extension)) return "cjs";
     return "";
   }
@@ -33351,7 +33382,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (extension && !__autojs6_is_esm_extension(extension) && !__autojs6_supported_local_module_extension(extension)) {
       throw __autojs6_esm_error("Unsupported Embedded Node partial ESM import extension: " + name);
     }
-    const candidates = extension ? [base] : [base + ".mjs", base + ".cjs", base + ".json"];
+    const candidates = extension ? [base] : [base + ".mts", base + ".ts", base + ".mjs", base + ".js", base + ".cts", base + ".cjs", base + ".json"];
     const resolved = __autojs6_resolve_esm_file_candidate(candidates, root, name, parentFilename);
     if (resolved) {
       return resolved;
@@ -33832,6 +33863,11 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_attach_child_module(parentModule, module);
     const extension = __autojs6_source_extension(resolved);
     __autojs6_throw_if_esm_extension(extension, resolved, "Embedded Node local module");
+    if (extension === ".ts" && __autojs6_package_type_module_for_file(resolved)) {
+      throw __autojs6_require_esm_unsupported(
+        "CommonJS require() cannot load AutoJs6 partial ESM TypeScript modules in AutoJs6 Safe Node Profile: " + resolved
+      );
+    }
     if (extension === ".json") {
       try {
         module.exports = JSON.parse(record.source);
@@ -33848,7 +33884,7 @@ std::string buildEmbeddedScriptExecutionSource(
       module.loaded = true;
       return module.exports;
     }
-    if (extension === ".js") {
+    if (extension === ".js" || extension === ".ts") {
       __autojs6_record_type_module_commonjs_policy(resolved);
     }
     __autojs6_assert_common_js_source_supported(record.source, resolved);

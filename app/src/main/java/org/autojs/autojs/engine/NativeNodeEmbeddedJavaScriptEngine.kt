@@ -334,7 +334,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     ): CommonJsPreloadResult {
         val startedAt = android.os.SystemClock.elapsedRealtime()
         val stats = CommonJsPreloadStats(source.toByteArray(Charsets.UTF_8).size)
-        if (File(sourceName).extension.equals(MJS_EXTENSION, ignoreCase = true)) {
+        if (isEsmSourceName(sourceName, workingDirectory)) {
             return CommonJsPreloadResult(
                 moduleSources = emptyMap(),
                 diagnostics = stats.toDiagnostics(sourceName, workingDirectory, emptyList(), startedAt),
@@ -432,6 +432,39 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             remainingBytes -= moduleBytes
         }
         return runtimeSources
+    }
+
+    private fun isEsmSourceName(sourceName: String, workingDirectory: String?): Boolean {
+        val extension = File(sourceName).extension.lowercase()
+        if (extension == MJS_EXTENSION || extension == MTS_EXTENSION) {
+            return true
+        }
+        if (extension != JS_EXTENSION && extension != TS_EXTENSION) {
+            return false
+        }
+        val root = workingDirectory
+            ?.takeIf { it.isNotBlank() }
+            ?.let { File(it).normalizedCanonicalFile() }
+            ?: return false
+        val file = File(sourceName).takeIf { it.isAbsolute }?.normalizedCanonicalFile() ?: return false
+        return packageTypeModuleForFile(file, root)
+    }
+
+    private fun packageTypeModuleForFile(file: File, root: File): Boolean {
+        var current = file.parentFile?.normalizedCanonicalFile() ?: root
+        while (current.isInsideOrSame(root)) {
+            val packageJson = File(current, PACKAGE_JSON).normalizedCanonicalFile()
+            if (packageJson.isFile && packageJson.isInsideOrSame(root) && packageJson.isInsideOrSame(current)) {
+                return runCatching {
+                    JSONObject(sourceText(packageJson)).optString("type") == "module"
+                }.getOrDefault(false)
+            }
+            if (current == root) {
+                break
+            }
+            current = current.parentFile?.normalizedCanonicalFile() ?: break
+        }
+        return false
     }
 
     private fun collectCommonJsModuleSources(
@@ -1000,6 +1033,9 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         const val JS_EXTENSION = "js"
         const val CJS_EXTENSION = "cjs"
         const val MJS_EXTENSION = "mjs"
+        const val TS_EXTENSION = "ts"
+        const val CTS_EXTENSION = "cts"
+        const val MTS_EXTENSION = "mts"
         const val JSON_EXTENSION = "json"
         const val PACKAGE_JSON = "package.json"
         const val PACKAGE_JSON_NAME = "name"
@@ -1011,7 +1047,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         const val RUNTIME_MODULE_SOURCES_MAX_BYTES = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCES_MAX_BYTES
         const val RUNTIME_MODULE_SOURCE_MAX_COUNT = NodeRuntimeCapabilities.RUNTIME_MODULE_SOURCE_MAX_COUNT
         val COMMON_JS_MODULE_EXTENSIONS = NodeRuntimeCapabilities.commonJsModuleExtensions
-        val RUNTIME_MODULE_SOURCE_EXTENSIONS = COMMON_JS_MODULE_EXTENSIONS + MJS_EXTENSION
+        val RUNTIME_MODULE_SOURCE_EXTENSIONS = COMMON_JS_MODULE_EXTENSIONS + MJS_EXTENSION + MTS_EXTENSION
         val COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS = NodeRuntimeCapabilities.commonJsRecursiveSourceExtensions
         val PACKAGE_JSON_EXPORT_CONDITIONS = NodeRuntimeCapabilities.packageJsonExportConditions
         const val COMMON_JS_REQUIRE_SEPARATOR = """(?:\s|/\*[\s\S]*?\*/|//[^\r\n]*(?:\r?\n|$))*"""

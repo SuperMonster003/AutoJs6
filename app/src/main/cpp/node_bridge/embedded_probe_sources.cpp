@@ -4333,7 +4333,7 @@ extern const char* const kUserFileDescriptorBootstrapSource = R"JS(
         filePathPresent: true,
         fileExists: "diagnostic_only",
         fileExtensionSupported: true,
-        supportedExtensions: ".js,.mjs,.cjs",
+        supportedExtensions: ".js,.mjs,.cjs,.ts,.mts,.cts",
         packageJsonRead: false,
         nodeModulesRead: false,
         resultText: "descriptor_ready"

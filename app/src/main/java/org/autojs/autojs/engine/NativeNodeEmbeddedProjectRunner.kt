@@ -307,7 +307,11 @@ object NativeNodeEmbeddedProjectRunner {
             )
         }
         when (entryFile.extension.lowercase()) {
-            "js", "cjs", "mjs" -> Unit
+            "js", "cjs", "mjs", "ts", "cts", "mts" -> Unit
+            "tsx" -> throw illegalRequest(
+                "ERR_AUTOJS6_TYPESCRIPT_UNSUPPORTED_EXTENSION: Unsupported TypeScript TSX project entry: ${entryFile.absolutePath}",
+                descriptor,
+            )
             "node" -> throw illegalRequest(
                 "Unsupported Node project native addon entry: ${entryFile.absolutePath}",
                 descriptor,
@@ -877,7 +881,8 @@ object NativeNodeEmbeddedProjectRunner {
         }
 
         when (entry.extension.lowercase()) {
-            "js", "cjs", "mjs" -> Unit
+            "js", "cjs", "mjs", "ts", "cts", "mts" -> Unit
+            "tsx" -> throw IllegalArgumentException("ERR_AUTOJS6_TYPESCRIPT_UNSUPPORTED_EXTENSION: $extensionMessage: $target")
             "node" -> throw IllegalArgumentException("$nativeAddonMessage: $target")
             else -> throw IllegalArgumentException("$extensionMessage: $target")
         }

@@ -4095,6 +4095,19 @@ val verifyNodeModernCoreGate = tasks.register("verifyNodeModernCoreGate") {
     }
 }
 
+val verifyNodeTypeScriptGate = tasks.register("verifyNodeTypeScriptGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 8 lightweight TypeScript routing and stripping gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodePhase7ResourceStressGate = tasks.register("verifyNodePhase7ResourceStressGate") {
     group = "verification"
     description = "Runs the focused Node Phase 7 runtime/provider resource stress gate on a connected Sony/full device profile."

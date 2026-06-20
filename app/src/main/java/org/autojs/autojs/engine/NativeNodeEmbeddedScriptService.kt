@@ -196,28 +196,40 @@ class NativeNodeEmbeddedScriptService : Service() {
             stopServiceIfQueueIdle(startId)
             return
         }
+        val preparedServiceRequest = try {
+            NativeNodeEmbeddedRuntimeBridge.prepareEmbeddedScriptRequest(serviceRequest)
+        } catch (e: Throwable) {
+            receiver?.send(
+                RESULT_SCRIPT,
+                NativeNodeEmbeddedRuntimeBridge
+                    .embeddedScriptRequestPreparationFailure(serviceRequest, e, startedAt)
+                    .toBundle(),
+            )
+            stopServiceIfQueueIdle(startId)
+            return
+        }
         val launchSurface = intent.getStringExtra(EXTRA_LAUNCH_SURFACE)
             ?.takeIf { it.isNotBlank() }
             ?: NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT
-        NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(serviceRequest, launchSurface)?.let { failure ->
+        NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(preparedServiceRequest, launchSurface)?.let { failure ->
             receiver?.send(RESULT_SCRIPT, failure.toBundle())
             stopServiceIfQueueIdle(startId)
             return
         }
-        val source = serviceRequest.source
-        val sourceName = serviceRequest.sourceName.ifBlank { DEFAULT_SOURCE_NAME }
-        val workingDirectory = serviceRequest.workingDirectory?.takeIf { it.isNotBlank() }
-        val executionMode = NodeExecutionModePolicy.normalize(serviceRequest.executionMode)
-        val timeoutMs = serviceRequest.timeoutMs.coerceAtLeast(1L)
-        val esmExperimentalEnabled = serviceRequest.esmExperimentalEnabled
+        val source = preparedServiceRequest.source
+        val sourceName = preparedServiceRequest.sourceName.ifBlank { DEFAULT_SOURCE_NAME }
+        val workingDirectory = preparedServiceRequest.workingDirectory?.takeIf { it.isNotBlank() }
+        val executionMode = NodeExecutionModePolicy.normalize(preparedServiceRequest.executionMode)
+        val timeoutMs = preparedServiceRequest.timeoutMs.coerceAtLeast(1L)
+        val esmExperimentalEnabled = preparedServiceRequest.esmExperimentalEnabled
         val dynamicImportLocalEnabled = BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED
-        val dynamicImportExperimentalEnabled = serviceRequest.dynamicImportExperimentalEnabled
-        val workerThreadsExperimentalEnabled = serviceRequest.workerThreadsExperimentalEnabled
-        val javaInteropExperimentalEnabled = serviceRequest.javaInteropExperimentalEnabled
-        val spawnDepth = serviceRequest.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
-        val env = serviceRequest.env
-        val moduleSources = serviceRequest.moduleSources
-        val runtimeModuleSources = serviceRequest.runtimeModuleSources
+        val dynamicImportExperimentalEnabled = preparedServiceRequest.dynamicImportExperimentalEnabled
+        val workerThreadsExperimentalEnabled = preparedServiceRequest.workerThreadsExperimentalEnabled
+        val javaInteropExperimentalEnabled = preparedServiceRequest.javaInteropExperimentalEnabled
+        val spawnDepth = preparedServiceRequest.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
+        val env = preparedServiceRequest.env
+        val moduleSources = preparedServiceRequest.moduleSources
+        val runtimeModuleSources = preparedServiceRequest.runtimeModuleSources
         val bridgeLimits = NodeBridgeLimits.fromRuntimeModuleOrWorkingDirectory(
             runtimeModuleSources[NodeBridgeLimits.RUNTIME_MODULE_NAME],
             workingDirectory,
@@ -229,7 +241,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             timeoutMs,
             bridgeLimits,
         )
-        val executionId = serviceRequest.executionId?.takeIf { it.isNotBlank() }
+        val executionId = preparedServiceRequest.executionId?.takeIf { it.isNotBlank() }
             ?: newExecutionId()
         val interactiveSession = executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
             launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
@@ -1535,7 +1547,15 @@ class NativeNodeEmbeddedScriptService : Service() {
             launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
-            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(request, launchSurface)?.let {
+            val requestWithExecutionId = request.copy(executionId = executionId)
+            val requestForService = try {
+                NativeNodeEmbeddedRuntimeBridge.prepareEmbeddedScriptRequest(requestWithExecutionId)
+            } catch (error: Throwable) {
+                return NativeNodeEmbeddedRuntimeBridge
+                    .embeddedScriptRequestPreparationFailure(requestWithExecutionId, error)
+                    .withLifecycle(preflightFailureLifecycle(executionId, requestWithExecutionId))
+            }
+            NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(requestForService, launchSurface)?.let {
                 return it.withLifecycle(preflightFailureLifecycle(executionId, request))
             }
             val startedAt = android.os.SystemClock.elapsedRealtime()
@@ -1551,21 +1571,20 @@ class NativeNodeEmbeddedScriptService : Service() {
                     completion.countDown()
                 }
             }
-            val requestForService = request.copy(executionId = executionId)
             var requestSpoolFile: File? = null
             val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
                 action = ACTION_RUN_SCRIPT
                 putExtra(EXTRA_RESULT_RECEIVER, receiver)
-                putExtra(EXTRA_SOURCE_NAME, request.sourceName)
-                putExtra(EXTRA_WORKING_DIRECTORY, request.workingDirectory)
-                putExtra(EXTRA_EXECUTION_MODE, request.executionMode)
+                putExtra(EXTRA_SOURCE_NAME, requestForService.sourceName)
+                putExtra(EXTRA_WORKING_DIRECTORY, requestForService.workingDirectory)
+                putExtra(EXTRA_EXECUTION_MODE, requestForService.executionMode)
                 putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
-                putExtra(EXTRA_TIMEOUT_MS, request.timeoutMs.coerceAtLeast(1L))
-                putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, request.esmExperimentalEnabled)
-                putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, request.dynamicImportExperimentalEnabled)
-                putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, request.workerThreadsExperimentalEnabled)
-                putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, request.javaInteropExperimentalEnabled)
-                putExtra(EXTRA_SPAWN_DEPTH, request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+                putExtra(EXTRA_TIMEOUT_MS, requestForService.timeoutMs.coerceAtLeast(1L))
+                putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, requestForService.esmExperimentalEnabled)
+                putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, requestForService.dynamicImportExperimentalEnabled)
+                putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
+                putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
+                putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 putExtra(EXTRA_EXECUTION_ID, executionId)
             }
             var component: android.content.ComponentName? = null
@@ -1583,9 +1602,9 @@ class NativeNodeEmbeddedScriptService : Service() {
                 val completed = completion.await(clientAwaitTimeoutMs(request.timeoutMs), TimeUnit.MILLISECONDS)
                 if (!completed) {
                     appContext.stopService(Intent().setComponent(component))
-                    val lifecycle = timeoutLifecycle(executionId, request)
+                    val lifecycle = timeoutLifecycle(executionId, requestForService)
                     return processCrashedOrTimedOut(
-                        request = request,
+                        request = requestForService,
                         message = "Embedded script process crashed or timed out.",
                         startedAt = startedAt,
                         timedOut = true,
@@ -1600,7 +1619,7 @@ class NativeNodeEmbeddedScriptService : Service() {
             } catch (e: Throwable) {
                 component?.let { appContext.stopService(Intent().setComponent(it)) }
                 return processCrashedOrTimedOut(
-                    request,
+                    requestForService,
                     "Embedded script process crashed or timed out.\n${e.message ?: e.javaClass.name}",
                     e,
                     startedAt = startedAt,
@@ -1610,7 +1629,7 @@ class NativeNodeEmbeddedScriptService : Service() {
                 requestSpoolFile?.parentFile?.deleteRecursively()
             }
             return result.get() ?: processCrashedOrTimedOut(
-                request = request,
+                request = requestForService,
                 message = "Embedded script process crashed or timed out.",
                 startedAt = startedAt,
                 executionId = executionId,
@@ -1631,13 +1650,37 @@ class NativeNodeEmbeddedScriptService : Service() {
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
             val appContext = context.applicationContext
             val startedAt = android.os.SystemClock.elapsedRealtime()
-            val requestForService = request.copy(
+            val requestWithExecutionId = request.copy(
                 executionId = executionId,
                 executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
                 timeoutMs = request.timeoutMs.takeIf { it > 0L } ?: DEFAULT_INTERACTIVE_TIMEOUT_MS,
                 queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
                 queueTimeoutMs = 0L,
             )
+            val requestForService = try {
+                NativeNodeEmbeddedRuntimeBridge.prepareEmbeddedScriptRequest(requestWithExecutionId)
+            } catch (error: Throwable) {
+                val failure = NativeNodeEmbeddedRuntimeBridge.embeddedScriptRequestPreparationFailure(
+                    requestWithExecutionId,
+                    error,
+                )
+                val status = NodeInteractiveLongRunningStatusStore.write(
+                    context = appContext,
+                    executionId = executionId,
+                    state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
+                    sourceName = requestWithExecutionId.sourceName,
+                    workingDirectory = requestWithExecutionId.workingDirectory,
+                    message = failure.errorMessage,
+                    activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("preflight_failed"),
+                    nativeValues = failure.nativeValues,
+                )
+                return InteractiveLongRunningSession(
+                    executionId = executionId,
+                    started = false,
+                    status = status,
+                    error = failure.withLifecycle(preflightFailureLifecycle(executionId, requestWithExecutionId)),
+                )
+            }
             NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(
                 requestForService,
                 NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,

@@ -42,7 +42,7 @@ const CAPABILITY_ALIASES = new Map([
   ["java", "java_interop"]
 ]);
 
-const SUPPORTED_ENTRY_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
+const SUPPORTED_ENTRY_EXTENSIONS = new Set([".js", ".cjs", ".mjs", ".ts", ".cts", ".mts"]);
 const MAX_DEPENDENCY_SCAN_ENTRIES = 5000;
 const MAX_COMPATIBILITY_SOURCE_BYTES = 256 * 1024;
 const UNSAFE_DEPENDENCY_SCRIPT_NAMES = new Set([
@@ -54,7 +54,7 @@ const UNSAFE_DEPENDENCY_SCRIPT_NAMES = new Set([
   "postpack"
 ]);
 const NATIVE_EXTENSIONS = new Set([".node", ".so", ".dll", ".dylib", ".a", ".o"]);
-const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs"]);
+const JAVASCRIPT_SOURCE_EXTENSIONS = new Set([".js", ".cjs", ".mjs", ".ts", ".cts", ".mts"]);
 const KNOWN_NODE_BUILTINS = new Set([
   "assert",
   "assert/strict",
@@ -418,7 +418,7 @@ function validateProjectJson(projectJson, file, issues) {
     issue(issues, "PROJECT_NAME_INVALID", file, "project.json name must be a non-empty string.", "Use a stable project name such as 'my-node-app'.");
   }
   if (projectJson.main !== undefined && !nonEmptyString(projectJson.main)) {
-    issue(issues, "PROJECT_MAIN_INVALID", file, "project.json main must be a non-empty string.", "Point main to a .js, .cjs, or .mjs entry file.");
+    issue(issues, "PROJECT_MAIN_INVALID", file, "project.json main must be a non-empty string.", "Point main to a .js, .cjs, .mjs, .ts, .cts, or .mts entry file.");
   }
 }
 
@@ -434,7 +434,7 @@ function validatePackageJson(packageJson, file, issues) {
     issue(issues, "PACKAGE_TYPE_UNSUPPORTED", file, "package.json type must be 'commonjs' or 'module'.", "Remove package.json type or set it to 'commonjs' or 'module'.");
   }
   if (packageJson.main !== undefined && !nonEmptyString(packageJson.main)) {
-    issue(issues, "PACKAGE_MAIN_INVALID", file, "package.json main must be a non-empty string when present.", "Point main to a .js, .cjs, or .mjs entry file.");
+    issue(issues, "PACKAGE_MAIN_INVALID", file, "package.json main must be a non-empty string when present.", "Point main to a .js, .cjs, .mjs, .ts, .cts, or .mts entry file.");
   }
 }
 
@@ -445,16 +445,18 @@ function validateEntry(root, projectJson, packageJson, issues) {
       ? packageJson.main
       : "";
   if (!entry) {
-    issue(issues, "ENTRY_DECLARATION_MISSING", root, "No Node entry file was declared.", "Set project.json main or package.json main to a .js, .cjs, or .mjs file.");
+    issue(issues, "ENTRY_DECLARATION_MISSING", root, "No Node entry file was declared.", "Set project.json main or package.json main to a .js, .cjs, .mjs, .ts, .cts, or .mts file.");
     return;
   }
   const entryPath = safeRelativePath(root, entry, "ENTRY_PATH_UNSAFE", issues, "Node entry");
   if (!entryPath) return;
   const extension = path.extname(entryPath).toLowerCase();
   if (extension === ".node") {
-    issue(issues, "ENTRY_NATIVE_ADDON_DISABLED", entryPath, "Native addon entry files are disabled.", "Use a JavaScript .js, .cjs, or .mjs entry file.");
+    issue(issues, "ENTRY_NATIVE_ADDON_DISABLED", entryPath, "Native addon entry files are disabled.", "Use a JavaScript or TypeScript .js, .cjs, .mjs, .ts, .cts, or .mts entry file.");
+  } else if (extension === ".tsx") {
+    issue(issues, "ENTRY_TYPESCRIPT_TSX_UNSUPPORTED", entryPath, "TypeScript TSX entry files are not supported by lightweight type stripping.", "Compile TSX to JavaScript before packaging or running it.");
   } else if (!SUPPORTED_ENTRY_EXTENSIONS.has(extension)) {
-    issue(issues, "ENTRY_EXTENSION_UNSUPPORTED", entryPath, "Unsupported Node entry extension '" + extension + "'.", "Use .js, .cjs, or .mjs.");
+    issue(issues, "ENTRY_EXTENSION_UNSUPPORTED", entryPath, "Unsupported Node entry extension '" + extension + "'.", "Use .js, .cjs, .mjs, .ts, .cts, or .mts.");
   }
   if (!fs.existsSync(entryPath) || !fs.statSync(entryPath).isFile()) {
     issue(issues, "ENTRY_FILE_MISSING", entryPath, "Declared Node entry file is missing.", "Create " + path.relative(root, entryPath) + " or update project.json main.");
@@ -711,9 +713,11 @@ function analyzeEntryFormat(root, projectJson, packageJson, signals) {
       : "";
   const extension = path.extname(String(entryValue || "")).toLowerCase();
   const packageType = packageJson && packageJson.type === "module" ? "module" : "commonjs";
-  const format = extension === ".mjs" || (extension === ".js" && packageType === "module")
+  const format = extension === ".mjs" ||
+    extension === ".mts" ||
+    ((extension === ".js" || extension === ".ts") && packageType === "module")
     ? "esm"
-    : extension === ".cjs" || extension === ".js"
+    : extension === ".cjs" || extension === ".cts" || extension === ".js" || extension === ".ts"
       ? "cjs"
       : "unknown";
   if (format === "esm") {

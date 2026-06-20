@@ -689,6 +689,9 @@ val nodeJsSecurityGateInstrumentationClasses = listOf(
 val nodeJs2417SecurityProbeInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest#phase8Node2417SecurityFixProbesStaySafe",
 )
+val nodeJsTypeScriptGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeTypeScriptInstrumentationTest",
+)
 val nodeJsRealNpmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
 )
@@ -765,6 +768,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodePhase7Gate" to nodeJsPhase7GateInstrumentationClasses,
     "verifyNode2417SecurityProbeGate" to nodeJs2417SecurityProbeInstrumentationClasses,
     "verifyNode2417UpgradeGate" to nodeJs2417UpgradeGateInstrumentationClasses,
+    "verifyNodeTypeScriptGate" to nodeJsTypeScriptGateInstrumentationClasses,
 )
 val nodeJsRequestedFocusedGate = taskNames
     .map { rawTaskName -> rawTaskName.substringAfterLast(':') }
