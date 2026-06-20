@@ -30846,15 +30846,18 @@ class EmbeddedScriptMvpInstrumentationTest {
 
         settleEmbeddedScriptServiceProcess()
 
+        val esmSource = File(context.cacheDir, "embedded-envelope-esm-source.mjs").absolutePath
+        val esmJson = File(context.cacheDir, "embedded-envelope-data.json").absolutePath
         val esm = runEmbeddedScript(
-            """console.log(import.meta.url);""",
-            "embedded-envelope-esm-source.mjs",
+            """import data from "./embedded-envelope-data.json"; console.log(data);""",
+            esmSource,
+            moduleSources = mapOf(esmJson to """{"value":1}"""),
         )
         assertErrorEnvelope(
             result = esm,
-            sourceName = "embedded-envelope-esm-source.mjs",
+            sourceName = esmSource,
             errorName = "Error",
-            messageToken = "import.meta is disabled for partial ESM module",
+            messageToken = """requires with { type: "json" }""",
             errorCode = "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
         )
 

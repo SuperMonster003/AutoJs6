@@ -33586,6 +33586,91 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
   }
+  function __autojs6_import_meta_file_url(filename) {
+    const url = __autojs6_limited_path_to_file_url(filename);
+    return url && typeof url.href === "string" ? url.href : String(url);
+  }
+  function __autojs6_import_meta_builtin_url(name) {
+    if (name === "node:test") {
+      return "node:test";
+    }
+    if (__autojs6_has_own(__autojs6_limited_builtin_module_map, name)) {
+      return name.indexOf("node:") === 0 ? name : "node:" + name;
+    }
+    if (__autojs6_has_own(__autojs6_require_builtin_allowlist, name)) {
+      const normalized = __autojs6_require_builtin_allowlist[name];
+      return normalized.indexOf("node:") === 0 ? normalized : "node:" + normalized;
+    }
+    return null;
+  }
+  function __autojs6_import_meta_resolve(specifier, parentFilename) {
+    const name = specifier === undefined || specifier === null ? "" : String(specifier);
+    const resolved = __autojs6_resolve_esm_module(name, parentFilename);
+    if (resolved.kind === "builtin") {
+      const builtinUrl = __autojs6_import_meta_builtin_url(resolved.name);
+      if (builtinUrl) {
+        return builtinUrl;
+      }
+      throw __autojs6_builtin_disabled(
+        "import.meta.resolve is restricted in Embedded Node partial ESM; builtin module '" + name + "' is not allowed."
+      );
+    }
+    return __autojs6_import_meta_file_url(resolved.resolved);
+  }
+  function __autojs6_import_meta_for_module(filename) {
+    const path = __autojs6_path_module();
+    const resolvedFilename = path && typeof path.resolve === "function"
+      ? path.resolve(filename)
+      : String(filename || "");
+    const entryFilename = path && typeof path.resolve === "function"
+      ? path.resolve(__autojs6_esm_entry_filename())
+      : String(__autojs6_esm_entry_filename() || "");
+    const meta = Object.create(null);
+    Object.defineProperties(meta, {
+      url: {
+        value: __autojs6_import_meta_file_url(resolvedFilename),
+        enumerable: true
+      },
+      filename: {
+        value: resolvedFilename,
+        enumerable: true
+      },
+      dirname: {
+        value: __autojs6_module_dirname(resolvedFilename),
+        enumerable: true
+      },
+      main: {
+        value: resolvedFilename === entryFilename,
+        enumerable: true
+      },
+      resolve: {
+        value: function(specifier) {
+          return __autojs6_import_meta_resolve(specifier, resolvedFilename);
+        },
+        enumerable: true
+      }
+    });
+    return Object.freeze(meta);
+  }
+  function __autojs6_transform_import_meta(source, sourceName) {
+    const sourceText = String(source || "");
+    if (sourceText.indexOf("import.meta") < 0) {
+      return sourceText;
+    }
+    const masked = __autojs6_mask_non_code(sourceText);
+    let output = "";
+    let cursor = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(masked, index, "import")) continue;
+      const nextIndex = index + "import".length;
+      if (masked.slice(nextIndex, nextIndex + 5) !== ".meta") continue;
+      if (__autojs6_is_identifier_part(masked.charAt(nextIndex + 5))) continue;
+      output += sourceText.slice(cursor, index);
+      output += "__autojs6_import_meta";
+      cursor = nextIndex + 5;
+    }
+    return output + sourceText.slice(cursor);
+  }
   function __autojs6_esm_transform_module_source(source, filename, syncMode) {
     const sourceText = String(source || "");
     if (syncMode && __autojs6_contains_await_token(sourceText)) {
@@ -33612,9 +33697,6 @@ std::string buildEmbeddedScriptExecutionSource(
           );
         }
         continue;
-      }
-      if (next === "." && masked.slice(nextIndex, nextIndex + 5) === ".meta") {
-        throw __autojs6_esm_error("import.meta is disabled for partial ESM module '" + filename + "'.");
       }
     }
     const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3(?:\s+(with|assert)\s*\{([^}]*)\})?\s*;?/g;
@@ -33643,7 +33725,8 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     body += sourceText.slice(cursor);
     const exportTransform = __autojs6_esm_transform_exports(body, filename);
-    const transformedBody = __autojs6_transform_dynamic_import_calls(exportTransform.body, filename, "__filename");
+    const importMetaBody = __autojs6_transform_import_meta(exportTransform.body, filename);
+    const transformedBody = __autojs6_transform_dynamic_import_calls(importMetaBody, filename, "__filename");
     const remaining = __autojs6_mask_non_code(transformedBody);
     if (/(^|[\r\n;{}])\s*import\b/.test(remaining) || /(^|[\r\n;{}])\s*export\b/.test(remaining)) {
       throw __autojs6_esm_error("Embedded Node partial ESM v1 found unsupported import/export syntax in " + filename + ".");
@@ -33731,6 +33814,7 @@ std::string buildEmbeddedScriptExecutionSource(
       const moduleFunction = __autojs6_native_async_function(
         "__autojs6_load_esm_module",
         "__autojs6_dynamic_import",
+        "__autojs6_import_meta",
         "__autojs6_esm_namespace",
         "require",
         "exports",
@@ -33743,6 +33827,7 @@ std::string buildEmbeddedScriptExecutionSource(
         undefined,
         __autojs6_load_esm_module,
         __autojs6_dynamic_import,
+        __autojs6_import_meta_for_module(resolved),
         namespace,
         undefined,
         undefined,
@@ -33786,6 +33871,7 @@ std::string buildEmbeddedScriptExecutionSource(
       const transformed = __autojs6_esm_transform_module_source(record.source, resolved, true);
       const moduleFunction = __autojs6_native_function(
         "__autojs6_load_esm_module_sync",
+        "__autojs6_import_meta",
         "__autojs6_esm_namespace",
         "require",
         "exports",
@@ -33797,6 +33883,7 @@ std::string buildEmbeddedScriptExecutionSource(
       moduleFunction.call(
         undefined,
         __autojs6_load_esm_module_sync,
+        __autojs6_import_meta_for_module(resolved),
         namespace,
         undefined,
         undefined,

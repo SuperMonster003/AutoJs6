@@ -370,6 +370,66 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun experimentalImportMetaExposesScopedMetadataAndResolve() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM import.meta")
+        val workDir = freshWorkDir("esm-import-meta")
+        File(workDir, "dep.mjs").writeText(
+            """
+            export const depMain = import.meta.main;
+            export const depUrl = import.meta.url;
+            export const depFilename = import.meta.filename;
+            """.trimIndent(),
+        )
+        val packageDir = File(workDir, "node_modules/meta-pkg").apply { mkdirs() }
+        File(packageDir, "package.json").writeText(
+            """
+            {
+              "name": "meta-pkg",
+              "exports": {
+                ".": "./entry.mjs"
+              }
+            }
+            """.trimIndent(),
+        )
+        File(packageDir, "entry.mjs").writeText("""export default "meta-pkg";""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import path from "node:path";
+                import { depMain, depUrl, depFilename } from "./dep.mjs";
+                const localResolved = import.meta.resolve("./dep.mjs");
+                const packageResolved = import.meta.resolve("meta-pkg");
+                const builtinResolved = import.meta.resolve("node:path");
+                let denied = false;
+                try {
+                  import.meta.resolve("node:child_process");
+                } catch (error) {
+                  denied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED";
+                }
+                console.log("esm.meta.url=" + (import.meta.url.startsWith("file://") && import.meta.url.endsWith("/main.mjs")));
+                console.log("esm.meta.filename=" + import.meta.filename.endsWith("/main.mjs"));
+                console.log("esm.meta.dirname=" + (import.meta.dirname === path.dirname(import.meta.filename)));
+                console.log("esm.meta.main=" + import.meta.main + "/" + depMain);
+                console.log("esm.meta.dep=" + (depUrl.startsWith("file://") && depFilename.endsWith("/dep.mjs")));
+                console.log("esm.meta.resolve=" + (localResolved.endsWith("/dep.mjs") && packageResolved.endsWith("/entry.mjs") && builtinResolved === "node:path"));
+                console.log("esm.meta.denied=" + denied);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("ESM import.meta", result)
+        assertTrue(result.stdout.contains("esm.meta.url=true"))
+        assertTrue(result.stdout.contains("esm.meta.filename=true"))
+        assertTrue(result.stdout.contains("esm.meta.dirname=true"))
+        assertTrue(result.stdout.contains("esm.meta.main=true/false"))
+        assertTrue(result.stdout.contains("esm.meta.dep=true"))
+        assertTrue(result.stdout.contains("esm.meta.resolve=true"))
+        assertTrue(result.stdout.contains("esm.meta.denied=true"))
+    }
+
+    @Test
     fun experimentalPackageExportsConditionsSplitByImporterMode() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package condition selection")
         val workDir = freshWorkDir("esm-package-conditions")
