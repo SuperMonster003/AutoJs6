@@ -309,6 +309,7 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
     "org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest",
     "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+    "org.autojs.autojs.engine.NodeWebPlatformGlobalsInstrumentationTest",
     "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
     "org.autojs.autojs.engine.NodeModernCoreDifferentialInstrumentationTest",
     "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest",
