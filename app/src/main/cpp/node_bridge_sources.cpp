@@ -8037,6 +8037,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
   let __autojs6_limited_fetch_cache = null;
+  let __autojs6_limited_undici_cache = null;
   let __autojs6_limited_axios_cache = null;
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
@@ -10093,6 +10094,231 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     __autojs6_limited_fetch_cache = Object.freeze(fetchModule);
     return __autojs6_limited_fetch_cache;
+  }
+  function __autojs6_undici_policy_error(optionName) {
+    return __autojs6_fetch_policy_error(
+      "AutoJs6 controlled undici facade rejects option '" + optionName + "'. Raw Undici connectors are unavailable.",
+      "undici_" + optionName,
+      "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    );
+  }
+  function __autojs6_undici_validate_options(options) {
+    if (!options || typeof options !== "object") {
+      return;
+    }
+    const denied = [
+      "connect",
+      "factory",
+      "socketPath",
+      "proxy",
+      "proxyTunnel"
+    ];
+    for (const name of denied) {
+      if (__autojs6_has_own(options, name) && options[name] !== undefined && options[name] !== null) {
+        throw __autojs6_undici_policy_error(name);
+      }
+    }
+  }
+  function __autojs6_undici_validate_dispatcher(dispatcher, optionName) {
+    if (dispatcher === undefined || dispatcher === null) {
+      return;
+    }
+    if (!dispatcher || typeof dispatcher !== "object" || dispatcher.__autojs6LimitedUndiciDispatcher !== true) {
+      throw __autojs6_undici_policy_error(optionName || "dispatcher");
+    }
+  }
+  function __autojs6_limited_undici() {
+    if (__autojs6_limited_undici_cache) {
+      return __autojs6_limited_undici_cache;
+    }
+    class LimitedDispatcher {
+      constructor(options) {
+        const opts = options && typeof options === "object" ? options : Object.create(null);
+        __autojs6_undici_validate_options(opts);
+        Object.defineProperty(this, "__autojs6LimitedUndiciDispatcher", {
+          value: true,
+          enumerable: false
+        });
+        this.options = Object.freeze(Object.assign(Object.create(null), opts));
+        this.closed = false;
+        this.destroyed = false;
+      }
+      dispatch() {
+        throw __autojs6_undici_policy_error("dispatch");
+      }
+      close(callback) {
+        this.closed = true;
+        if (typeof callback === "function") {
+          __autojs6_schedule_task(function() {
+            callback(null);
+          });
+          return undefined;
+        }
+        return Promise.resolve();
+      }
+      destroy(error, callback) {
+        if (typeof error === "function") {
+          callback = error;
+          error = null;
+        }
+        this.destroyed = true;
+        this.closed = true;
+        if (typeof callback === "function") {
+          const callbackError = error || null;
+          __autojs6_schedule_task(function() {
+            callback(callbackError);
+          });
+        }
+        return this;
+      }
+    }
+    class LimitedAgent extends LimitedDispatcher {
+      constructor(options) {
+        super(options);
+        const opts = options && typeof options === "object" ? options : Object.create(null);
+        this.connections = opts.connections === undefined ? null : Number(opts.connections);
+        this.pipelining = opts.pipelining === undefined ? 1 : Number(opts.pipelining);
+        this.keepAliveTimeout = opts.keepAliveTimeout === undefined ? 4000 : Number(opts.keepAliveTimeout);
+      }
+    }
+    class LimitedMockInterceptor {
+      constructor(pool, options) {
+        this.pool = pool;
+        this.options = Object.freeze(Object.assign(Object.create(null), options && typeof options === "object" ? options : {}));
+        this.replyStatusCode = null;
+        this.replyData = undefined;
+        this.replyOptions = Object.freeze(Object.create(null));
+        this.persisted = false;
+        this.remaining = 1;
+      }
+      reply(statusCode, data, options) {
+        this.replyStatusCode = Number(statusCode);
+        this.replyData = data;
+        this.replyOptions = Object.freeze(Object.assign(Object.create(null), options && typeof options === "object" ? options : {}));
+        return this;
+      }
+      times(count) {
+        const value = Number(count);
+        this.remaining = Number.isFinite(value) && value > 0 ? Math.floor(value) : 1;
+        return this;
+      }
+      persist() {
+        this.persisted = true;
+        return this;
+      }
+      delay() {
+        return this;
+      }
+    }
+    class LimitedMockPool {
+      constructor(origin) {
+        this.origin = String(origin);
+        this.interceptors = [];
+      }
+      intercept(options) {
+        const interceptor = new LimitedMockInterceptor(this, options);
+        this.interceptors.push(interceptor);
+        return interceptor;
+      }
+    }
+    class LimitedMockAgent extends LimitedDispatcher {
+      constructor(options) {
+        super(options);
+        this.netConnectDisabled = false;
+        this.__autojs6Pools = new Map();
+      }
+      disableNetConnect() {
+        this.netConnectDisabled = true;
+        return this;
+      }
+      enableNetConnect() {
+        this.netConnectDisabled = false;
+        return this;
+      }
+      get(origin) {
+        const key = String(origin);
+        if (!this.__autojs6Pools.has(key)) {
+          this.__autojs6Pools.set(key, new LimitedMockPool(key));
+        }
+        return this.__autojs6Pools.get(key);
+      }
+    }
+    const defaultDispatcher = new LimitedAgent({});
+    let globalDispatcher = defaultDispatcher;
+    function validateFetchInit(init) {
+      const requestInit = init && typeof init === "object" ? init : Object.create(null);
+      __autojs6_undici_validate_dispatcher(requestInit.dispatcher, "dispatcher");
+      __autojs6_undici_validate_options(requestInit);
+    }
+    function undiciFetch(input, init) {
+      validateFetchInit(init);
+      return __autojs6_controlled_fetch(input, init);
+    }
+    function undiciRequest(input, init) {
+      return undiciFetch(input, init).then(function(response) {
+        const headers = Object.create(null);
+        if (response.headers && typeof response.headers.forEach === "function") {
+          response.headers.forEach(function(value, name) {
+            headers[String(name)] = String(value);
+          });
+        }
+        return Object.freeze({
+          statusCode: response.status,
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.freeze(headers),
+          body: response.body,
+          trailers: Object.freeze(Object.create(null)),
+          opaque: null,
+          context: null
+        });
+      });
+    }
+    function setGlobalDispatcher(dispatcher) {
+      __autojs6_undici_validate_dispatcher(dispatcher, "globalDispatcher");
+      globalDispatcher = dispatcher;
+      return undefined;
+    }
+    function getGlobalDispatcher() {
+      return globalDispatcher;
+    }
+    function deniedConnector(name) {
+      return function() {
+        throw __autojs6_undici_policy_error(name);
+      };
+    }
+    [
+      LimitedDispatcher,
+      LimitedAgent,
+      LimitedMockAgent,
+      LimitedMockPool,
+      LimitedMockInterceptor
+    ].forEach(function(ctor) {
+      Object.freeze(ctor.prototype);
+      Object.freeze(ctor);
+    });
+    const undiciModule = {};
+    Object.defineProperties(undiciModule, {
+      fetch: { value: undiciFetch, enumerable: true },
+      request: { value: undiciRequest, enumerable: true },
+      Headers: { value: globalThis.Headers, enumerable: true },
+      Request: { value: globalThis.Request, enumerable: true },
+      Response: { value: globalThis.Response, enumerable: true },
+      FormData: { value: globalThis.FormData, enumerable: true },
+      File: { value: globalThis.File, enumerable: true },
+      Dispatcher: { value: LimitedDispatcher, enumerable: true },
+      Agent: { value: LimitedAgent, enumerable: true },
+      MockAgent: { value: LimitedMockAgent, enumerable: true },
+      setGlobalDispatcher: { value: setGlobalDispatcher, enumerable: true },
+      getGlobalDispatcher: { value: getGlobalDispatcher, enumerable: true },
+      connect: { value: deniedConnector("connect"), enumerable: true },
+      upgrade: { value: deniedConnector("upgrade"), enumerable: true },
+      stream: { value: deniedConnector("stream"), enumerable: true },
+      pipeline: { value: deniedConnector("pipeline"), enumerable: true }
+    });
+    Object.defineProperty(undiciModule, "default", { value: undiciModule, enumerable: true });
+    __autojs6_limited_undici_cache = Object.freeze(undiciModule);
+    return __autojs6_limited_undici_cache;
   }
   function __autojs6_axios_is_plain_object(value) {
     if (!value || Object.prototype.toString.call(value) !== "[object Object]") {
@@ -35017,6 +35243,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "fetch") {
       return __autojs6_limited_fetch();
+    }
+    if (name === "undici") {
+      return __autojs6_limited_undici();
     }
     if (name === "axios") {
       return __autojs6_limited_axios();

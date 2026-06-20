@@ -314,6 +314,7 @@ val nodeJsV11AlphaInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeHttpsClientFacadeInstrumentationTest",
     "org.autojs.autojs.engine.NodeHttpStreamSemanticsInstrumentationTest",
     "org.autojs.autojs.engine.NodeHttpAgentFacadeInstrumentationTest",
+    "org.autojs.autojs.engine.NodeUndiciFacadeInstrumentationTest",
     "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
     "org.autojs.autojs.engine.NodeModernCoreDifferentialInstrumentationTest",
     "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest",
