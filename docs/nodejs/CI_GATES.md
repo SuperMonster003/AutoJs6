@@ -199,6 +199,30 @@ embedded/native one-shot coverage, long-running, workers, live providers,
 startup/RSS, and the existing compatibility/npm/modern-core corpus. See
 [reports/phase8/README.md](reports/phase8/README.md).
 
+## Phase 8 Final Gates
+
+Use the Phase 8 focused gates to close the capability expansion stage without
+running the full release gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodePhase8SecurityStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase8Gate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+`verifyNodePhase8SecurityStressGate` selects the Phase 8 security/stress
+instrumentation subset: Node 24.17 security probes, TypeScript, module
+conformance, controlled HTTP/HTTPS/undici, advanced scoped fs, compile-cache /
+prewarm / performance, inspector security, hardened sandbox, broker/process
+pool policy, and bridge RPC fuzzing.
+
+`verifyNodePhase8Gate` selects the full Phase 8 capability set, runs host
+tooling/report gates, and writes
+`app/build/reports/nodejs/phase8-summary.json` through
+`generateNodePhase8Summary`. The summary fails on missing or failed expected
+instrumentation selectors and records known design-gated inputs separately.
+See [reports/phase8/README.md](reports/phase8/README.md).
+
 ## Phase 7 Focused Gates
 
 Phase 7 uses focused feature gates instead of expanding every iteration to the

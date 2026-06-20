@@ -184,6 +184,9 @@ Checked-in example project smoke:
 `verifyNodeExamples` validates `sample/nodejs/examples.json`, required files, metadata, Node directives, PASS markers,
 and Phase 7 example capability/provider/security declarations, then writes `app/build/reports/nodejs/examples.json`
 and `.md`.
+The Phase 8 catalog adds `require-esm`, `http-client-compat`, `filehandle-advanced`, `fs-watch`, `compile-cache`,
+`inspector-debug`, `cpu-profile`, and `hardened-sandbox`; these are static-verified examples and are not added to the
+default instrumentation smoke list.
 
 The instrumentation smoke runs `hello-node`, `cjs-package`, `fs-scoped`, `fs-promises`, `npm-pure-js-cjs`, `toast-app`,
 `accessibility-click-text`, `screenshot-find-image`, and `disabled-features-demo` from the `androidTest` asset source set.
@@ -1640,6 +1643,8 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodeV11AlphaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_alpha"
 .\gradlew.bat --console=plain :app:verifyNodeV11BetaGate "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
 .\gradlew.bat --console=plain :app:verifyNodeV11RcReadiness "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
+.\gradlew.bat --console=plain :app:verifyNodePhase8SecurityStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase8Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
@@ -1653,6 +1658,10 @@ requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/
 `autojs.nodejs.test.deviceProfile=v1_1_beta`; see [reports/v1.1-beta/README.md](reports/v1.1-beta/README.md).
 `verifyNodeV11RcReadiness` verifies v1.1 beta evidence is ready for release-candidate planning and also requires
 `autojs.nodejs.test.deviceProfile=v1_1_beta`; see [reports/v1.1-rc/README.md](reports/v1.1-rc/README.md).
+`verifyNodePhase8SecurityStressGate` runs the Phase 8 security/stress selector set on Sony/full profiles.
+`verifyNodePhase8Gate` runs the Phase 8 aggregate capability gate, host tooling/report checks, and
+`generateNodePhase8Summary`, which writes `app/build/reports/nodejs/phase8-summary.json`; see
+[reports/phase8/README.md](reports/phase8/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:

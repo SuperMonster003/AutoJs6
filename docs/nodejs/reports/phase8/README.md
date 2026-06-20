@@ -465,3 +465,47 @@ Detailed coverage is recorded in:
 - `docs/nodejs/design/PACKAGE_MANAGER.md`
 - `docs/nodejs/reports/phase8/DEPENDENCY_MANAGER.md`
 - `docs/nodejs/reports/phase8/REAL_NPM_CORPUS_PHASE8.md`
+
+## Batch J Final Security, Gate, Examples, And Summary
+
+Current Batch J implementation status:
+
+- S8-47 is complete as an aggregate security/stress expansion gate. The new
+  `verifyNodePhase8SecurityStressGate` focused selector set covers the Node
+  24.17 security probes, TypeScript parser/stripper routing, CJS/ESM module
+  conformance, controlled HTTP/HTTPS/undici surfaces, FileHandle/fd/opendir/
+  watcher/safe-fs lifecycle, module compile-cache diagnostics, inspector
+  release bypass denial, hardened sandbox policy, capability broker v2, process
+  pool policy, and bridge RPC malformed-input fuzzer.
+- S8-48 is complete as the Phase 8 aggregate functional gate.
+  `verifyNodePhase8Gate` selects the full Phase 8 capability selector set,
+  runs host tooling/report gates, and writes
+  `app/build/reports/nodejs/phase8-summary.json` through
+  `generateNodePhase8Summary`. The summary fails on missing or failed
+  instrumentation selectors and records known design-gated inputs separately.
+- S8-49 is complete for checked-in user examples. The sample catalog now adds
+  `require-esm`, `http-client-compat`, `filehandle-advanced`, `fs-watch`,
+  `compile-cache`, `inspector-debug`, `cpu-profile`, and `hardened-sandbox`.
+  These examples are static-verified by `verifyNodeExamples`; they are not
+  added to the default instrumentation smoke list.
+- S8-50 is complete as this final Phase 8 summary and capability-matrix update.
+  The v1.1 capability matrix now records the Phase 8 security/stress gate,
+  aggregate functional gate, and user-example surface.
+
+Focused gates:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:verifyNodePhase8SecurityStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase8Gate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:generateNodePhase8Summary "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeExamples
+.\gradlew.bat --console=plain :app:verifyNodeCompatibilityProfile
+```
+
+Detailed coverage is recorded in:
+
+- `docs/nodejs/reports/phase8/PHASE8_SECURITY_STRESS.md`
+- `docs/nodejs/reports/phase8/PHASE8_FUNCTIONAL_GATE.md`
+- `docs/nodejs/reports/phase8/USER_EXAMPLES.md`
+- `docs/nodejs/reports/phase8/PHASE8_SUMMARY.md`
