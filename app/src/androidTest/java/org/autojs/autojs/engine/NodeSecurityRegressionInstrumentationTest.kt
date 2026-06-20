@@ -450,6 +450,221 @@ class NodeSecurityRegressionInstrumentationTest {
     }
 
     @Test
+    fun phase7CapabilityBypassDeniesBeforeProviderDispatch() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Phase 7 bridge capability security corpus")
+
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(emptyList())
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                (async () => {
+                  const bridge = require("autojs6:bridge");
+                  const requests = [];
+                  function codeOf(error) {
+                    return String(error && (error.autojs6Code || error.code || error.legacyCode || error.name || ""));
+                  }
+                  function missingOf(error) {
+                    return Array.isArray(error && error.missingCapabilities) ? error.missingCapabilities.join(",") : "";
+                  }
+                  async function denied(label, action, missing) {
+                    try {
+                      await action();
+                      return label + ":allowed";
+                    } catch (error) {
+                      return label + ":" + codeOf(error) + ":" + missingOf(error) + ":" + (missingOf(error) === missing);
+                    }
+                  }
+
+                  bridge.__test.setTransport({
+                    postMessage(message) {
+                      const request = JSON.parse(message);
+                      requests.push(request);
+                      setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                        id: request.id,
+                        ok: false,
+                        error: {
+                          code: "UNEXPECTED_DISPATCH",
+                          message: "capability bypass reached provider"
+                        }
+                      })));
+                    }
+                  });
+
+                  const checks = [];
+                  checks.push(await denied("storage", () => require("storage").create("phase7").get("key", null, { timeoutMs: 1000 }), "storage"));
+                  checks.push(await denied("notifications", () => require("notifications").notify({ id: 7401, title: "Denied", text: "Denied" }, { timeoutMs: 1000 }), "notifications"));
+                  checks.push(await denied("ui", () => require("ui").showLayout({ type: "Text", id: "title", text: "Denied" }, { timeoutMs: 1000 }), "ui"));
+                  checks.push(await denied("work_manager", () => require("work_manager").scheduleOnce({ scriptPath: "main.cjs", timeoutMs: 1000 }), "work_manager"));
+                  checks.push(await denied("database", () => require("database").open("phase7", { timeoutMs: 1000 }), "database"));
+
+                  console.log("security.phase7.capability_bypass=" + checks.join("|"));
+                  console.log("security.phase7.capability_requests=" + requests.length);
+                })().catch((error) => {
+                  console.error("security.phase7.capability_bypass.error=" + (error && (error.stack || error.message) || error));
+                  process.exitCode = 1;
+                });
+            """.trimIndent(),
+            sourceName = "<node-security-phase7-capability-bypass.js>",
+            timeoutMs = 10_000L,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("Node Phase 7 capability bypass security regression", result)
+        assertTrue(
+            result.stdout,
+            result.stdout.contains(
+                "security.phase7.capability_bypass=" +
+                        "storage:${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}:storage:true|" +
+                        "notifications:${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}:notifications:true|" +
+                        "ui:${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}:ui:true|" +
+                        "work_manager:${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}:work_manager:true|" +
+                        "database:${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}:database:true",
+            ),
+        )
+        assertTrue(result.stdout, result.stdout.contains("security.phase7.capability_requests=0"))
+    }
+
+    @Test
+    fun phase7ProviderPolicyAndPluginEscapesStayDeniedBeforeDispatch() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Phase 7 provider policy security corpus")
+
+        val workDir = freshWorkDir("node-security-phase7-provider-policy")
+        try {
+            writePhase5Plugin(
+                workDir = workDir,
+                id = "org.example.phase7escape",
+                source = """module.exports = { escaped: true };""",
+                entry = "../phase7-escape.cjs",
+            )
+            writePhase5Plugin(
+                workDir = workDir,
+                id = "org.example.phase7cap",
+                source = """
+                    globalThis.__autojs6Phase7CapPluginExecuted = true;
+                    module.exports = { ready: true };
+                """.trimIndent(),
+                permissions = listOf("storage"),
+            )
+            val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(
+                listOf(
+                    "database",
+                    "work_manager",
+                    "plugin.org.example.phase7escape",
+                    "plugin.org.example.phase7cap",
+                ),
+            )
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async () => {
+                      const bridge = require("autojs6:bridge");
+                      const requests = [];
+                      const codes = [];
+                      function codeOf(error) {
+                        return String(error && (error.autojs6Code || error.code || error.legacyCode || error.name || ""));
+                      }
+                      function detail(label, error) {
+                        const missing = Array.isArray(error && error.missingCapabilities) ? error.missingCapabilities.join(",") : "";
+                        codes.push(label + ":" + [error && error.code, error && error.autojs6Code, error && error.module, error && error.method, missing].join(","));
+                      }
+                      async function denied(label, action) {
+                        try {
+                          await action();
+                          codes.push(label + ":allowed");
+                        } catch (error) {
+                          detail(label, error);
+                        }
+                      }
+                      function deniedSync(label, action) {
+                        try {
+                          action();
+                          codes.push(label + ":allowed");
+                        } catch (error) {
+                          detail(label, error);
+                        }
+                      }
+                      function respond(request, ok, result, error) {
+                        setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({ id: request.id, ok, result, error })));
+                      }
+
+                      bridge.__test.setTransport({
+                        postMessage(message) {
+                          const request = JSON.parse(message);
+                          requests.push(request);
+                          if (request.module === "database" && request.method === "open") {
+                            respond(request, true, { id: "phase7-db-1", name: request.args[0].name });
+                            return;
+                          }
+                          respond(request, false, null, {
+                            code: "UNEXPECTED_DISPATCH",
+                            message: "policy escape reached provider",
+                            module: request.module,
+                            method: request.method
+                          });
+                        }
+                      });
+
+                      const database = require("database");
+                      const db = await database.open("phase7", { timeoutMs: 1000 });
+                      const beforeDatabaseInvalid = requests.length;
+                      await denied("database.attach", () => db.exec("ATTACH DATABASE '../escape.db' AS escape", [], { timeoutMs: 1000 }));
+                      await denied("database.load_extension", () => db.get("SELECT load_extension(?)", ["x"], { timeoutMs: 1000 }));
+                      await denied("database.transaction_detach", () => db.transaction([{ method: "exec", sql: "DETACH DATABASE main" }], { timeoutMs: 1000 }));
+                      const databaseNoDispatch = requests.length === beforeDatabaseInvalid;
+
+                      const work = require("work_manager");
+                      const beforeWorkInvalid = requests.length;
+                      await denied("work.relative_escape", () => work.scheduleOnce({ scriptPath: "../escape.cjs" }));
+                      await denied("work.absolute", () => work.scheduleOnce({ scriptPath: "/sdcard/escape.cjs" }));
+                      await denied("work.nul", () => work.scheduleOnce({ scriptPath: "bad" + String.fromCharCode(0) + "path.cjs" }));
+                      await denied("work.packaged_entry_escape", () => work.scheduleOnce({ entry: "../escape.cjs", packaged: true }));
+                      const workNoDispatch = requests.length === beforeWorkInvalid;
+
+                      const plugins = require("plugins");
+                      deniedSync("plugin.path_escape", () => plugins.load("org.example.phase7escape"));
+                      deniedSync("plugin.capability_escape", () => plugins.load("org.example.phase7cap"));
+
+                      console.log("security.phase7.provider_policy.codes=" + codes.join("|"));
+                      console.log("security.phase7.provider_policy.requests=" + requests.map((request) => request.module + "." + request.method).join("|"));
+                      console.log("security.phase7.provider_policy.no_dispatch=" + [databaseNoDispatch, workNoDispatch, bridge.__test.pendingCount()].join("|"));
+                      console.log("security.phase7.provider_policy.plugin_executed=" + (globalThis.__autojs6Phase7CapPluginExecuted === true));
+                    })().catch((error) => {
+                      console.error("security.phase7.provider_policy.error=" + (error && (error.stack || error.message) || error));
+                      process.exitCode = 1;
+                    });
+                """.trimIndent(),
+                sourceName = File(workDir, "main.js").absolutePath,
+                workingDirectory = workDir,
+                timeoutMs = 10_000L,
+                runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("Node Phase 7 provider policy security regression", result)
+            listOf(
+                "database.attach:${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},database,exec,",
+                "database.load_extension:${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},database,get,",
+                "database.transaction_detach:${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},database,transaction,",
+                "work.relative_escape:${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},work_manager,scheduleOnce,",
+                "work.absolute:${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},work_manager,scheduleOnce,",
+                "work.nul:${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},work_manager,scheduleOnce,",
+                "work.packaged_entry_escape:${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},${NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED},work_manager,scheduleOnce,",
+                "plugin.path_escape:EPERM,${NodeRuntimeErrorCodes.FS_PATH_ESCAPE},plugins,load,",
+                "plugin.capability_escape:${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED},${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED},plugins,load,storage",
+            ).forEach { marker ->
+                assertTrue(
+                    NodeEmbeddedTestHarness.describeResult("missing Phase 7 provider policy marker $marker", result),
+                    result.stdout.contains(marker),
+                )
+            }
+            assertTrue(result.stdout, result.stdout.contains("security.phase7.provider_policy.requests=database.open"))
+            assertTrue(result.stdout, result.stdout.contains("security.phase7.provider_policy.no_dispatch=true|true|0"))
+            assertTrue(result.stdout, result.stdout.contains("security.phase7.provider_policy.plugin_executed=false"))
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
     fun phase5PluginAndWorkerBoundariesStayDenied() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Phase 5 plugin and worker security corpus")
 
@@ -563,6 +778,26 @@ class NodeSecurityRegressionInstrumentationTest {
     }
 
     @Test
+    fun phase7LongRunningResourceExhaustionTimesOutWithDiagnostics() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Phase 7 long-running timeout security corpus")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                setInterval(() => {}, 25);
+                console.log("security.phase7.long_running.started=true");
+            """.trimIndent(),
+            sourceName = "<node-security-phase7-long-running-timeout.js>",
+            timeoutMs = 700L,
+        )
+
+        assertFalse(NodeEmbeddedTestHarness.describeResult("Node Phase 7 long-running resource exhaustion", result), result.succeeded)
+        assertEquals(NodeRuntimeErrorCodes.LEGACY_SCRIPT_TIMEOUT, result.errorCode)
+        assertTrue(NodeEmbeddedTestHarness.describeResult("Node Phase 7 long-running timeout marker", result), result.timedOut)
+        assertEquals(true, result.pendingTimers)
+    }
+
+    @Test
     fun phase5ZlibStreamErrorsCleanUpResources() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Phase 5 zlib stream cleanup security corpus")
 
@@ -614,27 +849,33 @@ class NodeSecurityRegressionInstrumentationTest {
         workDir: File,
         id: String,
         source: String,
+        permissions: List<String> = emptyList(),
+        entry: String = "index.cjs",
     ) {
         val pluginDir = File(workDir, "plugins/$id").apply {
             check(mkdirs()) { "Failed to create plugin dir: $absolutePath" }
         }
+        val permissionsJson = permissions.joinToString(prefix = "[", postfix = "]") { "\"$it\"" }
         File(pluginDir, "package.json").writeText(
             """
             {
               "name": "$id",
               "version": "1.0.0",
-              "main": "index.cjs",
+              "main": "$entry",
               "autojs6": {
                 "plugin": {
                   "id": "$id",
-                  "permissions": []
+                  "permissions": $permissionsJson
                 }
               }
             }
             """.trimIndent(),
             StandardCharsets.UTF_8,
         )
-        File(pluginDir, "index.cjs").writeText(source, StandardCharsets.UTF_8)
+        File(pluginDir, entry).apply {
+            parentFile?.mkdirs()
+            writeText(source, StandardCharsets.UTF_8)
+        }
     }
 
     private fun writePackageEscapeFixtures(workDir: File) {

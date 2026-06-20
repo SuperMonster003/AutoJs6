@@ -190,12 +190,16 @@ small set of already-gated features toward practical use.
 - Project wizard smoke passes for every checked template, JSON validator output,
   missing-entry diagnostics, invalid package name diagnostics, unknown
   permission diagnostics, and unsafe dependency bundle diagnostics.
-- Phase 5 security corpus passes for ESM/static import escape denial, local
+- Phase 7 security corpus passes for packaged ESM/dynamic-import escape gates,
+  stale runtime descriptor mismatch, ESM/static import escape denial, local
   dynamic import escape and network URL denial, fs stream escape cleanup,
-  fetch/WebSocket unsupported schemes, UI handle cleanup without raw View
-  exposure, plugin `.node` rejection, worker bridge access denial or
-  unavailable-worker fail-closed behavior, shell `child_process` denial, and
-  zlib stream error cleanup.
+  live bridge capability bypass denial before dispatch, WorkManager arbitrary
+  path denial, database `ATTACH`/`DETACH`/`load_extension` denial, UI handle
+  cleanup without raw View exposure, plugin `.node`, path, and capability
+  rejection before code execution, worker bridge access denial or
+  unavailable-worker fail-closed behavior, long-running timer exhaustion
+  timeout diagnostics, dependency sanitizer bypass rejection, shell
+  `child_process` denial, and zlib stream error cleanup.
 - Bridge resource leak stress passes for repeated OCR, storage,
   notifications, sensors, accessibility selector, image, UI, shell timeout,
   and WebSocket loops with zero active provider resources, shell commands,

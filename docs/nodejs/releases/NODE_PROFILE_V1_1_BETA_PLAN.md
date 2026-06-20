@@ -49,7 +49,7 @@ experimental or blocked features from leaking into a release candidate.
 | controlled network | stay `experimental` | fake-provider fetch/axios/WebSocket coverage, raw network denial, manifest mapping, default Android provider denial, explicit live fetch/axios and WebSocket loopback subgates |
 | AutoJs bridge modules | stay `partial` or `protocol-gated partial` | provider health registry, Doctor provider status, capability denial, fake provider behavior, Android live/fail-closed behavior by module, TypeScript declarations, resource cleanup |
 | packaged APK | first-class beta gate | packaged v1.1 bridge smoke, host aggregate verification, focused packaged ESM/dynamic import gate |
-| security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, or bridge bypass |
+| security corpus | required | no scoped fs, native addon, raw process, raw network, plugin, UI, worker, bridge, WorkManager, database, packaged descriptor, or dependency sanitizer bypass |
 | DX/tooling | required | error catalog, project wizard, TypeScript declarations, doctor/compatibility/provider-health reports |
 | blocker register | required | [NODE_PROFILE_V1_1_BETA_BLOCKERS.md](NODE_PROFILE_V1_1_BETA_BLOCKERS.md), verified by `:app:verifyNodeV11BetaBlockerRegister` |
 

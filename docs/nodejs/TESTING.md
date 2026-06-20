@@ -316,10 +316,11 @@ registry access. The sanitized output is written to `app/build/nodejs/npm-ci-bun
 controls, bundle hash, cache entry, and dependency compatibility status.
 `verifyNodeDependencyBundlerFixtures` confirms the checked-in sample project passes, the sanitized bundle can be used as
 the packaged APK `assets/project` layout, the desktop `npm ci` fixture installs without lifecycle scripts, `.bin` links,
-or native addons, and unsafe fixtures are rejected for native addon, node-gyp build artifacts, lifecycle script, unchecked
-`.bin` entries, npm cache/postinstall artifacts, suspicious executables, absolute or escaping package metadata
-references, oversized files/packages/trees, and unsupported package-manager layouts such as PnP or pnpm-style nested
-stores. The packaged-layout verifier rejects analyzer `unsafe` and `unsupported` statuses before APK builder gates run.
+or native addons, and unsafe fixtures are rejected for native addon, node-gyp build artifacts, every blocked lifecycle
+script variant (`preinstall`, `install`, `postinstall`, `prepare`), unchecked `.bin` entries, npm cache/postinstall
+artifacts, suspicious executables, symlink/path escapes, absolute/NUL/escaping package metadata references, oversized
+files/packages/trees, and unsupported package-manager layouts such as PnP or pnpm-style nested stores. The
+packaged-layout verifier rejects analyzer `unsafe` and `unsupported` statuses before APK builder gates run.
 Native addon binaries are reported as
 `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` files are reported as
 `NODE_GYP_ARTIFACT_UNSUPPORTED`.
@@ -358,14 +359,20 @@ Current security regression instrumentation:
 
 This suite verifies dangerous process APIs, disabled builtins, network operation denial, scoped fs escape denial, native addon extension denial, and package exports/imports escape denial with stable error codes or documented current denial shape. `process.chdir` is treated as scoped and controlled; the security tests verify absolute and escaping chdir targets are rejected.
 
-The Phase 5 security corpus in the same class also covers v1.1 expansion
+The Phase 5/7 security corpus in the same class also covers v1.1 expansion
 boundaries: ESM static import escape denial, local dynamic import escape and
 network URL denial, `fs.createReadStream()`/`fs.createWriteStream()` scoped
 escape denial plus cleanup counters, unsupported `fetch`/`websocket` schemes,
-UI handle cleanup without raw View exposure, JS-only plugin `.node` rejection,
-worker-local bridge module denial when worker support is available or
-worker_threads fail-closed when unavailable, shell usage while `child_process`
-remains disabled, and zlib stream error cleanup.
+bridge capability bypass denial before provider dispatch, WorkManager arbitrary
+path denial before dispatch, database `ATTACH`/`DETACH`/`load_extension` SQL
+denial before dispatch, UI handle cleanup without raw View exposure, JS-only
+plugin `.node`, path, and requested-capability rejection before plugin code
+executes, worker-local bridge module denial when worker support is available or
+worker_threads fail-closed when unavailable, long-running timer exhaustion
+timeout diagnostics, shell usage while `child_process` remains disabled, and
+zlib stream error cleanup. Packaged ESM escape, packaged dynamic import escape,
+and stale runtime compatibility descriptor mismatch stay covered by the focused
+packaged ESM/dynamic-import and launch-failure gates.
 
 Focused native addon policy instrumentation:
 

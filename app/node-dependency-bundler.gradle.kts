@@ -1583,6 +1583,11 @@ val verifyNodeDependencyBundlerFixtures = tasks.register("verifyNodeDependencyBu
               "name": "unsafe-package",
               "version": "1.0.0",
               "main": "C:/absolute/evil.js",
+              "types": "bad\u0000types.d.ts",
+              "files": ["dist", "../escape"],
+              "directories": {
+                "bin": "../bin"
+              },
               "bin": {
                 "unsafe-package": "/tmp/evil.js"
               },
@@ -1590,8 +1595,20 @@ val verifyNodeDependencyBundlerFixtures = tasks.register("verifyNodeDependencyBu
                 ".": "./index.js",
                 "./escape": "../outside.js"
               },
+              "imports": {
+                "#escape": "../outside.js"
+              },
+              "typesVersions": {
+                "*": {
+                  "*": ["../types/*"]
+                }
+              },
+              "gypfile": true,
               "scripts": {
-                "postinstall": "node postinstall.js"
+                "preinstall": "node preinstall.js",
+                "install": "node install.js",
+                "postinstall": "node postinstall.js",
+                "prepare": "node prepare.js"
               }
             }
             """.trimIndent() + "\n"
@@ -1628,11 +1645,24 @@ val verifyNodeDependencyBundlerFixtures = tasks.register("verifyNodeDependencyBu
             "SUSPICIOUS_EXECUTABLE_UNSUPPORTED",
             "PACKAGE_ABSOLUTE_PATH_REFERENCE",
             "PACKAGE_PATH_ESCAPE_REFERENCE",
+            "PACKAGE_NUL_PATH_REFERENCE",
             "UNSUPPORTED_PACKAGE_MANAGER_LAYOUT",
         )
         val missingCodes = requiredCodes - rejectionCodes
         if (missingCodes.isNotEmpty()) {
             throw GradleException("Unsafe dependency fixture did not produce expected rejection codes: $missingCodes; actual=$rejectionCodes")
+        }
+        val lifecycleMessages = unsafeScan.issues
+            .filter { it.code == "LIFECYCLE_SCRIPT_DISABLED" }
+            .joinToString(separator = "\n") { it.message }
+        val missingLifecycleScripts = nodeDependencyBundlerForbiddenScripts.filter { scriptName ->
+            "'$scriptName'" !in lifecycleMessages
+        }
+        if (missingLifecycleScripts.isNotEmpty()) {
+            throw GradleException(
+                "Unsafe dependency fixture did not reject every lifecycle script variant: " +
+                        "$missingLifecycleScripts; messages=$lifecycleMessages"
+            )
         }
         if (symlinkCreated && rejectionCodes.intersect(setOf("SYMLINK_UNSUPPORTED", "PATH_ESCAPE")).isEmpty()) {
             throw GradleException("Unsafe dependency symlink fixture did not produce a symlink/path escape rejection; actual=$rejectionCodes")
