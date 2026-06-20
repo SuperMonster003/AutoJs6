@@ -49,8 +49,10 @@ import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
+import org.mozilla.javascript.Wrapper
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
+import java.lang.reflect.Array as JavaArray
 
 class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
@@ -481,11 +483,19 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
         }
 
-        private fun toJsArrayIfNeeded(results: Any?) = when {
-            results == null -> null
-            results is Iterable<*> -> results.toNativeArray()
-            results.javaClass.isArray -> RhinoUtils.javaArrayToString(results)
-            else -> results
+        private fun toJsArrayIfNeeded(results: Any?): Any? {
+            val value = if (results is Wrapper) results.unwrap() else results
+            return when {
+                value == null -> null
+                value is NativeArray -> value
+                value is Iterable<*> -> value.toNativeArray()
+                value.javaClass.isArray -> javaArrayToList(value).toNativeArray()
+                else -> value
+            }
+        }
+
+        private fun javaArrayToList(array: Any): List<Any?> {
+            return List(JavaArray.getLength(array)) { index -> JavaArray.get(array, index) }
         }
 
         private fun checkPreset(properties: NativeObject, key: String, def: Any) {
