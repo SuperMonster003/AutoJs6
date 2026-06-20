@@ -1105,10 +1105,12 @@ Task 122 GA evaluation report: [reports/WORKER_EXPERIMENTAL_EVALUATION.md](repor
 
 Task 146 v1.1 worker policy: [releases/V1_1_WORKER_POLICY.md](releases/V1_1_WORKER_POLICY.md).
 
+S8-44 partial-promotion recheck: [reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md](reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md).
+
 Current experimental worker_threads focused instrumentation:
 
 ```powershell
-.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWorkerThreadsExperimentalInstrumentationTest"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.worker_threads.experimental=true" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 This suite verifies the default disabled path when the build-level flag is off,

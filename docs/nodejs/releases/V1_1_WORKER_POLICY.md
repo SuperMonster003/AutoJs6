@@ -4,6 +4,8 @@ Date: 2026-06-17
 
 Latest S7-29 worker-stress/packaged-smoke gate update: 2026-06-19
 
+Latest S8-44 partial-promotion recheck: 2026-06-20
+
 Branch: `feature/nodejs-runtime-v1.1`
 
 Device: Sony XQ-AT72 `QV710AF65F`, Android 12
@@ -63,6 +65,13 @@ parent-completion pool cleanup, and a single packaged APK `.mjs` worker smoke.
 The packaged smoke is selected as one focused
 `EmbeddedNodePackagedApkSmokeTest` method and skips before APK construction
 when the native-worker preflight reports unavailable.
+
+S8-44 rechecked the partial-promotion precondition and kept the same release
+decision. The normal Sony worker gate passed 3/3. The experimental Sony worker
+gate selected 30 worker-gate tests, reported 0 failures, and skipped 11
+runnable/stress/packaged worker cases through the native-availability preflight.
+Because the stress and packaged worker cases still do not execute, workers
+cannot move to project opt-in partial.
 
 Normal builds must continue to keep:
 
@@ -139,12 +148,28 @@ The focused `verifyNodeWorkerGate` also selects
 that packaged smoke skips before APK construction when the same preflight is
 native-unavailable.
 
+S8-44 promotion recheck:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.worker_threads.experimental=true" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+Result:
+
+```text
+normal gate: 3 tests, 0 failures
+experimental gate: 30 tests selected, 0 failures, 11 native-availability skips
+```
+
 ## Evidence Matrix
 
 | Gate | Status | Notes |
 | --- | --- | --- |
 | S7-24 default `verifyNodeWorkerGate` | Pass | Sony default gate ran bootstrap/design coverage, 3 tests, 0 failures. |
 | S7-24 experimental `verifyNodeWorkerGate` | Pass with skips | Sony experimental gate ran bootstrap/preflight and skipped runnable/stress promotion tests because native workers remain unavailable, 0 failures. |
+| S8-44 partial-promotion recheck | Blocked | Normal gate passed 3/3; experimental gate selected 30 worker-gate tests with 0 failures and 11 native-availability skips, so runnable/stress/packaged evidence is still absent. |
 | S7-25 CJS/ESM worker entry gate | Prepared, skipped on Sony | Worker loader now has promotion coverage for `worker.cjs`, `worker.mjs`, `type=module` `.js`, local CJS/JSON and partial-ESM dependencies, allowed builtins, path escape denial, raw network denial, bridge denial, and native addon denial. Sony still skips runnable smoke because native workers remain unavailable. |
 | S7-26 MessageChannel/transferList gate | Prepared, skipped on Sony | Limited `MessageChannel`, `MessagePort`, ArrayBuffer transfer detachment, typed array delivery, structured-clone-safe value checks, DataCloneError-compatible failures, message-size/queue limits, and MessagePort cleanup counters are covered when the native preflight is available. Sony still skips runnable smoke because native workers remain unavailable. |
 | S7-27 worker capability isolation gate | Prepared, skipped on Sony | Worker profile now separates scoped worker `fs`/`fs.promises` from main-script capabilities and verifies denial of AutoJs bridge modules, `toast`, `accessibility`, `image`, `shell`, Java interop, inspector, raw network, and nested workers. Sony still skips runnable smoke because native workers remain unavailable. |

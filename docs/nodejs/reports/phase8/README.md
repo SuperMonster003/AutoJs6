@@ -403,8 +403,11 @@ Current Batch H implementation status:
   effective active slot and publishes `embedded_script.process_pool.*`
   diagnostics. No default concurrent execution or reserved-slot routing is
   enabled yet.
-- S8-44 worker partial promotion remains blocked by native `worker_threads`
-  availability and worker isolation gates.
+- S8-44 worker partial promotion was rechecked and remains blocked by native
+  `worker_threads` availability. The normal Sony worker gate passed 3/3; the
+  experimental gate selected 30 worker-gate tests with 0 failures and 11
+  expected native-availability skips, so runnable worker, stress, and packaged
+  worker support cannot be promoted.
 
 Focused gates:
 
@@ -413,6 +416,8 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHardenedIsolatedRuntimePocInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeCapabilityBrokerV2InstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedProcessPoolPolicyInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeWorkerGate "-Pautojs.nodejs.worker_threads.experimental=true" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
@@ -423,3 +428,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/CAPABILITY_BROKER_V2.md`
 - `docs/nodejs/design/PROCESS_POOL.md`
 - `docs/nodejs/reports/phase8/PROCESS_POOL_POLICY_GATE.md`
+- `docs/nodejs/reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md`
