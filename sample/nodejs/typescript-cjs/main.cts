@@ -14,4 +14,3 @@ function format<T>(input: T): string {
 
 console.log("sample.typescript-cjs.value=" + format(payload.label) + ":" + payload.count);
 console.log("sample.typescript-cjs=PASS");
-

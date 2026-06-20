@@ -1,3 +1,2 @@
 sample.typescript-esm.value=esm
 sample.typescript-esm=PASS
-

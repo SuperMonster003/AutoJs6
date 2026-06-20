@@ -7,4 +7,3 @@ const marker: Label = message + ":" + dynamic.suffix;
 
 console.log("sample.packaged-typescript.value=" + marker);
 console.log("sample.packaged-typescript=PASS");
-

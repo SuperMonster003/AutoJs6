@@ -14,4 +14,3 @@
     "securityLimitations": ["erasable syntax only", "no TSX", "no enum or decorator transforms"]
   }
 }
-
