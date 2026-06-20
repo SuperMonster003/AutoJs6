@@ -30763,6 +30763,36 @@ std::string buildEmbeddedScriptExecutionSource(
       "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
     );
   }
+  function __autojs6_limited_http_raw_option_error(protocol, optionName) {
+    return __autojs6_fetch_policy_error(
+      "AutoJs6 controlled " + protocol + " client rejects raw socket option '" + optionName + "'. Raw socket customization is unavailable.",
+      protocol + "_" + optionName,
+      "ERR_AUTOJS6_NETWORK_POLICY_DENIED"
+    );
+  }
+  function __autojs6_limited_http_validate_raw_options(protocol, options) {
+    if (!options || typeof options !== "object") {
+      return;
+    }
+    const denied = [
+      "createConnection",
+      "socketPath"
+    ];
+    for (const name of denied) {
+      if (__autojs6_has_own(options, name) && options[name] !== undefined && options[name] !== null) {
+        throw __autojs6_limited_http_raw_option_error(protocol, name);
+      }
+    }
+    const agent = options.agent;
+    if (agent && typeof agent === "object") {
+      if (typeof agent.createConnection === "function" && !agent.__autojs6LimitedAgent) {
+        throw __autojs6_limited_http_raw_option_error(protocol, "agent.createConnection");
+      }
+      if (typeof agent.addRequest === "function" && !agent.__autojs6LimitedAgent) {
+        throw __autojs6_limited_http_raw_option_error(protocol, "agent.addRequest");
+      }
+    }
+  }
   function __autojs6_limited_https_validate_options(options) {
     if (!options || typeof options !== "object") {
       return;
@@ -30956,6 +30986,7 @@ std::string buildEmbeddedScriptExecutionSource(
       constructor(options, callback, autoDispatch) {
         super();
         const normalized = __autojs6_limited_http_request_options(protocol, options);
+        __autojs6_limited_http_validate_raw_options(protocol, normalized);
         if (isHttps) {
           __autojs6_limited_https_validate_options(normalized);
         }
@@ -31293,6 +31324,7 @@ std::string buildEmbeddedScriptExecutionSource(
       constructor(options) {
         super();
         const opts = options && typeof options === "object" ? options : Object.create(null);
+        __autojs6_limited_http_validate_raw_options(protocol, opts);
         if (isHttps) {
           __autojs6_limited_https_validate_options(opts);
         }
