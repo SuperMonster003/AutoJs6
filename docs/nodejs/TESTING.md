@@ -310,6 +310,21 @@ binding, empty compatibility pool objects, request permission tagging, pending
 cleanup, and fail-closed denial for request-level `createConnection`,
 `socketPath`, and custom agent connector methods.
 
+Focused controlled Undici facade instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeUndiciFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-25 gate verifies the reserved `require("undici")` compatibility
+facade. It covers controlled `fetch()` / `request()` dispatch, Web Platform
+constructor reuse, `Dispatcher` / `Agent` / `MockAgent` safe shapes,
+`setGlobalDispatcher()` / `getGlobalDispatcher()` validation, local
+`node_modules/undici` shadow denial, bridge permission tagging, pending
+cleanup, and fail-closed denial for raw connectors, dispatcher injection,
+`socketPath`, proxy/tunnel options, `connect()`, `stream()`, and direct
+dispatcher dispatch.
+
 Current fixed real npm corpus instrumentation:
 
 ```powershell

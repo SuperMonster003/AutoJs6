@@ -57,6 +57,11 @@ Reasons:
 
 Task 167 adds an explicit AutoJs6-owned `require("axios")` compatibility adapter on top of the same controlled fetch provider. It is not the desktop axios package and does not enable raw Node `http`, `https`, socket agents, proxy tunneling, or custom adapters.
 
+Task S8-25 adds an explicit AutoJs6-owned `require("undici")` compatibility
+facade on top of the same controlled fetch provider. It is not the desktop
+Undici runtime and does not enable raw dispatchers, socket pools, custom
+connectors, proxy tunneling, upgrades, streams, or pipelines.
+
 User-facing entries:
 
 ```js
@@ -106,6 +111,21 @@ The axios-shaped adapter supports:
 - stable denial for `adapter`, `httpAgent`, `httpsAgent`, `agent`, `transport`, `socketPath`, custom `paramsSerializer`, and proxy configuration
 
 `require("axios")` is reserved by the Safe Node Profile and cannot be shadowed by `node_modules/axios`.
+
+The Undici-shaped facade supports:
+
+- `undici.fetch(input, init?)` backed by controlled fetch
+- `undici.request(input, init?)` returning limited status, headers, body,
+  trailers, opaque, and context fields
+- Web Platform constructor reuse for `Headers`, `Request`, `Response`,
+  `FormData`, and `File`
+- shape-only `Dispatcher`, `Agent`, and `MockAgent`
+- stable denial for dispatcher injection, custom `connect` / `factory`,
+  `socketPath`, proxy/tunnel options, raw `connect`, `upgrade`, `stream`,
+  `pipeline`, and direct `dispatch()`
+
+`require("undici")` is reserved by the Safe Node Profile and cannot be
+shadowed by `node_modules/undici`.
 
 ## Authority Boundary
 
@@ -183,6 +203,8 @@ Controlled fetch support must not imply support for:
 - UDP datagrams
 - HTTP upgrade or CONNECT tunnels
 - desktop axios adapters based on raw `http`/`https`, agents, proxy tunneling, or custom transport
+- desktop Undici dispatchers, socket pools, custom connectors, upgrades,
+  streams, pipelines, proxy tunneling, or direct dispatcher dispatch
 
 ## Android Permission Policy
 
@@ -215,7 +237,7 @@ Package-level opt-in:
 }
 ```
 
-The doctor report exposes the bridge capability manifest schema, the `network -> android.permission.INTERNET` mapping, the network provider feature flag state, and the controlled modules (`fetch`, `axios`, `http`/`https` client facade, and `websocket`). Missing declarations reject bridge calls before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+The doctor report exposes the bridge capability manifest schema, the `network -> android.permission.INTERNET` mapping, the network provider feature flag state, and the controlled modules (`fetch`, `axios`, `undici`, `http`/`https` client facade, and `websocket`). Missing declarations reject bridge calls before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 
 ## Timeout
 
@@ -364,6 +386,11 @@ Before live network capability is enabled in release builds, tests must cover:
 - service destroy rejection and active-count cleanup: covered by `NodeFetchBridgeInstrumentationTest`
 - diagnostics counters for active, timeout, policy rejection, and abort paths: covered by `NodeFetchBridgeInstrumentationTest`
 - `require("axios")` fetch-backed adapter surface, params serialization, response types, Axios-like errors, custom adapter/agent/proxy denial, and `node_modules/axios` shadow denial: covered by `NodeFetchBridgeInstrumentationTest`
+- `require("undici")` fetch-backed facade surface, `request()` result shape,
+  Web Platform constructor reuse, safe dispatcher/agent/mock-agent shapes,
+  custom connector/dispatcher/proxy/socket denial, and
+  `node_modules/undici` shadow denial: covered by
+  `NodeUndiciFacadeInstrumentationTest`
 - explicit live Android fetch/axios smoke: covered by `verifyNodeLiveFetchGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback server and the Android OkHttp provider
 - explicit live Android WebSocket smoke: covered by `verifyNodeLiveWebSocketGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback WebSocket server and the Android OkHttp provider
 - raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests
@@ -383,6 +410,8 @@ Task 41 does not enable:
 - `node:dns`
 - `node:dgram`
 - desktop/userland axios adapters backed by raw network authority
+- desktop/userland Undici dispatchers, raw connectors, socket pools, proxy
+  tunneling, upgrades, streams, and pipelines
 - request streaming
 - response streaming
 - background transfers

@@ -167,6 +167,11 @@ Current Batch D implementation status:
   `maxSockets`, `maxFreeSockets`, `defaultPort`, `protocol`, `getName()`, and
   `destroy()`, while request-level raw socket options and custom connector
   agents reject fail-closed.
+- S8-25 is complete for the controlled Undici compatibility facade.
+  `require("undici")` is reserved, `fetch()` and `request()` route through the
+  controlled fetch bridge, Web Platform constructors are reused, and
+  `Dispatcher` / `Agent` / `MockAgent` expose safe package-compatibility shapes
+  without raw connector, socket, proxy, upgrade, or pipeline authority.
 - Default scripts still get the existing synchronous disabled error for
   `http.request()` / `https.request()`, and raw `net`/`tls`/`dns`/`dgram`,
   servers, `CONNECT`, and socket upgrades remain unavailable.
@@ -180,6 +185,7 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpsClientFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpStreamSemanticsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpAgentFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeUndiciFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
@@ -189,3 +195,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/HTTPS_CLIENT_FACADE.md`
 - `docs/nodejs/reports/phase8/HTTP_STREAM_SEMANTICS.md`
 - `docs/nodejs/reports/phase8/HTTP_AGENT_FACADE.md`
+- `docs/nodejs/reports/phase8/UNDICI_FACADE.md`

@@ -1318,7 +1318,7 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - module diagnostics: `require("fetch").policy` and `require("fetch").diagnostics()`
   - response helpers: `text()`, `arrayBuffer()`, and `json()`
   - normal builds reject through the Android provider with `ERR_AUTOJS6_NETWORK_DISABLED`; fake-provider tests cover success, timeout, abort, response budget, unsupported scheme, redirect limit, concurrency limit, and service-destroy paths
-  - raw `net`, `tls`, `dns`, and `dgram` modules remain unavailable for network I/O; `http` and `https` expose only the controlled client facade described below
+  - raw `net`, `tls`, `dns`, and `dgram` modules remain unavailable for network I/O; `http`, `https`, and `undici` expose only the controlled client facades described below
 - `http` / `https`
   - `request(options|string|URL[, options][, callback])` and `get(...)` route through controlled fetch only when an enforced manifest declares `network`
   - exposes a `ClientRequest` subset: `write()`, `end()`, `setHeader()`, `getHeader()`, `getHeaders()`, `setTimeout()`, `abort()`, and `destroy()`
@@ -1332,6 +1332,13 @@ Overrides outside the documented safe range are ignored and reported in `profile
   - HTTPS rejects `rejectUnauthorized=false`, custom secure contexts, custom OpenSSL/TLS options, client certificate fields, request-level `createConnection`, and unsafe agent TLS options with `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
   - without an enforced `network` manifest, `request()` and `get()` keep the existing synchronous disabled error
   - `createServer()`, `listen()`, `CONNECT`, upgrade, agent socket pooling, raw sockets, DNS lookup, TLS session control, and local `node_modules/http` or `node_modules/https` shadow bypass remain unavailable
+- `undici`
+  - `fetch(input, init?): Promise<Response>` and `request(input, init?): Promise<{ statusCode: number, status: number, statusText: string, headers: object, body: ReadableStream | null, trailers: object, opaque: null, context: null }>` through reserved `require("undici")`
+  - reuses runtime Web Platform constructors for `Headers`, `Request`, `Response`, `FormData`, and `File`
+  - `Dispatcher`, `Agent`, and `MockAgent` expose only safe package-compatibility shapes; `MockAgent` helpers such as `disableNetConnect()`, `get()`, `intercept()`, `reply()`, `times()`, `persist()`, and `delay()` do not intercept real network traffic
+  - `setGlobalDispatcher()` accepts only AutoJs6 limited dispatcher instances, and `getGlobalDispatcher()` returns that limited facade object
+  - `connect()`, `upgrade()`, `stream()`, `pipeline()`, direct `dispatch()`, raw dispatcher injection, custom `connect` / `factory`, `socketPath`, proxy, and tunnel options reject with `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
+  - backed by controlled fetch only; local `node_modules/undici` cannot shadow it, and raw network modules remain denied
 - `axios`
   - `axios(config)`, `axios.request(config)`, `axios.get(url, config?)`, and `axios.post(url, data?, config?)` through `require("axios")`
   - options: `{ url?, baseURL?, method?, headers?, params?, data?, timeout?, maxResponseBytes?, maxContentLength?, maxRedirects?, responseType?, signal?, validateStatus? }`
