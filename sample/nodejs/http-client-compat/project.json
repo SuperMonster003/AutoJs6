@@ -1,0 +1,16 @@
+{
+  "name": "http-client-compat",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["http", "network"],
+    "expectedProvider": "Embedded Node controlled HTTP facade",
+    "packagedSupport": "main-app example only in this phase",
+    "securityLimitations": ["network disabled by default", "no raw net/tls/dns/dgram promotion"]
+  }
+}

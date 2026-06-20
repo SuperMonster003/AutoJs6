@@ -57,6 +57,14 @@ node tools/nodejs/project/autojs6-node-project.js validate D:\work\my-node-app
 - `typescript-cjs`: lightweight `.cts` CommonJS runtime smoke.
 - `typescript-esm`: lightweight `.mts` ESM runtime smoke.
 - `packaged-typescript`: packaged-compatible `.mts`/`.ts` graph with local dynamic import.
+- `require-esm`: CommonJS entry that loads a local ESM module with `require()`.
+- `http-client-compat`: controlled HTTP client shape and default-denied network behavior.
+- `filehandle-advanced`: scoped `fs/promises.open()` FileHandle lifecycle.
+- `fs-watch`: scoped watcher creation, update, and close lifecycle.
+- `compile-cache`: CommonJS module cache and optional compile-cache probe.
+- `inspector-debug`: release inspector disabled-state probe.
+- `cpu-profile`: design-gated CPU profiling placeholder.
+- `hardened-sandbox`: design-gated isolated-process sandbox placeholder.
 - `typescript-smoke`: compile-time smoke for the checked-in AutoJs6 Node bridge declarations.
 
 ## Smoke Coverage
@@ -103,6 +111,12 @@ instrumentation suite. `packaged-typescript` documents the packaged-compatible
 `.mts`/`.ts` graph shape; injected TypeScript moduleSources are covered by the
 focused TypeScript gate.
 
+The Phase 8 examples `require-esm`, `http-client-compat`, `filehandle-advanced`,
+`fs-watch`, `compile-cache`, `inspector-debug`, `cpu-profile`, and
+`hardened-sandbox` document the expanded v1.1 capability surface and
+design-gated boundaries. They are static-verified by `verifyNodeExamples` but
+are not part of the default runtime smoke list.
+
 The examples are also added to the `androidTest` asset source set so tests exercise the checked-in sample files directly.
 `sample/nodejs/npm-ci-pure-js` is intentionally excluded from the examples manifest because it is a host-side dependency
 sanitizer fixture, not a user-facing runnable example.
@@ -118,7 +132,7 @@ The stable examples target AutoJs6 Safe Node Profile and generally avoid:
 - unrestricted filesystem access
 
 Phase 7 and later examples that use ESM, dynamic import, TypeScript, live providers, workers, long-running mode,
-scheduled tasks, database, or plugin/UI surfaces declare those capabilities explicitly and include graceful
+scheduled tasks, database, controlled HTTP, advanced scoped fs, compile-cache, inspector, sandbox, or plugin/UI surfaces declare those capabilities explicitly and include graceful
 unavailable-provider paths where a permission, experimental flag, or hardware provider may be absent.
 
 Examples that use Android capabilities such as accessibility or media projection are written to handle unavailable permissions without crashing.

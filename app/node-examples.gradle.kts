@@ -39,6 +39,15 @@ private val nodeExampleKnownTags = setOf(
     "ui",
     "phase8",
     "tsx",
+    "require-esm",
+    "http",
+    "filehandle",
+    "fs-watch",
+    "compile-cache",
+    "inspector",
+    "profiler",
+    "hardened-sandbox",
+    "design-gated",
 )
 
 private val nodeExampleSupportedEntryExtensions = setOf("js", "cjs", "mjs", "ts", "cts", "mts")

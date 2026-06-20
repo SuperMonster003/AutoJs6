@@ -1,0 +1,2 @@
+sample.require-esm.value=esm-local:42
+sample.require-esm=PASS

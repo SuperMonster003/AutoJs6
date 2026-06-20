@@ -170,6 +170,62 @@
       "packagedCompatible": true
     },
     {
+      "name": "require-esm",
+      "status": "partial",
+      "tags": ["phase8", "main-app", "commonjs", "esm", "require-esm"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "http-client-compat",
+      "status": "experimental",
+      "tags": ["phase8", "main-app", "network", "http"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "filehandle-advanced",
+      "status": "partial",
+      "tags": ["phase8", "main-app", "scoped-fs", "fs-promises", "filehandle"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "fs-watch",
+      "status": "partial",
+      "tags": ["phase8", "main-app", "scoped-fs", "fs-watch"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "compile-cache",
+      "status": "partial",
+      "tags": ["phase8", "main-app", "commonjs", "compile-cache"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "inspector-debug",
+      "status": "experimental",
+      "tags": ["phase8", "main-app", "inspector", "design-gated", "security"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "cpu-profile",
+      "status": "experimental",
+      "tags": ["phase8", "main-app", "profiler", "inspector", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "hardened-sandbox",
+      "status": "experimental",
+      "tags": ["phase8", "main-app", "hardened-sandbox", "design-gated", "security"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
       "name": "typescript-smoke",
       "status": "stable",
       "tags": ["typescript", "bridge"],

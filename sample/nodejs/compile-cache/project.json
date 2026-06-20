@@ -1,0 +1,16 @@
+{
+  "name": "compile-cache",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["compile-cache", "commonjs"],
+    "expectedProvider": "Embedded Node compile-cache policy gate",
+    "packagedSupport": "main-app example only in this phase",
+    "securityLimitations": ["cache storage is runtime-managed", "native addons remain denied"]
+  }
+}

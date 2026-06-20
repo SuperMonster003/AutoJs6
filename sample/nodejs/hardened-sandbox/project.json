@@ -1,0 +1,16 @@
+{
+  "name": "hardened-sandbox",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["hardened-sandbox"],
+    "expectedProvider": "design-gated isolated-process runtime",
+    "packagedSupport": "not supported for user code in this phase",
+    "securityLimitations": ["no sandboxed user-code launch route", "no cross-process bridge provider yet"]
+  }
+}
