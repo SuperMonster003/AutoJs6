@@ -300,6 +300,13 @@ Current Batch F implementation status:
 - Custom AutoJs6 loader paths do not expose reliable Node hit/miss counters, so
   diagnostics report `hitMissStatus=unavailable_custom_loader` instead of
   fabricating counts.
+- S8-34 is design-gated for startup snapshots. The current native lifecycle
+  still passes `snapshot_data=nullptr` to Node isolate/isolate-data creation and
+  loads a request-specific generated bootstrap source. No snapshot blob is
+  generated, packaged, loaded, or requested.
+- Startup snapshot promotion requires a future bootstrap split between an
+  immutable snapshot prelude and a request install layer. The current fallback
+  and active v1.1 behavior remains normal bootstrap.
 
 Focused gates:
 
@@ -312,3 +319,4 @@ $env:ANDROID_SERIAL='QV710AF65F'
 Detailed coverage is recorded in:
 
 - `docs/nodejs/reports/phase8/MODULE_COMPILE_CACHE.md`
+- `docs/nodejs/reports/phase8/BOOTSTRAP_STARTUP_SNAPSHOT.md`

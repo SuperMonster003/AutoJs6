@@ -142,6 +142,31 @@ Recommended comparison method:
 3. Keep screen, power, and background load consistent.
 4. Record the report JSON with any lifecycle or native-load change.
 
+## Compile Cache And Startup Snapshot Modes
+
+S8-33 enables the module compile cache as an internal fail-soft optimization.
+It may improve repeated module compilation without changing isolate, context,
+or environment creation.
+
+S8-34 keeps bootstrap startup snapshots disabled behind a design gate. The
+current runtime does not generate, package, load, or request a snapshot blob;
+normal bootstrap remains the active path and the required fallback path.
+
+When startup snapshots are implemented, S8-36 must compare these modes on the
+same device, ABI, runtime slot, and app identity:
+
+| Mode | Current v1.1 status | Notes |
+| --- | --- | --- |
+| no cache / no snapshot | supported | Baseline normal bootstrap |
+| compile cache only | supported | Internal app-private module compile cache |
+| snapshot only | unavailable | Requires S8-34 runtime implementation |
+| compile cache plus snapshot | unavailable | Requires S8-34 runtime implementation |
+
+Each mode should record native load, environment creation, bootstrap, first
+module, first bridge call, packaged startup, RSS, and cache size. Until the
+snapshot gate is implemented, performance reports must not infer snapshot
+benefits from warm runs or compile-cache results.
+
 ## Memory Leak Stress
 
 Run the extended leak stress gate on a connected device:

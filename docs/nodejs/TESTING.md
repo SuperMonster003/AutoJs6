@@ -1181,6 +1181,13 @@ Current Embedded Node performance benchmark:
 
 This benchmark writes machine-readable JSON reports to `app/build/reports/nodejs/perf/` after the pull task. It records device/ABI metadata, cold and warm script wall time, runtime `elapsedMs`, native load duration when exposed, RSS/PSS/thread/fd snapshots, and Node `process.memoryUsage()`/`process.resourceUsage()`. It is optional and does not fail release builds by default; pass `autojs.nodejs.perf.failOnThreshold=true` plus threshold instrumentation arguments for controlled severe-regression checks. See `docs/nodejs/PERFORMANCE.md`.
 
+S8-34 startup snapshot support is a design gate only. There is no focused
+device test because no snapshot generation or load path is enabled. The current
+test expectation is that normal bootstrap remains the active and fallback path.
+Future snapshot promotion must add fallback, stale/corrupt manifest, isolation,
+packaged graph, compile-cache interaction, and startup/RSS matrix coverage
+before any runtime behavior changes.
+
 Current Embedded Node memory leak stress gate:
 
 ```powershell

@@ -663,6 +663,24 @@ moduleSources graphs. Node does not expose reliable per-module hit/miss counters
 for that custom-loader path, so diagnostics report
 `hitMissStatus=unavailable_custom_loader` instead of fabricated counts.
 
+## Bootstrap Startup Snapshot
+
+Startup snapshots are not enabled in Node Profile v1.1. The current embedded
+runtime creates a fresh isolate, context, environment, and request-local
+bootstrap source for each execution. Normal bootstrap is both the current path
+and the required fallback path.
+
+The snapshot design gate allows only immutable helper/schema code as a future
+candidate. It must not snapshot V8 `Context` objects, Android `Context` or
+Binder objects, providers, user paths, project roots, permissions, execution
+ids, request env, `moduleSources`, packaged graph contents, open resources,
+or project module cache state.
+
+Future compatibility claims require CJS, ESM, TypeScript-after-stripping,
+dynamic import, packaged graph, compile-cache interaction, and cross-execution
+isolation tests with snapshot enabled. See
+`docs/nodejs/design/BOOTSTRAP_STARTUP_SNAPSHOT.md`.
+
 ## Java Interop Experimental Allowlist
 
 Direct Java and Android interop is disabled by default. Normal builds keep:
