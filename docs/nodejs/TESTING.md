@@ -269,6 +269,21 @@ permission tagging, and pending-call cleanup. Without the enforced `network`
 manifest, the existing synchronous disabled error path remains covered by the
 raw network and security regression tests.
 
+Focused controlled HTTPS client facade instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpsClientFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-22 gate verifies the HTTPS-specific policy layer over the same
+controlled client facade. It covers `https` / `node:https` identity, `https:`
+request dispatch through controlled fetch, safe `https.Agent` shape options,
+request header/body serialization, response metadata/body delivery, bridge
+permission tagging, pending-call cleanup, and fail-closed TLS customization:
+`rejectUnauthorized=false`, custom secure contexts, client certificate fields,
+request-level `createConnection`, and unsafe agent TLS options all reject with
+`ERR_AUTOJS6_NETWORK_POLICY_DENIED`.
+
 Current fixed real npm corpus instrumentation:
 
 ```powershell

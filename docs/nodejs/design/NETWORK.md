@@ -215,7 +215,7 @@ Package-level opt-in:
 }
 ```
 
-The doctor report exposes the bridge capability manifest schema, the `network -> android.permission.INTERNET` mapping, the network provider feature flag state, and the controlled modules (`fetch`, `axios`, and `websocket`). Missing declarations reject bridge calls before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
+The doctor report exposes the bridge capability manifest schema, the `network -> android.permission.INTERNET` mapping, the network provider feature flag state, and the controlled modules (`fetch`, `axios`, `http`/`https` client facade, and `websocket`). Missing declarations reject bridge calls before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 
 ## Timeout
 
@@ -250,6 +250,11 @@ Current behavior:
 - `redirect: "manual"` returns the 3xx response to user code
 - `redirect: "error"` rejects on the first redirect
 
+The controlled `http` / `https` client facade is stricter than global
+`fetch()`: it uses manual redirect handling by default so package-level Node
+client behavior does not silently follow redirects unless `redirect` or
+`maxRedirects` is explicitly configured.
+
 ## Body Budgets
 
 The first implementation is buffer-oriented, not network-stream-oriented.
@@ -280,6 +285,11 @@ Out of scope for v1:
 - TLS socket customization
 
 Any certificate customization needs a separate design gate because it affects privacy, packaging, and user trust.
+
+The controlled `https` client facade enforces this by rejecting
+`rejectUnauthorized=false`, custom secure contexts, client certificate fields,
+request-level `createConnection`, and unsafe agent TLS options with
+`ERR_AUTOJS6_NETWORK_POLICY_DENIED`.
 
 ## Proxy Policy
 

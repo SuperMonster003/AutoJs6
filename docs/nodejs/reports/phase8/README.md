@@ -152,6 +152,11 @@ Current Batch D implementation status:
 - The HTTP facade covers request/response headers, status metadata, buffered
   request body chunks, response `data` / `end`, `pipe()`, timeout, abort, and
   explicit redirect follow through `redirect` or `maxRedirects`.
+- S8-22 is complete for HTTPS-specific policy hardening. Normal certificate
+  validation remains provider-owned, `rejectUnauthorized=false` and custom TLS
+  context/client-certificate fields reject with
+  `ERR_AUTOJS6_NETWORK_POLICY_DENIED`, and certificate pinning remains
+  design-gated.
 - Default scripts still get the existing synchronous disabled error for
   `http.request()` / `https.request()`, and raw `net`/`tls`/`dns`/`dgram`,
   servers, `CONNECT`, and socket upgrades remain unavailable.
@@ -162,9 +167,11 @@ Focused gates:
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebPlatformGlobalsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpClientFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpsClientFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
 
 - `docs/nodejs/reports/phase8/WEB_PLATFORM_GLOBALS.md`
 - `docs/nodejs/reports/phase8/HTTP_CLIENT_FACADE.md`
+- `docs/nodejs/reports/phase8/HTTPS_CLIENT_FACADE.md`
