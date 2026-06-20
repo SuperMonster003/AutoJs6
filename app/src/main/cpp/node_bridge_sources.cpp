@@ -30637,6 +30637,125 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_schedule_task(callback);
     }
   }
+  function __autojs6_limited_http_network_capability_declared() {
+    const manifest = __autojs6_bridge_permission_manifest();
+    return manifest.enforced === true &&
+      __autojs6_bridge_declares_capability(manifest.normalizedPermissions, "network");
+  }
+  function __autojs6_limited_http_controlled_client_enabled() {
+    if (!__autojs6_limited_http_network_capability_declared()) {
+      return false;
+    }
+    if (__autojs6_bridge_transport && typeof __autojs6_bridge_transport.postMessage === "function") {
+      return true;
+    }
+    return !!__autojs6_bridge_live_config();
+  }
+  function __autojs6_limited_http_buffer(chunk, encoding) {
+    const BufferCtor = __autojs6_fetch_buffer_constructor();
+    if (!BufferCtor || typeof BufferCtor.from !== "function") {
+      throw __autojs6_fetch_error(
+        "AutoJs6 controlled HTTP client requires Buffer support.",
+        "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED"
+      );
+    }
+    if (chunk === undefined || chunk === null) {
+      return BufferCtor.from([]);
+    }
+    if (BufferCtor.isBuffer && BufferCtor.isBuffer(chunk)) {
+      return chunk;
+    }
+    if (typeof ArrayBuffer === "function" && chunk instanceof ArrayBuffer) {
+      return BufferCtor.from(new Uint8Array(chunk));
+    }
+    if (typeof ArrayBuffer === "function" && ArrayBuffer.isView && ArrayBuffer.isView(chunk)) {
+      return BufferCtor.from(chunk.buffer, chunk.byteOffset, chunk.byteLength);
+    }
+    return BufferCtor.from(String(chunk), typeof encoding === "string" ? encoding : undefined);
+  }
+  function __autojs6_limited_http_concat(buffers) {
+    const BufferCtor = __autojs6_fetch_buffer_constructor();
+    if (!BufferCtor || typeof BufferCtor.concat !== "function") {
+      throw __autojs6_fetch_error(
+        "AutoJs6 controlled HTTP client requires Buffer support.",
+        "ERR_AUTOJS6_NETWORK_PERMISSION_DENIED"
+      );
+    }
+    return BufferCtor.concat(buffers);
+  }
+  function __autojs6_limited_http_apply_headers(message, headers) {
+    if (!headers || typeof headers !== "object") {
+      return;
+    }
+    if (Array.isArray(headers)) {
+      for (const entry of headers) {
+        if (entry && entry.length >= 2) {
+          message.setHeader(entry[0], entry[1]);
+        }
+      }
+      return;
+    }
+    Object.keys(headers).forEach(function(name) {
+      message.setHeader(name, headers[name]);
+    });
+  }
+  function __autojs6_limited_http_response_headers(headers) {
+    const normalized = new Headers(headers || undefined);
+    const object = Object.create(null);
+    const raw = [];
+    normalized.forEach(function(value, name) {
+      const key = String(name).toLowerCase();
+      object[key] = String(value);
+      raw.push(key, String(value));
+    });
+    return { headers: object, rawHeaders: raw };
+  }
+  function __autojs6_limited_http_protocol_error(expected, actual) {
+    const error = __autojs6_with_error_code(
+      new TypeError("Protocol \"" + String(actual) + "\" not supported. Expected \"" + String(expected) + "\"."),
+      "ERR_INVALID_PROTOCOL"
+    );
+    error.expected = String(expected);
+    error.actual = String(actual);
+    return error;
+  }
+  function __autojs6_limited_http_request_url(protocol, options) {
+    const protocolValue = String(options.protocol || (protocol + ":")).toLowerCase();
+    if (protocolValue !== protocol + ":") {
+      throw __autojs6_limited_http_protocol_error(protocol + ":", protocolValue);
+    }
+    let authority = String(options.host || options.hostname || "localhost");
+    const portText = options.port === undefined || options.port === null || options.port === ""
+      ? ""
+      : String(options.port);
+    if (portText && authority.indexOf(":") < 0) {
+      authority += ":" + portText;
+    }
+    const path = options.path === undefined || options.path === null || options.path === ""
+      ? "/"
+      : String(options.path);
+    return new URL(path, protocolValue + "//" + authority).toString();
+  }
+  function __autojs6_limited_http_request_arguments(protocol, values) {
+    const args = Array.prototype.slice.call(values || []);
+    let callback = null;
+    if (args.length > 0 && typeof args[args.length - 1] === "function") {
+      callback = args.pop();
+    }
+    let options;
+    if (args.length === 0) {
+      options = __autojs6_limited_http_request_options(protocol, undefined);
+    } else if (args.length === 1) {
+      options = __autojs6_limited_http_request_options(protocol, args[0]);
+    } else {
+      const base = __autojs6_limited_http_request_options(protocol, args[0]);
+      const extra = args[1] && typeof args[1] === "object" ? args[1] : Object.create(null);
+      options = __autojs6_limited_http_request_options(protocol, Object.assign({}, base, extra, {
+        headers: extra.headers !== undefined ? extra.headers : base.headers
+      }));
+    }
+    return { options, callback };
+  }
   function __autojs6_limited_http_request_options(protocol, options) {
     const defaults = {
       protocol: protocol + ":",
@@ -30780,7 +30899,7 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     }
     class LimitedClientRequest extends LimitedOutgoingMessage {
-      constructor(options, callback) {
+      constructor(options, callback, autoDispatch) {
         super();
         const normalized = __autojs6_limited_http_request_options(protocol, options);
         this.aborted = false;
@@ -30789,14 +30908,153 @@ std::string buildEmbeddedScriptExecutionSource(
         this.path = normalized.path;
         this.host = normalized.host;
         this.protocol = normalized.protocol || protocol + ":";
+        this.__autojs6Options = normalized;
+        this.__autojs6Chunks = [];
+        this.__autojs6Started = false;
+        this.__autojs6AutoDispatch = autoDispatch === true;
+        this.__autojs6TimeoutMs = __autojs6_fetch_timeout_ms(
+          normalized.timeoutMs === undefined ? normalized.timeout : normalized.timeoutMs
+        );
+        this.__autojs6AbortController = typeof AbortController === "function" ? new AbortController() : null;
+        __autojs6_limited_http_apply_headers(this, normalized.headers);
         if (typeof callback === "function") {
           this.once("response", callback);
         }
       }
+      write(chunk, encoding, callback) {
+        if (typeof encoding === "function") {
+          callback = encoding;
+          encoding = undefined;
+        }
+        if (this.destroyed || this.aborted) {
+          const error = __autojs6_fetch_error(
+            "AutoJs6 controlled HTTP request has been destroyed.",
+            "ERR_AUTOJS6_NETWORK_ABORTED"
+          );
+          __autojs6_limited_http_schedule_callback(function() {
+            if (typeof callback === "function") callback(error);
+          });
+          return false;
+        }
+        try {
+          this.__autojs6Chunks.push(__autojs6_limited_http_buffer(chunk, encoding));
+          __autojs6_limited_http_schedule_callback(callback);
+          return true;
+        } catch (error) {
+          __autojs6_limited_http_schedule_callback(function() {
+            if (typeof callback === "function") callback(error);
+          });
+          throw error;
+        }
+      }
+      end(chunk, encoding, callback) {
+        if (typeof chunk === "function") {
+          callback = chunk;
+          chunk = undefined;
+        } else if (typeof encoding === "function") {
+          callback = encoding;
+          encoding = undefined;
+        }
+        if (chunk !== undefined && chunk !== null) {
+          this.write(chunk, encoding);
+        }
+        this.finished = true;
+        this.writableEnded = true;
+        this.writableFinished = true;
+        __autojs6_limited_http_schedule_callback(callback);
+        if (this.__autojs6AutoDispatch) {
+          this.__autojs6Dispatch();
+        }
+        return this;
+      }
       abort() {
         this.aborted = true;
         this.destroyed = true;
+        if (this.__autojs6AbortController) {
+          try {
+            this.__autojs6AbortController.abort();
+          } catch (_) {}
+        }
+        this.emit("abort");
+        this.emit("close");
         return this;
+      }
+      destroy(error) {
+        if (error && typeof this.listenerCount === "function" && this.listenerCount("error") > 0) {
+          this.emit("error", error);
+        }
+        return this.abort();
+      }
+      setTimeout(timeout, callback) {
+        this.__autojs6TimeoutMs = __autojs6_fetch_timeout_ms(timeout);
+        if (typeof callback === "function") {
+          this.once("timeout", callback);
+        }
+        return this;
+      }
+      __autojs6Dispatch() {
+        if (this.__autojs6Started || this.destroyed || this.aborted) {
+          return;
+        }
+        this.__autojs6Started = true;
+        this.headersSent = true;
+        let url;
+        let body;
+        try {
+          url = __autojs6_limited_http_request_url(protocol, this.__autojs6Options);
+          body = __autojs6_limited_http_concat(this.__autojs6Chunks);
+        } catch (error) {
+          this.emit("error", error);
+          this.emit("close");
+          return;
+        }
+        const fetchInit = {
+          method: this.method,
+          headers: this.getHeaders(),
+          timeoutMs: this.__autojs6TimeoutMs,
+          maxResponseBytes: this.__autojs6Options.maxResponseBytes,
+          maxRedirects: this.__autojs6Options.maxRedirects,
+          redirect: this.__autojs6Options.redirect,
+          signal: this.__autojs6AbortController && this.__autojs6AbortController.signal
+        };
+        if (body.length > 0 || this.method === "POST") {
+          fetchInit.body = body;
+        }
+        const self = this;
+        __autojs6_controlled_fetch(url, fetchInit)
+          .then(function(response) {
+            return response.arrayBuffer().then(function(arrayBuffer) {
+              return { response, body: __autojs6_limited_http_buffer(arrayBuffer) };
+            });
+          })
+          .then(function(result) {
+            if (self.destroyed || self.aborted) {
+              return;
+            }
+            const incoming = new LimitedIncomingMessage();
+            const headerRecord = __autojs6_limited_http_response_headers(result.response.headers);
+            incoming.statusCode = Number(result.response.status);
+            incoming.statusMessage = String(result.response.statusText || STATUS_CODES[incoming.statusCode] || "");
+            incoming.headers = headerRecord.headers;
+            incoming.rawHeaders = headerRecord.rawHeaders;
+            incoming.url = url;
+            __autojs6_schedule_task(function() {
+              self.emit("response", incoming);
+              incoming.__autojs6EmitBody(result.body);
+              self.emit("close");
+            });
+          })
+          .catch(function(error) {
+            if (self.destroyed && !(error && (error.autojs6Code || error.code) === "ERR_AUTOJS6_NETWORK_ABORTED")) {
+              return;
+            }
+            const code = error && (error.autojs6Code || error.code);
+            if (code === "ERR_AUTOJS6_NETWORK_TIMEOUT" || code === "ERR_AUTOJS6_BRIDGE_TIMEOUT") {
+              self.emit("timeout");
+            }
+            self.emit("error", error);
+            self.emit("close");
+          });
       }
     }
     class LimitedIncomingMessage extends nodeEvents.EventEmitter {
@@ -30818,6 +31076,9 @@ std::string buildEmbeddedScriptExecutionSource(
         this.statusMessage = null;
         this.aborted = false;
         this.destroyed = false;
+        this.readable = true;
+        this.readableEnded = false;
+        this.__autojs6Encoding = null;
       }
       setTimeout(timeout, callback) {
         if (typeof callback === "function") {
@@ -30825,12 +31086,46 @@ std::string buildEmbeddedScriptExecutionSource(
         }
         return this;
       }
+      setEncoding(encoding) {
+        this.__autojs6Encoding = encoding === undefined || encoding === null ? "utf8" : String(encoding);
+        return this;
+      }
+      pause() {
+        return this;
+      }
+      resume() {
+        return this;
+      }
+      pipe(destination) {
+        const target = destination;
+        this.on("data", function(chunk) {
+          if (target && typeof target.write === "function") {
+            target.write(chunk);
+          }
+        });
+        this.on("end", function() {
+          if (target && typeof target.end === "function") {
+            target.end();
+          }
+        });
+        return target;
+      }
       destroy(error) {
         this.destroyed = true;
         if (error && typeof this.listenerCount === "function" && this.listenerCount("error") > 0) {
           this.emit("error", error);
         }
         return this;
+      }
+      __autojs6EmitBody(buffer) {
+        const body = buffer || __autojs6_limited_http_buffer("");
+        if (body.length > 0) {
+          this.emit("data", this.__autojs6Encoding ? body.toString(this.__autojs6Encoding) : body);
+        }
+        this.complete = true;
+        this.readableEnded = true;
+        this.emit("end");
+        this.emit("close");
       }
     }
     class LimitedServerResponse extends LimitedOutgoingMessage {
@@ -30948,10 +31243,20 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     }
     function request() {
-      throw __autojs6_limited_http_disabled_error(protocol, "request");
+      if (!__autojs6_limited_http_controlled_client_enabled()) {
+        throw __autojs6_limited_http_disabled_error(protocol, "request");
+      }
+      const parsed = __autojs6_limited_http_request_arguments(protocol, arguments);
+      return new LimitedClientRequest(parsed.options, parsed.callback, true);
     }
     function get() {
-      throw __autojs6_limited_http_disabled_error(protocol, "get");
+      if (!__autojs6_limited_http_controlled_client_enabled()) {
+        throw __autojs6_limited_http_disabled_error(protocol, "get");
+      }
+      const parsed = __autojs6_limited_http_request_arguments(protocol, arguments);
+      const req = new LimitedClientRequest(parsed.options, parsed.callback, true);
+      req.end();
+      return req;
     }
     function createServer(options, requestListener) {
       return new LimitedServer(options, requestListener);
