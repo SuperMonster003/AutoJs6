@@ -131,6 +131,21 @@ normalizes to `node_sandboxed` but remains `design_gated`; the dedicated
 code until the S8-42 Binder capability broker exists. See
 `docs/nodejs/reports/phase8/HARDENED_ISOLATED_RUNTIME_POC.md`.
 
+Current capability broker v2 focused instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeCapabilityBrokerV2InstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies the S8-42 provider-side broker contract: explicit
+module/method declarations, required capability metadata, JSON-array argument
+validation, broker payload size limits, quota-bound per-call audit rows,
+execution-owned diagnostics, and Android provider native diagnostics. This is
+the policy/audit layer for a future Binder broker; it does not make
+`node_sandboxed` executable. See
+`docs/nodejs/reports/phase8/CAPABILITY_BROKER_V2.md`.
+
 Current packaged APK smoke instrumentation:
 
 ```powershell

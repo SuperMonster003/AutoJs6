@@ -1154,6 +1154,10 @@ Current foundation:
 - malformed live bridge requests reject with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST` when a response id can be recovered
 - provider callbacks are accepted at most once per bridge request; duplicate callbacks are ignored
 - synchronous provider dispatch exceptions are converted to bridge failure responses with stable module and method metadata
+- every Android provider request passes through capability broker v2
+  declaration/preflight/audit before existing capability checks and dispatch
+- broker v2 diagnostics expose schema, operation count, request-size limits,
+  audit-row quota, total/rejected/failed/dropped counts, and last-row JSON
 - JS pending bridge calls reject on timeout with `ERR_AUTOJS6_BRIDGE_TIMEOUT`
 - JS pending bridge calls reject on `AbortSignal` cancellation with `ERR_AUTOJS6_BRIDGE_CANCELLED`
 - JS pending bridge calls reject on destroy with `ERR_AUTOJS6_BRIDGE_PROCESS_DEAD`
@@ -1221,6 +1225,16 @@ Default bridge limits:
 - `accessibilityQueriesPerSecond`: `20`, hard max `60`
 
 Overrides outside the documented safe range are ignored and reported in `profile.bridgeLimits.warnings`.
+
+Default capability broker v2 limits:
+
+- retained per-execution audit rows: `64`
+- max request JSON bytes: `65536`
+- max argument JSON bytes per operation: `32768`
+
+Broker v2 is currently provider-side policy/audit only. It does not expose a
+public JavaScript API and does not enable the design-gated `node_sandboxed`
+runtime.
 
 - `toast`
   - `showToast(message, options?): Promise<void>`

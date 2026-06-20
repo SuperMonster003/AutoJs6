@@ -368,6 +368,7 @@ Required bridge properties:
 - a centralized module/method registry for provider routing and diagnostics
 - a per-execution resource registry for provider-owned handles
 - a per-execution concurrency and resource limit policy
+- a capability broker v2 declaration/preflight/audit layer
 - main/UI/IO dispatcher separation
 - callbacks into JS marshalled onto the Node event loop thread
 
@@ -378,6 +379,14 @@ Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activ
 Declaring `network` is required for controlled `fetch`, `axios`, and `websocket` bridge dispatch when a capability manifest is enforced. Packaged builds map that capability to `android.permission.INTERNET`; doctor reports expose the mapping and raw Node network modules remain disabled.
 
 Bridge limit policy is optional and safe by default. Projects may lower or safely raise limits through `node.bridgeLimits` in `project.json` or `autojs6.node.bridgeLimits` in `package.json`; values above the hard maximum are ignored and reported through `profile.bridgeLimits.warnings`. The current policy bounds pending bridge calls, JS image handles, live shell commands, controlled fetch calls, controlled WebSocket sessions, and accessibility requests per second. Resource exhaustion uses `ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`; request-rate exhaustion uses `ERR_AUTOJS6_BRIDGE_RATE_LIMITED`.
+
+Capability broker v2 is the common provider-side security envelope for bridge
+dispatch. Every Android provider request must match an explicit operation
+declaration, carry JSON-array arguments, stay inside broker payload limits,
+record cancellation/execution ownership metadata, and write a quota-bound
+per-call audit row. The broker runs before provider dispatch and before any
+future isolated-process Binder broker can be promoted. It does not grant new
+capabilities or make `node_sandboxed` executable.
 
 Runtime budget policy is a diagnostic and alignment layer over those provider
 limits. Safe `node.runtimeBudget`/`autojs6.node.runtimeBudget` metadata and the

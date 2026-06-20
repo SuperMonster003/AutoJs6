@@ -389,9 +389,12 @@ Current Batch H implementation status:
   user code. `NativeNodeSandboxedScriptService` is declared as a non-exported
   Android `isolatedProcess` service under the `:nodejs_sandboxed` process
   suffix, but no script route targets it until the broker exists.
-- S8-42 remains the next required gate. The Binder capability broker must own
-  declaration, validation, size limits, cancellation, audit metadata, and
-  execution-owned cleanup before `node_sandboxed` can execute code.
+- S8-42 is complete as a provider-side capability broker v2 policy/audit MVP.
+  Every Android bridge provider request now passes through a versioned
+  operation declaration and preflight layer before existing capability audit
+  and dispatch. The broker records quota-bound per-call security audit rows
+  and native diagnostics, but it is not the future cross-process Binder broker
+  yet.
 - S8-43 multi-runtime process pools remain deferred. The current product
   runtime is still one active execution per `:nodejs_embedded` process plus the
   explicit caller-side queue.
@@ -403,9 +406,12 @@ Focused gates:
 ```powershell
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHardenedIsolatedRuntimePocInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeCapabilityBrokerV2InstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
 
 - `docs/nodejs/design/HARDENED_ISOLATED_RUNTIME.md`
 - `docs/nodejs/reports/phase8/HARDENED_ISOLATED_RUNTIME_POC.md`
+- `docs/nodejs/design/CAPABILITY_BROKER_V2.md`
+- `docs/nodejs/reports/phase8/CAPABILITY_BROKER_V2.md`

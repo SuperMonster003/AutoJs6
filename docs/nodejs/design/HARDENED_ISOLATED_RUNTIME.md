@@ -53,7 +53,10 @@ design-gated POC.
 
 ## Required Broker
 
-S8-42 owns the broker design. The minimum broker contract is:
+S8-42 adds the first provider-side broker policy and audit contract in
+`docs/nodejs/design/CAPABILITY_BROKER_V2.md`. The future cross-process Binder
+broker still needs to use that contract before `node_sandboxed` can execute
+code. The minimum Binder broker contract is:
 
 - request and response envelopes are JSON or typed parcelables with schema
   versions;
