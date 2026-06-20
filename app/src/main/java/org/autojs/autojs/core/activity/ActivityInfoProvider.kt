@@ -27,6 +27,13 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
 
     @Volatile
     private var mLatestActivity: String = ""
+
+    @Volatile
+    private var mLatestExternalPackage: String = ""
+
+    @Volatile
+    private var mLatestExternalActivity: String = ""
+
     private var mLatestComponentFromShell: ComponentName? = null
 
     private var mShell: Shell? = null
@@ -51,6 +58,17 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
                 return compFromShell.className
             }
             return mLatestActivity
+        }
+
+    val latestExternalComponent: ComponentName?
+        get() {
+            val compFromShell = mLatestComponentFromShell
+            if (useShell && compFromShell != null && isExternalPackage(compFromShell.packageName)) {
+                return compFromShell
+            }
+            return mLatestExternalPackage.takeIf { it.isNotEmpty() }?.let {
+                ComponentName(it, mLatestExternalActivity)
+            }
         }
 
     var useUsageStats: Boolean = false
@@ -92,6 +110,13 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         return mLatestPackage
     }
 
+    fun getLatestExternalPackageByUsageStatsIfGranted(): String {
+        if (isUsageStatsPermissionGranted(context)) {
+            return getLatestExternalPackageByUsageStats()
+        }
+        return mLatestExternalPackage
+    }
+
     private fun setLatestComponentFromShellOutput(output: String) {
         val matcher = WINDOW_PATTERN.matcher(output)
         if (!matcher.find() || matcher.groupCount() < 1) {
@@ -110,6 +135,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         Log.d(LOG_TAG, "setLatestComponent: output = $output, comp = $latestPackage/$latestActivity")
         if (latestPackage != null) {
             mLatestComponentFromShell = ComponentName(latestPackage, latestActivity)
+            setLatestExternalComponent(latestPackage, latestActivity)
         }
     }
 
@@ -140,11 +166,25 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val current = System.currentTimeMillis()
         val beginTime = current - 60 * 60 * 1000
-        val usageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, beginTime, current)
-        return when {
-            usageStats.isEmpty() -> mLatestPackage
-            else -> usageStats.apply { sortBy { it.lastTimeStamp } }.last().packageName
-        }
+        val usageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, beginTime, current).orEmpty()
+        return usageStats
+            .filter { it.packageName?.let(::isPackageExists) == true }
+            .maxByOrNull { it.lastTimeUsed }
+            ?.packageName
+            ?.also { mLatestPackage = it }
+            ?: mLatestPackage
+    }
+
+    private fun getLatestExternalPackageByUsageStats(): String {
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val current = System.currentTimeMillis()
+        val beginTime = current - 60 * 60 * 1000
+        val usageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, beginTime, current).orEmpty()
+        return usageStats
+            .filter { it.packageName?.let { packageName -> isExternalPackage(packageName) && isPackageExists(packageName) } == true }
+            .maxByOrNull { it.lastTimeUsed }
+            ?.packageName
+            ?: mLatestExternalPackage
     }
 
     private fun setLatestComponent(latestPackage: CharSequence?, latestClass: CharSequence?) {
@@ -155,8 +195,20 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         if (isPackageExists(latestPackageStr)) {
             mLatestPackage = latestPackage.toString()
             mLatestActivity = latestClassStr
+            setLatestExternalComponent(latestPackageStr, latestClassStr)
         }
         Log.d(LOG_TAG, "setLatestComponent: $latestPackage/$latestClassStr $mLatestPackage/$mLatestActivity")
+    }
+
+    private fun setLatestExternalComponent(packageName: String, className: String) {
+        if (isExternalPackage(packageName) && isPackageExists(packageName)) {
+            mLatestExternalPackage = packageName
+            mLatestExternalActivity = className
+        }
+    }
+
+    private fun isExternalPackage(packageName: String): Boolean {
+        return packageName.isNotEmpty() && packageName != context.packageName && !packageName.contains(":")
     }
 
     private fun isPackageExists(packageName: String) = try {

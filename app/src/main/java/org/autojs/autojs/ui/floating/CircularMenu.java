@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.floating;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -274,6 +275,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
             }
         });
         binding.actionMenuMore.setOnClickListener(v -> {
+            captureCurrentComponentBeforeDialog();
             mWindow.collapse();
 
             if (mMenuOperationDialog != null && mMenuOperationDialog.isShowing()) {
@@ -284,13 +286,13 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
                     .item(R.drawable.ic_accessibility_black_48dp, mContext.getString(R.string.text_a11y_service), this::getA11yState, onCircularMenuItemClick(itemView -> {
                         mA11yTool.launchSettings(false, true);
                     }))
-                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_package), this::getCurrentPackage, onCircularMenuItemClick(itemView -> {
+                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_package), this::getCurrentPackageText, onCircularMenuItemClick(itemView -> {
                         if (!TextUtils.isEmpty(mCurrentPackage)) {
                             ClipboardUtils.setClip(mContext, mCurrentPackage);
                             ViewUtils.showToast(mContext, getTextAlreadyCopied(R.string.text_latest_package));
                         }
                     }))
-                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_activity), this::getCurrentActivity, onCircularMenuItemClick(itemView -> {
+                    .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_activity), this::getCurrentActivityText, onCircularMenuItemClick(itemView -> {
                         if (!TextUtils.isEmpty(mCurrentActivity)) {
                             ClipboardUtils.setClip(mContext, mCurrentActivity);
                             ViewUtils.showToast(mContext, getTextAlreadyCopied(R.string.text_latest_activity));
@@ -329,6 +331,12 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     @NonNull
     private String getPointerLocationState() {
         return mPointerLocationTool.isShowing() ? mContext.getString(R.string.text_enabled) : mContext.getString(R.string.text_disabled);
+    }
+
+    private void captureCurrentComponentBeforeDialog() {
+        CurrentComponent currentComponent = resolveCurrentComponent();
+        mCurrentPackage = currentComponent == null ? "" : currentComponent.packageName();
+        mCurrentActivity = currentComponent == null ? "" : currentComponent.activityName();
     }
 
     @NonNull
@@ -441,60 +449,87 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         mWindow.savePosition(newConfig);
     }
 
-    private String getCurrentPackage() {
-        if (WrappedShizuku.INSTANCE.isOperational()) {
-            try {
-                IUserService service = WrappedShizuku.getServiceOrNull();
-                if (service != null) {
-                    mCurrentPackage = service.currentPackage();
-                    if (!TextUtils.isEmpty(mCurrentPackage)) {
-                        return mCurrentPackage;
-                    }
-                }
-            } catch (RemoteException ignored) {
-                /* Ignored. */
-            }
+    private CurrentComponent resolveCurrentComponent() {
+        CurrentComponent component = getCurrentComponentByShizuku();
+        if (component != null) {
+            return component;
         }
-        if (RootUtils.isRootAvailable()) {
-            mCurrentPackage = Shell.currentPackageRhino();
-            if (!TextUtils.isEmpty(mCurrentPackage)) {
-                return mCurrentPackage;
-            }
+        component = getCurrentComponentByRoot();
+        if (component != null) {
+            return component;
         }
-        ActivityInfoProvider infoProvider = AutoJs.getInstance().getInfoProvider();
-        mCurrentPackage = infoProvider.getLatestPackageByUsageStatsIfGranted();
-        if (!TextUtils.isEmpty(mCurrentPackage)) {
-            return mCurrentPackage;
-        }
-        return getEmptyInfoHint();
+        return getCurrentComponentByAccessibility();
     }
 
-    private String getCurrentActivity() {
+    private CurrentComponent getCurrentComponentByShizuku() {
         if (WrappedShizuku.INSTANCE.isOperational()) {
             try {
                 IUserService service = WrappedShizuku.getServiceOrNull();
                 if (service != null) {
-                    mCurrentActivity = service.currentActivity();
-                    if (!TextUtils.isEmpty(mCurrentActivity)) {
-                        return mCurrentActivity;
-                    }
+                    return createCurrentComponent(service.currentComponent());
                 }
             } catch (RemoteException ignored) {
                 /* Ignored. */
             }
         }
+        return null;
+    }
+
+    private CurrentComponent getCurrentComponentByRoot() {
         if (RootUtils.isRootAvailable()) {
-            mCurrentActivity = Shell.currentActivityRhino();
-            if (!TextUtils.isEmpty(mCurrentActivity)) {
-                return mCurrentActivity;
-            }
+            return createCurrentComponent(Shell.currentComponentRhino());
         }
+        return null;
+    }
+
+    private CurrentComponent getCurrentComponentByAccessibility() {
         ActivityInfoProvider infoProvider = AutoJs.getInstance().getInfoProvider();
-        mCurrentActivity = infoProvider.getLatestActivity();
-        if (!TextUtils.isEmpty(mCurrentActivity)) {
-            return mCurrentActivity;
+        CurrentComponent component = createCurrentComponent(infoProvider.getLatestExternalComponent());
+        if (component != null) {
+            return component;
         }
-        return getEmptyInfoHint();
+        return createCurrentComponent(infoProvider.getLatestExternalPackageByUsageStatsIfGranted(), "");
+    }
+
+    private CurrentComponent createCurrentComponent(String flattenedComponent) {
+        if (TextUtils.isEmpty(flattenedComponent)) {
+            return null;
+        }
+        ComponentName componentName = ComponentName.unflattenFromString(flattenedComponent);
+        if (componentName != null) {
+            return createCurrentComponent(componentName);
+        }
+        int separator = flattenedComponent.indexOf('/');
+        if (separator <= 0) {
+            return null;
+        }
+        return createCurrentComponent(flattenedComponent.substring(0, separator), flattenedComponent.substring(separator + 1));
+    }
+
+    private CurrentComponent createCurrentComponent(ComponentName componentName) {
+        if (componentName == null) {
+            return null;
+        }
+        return createCurrentComponent(componentName.getPackageName(), componentName.getClassName());
+    }
+
+    private CurrentComponent createCurrentComponent(String packageName, String activityName) {
+        if (!isExternalPackage(packageName)) {
+            return null;
+        }
+        return new CurrentComponent(packageName, activityName == null ? "" : activityName);
+    }
+
+    private boolean isExternalPackage(String packageName) {
+        return !TextUtils.isEmpty(packageName) && !mContext.getPackageName().equals(packageName);
+    }
+
+    private String getCurrentPackageText() {
+        return TextUtils.isEmpty(mCurrentPackage) ? getEmptyInfoHint() : mCurrentPackage;
+    }
+
+    private String getCurrentActivityText() {
+        return TextUtils.isEmpty(mCurrentActivity) ? getEmptyInfoHint() : mCurrentActivity;
     }
 
     private String getEmptyInfoHint() {
@@ -532,6 +567,10 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
         return MessageFormat.format("{0} ({1})",
                 mContext.getString(R.string.text_already_copied_to_clip),
                 mContext.getString(actionResId).toLowerCase(Language.getPrefLanguage().getLocale()));
+    }
+
+    private record CurrentComponent(String packageName, String activityName) {
+        /* Empty record body. */
     }
 
     public void close() {
