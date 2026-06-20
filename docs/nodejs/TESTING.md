@@ -254,6 +254,21 @@ gzip roundtrip behavior, and default controlled-network-off `fetch()` denial.
 It is the compatibility prelude for later `node:http`/`node:https` client
 facade work and does not enable raw socket modules.
 
+Focused controlled HTTP client facade instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpClientFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-21 gate verifies the controlled `http` / `node:http` and `https` /
+`node:https` client facade when an enforced manifest declares `network`. It
+covers `request()` / `get()`, request headers, response headers/status metadata,
+buffered request body chunks, response `data` / `end`, `pipe()`, timeout,
+abort, default manual redirect handling, explicit `maxRedirects` follow, bridge
+permission tagging, and pending-call cleanup. Without the enforced `network`
+manifest, the existing synchronous disabled error path remains covered by the
+raw network and security regression tests.
+
 Current fixed real npm corpus instrumentation:
 
 ```powershell
@@ -748,6 +763,11 @@ Current raw network policy focused instrumentation:
 ```
 
 This suite verifies that controlled `fetch` and `websocket` modules cannot be shadowed, raw `http`, `https`, `net`, `tls`, `dns`, `dns/promises`, and `dgram` stay denied, `node:` aliases stay denied or limited in the same way, and local `node_modules` fixtures cannot bypass the Safe Node Profile network policy.
+
+S8-21 keeps this default-denial policy intact. The controlled `http`/`https`
+client facade runs only with an enforced manifest declaring `network`, and still
+does not expose servers, raw sockets, DNS, TLS sessions, `CONNECT` tunneling, or
+socket upgrades.
 
 Task 123 GA evaluation report: [reports/NETWORK_EVALUATION.md](reports/NETWORK_EVALUATION.md).
 

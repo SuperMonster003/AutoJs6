@@ -146,15 +146,25 @@ Current Batch D implementation status:
   `DecompressionStream` are covered by a focused Sony instrumentation gate.
 - The gate also verifies that default global `fetch()` remains denied when the
   controlled network capability is not enabled.
-- Raw `http`/`https`/`net`/`tls`/`dns`/`dgram` I/O remains disabled; S8-21+
-  will decide any HTTP client facade behavior separately.
+- S8-21 is complete for the controlled `node:http` / `node:https` client
+  facade. `request()` and `get()` can dispatch through controlled fetch only
+  when an enforced bridge manifest declares `network`.
+- The HTTP facade covers request/response headers, status metadata, buffered
+  request body chunks, response `data` / `end`, `pipe()`, timeout, abort, and
+  explicit redirect follow through `redirect` or `maxRedirects`.
+- Default scripts still get the existing synchronous disabled error for
+  `http.request()` / `https.request()`, and raw `net`/`tls`/`dns`/`dgram`,
+  servers, `CONNECT`, and socket upgrades remain unavailable.
 
-Focused gate:
+Focused gates:
 
 ```powershell
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebPlatformGlobalsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHttpClientFacadeInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
-Detailed Web Platform global coverage is recorded in
-`docs/nodejs/reports/phase8/WEB_PLATFORM_GLOBALS.md`.
+Detailed coverage is recorded in:
+
+- `docs/nodejs/reports/phase8/WEB_PLATFORM_GLOBALS.md`
+- `docs/nodejs/reports/phase8/HTTP_CLIENT_FACADE.md`
