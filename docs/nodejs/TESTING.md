@@ -1234,6 +1234,21 @@ No endpoint, port binding, ADB forwarding target, or active-session
 notification exists while the design gate remains disabled. See
 `docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`.
 
+S8-38 ADB forwarding and Chrome DevTools attach are currently deferred by the
+disabled inspector gate. There is no `start inspector`, `retrieve port/url`,
+`adb forward`, DevTools attach, or `stop inspector` test command because no
+runtime endpoint exists. Future promotion must add positive debug-build attach
+coverage for breakpoints, pause/resume, console, async stacks, source maps, ESM
+source names, and lightweight TypeScript source names. See
+`docs/nodejs/reports/phase8/DEVTOOLS_ADB_FORWARD_GATE.md`.
+
+S8-39 CPU and heap profiling are currently deferred by the disabled inspector
+gate. The runtime does not emit `.cpuprofile`, `.heapsnapshot`, allocation
+sampling, or inspector-owned profiling exports. Future promotion must verify
+app-private artifact storage, explicit export/pull, service-stop cleanup,
+metadata redaction, and packaged release denial. See
+`docs/nodejs/reports/phase8/INSPECTOR_PROFILING_GATE.md`.
+
 Current Embedded Node memory leak stress gate:
 
 ```powershell

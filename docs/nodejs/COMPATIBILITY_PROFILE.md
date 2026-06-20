@@ -761,6 +761,8 @@ Network-related limited builtins may exist for feature detection and stable deni
 
 `inspector` is intentionally disabled, including debugger port binding and script-visible inspector APIs. S8-37 adds a focused disabled-state gate that proves metadata cannot enable the feature flag, `node_modules/inspector` cannot shadow the policy, process debugging APIs remain inert, and `NODE_OPTIONS` / `NODE_INSPECT_RESUME_ON_START` are filtered from script-visible `process.env`. A future positive implementation must be debug-build-only and must prove explicit user action, loopback binding, visible/revocable active-session state, lifecycle close, and packaged APK denial. See `docs/nodejs/design/INSPECTOR.md` and `docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`.
 
+ADB forwarding, Chrome DevTools attach, CPU profiles, heap snapshots, allocation sampling, and inspector-owned profiling exports are also disabled. S8-38 and S8-39 are documented as deferred gates because the current runtime exposes no inspector endpoint or profiler channel. See `docs/nodejs/reports/phase8/DEVTOOLS_ADB_FORWARD_GATE.md` and `docs/nodejs/reports/phase8/INSPECTOR_PROFILING_GATE.md`.
+
 ## ESM Status
 
 `.mjs` routes to Node and ESM execution is a default partial capability in Node Profile v1.1.

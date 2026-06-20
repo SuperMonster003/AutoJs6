@@ -63,6 +63,26 @@ If a future task implements inspector support, the minimum binding policy is:
 
 On Android, opening a socket may require `android.permission.INTERNET`. That permission is broad, so inspector support must not add it to normal main-app or packaged APK release manifests merely for debugging. Debug variants may opt in explicitly.
 
+## ADB Forward And DevTools Workflow
+
+S8-38 remains deferred while S8-37 keeps inspector disabled. There is currently
+no device endpoint, no port, no ADB forward target, and no Chrome DevTools URL.
+
+A future workflow must be host-assisted but runtime-owned:
+
+- AutoJs6 starts the session only from trusted debug UI or host/debug command.
+- The device listener binds loopback only and uses a random ephemeral port.
+- A structured session descriptor exposes execution id, loopback host, device
+  port, opaque WebSocket path/token, and expiry.
+- The host tool creates `adb forward tcp:<host-port> tcp:<device-port>`.
+- DevTools attaches through `127.0.0.1:<host-port>`, not a public interface.
+- Stop/revoke removes the active session and gives the host deterministic
+  cleanup instructions for the ADB forward.
+
+Breakpoints, pause/resume, console, async stacks, source maps, ESM source
+names, and lightweight TypeScript source names are acceptance criteria for a
+future positive gate, not current runtime behavior.
+
 ## WebSocket Transport
 
 The Node inspector protocol uses WebSocket transport, but it is not the same as AutoJs6's controlled `websocket` bridge module.
@@ -88,6 +108,23 @@ Future design must prove:
 - `node::Stop()` and service destroy close the inspector session deterministically
 - heap snapshot and CPU profile operations are bounded or explicitly user-controlled
 - crash diagnostics distinguish inspector crashes from script crashes
+
+## Profiling And Heap Snapshots
+
+S8-39 also remains deferred while inspector is disabled. The current runtime
+does not emit `.cpuprofile`, `.heapsnapshot`, allocation sampling, or
+inspector-owned event-loop reports.
+
+Future profiling support must:
+
+- require explicit user action for CPU profiles and heap snapshots
+- keep raw artifacts under app-private diagnostics until explicit export
+- correlate profiles with execution id, event-loop utilization, bridge resource
+  counters, memory/RSS samples, and cleanup state
+- redact project-sensitive metadata from summaries
+- close profiler sessions on script stop, timeout, crash, service destroy, or
+  user revoke
+- deny packaged release profiling
 
 ## Packaged APK Policy
 

@@ -97,7 +97,10 @@ overrides, and local package shadowing must all fail closed. Script-visible
 user-provided startup/debugger env values cannot become an implied inspector
 contract. Future inspector support must be debug-build-only and prove
 loopback-only binding, explicit user action, visible and revocable session
-state, deterministic shutdown, and packaged release denial.
+state, deterministic shutdown, and packaged release denial. ADB forwarding,
+DevTools attach, CPU profiles, heap snapshots, allocation sampling, and
+profiler artifact export remain unavailable until that inspector channel exists
+and stores raw artifacts under app-private diagnostics before explicit export.
 
 `module` and `node:module` are limited compatibility builtins, not loader authority. The safe subset exposes `createRequire`, `isBuiltin`, `builtinModules`, and a no-op `syncBuiltinESMExports` only. `createRequire` must stay scoped to a file inside the current working directory and must keep using the AutoJs6 resolver and builtin policy. Loader internals such as `Module`, `_load`, `_resolveFilename`, `_compile`, `wrap`, `globalPaths`, `register`, `registerHooks`, `enableCompileCache`, `flushCompileCache`, and compile-cache constants remain absent. The module compile cache is enabled only by the internal bootstrap against an app-private cache directory; `AUTOJS6_NODE_COMPILE_CACHE_*`, `NODE_COMPILE_CACHE`, and `NODE_DISABLE_COMPILE_CACHE` are filtered from script-visible `process.env`, so user code cannot redirect or disable the internal cache path.
 
