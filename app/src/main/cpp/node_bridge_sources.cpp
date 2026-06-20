@@ -21485,6 +21485,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_scoped_fs_watch_records = [];
   let __autojs6_scoped_fd_records = Object.create(null);
   let __autojs6_scoped_fd_next_id = 1;
+  const __autojs6_scoped_fs_recursive_entry_limit = 4096;
   let __autojs6_deferred_success_waiting = false;
   let __autojs6_deferred_success_value = undefined;
   function __autojs6_pending_callback_count() {
@@ -23439,6 +23440,15 @@ std::string buildEmbeddedScriptExecutionSource(
     if (encoding !== undefined) {
       direntReadOptions.encoding = encoding;
     }
+    function pushResult(value) {
+      if (results.length >= __autojs6_scoped_fs_recursive_entry_limit) {
+        throw __autojs6_out_of_range(
+          "Embedded Node scoped fs " + op + " recursive entry limit exceeded: " +
+            __autojs6_scoped_fs_recursive_entry_limit
+        );
+      }
+      results.push(value);
+    }
     function encodedName(relativePath) {
       if (encoding !== "buffer") {
         return relativePath;
@@ -23461,9 +23471,9 @@ std::string buildEmbeddedScriptExecutionSource(
           ? path.join(relativeDir, nameText)
           : nameText;
         if (withFileTypes) {
-          results.push(__autojs6_limited_dirent(nativeEntry, parentPath));
+          pushResult(__autojs6_limited_dirent(nativeEntry, parentPath));
         } else {
-          results.push(encodedName(childRelative));
+          pushResult(encodedName(childRelative));
         }
         if (
           nativeEntry &&
