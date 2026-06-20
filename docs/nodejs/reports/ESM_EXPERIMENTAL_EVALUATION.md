@@ -16,7 +16,7 @@ Do not promote it to partial support yet, and do not hide it. The current subset
 - packaged APK support is limited to focused diagnostics/single-file smoke paths
 - encrypted packaged ESM graphs remain design-gated
 - dynamic import is a separate experiment and intentionally narrower than static ESM
-- `import.meta`, loader hooks, `node:module` loader authority, URL/network imports, and CJS `require()` of ESM were unsupported for the v1 GA evaluation; Node Profile v1.1 Phase 8 later adds CJS `require()` support for synchronous partial ESM graphs only
+- `import.meta`, loader hooks, `node:module` loader authority, URL/network imports, and CJS `require()` of ESM were unsupported for the v1 GA evaluation; Node Profile v1.1 Phase 8 later adds CJS `require()` support for synchronous partial ESM graphs and scoped `import.meta` metadata/resolution
 - service cancellation/destroy behavior while ESM linking or evaluation is pending still needs a dedicated gate
 
 ## Commands Run

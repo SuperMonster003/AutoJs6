@@ -24,8 +24,9 @@ because these gaps remain:
   graph smoke, not broad package/export graph support;
 - dynamic import is local-only partial support; broad package graphs, file URLs,
   and loader hooks remain out of scope;
-- `import.meta`, loader hooks, raw `node:module` loader authority, and
-  URL/network imports remain unsupported;
+- `import.meta` is limited to scoped metadata and `resolve()`; loader hooks,
+  raw `node:module` loader authority, and URL/network imports remain
+  unsupported;
 - CJS `require()` is limited to synchronous partial ESM graphs and rejects ESM
   graphs containing `await` or dynamic `import()` with `ERR_REQUIRE_ASYNC_MODULE`;
 - service destroy/cancellation while ESM linking or evaluation is pending still
@@ -80,6 +81,7 @@ hit/miss status.
 | CJS `require()` of ESM | Pass as partial | Synchronous graphs return the ESM namespace object; async graphs fail with `ERR_REQUIRE_ASYNC_MODULE`. |
 | top-level await | Pass as partial | Covered in focused ESM tests. |
 | dynamic import | Pass as partial | Local `.mjs`/CJS, allowed builtin, and scoped package imports pass; disabled builtin, URL, absolute, escape, eval, and Function paths remain denied. |
+| `import.meta` | Pass as partial | S8-17 covers `url`, `filename`, `dirname`, `main`, scoped `resolve()` for local/package/allowed-builtin specifiers, and disabled builtin denial. |
 | source maps | Pass after fix | Inline and scoped external maps now map result `errorStack`; external escapes remain denied. |
 | real npm corpus | Insufficient | Existing corpus is CommonJS-only and explicitly excludes `type=module`. |
 | packaged APK | Partial | `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; packaged dynamic import covers local `.mjs` and CJS targets, while broad package graphs are not supported. |
@@ -139,5 +141,5 @@ Before reconsidering partial promotion, add:
 - packaged verifier metadata for ESM graph source count, source kinds, and
   package condition context;
 - service destroy/cancellation tests during ESM linking and top-level await;
-- `import.meta` decision tests;
+- broader `import.meta` packaged and encrypted-source URL policy tests;
 - source-map stack tests for ESM module frames, not only main CommonJS frames.

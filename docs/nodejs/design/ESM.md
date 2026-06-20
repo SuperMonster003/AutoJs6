@@ -61,7 +61,7 @@ Default behavior:
 - `.js` entries run as ESM only when the nearest scoped `package.json` contains `"type": "module"`.
 - static `import`/`export` syntax in CommonJS entries still fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
 - dynamic `import()` supports local-only package, builtin, `.mjs`, and CommonJS imports.
-- `import.meta` fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
+- `import.meta` exposes scoped `url`, `filename`, `dirname`, `main`, and `resolve()`.
 - CommonJS `require()` can synchronously load `.mjs`, `.mts`, and `type=module` `.js` targets when the partial ESM graph has no `await` token and no dynamic `import()`.
 - CommonJS `require()` of an asynchronous partial ESM graph fails with `ERR_REQUIRE_ASYNC_MODULE`.
 - JSON ESM imports require import attributes: `import config from "./config.json" with { type: "json" }`.
@@ -82,6 +82,7 @@ flag to false preserves the previous fail-closed path for diagnostics.
 - ESM self-reference and nested package imports use the ESM condition set.
 - CommonJS `require()` may load synchronous partial ESM targets without changing CommonJS package condition order.
 - ESM may import scoped JSON modules only with `with { type: "json" }`; the resulting default export shares the existing CommonJS JSON cache object.
+- ESM exposes `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)` for AutoJs6-managed modules. `resolve()` reuses the scoped ESM resolver, returns `file:` URLs for local/package targets, returns `node:` URLs for allowed builtins, and keeps disabled builtins denied.
 - simple named exports are supported for local `.mjs` modules.
 - top-level await is supported because the partial ESM graph is evaluated through an async runner.
 - diagnostics are emitted in the result envelope:
@@ -96,13 +97,13 @@ flag to false preserves the previous fail-closed path for diagnostics.
 
 Still unsupported in v1:
 
-- `import.meta`
 - CJS `require()` of asynchronous ESM graphs that contain `await` or dynamic `import()`; this fails with `ERR_REQUIRE_ASYNC_MODULE`
 - legacy ESM JSON import assertions (`assert { type: "json" }`); use import attributes instead
 - unknown import attributes or import attributes on non-JSON modules
 - custom loaders and `node:module` loader hooks
 - network, `file:`, `data:`, or other URL imports
 - imports outside `workingDirectory`
+- Node's full `import.meta` loader surface beyond `url`, `filename`, `dirname`, `main`, and scoped `resolve()`
 
 ## Routing Decisions
 
@@ -215,19 +216,28 @@ Dynamic import still must answer in future phases:
 
 The current implementation rewrites `import()` to the AutoJs6-managed loader instead of using Node's raw ESM loader.
 
-## import.meta.url
+## import.meta
 
-Current default: disabled.
+Current default: partial support for AutoJs6-managed ESM modules.
 
-Future behavior must avoid leaking unrestricted absolute host paths.
+Supported fields:
 
-Allowed directions:
+- `import.meta.url`: scoped `file:` URL for the resolved module filename.
+- `import.meta.filename`: resolved scoped module filename.
+- `import.meta.dirname`: resolved scoped module directory.
+- `import.meta.main`: `true` only for the ESM entry module.
+- `import.meta.resolve(specifier)`: scoped resolver using the same package, builtin, and filesystem policy as static ESM imports.
 
-- scoped `file:` URLs only after the file URL policy can validate them
-- `autojs6-node:` virtual URLs for encrypted or moduleSources-backed entries
-- stable source names for stack traces without exposing private cache extraction paths
+`import.meta.resolve()` does not invoke Node's raw ESM loader. It returns `file:`
+URLs for local and package targets, returns `node:` URLs for allowed builtins,
+and rejects disabled builtins such as `node:child_process`. URL, network,
+absolute-path, package-target escape, native addon, and disabled builtin
+boundaries remain unchanged.
 
-`import.meta.resolve` is out of scope for v1.
+The metadata object is frozen and does not expose loader hooks, raw
+`node:module` authority, package cache mutation, or unrestricted file URL
+imports. Future work may introduce virtual URLs for encrypted packaged sources,
+but v1.1 still treats broad file URL import semantics as unsupported.
 
 ## Package Exports Conditions
 
@@ -294,7 +304,7 @@ The partial profile must keep tests for:
 
 - explicit ESM-off requests reject `.mjs` with the documented message
 - CommonJS entries reject static import/export syntax and dynamic import when the dynamic gate is off
-- `import.meta` remains rejected until a file URL policy is selected
+- `import.meta` exposes scoped metadata, resolves local/package/allowed-builtin specifiers, and rejects disabled builtins
 - minimal `.mjs` entry smoke
 - package `type=module` `.js` entry smoke
 - CJS requiring ESM rejection or interop behavior
@@ -309,4 +319,4 @@ The partial profile must keep tests for:
 
 ## Current Decision
 
-ESM is partial and enabled by default for Node Profile v1.1. Partial v1.1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, CJS `require()` of synchronous ESM graphs, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, local-only dynamic import, and a focused packaged `.mjs` graph smoke with refreshed template support. Dynamic import is limited to local relative modules, allowed builtins, and packages resolved inside `workingDirectory`. This path still does not enable loader hooks, raw `node:module` loader authority, network imports, CJS `require()` of asynchronous ESM graphs, unrestricted file URLs, or unrestricted packaged encrypted ESM graphs.
+ESM is partial and enabled by default for Node Profile v1.1. Partial v1.1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, CJS `require()` of synchronous ESM graphs, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, scoped `import.meta` metadata and resolution, diagnostics, local-only dynamic import, and a focused packaged `.mjs` graph smoke with refreshed template support. Dynamic import is limited to local relative modules, allowed builtins, and packages resolved inside `workingDirectory`. This path still does not enable loader hooks, raw `node:module` loader authority, network imports, CJS `require()` of asynchronous ESM graphs, unrestricted file URLs, or unrestricted packaged encrypted ESM graphs.

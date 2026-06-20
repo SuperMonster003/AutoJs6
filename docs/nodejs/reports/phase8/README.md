@@ -108,6 +108,11 @@ Current Batch C implementation status:
 - JSON ESM imports reuse the existing CommonJS JSON parser/cache; missing
   attributes, unknown attributes, and legacy `assert { type: "json" }` syntax
   reject with the partial ESM unsupported error.
+- `import.meta.url`, `filename`, `dirname`, `main`, and `resolve()` are
+  available for AutoJs6-managed ESM modules.
+- `import.meta.resolve()` reuses the scoped ESM resolver, returns `file:` URLs
+  for local/package targets and `node:` URLs for allowed builtins, and keeps
+  disabled builtins denied.
 
 Focused gates:
 
