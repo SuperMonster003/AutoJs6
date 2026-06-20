@@ -114,13 +114,23 @@ Current Batch C implementation status:
 - `import.meta.resolve()` reuses the scoped ESM resolver, returns `file:` URLs
   for local/package targets and `node:` URLs for allowed builtins, and keeps
   disabled builtins denied.
+- The S8-19 module conformance v2 corpus is checked in under
+  `app/src/androidTest/assets/node_compat_corpus_v2/` and runs through
+  `NodeCompatCorpusInstrumentationTest`. It covers `require(esm)`, async/TLA
+  rejection, JSON import attributes, ESM/CJS cycles, `import.meta.resolve`, the
+  `autojs6` package condition, `.mts`/`.cts` mixed graphs, and packaged
+  moduleSources mixed graphs.
 
 Focused gates:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:compileAppDebugKotlin :app:compileAppDebugAndroidTestKotlin
 ```
 
 Packaged smoke expectations now cover both the positive packaged `.mjs`
 `require()` path and the async-graph denial path.
+
+Detailed corpus classification is recorded in
+`docs/nodejs/reports/phase8/MODULE_CONFORMANCE_V2.md`.

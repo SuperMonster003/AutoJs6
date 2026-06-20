@@ -239,6 +239,8 @@ Current compatibility corpus instrumentation:
 
 This suite copies `app/src/androidTest/assets/node_compat_corpus/` into a scoped working directory and verifies pure JavaScript CommonJS package patterns: basic CJS, deep dependencies, package `exports`, package `imports`, self-reference, JSON module caching, `util.promisify(fs)`, `Buffer`/`path`/`util`, and disabled-feature detection. It also runs a moduleSources/preload-shaped fixture as a packaged-preload proxy and verifies moduleSources budget behavior: within-budget execution passes, over-count and over-byte requests fail with `ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED`.
 
+The same test class also runs the S8-19 module conformance v2 corpus from `app/src/androidTest/assets/node_compat_corpus_v2/`. That corpus covers CommonJS `require()` of synchronous ESM graphs, async/TLA ESM rejection with `ERR_REQUIRE_ASYNC_MODULE`, JSON import attributes with CommonJS JSON cache sharing, ESM/CommonJS cycles, scoped `import.meta.resolve()`, the `autojs6` package condition, `.mts`/`.cts` mixed graphs, and a packaged moduleSources mixed graph with ESM, CommonJS, JSON, dynamic import, and lightweight TypeScript sources.
+
 Current fixed real npm corpus instrumentation:
 
 ```powershell

@@ -274,7 +274,11 @@ Unsupported or rejected module source forms:
 
 The reusable compatibility corpus lives under `app/src/androidTest/assets/node_compat_corpus/` and is executed by
 `NodeCompatCorpusInstrumentationTest`. It covers pure JavaScript CommonJS package patterns that should remain stable across
-future builtin and bridge work.
+future builtin and bridge work. The S8-19 module conformance v2 corpus lives under
+`app/src/androidTest/assets/node_compat_corpus_v2/` and is executed by the same test class. It freezes the v1.1 mixed-module
+boundary for CJS `require(esm)`, async ESM graph rejection, JSON import attributes, ESM/CJS cycles, scoped
+`import.meta.resolve()`, the `autojs6` package condition, `.mts`/`.cts` mixed graphs, and packaged moduleSources mixed
+graphs.
 
 The fixed real package corpus lives under `app/src/androidTest/assets/npm_compat_real/` and is executed by
 `NodeRealNpmCompatInstrumentationTest`. It vendors offline, license-noted CommonJS package snapshots that cover tested

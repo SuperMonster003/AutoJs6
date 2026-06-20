@@ -104,6 +104,9 @@ small set of already-gated features toward practical use.
 - ESM `import.meta` exposes scoped metadata, resolves local/package/allowed
   builtin specifiers, and rejects disabled builtins with stable AutoJs6 error
   metadata.
+- Module conformance v2 corpus passes for `require(esm)`, async ESM rejection,
+  JSON import attributes, ESM/CJS cycles, `import.meta.resolve`, custom package
+  conditions, TypeScript mixed graphs, and packaged moduleSources mixed graphs.
 - Packaged `.mjs` graph smoke passes with refreshed template support.
 - Dynamic import local-only smoke passes for `.mjs`, CommonJS, allowed builtins,
   and packages, while URL, absolute path, escape, and disabled builtin paths
