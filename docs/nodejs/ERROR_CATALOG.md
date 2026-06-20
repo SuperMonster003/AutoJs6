@@ -1,6 +1,7 @@
 # AutoJs6 Node.js Error Catalog
 
-This catalog documents the current user-visible `ERR_AUTOJS6_*` error codes in the AutoJs6 Safe Node Profile.
+This catalog documents the current user-visible AutoJs6 Safe Node Profile error codes, including `ERR_AUTOJS6_*`
+codes and Node-compatible errors kept for developer familiarity.
 It is verified by `:app:verifyNodeErrorCatalog` against `NodeRuntimeErrorCodes.kt` and the runtime bootstrap sources.
 
 Prefer `error.autojs6Code` when it exists. Some compatibility paths preserve a legacy `error.code` and attach the
@@ -45,6 +46,14 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - Example: a pending dialog or image request rejects after the Node service is stopped.
 - How to fix: handle rejection, clean resources in `finally`, and avoid assuming long bridge calls survive service stop.
 - Related docs: [TESTING.md](TESTING.md), [docs/nodejs/design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
+
+## ERR_AUTOJS6_BRIDGE_PROVIDER_FAILED
+
+- Meaning: A bridge provider failed while handling a declared and permitted request.
+- Common cause: provider-side exception, unavailable Android subsystem, invalid provider state, or a failed fake-provider test path.
+- Example: `require("ocr").recognize(image)` rejects after the OCR provider reports an internal failure.
+- How to fix: handle the rejection, verify the provider is available, and inspect provider diagnostics for the specific module.
+- Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
 ## ERR_AUTOJS6_BRIDGE_RATE_LIMITED
 
@@ -270,6 +279,14 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: use fake providers in tests or an explicitly approved experimental network build.
 - Related docs: [design/NETWORK.md](design/NETWORK.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
+## ERR_AUTOJS6_NETWORK_ERROR
+
+- Meaning: a controlled network operation failed with a provider or transport error that is not one of the more specific network codes.
+- Common cause: provider exception, transport failure, rejected axios-compatible request wrapper, or an unexpected fake-provider failure.
+- Example: a controlled axios request rejects without a timeout, abort, size, URL, permission, or policy-specific code.
+- How to fix: inspect the wrapped error details, retry only when the operation is idempotent, and keep live network behind the approved experimental gate.
+- Related docs: [design/NETWORK.md](design/NETWORK.md), [design/WEBSOCKET.md](design/WEBSOCKET.md).
+
 ## ERR_AUTOJS6_NETWORK_INVALID_URL
 
 - Meaning: a controlled network URL is invalid or unsupported.
@@ -350,6 +367,30 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: shorten the active script, increase the queue timeout where supported, or avoid queueing.
 - Related docs: [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md), [TESTING.md](TESTING.md).
 
+## ERR_AUTOJS6_NODE_TEST_ASYNC_ACTIVITY
+
+- Meaning: the embedded `node:test` subset detected async activity after a test completed.
+- Common cause: a test leaves timers or other pending work active after its body resolves.
+- Example: a test schedules `setTimeout()` and returns before clearing or awaiting it.
+- How to fix: await asynchronous work, clear timers, and keep node:test samples bounded.
+- Related docs: [TESTING.md](TESTING.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
+
+## ERR_AUTOJS6_NODE_TEST_FAILURE
+
+- Meaning: one or more embedded `node:test` subset cases failed.
+- Common cause: assertion failure, rejected test body, failed subtest, or a test harness diagnostic path.
+- Example: `assert.equal(actual, expected)` fails inside a sample compatibility test.
+- How to fix: inspect the test diagnostics and fix the failing case before treating the profile gate as passed.
+- Related docs: [TESTING.md](TESTING.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
+
+## ERR_AUTOJS6_NODE_TEST_TIMEOUT
+
+- Meaning: an embedded `node:test` subset case exceeded its timeout.
+- Common cause: a hung promise, uncleared timer, blocked event loop, or a test body that never resolves.
+- Example: a test awaits a promise that is never settled.
+- How to fix: add bounded waits, settle pending promises, and close handles before the test exits.
+- Related docs: [TESTING.md](TESTING.md), [PERFORMANCE.md](PERFORMANCE.md).
+
 ## ERR_AUTOJS6_FOREGROUND_SERVICE_START_NOT_ALLOWED
 
 - Meaning: Android denied starting the embedded Node foreground service from the current app state.
@@ -390,6 +431,22 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: import the CommonJS dependency from an ESM entry, or provide a CommonJS package branch for `require`.
 - Related docs: [design/ESM.md](design/ESM.md), [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md).
 
+## ERR_AUTOJS6_TYPESCRIPT_UNSUPPORTED_EXTENSION
+
+- Meaning: A TypeScript source file uses an extension outside AutoJs6 lightweight type stripping.
+- Common cause: running or packaging `.tsx` directly.
+- Example: declaring `main.tsx` in `project.json`.
+- How to fix: compile TSX to JavaScript on the desktop/build stage, or use `.ts`, `.mts`, or `.cts` with erasable type syntax only.
+- Related docs: [PROJECT_WIZARD.md](PROJECT_WIZARD.md), [EXAMPLES.md](EXAMPLES.md), [TESTING.md](TESTING.md).
+
+## ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX
+
+- Meaning: AutoJs6 detected TypeScript syntax that requires code generation instead of simple type stripping.
+- Common cause: `enum`, `namespace`, decorators, constructor parameter properties, or import aliases.
+- Example: `enum Color { Red }`.
+- How to fix: replace with erasable JavaScript-compatible patterns, such as a frozen object for enum-like values, or compile the project before packaging.
+- Related docs: [PROJECT_WIZARD.md](PROJECT_WIZARD.md), [EXAMPLES.md](EXAMPLES.md), [TESTING.md](TESTING.md).
+
 ## ERR_AUTOJS6_SCRIPT_TIMEOUT
 
 - Meaning: canonical script timeout code.
@@ -420,6 +477,46 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - Common cause: too many active experimental workers.
 - Example: creating more workers than the profile permits.
 - How to fix: terminate existing workers and keep worker concurrency below the limit.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
+
+## ERR_AUTOJS6_WORKER_POOL_CLOSED
+
+- Meaning: an experimental `WorkerPool` rejected work because the pool is closed or closing.
+- Common cause: submitting a task after `close()` or service shutdown started.
+- Example: calling `pool.run()` after the pool has rejected pending tasks during close.
+- How to fix: stop submitting work after close begins and create a new pool only in an explicitly enabled worker profile.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_WORKER_POOL_QUEUE_FULL
+
+- Meaning: an experimental `WorkerPool` task queue reached its configured limit.
+- Common cause: submitting tasks faster than workers can complete them.
+- Example: enqueueing another task when the pool queue limit is already full.
+- How to fix: throttle submissions, await previous tasks, or lower concurrency in stable scripts by avoiding worker pools.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
+
+## ERR_AUTOJS6_WORKER_POOL_TASK_CANCELLED
+
+- Meaning: an experimental `WorkerPool` task was cancelled before completion.
+- Common cause: caller cancellation, pool close, worker termination, or timeout cleanup.
+- Example: cancelling a pending task with an `AbortSignal`.
+- How to fix: handle cancellation as a normal control path and clean task-local resources.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_WORKER_POOL_TASK_FAILED
+
+- Meaning: an experimental `WorkerPool` task failed while executing or while receiving its result.
+- Common cause: worker exception, rejected task handler, worker exit, or unexpected worker error.
+- Example: a pool task throws before posting its result.
+- How to fix: catch task errors, keep worker code pure JavaScript, and inspect worker diagnostics.
+- Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_WORKER_POOL_TASK_TIMEOUT
+
+- Meaning: an experimental `WorkerPool` task exceeded its timeout.
+- Common cause: CPU-bound work, a hung promise, or a worker that does not respond before the task deadline.
+- Example: a pool task loops indefinitely and never posts a result.
+- How to fix: keep worker tasks bounded, add cooperative cancellation, and avoid workers in stable scripts.
 - Related docs: [design/WORKER_THREADS.md](design/WORKER_THREADS.md), [PERFORMANCE.md](PERFORMANCE.md).
 
 ## ERR_AUTOJS6_WORKER_TERMINATED
