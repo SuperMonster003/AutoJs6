@@ -546,6 +546,14 @@ covers `open`/`openSync`, `close`/`closeSync`, `read`/`readSync`,
 by the scoped descriptor registry; invalid, closed, or foreign descriptors
 reject with `EBADF` before raw native fd access.
 
+The scoped directory iteration subset covers `opendir`, `opendirSync`, and
+`fs.promises.opendir`. S8-29 keeps `Dir` handles execution-owned while
+supporting callback, sync, promise, and async-iteration reads, `Dirent`
+compatibility snapshots, buffer names, and bounded recursive walks. Closed
+directory handles reject with `ERR_DIR_CLOSED`, while relative escapes,
+absolute outside paths, file targets, missing directories, and NUL paths keep
+their stable scoped fs or Node error codes.
+
 The `zlib` wrapper exposes bounded transform streams for `createGzip()`,
 `createGunzip()`, `createDeflate()`, `createInflate()`, raw deflate/inflate,
 and Brotli compression/decompression. Active zlib transform tracking starts

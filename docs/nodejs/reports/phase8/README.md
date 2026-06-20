@@ -217,11 +217,17 @@ Current Batch E implementation status:
   `write()` / `writeSync()`, `fstat()` / `fstatSync()`, and
   `ftruncate()` / `ftruncateSync()` are covered as scoped, execution-owned
   descriptor operations.
+- S8-29 is complete for scoped `opendir()` / `Dir` / `Dirent` compatibility.
+  `fs.opendir()`, `fs.opendirSync()`, and `fs.promises.opendir()` support
+  managed directory reads, close paths, async iteration, buffer names, small
+  recursive walks, closed-handle `ERR_DIR_CLOSED`, and scoped path denial.
 - Relative escapes and absolute outside paths keep stable scoped-fs denial
   codes, while closed handles and non-owned numeric descriptors reject with
   `EBADF`.
-- Timeout cleanup with an unclosed handle is covered so a failed execution does
-  not poison the next embedded Node run.
+- Timeout cleanup with an unclosed file handle or fd is covered so a failed
+  execution does not poison the next embedded Node run.
+- Recursive directory walks are capped by the scoped fs recursive entry budget
+  before they can become unbounded traversal.
 
 Focused gates:
 
@@ -231,9 +237,12 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFdApiInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeOpendirInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest,org.autojs.autojs.engine.NodeOpendirInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
 
 - `docs/nodejs/reports/phase8/FILEHANDLE_ADVANCED.md`
 - `docs/nodejs/reports/phase8/FD_API.md`
+- `docs/nodejs/reports/phase8/OPENDIR_DIR.md`
