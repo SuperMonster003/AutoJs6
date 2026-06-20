@@ -3637,6 +3637,67 @@ val generateNodeDualRuntimeABReport = tasks.register(
     outputs.upToDateWhen { false }
 }
 
+val generateNode2417NativeDiffReport = tasks.register(
+    "generateNode2417NativeDiffReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the Node 24.17 native ABI/export diff report without changing the default runtime."
+
+    workingDir(rootProject.projectDir)
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-node2417-native-diff.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateJniLibs").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-jni-libs", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateHeaders").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-headers", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateSourceCommit").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-source-commit", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateBuildNotes").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-build-notes", it)) }
+    providers.gradleProperty("autojs.nodejs.nativeDiffFailOnBlocked").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-blocked") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val verifyNode2417NativeDiffGate = tasks.register("verifyNode2417NativeDiffGate") {
+    group = "verification"
+    description = "Fails unless the Node 24.17 native ABI/export diff report is ready."
+
+    dependsOn(generateNode2417NativeDiffReport)
+    doLast {
+        val reportFile = rootProject.layout.buildDirectory
+            .file("reports/nodejs/node-24.17-native-diff.json")
+            .get()
+            .asFile
+        if (!reportFile.isFile) {
+            throw GradleException("Node 24.17 native diff report is missing: ${reportFile.absolutePath}")
+        }
+        val reportJson = JsonSlurper().parse(reportFile) as Map<*, *>
+        val decision = reportJson["decision"] as? Map<*, *>
+        if (decision?.get("status") != "ready") {
+            throw GradleException(
+                "Node 24.17 native diff gate is not ready. See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
 val verifyNodeDualRuntimeABGate = tasks.register("verifyNodeDualRuntimeABGate") {
     group = "verification"
     description = "Fails unless the Node 24 dual-runtime A/B gate report has complete evidence for both slots."
