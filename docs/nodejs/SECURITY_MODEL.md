@@ -167,8 +167,10 @@ machine: `one_shot` is executable for normal launches,
 `interactive_long_running` is executable only through the explicit
 `interactive_session` launch surface with a persistent notification and Stop
 action, `scheduled` is executable only through the WorkManager-owned
-`scheduled_runner` launch surface, and `worker_computation` remains reserved.
-Direct script requests for non-`one_shot` modes still reject before user code.
+`scheduled_runner` launch surface, `worker_computation` remains reserved, and
+`node_sandboxed` is a Phase 8 manifest/design-gated POC that requires a Binder
+capability broker before execution. Direct script requests for non-`one_shot`
+modes still reject before user code.
 Interactive
 long-running status records restart policy `never`, `automaticRestart=false`,
 duration, active resources, and the Stop action; packaged service mode,
@@ -192,6 +194,16 @@ interactive runtime. These diagnostics report event-loop responsiveness, last
 bridge progress, active registry/resource counts, and budget breaches, but they
 do not grant new bridge capabilities, raw Android objects, raw network,
 child-process authority, automatic restart, or hidden background execution.
+
+S8-41 declares `NativeNodeSandboxedScriptService` as a non-exported Android
+`isolatedProcess` service under `:nodejs_sandboxed`, but no script route uses it
+yet. The canonical `node_sandboxed` execution mode exposes no launch surface and
+no bridge providers. Any future executable sandboxed runtime must route source,
+module, scoped filesystem, network, and bridge operations through a Binder
+broker with explicit capability checks, size limits, cancellation, audit
+metadata, and execution-owned cleanup; it must not inherit Java interop,
+shell/root, native addon, raw process, raw network, or unrestricted filesystem
+authority.
 
 ## Feature Flag Policy
 

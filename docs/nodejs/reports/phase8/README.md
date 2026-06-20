@@ -378,3 +378,34 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/DEVTOOLS_ADB_FORWARD_GATE.md`
 - `docs/nodejs/reports/phase8/INSPECTOR_PROFILING_GATE.md`
 - `docs/nodejs/reports/phase8/INSPECTOR_SECURITY_GATE.md`
+
+## Batch H Hardened Sandbox And Concurrency
+
+Current Batch H implementation status:
+
+- S8-41 is complete as a manifest and policy POC. `nodeSandboxed` now
+  canonicalizes to `node_sandboxed`, but the mode is `design_gated`, has no
+  supported launch surfaces, exposes no bridge providers, and rejects before
+  user code. `NativeNodeSandboxedScriptService` is declared as a non-exported
+  Android `isolatedProcess` service under the `:nodejs_sandboxed` process
+  suffix, but no script route targets it until the broker exists.
+- S8-42 remains the next required gate. The Binder capability broker must own
+  declaration, validation, size limits, cancellation, audit metadata, and
+  execution-owned cleanup before `node_sandboxed` can execute code.
+- S8-43 multi-runtime process pools remain deferred. The current product
+  runtime is still one active execution per `:nodejs_embedded` process plus the
+  explicit caller-side queue.
+- S8-44 worker partial promotion remains blocked by native `worker_threads`
+  availability and worker isolation gates.
+
+Focused gates:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHardenedIsolatedRuntimePocInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+Detailed coverage is recorded in:
+
+- `docs/nodejs/design/HARDENED_ISOLATED_RUNTIME.md`
+- `docs/nodejs/reports/phase8/HARDENED_ISOLATED_RUNTIME_POC.md`

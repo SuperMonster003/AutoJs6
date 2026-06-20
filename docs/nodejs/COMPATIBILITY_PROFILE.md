@@ -220,8 +220,8 @@ Current behavior remains:
 - timeout produces the existing timeout diagnostic shape
 - `EmbeddedScriptRequest.executionMode` is serialized through the service
   request spool and normalized through the Phase 7 mode state machine
-- canonical modes are `one_shot`, `interactive_long_running`, `scheduled`, and
-  `worker_computation`
+- canonical modes are `one_shot`, `interactive_long_running`, `scheduled`,
+  `worker_computation`, and the design-gated `node_sandboxed` POC
 - `one_shot` is the only supported executable value for normal script launches
 - `interactive_long_running` is supported only by the explicit
   `interactive_session` launch surface used by
@@ -229,8 +229,8 @@ Current behavior remains:
 - `scheduled` is supported only by the WorkManager-owned
   `scheduled_runner` launch surface used for fired `work_manager` tasks
 - direct script `interactiveLongRunning`, legacy `long_running`/`service`,
-  `scheduled`, and `workerComputation` requests still reject before user code
-  runs with `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`
+  `scheduled`, `workerComputation`, and `nodeSandboxed` requests still reject
+  before user code runs with `ERR_AUTOJS6_EMBEDDED_NODE_UNSUPPORTED_OPTION`
 - rejection native values include timeout policy, foreground requirement,
   notification requirement, allowed-provider list, restart policy, quota
   profile, stop semantics, launch surface, and supported launch surfaces

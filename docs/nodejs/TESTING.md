@@ -111,10 +111,25 @@ controlled by `timeoutMs`, including timeout recovery, uncleared interval
 timeout behavior, and the explicit execution-mode policy gate that rejects
 reserved or unsupported launch surfaces before user code runs.
 `NodeExecutionModePolicyInstrumentationTest` freezes the Phase 7 state machine
-for `one_shot`, `interactive_long_running`, `scheduled`, and
-`worker_computation`; `NodeEmbeddedLifecycleStressInstrumentationTest#explicitLongRunningModeIsRejectedBeforeUserScriptRuns`
+for `one_shot`, `interactive_long_running`, `scheduled`,
+`worker_computation`, and the S8-41 design-gated `node_sandboxed` POC;
+`NodeEmbeddedLifecycleStressInstrumentationTest#explicitLongRunningModeIsRejectedBeforeUserScriptRuns`
 verifies that direct script `interactiveLongRunning`/legacy `long_running`
 cannot be enabled by `timeoutMs=0` or pending timers.
+
+Current hardened isolated runtime POC instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHardenedIsolatedRuntimePocInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies the S8-41 manifest and policy POC: `nodeSandboxed`
+normalizes to `node_sandboxed` but remains `design_gated`; the dedicated
+`NativeNodeSandboxedScriptService` manifest entry is non-exported and
+`android:isolatedProcess=true`; and direct script requests reject before user
+code until the S8-42 Binder capability broker exists. See
+`docs/nodejs/reports/phase8/HARDENED_ISOLATED_RUNTIME_POC.md`.
 
 Current packaged APK smoke instrumentation:
 

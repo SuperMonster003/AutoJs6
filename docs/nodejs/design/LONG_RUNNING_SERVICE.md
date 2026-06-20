@@ -22,6 +22,8 @@ Task S7-17 expands that guard into a versioned execution-mode state machine:
   until the dedicated scheduled task runner gate exists.
 - `worker_computation`: reserved; blocked behind worker_threads capability
   isolation and worker resource gates.
+- `node_sandboxed`: Phase 8 manifest/design-gated POC; blocked until the
+  Binder capability broker exists.
 
 Each mode definition records timeout policy, foreground requirement,
 notification requirement, allowed provider set, restart policy, quota profile,
@@ -79,6 +81,7 @@ Long-running service mode is not:
 | `scheduled` | Reserved; WorkManager still launches bounded one-shot executions | Required task timeout | Future task UI/notification | future scheduled runner |
 | `interactive_long_running` | Partial explicit foreground MVP | Startup timeout plus stop grace and watchdog policy | Persistent foreground notification with Stop | explicit interactive session API |
 | `worker_computation` | Reserved behind worker_threads gates | Startup/task timeout | None | future worker runtime |
+| `node_sandboxed` | Manifest and policy POC; not executable | Broker startup and script timeout | Host-owned visibility required | future isolated-process runtime |
 
 ## Explicit Opt-In
 
