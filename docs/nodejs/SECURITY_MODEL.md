@@ -33,6 +33,11 @@ Embedded scripts run in `:nodejs_embedded`. This protects the main app process f
 - native bridge assertion failure
 
 The service currently uses a normal named process, not `android:isolatedProcess="true"`. Do not switch to `isolatedProcess` without redesigning all permission and Binder capability flows.
+S8-43 statically declares reserved embedded script service slots in
+`:nodejs_embedded_1` and `:nodejs_embedded_2`, but the process-pool policy gate
+keeps the effective runtime `primary_only`. Reserved slots are non-exported and
+cannot be selected by scripts, project metadata, or packaged metadata until a
+future pool coordinator and lifecycle gate are promoted.
 
 ## Filesystem Policy
 
@@ -156,6 +161,12 @@ default REPL manifest declares no bridge capabilities; callers must explicitly
 opt in to each bridge capability and the provider audit still applies.
 
 Embedded Node execution is single-active per `:nodejs_embedded` process. Normal concurrent starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY` instead of overlapping V8/libuv lifecycle ownership or silently queuing. A bounded execution queue exists only for explicit enqueue requests; queue full, timeout, and cancellation paths use stable `ERR_AUTOJS6_NODE_QUEUE_*` errors. See `docs/nodejs/design/MULTI_INSTANCE.md` and `docs/nodejs/design/EXECUTION_QUEUE.md`.
+Process-pool diagnostics are reported under
+`embedded_script.process_pool.*`, but S8-43 does not enable same-process
+concurrency, cross-process slot routing, or reusable Node environments. Future
+multi-process promotion must keep one active Node/V8/libuv environment per
+process slot and prove crash isolation, queue-when-full behavior, and
+cross-slot resource cleanup before enabling reserved slots.
 
 Long-running Node service mode is limited to the explicit S7-18 interactive
 foreground runtime. It must not be inferred from pending timers, open

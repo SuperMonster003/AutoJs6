@@ -99,18 +99,33 @@ The execution queue is intentionally small and explicit. It does not make embedd
 
 See [EXECUTION_QUEUE.md](EXECUTION_QUEUE.md).
 
-## Future Process-Per-Execution Option
+## Process Pool Policy Gate
 
-A future implementation could spawn separate service processes for concurrent scripts, but Android process names must be statically declared. That design would need:
+S8-43 declares the first process-pool policy gate. Android process names remain
+static, so the manifest now includes reserved embedded script service
+components for `:nodejs_embedded_1` and `:nodejs_embedded_2`. The default
+runtime does not route to those components yet.
 
-- a finite process pool
-- explicit service components per slot
-- ABI/native library diagnostics per slot
-- bridge provider isolation per process
-- foreground notification policy per execution
-- packaged manifest synthesis for every service component
+Current S8-43 behavior:
 
-This is outside the current Safe Node Profile baseline.
+- `NodeEmbeddedProcessPoolPolicy` status is `design_gated`;
+- effective runtime mode is `primary_only`;
+- effective active slot count is `1`;
+- device-memory-aware recommended slot count is diagnostic only;
+- the long-running dedicated slot is reserved but disabled;
+- queue-when-full remains disabled until a real pool coordinator exists.
+
+Future promotion still needs:
+
+- slot acquisition/release across multiple service processes;
+- crash detection that removes only the failed slot;
+- bridge provider isolation per process;
+- foreground notification policy per execution;
+- packaged manifest synthesis for every service component;
+- stress tests proving no cwd, env, module cache, bridge transport, provider,
+  fd, watcher, timer, or handle crosses execution or slot boundaries.
+
+See [PROCESS_POOL.md](PROCESS_POOL.md).
 
 ## Tests
 

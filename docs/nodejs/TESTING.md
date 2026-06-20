@@ -146,6 +146,20 @@ the policy/audit layer for a future Binder broker; it does not make
 `node_sandboxed` executable. See
 `docs/nodejs/reports/phase8/CAPABILITY_BROKER_V2.md`.
 
+Current embedded process-pool policy focused instrumentation:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedProcessPoolPolicyInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This suite verifies the S8-43 process-pool policy gate: three non-exported
+embedded script service slots are declared, reserved slots remain disabled by
+default, the device-memory-aware recommendation stays separate from the
+effective one-slot runtime limit, long-running slot routing remains reserved,
+and normal script results publish `embedded_script.process_pool.*` primary-only
+diagnostics. See `docs/nodejs/reports/phase8/PROCESS_POOL_POLICY_GATE.md`.
+
 Current packaged APK smoke instrumentation:
 
 ```powershell

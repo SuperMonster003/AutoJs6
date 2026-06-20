@@ -395,9 +395,14 @@ Current Batch H implementation status:
   and dispatch. The broker records quota-bound per-call security audit rows
   and native diagnostics, but it is not the future cross-process Binder broker
   yet.
-- S8-43 multi-runtime process pools remain deferred. The current product
-  runtime is still one active execution per `:nodejs_embedded` process plus the
-  explicit caller-side queue.
+- S8-43 is complete as a default-disabled process-pool policy gate.
+  `NativeNodeEmbeddedScriptServiceSlot1` and
+  `NativeNodeEmbeddedScriptServiceSlot2` are now statically declared as
+  reserved, non-exported embedded process slots, while
+  `NodeEmbeddedProcessPoolPolicy` keeps the runtime `primary_only` with one
+  effective active slot and publishes `embedded_script.process_pool.*`
+  diagnostics. No default concurrent execution or reserved-slot routing is
+  enabled yet.
 - S8-44 worker partial promotion remains blocked by native `worker_threads`
   availability and worker isolation gates.
 
@@ -407,6 +412,7 @@ Focused gates:
 $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeHardenedIsolatedRuntimePocInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeCapabilityBrokerV2InstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedProcessPoolPolicyInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
@@ -415,3 +421,5 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/HARDENED_ISOLATED_RUNTIME_POC.md`
 - `docs/nodejs/design/CAPABILITY_BROKER_V2.md`
 - `docs/nodejs/reports/phase8/CAPABILITY_BROKER_V2.md`
+- `docs/nodejs/design/PROCESS_POOL.md`
+- `docs/nodejs/reports/phase8/PROCESS_POOL_POLICY_GATE.md`

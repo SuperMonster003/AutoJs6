@@ -11,7 +11,9 @@ workarounds, see [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFIL
 - Profile name: `AutoJs6 Safe Node Profile`
 - Embedded Node baseline: Node.js `v24.5.0` artifacts are present in the current native tree.
 - Execution model: embedded `libnode.so` plus AutoJs6 bootstrap and CommonJS loader.
-- Process model: script service runs in `:nodejs_embedded`.
+- Process model: normal scripts run through the primary `:nodejs_embedded`
+  service process. S8-43 declares reserved process-pool slots, but the default
+  runtime remains primary-only.
 - Concurrency model: one active execution per embedded process; default concurrent starts reject, while explicit enqueue uses the bounded execution queue.
 - Service model: Phase 7 defines an execution-mode state machine, but only `one_shot` is executable; normal scripts remain timeout-controlled.
 - Project model: file entry, Node project entry, and packaged APK entry are all supported paths.
@@ -206,6 +208,31 @@ Stable queue errors:
 - `ERR_AUTOJS6_NODE_QUEUE_CANCELLED`
 
 See [design/EXECUTION_QUEUE.md](design/EXECUTION_QUEUE.md).
+
+## Embedded Process Pool
+
+Node Profile v1.1 includes the S8-43 process-pool policy gate, not a promoted
+multi-runtime pool. The manifest declares three non-exported embedded script
+service components:
+
+- `primary`: `NativeNodeEmbeddedScriptService` in `:nodejs_embedded`
+- `long_running`: `NativeNodeEmbeddedScriptServiceSlot1` in
+  `:nodejs_embedded_1`
+- `overflow_1`: `NativeNodeEmbeddedScriptServiceSlot2` in
+  `:nodejs_embedded_2`
+
+`NodeEmbeddedProcessPoolPolicy` keeps the effective runtime mode
+`primary_only`, with one active slot. The device memory profile is used only to
+publish a recommended future slot count; it does not enable additional slots.
+The reserved long-running and overflow slots cannot be selected by project
+metadata, packaged metadata, or direct script options.
+
+Script results expose `embedded_script.process_pool.*` diagnostics for schema,
+status, selected slot, declared slot count, effective limit, recommended limit,
+long-running reservation, queue policy, crash-isolation policy, and memory
+profile.
+
+See [design/PROCESS_POOL.md](design/PROCESS_POOL.md).
 
 ## Long-Running Service Mode
 
