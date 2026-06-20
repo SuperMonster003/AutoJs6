@@ -727,36 +727,46 @@ class AndroidNodeBridgeCapabilityProvider(
     private val bridgeResourceLimitRejections = AtomicInteger(0)
     private val bridgeRateLimitedRejections = AtomicInteger(0)
     private val accessibilityRateLimiter = NodeBridgeRateLimiter()
+    private val capabilityBrokerAudit = NodeCapabilityBrokerAuditLog(engineInfo.id)
 
     override fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val brokerAttempt = capabilityBrokerAudit.begin(request)
+        val auditedCallback: (NodeBridgeResponse) -> Unit = { response ->
+            capabilityBrokerAudit.complete(brokerAttempt, response)
+            callback(response)
+        }
+        brokerAttempt.preflightError?.let { error ->
+            auditedCallback(NodeBridgeResponse.failure(request.id, error))
+            return
+        }
         val auditFailure = capabilityAuditFailure(request)
         if (auditFailure != null) {
-            callback(NodeBridgeResponse.failure(request.id, auditFailure))
+            auditedCallback(NodeBridgeResponse.failure(request.id, auditFailure))
             return
         }
         when {
-            request.module == NodeBridgeModules.TOAST && request.method in NodeBridgeModules.toastMethods -> dispatchToast(request, callback)
-            request.module == NodeBridgeModules.APP && request.method in NodeBridgeModules.appMethods -> dispatchApp(request, callback)
-            request.module == NodeBridgeModules.ENGINES && request.method in NodeBridgeModules.enginesMethods -> dispatchEngines(request, callback)
-            request.module == NodeBridgeModules.DIALOGS && request.method in NodeBridgeModules.dialogsMethods -> dispatchDialogs(request, callback)
-            request.module == NodeBridgeModules.ACCESSIBILITY && request.method in NodeBridgeModules.accessibilityMethods -> dispatchAccessibility(request, callback)
-            request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, callback)
-            request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, callback)
-            request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, callback)
-            request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, callback)
-            request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, callback)
-            request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, callback)
-            request.module == NodeBridgeModules.SENSORS && request.method in NodeBridgeModules.sensorsMethods -> dispatchSensors(request, callback)
-            request.module == NodeBridgeModules.UI && request.method in NodeBridgeModules.uiMethods -> dispatchUi(request, callback)
-            request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, callback)
-            request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, callback)
-            request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, callback)
-            request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, callback)
-            request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, callback)
-            request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, callback)
-            request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, callback)
-            request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, callback)
-            else -> callback(unavailable(request))
+            request.module == NodeBridgeModules.TOAST && request.method in NodeBridgeModules.toastMethods -> dispatchToast(request, auditedCallback)
+            request.module == NodeBridgeModules.APP && request.method in NodeBridgeModules.appMethods -> dispatchApp(request, auditedCallback)
+            request.module == NodeBridgeModules.ENGINES && request.method in NodeBridgeModules.enginesMethods -> dispatchEngines(request, auditedCallback)
+            request.module == NodeBridgeModules.DIALOGS && request.method in NodeBridgeModules.dialogsMethods -> dispatchDialogs(request, auditedCallback)
+            request.module == NodeBridgeModules.ACCESSIBILITY && request.method in NodeBridgeModules.accessibilityMethods -> dispatchAccessibility(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, auditedCallback)
+            request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, auditedCallback)
+            request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, auditedCallback)
+            request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, auditedCallback)
+            request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, auditedCallback)
+            request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, auditedCallback)
+            request.module == NodeBridgeModules.SENSORS && request.method in NodeBridgeModules.sensorsMethods -> dispatchSensors(request, auditedCallback)
+            request.module == NodeBridgeModules.UI && request.method in NodeBridgeModules.uiMethods -> dispatchUi(request, auditedCallback)
+            request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
+            request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, auditedCallback)
+            request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, auditedCallback)
+            request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, auditedCallback)
+            request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, auditedCallback)
+            request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, auditedCallback)
+            request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, auditedCallback)
+            request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, auditedCallback)
+            else -> auditedCallback(unavailable(request))
         }
     }
 
@@ -770,6 +780,7 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
         putAll(NodeLifecycleCheckpointStore.nativeDiagnostics(appContext, engineInfo))
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
+        putAll(capabilityBrokerAudit.nativeDiagnostics())
         putAll(resourceRegistry.nativeDiagnostics())
         putAll(bridgeLimits.nativeDiagnostics())
         put("embedded_script.bridge_resource_limit_rejection_count", bridgeResourceLimitRejections.get().toString())
