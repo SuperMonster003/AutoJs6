@@ -686,6 +686,9 @@ val nodeJsPhase7ResourceStressGateInstrumentationClasses = listOf(
 val nodeJsSecurityGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest",
 )
+val nodeJs2417SecurityProbeInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest#phase8Node2417SecurityFixProbesStaySafe",
+)
 val nodeJsRealNpmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
 )
@@ -705,6 +708,24 @@ val nodeJsPhase7GateInstrumentationClasses = (
                 nodeJsSecurityGateInstrumentationClasses +
                 nodeJsRealNpmGateInstrumentationClasses +
                 nodeJsPluginUiGateInstrumentationClasses
+        ).distinct()
+val nodeJs2417UpgradeGateInstrumentationClasses = (
+        listOf(
+            "org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest",
+            "org.autojs.autojs.engine.NodeCompatCorpusInstrumentationTest",
+            "org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest",
+            "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
+            "org.autojs.autojs.engine.NodeModernCoreDifferentialInstrumentationTest",
+            "org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest",
+            "org.autojs.autojs.engine.NodeEmbeddedPerformanceInstrumentationTest",
+            "org.autojs.autojs.engine.NodeEmbeddedMemoryLeakStressInstrumentationTest",
+        ) +
+                nodeJs2417SecurityProbeInstrumentationClasses +
+                nodeJsPackagedEsmGateInstrumentationClasses +
+                nodeJsLiveProviderGateInstrumentationClasses +
+                nodeJsLongRunningGateInstrumentationClasses +
+                nodeJsWorkerGateInstrumentationClasses +
+                nodeJsModernCoreGateInstrumentationClasses
         ).distinct()
 val nodeJsPhase7HostGateNames = listOf(
     "generateDesktopNodeDifferentialReport",
@@ -742,6 +763,8 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodeModernCoreGate" to nodeJsModernCoreGateInstrumentationClasses,
     "verifyNodePhase7ResourceStressGate" to nodeJsPhase7ResourceStressGateInstrumentationClasses,
     "verifyNodePhase7Gate" to nodeJsPhase7GateInstrumentationClasses,
+    "verifyNode2417SecurityProbeGate" to nodeJs2417SecurityProbeInstrumentationClasses,
+    "verifyNode2417UpgradeGate" to nodeJs2417UpgradeGateInstrumentationClasses,
 )
 val nodeJsRequestedFocusedGate = taskNames
     .map { rawTaskName -> rawTaskName.substringAfterLast(':') }

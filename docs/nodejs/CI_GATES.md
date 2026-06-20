@@ -162,6 +162,43 @@ This gate does not create a tag and does not replace `verifyNodeReleaseGate`.
 See [reports/v1.1-rc/README.md](reports/v1.1-rc/README.md) and
 [releases/NODE_PROFILE_V1_1_RC_PLAN.md](releases/NODE_PROFILE_V1_1_RC_PLAN.md).
 
+## Phase 8 Node 24.17 Upgrade Gates
+
+Phase 8 starts with a build-only Node 24.17 candidate slot. These gates do not
+change the default runtime; `node24_5` remains the rollback/default slot until
+all reports are ready:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNode2417NativeDiffReport
+.\gradlew.bat --console=plain :app:generateNode2417SecurityProbeReport
+.\gradlew.bat --console=plain :app:generateNode2417UpgradeGateReport
+```
+
+The generated reports are:
+
+- `build/reports/nodejs/node-24.17-native-diff.json`
+- `build/reports/nodejs/node-24.17-security-probes.json`
+- `build/reports/nodejs/node-24.17-upgrade-gate.json`
+
+Candidate validation must pass explicit artifacts and run on Sony:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNode2417UpgradeGate `
+  "-Pautojs.nodejs.runtimeSlot=node24_current" `
+  "-Pautojs.nodejs.patchCandidateJniLibs=D:\path\to\jniLibs" `
+  "-Pautojs.nodejs.patchCandidateHeaders=D:\path\to\include\node" `
+  "-Pautojs.nodejs.test.deviceProfile=sony" `
+  "-Pautojs.nodejs.network.experimental=true"
+```
+
+`verifyNode2417UpgradeGate` fails fast unless `node24_current` is selected. It
+combines S8-01/S8-02 native artifact intake and ABI/export diff, S8-03
+dual-runtime A/B evidence, S8-04 security probes, packaged smoke, main-app
+embedded/native one-shot coverage, long-running, workers, live providers,
+startup/RSS, and the existing compatibility/npm/modern-core corpus. See
+[reports/phase8/README.md](reports/phase8/README.md).
+
 ## Phase 7 Focused Gates
 
 Phase 7 uses focused feature gates instead of expanding every iteration to the

@@ -839,6 +839,124 @@ class NodeSecurityRegressionInstrumentationTest {
         assertEquals(0, result.pendingZlibStreamCount ?: -1)
     }
 
+    @Test
+    fun phase8Node2417SecurityFixProbesStaySafe() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node 24.17 security fix probe corpus")
+
+        val workDir = freshWorkDir("node-security-phase8-2417")
+        try {
+            File(workDir, "safe.txt").writeText("safe", StandardCharsets.UTF_8)
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async () => {
+                      const assert = require("assert/strict");
+                      const crypto = require("crypto");
+                      const fsp = require("fs/promises");
+
+                      function codeOf(error) {
+                        return String(error && (error.autojs6Code || error.code || error.name || ""));
+                      }
+                      function detailOf(error) {
+                        return [
+                          error && error.name,
+                          error && error.code,
+                          error && error.autojs6Code,
+                          error && error.legacyCode
+                        ].filter(Boolean).join(":");
+                      }
+                      function captureSync(label, action) {
+                        try {
+                          action();
+                        } catch (error) {
+                          const message = String(error && error.message || "");
+                          const detail = detailOf(error);
+                          console.log("security.phase8." + label + "=" + detail + "|leaked=" + /user:pass|secret/.test(message));
+                          return { code: codeOf(error), detail, message };
+                        }
+                        throw new Error(label + " was unexpectedly allowed");
+                      }
+                      async function captureAsync(label, action) {
+                        try {
+                          await action();
+                        } catch (error) {
+                          const message = String(error && error.message || "");
+                          const detail = detailOf(error);
+                          console.log("security.phase8." + label + "=" + detail + "|leaked=" + /user:pass|secret/.test(message));
+                          return { code: codeOf(error), detail, message };
+                        }
+                        throw new Error(label + " was unexpectedly allowed");
+                      }
+
+                      const nulHostname = captureSync("nul_hostname", () => new URL("https://exa" + String.fromCharCode(0) + "mple.test/"));
+                      assert.strictEqual(nulHostname.code, "ERR_INVALID_URL");
+
+                      const httpsCredentials = captureSync(
+                        "https_credentials_redacted",
+                        () => require("https").request("https://user:pass@example.invalid/secret")
+                      );
+                      assert.strictEqual(httpsCredentials.code, "ERR_AUTOJS6_NETWORK_DISABLED");
+                      assert.strictEqual(/user:pass|secret/.test(httpsCredentials.message), false);
+
+                      const tlsDenied = captureSync("tls_hostname_policy", () => require("tls").connect(443, "Example.COM"));
+                      assert.strictEqual(tlsDenied.code, "ERR_AUTOJS6_NETWORK_DISABLED");
+
+                      const http2Denied = captureSync("http2_origin_state", () => require("http2"));
+                      assert.ok(
+                        http2Denied.code === "ERR_AUTOJS6_BUILTIN_DISABLED" ||
+                        http2Denied.code === "MODULE_NOT_FOUND" ||
+                        http2Denied.code === "ERR_AUTOJS6_MODULE_NOT_FOUND"
+                      );
+
+                      const webcryptoQuota = captureSync(
+                        "webcrypto_quota",
+                        () => crypto.webcrypto.getRandomValues(new Uint8Array(65537))
+                      );
+                      assert.strictEqual(webcryptoQuota.code, "QuotaExceededError");
+
+                      const handle = await fsp.open("./safe.txt", "r");
+                      try {
+                        assert.strictEqual(await handle.readFile("utf8"), "safe");
+                      } finally {
+                        await handle.close();
+                      }
+                      const fileHandleEscape = await captureAsync("filehandle_escape", () => fsp.open("../escape.txt", "r"));
+                      assert.strictEqual(fileHandleEscape.code, "ERR_AUTOJS6_FS_PATH_ESCAPE");
+
+                      console.log("security.phase8.node2417_fix_probes.ready=true");
+                    })().catch((error) => {
+                      console.error("security.phase8.node2417_fix_probes.error=" + (error && (error.stack || error.message) || error));
+                      process.exitCode = 1;
+                    });
+                """.trimIndent(),
+                sourceName = File(workDir, "phase8-node2417-security.js").absolutePath,
+                workingDirectory = workDir,
+                timeoutMs = 10_000L,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("Node 24.17 security fix probes", result)
+            assertTrue(result.stdout, result.stdout.contains("security.phase8.node2417_fix_probes.ready=true"))
+            listOf(
+                "nul_hostname",
+                "https_credentials_redacted",
+                "tls_hostname_policy",
+                "http2_origin_state",
+                "webcrypto_quota",
+                "filehandle_escape",
+            ).forEach { label ->
+                assertTrue(
+                    NodeEmbeddedTestHarness.describeResult("missing Phase 8 security probe $label", result),
+                    result.stdout.contains("security.phase8.$label="),
+                )
+            }
+            assertTrue(result.stdout, result.stdout.contains("security.phase8.https_credentials_redacted="))
+            assertTrue(result.stdout, result.stdout.contains("ERR_AUTOJS6_NETWORK_DISABLED"))
+            assertTrue(result.stdout, result.stdout.contains("security.phase8.https_credentials_redacted=") && result.stdout.contains("|leaked=false"))
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
     private fun freshWorkDir(name: String): File =
         File(context.cacheDir, "$name-${System.nanoTime()}").apply {
             deleteRecursively()

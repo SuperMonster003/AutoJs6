@@ -3698,6 +3698,156 @@ val verifyNode2417NativeDiffGate = tasks.register("verifyNode2417NativeDiffGate"
     }
 }
 
+val generateNode2417SecurityProbeReport = tasks.register(
+    "generateNode2417SecurityProbeReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the Node 24.17 security probe coverage/evidence report."
+
+    workingDir(rootProject.projectDir)
+    mustRunAfter("connectedAppDebugAndroidTest")
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-node2417-security-probes.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.patchCandidateSecurityReport").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--candidate-security-report", it)) }
+    providers.gradleProperty("autojs.nodejs.securityProbeFailOnBlocked").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-blocked") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val verifyNode2417SecurityProbeGate = tasks.register("verifyNode2417SecurityProbeGate") {
+    group = "verification"
+    description = "Runs and verifies the focused Node 24.17 security fix probes on a candidate runtime."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val runtimeSlot = providers.gradleProperty("autojs.nodejs.runtimeSlot").orElse("node24_5").get()
+    if (deviceProfile in setOf("sony", "full") && runtimeSlot == "node24_current") {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    dependsOn(generateNode2417SecurityProbeReport)
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (runtimeSlot != "node24_current") {
+            throw GradleException(
+                "$name must be run with -Pautojs.nodejs.runtimeSlot=node24_current and candidate 24.17 artifacts."
+            )
+        }
+    }
+    doLast {
+        val reportFile = rootProject.layout.buildDirectory
+            .file("reports/nodejs/node-24.17-security-probes.json")
+            .get()
+            .asFile
+        if (!reportFile.isFile) {
+            throw GradleException("Node 24.17 security probe report is missing: ${reportFile.absolutePath}")
+        }
+        val reportJson = JsonSlurper().parse(reportFile) as Map<*, *>
+        val decision = reportJson["decision"] as? Map<*, *>
+        if (decision?.get("status") != "ready") {
+            throw GradleException(
+                "Node 24.17 security probe gate is not ready. See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
+val generateNode2417UpgradeGateReport = tasks.register(
+    "generateNode2417UpgradeGateReport",
+    org.gradle.api.tasks.Exec::class,
+) {
+    group = "verification"
+    description = "Generates the Node 24.17 runtime upgrade gate report from Batch A evidence."
+
+    dependsOn(
+        generateNode24PatchUpgradeFeasibilityReport,
+        generateNode2417NativeDiffReport,
+        generateNodeDualRuntimeABReport,
+        generateNode2417SecurityProbeReport,
+    )
+    workingDir(rootProject.projectDir)
+    mustRunAfter("connectedAppDebugAndroidTest", "verifyEmbeddedNodeDebug", "verifyEmbeddedNodePackagedDebug")
+
+    val command = mutableListOf(
+        "node",
+        rootProject.projectDir
+            .resolve("tools/nodejs/patch-upgrade/generate-node2417-upgrade-gate.js")
+            .absolutePath,
+    )
+    providers.gradleProperty("autojs.nodejs.patchTargetVersion").orNull
+        ?.takeIf(String::isNotBlank)
+        ?.let { command.addAll(listOf("--target-version", it)) }
+    providers.gradleProperty("autojs.nodejs.upgradeGateFailOnBlocked").orNull
+        ?.takeIf { it.equals("true", ignoreCase = true) }
+        ?.let { command.add("--fail-on-blocked") }
+
+    commandLine(command)
+    outputs.upToDateWhen { false }
+}
+
+val verifyNode2417UpgradeGate = tasks.register("verifyNode2417UpgradeGate") {
+    group = "verification"
+    description = "Fails unless Node 24.17 Batch A runtime-upgrade evidence is complete and ready for default promotion."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    val runtimeSlot = providers.gradleProperty("autojs.nodejs.runtimeSlot").orElse("node24_5").get()
+    val networkExperimental = providers.gradleProperty("autojs.nodejs.network.experimental")
+        .orElse("false")
+        .get()
+        .equals("true", ignoreCase = true)
+    if (deviceProfile in setOf("sony", "full") && runtimeSlot == "node24_current") {
+        dependsOn(
+            "verifyEmbeddedNodeDebug",
+            "verifyEmbeddedNodePackagedDebug",
+            "connectedAppDebugAndroidTest",
+            generateNode2417UpgradeGateReport,
+        )
+    } else {
+        dependsOn(generateNode2417UpgradeGateReport)
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+        if (runtimeSlot != "node24_current") {
+            throw GradleException(
+                "$name must be run with -Pautojs.nodejs.runtimeSlot=node24_current and candidate 24.17 artifacts."
+            )
+        }
+        if (!networkExperimental) {
+            throw GradleException(
+                "$name requires -Pautojs.nodejs.network.experimental=true so live fetch/WebSocket providers are covered."
+            )
+        }
+    }
+    doLast {
+        val reportFile = rootProject.layout.buildDirectory
+            .file("reports/nodejs/node-24.17-upgrade-gate.json")
+            .get()
+            .asFile
+        if (!reportFile.isFile) {
+            throw GradleException("Node 24.17 upgrade gate report is missing: ${reportFile.absolutePath}")
+        }
+        val reportJson = JsonSlurper().parse(reportFile) as Map<*, *>
+        val decision = reportJson["decision"] as? Map<*, *>
+        if (decision?.get("status") != "ready") {
+            throw GradleException(
+                "Node 24.17 upgrade gate is not ready. See ${reportFile.absolutePath}"
+            )
+        }
+    }
+}
+
 val verifyNodeDualRuntimeABGate = tasks.register("verifyNodeDualRuntimeABGate") {
     group = "verification"
     description = "Fails unless the Node 24 dual-runtime A/B gate report has complete evidence for both slots."
