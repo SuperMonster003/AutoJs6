@@ -574,6 +574,21 @@ $env:ANDROID_SERIAL='QV710AF65F'
 
 This S8-29 suite verifies scoped `fs.opendir`, `fs.opendirSync`, and `fs.promises.opendir` behavior. It covers `Dir.read`/`readSync` callback and promise flows, `Dir.close`/`closeSync`, async iteration, `Dirent` shape and type helpers, buffer names, small recursive walks, recursive entry budget coverage, scoped path denial, file/missing/NUL path errors, missing callback denial, and closed `Dir` `ERR_DIR_CLOSED`. Pair it with `NodeFsPromisesInstrumentationTest`, `NodeFileHandleAdvancedInstrumentationTest`, and `NodeFdApiInstrumentationTest` for the advanced scoped fs regression set.
 
+Current `fs.watch` / `watchFile` focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsWatchInstrumentationTest"
+```
+
+For Sony unattended gates, pin the device and profile:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsWatchInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-30 suite verifies scoped `fs.watch`, `fs.promises.watch`, `fs.watchFile`, and `fs.unwatchFile` behavior. It covers callback, event-emitter, async-iterator, AbortSignal, close/ref/unref, buffer filename, scoped file URL and Buffer path inputs, polling stats, listener-specific unwatch, watcher quota, event-rate limiting, path denial, unsupported recursive watch, and timeout cleanup after a leaked watcher. Android file events may be coalesced, so the gate accepts `change` or `rename` and nullable filenames while still enforcing the AutoJs6 watcher wrapper and resource boundary. Pair it with the other Batch E classes for the advanced scoped fs regression set.
+
 Current stream focused instrumentation:
 
 ```powershell

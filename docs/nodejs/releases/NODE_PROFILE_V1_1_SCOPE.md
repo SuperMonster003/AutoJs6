@@ -63,6 +63,7 @@ small set of already-gated features toward practical use.
 | FileHandle advanced scoped fs | partial | `fs.promises.open()` returns execution-owned scoped handles with read/write, `readFile`, `writeFile`, `appendFile`, `truncate`, `stat`, `datasync`, `sync`, `close`, promise-level handle helpers, closed-handle `EBADF`, scoped path denial, and timeout recovery. |
 | Callback/sync fd APIs | partial | `fs.open`/`openSync`, `close`/`closeSync`, `read`/`readSync`, `write`/`writeSync`, `fstat`/`fstatSync`, and `ftruncate`/`ftruncateSync` operate only on AutoJs6-managed scoped descriptors, with path denial, closed/non-owned fd `EBADF`, and timeout recovery. |
 | opendir / Dir / Dirent | partial | `fs.opendir`, `fs.opendirSync`, and `fs.promises.opendir` operate only on scoped directories, with callback/sync/promise reads, async iteration, `Dirent` snapshots, buffer names, bounded recursive walks, closed `Dir` `ERR_DIR_CLOSED`, and path denial. |
+| fs watchers | partial | `fs.watch`, `fs.promises.watch`, `fs.watchFile`, and `fs.unwatchFile` operate only on scoped paths, with AbortSignal, async iterator, polling stats, watcher quota, event-rate limiting, timeout cleanup, recursive watch denial, and documented Android event coalescing. |
 | zlib streams | partial | Bounded transform streams support gzip/gunzip and deflate/inflate pipelines, scoped fs pipeline smoke, invalid input errors, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
 | HTTP client facade | experimental controlled client | `http.request()`, `http.get()`, `https.request()`, and `https.get()` expose a controlled fetch-backed client facade only when an enforced manifest declares `network`; default sync denial, no server/listen/raw sockets/CONNECT/upgrades, and explicit-only redirect follow remain enforced. |
@@ -298,6 +299,11 @@ small set of already-gated features toward practical use.
   `fs.promises.opendir`, including callback/sync/promise reads, close paths,
   async iteration, `Dirent` shape helpers, buffer names, bounded recursive
   walks, scoped path denial, and closed `Dir` `ERR_DIR_CLOSED`.
+- `fs.watch` smoke passes for managed `fs.watch`, `fs.promises.watch`,
+  `fs.watchFile`, and `fs.unwatchFile`, including AbortSignal, async iterator,
+  polling stats, path-like inputs, watcher quota, event-rate limiting,
+  unsupported recursive watch, Android event coalescing tolerance, and timeout
+  recovery after a leaked watcher.
 - zlib stream smoke passes for gzip/gunzip, deflate/inflate, scoped fs
   read->gzip->write, invalid gzip error propagation, active stream timeout
   cleanup, and packaged APK markers.

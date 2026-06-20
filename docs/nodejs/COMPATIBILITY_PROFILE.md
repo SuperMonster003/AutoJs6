@@ -554,6 +554,15 @@ directory handles reject with `ERR_DIR_CLOSED`, while relative escapes,
 absolute outside paths, file targets, missing directories, and NUL paths keep
 their stable scoped fs or Node error codes.
 
+The scoped watcher subset covers `fs.watch`, `fs.promises.watch`,
+`fs.watchFile`, and `fs.unwatchFile`. S8-30 keeps watchers execution-owned and
+subject to scoped path validation, a 16 active watcher quota, a 64 events per
+1000 ms per-watcher rate limit, AbortSignal cleanup, and service-stop cleanup.
+Recursive watch remains unsupported. Android watcher events may be coalesced
+and may report `change`, `rename`, or a null filename; scripts should treat
+watchers as notification hints and re-read scoped state when exact contents
+matter.
+
 The `zlib` wrapper exposes bounded transform streams for `createGzip()`,
 `createGunzip()`, `createDeflate()`, `createInflate()`, raw deflate/inflate,
 and Brotli compression/decompression. Active zlib transform tracking starts

@@ -221,13 +221,19 @@ Current Batch E implementation status:
   `fs.opendir()`, `fs.opendirSync()`, and `fs.promises.opendir()` support
   managed directory reads, close paths, async iteration, buffer names, small
   recursive walks, closed-handle `ERR_DIR_CLOSED`, and scoped path denial.
+- S8-30 is complete for scoped watcher compatibility. `fs.watch()`,
+  `fs.promises.watch()`, `fs.watchFile()`, and `fs.unwatchFile()` support
+  scoped path-like inputs, AbortSignal, close/ref/unref paths, polling stats,
+  listener-specific unwatch, watcher quota, event-rate limiting, timeout
+  cleanup, and documented Android event coalescing behavior.
 - Relative escapes and absolute outside paths keep stable scoped-fs denial
   codes, while closed handles and non-owned numeric descriptors reject with
   `EBADF`.
-- Timeout cleanup with an unclosed file handle or fd is covered so a failed
-  execution does not poison the next embedded Node run.
+- Timeout cleanup with an unclosed file handle, fd, or watcher is covered so a
+  failed execution does not poison the next embedded Node run.
 - Recursive directory walks are capped by the scoped fs recursive entry budget
   before they can become unbounded traversal.
+- Recursive watch remains disabled until Android/provider behavior is reliable.
 
 Focused gates:
 
@@ -239,6 +245,8 @@ $env:ANDROID_SERIAL='QV710AF65F'
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeOpendirInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest,org.autojs.autojs.engine.NodeOpendirInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsWatchInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeFsPromisesInstrumentationTest,org.autojs.autojs.engine.NodeFileHandleAdvancedInstrumentationTest,org.autojs.autojs.engine.NodeFdApiInstrumentationTest,org.autojs.autojs.engine.NodeOpendirInstrumentationTest,org.autojs.autojs.engine.NodeFsWatchInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Detailed coverage is recorded in:
@@ -246,3 +254,4 @@ Detailed coverage is recorded in:
 - `docs/nodejs/reports/phase8/FILEHANDLE_ADVANCED.md`
 - `docs/nodejs/reports/phase8/FD_API.md`
 - `docs/nodejs/reports/phase8/OPENDIR_DIR.md`
+- `docs/nodejs/reports/phase8/FS_WATCH.md`

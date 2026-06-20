@@ -207,6 +207,22 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: replace the symlink with copied files or remove the dependency path.
 - Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [TESTING.md](TESTING.md).
 
+## ERR_AUTOJS6_FS_WATCH_LIMIT
+
+- Meaning: the scoped fs watcher quota for the current embedded execution was exceeded.
+- Common cause: opening too many active `fs.watch`, `fs.promises.watch`, or `fs.watchFile` handles without closing them.
+- Example: creating a watcher per file in a large tree and leaving all handles active.
+- How to fix: close watchers promptly, multiplex directory watches where safe, or poll a bounded set of files.
+- Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
+
+## ERR_AUTOJS6_FS_WATCH_RATE_LIMITED
+
+- Meaning: a scoped fs watcher produced more events than the per-watcher rate limit allows.
+- Common cause: a tight file write loop, a noisy generated output directory, or manually emitted watcher events.
+- Example: rewriting the same watched file many times in one second.
+- How to fix: debounce file changes, close noisy watchers, and re-read scoped state after a quiet period.
+- Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).
+
 ## ERR_AUTOJS6_JAVA_CLASS_DENIED
 
 - Meaning: controlled Java interop denied access to a class.
