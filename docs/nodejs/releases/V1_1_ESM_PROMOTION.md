@@ -73,7 +73,7 @@ hit/miss status.
 | `.mjs` entry | Pass as partial | Default profile runs `.mjs`; explicit ESM-off requests still reject. |
 | local static import | Pass as partial | Scoped local `.mjs` imports are covered. |
 | package `type=module` | Pass as partial | Entry routing works by default under the v1.1 profile. |
-| package `exports` import condition | Pass as partial | Synthetic package tests cover `import`, `node`, and `default` condition order. |
+| package `exports` import condition | Pass as partial | Synthetic package tests cover importer-sensitive condition matching. Phase 8 S8-18 adds package key order preservation and the `autojs6` condition. |
 | package `imports` import condition | Pass as partial | Synthetic package tests cover importer-sensitive conditions. |
 | ESM import of CJS | Pass as partial | Default/namespace-style access stays scoped through existing CJS loader cache. |
 | supported builtin import | Pass as partial | Uses the Safe Node builtin allowlist. |

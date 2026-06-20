@@ -96,9 +96,10 @@ Current Batch C implementation status:
 - CommonJS `require()` can synchronously load partial ESM graphs from `.mjs`,
   `.mts`, and `type=module` `.js` targets.
 - The returned value is the ESM namespace object.
-- CommonJS package resolution keeps the CommonJS condition set
-  `require`, `node`, `default`; `require()` does not select `import`
-  conditions.
+- Package condition selection preserves package key order. CommonJS activates
+  `autojs6`, `require`, `node`, `default`; ESM activates `autojs6`, `import`,
+  `node`, `default`; `development` and `production` remain inactive by
+  default.
 - Sync-required ESM graphs containing `await` or dynamic `import()` reject with
   `ERR_REQUIRE_ASYNC_MODULE`.
 - Native addons, raw loader hooks, raw network, disabled builtins, scoped fs

@@ -76,11 +76,11 @@ flag to false preserves the previous fail-closed path for diagnostics.
 - local static imports of `.mjs` files inside `workingDirectory` are supported.
 - ESM may default-import scoped CommonJS modules (`.cjs`, `.js`, or `.json`) through the existing CommonJS loader cache.
 - ESM may import supported builtin modules through the existing Safe Node builtin allowlist and limited builtin wrappers.
-- ESM bare package imports may select package `exports` using the ESM condition set `import`, `node`, `default`, then load a CommonJS target through the CommonJS loader.
-- ESM package imports (`#alias`) may select package `imports` using the same ESM condition set.
+- ESM bare package imports may select package `exports` using the active ESM condition set `autojs6`, `import`, `node`, `default` while preserving package key order, then load a CommonJS target through the CommonJS loader.
+- ESM package imports (`#alias`) may select package `imports` using the same active ESM condition set and package key order.
 - ESM package `exports` and `imports` may target `.mjs` files inside the package root.
 - ESM self-reference and nested package imports use the ESM condition set.
-- CommonJS `require()` may load synchronous partial ESM targets without changing CommonJS package condition order.
+- CommonJS `require()` may load synchronous partial ESM targets without changing CommonJS package condition matching.
 - ESM may import scoped JSON modules only with `with { type: "json" }`; the resulting default export shares the existing CommonJS JSON cache object.
 - ESM exposes `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)` for AutoJs6-managed modules. `resolve()` reuses the scoped ESM resolver, returns `file:` URLs for local/package targets, returns `node:` URLs for allowed builtins, and keeps disabled builtins denied.
 - simple named exports are supported for local `.mjs` modules.
@@ -156,7 +156,7 @@ The preferred long-term direction is real ESM semantics through an explicit load
 CJS `require()` targeting ESM:
 
 - Current default: load synchronous partial ESM graphs and return the ESM namespace object.
-- CommonJS condition order remains `require`, `node`, `default`; `require()` does not select package `import` conditions.
+- CommonJS condition matching uses the active condition set `autojs6`, `require`, `node`, `default` while preserving package key order; `require()` does not select package `import` conditions.
 - Graphs containing `await` or dynamic `import()` reject with `ERR_REQUIRE_ASYNC_MODULE` because they cannot be synchronously evaluated.
 - Explicit ESM-off diagnostic requests may still reject earlier with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
 - Long-term behavior may align more closely with Node's `require(esm)` semantics where appropriate, but AutoJs6 policy errors must remain stable.
@@ -195,7 +195,7 @@ AutoJs6-managed dynamic import supports:
 - local relative specifiers such as `./dep.mjs` and `./dep.cjs`
 - safe package specifiers resolved inside `workingDirectory`
 - allowed builtin specifiers such as `node:path`
-- package `exports`/`imports` condition order for ESM importers
+- package `exports`/`imports` condition matching for ESM importers
 - the same ESM/CJS interop path as static ESM imports
 
 It rejects:
@@ -241,16 +241,27 @@ but v1.1 still treats broad file URL import semantics as unsupported.
 
 ## Package Exports Conditions
 
-Current CommonJS condition order remains:
+Current CommonJS active condition set:
 
 ```text
-require, node, default
+autojs6, require, node, default
 ```
 
-ESM condition order is importer-sensitive:
+Current ESM active condition set:
 
-- CommonJS importer: `require`, `node`, `default`
-- ESM importer: `import`, `node`, `default`
+```text
+autojs6, import, node, default
+```
+
+Condition object selection preserves package key order. The condition sets above
+only decide which keys are active; they do not reorder the package author's
+condition object. For example, an ESM `exports` object with `import` before
+`autojs6` selects `import`, while the same object with `autojs6` first selects
+`autojs6`.
+
+`development` and `production` are recognized for diagnostics but are not active
+by default. They must not be selected unless a future explicit build/runtime
+profile adds that condition deliberately.
 
 The resolver rejects package export/import targets that escape the package root, including under ESM mode.
 

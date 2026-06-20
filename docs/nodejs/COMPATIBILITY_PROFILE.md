@@ -88,7 +88,7 @@ Runtime diagnostics expose the same state through `require("autojs6:profile").fe
 - package `exports`
 - package `imports`
 - package self-reference
-- package condition order currently oriented around CommonJS: `require`, `node`, `default`
+- package condition matching currently uses active condition sets plus package key order: CommonJS activates `autojs6`, `require`, `node`, `default`; ESM activates `autojs6`, `import`, `node`, `default`
 - module source budget checks
 - optional resolver trace through `AUTOJS6_NODE_RESOLVE_TRACE=1`, written to stderr and disabled by default
 - resolver visualizer report through `node tools/nodejs/resolver/explain-node-resolve.js --mode compact|verbose|json --request <specifier> --from <file> --trace-file <stderr-log>` or `:app:explainNodeResolve` with `-Pautojs.nodejs.resolve.*`
@@ -655,21 +655,21 @@ Node Profile v1.1 partial ESM supports:
 - local static imports of `.mjs` files inside `workingDirectory`
 - default import from scoped CommonJS modules through the existing CommonJS loader
 - supported builtin imports such as `node:path` and `node:events`
-- bare package imports that resolve package `exports` with ESM condition order `import`, `node`, `default` and then load a CommonJS target
-- package `imports` aliases with ESM condition order `import`, `node`, `default`
+- bare package imports that resolve package `exports` with the ESM active condition set `autojs6`, `import`, `node`, `default`, preserving package key order, and then load a CommonJS target
+- package `imports` aliases with the same ESM active condition set and package key order
 - package `exports`/`imports` targets that point to `.mjs` files inside the package root
 - nested package imports and package self-reference under ESM mode
-- CommonJS `require()` of synchronous partial ESM targets, returning the ESM namespace object while preserving CommonJS package condition order
+- CommonJS `require()` of synchronous partial ESM targets, returning the ESM namespace object while preserving CommonJS package condition matching
 - ESM JSON imports with `with { type: "json" }`, sharing the CommonJS JSON cache object
 - scoped `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)`
 - simple named exports
 - simple top-level await
 
-CommonJS package condition order remains `require`, `node`, `default`.
+CommonJS package condition matching uses active conditions `autojs6`, `require`, `node`, `default` while preserving package key order. `development` and `production` are recognized for diagnostics but are not active by default.
 
 Partial ESM still rejects CJS `require()` of asynchronous ESM graphs containing `await` or dynamic `import()`, legacy ESM JSON import assertions, missing/unknown import attributes, import attributes on non-JSON modules, custom loaders, network/URL imports, disabled builtins, any import outside `workingDirectory`, and Node's full `import.meta` loader surface beyond the scoped metadata and resolver subset.
 
-Dynamic `import()` is local-only partial support. It allows local relative `.mjs`, CommonJS, and JSON modules, allowed builtins, and packages resolved inside `workingDirectory` with ESM package condition order. Dynamic JSON imports require `{ with: { type: "json" } }`. It rejects disabled builtins, absolute paths, `file:`/`data:` URLs, network URLs, path escapes, loader hooks, and dynamic-code sources such as `eval` and `Function` with stable AutoJs6 errors. `import.meta.resolve()` follows the same scoped ESM resolver, returning `file:` URLs for local/package targets and `node:` URLs for allowed builtins while keeping disabled builtins denied.
+Dynamic `import()` is local-only partial support. It allows local relative `.mjs`, CommonJS, and JSON modules, allowed builtins, and packages resolved inside `workingDirectory` with ESM package condition matching. Dynamic JSON imports require `{ with: { type: "json" } }`. It rejects disabled builtins, absolute paths, `file:`/`data:` URLs, network URLs, path escapes, loader hooks, and dynamic-code sources such as `eval` and `Function` with stable AutoJs6 errors. `import.meta.resolve()` follows the same scoped ESM resolver, returning `file:` URLs for local/package targets and `node:` URLs for allowed builtins while keeping disabled builtins denied.
 
 Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, `esmModuleGraphModules`, and `dynamicImportEnabled` in the embedded script result envelope.
 

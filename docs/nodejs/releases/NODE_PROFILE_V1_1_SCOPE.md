@@ -51,7 +51,7 @@ small set of already-gated features toward practical use.
 | ESM/CJS interop | partial | ESM may import CJS; CJS `require()` may load synchronous ESM graphs and rejects async graphs with `ERR_REQUIRE_ASYNC_MODULE`. |
 | ESM JSON import attributes | partial | Static `import data from "./data.json" with { type: "json" }` and dynamic `import("./data.json", { with: { type: "json" } })` load scoped JSON through the existing CommonJS JSON cache; missing/unknown attributes and legacy assertions are denied. |
 | ESM import.meta | partial | `import.meta.url`, `filename`, `dirname`, `main`, and `resolve()` are available for AutoJs6-managed ESM modules. `resolve()` reuses the scoped ESM resolver, returns `file:` URLs for local/package targets and `node:` URLs for allowed builtins, and denies disabled builtins. |
-| Package ESM conditions | partial | ESM uses `import`, `node`, `default`; CJS keeps `require`, `node`, `default`. |
+| Package ESM conditions | partial | Condition objects preserve package key order. ESM activates `autojs6`, `import`, `node`, `default`; CJS activates `autojs6`, `require`, `node`, `default`; `development` and `production` remain inactive unless explicitly enabled by a future profile. |
 | Dynamic import | partial | Local-only dynamic import is enabled by default for relative modules, allowed builtins, and scoped packages. |
 | Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import local graph smoke is covered separately. |
 | Buffer module | partial | `require("buffer")`, `require("node:buffer")`, and ESM `node:buffer` use the same builtin wrapper and cannot be shadowed by `node_modules/buffer`. |
@@ -91,10 +91,12 @@ small set of already-gated features toward practical use.
 - Local static import, named export, default export, and top-level await pass.
 - ESM imports of allowed builtins pass.
 - ESM import of disabled builtins fails with stable AutoJs6 error metadata.
-- ESM package `exports`/`imports` choose the import condition.
-- CJS package `exports`/`imports` still choose the require condition.
+- ESM package `exports`/`imports` use active conditions
+  `autojs6`/`import`/`node`/`default` while preserving package key order.
+- CJS package `exports`/`imports` use active conditions
+  `autojs6`/`require`/`node`/`default` while preserving package key order.
 - CommonJS `require()` of synchronous `.mjs`/`.mts`/`type=module` targets returns
-  an ESM namespace object while preserving CommonJS package condition order.
+  an ESM namespace object while preserving CommonJS package condition matching.
 - CommonJS `require()` of ESM graphs containing `await` or dynamic `import()`
   fails with `ERR_REQUIRE_ASYNC_MODULE`.
 - ESM JSON imports require `with { type: "json" }`, share the CommonJS JSON
