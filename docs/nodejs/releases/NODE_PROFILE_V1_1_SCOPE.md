@@ -58,6 +58,7 @@ small set of already-gated features toward practical use.
 | Core builtin feature-detect modules | partial | `constants`, `util/types`, `events`, and `diagnostics_channel` support CJS and partial ESM import paths with shadowing denial and no `process.getBuiltinModule()` bypass. |
 | Stream primitives | partial | Async iteration, callback/promise pipeline and finished helpers, Web Streams adapters, backpressure smoke, destroy propagation, and shadowing denial stay covered as pure-JS compatibility surface. |
 | Web Streams | partial | `stream/web`, globals, Blob streams, Node/Web adapters, and bounded fetch `response.body.stream()` reads are supported without direct network streaming. |
+| Web Platform globals | partial | `Headers`, `Request`, `Response`, `FormData`, `Blob`, `File`, `URLPattern`, `DOMException`, `EventTarget`, `MessageEvent`, `CompressionStream`, and `DecompressionStream` are aligned by a focused S8-20 gate as a compatibility prelude to controlled HTTP client facades. |
 | fs streams | partial | Scoped read/write streams support read, write, pipe, stable denial paths, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | zlib streams | partial | Bounded transform streams support gzip/gunzip and deflate/inflate pipelines, scoped fs pipeline smoke, invalid input errors, active-stream diagnostics, timeout/service cleanup, and packaged smoke coverage. |
 | Controlled fetch | experimental | Global `fetch` and `require("fetch")` surface is hardened for v1.1 with fake-provider GET/POST, headers, string/binary bodies, response helpers, abort, timeout, budgets, redirects, and raw-network denial; live provider remains default-off. |
@@ -123,6 +124,11 @@ small set of already-gated features toward practical use.
 - Web Streams smoke passes for `stream/web`, global constructors, Blob streams,
   Node/Web adapters, controlled fetch `response.body.stream()` reads, and
   packaged APK markers.
+- Web Platform globals smoke passes for `Headers`, `Request`, `Response`,
+  `FormData`, `Blob`, `File`, `URLPattern`, `DOMException`, `EventTarget`,
+  `MessageEvent`, `CompressionStream`, and `DecompressionStream`, including
+  descriptor locking, gzip roundtrip, URLPattern groups, DOM/Event shapes, and
+  default controlled-network-off `fetch()` denial.
 - Controlled fetch smoke passes for global `fetch`, `require("fetch")`,
   GET/POST, headers, string/Buffer/Uint8Array bodies, response
   text/json/arrayBuffer helpers, timeout, abort-before and abort-during

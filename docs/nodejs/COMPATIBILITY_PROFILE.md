@@ -481,6 +481,16 @@ surface. `process.getBuiltinModule()` remains disabled, builtin shadows remain
 ignored, and these APIs do not grant raw network, process, native addon,
 Android, or unscoped filesystem authority.
 
+S8-20 adds a focused Web Platform globals alignment gate for the constructors
+used by controlled HTTP compatibility work: `Headers`, `Request`, `Response`,
+`FormData`, `Blob`, `File`, `URLPattern`, `DOMException`, `EventTarget`,
+`MessageEvent`, `CompressionStream`, and `DecompressionStream`. The gate covers
+headers, request/response body consumption, form entries, URLPattern groups,
+DOM/Event shapes, gzip compression/decompression roundtrip, and descriptor
+locking. Global `fetch()` remains denied in the default controlled-network-off
+profile, and these globals do not expose raw sockets, native addons, process
+spawning, Java/Android objects, or unscoped filesystem authority.
+
 The `stream` wrapper is a partial compatibility surface for pure-JS packages. It
 exposes the standard constructors, `Readable.from()`, callback
 `pipeline()`/`finished()`, `stream/promises` `pipeline()`/`finished()`, selected

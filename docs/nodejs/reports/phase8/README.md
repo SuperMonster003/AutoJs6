@@ -134,3 +134,27 @@ Packaged smoke expectations now cover both the positive packaged `.mjs`
 
 Detailed corpus classification is recorded in
 `docs/nodejs/reports/phase8/MODULE_CONFORMANCE_V2.md`.
+
+## Batch D Web Platform And HTTP Client Prelude
+
+Current Batch D implementation status:
+
+- S8-20 is complete for the Web Platform globals needed by later controlled
+  `node:http` and `node:https` client compatibility work.
+- `Headers`, `Request`, `Response`, `FormData`, `Blob`, `File`, `URLPattern`,
+  `DOMException`, `EventTarget`, `MessageEvent`, `CompressionStream`, and
+  `DecompressionStream` are covered by a focused Sony instrumentation gate.
+- The gate also verifies that default global `fetch()` remains denied when the
+  controlled network capability is not enabled.
+- Raw `http`/`https`/`net`/`tls`/`dns`/`dgram` I/O remains disabled; S8-21+
+  will decide any HTTP client facade behavior separately.
+
+Focused gate:
+
+```powershell
+$env:ANDROID_SERIAL='QV710AF65F'
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebPlatformGlobalsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+Detailed Web Platform global coverage is recorded in
+`docs/nodejs/reports/phase8/WEB_PLATFORM_GLOBALS.md`.

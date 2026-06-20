@@ -241,6 +241,19 @@ This suite copies `app/src/androidTest/assets/node_compat_corpus/` into a scoped
 
 The same test class also runs the S8-19 module conformance v2 corpus from `app/src/androidTest/assets/node_compat_corpus_v2/`. That corpus covers CommonJS `require()` of synchronous ESM graphs, async/TLA ESM rejection with `ERR_REQUIRE_ASYNC_MODULE`, JSON import attributes with CommonJS JSON cache sharing, ESM/CommonJS cycles, scoped `import.meta.resolve()`, the `autojs6` package condition, `.mts`/`.cts` mixed graphs, and a packaged moduleSources mixed graph with ESM, CommonJS, JSON, dynamic import, and lightweight TypeScript sources.
 
+Focused Web Platform globals alignment instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeWebPlatformGlobalsInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This S8-20 gate verifies `Headers`, `Request`, `Response`, `FormData`, `Blob`,
+`File`, `URLPattern`, `DOMException`, `EventTarget`, `MessageEvent`,
+`CompressionStream`, and `DecompressionStream`, including descriptor locking,
+gzip roundtrip behavior, and default controlled-network-off `fetch()` denial.
+It is the compatibility prelude for later `node:http`/`node:https` client
+facade work and does not enable raw socket modules.
+
 Current fixed real npm corpus instrumentation:
 
 ```powershell
