@@ -21486,6 +21486,9 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_scoped_fd_records = Object.create(null);
   let __autojs6_scoped_fd_next_id = 1;
   const __autojs6_scoped_fs_recursive_entry_limit = 4096;
+  const __autojs6_scoped_fs_watcher_limit = 16;
+  const __autojs6_scoped_fs_watch_event_limit = 64;
+  const __autojs6_scoped_fs_watch_event_window_ms = 1000;
   let __autojs6_deferred_success_waiting = false;
   let __autojs6_deferred_success_value = undefined;
   function __autojs6_pending_callback_count() {
@@ -21999,12 +22002,26 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_track_watch_file(resolvedPath, listener, wrappedListener, handle, options) {
     const record = {
+      kind: "watchFile",
       path: resolvedPath,
       listener,
       wrappedListener,
       pending: __autojs6_watch_file_keeps_pending(options),
-      active: true
+      active: true,
+      rateState: __autojs6_create_scoped_fs_watch_rate_state()
     };
+    try {
+      Object.defineProperty(wrappedListener, "__autojs6ScopedWatchFileRecord", {
+        value: record,
+        configurable: true,
+        enumerable: false,
+        writable: true
+      });
+    } catch (_) {
+      try {
+        wrappedListener.__autojs6ScopedWatchFileRecord = record;
+      } catch (_) {}
+    }
     __autojs6_scoped_watch_file_records.push(record);
     if (record.pending) {
       __autojs6_adjust_pending_callback("fs", 1);
@@ -22059,6 +22076,76 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_fs_watch_keeps_pending(options) {
     return !(options && typeof options === "object" && options.persistent === false);
   }
+  function __autojs6_active_scoped_fs_watcher_count() {
+    return __autojs6_scoped_fs_watch_records.length +
+      __autojs6_scoped_watch_file_records.length;
+  }
+  function __autojs6_assert_scoped_fs_watcher_available(operation) {
+    if (__autojs6_active_scoped_fs_watcher_count() >= __autojs6_scoped_fs_watcher_limit) {
+      throw __autojs6_error(
+        "Embedded Node scoped fs " + operation + " watcher limit exceeded: " +
+          __autojs6_scoped_fs_watcher_limit,
+        "ERR_AUTOJS6_FS_WATCH_LIMIT"
+      );
+    }
+  }
+  function __autojs6_create_scoped_fs_watch_rate_state() {
+    return {
+      windowStartMs: 0,
+      eventCount: 0
+    };
+  }
+  function __autojs6_scoped_fs_watch_rate_limit_error(operation) {
+    return __autojs6_error(
+      "Embedded Node scoped fs " + operation + " event rate limit exceeded: " +
+        __autojs6_scoped_fs_watch_event_limit + " events per " +
+        __autojs6_scoped_fs_watch_event_window_ms + "ms",
+      "ERR_AUTOJS6_FS_WATCH_RATE_LIMITED"
+    );
+  }
+  function __autojs6_close_rate_limited_watch_record(record) {
+    if (!record) {
+      return;
+    }
+    if (record.kind === "watchFile") {
+      try {
+        __autojs6_untrack_watch_file_records(record.path, record.listener, true);
+      } catch (_) {
+        __autojs6_settle_watch_file_record(record);
+      }
+      return;
+    }
+    try {
+      if (record.close && typeof record.close === "function") {
+        record.close();
+      } else if (record.watcher && typeof record.watcher.close === "function") {
+        record.watcher.close();
+      }
+    } catch (_) {
+    } finally {
+      __autojs6_settle_fs_watch_record(record);
+    }
+  }
+  function __autojs6_note_scoped_fs_watch_event(record, operation) {
+    if (!record || !record.active) {
+      return;
+    }
+    const state = record.rateState || (record.rateState = __autojs6_create_scoped_fs_watch_rate_state());
+    const now = Date.now();
+    if (
+      !state.windowStartMs ||
+      now - state.windowStartMs >= __autojs6_scoped_fs_watch_event_window_ms
+    ) {
+      state.windowStartMs = now;
+      state.eventCount = 0;
+    }
+    state.eventCount += 1;
+    if (state.eventCount > __autojs6_scoped_fs_watch_event_limit) {
+      const error = __autojs6_scoped_fs_watch_rate_limit_error(operation);
+      __autojs6_close_rate_limited_watch_record(record);
+      throw error;
+    }
+  }
   function __autojs6_patch_fs_watcher_handle(watcher, record) {
     if (!watcher || typeof watcher.close !== "function" || watcher.__autojs6ScopedFsWatchPatched) {
       return watcher;
@@ -22066,6 +22153,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const nativeClose = watcher.close;
     const nativeRef = typeof watcher.ref === "function" ? watcher.ref : null;
     const nativeUnref = typeof watcher.unref === "function" ? watcher.unref : null;
+    const nativeEmit = typeof watcher.emit === "function" ? watcher.emit : null;
     try {
       Object.defineProperty(watcher, "close", {
         value: function() {
@@ -22092,6 +22180,19 @@ std::string buildEmbeddedScriptExecutionSource(
           value: function() {
             __autojs6_set_watch_record_pending(record, false);
             return nativeUnref.apply(this, arguments);
+          },
+          configurable: true,
+          enumerable: false,
+          writable: true
+        });
+      }
+      if (nativeEmit) {
+        Object.defineProperty(watcher, "emit", {
+          value: function(eventName) {
+            if (eventName === "change") {
+              __autojs6_note_scoped_fs_watch_event(record, "watch");
+            }
+            return nativeEmit.apply(this, arguments);
           },
           configurable: true,
           enumerable: false,
@@ -22129,10 +22230,12 @@ std::string buildEmbeddedScriptExecutionSource(
     const signal = __autojs6_fs_watch_option_signal(options);
     let done = false;
     const record = {
+      kind: "watch",
       path: resolvedPath,
       watcher,
       pending: __autojs6_fs_watch_keeps_pending(options),
-      active: true
+      active: true,
+      rateState: __autojs6_create_scoped_fs_watch_rate_state()
     };
     const cleanup = function() {
       __autojs6_timers_promises_remove_abort_listener(signal, onAbort);
@@ -22187,11 +22290,13 @@ std::string buildEmbeddedScriptExecutionSource(
     let finalError = null;
     let closeStarted = false;
     const record = {
+      kind: "watch",
       path: resolvedPath,
       iterator: nativeIterator,
       pending: __autojs6_fs_watch_keeps_pending(options),
       active: true,
-      close: null
+      close: null,
+      rateState: __autojs6_create_scoped_fs_watch_rate_state()
     };
     const cleanup = function() {
       __autojs6_timers_promises_remove_abort_listener(signal, onAbort);
@@ -22247,6 +22352,7 @@ std::string buildEmbeddedScriptExecutionSource(
               finish(null);
             }
             if (result && !result.done && result.value) {
+              __autojs6_note_scoped_fs_watch_event(record, "watch");
               return {
                 value: __autojs6_watch_event_value(result.value, filenameEncoding),
                 done: false
@@ -22358,6 +22464,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const normalized = __autojs6_normalize_fs_watch_options(parsed.options);
     const watchOptions = normalized.options;
     const resolved = __autojs6_validate_fs_path(pathValue, "watch", { mustExist: true });
+    __autojs6_assert_scoped_fs_watcher_available("watch");
     const wrapped = typeof parsed.listener === "function"
       ? function(eventType, filename) {
           if (__autojs6_finished) {
@@ -22394,6 +22501,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const normalized = __autojs6_normalize_fs_watch_options(options);
     const watchOptions = normalized.options;
     const resolved = __autojs6_validate_fs_path(pathValue, "watch", { mustExist: true });
+    __autojs6_assert_scoped_fs_watcher_available("watch");
     const nativeIterator = watchOptions === undefined
       ? nodeFsPromises.watch(resolved)
       : nodeFsPromises.watch(resolved, watchOptions);
@@ -22413,11 +22521,16 @@ std::string buildEmbeddedScriptExecutionSource(
         return;
       }
       try {
+        __autojs6_note_scoped_fs_watch_event(
+          wrapped.__autojs6ScopedWatchFileRecord,
+          "watchFile"
+        );
         return parsed.listener.call(this, curr, prev);
       } catch (error) {
         __autojs6_finish_error(error);
       }
     };
+    __autojs6_assert_scoped_fs_watcher_available("watchFile");
     const handle = parsed.options === undefined
       ? nodeFs.watchFile(resolved, wrapped)
       : nodeFs.watchFile(resolved, parsed.options, wrapped);
