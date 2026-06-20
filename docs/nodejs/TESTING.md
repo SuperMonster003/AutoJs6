@@ -910,7 +910,7 @@ Current ESM partial focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest"
 ```
 
-This suite verifies that `.mjs` can still be rejected by an explicit ESM-off diagnostic request, then covers default partial `.mjs` entry execution, local static `.mjs` imports, top-level await, package `type=module` entry routing, scoped import escape denial, ESM default import from CommonJS, ESM import of supported builtins, disabled builtin rejection from ESM, CJS `require()` of ESM rejection with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`, package `exports`/`imports` condition selection with resolver trace for both ESM and CommonJS importers, `.mjs` package targets, nested package imports, self-reference, null blocking, unsafe target denial, explicit dynamic import off rejection, local dynamic import of `.mjs` and CommonJS modules, allowed builtin dynamic import, disabled builtin dynamic import denial, package dynamic import with ESM conditions, dynamic import scoped escape denial, and URL/absolute dynamic import rejection.
+This suite verifies that `.mjs` can still be rejected by an explicit ESM-off diagnostic request, then covers default partial `.mjs` entry execution, local static `.mjs` imports, top-level await, package `type=module` entry routing, scoped import escape denial, ESM default import from CommonJS, ESM import of supported builtins, disabled builtin rejection from ESM, CJS `require()` of synchronous ESM graphs, CJS `require()` rejection for async ESM graphs with `ERR_REQUIRE_ASYNC_MODULE`, package `exports`/`imports` condition selection with resolver trace for both ESM and CommonJS importers, `.mjs` package targets, nested package imports, self-reference, null blocking, unsafe target denial, explicit dynamic import off rejection, local dynamic import of `.mjs` and CommonJS modules, allowed builtin dynamic import, disabled builtin dynamic import denial, package dynamic import with ESM conditions, dynamic import scoped escape denial, and URL/absolute dynamic import rejection.
 
 Packaged `.mjs`, `package.json` `type=module`, and dynamic import local smokes
 run through the focused packaged ESM gate with the default production inrt
@@ -922,16 +922,18 @@ $env:ANDROID_SERIAL="QV710AF65F"
 ```
 
 With ESM partial enabled by default, the packaged ESM diagnostics smoke asserts
-the CommonJS-to-ESM boundary with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`. The
-focused packaged ESM gate covers a `.mjs` entry, package `type=module` `.js`
-modules, local static imports, selected builtin imports, ESM-to-CJS interop,
-top-level await, source-name stack shape, scoped escape denial, disabled builtin
-denial, local dynamic import of `.mjs`, CommonJS, and type-module targets, and
-runtime compatibility descriptor version-vector mismatch before script
-execution. The gate also validates descriptor versions inside packaged APK
-fixtures and prints packaged fixture cache hit/miss lines; cache hits still
-export, install, launch, and assert logcat markers on device. Broader dynamic
-import package graphs remain design-gated follow-ups.
+that CommonJS can synchronously `require()` a packaged `.mjs` module. The broader
+packaged diagnostics smoke also verifies that `require()` rejects async ESM
+graphs with `ERR_REQUIRE_ASYNC_MODULE`. The focused packaged ESM gate covers a
+`.mjs` entry, package `type=module` `.js` modules, local static imports,
+selected builtin imports, ESM-to-CJS interop, top-level await, source-name stack
+shape, scoped escape denial, disabled builtin denial, local dynamic import of
+`.mjs`, CommonJS, and type-module targets, and runtime compatibility descriptor
+version-vector mismatch before script execution. The gate also validates
+descriptor versions inside packaged APK fixtures and prints packaged fixture
+cache hit/miss lines; cache hits still export, install, launch, and assert
+logcat markers on device. Broader dynamic import package graphs remain
+design-gated follow-ups.
 
 Current GA promotion evaluation: `docs/nodejs/reports/ESM_EXPERIMENTAL_EVALUATION.md`.
 Current v1.1 promotion evaluation: `docs/nodejs/releases/V1_1_ESM_PROMOTION.md`.

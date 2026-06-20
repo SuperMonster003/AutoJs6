@@ -425,11 +425,19 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 
 ## ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED
 
-- Meaning: CommonJS attempted to require an ESM module in a profile that does not support that boundary.
-- Common cause: `require()` resolves to `.mjs` or a package target selected as ESM.
+- Meaning: CommonJS attempted to require an ESM module while the partial ESM boundary was disabled or unavailable.
+- Common cause: an explicit ESM-off diagnostic request resolves `require()` to `.mjs` or a package target selected as ESM.
 - Example: `require("./module.mjs")`.
-- How to fix: import the CommonJS dependency from an ESM entry, or provide a CommonJS package branch for `require`.
+- How to fix: use the default v1.1 partial ESM profile for synchronous ESM graphs, or provide a CommonJS package branch for older/ESM-off profiles.
 - Related docs: [design/ESM.md](design/ESM.md), [EXPERIMENTAL_PROMOTION_POLICY.md](EXPERIMENTAL_PROMOTION_POLICY.md).
+
+## ERR_REQUIRE_ASYNC_MODULE
+
+- Meaning: CommonJS attempted to synchronously require a partial ESM graph that needs asynchronous evaluation.
+- Common cause: an ESM file reachable from `require()` contains `await` or dynamic `import()`.
+- Example: `require("./module-with-top-level-await.mjs")`.
+- How to fix: use an ESM entry or dynamic `import()` for asynchronous ESM graphs, or remove asynchronous ESM syntax from the required module.
+- Related docs: [design/ESM.md](design/ESM.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
 ## ERR_AUTOJS6_TYPESCRIPT_UNSUPPORTED_EXTENSION
 

@@ -96,8 +96,10 @@ Still out of scope:
 - native addons
 - raw network, `child_process`, `process.binding`, or `process.dlopen`
 
-CommonJS remains the widest-compatibility format. Calling `require()` on an ESM
-module rejects with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
+CommonJS remains the widest-compatibility format. Calling `require()` on a
+synchronous ESM graph returns that module's namespace object. Calling
+`require()` on an ESM graph that contains `await` or dynamic `import()` rejects
+with `ERR_REQUIRE_ASYNC_MODULE`.
 
 ## Controlled Fetch And Axios
 

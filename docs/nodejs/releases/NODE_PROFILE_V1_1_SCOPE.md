@@ -12,8 +12,9 @@ small set of already-gated features toward practical use.
 - ESM partial support for `.mjs` entries and `package.json` `type=module`
   entry routing.
 - Safe ESM builtin imports through the existing builtin allowlist.
-- Practical ESM-to-CommonJS interop while keeping CommonJS `require()` of ESM
-  disabled with a stable error.
+- Practical ESM/CommonJS interop, including CommonJS `require()` of synchronous
+  partial ESM graphs while keeping asynchronous ESM graphs rejected with a
+  stable error.
 - Package `exports` and `imports` condition selection for both CommonJS and
   ESM importers.
 - Controlled fetch and WebSocket remain on the v1.1 roadmap, but are not part
@@ -47,7 +48,7 @@ small set of already-gated features toward practical use.
 | Scoped fs | stable | No policy loosening. |
 | ESM entry | partial | `.mjs` and `type=module` entries run by default in v1.1. |
 | ESM builtin import | partial | Only allowed builtins and limited wrappers. |
-| ESM/CJS interop | partial | ESM may import CJS; CJS `require()` of ESM remains denied. |
+| ESM/CJS interop | partial | ESM may import CJS; CJS `require()` may load synchronous ESM graphs and rejects async graphs with `ERR_REQUIRE_ASYNC_MODULE`. |
 | Package ESM conditions | partial | ESM uses `import`, `node`, `default`; CJS keeps `require`, `node`, `default`. |
 | Dynamic import | partial | Local-only dynamic import is enabled by default for relative modules, allowed builtins, and scoped packages. |
 | Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import local graph smoke is covered separately. |
@@ -90,8 +91,10 @@ small set of already-gated features toward practical use.
 - ESM import of disabled builtins fails with stable AutoJs6 error metadata.
 - ESM package `exports`/`imports` choose the import condition.
 - CJS package `exports`/`imports` still choose the require condition.
-- CommonJS `require()` of `.mjs` fails with
-  `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
+- CommonJS `require()` of synchronous `.mjs`/`.mts`/`type=module` targets returns
+  an ESM namespace object while preserving CommonJS package condition order.
+- CommonJS `require()` of ESM graphs containing `await` or dynamic `import()`
+  fails with `ERR_REQUIRE_ASYNC_MODULE`.
 - Packaged `.mjs` graph smoke passes with refreshed template support.
 - Dynamic import local-only smoke passes for `.mjs`, CommonJS, allowed builtins,
   and packages, while URL, absolute path, escape, and disabled builtin paths

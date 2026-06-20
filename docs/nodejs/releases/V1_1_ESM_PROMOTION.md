@@ -24,8 +24,10 @@ because these gaps remain:
   graph smoke, not broad package/export graph support;
 - dynamic import is local-only partial support; broad package graphs, file URLs,
   and loader hooks remain out of scope;
-- `import.meta`, loader hooks, raw `node:module` loader authority, URL/network
-  imports, and CJS `require()` of ESM remain unsupported;
+- `import.meta`, loader hooks, raw `node:module` loader authority, and
+  URL/network imports remain unsupported;
+- CJS `require()` is limited to synchronous partial ESM graphs and rejects ESM
+  graphs containing `await` or dynamic `import()` with `ERR_REQUIRE_ASYNC_MODULE`;
 - service destroy/cancellation while ESM linking or evaluation is pending still
   needs a dedicated gate.
 
@@ -75,7 +77,7 @@ hit/miss status.
 | ESM import of CJS | Pass as partial | Default/namespace-style access stays scoped through existing CJS loader cache. |
 | supported builtin import | Pass as partial | Uses the Safe Node builtin allowlist. |
 | disabled builtin import | Pass | Denied through existing policy. |
-| CJS `require()` of ESM | Pass as denial | Fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`. |
+| CJS `require()` of ESM | Pass as partial | Synchronous graphs return the ESM namespace object; async graphs fail with `ERR_REQUIRE_ASYNC_MODULE`. |
 | top-level await | Pass as partial | Covered in focused ESM tests. |
 | dynamic import | Pass as partial | Local `.mjs`/CJS, allowed builtin, and scoped package imports pass; disabled builtin, URL, absolute, escape, eval, and Function paths remain denied. |
 | source maps | Pass after fix | Inline and scoped external maps now map result `errorStack`; external escapes remain denied. |
@@ -107,8 +109,8 @@ support contract without more history.
 Packaged APK behavior remains conservative but no longer treats all ESM as
 default-denied:
 
-- packaged CommonJS requiring ESM returns
-  `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`;
+- packaged CommonJS requiring synchronous ESM returns the ESM namespace object;
+- packaged CommonJS requiring async ESM returns `ERR_REQUIRE_ASYNC_MODULE`;
 - packaged local dynamic import smoke succeeds for `.mjs` and CommonJS targets;
 - packaged `.mjs` graph smoke is part of the v1.1 partial gate, but it is not
   enough for broader support because package/export graphs, richer module source

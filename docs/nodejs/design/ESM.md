@@ -62,7 +62,8 @@ Default behavior:
 - static `import`/`export` syntax in CommonJS entries still fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
 - dynamic `import()` supports local-only package, builtin, `.mjs`, and CommonJS imports.
 - `import.meta` fails with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
-- CommonJS `require()` of `.mjs` or package targets that resolve to ESM fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
+- CommonJS `require()` can synchronously load `.mjs`, `.mts`, and `type=module` `.js` targets when the partial ESM graph has no `await` token and no dynamic `import()`.
+- CommonJS `require()` of an asynchronous partial ESM graph fails with `ERR_REQUIRE_ASYNC_MODULE`.
 
 Explicitly setting `autojs.nodejs.esm.experimental=false` or an internal request
 flag to false preserves the previous fail-closed path for diagnostics.
@@ -78,6 +79,7 @@ flag to false preserves the previous fail-closed path for diagnostics.
 - ESM package imports (`#alias`) may select package `imports` using the same ESM condition set.
 - ESM package `exports` and `imports` may target `.mjs` files inside the package root.
 - ESM self-reference and nested package imports use the ESM condition set.
+- CommonJS `require()` may load synchronous partial ESM targets without changing CommonJS package condition order.
 - simple named exports are supported for local `.mjs` modules.
 - top-level await is supported because the partial ESM graph is evaluated through an async runner.
 - diagnostics are emitted in the result envelope:
@@ -93,7 +95,7 @@ flag to false preserves the previous fail-closed path for diagnostics.
 Still unsupported in v1:
 
 - `import.meta`
-- CJS `require()` of ESM; when the ESM flag is enabled this fails with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
+- CJS `require()` of asynchronous ESM graphs that contain `await` or dynamic `import()`; this fails with `ERR_REQUIRE_ASYNC_MODULE`
 - ESM JSON import assertions; JSON may only be reached through the CommonJS interop path
 - custom loaders and `node:module` loader hooks
 - network, `file:`, `data:`, or other URL imports
@@ -149,9 +151,11 @@ The preferred long-term direction is real ESM semantics through an explicit load
 
 CJS `require()` targeting ESM:
 
-- Current default: reject with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
+- Current default: load synchronous partial ESM graphs and return the ESM namespace object.
+- CommonJS condition order remains `require`, `node`, `default`; `require()` does not select package `import` conditions.
+- Graphs containing `await` or dynamic `import()` reject with `ERR_REQUIRE_ASYNC_MODULE` because they cannot be synchronously evaluated.
 - Explicit ESM-off diagnostic requests may still reject earlier with `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`.
-- Long-term behavior may follow Node's `ERR_REQUIRE_ESM` style where appropriate, but AutoJs6 policy errors must remain stable.
+- Long-term behavior may align more closely with Node's `require(esm)` semantics where appropriate, but AutoJs6 policy errors must remain stable.
 
 ESM importing CJS:
 
@@ -299,4 +303,4 @@ The partial profile must keep tests for:
 
 ## Current Decision
 
-ESM is partial and enabled by default for Node Profile v1.1. Partial v1.1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, local-only dynamic import, and a focused packaged `.mjs` graph smoke with refreshed template support. Dynamic import is limited to local relative modules, allowed builtins, and packages resolved inside `workingDirectory`. This path still does not enable loader hooks, raw `node:module` loader authority, network imports, CJS `require()` of ESM, unrestricted file URLs, or unrestricted packaged encrypted ESM graphs.
+ESM is partial and enabled by default for Node Profile v1.1. Partial v1.1 enables local static `.mjs` imports for plain working directories, simple exports, top-level await, package `type=module` entry routing, ESM-to-CJS default interop, CJS `require()` of synchronous ESM graphs, supported builtin imports, package `exports`/`imports` ESM condition selection, nested package imports, self-reference, diagnostics, local-only dynamic import, and a focused packaged `.mjs` graph smoke with refreshed template support. Dynamic import is limited to local relative modules, allowed builtins, and packages resolved inside `workingDirectory`. This path still does not enable loader hooks, raw `node:module` loader authority, network imports, CJS `require()` of asynchronous ESM graphs, unrestricted file URLs, or unrestricted packaged encrypted ESM graphs.

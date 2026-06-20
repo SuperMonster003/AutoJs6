@@ -42,7 +42,8 @@ AutoJs6 behavior:
 - `"nodejs";` and `"node";` route to the Node backend.
 - `.node.js`, `.cjs`, and `.mjs` route to the Node backend.
 - `.mjs` runs through the Node Profile v1.1 partial ESM path by default.
-- CommonJS `require()` of ESM remains rejected with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`.
+- CommonJS `require()` can load synchronous partial ESM graphs and rejects async
+  ESM graphs with `ERR_REQUIRE_ASYNC_MODULE`.
 
 Porting note: use `.cjs` or `"nodejs";` plus CommonJS `require()` when you need the widest AutoJs6 compatibility.
 
@@ -57,7 +58,8 @@ AutoJs6 behavior:
 - CommonJS `require()` is the primary supported module system.
 - package `main`, `exports`, `imports`, self-reference, scoped packages, and JSON modules are supported within the Safe Node Profile.
 - ESM static import is partially supported from `.mjs` and `type=module` entries.
-- Dynamic import is disabled by default.
+- Local-only dynamic import is partially supported for relative modules,
+  allowed builtins, and scoped packages.
 
 Porting note:
 

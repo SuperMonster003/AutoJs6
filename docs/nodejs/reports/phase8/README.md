@@ -88,3 +88,28 @@ Focused gates:
 The current packaged TypeScript evidence is project/moduleSources compatible.
 Full exported APK installation smoke remains part of the broader packaged gate
 before TypeScript can be treated as a release-complete Phase 8 capability.
+
+## Batch C CJS require(ESM)
+
+Current Batch C implementation status:
+
+- CommonJS `require()` can synchronously load partial ESM graphs from `.mjs`,
+  `.mts`, and `type=module` `.js` targets.
+- The returned value is the ESM namespace object.
+- CommonJS package resolution keeps the CommonJS condition set
+  `require`, `node`, `default`; `require()` does not select `import`
+  conditions.
+- Sync-required ESM graphs containing `await` or dynamic `import()` reject with
+  `ERR_REQUIRE_ASYNC_MODULE`.
+- Native addons, raw loader hooks, raw network, disabled builtins, scoped fs
+  escapes, and unrestricted `node:module` authority remain denied.
+
+Focused gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmExperimentalInstrumentationTest" "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:compileAppDebugKotlin :app:compileAppDebugAndroidTestKotlin
+```
+
+Packaged smoke expectations now cover both the positive packaged `.mjs`
+`require()` path and the async-graph denial path.

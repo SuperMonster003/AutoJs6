@@ -16,7 +16,7 @@ Do not promote it to partial support yet, and do not hide it. The current subset
 - packaged APK support is limited to focused diagnostics/single-file smoke paths
 - encrypted packaged ESM graphs remain design-gated
 - dynamic import is a separate experiment and intentionally narrower than static ESM
-- `import.meta`, loader hooks, `node:module` loader authority, URL/network imports, and CJS `require()` of ESM remain unsupported
+- `import.meta`, loader hooks, `node:module` loader authority, URL/network imports, and CJS `require()` of ESM were unsupported for the v1 GA evaluation; Node Profile v1.1 Phase 8 later adds CJS `require()` support for synchronous partial ESM graphs only
 - service cancellation/destroy behavior while ESM linking or evaluation is pending still needs a dedicated gate
 
 ## Commands Run
@@ -50,7 +50,7 @@ The experimental ESM suite passed these cases on the Sony device:
 - ESM default import from CommonJS
 - supported builtin import from ESM
 - disabled builtin rejection from ESM
-- CJS `require()` of ESM rejection with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
+- CJS `require()` of ESM rejection with `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED` for the v1 GA experimental contract
 - package `exports` condition selection for ESM and CJS importers
 - package `imports` condition selection for ESM and CJS importers
 - `.mjs` package export targets

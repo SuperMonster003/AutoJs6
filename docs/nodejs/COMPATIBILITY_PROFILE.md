@@ -644,7 +644,7 @@ Expected ESM boundary errors:
 - explicit ESM-off request path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
 - static `import` syntax in a CommonJS entry path: `ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED`
 - disabled or unsupported dynamic import path: legacy `code` `ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED`, canonical `autojs6Code` `ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED`
-- CJS `require()` of ESM: `ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED`
+- CJS `require()` of an asynchronous ESM graph: `ERR_REQUIRE_ASYNC_MODULE`
 
 Default `require("autojs6:profile")` reports `esm=true`, `dynamicImport=true`, `featureFlags.esm.status="partial"`, `featureFlags.dynamic_import.status="partial"`, `featureFlags.dynamic_import.defaultEnabled=true`, and `experimentalFlags.dynamicImport=true`. The legacy `experimentalFlags.esm` and `experimentalFlags.dynamicImport` snapshots remain for compatibility with older diagnostics.
 
@@ -659,12 +659,13 @@ Node Profile v1.1 partial ESM supports:
 - package `imports` aliases with ESM condition order `import`, `node`, `default`
 - package `exports`/`imports` targets that point to `.mjs` files inside the package root
 - nested package imports and package self-reference under ESM mode
+- CommonJS `require()` of synchronous partial ESM targets, returning the ESM namespace object while preserving CommonJS package condition order
 - simple named exports
 - simple top-level await
 
 CommonJS package condition order remains `require`, `node`, `default`.
 
-Partial ESM still rejects `import.meta`, CJS `require()` of ESM, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
+Partial ESM still rejects `import.meta`, CJS `require()` of asynchronous ESM graphs containing `await` or dynamic `import()`, ESM JSON import assertions, custom loaders, network/URL imports, disabled builtins, and any import outside `workingDirectory`.
 
 Dynamic `import()` is local-only partial support. It allows local relative `.mjs` and CommonJS modules, allowed builtins, and packages resolved inside `workingDirectory` with ESM package condition order. It rejects disabled builtins, absolute paths, `file:`/`data:` URLs, network URLs, path escapes, loader hooks, and dynamic-code sources such as `eval` and `Function` with stable AutoJs6 errors.
 
