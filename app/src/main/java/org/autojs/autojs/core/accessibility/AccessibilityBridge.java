@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.accessibility;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import androidx.annotation.NonNull;
@@ -20,6 +21,8 @@ import java.util.List;
  * Created by Stardust on Apr 2, 2017.
  */
 public abstract class AccessibilityBridge {
+
+    private static final String TAG = "AccessibilityBridge";
 
     public interface WindowFilter {
         boolean filter(AccessibilityWindowInfo info);
@@ -63,6 +66,35 @@ public abstract class AccessibilityBridge {
     @Nullable
     public abstract AccessibilityService getService();
 
+    private List<AccessibilityWindowInfo> getWindowsSafely(AccessibilityService service) {
+        try {
+            List<AccessibilityWindowInfo> windows = service.getWindows();
+            return windows == null ? Collections.emptyList() : windows;
+        } catch (Throwable e) {
+            Log.w(TAG, "Unable to get accessibility windows", e);
+            return Collections.emptyList();
+        }
+    }
+
+    @Nullable
+    private AccessibilityNodeInfo getWindowRootSafely(AccessibilityWindowInfo window) {
+        try {
+            return window.getRoot();
+        } catch (Throwable e) {
+            Log.w(TAG, "Unable to get accessibility window root", e);
+            return null;
+        }
+    }
+
+    private boolean filterWindowSafely(AccessibilityWindowInfo window) {
+        try {
+            return mWindowFilter == null || mWindowFilter.filter(window);
+        } catch (Throwable e) {
+            Log.w(TAG, "Unable to filter accessibility window", e);
+            return false;
+        }
+    }
+
     public List<AccessibilityNodeInfo> windowRoots() {
         AccessibilityService service = getService();
         if (service == null) {
@@ -70,9 +102,9 @@ public abstract class AccessibilityBridge {
         }
         ArrayList<AccessibilityNodeInfo> roots = new ArrayList<>();
         if (mWindowFilter != null) {
-            for (AccessibilityWindowInfo window : service.getWindows()) {
-                if (mWindowFilter.filter(window)) {
-                    AccessibilityNodeInfo root = window.getRoot();
+            for (AccessibilityWindowInfo window : getWindowsSafely(service)) {
+                if (filterWindowSafely(window)) {
+                    AccessibilityNodeInfo root = getWindowRootSafely(window);
                     if (root != null) {
                         roots.add(root);
                     }
@@ -93,9 +125,9 @@ public abstract class AccessibilityBridge {
             return null;
         }
         if (mWindowFilter != null) {
-            for (AccessibilityWindowInfo window : service.getWindows()) {
-                if (mWindowFilter.filter(window)) {
-                    return window.getRoot();
+            for (AccessibilityWindowInfo window : getWindowsSafely(service)) {
+                if (filterWindowSafely(window)) {
+                    return getWindowRootSafely(window);
                 }
             }
             return null;

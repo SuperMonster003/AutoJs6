@@ -34,12 +34,14 @@ class AccessibilityTool(private val context: Context? = null) {
     private val mServiceName = "$mServiceNamePrefix/$mServiceNameSuffix"
 
     @ScriptInterface
-    fun clearCache(): Boolean = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-            AccessibilityService.instance?.clearCache() == true
+    fun clearCache(): Boolean = runCatching {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                AccessibilityService.instance?.clearCache() == true
+            }
+            else -> AccessibilityInteractionClient.clearCache()
         }
-        else -> AccessibilityInteractionClient.clearCache()
-    }
+    }.getOrDefault(false)
 
     @ScriptInterface
     @JvmOverloads

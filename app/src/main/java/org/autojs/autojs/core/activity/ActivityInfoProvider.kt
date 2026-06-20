@@ -244,6 +244,11 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
 }
 
 private fun AccessibilityService.getWindow(windowId: Int): AccessibilityWindowInfo? {
+    val windows = runCatching {
+        this.windows
+    }.onFailure {
+        Log.w("ActivityInfoProvider", "Unable to get accessibility windows", it)
+    }.getOrDefault(emptyList())
     windows.forEach {
         if (it.id == windowId) {
             return it

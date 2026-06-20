@@ -21,9 +21,9 @@ import org.autojs.autojs6.R
  * Created by Stardust on May 16, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
-class GlobalActionAutomator(private val context: Context, private val handler: Handler?, private val serviceProvider: () -> AccessibilityService) {
+class GlobalActionAutomator(private val context: Context, private val handler: Handler?, private val serviceProvider: () -> AccessibilityService?) {
 
-    private val service: AccessibilityService
+    private val service: AccessibilityService?
         get() = serviceProvider()
 
     private var mScreenMetrics: ScreenMetrics? = null
@@ -94,7 +94,14 @@ class GlobalActionAutomator(private val context: Context, private val handler: H
         else -> tryPerformGlobalActionWithLowerApi(GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE)
     }
 
-    private fun performGlobalAction(globalAction: Int) = service.performGlobalAction(globalAction)
+    private fun performGlobalAction(globalAction: Int): Boolean {
+        val service = service ?: return false
+        return runCatching {
+            service.performGlobalAction(globalAction)
+        }.onFailure {
+            Log.w(TAG, "Failed to perform global action: $globalAction", it)
+        }.getOrDefault(false)
+    }
 
     // @Hint by SuperMonster003 on May 12, 2022.
     //  ! Global actions such as GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS requires API Level S.
@@ -103,11 +110,7 @@ class GlobalActionAutomator(private val context: Context, private val handler: H
     //  ! zh-CN:
     //  ! 一些全局行为 (如 GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS) 要求设备至少为 API S 级别.
     //  ! 然而, 上述全局操作在低 API 级别的设备上 (如 API R) 也有较大可能性可以正常执行.
-    private fun tryPerformGlobalActionWithLowerApi(action: Int) = try {
-        performGlobalAction(action)
-    } catch (e: Throwable) {
-        false
-    }
+    private fun tryPerformGlobalActionWithLowerApi(action: Int) = performGlobalAction(action)
 
     fun gesture(start: Long, duration: Long, vararg points: IntArray) = gesture(start, duration, "gesture", *points)
 
@@ -139,47 +142,65 @@ class GlobalActionAutomator(private val context: Context, private val handler: H
     }
 
     private fun gesturesWithHandler(handler: Handler, description: GestureDescription): Boolean {
+        val service = service ?: return false
         val result = VolatileDispose<Boolean>()
-        val dispatchGesture: Boolean = service.dispatchGesture(description, object : GestureResultCallback() {
-            override fun onCompleted(gestureDescription: GestureDescription) {
-                result.setAndNotify(true)
-            }
+        val dispatchGesture = runCatching {
+            service.dispatchGesture(description, object : GestureResultCallback() {
+                override fun onCompleted(gestureDescription: GestureDescription) {
+                    result.setAndNotify(true)
+                }
 
-            override fun onCancelled(gestureDescription: GestureDescription) {
-                result.setAndNotify(false)
-            }
-        }, handler)
+                override fun onCancelled(gestureDescription: GestureDescription) {
+                    result.setAndNotify(false)
+                }
+            }, handler)
+        }.onFailure {
+            Log.w(TAG, "Failed to dispatch gesture", it)
+        }.getOrDefault(false)
         Log.d(TAG, "dispatchGesture: $dispatchGesture")
         if (!dispatchGesture) {
-            throw RuntimeException(context.getString(R.string.text_a11y_service_enabled_but_not_running))
+            return false
         }
         return result.blockedGet(128_000) ?: false
     }
 
     private fun gesturesWithoutHandler(description: GestureDescription): Boolean {
+        val service = service ?: return false
         prepareLooperIfNeeded()
         val result = VolatileBox(false)
-        Looper.myLooper()?.let { myLooper ->
-            service.dispatchGesture(description, object : GestureResultCallback() {
-                override fun onCompleted(gestureDescription: GestureDescription) {
-                    result.set(true)
-                    quitLoop()
-                }
+        val dispatchGesture = Looper.myLooper()?.let { myLooper ->
+            runCatching {
+                service.dispatchGesture(description, object : GestureResultCallback() {
+                    override fun onCompleted(gestureDescription: GestureDescription) {
+                        result.set(true)
+                        quitLoop()
+                    }
 
-                override fun onCancelled(gestureDescription: GestureDescription) {
-                    result.set(false)
-                    quitLoop()
-                }
-            }, Handler(myLooper))
+                    override fun onCancelled(gestureDescription: GestureDescription) {
+                        result.set(false)
+                        quitLoop()
+                    }
+                }, Handler(myLooper))
+            }.onFailure {
+                Log.w(TAG, "Failed to dispatch gesture", it)
+            }.getOrDefault(false)
+        } ?: false
+        if (!dispatchGesture) {
+            return false
         }
         Looper.loop()
         return result.get()
     }
 
     fun gesturesAsync(strokes: Array<out GestureDescription.StrokeDescription>, callback: GestureResultCallback? = null) {
+        val service = service ?: return
         GestureDescription.Builder().let { builder ->
             val built = strokes.forEach { builder.addStroke(it) }.let { builder.build() }
-            service.dispatchGesture(built, callback, null)
+            runCatching {
+                service.dispatchGesture(built, callback, null)
+            }.onFailure {
+                Log.w(TAG, "Failed to dispatch async gesture", it)
+            }
         }
     }
 

@@ -206,7 +206,7 @@ open class UiObject(
         //  ! 未包含 "脚本运行时" 相关联的 ScreenMetrics 信息.
         val automatorTmp = GlobalActionAutomator(ScriptRuntime.applicationContext, null) {
             accessibilityBridge.ensureServiceStarted()
-            accessibilityBridge.service!!
+            accessibilityBridge.service
         }
         return automatorTmp.click(
             centerX() + toRoundIntX(offsetX, false),

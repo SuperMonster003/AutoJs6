@@ -43,7 +43,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     private val mGlobalActionAutomatorRaw by lazy {
         GlobalActionAutomator(scriptRuntime.uiHandler.applicationContext, Handler(scriptRuntime.loopers.servantLooper)) {
             ensureService()
-            accessibilityBridge.service!!
+            accessibilityBridge.service
         }
     }
 
@@ -244,7 +244,11 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
         ensureService()
 
         val promiseAdapter = mPromiseAdapter ?: ScriptPromiseAdapter().also { mPromiseAdapter = it }
-        val service = accessibilityBridge.service!!
+        val service = accessibilityBridge.service ?: run {
+            promiseAdapter.resolve(null)
+            mPromiseAdapter = null
+            return promiseAdapter
+        }
         val executor = service.mainExecutor
         val callback = object : AndroidAccessibilityService.TakeScreenshotCallback {
             override fun onSuccess(screenshot: AndroidAccessibilityService.ScreenshotResult) {
@@ -273,11 +277,18 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
                 } else {
                     Log.w(TAG, "onFailure: $errorCode")
                     promiseAdapter.resolve(null)
+                    mPromiseAdapter = null
                 }
             }
         }
 
-        service.takeScreenshot(Display.DEFAULT_DISPLAY, executor, callback)
+        runCatching {
+            service.takeScreenshot(Display.DEFAULT_DISPLAY, executor, callback)
+        }.onFailure {
+            Log.w(TAG, "takeScreenshot failed", it)
+            promiseAdapter.resolve(null)
+            mPromiseAdapter = null
+        }
 
         return promiseAdapter
     }

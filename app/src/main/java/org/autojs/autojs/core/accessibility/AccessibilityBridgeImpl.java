@@ -36,7 +36,9 @@ public class AccessibilityBridgeImpl extends AccessibilityBridge {
     @Nullable
     @Override
     public AccessibilityService getService() {
-        return AccessibilityService.Companion.getInstance();
+        return AccessibilityService.Companion.hasInstance()
+                ? AccessibilityService.Companion.getInstance()
+                : null;
     }
 
     @Override

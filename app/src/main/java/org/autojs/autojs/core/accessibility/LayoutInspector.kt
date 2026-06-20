@@ -39,12 +39,34 @@ class LayoutInspector(private val mContext: Context) {
             return false
         }
         mExecutor.execute {
-            val windowInfoList = service.windows.map {
-                WindowInfo.create(mContext, it)
+            val windowInfoList = runCatching {
+                service.windows
+            }.onFailure {
+                Log.w(LOG_TAG, "captureCurrentWindow: failed to get windows", it)
+            }.getOrDefault(emptyList()).mapNotNull { window ->
+                runCatching {
+                    WindowInfo.create(mContext, window)
+                }.onFailure {
+                    Log.w(LOG_TAG, "captureCurrentWindow: failed to capture window", it)
+                }.getOrNull()
             }
-            capture = Capture(windowInfoList, NodeInfo.capture(mContext, root))
-            for (l in mCaptureAvailableListeners) {
-                l.onCaptureAvailable(capture!!, mContext)
+            val rootInfo = runCatching {
+                NodeInfo.capture(mContext, root)
+            }.onFailure {
+                Log.w(LOG_TAG, "captureCurrentWindow: failed to capture root", it)
+            }.getOrNull()
+            if (rootInfo == null) {
+                capture = null
+                return@execute
+            }
+            val newCapture = Capture(windowInfoList, rootInfo)
+            capture = newCapture
+            for (listener in mCaptureAvailableListeners) {
+                try {
+                    listener.onCaptureAvailable(newCapture, mContext)
+                } catch (e: Throwable) {
+                    Log.e(LOG_TAG, "captureCurrentWindow: listener failed", e)
+                }
             }
         }
         return true
