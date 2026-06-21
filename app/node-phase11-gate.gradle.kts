@@ -484,11 +484,85 @@ tasks.register<Exec>("verifyNodeFinalMultiInstanceGate") {
     )
 }
 
-tasks.register("verifyNodeFinalWorkerDecisionGate") {
+tasks.register<Exec>("generateNodeFinalWorkerDecisionStatus") {
+    group = "verification"
+    description = "Writes the current Phase 11 Worker/WASI decision status without failing on unresolved conditional decisions."
+
+    dependsOn("verifyNodePhase10WorkerWasiBoundary", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-worker-decision-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsExperimentalInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasmWasiInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/WORKER_THREADS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/WORKER_WASI_BOUNDARY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/WASM_WASI.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(nodePhase11ReportDir.map { it.file("phase10-worker-wasi-boundary.json") })
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-worker-decision-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeFinalWorkerDecisionGate") {
     group = "verification"
     description = "Strict final Worker/WASI decision gate; blocked until conditional decisions are resolved."
 
-    dependsOn("verifyNodeWorkerWasiGate", "verifyNodeFinalCapabilityTruth")
+    dependsOn("verifyNodePhase10WorkerWasiBoundary", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-worker-decision-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsExperimentalInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasmWasiInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/WORKER_THREADS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/WORKER_WASI_BOUNDARY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/WASM_WASI.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(nodePhase11ReportDir.map { it.file("phase10-worker-wasi-boundary.json") })
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-worker-decision-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-blocked",
+    )
 }
 
 tasks.register("verifyNodeFinalProviderGate") {
@@ -531,6 +605,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         "generateNodeFinalPackageManagerStatus",
         "generateNodeFinalLongRunningStatus",
         "generateNodeFinalMultiInstanceStatus",
+        "generateNodeFinalWorkerDecisionStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -544,6 +619,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
         nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },
@@ -573,6 +649,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         "generateNodeFinalPackageManagerStatus",
         "generateNodeFinalLongRunningStatus",
         "generateNodeFinalMultiInstanceStatus",
+        "generateNodeFinalWorkerDecisionStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -586,6 +663,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
         nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },

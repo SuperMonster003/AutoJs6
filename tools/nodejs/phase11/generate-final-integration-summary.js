@@ -12,6 +12,7 @@ const REPORTS = [
   ["package_manager_gate", "final-package-manager-gate.json", false],
   ["long_running_gate", "final-long-running-gate.json", false],
   ["multi_instance_gate", "final-multi-instance-gate.json", false],
+  ["worker_decision_gate", "final-worker-decision-gate.json", false],
 ];
 
 function main() {
