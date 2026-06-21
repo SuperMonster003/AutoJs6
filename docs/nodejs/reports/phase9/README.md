@@ -12,6 +12,9 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterAbi
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeAdapterExport
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeBuildPlan
+.\gradlew.bat --console=plain :app:verifyNode16KbNativeAlignment
+.\gradlew.bat --console=plain :app:generateNodeRuntimeArtifactManifest
+.\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactIntegrity
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 ```
 
@@ -25,6 +28,12 @@ Generated outputs:
 - `build/reports/nodejs/runtime-adapter-export.md`
 - `build/reports/nodejs/runtime-build-plan.json`
 - `build/reports/nodejs/runtime-build-plan.md`
+- `build/reports/nodejs/native-16kb-alignment.json`
+- `build/reports/nodejs/native-16kb-alignment.md`
+- `build/reports/nodejs/runtime-artifact-manifest.json`
+- `build/reports/nodejs/runtime-artifact-manifest.md`
+- `build/reports/nodejs/runtime-artifact-integrity.json`
+- `build/reports/nodejs/runtime-artifact-integrity.md`
 
 ## Current Status
 
@@ -38,6 +47,9 @@ The Batch A start is intentionally conservative:
 - S9-04 records the reproducible build skeleton for future Node 24.17 Android
   artifacts and locks the current upstream/fork provenance. See
   [../../native/RUNTIME_PROVENANCE.md](../../native/RUNTIME_PROVENANCE.md).
+- S9-09/S9-11/S9-12 now have host-side current-runtime checks for 16 KB ELF
+  alignment, runtime artifact manifests, and integrity metadata. See
+  [../../native/ANDROID_NATIVE_COMPAT.md](../../native/ANDROID_NATIVE_COMPAT.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because

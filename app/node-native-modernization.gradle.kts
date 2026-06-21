@@ -9,6 +9,12 @@ val nodeRuntimeAdapterExportJson = nodeNativeModernizationReportDir.map { it.fil
 val nodeRuntimeAdapterExportMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-adapter-export.md") }
 val nodeRuntimeBuildPlanJson = nodeNativeModernizationReportDir.map { it.file("runtime-build-plan.json") }
 val nodeRuntimeBuildPlanMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-build-plan.md") }
+val nodeNative16KbAlignmentJson = nodeNativeModernizationReportDir.map { it.file("native-16kb-alignment.json") }
+val nodeNative16KbAlignmentMarkdown = nodeNativeModernizationReportDir.map { it.file("native-16kb-alignment.md") }
+val nodeRuntimeArtifactManifestJson = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-manifest.json") }
+val nodeRuntimeArtifactManifestMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-manifest.md") }
+val nodeRuntimeArtifactIntegrityJson = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-integrity.json") }
+val nodeRuntimeArtifactIntegrityMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-integrity.md") }
 
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
@@ -102,6 +108,78 @@ tasks.register<Exec>("verifyNodeRuntimeAdapterExport") {
     )
 }
 
+tasks.register<Exec>("verifyNode16KbNativeAlignment") {
+    group = "verification"
+    description = "Verifies Phase 9 16 KB ELF alignment for current Node runtime native artifacts."
+
+    dependsOn("externalNativeBuildAppDebug")
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-artifacts.js")
+    inputs.file(scriptFile)
+    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.dir(project.layout.buildDirectory.dir("intermediates/cxx"))
+    outputs.files(nodeNative16KbAlignmentJson, nodeNative16KbAlignmentMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+        "--mode",
+        "alignment",
+    )
+}
+
+tasks.register<Exec>("generateNodeRuntimeArtifactManifest") {
+    group = "verification"
+    description = "Generates the Phase 9 runtime artifact manifest for current Node runtime native artifacts."
+
+    dependsOn("externalNativeBuildAppDebug")
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-artifacts.js")
+    inputs.file(scriptFile)
+    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.dir(project.layout.buildDirectory.dir("intermediates/cxx"))
+    outputs.files(nodeRuntimeArtifactManifestJson, nodeRuntimeArtifactManifestMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+        "--mode",
+        "manifest",
+    )
+}
+
+tasks.register<Exec>("verifyNodeRuntimeArtifactIntegrity") {
+    group = "verification"
+    description = "Verifies Phase 9 runtime artifact integrity metadata for current Node runtime native artifacts."
+
+    dependsOn("externalNativeBuildAppDebug")
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-artifacts.js")
+    inputs.file(scriptFile)
+    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.dir(project.layout.buildDirectory.dir("intermediates/cxx"))
+    outputs.files(nodeRuntimeArtifactIntegrityJson, nodeRuntimeArtifactIntegrityMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+        "--mode",
+        "integrity",
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -111,5 +189,8 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNodeRuntimeAdapterAbi",
         "verifyNodeRuntimeAdapterExport",
         "verifyNodeRuntimeBuildPlan",
+        "verifyNode16KbNativeAlignment",
+        "generateNodeRuntimeArtifactManifest",
+        "verifyNodeRuntimeArtifactIntegrity",
     )
 }
