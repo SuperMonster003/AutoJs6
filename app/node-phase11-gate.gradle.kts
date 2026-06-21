@@ -336,11 +336,87 @@ tasks.register<Exec>("verifyNodeFinalPackageManagerGate") {
     )
 }
 
-tasks.register("verifyNodeFinalLongRunningGate") {
+tasks.register<Exec>("generateNodeFinalLongRunningStatus") {
+    group = "verification"
+    description = "Writes the current Phase 11 long-running status without failing on packaged/stress blockers."
+
+    dependsOn("verifyNodePhase10LongRunningActivation", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-long-running-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("embedded-node-packaging-preflight.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeBudgetPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeLifecycleCheckpointStore.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeInteractiveLongRunningStatusStore.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInteractiveLongRunningInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeLongRunningStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedLifecycleStressInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/LONG_RUNNING_SERVICE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/LONG_RUNNING_ACTIVATION.md"))
+    inputs.file(nodePhase11ReportDir.map { it.file("phase10-long-running-activation.json") })
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-long-running-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeFinalLongRunningGate") {
     group = "verification"
     description = "Strict final long-running gate; blocked until packaged long-running and full stress are implemented."
 
-    dependsOn("verifyNodeLongRunningGate", "verifyNodeFinalCapabilityTruth")
+    dependsOn("verifyNodePhase10LongRunningActivation", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-long-running-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("embedded-node-packaging-preflight.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeBudgetPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeLifecycleCheckpointStore.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeInteractiveLongRunningStatusStore.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInteractiveLongRunningInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeLongRunningStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedLifecycleStressInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/LONG_RUNNING_SERVICE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/LONG_RUNNING_ACTIVATION.md"))
+    inputs.file(nodePhase11ReportDir.map { it.file("phase10-long-running-activation.json") })
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-long-running-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-blocked",
+    )
 }
 
 tasks.register<Exec>("generateNodeFinalMultiInstanceStatus") {
@@ -453,6 +529,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         "generateNodeFinalAdapterStatus",
         "generateNodeFinalCrashStatus",
         "generateNodeFinalPackageManagerStatus",
+        "generateNodeFinalLongRunningStatus",
         "generateNodeFinalMultiInstanceStatus",
     )
 
@@ -465,6 +542,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         nodePhase11ReportDir.map { it.file("final-adapter-gate.json") },
         nodePhase11ReportDir.map { it.file("final-crash-gate.json") },
         nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
     )
     outputs.files(
@@ -493,6 +571,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         "generateNodeFinalAdapterStatus",
         "generateNodeFinalCrashStatus",
         "generateNodeFinalPackageManagerStatus",
+        "generateNodeFinalLongRunningStatus",
         "generateNodeFinalMultiInstanceStatus",
     )
 
@@ -505,6 +584,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         nodePhase11ReportDir.map { it.file("final-adapter-gate.json") },
         nodePhase11ReportDir.map { it.file("final-crash-gate.json") },
         nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
     )
     outputs.files(

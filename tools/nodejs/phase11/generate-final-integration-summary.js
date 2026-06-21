@@ -10,6 +10,7 @@ const REPORTS = [
   ["adapter_gate", "final-adapter-gate.json", false],
   ["crash_gate", "final-crash-gate.json", false],
   ["package_manager_gate", "final-package-manager-gate.json", false],
+  ["long_running_gate", "final-long-running-gate.json", false],
   ["multi_instance_gate", "final-multi-instance-gate.json", false],
 ];
 
