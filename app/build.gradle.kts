@@ -383,6 +383,7 @@ val nodeJsPackagedEsmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunDynamicImportLocalEmbeddedNodePackagedApk",
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
 )
+val nodeJsPackagedParityGateInstrumentationClasses = nodeJsPackagedEsmGateInstrumentationClasses
 val nodeJsLiveProviderSummaryTaskName = "generateNodeLiveProviderSummary"
 val nodeJsLiveProviderGateCases = listOf(
     mapOf(
@@ -785,6 +786,14 @@ val nodeJsPhase9GateInstrumentationClasses = (
         nodeJsPhase9WasmWasiGateInstrumentationClasses +
                 nodeJsRealNpmGateInstrumentationClasses
         ).distinct()
+val nodeJsWorkerWasiGateInstrumentationClasses = (
+        nodeJsWorkerGateInstrumentationClasses +
+                nodeJsPhase9WasmWasiGateInstrumentationClasses
+        ).distinct()
+val nodeJsPhase10GateInstrumentationClasses = (
+        nodeJsPackagedParityGateInstrumentationClasses +
+                nodeJsWorkerWasiGateInstrumentationClasses
+        ).distinct()
 val nodeJsPhase8SecurityStressGateInstrumentationClasses = (
         nodeJs2417SecurityProbeInstrumentationClasses +
                 nodeJsTypeScriptGateInstrumentationClasses +
@@ -867,6 +876,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     nodeJsPhase9SummaryTaskName to nodeJsPhase9GateInstrumentationClasses,
     nodeJsLiveProviderSummaryTaskName to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
+    "verifyNodePackagedParityGate" to nodeJsPackagedParityGateInstrumentationClasses,
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodeLiveFetchGate" to nodeJsLiveFetchGateInstrumentationClasses,
     "verifyNodeLiveWebSocketGate" to nodeJsLiveWebSocketGateInstrumentationClasses,
@@ -887,7 +897,9 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodePhase8SecurityStressGate" to nodeJsPhase8SecurityStressGateInstrumentationClasses,
     "verifyNodePhase8Gate" to nodeJsPhase8GateInstrumentationClasses,
     "verifyNodeWasmWasiGate" to nodeJsPhase9WasmWasiGateInstrumentationClasses,
+    "verifyNodeWorkerWasiGate" to nodeJsWorkerWasiGateInstrumentationClasses,
     "verifyNodePhase9Gate" to nodeJsPhase9GateInstrumentationClasses,
+    "verifyNodePhase10Gate" to nodeJsPhase10GateInstrumentationClasses,
 )
 val nodeJsRequestedFocusedGate = taskNames
     .map { rawTaskName -> rawTaskName.substringAfterLast(':') }
@@ -2496,6 +2508,7 @@ apply(from = "node-v1-1-alpha-gate.gradle.kts")
 apply(from = "node-v1-1-beta-gate.gradle.kts")
 apply(from = "node-v1-1-rc-gate.gradle.kts")
 apply(from = "node-native-modernization.gradle.kts")
+apply(from = "node-phase10-gate.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {
