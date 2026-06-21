@@ -1646,6 +1646,7 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase8SecurityStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase8Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -1670,7 +1671,9 @@ alignment, runtime artifact manifest/integrity, distribution policy, and
 runtime artifact aggregate checks. It also includes
 `verifyNodePhase9PerformancePolicy`, which records compile-cache, startup
 snapshot, process-prewarm, memory-pressure, and performance matrix policy
-evidence for S9-15 through S9-20; see
+evidence for S9-15 through S9-20. `verifyNodePhase9InspectorPolicy` records the
+S9-21 through S9-26 inspector, DevTools, profiling, diagnostic-report, and
+security policy state while keeping the runtime inspector disabled; see
 [reports/phase9/README.md](reports/phase9/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).

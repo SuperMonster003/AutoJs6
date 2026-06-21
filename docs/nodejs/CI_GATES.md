@@ -238,6 +238,7 @@ Phase 9 Batch A starts with host-side native modernization preflights:
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeDistributionPolicy
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactGate
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 ```
 
@@ -249,7 +250,10 @@ They also verify the runtime distribution policy and aggregate runtime artifact
 gate. The performance policy gate records the current S9-15/S9-20 state:
 compile cache is production-evidenced, startup snapshots remain deferred, and
 process-only prewarm/performance matrix coverage remains partial until reusable
-runtime pooling, packaged metrics, and numeric SLO thresholds exist. These gates
+runtime pooling, packaged metrics, and numeric SLO thresholds exist. The
+inspector policy gate records S9-21/S9-26 with the disabled inspector boundary
+preserved, DevTools/profiling/heap support deferred, diagnostic reports partial,
+and the disabled-state security gate ready. These gates
 do not promote Node 24.17 and do not change the default runtime slot. See
 [reports/phase9/README.md](reports/phase9/README.md),
 [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), and

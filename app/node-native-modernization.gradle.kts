@@ -21,6 +21,8 @@ val nodeRuntimeArtifactGateJson = nodeNativeModernizationReportDir.map { it.file
 val nodeRuntimeArtifactGateMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-gate.md") }
 val nodePhase9PerformancePolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-performance-policy.json") }
 val nodePhase9PerformancePolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-performance-policy.md") }
+val nodePhase9InspectorPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-inspector-policy.json") }
+val nodePhase9InspectorPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-inspector-policy.md") }
 
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
@@ -276,6 +278,39 @@ tasks.register<Exec>("verifyNodePhase9PerformancePolicy") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase9InspectorPolicy") {
+    group = "verification"
+    description = "Verifies Phase 9 inspector, DevTools, profiling, diagnostic report, and inspector security policy evidence."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/debug/verify-phase9-inspector-policy.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_lifecycle.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInspectorDesignGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInspectorSecurityGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/ui/settings/NodeDoctorReportGeneratorInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/ui/settings/NodeDoctorReportGenerator.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/INSPECTOR.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/DEVTOOLS_ADB_FORWARD_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/INSPECTOR_PROFILING_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/INSPECTOR_SECURITY_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    outputs.files(nodePhase9InspectorPolicyJson, nodePhase9InspectorPolicyMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -291,5 +326,6 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNodeRuntimeDistributionPolicy",
         "verifyNodeRuntimeArtifactGate",
         "verifyNodePhase9PerformancePolicy",
+        "verifyNodePhase9InspectorPolicy",
     )
 }

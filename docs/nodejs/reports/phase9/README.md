@@ -18,6 +18,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeDistributionPolicy
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactGate
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 ```
 
@@ -43,6 +44,8 @@ Generated outputs:
 - `build/reports/nodejs/runtime-artifact-gate.md`
 - `build/reports/nodejs/phase9-performance-policy.json`
 - `build/reports/nodejs/phase9-performance-policy.md`
+- `build/reports/nodejs/phase9-inspector-policy.json`
+- `build/reports/nodejs/phase9-inspector-policy.md`
 
 ## Current Status
 
@@ -67,6 +70,10 @@ The Batch A start is intentionally conservative:
   deferred, records process-only prewarm and memory-pressure coverage, and
   keeps the current performance matrix partial until packaged/SLO metrics exist.
   See [PERFORMANCE_POLICY.md](PERFORMANCE_POLICY.md).
+- S9-21/S9-26 now have a host-side inspector policy gate that preserves the
+  disabled runtime boundary, records DevTools/profiling/heap work as deferred,
+  marks controlled diagnostic reports partial, and keeps the disabled-state
+  inspector security evidence ready. See [INSPECTOR_POLICY.md](INSPECTOR_POLICY.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because
