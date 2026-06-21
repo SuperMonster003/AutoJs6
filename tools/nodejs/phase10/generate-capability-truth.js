@@ -116,14 +116,21 @@ const CAPABILITIES = [
   {
     id: "workers",
     status: ["disabled", "blocked"],
-    evidence: ["NodeWorkerThreadsDesignGateInstrumentationTest"],
-    notes: "worker_threads remains default disabled unless explicit experimental support is available.",
+    evidence: [
+      "verifyNodePhase10WorkerWasiBoundary",
+      "NodeWorkerThreadsDesignGateInstrumentationTest",
+    ],
+    notes: "worker_threads remains default disabled and blocked by native availability; experimental worker code stays internal/debug-only.",
   },
   {
     id: "wasi",
     status: ["disabled", "blocked"],
-    evidence: ["NodeWasmWasiInstrumentationTest", "verifyNodeWasmWasiGate"],
-    notes: "WebAssembly loading is allowed, but raw node:wasi is not exposed as a sandbox.",
+    evidence: [
+      "verifyNodePhase10WorkerWasiBoundary",
+      "NodeWasmWasiInstrumentationTest",
+      "verifyNodeWasmWasiGate",
+    ],
+    notes: "WebAssembly loading is allowed, but raw node:wasi and controlled autojs6:wasi facade promotion remain disabled/deferred.",
   },
   {
     id: "package_manager",
@@ -220,6 +227,7 @@ function loadEvidenceFiles(repoRoot) {
     phase10Gate: readEvidence(repoRoot, "app/node-phase10-gate.gradle.kts"),
     autojs6Pm: readEvidence(repoRoot, "tools/nodejs/phase10/autojs6-pm.js"),
     longRunningActivation: readEvidence(repoRoot, "tools/nodejs/phase10/verify-long-running-activation.js"),
+    workerWasiBoundary: readEvidence(repoRoot, "tools/nodejs/phase10/verify-worker-wasi-boundary.js"),
     testingDoc: readEvidence(repoRoot, "docs/nodejs/TESTING.md"),
     ciGatesDoc: readEvidence(repoRoot, "docs/nodejs/CI_GATES.md"),
   };

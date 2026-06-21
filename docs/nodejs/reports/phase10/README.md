@@ -17,6 +17,8 @@ skip audit, and focused gate coverage into repeatable evidence.
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
+.\gradlew.bat --console=plain :app:verifyNodeWorkerWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
@@ -46,6 +48,8 @@ promote any blocked capability.
 - `build/reports/nodejs/phase10-package-manager-boundary.md`
 - `build/reports/nodejs/phase10-long-running-activation.json`
 - `build/reports/nodejs/phase10-long-running-activation.md`
+- `build/reports/nodejs/phase10-worker-wasi-boundary.json`
+- `build/reports/nodejs/phase10-worker-wasi-boundary.md`
 - `app/build/reports/nodejs/live-provider-summary.json`
 
 ## Current Decisions
@@ -73,6 +77,10 @@ promote any blocked capability.
   queueing, heartbeat/budget diagnostics, checkpoint/restore, and stress
   coverage are active; multi-instance remains primary-only and packaged
   long-running service mode remains blocked.
+- [WORKER_WASI_BOUNDARY.md](WORKER_WASI_BOUNDARY.md) records S10-37 through
+  S10-42. Pure WebAssembly remains usable; `worker_threads`, raw WASI,
+  controlled WASI, worker+WASM, and packaged WASM cache/asset promotion remain
+  blocked or deferred.
 - The descriptor schema remains compatible with existing v1 projects while the
   version vector carries the v1.1 bootstrap, CJS loader, ESM loader, dynamic
   import, builtin profile, bridge protocol, capability manifest, and

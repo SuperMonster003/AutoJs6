@@ -499,6 +499,7 @@ Current dependency bundler verification:
 .\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
+.\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
 ```
 
 `bundleNodeDependencies` validates an existing project root with `package.json` and `node_modules`, then writes a
@@ -556,6 +557,13 @@ stress case. The report keeps
 multi-instance as `blocked_primary_only` because reserved process slots exist
 but `effectiveMaxActiveSlots` remains `1`, and packaged long-running service
 mode is still not promoted.
+
+`verifyNodePhase10WorkerWasiBoundary` writes the S10-37 through S10-42
+machine-readable report. It records default-disabled `worker_threads`, native
+worker availability blockers, blocked MessageChannel/transfer and WorkerPool
+promotion, pure WebAssembly compile/instantiate support, raw `wasi`/`node:wasi`
+denial, and deferred controlled WASI plus packaged WASM cache/asset gates.
+Run `verifyNodeWorkerWasiGate` on Sony for the focused device proof.
 
 Current doctor diagnostics:
 

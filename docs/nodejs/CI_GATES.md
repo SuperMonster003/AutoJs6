@@ -305,6 +305,8 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
+.\gradlew.bat --console=plain :app:verifyNodeWorkerWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -329,7 +331,10 @@ not enable Android runtime package installation or full npm CLI behavior.
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
 focused gates; multi-instance remains primary-only and packaged long-running
-service mode remains blocked. See
+service mode remains blocked. `verifyNodePhase10WorkerWasiBoundary` records
+S10-37 through S10-42: pure WebAssembly stays usable, while `worker_threads`,
+raw WASI, controlled WASI, worker+WASM, and packaged WASM cache/asset promotion
+remain blocked or deferred. See
 [reports/phase10/README.md](reports/phase10/README.md).
 
 ## Phase 7 Focused Gates

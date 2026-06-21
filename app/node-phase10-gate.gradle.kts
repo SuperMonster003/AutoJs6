@@ -40,6 +40,7 @@ tasks.register<Exec>("generateNodePhase10CapabilityTruth") {
     inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
     outputs.files(
@@ -248,12 +249,45 @@ tasks.register("verifyNodeMultiInstanceGate") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase10WorkerWasiBoundary") {
+    group = "verification"
+    description = "Verifies the Phase 10 worker_threads, WASM, and controlled WASI boundary report."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsExperimentalInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasmWasiInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/WASM_WASI.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    outputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-worker-wasi-boundary.json") },
+        nodePhase10ReportDir.map { it.file("phase10-worker-wasi-boundary.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase10ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodeWorkerWasiGate") {
     group = "verification"
     description = "Runs the focused Phase 10 worker/WASI boundary gate on a connected Sony/full profile."
 
     dependsOn(
         "generateNodePhase10CapabilityTruth",
+        "verifyNodePhase10WorkerWasiBoundary",
         "verifyNodeWorkerGate",
         "verifyNodeWasmWasiGate",
         "verifyNodePhase9WasmWasiPolicy",
@@ -292,6 +326,7 @@ tasks.register("verifyNodePhase10Gate") {
         "verifyNodePackageManagerGate",
         "verifyNodePhase10LongRunningActivation",
         "verifyNodeMultiInstanceGate",
+        "verifyNodePhase10WorkerWasiBoundary",
         "verifyNodeAdapterV1Gate",
     )
 }
