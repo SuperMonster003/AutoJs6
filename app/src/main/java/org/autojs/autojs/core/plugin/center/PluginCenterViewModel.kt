@@ -57,8 +57,6 @@ class PluginCenterViewModel : ViewModel() {
     private val _fatalError = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val fatalError: SharedFlow<String> = _fatalError
 
-    private val autoWakeAttemptedPackages = mutableSetOf<String>()
-
     /**
      * Load plugin list.
      *
@@ -114,29 +112,6 @@ class PluginCenterViewModel : ViewModel() {
             }.onFailure { e ->
                 Log.w(TAG, "legacy discovery failed: ${e.message}")
             }.getOrElse { emptyList() }
-            val hostVersionCode = currentHostVersionCode()
-
-            installed.forEach { local ->
-                if (!isHostVersionCompatible(hostVersionCode, local.requiresHostVersion)) {
-                    enableStore.setEnabled(context, local.packageName, false)
-                    return@forEach
-                }
-                val bindError = local.bindError ?: return@forEach
-                val mapped = PluginErrorMapper.fromThrowable(bindError)
-                if (mapped.code == PluginErrorCode.PROTOCOL_MISMATCH) {
-                    enableStore.setEnabled(context, local.packageName, false)
-                    return@forEach
-                }
-                if (!PluginErrorMapper.shouldRecommendActivation(mapped)) {
-                    return@forEach
-                }
-                if (!autoWakeAttemptedPackages.add(local.packageName)) {
-                    return@forEach
-                }
-                val isAutoWakeSuccess = PluginWakeManager.tryAutoWakeIfNeeded(context, local.packageName)
-                enableStore.setEnabled(context, local.packageName, isAutoWakeSuccess)
-            }
-
             // Render list using "local only".
             // zh-CN: 使用 "仅本地" 渲染列表.
             val localAidlItems = installed.mapNotNull { local ->

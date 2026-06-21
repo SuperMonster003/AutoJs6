@@ -16,7 +16,6 @@ import org.autojs.autojs.runtime.api.OcrResult
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
-import org.autojs.autojs.runtime.exception.OfficialPluginMissingException
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
@@ -81,8 +80,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             }
             return if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
-                    val target = PaddleOcrPluginHost.select(globalContext)
-                        ?: throw OfficialPluginMissingException(globalContext, "Paddle OCR")
+                    val target = PaddleOcrPluginHost.selectOrThrow(globalContext)
                     PaddleOcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
                 }
             } else {
@@ -106,8 +104,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             }
             val results = if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
-                    val target = PaddleOcrPluginHost.select(globalContext)
-                        ?: throw OfficialPluginMissingException(globalContext, "Paddle OCR")
+                    val target = PaddleOcrPluginHost.selectOrThrow(globalContext)
                     PaddleOcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
                 }.map { OcrResult(it.text, it.confidence, it.bounds) }
             } else {

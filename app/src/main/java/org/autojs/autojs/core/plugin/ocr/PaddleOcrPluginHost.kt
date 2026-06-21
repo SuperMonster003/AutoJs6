@@ -32,6 +32,7 @@ import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
@@ -63,6 +64,7 @@ object PaddleOcrPluginHost {
     private const val EXTRA_RAW_CONFIG = "rawConfig"
     private const val IDLE_UNBIND_MS = 30_000L
     private const val RETRY_WAKE_DELAY_MS = 300L
+    private const val MODULE_LABEL_PADDLE_OCR = "Paddle OCR"
     private val pluginPermission = "${BuildConfig.APPLICATION_ID}.permission.PLUGIN"
 
     private val externalServiceFlag = runCatching { ServiceInfo::class.java.getField("FLAG_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
@@ -148,13 +150,36 @@ object PaddleOcrPluginHost {
         // e.g. "v5"
         variant: String? = null,
     ): Discovered? {
-        val discovered = discover(context)
-        selectFrom(discovered, context, engineId, engine, variant)?.let { return it }
+        return selectDetailed(context, engineId, engine, variant).selected
+    }
+
+    suspend fun selectOrThrow(
+        context: Context,
+        // e.g. "paddle-ocr-pp-ocrv5"
+        engineId: String? = null,
+        // e.g. "paddle-ocr"
+        engine: String? = null,
+        // e.g. "v5"
+        variant: String? = null,
+    ): Discovered {
+        val result = selectDetailed(context, engineId, engine, variant)
+        return result.selected ?: throw buildSelectionFailure(context, result.discovered)
+    }
+
+    private suspend fun selectDetailed(
+        context: Context,
+        engineId: String?,
+        engine: String?,
+        variant: String?,
+    ): SelectionResult {
+        var discovered = discover(context)
+        selectFrom(discovered, context, engineId, engine, variant)?.let { return SelectionResult(it, discovered) }
         if (discovered.any { it.error != null }) {
             recoverFailedDiscoveries(context, discovered)
-            selectFrom(discover(context), context, engineId, engine, variant)?.let { return it }
+            discovered = discover(context)
+            selectFrom(discovered, context, engineId, engine, variant)?.let { return SelectionResult(it, discovered) }
         }
-        return null
+        return SelectionResult(null, discovered)
     }
 
     private fun selectFrom(
@@ -251,6 +276,61 @@ object PaddleOcrPluginHost {
                 ?: PluginVariantPriorityStore.normalizeFamilyKey(candidate.pluginInfo?.engine)
         }.distinct()
         return families.singleOrNull()
+    }
+
+    private fun buildSelectionFailure(context: Context, discovered: List<Discovered>): IllegalStateException {
+        if (discovered.isEmpty()) {
+            return IllegalStateException(
+                context.getString(R.string.error_missing_required_plugin_for_module_label, MODULE_LABEL_PADDLE_OCR)
+            )
+        }
+        val variantList = discovered
+            .mapNotNull { item ->
+                item.pluginInfo?.let { info ->
+                    info.variant?.takeIf { it.isNotBlank() }
+                        ?: info.id?.takeIf { it.isNotBlank() }
+                        ?: info.engine?.takeIf { it.isNotBlank() }
+                }
+            }
+            .distinct()
+            .joinToString("/")
+            .ifBlank { "*" }
+        val fallback = context.getString(
+            R.string.error_no_available_enabled_plugin_variants_found,
+            MODULE_LABEL_PADDLE_OCR,
+            variantList,
+        )
+
+        val infoItems = discovered.filter { it.pluginInfo != null }
+        if (infoItems.isEmpty()) {
+            val failure = discovered.firstNotNullOfOrNull { item ->
+                item.error?.let { item to it }
+            }
+            if (failure != null) {
+                val (item, error) = failure
+                val message = "${fallback}: ${item.serviceInfo.packageName}/${item.serviceInfo.name}: ${error.message ?: error}"
+                return IllegalStateException(message, error)
+            }
+            return IllegalStateException(fallback)
+        }
+
+        val authorizedItems = infoItems.filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
+        if (authorizedItems.isEmpty()) {
+            return IllegalStateException(
+                context.getString(R.string.error_plugin_is_not_authorized_in_plugin_center, infoItems.first().serviceInfo.packageName)
+            )
+        }
+
+        val enabledItems = authorizedItems.filter {
+            PluginEnableStore.isEnabled(context, it.serviceInfo.packageName, true)
+        }
+        if (enabledItems.isEmpty()) {
+            return IllegalStateException(
+                context.getString(R.string.error_plugin_is_not_enabled_in_plugin_center, authorizedItems.first().serviceInfo.packageName)
+            )
+        }
+
+        return IllegalStateException(fallback)
     }
 
     private suspend fun recoverFailedDiscoveries(context: Context, discovered: List<Discovered>) {
@@ -812,6 +892,11 @@ object PaddleOcrPluginHost {
             }
         }
     }
+
+    private data class SelectionResult(
+        val selected: Discovered?,
+        val discovered: List<Discovered>,
+    )
 
     private class TimeoutException(msg: String) : RuntimeException(msg)
 
