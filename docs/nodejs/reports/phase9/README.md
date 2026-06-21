@@ -40,5 +40,7 @@ The Batch A start is intentionally conservative:
   [../../native/RUNTIME_PROVENANCE.md](../../native/RUNTIME_PROVENANCE.md).
 
 Node 24.17 is not the default runtime. The current default remains
-`node24_5`, and raw native addons, unrestricted process spawning, raw sockets,
-production Inspector, and private runtime entry points remain disabled.
+`node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because
+Node 24.17 Android `libnode.so` artifacts are not currently producible. Raw
+native addons, unrestricted process spawning, raw sockets, production
+Inspector, and private runtime entry points remain disabled.

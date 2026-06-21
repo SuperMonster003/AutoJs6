@@ -46,6 +46,19 @@ Node 24.17 promotion artifact. Node 24.17 still requires an Android port,
 runtime artifacts, per-ABI `libnode.so` SHA-256 values, Build IDs, and device
 validation before default promotion.
 
+Current promotion decision:
+
+- default runtime slot: `node24_5`
+- default runtime version: Node 24.5
+- Node 24.17 promotion: `deferred`
+- reason: Node 24.17 Android `libnode.so` artifacts are not currently
+  producible.
+
+Do not change the default runtime until Node 24.17 Android `libnode.so` exists
+for `arm64-v8a`, `armeabi-v7a`, and `x86_64`, each artifact has a SHA-256 and
+Build ID, and the Phase 9 native modernization plus Sony device validation
+gates pass.
+
 Host-side provenance check:
 
 ```powershell

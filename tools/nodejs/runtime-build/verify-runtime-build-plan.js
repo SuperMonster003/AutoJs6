@@ -60,6 +60,15 @@ function main() {
   if (!lock.androidFork || !lock.androidFork.androidArtifact || !lock.androidFork.androidArtifact.url) {
     issues.push("missing Android libnode artifact provenance");
   }
+  if (!lock.promotionDecision || !lock.promotionDecision.defaultRuntimeSlot) {
+    issues.push("missing runtime promotion decision");
+  }
+  if (lock.promotionDecision && lock.promotionDecision.defaultRuntimeSlot !== "node24_5") {
+    issues.push("default runtime slot must remain node24_5 until promotion requirements are satisfied");
+  }
+  if (lock.promotionDecision && lock.promotionDecision.node2417Promotion !== "deferred") {
+    issues.push("Node 24.17 promotion must remain deferred until Android artifacts are available");
+  }
   if (lock.androidFork && lock.androidFork.androidArtifact) {
     if (!/^[0-9a-f]{64}$/i.test(lock.androidFork.androidArtifact.sha256 || "")) {
       issues.push("androidFork.androidArtifact.sha256 must be a 64-character SHA-256 digest");
@@ -143,6 +152,8 @@ function main() {
       forkCommit: lock.androidFork && lock.androidFork.currentCommit,
       androidArtifact: lock.androidFork && lock.androidFork.androidArtifact && lock.androidFork.androidArtifact.name,
       androidArtifactSha256: lock.androidFork && lock.androidFork.androidArtifact && lock.androidFork.androidArtifact.sha256,
+      defaultRuntimeSlot: lock.promotionDecision && lock.promotionDecision.defaultRuntimeSlot,
+      node2417Promotion: lock.promotionDecision && lock.promotionDecision.node2417Promotion,
       ndkVersion: lock.toolchain && lock.toolchain.ndkVersion,
       clangVersion: lock.toolchain && lock.toolchain.clangVersion,
       pythonVersion: lock.toolchain && lock.toolchain.pythonVersion,
@@ -255,6 +266,8 @@ function renderMarkdown(report) {
   lines.push(`- fork commit: ${report.lockSummary.forkCommit || "missing"}`);
   lines.push(`- Android artifact: ${report.lockSummary.androidArtifact || "missing"}`);
   lines.push(`- Android artifact SHA-256: ${report.lockSummary.androidArtifactSha256 || "missing"}`);
+  lines.push(`- default runtime slot: ${report.lockSummary.defaultRuntimeSlot || "missing"}`);
+  lines.push(`- Node 24.17 promotion: ${report.lockSummary.node2417Promotion || "missing"}`);
   lines.push(`- NDK: ${report.lockSummary.ndkVersion || "missing"}`);
   lines.push(`- Clang: ${report.lockSummary.clangVersion || "missing"}`);
   lines.push(`- Python: ${report.lockSummary.pythonVersion || "missing"}`);

@@ -51,4 +51,6 @@ The lock file records:
 The current decision is `bootstrap_only` because Node 24.17 Android runtime
 artifacts, per-ABI `libnode.so` SHA-256 values, and Build IDs are still
 external. The upstream and fork baselines are now locked, but no promoted
-runtime artifact is emitted and the default runtime remains Node 24.5.
+runtime artifact is emitted and the default runtime remains Node 24.5. The
+lock file records `promotionDecision.node2417Promotion=deferred` so this
+default-retention decision is machine checked by `verifyNodeRuntimeBuildPlan`.
