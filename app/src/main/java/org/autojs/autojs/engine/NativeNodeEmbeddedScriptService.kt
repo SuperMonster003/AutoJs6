@@ -1643,6 +1643,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED = "worker_threads_experimental_enabled"
         private const val EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED = "java_interop_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
+        private const val EXTRA_RUNTIME_ADAPTER = "runtime_adapter"
         private const val EXTRA_EXECUTION_ID = "execution_id"
         private const val EXTRA_FOREGROUND_SERVICE_TYPE = "foreground_service_type"
         private const val EXTRA_PREWARM_TTL_MS = "prewarm_ttl_ms"
@@ -1882,6 +1883,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
                 putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
                 putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+                putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
                 putExtra(EXTRA_EXECUTION_ID, executionId)
             }
             val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
@@ -2034,6 +2036,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
                     putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
                     putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+                    putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
                     putExtra(EXTRA_EXECUTION_ID, executionId)
                     putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
                 }
@@ -2903,6 +2906,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
                 ),
                 spawnDepth = getIntExtra(EXTRA_SPAWN_DEPTH, 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
+                runtimeAdapter = getStringExtra(EXTRA_RUNTIME_ADAPTER)?.takeIf { it.isNotBlank() },
             )
         }
 
@@ -2943,6 +2947,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 put("workerThreadsExperimentalEnabled", request.workerThreadsExperimentalEnabled)
                 put("javaInteropExperimentalEnabled", request.javaInteropExperimentalEnabled)
                 put("spawnDepth", request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
+                request.runtimeAdapter?.takeIf { it.isNotBlank() }?.let { put("runtimeAdapter", it) }
             }
         }
 
@@ -2983,6 +2988,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
                 ),
                 spawnDepth = json.optInt("spawnDepth", 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
+                runtimeAdapter = json.optString("runtimeAdapter").takeIf { it.isNotBlank() },
             )
         }
 

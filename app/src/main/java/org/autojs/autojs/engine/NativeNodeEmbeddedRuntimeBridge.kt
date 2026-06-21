@@ -572,7 +572,7 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
 
-        val runtimeAdapterSelection = resolveRuntimeAdapterSelection()
+        val runtimeAdapterSelection = resolveRuntimeAdapterSelection(preparedRequest.runtimeAdapter)
         val nativeCall = runCatching {
             val payload = if (runtimeAdapterSelection.effective == RUNTIME_ADAPTER_V1) {
                 nativeRunEmbeddedScriptAdapterV1Execute(
@@ -727,38 +727,51 @@ object NativeNodeEmbeddedRuntimeBridge {
         val requested: String,
         val effective: String,
         val status: String,
+        val source: String,
     ) {
         fun toNativeValues(): Map<String, String> = mapOf(
             "embedded_script.runtime_adapter.selector_property" to RUNTIME_ADAPTER_PROPERTY,
             "embedded_script.runtime_adapter.requested" to requested,
             "embedded_script.runtime_adapter.effective" to effective,
             "embedded_script.runtime_adapter.status" to status,
+            "embedded_script.runtime_adapter.source" to source,
         )
     }
 
-    private fun resolveRuntimeAdapterSelection(): RuntimeAdapterSelection {
-        val rawRequested = System.getProperty(RUNTIME_ADAPTER_PROPERTY)?.trim().orEmpty()
+    private fun resolveRuntimeAdapterSelection(requestOverride: String? = null): RuntimeAdapterSelection {
+        val normalizedOverride = requestOverride?.trim().orEmpty()
+        val fromRequest = normalizedOverride.isNotBlank()
+        val rawRequested = if (fromRequest) {
+            normalizedOverride
+        } else {
+            System.getProperty(RUNTIME_ADAPTER_PROPERTY)?.trim().orEmpty()
+        }
         val requested = rawRequested.lowercase(Locale.US).ifBlank { RUNTIME_ADAPTER_AUTO }
+        val source = if (fromRequest) "request" else "system_property"
         return when (requested) {
             RUNTIME_ADAPTER_V1 -> RuntimeAdapterSelection(
                 requested = requested,
                 effective = RUNTIME_ADAPTER_V1,
                 status = "adapter_v1_selected",
+                source = source,
             )
             RUNTIME_ADAPTER_LEGACY_JNI -> RuntimeAdapterSelection(
                 requested = requested,
                 effective = RUNTIME_ADAPTER_LEGACY_JNI,
                 status = "legacy_jni_selected",
+                source = source,
             )
             RUNTIME_ADAPTER_AUTO -> RuntimeAdapterSelection(
                 requested = requested,
                 effective = RUNTIME_ADAPTER_LEGACY_JNI,
                 status = "auto_fallback_legacy_jni",
+                source = source,
             )
             else -> RuntimeAdapterSelection(
                 requested = requested,
                 effective = RUNTIME_ADAPTER_LEGACY_JNI,
                 status = "invalid_fallback_legacy_jni",
+                source = source,
             )
         }
     }
@@ -940,6 +953,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         updatePart(BuildConfig.NODEJS_RUNTIME_BACKEND)
         updatePart(BuildConfig.NODEJS_RUNTIME_SLOT)
         updatePart(BuildConfig.NODEJS_RUNTIME_SLOT_TARGET_VERSION)
+        updatePart(request.runtimeAdapter.orEmpty())
         updatePart(Build.SUPPORTED_ABIS.joinToString(","))
         updatePart(Build.VERSION.SDK_INT.toString())
         updatePart(compileCacheLoaderVersion())
@@ -17524,6 +17538,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
         val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
         val spawnDepth: Int = 0,
+        val runtimeAdapter: String? = null,
     )
 
     data class EmbeddedScriptResult(

@@ -25,10 +25,12 @@ function main() {
   const adapterPath = path.join(repoRoot, "app/src/main/cpp/node_runtime_adapter_24_5.cpp");
   const jniPath = path.join(repoRoot, "app/src/main/cpp/node_bridge_jni.cpp");
   const kotlinPath = path.join(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt");
+  const abHarnessPath = path.join(repoRoot, "app/src/androidTest/java/org/autojs/autojs/engine/NodeRuntimeAdapterV1DifferentialInstrumentationTest.kt");
   const header = read(headerPath);
   const adapter = read(adapterPath);
   const jni = read(jniPath);
   const kotlin = read(kotlinPath);
+  const abHarness = read(abHarnessPath);
   const publicAbiLeaks = ["node::", "v8::", "uv_", "JNIEnv", "jobject", "jstring", "std::"]
     .filter((token) => header.includes(token));
   const operations = FINAL_OPERATIONS.map((operation) => ({
@@ -50,6 +52,11 @@ function main() {
   const adapterExecutionReady = !adapterSurfaceOnly && selectorReady &&
     adapter.includes("runEmbeddedScriptExecution") &&
     kotlin.includes("adapter_v1_selected");
+  const adapterAbHarnessReady = kotlin.includes("runtimeAdapter: String? = null") &&
+    abHarness.includes("NodeRuntimeAdapterV1DifferentialInstrumentationTest") &&
+    abHarness.includes("node.adapter_v1.differential.result=") &&
+    abHarness.includes("RUNTIME_ADAPTER_LEGACY_JNI") &&
+    abHarness.includes("RUNTIME_ADAPTER_V1");
   const defaultPromoted = kotlin.includes("effective = RUNTIME_ADAPTER_V1") &&
     kotlin.includes("status = \"auto_adapter_v1_selected\"");
   const blockers = [];
@@ -86,10 +93,16 @@ function main() {
     legacyJniFallbackRequired: true,
     defaultRuntimePath: defaultPromoted ? "adapter_v1" : "legacy_jni",
     adapterExecutionReady,
+    adapterAbHarness: {
+      status: adapterAbHarnessReady ? "instrumentation_registered" : "missing",
+      resultEvidenceRequiredForPromotion: true,
+    },
     defaultPromotion: {
       status: defaultPromoted ? "promoted" : "not_promoted",
       blockers: defaultPromoted ? [] : [
-        "legacy/adapter A-B differential evidence",
+        adapterAbHarnessReady
+          ? "legacy/adapter A-B differential result evidence"
+          : "legacy/adapter A-B differential harness",
         "packaged adapter smoke",
         "lifecycle and memory stress",
         "crash injection",
@@ -119,6 +132,7 @@ function renderMarkdown(report) {
     `- Default runtime path: ${report.defaultRuntimePath}`,
     `- Adapter v1 selectable: ${report.decision.adapterV1Selectable}`,
     `- Adapter v1 default allowed: ${report.decision.adapterV1DefaultAllowed}`,
+    `- Adapter A/B harness: ${report.adapterAbHarness.status}`,
     `- Public ABI leaks: ${report.publicAbiLeaks.length}`,
     "",
     "| Operation | Header | Adapter Source |",
@@ -127,6 +141,17 @@ function renderMarkdown(report) {
   report.operations.forEach((entry) => {
     lines.push(`| ${entry.operation} | ${entry.inHeader} | ${entry.inAdapter} |`);
   });
+  lines.push(
+    "",
+    "## Default Promotion",
+    "",
+    `- Status: ${report.defaultPromotion.status}`,
+  );
+  if (report.defaultPromotion.blockers.length === 0) {
+    lines.push("- Blockers: none");
+  } else {
+    report.defaultPromotion.blockers.forEach((blocker) => lines.push(`- ${blocker}`));
+  }
   lines.push("", "## Blockers", "");
   if (report.blockers.length === 0) {
     lines.push("None.");
