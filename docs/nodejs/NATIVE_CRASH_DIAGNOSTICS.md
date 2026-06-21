@@ -121,6 +121,43 @@ $ndk = "$env:ANDROID_HOME\ndk\26.1.10909125"
 
 If `ndk-stack` does not resolve frames, use the exact `symbol_file` path listed by the report with `llvm-symbolizer` from the same NDK.
 
+## Phase 11 Crash Bundle Tools
+
+The final integration lane also provides schema-stable crash bundle tools:
+
+```powershell
+.\gradlew.bat --console=plain :app:collectNodeCrashBundle
+.\gradlew.bat --console=plain :app:symbolizeNodeCrash
+.\gradlew.bat --console=plain :app:verifyNodeCrashBundle
+```
+
+The default bundle is written to:
+
+```text
+build/reports/nodejs/final-crash-evidence-bundle/
+```
+
+For manual evidence, call the scripts directly with a tombstone or logcat file:
+
+```powershell
+node tools\nodejs\phase11\collect-node-crash-bundle.js `
+  --repo-root . `
+  --report-dir build\reports\nodejs `
+  --logcat app\build\reports\native-node\logcat-native-crash.txt
+
+node tools\nodejs\phase11\symbolize-node-crash.js `
+  --repo-root . `
+  --report-dir build\reports\nodejs `
+  --logcat app\build\reports\native-node\logcat-native-crash.txt `
+  --symbol-dir app\build\intermediates\cxx
+
+node tools\nodejs\phase11\verify-node-crash-bundle.js `
+  --repo-root . `
+  --report-dir build\reports\nodejs
+```
+
+These tools make collection, schema validation, and best-effort symbolization callable. They do not claim final crash readiness until safe native crash markers, automatic next-launch collection, resource snapshots, timeline tail capture, and chaos injection exist.
+
 ## Triage Bundle
 
 Attach these files to any native crash issue:

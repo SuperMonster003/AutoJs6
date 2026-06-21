@@ -10,6 +10,19 @@ function main() {
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const bundleDir = path.join(reportDir, "final-crash-evidence-bundle");
+  const toolScripts = {
+    collect: path.join(repoRoot, "tools/nodejs/phase11/collect-node-crash-bundle.js"),
+    verify: path.join(repoRoot, "tools/nodejs/phase11/verify-node-crash-bundle.js"),
+    symbolize: path.join(repoRoot, "tools/nodejs/phase11/symbolize-node-crash.js"),
+  };
+  const gradleFile = path.join(repoRoot, "app/node-phase11-gate.gradle.kts");
+  const gradleText = read(gradleFile);
+  const tooling = {
+    collectNodeCrashBundle: fs.existsSync(toolScripts.collect) && gradleText.includes("\"collectNodeCrashBundle\""),
+    verifyNodeCrashBundle: fs.existsSync(toolScripts.verify) && gradleText.includes("\"verifyNodeCrashBundle\""),
+    symbolizeNodeCrash: fs.existsSync(toolScripts.symbolize) && gradleText.includes("\"symbolizeNodeCrash\""),
+  };
+  const crashToolsImplemented = Object.values(tooling).every(Boolean);
   fs.mkdirSync(bundleDir, { recursive: true });
   const nativeLibraryHashes = collectNativeLibraryHashes(repoRoot);
   const bundle = {
@@ -54,8 +67,10 @@ function main() {
     },
     symbolization: {
       tools: ["symbolizeNodeCrash", "collectNodeCrashBundle", "verifyNodeCrashBundle"],
-      implemented: false,
+      implemented: crashToolsImplemented,
+      report: "build/reports/nodejs/final-crash-symbolization.json",
     },
+    tooling,
     chaosInjection: {
       implemented: false,
       scenarios: [
@@ -78,7 +93,7 @@ function main() {
   if (!bundle.automaticCollection) blockers.push("next-launch crash evidence collection is not automatic");
   if (!bundle.resourceSnapshot.implemented) blockers.push("resource snapshot is not captured for crash/hang evidence");
   if (!bundle.timelineTail.implemented) blockers.push("runtime timeline tail is not captured for crash evidence");
-  if (!bundle.symbolization.implemented) blockers.push("crash symbolization tooling is not implemented");
+  if (!bundle.symbolization.implemented) blockers.push("crash bundle collection/verification/symbolization tooling is not fully implemented");
   if (!bundle.chaosInjection.implemented) blockers.push("chaos/crash injection gate is not implemented");
 
   const report = {
@@ -91,6 +106,7 @@ function main() {
       manifest: relativePath(repoRoot, path.join(bundleDir, "manifest.json")),
       nativeLibraryCount: nativeLibraryHashes.length,
     },
+    tooling,
     blockers,
     decision: {
       status: blockers.length === 0 ? "ready" : "blocked",
@@ -125,6 +141,10 @@ function collectNativeLibraryHashes(repoRoot) {
 
 function sha256(file) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+}
+
+function read(file) {
+  return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
 }
 
 function renderBundleReadme(bundle) {

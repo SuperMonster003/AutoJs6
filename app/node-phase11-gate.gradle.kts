@@ -85,6 +85,7 @@ tasks.register<Exec>("generateNodeFinalAdapterStatus") {
     inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_api_v1.h"))
     inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_adapter_24_5.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_jni.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt"))
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-adapter-gate.json") },
         nodePhase11ReportDir.map { it.file("final-adapter-gate.md") },
@@ -112,6 +113,7 @@ tasks.register<Exec>("verifyNodeFinalAdapterGate") {
     inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_api_v1.h"))
     inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_adapter_24_5.cpp"))
     inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_jni.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt"))
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-adapter-gate.json") },
         nodePhase11ReportDir.map { it.file("final-adapter-gate.md") },
@@ -129,12 +131,94 @@ tasks.register<Exec>("verifyNodeFinalAdapterGate") {
     )
 }
 
+tasks.register<Exec>("collectNodeCrashBundle") {
+    group = "verification"
+    description = "Collects the Phase 11 Node crash evidence bundle schema and available native artifacts."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/collect-node-crash-bundle.js")
+    inputs.file(scriptFile)
+    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-crash-bundle-collection.json") },
+        nodePhase11ReportDir.map { it.file("final-crash-bundle-collection.md") },
+    )
+    outputs.dir(nodePhase11ReportDir.map { it.dir("final-crash-evidence-bundle") })
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("symbolizeNodeCrash") {
+    group = "verification"
+    description = "Parses and best-effort symbolizes Phase 11 Node crash evidence."
+
+    dependsOn("collectNodeCrashBundle")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/symbolize-node-crash.js")
+    inputs.file(scriptFile)
+    inputs.dir(nodePhase11ReportDir.map { it.dir("final-crash-evidence-bundle") })
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-crash-symbolization.json") },
+        nodePhase11ReportDir.map { it.file("final-crash-symbolization.md") },
+    )
+    outputs.file(nodePhase11ReportDir.map { it.file("final-crash-evidence-bundle/symbolization.json") })
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeCrashBundle") {
+    group = "verification"
+    description = "Verifies the Phase 11 Node crash evidence bundle schema."
+
+    dependsOn("symbolizeNodeCrash")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-node-crash-bundle.js")
+    inputs.file(scriptFile)
+    inputs.dir(nodePhase11ReportDir.map { it.dir("final-crash-evidence-bundle") })
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-crash-bundle-verification.json") },
+        nodePhase11ReportDir.map { it.file("final-crash-bundle-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCrashStatus") {
     group = "verification"
     description = "Writes the current Phase 11 crash evidence status without failing on unimplemented crash automation."
 
+    dependsOn("verifyNodeCrashBundle")
+
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-crash-gate.js")
     inputs.file(scriptFile)
+    inputs.files(
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/collect-node-crash-bundle.js"),
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/symbolize-node-crash.js"),
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-node-crash-bundle.js"),
+    )
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CRASH_INTAKE.md"))
     inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
@@ -161,6 +245,11 @@ tasks.register<Exec>("verifyNodeFinalCrashGate") {
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-crash-gate.js")
     inputs.file(scriptFile)
+    inputs.files(
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/collect-node-crash-bundle.js"),
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/symbolize-node-crash.js"),
+        rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-node-crash-bundle.js"),
+    )
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CRASH_INTAKE.md"))
     inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))

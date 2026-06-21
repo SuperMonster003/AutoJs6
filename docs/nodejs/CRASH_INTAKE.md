@@ -41,6 +41,12 @@ captures. Request the smallest reproduction and the crash window only.
 
 .\gradlew.bat --console=plain :app:nativeNodeAbiSizeReport `
   "-Pautojs.nodejs.identity=production"
+
+.\gradlew.bat --console=plain :app:collectNodeCrashBundle
+
+.\gradlew.bat --console=plain :app:symbolizeNodeCrash
+
+.\gradlew.bat --console=plain :app:verifyNodeCrashBundle
 ```
 
 Relevant outputs:
@@ -51,6 +57,9 @@ app/build/reports/nodejs/doctor/node-doctor-report.txt
 app/build/reports/native-node/native-deps-appDebug.txt
 app/build/reports/native-node/native-symbol-archive-appDebug.txt
 app/build/reports/native-node/native-abi-size-appDebug.txt
+build/reports/nodejs/final-crash-evidence-bundle/manifest.json
+build/reports/nodejs/final-crash-symbolization.json
+build/reports/nodejs/final-crash-bundle-verification.json
 ```
 
 For packaged APK failures with an APK artifact:

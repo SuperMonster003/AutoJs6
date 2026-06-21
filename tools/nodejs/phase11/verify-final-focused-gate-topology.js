@@ -6,6 +6,9 @@ const path = require("path");
 
 const REQUIRED_TASKS = [
   "verifyNodeFinalAdapterGate",
+  "collectNodeCrashBundle",
+  "symbolizeNodeCrash",
+  "verifyNodeCrashBundle",
   "verifyNodeFinalCrashGate",
   "verifyNodeFinalPackageManagerGate",
   "verifyNodeFinalLongRunningGate",
