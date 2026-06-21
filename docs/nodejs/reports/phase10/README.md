@@ -14,6 +14,7 @@ skip audit, and focused gate coverage into repeatable evidence.
 .\gradlew.bat --console=plain :app:verifyNodePhase10PackagedParityHost
 .\gradlew.bat --console=plain :app:verifyNodePhase10FocusedGateMatrix
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
 
 `verifyNodePhase10Gate` aggregates the first-wave host gates, packaged parity,
@@ -37,6 +38,7 @@ promote any blocked capability.
 - `build/reports/nodejs/phase10-packaged-parity.md`
 - `build/reports/nodejs/phase10-focused-gate-matrix.json`
 - `build/reports/nodejs/phase10-focused-gate-matrix.md`
+- `app/build/reports/nodejs/live-provider-summary.json`
 
 ## Current Decisions
 
@@ -49,6 +51,10 @@ promote any blocked capability.
   fields while adding Phase 10 `statusCode`, `healthCheck`,
   `activeResources`, `lastError`, and `packagedSupport` fields for machine
   reporting.
+- [LIVE_PROVIDER_ACTIVATION.md](LIVE_PROVIDER_ACTIVATION.md) records the S10-12
+  through S10-20 Sony live-provider activation evidence. The gate passed with
+  27 tests, 0 failures, 0 errors, 1 policy-allowed accessibility skip, and 0
+  policy violations.
 - The descriptor schema remains compatible with existing v1 projects while the
   version vector carries the v1.1 bootstrap, CJS loader, ESM loader, dynamic
   import, builtin profile, bridge protocol, capability manifest, and

@@ -274,11 +274,11 @@ class NodeStorageBridgeInstrumentationTest {
         assertEquals("host", JSONObject(hostRead.resultJson.orEmpty()).getString("value"))
         assertEquals("packaged", JSONObject(packagedRead.resultJson.orEmpty()).getString("value"))
 
-        val chunk = "x".repeat(60 * 1024)
-        repeat(4) { index ->
+        val chunk = "x".repeat(24 * 1024)
+        repeat(10) { index ->
             assertOk(dispatch(hostProvider, "put", JSONArray().put("quota").put("k$index").put(chunk).toString()))
         }
-        val overQuota = dispatch(hostProvider, "put", JSONArray().put("quota").put("overflow").put("y".repeat(30 * 1024)).toString())
+        val overQuota = dispatch(hostProvider, "put", JSONArray().put("quota").put("overflow").put("y".repeat(24 * 1024)).toString())
         assertFalse(overQuota.toString(), overQuota.ok)
         assertEquals(NodeRuntimeErrorCodes.BRIDGE_RESOURCE_LIMIT, overQuota.error?.code)
 
