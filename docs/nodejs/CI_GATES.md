@@ -242,6 +242,7 @@ Phase 9 Batch A starts with host-side native modernization preflights:
 .\gradlew.bat --console=plain :app:verifyNodePhase9IsolationPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9PluginPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9WasmWasiPolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9NativeCrashPipeline
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -267,7 +268,10 @@ WASM/WASI policy gate records the remaining compile-cache, facade,
 resource-limit, worker, build-workflow, and security-corpus gaps. The plugin
 policy gate records S9-41/S9-43 with WASM plugin packages and native service
 plugins deferred, JS-only manager ABI/lifecycle partial, and native
-addon/plugin runtime denial preserved. These gates
+addon/plugin runtime denial preserved. The native crash pipeline gate records
+S9-44 with runtime artifact evidence, symbol archive/dependency reports,
+logcat/tombstone capture, execution descriptor, and offline symbolication
+requirements. These gates
 do not promote Node 24.17 and do not change the default runtime slot. See
 [reports/phase9/README.md](reports/phase9/README.md),
 [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), and

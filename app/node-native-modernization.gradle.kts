@@ -29,6 +29,8 @@ val nodePhase9PluginPolicyJson = nodeNativeModernizationReportDir.map { it.file(
 val nodePhase9PluginPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-plugin-policy.md") }
 val nodePhase9WasmWasiPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.json") }
 val nodePhase9WasmWasiPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.md") }
+val nodePhase9NativeCrashPipelineJson = nodeNativeModernizationReportDir.map { it.file("phase9-native-crash-pipeline.json") }
+val nodePhase9NativeCrashPipelineMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-native-crash-pipeline.md") }
 
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
@@ -408,6 +410,35 @@ tasks.register<Exec>("verifyNodePhase9PluginPolicy") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase9NativeCrashPipeline") {
+    group = "verification"
+    description = "Verifies Phase 9 native crash pipeline, symbolication, and crash evidence policy."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/stability/verify-phase9-native-crash-pipeline.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/NATIVE_CRASH_PIPELINE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CRASH_INTAKE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MAINTENANCE_PLAN.md"))
+    inputs.file(project.layout.projectDirectory.file("native-node-deps-report.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-artifacts.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/generate-runtime-artifact-gate.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-distribution-policy.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/ISOLATION_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/INSPECTOR_POLICY.md"))
+    outputs.files(nodePhase9NativeCrashPipelineJson, nodePhase9NativeCrashPipelineMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -427,5 +458,6 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNodePhase9IsolationPolicy",
         "verifyNodePhase9PluginPolicy",
         "verifyNodePhase9WasmWasiPolicy",
+        "verifyNodePhase9NativeCrashPipeline",
     )
 }

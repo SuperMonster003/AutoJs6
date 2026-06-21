@@ -22,6 +22,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodePhase9IsolationPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9PluginPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9WasmWasiPolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9NativeCrashPipeline
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -56,6 +57,8 @@ Generated outputs:
 - `build/reports/nodejs/phase9-plugin-policy.md`
 - `build/reports/nodejs/phase9-wasm-wasi-policy.json`
 - `build/reports/nodejs/phase9-wasm-wasi-policy.md`
+- `build/reports/nodejs/phase9-native-crash-pipeline.json`
+- `build/reports/nodejs/phase9-native-crash-pipeline.md`
 
 ## Current Status
 
@@ -101,6 +104,10 @@ The Batch A start is intentionally conservative:
   packages and native service plugins deferred, records the JS-only manager ABI
   and lifecycle state as partial, and preserves the native addon/plugin runtime
   denial. See [PLUGIN_POLICY.md](PLUGIN_POLICY.md).
+- S9-44 now has a host-side native crash pipeline gate that verifies runtime
+  artifact evidence, symbol archive/dependency reports, logcat/tombstone
+  capture instructions, execution descriptor requirements, and offline
+  symbolication instructions. See [NATIVE_CRASH_PIPELINE.md](NATIVE_CRASH_PIPELINE.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because
