@@ -11,7 +11,6 @@ intentional Safe Node Profile non-goals, and external runtime maintenance.
 
 ## Required Internal
 
-- `adapter_v1_real_execution_path`
 - `crash_evidence_automation`
 - `android_side_package_installation`
 - `packaged_long_running`
@@ -19,6 +18,13 @@ intentional Safe Node Profile non-goals, and external runtime maintenance.
 - `full_heavy_resource_stress`
 
 These must be resolved before Phase 11 can report `completed`.
+
+Resolved in Phase 11:
+
+- `adapter_v1_real_execution_path`: `AutoJsNodeRuntimeApiV1` is now a
+  selectable execution path for Node 24.5 while `legacy_jni` remains the
+  default fallback pending A/B, packaged, memory, and crash-injection promotion
+  gates.
 
 ## Conditional
 

@@ -575,13 +575,20 @@ object NativeNodeEmbeddedRuntimeBridge {
         val runtimeAdapterSelection = resolveRuntimeAdapterSelection()
         val nativeCall = runCatching {
             val payload = if (runtimeAdapterSelection.effective == RUNTIME_ADAPTER_V1) {
-                nativeRunEmbeddedScriptAdapterV1Diagnostics(
+                nativeRunEmbeddedScriptAdapterV1Execute(
                     preparedRequest.source,
                     preparedRequest.sourceName,
                     preparedRequest.workingDirectory,
-                    preparedRequest.moduleSources.size,
-                    preparedRequest.runtimeModuleSources.size,
-                    preparedRequest.env.size,
+                    preparedRequest.moduleSources.keys.toTypedArray(),
+                    preparedRequest.moduleSources.values.toTypedArray(),
+                    preparedRequest.runtimeModuleSources.keys.toTypedArray(),
+                    preparedRequest.runtimeModuleSources.values.toTypedArray(),
+                    preparedRequest.env.keys.toTypedArray(),
+                    preparedRequest.env.values.toTypedArray(),
+                    preparedRequest.esmExperimentalEnabled,
+                    preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.javaInteropExperimentalEnabled,
                 )
             } else if (preparedRequest.runtimeModuleSources.isEmpty()) {
                 nativeRunEmbeddedScriptLifecycleWithModulesV2(
@@ -736,7 +743,7 @@ object NativeNodeEmbeddedRuntimeBridge {
             RUNTIME_ADAPTER_V1 -> RuntimeAdapterSelection(
                 requested = requested,
                 effective = RUNTIME_ADAPTER_V1,
-                status = "adapter_v1_diagnostics_only",
+                status = "adapter_v1_selected",
             )
             RUNTIME_ADAPTER_LEGACY_JNI -> RuntimeAdapterSelection(
                 requested = requested,
@@ -15242,6 +15249,22 @@ object NativeNodeEmbeddedRuntimeBridge {
         moduleSourceCount: Int,
         runtimeModuleSourceCount: Int,
         envCount: Int,
+    ): Array<String>?
+
+    private external fun nativeRunEmbeddedScriptAdapterV1Execute(
+        source: String,
+        sourceName: String,
+        workingDirectory: String?,
+        moduleSourceNames: Array<String>,
+        moduleSources: Array<String>,
+        runtimeModuleSourceNames: Array<String>,
+        runtimeModuleSources: Array<String>,
+        envNames: Array<String>,
+        envValues: Array<String>,
+        esmExperimentalEnabled: Boolean,
+        dynamicImportExperimentalEnabled: Boolean,
+        workerThreadsExperimentalEnabled: Boolean,
+        javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
     private fun isProbePropertyEnabled(propertyName: String): Boolean {

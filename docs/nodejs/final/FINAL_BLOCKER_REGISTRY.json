@@ -12,8 +12,8 @@
     {
       "id": "adapter_v1_real_execution_path",
       "classification": "required_internal",
-      "status": "open",
-      "currentEvidence": "AutoJsNodeRuntimeApiV1 exports a surface-only table; default execution remains legacy_jni.",
+      "status": "closed",
+      "currentEvidence": "AutoJsNodeRuntimeApiV1 now creates opaque handles, executes through the shared Node 24.5 embedded lifecycle, reports state/diagnostics, and destroys idempotently. adapter_v1 is selectable with legacy_jni retained as the auto/default fallback.",
       "requiredResolution": "adapter_v1 creates, executes, polls, stops, diagnoses, and destroys the Node 24.5 runtime for script, CommonJS, ESM, dynamic import, bridge, and packaged execution."
     },
     {

@@ -45,7 +45,13 @@ function main() {
     combinedSelectorSource.includes("adapter_v1") &&
     combinedSelectorSource.includes("legacy_jni") &&
     combinedSelectorSource.includes("nativeRunEmbeddedScriptAdapterV1Diagnostics") &&
+    combinedSelectorSource.includes("nativeRunEmbeddedScriptAdapterV1Execute") &&
     jni.includes("runEmbeddedScriptAdapterV1DiagnosticsNative");
+  const adapterExecutionReady = !adapterSurfaceOnly && selectorReady &&
+    adapter.includes("runEmbeddedScriptExecution") &&
+    kotlin.includes("adapter_v1_selected");
+  const defaultPromoted = kotlin.includes("effective = RUNTIME_ADAPTER_V1") &&
+    kotlin.includes("status = \"auto_adapter_v1_selected\"");
   const blockers = [];
   operations.filter((entry) => !entry.inHeader).forEach((entry) => {
     blockers.push("missing final ABI operation in header: " + entry.operation);
@@ -75,14 +81,25 @@ function main() {
       property: "autojs.nodejs.runtime.adapter",
       supportedValues: ["auto", "legacy_jni", "adapter_v1"],
       defaultEffectivePath: "legacy_jni",
-      adapterV1Mode: "diagnostics_only",
+      adapterV1Mode: adapterExecutionReady ? "execution_path" : "diagnostics_only",
     },
     legacyJniFallbackRequired: true,
-    defaultRuntimePath: adapterSurfaceOnly ? "legacy_jni" : "adapter_v1",
+    defaultRuntimePath: defaultPromoted ? "adapter_v1" : "legacy_jni",
+    adapterExecutionReady,
+    defaultPromotion: {
+      status: defaultPromoted ? "promoted" : "not_promoted",
+      blockers: defaultPromoted ? [] : [
+        "legacy/adapter A-B differential evidence",
+        "packaged adapter smoke",
+        "lifecycle and memory stress",
+        "crash injection",
+      ],
+    },
     blockers,
     decision: {
       status: blockers.length === 0 ? "ready" : "blocked",
-      adapterV1DefaultAllowed: blockers.length === 0,
+      adapterV1Selectable: adapterExecutionReady && blockers.length === 0,
+      adapterV1DefaultAllowed: defaultPromoted && blockers.length === 0,
       safeNodeProfilePreserved: true,
     },
   };
@@ -100,6 +117,7 @@ function renderMarkdown(report) {
     "",
     `- Decision: ${report.decision.status}`,
     `- Default runtime path: ${report.defaultRuntimePath}`,
+    `- Adapter v1 selectable: ${report.decision.adapterV1Selectable}`,
     `- Adapter v1 default allowed: ${report.decision.adapterV1DefaultAllowed}`,
     `- Public ABI leaks: ${report.publicAbiLeaks.length}`,
     "",

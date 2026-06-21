@@ -884,6 +884,19 @@ private:
 class ScopedWorkingDirectory {
 public:
     bool enter(JNIEnv* env, const std::string& workingDirectory) {
+        std::string error;
+        if (enter(workingDirectory, &error)) {
+            return true;
+        }
+        throwJava(
+                env,
+                "java/lang/IllegalStateException",
+                error
+        );
+        return false;
+    }
+
+    bool enter(const std::string& workingDirectory, std::string* error) {
         if (workingDirectory.empty()) {
             return true;
         }
@@ -895,12 +908,10 @@ public:
         }
 
         if (chdir(workingDirectory.c_str()) != 0) {
-            throwJava(
-                    env,
-                    "java/lang/IllegalStateException",
-                    "Failed to change working directory to " + workingDirectory + ": " +
-                            std::strerror(errno)
-            );
+            if (error != nullptr) {
+                *error = "Failed to change working directory to " + workingDirectory + ": " +
+                        std::strerror(errno);
+            }
             return false;
         }
         changed_ = true;
@@ -925,6 +936,25 @@ private:
     bool changed_ = false;
     std::string previous_;
 };
+
+struct EmbeddedScriptExecutionRequest {
+    std::string source;
+    std::string sourceName;
+    std::string workingDirectory;
+    std::vector<std::pair<std::string, std::string>> moduleSources;
+    std::vector<std::pair<std::string, std::string>> runtimeModuleSources;
+    std::vector<std::pair<std::string, std::string>> env;
+    bool esmExperimentalEnabled = false;
+    bool dynamicImportExperimentalEnabled = false;
+    bool workerThreadsExperimentalEnabled = false;
+    bool javaInteropExperimentalEnabled = false;
+};
+
+std::vector<std::string> runEmbeddedScriptExecution(
+        const EmbeddedScriptExecutionRequest& request,
+        const char* runtimeAdapterPath = nullptr,
+        const char* runtimeAdapterMode = nullptr
+);
 
 bool isInlineSystemServiceDeniedProbe(EmbeddedLifecycleJsProbeKind kind);
 void putInlineSystemServiceDeniedSkippedPayload(

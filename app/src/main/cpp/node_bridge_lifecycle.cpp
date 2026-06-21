@@ -474,6 +474,120 @@ void appendEmbeddedV8LifecycleProbePayload(std::vector<std::string>& payload, vo
 #endif
 }
 
+std::vector<std::string> runEmbeddedScriptExecution(
+        const EmbeddedScriptExecutionRequest& request,
+        const char* runtimeAdapterPath,
+        const char* runtimeAdapterMode
+) {
+    const auto startedAt = Clock::now();
+    __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.enter");
+    const std::string sourceNameText = request.sourceName.empty()
+            ? "<embedded-user-script.js>"
+            : request.sourceName;
+    std::vector<std::string> payload;
+    putPayload(payload, "embedded_script.request.source_name", sourceNameText);
+    putPayload(payload, "embedded_script.request.source.length", static_cast<long long>(request.source.size()));
+    putPayload(payload, "embedded_script.request.working_directory", request.workingDirectory);
+    putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(request.env.size()));
+    putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(request.moduleSources.size()));
+    putPayload(
+            payload,
+            "embedded_script.request.runtime_module_sources.count",
+            static_cast<long long>(request.runtimeModuleSources.size())
+    );
+    putPayload(payload, "embedded_script.request.source_kind", "kotlin_provided_source");
+    putPayload(payload, "embedded_script.request.user_file_read_by_native", false);
+    putPayload(payload, "embedded_script.request.require_allowed", true);
+    putPayload(
+            payload,
+            "embedded_script.request.require_mode",
+            request.esmExperimentalEnabled ? "restricted_commonjs_mvp_with_experimental_esm" : "restricted_commonjs_mvp"
+    );
+    putPayload(payload, "embedded_script.request.fs_allowed", "scoped_working_directory_sync_mvp");
+    putPayload(payload, "embedded_script.request.import_allowed", request.esmExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.esm_experimental_enabled", request.esmExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.dynamic_import_experimental_enabled", request.dynamicImportExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.worker_threads_experimental_enabled", request.workerThreadsExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.java_interop_experimental_enabled", request.javaInteropExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.node_modules_allowed", "working_directory_commonjs_mvp");
+    putPayload(payload, "embedded_script.request.autojs_api_allowed", false);
+    putPayload(payload, "embedded_script.request.android_bridge_allowed", false);
+    if (runtimeAdapterPath != nullptr && std::strlen(runtimeAdapterPath) > 0) {
+        putPayload(payload, "embedded_script.runtime_adapter.path", runtimeAdapterPath);
+    }
+    if (runtimeAdapterMode != nullptr && std::strlen(runtimeAdapterMode) > 0) {
+        putPayload(payload, "embedded_script.runtime_adapter.mode", runtimeAdapterMode);
+    }
+
+    ScopedWorkingDirectory scopedWorkingDirectory;
+    std::string workingDirectoryError;
+    if (!scopedWorkingDirectory.enter(request.workingDirectory, &workingDirectoryError)) {
+        putPayload(payload, "embedded_script.request.working_directory_entered", false);
+        putPayload(payload, "embedded_script.status", "failed");
+        putPayload(payload, "embedded_script.detail", workingDirectoryError);
+        putPayload(payload, "embedded_script.succeeded", false);
+        putPayload(payload, "embedded_script.exit_code", static_cast<long long>(1));
+        putPayload(payload, "embedded_script.error_code", "ERR_AUTOJS6_NODE_WORKING_DIRECTORY");
+        putCommonEmbeddedProbePayload(payload, 0, startedAt);
+        __android_log_print(
+                ANDROID_LOG_WARN,
+                kLogTag,
+                "embedded_script.exit status=failed reason=working_directory elapsed=%lldms",
+                elapsedMs(startedAt)
+        );
+        return payload;
+    }
+    putPayload(payload, "embedded_script.request.working_directory_entered", !request.workingDirectory.empty());
+    std::string wrappedSource = buildEmbeddedScriptExecutionSource(
+            request.source,
+            sourceNameText,
+            request.workingDirectory,
+            request.moduleSources,
+            request.runtimeModuleSources,
+            request.env,
+            request.esmExperimentalEnabled,
+            request.dynamicImportExperimentalEnabled,
+            request.workerThreadsExperimentalEnabled,
+            request.javaInteropExperimentalEnabled
+    );
+    void* handle = probeLoadedLibnodeHandle(payload);
+    const char* workingDirectoryPtr = request.workingDirectory.empty() ? nullptr : request.workingDirectory.c_str();
+    appendEmbeddedV8UvIsolateLifecycleProbePayload(
+            payload,
+            handle,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            &wrappedSource,
+            "embedded_script",
+            workingDirectoryPtr,
+            true
+    );
+    putCommonEmbeddedProbePayload(payload, 0, startedAt);
+    __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.exit elapsed=%lldms", elapsedMs(startedAt));
+    return payload;
+}
+
 void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         std::vector<std::string>& payload,
         void* handle,
