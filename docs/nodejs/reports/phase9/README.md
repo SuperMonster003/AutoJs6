@@ -20,6 +20,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9IsolationPolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9PluginPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9WasmWasiPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -51,6 +52,8 @@ Generated outputs:
 - `build/reports/nodejs/phase9-inspector-policy.md`
 - `build/reports/nodejs/phase9-isolation-policy.json`
 - `build/reports/nodejs/phase9-isolation-policy.md`
+- `build/reports/nodejs/phase9-plugin-policy.json`
+- `build/reports/nodejs/phase9-plugin-policy.md`
 - `build/reports/nodejs/phase9-wasm-wasi-policy.json`
 - `build/reports/nodejs/phase9-wasm-wasi-policy.md`
 
@@ -94,6 +97,10 @@ The Batch A start is intentionally conservative:
   current split between ready WebAssembly loading, deferred WASM compile cache,
   deferred `autojs6:wasi` facade/resource/worker/build workflow work, and the
   partial security corpus.
+- S9-41/S9-43 now have a host-side plugin policy gate that keeps WASM plugin
+  packages and native service plugins deferred, records the JS-only manager ABI
+  and lifecycle state as partial, and preserves the native addon/plugin runtime
+  denial. See [PLUGIN_POLICY.md](PLUGIN_POLICY.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because

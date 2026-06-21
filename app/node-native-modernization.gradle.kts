@@ -25,6 +25,8 @@ val nodePhase9InspectorPolicyJson = nodeNativeModernizationReportDir.map { it.fi
 val nodePhase9InspectorPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-inspector-policy.md") }
 val nodePhase9IsolationPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-isolation-policy.json") }
 val nodePhase9IsolationPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-isolation-policy.md") }
+val nodePhase9PluginPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-plugin-policy.json") }
+val nodePhase9PluginPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-plugin-policy.md") }
 val nodePhase9WasmWasiPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.json") }
 val nodePhase9WasmWasiPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.md") }
 
@@ -380,6 +382,32 @@ tasks.register<Exec>("verifyNodePhase9IsolationPolicy") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase9PluginPolicy") {
+    group = "verification"
+    description = "Verifies Phase 9 WASM plugin package, native service plugin, and plugin ABI lifecycle policy evidence."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/plugin/verify-phase9-plugin-policy.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePluginSystemInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/PLUGIN_SYSTEM.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/WASM_WASI.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/PLUGIN_POLICY.md"))
+    outputs.files(nodePhase9PluginPolicyJson, nodePhase9PluginPolicyMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -397,6 +425,7 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNodePhase9PerformancePolicy",
         "verifyNodePhase9InspectorPolicy",
         "verifyNodePhase9IsolationPolicy",
+        "verifyNodePhase9PluginPolicy",
         "verifyNodePhase9WasmWasiPolicy",
     )
 }
