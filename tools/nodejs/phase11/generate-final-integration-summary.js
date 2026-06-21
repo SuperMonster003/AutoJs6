@@ -9,6 +9,7 @@ const REPORTS = [
   ["focused_gate_topology", "final-focused-gate-topology.json", true],
   ["adapter_gate", "final-adapter-gate.json", false],
   ["crash_gate", "final-crash-gate.json", false],
+  ["multi_instance_gate", "final-multi-instance-gate.json", false],
 ];
 
 function main() {

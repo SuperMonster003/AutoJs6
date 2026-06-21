@@ -285,11 +285,69 @@ tasks.register("verifyNodeFinalLongRunningGate") {
     dependsOn("verifyNodeLongRunningGate", "verifyNodeFinalCapabilityTruth")
 }
 
-tasks.register("verifyNodeFinalMultiInstanceGate") {
+tasks.register<Exec>("generateNodeFinalMultiInstanceStatus") {
+    group = "verification"
+    description = "Writes the current Phase 11 multi-instance status without failing on open promotion blockers."
+
+    dependsOn("verifyNodeMultiInstanceGate", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-multi-instance-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicyInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/PROCESS_POOL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/MULTI_INSTANCE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-multi-instance-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeFinalMultiInstanceGate") {
     group = "verification"
     description = "Strict final multi-instance gate; blocked until a second execution slot is promoted."
 
-    dependsOn("verifyNodeMultiInstanceGate", "verifyNodeFinalCapabilityTruth")
+    dependsOn("verifyNodeMultiInstanceGate", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-multi-instance-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicyInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/PROCESS_POOL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/MULTI_INSTANCE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-multi-instance-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-blocked",
+    )
 }
 
 tasks.register("verifyNodeFinalWorkerDecisionGate") {
@@ -336,6 +394,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         "verifyNodeFinalFocusedGateTopology",
         "generateNodeFinalAdapterStatus",
         "generateNodeFinalCrashStatus",
+        "generateNodeFinalMultiInstanceStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -346,6 +405,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         nodePhase11ReportDir.map { it.file("final-focused-gate-topology.json") },
         nodePhase11ReportDir.map { it.file("final-adapter-gate.json") },
         nodePhase11ReportDir.map { it.file("final-crash-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },
@@ -372,6 +432,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         "verifyNodeFinalFocusedGateTopology",
         "generateNodeFinalAdapterStatus",
         "generateNodeFinalCrashStatus",
+        "generateNodeFinalMultiInstanceStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -382,6 +443,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         nodePhase11ReportDir.map { it.file("final-focused-gate-topology.json") },
         nodePhase11ReportDir.map { it.file("final-adapter-gate.json") },
         nodePhase11ReportDir.map { it.file("final-crash-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },
