@@ -19,6 +19,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactGate
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9IsolationPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9WasmWasiPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -48,6 +49,8 @@ Generated outputs:
 - `build/reports/nodejs/phase9-performance-policy.md`
 - `build/reports/nodejs/phase9-inspector-policy.json`
 - `build/reports/nodejs/phase9-inspector-policy.md`
+- `build/reports/nodejs/phase9-isolation-policy.json`
+- `build/reports/nodejs/phase9-isolation-policy.md`
 - `build/reports/nodejs/phase9-wasm-wasi-policy.json`
 - `build/reports/nodejs/phase9-wasm-wasi-policy.md`
 
@@ -78,6 +81,11 @@ The Batch A start is intentionally conservative:
   disabled runtime boundary, records DevTools/profiling/heap work as deferred,
   marks controlled diagnostic reports partial, and keeps the disabled-state
   inspector security evidence ready. See [INSPECTOR_POLICY.md](INSPECTOR_POLICY.md).
+- S9-27/S9-33 now have a host-side isolation policy gate that records hardened
+  isolated runtime, capability broker, and process-pool evidence as partial,
+  keeps crash containment, per-runtime resource limits, and multi-instance
+  consistency deferred, and keeps worker partial promotion blocked on native
+  worker availability. See [ISOLATION_POLICY.md](ISOLATION_POLICY.md).
 - S9-34/S9-40 now have a focused WebAssembly/WASI starting gate: pure
   WebAssembly compile/instantiate works through scoped `.wasm` bytes, while raw
   `wasi` / `node:wasi` remains disabled and unshadowable. See

@@ -1657,6 +1657,7 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase8Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9IsolationPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9WasmWasiPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -1686,8 +1687,10 @@ snapshot, process-prewarm, memory-pressure, and performance matrix policy
 evidence for S9-15 through S9-20. `verifyNodePhase9InspectorPolicy` records the
 S9-21 through S9-26 inspector, DevTools, profiling, diagnostic-report, and
 security policy state while keeping the runtime inspector disabled.
-`verifyNodePhase9WasmWasiPolicy` records the S9-34 through S9-40 WASM/WASI
-policy split between ready, partial, and deferred work; see
+`verifyNodePhase9IsolationPolicy` records the S9-27 through S9-33 isolation,
+broker, process-pool, crash, resource-limit, multi-instance, and worker
+promotion state. `verifyNodePhase9WasmWasiPolicy` records the S9-34 through
+S9-40 WASM/WASI policy split between ready, partial, and deferred work; see
 [reports/phase9/README.md](reports/phase9/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).

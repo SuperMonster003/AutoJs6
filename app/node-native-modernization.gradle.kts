@@ -23,6 +23,8 @@ val nodePhase9PerformancePolicyJson = nodeNativeModernizationReportDir.map { it.
 val nodePhase9PerformancePolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-performance-policy.md") }
 val nodePhase9InspectorPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-inspector-policy.json") }
 val nodePhase9InspectorPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-inspector-policy.md") }
+val nodePhase9IsolationPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-isolation-policy.json") }
+val nodePhase9IsolationPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-isolation-policy.md") }
 val nodePhase9WasmWasiPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.json") }
 val nodePhase9WasmWasiPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.md") }
 
@@ -339,6 +341,45 @@ tasks.register<Exec>("verifyNodePhase9WasmWasiPolicy") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase9IsolationPolicy") {
+    group = "verification"
+    description = "Verifies Phase 9 isolation, broker, process-pool, crash, resource-limit, and worker policy evidence."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/isolation/verify-phase9-isolation-policy.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/main/AndroidManifest.xml"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeCapabilityBrokerPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeHardenedIsolatedRuntimePocInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeCapabilityBrokerV2InstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicyInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/HARDENED_ISOLATED_RUNTIME_POC.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/CAPABILITY_BROKER_V2.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/PROCESS_POOL_POLICY_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/HARDENED_ISOLATED_RUNTIME.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/CAPABILITY_BROKER_V2.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/PROCESS_POOL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/MULTI_INSTANCE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/WORKER_THREADS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/ISOLATION_POLICY.md"))
+    outputs.files(nodePhase9IsolationPolicyJson, nodePhase9IsolationPolicyMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -355,6 +396,7 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNodeRuntimeArtifactGate",
         "verifyNodePhase9PerformancePolicy",
         "verifyNodePhase9InspectorPolicy",
+        "verifyNodePhase9IsolationPolicy",
         "verifyNodePhase9WasmWasiPolicy",
     )
 }
