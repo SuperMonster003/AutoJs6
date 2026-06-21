@@ -1665,7 +1665,8 @@ requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/
 [reports/phase8/README.md](reports/phase8/README.md).
 `verifyNodePhase9NativeModernizationPlan` runs the Phase 9 Batch A host-side
 native boundary, runtime adapter ABI/export, runtime build-plan, 16 KB ELF
-alignment, and runtime artifact manifest/integrity checks; see
+alignment, runtime artifact manifest/integrity, distribution policy, and
+runtime artifact aggregate checks; see
 [reports/phase9/README.md](reports/phase9/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).

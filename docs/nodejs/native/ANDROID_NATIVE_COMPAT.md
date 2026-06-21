@@ -9,6 +9,7 @@ Host-side gates:
 .\gradlew.bat --console=plain :app:verifyNode16KbNativeAlignment
 .\gradlew.bat --console=plain :app:generateNodeRuntimeArtifactManifest
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactIntegrity
+.\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactGate
 ```
 
 Generated reports:
@@ -19,6 +20,8 @@ Generated reports:
 - `build/reports/nodejs/runtime-artifact-manifest.md`
 - `build/reports/nodejs/runtime-artifact-integrity.json`
 - `build/reports/nodejs/runtime-artifact-integrity.md`
+- `build/reports/nodejs/runtime-artifact-gate.json`
+- `build/reports/nodejs/runtime-artifact-gate.md`
 
 ## Current Coverage
 

@@ -15,6 +15,10 @@ val nodeRuntimeArtifactManifestJson = nodeNativeModernizationReportDir.map { it.
 val nodeRuntimeArtifactManifestMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-manifest.md") }
 val nodeRuntimeArtifactIntegrityJson = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-integrity.json") }
 val nodeRuntimeArtifactIntegrityMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-integrity.md") }
+val nodeRuntimeDistributionPolicyJson = nodeNativeModernizationReportDir.map { it.file("runtime-distribution-policy.json") }
+val nodeRuntimeDistributionPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-distribution-policy.md") }
+val nodeRuntimeArtifactGateJson = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-gate.json") }
+val nodeRuntimeArtifactGateMarkdown = nodeNativeModernizationReportDir.map { it.file("runtime-artifact-gate.md") }
 
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
@@ -180,6 +184,61 @@ tasks.register<Exec>("verifyNodeRuntimeArtifactIntegrity") {
     )
 }
 
+tasks.register<Exec>("verifyNodeRuntimeDistributionPolicy") {
+    group = "verification"
+    description = "Verifies Phase 9 runtime distribution policy for current and planned runtime modes."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-distribution-policy.js")
+    inputs.file(scriptFile)
+    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    outputs.files(nodeRuntimeDistributionPolicyJson, nodeRuntimeDistributionPolicyMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeRuntimeArtifactGate") {
+    group = "verification"
+    description = "Runs the Phase 9 runtime artifact aggregate gate."
+
+    dependsOn(
+        "verifyNodeRuntimeAdapterExport",
+        "verifyNodeRuntimeBuildPlan",
+        "verifyNode16KbNativeAlignment",
+        "generateNodeRuntimeArtifactManifest",
+        "verifyNodeRuntimeArtifactIntegrity",
+        "verifyNodeRuntimeDistributionPolicy",
+    )
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/native/generate-runtime-artifact-gate.js")
+    inputs.file(scriptFile)
+    inputs.files(
+        nodeRuntimeAdapterExportJson,
+        nodeRuntimeBuildPlanJson,
+        nodeNative16KbAlignmentJson,
+        nodeRuntimeArtifactManifestJson,
+        nodeRuntimeArtifactIntegrityJson,
+        nodeRuntimeDistributionPolicyJson,
+    )
+    outputs.files(nodeRuntimeArtifactGateJson, nodeRuntimeArtifactGateMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -192,5 +251,7 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNode16KbNativeAlignment",
         "generateNodeRuntimeArtifactManifest",
         "verifyNodeRuntimeArtifactIntegrity",
+        "verifyNodeRuntimeDistributionPolicy",
+        "verifyNodeRuntimeArtifactGate",
     )
 }
