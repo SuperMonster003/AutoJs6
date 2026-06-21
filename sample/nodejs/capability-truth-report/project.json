@@ -1,0 +1,5 @@
+{
+  "name": "capability-truth-report",
+  "type": "node",
+  "main": "main.cjs"
+}

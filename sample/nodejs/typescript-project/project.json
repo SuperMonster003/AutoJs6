@@ -1,0 +1,5 @@
+{
+  "name": "typescript-project",
+  "type": "node",
+  "main": "main.cts"
+}

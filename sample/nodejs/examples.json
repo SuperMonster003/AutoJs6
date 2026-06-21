@@ -294,6 +294,97 @@
       "tags": ["typescript", "bridge"],
       "mainAppSmoke": false,
       "packagedCompatible": false
+    },
+    {
+      "name": "persistent-storage",
+      "status": "experimental",
+      "tags": ["phase10", "main-app", "bridge", "storage"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "notifications",
+      "status": "experimental",
+      "tags": ["phase10", "main-app", "bridge", "notifications"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "sensor-monitor",
+      "status": "experimental",
+      "tags": ["phase10", "main-app", "bridge", "sensors"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "controlled-wasi",
+      "status": "experimental",
+      "tags": ["phase10", "main-app", "wasi", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "package-install",
+      "status": "experimental",
+      "tags": ["phase10", "main-app", "pure-js-npm", "package-install"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "typescript-project",
+      "status": "partial",
+      "tags": ["phase10", "main-app", "typescript"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "provider-health",
+      "status": "experimental",
+      "tags": ["phase10", "main-app", "bridge", "provider"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "capability-truth-report",
+      "status": "partial",
+      "tags": ["phase10", "main-app", "capability-truth"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "crash-evidence-bundle",
+      "status": "partial",
+      "tags": ["phase10", "main-app", "crash"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "adapter-cutover-status",
+      "status": "partial",
+      "tags": ["phase10", "main-app", "adapter", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "debug-hot-reload",
+      "status": "experimental",
+      "tags": ["phase10", "main-app", "debug", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "execution-queue",
+      "status": "experimental",
+      "tags": ["phase10", "main-app", "long-running", "queue"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "security-corpus",
+      "status": "partial",
+      "tags": ["phase10", "main-app", "security"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
     }
   ]
 }

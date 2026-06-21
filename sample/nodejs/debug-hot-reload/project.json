@@ -1,0 +1,5 @@
+{
+  "name": "debug-hot-reload",
+  "type": "node",
+  "main": "main.cjs"
+}

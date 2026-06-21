@@ -1,0 +1,1 @@
+sample.capability-truth-report=PASS

@@ -4,7 +4,7 @@ import org.gradle.api.tasks.Exec
 import java.io.File
 
 private val nodeExampleKnownStatuses = setOf("stable", "partial", "experimental")
-private val nodeExampleIgnoredDirectories = setOf("npm-ci-pure-js")
+private val nodeExampleIgnoredDirectories = setOf("npm-ci-pure-js", "autojs6-pm-fixture")
 private val nodeExampleKnownTags = setOf(
     "main-app",
     "packaged",
@@ -58,6 +58,17 @@ private val nodeExampleKnownTags = setOf(
     "wasi",
     "wasm-worker",
     "wasm-plugin",
+    "phase10",
+    "storage",
+    "notifications",
+    "sensors",
+    "package-install",
+    "provider",
+    "capability-truth",
+    "crash",
+    "adapter",
+    "debug",
+    "queue",
 )
 
 private val nodeExampleSupportedEntryExtensions = setOf("js", "cjs", "mjs", "ts", "cts", "mts")
