@@ -289,6 +289,31 @@ slot. See
 [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), and
 [native/ANDROID_NATIVE_COMPAT.md](native/ANDROID_NATIVE_COMPAT.md).
 
+## Phase 10 Real-World Activation Gates
+
+Phase 10 starts by freezing the runtime upgrade lane and promoting existing
+packaged APK evidence into focused first-wave gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase10RuntimeFreeze
+.\gradlew.bat --console=plain :app:generateNodePhase10CapabilityTruth
+.\gradlew.bat --console=plain :app:generateNodePhase10SkipAudit
+.\gradlew.bat --console=plain :app:verifyNodePhase10PackagedParityHost
+.\gradlew.bat --console=plain :app:verifyNodePhase10FocusedGateMatrix
+.\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase10Gate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+`verifyNodePhase10RuntimeFreeze` fails if the recorded `libnode.so` hashes,
+default `node24_5` slot, Node 24.5 capability constants, or moduleSources
+budgets drift. `generateNodePhase10CapabilityTruth` records implemented,
+live-provider, packaged-supported, experimental, blocked, and disabled
+capabilities without promoting fake-provider-only results. The packaged parity
+host report records descriptor/version-vector coverage, stale-template checks,
+and fixture cache-key invalidators; `verifyNodePackagedParityGate` still runs
+the Sony install-and-launch APK smokes. See
+[reports/phase10/README.md](reports/phase10/README.md).
+
 ## Phase 7 Focused Gates
 
 Phase 7 uses focused feature gates instead of expanding every iteration to the

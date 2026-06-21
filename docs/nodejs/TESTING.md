@@ -1239,6 +1239,22 @@ design-gated follow-ups.
 Current GA promotion evaluation: `docs/nodejs/reports/ESM_EXPERIMENTAL_EVALUATION.md`.
 Current v1.1 promotion evaluation: `docs/nodejs/releases/V1_1_ESM_PROMOTION.md`.
 
+Phase 10 packages the same evidence as a first-class parity gate:
+
+```powershell
+$env:ANDROID_SERIAL="QV710AF65F"
+.\gradlew.bat --console=plain :app:verifyNodePhase10RuntimeFreeze
+.\gradlew.bat --console=plain :app:verifyNodePhase10PackagedParityHost
+.\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+The host parity report checks the runtime descriptor version vector,
+template-staleness fail-fast markers, packaged ESM/dynamic-import markers,
+module graph/source-name evidence, and the APK fixture cache-key invalidators.
+The device gate remains responsible for proving real APK export, install,
+launch, logcat marker collection, and stale descriptor failure before user
+script execution.
+
 Current source map stack trace focused instrumentation:
 
 ```powershell
@@ -1711,6 +1727,17 @@ and `.md` from the Phase 9 host reports, focused Sony device XML, example
 catalog, real npm corpus, runtime comparison, page-size validation,
 startup/prewarm performance delta, capability matrix, and remaining blockers.
 Running `verifyNodePhase9Gate` finalizes with this summary automatically.
+`verifyNodePhase10RuntimeFreeze` records the Phase 10 Node 24.5 freeze and
+fails on `libnode.so`, default runtime slot, capability constant, or
+moduleSources budget drift. `generateNodePhase10CapabilityTruth` writes
+`build/reports/nodejs/phase10-capability-truth.json` and `.md` with
+implemented, live-provider, packaged-supported, experimental, blocked, and
+disabled labels. `generateNodePhase10SkipAudit` records unresolved
+skip/assume/ignore sites for packaged, live provider, worker, long-running,
+WASI, Inspector, and device-requirement categories. `verifyNodePhase10Gate`
+aggregates the first-wave host evidence, packaged parity, package-manager
+boundary fixtures, multi-instance policy evidence, and adapter v1 ABI/export
+checks without promoting Node 24.17 or blocked capabilities.
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
