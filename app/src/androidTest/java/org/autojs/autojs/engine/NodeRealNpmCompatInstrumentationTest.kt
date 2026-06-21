@@ -31,7 +31,9 @@ class NodeRealNpmCompatInstrumentationTest {
             val fixtures = readFixtures(corpusRoot)
             assertEquals("unexpected real npm fixture count", EXPECTED_FIXTURE_COUNT, fixtures.size)
             assertTrue("real npm corpus should grow beyond the Phase 8 baseline", fixtures.size > PHASE8_FIXTURE_COUNT)
+            assertTrue("real npm corpus should grow beyond the Phase 9 baseline", fixtures.size > PHASE9_FIXTURE_COUNT)
             assertEquals(EXPECTED_FIXTURE_COUNT - PHASE8_FIXTURE_COUNT, fixtures.size - PHASE8_FIXTURE_COUNT)
+            assertEquals(EXPECTED_FIXTURE_COUNT - PHASE9_FIXTURE_COUNT, fixtures.size - PHASE9_FIXTURE_COUNT)
             assertRequiredPatternsPresent(fixtures)
 
             fixtures.forEach { fixture ->
@@ -134,10 +136,12 @@ class NodeRealNpmCompatInstrumentationTest {
             assertTrue(stdout.contains("realnpm.corpus.baseline=$V1_0_BASELINE_FIXTURE_COUNT"))
             assertTrue(stdout.contains("realnpm.corpus.phase7=$PHASE7_FIXTURE_COUNT"))
             assertTrue(stdout.contains("realnpm.corpus.phase8=$PHASE8_FIXTURE_COUNT"))
+            assertTrue(stdout.contains("realnpm.corpus.phase9=$PHASE9_FIXTURE_COUNT"))
             assertTrue(stdout.contains("realnpm.corpus.total=${fixtures.size}"))
             assertTrue(stdout.contains("realnpm.corpus.delta=${fixtures.size - V1_0_BASELINE_FIXTURE_COUNT}"))
             assertTrue(stdout.contains("realnpm.corpus.phase8_delta=${fixtures.size - PHASE7_FIXTURE_COUNT}"))
             assertTrue(stdout.contains("realnpm.corpus.phase9_delta=${fixtures.size - PHASE8_FIXTURE_COUNT}"))
+            assertTrue(stdout.contains("realnpm.corpus.phase10_delta=${fixtures.size - PHASE9_FIXTURE_COUNT}"))
 
             diagnosticOutput.lineSequence()
                 .filter { it.startsWith("realnpm.differential.result=") }
@@ -158,10 +162,12 @@ class NodeRealNpmCompatInstrumentationTest {
                   console.log("realnpm.corpus.baseline=$V1_0_BASELINE_FIXTURE_COUNT");
                   console.log("realnpm.corpus.phase7=$PHASE7_FIXTURE_COUNT");
                   console.log("realnpm.corpus.phase8=$PHASE8_FIXTURE_COUNT");
+                  console.log("realnpm.corpus.phase9=$PHASE9_FIXTURE_COUNT");
                   console.log("realnpm.corpus.total=$totalFixtureCount");
                   console.log("realnpm.corpus.delta=${totalFixtureCount - V1_0_BASELINE_FIXTURE_COUNT}");
                   console.log("realnpm.corpus.phase8_delta=${totalFixtureCount - PHASE7_FIXTURE_COUNT}");
                   console.log("realnpm.corpus.phase9_delta=${totalFixtureCount - PHASE8_FIXTURE_COUNT}");
+                  console.log("realnpm.corpus.phase10_delta=${totalFixtureCount - PHASE9_FIXTURE_COUNT}");
             """.trimIndent()
         } else {
             ""
@@ -286,7 +292,8 @@ class NodeRealNpmCompatInstrumentationTest {
         private const val V1_0_BASELINE_FIXTURE_COUNT = 7
         private const val PHASE7_FIXTURE_COUNT = 13
         private const val PHASE8_FIXTURE_COUNT = 20
-        private const val EXPECTED_FIXTURE_COUNT = 30
+        private const val PHASE9_FIXTURE_COUNT = 30
+        private const val EXPECTED_FIXTURE_COUNT = 50
         private const val REAL_NPM_FIXTURE_BATCH_SIZE = 6
         private const val REAL_NPM_FIXTURE_BATCH_TIMEOUT_MS = 30_000L
         private val FORBIDDEN_PACKAGE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")

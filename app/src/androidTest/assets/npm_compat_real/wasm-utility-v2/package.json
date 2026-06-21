@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/wasm-utility-v2-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "wasm-utility-v2-probe": "1.0.0"
+  }
+}

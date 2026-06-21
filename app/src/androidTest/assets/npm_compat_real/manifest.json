@@ -237,6 +237,166 @@
         "crypto hash utility",
         "asset integrity manifest"
       ]
+    },
+    {
+      "name": "esm-only-utility-v2",
+      "patterns": [
+        "ESM-only Phase 10 utility",
+        "local dynamic import",
+        "package exports import condition"
+      ]
+    },
+    {
+      "name": "hybrid-exports-v2",
+      "patterns": [
+        "hybrid CJS/ESM Phase 10 package",
+        "package exports import/require conditions",
+        "require plus dynamic import"
+      ]
+    },
+    {
+      "name": "web-streams-transform",
+      "patterns": [
+        "Web Streams transform",
+        "ReadableStream pipeline",
+        "pure JavaScript stream adapter"
+      ]
+    },
+    {
+      "name": "fetch-adapter-v2",
+      "patterns": [
+        "fetch adapter package",
+        "controlled provider shape",
+        "no implicit network call"
+      ]
+    },
+    {
+      "name": "websocket-protocol-util",
+      "patterns": [
+        "WebSocket protocol utility",
+        "binary frame helper",
+        "no raw socket dependency"
+      ]
+    },
+    {
+      "name": "wasm-utility-v2",
+      "patterns": [
+        "WASM utility package",
+        "WebAssembly validate and compile",
+        "pure bytecode helper"
+      ]
+    },
+    {
+      "name": "typescript-output-package",
+      "patterns": [
+        "TypeScript output package",
+        "declaration metadata",
+        "compiled CommonJS artifact"
+      ]
+    },
+    {
+      "name": "test-helper-v2",
+      "patterns": [
+        "test helper package",
+        "assertion aggregation",
+        "async test summary"
+      ]
+    },
+    {
+      "name": "package-manager-installed",
+      "patterns": [
+        "package-manager-installed fixture",
+        "lockfile metadata reader",
+        "nested dependency install shape"
+      ]
+    },
+    {
+      "name": "lockfile-reader",
+      "patterns": [
+        "AutoJs6 lockfile reader",
+        "dependency graph traversal",
+        "integrity metadata"
+      ]
+    },
+    {
+      "name": "storage-json-helper",
+      "patterns": [
+        "storage JSON helper",
+        "namespace key encoder",
+        "quota-friendly serialization"
+      ]
+    },
+    {
+      "name": "notification-payload-helper",
+      "patterns": [
+        "notification payload helper",
+        "channel descriptor builder",
+        "permission-aware shape"
+      ]
+    },
+    {
+      "name": "sensor-data-normalizer",
+      "patterns": [
+        "sensor data normalizer",
+        "timestamp ordering",
+        "sampling interval helper"
+      ]
+    },
+    {
+      "name": "long-running-scheduler-helper",
+      "patterns": [
+        "long-running scheduler helper",
+        "heartbeat window calculation",
+        "stop policy metadata"
+      ]
+    },
+    {
+      "name": "checkpoint-serializer",
+      "patterns": [
+        "checkpoint serializer",
+        "JSON-only restore payload",
+        "atomic state envelope"
+      ]
+    },
+    {
+      "name": "module-graph-resolver",
+      "patterns": [
+        "module graph resolver",
+        "exports condition selection",
+        "local target normalization"
+      ]
+    },
+    {
+      "name": "source-map-parser-lite",
+      "patterns": [
+        "source map parser",
+        "line column mapping",
+        "inline source content"
+      ]
+    },
+    {
+      "name": "capability-manifest-reader",
+      "patterns": [
+        "capability manifest reader",
+        "provider requirement extraction",
+        "safe profile classification"
+      ]
+    },
+    {
+      "name": "security-policy-checker",
+      "patterns": [
+        "security policy checker",
+        "disabled builtin detection",
+        "native addon denial metadata"
+      ]
+    },
+    {
+      "name": "adapter-diagnostics-helper",
+      "patterns": [
+        "adapter diagnostics helper",
+        "C ABI status parser",
+        "legacy path blocker metadata"
+      ]
     }
   ]
 }

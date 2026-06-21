@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/fetch-adapter-v2-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "fetch-adapter-v2-probe": "1.0.0"
+  }
+}

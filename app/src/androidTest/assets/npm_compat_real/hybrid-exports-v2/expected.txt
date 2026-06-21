@@ -1,0 +1,1 @@
+realnpm.hybrid-exports-v2=hybrid:cjs+esm

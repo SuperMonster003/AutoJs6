@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/package-manager-installed-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "package-manager-installed-probe": "1.0.0"
+  }
+}

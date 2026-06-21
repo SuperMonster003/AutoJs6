@@ -1,0 +1,1 @@
+realnpm.typescript-output-package=ts-output:10/commonjs/declarations

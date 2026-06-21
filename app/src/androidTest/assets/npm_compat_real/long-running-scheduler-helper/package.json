@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/long-running-scheduler-helper-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "long-running-scheduler-helper-probe": "1.0.0"
+  }
+}
