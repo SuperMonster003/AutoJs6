@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/worker-wasm-fallback-package-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "wasm-worker-fallback-probe": "1.0.0"
+  }
+}

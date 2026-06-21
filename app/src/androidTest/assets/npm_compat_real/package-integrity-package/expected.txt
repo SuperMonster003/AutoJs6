@@ -1,0 +1,1 @@
+realnpm.package-integrity-package=integrity:sha256/12/true

@@ -1,0 +1,1 @@
+realnpm.wasi-policy-package=wasi:policy-aware/true

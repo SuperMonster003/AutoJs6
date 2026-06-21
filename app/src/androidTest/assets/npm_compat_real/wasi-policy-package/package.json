@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/wasi-policy-package-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "wasi-policy-probe": "1.0.0"
+  }
+}

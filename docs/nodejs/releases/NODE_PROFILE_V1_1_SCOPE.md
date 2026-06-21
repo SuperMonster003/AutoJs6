@@ -44,7 +44,7 @@ small set of already-gated features toward practical use.
 | Feature | v1.1 target | Notes |
 | --- | --- | --- |
 | CommonJS/npm subset | stable | Existing v1.0 contract remains first-class. |
-| Real npm corpus | partial | v1.1 expands the fixed offline corpus from 7 to 20 fixtures. S7-48 adds ESM-only dependency, hybrid CJS/ESM, Buffer, fetch wrapper fallback, assertion helper, `AsyncLocalStorage`, `stream/promises`, WebCrypto, worker CPU fallback, test-runner, and database-abstraction coverage; S8-46 adds TypeScript-source, CJS `require(esm)`, default-denied `node:http`, `FormData`/`fetch`, scoped `FileHandle`, `fs.watch()` lifecycle, and compile-cache-shaped package coverage while retaining no-install/no-native safety checks. |
+| Real npm corpus | partial | v1.1 expands the fixed offline corpus from 7 to 30 fixtures. S7-48 adds ESM-only dependency, hybrid CJS/ESM, Buffer, fetch wrapper fallback, assertion helper, `AsyncLocalStorage`, `stream/promises`, WebCrypto, worker CPU fallback, test-runner, and database-abstraction coverage; S8-46 adds TypeScript-source, CJS `require(esm)`, default-denied `node:http`, `FormData`/`fetch`, scoped `FileHandle`, `fs.watch()` lifecycle, and compile-cache-shaped package coverage; S9-46 adds WebAssembly, WASI-policy detection, inspector-free diagnostics, concurrency, deeper compile-cache graph, TypeScript+WASM, worker+WASM fallback, large ESM graph, and package-integrity coverage while retaining no-install/no-native safety checks. |
 | Dependency manager | host-side project action | S8-45 integrates lockfile install, validation, sanitizer, content-addressed cache, SBOM-lite, compatibility report, and APK bundle layout verification through `:app:manageNodeDependencies` while keeping Android runtime install and package lifecycle scripts disabled. |
 | Scoped fs | stable | No policy loosening. |
 | ESM entry | partial | `.mjs` and `type=module` entries run by default in v1.1. |
@@ -100,7 +100,7 @@ small set of already-gated features toward practical use.
 ## Success Criteria
 
 - `.mjs` entry smoke passes without a per-test ESM opt-in.
-- Fixed real npm corpus increases from the v1.0 CommonJS-only baseline to 20 fixtures and
+- Fixed real npm corpus increases from the v1.0 CommonJS-only baseline to 30 fixtures and
   produces `build/reports/nodejs/npm-compat-v1.1.md` and `build/reports/nodejs/v1.1-differential.md`.
 - Package `type=module` entry smoke passes.
 - Local static import, named export, default export, and top-level await pass.

@@ -30,8 +30,8 @@ class NodeRealNpmCompatInstrumentationTest {
             val corpusRoot = File(workDir, CORPUS_ASSET_DIR)
             val fixtures = readFixtures(corpusRoot)
             assertEquals("unexpected real npm fixture count", EXPECTED_FIXTURE_COUNT, fixtures.size)
-            assertTrue("real npm corpus should grow beyond the Phase 7 baseline", fixtures.size > PHASE7_FIXTURE_COUNT)
-            assertEquals(EXPECTED_FIXTURE_COUNT - PHASE7_FIXTURE_COUNT, fixtures.size - PHASE7_FIXTURE_COUNT)
+            assertTrue("real npm corpus should grow beyond the Phase 8 baseline", fixtures.size > PHASE8_FIXTURE_COUNT)
+            assertEquals(EXPECTED_FIXTURE_COUNT - PHASE8_FIXTURE_COUNT, fixtures.size - PHASE8_FIXTURE_COUNT)
             assertRequiredPatternsPresent(fixtures)
 
             fixtures.forEach { fixture ->
@@ -83,103 +83,61 @@ class NodeRealNpmCompatInstrumentationTest {
         try {
             val corpusRoot = File(workDir, CORPUS_ASSET_DIR)
             val fixtures = readFixtures(corpusRoot)
-            val fixtureNames = fixtures.map { it.name }
             val expectedByFixture = fixtures.associate { fixture ->
                 fixture.name to File(corpusRoot, "${fixture.name}/expected.txt").readText().trim()
             }
-            val source = """
-                "nodejs";
-                (async () => {
-                  const fixtures = ${fixtureNames.joinToString(prefix = "[", postfix = "]") { jsString(it) }};
-                  const expected = ${jsObject(expectedByFixture)};
-                  for (const name of fixtures) {
-                    const run = require("./$CORPUS_ASSET_DIR/" + name + "/test.cjs");
-                    if (typeof run !== "function") {
-                      throw new Error("real npm fixture " + name + " does not export a runner");
-                    }
-                    const captured = [];
-                    const originalLog = console.log;
-                    const originalError = console.error;
-                    console.log = function captureFixtureLog() {
-                      const line = Array.prototype.map.call(arguments, String).join(" ");
-                      captured.push(line);
-                    };
-                    try {
-                      const result = await run();
-                      if (result !== "PASS") {
-                        throw new Error("real npm fixture " + name + " returned " + result);
-                      }
-                      console.log = originalLog;
-                      const stdout = captured.join("\n");
-                      const expectedOutput = expected[name] || "";
-                      const expectedOutputFound = stdout.indexOf(expectedOutput) >= 0;
-                      if (stdout.length > 0) {
-                        originalLog(stdout);
-                      }
-                      originalLog("realnpm.fixture." + name + "=PASS");
-                      originalError("realnpm.differential.result=" + JSON.stringify({
-                        runtime: "autojs6",
-                        fixture: name,
-                        exitCode: 0,
-                        expectedOutputFound,
-                      }));
-                    } catch (error) {
-                      console.log = originalLog;
-                      const stdout = captured.join("\n");
-                      if (stdout.length > 0) {
-                        originalLog(stdout);
-                      }
-                      originalError("realnpm.differential.result=" + JSON.stringify({
-                        runtime: "autojs6",
-                        fixture: name,
-                        exitCode: 1,
-                        errorCode: String(error && error.code || ""),
-                        errorMessage: String(error && error.message || error),
-                        errorMessagePattern: String(error && error.message || error).replace(/\d+/g, "<n>"),
-                      }));
-                      throw error;
-                    }
-                  }
-                  console.log("realnpm.corpus.baseline=$V1_0_BASELINE_FIXTURE_COUNT");
-                  console.log("realnpm.corpus.phase7=$PHASE7_FIXTURE_COUNT");
-                  console.log("realnpm.corpus.total=" + fixtures.length);
-                  console.log("realnpm.corpus.delta=" + (fixtures.length - $V1_0_BASELINE_FIXTURE_COUNT));
-                  console.log("realnpm.corpus.phase8_delta=" + (fixtures.length - $PHASE7_FIXTURE_COUNT));
-                })().catch((error) => {
-                  console.error("realnpm.corpus.error=" + (error && (error.stack || error.message) || error));
-                  process.exitCode = 1;
-                });
-            """.trimIndent()
+            val batches = fixtures.chunked(REAL_NPM_FIXTURE_BATCH_SIZE)
+            val stdoutBuilder = StringBuilder()
+            val stderrBuilder = StringBuilder()
+            batches.forEachIndexed { batchIndex, batchFixtures ->
+                NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+                val result = try {
+                    NodeEmbeddedTestHarness.runEmbeddedScript(
+                        source = realNpmRunnerSource(
+                            fixtureNames = batchFixtures.map { it.name },
+                            expectedByFixture = expectedByFixture,
+                            emitSummary = batchIndex == batches.lastIndex,
+                            totalFixtureCount = fixtures.size,
+                        ),
+                        sourceName = "<node-real-npm-compat-runner-batch-${batchIndex + 1}.js>",
+                        workingDirectory = workDir,
+                        timeoutMs = REAL_NPM_FIXTURE_BATCH_TIMEOUT_MS,
+                    )
+                } finally {
+                    NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+                }
+                NodeEmbeddedTestHarness.assertSucceeded(
+                    "real npm compatibility corpus batch ${batchIndex + 1}/${batches.size}",
+                    result,
+                )
+                stdoutBuilder.append(result.stdout).append('\n')
+                stderrBuilder.append(result.stderr).append('\n')
+            }
 
-            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
-                source = source,
-                sourceName = "<node-real-npm-compat-runner.js>",
-                workingDirectory = workDir,
-                timeoutMs = 20_000L,
-            )
-
-            NodeEmbeddedTestHarness.assertSucceeded("real npm compatibility corpus", result)
-            val diagnosticOutput = result.stdout + "\n" + result.stderr
+            val stdout = stdoutBuilder.toString()
+            val diagnosticOutput = stdout + "\n" + stderrBuilder
             fixtures.forEach { fixture ->
                 val expected = File(corpusRoot, "${fixture.name}/expected.txt").readText().trim()
                 assertTrue(
-                    NodeEmbeddedTestHarness.describeResult("missing expected output for ${fixture.name}", result),
-                    result.stdout.contains(expected),
+                    "missing expected output for ${fixture.name}\n$diagnosticOutput",
+                    stdout.contains(expected),
                 )
                 assertTrue(
-                    NodeEmbeddedTestHarness.describeResult("missing fixture pass marker for ${fixture.name}", result),
-                    result.stdout.contains("realnpm.fixture.${fixture.name}=PASS"),
+                    "missing fixture pass marker for ${fixture.name}\n$diagnosticOutput",
+                    stdout.contains("realnpm.fixture.${fixture.name}=PASS"),
                 )
                 assertTrue(
-                    NodeEmbeddedTestHarness.describeResult("missing differential JSON for ${fixture.name}", result),
+                    "missing differential JSON for ${fixture.name}\n$diagnosticOutput",
                     diagnosticOutput.contains("\"runtime\":\"autojs6\",\"fixture\":\"${fixture.name}\""),
                 )
             }
-            assertTrue(result.stdout.contains("realnpm.corpus.baseline=$V1_0_BASELINE_FIXTURE_COUNT"))
-            assertTrue(result.stdout.contains("realnpm.corpus.phase7=$PHASE7_FIXTURE_COUNT"))
-            assertTrue(result.stdout.contains("realnpm.corpus.total=${fixtures.size}"))
-            assertTrue(result.stdout.contains("realnpm.corpus.delta=${fixtures.size - V1_0_BASELINE_FIXTURE_COUNT}"))
-            assertTrue(result.stdout.contains("realnpm.corpus.phase8_delta=${fixtures.size - PHASE7_FIXTURE_COUNT}"))
+            assertTrue(stdout.contains("realnpm.corpus.baseline=$V1_0_BASELINE_FIXTURE_COUNT"))
+            assertTrue(stdout.contains("realnpm.corpus.phase7=$PHASE7_FIXTURE_COUNT"))
+            assertTrue(stdout.contains("realnpm.corpus.phase8=$PHASE8_FIXTURE_COUNT"))
+            assertTrue(stdout.contains("realnpm.corpus.total=${fixtures.size}"))
+            assertTrue(stdout.contains("realnpm.corpus.delta=${fixtures.size - V1_0_BASELINE_FIXTURE_COUNT}"))
+            assertTrue(stdout.contains("realnpm.corpus.phase8_delta=${fixtures.size - PHASE7_FIXTURE_COUNT}"))
+            assertTrue(stdout.contains("realnpm.corpus.phase9_delta=${fixtures.size - PHASE8_FIXTURE_COUNT}"))
 
             diagnosticOutput.lineSequence()
                 .filter { it.startsWith("realnpm.differential.result=") }
@@ -187,6 +145,86 @@ class NodeRealNpmCompatInstrumentationTest {
         } finally {
             workDir.deleteRecursively()
         }
+    }
+
+    private fun realNpmRunnerSource(
+        fixtureNames: List<String>,
+        expectedByFixture: Map<String, String>,
+        emitSummary: Boolean,
+        totalFixtureCount: Int,
+    ): String {
+        val summarySource = if (emitSummary) {
+            """
+                  console.log("realnpm.corpus.baseline=$V1_0_BASELINE_FIXTURE_COUNT");
+                  console.log("realnpm.corpus.phase7=$PHASE7_FIXTURE_COUNT");
+                  console.log("realnpm.corpus.phase8=$PHASE8_FIXTURE_COUNT");
+                  console.log("realnpm.corpus.total=$totalFixtureCount");
+                  console.log("realnpm.corpus.delta=${totalFixtureCount - V1_0_BASELINE_FIXTURE_COUNT}");
+                  console.log("realnpm.corpus.phase8_delta=${totalFixtureCount - PHASE7_FIXTURE_COUNT}");
+                  console.log("realnpm.corpus.phase9_delta=${totalFixtureCount - PHASE8_FIXTURE_COUNT}");
+            """.trimIndent()
+        } else {
+            ""
+        }
+        return """
+            "nodejs";
+            (async () => {
+              const fixtures = ${fixtureNames.joinToString(prefix = "[", postfix = "]") { jsString(it) }};
+              const expected = ${jsObject(expectedByFixture)};
+              for (const name of fixtures) {
+                const run = require("./$CORPUS_ASSET_DIR/" + name + "/test.cjs");
+                if (typeof run !== "function") {
+                  throw new Error("real npm fixture " + name + " does not export a runner");
+                }
+                const captured = [];
+                const originalLog = console.log;
+                const originalError = console.error;
+                console.log = function captureFixtureLog() {
+                  const line = Array.prototype.map.call(arguments, String).join(" ");
+                  captured.push(line);
+                };
+                try {
+                  const result = await run();
+                  if (result !== "PASS") {
+                    throw new Error("real npm fixture " + name + " returned " + result);
+                  }
+                  console.log = originalLog;
+                  const stdout = captured.join("\n");
+                  const expectedOutput = expected[name] || "";
+                  const expectedOutputFound = stdout.indexOf(expectedOutput) >= 0;
+                  if (stdout.length > 0) {
+                    originalLog(stdout);
+                  }
+                  originalLog("realnpm.fixture." + name + "=PASS");
+                  originalError("realnpm.differential.result=" + JSON.stringify({
+                    runtime: "autojs6",
+                    fixture: name,
+                    exitCode: 0,
+                    expectedOutputFound,
+                  }));
+                } catch (error) {
+                  console.log = originalLog;
+                  const stdout = captured.join("\n");
+                  if (stdout.length > 0) {
+                    originalLog(stdout);
+                  }
+                  originalError("realnpm.differential.result=" + JSON.stringify({
+                    runtime: "autojs6",
+                    fixture: name,
+                    exitCode: 1,
+                    errorCode: String(error && error.code || ""),
+                    errorMessage: String(error && error.message || error),
+                    errorMessagePattern: String(error && error.message || error).replace(/\d+/g, "<n>"),
+                  }));
+                  throw error;
+                }
+              }
+            $summarySource
+            })().catch((error) => {
+              console.error("realnpm.corpus.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent()
     }
 
     private fun copyCorpusToTemp(prefix: String): File {
@@ -247,7 +285,10 @@ class NodeRealNpmCompatInstrumentationTest {
         private const val CORPUS_ASSET_DIR = "npm_compat_real"
         private const val V1_0_BASELINE_FIXTURE_COUNT = 7
         private const val PHASE7_FIXTURE_COUNT = 13
-        private const val EXPECTED_FIXTURE_COUNT = 20
+        private const val PHASE8_FIXTURE_COUNT = 20
+        private const val EXPECTED_FIXTURE_COUNT = 30
+        private const val REAL_NPM_FIXTURE_BATCH_SIZE = 6
+        private const val REAL_NPM_FIXTURE_BATCH_TIMEOUT_MS = 30_000L
         private val FORBIDDEN_PACKAGE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")
         private val REQUIRED_REAL_NPM_PATTERNS = setOf(
             "ESM-only small package",
@@ -266,6 +307,15 @@ class NodeRealNpmCompatInstrumentationTest {
             "package using FileHandle",
             "package using fs.watch",
             "package benefiting from compile cache",
+            "WebAssembly package",
+            "controlled WASI facade detection",
+            "Inspector-free diagnostics",
+            "multiple concurrent scripts",
+            "compile-cache-sensitive package",
+            "TypeScript + WASM",
+            "worker + WASM",
+            "large ESM graph",
+            "package integrity",
         )
     }
 }

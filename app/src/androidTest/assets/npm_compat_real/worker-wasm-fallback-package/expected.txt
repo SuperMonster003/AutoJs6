@@ -1,0 +1,1 @@
+realnpm.worker-wasm-fallback-package=worker-wasm:fallback/9/true

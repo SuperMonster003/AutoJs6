@@ -116,6 +116,11 @@ The Batch A start is intentionally conservative:
   cache/snapshot/worker/WASM chaos gaps, native artifact security boundaries,
   broker/worker/WASI/plugin denial posture, and inspector release-bypass
   coverage. See [CHAOS_SECURITY.md](CHAOS_SECURITY.md).
+- S9-46 expands the fixed offline real npm corpus from 20 to 30 fixtures with
+  WASM, WASI-policy detection, inspector-free diagnostics, concurrency,
+  compile-cache graph, TypeScript+WASM, worker+WASM fallback, large ESM graph,
+  and package-integrity coverage. See
+  [REAL_NPM_CORPUS_PHASE9.md](REAL_NPM_CORPUS_PHASE9.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because

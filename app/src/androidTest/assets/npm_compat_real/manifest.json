@@ -157,6 +157,86 @@
         "large reusable module graph",
         "module cache repeat load"
       ]
+    },
+    {
+      "name": "wasm-basic-package",
+      "patterns": [
+        "WebAssembly package",
+        "WebAssembly.compile",
+        "pure bytecode compute"
+      ]
+    },
+    {
+      "name": "wasm-buffer-package",
+      "patterns": [
+        "WebAssembly binary utility",
+        "Buffer-backed wasm bytes",
+        "compile cache friendly wasm module"
+      ]
+    },
+    {
+      "name": "wasi-policy-package",
+      "patterns": [
+        "controlled WASI facade detection",
+        "raw WASI tolerant package",
+        "safe WASI feature probe"
+      ]
+    },
+    {
+      "name": "diagnostics-report-package",
+      "patterns": [
+        "Inspector-free diagnostics",
+        "process.report graceful support",
+        "diagnostics without DevTools"
+      ]
+    },
+    {
+      "name": "concurrency-pool-package",
+      "patterns": [
+        "multiple concurrent scripts",
+        "Promise pool",
+        "timer and microtask scheduling"
+      ]
+    },
+    {
+      "name": "compile-cache-graph-package",
+      "patterns": [
+        "compile-cache-sensitive package",
+        "wide reusable module graph",
+        "repeat require identity"
+      ]
+    },
+    {
+      "name": "typescript-wasm-package",
+      "patterns": [
+        "TypeScript + WASM",
+        "typed package metadata",
+        "wasm compute"
+      ]
+    },
+    {
+      "name": "worker-wasm-fallback-package",
+      "patterns": [
+        "worker + WASM",
+        "worker_threads graceful fallback",
+        "wasm compute fallback"
+      ]
+    },
+    {
+      "name": "large-esm-graph-package",
+      "patterns": [
+        "large ESM graph",
+        "require(esm) package graph",
+        "ESM dependency fanout"
+      ]
+    },
+    {
+      "name": "package-integrity-package",
+      "patterns": [
+        "package integrity",
+        "crypto hash utility",
+        "asset integrity manifest"
+      ]
     }
   ]
 }

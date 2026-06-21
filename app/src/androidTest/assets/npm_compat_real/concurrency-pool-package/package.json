@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/concurrency-pool-package-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "promise-pool-probe": "1.0.0"
+  }
+}

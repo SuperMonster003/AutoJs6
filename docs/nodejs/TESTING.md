@@ -411,9 +411,13 @@ behavior, assertion/test helper patterns, `AsyncLocalStorage`, `stream/promises`
 package fallback behavior while `worker_threads` remains default-disabled, a tiny test-runner package, and a database
 abstraction package. S8-46 grows the corpus from 13 to 20 fixtures while keeping the pass rate at 100%: it adds native
 TypeScript source project shape, CJS `require(esm)`, default-denied `node:http`, `FormData`/`fetch`, scoped
-`FileHandle`, `fs.watch()` lifecycle, and compile-cache-shaped package coverage. It also checks that the corpus contains
-no native addons, no install/postinstall scripts, and no ESM root runner; ESM-only package metadata is allowed only below
-fixture `node_modules`.
+`FileHandle`, `fs.watch()` lifecycle, and compile-cache-shaped package coverage. S9-46 grows the corpus from 20 to 30
+fixtures with WebAssembly, WASI-policy detection, inspector-free diagnostics, promise-pool concurrency, a wider
+compile-cache graph, TypeScript+WASM metadata, worker+WASM fallback, large ESM graph, and package-integrity coverage.
+The Android connected runner executes the corpus in fixed 6-fixture batches so corpus growth does not require loosening
+the existing 64-moduleSources runtime budget. It also checks that the corpus contains no native addons, no
+install/postinstall scripts, and no ESM root runner; ESM-only package metadata is allowed only below fixture
+`node_modules`.
 
 Desktop Node differential harness:
 

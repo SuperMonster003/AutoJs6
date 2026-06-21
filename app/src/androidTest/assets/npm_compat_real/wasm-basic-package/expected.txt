@@ -1,0 +1,1 @@
+realnpm.wasm-basic-package=wasm:add/42/valid
