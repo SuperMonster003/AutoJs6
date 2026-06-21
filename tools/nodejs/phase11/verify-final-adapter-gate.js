@@ -24,9 +24,11 @@ function main() {
   const headerPath = path.join(repoRoot, "app/src/main/cpp/node_runtime_api_v1.h");
   const adapterPath = path.join(repoRoot, "app/src/main/cpp/node_runtime_adapter_24_5.cpp");
   const jniPath = path.join(repoRoot, "app/src/main/cpp/node_bridge_jni.cpp");
+  const kotlinPath = path.join(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt");
   const header = read(headerPath);
   const adapter = read(adapterPath);
   const jni = read(jniPath);
+  const kotlin = read(kotlinPath);
   const publicAbiLeaks = ["node::", "v8::", "uv_", "JNIEnv", "jobject", "jstring", "std::"]
     .filter((token) => header.includes(token));
   const operations = FINAL_OPERATIONS.map((operation) => ({
@@ -37,7 +39,13 @@ function main() {
   const adapterSurfaceOnly = adapter.includes("\"status\":\"surface_only\"") ||
     adapter.includes("AUTOJS_NODE_RESULT_UNAVAILABLE") ||
     adapter.includes("ERR_AUTOJS6_NODE_ADAPTER_NOT_MIGRATED");
-  const selectorReady = jni.includes("adapter_v1") && jni.includes("legacy_jni");
+  const combinedSelectorSource = kotlin + "\n" + jni;
+  const selectorReady = combinedSelectorSource.includes("RUNTIME_ADAPTER_PROPERTY") &&
+    combinedSelectorSource.includes("autojs.nodejs.runtime.adapter") &&
+    combinedSelectorSource.includes("adapter_v1") &&
+    combinedSelectorSource.includes("legacy_jni") &&
+    combinedSelectorSource.includes("nativeRunEmbeddedScriptAdapterV1Diagnostics") &&
+    jni.includes("runEmbeddedScriptAdapterV1DiagnosticsNative");
   const blockers = [];
   operations.filter((entry) => !entry.inHeader).forEach((entry) => {
     blockers.push("missing final ABI operation in header: " + entry.operation);
@@ -58,10 +66,17 @@ function main() {
     tasks: ["S11-05", "S11-06", "S11-07", "S11-08", "S11-09", "S11-10", "S11-11", "S11-12"],
     header: relativePath(repoRoot, headerPath),
     adapter: relativePath(repoRoot, adapterPath),
+    kotlinBridge: relativePath(repoRoot, kotlinPath),
     operations,
     publicAbiLeaks,
     adapterSurfaceOnly,
     selectorReady,
+    selector: {
+      property: "autojs.nodejs.runtime.adapter",
+      supportedValues: ["auto", "legacy_jni", "adapter_v1"],
+      defaultEffectivePath: "legacy_jni",
+      adapterV1Mode: "diagnostics_only",
+    },
     legacyJniFallbackRequired: true,
     defaultRuntimePath: adapterSurfaceOnly ? "legacy_jni" : "adapter_v1",
     blockers,

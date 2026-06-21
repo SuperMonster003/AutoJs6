@@ -17,6 +17,10 @@ object NativeNodeEmbeddedRuntimeBridge {
 
     private const val TAG = "NativeNodeEmbeddedRuntime"
     private val NODE_HEADER_VERSION = NodeRuntimeCapabilities.NODE_HEADER_VERSION
+    private const val RUNTIME_ADAPTER_PROPERTY = "autojs.nodejs.runtime.adapter"
+    private const val RUNTIME_ADAPTER_AUTO = "auto"
+    private const val RUNTIME_ADAPTER_LEGACY_JNI = "legacy_jni"
+    private const val RUNTIME_ADAPTER_V1 = "adapter_v1"
     private const val INITIALIZE_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.initialize"
     private const val ISOLATE_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.isolate"
     private const val UVLOOP_PROBE_PROPERTY = "autojs.nodejs.embedded.probe.uvloop"
@@ -568,8 +572,18 @@ object NativeNodeEmbeddedRuntimeBridge {
             )
         }
 
+        val runtimeAdapterSelection = resolveRuntimeAdapterSelection()
         val nativeCall = runCatching {
-            val payload = if (preparedRequest.runtimeModuleSources.isEmpty()) {
+            val payload = if (runtimeAdapterSelection.effective == RUNTIME_ADAPTER_V1) {
+                nativeRunEmbeddedScriptAdapterV1Diagnostics(
+                    preparedRequest.source,
+                    preparedRequest.sourceName,
+                    preparedRequest.workingDirectory,
+                    preparedRequest.moduleSources.size,
+                    preparedRequest.runtimeModuleSources.size,
+                    preparedRequest.env.size,
+                )
+            } else if (preparedRequest.runtimeModuleSources.isEmpty()) {
                 nativeRunEmbeddedScriptLifecycleWithModulesV2(
                     preparedRequest.source,
                     preparedRequest.sourceName,
@@ -610,10 +624,11 @@ object NativeNodeEmbeddedRuntimeBridge {
                 startedAt = startedAt,
                 message = "Embedded script native runner failed: ${throwable.message ?: throwable.javaClass.name}",
                 nativeError = throwable,
-                nativeValues = mapOf("load.duration.ms" to loadDurationMs.toString()),
+                nativeValues = runtimeAdapterSelection.toNativeValues() + ("load.duration.ms" to loadDurationMs.toString()),
             )
         }
         val nativeValues = parseNativePayload(nativePayload).toMutableMap()
+        nativeValues.putAll(runtimeAdapterSelection.toNativeValues())
         nativeValues["load.duration.ms"] = loadDurationMs.toString()
         return parseEmbeddedScriptResult(
             request = preparedRequest,
@@ -699,6 +714,46 @@ object NativeNodeEmbeddedRuntimeBridge {
             return captureText
         }
         return embeddedText
+    }
+
+    private data class RuntimeAdapterSelection(
+        val requested: String,
+        val effective: String,
+        val status: String,
+    ) {
+        fun toNativeValues(): Map<String, String> = mapOf(
+            "embedded_script.runtime_adapter.selector_property" to RUNTIME_ADAPTER_PROPERTY,
+            "embedded_script.runtime_adapter.requested" to requested,
+            "embedded_script.runtime_adapter.effective" to effective,
+            "embedded_script.runtime_adapter.status" to status,
+        )
+    }
+
+    private fun resolveRuntimeAdapterSelection(): RuntimeAdapterSelection {
+        val rawRequested = System.getProperty(RUNTIME_ADAPTER_PROPERTY)?.trim().orEmpty()
+        val requested = rawRequested.lowercase(Locale.US).ifBlank { RUNTIME_ADAPTER_AUTO }
+        return when (requested) {
+            RUNTIME_ADAPTER_V1 -> RuntimeAdapterSelection(
+                requested = requested,
+                effective = RUNTIME_ADAPTER_V1,
+                status = "adapter_v1_diagnostics_only",
+            )
+            RUNTIME_ADAPTER_LEGACY_JNI -> RuntimeAdapterSelection(
+                requested = requested,
+                effective = RUNTIME_ADAPTER_LEGACY_JNI,
+                status = "legacy_jni_selected",
+            )
+            RUNTIME_ADAPTER_AUTO -> RuntimeAdapterSelection(
+                requested = requested,
+                effective = RUNTIME_ADAPTER_LEGACY_JNI,
+                status = "auto_fallback_legacy_jni",
+            )
+            else -> RuntimeAdapterSelection(
+                requested = requested,
+                effective = RUNTIME_ADAPTER_LEGACY_JNI,
+                status = "invalid_fallback_legacy_jni",
+            )
+        }
     }
 
     private fun failureEmbeddedScriptResult(
@@ -15178,6 +15233,15 @@ object NativeNodeEmbeddedRuntimeBridge {
         dynamicImportExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
+    ): Array<String>?
+
+    private external fun nativeRunEmbeddedScriptAdapterV1Diagnostics(
+        source: String,
+        sourceName: String,
+        workingDirectory: String?,
+        moduleSourceCount: Int,
+        runtimeModuleSourceCount: Int,
+        envCount: Int,
     ): Array<String>?
 
     private fun isProbePropertyEnabled(propertyName: String): Boolean {

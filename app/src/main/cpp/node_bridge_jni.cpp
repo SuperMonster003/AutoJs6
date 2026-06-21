@@ -1,4 +1,5 @@
 #include "node_bridge_internal.h"
+#include "node_runtime_api_v1.h"
 
 using namespace autojs6::node_bridge;
 using namespace autojs6::node_bridge::internal;
@@ -186,6 +187,121 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     return toJavaStringArray(env, payload);
 }
 
+static const char* adapterResultCodeName(int32_t code) {
+    switch (code) {
+        case AUTOJS_NODE_RESULT_OK:
+            return "ok";
+        case AUTOJS_NODE_RESULT_INVALID_ARGUMENT:
+            return "invalid_argument";
+        case AUTOJS_NODE_RESULT_UNAVAILABLE:
+            return "unavailable";
+        case AUTOJS_NODE_RESULT_INTERRUPTED:
+            return "interrupted";
+        case AUTOJS_NODE_RESULT_FAILED:
+            return "failed";
+        default:
+            return "unknown";
+    }
+}
+
+static jobjectArray runEmbeddedScriptAdapterV1DiagnosticsNative(
+        JNIEnv* env,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory,
+        jint moduleSourceCount,
+        jint runtimeModuleSourceCount,
+        jint envCount
+) {
+    const auto startedAt = Clock::now();
+    const std::string sourceText = toStdString(env, source);
+    const std::string sourceNameInput = toStdString(env, sourceName);
+    const std::string sourceNameText = sourceNameInput.empty()
+            ? "<embedded-user-script.js>"
+            : sourceNameInput;
+    const std::string workingDirectoryText = toStdString(env, workingDirectory);
+    const char* workingDirectoryPtr = workingDirectoryText.empty() ? nullptr : workingDirectoryText.c_str();
+    std::vector<std::string> payload;
+    putPayload(payload, "embedded_script.request.source_name", sourceNameText);
+    putPayload(payload, "embedded_script.request.source.length", static_cast<long long>(sourceText.size()));
+    putPayload(payload, "embedded_script.request.working_directory", workingDirectoryText);
+    putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(envCount));
+    putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(moduleSourceCount));
+    putPayload(
+            payload,
+            "embedded_script.request.runtime_module_sources.count",
+            static_cast<long long>(runtimeModuleSourceCount)
+    );
+    putPayload(payload, "embedded_script.request.source_kind", "kotlin_provided_source");
+    putPayload(payload, "embedded_script.request.user_file_read_by_native", false);
+    putPayload(payload, "embedded_script.runtime_adapter.path", "adapter_v1");
+    putPayload(payload, "embedded_script.runtime_adapter.fallback_path", "legacy_jni");
+    putPayload(payload, "embedded_script.runtime_adapter.mode", "diagnostics_only");
+
+    const AutoJsNodeRuntimeApiV1* api = autojs_node_get_runtime_api_v1();
+    if (api == nullptr) {
+        putPayload(payload, "embedded_script.runtime_adapter.status", "api_unavailable");
+        putPayload(payload, "embedded_script.status", "failed");
+        putPayload(payload, "embedded_script.detail", "autojs_node_get_runtime_api_v1 returned null");
+        putPayload(payload, "embedded_script.succeeded", false);
+        putPayload(payload, "embedded_script.exit_code", static_cast<long long>(1));
+        putPayload(payload, "embedded_script.error_code", "ERR_AUTOJS6_NODE_ADAPTER_API_UNAVAILABLE");
+        putCommonEmbeddedProbePayload(payload, 0, startedAt);
+        return toJavaStringArray(env, payload);
+    }
+
+    putPayload(payload, "embedded_script.runtime_adapter.abi_version", static_cast<long long>(api->abi_version));
+    putPayload(payload, "embedded_script.runtime_adapter.struct_size", static_cast<long long>(api->struct_size));
+    putPayload(payload, "embedded_script.runtime_adapter.feature_bits", static_cast<long long>(api->feature_bits));
+    putPayload(payload, "embedded_script.runtime_adapter.node_version", api->get_node_version == nullptr ? "" : api->get_node_version());
+    putPayload(
+            payload,
+            "embedded_script.runtime_adapter.runtime_descriptor_json",
+            api->get_runtime_descriptor == nullptr ? "" : api->get_runtime_descriptor()
+    );
+
+    AutoJsNodeCreateOptions createOptions{};
+    createOptions.struct_size = sizeof(AutoJsNodeCreateOptions);
+    createOptions.runtime_descriptor_json = "{\"requestedPath\":\"adapter_v1\",\"host\":\"autojs6\"}";
+    createOptions.working_directory = workingDirectoryPtr;
+    createOptions.initial_environment_json = "{}";
+    createOptions.timeout_ms = 0;
+    AutoJsNodeHandle* handle = nullptr;
+    const int32_t createCode = api->create_runtime == nullptr
+            ? AUTOJS_NODE_RESULT_UNAVAILABLE
+            : api->create_runtime(&createOptions, &handle);
+    putPayload(payload, "embedded_script.runtime_adapter.create_result_code", static_cast<long long>(createCode));
+    putPayload(payload, "embedded_script.runtime_adapter.create_result", adapterResultCodeName(createCode));
+    putPayload(payload, "embedded_script.runtime_adapter.handle_created", handle != nullptr);
+
+    AutoJsNodeDiagnostics diagnostics{};
+    diagnostics.struct_size = sizeof(AutoJsNodeDiagnostics);
+    const int32_t diagnosticsCode = api->get_diagnostics == nullptr
+            ? AUTOJS_NODE_RESULT_UNAVAILABLE
+            : api->get_diagnostics(handle, &diagnostics);
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_result_code", static_cast<long long>(diagnosticsCode));
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_result", adapterResultCodeName(diagnosticsCode));
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_descriptor_json", diagnostics.runtime_descriptor_json);
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_state_json", diagnostics.state_json);
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_resource_json", diagnostics.resource_json);
+    putPayload(payload, "embedded_script.runtime_adapter.diagnostics_last_error_json", diagnostics.last_error_json);
+
+    if (handle != nullptr && api->destroy_runtime != nullptr) {
+        const int32_t destroyCode = api->destroy_runtime(handle);
+        putPayload(payload, "embedded_script.runtime_adapter.destroy_result_code", static_cast<long long>(destroyCode));
+        putPayload(payload, "embedded_script.runtime_adapter.destroy_result", adapterResultCodeName(destroyCode));
+    }
+
+    putPayload(payload, "embedded_script.runtime_adapter.status", "surface_only");
+    putPayload(payload, "embedded_script.status", "failed");
+    putPayload(payload, "embedded_script.detail", "ERR_AUTOJS6_NODE_ADAPTER_NOT_MIGRATED");
+    putPayload(payload, "embedded_script.succeeded", false);
+    putPayload(payload, "embedded_script.exit_code", static_cast<long long>(1));
+    putPayload(payload, "embedded_script.error_code", "ERR_AUTOJS6_NODE_ADAPTER_NOT_MIGRATED");
+    putCommonEmbeddedProbePayload(payload, 0, startedAt);
+    return toJavaStringArray(env, payload);
+}
+
 // Keep the unversioned JNI symbols compatible with already-packaged INRT
 // templates. Current app builds call the V2 symbols below so new arguments can
 // be added without breaking older packaged APK smoke artifacts.
@@ -209,6 +325,28 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             false,
             false,
             false
+    );
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedScriptAdapterV1Diagnostics(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jstring source,
+        jstring sourceName,
+        jstring workingDirectory,
+        jint moduleSourceCount,
+        jint runtimeModuleSourceCount,
+        jint envCount
+) {
+    return runEmbeddedScriptAdapterV1DiagnosticsNative(
+            env,
+            source,
+            sourceName,
+            workingDirectory,
+            moduleSourceCount,
+            runtimeModuleSourceCount,
+            envCount
     );
 }
 
