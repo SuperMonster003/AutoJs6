@@ -1066,6 +1066,12 @@
     <string name="text_disabled">Disabled</string>
     <string name="text_display_over_other_app">Display over other apps</string>
     <string name="text_display_over_other_app_is_recommended">\"Display over other apps\" permission is recommended to make all widgets displayed properly</string>
+    <string name="text_countdown_task">Countdown task</string>
+    <string name="text_countdown_hours">Hours</string>
+    <string name="text_countdown_minutes">Minutes</string>
+    <string name="text_countdown_duration_must_be_positive">Countdown duration must be greater than 0</string>
+    <string name="text_countdown_duration_should_be_valid">Countdown duration is invalid</string>
+    <string name="text_countdown_minutes_should_be_less_than_60">Minutes must be between 0 and 59</string>
     <string name="text_disposable_task">Disposable task</string>
     <string name="text_disposable_task_time_before_now">Time should be later than now</string>
     <string name="text_do_not_ask_again_for_this_version">Don\'t ask again for this version</string>

@@ -776,6 +776,12 @@
     <string name="text_disabled">已禁用</string>
     <string name="text_display_over_other_app">顯示在其他應用上層</string>
     <string name="text_display_over_other_app_is_recommended">建議授予 \"顯示在其他應用上層\" 權限以確保應用窗口組件正常顯示</string>
+    <string name="text_countdown_task">倒數計時任務</string>
+    <string name="text_countdown_hours">小時</string>
+    <string name="text_countdown_minutes">分鐘</string>
+    <string name="text_countdown_duration_must_be_positive">倒數計時長度需大於 0</string>
+    <string name="text_countdown_duration_should_be_valid">倒數計時長度無效</string>
+    <string name="text_countdown_minutes_should_be_less_than_60">分鐘須介於 0 到 59 之間</string>
     <string name="text_disposable_task">一次性任務</string>
     <string name="text_disposable_task_time_before_now">任務時間小於當前時間</string>
     <string name="text_do_not_ask_again_for_this_version">此版本不再提示</string>

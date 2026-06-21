@@ -41,6 +41,7 @@ public class TimedTask extends BaseModel {
     public static final int REPEAT_MODE_WEEKLY = 2;
     public static final int REPEAT_MODE_MONTHLY = 3;
     public static final int REPEAT_MODE_YEARLY = 4;
+    public static final int REPEAT_MODE_COUNTDOWN = 5;
 
     public static final int END_MODE_FOREVER = 0;
     public static final int END_MODE_UNTIL_DATE = 1;
@@ -89,7 +90,7 @@ public class TimedTask extends BaseModel {
     }
 
     public boolean isDisposable() {
-        return getRepeatMode() == REPEAT_MODE_DISPOSABLE;
+        return getRepeatMode() == REPEAT_MODE_DISPOSABLE || isCountdown();
     }
 
     public boolean isScheduled() {
@@ -301,6 +302,10 @@ public class TimedTask extends BaseModel {
         return getRepeatMode() == REPEAT_MODE_YEARLY;
     }
 
+    public boolean isCountdown() {
+        return getRepeatMode() == REPEAT_MODE_COUNTDOWN;
+    }
+
     public int getRepeatMode() {
         if (mRepeatMode == REPEAT_MODE_UNKNOWN) {
             mRepeatMode = inferRepeatMode(mTimeFlag);
@@ -399,6 +404,21 @@ public class TimedTask extends BaseModel {
 
     public static TimedTask disposableTask(LocalDateTime dateTime, String scriptPath, ExecutionConfig config) {
         return new TimedTask(dateTime.toDateTime().getMillis(), FLAG_DISPOSABLE, scriptPath, config);
+    }
+
+    public static TimedTask countdownTask(long delayMillis, String scriptPath, ExecutionConfig config) {
+        if (delayMillis <= 0) {
+            throw new IllegalArgumentException("delayMillis must be greater than 0");
+        }
+        long targetMillis;
+        try {
+            targetMillis = Math.addExact(System.currentTimeMillis(), delayMillis);
+        } catch (ArithmeticException e) {
+            throw new IllegalArgumentException("delayMillis is too large", e);
+        }
+        TimedTask task = new TimedTask(targetMillis, FLAG_DISPOSABLE, scriptPath, config);
+        task.mRepeatMode = REPEAT_MODE_COUNTDOWN;
+        return task;
     }
 
     public static TimedTask weeklyTask(LocalTime time, long timeFlag, String scriptPath, ExecutionConfig config) {

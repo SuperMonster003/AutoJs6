@@ -51,6 +51,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::addMonthlyTask.name,
         ::addYearlyTask.name,
         ::addDisposableTask.name,
+        ::addCountdownTask.name,
         ::addIntentTask.name,
         ::getTimedTask.name,
         ::getIntentTask.name,
@@ -65,6 +66,11 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
     )
 
     companion object : ArgumentGuards() {
+
+        private const val MILLIS_PER_SECOND = 1_000L
+        private const val MILLIS_PER_MINUTE = 60_000L
+        private const val MILLIS_PER_HOUR = 3_600_000L
+        private const val MILLIS_PER_DAY = 86_400_000L
 
         private val daysOfWeekFlatList: List<String> = listOf(
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
@@ -151,6 +157,16 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val opt = coerceObject(options, newNativeObject())
 
             createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_DISPOSABLE)
+                .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun addCountdownTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
+            val (options) = argList
+            val opt = coerceObject(options, newNativeObject())
+
+            createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_COUNTDOWN)
                 .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
         }
 
@@ -314,6 +330,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val config = parseConfig(opt)
             return when (repeatMode) {
                 TimedTask.REPEAT_MODE_DISPOSABLE -> TimedTask.disposableTask(parseLocalDateTime(opt), path, config)
+                TimedTask.REPEAT_MODE_COUNTDOWN -> TimedTask.countdownTask(parseCountdownDurationMillis(opt), path, config)
                 TimedTask.REPEAT_MODE_DAILY -> TimedTask.dailyTask(parseLocalTime(opt), path, config)
                 TimedTask.REPEAT_MODE_WEEKLY -> TimedTask.weeklyTask(parseLocalTime(opt), parseDayOfWeekTimeFlag(opt).toLong(), path, config)
                 TimedTask.REPEAT_MODE_MONTHLY -> TimedTask.monthlyTask(parseLocalTime(opt), parseDayOfMonth(opt), path, config)
@@ -358,6 +375,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             is Number -> coerceIntNumber(mode)
             else -> when (normalizeModeName(mode)) {
                 "disposable", "once", "onetime", "oneoff" -> TimedTask.REPEAT_MODE_DISPOSABLE
+                "countdown", "after", "runafter", "later" -> TimedTask.REPEAT_MODE_COUNTDOWN
                 "daily", "day" -> TimedTask.REPEAT_MODE_DAILY
                 "weekly", "week" -> TimedTask.REPEAT_MODE_WEEKLY
                 "monthly", "month" -> TimedTask.REPEAT_MODE_MONTHLY
@@ -402,6 +420,7 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun parseLocalDateTime(options: ScriptableObject): LocalDateTime {
+            parseOptionalCountdownDateTime(options)?.let { return it }
             val localDateTime = options.prop("time").takeUnless { it.isJsNullish() } ?: options.prop("date")
             return when {
                 localDateTime.isJsNullish() -> LocalDateTime(now())
@@ -409,6 +428,70 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 localDateTime is NativeDate -> LocalDateTime(localDateTime.date)
                 localDateTime is String -> LocalDateTime.parse(localDateTime)
                 else -> throw WrappedIllegalArgumentException("Unknown localDateTime ${localDateTime.jsBrief()}")
+            }
+        }
+
+        private fun parseOptionalCountdownDateTime(options: ScriptableObject): LocalDateTime? {
+            if (options !is NativeObject) {
+                return null
+            }
+            val duration = options.inquire(listOf("after", "countdown", "timeOffset", "duration", "runAfter"))
+            if (duration.isJsNullish()) {
+                return null
+            }
+            return createCountdownDateTime(parseDurationMillis(duration))
+        }
+
+        private fun parseCountdownDurationMillis(opt: NativeObject): Long {
+            val duration = opt.inquire(listOf("after", "countdown", "timeOffset", "duration", "runAfter"))
+            val durationMillis = when {
+                duration.isJsNullish() -> parseDurationFieldsMillis(opt)
+                else -> parseDurationMillis(duration)
+            }
+            return requirePositiveCountdownDuration(durationMillis)
+        }
+
+        private fun createCountdownDateTime(durationMillis: Long): LocalDateTime {
+            val positiveDurationMillis = requirePositiveCountdownDuration(durationMillis)
+            val targetMillis = runCatching { Math.addExact(now(), positiveDurationMillis) }.getOrElse {
+                throw WrappedIllegalArgumentException("Countdown target time is too large")
+            }
+            return LocalDateTime(targetMillis)
+        }
+
+        private fun requirePositiveCountdownDuration(durationMillis: Long): Long {
+            require(durationMillis > 0) { "Countdown duration must be greater than 0" }
+            return durationMillis
+        }
+
+        private fun parseDurationMillis(duration: Any?): Long = when {
+            duration.isJsNullish() -> 0L
+            duration is Number -> coerceLongNumber(duration)
+            duration is NativeObject -> parseDurationFieldsMillis(duration)
+            else -> parseDurationFieldsMillis(coerceObject(duration, newNativeObject()))
+        }
+
+        private fun parseDurationFieldsMillis(opt: NativeObject): Long {
+            val days = opt.inquire(listOf("days", "day", "d", "delayDays"), ::coerceLongNumber, 0L)
+            val hours = opt.inquire(listOf("hours", "hour", "hr", "h", "delayHours"), ::coerceLongNumber, 0L)
+            val minutes = opt.inquire(listOf("minutes", "minute", "min", "m", "delayMinutes"), ::coerceLongNumber, 0L)
+            val seconds = opt.inquire(listOf("seconds", "second", "sec", "s", "delaySeconds"), ::coerceLongNumber, 0L)
+            val millis = opt.inquire(listOf("milliseconds", "millisecond", "millis", "ms", "delayMillis"), ::coerceLongNumber, 0L)
+
+            require(listOf(days, hours, minutes, seconds, millis).all { it >= 0 }) {
+                "Countdown duration values must not be negative"
+            }
+
+            return runCatching {
+                listOf(
+                    Math.multiplyExact(days, MILLIS_PER_DAY),
+                    Math.multiplyExact(hours, MILLIS_PER_HOUR),
+                    Math.multiplyExact(minutes, MILLIS_PER_MINUTE),
+                    Math.multiplyExact(seconds, MILLIS_PER_SECOND),
+                    millis,
+                ).fold(0L) { acc, value -> Math.addExact(acc, value) }
+            }.getOrElse {
+                throw WrappedIllegalArgumentException("Countdown duration is too large")
             }
         }
 

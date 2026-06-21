@@ -66,6 +66,7 @@ class TimedTaskSettingActivity : BaseActivity() {
     private lateinit var mToolbar: Toolbar
     private lateinit var mTimingGroup: RadioGroup
     private lateinit var mDisposableTaskRadio: RadioButton
+    private lateinit var mCountdownTaskRadio: RadioButton
     private lateinit var mDailyTaskRadio: RadioButton
     private lateinit var mWeeklyTaskRadio: RadioButton
     private lateinit var mMonthlyTaskRadio: RadioButton
@@ -76,6 +77,8 @@ class TimedTaskSettingActivity : BaseActivity() {
     private lateinit var mBroadcastGroup: RadioGroup
     private lateinit var mDisposableTaskTime: TextView
     private lateinit var mDisposableTaskDate: TextView
+    private lateinit var mCountdownTaskHours: EditText
+    private lateinit var mCountdownTaskMinutes: EditText
     private lateinit var mDailyTaskTimePicker: TimePicker
     private lateinit var mWeeklyTaskTimePicker: TimePicker
     private lateinit var mMonthlyTaskTimePicker: TimePicker
@@ -173,6 +176,9 @@ class TimedTaskSettingActivity : BaseActivity() {
         mDisposableTaskRadio = binding.disposableTaskRadio.apply {
             setUpRadioButton()
         }
+        mCountdownTaskRadio = binding.countdownTaskRadio.apply {
+            setUpRadioButton()
+        }
         mRunOnBroadcastRadio = binding.runOnBroadcast.apply {
             setUpRadioButton()
         }
@@ -183,6 +189,12 @@ class TimedTaskSettingActivity : BaseActivity() {
         mDisposableTaskDate = binding.disposableTaskDate.apply {
             text = DATE_FORMATTER.print(LocalDate.now())
             setOnClickListener { showDisposableTaskDatePicker() }
+        }
+        mCountdownTaskHours = binding.countdownTaskHours.apply {
+            setUpCountdownInput()
+        }
+        mCountdownTaskMinutes = binding.countdownTaskMinutes.apply {
+            setUpCountdownInput()
         }
 
         loadTaskFromIntent()
@@ -254,6 +266,14 @@ class TimedTaskSettingActivity : BaseActivity() {
         setOnCheckedChangeListener { buttonView, _ -> onCheckedChanged(buttonView) }
     }
 
+    private fun EditText.setUpCountdownInput() {
+        setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                mCountdownTaskRadio.isChecked = true
+            }
+        }
+    }
+
     private fun ViewGroup.setUpDayOfWeekCheckBoxes() {
         for (i in 0 until this.childCount) {
             val child = this.getChildAt(i)
@@ -279,6 +299,11 @@ class TimedTaskSettingActivity : BaseActivity() {
     }
 
     private fun setUpTime(timedTask: TimedTask) {
+        if (timedTask.isCountdown) {
+            mCountdownTaskRadio.isChecked = true
+            setUpCountdownDuration(timedTask.millis - System.currentTimeMillis())
+            return
+        }
         if (timedTask.isDisposable) {
             mDisposableTaskRadio.isChecked = true
             mDisposableTaskTime.text = TIME_FORMATTER.print(timedTask.millis)
@@ -353,6 +378,12 @@ class TimedTaskSettingActivity : BaseActivity() {
             }
             else -> mRepeatEndForever.isChecked = true
         }
+    }
+
+    private fun setUpCountdownDuration(durationMillis: Long) {
+        val totalMinutes = maxOf(1L, (durationMillis + MILLIS_PER_MINUTE - 1) / MILLIS_PER_MINUTE)
+        mCountdownTaskHours.setText((totalMinutes / MINUTES_PER_HOUR).toString())
+        mCountdownTaskMinutes.setText((totalMinutes % MINUTES_PER_HOUR).toString())
     }
 
     private fun setUpAction(intentTask: IntentTask) {
@@ -465,6 +496,7 @@ class TimedTaskSettingActivity : BaseActivity() {
 
     private fun createTimedTask(): TimedTask? = when {
         mDisposableTaskRadio.isChecked -> createDisposableTask()
+        mCountdownTaskRadio.isChecked -> createCountdownTask()
         mDailyTaskRadio.isChecked -> createDailyTask()
         mWeeklyTaskRadio.isChecked -> createWeeklyTask()
         mMonthlyTaskRadio.isChecked -> createMonthlyTask()
@@ -516,6 +548,42 @@ class TimedTaskSettingActivity : BaseActivity() {
         }
         return TimedTask.disposableTask(dateTime, mScriptFile.path, default)
     }
+
+    private fun createCountdownTask(): TimedTask? {
+        val hours = parseCountdownValue(mCountdownTaskHours) ?: return null
+        val minutes = parseCountdownValue(mCountdownTaskMinutes) ?: return null
+        if (minutes >= MINUTES_PER_HOUR) {
+            mCountdownTaskMinutes.error = getString(R.string.text_countdown_minutes_should_be_less_than_60)
+            return null
+        }
+        val delayMillis = calculateCountdownDelayMillis(hours, minutes) ?: run {
+            showToast(this, R.string.text_countdown_duration_should_be_valid)
+            return null
+        }
+        if (delayMillis <= 0) {
+            showToast(this, R.string.text_countdown_duration_must_be_positive)
+            return null
+        }
+        return TimedTask.countdownTask(delayMillis, mScriptFile.path, default)
+    }
+
+    private fun parseCountdownValue(editText: EditText): Long? {
+        val value = editText.text.toString().trim()
+        if (value.isEmpty()) {
+            return 0
+        }
+        val number = value.toLongOrNull()
+        if (number == null || number < 0) {
+            editText.error = getString(R.string.text_countdown_duration_should_be_valid)
+            return null
+        }
+        return number
+    }
+
+    private fun calculateCountdownDelayMillis(hours: Long, minutes: Long): Long? = runCatching {
+        val totalMinutes = Math.addExact(Math.multiplyExact(hours, MINUTES_PER_HOUR.toLong()), minutes)
+        Math.multiplyExact(totalMinutes, MILLIS_PER_MINUTE)
+    }.getOrNull()
 
     private fun applyRepeatEnd(task: TimedTask): TimedTask? {
         when (mRepeatEndGroup.checkedRadioButtonId) {
@@ -648,6 +716,8 @@ class TimedTaskSettingActivity : BaseActivity() {
         private const val REQUEST_CODE_IGNORE_BATTERY = 27101
         private const val REQUEST_CODE_SCHEDULE_EXACT_ALARM = 27102
         private const val LOG_TAG = "TimedTaskSettings"
+        private const val MINUTES_PER_HOUR = 60
+        private const val MILLIS_PER_MINUTE = 60_000L
 
         @JvmField
         @Suppress("DEPRECATION")

@@ -165,6 +165,73 @@
                         </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
 
                         <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+                            android:id="@+id/countdown_task_radio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:paddingStart="16dp"
+                            android:text="@string/text_countdown_task"
+                            tools:ignore="RtlSymmetry" />
+
+                        <com.github.aakira.expandablelayout.ExpandableRelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="36dp"
+                            app:ael_expanded="false"
+                            app:ael_interpolator="fastOutSlowIn"
+                            app:ael_orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingTop="6dp"
+                                android:paddingBottom="6dp">
+
+                                <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                                    android:id="@+id/countdown_task_hours_container"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:hint="@string/text_countdown_hours"
+                                    app:expandedHintEnabled="false">
+
+                                    <androidx.appcompat.widget.AppCompatEditText
+                                        android:id="@+id/countdown_task_hours"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="number"
+                                        android:maxLines="1"
+                                        android:selectAllOnFocus="true"
+                                        android:text="0" />
+
+                                </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                                <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                                    android:id="@+id/countdown_task_minutes_container"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="12dp"
+                                    android:layout_weight="1"
+                                    android:hint="@string/text_countdown_minutes"
+                                    app:expandedHintEnabled="false">
+
+                                    <androidx.appcompat.widget.AppCompatEditText
+                                        android:id="@+id/countdown_task_minutes"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="number"
+                                        android:maxLines="1"
+                                        android:selectAllOnFocus="true"
+                                        android:text="1" />
+
+                                </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                            </LinearLayout>
+
+                        </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
+
+                        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                             android:id="@+id/weekly_task_radio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
