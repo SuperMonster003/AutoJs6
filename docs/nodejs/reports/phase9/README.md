@@ -17,6 +17,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactIntegrity
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeDistributionPolicy
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactGate
+.\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 ```
 
@@ -40,6 +41,8 @@ Generated outputs:
 - `build/reports/nodejs/runtime-distribution-policy.md`
 - `build/reports/nodejs/runtime-artifact-gate.json`
 - `build/reports/nodejs/runtime-artifact-gate.md`
+- `build/reports/nodejs/phase9-performance-policy.json`
+- `build/reports/nodejs/phase9-performance-policy.md`
 
 ## Current Status
 
@@ -59,6 +62,11 @@ The Batch A start is intentionally conservative:
 - S9-13/S9-14 now have host-side runtime distribution policy and runtime
   artifact aggregate gate coverage. See
   [../../native/RUNTIME_DISTRIBUTION.md](../../native/RUNTIME_DISTRIBUTION.md).
+- S9-15/S9-20 now have a host-side performance policy gate that verifies
+  compile-cache production evidence, keeps startup snapshots explicitly
+  deferred, records process-only prewarm and memory-pressure coverage, and
+  keeps the current performance matrix partial until packaged/SLO metrics exist.
+  See [PERFORMANCE_POLICY.md](PERFORMANCE_POLICY.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because

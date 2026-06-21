@@ -1645,6 +1645,7 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodeV11RcReadiness "-Pautojs.nodejs.test.deviceProfile=v1_1_beta"
 .\gradlew.bat --console=plain :app:verifyNodePhase8SecurityStressGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase8Gate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -1666,7 +1667,10 @@ requires `autojs.nodejs.test.deviceProfile=v1_1_alpha`; see [reports/v1.1-alpha/
 `verifyNodePhase9NativeModernizationPlan` runs the Phase 9 Batch A host-side
 native boundary, runtime adapter ABI/export, runtime build-plan, 16 KB ELF
 alignment, runtime artifact manifest/integrity, distribution policy, and
-runtime artifact aggregate checks; see
+runtime artifact aggregate checks. It also includes
+`verifyNodePhase9PerformancePolicy`, which records compile-cache, startup
+snapshot, process-prewarm, memory-pressure, and performance matrix policy
+evidence for S9-15 through S9-20; see
 [reports/phase9/README.md](reports/phase9/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
