@@ -19,6 +19,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodeRuntimeArtifactGate
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
+.\gradlew.bat --console=plain :app:verifyNodePhase9WasmWasiPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -47,6 +48,8 @@ Generated outputs:
 - `build/reports/nodejs/phase9-performance-policy.md`
 - `build/reports/nodejs/phase9-inspector-policy.json`
 - `build/reports/nodejs/phase9-inspector-policy.md`
+- `build/reports/nodejs/phase9-wasm-wasi-policy.json`
+- `build/reports/nodejs/phase9-wasm-wasi-policy.md`
 
 ## Current Status
 
@@ -79,6 +82,10 @@ The Batch A start is intentionally conservative:
   WebAssembly compile/instantiate works through scoped `.wasm` bytes, while raw
   `wasi` / `node:wasi` remains disabled and unshadowable. See
   [WASM_WASI.md](WASM_WASI.md).
+- S9-34/S9-40 also have a host-side WASM/WASI policy gate that records the
+  current split between ready WebAssembly loading, deferred WASM compile cache,
+  deferred `autojs6:wasi` facade/resource/worker/build workflow work, and the
+  partial security corpus.
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because

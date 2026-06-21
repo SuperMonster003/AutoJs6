@@ -23,6 +23,8 @@ val nodePhase9PerformancePolicyJson = nodeNativeModernizationReportDir.map { it.
 val nodePhase9PerformancePolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-performance-policy.md") }
 val nodePhase9InspectorPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-inspector-policy.json") }
 val nodePhase9InspectorPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-inspector-policy.md") }
+val nodePhase9WasmWasiPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.json") }
+val nodePhase9WasmWasiPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.md") }
 
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
@@ -311,6 +313,32 @@ tasks.register<Exec>("verifyNodePhase9InspectorPolicy") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase9WasmWasiPolicy") {
+    group = "verification"
+    description = "Verifies Phase 9 WebAssembly loading, raw WASI denial, and future controlled WASI policy evidence."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/wasm/verify-phase9-wasm-wasi-policy.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasmWasiInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/WASM_WASI.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    outputs.files(nodePhase9WasmWasiPolicyJson, nodePhase9WasmWasiPolicyMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -327,5 +355,6 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNodeRuntimeArtifactGate",
         "verifyNodePhase9PerformancePolicy",
         "verifyNodePhase9InspectorPolicy",
+        "verifyNodePhase9WasmWasiPolicy",
     )
 }
