@@ -138,14 +138,21 @@ const CAPABILITIES = [
   {
     id: "long_running",
     status: ["implemented", "experimental"],
-    evidence: ["NodeInteractiveLongRunningInstrumentationTest", "verifyNodeLongRunningGate"],
-    notes: "Long-running/resource lifecycle policies and stress gates exist; scheduled expansion remains Phase 10 work.",
+    evidence: [
+      "verifyNodePhase10LongRunningActivation",
+      "NodeInteractiveLongRunningInstrumentationTest",
+      "verifyNodeLongRunningGate",
+    ],
+    notes: "Interactive foreground long-running, scheduled runner, queue, heartbeat, checkpoint, and stress evidence exist; packaged long-running service mode remains blocked.",
   },
   {
     id: "multi_instance",
     status: ["blocked", "experimental"],
-    evidence: ["NodeEmbeddedProcessPoolPolicyInstrumentationTest"],
-    notes: "Policy and process-pool design evidence exists; two live execution slots are not promoted yet.",
+    evidence: [
+      "verifyNodePhase10LongRunningActivation",
+      "NodeEmbeddedProcessPoolPolicyInstrumentationTest",
+    ],
+    notes: "Reserved process slots and policy evidence exist, but effective active slots remain primary-only and two live execution slots are not promoted.",
   },
 ];
 
@@ -212,6 +219,7 @@ function loadEvidenceFiles(repoRoot) {
     providerRegistry: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"),
     phase10Gate: readEvidence(repoRoot, "app/node-phase10-gate.gradle.kts"),
     autojs6Pm: readEvidence(repoRoot, "tools/nodejs/phase10/autojs6-pm.js"),
+    longRunningActivation: readEvidence(repoRoot, "tools/nodejs/phase10/verify-long-running-activation.js"),
     testingDoc: readEvidence(repoRoot, "docs/nodejs/TESTING.md"),
     ciGatesDoc: readEvidence(repoRoot, "docs/nodejs/CI_GATES.md"),
   };

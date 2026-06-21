@@ -498,6 +498,7 @@ Current dependency bundler verification:
 .\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
 .\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
+.\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 ```
 
 `bundleNodeDependencies` validates an existing project root with `package.json` and `node_modules`, then writes a
@@ -543,6 +544,18 @@ disabled lifecycle scripts, native addon files, and non-HTTPS registry protocol.
 The gate is host-managed and experimental; Android runtime package installation,
 full npm CLI behavior, hoisting, package-manager hooks, and peer installation
 remain deferred.
+
+`verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
+machine-readable report for execution mode, interactive foreground
+long-running, runtime budget/heartbeat, queueing, scheduled runner,
+checkpoint/restore, stress coverage, and multi-instance blockers. It does not
+replace device testing; run the focused S10 core selector on Sony for routine
+activation evidence, and keep full `verifyNodeLongRunningGate` for
+release/nightly stress because it includes the heavier embedded memory leak
+stress case. The report keeps
+multi-instance as `blocked_primary_only` because reserved process slots exist
+but `effectiveMaxActiveSlots` remains `1`, and packaged long-running service
+mode is still not promoted.
 
 Current doctor diagnostics:
 

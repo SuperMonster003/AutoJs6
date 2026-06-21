@@ -303,6 +303,8 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase10FocusedGateMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
+.\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
+.\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -322,7 +324,12 @@ smokes. `verifyNodePhase10Autojs6PmFixture` covers the S10-21 through S10-27
 host-managed `autojs6-pm` boundary with offline registry metadata, semver,
 tarball integrity, safe extraction, `autojs6-lock.json`, install/list/update/
 remove/verify/prune, and package compatibility analyzer negative tests. It does
-not enable Android runtime package installation or full npm CLI behavior. See
+not enable Android runtime package installation or full npm CLI behavior.
+`verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
+long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
+Interactive foreground long-running and the scheduled runner are active through
+focused gates; multi-instance remains primary-only and packaged long-running
+service mode remains blocked. See
 [reports/phase10/README.md](reports/phase10/README.md).
 
 ## Phase 7 Focused Gates

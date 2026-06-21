@@ -39,6 +39,7 @@ tasks.register<Exec>("generateNodePhase10CapabilityTruth") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
     outputs.files(
@@ -192,6 +193,38 @@ tasks.register<Exec>("verifyNodePhase10Autojs6PmFixture") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase10LongRunningActivation") {
+    group = "verification"
+    description = "Verifies the Phase 10 long-running, scheduled, queue, checkpoint, and multi-instance boundary report."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeBudgetPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeLifecycleCheckpointStore.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeInteractiveLongRunningStatusStore.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionQueuePolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt"))
+    inputs.dir(project.layout.projectDirectory.dir("src/androidTest/java/org/autojs/autojs/engine"))
+    outputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-long-running-activation.json") },
+        nodePhase10ReportDir.map { it.file("phase10-long-running-activation.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase10ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePackageManagerGate") {
     group = "verification"
     description = "Runs the current Phase 10 package-manager boundary gate using safe dependency manager and bundler fixtures."
@@ -210,6 +243,7 @@ tasks.register("verifyNodeMultiInstanceGate") {
 
     dependsOn(
         "generateNodePhase10CapabilityTruth",
+        "verifyNodePhase10LongRunningActivation",
         "verifyNodePhase9IsolationPolicy",
     )
 }
@@ -256,6 +290,7 @@ tasks.register("verifyNodePhase10Gate") {
         "verifyNodePhase10ProviderRegistryV2",
         "verifyNodePackagedParityGate",
         "verifyNodePackageManagerGate",
+        "verifyNodePhase10LongRunningActivation",
         "verifyNodeMultiInstanceGate",
         "verifyNodeAdapterV1Gate",
     )

@@ -15,6 +15,8 @@ skip audit, and focused gate coverage into repeatable evidence.
 .\gradlew.bat --console=plain :app:verifyNodePhase10FocusedGateMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
+.\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
+.\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
@@ -42,6 +44,8 @@ promote any blocked capability.
 - `build/reports/nodejs/phase10-focused-gate-matrix.md`
 - `build/reports/nodejs/phase10-package-manager-boundary.json`
 - `build/reports/nodejs/phase10-package-manager-boundary.md`
+- `build/reports/nodejs/phase10-long-running-activation.json`
+- `build/reports/nodejs/phase10-long-running-activation.md`
 - `app/build/reports/nodejs/live-provider-summary.json`
 
 ## Current Decisions
@@ -64,6 +68,11 @@ promote any blocked capability.
   registry metadata, semver, nested dependency install, tarball integrity, safe
   extraction, `autojs6-lock.json`, install/list/update/remove/verify/prune, and
   package compatibility analysis without enabling Android runtime install.
+- [LONG_RUNNING_ACTIVATION.md](LONG_RUNNING_ACTIVATION.md) records S10-29
+  through S10-36. Interactive foreground long-running, scheduled runner,
+  queueing, heartbeat/budget diagnostics, checkpoint/restore, and stress
+  coverage are active; multi-instance remains primary-only and packaged
+  long-running service mode remains blocked.
 - The descriptor schema remains compatible with existing v1 projects while the
   version vector carries the v1.1 bootstrap, CJS loader, ESM loader, dynamic
   import, builtin profile, bridge protocol, capability manifest, and
