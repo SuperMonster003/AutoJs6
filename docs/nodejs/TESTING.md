@@ -1806,8 +1806,17 @@ unresolved skip/assume/ignore sites for packaged, live provider, worker,
 long-running, WASI, Inspector, and device-requirement categories.
 `verifyNodePhase10Gate` aggregates the first-wave host evidence, Provider
 Registry v2, packaged parity, package-manager boundary fixtures, multi-instance
-policy evidence, and adapter v1 ABI/export checks without promoting Node 24.17
-or blocked capabilities.
+policy evidence, developer-experience evidence, crash/adapter cutover evidence,
+and adapter v1 ABI/export checks without promoting Node 24.17 or blocked
+capabilities. `verifyNodePhase10CrashAdapterCutover` writes
+`phase10-crash-adapter-cutover.json` and a synthetic
+`phase10-crash-evidence-bundle/manifest.json` for S10-47 through S10-52. It
+records crash bundle fields, resource/timeline snapshot requirements,
+`AutoJsNodeRuntimeApiV1` operation inventory, and adapter cutover blockers.
+`verifyNodeCrashAdapterCutoverGate` pairs that report with
+`verifyNodePhase9NativeCrashPipeline`, `verifyNodeRuntimeAdapterAbi`, and
+`verifyNodeRuntimeAdapterExport`. Current Node 24.5 adapter lifecycle remains
+`surface_only`, so the gate keeps `legacy_jni` as the default path.
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:

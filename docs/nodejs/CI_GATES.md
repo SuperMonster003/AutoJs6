@@ -309,6 +309,8 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodeWorkerWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10DeveloperExperience
 .\gradlew.bat --console=plain :app:verifyNodeDeveloperExperienceGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase10CrashAdapterCutover
+.\gradlew.bat --console=plain :app:verifyNodeCrashAdapterCutoverGate
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -341,7 +343,13 @@ S10-43 through S10-46 with a host/build-stage TypeScript transform fixture,
 incremental cache evidence, source-map evidence, embedded `node:test` coverage,
 and debug-only hot reload policy. `verifyNodeDeveloperExperienceGate` runs the
 focused Sony TypeScript/source-map/node:test/debug-reload selector. Packaged and
-release hot reload remain disabled. See
+release hot reload remain disabled. `verifyNodePhase10CrashAdapterCutover`
+records S10-47 through S10-52: crash evidence bundle schema, resource/timeline
+snapshot requirements, adapter operation inventory, legacy-vs-adapter A/B
+blockers, and default-switch blockers. `verifyNodeCrashAdapterCutoverGate`
+pairs that report with the Phase 9 native crash pipeline and adapter ABI/export
+checks. The Node 24.5 adapter remains `surface_only`, so `legacy_jni` remains
+the default execution path. See
 [reports/phase10/README.md](reports/phase10/README.md).
 
 ## Phase 7 Focused Gates

@@ -21,16 +21,18 @@ skip audit, and focused gate coverage into repeatable evidence.
 .\gradlew.bat --console=plain :app:verifyNodeWorkerWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10DeveloperExperience
 .\gradlew.bat --console=plain :app:verifyNodeDeveloperExperienceGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase10CrashAdapterCutover
+.\gradlew.bat --console=plain :app:verifyNodeCrashAdapterCutoverGate
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
 
 `verifyNodePhase10Gate` aggregates the first-wave host gates, packaged parity,
 package-manager boundary checks, multi-instance policy evidence,
-Worker/WASI boundary evidence, developer-experience evidence, and adapter v1
-ABI/export checks. The live-provider device gate remains explicit because fetch
-and WebSocket require the experimental network provider flag. It does not
-promote any blocked capability.
+Worker/WASI boundary evidence, developer-experience evidence, crash/adapter
+cutover evidence, and adapter v1 ABI/export checks. The live-provider device
+gate remains explicit because fetch and WebSocket require the experimental
+network provider flag. It does not promote any blocked capability.
 
 ## Outputs
 
@@ -54,6 +56,9 @@ promote any blocked capability.
 - `build/reports/nodejs/phase10-worker-wasi-boundary.md`
 - `build/reports/nodejs/phase10-developer-experience.json`
 - `build/reports/nodejs/phase10-developer-experience.md`
+- `build/reports/nodejs/phase10-crash-adapter-cutover.json`
+- `build/reports/nodejs/phase10-crash-adapter-cutover.md`
+- `build/reports/nodejs/phase10-crash-evidence-bundle/manifest.json`
 - `app/build/reports/nodejs/live-provider-summary.json`
 
 ## Current Decisions
@@ -89,6 +94,11 @@ promote any blocked capability.
   S10-46. Host/build-stage TypeScript output, source-map evidence, the embedded
   `node:test` subset, and debug-only hot reload are now covered by focused
   gates. Packaged and release hot reload remain disabled.
+- [CRASH_ADAPTER_CUTOVER.md](CRASH_ADAPTER_CUTOVER.md) records S10-47 through
+  S10-52. The crash evidence bundle schema is generated, resource/timeline
+  snapshot requirements are fixed, and `AutoJsNodeRuntimeApiV1` operation
+  inventory is checked. The Node 24.5 adapter remains `surface_only`, so
+  `adapter_v1` is not promoted and `legacy_jni` remains the default path.
 - The descriptor schema remains compatible with existing v1 projects while the
   version vector carries the v1.1 bootstrap, CJS loader, ESM loader, dynamic
   import, builtin profile, bridge protocol, capability manifest, and
