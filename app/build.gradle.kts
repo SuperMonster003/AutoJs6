@@ -714,6 +714,14 @@ val nodeJs2417SecurityProbeInstrumentationClasses = listOf(
 val nodeJsTypeScriptGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeTypeScriptInstrumentationTest",
 )
+val nodeJsDeveloperExperienceGateInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeTypeScriptInstrumentationTest",
+    "org.autojs.autojs.engine.NodeSourceMapStackTraceInstrumentationTest",
+    "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest#nodeTestEmbeddedSubsetRunsSingleRuntimeTap",
+    "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest#nodeTestEmbeddedSubsetReportsFailuresTimeoutsAndLateAsyncActivity",
+    "org.autojs.autojs.engine.NodeCoreBuiltinCompatibilityInstrumentationTest#partialEsmImportsNodeTestEmbeddedSubset",
+    "org.autojs.autojs.engine.NodePluginSystemInstrumentationTest#pluginLifecycleResourcesAndDebugReload",
+)
 val nodeJsRealNpmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest",
 )
@@ -792,7 +800,8 @@ val nodeJsWorkerWasiGateInstrumentationClasses = (
         ).distinct()
 val nodeJsPhase10GateInstrumentationClasses = (
         nodeJsPackagedParityGateInstrumentationClasses +
-                nodeJsWorkerWasiGateInstrumentationClasses
+                nodeJsWorkerWasiGateInstrumentationClasses +
+                nodeJsDeveloperExperienceGateInstrumentationClasses
         ).distinct()
 val nodeJsPhase8SecurityStressGateInstrumentationClasses = (
         nodeJs2417SecurityProbeInstrumentationClasses +
@@ -894,6 +903,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNode2417SecurityProbeGate" to nodeJs2417SecurityProbeInstrumentationClasses,
     "verifyNode2417UpgradeGate" to nodeJs2417UpgradeGateInstrumentationClasses,
     "verifyNodeTypeScriptGate" to nodeJsTypeScriptGateInstrumentationClasses,
+    "verifyNodeDeveloperExperienceGate" to nodeJsDeveloperExperienceGateInstrumentationClasses,
     "verifyNodePhase8SecurityStressGate" to nodeJsPhase8SecurityStressGateInstrumentationClasses,
     "verifyNodePhase8Gate" to nodeJsPhase8GateInstrumentationClasses,
     "verifyNodeWasmWasiGate" to nodeJsPhase9WasmWasiGateInstrumentationClasses,

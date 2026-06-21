@@ -12,6 +12,7 @@ const REQUIRED_TASKS = [
   "verifyNodeLongRunningGate",
   "verifyNodeMultiInstanceGate",
   "verifyNodeWorkerWasiGate",
+  "verifyNodeDeveloperExperienceGate",
   "verifyNodeAdapterV1Gate",
   "verifyNodePhase10Gate",
 ];
@@ -72,6 +73,7 @@ function requiresInstrumentationSelector(task) {
     "verifyNodePackagedParityGate",
     "verifyNodeLongRunningGate",
     "verifyNodeWorkerWasiGate",
+    "verifyNodeDeveloperExperienceGate",
     "verifyNodePhase10Gate",
   ].includes(task);
 }
@@ -84,6 +86,7 @@ function category(task) {
   if (task.includes("LongRunning")) return "long_running";
   if (task.includes("MultiInstance")) return "multi_instance";
   if (task.includes("WorkerWasi")) return "worker_wasi";
+  if (task.includes("DeveloperExperience")) return "developer_experience";
   if (task.includes("Adapter")) return "adapter";
   return "aggregate";
 }

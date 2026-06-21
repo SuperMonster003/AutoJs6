@@ -41,6 +41,7 @@ tasks.register<Exec>("generateNodePhase10CapabilityTruth") {
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-developer-experience.js"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
     outputs.files(
@@ -294,6 +295,35 @@ tasks.register("verifyNodeWorkerWasiGate") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase10DeveloperExperience") {
+    group = "verification"
+    description = "Verifies the Phase 10 TypeScript, source-map, node:test, and debug-only hot-reload developer experience report."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-developer-experience.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeTypeScriptInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeSourceMapStackTraceInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeCoreBuiltinCompatibilityInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePluginSystemInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    outputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-developer-experience.json") },
+        nodePhase10ReportDir.map { it.file("phase10-developer-experience.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase10ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodeAdapterV1Gate") {
     group = "verification"
     description = "Runs the Phase 10 adapter v1 boundary gate without switching the default runtime execution path."
@@ -327,6 +357,7 @@ tasks.register("verifyNodePhase10Gate") {
         "verifyNodePhase10LongRunningActivation",
         "verifyNodeMultiInstanceGate",
         "verifyNodePhase10WorkerWasiBoundary",
+        "verifyNodeDeveloperExperienceGate",
         "verifyNodeAdapterV1Gate",
     )
 }

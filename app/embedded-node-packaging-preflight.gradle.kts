@@ -4108,6 +4108,20 @@ val verifyNodeTypeScriptGate = tasks.register("verifyNodeTypeScriptGate") {
     }
 }
 
+val verifyNodeDeveloperExperienceGate = tasks.register("verifyNodeDeveloperExperienceGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 10 TypeScript/source-map/node:test/debug-reload developer experience gate."
+
+    dependsOn("verifyNodePhase10DeveloperExperience")
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodePhase8SecurityStressGate = tasks.register("verifyNodePhase8SecurityStressGate") {
     group = "verification"
     description = "Runs the focused Node Phase 8 security and stress expansion gate on a connected Sony/full device profile."

@@ -143,6 +143,46 @@ const CAPABILITIES = [
     notes: "Host-managed autojs6-pm MVP covers offline registry metadata, semver, tarball integrity, lockfile, safe extraction, and compatibility analysis; Android runtime install remains disabled.",
   },
   {
+    id: "typescript_build",
+    status: ["implemented", "packaged_supported", "experimental"],
+    evidence: [
+      "verifyNodePhase10DeveloperExperience",
+      "NodeTypeScriptInstrumentationTest",
+      "phase10-developer-experience",
+    ],
+    notes: "Runtime lightweight TypeScript remains .ts/.mts/.cts erasable syntax only; Phase 10 adds a host/build-stage transform and incremental cache report.",
+  },
+  {
+    id: "source_maps",
+    status: ["implemented", "packaged_supported", "experimental"],
+    evidence: [
+      "NodeSourceMapStackTraceInstrumentationTest",
+      "embedded_script.source_map_loaded_count",
+      "verifyNodeDeveloperExperienceGate",
+    ],
+    notes: "Inline and scoped external source maps are device-tested; Phase 10 developer experience also records TypeScript build-stage map outputs.",
+  },
+  {
+    id: "embedded_test_runner",
+    status: ["implemented", "experimental"],
+    evidence: [
+      "nodeTestEmbeddedSubsetRunsSingleRuntimeTap",
+      "nodeTestEmbeddedSubsetReportsFailuresTimeoutsAndLateAsyncActivity",
+      "partialEsmImportsNodeTestEmbeddedSubset",
+    ],
+    notes: "Single-runtime node:test subset supports TAP, hooks, skip/todo, timeouts, failures, and late async diagnostics without child_process isolation.",
+  },
+  {
+    id: "watch_hot_reload",
+    status: ["implemented", "experimental", "disabled"],
+    evidence: [
+      "verifyNodePhase10DeveloperExperience",
+      "pluginLifecycleResourcesAndDebugReload",
+      "plugins.reload is debug-only",
+    ],
+    notes: "Debug-only host workflow and plugin reload evidence exist; packaged/release hot reload remains disabled by policy.",
+  },
+  {
     id: "long_running",
     status: ["implemented", "experimental"],
     evidence: [
@@ -228,6 +268,7 @@ function loadEvidenceFiles(repoRoot) {
     autojs6Pm: readEvidence(repoRoot, "tools/nodejs/phase10/autojs6-pm.js"),
     longRunningActivation: readEvidence(repoRoot, "tools/nodejs/phase10/verify-long-running-activation.js"),
     workerWasiBoundary: readEvidence(repoRoot, "tools/nodejs/phase10/verify-worker-wasi-boundary.js"),
+    developerExperience: readEvidence(repoRoot, "tools/nodejs/phase10/verify-developer-experience.js"),
     testingDoc: readEvidence(repoRoot, "docs/nodejs/TESTING.md"),
     ciGatesDoc: readEvidence(repoRoot, "docs/nodejs/CI_GATES.md"),
   };
