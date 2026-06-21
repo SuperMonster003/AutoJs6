@@ -586,11 +586,83 @@ tasks.register("verifyNodeFinalSecurityGate") {
     dependsOn("verifyNodePhase10SecurityCorpus", "verifyNodeFinalCapabilityTruth")
 }
 
-tasks.register("verifyNodeFinalSoakGate") {
+tasks.register<Exec>("generateNodeFinalSoakStatus") {
+    group = "verification"
+    description = "Writes the current Phase 11 soak status without failing on missing long-duration soak evidence."
+
+    dependsOn("generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-soak-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedMemoryLeakStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeResourceStressSnapshot.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeLongRunningStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/PERFORMANCE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.files(
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/quick-soak-8h.json"),
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/final-soak-24h.json"),
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-soak-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeFinalSoakGate") {
     group = "verification"
     description = "Strict final soak gate; blocked until 24-hour soak evidence exists."
 
-    dependsOn("verifyNodeFinalCapabilityTruth")
+    dependsOn("generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-soak-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedMemoryLeakStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeResourceStressSnapshot.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeLongRunningStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/PERFORMANCE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.files(
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/quick-soak-8h.json"),
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/final-soak-24h.json"),
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-soak-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-blocked",
+    )
 }
 
 tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
@@ -606,6 +678,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         "generateNodeFinalLongRunningStatus",
         "generateNodeFinalMultiInstanceStatus",
         "generateNodeFinalWorkerDecisionStatus",
+        "generateNodeFinalSoakStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -620,6 +693,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
         nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },
@@ -650,6 +724,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         "generateNodeFinalLongRunningStatus",
         "generateNodeFinalMultiInstanceStatus",
         "generateNodeFinalWorkerDecisionStatus",
+        "generateNodeFinalSoakStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -664,6 +739,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         nodePhase11ReportDir.map { it.file("final-long-running-gate.json") },
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
         nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },

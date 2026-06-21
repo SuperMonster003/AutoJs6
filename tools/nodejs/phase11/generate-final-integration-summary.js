@@ -13,6 +13,7 @@ const REPORTS = [
   ["long_running_gate", "final-long-running-gate.json", false],
   ["multi_instance_gate", "final-multi-instance-gate.json", false],
   ["worker_decision_gate", "final-worker-decision-gate.json", false],
+  ["soak_gate", "final-soak-gate.json", false],
 ];
 
 function main() {
