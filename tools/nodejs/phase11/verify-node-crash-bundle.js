@@ -44,19 +44,27 @@ function main() {
     if (!manifest.symbolization || manifest.symbolization.implemented !== true) {
       warnings.push("symbolization tooling is not marked implemented in the bundle");
     }
-    if (!manifest.crashMarker || manifest.crashMarker.implemented !== true) {
+    if (!isImplemented(manifest.crashMarker)) {
       warnings.push("safe crash marker is not implemented");
+    } else {
+      checkManifestFile(repoRoot, bundleDir, manifest.crashMarker, "crash marker", policyViolations);
     }
     if (manifest.automaticCollection !== true) {
       warnings.push("next-launch crash evidence collection is not automatic");
     }
-    if (!manifest.resourceSnapshot || manifest.resourceSnapshot.implemented !== true) {
+    const resourceSnapshot = readManifestArtifact(repoRoot, bundleDir, manifest.resourceSnapshot, "resource snapshot", policyViolations);
+    if (!isImplemented(manifest.resourceSnapshot)) {
       warnings.push("resource snapshot is schema-only");
+    } else if (resourceSnapshot && resourceSnapshot.schema !== "autojs6-node-final-crash-resource-snapshot-v1") {
+      policyViolations.push("unexpected resource snapshot schema: " + resourceSnapshot.schema);
     }
-    if (!manifest.timelineTail || manifest.timelineTail.implemented !== true) {
+    const timelineTail = readManifestArtifact(repoRoot, bundleDir, manifest.timelineTail, "timeline tail", policyViolations);
+    if (!isImplemented(manifest.timelineTail)) {
       warnings.push("runtime timeline tail is schema-only");
+    } else if (timelineTail && timelineTail.schema !== "autojs6-node-final-crash-timeline-tail-v1") {
+      policyViolations.push("unexpected timeline tail schema: " + timelineTail.schema);
     }
-    if (!manifest.chaosInjection || manifest.chaosInjection.implemented !== true) {
+    if (!isImplemented(manifest.chaosInjection)) {
       warnings.push("chaos injection is not implemented");
     }
   }
@@ -141,7 +149,59 @@ function renderMarkdown(report) {
 }
 
 function readJson(file) {
-  return JSON.parse(fs.readFileSync(file, "utf8"));
+  return JSON.parse(stripBom(fs.readFileSync(file, "utf8")));
+}
+
+function stripBom(value) {
+  return value.replace(/^\uFEFF/, "");
+}
+
+function isImplemented(value) {
+  return value === true || Boolean(value && typeof value === "object" && value.implemented === true);
+}
+
+function readManifestArtifact(repoRoot, bundleDir, value, label, policyViolations) {
+  const artifactPath = manifestArtifactPath(repoRoot, bundleDir, value);
+  if (!artifactPath) {
+    return null;
+  }
+  if (!fs.existsSync(artifactPath) || !fs.statSync(artifactPath).isFile()) {
+    policyViolations.push(`${label} artifact is missing: ${relativePath(repoRoot, artifactPath)}`);
+    return null;
+  }
+  try {
+    return readJson(artifactPath);
+  } catch (error) {
+    policyViolations.push(`${label} artifact is not valid JSON: ${error.message}`);
+    return null;
+  }
+}
+
+function checkManifestFile(repoRoot, bundleDir, value, label, policyViolations) {
+  const artifactPath = manifestArtifactPath(repoRoot, bundleDir, value);
+  if (!artifactPath) {
+    policyViolations.push(`${label} artifact path is missing`);
+    return;
+  }
+  if (!fs.existsSync(artifactPath) || !fs.statSync(artifactPath).isFile()) {
+    policyViolations.push(`${label} artifact is missing: ${relativePath(repoRoot, artifactPath)}`);
+  }
+}
+
+function manifestArtifactPath(repoRoot, bundleDir, value) {
+  if (!value) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return path.resolve(repoRoot, value);
+  }
+  if (typeof value === "object" && value.path) {
+    return path.resolve(repoRoot, value.path);
+  }
+  if (typeof value === "object" && value.file) {
+    return path.resolve(bundleDir, value.file);
+  }
+  return "";
 }
 
 function relativePath(root, file) {

@@ -58,6 +58,8 @@ app/build/reports/native-node/native-deps-appDebug.txt
 app/build/reports/native-node/native-symbol-archive-appDebug.txt
 app/build/reports/native-node/native-abi-size-appDebug.txt
 build/reports/nodejs/final-crash-evidence-bundle/manifest.json
+build/reports/nodejs/final-crash-evidence-bundle/resource-snapshot.json
+build/reports/nodejs/final-crash-evidence-bundle/timeline-tail.json
 build/reports/nodejs/final-crash-symbolization.json
 build/reports/nodejs/final-crash-bundle-verification.json
 ```

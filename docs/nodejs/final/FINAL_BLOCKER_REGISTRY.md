@@ -19,6 +19,13 @@ intentional Safe Node Profile non-goals, and external runtime maintenance.
 
 These must be resolved before Phase 11 can report `completed`.
 
+Current crash evidence progress:
+
+- `crash_evidence_automation`: Phase 11 crash bundle tooling can now import
+  runtime resource snapshots and timeline tails as first-class evidence, while
+  safe fatal markers, automatic next-launch collection, and chaos injection
+  remain open.
+
 Resolved in Phase 11:
 
 - `adapter_v1_real_execution_path`: `AutoJsNodeRuntimeApiV1` is now a

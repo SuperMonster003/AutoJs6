@@ -25,76 +25,18 @@ function main() {
   const crashToolsImplemented = Object.values(tooling).every(Boolean);
   fs.mkdirSync(bundleDir, { recursive: true });
   const nativeLibraryHashes = collectNativeLibraryHashes(repoRoot);
-  const bundle = {
-    schema: "autojs6-node-final-crash-evidence-bundle-v1",
-    generatedAt: new Date().toISOString(),
-    crashInjected: false,
-    crashMarker: {
-      implemented: false,
-      allowedSignalHandlerWork: ["write preopened fd", "record fixed-size marker"],
-      forbiddenSignalHandlerWork: ["JNI", "malloc", "JSON", "formatted logging", "Java callbacks"],
-    },
-    automaticCollection: false,
-    tombstoneReference: "documented",
-    logcatTail: "documented",
-    nativeLibraryHashes,
-    buildIds: {
-      status: "pending_runtime_build_id_archive",
-    },
-    runtimeDescriptor: {
-      runtimeSlot: "node24_5",
-      adapter: "surface_only",
-    },
-    resourceSnapshot: {
-      implemented: false,
-      requiredEntries: [
-        "ResourceRegistry",
-        "pending bridge calls",
-        "timers",
-        "open files",
-        "image handles",
-        "network requests",
-        "WebSockets",
-        "sensors",
-        "UI handles",
-        "workers",
-        "execution queue",
-      ],
-    },
-    timelineTail: {
-      implemented: false,
-      requiredEventCount: 256,
-    },
-    symbolization: {
-      tools: ["symbolizeNodeCrash", "collectNodeCrashBundle", "verifyNodeCrashBundle"],
-      implemented: crashToolsImplemented,
-      report: "build/reports/nodejs/final-crash-symbolization.json",
-    },
-    tooling,
-    chaosInjection: {
-      implemented: false,
-      scenarios: [
-        "SIGABRT",
-        "native exception boundary",
-        "V8 fatal error simulation",
-        "service process kill",
-        "watchdog hang",
-        "adapter invalid handle",
-        "destroy during pending callback",
-        "crash during packaged execution",
-      ],
-    },
-  };
+  const existingBundle = readJsonIfExists(path.join(bundleDir, "manifest.json"));
+  const bundle = buildCrashGateBundle(existingBundle, nativeLibraryHashes, crashToolsImplemented, tooling);
   fs.writeFileSync(path.join(bundleDir, "manifest.json"), JSON.stringify(bundle, null, 2) + "\n");
   fs.writeFileSync(path.join(bundleDir, "README.md"), renderBundleReadme(bundle));
 
   const blockers = [];
-  if (!bundle.crashMarker.implemented) blockers.push("safe native crash marker is not implemented");
-  if (!bundle.automaticCollection) blockers.push("next-launch crash evidence collection is not automatic");
-  if (!bundle.resourceSnapshot.implemented) blockers.push("resource snapshot is not captured for crash/hang evidence");
-  if (!bundle.timelineTail.implemented) blockers.push("runtime timeline tail is not captured for crash evidence");
-  if (!bundle.symbolization.implemented) blockers.push("crash bundle collection/verification/symbolization tooling is not fully implemented");
-  if (!bundle.chaosInjection.implemented) blockers.push("chaos/crash injection gate is not implemented");
+  if (!isImplemented(bundle.crashMarker)) blockers.push("safe native crash marker is not implemented");
+  if (bundle.automaticCollection !== true) blockers.push("next-launch crash evidence collection is not automatic");
+  if (!isImplemented(bundle.resourceSnapshot)) blockers.push("resource snapshot is not captured for crash/hang evidence");
+  if (!isImplemented(bundle.timelineTail)) blockers.push("runtime timeline tail is not captured for crash evidence");
+  if (!isImplemented(bundle.symbolization)) blockers.push("crash bundle collection/verification/symbolization tooling is not fully implemented");
+  if (!isImplemented(bundle.chaosInjection)) blockers.push("chaos/crash injection gate is not implemented");
 
   const report = {
     schema: "autojs6-node-final-crash-gate-v1",
@@ -104,9 +46,17 @@ function main() {
     bundle: {
       directory: relativePath(repoRoot, bundleDir),
       manifest: relativePath(repoRoot, path.join(bundleDir, "manifest.json")),
-      nativeLibraryCount: nativeLibraryHashes.length,
+      nativeLibraryCount: Array.isArray(bundle.nativeLibraryHashes) ? bundle.nativeLibraryHashes.length : 0,
     },
     tooling,
+    evidence: {
+      crashMarkerImplemented: isImplemented(bundle.crashMarker),
+      automaticCollection: bundle.automaticCollection === true,
+      resourceSnapshotImplemented: isImplemented(bundle.resourceSnapshot),
+      timelineTailImplemented: isImplemented(bundle.timelineTail),
+      symbolizationImplemented: isImplemented(bundle.symbolization),
+      chaosInjectionImplemented: isImplemented(bundle.chaosInjection),
+    },
     blockers,
     decision: {
       status: blockers.length === 0 ? "ready" : "blocked",
@@ -139,12 +89,144 @@ function collectNativeLibraryHashes(repoRoot) {
   return entries;
 }
 
+const REQUIRED_RESOURCE_ENTRIES = [
+  "ResourceRegistry",
+  "pending bridge calls",
+  "timers",
+  "open files",
+  "image handles",
+  "network requests",
+  "WebSockets",
+  "sensors",
+  "UI handles",
+  "workers",
+  "execution queue",
+];
+
+const CHAOS_SCENARIOS = [
+  "SIGABRT",
+  "native exception boundary",
+  "V8 fatal error simulation",
+  "service process kill",
+  "watchdog hang",
+  "adapter invalid handle",
+  "destroy during pending callback",
+  "crash during packaged execution",
+];
+
+function buildCrashGateBundle(existing, nativeLibraryHashes, crashToolsImplemented, tooling) {
+  const base = {
+    schema: "autojs6-node-final-crash-evidence-bundle-v1",
+    generatedAt: new Date().toISOString(),
+    generatedBy: "verifyNodeFinalCrashGate",
+    crashInjected: false,
+    crashMarker: {
+      implemented: false,
+      allowedSignalHandlerWork: ["write preopened fd", "record fixed-size marker"],
+      forbiddenSignalHandlerWork: ["JNI", "malloc", "JSON", "formatted logging", "Java callbacks"],
+    },
+    automaticCollection: false,
+    tombstoneReference: "documented",
+    logcatTail: "documented",
+    nativeLibraryHashes,
+    buildIds: {
+      status: "pending_runtime_build_id_archive",
+    },
+    runtimeDescriptor: {
+      runtimeSlot: "node24_5",
+      adapter: "legacy_jni",
+    },
+    resourceSnapshot: {
+      implemented: false,
+      requiredEntries: REQUIRED_RESOURCE_ENTRIES,
+    },
+    timelineTail: {
+      implemented: false,
+      requiredEventCount: 256,
+    },
+    symbolization: {
+      tools: ["symbolizeNodeCrash", "collectNodeCrashBundle", "verifyNodeCrashBundle"],
+      implemented: crashToolsImplemented,
+      report: "build/reports/nodejs/final-crash-symbolization.json",
+    },
+    tooling,
+    chaosInjection: {
+      implemented: false,
+      scenarios: CHAOS_SCENARIOS,
+    },
+  };
+  if (!existing || existing.schema !== base.schema) {
+    return base;
+  }
+  return {
+    ...base,
+    ...existing,
+    generatedAt: base.generatedAt,
+    nativeLibraryHashes: Array.isArray(existing.nativeLibraryHashes) && existing.nativeLibraryHashes.length > 0
+      ? existing.nativeLibraryHashes
+      : nativeLibraryHashes,
+    runtimeDescriptor: {
+      ...base.runtimeDescriptor,
+      ...(existing.runtimeDescriptor || {}),
+    },
+    crashMarker: mergeEvidence(base.crashMarker, existing.crashMarker),
+    automaticCollection: existing.automaticCollection === true,
+    resourceSnapshot: mergeEvidence(base.resourceSnapshot, existing.resourceSnapshot),
+    timelineTail: mergeEvidence(base.timelineTail, existing.timelineTail),
+    symbolization: {
+      ...base.symbolization,
+      ...(typeof existing.symbolization === "object" ? existing.symbolization : {}),
+      implemented: isImplemented(existing.symbolization) || crashToolsImplemented,
+    },
+    tooling,
+    chaosInjection: mergeEvidence(base.chaosInjection, existing.chaosInjection),
+  };
+}
+
+function mergeEvidence(defaults, value) {
+  if (!value) {
+    return defaults;
+  }
+  if (typeof value === "string") {
+    return {
+      ...defaults,
+      path: value,
+    };
+  }
+  if (typeof value === "object") {
+    return {
+      ...defaults,
+      ...value,
+    };
+  }
+  return defaults;
+}
+
+function isImplemented(value) {
+  return value === true || Boolean(value && typeof value === "object" && value.implemented === true);
+}
+
 function sha256(file) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 
 function read(file) {
   return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+}
+
+function readJsonIfExists(file) {
+  if (!fs.existsSync(file)) {
+    return null;
+  }
+  try {
+    return JSON.parse(stripBom(fs.readFileSync(file, "utf8")));
+  } catch (_) {
+    return null;
+  }
+}
+
+function stripBom(value) {
+  return value.replace(/^\uFEFF/, "");
 }
 
 function renderBundleReadme(bundle) {
@@ -168,6 +250,11 @@ function renderMarkdown(report) {
     `- Decision: ${report.decision.status}`,
     `- Evidence bundle: ${report.bundle.manifest}`,
     `- Native libraries: ${report.bundle.nativeLibraryCount}`,
+    `- Safe crash marker: ${report.evidence.crashMarkerImplemented}`,
+    `- Automatic collection: ${report.evidence.automaticCollection}`,
+    `- Resource snapshot: ${report.evidence.resourceSnapshotImplemented}`,
+    `- Timeline tail: ${report.evidence.timelineTailImplemented}`,
+    `- Chaos injection: ${report.evidence.chaosInjectionImplemented}`,
     "",
     "## Blockers",
     "",

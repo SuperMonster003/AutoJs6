@@ -20,7 +20,7 @@
       "id": "crash_evidence_automation",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Crash evidence bundle schema and host manifest exist, but fatal marker and next-launch collection are not automatic.",
+      "currentEvidence": "Crash evidence bundle tooling can import resource snapshots and timeline tails from runtime evidence, but fatal marker, next-launch collection, and chaos injection are not automatic.",
       "requiredResolution": "Crash marker, next-launch collection, resource snapshot, timeline tail, symbolization, and chaos injection pass focused gates."
     },
     {

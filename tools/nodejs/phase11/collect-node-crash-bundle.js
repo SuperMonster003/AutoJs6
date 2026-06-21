@@ -19,6 +19,9 @@ function main() {
     copyAttachment(repoRoot, attachmentsDir, "tombstone", options.tombstone),
     copyAttachment(repoRoot, attachmentsDir, "bugreport", options.bugreport),
   ].filter(Boolean);
+  const crashMarker = loadCrashMarker(repoRoot, bundleDir, options.crashMarker, options.safeCrashMarker);
+  const resourceSnapshot = loadResourceSnapshot(repoRoot, bundleDir, options.resourceSnapshot);
+  const timelineTail = loadTimelineTail(repoRoot, bundleDir, options.timelineTail || options.timeline);
 
   const manifest = {
     schema: "autojs6-node-final-crash-evidence-bundle-v1",
@@ -27,20 +30,16 @@ function main() {
     git: gitInfo(repoRoot),
     runtimeDescriptor: {
       runtimeSlot: options.runtimeSlot || "node24_5",
-      adapter: options.adapter || "surface_only",
+      adapter: options.adapter || "legacy_jni",
       node2417Lane: "external_runtime_maintenance",
     },
     crash: {
       scenario: options.scenario || "manual_or_not_reproduced",
-      markerFile: options.crashMarker || "",
+      markerFile: crashMarker.path || crashMarker.source || "",
       crashInjected: parseBoolean(options.crashInjected || "false"),
     },
-    crashMarker: {
-      implemented: false,
-      allowedSignalHandlerWork: ["write preopened fd", "record fixed-size marker"],
-      forbiddenSignalHandlerWork: ["JNI", "malloc", "JSON", "formatted logging", "Java callbacks"],
-    },
-    automaticCollection: false,
+    crashMarker,
+    automaticCollection: parseBoolean(options.automaticCollection || "false"),
     attachments,
     nativeLibraryHashes: collectNativeLibraryHashes(repoRoot),
     symbolArchiveReports: collectExistingReports(repoRoot, [
@@ -48,31 +47,8 @@ function main() {
       "app/build/reports/native-node/native-deps-appDebug.txt",
       "app/build/reports/native-node/native-abi-size-appDebug.txt",
     ]),
-    resourceSnapshot: writeJsonFile(path.join(bundleDir, "resource-snapshot.json"), {
-      schema: "autojs6-node-final-crash-resource-snapshot-v1",
-      implemented: false,
-      entries: [],
-      requiredEntries: [
-        "ResourceRegistry",
-        "pending bridge calls",
-        "timers",
-        "open files",
-        "image handles",
-        "network requests",
-        "WebSockets",
-        "sensors",
-        "UI handles",
-        "workers",
-        "execution queue",
-      ],
-    }, repoRoot),
-    timelineTail: writeJsonFile(path.join(bundleDir, "timeline-tail.json"), {
-      schema: "autojs6-node-final-crash-timeline-tail-v1",
-      implemented: false,
-      eventCount: 0,
-      requiredEventCount: 256,
-      events: [],
-    }, repoRoot),
+    resourceSnapshot,
+    timelineTail,
     symbolization: {
       implemented: true,
       report: relativePath(repoRoot, path.join(bundleDir, "symbolization.json")),
@@ -113,13 +89,182 @@ function main() {
     },
     decision: {
       status: "collected",
-      automaticCollection: false,
+      automaticCollection: manifest.automaticCollection,
       safeNodeProfilePreserved: true,
     },
   };
   fs.mkdirSync(reportDir, { recursive: true });
   writeReport(reportDir, "final-crash-bundle-collection", report, renderCollectionMarkdown);
   console.log("Crash evidence bundle collected: " + report.bundle.manifest);
+}
+
+const REQUIRED_RESOURCE_ENTRIES = [
+  "ResourceRegistry",
+  "pending bridge calls",
+  "timers",
+  "open files",
+  "image handles",
+  "network requests",
+  "WebSockets",
+  "sensors",
+  "UI handles",
+  "workers",
+  "execution queue",
+];
+
+function loadCrashMarker(repoRoot, bundleDir, file, safeCrashMarker) {
+  const marker = {
+    implemented: false,
+    source: file || "",
+    path: "",
+    sha256: "",
+    sizeBytes: 0,
+    allowedSignalHandlerWork: ["write preopened fd", "record fixed-size marker"],
+    forbiddenSignalHandlerWork: ["JNI", "malloc", "JSON", "formatted logging", "Java callbacks"],
+  };
+  if (!file) {
+    return marker;
+  }
+  const absolute = path.resolve(file);
+  if (!fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) {
+    marker.missing = true;
+    return marker;
+  }
+  const target = path.join(bundleDir, "crash-marker.bin");
+  fs.mkdirSync(bundleDir, { recursive: true });
+  fs.copyFileSync(absolute, target);
+  marker.path = relativePath(repoRoot, target);
+  marker.sha256 = sha256(target);
+  marker.sizeBytes = fs.statSync(target).size;
+  marker.implemented = parseBoolean(safeCrashMarker || "false");
+  return marker;
+}
+
+function loadResourceSnapshot(repoRoot, bundleDir, file) {
+  const target = path.join(bundleDir, "resource-snapshot.json");
+  const base = {
+    schema: "autojs6-node-final-crash-resource-snapshot-v1",
+    implemented: false,
+    source: file || "",
+    entries: [],
+    requiredEntries: REQUIRED_RESOURCE_ENTRIES,
+    summary: {},
+  };
+  const snapshot = file ? normalizeResourceSnapshot(repoRoot, file, base) : base;
+  writeJsonFile(target, snapshot, repoRoot);
+  return {
+    implemented: snapshot.implemented,
+    path: relativePath(repoRoot, target),
+    source: snapshot.source || "",
+    entryCount: Array.isArray(snapshot.entries) ? snapshot.entries.length : 0,
+    requiredEntryCount: REQUIRED_RESOURCE_ENTRIES.length,
+  };
+}
+
+function normalizeResourceSnapshot(repoRoot, file, base) {
+  const absolute = path.resolve(file);
+  if (!fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) {
+    return {
+      ...base,
+      missing: true,
+    };
+  }
+  const payload = readJson(absolute);
+  if (payload.schema === base.schema) {
+    return {
+      ...base,
+      ...payload,
+      source: relativePath(repoRoot, absolute),
+      implemented: payload.implemented === true,
+      requiredEntries: Array.isArray(payload.requiredEntries) ? payload.requiredEntries : REQUIRED_RESOURCE_ENTRIES,
+      entries: Array.isArray(payload.entries) ? payload.entries : [],
+    };
+  }
+  const nativeValues = payload.nativeValues && typeof payload.nativeValues === "object"
+    ? payload.nativeValues
+    : payload;
+  const dump = parseJsonValue(nativeValues["embedded_script.bridge_resource.dump_json"], []);
+  const activeTypes = parseJsonValue(nativeValues["embedded_script.bridge_resource.active_types"], {});
+  const cleanupSummary = parseJsonValue(nativeValues["embedded_script.bridge_resource.last_cleanup_summary"], {});
+  const hasRegistryDiagnostics = Object.keys(nativeValues)
+    .some((key) => key.startsWith("embedded_script.bridge_resource."));
+  return {
+    ...base,
+    source: relativePath(repoRoot, absolute),
+    implemented: hasRegistryDiagnostics || payload.implemented === true,
+    entries: Array.isArray(dump) ? dump : [],
+    summary: {
+      ownerExecutionId: nativeValues["embedded_script.bridge_resource.owner_execution_id"] || "",
+      activeCount: numberOrNull(nativeValues["embedded_script.bridge_resource.active_count"]),
+      maxActiveCount: numberOrNull(nativeValues["embedded_script.bridge_resource.max_active_count"]),
+      createdCount: numberOrNull(nativeValues["embedded_script.bridge_resource.created_count"]),
+      closedCount: numberOrNull(nativeValues["embedded_script.bridge_resource.closed_count"]),
+      destroyClosedCount: numberOrNull(nativeValues["embedded_script.bridge_resource.destroy_closed_count"]),
+      leakCount: numberOrNull(nativeValues["embedded_script.bridge_resource.leak_count"]),
+      closeErrorCount: numberOrNull(nativeValues["embedded_script.bridge_resource.close_error_count"]),
+      activeTypes,
+      cleanupSummary,
+    },
+  };
+}
+
+function loadTimelineTail(repoRoot, bundleDir, file) {
+  const target = path.join(bundleDir, "timeline-tail.json");
+  const base = {
+    schema: "autojs6-node-final-crash-timeline-tail-v1",
+    implemented: false,
+    source: file || "",
+    eventCount: 0,
+    requiredEventCount: 256,
+    events: [],
+  };
+  const timeline = file ? normalizeTimelineTail(repoRoot, file, base) : base;
+  writeJsonFile(target, timeline, repoRoot);
+  return {
+    implemented: timeline.implemented,
+    path: relativePath(repoRoot, target),
+    source: timeline.source || "",
+    eventCount: timeline.eventCount || 0,
+    requiredEventCount: timeline.requiredEventCount || 256,
+  };
+}
+
+function normalizeTimelineTail(repoRoot, file, base) {
+  const absolute = path.resolve(file);
+  if (!fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) {
+    return {
+      ...base,
+      missing: true,
+    };
+  }
+  const payload = readJson(absolute);
+  if (payload.schema === base.schema) {
+    const events = Array.isArray(payload.events) ? payload.events : [];
+    return {
+      ...base,
+      ...payload,
+      source: relativePath(repoRoot, absolute),
+      implemented: payload.implemented === true,
+      eventCount: Number(payload.eventCount || events.length),
+      events: events.slice(-256),
+    };
+  }
+  const nativeValues = payload.nativeValues && typeof payload.nativeValues === "object"
+    ? payload.nativeValues
+    : payload;
+  const rawEvents = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload.events)
+      ? payload.events
+      : parseJsonValue(nativeValues["embedded_script.timeline_json"], []);
+  const events = Array.isArray(rawEvents) ? rawEvents : [];
+  return {
+    ...base,
+    source: relativePath(repoRoot, absolute),
+    implemented: events.length > 0 || payload.implemented === true,
+    eventCount: events.length,
+    events: events.slice(-256),
+  };
 }
 
 function collectNativeLibraryHashes(repoRoot) {
@@ -227,6 +372,33 @@ function writeJsonFile(file, json, repoRoot) {
   return relativePath(repoRoot, file);
 }
 
+function readJson(file) {
+  return JSON.parse(stripBom(fs.readFileSync(file, "utf8")));
+}
+
+function stripBom(value) {
+  return value.replace(/^\uFEFF/, "");
+}
+
+function parseJsonValue(value, fallback) {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+  if (typeof value === "object") {
+    return value;
+  }
+  try {
+    return JSON.parse(String(value));
+  } catch (_) {
+    return fallback;
+  }
+}
+
+function numberOrNull(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
 function renderBundleReadme(manifest) {
   return [
     "# Final Crash Evidence Bundle",
@@ -275,11 +447,11 @@ function writeReport(reportDir, basename, json, markdownRenderer) {
 
 function parseArgs(argv) {
   const options = {};
-  const booleanArgs = new Set(["crash-injected"]);
+  const booleanArgs = new Set(["crash-injected", "safe-crash-marker", "automatic-collection"]);
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node collect-node-crash-bundle.js [--repo-root dir] [--report-dir dir] [--bundle-dir dir] [--logcat file] [--tombstone file] [--bugreport file]");
+      console.log("Usage: node collect-node-crash-bundle.js [--repo-root dir] [--report-dir dir] [--bundle-dir dir] [--logcat file] [--tombstone file] [--bugreport file] [--resource-snapshot file] [--timeline-tail file]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {

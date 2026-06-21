@@ -143,7 +143,9 @@ For manual evidence, call the scripts directly with a tombstone or logcat file:
 node tools\nodejs\phase11\collect-node-crash-bundle.js `
   --repo-root . `
   --report-dir build\reports\nodejs `
-  --logcat app\build\reports\native-node\logcat-native-crash.txt
+  --logcat app\build\reports\native-node\logcat-native-crash.txt `
+  --resource-snapshot app\build\reports\native-node\resource-snapshot.json `
+  --timeline-tail app\build\reports\native-node\timeline-tail.json
 
 node tools\nodejs\phase11\symbolize-node-crash.js `
   --repo-root . `
@@ -156,7 +158,13 @@ node tools\nodejs\phase11\verify-node-crash-bundle.js `
   --report-dir build\reports\nodejs
 ```
 
-These tools make collection, schema validation, and best-effort symbolization callable. They do not claim final crash readiness until safe native crash markers, automatic next-launch collection, resource snapshots, timeline tail capture, and chaos injection exist.
+These tools make collection, schema validation, evidence import, and best-effort
+symbolization callable. `--resource-snapshot` accepts either the Phase 11
+resource snapshot schema or exported `EmbeddedScriptResult.nativeValues` JSON.
+`--timeline-tail` accepts either the Phase 11 timeline schema or exported
+`embedded_script.timeline_json` data. The final crash gate still remains blocked
+until safe native crash markers, automatic next-launch collection, and chaos
+injection exist.
 
 ## Triage Bundle
 
