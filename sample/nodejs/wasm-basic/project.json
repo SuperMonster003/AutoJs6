@@ -1,0 +1,16 @@
+{
+  "name": "wasm-basic",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["wasm"],
+    "expectedProvider": "embedded Node V8 WebAssembly runtime",
+    "packagedSupport": "main-app example only in this phase",
+    "securityLimitations": ["native addons remain denied", "resource limits still apply"]
+  }
+}

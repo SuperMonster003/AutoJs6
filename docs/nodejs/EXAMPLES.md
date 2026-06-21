@@ -65,6 +65,15 @@ node tools/nodejs/project/autojs6-node-project.js validate D:\work\my-node-app
 - `inspector-debug`: release inspector disabled-state probe.
 - `cpu-profile`: design-gated CPU profiling placeholder.
 - `hardened-sandbox`: design-gated isolated-process sandbox placeholder.
+- `node-runtime-info`: runtime version and descriptor-shape reporting.
+- `startup-snapshot`: design-gated startup snapshot policy placeholder.
+- `heap-snapshot`: design-gated heap snapshot diagnostics placeholder.
+- `multi-instance`: design-gated multi-process runtime pool policy placeholder.
+- `sandboxed-script`: design-gated brokered sandbox execution placeholder.
+- `wasm-basic`: WebAssembly compile/instantiate compute example.
+- `wasi-scoped-fs`: controlled WASI facade and scoped-fs policy placeholder.
+- `wasm-worker`: design-gated WASM worker integration placeholder.
+- `wasm-plugin`: JS plus WASM plugin package policy placeholder.
 - `typescript-smoke`: compile-time smoke for the checked-in AutoJs6 Node bridge declarations.
 
 ## Smoke Coverage
@@ -117,6 +126,14 @@ The Phase 8 examples `require-esm`, `http-client-compat`, `filehandle-advanced`,
 design-gated boundaries. They are static-verified by `verifyNodeExamples` but
 are not part of the default runtime smoke list.
 
+The Phase 9 examples `node-runtime-info`, `startup-snapshot`, `heap-snapshot`,
+`multi-instance`, `sandboxed-script`, `wasm-basic`, `wasi-scoped-fs`,
+`wasm-worker`, and `wasm-plugin` document the native modernization,
+diagnostics, isolation, and safe WASM/WASI/plugin extension direction. They are
+static-verified by `verifyNodeExamples`; `wasm-basic` is a real WASM compute
+example, while design-gated examples print explicit policy markers instead of
+pretending deferred capabilities are available.
+
 The examples are also added to the `androidTest` asset source set so tests exercise the checked-in sample files directly.
 `sample/nodejs/npm-ci-pure-js` is intentionally excluded from the examples manifest because it is a host-side dependency
 sanitizer fixture, not a user-facing runnable example.
@@ -132,7 +149,7 @@ The stable examples target AutoJs6 Safe Node Profile and generally avoid:
 - unrestricted filesystem access
 
 Phase 7 and later examples that use ESM, dynamic import, TypeScript, live providers, workers, long-running mode,
-scheduled tasks, database, controlled HTTP, advanced scoped fs, compile-cache, inspector, sandbox, or plugin/UI surfaces declare those capabilities explicitly and include graceful
+scheduled tasks, database, controlled HTTP, advanced scoped fs, compile-cache, inspector, sandbox, WASM/WASI, multi-instance, snapshot, or plugin/UI surfaces declare those capabilities explicitly and include graceful
 unavailable-provider paths where a permission, experimental flag, or hardware provider may be absent.
 
 Examples that use Android capabilities such as accessibility or media projection are written to handle unavailable permissions without crashing.

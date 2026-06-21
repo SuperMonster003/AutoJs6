@@ -48,6 +48,16 @@ private val nodeExampleKnownTags = setOf(
     "profiler",
     "hardened-sandbox",
     "design-gated",
+    "phase9",
+    "runtime-info",
+    "snapshot",
+    "heap-snapshot",
+    "multi-instance",
+    "sandbox",
+    "wasm",
+    "wasi",
+    "wasm-worker",
+    "wasm-plugin",
 )
 
 private val nodeExampleSupportedEntryExtensions = setOf("js", "cjs", "mjs", "ts", "cts", "mts")

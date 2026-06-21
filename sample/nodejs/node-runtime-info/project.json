@@ -1,0 +1,16 @@
+{
+  "name": "node-runtime-info",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["runtime-info"],
+    "expectedProvider": "embedded Node runtime descriptor",
+    "packagedSupport": "main-app example only in this phase",
+    "securityLimitations": ["runtime slot is build-controlled", "native runtime downloads remain denied"]
+  }
+}

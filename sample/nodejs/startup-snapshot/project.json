@@ -1,0 +1,16 @@
+{
+  "name": "startup-snapshot",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["startup-snapshot"],
+    "expectedProvider": "design-gated bootstrap snapshot loader",
+    "packagedSupport": "not supported for packaged user projects in this phase",
+    "securityLimitations": ["no user module cache in snapshots", "stale snapshots must be rejected"]
+  }
+}

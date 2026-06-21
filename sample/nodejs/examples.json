@@ -226,6 +226,69 @@
       "packagedCompatible": false
     },
     {
+      "name": "node-runtime-info",
+      "status": "partial",
+      "tags": ["phase9", "main-app", "runtime-info"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "startup-snapshot",
+      "status": "experimental",
+      "tags": ["phase9", "main-app", "snapshot", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "heap-snapshot",
+      "status": "experimental",
+      "tags": ["phase9", "main-app", "heap-snapshot", "inspector", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "multi-instance",
+      "status": "experimental",
+      "tags": ["phase9", "main-app", "multi-instance", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "sandboxed-script",
+      "status": "experimental",
+      "tags": ["phase9", "main-app", "sandbox", "hardened-sandbox", "design-gated", "security"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "wasm-basic",
+      "status": "partial",
+      "tags": ["phase9", "main-app", "wasm"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "wasi-scoped-fs",
+      "status": "experimental",
+      "tags": ["phase9", "main-app", "wasm", "wasi", "scoped-fs", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "wasm-worker",
+      "status": "experimental",
+      "tags": ["phase9", "main-app", "wasm", "wasm-worker", "worker", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
+      "name": "wasm-plugin",
+      "status": "experimental",
+      "tags": ["phase9", "main-app", "wasm", "plugin", "wasm-plugin", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
+    },
+    {
       "name": "typescript-smoke",
       "status": "stable",
       "tags": ["typescript", "bridge"],

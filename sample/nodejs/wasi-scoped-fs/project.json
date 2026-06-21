@@ -1,0 +1,16 @@
+{
+  "name": "wasi-scoped-fs",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["wasi", "scoped-fs"],
+    "expectedProvider": "design-gated scoped-fs WASI facade",
+    "packagedSupport": "not supported for user code in this phase",
+    "securityLimitations": ["raw node:wasi remains disabled", "preopens must be brokered through scoped fs"]
+  }
+}

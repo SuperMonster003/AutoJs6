@@ -126,6 +126,10 @@ The Batch A start is intentionally conservative:
   host-side Phase 9 modernization/policy aggregate plus the connected
   WASM/WASI and real npm corpus subgates on Sony/full profiles, while keeping
   Node 24.17 promotion blocked until Android runtime artifacts exist.
+- S9-49 adds Phase 9 user examples for runtime info, startup snapshot policy,
+  heap snapshot policy, multi-instance policy, brokered sandboxing, basic WASM,
+  controlled WASI facade policy, WASM worker policy, and JS+WASM plugin policy.
+  See [USER_EXAMPLES.md](USER_EXAMPLES.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because

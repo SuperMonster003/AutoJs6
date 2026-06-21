@@ -1,0 +1,16 @@
+{
+  "name": "heap-snapshot",
+  "type": "node",
+  "main": "main.cjs",
+  "node": {
+    "backend": "embedded",
+    "timeoutMs": 10000,
+    "permissions": []
+  },
+  "example": {
+    "capabilities": ["heap-snapshot", "inspector"],
+    "expectedProvider": "design-gated debug diagnostics",
+    "packagedSupport": "not supported in release packaged apps",
+    "securityLimitations": ["no production inspector", "heap data stays app-private until explicit export"]
+  }
+}
