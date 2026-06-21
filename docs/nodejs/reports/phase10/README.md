@@ -19,15 +19,17 @@ skip audit, and focused gate coverage into repeatable evidence.
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
 .\gradlew.bat --console=plain :app:verifyNodeWorkerWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase10DeveloperExperience
+.\gradlew.bat --console=plain :app:verifyNodeDeveloperExperienceGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
 
 `verifyNodePhase10Gate` aggregates the first-wave host gates, packaged parity,
-package-manager boundary checks, multi-instance policy evidence, and adapter v1
-ABI/export checks. The second-wave provider registry host gate is included as
-S10-11 evidence, but the full live-provider device gate remains explicit because
-fetch and WebSocket require the experimental network provider flag. It does not
+package-manager boundary checks, multi-instance policy evidence,
+Worker/WASI boundary evidence, developer-experience evidence, and adapter v1
+ABI/export checks. The live-provider device gate remains explicit because fetch
+and WebSocket require the experimental network provider flag. It does not
 promote any blocked capability.
 
 ## Outputs
@@ -50,6 +52,8 @@ promote any blocked capability.
 - `build/reports/nodejs/phase10-long-running-activation.md`
 - `build/reports/nodejs/phase10-worker-wasi-boundary.json`
 - `build/reports/nodejs/phase10-worker-wasi-boundary.md`
+- `build/reports/nodejs/phase10-developer-experience.json`
+- `build/reports/nodejs/phase10-developer-experience.md`
 - `app/build/reports/nodejs/live-provider-summary.json`
 
 ## Current Decisions
@@ -81,6 +85,10 @@ promote any blocked capability.
   S10-42. Pure WebAssembly remains usable; `worker_threads`, raw WASI,
   controlled WASI, worker+WASM, and packaged WASM cache/asset promotion remain
   blocked or deferred.
+- [DEVELOPER_EXPERIENCE.md](DEVELOPER_EXPERIENCE.md) records S10-43 through
+  S10-46. Host/build-stage TypeScript output, source-map evidence, the embedded
+  `node:test` subset, and debug-only hot reload are now covered by focused
+  gates. Packaged and release hot reload remain disabled.
 - The descriptor schema remains compatible with existing v1 projects while the
   version vector carries the v1.1 bootstrap, CJS loader, ESM loader, dynamic
   import, builtin profile, bridge protocol, capability manifest, and

@@ -307,6 +307,8 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
 .\gradlew.bat --console=plain :app:verifyNodeWorkerWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase10DeveloperExperience
+.\gradlew.bat --console=plain :app:verifyNodeDeveloperExperienceGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -334,7 +336,12 @@ focused gates; multi-instance remains primary-only and packaged long-running
 service mode remains blocked. `verifyNodePhase10WorkerWasiBoundary` records
 S10-37 through S10-42: pure WebAssembly stays usable, while `worker_threads`,
 raw WASI, controlled WASI, worker+WASM, and packaged WASM cache/asset promotion
-remain blocked or deferred. See
+remain blocked or deferred. `verifyNodePhase10DeveloperExperience` records
+S10-43 through S10-46 with a host/build-stage TypeScript transform fixture,
+incremental cache evidence, source-map evidence, embedded `node:test` coverage,
+and debug-only hot reload policy. `verifyNodeDeveloperExperienceGate` runs the
+focused Sony TypeScript/source-map/node:test/debug-reload selector. Packaged and
+release hot reload remain disabled. See
 [reports/phase10/README.md](reports/phase10/README.md).
 
 ## Phase 7 Focused Gates

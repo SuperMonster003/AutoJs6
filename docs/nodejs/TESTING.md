@@ -322,6 +322,25 @@ This gate verifies basic `WebAssembly.compile` / `instantiate` support and
 scoped `.wasm` file loading while keeping raw `wasi` / `node:wasi` disabled and
 unshadowable.
 
+Focused Phase 10 developer-experience instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase10DeveloperExperience
+.\gradlew.bat --console=plain :app:verifyNodeDeveloperExperienceGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+`verifyNodePhase10DeveloperExperience` writes the S10-43 through S10-46
+developer-experience report. The host verifier builds a temporary `.ts` /
+`.mts` / `.cts` project, emits CJS/ESM output and source maps, proves
+incremental cache hit and invalidation behavior, runs the generated output with
+host Node, and rejects lifecycle scripts, compiler plugins, runtime `.tsx`,
+native addons, and transform-required TypeScript syntax. The Sony gate runs
+`NodeTypeScriptInstrumentationTest`, `NodeSourceMapStackTraceInstrumentationTest`,
+the focused embedded `node:test` subset methods from
+`NodeCoreBuiltinCompatibilityInstrumentationTest`, and the debug-only plugin
+reload method from `NodePluginSystemInstrumentationTest`. Hot reload remains a
+debug-only host workflow; packaged and release hot reload stay disabled.
+
 Focused controlled HTTP client facade instrumentation:
 
 ```powershell
