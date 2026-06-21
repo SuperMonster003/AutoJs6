@@ -13,6 +13,8 @@ skip audit, and focused gate coverage into repeatable evidence.
 .\gradlew.bat --console=plain :app:generateNodePhase10SkipAudit
 .\gradlew.bat --console=plain :app:verifyNodePhase10PackagedParityHost
 .\gradlew.bat --console=plain :app:verifyNodePhase10FocusedGateMatrix
+.\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
+.\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
@@ -38,6 +40,8 @@ promote any blocked capability.
 - `build/reports/nodejs/phase10-packaged-parity.md`
 - `build/reports/nodejs/phase10-focused-gate-matrix.json`
 - `build/reports/nodejs/phase10-focused-gate-matrix.md`
+- `build/reports/nodejs/phase10-package-manager-boundary.json`
+- `build/reports/nodejs/phase10-package-manager-boundary.md`
 - `app/build/reports/nodejs/live-provider-summary.json`
 
 ## Current Decisions
@@ -55,6 +59,11 @@ promote any blocked capability.
   through S10-20 Sony live-provider activation evidence. The gate passed with
   27 tests, 0 failures, 0 errors, 1 policy-allowed accessibility skip, and 0
   policy violations.
+- [PACKAGE_MANAGER_BOUNDARY.md](PACKAGE_MANAGER_BOUNDARY.md) records the
+  S10-21 through S10-27 `autojs6-pm` host-managed fixture. It covers offline
+  registry metadata, semver, nested dependency install, tarball integrity, safe
+  extraction, `autojs6-lock.json`, install/list/update/remove/verify/prune, and
+  package compatibility analysis without enabling Android runtime install.
 - The descriptor schema remains compatible with existing v1 projects while the
   version vector carries the v1.1 bootstrap, CJS loader, ESM loader, dynamic
   import, builtin profile, bridge protocol, capability manifest, and

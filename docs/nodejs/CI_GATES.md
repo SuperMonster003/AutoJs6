@@ -301,6 +301,8 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:generateNodePhase10SkipAudit
 .\gradlew.bat --console=plain :app:verifyNodePhase10PackagedParityHost
 .\gradlew.bat --console=plain :app:verifyNodePhase10FocusedGateMatrix
+.\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
+.\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -316,7 +318,11 @@ metadata, Doctor report wiring, Phase 10 `statusCode` vocabulary,
 packaged parity host report records descriptor/version-vector coverage,
 stale-template checks, and fixture cache-key invalidators;
 `verifyNodePackagedParityGate` still runs the Sony install-and-launch APK
-smokes. See
+smokes. `verifyNodePhase10Autojs6PmFixture` covers the S10-21 through S10-27
+host-managed `autojs6-pm` boundary with offline registry metadata, semver,
+tarball integrity, safe extraction, `autojs6-lock.json`, install/list/update/
+remove/verify/prune, and package compatibility analyzer negative tests. It does
+not enable Android runtime package installation or full npm CLI behavior. See
 [reports/phase10/README.md](reports/phase10/README.md).
 
 ## Phase 7 Focused Gates

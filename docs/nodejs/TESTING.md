@@ -496,6 +496,8 @@ Current dependency bundler verification:
 .\gradlew.bat --console=plain :app:manageNodeDependencies
 .\gradlew.bat --console=plain :app:verifyNodeDependencyManagerFixture
 .\gradlew.bat --console=plain :app:verifyNodeDependencyBundlerFixtures
+.\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
+.\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
 ```
 
 `bundleNodeDependencies` validates an existing project root with `package.json` and `node_modules`, then writes a
@@ -529,6 +531,18 @@ packaged-layout verifier rejects analyzer `unsafe` and `unsupported` statuses be
 Native addon binaries are reported as
 `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` files are reported as
 `NODE_GYP_ARTIFACT_UNSUPPORTED`.
+
+`verifyNodePhase10Autojs6PmFixture` is the S10-21 through S10-27
+host-managed `autojs6-pm` gate. It uses `sample/nodejs/autojs6-pm-fixture` to
+generate local registry tarballs, resolve exact/caret/tilde/comparator/dist-tag
+ranges, install a nested pure JavaScript graph, verify `sha512` integrity,
+extract `.tgz` files with Tar Slip/link denial, write `autojs6-lock.json`, and
+exercise `install`, `installFromTarball`, `update`, `remove`, `list`, `verify`,
+and `prune`. Its negative tests cover integrity mismatch, tar path escape,
+disabled lifecycle scripts, native addon files, and non-HTTPS registry protocol.
+The gate is host-managed and experimental; Android runtime package installation,
+full npm CLI behavior, hoisting, package-manager hooks, and peer installation
+remain deferred.
 
 Current doctor diagnostics:
 

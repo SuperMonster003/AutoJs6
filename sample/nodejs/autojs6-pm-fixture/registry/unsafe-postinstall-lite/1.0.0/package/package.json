@@ -1,0 +1,9 @@
+{
+  "name": "unsafe-postinstall-lite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  }
+}

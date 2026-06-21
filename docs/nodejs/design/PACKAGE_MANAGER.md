@@ -250,3 +250,34 @@ SBOM-lite and compatibility reports, and verifies the output is ready for packag
 fixture stays offline through local `file:` dependencies. The manager report uses schema
 `autojs6-node-dependency-manager-v1` and records each step, the report index, the bundle hash, the cache key, and safety
 controls including `packageLifecycleScriptsExecuted=false`.
+
+## Phase 10 AutoJs6 Package Manager MVP
+
+Phase 10 adds a smaller host-managed installer prototype named `autojs6-pm`.
+It is intentionally not a full npm CLI and does not install packages inside the
+Android runtime.
+
+Focused gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
+.\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
+```
+
+The fixture uses a local registry under
+`sample/nodejs/autojs6-pm-fixture` and verifies:
+
+- registry metadata parsing
+- exact, caret, tilde, comparator range, and dist-tag semver resolution
+- nested `node_modules` layout
+- `sha512` tarball integrity checks
+- safe `.tgz` extraction with Tar Slip, symlink, and hardlink denial
+- `autojs6-lock.json`
+- `install`, `installFromTarball`, `update`, `remove`, `list`, `verify`, and
+  `prune`
+- compatibility analysis for lifecycle scripts, native addons, raw process and
+  raw network modules, `worker_threads`, raw `node:wasi`, and private bindings
+
+This is the S10-21 through S10-27 evidence path. S10-28 remains deferred:
+project UI, live online registry integration, and APK builder dependency UI
+must be added separately before this becomes a user-facing mobile installer.

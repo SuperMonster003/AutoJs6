@@ -37,6 +37,8 @@ tasks.register<Exec>("generateNodePhase10CapabilityTruth") {
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
     outputs.files(
@@ -166,12 +168,37 @@ tasks.register<Exec>("verifyNodePhase10FocusedGateMatrix") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase10Autojs6PmFixture") {
+    group = "verification"
+    description = "Verifies the Phase 10 autojs6-pm host-managed pure-JS package manager fixture and safety boundary."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js")
+    inputs.file(scriptFile)
+    inputs.dir(rootProject.layout.projectDirectory.dir("sample/nodejs/autojs6-pm-fixture"))
+    outputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-package-manager-boundary.json") },
+        nodePhase10ReportDir.map { it.file("phase10-package-manager-boundary.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "verify-fixture",
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase10ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePackageManagerGate") {
     group = "verification"
     description = "Runs the current Phase 10 package-manager boundary gate using safe dependency manager and bundler fixtures."
 
     dependsOn(
         "generateNodePhase10CapabilityTruth",
+        "verifyNodePhase10Autojs6PmFixture",
         "verifyNodeDependencyManagerFixture",
         "verifyNodeDependencyBundlerFixtures",
     )

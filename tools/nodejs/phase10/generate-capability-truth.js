@@ -128,8 +128,12 @@ const CAPABILITIES = [
   {
     id: "package_manager",
     status: ["implemented", "experimental"],
-    evidence: ["verifyNodeDependencyManagerFixture", "verifyNodeDependencyBundlerFixtures"],
-    notes: "Host dependency manager and bundler sanitizer exist; user-facing package manager remains Phase 10 work.",
+    evidence: [
+      "verifyNodePhase10Autojs6PmFixture",
+      "verifyNodeDependencyManagerFixture",
+      "verifyNodeDependencyBundlerFixtures",
+    ],
+    notes: "Host-managed autojs6-pm MVP covers offline registry metadata, semver, tarball integrity, lockfile, safe extraction, and compatibility analysis; Android runtime install remains disabled.",
   },
   {
     id: "long_running",
@@ -206,6 +210,8 @@ function loadEvidenceFiles(repoRoot) {
     descriptor: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt"),
     capabilities: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"),
     providerRegistry: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"),
+    phase10Gate: readEvidence(repoRoot, "app/node-phase10-gate.gradle.kts"),
+    autojs6Pm: readEvidence(repoRoot, "tools/nodejs/phase10/autojs6-pm.js"),
     testingDoc: readEvidence(repoRoot, "docs/nodejs/TESTING.md"),
     ciGatesDoc: readEvidence(repoRoot, "docs/nodejs/CI_GATES.md"),
   };
