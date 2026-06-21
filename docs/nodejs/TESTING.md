@@ -1754,6 +1754,11 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:generateNodePhase9Summary "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase9Gate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:generateNodeFinalCapabilityTruth
+.\gradlew.bat --console=plain :app:verifyNodeFinalFocusedGateTopology
+.\gradlew.bat --console=plain :app:generateNodeFinalAdapterStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalCrashStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalIntegrationSummary
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
@@ -1822,6 +1827,16 @@ records crash bundle fields, resource/timeline snapshot requirements,
 `phase10-summary.json` and `.md` for S10-56, combining Phase 10 host reports,
 the example catalog, real npm corpus manifest, and available focused device
 XML. The summary requires at least 55 examples and 50 real npm fixtures.
+Phase 11 final generation tasks write `final-capability-truth.json`,
+`final-focused-gate-topology.json`, `final-adapter-gate.json`,
+`final-crash-gate.json`, and `final-integration-summary.json` without failing
+on open blockers. Strict final tasks such as `verifyNodeFinalCapabilityTruth`,
+`verifyNodeFinalAdapterGate`, `verifyNodeFinalCrashGate`, and
+`verifyNodeFinalIntegrationGate` are expected to fail until the required
+internal blockers in `docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` are
+closed. The final status vocabulary is only `completed` or `blocked`;
+`completed_with_recorded_blockers` is not valid for required internal Phase 11
+capabilities.
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:

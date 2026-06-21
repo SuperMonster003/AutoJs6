@@ -360,6 +360,35 @@ Phase 10 50-fixture real npm corpus and 55-example catalog before it can report
 `completed_with_recorded_blockers`. See
 [reports/phase10/README.md](reports/phase10/README.md).
 
+## Phase 11 Final Graduation Gates
+
+Phase 11 introduces the final graduation contract. Generation tasks are safe to
+run while required internal blockers are still open:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodeFinalCapabilityTruth
+.\gradlew.bat --console=plain :app:verifyNodeFinalFocusedGateTopology
+.\gradlew.bat --console=plain :app:generateNodeFinalAdapterStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalCrashStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalIntegrationSummary
+```
+
+Strict final gates intentionally fail until the required internal blockers in
+`docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` are closed:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeFinalCapabilityTruth
+.\gradlew.bat --console=plain :app:verifyNodeFinalAdapterGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalCrashGate
+.\gradlew.bat --console=plain :app:verifyNodeFinalIntegrationGate
+```
+
+The final status vocabulary is only `completed` or `blocked`;
+`completed_with_recorded_blockers` is not valid for required internal
+capabilities. Node 24.17 remains an external runtime maintenance lane, and
+`node24_5` remains the default runtime while Phase 11 work proceeds. See
+[final/README.md](final/README.md).
+
 ## Phase 7 Focused Gates
 
 Phase 7 uses focused feature gates instead of expanding every iteration to the
