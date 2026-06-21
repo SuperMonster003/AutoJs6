@@ -26,6 +26,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodePhase9ChaosSecurityPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase9Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Generated outputs:
@@ -121,6 +122,10 @@ The Batch A start is intentionally conservative:
   compile-cache graph, TypeScript+WASM, worker+WASM fallback, large ESM graph,
   and package-integrity coverage. See
   [REAL_NPM_CORPUS_PHASE9.md](REAL_NPM_CORPUS_PHASE9.md).
+- S9-48 now has an aggregate `verifyNodePhase9Gate` entry point. It runs the
+  host-side Phase 9 modernization/policy aggregate plus the connected
+  WASM/WASI and real npm corpus subgates on Sony/full profiles, while keeping
+  Node 24.17 promotion blocked until Android runtime artifacts exist.
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because

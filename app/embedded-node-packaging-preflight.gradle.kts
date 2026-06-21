@@ -4185,6 +4185,23 @@ val verifyNodeWasmWasiGate = tasks.register("verifyNodeWasmWasiGate") {
     }
 }
 
+val verifyNodePhase9Gate = tasks.register("verifyNodePhase9Gate") {
+    group = "verification"
+    description = "Runs the Phase 9 aggregate gate without promoting Node 24.17 or loosening Safe Node boundaries."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn(
+            "verifyNodePhase9NativeModernizationPlan",
+            verifyNodeWasmWasiGate,
+            "connectedAppDebugAndroidTest",
+        )
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
     group = "verification"
     description = "Runs the Embedded Node release gate with RC host checks, desktop differential, and explicit heavy device profile."

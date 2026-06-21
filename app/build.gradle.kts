@@ -781,6 +781,10 @@ val nodeJsPhase8SandboxConcurrencyGateInstrumentationClasses = listOf(
 val nodeJsPhase9WasmWasiGateInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeWasmWasiInstrumentationTest",
 )
+val nodeJsPhase9GateInstrumentationClasses = (
+        nodeJsPhase9WasmWasiGateInstrumentationClasses +
+                nodeJsRealNpmGateInstrumentationClasses
+        ).distinct()
 val nodeJsPhase8SecurityStressGateInstrumentationClasses = (
         nodeJs2417SecurityProbeInstrumentationClasses +
                 nodeJsTypeScriptGateInstrumentationClasses +
@@ -881,6 +885,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodePhase8SecurityStressGate" to nodeJsPhase8SecurityStressGateInstrumentationClasses,
     "verifyNodePhase8Gate" to nodeJsPhase8GateInstrumentationClasses,
     "verifyNodeWasmWasiGate" to nodeJsPhase9WasmWasiGateInstrumentationClasses,
+    "verifyNodePhase9Gate" to nodeJsPhase9GateInstrumentationClasses,
 )
 val nodeJsRequestedFocusedGate = taskNames
     .map { rawTaskName -> rawTaskName.substringAfterLast(':') }
