@@ -271,11 +271,69 @@ tasks.register<Exec>("verifyNodeFinalCrashGate") {
     )
 }
 
-tasks.register("verifyNodeFinalPackageManagerGate") {
+tasks.register<Exec>("generateNodeFinalPackageManagerStatus") {
+    group = "verification"
+    description = "Writes the current Phase 11 package-manager status without failing on Android install blockers."
+
+    dependsOn("verifyNodePackageManagerGate", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-package-manager-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/PACKAGE_MANAGER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/PACKAGE_MANAGER_BOUNDARY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(nodePhase11ReportDir.map { it.file("phase10-package-manager-boundary.json") })
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-package-manager-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeFinalPackageManagerGate") {
     group = "verification"
     description = "Strict final package-manager gate; blocked until Android-side package installation is implemented."
 
-    dependsOn("verifyNodePackageManagerGate", "verifyNodeFinalCapabilityTruth")
+    dependsOn("verifyNodePackageManagerGate", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-package-manager-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/PACKAGE_MANAGER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/PACKAGE_MANAGER_BOUNDARY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(nodePhase11ReportDir.map { it.file("phase10-package-manager-boundary.json") })
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-package-manager-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-blocked",
+    )
 }
 
 tasks.register("verifyNodeFinalLongRunningGate") {
@@ -394,6 +452,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         "verifyNodeFinalFocusedGateTopology",
         "generateNodeFinalAdapterStatus",
         "generateNodeFinalCrashStatus",
+        "generateNodeFinalPackageManagerStatus",
         "generateNodeFinalMultiInstanceStatus",
     )
 
@@ -405,6 +464,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         nodePhase11ReportDir.map { it.file("final-focused-gate-topology.json") },
         nodePhase11ReportDir.map { it.file("final-adapter-gate.json") },
         nodePhase11ReportDir.map { it.file("final-crash-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
     )
     outputs.files(
@@ -432,6 +492,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         "verifyNodeFinalFocusedGateTopology",
         "generateNodeFinalAdapterStatus",
         "generateNodeFinalCrashStatus",
+        "generateNodeFinalPackageManagerStatus",
         "generateNodeFinalMultiInstanceStatus",
     )
 
@@ -443,6 +504,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         nodePhase11ReportDir.map { it.file("final-focused-gate-topology.json") },
         nodePhase11ReportDir.map { it.file("final-adapter-gate.json") },
         nodePhase11ReportDir.map { it.file("final-crash-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-package-manager-gate.json") },
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
     )
     outputs.files(

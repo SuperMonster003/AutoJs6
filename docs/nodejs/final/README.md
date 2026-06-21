@@ -15,11 +15,13 @@ Host report tasks:
 ```powershell
 .\gradlew.bat --console=plain :app:generateNodeFinalCapabilityTruth
 .\gradlew.bat --console=plain :app:verifyNodeFinalFocusedGateTopology
+.\gradlew.bat --console=plain :app:generateNodeFinalPackageManagerStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalMultiInstanceStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalIntegrationSummary
 ```
 
 Strict final gates such as `verifyNodeFinalCapabilityTruth`,
 `verifyNodeFinalAdapterGate`, `verifyNodeFinalCrashGate`,
-`verifyNodeFinalMultiInstanceGate`, and `verifyNodeFinalIntegrationGate` are
-expected to remain `blocked` until the required internal blockers are resolved.
+`verifyNodeFinalPackageManagerGate`, `verifyNodeFinalMultiInstanceGate`, and
+`verifyNodeFinalIntegrationGate` are expected to remain `blocked` until the
+required internal blockers are resolved.
