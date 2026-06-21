@@ -12,13 +12,31 @@ import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 
-enum class NodeBridgeProviderStatus(val wireName: String) {
+enum class NodeBridgeProviderStatus(val wireName: String, val phase10WireName: String = wireName) {
     UNAVAILABLE("unavailable"),
     FAKE("fake"),
     AVAILABLE("available"),
-    PERMISSION_REQUIRED("permission-required"),
+    PERMISSION_REQUIRED("permission-required", "permission_required"),
     DEGRADED("degraded"),
     FAILED("failed"),
+}
+
+enum class NodeBridgePackagedSupportStatus(val wireName: String) {
+    SUPPORTED("supported"),
+    PROVIDER_DEPENDENT("provider-dependent"),
+    DEGRADED("degraded"),
+    UNSUPPORTED("unsupported"),
+    DEBUG_ONLY("debug-only"),
+}
+
+data class NodeBridgePackagedSupport(
+    val status: NodeBridgePackagedSupportStatus,
+    val notes: String,
+) {
+    fun toJsonObject(): JSONObject = JSONObject().apply {
+        put("status", status.wireName)
+        put("notes", notes)
+    }
 }
 
 data class NodeBridgeProviderDefinition(
@@ -29,8 +47,12 @@ data class NodeBridgeProviderDefinition(
     val requiredCapabilities: List<String>,
     val requiredAndroidPermissions: List<String> =
         NodeBridgePermissionManifest.androidPermissionsForCapabilities(requiredCapabilities),
+    val packagedSupport: NodeBridgePackagedSupport,
+    val healthCheckName: String = "androidHealth",
 ) {
     fun toJsonObject(): JSONObject = JSONObject().apply {
+        put("schema", NodeBridgeProviderRegistry.PROVIDER_SCHEMA)
+        put("registryVersion", NodeBridgeProviderRegistry.REGISTRY_VERSION)
         put("id", id)
         put("displayName", displayName)
         put("version", version)
@@ -38,6 +60,15 @@ data class NodeBridgeProviderDefinition(
         put("methods", methodsJson())
         put("requiredCapabilities", JSONArray(requiredCapabilities))
         put("requiredAndroidPermissions", JSONArray(requiredAndroidPermissions))
+        put("statusVocabulary", JSONArray(NodeBridgeProviderRegistry.statusVocabulary))
+        put(
+            "healthCheck",
+            JSONObject()
+                .put("name", healthCheckName)
+                .put("status", "not_run")
+                .put("async", false),
+        )
+        put("packagedSupport", packagedSupport.toJsonObject())
     }
 
     private fun methodsJson(): JSONObject = JSONObject().apply {
@@ -55,16 +86,37 @@ data class NodeBridgeProviderHealth(
     val details: Map<String, String> = emptyMap(),
 ) {
     fun toJsonObject(): JSONObject = definition.toJsonObject().apply {
+        val activeCount = activeResourceCount.coerceAtLeast(0)
         put("status", status.wireName)
+        put("statusCode", status.phase10WireName)
         put("lastFailure", lastFailure ?: JSONObject.NULL)
-        put("activeResourceCount", activeResourceCount.coerceAtLeast(0))
+        put("lastError", lastFailure?.let { JSONObject().put("message", it) } ?: JSONObject.NULL)
+        put("activeResourceCount", activeCount)
+        put(
+            "activeResources",
+            JSONObject()
+                .put("count", activeCount),
+        )
+        put(
+            "healthCheck",
+            JSONObject()
+                .put("name", definition.healthCheckName)
+                .put("status", status.phase10WireName)
+                .put("lastError", lastFailure ?: JSONObject.NULL)
+                .put("activeResourceCount", activeCount),
+        )
         put("details", JSONObject(details))
     }
 }
 
 object NodeBridgeProviderRegistry {
 
-    const val PROVIDER_VERSION = "autojs6-bridge-provider-v1"
+    const val REGISTRY_VERSION = "autojs6-bridge-provider-registry-v2"
+    const val PROVIDER_SCHEMA = "autojs6-node-bridge-provider-v2"
+    const val PROVIDER_VERSION = "autojs6-bridge-provider-v2"
+
+    val statusVocabulary: List<String> =
+        NodeBridgeProviderStatus.values().map { it.phase10WireName }.distinct()
 
     private const val FETCH_PROVIDER = "fetch"
     private const val WEBSOCKET_PROVIDER = "websocket"
@@ -86,67 +138,80 @@ object NodeBridgeProviderRegistry {
             displayName = "fetch/axios",
             modules = listOf(NodeBridgeModules.FETCH),
             capabilities = listOf(NodeBridgePermissionManifest.NETWORK),
+            packagedSupport = packagedProviderDependent("requires packaged network capability and the experimental network provider flag"),
         ),
         provider(
             id = WEBSOCKET_PROVIDER,
             modules = listOf(NodeBridgeModules.WEBSOCKET),
             capabilities = listOf(NodeBridgePermissionManifest.NETWORK),
+            packagedSupport = packagedProviderDependent("requires packaged network capability and the experimental network provider flag"),
         ),
         provider(
             id = OCR_PROVIDER,
             modules = listOf(NodeBridgeModules.OCR),
             capabilities = listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
+            packagedSupport = packagedProviderDependent("requires device OCR engine availability and packaged image-handle assets"),
         ),
         provider(
             id = STORAGE_PROVIDER,
             modules = listOf(NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES),
             capabilities = listOf(NodeBridgePermissionManifest.STORAGE),
+            packagedSupport = packagedSupported("packaged project namespace is isolated from the main app namespace"),
         ),
         provider(
             id = DATABASE_PROVIDER,
             displayName = "database/sqlite",
             modules = listOf(NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE),
             capabilities = listOf(NodeBridgePermissionManifest.DATABASE),
+            packagedSupport = packagedSupported("database files remain scoped to the packaged project working directory"),
         ),
         provider(
             id = NOTIFICATIONS_PROVIDER,
             modules = listOf(NodeBridgeModules.NOTIFICATIONS),
             capabilities = listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
+            packagedSupport = packagedProviderDependent("requires Android notification permission and channel policy"),
         ),
         provider(
             id = SENSORS_PROVIDER,
             modules = listOf(NodeBridgeModules.SENSORS),
             capabilities = listOf(NodeBridgePermissionManifest.SENSORS),
+            packagedSupport = packagedProviderDependent("depends on device sensor availability"),
         ),
         provider(
             id = ACCESSIBILITY_PROVIDER,
             modules = listOf(NodeBridgeModules.ACCESSIBILITY),
             capabilities = listOf(NodeBridgePermissionManifest.ACCESSIBILITY),
+            packagedSupport = packagedProviderDependent("requires accessibility service connection and explicit capability"),
         ),
         provider(
             id = MEDIA_PROJECTION_PROVIDER,
             modules = listOf(NodeBridgeModules.MEDIA_PROJECTION),
             capabilities = listOf(NodeBridgePermissionManifest.SCREEN_CAPTURE),
+            packagedSupport = packagedUnsupported("screen-capture grant flow is not promoted for packaged Node execution"),
         ),
         provider(
             id = IMAGE_PROVIDER,
             modules = listOf(NodeBridgeModules.IMAGE, NodeBridgeModules.IMAGES),
             capabilities = listOf(NodeBridgePermissionManifest.IMAGE, NodeBridgePermissionManifest.SCREEN_CAPTURE),
+            packagedSupport = packagedDegraded("readImage/recycle handles are live; capture and matching remain fail-closed without media projection"),
         ),
         provider(
             id = UI_PROVIDER,
             modules = listOf(NodeBridgeModules.UI),
             capabilities = listOf(NodeBridgePermissionManifest.UI),
+            packagedSupport = packagedSupported("Activity-owned declarative UI sessions are handle-based and project-owned"),
         ),
         provider(
             id = WORK_MANAGER_PROVIDER,
             modules = listOf(NodeBridgeModules.WORK_MANAGER),
             capabilities = listOf(NodeBridgePermissionManifest.WORK_MANAGER),
+            packagedSupport = packagedSupported("packaged project entries are validated and executed through WorkManager metadata"),
         ),
         provider(
             id = SHELL_PROVIDER,
             modules = listOf(NodeBridgeModules.SHELL),
             capabilities = listOf(NodeBridgePermissionManifest.SHELL),
+            packagedSupport = packagedProviderDependent("controlled shell bridge requires explicit capability and remains separate from child_process"),
         ),
     )
 
@@ -198,14 +263,28 @@ object NodeBridgeProviderRegistry {
         displayName: String = id,
         modules: List<String>,
         capabilities: List<String>,
+        packagedSupport: NodeBridgePackagedSupport,
     ): NodeBridgeProviderDefinition {
         return NodeBridgeProviderDefinition(
             id = id,
             displayName = displayName,
             modules = modules,
             requiredCapabilities = capabilities.map(NodeBridgePermissionManifest::normalizeCapability).distinct(),
+            packagedSupport = packagedSupport,
         )
     }
+
+    private fun packagedSupported(notes: String): NodeBridgePackagedSupport =
+        NodeBridgePackagedSupport(NodeBridgePackagedSupportStatus.SUPPORTED, notes)
+
+    private fun packagedProviderDependent(notes: String): NodeBridgePackagedSupport =
+        NodeBridgePackagedSupport(NodeBridgePackagedSupportStatus.PROVIDER_DEPENDENT, notes)
+
+    private fun packagedDegraded(notes: String): NodeBridgePackagedSupport =
+        NodeBridgePackagedSupport(NodeBridgePackagedSupportStatus.DEGRADED, notes)
+
+    private fun packagedUnsupported(notes: String): NodeBridgePackagedSupport =
+        NodeBridgePackagedSupport(NodeBridgePackagedSupportStatus.UNSUPPORTED, notes)
 
     private fun androidStatus(id: String, context: Context): NodeBridgeProviderStatus = when (id) {
         FETCH_PROVIDER, WEBSOCKET_PROVIDER -> if (BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {

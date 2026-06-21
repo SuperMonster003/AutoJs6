@@ -327,8 +327,15 @@ object NodeDoctorReportGenerator {
                 val provider = bridgeProviders.getJSONObject(index)
                 appendLine(
                     "  ${provider.getString("displayName")}: status=${provider.getString("status")} " +
+                            "statusCode=${provider.optString("statusCode", provider.getString("status"))} " +
                             "version=${provider.getString("version")} active=${provider.getInt("activeResourceCount")}",
                 )
+                provider.optJSONObject("packagedSupport")?.let { packagedSupport ->
+                    appendLine(
+                        "    packaged: ${packagedSupport.optString("status", "unknown")} " +
+                                packagedSupport.optString("notes").takeIf { it.isNotBlank() }.orEmpty(),
+                    )
+                }
                 val details = provider.optJSONObject("details")
                 if (details != null && details.length() > 0) {
                     appendLine(

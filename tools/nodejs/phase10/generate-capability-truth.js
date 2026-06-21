@@ -205,6 +205,7 @@ function loadEvidenceFiles(repoRoot) {
     packagedSmoke: readEvidence(repoRoot, "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"),
     descriptor: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt"),
     capabilities: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"),
+    providerRegistry: readEvidence(repoRoot, "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"),
     testingDoc: readEvidence(repoRoot, "docs/nodejs/TESTING.md"),
     ciGatesDoc: readEvidence(repoRoot, "docs/nodejs/CI_GATES.md"),
   };

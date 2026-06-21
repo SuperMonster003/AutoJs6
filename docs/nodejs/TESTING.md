@@ -234,6 +234,17 @@ Provider registry and Doctor health instrumentation:
 
 This suite verifies the Phase 7 bridge provider registry for `fetch`/`axios`, `websocket`, OCR, storage, notifications, sensors, accessibility, media projection, image, UI, `work_manager`, and shell. It freezes provider version metadata, required AutoJs capabilities, Android permissions, active resource counts, current `available`/`fake`/`unavailable`/`permission-required`/`degraded` health states, provider detail fields, Doctor JSON/text reporting, and bridge error categories for unavailable, permission-denied, capability-denied, and provider-failed paths while preserving legacy error codes.
 
+Phase 10 S10-11 upgrades this same registry to Provider Registry v2 without
+breaking legacy report consumers. `status` and `activeResourceCount` remain
+present, while `statusCode` uses the Phase 10 vocabulary
+`unavailable`/`fake`/`available`/`permission_required`/`degraded`/`failed`.
+The v2 JSON also exposes `healthCheck`, `activeResources`, `lastError`, and
+`packagedSupport` for every provider. The host verifier is:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase10ProviderRegistryV2
+```
+
 Phase 7 S7-16 live-provider gate:
 
 ```powershell
@@ -1735,12 +1746,14 @@ fails on `libnode.so`, default runtime slot, capability constant, or
 moduleSources budget drift. `generateNodePhase10CapabilityTruth` writes
 `build/reports/nodejs/phase10-capability-truth.json` and `.md` with
 implemented, live-provider, packaged-supported, experimental, blocked, and
-disabled labels. `generateNodePhase10SkipAudit` records unresolved
-skip/assume/ignore sites for packaged, live provider, worker, long-running,
-WASI, Inspector, and device-requirement categories. `verifyNodePhase10Gate`
-aggregates the first-wave host evidence, packaged parity, package-manager
-boundary fixtures, multi-instance policy evidence, and adapter v1 ABI/export
-checks without promoting Node 24.17 or blocked capabilities.
+disabled labels. `verifyNodePhase10ProviderRegistryV2` records S10-11 Provider
+Registry v2 metadata and Doctor wiring. `generateNodePhase10SkipAudit` records
+unresolved skip/assume/ignore sites for packaged, live provider, worker,
+long-running, WASI, Inspector, and device-requirement categories.
+`verifyNodePhase10Gate` aggregates the first-wave host evidence, Provider
+Registry v2, packaged parity, package-manager boundary fixtures, multi-instance
+policy evidence, and adapter v1 ABI/export checks without promoting Node 24.17
+or blocked capabilities.
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:

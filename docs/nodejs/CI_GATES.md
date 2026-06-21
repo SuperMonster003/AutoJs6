@@ -297,6 +297,7 @@ packaged APK evidence into focused first-wave gates:
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodePhase10RuntimeFreeze
 .\gradlew.bat --console=plain :app:generateNodePhase10CapabilityTruth
+.\gradlew.bat --console=plain :app:verifyNodePhase10ProviderRegistryV2
 .\gradlew.bat --console=plain :app:generateNodePhase10SkipAudit
 .\gradlew.bat --console=plain :app:verifyNodePhase10PackagedParityHost
 .\gradlew.bat --console=plain :app:verifyNodePhase10FocusedGateMatrix
@@ -308,10 +309,14 @@ packaged APK evidence into focused first-wave gates:
 default `node24_5` slot, Node 24.5 capability constants, or moduleSources
 budgets drift. `generateNodePhase10CapabilityTruth` records implemented,
 live-provider, packaged-supported, experimental, blocked, and disabled
-capabilities without promoting fake-provider-only results. The packaged parity
-host report records descriptor/version-vector coverage, stale-template checks,
-and fixture cache-key invalidators; `verifyNodePackagedParityGate` still runs
-the Sony install-and-launch APK smokes. See
+capabilities without promoting fake-provider-only results.
+`verifyNodePhase10ProviderRegistryV2` verifies the S10-11 provider registry
+metadata, Doctor report wiring, Phase 10 `statusCode` vocabulary,
+`healthCheck`, `activeResources`, `lastError`, and packaged-support fields. The
+packaged parity host report records descriptor/version-vector coverage,
+stale-template checks, and fixture cache-key invalidators;
+`verifyNodePackagedParityGate` still runs the Sony install-and-launch APK
+smokes. See
 [reports/phase10/README.md](reports/phase10/README.md).
 
 ## Phase 7 Focused Gates

@@ -36,11 +36,38 @@ tasks.register<Exec>("generateNodePhase10CapabilityTruth") {
     inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
     outputs.files(
         nodePhase10ReportDir.map { it.file("phase10-capability-truth.json") },
         nodePhase10ReportDir.map { it.file("phase10-capability-truth.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase10ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodePhase10ProviderRegistryV2") {
+    group = "verification"
+    description = "Verifies the Phase 10 Provider Registry v2 metadata, Doctor wiring, and instrumentation coverage."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-provider-registry-v2.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/ui/settings/NodeDoctorReportGenerator.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeProviderRegistryInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/ui/settings/NodeDoctorReportGeneratorInstrumentationTest.kt"))
+    outputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-provider-registry-v2.json") },
+        nodePhase10ReportDir.map { it.file("phase10-provider-registry-v2.md") },
     )
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
@@ -112,6 +139,7 @@ tasks.register<Exec>("verifyNodePhase10FocusedGateMatrix") {
     dependsOn(
         "verifyNodePhase10RuntimeFreeze",
         "generateNodePhase10CapabilityTruth",
+        "verifyNodePhase10ProviderRegistryV2",
         "generateNodePhase10SkipAudit",
         "verifyNodePhase10PackagedParityHost",
     )
@@ -198,6 +226,7 @@ tasks.register("verifyNodePhase10Gate") {
 
     dependsOn(
         "verifyNodePhase10FocusedGateMatrix",
+        "verifyNodePhase10ProviderRegistryV2",
         "verifyNodePackagedParityGate",
         "verifyNodePackageManagerGate",
         "verifyNodeMultiInstanceGate",

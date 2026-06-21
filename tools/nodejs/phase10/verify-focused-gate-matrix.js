@@ -7,6 +7,7 @@ const path = require("path");
 const REQUIRED_TASKS = [
   "verifyNodePackagedParityGate",
   "verifyNodeLiveProviderGate",
+  "verifyNodePhase10ProviderRegistryV2",
   "verifyNodePackageManagerGate",
   "verifyNodeLongRunningGate",
   "verifyNodeMultiInstanceGate",
@@ -78,6 +79,7 @@ function requiresInstrumentationSelector(task) {
 function category(task) {
   if (task.includes("Packaged")) return "packaged";
   if (task.includes("LiveProvider")) return "live_provider";
+  if (task.includes("ProviderRegistry")) return "live_provider";
   if (task.includes("PackageManager")) return "package_manager";
   if (task.includes("LongRunning")) return "long_running";
   if (task.includes("MultiInstance")) return "multi_instance";

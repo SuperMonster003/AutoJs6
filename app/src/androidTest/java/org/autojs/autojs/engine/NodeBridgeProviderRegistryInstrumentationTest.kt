@@ -80,7 +80,20 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         healthById.values.forEach { health ->
             assertEquals(NodeBridgeProviderRegistry.PROVIDER_VERSION, health.definition.version)
             assertTrue(health.activeResourceCount >= 0)
+            val definitionJson = health.definition.toJsonObject()
+            assertEquals(NodeBridgeProviderRegistry.PROVIDER_SCHEMA, definitionJson.getString("schema"))
+            assertEquals(NodeBridgeProviderRegistry.REGISTRY_VERSION, definitionJson.getString("registryVersion"))
+            assertTrue(definitionJson.getJSONArray("statusVocabulary").length() >= 6)
+            assertTrue(definitionJson.getJSONObject("packagedSupport").getString("status").isNotBlank())
+            val healthJson = health.toJsonObject()
+            assertTrue(NodeBridgeProviderRegistry.statusVocabulary.contains(healthJson.getString("statusCode")))
+            assertEquals(healthJson.getString("statusCode"), healthJson.getJSONObject("healthCheck").getString("status"))
+            assertEquals(health.activeResourceCount, healthJson.getJSONObject("activeResources").getInt("count"))
+            assertTrue(healthJson.has("lastError"))
         }
+        assertEquals("supported", healthById.getValue("storage").definition.packagedSupport.status.wireName)
+        assertEquals("supported", healthById.getValue("work_manager").definition.packagedSupport.status.wireName)
+        assertEquals("unsupported", healthById.getValue("media_projection").definition.packagedSupport.status.wireName)
     }
 
     @Test
