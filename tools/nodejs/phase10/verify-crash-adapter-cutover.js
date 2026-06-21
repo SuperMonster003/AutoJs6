@@ -19,16 +19,16 @@ const REQUIRED_CRASH_BUNDLE_FIELDS = [
 ];
 
 const ADAPTER_OPERATIONS = [
-  { id: "create_runtime", headerToken: "create", requiredForDefault: true },
-  { id: "start_runtime", headerToken: "start", requiredForDefault: true },
-  { id: "execute_source", headerToken: "execute", requiredForDefault: true },
-  { id: "execute_module", headerToken: "execute", requiredForDefault: true },
-  { id: "poll_drain", headerToken: "get_diagnostics", requiredForDefault: true },
+  { id: "create_runtime", headerToken: "create_runtime", requiredForDefault: true },
+  { id: "execute_script", headerToken: "execute_script", requiredForDefault: true },
+  { id: "execute_commonjs", headerToken: "execute_commonjs", requiredForDefault: true },
+  { id: "execute_module", headerToken: "execute_module", requiredForDefault: true },
+  { id: "poll_runtime", headerToken: "poll_runtime", requiredForDefault: true },
   { id: "request_stop", headerToken: "request_stop", requiredForDefault: true },
-  { id: "force_stop", headerToken: "request_stop", requiredForDefault: true },
-  { id: "get_state", headerToken: "get_diagnostics", requiredForDefault: true },
+  { id: "force_stop", headerToken: "force_stop", requiredForDefault: true },
+  { id: "get_state", headerToken: "get_state", requiredForDefault: true },
   { id: "get_diagnostics", headerToken: "get_diagnostics", requiredForDefault: true },
-  { id: "destroy_runtime", headerToken: "destroy", requiredForDefault: true },
+  { id: "destroy_runtime", headerToken: "destroy_runtime", requiredForDefault: true },
   { id: "post_bridge_result", headerToken: "post_bridge_result", requiredForDefault: false },
 ];
 

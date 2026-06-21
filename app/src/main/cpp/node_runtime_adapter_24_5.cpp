@@ -36,11 +36,7 @@ int32_t startRuntime(AutoJsNodeHandle*) {
     return AUTOJS_NODE_RESULT_UNAVAILABLE;
 }
 
-int32_t executeRuntime(
-        AutoJsNodeHandle*,
-        const AutoJsNodeExecutionRequest*,
-        AutoJsNodeExecutionResult* result
-) {
+int32_t fillUnavailableExecutionResult(AutoJsNodeExecutionResult* result) {
     if (result != nullptr && result->struct_size >= sizeof(AutoJsNodeExecutionResult)) {
         result->exit_code = -1;
         result->result_code = AUTOJS_NODE_RESULT_UNAVAILABLE;
@@ -52,7 +48,43 @@ int32_t executeRuntime(
     return AUTOJS_NODE_RESULT_UNAVAILABLE;
 }
 
+int32_t executeScript(
+        AutoJsNodeHandle*,
+        const AutoJsNodeExecutionRequest*,
+        AutoJsNodeExecutionResult* result
+) {
+    return fillUnavailableExecutionResult(result);
+}
+
+int32_t executeCommonjs(
+        AutoJsNodeHandle* handle,
+        const AutoJsNodeExecutionRequest* request,
+        AutoJsNodeExecutionResult* result
+) {
+    return executeScript(handle, request, result);
+}
+
+int32_t executeModule(
+        AutoJsNodeHandle* handle,
+        const AutoJsNodeExecutionRequest* request,
+        AutoJsNodeExecutionResult* result
+) {
+    return executeScript(handle, request, result);
+}
+
+int32_t pollRuntime(
+        AutoJsNodeHandle*,
+        const AutoJsNodePollOptions*,
+        AutoJsNodeExecutionResult* result
+) {
+    return fillUnavailableExecutionResult(result);
+}
+
 int32_t requestStop(AutoJsNodeHandle*, int32_t) {
+    return AUTOJS_NODE_RESULT_UNAVAILABLE;
+}
+
+int32_t forceStop(AutoJsNodeHandle*, int32_t) {
     return AUTOJS_NODE_RESULT_UNAVAILABLE;
 }
 
@@ -62,6 +94,15 @@ int32_t destroyRuntime(AutoJsNodeHandle*) {
 
 int32_t postBridgeResult(AutoJsNodeHandle*, const char*, uint64_t) {
     return AUTOJS_NODE_RESULT_UNAVAILABLE;
+}
+
+int32_t getState(AutoJsNodeHandle*, AutoJsNodeRuntimeState* state) {
+    if (state != nullptr && state->struct_size >= sizeof(AutoJsNodeRuntimeState)) {
+        state->state_code = AUTOJS_NODE_RUNTIME_STATE_UNKNOWN;
+        state->execution_id = 0;
+        state->state_json = "{\"state\":\"surface_only\"}";
+    }
+    return AUTOJS_NODE_RESULT_OK;
 }
 
 int32_t getDiagnostics(AutoJsNodeHandle*, AutoJsNodeDiagnostics* diagnostics) {
@@ -78,11 +119,23 @@ int32_t getDiagnostics(AutoJsNodeHandle*, AutoJsNodeDiagnostics* diagnostics) {
 const AutoJsNodeRuntimeApiV1 kRuntimeApi = {
         sizeof(AutoJsNodeRuntimeApiV1),
         AUTOJS_NODE_RUNTIME_API_ABI_VERSION,
+        0,
         getNodeVersion,
         getRuntimeDescriptor,
         createRuntime,
+        executeScript,
+        executeCommonjs,
+        executeModule,
+        pollRuntime,
+        requestStop,
+        forceStop,
+        getState,
+        getDiagnostics,
+        destroyRuntime,
+        postBridgeResult,
+        createRuntime,
         startRuntime,
-        executeRuntime,
+        executeScript,
         requestStop,
         destroyRuntime,
         postBridgeResult,
