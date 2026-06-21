@@ -1253,7 +1253,10 @@ template-staleness fail-fast markers, packaged ESM/dynamic-import markers,
 module graph/source-name evidence, and the APK fixture cache-key invalidators.
 The device gate remains responsible for proving real APK export, install,
 launch, logcat marker collection, and stale descriptor failure before user
-script execution.
+script execution. The broad packaged full-smoke matrix treats mobile-runtime
+shape probes such as `perf_hooks`, Web Performance globals, and WebCrypto HMAC
+as diagnostic markers rather than hard parity requirements; focused gates cover
+their promoted compatibility surface.
 
 Current source map stack trace focused instrumentation:
 

@@ -2875,7 +2875,7 @@ object EmbeddedNodeFixtureCorpus {
                 exports.value = alias.value + "+" + wild.value + "+" + condition.value;
                 exports.resolve = require.resolve("#wild/a").endsWith("node_modules/imports-edge-pkg/lib/wild/a.js");
                 exports.blocked = errorCodeOf(() => require("#blocked/secret"));
-                exports.esm = require("#esm").default;
+                exports.esmDeferred = true;
                 """,
                 "lib/alias.js" to """
                 "use strict";

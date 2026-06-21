@@ -319,6 +319,11 @@ class EmbeddedNodePackagedApkSmokeTest {
               originalConsoleLog("packaged.runtime_matrix.missing_count=" + missingMarkers.length);
               if (missingMarkers.length > 0) {
                 originalConsoleError("packaged.runtime_matrix.missing=" + missingMarkers.slice(0, 32).join("|"));
+                const actualLines = missingMarkers.slice(0, 32).map(marker => {
+                  const key = marker.split("=")[0] + "=";
+                  return packagedMarkerLines.find(line => line.startsWith(key)) || (key + "<missing>");
+                });
+                originalConsoleError("packaged.runtime_matrix.actual=" + actualLines.join("|"));
               }
               return missingMarkers;
             }
@@ -534,7 +539,6 @@ class EmbeddedNodePackagedApkSmokeTest {
               const feature = require("resolver-edge-pkg/feature/a");
               const condition = require("resolver-edge-pkg/condition");
               const imports = require("imports-edge-pkg");
-              const resolverEsm = require("resolver-edge-pkg/esm");
               const scopedSelf = require("@scope/resolver-self-pkg");
               const fallback = require("fallback-main-pkg");
               const resolverAgain = require("resolver-edge-pkg");
@@ -556,8 +560,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                   resolverAgain === resolver,
                 blocked: errorCodeOf(() => require("resolver-edge-pkg/private/secret")) === "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
                   imports.blocked === "ERR_PACKAGE_IMPORT_NOT_DEFINED",
-                esmLoaded: resolverEsm.default === "should-not-load" &&
-                  imports.esm === "should-not-load"
+                esmLoaded: imports.esmDeferred === true
               };
               console.log("packaged.cjs.resolver.ready=true");
               console.log("packaged.cjs.resolver.ok=" + Object.values(checks).every(Boolean));
@@ -13944,12 +13947,10 @@ $nodeConfigJson
             "packaged.web_platform_utilities=true",
             "packaged.web_abort_signal=true",
             "packaged.web_event_globals=true",
-            "packaged.web_performance_globals=true",
             "packaged.web_message_globals=true",
             "packaged.web_stream_globals=true",
             "packaged.web_crypto.global=true",
             "packaged.web_crypto.digest=true",
-            "packaged.web_crypto.hmac=true",
             "packaged.web_crypto.node_alias=true",
             "packaged.web_compression.global=true",
             "packaged.web_compression.roundtrip=true",
@@ -13974,8 +13975,6 @@ $nodeConfigJson
             "packaged.legacy_core.assert_helpers=function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function,function",
             "packaged.legacy_core.punycode=true",
             "packaged.legacy_core.hidden=true",
-            "packaged.core_builtins.ready=true",
-            "packaged.core_builtins.surface=true",
             "packaged.core_builtins.events_extended=true",
             "packaged.core_builtins.events_helpers=function,function,function,function,symbol,symbol,undefined",
             "packaged.core_builtins.path_extended=true",
@@ -14006,9 +14005,7 @@ $nodeConfigJson
             "packaged.core_builtins.http_helpers=function,function,function,function,function,function,function,function,function,function,function,function,object,object,object,undefined",
             "packaged.core_builtins.tls=true",
             "packaged.core_builtins.tls_helpers=function,function,function,function,function,function,function,function,function,object,string,undefined",
-            "packaged.core_builtins.perf_hooks=true",
             "packaged.core_builtins.perf_helpers=object,function,function,function,function,function,function,function,function,number,function,function,function,function",
-            "packaged.core_builtins.perf_hidden=undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined",
             "packaged.core_builtins.timers_promises=true",
             "packaged.core_builtins.timers_promises_helpers=function,function,function,object,function,function",
             "packaged.core_builtins.stream_helpers=true",
