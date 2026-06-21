@@ -25,10 +25,16 @@ Plan-only entry points:
 - `tools/nodejs/runtime-build/build-node-runtime.ps1`
 - `tools/nodejs/runtime-build/build-node-runtime.sh`
 
+Runtime provenance:
+
+- `docs/nodejs/native/RUNTIME_PROVENANCE.md`
+
 The lock file records:
 
 - current runtime version: Node 24.5
 - target runtime version: Node 24.17
+- Node 24.17 upstream tag, release, commit, source archive, and headers archive
+- Android fork repository, local path, current commit, and current artifact
 - Android ABIs: `arm64-v8a`, `armeabi-v7a`, `x86_64`
 - NDK and CMake versions
 - Clang and Python versions
@@ -42,7 +48,7 @@ The lock file records:
 
 ## Current Status
 
-The current decision is `bootstrap_only` because maintainer-provided artifact
-metadata is still external. This is intentional for the first S9-04 pass:
-the build plan is reviewable, but no promoted runtime artifact is emitted and
-the default runtime remains Node 24.5.
+The current decision is `bootstrap_only` because Node 24.17 Android runtime
+artifacts, per-ABI `libnode.so` SHA-256 values, and Build IDs are still
+external. The upstream and fork baselines are now locked, but no promoted
+runtime artifact is emitted and the default runtime remains Node 24.5.

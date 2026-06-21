@@ -36,7 +36,8 @@ The Batch A start is intentionally conservative:
   exports `AutoJsNodeRuntimeApiV1`, but execution still routes through the
   legacy JNI path until the lifecycle implementation is migrated.
 - S9-04 records the reproducible build skeleton for future Node 24.17 Android
-  artifacts.
+  artifacts and locks the current upstream/fork provenance. See
+  [../../native/RUNTIME_PROVENANCE.md](../../native/RUNTIME_PROVENANCE.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and raw native addons, unrestricted process spawning, raw sockets,

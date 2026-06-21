@@ -6,11 +6,12 @@ Node runtime artifacts.
 Current status: `bootstrap_only`.
 
 The checked-in lock file records the target Node version, required Android
-ABIs, toolchain versions, page-size targets, configure arguments, runtime
-library settings, linker visibility policy, and expected artifact metadata
-fields. Maintainers still need to fill source commits/checksums, fork commit,
-patch-series identity, per-ABI library hashes, Build IDs, and signing inputs
-before this can produce promoted artifacts.
+ABIs, Node 24.17 upstream provenance, Android fork provenance, toolchain
+versions, page-size targets, configure arguments, runtime library settings,
+linker visibility policy, and expected artifact metadata fields. Maintainers
+still need to produce the Node 24.17 Android port artifacts, per-ABI library
+hashes, Build IDs, and signing inputs before this can produce promoted
+artifacts.
 
 Run the host-side check:
 
