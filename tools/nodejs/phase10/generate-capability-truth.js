@@ -183,6 +183,26 @@ const CAPABILITIES = [
     notes: "Debug-only host workflow and plugin reload evidence exist; packaged/release hot reload remains disabled by policy.",
   },
   {
+    id: "crash_evidence_bundle",
+    status: ["implemented", "experimental"],
+    evidence: [
+      "verifyNodePhase10CrashAdapterCutover",
+      "phase10-crash-evidence-bundle",
+      "nativeLibraryHashes",
+    ],
+    notes: "Phase 10 fixes the crash evidence bundle schema and generates a synthetic host manifest; automatic crash-time capture remains future work.",
+  },
+  {
+    id: "adapter_v1_cutover",
+    status: ["blocked", "disabled"],
+    evidence: [
+      "verifyNodeCrashAdapterCutoverGate",
+      "ERR_AUTOJS6_NODE_ADAPTER_NOT_MIGRATED",
+      "legacy_jni",
+    ],
+    notes: "Adapter ABI/export gates are ready, but Node 24.5 adapter lifecycle is still surface-only and default execution remains legacy_jni.",
+  },
+  {
     id: "long_running",
     status: ["implemented", "experimental"],
     evidence: [
@@ -269,6 +289,8 @@ function loadEvidenceFiles(repoRoot) {
     longRunningActivation: readEvidence(repoRoot, "tools/nodejs/phase10/verify-long-running-activation.js"),
     workerWasiBoundary: readEvidence(repoRoot, "tools/nodejs/phase10/verify-worker-wasi-boundary.js"),
     developerExperience: readEvidence(repoRoot, "tools/nodejs/phase10/verify-developer-experience.js"),
+    crashAdapterCutover: readEvidence(repoRoot, "tools/nodejs/phase10/verify-crash-adapter-cutover.js"),
+    runtimeAdapter245: readEvidence(repoRoot, "app/src/main/cpp/node_runtime_adapter_24_5.cpp"),
     testingDoc: readEvidence(repoRoot, "docs/nodejs/TESTING.md"),
     ciGatesDoc: readEvidence(repoRoot, "docs/nodejs/CI_GATES.md"),
   };

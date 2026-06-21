@@ -14,6 +14,7 @@ const REQUIRED_TASKS = [
   "verifyNodeWorkerWasiGate",
   "verifyNodeDeveloperExperienceGate",
   "verifyNodeAdapterV1Gate",
+  "verifyNodeCrashAdapterCutoverGate",
   "verifyNodePhase10Gate",
 ];
 
@@ -87,6 +88,7 @@ function category(task) {
   if (task.includes("MultiInstance")) return "multi_instance";
   if (task.includes("WorkerWasi")) return "worker_wasi";
   if (task.includes("DeveloperExperience")) return "developer_experience";
+  if (task.includes("CrashAdapterCutover")) return "crash_adapter";
   if (task.includes("Adapter")) return "adapter";
   return "aggregate";
 }

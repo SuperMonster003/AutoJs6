@@ -42,6 +42,7 @@ tasks.register<Exec>("generateNodePhase10CapabilityTruth") {
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-developer-experience.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-crash-adapter-cutover.js"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
     outputs.files(
@@ -324,6 +325,41 @@ tasks.register<Exec>("verifyNodePhase10DeveloperExperience") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase10CrashAdapterCutover") {
+    group = "verification"
+    description = "Verifies the Phase 10 crash evidence bundle schema and adapter v1 cutover blockers without switching the default runtime path."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-crash-adapter-cutover.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_api_v1.h"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_adapter_24_5.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-abi.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-export.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/NATIVE_CRASH_PIPELINE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/NATIVE_CRASH_DIAGNOSTICS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CRASH_INTAKE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    outputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-crash-adapter-cutover.json") },
+        nodePhase10ReportDir.map { it.file("phase10-crash-adapter-cutover.md") },
+    )
+    outputs.dir(nodePhase10ReportDir.map { it.dir("phase10-crash-evidence-bundle") })
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase10ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodeAdapterV1Gate") {
     group = "verification"
     description = "Runs the Phase 10 adapter v1 boundary gate without switching the default runtime execution path."
@@ -332,6 +368,17 @@ tasks.register("verifyNodeAdapterV1Gate") {
         "verifyNodePhase10RuntimeFreeze",
         "verifyNodeRuntimeAdapterAbi",
         "verifyNodeRuntimeAdapterExport",
+    )
+}
+
+tasks.register("verifyNodeCrashAdapterCutoverGate") {
+    group = "verification"
+    description = "Runs the Phase 10 crash evidence bundle and adapter cutover gate while keeping legacy JNI as the default path."
+
+    dependsOn(
+        "verifyNodePhase9NativeCrashPipeline",
+        "verifyNodePhase10CrashAdapterCutover",
+        "verifyNodeAdapterV1Gate",
     )
 }
 
@@ -358,6 +405,6 @@ tasks.register("verifyNodePhase10Gate") {
         "verifyNodeMultiInstanceGate",
         "verifyNodePhase10WorkerWasiBoundary",
         "verifyNodeDeveloperExperienceGate",
-        "verifyNodeAdapterV1Gate",
+        "verifyNodeCrashAdapterCutoverGate",
     )
 }
