@@ -20,6 +20,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
+.\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 Generated outputs:
@@ -74,6 +75,10 @@ The Batch A start is intentionally conservative:
   disabled runtime boundary, records DevTools/profiling/heap work as deferred,
   marks controlled diagnostic reports partial, and keeps the disabled-state
   inspector security evidence ready. See [INSPECTOR_POLICY.md](INSPECTOR_POLICY.md).
+- S9-34/S9-40 now have a focused WebAssembly/WASI starting gate: pure
+  WebAssembly compile/instantiate works through scoped `.wasm` bytes, while raw
+  `wasi` / `node:wasi` remains disabled and unshadowable. See
+  [WASM_WASI.md](WASM_WASI.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because

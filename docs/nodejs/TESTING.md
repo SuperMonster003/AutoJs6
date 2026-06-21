@@ -301,6 +301,16 @@ gzip roundtrip behavior, and default controlled-network-off `fetch()` denial.
 It is the compatibility prelude for later `node:http`/`node:https` client
 facade work and does not enable raw socket modules.
 
+Focused Phase 9 WebAssembly/WASI instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+This gate verifies basic `WebAssembly.compile` / `instantiate` support and
+scoped `.wasm` file loading while keeping raw `wasi` / `node:wasi` disabled and
+unshadowable.
+
 Focused controlled HTTP client facade instrumentation:
 
 ```powershell
@@ -1648,6 +1658,7 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
+.\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug

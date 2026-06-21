@@ -4172,6 +4172,19 @@ val verifyNodePhase8Gate = tasks.register("verifyNodePhase8Gate") {
     }
 }
 
+val verifyNodeWasmWasiGate = tasks.register("verifyNodeWasmWasiGate") {
+    group = "verification"
+    description = "Runs the focused Node Phase 9 WebAssembly and raw WASI policy gate on a connected Sony/full device profile."
+
+    val deviceProfile = embeddedNodePackagingTestDeviceProfile()
+    if (deviceProfile in setOf("sony", "full")) {
+        dependsOn("connectedAppDebugAndroidTest")
+    }
+    doFirst {
+        embeddedNodePackagingRequiresHeavyDeviceProfile(name, deviceProfile)
+    }
+}
+
 val verifyNodeReleaseGate = tasks.register("verifyNodeReleaseGate") {
     group = "verification"
     description = "Runs the Embedded Node release gate with RC host checks, desktop differential, and explicit heavy device profile."

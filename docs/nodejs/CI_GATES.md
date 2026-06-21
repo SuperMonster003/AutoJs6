@@ -240,6 +240,7 @@ Phase 9 Batch A starts with host-side native modernization preflights:
 .\gradlew.bat --console=plain :app:verifyNodePhase9PerformancePolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9InspectorPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
+.\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
 These tasks generate the native symbol usage map, verify the versioned C
@@ -253,7 +254,9 @@ process-only prewarm/performance matrix coverage remains partial until reusable
 runtime pooling, packaged metrics, and numeric SLO thresholds exist. The
 inspector policy gate records S9-21/S9-26 with the disabled inspector boundary
 preserved, DevTools/profiling/heap support deferred, diagnostic reports partial,
-and the disabled-state security gate ready. These gates
+and the disabled-state security gate ready. The WASM/WASI focused gate records
+the first S9-34/S9-40 device evidence: pure WebAssembly works with scoped
+`.wasm` bytes while raw `wasi` / `node:wasi` remains disabled. These gates
 do not promote Node 24.17 and do not change the default runtime slot. See
 [reports/phase9/README.md](reports/phase9/README.md),
 [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), and
