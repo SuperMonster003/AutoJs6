@@ -1,0 +1,118 @@
+{
+  "schema": "autojs6-node-final-blocker-registry-v1",
+  "phase": "Phase 11: Node Platform Completion & Graduation",
+  "defaultRuntime": "node24_5",
+  "node2417Lane": "external_runtime_maintenance",
+  "finalStatusVocabulary": [
+    "completed",
+    "blocked"
+  ],
+  "blockedCompletionStatusForbidden": "completed_with_recorded_blockers",
+  "blockers": [
+    {
+      "id": "adapter_v1_real_execution_path",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "AutoJsNodeRuntimeApiV1 exports a surface-only table; default execution remains legacy_jni.",
+      "requiredResolution": "adapter_v1 creates, executes, polls, stops, diagnoses, and destroys the Node 24.5 runtime for script, CommonJS, ESM, dynamic import, bridge, and packaged execution."
+    },
+    {
+      "id": "crash_evidence_automation",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Crash evidence bundle schema and host manifest exist, but fatal marker and next-launch collection are not automatic.",
+      "requiredResolution": "Crash marker, next-launch collection, resource snapshot, timeline tail, symbolization, and chaos injection pass focused gates."
+    },
+    {
+      "id": "android_side_package_installation",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Package manager is host-managed/offline fixture only.",
+      "requiredResolution": "Android package install/update/remove/list/verify/prune is transactional, cancellable, locked, integrity checked, and lifecycle-script free."
+    },
+    {
+      "id": "packaged_long_running",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Interactive long-running works; packaged service mode remains blocked.",
+      "requiredResolution": "Packaged APK long-running mode has foreground notification, stop action, lifecycle handling, checkpoint, quota, and cleanup evidence."
+    },
+    {
+      "id": "second_execution_slot",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Reserved process slots exist, but effective active execution remains primary-only.",
+      "requiredResolution": "At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence."
+    },
+    {
+      "id": "full_heavy_resource_stress",
+      "classification": "required_internal",
+      "status": "open",
+      "currentEvidence": "Core long-running/resource stress exists; full heavy stress and 24-hour soak remain incomplete.",
+      "requiredResolution": "8-hour quick soak and 24-hour final soak show no monotonic leaks, orphan process, or unrecoverable runtime."
+    },
+    {
+      "id": "worker_threads",
+      "classification": "conditional",
+      "status": "decision_required",
+      "currentEvidence": "Default disabled and blocked by native availability.",
+      "requiredResolution": "Implement controlled worker_threads or declare intentionally unsupported with an AutoJs6 process-worker replacement."
+    },
+    {
+      "id": "controlled_wasi",
+      "classification": "conditional",
+      "status": "decision_required",
+      "currentEvidence": "Pure WebAssembly works; raw node:wasi remains disabled.",
+      "requiredResolution": "Either support only WebAssembly or implement a controlled autojs:wasi profile while keeping raw node:wasi disabled."
+    },
+    {
+      "id": "x86",
+      "classification": "conditional",
+      "status": "optional",
+      "currentEvidence": "x86 is not a required Phase 11 ABI.",
+      "requiredResolution": "Optional experiment only; does not block the three required ABIs."
+    },
+    {
+      "id": "native_addon",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "Native addon .node loading is denied by policy and tests.",
+      "requiredResolution": "Stable denial remains documented and tested."
+    },
+    {
+      "id": "unrestricted_child_process",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "child_process is disabled.",
+      "requiredResolution": "Stable denial remains documented and tested."
+    },
+    {
+      "id": "raw_network",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "Raw net/tls/dns/dgram stay denied; controlled fetch/http/WebSocket providers remain bounded.",
+      "requiredResolution": "Stable denial remains documented and tested."
+    },
+    {
+      "id": "private_node_bindings",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "process.binding, process._linkedBinding, and process.dlopen stay denied.",
+      "requiredResolution": "Stable denial remains documented and tested."
+    },
+    {
+      "id": "production_inspector",
+      "classification": "intentional_non_goal",
+      "status": "permanently_unsupported",
+      "currentEvidence": "Inspector remains disabled outside debug-only gates.",
+      "requiredResolution": "Stable release bypass denial remains documented and tested."
+    },
+    {
+      "id": "node_24_17_community_fork",
+      "classification": "external_runtime_maintenance",
+      "status": "waiting_for_android_artifacts",
+      "currentEvidence": "Node 24.17 upstream exists, but Android shared-libnode artifacts for the required ABIs are not production-ready.",
+      "requiredResolution": "Future runtime upgrade lane only; does not block Phase 11 completion on node24_5."
+    }
+  ]
+}
