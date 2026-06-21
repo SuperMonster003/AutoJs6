@@ -23,6 +23,10 @@ skip audit, and focused gate coverage into repeatable evidence.
 .\gradlew.bat --console=plain :app:verifyNodeDeveloperExperienceGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10CrashAdapterCutover
 .\gradlew.bat --console=plain :app:verifyNodeCrashAdapterCutoverGate
+.\gradlew.bat --console=plain :app:verifyNodePhase10SecurityCorpus
+.\gradlew.bat --console=plain :app:verifyNodeRealNpmGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeExamples
+.\gradlew.bat --console=plain :app:generateNodePhase10Summary
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeLiveProviderGate "-Pautojs.nodejs.test.deviceProfile=sony" "-Pautojs.nodejs.network.experimental=true"
 ```
@@ -33,6 +37,9 @@ Worker/WASI boundary evidence, developer-experience evidence, crash/adapter
 cutover evidence, and adapter v1 ABI/export checks. The live-provider device
 gate remains explicit because fetch and WebSocket require the experimental
 network provider flag. It does not promote any blocked capability.
+The final milestone adds S10-53 through S10-56: a machine-readable security
+corpus, 50-fixture real npm corpus, 55-example catalog target, and aggregate
+Phase 10 summary.
 
 ## Outputs
 
@@ -59,6 +66,10 @@ network provider flag. It does not promote any blocked capability.
 - `build/reports/nodejs/phase10-crash-adapter-cutover.json`
 - `build/reports/nodejs/phase10-crash-adapter-cutover.md`
 - `build/reports/nodejs/phase10-crash-evidence-bundle/manifest.json`
+- `build/reports/nodejs/phase10-security-corpus.json`
+- `build/reports/nodejs/phase10-security-corpus.md`
+- `build/reports/nodejs/phase10-summary.json`
+- `build/reports/nodejs/phase10-summary.md`
 - `app/build/reports/nodejs/live-provider-summary.json`
 
 ## Current Decisions
@@ -99,6 +110,13 @@ network provider flag. It does not promote any blocked capability.
   snapshot requirements are fixed, and `AutoJsNodeRuntimeApiV1` operation
   inventory is checked. The Node 24.5 adapter remains `surface_only`, so
   `adapter_v1` is not promoted and `legacy_jni` remains the default path.
+- [SECURITY_CORPUS.md](SECURITY_CORPUS.md) records S10-53. Packaged module
+  escape, provider capability bypass, package-manager tar/integrity/script
+  attacks, quota, multi-instance, Worker/WASI, plugin namespace, and adapter ABI
+  surfaces are now tracked by a host gate.
+- [PHASE10_SUMMARY.md](PHASE10_SUMMARY.md) records S10-56. It defines the final
+  aggregate summary, keeps `node24_5` as the default, and treats blocked
+  surfaces as recorded blockers rather than promoted capabilities.
 - The descriptor schema remains compatible with existing v1 projects while the
   version vector carries the v1.1 bootstrap, CJS loader, ESM loader, dynamic
   import, builtin profile, bridge protocol, capability manifest, and

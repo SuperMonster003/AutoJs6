@@ -360,6 +360,109 @@ tasks.register<Exec>("verifyNodePhase10CrashAdapterCutover") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase10SecurityCorpus") {
+    group = "verification"
+    description = "Verifies the Phase 10 security corpus attack-surface evidence without promoting blocked capabilities."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-security-corpus.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/generate-packaged-parity-report.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/generate-capability-truth.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/autojs6-pm.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-long-running-activation.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-worker-wasi-boundary.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-crash-adapter-cutover.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-abi.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-adapter-export.js"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeRealNpmCompatInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicyInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePluginSystemInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/PLUGIN_SYSTEM.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/BRIDGE_V1_1_MODULES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/WORKER_WASI_BOUNDARY.md"))
+    outputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-security-corpus.json") },
+        nodePhase10ReportDir.map { it.file("phase10-security-corpus.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase10ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("generateNodePhase10Summary") {
+    group = "verification"
+    description = "Writes the Phase 10 aggregate summary from available host reports, example metadata, real npm corpus, and focused device results."
+
+    mustRunAfter("connectedAppDebugAndroidTest")
+
+    dependsOn(
+        "verifyNodePhase10RuntimeFreeze",
+        "generateNodePhase10CapabilityTruth",
+        "verifyNodePhase10ProviderRegistryV2",
+        "generateNodePhase10SkipAudit",
+        "verifyNodePhase10PackagedParityHost",
+        "verifyNodePhase10FocusedGateMatrix",
+        "verifyNodePhase10Autojs6PmFixture",
+        "verifyNodePhase10LongRunningActivation",
+        "verifyNodePhase10WorkerWasiBoundary",
+        "verifyNodePhase10DeveloperExperience",
+        "verifyNodePhase10CrashAdapterCutover",
+        "verifyNodePhase10SecurityCorpus",
+        "verifyNodeExamples",
+    )
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase10/generate-phase10-summary.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/assets/npm_compat_real/manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/examples.json"))
+    inputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-runtime-freeze.json") },
+        nodePhase10ReportDir.map { it.file("phase10-capability-truth.json") },
+        nodePhase10ReportDir.map { it.file("phase10-provider-registry-v2.json") },
+        nodePhase10ReportDir.map { it.file("phase10-skip-audit.json") },
+        nodePhase10ReportDir.map { it.file("phase10-packaged-parity.json") },
+        nodePhase10ReportDir.map { it.file("phase10-focused-gate-matrix.json") },
+        nodePhase10ReportDir.map { it.file("phase10-package-manager-boundary.json") },
+        nodePhase10ReportDir.map { it.file("phase10-long-running-activation.json") },
+        nodePhase10ReportDir.map { it.file("phase10-worker-wasi-boundary.json") },
+        nodePhase10ReportDir.map { it.file("phase10-developer-experience.json") },
+        nodePhase10ReportDir.map { it.file("phase10-crash-adapter-cutover.json") },
+        nodePhase10ReportDir.map { it.file("phase10-security-corpus.json") },
+        project.layout.buildDirectory.file("reports/nodejs/examples.json"),
+    )
+    inputs.dir(project.layout.buildDirectory.dir("outputs/androidTest-results/connected/debug/flavors/app"))
+    outputs.files(
+        nodePhase10ReportDir.map { it.file("phase10-summary.json") },
+        nodePhase10ReportDir.map { it.file("phase10-summary.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase10ReportDir.get().asFile.absolutePath,
+        "--app-report-dir",
+        project.layout.buildDirectory.dir("reports/nodejs").get().asFile.absolutePath,
+        "--android-results-dir",
+        project.layout.buildDirectory.dir("outputs/androidTest-results/connected/debug/flavors/app").get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodeAdapterV1Gate") {
     group = "verification"
     description = "Runs the Phase 10 adapter v1 boundary gate without switching the default runtime execution path."
@@ -382,6 +485,13 @@ tasks.register("verifyNodeCrashAdapterCutoverGate") {
     )
 }
 
+tasks.register("verifyNodeRealNpmGate") {
+    group = "verification"
+    description = "Runs the focused real npm compatibility corpus gate on a connected device."
+
+    dependsOn("connectedAppDebugAndroidTest")
+}
+
 tasks.register("verifyNodePackagedParityGate") {
     group = "verification"
     description = "Runs the Phase 10 packaged APK parity host checks and focused packaged ESM/dynamic-import Sony gate."
@@ -394,7 +504,7 @@ tasks.register("verifyNodePackagedParityGate") {
 
 tasks.register("verifyNodePhase10Gate") {
     group = "verification"
-    description = "Runs the Phase 10 first-wave aggregate gate without promoting blocked capabilities."
+    description = "Runs the Phase 10 aggregate gate without promoting blocked capabilities."
 
     dependsOn(
         "verifyNodePhase10FocusedGateMatrix",
@@ -406,5 +516,9 @@ tasks.register("verifyNodePhase10Gate") {
         "verifyNodePhase10WorkerWasiBoundary",
         "verifyNodeDeveloperExperienceGate",
         "verifyNodeCrashAdapterCutoverGate",
+        "verifyNodePhase10SecurityCorpus",
+        "verifyNodeRealNpmGate",
+        "verifyNodeExamples",
+        "generateNodePhase10Summary",
     )
 }

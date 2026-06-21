@@ -311,6 +311,10 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodeDeveloperExperienceGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10CrashAdapterCutover
 .\gradlew.bat --console=plain :app:verifyNodeCrashAdapterCutoverGate
+.\gradlew.bat --console=plain :app:verifyNodePhase10SecurityCorpus
+.\gradlew.bat --console=plain :app:verifyNodeRealNpmGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodeExamples
+.\gradlew.bat --console=plain :app:generateNodePhase10Summary
 .\gradlew.bat --console=plain :app:verifyNodePackagedParityGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -349,7 +353,11 @@ snapshot requirements, adapter operation inventory, legacy-vs-adapter A/B
 blockers, and default-switch blockers. `verifyNodeCrashAdapterCutoverGate`
 pairs that report with the Phase 9 native crash pipeline and adapter ABI/export
 checks. The Node 24.5 adapter remains `surface_only`, so `legacy_jni` remains
-the default execution path. See
+the default execution path. `verifyNodePhase10SecurityCorpus` records S10-53
+attack-surface evidence and fails if any corpus entry loses its code or gate
+evidence. `generateNodePhase10Summary` records S10-56 and requires the final
+Phase 10 50-fixture real npm corpus and 55-example catalog before it can report
+`completed_with_recorded_blockers`. See
 [reports/phase10/README.md](reports/phase10/README.md).
 
 ## Phase 7 Focused Gates

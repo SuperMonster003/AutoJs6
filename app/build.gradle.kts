@@ -801,7 +801,8 @@ val nodeJsWorkerWasiGateInstrumentationClasses = (
 val nodeJsPhase10GateInstrumentationClasses = (
         nodeJsPackagedParityGateInstrumentationClasses +
                 nodeJsWorkerWasiGateInstrumentationClasses +
-                nodeJsDeveloperExperienceGateInstrumentationClasses
+                nodeJsDeveloperExperienceGateInstrumentationClasses +
+                nodeJsRealNpmGateInstrumentationClasses
         ).distinct()
 val nodeJsPhase8SecurityStressGateInstrumentationClasses = (
         nodeJs2417SecurityProbeInstrumentationClasses +
@@ -904,6 +905,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNode2417UpgradeGate" to nodeJs2417UpgradeGateInstrumentationClasses,
     "verifyNodeTypeScriptGate" to nodeJsTypeScriptGateInstrumentationClasses,
     "verifyNodeDeveloperExperienceGate" to nodeJsDeveloperExperienceGateInstrumentationClasses,
+    "verifyNodeRealNpmGate" to nodeJsRealNpmGateInstrumentationClasses,
     "verifyNodePhase8SecurityStressGate" to nodeJsPhase8SecurityStressGateInstrumentationClasses,
     "verifyNodePhase8Gate" to nodeJsPhase8GateInstrumentationClasses,
     "verifyNodeWasmWasiGate" to nodeJsPhase9WasmWasiGateInstrumentationClasses,

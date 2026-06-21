@@ -1817,6 +1817,11 @@ records crash bundle fields, resource/timeline snapshot requirements,
 `verifyNodePhase9NativeCrashPipeline`, `verifyNodeRuntimeAdapterAbi`, and
 `verifyNodeRuntimeAdapterExport`. Current Node 24.5 adapter lifecycle remains
 `surface_only`, so the gate keeps `legacy_jni` as the default path.
+`verifyNodePhase10SecurityCorpus` writes `phase10-security-corpus.json` and
+`.md` for S10-53. `generateNodePhase10Summary` writes
+`phase10-summary.json` and `.md` for S10-56, combining Phase 10 host reports,
+the example catalog, real npm corpus manifest, and available focused device
+XML. The summary requires at least 55 examples and 50 real npm fixtures.
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
