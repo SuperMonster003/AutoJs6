@@ -1661,6 +1661,7 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase9PluginPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9WasmWasiPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeCrashPipeline
+.\gradlew.bat --console=plain :app:verifyNodePhase9ChaosSecurityPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
@@ -1696,7 +1697,8 @@ S9-40 WASM/WASI policy split between ready, partial, and deferred work.
 `verifyNodePhase9PluginPolicy` records the S9-41 through S9-43 plugin package,
 native service plugin, and plugin ABI/lifecycle policy split.
 `verifyNodePhase9NativeCrashPipeline` records the S9-44 crash evidence and
-offline symbolication policy; see
+offline symbolication policy. `verifyNodePhase9ChaosSecurityPolicy` records
+the S9-45/S9-47 chaos-test and security-corpus policy split; see
 [reports/phase9/README.md](reports/phase9/README.md).
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).

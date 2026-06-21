@@ -31,6 +31,8 @@ val nodePhase9WasmWasiPolicyJson = nodeNativeModernizationReportDir.map { it.fil
 val nodePhase9WasmWasiPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-wasm-wasi-policy.md") }
 val nodePhase9NativeCrashPipelineJson = nodeNativeModernizationReportDir.map { it.file("phase9-native-crash-pipeline.json") }
 val nodePhase9NativeCrashPipelineMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-native-crash-pipeline.md") }
+val nodePhase9ChaosSecurityPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-chaos-security-policy.json") }
+val nodePhase9ChaosSecurityPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-chaos-security-policy.md") }
 
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
@@ -439,6 +441,43 @@ tasks.register<Exec>("verifyNodePhase9NativeCrashPipeline") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase9ChaosSecurityPolicy") {
+    group = "verification"
+    description = "Verifies Phase 9 chaos-test and security-corpus policy evidence."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/stability/verify-phase9-chaos-security-policy.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/CHAOS_SECURITY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/NATIVE_CRASH_PIPELINE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/ISOLATION_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/WASM_WASI.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/INSPECTOR_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/PLUGIN_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/PERFORMANCE_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/native/ANDROID_NATIVE_COMPAT.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/native/RUNTIME_DISTRIBUTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/native/RUNTIME_ADAPTER_ABI.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-artifacts.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/native/verify-runtime-distribution-policy.js"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeModuleCompileCacheInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeRuntimePrewarmPoolInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasmWasiInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInspectorSecurityGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePluginSystemInstrumentationTest.kt"))
+    outputs.files(nodePhase9ChaosSecurityPolicyJson, nodePhase9ChaosSecurityPolicyMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register("verifyNodePhase9NativeModernizationPlan") {
     group = "verification"
     description = "Runs Phase 9 native modernization planning checks without changing the default runtime."
@@ -459,5 +498,6 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNodePhase9PluginPolicy",
         "verifyNodePhase9WasmWasiPolicy",
         "verifyNodePhase9NativeCrashPipeline",
+        "verifyNodePhase9ChaosSecurityPolicy",
     )
 }

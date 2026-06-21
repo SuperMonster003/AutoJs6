@@ -23,6 +23,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodePhase9PluginPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9WasmWasiPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeCrashPipeline
+.\gradlew.bat --console=plain :app:verifyNodePhase9ChaosSecurityPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
@@ -59,6 +60,8 @@ Generated outputs:
 - `build/reports/nodejs/phase9-wasm-wasi-policy.md`
 - `build/reports/nodejs/phase9-native-crash-pipeline.json`
 - `build/reports/nodejs/phase9-native-crash-pipeline.md`
+- `build/reports/nodejs/phase9-chaos-security-policy.json`
+- `build/reports/nodejs/phase9-chaos-security-policy.md`
 
 ## Current Status
 
@@ -108,6 +111,11 @@ The Batch A start is intentionally conservative:
   artifact evidence, symbol archive/dependency reports, logcat/tombstone
   capture instructions, execution descriptor requirements, and offline
   symbolication instructions. See [NATIVE_CRASH_PIPELINE.md](NATIVE_CRASH_PIPELINE.md).
+- S9-45/S9-47 now have a host-side chaos/security policy gate that records
+  adapter/hash/16 KB failure coverage, process/provider failure evidence,
+  cache/snapshot/worker/WASM chaos gaps, native artifact security boundaries,
+  broker/worker/WASI/plugin denial posture, and inspector release-bypass
+  coverage. See [CHAOS_SECURITY.md](CHAOS_SECURITY.md).
 
 Node 24.17 is not the default runtime. The current default remains
 `node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because
