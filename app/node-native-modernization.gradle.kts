@@ -33,6 +33,8 @@ val nodePhase9NativeCrashPipelineJson = nodeNativeModernizationReportDir.map { i
 val nodePhase9NativeCrashPipelineMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-native-crash-pipeline.md") }
 val nodePhase9ChaosSecurityPolicyJson = nodeNativeModernizationReportDir.map { it.file("phase9-chaos-security-policy.json") }
 val nodePhase9ChaosSecurityPolicyMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-chaos-security-policy.md") }
+val nodePhase9SummaryJson = nodeNativeModernizationReportDir.map { it.file("phase9-summary.json") }
+val nodePhase9SummaryMarkdown = nodeNativeModernizationReportDir.map { it.file("phase9-summary.md") }
 
 tasks.register<Exec>("generateNodeNativeSymbolUsageReport") {
     group = "verification"
@@ -499,5 +501,58 @@ tasks.register("verifyNodePhase9NativeModernizationPlan") {
         "verifyNodePhase9WasmWasiPolicy",
         "verifyNodePhase9NativeCrashPipeline",
         "verifyNodePhase9ChaosSecurityPolicy",
+    )
+}
+
+tasks.register<Exec>("generateNodePhase9Summary") {
+    group = "verification"
+    description = "Writes build/reports/nodejs/phase9-summary.json from the Phase 9 host, example, and device gate evidence."
+
+    dependsOn(
+        "generateNode2417UpgradeGateReport",
+        "verifyNodePhase9NativeModernizationPlan",
+        "verifyNodeExamples",
+        "connectedAppDebugAndroidTest",
+    )
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/reports/generate-phase9-summary.js")
+    inputs.file(scriptFile)
+    inputs.files(
+        nodeNativeSymbolUsageJson,
+        nodeRuntimeAdapterAbiJson,
+        nodeRuntimeAdapterExportJson,
+        nodeRuntimeBuildPlanJson,
+        rootProject.layout.buildDirectory.file("reports/nodejs/node-24.17-upgrade-gate.json"),
+        nodeNative16KbAlignmentJson,
+        nodeRuntimeArtifactManifestJson,
+        nodeRuntimeArtifactIntegrityJson,
+        nodeRuntimeDistributionPolicyJson,
+        nodeRuntimeArtifactGateJson,
+        nodePhase9PerformancePolicyJson,
+        nodePhase9InspectorPolicyJson,
+        nodePhase9IsolationPolicyJson,
+        nodePhase9PluginPolicyJson,
+        nodePhase9WasmWasiPolicyJson,
+        nodePhase9NativeCrashPipelineJson,
+        nodePhase9ChaosSecurityPolicyJson,
+        project.layout.buildDirectory.file("reports/nodejs/examples.json"),
+        project.layout.projectDirectory.file("src/androidTest/assets/npm_compat_real/manifest.json"),
+    )
+    inputs.dir(project.layout.buildDirectory.dir("outputs/androidTest-results/connected/debug/flavors/app"))
+    outputs.files(nodePhase9SummaryJson, nodePhase9SummaryMarkdown)
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodeNativeModernizationReportDir.get().asFile.absolutePath,
+        "--app-report-dir",
+        project.layout.buildDirectory.dir("reports/nodejs").get().asFile.absolutePath,
+        "--android-results-dir",
+        project.layout.buildDirectory.dir("outputs/androidTest-results/connected/debug/flavors/app").get().asFile.absolutePath,
+        "--device-profile",
+        providers.gradleProperty("autojs.nodejs.test.deviceProfile").orElse("default").get(),
     )
 }

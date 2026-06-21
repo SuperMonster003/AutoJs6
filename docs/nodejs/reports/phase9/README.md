@@ -26,6 +26,7 @@ Current Batch A host-side tasks:
 .\gradlew.bat --console=plain :app:verifyNodePhase9ChaosSecurityPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:generateNodePhase9Summary "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase9Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
@@ -63,6 +64,8 @@ Generated outputs:
 - `build/reports/nodejs/phase9-native-crash-pipeline.md`
 - `build/reports/nodejs/phase9-chaos-security-policy.json`
 - `build/reports/nodejs/phase9-chaos-security-policy.md`
+- `build/reports/nodejs/phase9-summary.json`
+- `build/reports/nodejs/phase9-summary.md`
 
 ## Current Status
 
@@ -130,9 +133,16 @@ The Batch A start is intentionally conservative:
   heap snapshot policy, multi-instance policy, brokered sandboxing, basic WASM,
   controlled WASI facade policy, WASM worker policy, and JS+WASM plugin policy.
   See [USER_EXAMPLES.md](USER_EXAMPLES.md).
+- S9-50 adds `generateNodePhase9Summary`, which combines the host
+  modernization/policy reports, focused Sony device XML, 30-fixture real npm
+  corpus, 42-example catalog, runtime 24.5 vs 24.17 comparison, 4 KB vs
+  16 KB validation, startup/prewarm performance delta, capability matrix, and
+  remaining blockers into `build/reports/nodejs/phase9-summary.json` and
+  `.md`. See [PHASE9_SUMMARY.md](PHASE9_SUMMARY.md).
 
 Node 24.17 is not the default runtime. The current default remains
-`node24_5`, and `promotionDecision.node2417Promotion` is `deferred` because
+`node24_5`; the runtime build plan records promotion as deferred and the
+upgrade gate records the current promotion decision as blocked/no-go because
 Node 24.17 Android `libnode.so` artifacts are not currently producible. Raw
-native addons, unrestricted process spawning, raw sockets, production
-Inspector, and private runtime entry points remain disabled.
+native addons, unrestricted process spawning, raw sockets, raw WASI,
+production Inspector, and private runtime entry points remain disabled.

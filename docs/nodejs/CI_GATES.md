@@ -246,6 +246,7 @@ Phase 9 Batch A starts with host-side native modernization preflights:
 .\gradlew.bat --console=plain :app:verifyNodePhase9ChaosSecurityPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:generateNodePhase9Summary "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase9Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 ```
 
@@ -276,10 +277,14 @@ logcat/tombstone capture, execution descriptor, and offline symbolication.
 The chaos/security policy gate records S9-45/S9-47 with artifact failure
 coverage, process/provider failure gaps, cache/snapshot/worker/WASM chaos
 status, native artifact security boundaries, broker/WASI/plugin denial posture,
-and inspector release-bypass evidence. `verifyNodePhase9Gate` combines the
-host-side Phase 9 modernization plan with the connected WASM/WASI and 30-fixture
-real npm corpus subgates on the Sony/full device profile. These gates do not
-promote Node 24.17 and do not change the default runtime slot. See
+and inspector release-bypass evidence. `generateNodePhase9Summary` combines the
+host-side reports, connected WASM/WASI and 30-fixture real npm corpus XML,
+examples report, runtime comparison, page-size validation, startup/prewarm
+performance delta, capability matrix, and remaining blockers into
+`build/reports/nodejs/phase9-summary.json` and `.md`. `verifyNodePhase9Gate`
+runs this summary as the aggregate close-out on the Sony/full device profile.
+These gates do not promote Node 24.17 and do not change the default runtime
+slot. See
 [reports/phase9/README.md](reports/phase9/README.md),
 [native/RUNTIME_ADAPTER_ABI.md](native/RUNTIME_ADAPTER_ABI.md), and
 [native/ANDROID_NATIVE_COMPAT.md](native/ANDROID_NATIVE_COMPAT.md).

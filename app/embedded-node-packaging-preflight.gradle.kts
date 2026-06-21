@@ -4192,9 +4192,8 @@ val verifyNodePhase9Gate = tasks.register("verifyNodePhase9Gate") {
     val deviceProfile = embeddedNodePackagingTestDeviceProfile()
     if (deviceProfile in setOf("sony", "full")) {
         dependsOn(
-            "verifyNodePhase9NativeModernizationPlan",
+            "generateNodePhase9Summary",
             verifyNodeWasmWasiGate,
-            "connectedAppDebugAndroidTest",
         )
     }
     doFirst {

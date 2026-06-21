@@ -830,6 +830,7 @@ val nodeJsPhase8HostGateNames = listOf(
     "verifyNodeDependencyBundlerFixtures",
 )
 val nodeJsPhase8SummaryTaskName = "generateNodePhase8Summary"
+val nodeJsPhase9SummaryTaskName = "generateNodePhase9Summary"
 val nodeJsPhase7GateCoverageGroups = listOf(
     "packaged_esm_dynamic" to nodeJsPackagedEsmGateInstrumentationClasses,
     "live_providers" to nodeJsLiveProviderGateInstrumentationClasses,
@@ -863,6 +864,7 @@ val nodeJsPhase8GateCoverageGroups = listOf(
 val nodeJsFocusedGateInstrumentationClasses = mapOf(
     nodeJsPhase7SummaryTaskName to nodeJsPhase7GateInstrumentationClasses,
     nodeJsPhase8SummaryTaskName to nodeJsPhase8GateInstrumentationClasses,
+    nodeJsPhase9SummaryTaskName to nodeJsPhase9GateInstrumentationClasses,
     nodeJsLiveProviderSummaryTaskName to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,

@@ -1668,6 +1668,8 @@ Use these aggregate tasks for local gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase9ChaosSecurityPolicy
 .\gradlew.bat --console=plain :app:verifyNodePhase9NativeModernizationPlan
 .\gradlew.bat --console=plain :app:verifyNodeWasmWasiGate "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:generateNodePhase9Summary "-Pautojs.nodejs.test.deviceProfile=sony"
+.\gradlew.bat --console=plain :app:verifyNodePhase9Gate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeNightlyGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodeReleaseGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyEmbeddedNodeDebug
@@ -1704,6 +1706,11 @@ native service plugin, and plugin ABI/lifecycle policy split.
 offline symbolication policy. `verifyNodePhase9ChaosSecurityPolicy` records
 the S9-45/S9-47 chaos-test and security-corpus policy split; see
 [reports/phase9/README.md](reports/phase9/README.md).
+`generateNodePhase9Summary` writes `build/reports/nodejs/phase9-summary.json`
+and `.md` from the Phase 9 host reports, focused Sony device XML, example
+catalog, real npm corpus, runtime comparison, page-size validation,
+startup/prewarm performance delta, capability matrix, and remaining blockers.
+Running `verifyNodePhase9Gate` finalizes with this summary automatically.
 `verifyNodeNightlyGate` and `verifyNodeReleaseGate` require `autojs.nodejs.test.deviceProfile=sony` or `full`; see
 [CI_GATES.md](CI_GATES.md).
 `generateNodeNightlyReport` can also be run directly to summarize the currently available build/device reports:
