@@ -221,11 +221,12 @@ service components:
 - `overflow_1`: `NativeNodeEmbeddedScriptServiceSlot2` in
   `:nodejs_embedded_2`
 
-`NodeEmbeddedProcessPoolPolicy` keeps the effective runtime mode
-`primary_only`, with one active slot. The device memory profile is used only to
-publish a recommended future slot count; it does not enable additional slots.
-The reserved long-running and overflow slots cannot be selected by project
-metadata, packaged metadata, or direct script options.
+`NodeEmbeddedProcessPoolPolicy` keeps the default runtime mode `primary_only`,
+with one active slot. Phase 11 adds an internal explicit one-shot diagnostic
+route for `primary` and `overflow_1`; selecting `overflow_1` runs in
+`:nodejs_embedded_2` and reports `explicit_two_slot` diagnostics. The device
+memory profile is still diagnostic, `long_running` remains reserved, and
+project metadata or packaged metadata cannot select additional slots.
 
 Script results expose `embedded_script.process_pool.*` diagnostics for schema,
 status, selected slot, declared slot count, effective limit, recommended limit,

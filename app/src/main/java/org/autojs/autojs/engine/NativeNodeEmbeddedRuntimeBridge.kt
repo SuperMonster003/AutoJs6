@@ -954,6 +954,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         updatePart(BuildConfig.NODEJS_RUNTIME_SLOT)
         updatePart(BuildConfig.NODEJS_RUNTIME_SLOT_TARGET_VERSION)
         updatePart(request.runtimeAdapter.orEmpty())
+        updatePart(request.processPoolSlot.orEmpty())
         updatePart(Build.SUPPORTED_ABIS.joinToString(","))
         updatePart(Build.VERSION.SDK_INT.toString())
         updatePart(compileCacheLoaderVersion())
@@ -17539,6 +17540,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
         val spawnDepth: Int = 0,
         val runtimeAdapter: String? = null,
+        val processPoolSlot: String? = null,
     )
 
     data class EmbeddedScriptResult(

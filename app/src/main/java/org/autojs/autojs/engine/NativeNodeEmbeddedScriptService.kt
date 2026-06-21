@@ -272,6 +272,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             executionMode = executionMode,
             launchSurface = launchSurface,
             currentServiceClassName = javaClass.name,
+            requestedSlotId = preparedServiceRequest.processPoolSlot,
         )
         val interactiveSession = executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
             launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
@@ -400,6 +401,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
             executionId = executionId,
             queueMode = queueMode,
             queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(queueMode, queueTimeoutMs),
+            runtimeAdapter = preparedServiceRequest.runtimeAdapter,
+            processPoolSlot = preparedServiceRequest.processPoolSlot,
         )
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
         val timeline = NodeEmbeddedRuntimeTimeline.create(
@@ -1644,6 +1647,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED = "java_interop_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_RUNTIME_ADAPTER = "runtime_adapter"
+        private const val EXTRA_PROCESS_POOL_SLOT = "process_pool_slot"
         private const val EXTRA_EXECUTION_ID = "execution_id"
         private const val EXTRA_FOREGROUND_SERVICE_TYPE = "foreground_service_type"
         private const val EXTRA_PREWARM_TTL_MS = "prewarm_ttl_ms"
@@ -1884,12 +1888,14 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
                 putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
+                putExtra(EXTRA_PROCESS_POOL_SLOT, requestForService.processPoolSlot)
                 putExtra(EXTRA_EXECUTION_ID, executionId)
             }
             val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
                 context = appContext,
                 executionMode = requestForService.executionMode,
                 launchSurface = launchSurface,
+                requestedSlotId = requestForService.processPoolSlot,
             )
             var component: android.content.ComponentName? = null
             try {
@@ -2037,6 +2043,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
                     putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                     putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
+                    putExtra(EXTRA_PROCESS_POOL_SLOT, requestForService.processPoolSlot)
                     putExtra(EXTRA_EXECUTION_ID, executionId)
                     putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
                 }
@@ -2907,6 +2914,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 ),
                 spawnDepth = getIntExtra(EXTRA_SPAWN_DEPTH, 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
                 runtimeAdapter = getStringExtra(EXTRA_RUNTIME_ADAPTER)?.takeIf { it.isNotBlank() },
+                processPoolSlot = getStringExtra(EXTRA_PROCESS_POOL_SLOT)?.takeIf { it.isNotBlank() },
             )
         }
 
@@ -2948,6 +2956,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 put("javaInteropExperimentalEnabled", request.javaInteropExperimentalEnabled)
                 put("spawnDepth", request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 request.runtimeAdapter?.takeIf { it.isNotBlank() }?.let { put("runtimeAdapter", it) }
+                request.processPoolSlot?.takeIf { it.isNotBlank() }?.let { put("processPoolSlot", it) }
             }
         }
 
@@ -2989,6 +2998,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 ),
                 spawnDepth = json.optInt("spawnDepth", 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
                 runtimeAdapter = json.optString("runtimeAdapter").takeIf { it.isNotBlank() },
+                processPoolSlot = json.optString("processPoolSlot").takeIf { it.isNotBlank() },
             )
         }
 

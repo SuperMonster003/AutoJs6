@@ -41,7 +41,7 @@
       "id": "second_execution_slot",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Reserved process slots exist, but effective active execution remains primary-only.",
+      "currentEvidence": "Explicit primary/overflow_1 one-shot slot selection now routes to independent Android service processes with focused concurrent instrumentation coverage; default scheduler routing, packaged behavior, slot crash evidence, and stress promotion remain open.",
       "requiredResolution": "At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence."
     },
     {

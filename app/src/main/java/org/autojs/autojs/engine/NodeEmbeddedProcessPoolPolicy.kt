@@ -9,11 +9,14 @@ object NodeEmbeddedProcessPoolPolicy {
     const val SCHEMA = "autojs6-node-embedded-process-pool-v1"
     const val VERSION = 1
     const val STATUS_DESIGN_GATED = "design_gated"
+    const val STATUS_EXPLICIT_SLOT_ENABLED = "explicit_slot_enabled"
     const val MODE_PRIMARY_ONLY = "primary_only"
+    const val MODE_EXPLICIT_TWO_SLOT = "explicit_two_slot"
     const val PRIMARY_SLOT_ID = "primary"
     const val LONG_RUNNING_SLOT_ID = "long_running"
     const val OVERFLOW_SLOT_ID = "overflow_1"
     const val DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS = 1
+    const val EXPLICIT_EFFECTIVE_MAX_ACTIVE_SLOTS = 2
 
     private const val MB = 1024L * 1024L
     private const val STANDARD_DEVICE_MIN_TOTAL_MB = 3_072L
@@ -51,6 +54,7 @@ object NodeEmbeddedProcessPoolPolicy {
         val mode: String,
         val multiProcessEnabled: Boolean,
         val declaredSlots: List<ProcessSlot>,
+        val requestedSlotId: String,
         val selectedSlot: ProcessSlot,
         val effectiveMaxActiveSlots: Int,
         val recommendedMaxActiveSlots: Int,
@@ -72,6 +76,7 @@ object NodeEmbeddedProcessPoolPolicy {
             "embedded_script.process_pool.enabled" to multiProcessEnabled.toString(),
             "embedded_script.process_pool.declared_slot_count" to declaredSlots.size.toString(),
             "embedded_script.process_pool.declared_slot_ids" to declaredSlots.joinToString(",") { it.id },
+            "embedded_script.process_pool.requested_slot_id" to requestedSlotId,
             "embedded_script.process_pool.selected_slot_id" to selectedSlot.id,
             "embedded_script.process_pool.selected_service_class" to selectedSlot.serviceClassName,
             "embedded_script.process_pool.selected_process_suffix" to selectedSlot.processSuffix,
@@ -126,6 +131,8 @@ object NodeEmbeddedProcessPoolPolicy {
 
     val longRunningSlot: ProcessSlot = declaredSlots.first { it.id == LONG_RUNNING_SLOT_ID }
 
+    val overflowSlot: ProcessSlot = declaredSlots.first { it.id == OVERFLOW_SLOT_ID }
+
     fun slotForServiceClassName(className: String?): ProcessSlot? {
         if (className.isNullOrBlank()) {
             return null
@@ -138,14 +145,25 @@ object NodeEmbeddedProcessPoolPolicy {
         executionMode: String? = NodeExecutionModePolicy.MODE_ONE_SHOT,
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         currentServiceClassName: String? = null,
+        requestedSlotId: String? = null,
     ): ProcessPoolPlan {
         val memoryProfile = deviceMemoryProfile(context)
         val normalizedMode = NodeExecutionModePolicy.normalize(executionMode)
         val currentSlot = slotForServiceClassName(currentServiceClassName)
-        val selectedSlot = currentSlot ?: primarySlot
+        val normalizedRequestedSlotId = requestedSlotId?.trim().orEmpty()
+        val requestedSlot = explicitSelectableSlot(normalizedRequestedSlotId)
+        val explicitSlotRequested = normalizedRequestedSlotId.isNotBlank()
+        val explicitSlotEnabled = requestedSlot != null || currentSlot?.id == OVERFLOW_SLOT_ID
+        val selectedSlot = currentSlot ?: requestedSlot ?: primarySlot
         val reason = when {
+            currentSlot != null && requestedSlot != null && currentSlot.id != requestedSlot.id ->
+                "current_service_slot_overrides_requested:${currentSlot.id}"
             currentSlot != null && currentSlot.id != PRIMARY_SLOT_ID ->
-                "reserved_slot_direct_start_detected"
+                "reserved_slot_direct_start_detected:current_service_slot:${currentSlot.id}"
+            requestedSlot != null ->
+                "explicit_process_slot_selected:${requestedSlot.id}"
+            explicitSlotRequested ->
+                "explicit_process_slot_rejected:$normalizedRequestedSlotId"
             normalizedMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING ||
                 launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION ->
                 "dedicated_long_running_slot_reserved_until_pool_promotion"
@@ -154,12 +172,17 @@ object NodeEmbeddedProcessPoolPolicy {
         return ProcessPoolPlan(
             schema = SCHEMA,
             version = VERSION,
-            status = STATUS_DESIGN_GATED,
-            mode = MODE_PRIMARY_ONLY,
-            multiProcessEnabled = false,
+            status = if (explicitSlotEnabled) STATUS_EXPLICIT_SLOT_ENABLED else STATUS_DESIGN_GATED,
+            mode = if (explicitSlotEnabled) MODE_EXPLICIT_TWO_SLOT else MODE_PRIMARY_ONLY,
+            multiProcessEnabled = explicitSlotEnabled,
             declaredSlots = declaredSlots,
+            requestedSlotId = normalizedRequestedSlotId,
             selectedSlot = selectedSlot,
-            effectiveMaxActiveSlots = DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS,
+            effectiveMaxActiveSlots = if (explicitSlotEnabled) {
+                EXPLICIT_EFFECTIVE_MAX_ACTIVE_SLOTS
+            } else {
+                DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS
+            },
             recommendedMaxActiveSlots = recommendedMaxActiveSlots(memoryProfile),
             longRunningDedicatedSlotId = longRunningSlot.id,
             longRunningDedicatedSlotEnabled = false,
@@ -171,6 +194,14 @@ object NodeEmbeddedProcessPoolPolicy {
             memoryProfile = memoryProfile,
             reason = reason,
         )
+    }
+
+    private fun explicitSelectableSlot(requestedSlotId: String): ProcessSlot? {
+        return when (requestedSlotId) {
+            PRIMARY_SLOT_ID -> primarySlot
+            OVERFLOW_SLOT_ID -> overflowSlot
+            else -> null
+        }
     }
 
     fun deviceMemoryProfile(context: Context): DeviceMemoryProfile {

@@ -1,6 +1,8 @@
 # Embedded Node Multi-Instance Policy
 
-Status: enforced single active execution per `:nodejs_embedded` process, with an explicit opt-in queue documented in [EXECUTION_QUEUE.md](EXECUTION_QUEUE.md).
+Status: enforced single active execution per embedded service process. Phase 11
+adds an internal explicit `primary` / `overflow_1` process-slot selector for
+focused diagnostics; default project/package execution still uses `primary`.
 
 ## Decision
 
@@ -20,6 +22,10 @@ The rejected request is not queued silently.
 
 Callers that deliberately want queueing must use the controlled caller-side enqueue API. Queueing is not the default startup behavior.
 
+Focused Phase 11 diagnostics may explicitly route a one-shot execution to
+`overflow_1`, which runs in `:nodejs_embedded_2`. This is not same-process
+concurrency and does not change the default startup path.
+
 ## Rationale
 
 Embedded Node execution owns process-local native state:
@@ -32,7 +38,10 @@ Embedded Node execution owns process-local native state:
 - Android capability providers
 - service lifecycle and foreground notification state
 
-The current service process is intentionally short-lived and schedules process exit after an execution finishes. Allowing overlapping executions in the same process would make stop, timeout, native handle cleanup, bridge callbacks, and stdout capture ambiguous.
+Each service process is intentionally short-lived and schedules process exit
+after an execution finishes. Allowing overlapping executions in the same process
+would make stop, timeout, native handle cleanup, bridge callbacks, and stdout
+capture ambiguous.
 
 Rejecting concurrent starts by default is safer than silent queueing. The controlled queue keeps max queued executions, timeout ownership, cancellation, status, and service-exit behavior explicit.
 
@@ -102,26 +111,27 @@ See [EXECUTION_QUEUE.md](EXECUTION_QUEUE.md).
 ## Process Pool Policy Gate
 
 S8-43 declares the first process-pool policy gate. Android process names remain
-static, so the manifest now includes reserved embedded script service
-components for `:nodejs_embedded_1` and `:nodejs_embedded_2`. The default
-runtime does not route to those components yet.
+static, so the manifest includes embedded script service components for
+`:nodejs_embedded_1` and `:nodejs_embedded_2`. Phase 11 promotes the
+`overflow_1` component to an internal explicit one-shot diagnostic route.
 
 Current S8-43 behavior:
 
-- `NodeEmbeddedProcessPoolPolicy` status is `design_gated`;
-- effective runtime mode is `primary_only`;
-- effective active slot count is `1`;
+- default `NodeEmbeddedProcessPoolPolicy` status is `design_gated`;
+- default runtime mode is `primary_only`;
+- default effective active slot count is `1`;
+- explicit `overflow_1` diagnostics use `explicit_slot_enabled` /
+  `explicit_two_slot` with effective active slot count `2`;
 - device-memory-aware recommended slot count is diagnostic only;
 - the long-running dedicated slot is reserved but disabled;
 - queue-when-full remains disabled until a real pool coordinator exists.
 
 Future promotion still needs:
 
-- slot acquisition/release across multiple service processes;
 - crash detection that removes only the failed slot;
-- bridge provider isolation per process;
 - foreground notification policy per execution;
 - packaged manifest synthesis for every service component;
+- default scheduler / pool coordinator routing;
 - stress tests proving no cwd, env, module cache, bridge transport, provider,
   fd, watcher, timer, or handle crosses execution or slot boundaries.
 
@@ -139,5 +149,8 @@ Current focused coverage:
 - enqueue a second script explicitly and assert it runs after the first
 - cancel a queued script by execution id
 - assert a third enqueue returns `ERR_AUTOJS6_NODE_QUEUE_FULL` when the queue is full
+- explicitly run `overflow_1` and assert `:nodejs_embedded_2` diagnostics
+- explicitly run `primary` and `overflow_1` concurrently and assert different
+  service-process pids
 
 Release candidates should also verify packaged smoke still uses one embedded service process and does not treat queue support as concurrent execution support.

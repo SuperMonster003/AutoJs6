@@ -42,6 +42,7 @@ internal object NodeEmbeddedTestHarness {
         workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
         javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
         runtimeAdapter: String? = null,
+        processPoolSlot: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             targetContext,
@@ -58,6 +59,7 @@ internal object NodeEmbeddedTestHarness {
                 workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
                 javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
                 runtimeAdapter = runtimeAdapter,
+                processPoolSlot = processPoolSlot,
             ),
         )
     }

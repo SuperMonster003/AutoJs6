@@ -26,6 +26,14 @@ Current crash evidence progress:
   safe fatal markers, automatic next-launch collection, and chaos injection
   remain open.
 
+Current multi-instance progress:
+
+- `second_execution_slot`: explicit one-shot routing can now select `primary`
+  or `overflow_1`; focused instrumentation covers `overflow_1` diagnostics and
+  concurrent primary/overflow execution in different Android service processes.
+  Default scheduling, packaged behavior, per-slot crash evidence, and stress
+  promotion remain open.
+
 Resolved in Phase 11:
 
 - `adapter_v1_real_execution_path`: `AutoJsNodeRuntimeApiV1` is now a

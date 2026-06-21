@@ -1,6 +1,8 @@
 # Embedded Node Process Pool Policy
 
-Status: S8-43 policy gate implemented, runtime promotion disabled by default.
+Status: S8-43 policy gate implemented; Phase 11 adds internal explicit
+`primary` / `overflow_1` slot selection while default runtime promotion remains
+disabled.
 
 ## Goal
 
@@ -25,9 +27,11 @@ components:
 | `long_running` | `NativeNodeEmbeddedScriptServiceSlot1` | `:nodejs_embedded_1` | disabled |
 | `overflow_1` | `NativeNodeEmbeddedScriptServiceSlot2` | `:nodejs_embedded_2` | disabled |
 
-The reserved slots exist only as static process-pool capacity. No public API,
-script metadata, package metadata, or execution mode can select them in the
-default v1.1 profile.
+The default v1.1 profile still starts normal scripts on `primary`. Phase 11
+adds an internal request field that can explicitly route one-shot diagnostics to
+`primary` or `overflow_1`, allowing focused tests to prove two independent
+Android service processes. Project metadata and package metadata still cannot
+select additional slots, and `long_running` remains reserved.
 
 ## Policy Gate
 
@@ -40,6 +44,14 @@ default v1.1 profile.
 - device-memory-aware recommended slot count: `1..3`;
 - long-running dedicated slot: reserved but disabled;
 - queue-when-full: disabled until the pool is promoted;
+- shared V8 environment across slots: forbidden.
+
+When a request explicitly selects `overflow_1`, diagnostics switch to:
+
+- status: `explicit_slot_enabled`;
+- mode: `explicit_two_slot`;
+- selected slot: `overflow_1`;
+- effective active slots: `2`;
 - shared V8 environment across slots: forbidden.
 
 Script result native values expose `embedded_script.process_pool.*` diagnostics
@@ -56,14 +68,14 @@ It preserves the existing invariants:
 - no shared stdout/stderr capture, bridge transport directory, capability
   provider, cwd, env, module cache, timer, watcher, fd, image handle, or
   execution id across scripts;
-- reserved slots are non-exported foreground services and remain unreachable
+- non-primary slots are non-exported foreground services and remain unreachable
   from project/package metadata;
 - explicit caller-side queueing remains separate from the process-pool policy.
 
-Future promotion must add a real pool coordinator, per-slot lifecycle ownership,
-queue-when-full behavior, crash removal/replacement, foreground notification
-policy per execution, and packaged manifest synthesis before enabling any slot
-beyond `primary`.
+Future promotion must add a real pool coordinator, queue-when-full behavior,
+crash removal/replacement, foreground notification policy per execution,
+packaged manifest synthesis, and long-running routing before any non-primary
+slot becomes part of default project/package behavior.
 
 ## Tests
 
@@ -75,5 +87,7 @@ $env:ANDROID_SERIAL='QV710AF65F'
 ```
 
 The gate verifies policy defaults, device-memory-aware recommendations,
-manifest declarations for all three slots, default-disabled reserved slots, and
-primary-only script result diagnostics.
+manifest declarations for all three slots, default-disabled reserved slots,
+primary-only script result diagnostics, explicit `overflow_1` diagnostics, and
+focused primary/overflow concurrent execution with different service-process
+pids.
