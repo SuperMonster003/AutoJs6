@@ -168,10 +168,16 @@ Inventory 和兼容矩阵统一使用以下状态：
     `rhino-compat-inventory-verification.json` 和 `.md`；当前 gate 通过，73
     个模块、879 个 API entry、0 个 policy violation。
 
-- [ ] S11-07: 发布第一版 Rhino-to-Node 兼容矩阵。
+- [x] S11-07: 发布第一版 Rhino-to-Node 兼容矩阵。
   - 范围：把 report 中的当前人工矩阵转换为生成或半生成文档。
   - 产物：`docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`。
   - 验收：矩阵按模块分组，包含状态、Node 替代模块、风险和下一步。
+  - Evidence：
+    `tools/nodejs/phase11/generate-rhino-compat-matrix.js`；
+    `:app:generateNodeRhinoCompatMatrix` 生成
+    `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`；当前矩阵覆盖 73 个
+    Rhino 模块和 879 个 API entry，并按模块记录 status、Node surface、
+    risks 和 next step。
 
 ### Track B: Low-risk facade
 

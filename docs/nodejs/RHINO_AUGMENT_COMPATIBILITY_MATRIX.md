@@ -1,0 +1,830 @@
+# Rhino Augment Compatibility Matrix
+
+This Phase 11A matrix is generated from the Rhino augment inventory, the checked-in status manifest, and the Node bridge/types/docs gap report. It is a module-level tracking document; API-level details remain in `build/reports/nodejs/rhino-augment-api-inventory.json` and `build/reports/nodejs/rhino-node-compat-gap.json`.
+
+## Summary
+
+- Rhino modules: 73
+- Rhino API entries: 879
+- Node bridge modules: 23
+- Node type modules: 25
+- Modules with bridge evidence: 24
+- Modules with type evidence: 24
+- Modules without Node surface evidence: 48
+
+## Status Totals
+
+- blocked_by_design: 16
+- partial: 343
+- supported_async: 38
+- unsupported: 555
+
+## Module Matrix
+
+| Order | Rhino Module | Key | Status | Node Surface | API Status | Risks | Next Step |
+| ---: | --- | --- | --- | --- | --- | --- | --- |
+| 0 | global | global | unsupported | - | unsupported:46 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 1 | global.legacy | legacy | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
+| 2 | global.is_nullish | isNullish | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
+| 3 | util | util | unsupported | - | unsupported:50 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 4 | util.java | java | blocked_by_design | java | blocked_by_design:6 | none | Keep denial documented and covered by policy tests. |
+| 5 | util.version | version | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
+| 6 | util.version_codes | versionCodes | unsupported | - | unsupported:5 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 7 | util.inspect | inspect | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
+| 8 | util.morse_code | morseCode | unsupported | - | unsupported:4 | none | Design a Node facade or record a permanent non-goal. |
+| 9 | global.species | species | unsupported | - | unsupported:36 | none | Design a Node facade or record a permanent non-goal. |
+| 10 | app | app | partial | app | partial:36, supported_async:4 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 11 | autojs | autojs | partial | engines | partial:19 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 12 | autojs.version | version | unsupported | - | unsupported:8 | none | Design a Node facade or record a permanent non-goal. |
+| 13 | shell | shell | partial | shell | partial:27 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 14 | timers | timers | unsupported | - | unsupported:11 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 15 | automator.auto | auto | partial | accessibility | partial:24 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 16 | automator | automator | partial | accessibility | partial:27, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 17 | selector | selector | partial | accessibility | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 18 | events | events | unsupported | - | unsupported:2 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 19 | events.keys | keys | unsupported | - | unsupported:13 | none | Design a Node facade or record a permanent non-goal. |
+| 20 | canvas | Canvas | unsupported | - | unsupported:1 | lifecycle_resource, raw_android_object | Design a Node facade or record a permanent non-goal. |
+| 21 | images | images | partial | image, images | partial:65, supported_async:12 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
+| 22 | ocr | ocr | partial | ocr | partial:6, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 23 | ocr.ocr_ml_kit | mlkit | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
+| 24 | ocr.ocr_paddle | paddle | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
+| 25 | ocr.ocr_rapid | rapid | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
+| 26 | barcode | barcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 27 | barcode.qr_code | qrcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 28 | threads | threads | blocked_by_design | - | blocked_by_design:6 | provider_availability | Keep denial documented and covered by policy tests. |
+| 29 | ui | ui | partial | ui | partial:35 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
+| 30 | colors | colors | unsupported | - | unsupported:63 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 31 | colors.color | Color | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 32 | tasks | tasks | partial | work_manager | partial:16 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 33 | dialogs | dialogs | partial | dialogs | partial:5, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 34 | continuation | continuation | unsupported | - | unsupported:4 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 35 | http | http | unsupported | - | unsupported:21 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 36 | web | web | partial | fetch, websocket | partial:4 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 37 | web.web_socket | WebSocket | partial | websocket | partial:1 | lifecycle_resource, provider_availability, raw_android_object | Implement explicit compat facade and promote mapped APIs one by one. |
+| 38 | s13n | s13n | unsupported | - | unsupported:6 | none | Design a Node facade or record a permanent non-goal. |
+| 39 | converter | cvt | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
+| 40 | converter.bytes | bytes | unsupported | - | unsupported:7 | none | Design a Node facade or record a permanent non-goal. |
+| 41 | formatter | fmt | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
+| 42 | formatter.bytes | bytes | unsupported | - | unsupported:7 | none | Design a Node facade or record a permanent non-goal. |
+| 43 | console | console | unsupported | - | unsupported:54 | lifecycle_resource, provider_availability, thread_model | Design a Node facade or record a permanent non-goal. |
+| 44 | plugins | plugins | partial | plugins | partial:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 45 | jsox.arrayx | Arrayx | unsupported | - | unsupported:16 | none | Design a Node facade or record a permanent non-goal. |
+| 46 | jsox.numberx | Numberx | unsupported | - | unsupported:14 | none | Design a Node facade or record a permanent non-goal. |
+| 47 | jsox.mathx | Mathx | unsupported | - | unsupported:25 | none | Design a Node facade or record a permanent non-goal. |
+| 48 | jsox | jsox | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
+| 49 | files | files | unsupported | - | unsupported:5 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 50 | cryptyo.crypto | crypto | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 51 | automator.root_automator | RootAutomator | blocked_by_design | - | blocked_by_design:1 | lifecycle_resource, raw_android_object | Keep denial documented and covered by policy tests. |
+| 52 | engines | engines | partial | engines | partial:4, supported_async:5 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
+| 53 | floaty | floaty | unsupported | - | unsupported:8 | none | Design a Node facade or record a permanent non-goal. |
+| 54 | storages | storages | partial | storage, storages | partial:4, supported_async:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 55 | device | device | partial | clipboard, device | partial:19, supported_async:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 56 | recorder | recorder | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 57 | toast | toast | partial | toast | partial:1, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 58 | media | media | partial | media_projection | partial:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 59 | sensors | sensors | partial | sensors | partial:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 60 | base64 | base64 | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
+| 61 | notice | notice | partial | notifications | partial:6, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 62 | notice.channel | channel | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
+| 63 | shizuku | shizuku | unsupported | - | unsupported:7 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 64 | opencc | opencc | unsupported | - | unsupported:34 | none | Design a Node facade or record a permanent non-goal. |
+| 65 | mime | mime | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 66 | sysprops | sysprops | unsupported | - | unsupported:5 | none | Design a Node facade or record a permanent non-goal. |
+| 67 | sqlite | sqlite | partial | database, sqlite | partial:1, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 68 | zip | zip | unsupported | - | unsupported:6 | none | Design a Node facade or record a permanent non-goal. |
+| 69 | nanoid | nanoid | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
+| 70 | pinyin | pinyin | unsupported | - | unsupported:17 | none | Design a Node facade or record a permanent non-goal. |
+| 71 | pinyin4j | pinyin4j | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
+| 72 | mediainfo | mediainfo | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
+
+## Module Details
+
+### global
+
+- Key: `global`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:46
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### global.legacy
+
+- Key: `legacy`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:3
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### global.is_nullish
+
+- Key: `isNullish`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### util
+
+- Key: `util`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:50
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### util.java
+
+- Key: `java`
+- Status: `blocked_by_design`
+- Node surface: java
+- Coverage: `bridge_only`
+- API status: blocked_by_design:6
+- Risks: none
+- Next step: Keep denial documented and covered by policy tests.
+
+### util.version
+
+- Key: `version`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:2
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### util.version_codes
+
+- Key: `versionCodes`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:5
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### util.inspect
+
+- Key: `inspect`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### util.morse_code
+
+- Key: `morseCode`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:4
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### global.species
+
+- Key: `species`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:36
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### app
+
+- Key: `app`
+- Status: `partial`
+- Node surface: app
+- Coverage: `bridge_and_types`
+- API status: partial:36, supported_async:4
+- Risks: provider_availability
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### autojs
+
+- Key: `autojs`
+- Status: `partial`
+- Node surface: engines
+- Coverage: `bridge_and_types`
+- API status: partial:19
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### autojs.version
+
+- Key: `version`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:8
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### shell
+
+- Key: `shell`
+- Status: `partial`
+- Node surface: shell
+- Coverage: `bridge_and_types`
+- API status: partial:27
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### timers
+
+- Key: `timers`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:11
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### automator.auto
+
+- Key: `auto`
+- Status: `partial`
+- Node surface: accessibility
+- Coverage: `bridge_and_types`
+- API status: partial:24
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### automator
+
+- Key: `automator`
+- Status: `partial`
+- Node surface: accessibility
+- Coverage: `bridge_and_types`
+- API status: partial:27, supported_async:5
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### selector
+
+- Key: `selector`
+- Status: `partial`
+- Node surface: accessibility
+- Coverage: `bridge_and_types`
+- API status: partial:5
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### events
+
+- Key: `events`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:2
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### events.keys
+
+- Key: `keys`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:13
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### canvas
+
+- Key: `Canvas`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: lifecycle_resource, raw_android_object
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### images
+
+- Key: `images`
+- Status: `partial`
+- Node surface: image, images
+- Coverage: `bridge_and_types`
+- API status: partial:65, supported_async:12
+- Risks: event_loop_semantics, lifecycle_resource
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### ocr
+
+- Key: `ocr`
+- Status: `partial`
+- Node surface: ocr
+- Coverage: `bridge_and_types`
+- API status: partial:6, supported_async:1
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### ocr.ocr_ml_kit
+
+- Key: `mlkit`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:3
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### ocr.ocr_paddle
+
+- Key: `paddle`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:3
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### ocr.ocr_rapid
+
+- Key: `rapid`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:3
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### barcode
+
+- Key: `barcode`
+- Status: `partial`
+- Node surface: image
+- Coverage: `bridge_and_types`
+- API status: partial:5
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### barcode.qr_code
+
+- Key: `qrcode`
+- Status: `partial`
+- Node surface: image
+- Coverage: `bridge_and_types`
+- API status: partial:5
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### threads
+
+- Key: `threads`
+- Status: `blocked_by_design`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: blocked_by_design:6
+- Risks: provider_availability
+- Next step: Keep denial documented and covered by policy tests.
+
+### ui
+
+- Key: `ui`
+- Status: `partial`
+- Node surface: ui
+- Coverage: `bridge_and_types`
+- API status: partial:35
+- Risks: lifecycle_resource, provider_availability, thread_model
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### colors
+
+- Key: `colors`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:63
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### colors.color
+
+- Key: `Color`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### tasks
+
+- Key: `tasks`
+- Status: `partial`
+- Node surface: work_manager
+- Coverage: `bridge_and_types`
+- API status: partial:16
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### dialogs
+
+- Key: `dialogs`
+- Status: `partial`
+- Node surface: dialogs
+- Coverage: `bridge_and_types`
+- API status: partial:5, supported_async:5
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### continuation
+
+- Key: `continuation`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:4
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### http
+
+- Key: `http`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:21
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### web
+
+- Key: `web`
+- Status: `partial`
+- Node surface: fetch, websocket
+- Coverage: `bridge_and_types`
+- API status: partial:4
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### web.web_socket
+
+- Key: `WebSocket`
+- Status: `partial`
+- Node surface: websocket
+- Coverage: `bridge_and_types`
+- API status: partial:1
+- Risks: lifecycle_resource, provider_availability, raw_android_object
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### s13n
+
+- Key: `s13n`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:6
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### converter
+
+- Key: `cvt`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### converter.bytes
+
+- Key: `bytes`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:7
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### formatter
+
+- Key: `fmt`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### formatter.bytes
+
+- Key: `bytes`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:7
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### console
+
+- Key: `console`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:54
+- Risks: lifecycle_resource, provider_availability, thread_model
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### plugins
+
+- Key: `plugins`
+- Status: `partial`
+- Node surface: plugins
+- Coverage: `types_only`
+- API status: partial:2
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### jsox.arrayx
+
+- Key: `Arrayx`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:16
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### jsox.numberx
+
+- Key: `Numberx`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:14
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### jsox.mathx
+
+- Key: `Mathx`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:25
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### jsox
+
+- Key: `jsox`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:3
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### files
+
+- Key: `files`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:5
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### cryptyo.crypto
+
+- Key: `crypto`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### automator.root_automator
+
+- Key: `RootAutomator`
+- Status: `blocked_by_design`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: blocked_by_design:1
+- Risks: lifecycle_resource, raw_android_object
+- Next step: Keep denial documented and covered by policy tests.
+
+### engines
+
+- Key: `engines`
+- Status: `partial`
+- Node surface: engines
+- Coverage: `bridge_and_types`
+- API status: partial:4, supported_async:5
+- Risks: event_loop_semantics, lifecycle_resource
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### floaty
+
+- Key: `floaty`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:8
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### storages
+
+- Key: `storages`
+- Status: `partial`
+- Node surface: storage, storages
+- Coverage: `bridge_and_types`
+- API status: partial:4, supported_async:2
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### device
+
+- Key: `device`
+- Status: `partial`
+- Node surface: clipboard, device
+- Coverage: `bridge_and_types`
+- API status: partial:19, supported_async:1
+- Risks: provider_availability
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### recorder
+
+- Key: `recorder`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### toast
+
+- Key: `toast`
+- Status: `partial`
+- Node surface: toast
+- Coverage: `bridge_and_types`
+- API status: partial:1, supported_async:1
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### media
+
+- Key: `media`
+- Status: `partial`
+- Node surface: media_projection
+- Coverage: `bridge_and_types`
+- API status: partial:1
+- Risks: provider_availability
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### sensors
+
+- Key: `sensors`
+- Status: `partial`
+- Node surface: sensors
+- Coverage: `bridge_and_types`
+- API status: partial:1
+- Risks: provider_availability
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### base64
+
+- Key: `base64`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:3
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### notice
+
+- Key: `notice`
+- Status: `partial`
+- Node surface: notifications
+- Coverage: `bridge_and_types`
+- API status: partial:6, supported_async:1
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### notice.channel
+
+- Key: `channel`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### shizuku
+
+- Key: `shizuku`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:7
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### opencc
+
+- Key: `opencc`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:34
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### mime
+
+- Key: `mime`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: provider_availability
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### sysprops
+
+- Key: `sysprops`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:5
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### sqlite
+
+- Key: `sqlite`
+- Status: `partial`
+- Node surface: database, sqlite
+- Coverage: `bridge_and_types`
+- API status: partial:1, supported_async:1
+- Risks: none
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+
+### zip
+
+- Key: `zip`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:6
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### nanoid
+
+- Key: `nanoid`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:1
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### pinyin
+
+- Key: `pinyin`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:17
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### pinyin4j
+
+- Key: `pinyin4j`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:2
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
+
+### mediainfo
+
+- Key: `mediainfo`
+- Status: `unsupported`
+- Node surface: -
+- Coverage: `no_node_surface`
+- API status: unsupported:2
+- Risks: none
+- Next step: Design a Node facade or record a permanent non-goal.
