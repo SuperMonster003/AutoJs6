@@ -321,11 +321,19 @@ Inventory 和兼容矩阵统一使用以下状态：
     `verifyNodeRhinoCompatAppDeviceShell` host gate 覆盖默认不注入全局、
     显式安装 globals、app/device 路由和 shell root 边界。
 
-- [ ] S11-18: 实现 images compatibility 第一版。
+- [x] S11-18: 实现 images compatibility 第一版。
   - 范围：`images.read/save/clip/resize/grayscale/threshold/findImage/
     matchTemplate/findColor/findMultiColors/recycle`。
   - 产物：facade、types、image handle lifecycle tests。
   - 验收：每个 image handle 在 stop/timeout/destroy 后可追踪释放。
+  - 状态：已在 `autojs6:compat` 中暴露 `images` facade，并支持
+    Rhino 风格 `read/save`、region/size 参数、`threshold(image,
+    threshold, maxValue, type)`、`findImage/findColor` region overload、
+    `matchTemplate/findMultiColors/recycle`；所有 bridge 操作保持
+    Promise 语义，image handle 继续由受控 provider 持有并要求显式
+    `recycle()`；新增 `verifyNodeRhinoCompatImagesFacade` host gate 覆盖
+    默认不注入全局、显式安装 `images`、handle 创建/派生/回收路由和
+    S11-19 screenshot permission 边界。
 
 - [ ] S11-19: 补齐 screenshot permission compatibility。
   - 范围：`requestScreenCapture()`、`captureScreen()` 和 media projection

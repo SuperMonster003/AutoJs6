@@ -357,7 +357,25 @@ Node:
 })();
 ```
 
-Image values are handles owned by the current execution. They are recycled explicitly or when the service is destroyed.
+Node with the S11-18 compatibility facade:
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+
+  const capture = await compat.images.captureScreen({ timeoutMs: 5000 });
+  const template = await compat.images.read("template.png", { timeoutMs: 1000 });
+  const point = await compat.images.findImage(capture, template, 0, 0, 1080, 2400, 0.9);
+
+  await compat.images.recycle(template);
+  await compat.images.recycle(capture);
+  console.log(JSON.stringify(point));
+})();
+```
+
+Image values are handles owned by the current execution. They are recycled explicitly or when the service is destroyed. The S11-18 facade keeps Rhino names such as `images.read()` and `images.save()`, but bridge work is still asynchronous and must be awaited. `requestScreenCapture()` and permission-prompt compatibility remain separate S11-19 work; `captureScreen()` can only use the existing controlled screen-capture provider path.
 
 ### File Read And Write
 

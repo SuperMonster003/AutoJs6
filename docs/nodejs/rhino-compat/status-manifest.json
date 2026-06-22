@@ -30,11 +30,13 @@
         "accessibility",
         "app",
         "device",
-        "shell"
+        "shell",
+        "images"
       ],
       "decision": "compat_facade_partial",
       "notes": [
-        "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; S11-16 adds explicit selector/accessibility globals through compat.install({ globals: true }); S11-17 adds explicit app/device/shell globals and callable shell() migration; other Rhino globals remain unsupported or blocked by design."
+        "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; S11-16 adds explicit selector/accessibility globals through compat.install({ globals: true }); S11-17 adds explicit app/device/shell globals and callable shell() migration; other Rhino globals remain unsupported or blocked by design.",
+        "S11-18 adds explicit images global compatibility over opaque image handles for read/save/transform/search/recycle; screenshot permission wrappers remain S11-19 work."
       ],
       "apiEntries": [
         {
@@ -4375,15 +4377,16 @@
       "asyncMode": "promise",
       "nodeModules": [
         "image",
-        "images"
+        "images",
+        "autojs6:compat"
       ],
       "bridgeModules": [
         "image",
         "images"
       ],
-      "decision": "node_surface_exists_compat_facade_pending",
+      "decision": "s11_18_images_compat_facade_partial",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-18 exposes compat.images over the controlled images bridge for read/save/clip/resize/grayscale/threshold/findImage/matchTemplate/findColor/findMultiColors/recycle; raw Bitmap/Mat/ImageWrapper objects and screenshot permission prompts remain out of scope."
       ],
       "apiEntries": [
         {
@@ -4462,12 +4465,12 @@
           "id": "images.clip",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "clip",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -4630,12 +4633,12 @@
           "id": "images.findColor",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "findColor",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -4666,12 +4669,12 @@
           "id": "images.findImage",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "findImage",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -4690,12 +4693,12 @@
           "id": "images.findMultiColors",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "findMultiColors",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -4882,12 +4885,12 @@
           "id": "images.grayscale",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "grayscale",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -5050,12 +5053,12 @@
           "id": "images.matchTemplate",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "matchTemplate",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -5132,14 +5135,14 @@
         },
         {
           "id": "images.read",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
+          "nodeName": "readImage",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -5158,12 +5161,12 @@
           "id": "images.recycle",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "recycle",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -5194,12 +5197,12 @@
           "id": "images.resize",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "resize",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -5216,14 +5219,14 @@
         },
         {
           "id": "images.save",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
+          "nodeName": "saveImage",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -5278,12 +5281,12 @@
           "id": "images.threshold",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "threshold",
-          "decision": "exact_node_method_match",
+          "decision": "s11_18_images_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-18 maps this Rhino images API through compat.images; calls remain Promise-based and image handles must be recycled explicitly."
           ]
         },
         {
@@ -11696,11 +11699,11 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "partial": 382,
-      "unsupported": 371,
-      "supported_async": 45,
       "blocked_by_design": 22,
-      "supported": 132
+      "partial": 380,
+      "supported": 132,
+      "supported_async": 47,
+      "unsupported": 371
     }
   }
 }

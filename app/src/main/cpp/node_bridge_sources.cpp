@@ -16034,8 +16034,9 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_rhino_selector_global_names = Object.freeze(["selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents"]);
   let __autojs6_rhino_selector_dsl_cache = null;
   let __autojs6_rhino_compat_shell_cache = null;
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell"]);
+  let __autojs6_rhino_compat_images_cache = null;
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16183,6 +16184,273 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     __autojs6_rhino_compat_shell_cache = Object.freeze(shell);
     return __autojs6_rhino_compat_shell_cache;
+  }
+  function __autojs6_rhino_compat_image_plain_options(value, apiName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      return value;
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat." + apiName + " options must be an object when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_image_number(value, apiName, fieldName) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat." + apiName + " requires finite numeric " + fieldName + ".",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    return number;
+  }
+  function __autojs6_rhino_compat_image_region(value, y, width, height, apiName) {
+    let xValue = value;
+    let yValue = y;
+    let widthValue = width;
+    let heightValue = height;
+    if (Array.isArray(value)) {
+      xValue = value[0];
+      yValue = value[1];
+      widthValue = value[2];
+      heightValue = value[3];
+    } else if (value && typeof value === "object") {
+      xValue = value.x !== undefined ? value.x : value.left;
+      yValue = value.y !== undefined ? value.y : value.top;
+      if (value.width !== undefined || value.height !== undefined) {
+        widthValue = value.width;
+        heightValue = value.height;
+      } else {
+        widthValue = Number(value.right) - Number(xValue);
+        heightValue = Number(value.bottom) - Number(yValue);
+      }
+    }
+    return Object.freeze({
+      x: __autojs6_rhino_compat_image_number(xValue, apiName, "region.x"),
+      y: __autojs6_rhino_compat_image_number(yValue, apiName, "region.y"),
+      width: __autojs6_rhino_compat_image_number(widthValue, apiName, "region.width"),
+      height: __autojs6_rhino_compat_image_number(heightValue, apiName, "region.height")
+    });
+  }
+  function __autojs6_rhino_compat_image_size(value, height, apiName) {
+    let widthValue = value;
+    let heightValue = height;
+    if (Array.isArray(value)) {
+      widthValue = value[0];
+      heightValue = value[1];
+    } else if (value && typeof value === "object") {
+      widthValue = value.width;
+      heightValue = value.height;
+    }
+    return Object.freeze({
+      width: __autojs6_rhino_compat_image_number(widthValue, apiName, "width"),
+      height: __autojs6_rhino_compat_image_number(heightValue, apiName, "height")
+    });
+  }
+  function __autojs6_rhino_compat_image_save_options(formatOrOptions, qualityOrOptions, apiName) {
+    const output = {};
+    if (formatOrOptions !== undefined && formatOrOptions !== null) {
+      if (typeof formatOrOptions === "string") {
+        output.format = formatOrOptions;
+      } else if (typeof formatOrOptions === "object" && !Array.isArray(formatOrOptions)) {
+        Object.keys(formatOrOptions).forEach(function(key) {
+          output[key] = formatOrOptions[key];
+        });
+      } else {
+        throw __autojs6_rhino_compat_error(
+          "autojs6:compat." + apiName + " format must be a string or options object.",
+          __autojs6_rhino_compat_error_codes.invalidOption,
+          apiName,
+          "invalid-option"
+        );
+      }
+    }
+    if (qualityOrOptions !== undefined && qualityOrOptions !== null) {
+      if (typeof qualityOrOptions === "object" && !Array.isArray(qualityOrOptions)) {
+        Object.keys(qualityOrOptions).forEach(function(key) {
+          output[key] = qualityOrOptions[key];
+        });
+      } else {
+        output.quality = __autojs6_rhino_compat_image_number(qualityOrOptions, apiName, "quality");
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_image_threshold_type(value) {
+    if (value === undefined || value === null || value === "") {
+      return undefined;
+    }
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return ["binary", "binary_inv", "trunc", "tozero", "tozero_inv"][Math.trunc(value)];
+    }
+    const text = String(value).toLowerCase().replace(/^thresh[_-]?/, "").replace(/-/g, "_");
+    return text === "binary" || text === "binary_inv" || text === "trunc" || text === "tozero" || text === "tozero_inv"
+      ? text
+      : String(value);
+  }
+  function __autojs6_rhino_compat_image_threshold_options(thresholdOrOptions, maxValue, type, apiName) {
+    if (thresholdOrOptions && typeof thresholdOrOptions === "object" && !Array.isArray(thresholdOrOptions)) {
+      return thresholdOrOptions;
+    }
+    const output = {};
+    if (thresholdOrOptions !== undefined && thresholdOrOptions !== null) {
+      output.threshold = __autojs6_rhino_compat_image_number(thresholdOrOptions, apiName, "threshold");
+    }
+    if (maxValue !== undefined && maxValue !== null) {
+      output.maxValue = __autojs6_rhino_compat_image_number(maxValue, apiName, "maxValue");
+    }
+    const thresholdType = __autojs6_rhino_compat_image_threshold_type(type);
+    if (thresholdType !== undefined) {
+      output.type = thresholdType;
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_image_find_options(optionsOrX, y, width, height, threshold, apiName, hasRegionArgs) {
+    if (!hasRegionArgs) {
+      return __autojs6_rhino_compat_image_plain_options(optionsOrX, apiName);
+    }
+    const region = __autojs6_rhino_compat_image_region(optionsOrX, y, width, height, apiName);
+    const output = { region: Object.freeze([region.x, region.y, region.width, region.height]) };
+    if (threshold !== undefined && threshold !== null) {
+      output.threshold = __autojs6_rhino_compat_image_number(threshold, apiName, "threshold");
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_images() {
+    if (__autojs6_rhino_compat_images_cache) {
+      return __autojs6_rhino_compat_images_cache;
+    }
+    const imageModule = __autojs6_limited_image("images");
+    function read(path, strictOrOptions, maybeOptions) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_plain_options(
+          maybeOptions !== undefined ? maybeOptions : (strictOrOptions && typeof strictOrOptions === "object" && !Array.isArray(strictOrOptions) ? strictOrOptions : undefined),
+          "images.read"
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.readImage(path, options);
+    }
+    function save(image, path, formatOrOptions, qualityOrOptions) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_save_options(formatOrOptions, qualityOrOptions, "images.save");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.saveImage(image, path, options).then(function() {
+        return true;
+      });
+    }
+    function clip(image, xOrRegion, y, width, height, options) {
+      let region;
+      let bridgeOptions;
+      try {
+        region = __autojs6_rhino_compat_image_region(xOrRegion, y, width, height, "images.clip");
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(
+          (Array.isArray(xOrRegion) || (xOrRegion && typeof xOrRegion === "object")) ? y : options,
+          "images.clip"
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.clip(image, region.x, region.y, region.width, region.height, bridgeOptions);
+    }
+    function resize(image, sizeOrWidth, heightOrOptions, maybeOptions) {
+      let size;
+      let bridgeOptions;
+      try {
+        size = __autojs6_rhino_compat_image_size(sizeOrWidth, heightOrOptions, "images.resize");
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(
+          (Array.isArray(sizeOrWidth) || (sizeOrWidth && typeof sizeOrWidth === "object")) ? heightOrOptions : maybeOptions,
+          "images.resize"
+        );
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.resize(image, size.width, size.height, bridgeOptions);
+    }
+    function grayscale(image, options) {
+      let bridgeOptions;
+      try {
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(options, "images.grayscale");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.grayscale(image, bridgeOptions);
+    }
+    function threshold(image, thresholdOrOptions, maxValue, type) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_threshold_options(thresholdOrOptions, maxValue, type, "images.threshold");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.threshold(image, options);
+    }
+    function findImage(source, template, optionsOrX, y, width, height, threshold) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_find_options(optionsOrX, y, width, height, threshold, "images.findImage", arguments.length > 3);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.findImage(source, template, options);
+    }
+    function matchTemplate(source, template, options) {
+      let bridgeOptions;
+      try {
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(options, "images.matchTemplate");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.matchTemplate(source, template, bridgeOptions);
+    }
+    function findColor(image, color, optionsOrX, y, width, height, threshold) {
+      let options;
+      try {
+        options = __autojs6_rhino_compat_image_find_options(optionsOrX, y, width, height, threshold, "images.findColor", arguments.length > 3);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.findColor(image, color, options);
+    }
+    function findMultiColors(image, color, points, options) {
+      let bridgeOptions;
+      try {
+        bridgeOptions = __autojs6_rhino_compat_image_plain_options(options, "images.findMultiColors");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return imageModule.findMultiColors(image, color, points, bridgeOptions);
+    }
+    __autojs6_rhino_compat_images_cache = Object.freeze({
+      captureScreen: imageModule.captureScreen,
+      read,
+      readImage: imageModule.readImage,
+      save,
+      saveImage: save,
+      clip,
+      resize,
+      grayscale,
+      threshold,
+      findImage,
+      matchTemplate,
+      findColor,
+      findMultiColors,
+      getSize: imageModule.getSize,
+      recycle: imageModule.recycle
+    });
+    return __autojs6_rhino_compat_images_cache;
   }
   function __autojs6_rhino_selector_copy_field(target, source, fieldName) {
     if (Object.prototype.hasOwnProperty.call(source, fieldName) && source[fieldName] !== undefined) {
@@ -16398,6 +16666,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const selector = __autojs6_rhino_selector_dsl();
     const shell = __autojs6_rhino_compat_shell();
+    const images = __autojs6_rhino_compat_images();
     __autojs6_rhino_compat_facade_cache = Object.freeze({
       toast: __autojs6_rhino_compat_toast,
       toastLog: __autojs6_rhino_compat_toast_log,
@@ -16450,7 +16719,8 @@ std::string buildEmbeddedScriptExecutionSource(
       recents: selector.recents,
       app: __autojs6_limited_app(),
       device: __autojs6_limited_device(),
-      shell: shell
+      shell: shell,
+      images: images
     });
     return __autojs6_rhino_compat_facade_cache;
   }
@@ -16469,7 +16739,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -16504,7 +16774,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-17."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-18."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -16542,6 +16812,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const selector = __autojs6_rhino_selector_dsl();
     const shell = __autojs6_rhino_compat_shell();
+    const images = __autojs6_rhino_compat_images();
     __autojs6_limited_rhino_compat_cache = Object.freeze({
       name: "autojs6:compat",
       version: 1,
@@ -16601,6 +16872,7 @@ std::string buildEmbeddedScriptExecutionSource(
       app: __autojs6_limited_app(),
       device: __autojs6_limited_device(),
       shell: shell,
+      images: images,
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {

@@ -186,6 +186,21 @@ function createHarness(pureBlock, compatBlock) {
         checkAccess(options) { return Object.freeze({ shell: true, root: !!(options && options.root === true), shizuku: false, missingCapabilities: Object.freeze([]) }); },
         setDefaultTimeout(ms) { return Number(ms); }
       });
+      const imageStub = Object.freeze({
+        captureScreen() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+        readImage() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+        saveImage() { return Promise.resolve(undefined); },
+        clip() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+        resize() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+        grayscale() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+        threshold() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+        findImage() { return Promise.resolve(null); },
+        matchTemplate() { return Promise.resolve([]); },
+        findColor() { return Promise.resolve(null); },
+        findMultiColors() { return Promise.resolve(null); },
+        getSize() { return Object.freeze({ width: 1, height: 1 }); },
+        recycle() { return Promise.resolve(undefined); }
+      });
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
       }
@@ -241,6 +256,9 @@ function createHarness(pureBlock, compatBlock) {
       }
       function __autojs6_limited_shell() {
         return shellStub;
+      }
+      function __autojs6_limited_image() {
+        return imageStub;
       }
       function __autojs6_limited_toast() {
         return { showToast() { return Promise.resolve(); } };

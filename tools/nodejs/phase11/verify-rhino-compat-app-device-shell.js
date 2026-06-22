@@ -201,6 +201,21 @@ function createCompatHarness(compatBlock) {
           clearInterval() {},
           setImmediate() { return { type: "immediate" }; },
           clearImmediate() {}
+        }),
+        images: Object.freeze({
+          captureScreen() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          readImage() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          saveImage() { return Promise.resolve(undefined); },
+          clip() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          resize() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          grayscale() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          threshold() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          findImage() { return Promise.resolve(null); },
+          matchTemplate() { return Promise.resolve([]); },
+          findColor() { return Promise.resolve(null); },
+          findMultiColors() { return Promise.resolve(null); },
+          getSize() { return Object.freeze({ width: 1, height: 1 }); },
+          recycle() { return Promise.resolve(undefined); }
         })
       };
       function __autojs6_define_error_property(error, name, value) {
@@ -235,6 +250,7 @@ function createCompatHarness(compatBlock) {
       function __autojs6_limited_app() { return app; }
       function __autojs6_limited_device() { return device; }
       function __autojs6_limited_shell() { return shellModule; }
+      function __autojs6_limited_image() { return moduleStubs.images; }
       ${compatBlock}
       return {
         compat: __autojs6_limited_rhino_compat(),

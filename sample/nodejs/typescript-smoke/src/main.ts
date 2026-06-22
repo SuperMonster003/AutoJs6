@@ -145,6 +145,16 @@ async function smoke(): Promise<void> {
   const colorPoint = await image.findColor(binary, "#ff0000", { threshold: 4, timeoutMs: 1000 });
   const multiPoint = await image.findMultiColors(binary, 0xff0000, [[1, 0, "#00ff00"], { x: 0, y: 1, color: "#0000ff" }], { timeoutMs: 1000 });
   const size: image.ImageSize = image.getSize(binary);
+  const compatTemplate = await rhinoCompat.images.read("template.png", { timeoutMs: 1000 });
+  const compatClip = await rhinoCompat.images.clip(capture, [0, 0, 10, 10], { timeoutMs: 1000 });
+  const compatResize = await rhinoCompat.images.resize(compatClip, { width: 5, height: 5 }, { timeoutMs: 1000 });
+  const compatGray = await rhinoCompat.images.grayscale(compatResize, { timeoutMs: 1000 });
+  const compatBinary = await rhinoCompat.images.threshold(compatGray, 128, 255, "BINARY");
+  const compatFind = await rhinoCompat.images.findImage(compatBinary, compatTemplate, 0, 0, 5, 5, 0.8);
+  const compatMatches: readonly image.ImageMatch[] = await rhinoCompat.images.matchTemplate(compatBinary, compatTemplate, { max: 2, timeoutMs: 1000 });
+  const compatColor = await rhinoCompat.images.findColor(compatBinary, "#ff0000", 0, 0, 5, 5, 4);
+  const compatMultiColor = await rhinoCompat.images.findMultiColors(compatBinary, 0xff0000, [[1, 0, "#00ff00"]], { threshold: 4, timeoutMs: 1000 });
+  const compatSaved: boolean = await rhinoCompat.images.save(compatBinary, "out/rhino-compat.png", "png", 90);
   const ocrResults: readonly ocr.OcrResult[] = await ocr.recognize(capture, { lang: "auto", timeoutMs: 1000 });
   const ocrText: string = await ocr.recognizeText(capture, { timeoutMs: 1000 });
   const ocrBounds: readonly ocr.OcrResult[] = await ocr.detectTextBounds(capture, {
@@ -241,6 +251,11 @@ async function smoke(): Promise<void> {
   unsubscribeUi();
   await uiHandle.close({ timeoutMs: 1000 });
 
+  await rhinoCompat.images.recycle(compatTemplate, { timeoutMs: 1000 });
+  await rhinoCompat.images.recycle(compatClip, { timeoutMs: 1000 });
+  await rhinoCompat.images.recycle(compatResize, { timeoutMs: 1000 });
+  await rhinoCompat.images.recycle(compatGray, { timeoutMs: 1000 });
+  await rhinoCompat.images.recycle(compatBinary, { timeoutMs: 1000 });
   await image.recycle(template, { timeoutMs: 1000 });
   await images.recycle(frame, { timeoutMs: 1000 });
 
@@ -348,6 +363,15 @@ async function smoke(): Promise<void> {
   void rhinoPointClicked;
   void clickedText;
   void point;
+  void matches;
+  void colorPoint;
+  void multiPoint;
+  void size;
+  void compatFind;
+  void compatMatches;
+  void compatColor;
+  void compatMultiColor;
+  void compatSaved;
   void ocrResults;
   void ocrText;
   void ocrBounds;

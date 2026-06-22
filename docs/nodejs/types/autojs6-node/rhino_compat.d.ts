@@ -8,6 +8,7 @@ declare module "autojs6:compat" {
   import app = require("app");
   import device = require("device");
   import shellModule = require("shell");
+  import image = require("image");
   import files = require("files");
   import base64 = require("base64");
   import colors = require("colors");
@@ -145,6 +146,67 @@ declare module "autojs6:compat" {
       setDefaultTimeout(ms: number): number;
     }
 
+    export type ImageRegionInput =
+      | readonly [number, number, number, number]
+      | {
+          readonly x?: number;
+          readonly y?: number;
+          readonly width?: number;
+          readonly height?: number;
+          readonly left?: number;
+          readonly top?: number;
+          readonly right?: number;
+          readonly bottom?: number;
+        };
+
+    export type ImageSizeInput =
+      | readonly [number, number]
+      | {
+          readonly width: number;
+          readonly height: number;
+        };
+
+    export type ImageThresholdType =
+      | "binary"
+      | "binary_inv"
+      | "trunc"
+      | "tozero"
+      | "tozero_inv"
+      | "BINARY"
+      | "BINARY_INV"
+      | "TRUNC"
+      | "TOZERO"
+      | "TOZERO_INV"
+      | number;
+
+    export interface RhinoImagesCompatModule {
+      captureScreen(options?: image.CaptureScreenOptions): Promise<AutoJs6Node.ImageHandle>;
+      read(path: string, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
+      read(path: string, strict?: boolean, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
+      readImage(path: string, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
+      save(image: AutoJs6Node.ImageHandleLike, path: string, options?: image.SaveImageOptions): Promise<boolean>;
+      save(image: AutoJs6Node.ImageHandleLike, path: string, format: image.SaveImageOptions["format"], quality?: number): Promise<boolean>;
+      save(image: AutoJs6Node.ImageHandleLike, path: string, format: image.SaveImageOptions["format"], options?: image.SaveImageOptions): Promise<boolean>;
+      saveImage(image: AutoJs6Node.ImageHandleLike, path: string, options?: image.SaveImageOptions): Promise<boolean>;
+      saveImage(image: AutoJs6Node.ImageHandleLike, path: string, format: image.SaveImageOptions["format"], quality?: number): Promise<boolean>;
+      saveImage(image: AutoJs6Node.ImageHandleLike, path: string, format: image.SaveImageOptions["format"], options?: image.SaveImageOptions): Promise<boolean>;
+      clip(image: AutoJs6Node.ImageHandleLike, region: ImageRegionInput, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
+      clip(image: AutoJs6Node.ImageHandleLike, x: number, y: number, width: number, height: number, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
+      resize(image: AutoJs6Node.ImageHandleLike, size: ImageSizeInput, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
+      resize(image: AutoJs6Node.ImageHandleLike, width: number, height: number, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
+      grayscale(image: AutoJs6Node.ImageHandleLike, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
+      threshold(image: AutoJs6Node.ImageHandleLike, options?: image.ThresholdOptions): Promise<AutoJs6Node.ImageHandle>;
+      threshold(image: AutoJs6Node.ImageHandleLike, threshold: number, maxValue: number, type?: ImageThresholdType): Promise<AutoJs6Node.ImageHandle>;
+      findImage(image: AutoJs6Node.ImageHandleLike, template: AutoJs6Node.ImageHandleLike, options?: image.FindImageOptions): Promise<AutoJs6Node.Point | null>;
+      findImage(image: AutoJs6Node.ImageHandleLike, template: AutoJs6Node.ImageHandleLike, x: number, y: number, width: number, height: number, threshold?: number): Promise<AutoJs6Node.Point | null>;
+      matchTemplate(image: AutoJs6Node.ImageHandleLike, template: AutoJs6Node.ImageHandleLike, options?: image.MatchTemplateOptions): Promise<readonly image.ImageMatch[]>;
+      findColor(image: AutoJs6Node.ImageHandleLike, color: image.ColorInput, options?: image.FindColorOptions): Promise<AutoJs6Node.Point | null>;
+      findColor(image: AutoJs6Node.ImageHandleLike, color: image.ColorInput, x: number, y: number, width: number, height: number, threshold?: number): Promise<AutoJs6Node.Point | null>;
+      findMultiColors(image: AutoJs6Node.ImageHandleLike, color: image.ColorInput, points: readonly image.MultiColorPointInput[], options?: image.FindColorOptions): Promise<AutoJs6Node.Point | null>;
+      getSize(image: AutoJs6Node.ImageHandleLike): image.ImageSize;
+      recycle(image: AutoJs6Node.ImageHandleLike, options?: AutoJs6Node.BridgeCallOptions): Promise<void>;
+    }
+
     export interface RhinoCompatModule {
       readonly name: "autojs6:compat";
       readonly version: 1;
@@ -206,6 +268,7 @@ declare module "autojs6:compat" {
       readonly app: app.AppModule;
       readonly device: device.DeviceModule;
       readonly shell: ShellCompatFunction;
+      readonly images: RhinoImagesCompatModule;
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;

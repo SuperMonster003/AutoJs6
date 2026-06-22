@@ -15,9 +15,9 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ## Status Totals
 
 - blocked_by_design: 22
-- partial: 382
+- partial: 380
 - supported: 132
-- supported_async: 45
+- supported_async: 47
 - unsupported: 371
 
 ## Module Matrix
@@ -45,7 +45,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 18 | events | events | unsupported | - | unsupported:2 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 19 | events.keys | keys | unsupported | - | unsupported:13 | none | Design a Node facade or record a permanent non-goal. |
 | 20 | canvas | Canvas | unsupported | - | unsupported:1 | lifecycle_resource, raw_android_object | Design a Node facade or record a permanent non-goal. |
-| 21 | images | images | partial | image, images | partial:65, supported_async:12 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
+| 21 | images | images | partial | image, images | partial:63, supported_async:14 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
 | 22 | ocr | ocr | partial | ocr | partial:6, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 23 | ocr.ocr_ml_kit | mlkit | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 24 | ocr.ocr_paddle | paddle | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
@@ -316,7 +316,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Status: `partial`
 - Node surface: image, images
 - Coverage: `bridge_and_types`
-- API status: partial:65, supported_async:12
+- API status: partial:63, supported_async:14
 - Risks: event_loop_semantics, lifecycle_resource
 - Next step: Implement explicit compat facade and promote mapped APIs one by one.
 

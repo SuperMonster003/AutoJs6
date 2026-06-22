@@ -181,6 +181,21 @@ function createHarness(textBlock, compatBlock) {
           execFile(path) { return Promise.resolve(Object.freeze({ code: 0, stdout: String(path), stderr: "" })); },
           checkAccess(options) { return Object.freeze({ shell: true, root: !!(options && options.root === true), shizuku: false, missingCapabilities: Object.freeze([]) }); },
           setDefaultTimeout(ms) { return Number(ms); }
+        }),
+        images: Object.freeze({
+          captureScreen() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          readImage() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          saveImage() { return Promise.resolve(undefined); },
+          clip() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          resize() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          grayscale() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          threshold() { return Promise.resolve(Object.freeze({ id: "image", width: 1, height: 1 })); },
+          findImage() { return Promise.resolve(null); },
+          matchTemplate() { return Promise.resolve([]); },
+          findColor() { return Promise.resolve(null); },
+          findMultiColors() { return Promise.resolve(null); },
+          getSize() { return Object.freeze({ width: 1, height: 1 }); },
+          recycle() { return Promise.resolve(undefined); }
         })
       };
       function __autojs6_define_error_property(error, name, value) {
@@ -212,6 +227,7 @@ function createHarness(textBlock, compatBlock) {
       function __autojs6_limited_app() { return __moduleStubs.app; }
       function __autojs6_limited_device() { return __moduleStubs.device; }
       function __autojs6_limited_shell() { return __moduleStubs.shell; }
+      function __autojs6_limited_image() { return __moduleStubs.images; }
       function __autojs6_limited_toast() { return { showToast() { return Promise.resolve(); } }; }
       function __autojs6_limited_clipboard() { return { setText() { return Promise.resolve(); }, getText() { return Promise.resolve(""); } }; }
       function __autojs6_define_global(name, value) {
