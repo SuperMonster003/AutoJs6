@@ -1,7 +1,7 @@
 {
   "schema": "autojs6-node-rhino-compat-status-manifest-v1",
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T04:31:25.830Z",
+  "generatedAt": "2026-06-22T08:18:40.870Z",
   "inventorySchema": "autojs6-node-rhino-augment-inventory-v1",
   "statusVocabulary": [
     "supported",
@@ -1475,25 +1475,28 @@
     },
     {
       "id": "util.inspect",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "util",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "node_builtin_inspect_migration",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 maps Rhino util.inspect migration to Node require(\"util\").inspect and compat.util.inspect."
       ],
       "apiEntries": [
         {
           "id": "util.inspect.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "util",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "inspect",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         }
       ]
@@ -6224,794 +6227,799 @@
     },
     {
       "id": "colors",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "colors",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_11_pure_utility_facade_partial",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 exposes pure ARGB/RGB/HSL/HSV color helpers; Android object APIs remain blocked by design."
       ],
       "apiEntries": [
         {
           "id": "colors.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_11_pure_utility_subset",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes the low-risk pure JavaScript subset; uncommon Rhino edge cases remain tracked for compatibility refinement."
           ]
         },
         {
           "id": "colors.alpha",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "alpha",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.alphaDouble",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "alphaDouble",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.argb",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "argb",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.blue",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "blue",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.blueDouble",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "blueDouble",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.build",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "build",
+          "decision": "s11_11_pure_utility_subset",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes the low-risk pure JavaScript subset; uncommon Rhino edge cases remain tracked for compatibility refinement."
           ]
         },
         {
           "id": "colors.getAlpha",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "getAlpha",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.getAlphaDouble",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "getAlphaDouble",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.getBlue",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "getBlue",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.getBlueDouble",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "getBlueDouble",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.getGreen",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "getGreen",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.getGreenDouble",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "getGreenDouble",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.getRed",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "getRed",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.getRedDouble",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "getRedDouble",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.green",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "green",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.greenDouble",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "greenDouble",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.hsl",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hsl",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.hsla",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hsla",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.hsv",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hsv",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.hsva",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hsva",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.isEqual",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "isEqual",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.isSimilar",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "isSimilar",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.luminance",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "luminance",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.red",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "red",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.redDouble",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "redDouble",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.removeAlpha",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "removeAlpha",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.removeBlue",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "removeBlue",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.removeGreen",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "removeGreen",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.removeRed",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "removeRed",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.rgb",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "rgb",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.rgba",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "rgba",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.setAlpha",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setAlpha",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.setAlphaRelative",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setAlphaRelative",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.setBlue",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setBlue",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.setBlueRelative",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setBlueRelative",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.setGreen",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setGreen",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.setGreenRelative",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setGreenRelative",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.setPaintColor",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "blocked_by_design",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setPaintColor",
+          "decision": "safe_node_profile_boundary",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "This Rhino API would expose a raw Android, Java, or Rhino object and is blocked by the Safe Node Profile."
           ]
         },
         {
           "id": "colors.setRed",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setRed",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.setRedRelative",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setRedRelative",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.summary",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "summary",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toArgb",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toArgb",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toArgbString",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toArgbString",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toColorStateList",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "blocked_by_design",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toColorStateList",
+          "decision": "safe_node_profile_boundary",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "This Rhino API would expose a raw Android, Java, or Rhino object and is blocked by the Safe Node Profile."
           ]
         },
         {
           "id": "colors.toFullHex",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toFullHex",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHex",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHex",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHsl",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHsl",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHslString",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHslString",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHsla",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHsla",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHslaString",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHslaString",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHsv",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHsv",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHsvString",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHsvString",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHsva",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHsva",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toHsvaString",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toHsvaString",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toInt",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toInt",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toRgb",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toRgb",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toRgbString",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toRgbString",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toRgba",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toRgba",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toRgbaString",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toRgbaString",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.toString",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "toString",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.all",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "all",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "colors.themeColor",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "blocked_by_design",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "themeColor",
+          "decision": "safe_node_profile_boundary",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "This Rhino API would expose a raw Android, Java, or Rhino object and is blocked by the Safe Node Profile."
           ]
         }
       ]
     },
     {
       "id": "colors.color",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "blocked_by_design",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "colors"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "safe_node_profile_boundary",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "ColorNativeObject is a Rhino native object shape and is not exposed in the Node Safe Profile."
       ],
       "apiEntries": [
         {
           "id": "colors.color.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "blocked_by_design",
+          "asyncMode": "sync",
+          "nodeModule": "colors",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "__module",
+          "decision": "safe_node_profile_boundary",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "This Rhino API would expose a raw Android, Java, or Rhino object and is blocked by the Safe Node Profile."
           ]
         }
       ]
@@ -7871,244 +7879,260 @@
     },
     {
       "id": "converter",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "converter",
+        "cvt",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_11_pure_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 exposes the cvt namespace through require(\"converter\") / require(\"cvt\")."
       ],
       "apiEntries": [
         {
           "id": "converter.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "converter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "cvt",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         }
       ]
     },
     {
       "id": "converter.bytes",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "converter",
+        "cvt",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_11_pure_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 exposes cvt.bytes with constants and strict/loose helpers for host-side byte conversion."
       ],
       "apiEntries": [
         {
           "id": "converter.bytes.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "converter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "converter.bytes.AUTO",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "converter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.AUTO",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "converter.bytes.IEC_DIV",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "converter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.IEC_DIV",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "converter.bytes.SI_DIV",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "converter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.SI_DIV",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "converter.bytes.UNITS",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "converter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.UNITS",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "converter.bytes.loose",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "converter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.loose",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "converter.bytes.strict",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "converter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.strict",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         }
       ]
     },
     {
       "id": "formatter",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "formatter",
+        "fmt",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_11_pure_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 exposes the fmt namespace through require(\"formatter\") / require(\"fmt\")."
       ],
       "apiEntries": [
         {
           "id": "formatter.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "formatter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "fmt",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         }
       ]
     },
     {
       "id": "formatter.bytes",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "formatter",
+        "fmt",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_11_pure_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 exposes fmt.bytes with constants and strict/loose helpers for host-side byte formatting."
       ],
       "apiEntries": [
         {
           "id": "formatter.bytes.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "formatter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "formatter.bytes.AUTO",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "formatter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.AUTO",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "formatter.bytes.IEC_DIV",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "formatter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.IEC_DIV",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "formatter.bytes.SI_DIV",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "formatter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.SI_DIV",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "formatter.bytes.UNITS",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "formatter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.UNITS",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "formatter.bytes.loose",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "formatter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.loose",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "formatter.bytes.strict",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "formatter",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes.strict",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         }
       ]
@@ -10398,49 +10422,52 @@
     },
     {
       "id": "base64",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "base64",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_11_pure_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 exposes base64.encode/decode through Buffer-backed pure Node facade."
       ],
       "apiEntries": [
         {
           "id": "base64.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "base64",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "__module",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "base64.decode",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "base64",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "decode",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         },
         {
           "id": "base64.encode",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "base64",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "encode",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         }
       ]
@@ -11091,25 +11118,28 @@
     },
     {
       "id": "mime",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "mime",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_11_pure_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 exposes the invokable mime parser as a pure host-side facade."
       ],
       "apiEntries": [
         {
           "id": "mime.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "mime",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "mime",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         }
       ]
@@ -11317,25 +11347,28 @@
     },
     {
       "id": "nanoid",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "nanoid",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_11_pure_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-11 exposes the invokable NanoID generator using Node crypto random bytes when available."
       ],
       "apiEntries": [
         {
           "id": "nanoid.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "nanoid",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "nanoid",
+          "decision": "s11_11_pure_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-11 exposes this Rhino pure utility API through a synchronous Node facade without Android provider access."
           ]
         }
       ]
@@ -11636,11 +11669,11 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "unsupported": 545,
-      "blocked_by_design": 17,
-      "partial": 346,
-      "supported": 2,
-      "supported_async": 42
+      "partial": 349,
+      "unsupported": 449,
+      "supported_async": 42,
+      "blocked_by_design": 22,
+      "supported": 90
     }
   }
 }

@@ -220,11 +220,22 @@ Inventory 和兼容矩阵统一使用以下状态：
     `:app:verifyNodeRhinoCompatFilesFacade` 覆盖 scoped read/write/copy/move/remove
     以及 path traversal migration hint。
 
-- [ ] S11-11: 实现 pure utility facade。
+- [x] S11-11: 实现 pure utility facade。
   - 范围：`base64`、`colors`、`formatter`、`converter`、`mime`、
     `nanoid` 的优先子集。
   - 产物：runtime module 或 JS facade、types、unit tests。
   - 验收：不依赖 Android provider；可在 host gate 中跑。
+  - 状态：已接入 `require("base64")`、`require("colors")`、
+    `require("formatter")` / `require("fmt")`、`require("converter")` /
+    `require("cvt")`、`require("mime")`、`require("nanoid")`，并通过
+    `autojs6:compat` 显式安装 `base64`、`colors`、`fmt`、`cvt`、
+    `mime`、`nanoid`、`util`。
+  - 边界：`colors.toColorStateList()`、`colors.setPaintColor()`、
+    `colors.themeColor` 保持 Safe Node Profile 边界阻断；`util.inspect`
+    迁移到 Node `require("util").inspect` / `compat.util.inspect`。
+  - 证据：`tools/nodejs/phase11/verify-rhino-compat-pure-utilities.js` 和
+    `:app:verifyNodeRhinoCompatPureUtilities` 覆盖 host-side base64、colors、
+    bytes formatter/converter、mime、nanoid、explicit globals 和阻断策略。
 
 - [ ] S11-12: 实现 text utility facade。
   - 范围：`opencc`、`pinyin`、`pinyin4j` 的可用子集和缺依赖降级。

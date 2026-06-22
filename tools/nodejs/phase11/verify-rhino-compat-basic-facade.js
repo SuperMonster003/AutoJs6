@@ -118,6 +118,15 @@ function createHarness(compatBlock) {
       let __clip = "";
       let __autojs6_limited_rhino_compat_cache = null;
       let __autojs6_rhino_compat_facade_cache = null;
+      const __pureUtilityStubs = {
+        base64: Object.freeze({ encode() { return ""; }, decode() { return ""; } }),
+        colors: Object.freeze({ rgb() { return 0; } }),
+        formatter: Object.freeze({ bytes() { return ""; } }),
+        converter: Object.freeze({ bytes() { return 0; } }),
+        mime: Object.freeze(function mime() { return Object.freeze({ type: "", subtype: "", parameters: Object.freeze({}) }); }),
+        nanoid: Object.freeze(function nanoid() { return ""; }),
+        util: Object.freeze({ format(value) { return String(value); }, inspect(value) { return String(value); } })
+      };
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
       }
@@ -164,6 +173,27 @@ function createHarness(compatBlock) {
             return [];
           }
         };
+      }
+      function __autojs6_limited_base64() {
+        return __pureUtilityStubs.base64;
+      }
+      function __autojs6_limited_colors() {
+        return __pureUtilityStubs.colors;
+      }
+      function __autojs6_limited_formatter() {
+        return __pureUtilityStubs.formatter;
+      }
+      function __autojs6_limited_converter() {
+        return __pureUtilityStubs.converter;
+      }
+      function __autojs6_limited_mime() {
+        return __pureUtilityStubs.mime;
+      }
+      function __autojs6_limited_nanoid() {
+        return __pureUtilityStubs.nanoid;
+      }
+      function __autojs6_limited_util() {
+        return __pureUtilityStubs.util;
       }
       function __autojs6_define_global(name, value) {
         Object.defineProperty(globalThis, name, {

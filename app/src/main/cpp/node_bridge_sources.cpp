@@ -8192,6 +8192,12 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_lifecycle_cache = null;
   let __autojs6_limited_rhino_compat_cache = null;
   let __autojs6_limited_files_cache = null;
+  let __autojs6_limited_base64_cache = null;
+  let __autojs6_limited_colors_cache = null;
+  let __autojs6_limited_formatter_cache = null;
+  let __autojs6_limited_converter_cache = null;
+  let __autojs6_limited_mime_cache = null;
+  let __autojs6_limited_nanoid_cache = null;
   let __autojs6_rhino_compat_facade_cache = null;
   let __autojs6_lifecycle_config_cache = undefined;
   const __autojs6_lifecycle_checkpoint_handlers = [];
@@ -14900,13 +14906,759 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_limited_files_cache = filesModule;
     return __autojs6_limited_files_cache;
   }
+  function __autojs6_buffer_constructor_required(apiName) {
+    const BufferCtor = __autojs6_buffer_constructor();
+    if (!BufferCtor || typeof BufferCtor.from !== "function") {
+      throw new Error("autojs6:compat " + apiName + " requires Buffer support.");
+    }
+    return BufferCtor;
+  }
+  function __autojs6_base64_encoding(encoding) {
+    if (encoding === undefined || encoding === null || encoding === "") {
+      return "utf8";
+    }
+    const raw = String(encoding).trim();
+    const normalized = raw.toLowerCase().replace(/\W+/g, "");
+    const aliases = Object.freeze({
+      utf8: "utf8",
+      utf: "utf8",
+      unicode: "utf8",
+      utf16: "utf16le",
+      utf16le: "utf16le",
+      ucs2: "ucs2",
+      latin1: "latin1",
+      binary: "latin1",
+      ascii: "ascii",
+      hex: "hex",
+      base64: "base64",
+      base64url: "base64url"
+    });
+    const candidate = aliases[normalized] || raw;
+    const BufferCtor = __autojs6_buffer_constructor_required("base64");
+    return typeof BufferCtor.isEncoding === "function" && BufferCtor.isEncoding(candidate)
+      ? candidate
+      : "utf8";
+  }
+  function __autojs6_base64_to_buffer(value, encoding, apiName) {
+    if (value === undefined || value === null) {
+      throw __autojs6_invalid_arg_type("autojs6:compat " + apiName + " value must not be nullish.");
+    }
+    const BufferCtor = __autojs6_buffer_constructor_required(apiName);
+    if (typeof BufferCtor.isBuffer === "function" && BufferCtor.isBuffer(value)) {
+      return BufferCtor.from(value);
+    }
+    if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) {
+      return BufferCtor.from(value);
+    }
+    if (typeof ArrayBuffer === "function" && ArrayBuffer.isView && ArrayBuffer.isView(value)) {
+      return BufferCtor.from(value.buffer, value.byteOffset, value.byteLength);
+    }
+    if (Array.isArray(value)) {
+      return BufferCtor.from(value);
+    }
+    return BufferCtor.from(String(value), encoding || "utf8");
+  }
+  function __autojs6_limited_base64() {
+    if (__autojs6_limited_base64_cache) {
+      return __autojs6_limited_base64_cache;
+    }
+    __autojs6_limited_base64_cache = Object.freeze({
+      encode: function(value, encoding) {
+        return __autojs6_base64_to_buffer(value, __autojs6_base64_encoding(encoding), "base64.encode").toString("base64");
+      },
+      decode: function(value, encoding) {
+        const textEncoding = __autojs6_base64_encoding(encoding);
+        return __autojs6_base64_to_buffer(value, "base64", "base64.decode").toString(textEncoding);
+      }
+    });
+    return __autojs6_limited_base64_cache;
+  }
+  const __autojs6_color_names = Object.freeze({
+    black: 0xff000000,
+    white: 0xffffffff,
+    red: 0xffff0000,
+    green: 0xff00ff00,
+    blue: 0xff0000ff,
+    yellow: 0xffffff00,
+    cyan: 0xff00ffff,
+    magenta: 0xffff00ff,
+    transparent: 0x00000000,
+    gray: 0xff808080,
+    grey: 0xff808080
+  });
+  function __autojs6_color_byte(value, name) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_invalid_arg_type("colors." + name + " component must be a finite number.");
+    }
+    const scaled = number >= 0 && number <= 1 && !Number.isInteger(number)
+      ? number * 255
+      : number;
+    return Math.max(0, Math.min(255, Math.round(scaled)));
+  }
+  function __autojs6_color_component(value, shift) {
+    return (__autojs6_color_uint(value) >>> shift) & 0xff;
+  }
+  function __autojs6_color_int(value) {
+    return (__autojs6_color_uint(value) | 0);
+  }
+  function __autojs6_color_uint(value) {
+    if (typeof value === "number") {
+      return value >>> 0;
+    }
+    if (typeof value === "bigint") {
+      return Number(value & 0xffffffffn) >>> 0;
+    }
+    if (typeof value === "string") {
+      const text = value.trim();
+      const named = __autojs6_color_names[text.toLowerCase()];
+      if (named !== undefined) {
+        return named >>> 0;
+      }
+      const hex = text.charAt(0) === "#" ? text.slice(1) : text;
+      if (/^[0-9a-f]{3}$/i.test(hex)) {
+        const r = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+        const g = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+        const b = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+        return __autojs6_color_argb_uint(255, r, g, b);
+      }
+      if (/^[0-9a-f]{4}$/i.test(hex)) {
+        const a = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+        const r = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+        const g = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+        const b = parseInt(hex.charAt(3) + hex.charAt(3), 16);
+        return __autojs6_color_argb_uint(a, r, g, b);
+      }
+      if (/^[0-9a-f]{6}$/i.test(hex)) {
+        return (0xff000000 | parseInt(hex, 16)) >>> 0;
+      }
+      if (/^[0-9a-f]{8}$/i.test(hex)) {
+        return parseInt(hex, 16) >>> 0;
+      }
+    }
+    if (value && typeof value === "object") {
+      if (typeof value.color === "number") {
+        return value.color >>> 0;
+      }
+      if ("a" in value || "r" in value || "g" in value || "b" in value) {
+        return __autojs6_color_argb_uint(
+          value.a === undefined ? 255 : value.a,
+          value.r === undefined ? 0 : value.r,
+          value.g === undefined ? 0 : value.g,
+          value.b === undefined ? 0 : value.b
+        );
+      }
+    }
+    throw __autojs6_invalid_arg_type("colors value cannot be converted to an ARGB integer.");
+  }
+  function __autojs6_color_argb_uint(a, r, g, b) {
+    return (
+      (__autojs6_color_byte(a, "argb") << 24) |
+      (__autojs6_color_byte(r, "argb") << 16) |
+      (__autojs6_color_byte(g, "argb") << 8) |
+      __autojs6_color_byte(b, "argb")
+    ) >>> 0;
+  }
+  function __autojs6_color_hex_pair(value) {
+    return value.toString(16).padStart(2, "0");
+  }
+  function __autojs6_color_to_full_hex(value) {
+    const color = __autojs6_color_uint(value);
+    return "#" +
+      __autojs6_color_hex_pair((color >>> 24) & 0xff) +
+      __autojs6_color_hex_pair((color >>> 16) & 0xff) +
+      __autojs6_color_hex_pair((color >>> 8) & 0xff) +
+      __autojs6_color_hex_pair(color & 0xff);
+  }
+  function __autojs6_color_to_hex(value, alphaOrLength) {
+    const color = __autojs6_color_uint(value);
+    const includeAlpha = alphaOrLength === true || Number(alphaOrLength) === 8;
+    const body = __autojs6_color_hex_pair((color >>> 16) & 0xff) +
+      __autojs6_color_hex_pair((color >>> 8) & 0xff) +
+      __autojs6_color_hex_pair(color & 0xff);
+    return includeAlpha ? "#" + __autojs6_color_hex_pair((color >>> 24) & 0xff) + body : "#" + body;
+  }
+  function __autojs6_color_set_component(value, shift, component) {
+    const color = __autojs6_color_uint(value);
+    const mask = ~(0xff << shift);
+    return (((color & mask) | (__autojs6_color_byte(component, "setComponent") << shift)) >>> 0) | 0;
+  }
+  function __autojs6_color_remove_component(value, shift) {
+    return __autojs6_color_set_component(value, shift, 0);
+  }
+  function __autojs6_color_round_alpha(value, keepTrailingZero) {
+    const rounded = Math.round(value * 1000) / 1000;
+    if (rounded === 1 && keepTrailingZero !== false) {
+      return "1.0";
+    }
+    return String(rounded).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+  }
+  function __autojs6_color_rgb_array(value) {
+    return [
+      __autojs6_color_component(value, 16),
+      __autojs6_color_component(value, 8),
+      __autojs6_color_component(value, 0)
+    ];
+  }
+  function __autojs6_color_argb_array(value) {
+    return [
+      __autojs6_color_component(value, 24),
+      __autojs6_color_component(value, 16),
+      __autojs6_color_component(value, 8),
+      __autojs6_color_component(value, 0)
+    ];
+  }
+  function __autojs6_color_rgb_to_hsv(r, g, b) {
+    const rn = __autojs6_color_byte(r, "hsv") / 255;
+    const gn = __autojs6_color_byte(g, "hsv") / 255;
+    const bn = __autojs6_color_byte(b, "hsv") / 255;
+    const max = Math.max(rn, gn, bn);
+    const min = Math.min(rn, gn, bn);
+    const delta = max - min;
+    let hue = 0;
+    if (delta !== 0) {
+      if (max === rn) {
+        hue = 60 * (((gn - bn) / delta) % 6);
+      } else if (max === gn) {
+        hue = 60 * (((bn - rn) / delta) + 2);
+      } else {
+        hue = 60 * (((rn - gn) / delta) + 4);
+      }
+    }
+    if (hue < 0) hue += 360;
+    const saturation = max === 0 ? 0 : delta / max;
+    return [hue, saturation, max];
+  }
+  function __autojs6_color_hsv_to_rgb(h, s, v) {
+    const hue = ((((Number(h) || 0) % 360) + 360) % 360) / 60;
+    const saturation = Math.max(0, Math.min(1, Number(s) > 1 ? Number(s) / 100 : Number(s) || 0));
+    const value = Math.max(0, Math.min(1, Number(v) > 1 ? Number(v) / 100 : Number(v) || 0));
+    const c = value * saturation;
+    const x = c * (1 - Math.abs((hue % 2) - 1));
+    const m = value - c;
+    let rgb;
+    if (hue < 1) rgb = [c, x, 0];
+    else if (hue < 2) rgb = [x, c, 0];
+    else if (hue < 3) rgb = [0, c, x];
+    else if (hue < 4) rgb = [0, x, c];
+    else if (hue < 5) rgb = [x, 0, c];
+    else rgb = [c, 0, x];
+    return rgb.map(function(part) { return Math.round((part + m) * 255); });
+  }
+  function __autojs6_color_rgb_to_hsl(r, g, b) {
+    const rn = __autojs6_color_byte(r, "hsl") / 255;
+    const gn = __autojs6_color_byte(g, "hsl") / 255;
+    const bn = __autojs6_color_byte(b, "hsl") / 255;
+    const max = Math.max(rn, gn, bn);
+    const min = Math.min(rn, gn, bn);
+    const delta = max - min;
+    const lightness = (max + min) / 2;
+    let hue = 0;
+    let saturation = 0;
+    if (delta !== 0) {
+      saturation = delta / (1 - Math.abs(2 * lightness - 1));
+      if (max === rn) {
+        hue = 60 * (((gn - bn) / delta) % 6);
+      } else if (max === gn) {
+        hue = 60 * (((bn - rn) / delta) + 2);
+      } else {
+        hue = 60 * (((rn - gn) / delta) + 4);
+      }
+    }
+    if (hue < 0) hue += 360;
+    return [hue, saturation, lightness];
+  }
+  function __autojs6_color_hsl_to_rgb(h, s, l) {
+    const hue = ((((Number(h) || 0) % 360) + 360) % 360);
+    const saturation = Math.max(0, Math.min(1, Number(s) > 1 ? Number(s) / 100 : Number(s) || 0));
+    const lightness = Math.max(0, Math.min(1, Number(l) > 1 ? Number(l) / 100 : Number(l) || 0));
+    const c = (1 - Math.abs(2 * lightness - 1)) * saturation;
+    const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+    const m = lightness - c / 2;
+    let rgb;
+    if (hue < 60) rgb = [c, x, 0];
+    else if (hue < 120) rgb = [x, c, 0];
+    else if (hue < 180) rgb = [0, c, x];
+    else if (hue < 240) rgb = [0, x, c];
+    else if (hue < 300) rgb = [x, 0, c];
+    else rgb = [c, 0, x];
+    return rgb.map(function(part) { return Math.round((part + m) * 255); });
+  }
+  function __autojs6_limited_colors() {
+    if (__autojs6_limited_colors_cache) {
+      return __autojs6_limited_colors_cache;
+    }
+    const colorsModule = {
+      toInt: __autojs6_color_int,
+      toHex: __autojs6_color_to_hex,
+      toFullHex: __autojs6_color_to_full_hex,
+      toString: __autojs6_color_to_hex,
+      alpha: function(value, options) {
+        const alpha = __autojs6_color_component(value, 24);
+        return options && Number(options.max) === 1 ? alpha / 255 : alpha;
+      },
+      getAlpha: function(value, options) { return colorsModule.alpha(value, options); },
+      alphaDouble: function(value) { return __autojs6_color_component(value, 24) / 255; },
+      getAlphaDouble: function(value) { return colorsModule.alphaDouble(value); },
+      setAlpha: function(value, alpha) { return __autojs6_color_set_component(value, 24, alpha); },
+      setAlphaRelative: function(value, percentage) { return colorsModule.setAlpha(value, colorsModule.alpha(value) * Number(percentage)); },
+      removeAlpha: function(value) { return __autojs6_color_remove_component(value, 24); },
+      red: function(value, options) {
+        const red = __autojs6_color_component(value, 16);
+        return options && Number(options.max) === 1 ? red / 255 : red;
+      },
+      getRed: function(value, options) { return colorsModule.red(value, options); },
+      redDouble: function(value) { return __autojs6_color_component(value, 16) / 255; },
+      getRedDouble: function(value) { return colorsModule.redDouble(value); },
+      setRed: function(value, red) { return __autojs6_color_set_component(value, 16, red); },
+      setRedRelative: function(value, percentage) { return colorsModule.setRed(value, colorsModule.red(value) * Number(percentage)); },
+      removeRed: function(value) { return __autojs6_color_remove_component(value, 16); },
+      green: function(value, options) {
+        const green = __autojs6_color_component(value, 8);
+        return options && Number(options.max) === 1 ? green / 255 : green;
+      },
+      getGreen: function(value, options) { return colorsModule.green(value, options); },
+      greenDouble: function(value) { return __autojs6_color_component(value, 8) / 255; },
+      getGreenDouble: function(value) { return colorsModule.greenDouble(value); },
+      setGreen: function(value, green) { return __autojs6_color_set_component(value, 8, green); },
+      setGreenRelative: function(value, percentage) { return colorsModule.setGreen(value, colorsModule.green(value) * Number(percentage)); },
+      removeGreen: function(value) { return __autojs6_color_remove_component(value, 8); },
+      blue: function(value, options) {
+        const blue = __autojs6_color_component(value, 0);
+        return options && Number(options.max) === 1 ? blue / 255 : blue;
+      },
+      getBlue: function(value, options) { return colorsModule.blue(value, options); },
+      blueDouble: function(value) { return __autojs6_color_component(value, 0) / 255; },
+      getBlueDouble: function(value) { return colorsModule.blueDouble(value); },
+      setBlue: function(value, blue) { return __autojs6_color_set_component(value, 0, blue); },
+      setBlueRelative: function(value, percentage) { return colorsModule.setBlue(value, colorsModule.blue(value) * Number(percentage)); },
+      removeBlue: function(value) { return __autojs6_color_remove_component(value, 0); },
+      argb: function(a, r, g, b) { return __autojs6_color_argb_uint(a, r, g, b) | 0; },
+      rgb: function(r, g, b) { return __autojs6_color_argb_uint(255, r, g, b) | 0; },
+      rgba: function(r, g, b, a) { return __autojs6_color_argb_uint(a === undefined ? 255 : a, r, g, b) | 0; },
+      hsv: function(h, s, v) {
+        const rgb = __autojs6_color_hsv_to_rgb(h, s, v);
+        return __autojs6_color_argb_uint(255, rgb[0], rgb[1], rgb[2]) | 0;
+      },
+      hsva: function(h, s, v, a) {
+        const rgb = __autojs6_color_hsv_to_rgb(h, s, v);
+        return __autojs6_color_argb_uint(a === undefined ? 255 : a, rgb[0], rgb[1], rgb[2]) | 0;
+      },
+      hsl: function(h, s, l) {
+        const rgb = __autojs6_color_hsl_to_rgb(h, s, l);
+        return __autojs6_color_argb_uint(255, rgb[0], rgb[1], rgb[2]) | 0;
+      },
+      hsla: function(h, s, l, a) {
+        const rgb = __autojs6_color_hsl_to_rgb(h, s, l);
+        return __autojs6_color_argb_uint(a === undefined ? 255 : a, rgb[0], rgb[1], rgb[2]) | 0;
+      },
+      toRgb: function(value) { return Object.freeze(__autojs6_color_rgb_array(value)); },
+      toRgba: function(value) { return Object.freeze(__autojs6_color_rgb_array(value).concat([colorsModule.alphaDouble(value)])); },
+      toArgb: function(value) { return Object.freeze(__autojs6_color_argb_array(value)); },
+      toHsv: function(value) {
+        const rgb = __autojs6_color_rgb_array(value);
+        return Object.freeze(__autojs6_color_rgb_to_hsv(rgb[0], rgb[1], rgb[2]));
+      },
+      toHsva: function(value) { return Object.freeze(colorsModule.toHsv(value).concat([colorsModule.alphaDouble(value)])); },
+      toHsl: function(value) {
+        const rgb = __autojs6_color_rgb_array(value);
+        return Object.freeze(__autojs6_color_rgb_to_hsl(rgb[0], rgb[1], rgb[2]));
+      },
+      toHsla: function(value) { return Object.freeze(colorsModule.toHsl(value).concat([colorsModule.alphaDouble(value)])); },
+      toRgbString: function(value) { return "rgb(" + __autojs6_color_rgb_array(value).join(", ") + ")"; },
+      toRgbaString: function(value, options) {
+        return "rgba(" + __autojs6_color_rgb_array(value).join(", ") + ", " + __autojs6_color_round_alpha(colorsModule.alphaDouble(value), options && options.keepTrailingZeroForFullAlpha) + ")";
+      },
+      toArgbString: function(value, options) {
+        const argb = __autojs6_color_argb_array(value);
+        return "argb(" + __autojs6_color_round_alpha(argb[0] / 255, options && options.keepTrailingZeroForFullAlpha) + ", " + argb.slice(1).join(", ") + ")";
+      },
+      toHsvString: function(value) {
+        const hsv = colorsModule.toHsv(value);
+        return "hsv(" + Math.round(hsv[0] * 1000) / 1000 + ", " + Math.round(hsv[1] * 1000) / 1000 + ", " + Math.round(hsv[2] * 1000) / 1000 + ")";
+      },
+      toHsvaString: function(value) {
+        const hsva = colorsModule.toHsva(value);
+        return "hsva(" + Math.round(hsva[0] * 1000) / 1000 + ", " + Math.round(hsva[1] * 1000) / 1000 + ", " + Math.round(hsva[2] * 1000) / 1000 + ", " + __autojs6_color_round_alpha(hsva[3], true) + ")";
+      },
+      toHslString: function(value) {
+        const hsl = colorsModule.toHsl(value);
+        return "hsl(" + Math.round(hsl[0] * 1000) / 1000 + ", " + Math.round(hsl[1] * 1000) / 1000 + ", " + Math.round(hsl[2] * 1000) / 1000 + ")";
+      },
+      toHslaString: function(value) {
+        const hsla = colorsModule.toHsla(value);
+        return "hsla(" + Math.round(hsla[0] * 1000) / 1000 + ", " + Math.round(hsla[1] * 1000) / 1000 + ", " + Math.round(hsla[2] * 1000) / 1000 + ", " + __autojs6_color_round_alpha(hsla[3], true) + ")";
+      },
+      isEqual: function(left, right) { return __autojs6_color_uint(left) === __autojs6_color_uint(right); },
+      isSimilar: function(left, right, threshold) {
+        const max = threshold === undefined || threshold === null ? 4 : Number(threshold);
+        return Math.abs(colorsModule.red(left) - colorsModule.red(right)) <= max &&
+          Math.abs(colorsModule.green(left) - colorsModule.green(right)) <= max &&
+          Math.abs(colorsModule.blue(left) - colorsModule.blue(right)) <= max &&
+          Math.abs(colorsModule.alpha(left) - colorsModule.alpha(right)) <= max;
+      },
+      luminance: function(value) {
+        const rgb = __autojs6_color_rgb_array(value).map(function(part) {
+          const normalized = part / 255;
+          return normalized <= 0.03928 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+      },
+      build: function() { return colorsModule.argb.apply(colorsModule, arguments); },
+      summary: function(value) {
+        const color = __autojs6_color_int(value);
+        return "Color { " + colorsModule.toHex(color) + " | " + colorsModule.toRgbaString(color) + " | int(" + color + ") }";
+      },
+      toColorStateList: function() {
+        throw __autojs6_rhino_compat_blocked_by_design("colors.toColorStateList", "ColorStateList is an Android object and is not exposed in the Safe Node Profile.");
+      },
+      setPaintColor: function() {
+        throw __autojs6_rhino_compat_blocked_by_design("colors.setPaintColor", "Paint is an Android object and is not exposed in the Safe Node Profile.");
+      }
+    };
+    Object.defineProperty(colorsModule, "all", { value: __autojs6_color_names, enumerable: true });
+    Object.defineProperty(colorsModule, "themeColor", {
+      enumerable: true,
+      get: function() {
+        throw __autojs6_rhino_compat_blocked_by_design("colors.themeColor", "ThemeColor is an Android theme object and is not exposed in the Safe Node Profile.");
+      }
+    });
+    __autojs6_limited_colors_cache = Object.freeze(colorsModule);
+    return __autojs6_limited_colors_cache;
+  }
+  const __autojs6_bytes_constants = Object.freeze({
+    UNITS: "KMGTPEZYRQ",
+    AUTO: "AUTO",
+    IEC_DIV: 1024,
+    SI_DIV: 1000
+  });
+  function __autojs6_bytes_unit(unit, strict) {
+    const text = unit === undefined || unit === null || unit === "" ? "B" : String(unit).trim().toUpperCase();
+    if (text === __autojs6_bytes_constants.AUTO) {
+      return { auto: true, base: __autojs6_bytes_constants.IEC_DIV, exp: -1, label: __autojs6_bytes_constants.AUTO };
+    }
+    const normalized = strict ? text : text.replace(/I(?=B$)/, "");
+    const coreRaw = normalized.endsWith("B") ? normalized.slice(0, -1) : normalized;
+    const isIec = strict && coreRaw.endsWith("I");
+    const core = isIec ? coreRaw.slice(0, -1) : coreRaw;
+    if (core === "") {
+      return { auto: false, base: strict && !isIec ? __autojs6_bytes_constants.SI_DIV : __autojs6_bytes_constants.IEC_DIV, exp: 0, label: "B", iec: isIec };
+    }
+    const index = __autojs6_bytes_constants.UNITS.indexOf(core);
+    if (index < 0) {
+      throw __autojs6_invalid_arg_type("bytes unit is invalid: " + unit);
+    }
+    return {
+      auto: false,
+      base: strict && !isIec ? __autojs6_bytes_constants.SI_DIV : __autojs6_bytes_constants.IEC_DIV,
+      exp: index + 1,
+      label: core + (strict && isIec ? "iB" : "B"),
+      iec: isIec
+    };
+  }
+  function __autojs6_bytes_options(args, mode, tough) {
+    const options = {
+      source: args[0],
+      fromUnit: undefined,
+      toUnit: __autojs6_bytes_constants.AUTO,
+      fractionDigits: 2,
+      useIecIdentifier: undefined,
+      useSpace: true,
+      trimTrailingZero: false,
+      autoCarryThreshold: __autojs6_bytes_constants.IEC_DIV,
+      strict: tough === "strict"
+    };
+    if (tough === "loose") {
+      options.strict = false;
+    }
+    function merge(object) {
+      if (!object || typeof object !== "object" || Array.isArray(object)) return;
+      Object.keys(object).forEach(function(key) {
+        if (Object.prototype.hasOwnProperty.call(options, key)) {
+          options[key] = object[key];
+        }
+      });
+    }
+    if (args.length >= 2) {
+      const second = args[1];
+      if (second && typeof second === "object" && !Array.isArray(second)) {
+        merge(second);
+      } else if (typeof second === "string") {
+        options.toUnit = second;
+      } else if (typeof second === "number") {
+        options.fractionDigits = second;
+      } else if (typeof second === "boolean" && mode === "format") {
+        options.useIecIdentifier = second;
+      }
+    }
+    if (args.length >= 3) {
+      const second = args[1];
+      const third = args[2];
+      if (typeof second === "string" && typeof third === "string") {
+        options.fromUnit = second;
+        options.toUnit = third;
+      } else if (third && typeof third === "object" && !Array.isArray(third)) {
+        if (typeof second === "string") {
+          options.toUnit = second;
+        }
+        merge(third);
+      } else if (typeof third === "number") {
+        if (typeof second === "string") options.toUnit = second;
+        options.fractionDigits = third;
+      } else if (typeof third === "boolean" && mode === "format") {
+        if (typeof second === "string") options.toUnit = second;
+        options.useIecIdentifier = third;
+      }
+    }
+    if (args.length >= 4) {
+      options.fromUnit = args[1];
+      options.toUnit = args[2];
+      const fourth = args[3];
+      if (fourth && typeof fourth === "object" && !Array.isArray(fourth)) {
+        merge(fourth);
+      } else if (typeof fourth === "number") {
+        options.fractionDigits = fourth;
+      } else if (typeof fourth === "boolean" && mode === "format") {
+        options.useIecIdentifier = fourth;
+      }
+    }
+    if (tough === "strict") options.strict = true;
+    if (tough === "loose") options.strict = false;
+    options.fractionDigits = Math.max(0, Math.floor(Number(options.fractionDigits) || 0));
+    options.autoCarryThreshold = Math.max(1, Number(options.autoCarryThreshold) || __autojs6_bytes_constants.IEC_DIV);
+    options.useSpace = options.useSpace !== false;
+    options.trimTrailingZero = options.trimTrailingZero === true;
+    return options;
+  }
+  function __autojs6_bytes_parse_source(source, fromUnit, strict) {
+    let value;
+    let parsedUnit = "";
+    if (typeof source === "number" || typeof source === "bigint") {
+      value = Number(source);
+    } else {
+      const match = /^(\d+(?:\.\d+)?)\s*([A-Za-z]*)$/.exec(String(source === undefined || source === null ? 0 : source).trim());
+      if (!match) {
+        throw __autojs6_invalid_arg_type("bytes source is invalid: " + source);
+      }
+      value = Number(match[1]);
+      parsedUnit = match[2] || "";
+    }
+    if (!Number.isFinite(value) || value < 0) {
+      throw __autojs6_invalid_arg_type("bytes source must be a non-negative finite number.");
+    }
+    const incoming = fromUnit === undefined || fromUnit === null || fromUnit === "" ? "" : String(fromUnit);
+    const normalizedIncoming = strict ? incoming.trim() : incoming.trim().toUpperCase().replace(/I(?=B$)/, "");
+    const normalizedParsed = strict ? parsedUnit.trim() : parsedUnit.trim().toUpperCase().replace(/I(?=B$)/, "");
+    let unit = normalizedIncoming || normalizedParsed || "B";
+    if (normalizedIncoming && normalizedParsed && normalizedIncoming.toUpperCase() !== normalizedParsed.toUpperCase()) {
+      throw __autojs6_invalid_arg_type("bytes source has ambiguous units.");
+    }
+    unit = unit.toUpperCase();
+    return { value: value, unit: unit };
+  }
+  function __autojs6_bytes_value(options) {
+    const parsed = __autojs6_bytes_parse_source(options.source, options.fromUnit, options.strict);
+    const from = __autojs6_bytes_unit(parsed.unit, options.strict);
+    return parsed.value * Math.pow(from.base, from.exp);
+  }
+  function __autojs6_bytes_pick_auto(bytes, strict, threshold) {
+    const base = __autojs6_bytes_constants.IEC_DIV;
+    let exp = 0;
+    for (let index = 1; index <= __autojs6_bytes_constants.UNITS.length; index += 1) {
+      if (bytes >= Math.pow(base, index)) {
+        exp = index;
+      } else {
+        break;
+      }
+    }
+    if (exp > 0 && bytes / Math.pow(base, exp) >= threshold && exp < __autojs6_bytes_constants.UNITS.length) {
+      exp += 1;
+    }
+    const core = exp === 0 ? "" : __autojs6_bytes_constants.UNITS.charAt(exp - 1);
+    return { exp: exp, base: base, label: core ? core + (strict ? "iB" : "B") : "B" };
+  }
+  function __autojs6_bytes_number(args, tough) {
+    const options = __autojs6_bytes_options(args, "number", tough);
+    const bytes = __autojs6_bytes_value(options);
+    const target = String(options.toUnit || __autojs6_bytes_constants.AUTO).toUpperCase() === __autojs6_bytes_constants.AUTO
+      ? __autojs6_bytes_pick_auto(bytes, options.strict, options.autoCarryThreshold)
+      : __autojs6_bytes_unit(options.toUnit, options.strict);
+    const divisor = Math.pow(target.base, target.exp);
+    const value = target.exp === 0 ? bytes : bytes / divisor;
+    const scale = Math.pow(10, options.fractionDigits);
+    return Math.round(value * scale) / scale;
+  }
+  function __autojs6_bytes_string(args, tough) {
+    const options = __autojs6_bytes_options(args, "format", tough);
+    const bytes = __autojs6_bytes_value(options);
+    const target = String(options.toUnit || __autojs6_bytes_constants.AUTO).toUpperCase() === __autojs6_bytes_constants.AUTO
+      ? __autojs6_bytes_pick_auto(bytes, options.strict, options.autoCarryThreshold)
+      : __autojs6_bytes_unit(options.toUnit, options.strict);
+    const value = target.exp === 0 ? bytes : bytes / Math.pow(target.base, target.exp);
+    let text = value.toFixed(options.fractionDigits);
+    if (options.trimTrailingZero) {
+      text = text.replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+    }
+    let label = target.label;
+    if (!options.strict && options.useIecIdentifier === true && label !== "B" && label.indexOf("iB") < 0) {
+      label = label.replace(/B$/, "iB");
+    }
+    if (!options.strict && options.useIecIdentifier === false && label.indexOf("iB") >= 0) {
+      label = label.replace(/iB$/, "B");
+    }
+    return text + (options.useSpace ? " " : "") + label;
+  }
+  function __autojs6_limited_formatter() {
+    if (__autojs6_limited_formatter_cache) {
+      return __autojs6_limited_formatter_cache;
+    }
+    const bytes = function() {
+      return __autojs6_bytes_string(Array.prototype.slice.call(arguments), "none");
+    };
+    Object.defineProperties(bytes, {
+      UNITS: { value: __autojs6_bytes_constants.UNITS, enumerable: true },
+      AUTO: { value: __autojs6_bytes_constants.AUTO, enumerable: true },
+      IEC_DIV: { value: __autojs6_bytes_constants.IEC_DIV, enumerable: true },
+      SI_DIV: { value: __autojs6_bytes_constants.SI_DIV, enumerable: true },
+      strict: { value: function() { return __autojs6_bytes_string(Array.prototype.slice.call(arguments), "strict"); }, enumerable: true },
+      loose: { value: function() { return __autojs6_bytes_string(Array.prototype.slice.call(arguments), "loose"); }, enumerable: true }
+    });
+    __autojs6_limited_formatter_cache = Object.freeze({ bytes: Object.freeze(bytes) });
+    return __autojs6_limited_formatter_cache;
+  }
+  function __autojs6_limited_converter() {
+    if (__autojs6_limited_converter_cache) {
+      return __autojs6_limited_converter_cache;
+    }
+    const bytes = function() {
+      return __autojs6_bytes_number(Array.prototype.slice.call(arguments), "none");
+    };
+    Object.defineProperties(bytes, {
+      UNITS: { value: __autojs6_bytes_constants.UNITS, enumerable: true },
+      AUTO: { value: __autojs6_bytes_constants.AUTO, enumerable: true },
+      IEC_DIV: { value: __autojs6_bytes_constants.IEC_DIV, enumerable: true },
+      SI_DIV: { value: __autojs6_bytes_constants.SI_DIV, enumerable: true },
+      strict: { value: function() { return __autojs6_bytes_number(Array.prototype.slice.call(arguments), "strict"); }, enumerable: true },
+      loose: { value: function() { return __autojs6_bytes_number(Array.prototype.slice.call(arguments), "loose"); }, enumerable: true }
+    });
+    __autojs6_limited_converter_cache = Object.freeze({ bytes: Object.freeze(bytes) });
+    return __autojs6_limited_converter_cache;
+  }
+  function __autojs6_mime_parse(value) {
+    const raw = value === undefined || value === null ? "" : String(value);
+    const parts = raw.split(/\s*;\s*/).filter(function(part) { return part.length > 0; });
+    const typePart = parts.shift() || "application/octet-stream";
+    const typeMatch = /^([^\/\s]+)\/([^;\s]+)$/.exec(typePart);
+    const type = typeMatch ? typeMatch[1].toLowerCase() : "application";
+    const subtype = typeMatch ? typeMatch[2].toLowerCase() : "octet-stream";
+    const parameters = {};
+    parts.forEach(function(part) {
+      const index = part.indexOf("=");
+      if (index > 0) {
+        parameters[part.slice(0, index).trim()] = part.slice(index + 1).trim().replace(/^"|"$/g, "");
+      }
+    });
+    const mimeTypeRefined = type + "/" + subtype;
+    const parameterText = Object.keys(parameters).map(function(key) {
+      return key + "=" + parameters[key];
+    }).join("; ");
+    const mimeType = parameterText ? mimeTypeRefined + "; " + parameterText : mimeTypeRefined;
+    const result = {
+      raw: raw,
+      type: type,
+      subtype: subtype,
+      mimeType: mimeType,
+      mimeTypeRefined: mimeTypeRefined,
+      parameters: Object.freeze(parameters),
+      toStringReadable: function() { return this.toString(); },
+      toString: function() {
+        return [
+          "JsMime {",
+          "  type: '" + type + "',",
+          "  subtype: '" + subtype + "',",
+          "  mimeType: '" + mimeType + "',",
+          "  mimeTypeRefined: '" + mimeTypeRefined + "',",
+          "  parameters: '" + __autojs6_limited_util().format(parameters) + "',",
+          "  raw: '" + raw + "',",
+          "}"
+        ].join("\n");
+      }
+    };
+    return Object.freeze(result);
+  }
+  function __autojs6_limited_mime() {
+    if (__autojs6_limited_mime_cache) {
+      return __autojs6_limited_mime_cache;
+    }
+    const mime = function(value) {
+      return __autojs6_mime_parse(value);
+    };
+    Object.defineProperties(mime, {
+      WILDCARD: { value: "*/*", enumerable: true },
+      TEXT_PLAIN: { value: "text/plain", enumerable: true },
+      APPLICATION_JSON: { value: "application/json", enumerable: true },
+      APPLICATION_OCTET_STREAM: { value: "application/octet-stream", enumerable: true },
+      IMAGE_PNG: { value: "image/png", enumerable: true },
+      parse: { value: __autojs6_mime_parse, enumerable: true }
+    });
+    __autojs6_limited_mime_cache = Object.freeze(mime);
+    return __autojs6_limited_mime_cache;
+  }
+  const __autojs6_nanoid_alphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+  function __autojs6_nanoid_random_bytes(size) {
+    const count = Math.max(0, Math.min(1024, Math.floor(Number(size) || 0)));
+    const nodeCrypto = __autojs6_crypto_module();
+    if (nodeCrypto && typeof nodeCrypto.randomBytes === "function") {
+      return nodeCrypto.randomBytes(count);
+    }
+    const bytes = new Uint8Array(count);
+    for (let index = 0; index < count; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+    return bytes;
+  }
+  function __autojs6_nanoid_generate(size, alphabet) {
+    const length = size === undefined || size === null || size === "" ? 21 : Math.max(0, Math.floor(Number(size)));
+    const sourceAlphabet = alphabet || __autojs6_nanoid_alphabet;
+    const bytes = __autojs6_nanoid_random_bytes(length);
+    let id = "";
+    for (let index = 0; index < length; index += 1) {
+      id += sourceAlphabet[bytes[index] % sourceAlphabet.length];
+    }
+    return id;
+  }
+  function __autojs6_limited_nanoid() {
+    if (__autojs6_limited_nanoid_cache) {
+      return __autojs6_limited_nanoid_cache;
+    }
+    const nanoid = function(size) {
+      return __autojs6_nanoid_generate(size);
+    };
+    Object.defineProperties(nanoid, {
+      urlAlphabet: { value: __autojs6_nanoid_alphabet, enumerable: true },
+      customAlphabet: {
+        value: function(alphabet, defaultSize) {
+          const text = String(alphabet || "");
+          if (!text) {
+            throw __autojs6_invalid_arg_type("nanoid.customAlphabet alphabet must be non-empty.");
+          }
+          return function(size) {
+            return __autojs6_nanoid_generate(size === undefined ? defaultSize : size, text);
+          };
+        },
+        enumerable: true
+      }
+    });
+    __autojs6_limited_nanoid_cache = Object.freeze(nanoid);
+    return __autojs6_limited_nanoid_cache;
+  }
   const __autojs6_rhino_compat_error_codes = Object.freeze({
     invalidOption: "ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION",
     unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
     blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers", "files"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -15025,7 +15777,16 @@ std::string buildEmbeddedScriptExecutionSource(
       sleep: __autojs6_rhino_compat_sleep,
       setClip: __autojs6_rhino_compat_set_clip,
       getClip: __autojs6_rhino_compat_get_clip,
-      files: __autojs6_limited_files()
+      files: __autojs6_limited_files(),
+      base64: __autojs6_limited_base64(),
+      colors: __autojs6_limited_colors(),
+      fmt: __autojs6_limited_formatter(),
+      formatter: __autojs6_limited_formatter(),
+      cvt: __autojs6_limited_converter(),
+      converter: __autojs6_limited_converter(),
+      mime: __autojs6_limited_mime(),
+      nanoid: __autojs6_limited_nanoid(),
+      util: __autojs6_limited_util()
     });
     return __autojs6_rhino_compat_facade_cache;
   }
@@ -15044,8 +15805,8 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10"]),
-      pendingTasks: Object.freeze(["S11-11", "S11-12", "S11-13", "S11-14"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11"]),
+      pendingTasks: Object.freeze(["S11-12", "S11-13", "S11-14"]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
       moduleNames: __autojs6_rhino_compat_basic_module_names
@@ -15079,7 +15840,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed low-risk Rhino compatibility globals for S11-09 and S11-10."
+        ? "Installed low-risk Rhino compatibility globals for S11-09 through S11-11."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -15128,6 +15889,15 @@ std::string buildEmbeddedScriptExecutionSource(
       setClip: __autojs6_rhino_compat_set_clip,
       getClip: __autojs6_rhino_compat_get_clip,
       files: __autojs6_limited_files(),
+      base64: __autojs6_limited_base64(),
+      colors: __autojs6_limited_colors(),
+      fmt: __autojs6_limited_formatter(),
+      formatter: __autojs6_limited_formatter(),
+      cvt: __autojs6_limited_converter(),
+      converter: __autojs6_limited_converter(),
+      mime: __autojs6_limited_mime(),
+      nanoid: __autojs6_limited_nanoid(),
+      util: __autojs6_limited_util(),
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {
@@ -35737,6 +36507,24 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "files") {
       return "files";
     }
+    if (name === "base64") {
+      return "base64";
+    }
+    if (name === "colors") {
+      return "colors";
+    }
+    if (name === "formatter" || name === "fmt") {
+      return "formatter";
+    }
+    if (name === "converter" || name === "cvt") {
+      return "converter";
+    }
+    if (name === "mime") {
+      return "mime";
+    }
+    if (name === "nanoid") {
+      return "nanoid";
+    }
     if (name === "autojs6:lifecycle") {
       return "autojs6:lifecycle";
     }
@@ -36000,6 +36788,24 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "files") {
       return __autojs6_limited_files();
+    }
+    if (name === "base64") {
+      return __autojs6_limited_base64();
+    }
+    if (name === "colors") {
+      return __autojs6_limited_colors();
+    }
+    if (name === "formatter" || name === "fmt") {
+      return __autojs6_limited_formatter();
+    }
+    if (name === "converter" || name === "cvt") {
+      return __autojs6_limited_converter();
+    }
+    if (name === "mime") {
+      return __autojs6_limited_mime();
+    }
+    if (name === "nanoid") {
+      return __autojs6_limited_nanoid();
     }
     if (name === "autojs6:lifecycle") {
       return __autojs6_limited_lifecycle();

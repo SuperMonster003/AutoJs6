@@ -75,7 +75,7 @@ function buildStaticChecks(files, filesBlock, compatBlock) {
     check("runtime-files-scoped-paths", filesBlock.includes("__autojs6_validate_fs_path") && filesBlock.includes("Migration: AutoJs6 Node files compatibility"), "runtime files facade must use scoped path validation and migration hints"),
     check("runtime-require-files", files.runtime.text.includes('name === "files"') && files.runtime.text.includes("return __autojs6_limited_files();"), "runtime must resolve and require the files module"),
     check("runtime-compat-files", compatBlock.includes("files: __autojs6_limited_files()") && compatBlock.includes('"files"'), "autojs6:compat must expose files and list it as an installable global"),
-    check("runtime-status-s11-10", compatBlock.includes('"S11-10"') && !compatBlock.includes('"S11-10", "S11-11"'), "compat status must mark S11-10 implemented and remove it from pending tasks"),
+    check("runtime-status-s11-10", /implementedTasks:\s*Object\.freeze\(\[[^\]]*"S11-10"/.test(compatBlock) && !/pendingTasks:\s*Object\.freeze\(\[[^\]]*"S11-10"/.test(compatBlock), "compat status must mark S11-10 implemented and remove it from pending tasks"),
     check("types-files-module", files.filesTypes.text.includes('declare module "files"') && REQUIRED_METHODS.every((name) => files.filesTypes.text.includes(`${name}(`)), "files.d.ts must declare the S11-10 methods"),
     check("types-index-files", files.indexTypes.text.includes('./files.d.ts'), "index.d.ts must reference files.d.ts"),
     check("types-compat-files", files.compatTypes.text.includes('import files = require("files")') && files.compatTypes.text.includes("readonly files: files.FilesModule"), "rhino_compat.d.ts must expose compat.files"),
@@ -129,6 +129,15 @@ function createHarness(filesBlock, compatBlock, root) {
       let __autojs6_limited_files_cache = null;
       let __autojs6_limited_rhino_compat_cache = null;
       let __autojs6_rhino_compat_facade_cache = null;
+      const __pureUtilityStubs = {
+        base64: Object.freeze({ encode() { return ""; }, decode() { return ""; } }),
+        colors: Object.freeze({ rgb() { return 0; } }),
+        formatter: Object.freeze({ bytes() { return ""; } }),
+        converter: Object.freeze({ bytes() { return 0; } }),
+        mime: Object.freeze(function mime() { return Object.freeze({ type: "", subtype: "", parameters: Object.freeze({}) }); }),
+        nanoid: Object.freeze(function nanoid() { return ""; }),
+        util: Object.freeze({ format(value) { return String(value); }, inspect(value) { return String(value); } })
+      };
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
       }
@@ -210,6 +219,27 @@ function createHarness(filesBlock, compatBlock, root) {
       function __autojs6_limited_clipboard() {
         return { setText() { return Promise.resolve(); }, getText() { return Promise.resolve(""); } };
       }
+      function __autojs6_limited_base64() {
+        return __pureUtilityStubs.base64;
+      }
+      function __autojs6_limited_colors() {
+        return __pureUtilityStubs.colors;
+      }
+      function __autojs6_limited_formatter() {
+        return __pureUtilityStubs.formatter;
+      }
+      function __autojs6_limited_converter() {
+        return __pureUtilityStubs.converter;
+      }
+      function __autojs6_limited_mime() {
+        return __pureUtilityStubs.mime;
+      }
+      function __autojs6_limited_nanoid() {
+        return __pureUtilityStubs.nanoid;
+      }
+      function __autojs6_limited_util() {
+        return __pureUtilityStubs.util;
+      }
       function __autojs6_define_global(name, value) {
         Object.defineProperty(globalThis, name, { value, configurable: true, enumerable: false, writable: false });
       }
@@ -272,7 +302,7 @@ function inside(target, rootValue) {
 
 function extractFilesBlock(runtime) {
   const start = runtime.indexOf("function __autojs6_files_is_nullish");
-  const end = runtime.indexOf("  const __autojs6_rhino_compat_error_codes", start);
+  const end = runtime.indexOf("  function __autojs6_buffer_constructor_required", start);
   if (start < 0 || end <= start) {
     return "";
   }

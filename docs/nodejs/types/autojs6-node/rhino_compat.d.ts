@@ -1,5 +1,12 @@
 declare module "autojs6:compat" {
   import files = require("files");
+  import base64 = require("base64");
+  import colors = require("colors");
+  import formatter = require("formatter");
+  import converter = require("converter");
+  import mime = require("mime");
+  import nanoid = require("nanoid");
+  import util = require("util");
 
   namespace rhinoCompat {
     export type ErrorCode =
@@ -68,6 +75,15 @@ declare module "autojs6:compat" {
       setClip(text?: unknown, options?: AutoJs6Node.BridgeCallOptions): Promise<void>;
       getClip(options?: AutoJs6Node.BridgeCallOptions): Promise<string>;
       readonly files: files.FilesModule;
+      readonly base64: base64.Base64Module;
+      readonly colors: colors.ColorsModule;
+      readonly fmt: formatter.FormatterModule;
+      readonly formatter: formatter.FormatterModule;
+      readonly cvt: converter.ConverterModule;
+      readonly converter: converter.ConverterModule;
+      readonly mime: mime.MimeModule;
+      readonly nanoid: nanoid.NanoidModule;
+      readonly util: util.UtilModule;
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;

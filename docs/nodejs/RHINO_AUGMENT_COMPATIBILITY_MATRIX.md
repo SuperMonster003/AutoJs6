@@ -7,18 +7,18 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Rhino modules: 73
 - Rhino API entries: 879
 - Node bridge modules: 23
-- Node type modules: 27
+- Node type modules: 37
 - Modules with bridge evidence: 24
-- Modules with type evidence: 25
-- Modules without Node surface evidence: 47
+- Modules with type evidence: 32
+- Modules without Node surface evidence: 40
 
 ## Status Totals
 
-- blocked_by_design: 17
-- partial: 346
-- supported: 2
+- blocked_by_design: 22
+- partial: 349
+- supported: 90
 - supported_async: 42
-- unsupported: 545
+- unsupported: 449
 
 ## Module Matrix
 
@@ -27,11 +27,11 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 0 | global | global | partial | autojs6:compat, toast | supported_async:4, unsupported:42 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 1 | global.legacy | legacy | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 2 | global.is_nullish | isNullish | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
-| 3 | util | util | unsupported | - | unsupported:50 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 3 | util | util | unsupported | util | unsupported:50 | provider_availability | Decide explicit mapping or mark blocked-by-design. |
 | 4 | util.java | java | blocked_by_design | java | blocked_by_design:6 | none | Keep denial documented and covered by policy tests. |
 | 5 | util.version | version | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
 | 6 | util.version_codes | versionCodes | unsupported | - | unsupported:5 | provider_availability | Design a Node facade or record a permanent non-goal. |
-| 7 | util.inspect | inspect | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
+| 7 | util.inspect | inspect | supported | util | supported:1 | none | Review status manifest decision. |
 | 8 | util.morse_code | morseCode | unsupported | - | unsupported:4 | none | Design a Node facade or record a permanent non-goal. |
 | 9 | global.species | species | unsupported | - | unsupported:36 | none | Design a Node facade or record a permanent non-goal. |
 | 10 | app | app | partial | app | partial:36, supported_async:4 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -54,8 +54,8 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 27 | barcode.qr_code | qrcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 28 | threads | threads | blocked_by_design | - | blocked_by_design:6 | provider_availability | Keep denial documented and covered by policy tests. |
 | 29 | ui | ui | partial | ui | partial:35 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
-| 30 | colors | colors | unsupported | - | unsupported:63 | provider_availability | Design a Node facade or record a permanent non-goal. |
-| 31 | colors.color | Color | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 30 | colors | colors | partial | colors | blocked_by_design:3, partial:2, supported:58 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 31 | colors.color | Color | blocked_by_design | colors | blocked_by_design:1 | provider_availability | Keep denial documented and covered by policy tests. |
 | 32 | tasks | tasks | partial | work_manager | partial:16 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 33 | dialogs | dialogs | partial | dialogs | partial:5, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 34 | continuation | continuation | unsupported | - | unsupported:4 | provider_availability | Design a Node facade or record a permanent non-goal. |
@@ -63,10 +63,10 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 36 | web | web | partial | fetch, websocket | partial:4 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 37 | web.web_socket | WebSocket | partial | websocket | partial:1 | lifecycle_resource, provider_availability, raw_android_object | Implement explicit compat facade and promote mapped APIs one by one. |
 | 38 | s13n | s13n | unsupported | - | unsupported:6 | none | Design a Node facade or record a permanent non-goal. |
-| 39 | converter | cvt | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
-| 40 | converter.bytes | bytes | unsupported | - | unsupported:7 | none | Design a Node facade or record a permanent non-goal. |
-| 41 | formatter | fmt | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
-| 42 | formatter.bytes | bytes | unsupported | - | unsupported:7 | none | Design a Node facade or record a permanent non-goal. |
+| 39 | converter | cvt | supported | converter, cvt | supported:1 | none | Review status manifest decision. |
+| 40 | converter.bytes | bytes | supported | converter | supported:7 | none | Review status manifest decision. |
+| 41 | formatter | fmt | supported | fmt, formatter | supported:1 | none | Review status manifest decision. |
+| 42 | formatter.bytes | bytes | supported | formatter | supported:7 | none | Review status manifest decision. |
 | 43 | console | console | unsupported | - | unsupported:54 | lifecycle_resource, provider_availability, thread_model | Design a Node facade or record a permanent non-goal. |
 | 44 | plugins | plugins | partial | plugins | partial:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 45 | jsox.arrayx | Arrayx | unsupported | - | unsupported:16 | none | Design a Node facade or record a permanent non-goal. |
@@ -84,16 +84,16 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 57 | toast | toast | partial | toast | partial:1, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 58 | media | media | partial | media_projection | partial:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 59 | sensors | sensors | partial | sensors | partial:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
-| 60 | base64 | base64 | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
+| 60 | base64 | base64 | supported | base64 | supported:3 | none | Review status manifest decision. |
 | 61 | notice | notice | partial | notifications | partial:6, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 62 | notice.channel | channel | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
 | 63 | shizuku | shizuku | unsupported | - | unsupported:7 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 64 | opencc | opencc | unsupported | - | unsupported:34 | none | Design a Node facade or record a permanent non-goal. |
-| 65 | mime | mime | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 65 | mime | mime | supported | mime | supported:1 | provider_availability | Review status manifest decision. |
 | 66 | sysprops | sysprops | unsupported | - | unsupported:5 | none | Design a Node facade or record a permanent non-goal. |
 | 67 | sqlite | sqlite | partial | database, sqlite | partial:1, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 68 | zip | zip | unsupported | - | unsupported:6 | none | Design a Node facade or record a permanent non-goal. |
-| 69 | nanoid | nanoid | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
+| 69 | nanoid | nanoid | supported | nanoid | supported:1 | none | Review status manifest decision. |
 | 70 | pinyin | pinyin | unsupported | - | unsupported:17 | none | Design a Node facade or record a permanent non-goal. |
 | 71 | pinyin4j | pinyin4j | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
 | 72 | mediainfo | mediainfo | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
@@ -134,11 +134,11 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `util`
 - Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
+- Node surface: util
+- Coverage: `types_only`
 - API status: unsupported:50
 - Risks: provider_availability
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Decide explicit mapping or mark blocked-by-design.
 
 ### util.java
 
@@ -173,12 +173,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### util.inspect
 
 - Key: `inspect`
-- Status: `unsupported`
-- Node surface: -
+- Status: `supported`
+- Node surface: util
 - Coverage: `no_node_surface`
-- API status: unsupported:1
+- API status: supported:1
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### util.morse_code
 
@@ -403,22 +403,22 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### colors
 
 - Key: `colors`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:63
+- Status: `partial`
+- Node surface: colors
+- Coverage: `types_only`
+- API status: blocked_by_design:3, partial:2, supported:58
 - Risks: provider_availability
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
 
 ### colors.color
 
 - Key: `Color`
-- Status: `unsupported`
-- Node surface: -
+- Status: `blocked_by_design`
+- Node surface: colors
 - Coverage: `no_node_surface`
-- API status: unsupported:1
+- API status: blocked_by_design:1
 - Risks: provider_availability
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Keep denial documented and covered by policy tests.
 
 ### tasks
 
@@ -493,42 +493,42 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### converter
 
 - Key: `cvt`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:1
+- Status: `supported`
+- Node surface: converter, cvt
+- Coverage: `types_only`
+- API status: supported:1
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### converter.bytes
 
 - Key: `bytes`
-- Status: `unsupported`
-- Node surface: -
+- Status: `supported`
+- Node surface: converter
 - Coverage: `no_node_surface`
-- API status: unsupported:7
+- API status: supported:7
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### formatter
 
 - Key: `fmt`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:1
+- Status: `supported`
+- Node surface: fmt, formatter
+- Coverage: `types_only`
+- API status: supported:1
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### formatter.bytes
 
 - Key: `bytes`
-- Status: `unsupported`
-- Node surface: -
+- Status: `supported`
+- Node surface: formatter
 - Coverage: `no_node_surface`
-- API status: unsupported:7
+- API status: supported:7
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### console
 
@@ -703,12 +703,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### base64
 
 - Key: `base64`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:3
+- Status: `supported`
+- Node surface: base64
+- Coverage: `types_only`
+- API status: supported:3
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### notice
 
@@ -753,12 +753,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### mime
 
 - Key: `mime`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:1
+- Status: `supported`
+- Node surface: mime
+- Coverage: `types_only`
+- API status: supported:1
 - Risks: provider_availability
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### sysprops
 
@@ -793,12 +793,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### nanoid
 
 - Key: `nanoid`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:1
+- Status: `supported`
+- Node surface: nanoid
+- Coverage: `types_only`
+- API status: supported:1
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### pinyin
 
