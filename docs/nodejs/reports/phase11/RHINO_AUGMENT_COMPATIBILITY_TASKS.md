@@ -109,11 +109,16 @@ Inventory 和兼容矩阵统一使用以下状态：
     `docs/nodejs/rhino-compat/rhino-augment-inventory.schema.json`、
     `docs/nodejs/rhino-compat/fixtures/rhino-augment-inventory.sample.json`。
 
-- [ ] S11-02: 实现 augment source scanner。
+- [x] S11-02: 实现 augment source scanner。
   - 范围：扫描 `org/autojs/autojs/runtime/api/augment` 和
     `ScriptRuntime.augment(...)` 的实际注册顺序。
   - 产物：scanner task 或 Kotlin utility。
   - 验收：能输出所有已注册 augment module，包含文件路径和行号。
+  - Evidence：
+    `tools/nodejs/phase11/scan-rhino-augment-inventory.js`；
+    `node --check tools/nodejs/phase11/scan-rhino-augment-inventory.js`；
+    `node tools/nodejs/phase11/scan-rhino-augment-inventory.js --output build/reports/nodejs/rhino-augment-source-scan.json --fail-on-unresolved`
+    输出 73 个注册模块、21 个 proto reference、0 个未解析 receiver。
 
 - [ ] S11-03: 生成 `rhino-augment-api-inventory.json` 和 `.md`。
   - 范围：新增 Gradle 任务，例如 `generateNodeRhinoAugmentInventory`。
