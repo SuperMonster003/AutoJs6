@@ -21,7 +21,7 @@ The loader is an AutoJs6 controlled module, not an npm package name and not a sc
 
 ## Runtime Contract
 
-S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, S11-12 adds text utility facades with stable dependency-missing degradation, S11-13 adds async-compatible storage/sqlite facades over the controlled bridge, S11-14 stabilizes console/timer/error debugging migration, S11-16 adds the first selector/accessibility facade over the controlled `accessibility` bridge, S11-17 exposes app/device/shell compatibility wrappers, S11-18 adds the first `images` compatibility facade over opaque image handles, S11-19 adds screenshot permission compatibility wrappers over `media_projection` and `images`, and S11-20 adds an ML Kit-only OCR compatibility facade over `ocr`/`images`. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, shell `Process` handles, raw `MediaProjection`, raw OCR engines, raw `Bitmap`/`Mat`/`ImageWrapper` instances, or Pro 9 `require("rhino").install()` behavior.
+S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, S11-12 adds text utility facades with stable dependency-missing degradation, S11-13 adds async-compatible storage/sqlite facades over the controlled bridge, S11-14 stabilizes console/timer/error debugging migration, S11-16 adds the first selector/accessibility facade over the controlled `accessibility` bridge, S11-17 exposes app/device/shell compatibility wrappers, S11-18 adds the first `images` compatibility facade over opaque image handles, S11-19 adds screenshot permission compatibility wrappers over `media_projection` and `images`, S11-20 adds an ML Kit-only OCR compatibility facade over `ocr`/`images`, and S11-21 records the events/keys/input observer design gate without adding runtime observer APIs. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, shell `Process` handles, raw `MediaProjection`, raw OCR engines, raw `Bitmap`/`Mat`/`ImageWrapper` instances, Rhino `events.__asEmitter__()`, Java `EventEmitter`, `Thread`, `MainThreadProxy`, raw key/touch listeners, or Pro 9 `require("rhino").install()` behavior.
 
 The first runtime shape is:
 
@@ -108,6 +108,8 @@ The S11-19 screenshot facade is also Promise-based. `compat.requestScreenCapture
 
 The S11-20 OCR facade is Promise-based and ML Kit-only. `compat.ocr.recognizeText(imageOrPath, options)` returns a frozen string array to match Rhino's list-style `ocr.recognizeText()`, while `compat.ocr.detect()` and `detectTextBounds()` return frozen JSON-safe OCR result snapshots with optional bounds. Image input may be an opaque image handle, a project-relative path loaded through `images.readImage()` and recycled after the OCR call settles, or omitted to capture the screen through the existing-permission image path and recycle the temporary handle. `compat.ocr.tap("mlkit")` is accepted; Paddle/Rapid mode switching and raw mode modules remain blocked until safe Node providers exist. Barcode and qrcode are deliberately not advertised as compat-supported in S11-20 because Node has no controlled barcode bridge or JSON-safe barcode result contract yet.
 
+S11-21 does not add `compat.events`, `compat.keys`, `events` globals, key observers, touch observers, or key interception wrappers. Rhino `events.__asEmitter__()` is blocked by design because it depends on Rhino `ScriptableObject`, Java `EventEmitter`, `Thread`, and `MainThreadProxy` behavior. Scripts that only need in-process JavaScript events should use `require("node:events").EventEmitter`. Android key/touch observation remains gated behind a future `input_observer` provider with opaque subscription handles, bounded `drainEvents`, explicit `close()`, and provider-destroy cleanup.
+
 Future tasks should extend the module in small commits:
 
 - S11-09: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, and basic globals.
@@ -121,6 +123,7 @@ Future tasks should extend the module in small commits:
 - S11-18: images compatibility for read/save/transform/search methods over opaque handles.
 - S11-19: screenshot permission wrappers over `media_projection` and `images.captureScreen`.
 - S11-20: ML Kit-only OCR compatibility over `ocr` and `images`, with barcode/qrcode recorded as bridge gaps.
+- S11-21: events/keys/input observer design gate; no runtime observer facade until a controlled `input_observer` provider exists.
 
 ## Error Codes
 
@@ -147,4 +150,4 @@ When later tasks add globals, they must keep these rules:
 
 ## Type Surface
 
-The checked-in type declaration is `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`. It declares the loader, stable error helpers, and the implemented Phase 11 facade modules through S11-20.
+The checked-in type declaration is `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`. It declares the loader, stable error helpers, and the implemented Phase 11 facade modules through S11-20. S11-21 is design-only and intentionally adds no `events`, `keys`, or `input_observer` compat type surface.

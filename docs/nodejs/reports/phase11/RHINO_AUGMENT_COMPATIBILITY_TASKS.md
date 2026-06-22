@@ -364,10 +364,20 @@ Inventory 和兼容矩阵统一使用以下状态：
 
 ### Track D: Lifecycle-heavy APIs
 
-- [ ] S11-21: 设计 events/keys/input observer compatibility。
+- [x] S11-21: 设计 events/keys/input observer compatibility。
   - 范围：事件订阅、按键监听、触摸/key observer 的权限和资源释放。
   - 产物：design gate、capability manifest diff。
   - 验收：没有未释放 listener；后台/packaged 语义有明确边界。
+  - 状态：新增 `docs/nodejs/design/RHINO_EVENTS_INPUT_OBSERVER.md`，明确
+    `events.__asEmitter__()` / `events.asEmitter()` 因 Rhino `ScriptableObject`、
+    Java `EventEmitter`、`Thread` / `MainThreadProxy` 语义标记为
+    `blocked_by_design`；`events.keys` 记录为后续可落地的 pure-constant
+    subset，但 S11-21 不新增 runtime facade。capability manifest diff 仅作为
+    未来 `input_observer`、`input_observer.keys`、`input_observer.touch`、
+    `input_observer.intercept` 提案记录，当前 canonical capability list 不变。
+    新增 `verifyNodeRhinoCompatEventsInputObserverDesign` gate 校验设计文档、
+    status manifest、matrix、迁移/安全/loader 文档、Gradle 注册，以及 S11-21
+    没有提前开放 `input_observer` runtime capability。
 
 - [ ] S11-22: 设计 tasks 到 WorkManager/用户任务数据库的迁移。
   - 范围：Rhino `tasks` 与现有 `work_manager` 的 API 映射和不可映射项。

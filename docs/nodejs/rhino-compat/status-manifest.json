@@ -4146,37 +4146,40 @@
     },
     {
       "id": "events",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "blocked_by_design",
+      "asyncMode": "not_applicable",
+      "nodeModules": [
+        "node:events"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_21_raw_rhino_event_emitter_blocked",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-21 blocks Rhino events.__asEmitter__ compatibility because it grafts Java EventEmitter methods onto Rhino ScriptableObject instances and may bind to MainThreadProxy or Thread.",
+        "Use Node's node:events EventEmitter for pure JavaScript events; Android key/touch observation requires a future controlled input_observer provider."
       ],
       "apiEntries": [
         {
           "id": "events.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": "node:events",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_raw_rhino_event_emitter_blocked",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "The Rhino events module is not exposed as a Node compat facade in S11-21; pure JavaScript events should use node:events."
           ]
         },
         {
           "id": "events.asEmitter",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": "node:events",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_raw_rhino_event_emitter_blocked",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-21 blocks events.__asEmitter__ because it would expose Rhino ScriptableObject and Java EventEmitter threading semantics to V8."
           ]
         }
       ]
@@ -4184,168 +4187,169 @@
     {
       "id": "events.keys",
       "status": "unsupported",
-      "asyncMode": "unknown",
+      "asyncMode": "sync",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_21_key_constants_pending_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-21 identifies events.keys as a safe pure-constant subset, but no runtime facade or global is added in this design-only task.",
+        "A later small task may expose HOME, MENU, BACK, VOLUME_UP, and VOLUME_DOWN aliases without an Android provider."
       ],
       "apiEntries": [
         {
           "id": "events.keys.__module",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "The constants-only events.keys facade is pending a later runtime/types task."
           ]
         },
         {
           "id": "events.keys.BACK",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.HOME",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.MENU",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.VOLUME_DOWN",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.VOLUME_UP",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.back",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.home",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.menu",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.volumeDown",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.volumeUp",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.volume_down",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         },
         {
           "id": "events.keys.volume_up",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "sync",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_21_key_constants_pending_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Safe constant alias identified; not exposed in S11-21."
           ]
         }
       ]
@@ -11716,11 +11720,11 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "blocked_by_design": 22,
+      "blocked_by_design": 25,
       "partial": 373,
       "supported": 134,
       "supported_async": 52,
-      "unsupported": 371
+      "unsupported": 368
     }
   }
 }

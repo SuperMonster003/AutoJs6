@@ -14,11 +14,11 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 ## Status Totals
 
-- blocked_by_design: 22
+- blocked_by_design: 25
 - partial: 373
 - supported: 134
 - supported_async: 52
-- unsupported: 371
+- unsupported: 368
 
 ## Module Matrix
 
@@ -42,7 +42,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 15 | automator.auto | auto | partial | accessibility | partial:24 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 16 | automator | automator | partial | accessibility | partial:27, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 17 | selector | selector | partial | accessibility | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 18 | events | events | unsupported | - | unsupported:2 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 18 | events | events | blocked_by_design | node:events | blocked_by_design:2 | provider_availability | Keep denial documented and covered by policy tests. |
 | 19 | events.keys | keys | unsupported | - | unsupported:13 | none | Design a Node facade or record a permanent non-goal. |
 | 20 | canvas | Canvas | unsupported | - | unsupported:1 | lifecycle_resource, raw_android_object | Design a Node facade or record a permanent non-goal. |
 | 21 | images | images | partial | autojs6:compat, image, images, media_projection | partial:60, supported_async:17 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -283,12 +283,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### events
 
 - Key: `events`
-- Status: `unsupported`
-- Node surface: -
+- Status: `blocked_by_design`
+- Node surface: node:events
 - Coverage: `no_node_surface`
-- API status: unsupported:2
+- API status: blocked_by_design:2
 - Risks: provider_availability
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Keep denial documented and covered by policy tests.
 
 ### events.keys
 

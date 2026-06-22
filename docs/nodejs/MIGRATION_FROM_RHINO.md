@@ -409,6 +409,37 @@ Node with the S11-20 compatibility facade:
 
 `compat.ocr` is ML Kit-only in S11-20. It accepts an opaque image handle, a project-relative image path that is read and recycled after OCR completes, or no image argument to capture through the existing-permission screenshot path. `compat.ocr.recognizeText()` returns a string array like Rhino, while `compat.ocr.detect()` and `detectTextBounds()` return JSON-safe result snapshots. `ocr.tap("mlkit")` is accepted; Paddle/Rapid mode modules are not exposed in Node. `barcode` and `qrcode` remain a documented bridge gap until Node has a controlled barcode provider and JSON-safe barcode result contract.
 
+### Key And Touch Events
+
+Rhino:
+
+```js
+events.observeKey();
+events.onKeyDown("volume_up", function(event) {
+  toast("volume up");
+});
+events.setKeyInterceptionEnabled("volume_up", true);
+events.observeTouch();
+events.on("touch", function(point) {
+  log(point.x + "," + point.y);
+});
+```
+
+Node S11-21:
+
+```js
+"nodejs";
+
+const { EventEmitter } = require("node:events");
+const bus = new EventEmitter();
+bus.on("ready", () => console.log("ready"));
+bus.emit("ready");
+```
+
+`node:events` is only the pure JavaScript event-emitter replacement. It is not a Rhino `events` facade and does not observe Android keys or touch input. `events.__asEmitter__()` / `events.asEmitter()` is blocked by design because it depends on Rhino `ScriptableObject`, Java `EventEmitter`, `Thread`, and `MainThreadProxy` semantics.
+
+`events.observeKey()`, `events.onKeyDown()`, `events.onKeyUp()`, `events.setKeyInterceptionEnabled()`, and `events.observeTouch()` remain design-gated in S11-21. A future `input_observer` provider must return opaque subscription handles, drain JSON event snapshots through bounded queues, close every listener on script stop/provider destroy, and reject packaged/background usage unless a foreground user-visible provider state is valid. The `events.keys` constants are a safe pure subset but are not exposed by the S11-21 design-only task.
+
 ### File Read And Write
 
 Rhino:
