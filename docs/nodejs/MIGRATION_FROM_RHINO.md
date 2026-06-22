@@ -72,7 +72,7 @@ Do not assume Rhino globals are present:
 
 - no direct global `toast()`
 - no direct global `files`
-- no direct global selector DSL
+- no direct global selector DSL unless `require("autojs6:compat").install({ globals: true })` is called explicitly
 - no direct global `images`
 - no direct Java object access by default
 - no `importClass`, `importPackage`, or Rhino Java bridge globals
@@ -93,7 +93,7 @@ Do not migrate scripts by expecting these Rhino-era surfaces to appear inside No
 - direct `android.*`
 - old global AutoJs APIs such as `toast`, `files`, `images`, selector globals, or `threads`
 
-The recommended migration path is to rewrite those calls to explicit Node bridge modules. For low-risk helpers, `autojs6:compat` currently covers toast/sleep/clipboard, scoped files, pure/text utilities, storage/sqlite, and readable `console`/timer debugging migration. `console.show()` and related floating-console controls are no-op output-capture shims in Node; logs still go to captured stdout/stderr, and uncaught errors keep source-map-aware `errorStack` output. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing unrestricted Rhino globals into Node.
+The recommended migration path is to rewrite those calls to explicit Node bridge modules. For low-risk helpers, `autojs6:compat` currently covers toast/sleep/clipboard, scoped files, pure/text utilities, storage/sqlite, readable `console`/timer debugging migration, and the first selector/accessibility compatibility facade. `console.show()` and related floating-console controls are no-op output-capture shims in Node; logs still go to captured stdout/stderr, and uncaught errors keep source-map-aware `errorStack` output. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing unrestricted Rhino globals into Node.
 
 The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). Its recommendation is that any future shim should be explicit, isolated, JSON-serialized, timeout-bounded, and used only for migration.
 
@@ -275,24 +275,32 @@ Rhino:
 text("OK").findOne(3000).click();
 ```
 
-Node:
+Node with the S11-16 compatibility facade:
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+  const node = await compat.text("OK").findOne(3000);
+  const clicked = node !== null && await compat.text("OK").click({ timeoutMs: 3000 });
+  console.log("clicked=" + clicked);
+})();
+```
+
+Node with the direct bridge module:
 
 ```js
 "nodejs";
 
 (async function main() {
   const accessibility = require("accessibility");
-  const enabled = await accessibility.isEnabled();
-  if (!enabled) {
-    console.log("accessibility disabled");
-    return;
-  }
   const clicked = await accessibility.clickText("OK", { timeoutMs: 3000 });
   console.log("clicked=" + clicked);
 })();
 ```
 
-Node accessibility selectors are JSON descriptors and returned nodes are snapshots. Raw `AccessibilityNodeInfo` objects do not cross the process boundary.
+Node accessibility selectors are JSON descriptors and returned nodes are snapshots. No raw `AccessibilityNodeInfo` objects cross the process boundary. The compatibility selector DSL is synchronous only while building a handle; `findOne(3000)`, `find()`, `click()`, `back()`, and `home()` return Promises and must be awaited.
 
 ### Screenshot And Find Image
 

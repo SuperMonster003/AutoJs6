@@ -393,6 +393,7 @@ tasks.register<Exec>("verifyNodeRhinoCompatConsoleTimersError") {
 tasks.register<Exec>("verifyNodeRhinoSelectorDslHandleDesign") {
     group = "verification"
     description = "Verifies the Phase 11A Rhino selector DSL handle design gate."
+    mustRunAfter("generateNodeRhinoCompatMatrix")
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-selector-dsl-handle-design.js")
     inputs.file(scriptFile)
@@ -409,6 +410,42 @@ tasks.register<Exec>("verifyNodeRhinoSelectorDslHandleDesign") {
     outputs.files(
         nodePhase11ReportDir.map { it.file("rhino-selector-dsl-handle-design-verification.json") },
         nodePhase11ReportDir.map { it.file("rhino-selector-dsl-handle-design-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeRhinoCompatSelectorAccessibility") {
+    group = "verification"
+    description = "Verifies the Phase 11A Rhino selector/accessibility compatibility facade."
+    mustRunAfter("generateNodeRhinoCompatMatrix")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-selector-accessibility.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/accessibility.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/src/main.ts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAccessibilitySelectorBridgeInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_SELECTOR_DSL_HANDLE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_COMPAT_LOADER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-compat-selector-accessibility-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-selector-accessibility-verification.md") },
     )
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir

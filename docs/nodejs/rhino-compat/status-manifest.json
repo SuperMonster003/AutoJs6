@@ -26,11 +26,12 @@
       ],
       "bridgeModules": [
         "toast",
-        "clipboard"
+        "clipboard",
+        "accessibility"
       ],
       "decision": "compat_facade_partial",
       "notes": [
-        "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; other Rhino globals remain unsupported or blocked by design."
+        "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; S11-16 adds explicit selector/accessibility globals through compat.install({ globals: true }); other Rhino globals remain unsupported or blocked by design."
       ],
       "apiEntries": [
         {
@@ -2019,7 +2020,7 @@
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-16 exposes core automator actions through the explicit autojs6:compat selector/accessibility facade; broader automator parity still needs explicit compatibility wrappers."
       ],
       "apiEntries": [
         {
@@ -2516,7 +2517,7 @@
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-16 exposes the first selector DSL handle facade through autojs6:compat over the controlled accessibility bridge; pickup/detect/existsAll/existsOne remain design-gated."
       ],
       "apiEntries": [
         {
@@ -3666,7 +3667,7 @@
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-16 exposes core automator actions through the explicit autojs6:compat selector/accessibility facade; broader automator parity still needs explicit compatibility wrappers."
       ],
       "apiEntries": [
         {
@@ -4067,7 +4068,7 @@
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-16 exposes the first selector DSL handle facade through autojs6:compat over the controlled accessibility bridge; pickup/detect/existsAll/existsOne remain design-gated."
       ],
       "apiEntries": [
         {

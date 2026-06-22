@@ -294,11 +294,20 @@ Inventory 和兼容矩阵统一使用以下状态：
     bridge method，主要实现 Node 侧 Rhino selector handle wrapper；新增
     `verifyNodeRhinoSelectorDslHandleDesign` 锁定设计、类型草案和 bridge gap。
 
-- [ ] S11-16: 实现 selector/accessibility 第一版 facade。
+- [x] S11-16: 实现 selector/accessibility 第一版 facade。
   - 范围：覆盖最常见的 `text("...").findOne(timeout)`、
     `text("...").click()`、`back()`、`home()`、`click(x,y)`。
   - 产物：facade、types、instrumentation tests。
   - 验收：无 raw `AccessibilityNodeInfo` 泄漏；handle 超时后释放。
+  - 状态：已在 `autojs6:compat` 中新增 `selector` DSL 和直接 builder/action
+    别名，`findOne(number)` 归一化为 `{ timeoutMs }`，`find()` 路由到
+    `accessibility.findAll()`；handle/descriptor 保持 frozen JSON，不暴露
+    raw `AccessibilityNodeInfo`；新增
+    `verifyNodeRhinoCompatSelectorAccessibility` host gate 覆盖默认不注入全局、
+    显式安装 selector globals、链式不可变和 Promise 动作边界；新增
+    `NodeAccessibilitySelectorBridgeInstrumentationTest.jsRhinoCompatSelectorFacadeUsesFakeTransport`
+    通过 fake bridge transport 覆盖 compat selector facade 的设备侧嵌入式
+    Node 路径。
 
 - [ ] S11-17: 扩展 app/device/shell compatibility。
   - 范围：`app.launchPackage`、`app.openAppSetting`、basic intent helpers、

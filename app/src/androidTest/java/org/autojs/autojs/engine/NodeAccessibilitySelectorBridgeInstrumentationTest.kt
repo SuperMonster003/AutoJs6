@@ -351,6 +351,139 @@ class NodeAccessibilitySelectorBridgeInstrumentationTest {
     }
 
     @Test
+    fun jsRhinoCompatSelectorFacadeUsesFakeTransport() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Rhino compat selector facade regression")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const assert = require("assert");
+              const bridge = require("autojs6:bridge");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  let result = true;
+                  if (request.module === "accessibility" && request.method === "findOne") {
+                    const selector = request.args[0];
+                    assert.strictEqual(selector.text, "OK");
+                    assert.strictEqual(selector.descContains, "Confirm");
+                    assert.strictEqual(selector.clickable, true);
+                    assert.strictEqual(request.args[1].timeoutMs, 3000);
+                    result = {
+                      text: "OK",
+                      desc: "Confirm",
+                      id: "android:id/button1",
+                      className: "android.widget.Button",
+                      bounds: { left: 1, top: 2, right: 3, bottom: 4 },
+                      clickable: true,
+                      enabled: true,
+                      raw: { leaked: true },
+                      nodeInfo: "raw-node"
+                    };
+                  } else if (request.module === "accessibility" && request.method === "findAll") {
+                    assert.strictEqual(request.args[0].descContains, "Confirm");
+                    assert.strictEqual(request.args[1].timeoutMs, 3001);
+                    result = [
+                      { text: "OK", bounds: { left: 1, top: 2, right: 3, bottom: 4 }, clickable: true, enabled: true },
+                      { text: "Cancel", bounds: { left: 5, top: 6, right: 7, bottom: 8 }, clickable: true, enabled: true }
+                    ];
+                  } else if (request.module === "accessibility" && request.method === "click" && typeof request.args[0] === "object") {
+                    assert.strictEqual(request.args[0].text, "OK");
+                    assert.strictEqual(request.args[1].timeoutMs, 3002);
+                  } else if (request.module === "accessibility" && request.method === "click") {
+                    assert.strictEqual(request.args[0], 7);
+                    assert.strictEqual(request.args[1], 8);
+                    assert.strictEqual(request.timeoutMs, 3003);
+                  } else if (request.module === "accessibility" && request.method === "back") {
+                    assert.strictEqual(request.timeoutMs, 3004);
+                  } else if (request.module === "accessibility" && request.method === "home") {
+                    assert.strictEqual(request.timeoutMs, 3005);
+                  } else if (request.module === "accessibility" && request.method === "recentApps") {
+                    assert.strictEqual(request.timeoutMs, 3006);
+                  } else {
+                    throw new Error("Unexpected request: " + request.module + "/" + request.method);
+                  }
+                  setImmediate(() => {
+                    bridge.__test.receiveMessage(JSON.stringify({
+                      id: request.id,
+                      ok: true,
+                      result
+                    }));
+                  });
+                }
+              });
+
+              const compat = require("autojs6:compat");
+              const defaultGlobals = ["selector", "text", "click", "back", "home"].every(name => !(name in globalThis));
+              const base = compat.text("OK");
+              const chained = base.descContains("Confirm").clickable();
+              const one = await chained.findOne(3000);
+              const all = await chained.find({ timeoutMs: 3001 });
+              const clicked = await chained.click({ timeoutMs: 3002 });
+              const pointClicked = await compat.click(7, 8, { timeoutMs: 3003 });
+              const back = await compat.back({ timeoutMs: 3004 });
+              const home = await compat.home({ timeoutMs: 3005 });
+              const recents = await compat.recents({ timeoutMs: 3006 });
+              const install = compat.install({ globals: true });
+
+              console.log("rhino.compat.selector.defaultGlobals=" + defaultGlobals);
+              console.log("rhino.compat.selector.status=" + compat.status().implementedTasks.indexOf("S11-16"));
+              console.log("rhino.compat.selector.shape=" + [
+                base.type,
+                base.descriptor.type,
+                Object.isFrozen(base),
+                Object.isFrozen(base.descriptor),
+                Object.isFrozen(chained),
+                Object.isFrozen(chained.descriptor),
+                base.descriptor.descContains === undefined,
+                chained.descriptor.descContains,
+                chained.descriptor.clickable
+              ].join("|"));
+              console.log("rhino.compat.selector.results=" + [
+                one.text,
+                one.raw === undefined,
+                one.nodeInfo === undefined,
+                Object.isFrozen(one),
+                Object.isFrozen(one.bounds),
+                all.length,
+                clicked,
+                pointClicked,
+                back,
+                home,
+                recents
+              ].join("|"));
+              console.log("rhino.compat.selector.install=" + [
+                install.globals.indexOf("selector") >= 0,
+                install.globals.indexOf("text") >= 0,
+                install.globals.indexOf("click") >= 0,
+                globalThis.selector === compat.selector,
+                globalThis.text === compat.text,
+                globalThis.click === compat.click
+              ].join("|"));
+              console.log("rhino.compat.selector.requests=" + requests.map(r => r.method).join("|"));
+              console.log("rhino.compat.selector.timeouts=" + requests.map(r => r.timeoutMs).join("|"));
+              console.log("rhino.compat.selector.pending=" + bridge.__test.pendingCount());
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-rhino-compat-selector-fake.js>",
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("Rhino compat selector fake bridge", result)
+        assertTrue(result.stdout.contains("rhino.compat.selector.defaultGlobals=true"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.status="))
+        assertFalse(result.stdout.contains("rhino.compat.selector.status=-1"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.shape=autojs6.rhino.selector.handle|autojs6.accessibility.selector|true|true|true|true|true|Confirm|true"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.results=OK|true|true|true|true|2|true|true|true|true|true"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.install=true|true|true|true|true|true"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.requests=findOne|findAll|click|click|back|home|recentApps"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.timeouts=3000|3001|3002|3003|3004|3005|3006"))
+        assertTrue(result.stdout.contains("rhino.compat.selector.pending=0"))
+    }
+
+    @Test
     fun jsAccessibilitySelectorV2RejectsInvalidDescriptorsBeforeDispatch() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node accessibility selector invalid descriptor regression")
 

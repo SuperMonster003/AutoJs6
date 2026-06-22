@@ -4,6 +4,7 @@ declare module "autojs6:compat" {
   import sqlite = require("sqlite");
   import consoleModule = require("console");
   import timers = require("timers");
+  import accessibility = require("accessibility");
   import files = require("files");
   import base64 = require("base64");
   import colors = require("colors");
@@ -70,6 +71,67 @@ declare module "autojs6:compat" {
       readonly category?: "invalid-option" | "unsupported" | "blocked-by-design";
     }
 
+    export type SelectorOptions = AutoJs6Node.BridgeCallOptions;
+
+    export type FindOneOptions = number | SelectorOptions;
+
+    export interface RhinoSelectorHandle {
+      readonly type: "autojs6.rhino.selector.handle";
+      readonly version: 1;
+      readonly descriptor: accessibility.SelectorDescriptor;
+      text(value: string): RhinoSelectorHandle;
+      desc(value: string): RhinoSelectorHandle;
+      id(value: string): RhinoSelectorHandle;
+      className(value: string): RhinoSelectorHandle;
+      textContains(value: string): RhinoSelectorHandle;
+      descContains(value: string): RhinoSelectorHandle;
+      textMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      descMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      idMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      classNameMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      clickable(value?: boolean): RhinoSelectorHandle;
+      enabled(value?: boolean): RhinoSelectorHandle;
+      depth(value: number): RhinoSelectorHandle;
+      boundsInside(bounds: AutoJs6Node.Bounds): RhinoSelectorHandle;
+      boundsInside(left: number, top: number, right: number, bottom: number): RhinoSelectorHandle;
+      boundsContains(bounds: AutoJs6Node.Bounds): RhinoSelectorHandle;
+      boundsContains(left: number, top: number, right: number, bottom: number): RhinoSelectorHandle;
+      findOne(options?: FindOneOptions): Promise<accessibility.UiNodeSnapshot | null>;
+      find(options?: SelectorOptions): Promise<readonly accessibility.UiNodeSnapshot[]>;
+      findAll(options?: SelectorOptions): Promise<readonly accessibility.UiNodeSnapshot[]>;
+      click(options?: SelectorOptions): Promise<boolean>;
+      longClick(options?: SelectorOptions): Promise<boolean>;
+      setText(text: string, options?: SelectorOptions): Promise<boolean>;
+      scrollForward(options?: SelectorOptions): Promise<boolean>;
+      scrollBackward(options?: SelectorOptions): Promise<boolean>;
+      exists(options?: FindOneOptions): Promise<boolean>;
+    }
+
+    export interface SelectorDslModule {
+      text(value: string): RhinoSelectorHandle;
+      desc(value: string): RhinoSelectorHandle;
+      id(value: string): RhinoSelectorHandle;
+      className(value: string): RhinoSelectorHandle;
+      textContains(value: string): RhinoSelectorHandle;
+      descContains(value: string): RhinoSelectorHandle;
+      textMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      descMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      idMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      classNameMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      clickable(value?: boolean): RhinoSelectorHandle;
+      enabled(value?: boolean): RhinoSelectorHandle;
+      depth(value: number): RhinoSelectorHandle;
+      boundsInside(bounds: AutoJs6Node.Bounds): RhinoSelectorHandle;
+      boundsInside(left: number, top: number, right: number, bottom: number): RhinoSelectorHandle;
+      boundsContains(bounds: AutoJs6Node.Bounds): RhinoSelectorHandle;
+      boundsContains(left: number, top: number, right: number, bottom: number): RhinoSelectorHandle;
+      click(x: number, y: number, options?: SelectorOptions): Promise<boolean>;
+      back(options?: SelectorOptions): Promise<boolean>;
+      home(options?: SelectorOptions): Promise<boolean>;
+      recentApps(options?: SelectorOptions): Promise<boolean>;
+      recents(options?: SelectorOptions): Promise<boolean>;
+    }
+
     export interface RhinoCompatModule {
       readonly name: "autojs6:compat";
       readonly version: 1;
@@ -105,6 +167,29 @@ declare module "autojs6:compat" {
       readonly clearTimeout: timers.TimersModule["clearTimeout"];
       readonly setInterval: timers.TimersModule["setInterval"];
       readonly clearInterval: timers.TimersModule["clearInterval"];
+      readonly selector: SelectorDslModule;
+      text(value: string): RhinoSelectorHandle;
+      desc(value: string): RhinoSelectorHandle;
+      id(value: string): RhinoSelectorHandle;
+      className(value: string): RhinoSelectorHandle;
+      textContains(value: string): RhinoSelectorHandle;
+      descContains(value: string): RhinoSelectorHandle;
+      textMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      descMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      idMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      classNameMatches(value: accessibility.SelectorPatternInput): RhinoSelectorHandle;
+      clickable(value?: boolean): RhinoSelectorHandle;
+      enabled(value?: boolean): RhinoSelectorHandle;
+      depth(value: number): RhinoSelectorHandle;
+      boundsInside(bounds: AutoJs6Node.Bounds): RhinoSelectorHandle;
+      boundsInside(left: number, top: number, right: number, bottom: number): RhinoSelectorHandle;
+      boundsContains(bounds: AutoJs6Node.Bounds): RhinoSelectorHandle;
+      boundsContains(left: number, top: number, right: number, bottom: number): RhinoSelectorHandle;
+      click(x: number, y: number, options?: SelectorOptions): Promise<boolean>;
+      back(options?: SelectorOptions): Promise<boolean>;
+      home(options?: SelectorOptions): Promise<boolean>;
+      recentApps(options?: SelectorOptions): Promise<boolean>;
+      recents(options?: SelectorOptions): Promise<boolean>;
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;

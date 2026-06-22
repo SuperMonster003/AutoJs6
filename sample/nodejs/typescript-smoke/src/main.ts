@@ -6,6 +6,7 @@ import device = require("device");
 import shell = require("shell");
 import engines = require("engines");
 import accessibility = require("accessibility");
+import rhinoCompat = require("autojs6:compat");
 import mediaProjection = require("media_projection");
 import image = require("image");
 import images = require("images");
@@ -109,6 +110,15 @@ async function smoke(): Promise<void> {
   await accessibility.back({ timeoutMs: 1000 });
   await accessibility.home({ timeoutMs: 1000 });
   await accessibility.recentApps({ timeoutMs: 1000 });
+
+  const rhinoSelector: rhinoCompat.RhinoSelectorHandle = rhinoCompat.text("OK").descContains("Confirm").clickable();
+  const rhinoNode = await rhinoSelector.findOne(1000);
+  const rhinoNodes: readonly accessibility.UiNodeSnapshot[] = await rhinoSelector.find({ timeoutMs: 1000 });
+  const rhinoClicked: boolean = await rhinoSelector.click({ timeoutMs: 1000 });
+  const rhinoExists: boolean = await rhinoCompat.selector.id("submit").enabled().exists(1000);
+  const rhinoPointClicked: boolean = await rhinoCompat.click(1, 2, { timeoutMs: 1000 });
+  await rhinoCompat.back({ timeoutMs: 1000 });
+  await rhinoCompat.home({ timeoutMs: 1000 });
 
   const capturer: mediaProjection.ScreenCapturer = await mediaProjection.requestScreenCapture({
     requireExistingPermission: true,
@@ -320,6 +330,12 @@ async function smoke(): Promise<void> {
   void foundText;
   void foundOne;
   void foundAll;
+  void rhinoSelector;
+  void rhinoNode;
+  void rhinoNodes;
+  void rhinoClicked;
+  void rhinoExists;
+  void rhinoPointClicked;
   void clickedText;
   void point;
   void ocrResults;

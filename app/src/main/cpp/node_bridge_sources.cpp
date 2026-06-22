@@ -16028,8 +16028,13 @@ std::string buildEmbeddedScriptExecutionSource(
     unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
     blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite"]);
+  const __autojs6_rhino_selector_handle_type = "autojs6.rhino.selector.handle";
+  const __autojs6_rhino_selector_builder_names = Object.freeze(["text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains"]);
+  const __autojs6_rhino_selector_action_names = Object.freeze(["click", "back", "home", "recentApps", "recents"]);
+  const __autojs6_rhino_selector_global_names = Object.freeze(["selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents"]);
+  let __autojs6_rhino_selector_dsl_cache = null;
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16138,10 +16143,219 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_rhino_compat_get_clip(options) {
     return __autojs6_limited_clipboard().getText(options);
   }
+  function __autojs6_rhino_selector_copy_field(target, source, fieldName) {
+    if (Object.prototype.hasOwnProperty.call(source, fieldName) && source[fieldName] !== undefined) {
+      target[fieldName] = source[fieldName];
+    }
+  }
+  function __autojs6_rhino_selector_clone_descriptor(descriptor) {
+    const source = descriptor && typeof descriptor === "object" && !Array.isArray(descriptor) ? descriptor : {};
+    const target = {
+      type: source.type === undefined || source.type === null ? "autojs6.accessibility.selector" : source.type,
+      version: Number(source.version) === 1 ? 1 : 1
+    };
+    __autojs6_rhino_selector_builder_names.forEach(function(fieldName) {
+      __autojs6_rhino_selector_copy_field(target, source, fieldName);
+    });
+    return Object.freeze(target);
+  }
+  function __autojs6_rhino_selector_merge_descriptor(baseDescriptor, nextDescriptor) {
+    const target = {
+      type: baseDescriptor.type === undefined || baseDescriptor.type === null ? nextDescriptor.type : baseDescriptor.type,
+      version: 1
+    };
+    __autojs6_rhino_selector_builder_names.forEach(function(fieldName) {
+      __autojs6_rhino_selector_copy_field(target, baseDescriptor, fieldName);
+    });
+    __autojs6_rhino_selector_builder_names.forEach(function(fieldName) {
+      __autojs6_rhino_selector_copy_field(target, nextDescriptor, fieldName);
+    });
+    return Object.freeze(target);
+  }
+  function __autojs6_rhino_selector_build_descriptor(builderName, args) {
+    const accessibility = __autojs6_limited_accessibility();
+    return accessibility[builderName].apply(accessibility, args);
+  }
+  function __autojs6_rhino_selector_options(options, apiName) {
+    if (options === undefined || options === null) {
+      return undefined;
+    }
+    if (typeof options === "object" && !Array.isArray(options)) {
+      return options;
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat." + apiName + " options must be an object when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_selector_find_one_options(options, apiName) {
+    if (typeof options === "number") {
+      if (!Number.isFinite(options)) {
+        throw __autojs6_rhino_compat_error(
+          "autojs6:compat." + apiName + " timeout must be finite.",
+          __autojs6_rhino_compat_error_codes.invalidOption,
+          apiName,
+          "invalid-option"
+        );
+      }
+      return Object.freeze({ timeoutMs: options });
+    }
+    return __autojs6_rhino_selector_options(options, apiName);
+  }
+  function __autojs6_rhino_selector_rejected(error) {
+    return Promise.reject(error);
+  }
+  function __autojs6_rhino_selector_handle(descriptor) {
+    const frozenDescriptor = __autojs6_rhino_selector_clone_descriptor(descriptor);
+    const handle = {
+      type: __autojs6_rhino_selector_handle_type,
+      version: 1,
+      descriptor: frozenDescriptor,
+      findOne: function(options) {
+        let findOptions;
+        try {
+          findOptions = __autojs6_rhino_selector_find_one_options(options, "findOne");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().findOne(frozenDescriptor, findOptions);
+      },
+      find: function(options) {
+        let findOptions;
+        try {
+          findOptions = __autojs6_rhino_selector_options(options, "find");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().findAll(frozenDescriptor, findOptions);
+      },
+      findAll: function(options) {
+        let findOptions;
+        try {
+          findOptions = __autojs6_rhino_selector_options(options, "findAll");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().findAll(frozenDescriptor, findOptions);
+      },
+      click: function(options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "click");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().click(frozenDescriptor, actionOptions);
+      },
+      longClick: function(options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "longClick");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().longClick(frozenDescriptor, actionOptions);
+      },
+      setText: function(text, options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "setText");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().setText(frozenDescriptor, text, actionOptions);
+      },
+      scrollForward: function(options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "scrollForward");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().scrollForward(frozenDescriptor, actionOptions);
+      },
+      scrollBackward: function(options) {
+        let actionOptions;
+        try {
+          actionOptions = __autojs6_rhino_selector_options(options, "scrollBackward");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().scrollBackward(frozenDescriptor, actionOptions);
+      },
+      exists: function(options) {
+        let findOptions;
+        try {
+          findOptions = __autojs6_rhino_selector_find_one_options(options, "exists");
+        } catch (error) {
+          return __autojs6_rhino_selector_rejected(error);
+        }
+        return __autojs6_limited_accessibility().findOne(frozenDescriptor, findOptions).then(function(node) {
+          return node !== null;
+        });
+      }
+    };
+    __autojs6_rhino_selector_builder_names.forEach(function(builderName) {
+      Object.defineProperty(handle, builderName, {
+        value: function() {
+          const nextDescriptor = __autojs6_rhino_selector_build_descriptor(builderName, arguments);
+          return __autojs6_rhino_selector_handle(__autojs6_rhino_selector_merge_descriptor(frozenDescriptor, nextDescriptor));
+        },
+        enumerable: true,
+        configurable: false,
+        writable: false
+      });
+    });
+    return Object.freeze(handle);
+  }
+  function __autojs6_rhino_selector_builder(builderName) {
+    return function() {
+      return __autojs6_rhino_selector_handle(__autojs6_rhino_selector_build_descriptor(builderName, arguments));
+    };
+  }
+  function __autojs6_rhino_selector_click(x, y, options) {
+    let actionOptions;
+    try {
+      actionOptions = __autojs6_rhino_selector_options(options, "click");
+    } catch (error) {
+      return __autojs6_rhino_selector_rejected(error);
+    }
+    return __autojs6_limited_accessibility().click(x, y, actionOptions);
+  }
+  function __autojs6_rhino_selector_simple_action(methodName) {
+    return function(options) {
+      let actionOptions;
+      try {
+        actionOptions = __autojs6_rhino_selector_options(options, methodName);
+      } catch (error) {
+        return __autojs6_rhino_selector_rejected(error);
+      }
+      return __autojs6_limited_accessibility()[methodName](actionOptions);
+    };
+  }
+  function __autojs6_rhino_selector_dsl() {
+    if (__autojs6_rhino_selector_dsl_cache) {
+      return __autojs6_rhino_selector_dsl_cache;
+    }
+    const selector = {};
+    __autojs6_rhino_selector_builder_names.forEach(function(builderName) {
+      selector[builderName] = __autojs6_rhino_selector_builder(builderName);
+    });
+    selector.click = __autojs6_rhino_selector_click;
+    selector.back = __autojs6_rhino_selector_simple_action("back");
+    selector.home = __autojs6_rhino_selector_simple_action("home");
+    selector.recentApps = __autojs6_rhino_selector_simple_action("recentApps");
+    selector.recents = selector.recentApps;
+    __autojs6_rhino_selector_dsl_cache = Object.freeze(selector);
+    return __autojs6_rhino_selector_dsl_cache;
+  }
   function __autojs6_rhino_compat_facade() {
     if (__autojs6_rhino_compat_facade_cache) {
       return __autojs6_rhino_compat_facade_cache;
     }
+    const selector = __autojs6_rhino_selector_dsl();
     __autojs6_rhino_compat_facade_cache = Object.freeze({
       toast: __autojs6_rhino_compat_toast,
       toastLog: __autojs6_rhino_compat_toast_log,
@@ -16170,7 +16384,28 @@ std::string buildEmbeddedScriptExecutionSource(
       setTimeout: __autojs6_limited_timers().setTimeout,
       clearTimeout: __autojs6_limited_timers().clearTimeout,
       setInterval: __autojs6_limited_timers().setInterval,
-      clearInterval: __autojs6_limited_timers().clearInterval
+      clearInterval: __autojs6_limited_timers().clearInterval,
+      selector: selector,
+      text: selector.text,
+      desc: selector.desc,
+      id: selector.id,
+      className: selector.className,
+      textContains: selector.textContains,
+      descContains: selector.descContains,
+      textMatches: selector.textMatches,
+      descMatches: selector.descMatches,
+      idMatches: selector.idMatches,
+      classNameMatches: selector.classNameMatches,
+      clickable: selector.clickable,
+      enabled: selector.enabled,
+      depth: selector.depth,
+      boundsInside: selector.boundsInside,
+      boundsContains: selector.boundsContains,
+      click: selector.click,
+      back: selector.back,
+      home: selector.home,
+      recentApps: selector.recentApps,
+      recents: selector.recents
     });
     return __autojs6_rhino_compat_facade_cache;
   }
@@ -16189,7 +16424,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -16224,7 +16459,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed low-risk Rhino compatibility globals for S11-09 through S11-14."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-16."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -16260,6 +16495,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_limited_rhino_compat_cache) {
       return __autojs6_limited_rhino_compat_cache;
     }
+    const selector = __autojs6_rhino_selector_dsl();
     __autojs6_limited_rhino_compat_cache = Object.freeze({
       name: "autojs6:compat",
       version: 1,
@@ -16295,6 +16531,27 @@ std::string buildEmbeddedScriptExecutionSource(
       clearTimeout: __autojs6_limited_timers().clearTimeout,
       setInterval: __autojs6_limited_timers().setInterval,
       clearInterval: __autojs6_limited_timers().clearInterval,
+      selector: selector,
+      text: selector.text,
+      desc: selector.desc,
+      id: selector.id,
+      className: selector.className,
+      textContains: selector.textContains,
+      descContains: selector.descContains,
+      textMatches: selector.textMatches,
+      descMatches: selector.descMatches,
+      idMatches: selector.idMatches,
+      classNameMatches: selector.classNameMatches,
+      clickable: selector.clickable,
+      enabled: selector.enabled,
+      depth: selector.depth,
+      boundsInside: selector.boundsInside,
+      boundsContains: selector.boundsContains,
+      click: selector.click,
+      back: selector.back,
+      home: selector.home,
+      recentApps: selector.recentApps,
+      recents: selector.recents,
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {
