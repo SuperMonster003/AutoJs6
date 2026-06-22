@@ -21,7 +21,7 @@ The loader is an AutoJs6 controlled module, not an npm package name and not a sc
 
 ## Runtime Contract
 
-S11-08 only installs the loader stub. It does not expose Rhino globals, raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, or Pro 9 `require("rhino").install()` behavior.
+S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, or Pro 9 `require("rhino").install()` behavior.
 
 The first runtime shape is:
 
@@ -30,12 +30,19 @@ const compat = require("autojs6:compat");
 
 compat.status();
 compat.install({ globals: false });
+await compat.toast("hello");
+await compat.toastLog("hello");
+await compat.sleep(100);
+await compat.setClip("text");
+const text = await compat.getClip();
 compat.unsupported("files.read");
 compat.blockedByDesign("importClass");
 compat.assertSupported("toast");
 ```
 
-`compat.install()` is intentionally explicit. In S11-08 it returns an install result with `installed: false` when no globals are requested. `compat.install({ globals: true })` throws until later facade tasks implement a concrete set of globals.
+`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs only the S11-09 low-risk names: `toast`, `toastLog`, `sleep`, `setClip`, and `getClip`.
+
+The S11-09 facade is async. Rhino `sleep()` blocks the Rhino script thread; Node compat `sleep()` returns a Promise and must be awaited. Toast and clipboard helpers also return Promises because they cross the Android bridge.
 
 Future tasks should extend the module in small commits:
 

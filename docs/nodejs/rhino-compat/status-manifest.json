@@ -19,13 +19,18 @@
   "modules": [
     {
       "id": "global",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
-      "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "status": "partial",
+      "asyncMode": "mixed",
+      "nodeModules": [
+        "autojs6:compat"
+      ],
+      "bridgeModules": [
+        "toast",
+        "clipboard"
+      ],
+      "decision": "compat_facade_partial",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; other Rhino globals remain unsupported or blocked by design."
       ],
       "apiEntries": [
         {
@@ -162,14 +167,14 @@
         },
         {
           "id": "global.getClip",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
-          "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "status": "supported_async",
+          "asyncMode": "promise",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "clipboard",
+          "nodeName": "getClip",
+          "decision": "compat_facade_async_mapping",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-09 exposes getClip() through require(\"autojs6:compat\"); it returns a Promise because clipboard access crosses the Node bridge."
           ]
         },
         {
@@ -378,14 +383,14 @@
         },
         {
           "id": "global.setClip",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
-          "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "status": "supported_async",
+          "asyncMode": "promise",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "clipboard",
+          "nodeName": "setClip",
+          "decision": "compat_facade_async_mapping",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-09 exposes setClip(text) through require(\"autojs6:compat\"); it returns a Promise because clipboard access crosses the Node bridge."
           ]
         },
         {
@@ -438,14 +443,14 @@
         },
         {
           "id": "global.sleep",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported_async",
+          "asyncMode": "promise",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sleep",
+          "decision": "compat_facade_async_mapping",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-09 exposes sleep(ms[, max]) through require(\"autojs6:compat\"); it returns a Promise instead of blocking the V8 event loop."
           ]
         },
         {
@@ -498,14 +503,14 @@
         },
         {
           "id": "global.toastLog",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
-          "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "status": "supported_async",
+          "asyncMode": "promise",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "toast",
+          "nodeName": "toastLog",
+          "decision": "compat_facade_async_mapping",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-09 exposes toastLog(...args) through require(\"autojs6:compat\"); it logs to console and returns the toast bridge Promise."
           ]
         },
         {
@@ -11627,10 +11632,10 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "unsupported": 555,
+      "unsupported": 550,
       "blocked_by_design": 16,
-      "partial": 343,
-      "supported_async": 38
+      "partial": 344,
+      "supported_async": 42
     }
   }
 }

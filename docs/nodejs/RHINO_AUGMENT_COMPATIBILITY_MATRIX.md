@@ -15,15 +15,15 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ## Status Totals
 
 - blocked_by_design: 16
-- partial: 343
-- supported_async: 38
-- unsupported: 555
+- partial: 344
+- supported_async: 42
+- unsupported: 550
 
 ## Module Matrix
 
 | Order | Rhino Module | Key | Status | Node Surface | API Status | Risks | Next Step |
 | ---: | --- | --- | --- | --- | --- | --- | --- |
-| 0 | global | global | unsupported | - | unsupported:46 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 0 | global | global | partial | autojs6:compat, toast | supported_async:4, unsupported:42 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 1 | global.legacy | legacy | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 2 | global.is_nullish | isNullish | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
 | 3 | util | util | unsupported | - | unsupported:50 | provider_availability | Design a Node facade or record a permanent non-goal. |
@@ -102,12 +102,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### global
 
 - Key: `global`
-- Status: `unsupported`
-- Node surface: -
+- Status: `partial`
+- Node surface: autojs6:compat, toast
 - Coverage: `no_node_surface`
-- API status: unsupported:46
+- API status: supported_async:4, unsupported:42
 - Risks: provider_availability
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
 
 ### global.legacy
 

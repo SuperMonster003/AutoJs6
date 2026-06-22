@@ -64,13 +64,14 @@ function main() {
 function buildChecks(files) {
   const runtime = files.runtime.text;
   const compatBlock = extractCompatBlock(runtime);
+  const preInstallBlock = extractBeforeInstallBlock(compatBlock);
   const checks = [
     check("runtime-resolve-entrypoint", runtime.includes(`name === "${ENTRYPOINT}"`) && runtime.includes(`return "${ENTRYPOINT}";`), "runtime require.resolve must resolve autojs6:compat"),
     check("runtime-require-entrypoint", runtime.includes(`return __autojs6_limited_rhino_compat();`), "runtime require must return the Rhino compat loader stub"),
     check("runtime-stub-function", runtime.includes("function __autojs6_limited_rhino_compat()"), "runtime must define __autojs6_limited_rhino_compat"),
     check("runtime-status-explicit-opt-in", compatBlock.includes('mode: "explicit-opt-in"') && compatBlock.includes("defaultGlobalInjection: false"), "runtime status must declare explicit opt-in and no default global injection"),
-    check("runtime-install-noop-stub", compatBlock.includes("installed: false") && compatBlock.includes("S11-08 installs the explicit loader stub only"), "S11-08 install() must remain a non-installing stub"),
-    check("runtime-stub-no-global-writes", !/__autojs6_define_global\s*\(|globalThis\s*\.|globalThis\s*\[|global\s*\[/.test(compatBlock), "compat loader stub must not write globals during require"),
+    check("runtime-install-explicit-globals", compatBlock.includes("input.global === true || input.globals === true") && compatBlock.includes("__autojs6_define_global(name, facade[name])"), "compat install must require explicit global/global options before writing globals"),
+    check("runtime-stub-no-global-writes", !/__autojs6_define_global\s*\(|globalThis\s*\.|globalThis\s*\[|global\s*\[/.test(preInstallBlock), "compat loader must not write globals before explicit install()"),
     check("runtime-no-bare-rhino-compat-alias", !runtime.includes('name === "rhino-compat"') && !runtime.includes("name === 'rhino-compat'"), "runtime must not register a bare rhino-compat alias"),
     check("types-declare-entrypoint", files.typeDeclaration.text.includes(`declare module "${ENTRYPOINT}"`), "Type declarations must declare autojs6:compat"),
     check("types-index-reference", files.typeIndex.text.includes("./rhino_compat.d.ts"), "index.d.ts must reference rhino_compat.d.ts"),
@@ -96,6 +97,14 @@ function extractCompatBlock(runtime) {
     return "";
   }
   return runtime.slice(start, end);
+}
+
+function extractBeforeInstallBlock(compatBlock) {
+  const installIndex = compatBlock.indexOf("function __autojs6_rhino_compat_install");
+  if (installIndex < 0) {
+    return compatBlock;
+  }
+  return compatBlock.slice(0, installIndex);
 }
 
 function check(id, passed, message) {

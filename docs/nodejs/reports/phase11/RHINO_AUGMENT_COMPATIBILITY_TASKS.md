@@ -194,11 +194,19 @@ Inventory 和兼容矩阵统一使用以下状态：
     增加类型声明；`tools/nodejs/phase11/verify-rhino-compat-loader.js` 和
     `:app:verifyNodeRhinoCompatLoader` 校验 no-default-global、错误码和文档/类型覆盖。
 
-- [ ] S11-09: 实现 toast、sleep、clipboard、basic global facade。
+- [x] S11-09: 实现 toast、sleep、clipboard、basic global facade。
   - 范围：`toast()`、`toastLog()`、`sleep()`、`setClip()`、`getClip()` 等
     低风险常用 API。
   - 产物：runtime module、types、host tests。
   - 验收：Node compat 示例可运行；缺 clipboard provider 时有稳定错误码。
+  - Evidence：
+    `app/src/main/cpp/node_bridge_sources.cpp` 在 `autojs6:compat` 中暴露
+    `toast`、`toastLog`、`sleep`、`setClip`、`getClip` Promise facade；
+    `install({ globals: true })` 才显式安装同名全局，默认 `require("autojs6:compat")`
+    不污染 global；`docs/nodejs/types/autojs6-node/rhino_compat.d.ts` 补齐类型；
+    `tools/nodejs/phase11/verify-rhino-compat-basic-facade.js` 和
+    `:app:verifyNodeRhinoCompatBasicFacade` 使用 fake toast/clipboard provider 验证
+    facade、async sleep 和显式 global install。
 
 - [ ] S11-10: 实现 scoped `files` compatibility facade。
   - 范围：覆盖常用 `files.read/write/exists/listDir/join/path/remove/copy/move`

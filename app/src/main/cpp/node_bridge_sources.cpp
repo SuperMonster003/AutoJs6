@@ -8191,6 +8191,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_work_manager_cache = null;
   let __autojs6_limited_lifecycle_cache = null;
   let __autojs6_limited_rhino_compat_cache = null;
+  let __autojs6_rhino_compat_facade_cache = null;
   let __autojs6_lifecycle_config_cache = undefined;
   const __autojs6_lifecycle_checkpoint_handlers = [];
   const __autojs6_lifecycle_stop_handlers = [];
@@ -14606,6 +14607,9 @@ std::string buildEmbeddedScriptExecutionSource(
     unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
     blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
   });
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers"]);
+  const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
     __autojs6_define_error_property(error, "module", "autojs6:compat");
@@ -14631,36 +14635,153 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return options;
   }
+  function __autojs6_rhino_compat_message(value) {
+    return value === undefined || value === null ? "" : String(value);
+  }
+  function __autojs6_rhino_compat_toast(message, options) {
+    return __autojs6_limited_toast().showToast(
+      __autojs6_rhino_compat_message(message),
+      options
+    );
+  }
+  function __autojs6_rhino_compat_toast_log() {
+    const args = Array.prototype.slice.call(arguments);
+    const message = args.length === 0
+      ? ""
+      : args.map(__autojs6_rhino_compat_message).join(" ");
+    try {
+      if (typeof console === "object" && console && typeof console.log === "function") {
+        console.log.apply(console, args.length === 0 ? [message] : args);
+      }
+    } catch (_) {}
+    return __autojs6_limited_toast().showToast(message, { log: true });
+  }
+  function __autojs6_rhino_compat_number(value, operation, fallback) {
+    if (value === undefined || value === null || value === "") {
+      return fallback;
+    }
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat." + operation + " requires a finite millisecond value.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        operation,
+        "invalid-option"
+      );
+    }
+    return number;
+  }
+  function __autojs6_rhino_compat_sleep_duration(millisMin, millisMax, hasMax) {
+    let min = Math.max(0, __autojs6_rhino_compat_number(millisMin, "sleep", 0));
+    let max = min;
+    if (hasMax) {
+      if (typeof millisMax === "string") {
+        const match = /[+-]?(\d+(\.\d+)?(e[+-]?\d+)?)/i.exec(millisMax);
+        if (!match) {
+          throw __autojs6_rhino_compat_error(
+            "autojs6:compat.sleep string max must contain a number.",
+            __autojs6_rhino_compat_error_codes.invalidOption,
+            "sleep",
+            "invalid-option"
+          );
+        }
+        const delta = __autojs6_rhino_compat_number(match[0], "sleep", 0);
+        max = min + delta;
+        min -= delta;
+      } else {
+        max = __autojs6_rhino_compat_number(millisMax, "sleep", min);
+      }
+    }
+    const low = Math.max(0, Math.min(min, max));
+    const high = Math.max(low, Math.max(min, max));
+    const duration = low + Math.random() * (high - low);
+    return Math.max(0, Math.min(2147483647, Math.floor(duration)));
+  }
+  function __autojs6_rhino_compat_sleep(millisMin, millisMax) {
+    let duration;
+    try {
+      duration = __autojs6_rhino_compat_sleep_duration(millisMin, millisMax, arguments.length > 1);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return new Promise(function(resolve) {
+      setTimeout(resolve, duration);
+    });
+  }
+  function __autojs6_rhino_compat_set_clip(text, options) {
+    return __autojs6_limited_clipboard().setText(
+      __autojs6_rhino_compat_message(text),
+      options
+    );
+  }
+  function __autojs6_rhino_compat_get_clip(options) {
+    return __autojs6_limited_clipboard().getText(options);
+  }
+  function __autojs6_rhino_compat_facade() {
+    if (__autojs6_rhino_compat_facade_cache) {
+      return __autojs6_rhino_compat_facade_cache;
+    }
+    __autojs6_rhino_compat_facade_cache = Object.freeze({
+      toast: __autojs6_rhino_compat_toast,
+      toastLog: __autojs6_rhino_compat_toast_log,
+      sleep: __autojs6_rhino_compat_sleep,
+      setClip: __autojs6_rhino_compat_set_clip,
+      getClip: __autojs6_rhino_compat_get_clip
+    });
+    return __autojs6_rhino_compat_facade_cache;
+  }
+  function __autojs6_rhino_compat_installed_global_names() {
+    return Object.freeze(__autojs6_rhino_compat_installed_globals.slice());
+  }
+  function __autojs6_rhino_compat_mark_global_installed(name) {
+    if (__autojs6_rhino_compat_installed_globals.indexOf(name) < 0) {
+      __autojs6_rhino_compat_installed_globals.push(name);
+    }
+  }
   function __autojs6_rhino_compat_status_snapshot() {
     return Object.freeze({
       schema: "autojs6-node-rhino-compat-loader-v1",
       entry: "autojs6:compat",
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
-      installed: false,
-      implementedTasks: Object.freeze(["S11-08"]),
-      pendingTasks: Object.freeze(["S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14"]),
-      globalNames: Object.freeze([]),
-      moduleNames: Object.freeze([])
+      installed: __autojs6_rhino_compat_installed_globals.length > 0,
+      implementedTasks: Object.freeze(["S11-08", "S11-09"]),
+      pendingTasks: Object.freeze(["S11-10", "S11-11", "S11-12", "S11-13", "S11-14"]),
+      globalNames: __autojs6_rhino_compat_installed_global_names(),
+      availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
+      moduleNames: __autojs6_rhino_compat_basic_module_names
     });
   }
   function __autojs6_rhino_compat_install(options) {
     const input = __autojs6_rhino_compat_option_object(options, "install");
-    if (input.global === true || input.globals === true) {
-      throw __autojs6_rhino_compat_error(
-        "autojs6:compat global installation is reserved for later Phase 11 facade tasks.",
-        __autojs6_rhino_compat_error_codes.unsupported,
-        "install",
-        "unsupported"
-      );
+    const installGlobals = input.global === true || input.globals === true;
+    const warnings = [];
+    if (installGlobals) {
+      const facade = __autojs6_rhino_compat_facade();
+      const overwrite = input.overwrite === true;
+      __autojs6_rhino_compat_basic_global_names.forEach(function(name) {
+        if (!overwrite && Object.prototype.hasOwnProperty.call(globalThis, name) && globalThis[name] !== facade[name]) {
+          warnings.push("global " + name + " already exists; pass overwrite: true to replace it.");
+          return;
+        }
+        __autojs6_define_global(name, facade[name]);
+        if (globalThis[name] === facade[name]) {
+          __autojs6_rhino_compat_mark_global_installed(name);
+        } else {
+          warnings.push("global " + name + " could not be installed.");
+        }
+      });
     }
     return Object.freeze({
       schema: "autojs6-node-rhino-compat-install-result-v1",
-      installed: false,
+      installed: __autojs6_rhino_compat_installed_globals.length > 0,
       explicit: true,
-      globals: Object.freeze([]),
-      modules: Object.freeze([]),
-      reason: "S11-08 installs the explicit loader stub only; facade APIs are implemented by later Phase 11 tasks."
+      globals: __autojs6_rhino_compat_installed_global_names(),
+      modules: __autojs6_rhino_compat_basic_module_names,
+      warnings: Object.freeze(warnings),
+      reason: installGlobals
+        ? "Installed low-risk Rhino compatibility globals for S11-09."
+        : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
   function __autojs6_rhino_compat_unsupported(apiName, reason) {
@@ -14702,6 +14823,11 @@ std::string buildEmbeddedScriptExecutionSource(
       errorCodes: __autojs6_rhino_compat_error_codes,
       status: __autojs6_rhino_compat_status_snapshot,
       install: __autojs6_rhino_compat_install,
+      toast: __autojs6_rhino_compat_toast,
+      toastLog: __autojs6_rhino_compat_toast_log,
+      sleep: __autojs6_rhino_compat_sleep,
+      setClip: __autojs6_rhino_compat_set_clip,
+      getClip: __autojs6_rhino_compat_get_clip,
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {
