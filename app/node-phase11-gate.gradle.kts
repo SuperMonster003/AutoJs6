@@ -9,6 +9,7 @@ tasks.register<Exec>("generateNodeRhinoAugmentInventory") {
     inputs.file(scriptFile)
     inputs.file(scannerFile)
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/rhino-augment-inventory.schema.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
     inputs.dir(project.layout.projectDirectory.dir("src/main/java/org/autojs/autojs/runtime/api/augment"))
     inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt"))
     outputs.files(
@@ -25,6 +26,7 @@ tasks.register<Exec>("generateNodeRhinoAugmentInventory") {
         rootProject.projectDir.absolutePath,
         "--report-dir",
         nodePhase11ReportDir.get().asFile.absolutePath,
+        "--require-status-manifest",
         "--fail-on-unresolved",
     )
 }
@@ -40,6 +42,7 @@ tasks.register<Exec>("generateNodeRhinoNodeCompatGap") {
     inputs.file(inventoryGeneratorFile)
     inputs.file(scannerFile)
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/rhino-augment-inventory.schema.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/NODE_PROFILE_V1_1_USER_DRAFT.md"))
@@ -62,6 +65,7 @@ tasks.register<Exec>("generateNodeRhinoNodeCompatGap") {
         rootProject.projectDir.absolutePath,
         "--report-dir",
         nodePhase11ReportDir.get().asFile.absolutePath,
+        "--require-status-manifest",
     )
 }
 

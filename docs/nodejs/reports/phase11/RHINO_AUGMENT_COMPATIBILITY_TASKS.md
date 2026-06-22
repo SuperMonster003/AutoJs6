@@ -145,11 +145,18 @@ Inventory 和兼容矩阵统一使用以下状态：
     73 个 Rhino 模块、879 个 API entry、24 个模块有 bridge evidence、24
     个模块有 type evidence。
 
-- [ ] S11-05: 增加 inventory status manifest。
+- [x] S11-05: 增加 inventory status manifest。
   - 范围：建立人工维护的 status/decision manifest，避免 scanner 只知道
     "存在"，不知道 "迁移策略"。
   - 产物：例如 `docs/nodejs/rhino-compat/status-manifest.json`。
   - 验收：manifest 缺项时 gate 能失败并指出具体 API。
+  - Evidence：
+    `docs/nodejs/rhino-compat/status-manifest.json` 显式覆盖 73 个模块和
+    879 个 API entry；`docs/nodejs/rhino-compat/STATUS_MANIFEST.md` 记录维护
+    规则；`tools/nodejs/phase11/rhino-compat-status-manifest.js` 负责校验和
+    应用状态。负向校验删除 `global.__module` 后，
+    `generate-rhino-augment-inventory.js --require-status-manifest` 失败并输出
+    `missing API global.__module`。
 
 - [ ] S11-06: 增加 `verifyNodeRhinoCompatInventory` gate。
   - 范围：校验 inventory、status manifest、bridge/types/docs diff。

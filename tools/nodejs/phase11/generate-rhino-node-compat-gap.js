@@ -5,6 +5,11 @@ const fs = require("fs");
 const path = require("path");
 const { scan } = require("./scan-rhino-augment-inventory.js");
 const { buildInventory } = require("./generate-rhino-augment-inventory.js");
+const {
+  DEFAULT_STATUS_MANIFEST,
+  loadStatusManifest,
+  applyStatusManifest,
+} = require("./rhino-compat-status-manifest.js");
 
 const GAP_SCHEMA = "autojs6-node-rhino-node-compat-gap-v1";
 const BRIDGE_PROTOCOL = "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt";
@@ -59,7 +64,12 @@ function main() {
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const scanReport = scan(repoRoot);
-  const inventory = buildInventory(scanReport);
+  const statusManifest = loadStatusManifest(repoRoot, options.statusManifest || DEFAULT_STATUS_MANIFEST);
+  const inventory = applyStatusManifest(
+    buildInventory(scanReport),
+    statusManifest,
+    { requireManifest: options.requireStatusManifest },
+  );
   const bridge = parseBridgeModules(path.join(repoRoot, BRIDGE_PROTOCOL));
   const types = parseTypeDeclarations(path.join(repoRoot, TYPES_ROOT));
   const runtime = parseRuntimeEvidence(path.join(repoRoot, NODE_BRIDGE_SOURCES), bridge.modules, types.modules);
@@ -412,10 +422,11 @@ function matchOne(text, pattern) {
 
 function parseArgs(argv) {
   const options = {};
+  const booleanArgs = new Set(["require-status-manifest"]);
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node generate-rhino-node-compat-gap.js [--repo-root dir] [--report-dir dir]");
+      console.log("Usage: node generate-rhino-node-compat-gap.js [--repo-root dir] [--report-dir dir] [--status-manifest file] [--require-status-manifest]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {
@@ -424,6 +435,10 @@ function parseArgs(argv) {
     const eq = arg.indexOf("=");
     const rawKey = eq >= 0 ? arg.slice(2, eq) : arg.slice(2);
     const key = rawKey.replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
+    if (booleanArgs.has(rawKey)) {
+      options[key] = eq >= 0 ? parseBoolean(arg.slice(eq + 1)) : true;
+      continue;
+    }
     const value = eq >= 0 ? arg.slice(eq + 1) : argv[index + 1];
     if (eq < 0) {
       index += 1;
@@ -436,4 +451,18 @@ function parseArgs(argv) {
   return options;
 }
 
-main();
+function parseBoolean(value) {
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  buildGapReport,
+  parseBridgeModules,
+  parseTypeDeclarations,
+  parseRuntimeEvidence,
+  parseDocsEvidence,
+};

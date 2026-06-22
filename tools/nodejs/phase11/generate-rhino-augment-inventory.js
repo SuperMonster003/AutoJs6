@@ -4,6 +4,11 @@
 const fs = require("fs");
 const path = require("path");
 const { scan } = require("./scan-rhino-augment-inventory.js");
+const {
+  DEFAULT_STATUS_MANIFEST,
+  loadStatusManifest,
+  applyStatusManifest,
+} = require("./rhino-compat-status-manifest.js");
 
 const INVENTORY_SCHEMA = "autojs6-node-rhino-augment-inventory-v1";
 const STATUS_VOCABULARY = [
@@ -32,7 +37,12 @@ function main() {
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const scanReport = scan(repoRoot);
-  const inventory = buildInventory(scanReport);
+  const statusManifest = loadStatusManifest(repoRoot, options.statusManifest || DEFAULT_STATUS_MANIFEST);
+  const inventory = applyStatusManifest(
+    buildInventory(scanReport),
+    statusManifest,
+    { requireManifest: options.requireStatusManifest },
+  );
 
   fs.mkdirSync(reportDir, { recursive: true });
   fs.writeFileSync(path.join(reportDir, "rhino-augment-source-scan.json"), JSON.stringify(scanReport, null, 2) + "\n");
@@ -305,11 +315,11 @@ function withoutUndefined(value) {
 
 function parseArgs(argv) {
   const options = {};
-  const booleanArgs = new Set(["fail-on-unresolved"]);
+  const booleanArgs = new Set(["fail-on-unresolved", "require-status-manifest"]);
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--help" || arg === "-h") {
-      console.log("Usage: node generate-rhino-augment-inventory.js [--repo-root dir] [--report-dir dir] [--fail-on-unresolved]");
+      console.log("Usage: node generate-rhino-augment-inventory.js [--repo-root dir] [--report-dir dir] [--status-manifest file] [--require-status-manifest] [--fail-on-unresolved]");
       process.exit(0);
     }
     if (!arg.startsWith("--")) {
