@@ -338,4 +338,11 @@ function parseBoolean(value) {
   return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  buildInventory,
+  renderMarkdown,
+};

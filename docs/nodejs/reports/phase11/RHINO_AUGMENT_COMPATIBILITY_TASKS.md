@@ -132,13 +132,18 @@ Inventory 和兼容矩阵统一使用以下状态：
     `rhino-augment-source-scan.json`；当前输出 73 个注册模块、879 个 API
     entry、0 个未解析 receiver。
 
-- [ ] S11-04: 生成 Node bridge/types/docs 差距报告。
+- [x] S11-04: 生成 Node bridge/types/docs 差距报告。
   - 范围：对比 `NodeBridgeModules`、
     `docs/nodejs/types/autojs6-node/index.d.ts`、runtime module source 和
     inventory。
   - 产物：`build/reports/nodejs/rhino-node-compat-gap.json`、
     `build/reports/nodejs/rhino-node-compat-gap.md`。
   - 验收：每个 Rhino API 至少落到一个状态词汇。
+  - Evidence：
+    `tools/nodejs/phase11/generate-rhino-node-compat-gap.js`；
+    `:app:generateNodeRhinoNodeCompatGap` 生成 gap JSON/Markdown；当前输出
+    73 个 Rhino 模块、879 个 API entry、24 个模块有 bridge evidence、24
+    个模块有 type evidence。
 
 - [ ] S11-05: 增加 inventory status manifest。
   - 范围：建立人工维护的 status/decision manifest，避免 scanner 只知道
