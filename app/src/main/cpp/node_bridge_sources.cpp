@@ -16028,8 +16028,8 @@ std::string buildEmbeddedScriptExecutionSource(
     unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
     blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16164,7 +16164,13 @@ std::string buildEmbeddedScriptExecutionSource(
       storage: __autojs6_limited_storage("storage"),
       storages: __autojs6_limited_storage("storages"),
       database: __autojs6_limited_database("database"),
-      sqlite: __autojs6_limited_database("sqlite")
+      sqlite: __autojs6_limited_database("sqlite"),
+      console: __autojs6_limited_console(),
+      timers: __autojs6_limited_timers(),
+      setTimeout: __autojs6_limited_timers().setTimeout,
+      clearTimeout: __autojs6_limited_timers().clearTimeout,
+      setInterval: __autojs6_limited_timers().setInterval,
+      clearInterval: __autojs6_limited_timers().clearInterval
     });
     return __autojs6_rhino_compat_facade_cache;
   }
@@ -16183,8 +16189,8 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13"]),
-      pendingTasks: Object.freeze(["S11-14"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14"]),
+      pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
       moduleNames: __autojs6_rhino_compat_basic_module_names
@@ -16218,7 +16224,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed low-risk Rhino compatibility globals for S11-09 through S11-12."
+        ? "Installed low-risk Rhino compatibility globals for S11-09 through S11-14."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -16283,6 +16289,12 @@ std::string buildEmbeddedScriptExecutionSource(
       storages: __autojs6_limited_storage("storages"),
       database: __autojs6_limited_database("database"),
       sqlite: __autojs6_limited_database("sqlite"),
+      console: __autojs6_limited_console(),
+      timers: __autojs6_limited_timers(),
+      setTimeout: __autojs6_limited_timers().setTimeout,
+      clearTimeout: __autojs6_limited_timers().clearTimeout,
+      setInterval: __autojs6_limited_timers().setInterval,
+      clearInterval: __autojs6_limited_timers().clearInterval,
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {
@@ -31700,6 +31712,29 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       return undefined;
     }
+    function consoleNoopReturnSelf() {
+      return limitedConsole;
+    }
+    function consoleUnsupported(apiName, reason) {
+      return function() {
+        throw __autojs6_rhino_compat_unsupported(apiName, reason);
+      };
+    }
+    function consolePrintAllStackTrace(value) {
+      let output = "";
+      if (value && value.stack !== undefined && value.stack !== null) {
+        output = String(value.stack);
+      } else if (arguments.length > 0) {
+        output = __autojs6_console_text(value);
+      } else {
+        try {
+          output = (new Error("Stack trace")).stack || "Stack trace";
+        } catch (_) {
+          output = "Stack trace";
+        }
+      }
+      return consoleWrite(consoleState(this), "stderr", [output]);
+    }
     function Console(stdoutOrOptions, stderr) {
       if (!(this instanceof Console)) {
         return new Console(stdoutOrOptions, stderr);
@@ -31737,6 +31772,7 @@ std::string buildEmbeddedScriptExecutionSource(
       timeLog: { value: consoleTimeLog, enumerable: true },
       timeEnd: { value: consoleTimeEnd, enumerable: true },
       trace: { value: consoleTrace, enumerable: true },
+      printAllStackTrace: { value: consolePrintAllStackTrace, enumerable: true },
       clear: { value: consoleClear, enumerable: true },
       group: { value: consoleGroup, enumerable: true },
       groupCollapsed: { value: consoleGroup, enumerable: true },
@@ -31770,7 +31806,16 @@ std::string buildEmbeddedScriptExecutionSource(
     Object.defineProperties(limitedConsole, {
       Console: { value: Console, enumerable: true },
       assert: { value: defaultMethod("assert"), enumerable: true },
+      build: {
+        value: consoleUnsupported(
+          "console.build",
+          "Rhino Console.Builder is not exposed in the Safe Node Profile."
+        ),
+        enumerable: true
+      },
       clear: { value: defaultMethod("clear"), enumerable: true },
+      clearConsole: { value: defaultMethod("clear"), enumerable: true },
+      collapse: { value: consoleNoopReturnSelf, enumerable: true },
       context: { value: consoleContext, enumerable: true },
       count: { value: defaultMethod("count"), enumerable: true },
       countReset: { value: defaultMethod("countReset"), enumerable: true },
@@ -31778,20 +31823,70 @@ std::string buildEmbeddedScriptExecutionSource(
       debug: { value: defaultMethod("debug"), enumerable: true },
       dir: { value: defaultMethod("dir"), enumerable: true },
       dirxml: { value: defaultMethod("dirxml"), enumerable: true },
+      err: { value: defaultMethod("error"), enumerable: true },
       error: { value: defaultMethod("error"), enumerable: true },
+      expand: { value: consoleNoopReturnSelf, enumerable: true },
       group: { value: defaultMethod("group"), enumerable: true },
       groupCollapsed: { value: defaultMethod("groupCollapsed"), enumerable: true },
       groupEnd: { value: defaultMethod("groupEnd"), enumerable: true },
+      hide: { value: consoleNoopReturnSelf, enumerable: true },
       info: { value: defaultMethod("info"), enumerable: true },
+      input: {
+        value: consoleUnsupported(
+          "console.input",
+          "Interactive Rhino console input is not exposed in the Safe Node Profile."
+        ),
+        enumerable: true
+      },
+      launch: { value: consoleNoopReturnSelf, enumerable: true },
+      launchConsole: { value: consoleNoopReturnSelf, enumerable: true },
       log: { value: defaultMethod("log"), enumerable: true },
+      openConsole: { value: consoleNoopReturnSelf, enumerable: true },
+      print: { value: defaultMethod("log"), enumerable: true },
+      printAllStackTrace: { value: defaultMethod("printAllStackTrace"), enumerable: true },
       profile: { value: defaultMethod("clear"), enumerable: true },
       profileEnd: { value: defaultMethod("clear"), enumerable: true },
+      rawInput: {
+        value: consoleUnsupported(
+          "console.rawInput",
+          "Interactive Rhino console input is not exposed in the Safe Node Profile."
+        ),
+        enumerable: true
+      },
+      reset: { value: consoleNoopReturnSelf, enumerable: true },
+      resetGlobalLogConfig: { value: consoleNoopReturnSelf, enumerable: true },
+      setBackgroundAlpha: { value: consoleNoopReturnSelf, enumerable: true },
+      setBackgroundColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setBackgroundTint: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentBackgroundAlpha: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentBackgroundColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentBackgroundTint: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentTextColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentTextColors: { value: consoleNoopReturnSelf, enumerable: true },
+      setContentTextSize: { value: consoleNoopReturnSelf, enumerable: true },
+      setExitOnClose: { value: consoleNoopReturnSelf, enumerable: true },
+      setGlobalLogConfig: { value: consoleNoopReturnSelf, enumerable: true },
+      setPosition: { value: consoleNoopReturnSelf, enumerable: true },
+      setSize: { value: consoleNoopReturnSelf, enumerable: true },
+      setTextColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setTextSize: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitle: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleBackgroundAlpha: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleBackgroundColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleBackgroundTint: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleIconsTint: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleTextColor: { value: consoleNoopReturnSelf, enumerable: true },
+      setTitleTextSize: { value: consoleNoopReturnSelf, enumerable: true },
+      setTouchable: { value: consoleNoopReturnSelf, enumerable: true },
+      show: { value: consoleNoopReturnSelf, enumerable: true },
+      showConsole: { value: consoleNoopReturnSelf, enumerable: true },
       table: { value: defaultMethod("table"), enumerable: true },
       time: { value: defaultMethod("time"), enumerable: true },
       timeEnd: { value: defaultMethod("timeEnd"), enumerable: true },
       timeLog: { value: defaultMethod("timeLog"), enumerable: true },
       timeStamp: { value: defaultMethod("clear"), enumerable: true },
       trace: { value: defaultMethod("trace"), enumerable: true },
+      verbose: { value: defaultMethod("debug"), enumerable: true },
       warn: { value: defaultMethod("warn"), enumerable: true }
     });
     __autojs6_limited_console_cache = Object.freeze(limitedConsole);

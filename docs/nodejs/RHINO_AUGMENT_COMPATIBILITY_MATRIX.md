@@ -7,18 +7,18 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Rhino modules: 73
 - Rhino API entries: 879
 - Node bridge modules: 23
-- Node type modules: 40
+- Node type modules: 46
 - Modules with bridge evidence: 24
-- Modules with type evidence: 35
-- Modules without Node surface evidence: 37
+- Modules with type evidence: 37
+- Modules without Node surface evidence: 35
 
 ## Status Totals
 
 - blocked_by_design: 22
-- partial: 345
-- supported: 109
+- partial: 382
+- supported: 132
 - supported_async: 45
-- unsupported: 431
+- unsupported: 371
 
 ## Module Matrix
 
@@ -38,7 +38,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 11 | autojs | autojs | partial | engines | partial:19 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 12 | autojs.version | version | unsupported | - | unsupported:8 | none | Design a Node facade or record a permanent non-goal. |
 | 13 | shell | shell | partial | shell | partial:27 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 14 | timers | timers | unsupported | - | unsupported:11 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 14 | timers | timers | partial | timers | supported:7, unsupported:4 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 15 | automator.auto | auto | partial | accessibility | partial:24 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 16 | automator | automator | partial | accessibility | partial:27, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 17 | selector | selector | partial | accessibility | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -67,7 +67,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 40 | converter.bytes | bytes | supported | converter | supported:7 | none | Review status manifest decision. |
 | 41 | formatter | fmt | supported | fmt, formatter | supported:1 | none | Review status manifest decision. |
 | 42 | formatter.bytes | bytes | supported | formatter | supported:7 | none | Review status manifest decision. |
-| 43 | console | console | unsupported | - | unsupported:54 | lifecycle_resource, provider_availability, thread_model | Design a Node facade or record a permanent non-goal. |
+| 43 | console | console | partial | console | partial:35, supported:16, unsupported:3 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
 | 44 | plugins | plugins | partial | plugins | partial:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 45 | jsox.arrayx | Arrayx | unsupported | - | unsupported:16 | none | Design a Node facade or record a permanent non-goal. |
 | 46 | jsox.numberx | Numberx | unsupported | - | unsupported:14 | none | Design a Node facade or record a permanent non-goal. |
@@ -243,12 +243,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### timers
 
 - Key: `timers`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:11
+- Status: `partial`
+- Node surface: timers
+- Coverage: `types_only`
+- API status: supported:7, unsupported:4
 - Risks: provider_availability
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
 
 ### automator.auto
 
@@ -533,12 +533,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### console
 
 - Key: `console`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:54
+- Status: `partial`
+- Node surface: console
+- Coverage: `types_only`
+- API status: partial:35, supported:16, unsupported:3
 - Risks: lifecycle_resource, provider_availability, thread_model
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
 
 ### plugins
 

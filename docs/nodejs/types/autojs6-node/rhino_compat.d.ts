@@ -2,6 +2,8 @@ declare module "autojs6:compat" {
   import storage = require("storage");
   import database = require("database");
   import sqlite = require("sqlite");
+  import consoleModule = require("console");
+  import timers = require("timers");
   import files = require("files");
   import base64 = require("base64");
   import colors = require("colors");
@@ -97,6 +99,12 @@ declare module "autojs6:compat" {
       readonly storages: storage.StorageModule;
       readonly database: database.DatabaseModule;
       readonly sqlite: sqlite.SQLiteModule;
+      readonly console: consoleModule.ConsoleModule;
+      readonly timers: timers.TimersModule;
+      readonly setTimeout: timers.TimersModule["setTimeout"];
+      readonly clearTimeout: timers.TimersModule["clearTimeout"];
+      readonly setInterval: timers.TimersModule["setInterval"];
+      readonly clearInterval: timers.TimersModule["clearInterval"];
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;

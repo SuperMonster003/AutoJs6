@@ -148,7 +148,16 @@ function createHarness(textBlock, compatBlock) {
         storage: Object.freeze({ create() { return {}; }, open() { return {}; } }),
         storages: Object.freeze({ create() { return {}; }, open() { return {}; } }),
         database: Object.freeze({ open() { return Promise.resolve({ close() { return Promise.resolve(true); } }); } }),
-        sqlite: Object.freeze(function sqlite() { return Promise.resolve({ close() { return Promise.resolve(true); } }); })
+        sqlite: Object.freeze(function sqlite() { return Promise.resolve({ close() { return Promise.resolve(true); } }); }),
+        console: Object.freeze({ log() {}, info() {}, warn() {}, error() {}, verbose() {}, print() {}, show() { return this; } }),
+        timers: Object.freeze({
+          setTimeout() { return { type: "timeout" }; },
+          clearTimeout() {},
+          setInterval() { return { type: "interval" }; },
+          clearInterval() {},
+          setImmediate() { return { type: "immediate" }; },
+          clearImmediate() {}
+        })
       };
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
@@ -174,6 +183,8 @@ function createHarness(textBlock, compatBlock) {
       function __autojs6_limited_util() { return __moduleStubs.util; }
       function __autojs6_limited_storage(moduleName) { return moduleName === "storages" ? __moduleStubs.storages : __moduleStubs.storage; }
       function __autojs6_limited_database(moduleName) { return moduleName === "sqlite" ? __moduleStubs.sqlite : __moduleStubs.database; }
+      function __autojs6_limited_console() { return __moduleStubs.console; }
+      function __autojs6_limited_timers() { return __moduleStubs.timers; }
       function __autojs6_limited_toast() { return { showToast() { return Promise.resolve(); } }; }
       function __autojs6_limited_clipboard() { return { setText() { return Promise.resolve(); }, getText() { return Promise.resolve(""); } }; }
       function __autojs6_define_global(name, value) {

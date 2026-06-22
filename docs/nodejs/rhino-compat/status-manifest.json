@@ -1,7 +1,7 @@
 {
   "schema": "autojs6-node-rhino-compat-status-manifest-v1",
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T09:20:24.616Z",
+  "generatedAt": "2026-06-22T10:23:51.965Z",
   "inventorySchema": "autojs6-node-rhino-augment-inventory-v1",
   "statusVocabulary": [
     "supported",
@@ -3201,145 +3201,150 @@
     },
     {
       "id": "timers",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "callback",
+      "nodeModules": [
+        "timers",
+        "timers/promises",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_14_node_timer_global_compat",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-14 verifies standard Node timer globals and require(\"timers\") for Rhino setTimeout/setInterval migration.",
+        "Auto.js-specific timer lifecycle helpers remain unsupported until a Node-safe lifecycle model is designed."
       ],
       "apiEntries": [
         {
           "id": "timers.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "timers",
+          "decision": "s11_14_standard_node_timer_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino timer API to the embedded Node timer global/module implementation with diagnostics tracking."
           ]
         },
         {
           "id": "timers.keepAlive",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_14_autojs_timer_extension_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "This Auto.js-specific timer extension needs lifecycle semantics beyond standard Node timers and remains a stable unsupported API in S11-14."
           ]
         },
         {
           "id": "timers.setIntervalExt",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_14_autojs_timer_extension_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "This Auto.js-specific timer extension needs lifecycle semantics beyond standard Node timers and remains a stable unsupported API in S11-14."
           ]
         },
         {
           "id": "timers.clearImmediate",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "clearImmediate",
+          "decision": "s11_14_standard_node_timer_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino timer API to the embedded Node timer global/module implementation with diagnostics tracking."
           ]
         },
         {
           "id": "timers.clearInterval",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "clearInterval",
+          "decision": "s11_14_standard_node_timer_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino timer API to the embedded Node timer global/module implementation with diagnostics tracking."
           ]
         },
         {
           "id": "timers.clearTimeout",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "clearTimeout",
+          "decision": "s11_14_standard_node_timer_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino timer API to the embedded Node timer global/module implementation with diagnostics tracking."
           ]
         },
         {
           "id": "timers.keepAlive",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_14_autojs_timer_extension_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "This Auto.js-specific timer extension needs lifecycle semantics beyond standard Node timers and remains a stable unsupported API in S11-14."
           ]
         },
         {
           "id": "timers.loop",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_14_autojs_timer_extension_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "This Auto.js-specific timer extension needs lifecycle semantics beyond standard Node timers and remains a stable unsupported API in S11-14."
           ]
         },
         {
           "id": "timers.setImmediate",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setImmediate",
+          "decision": "s11_14_standard_node_timer_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino timer API to the embedded Node timer global/module implementation with diagnostics tracking."
           ]
         },
         {
           "id": "timers.setInterval",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setInterval",
+          "decision": "s11_14_standard_node_timer_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino timer API to the embedded Node timer global/module implementation with diagnostics tracking."
           ]
         },
         {
           "id": "timers.setTimeout",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "callback",
+          "nodeModule": "timers",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTimeout",
+          "decision": "s11_14_standard_node_timer_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino timer API to the embedded Node timer global/module implementation with diagnostics tracking."
           ]
         }
       ]
@@ -8139,661 +8144,665 @@
     },
     {
       "id": "console",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "console",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_14_console_timer_error_stabilization",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-14 exposes the controlled Node console through require(\"console\") and autojs6:compat.console for readable migrated debug output.",
+        "Floating-console UI controls are no-op compatibility shims that keep output flowing through the embedded Node stdout/stderr capture."
       ],
       "apiEntries": [
         {
           "id": "console.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "console",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.assert",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "assert",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.build",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_14_console_interactive_input_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Interactive Rhino console input/builder APIs are not exposed in the Safe Node Profile and return stable unsupported diagnostics."
           ]
         },
         {
           "id": "console.clear",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "clear",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.collapse",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "collapse",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.error",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "error",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.expand",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "expand",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.hide",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hide",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.info",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "info",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.input",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_14_console_interactive_input_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Interactive Rhino console input/builder APIs are not exposed in the Safe Node Profile and return stable unsupported diagnostics."
           ]
         },
         {
           "id": "console.launch",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "launch",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.log",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "log",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.print",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "print",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.printAllStackTrace",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "printAllStackTrace",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.rawInput",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_14_console_interactive_input_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Interactive Rhino console input/builder APIs are not exposed in the Safe Node Profile and return stable unsupported diagnostics."
           ]
         },
         {
           "id": "console.reset",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "reset",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.resetGlobalLogConfig",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "resetGlobalLogConfig",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setBackgroundAlpha",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setBackgroundAlpha",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setBackgroundColor",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setBackgroundColor",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setBackgroundTint",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setBackgroundTint",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setContentBackgroundAlpha",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setContentBackgroundAlpha",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setContentBackgroundColor",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setContentBackgroundColor",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setContentBackgroundTint",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setContentBackgroundTint",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setContentTextColor",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setContentTextColor",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setContentTextColors",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setContentTextColors",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setContentTextSize",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setContentTextSize",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setExitOnClose",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setExitOnClose",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setGlobalLogConfig",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setGlobalLogConfig",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setPosition",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setPosition",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setSize",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setSize",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTextColor",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTextColor",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTextSize",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTextSize",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTitle",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTitle",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTitleBackgroundAlpha",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTitleBackgroundAlpha",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTitleBackgroundColor",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTitleBackgroundColor",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTitleBackgroundTint",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTitleBackgroundTint",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTitleIconsTint",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTitleIconsTint",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTitleTextColor",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTitleTextColor",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTitleTextSize",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTitleTextSize",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.setTouchable",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "setTouchable",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.show",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "show",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.time",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "time",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.timeEnd",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "timeEnd",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.verbose",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "verbose",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.warn",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "warn",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.clear",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "clear",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.clearConsole",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "clearConsole",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.err",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "err",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.error",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "error",
+          "decision": "s11_14_console_debug_output_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 maps this Rhino console debugging API to the controlled Node console and captured stdout/stderr output."
           ]
         },
         {
           "id": "console.launch",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "launch",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.launchConsole",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "launchConsole",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.openConsole",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "openConsole",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.show",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "show",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         },
         {
           "id": "console.showConsole",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "console",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "showConsole",
+          "decision": "s11_14_console_ui_noop_output_capture",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-14 keeps this floating-console UI control as a no-op compatibility shim; it does not open or configure an Android console window in Node."
           ]
         }
       ]
@@ -11680,11 +11689,11 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "unsupported": 399,
-      "supported_async": 44,
-      "blocked_by_design": 18,
-      "supported": 100,
-      "partial": 318
+      "partial": 382,
+      "unsupported": 371,
+      "supported_async": 45,
+      "blocked_by_design": 22,
+      "supported": 132
     }
   }
 }

@@ -143,7 +143,16 @@ function createHarness(filesBlock, compatBlock, root) {
         storage: Object.freeze({ create() { return {}; }, open() { return {}; } }),
         storages: Object.freeze({ create() { return {}; }, open() { return {}; } }),
         database: Object.freeze({ open() { return Promise.resolve({ close() { return Promise.resolve(true); } }); } }),
-        sqlite: Object.freeze(function sqlite() { return Promise.resolve({ close() { return Promise.resolve(true); } }); })
+        sqlite: Object.freeze(function sqlite() { return Promise.resolve({ close() { return Promise.resolve(true); } }); }),
+        console: Object.freeze({ log() {}, info() {}, warn() {}, error() {}, verbose() {}, print() {}, show() { return this; } }),
+        timers: Object.freeze({
+          setTimeout() { return { type: "timeout" }; },
+          clearTimeout() {},
+          setInterval() { return { type: "interval" }; },
+          clearInterval() {},
+          setImmediate() { return { type: "immediate" }; },
+          clearImmediate() {}
+        })
       };
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
@@ -261,6 +270,12 @@ function createHarness(filesBlock, compatBlock, root) {
       }
       function __autojs6_limited_database(moduleName) {
         return moduleName === "sqlite" ? __pureUtilityStubs.sqlite : __pureUtilityStubs.database;
+      }
+      function __autojs6_limited_console() {
+        return __pureUtilityStubs.console;
+      }
+      function __autojs6_limited_timers() {
+        return __pureUtilityStubs.timers;
       }
       function __autojs6_define_global(name, value) {
         Object.defineProperty(globalThis, name, { value, configurable: true, enumerable: false, writable: false });

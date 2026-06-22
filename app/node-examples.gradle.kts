@@ -90,6 +90,8 @@ private val nodeTypeDeclarationModules = listOf(
     "storages",
     "database",
     "sqlite",
+    "console",
+    "timers",
     "files",
     "base64",
     "colors",

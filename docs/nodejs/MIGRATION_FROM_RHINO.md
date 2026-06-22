@@ -81,7 +81,7 @@ If a script needs Android or AutoJs functionality, use an AutoJs bridge module.
 
 ## Rhino Compatibility Shim
 
-There is no `require("rhino")` compatibility module in the default Safe Node Profile, and Node does not support `rhino.install()` or automatic installation of old AutoJs globals.
+There is no `require("rhino")` compatibility module in the default Safe Node Profile, and Node does not support `rhino.install()` or automatic installation of old AutoJs globals. The explicit migration helper is `require("autojs6:compat")`; it does not install globals unless the script calls `compat.install({ globals: true })`.
 
 Do not migrate scripts by expecting these Rhino-era surfaces to appear inside Node:
 
@@ -93,9 +93,9 @@ Do not migrate scripts by expecting these Rhino-era surfaces to appear inside No
 - direct `android.*`
 - old global AutoJs APIs such as `toast`, `files`, `images`, selector globals, or `threads`
 
-The recommended migration path is to rewrite those calls to explicit Node bridge modules. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing Rhino globals into Node.
+The recommended migration path is to rewrite those calls to explicit Node bridge modules. For low-risk helpers, `autojs6:compat` currently covers toast/sleep/clipboard, scoped files, pure/text utilities, storage/sqlite, and readable `console`/timer debugging migration. `console.show()` and related floating-console controls are no-op output-capture shims in Node; logs still go to captured stdout/stderr, and uncaught errors keep source-map-aware `errorStack` output. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing unrestricted Rhino globals into Node.
 
-The design gate for a possible future shim is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). Its recommendation is that any future shim should be explicit, isolated, JSON-serialized, timeout-bounded, and used only for migration.
+The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). Its recommendation is that any future shim should be explicit, isolated, JSON-serialized, timeout-bounded, and used only for migration.
 
 ## Modules Instead Of Globals
 

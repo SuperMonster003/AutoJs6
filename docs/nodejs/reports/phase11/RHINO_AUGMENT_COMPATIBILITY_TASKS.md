@@ -268,11 +268,17 @@ Inventory 和兼容矩阵统一使用以下状态：
     callable、database close、transaction 错误路径、explicit globals 和类型
     smoke。
 
-- [ ] S11-14: 稳定 console/timers/error compatibility。
+- [x] S11-14: 稳定 console/timers/error compatibility。
   - 范围：确认 `console`、`setTimeout`、`setInterval`、`clearTimeout`、
     `clearInterval`、异常格式和 source map 输出。
   - 产物：compat tests、docs。
   - 验收：常用 Rhino 调试脚本迁移到 Node 后输出可读。
+  - 状态：已接入 `autojs6:compat.console`、`autojs6:compat.timers`
+    和 `console`/timer 显式 globals；`console.print`、`verbose`、
+    `err`、`clearConsole`、`console.show()` 等常见调试脚本路径可读输出，
+    悬浮控制台窗口控制为 no-op 兼容层；交互输入和 Auto.js timer 扩展保持
+    stable unsupported；新增 `verifyNodeRhinoCompatConsoleTimersError` 覆盖
+    console 输出、timer facade、source-map-aware `errorStack` 和类型 smoke。
 
 ### Track C: Automation core facade
 

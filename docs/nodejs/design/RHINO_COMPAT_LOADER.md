@@ -21,7 +21,7 @@ The loader is an AutoJs6 controlled module, not an npm package name and not a sc
 
 ## Runtime Contract
 
-S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, S11-12 adds text utility facades with stable dependency-missing degradation, and S11-13 adds async-compatible storage/sqlite facades over the controlled bridge. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, or Pro 9 `require("rhino").install()` behavior.
+S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, S11-12 adds text utility facades with stable dependency-missing degradation, S11-13 adds async-compatible storage/sqlite facades over the controlled bridge, and S11-14 stabilizes console/timer/error debugging migration. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, or Pro 9 `require("rhino").install()` behavior.
 
 The first runtime shape is:
 
@@ -52,12 +52,16 @@ await store.put("enabled", true);
 const db = await compat.sqlite("settings_db");
 await db.transaction([{ type: "exec", sql: "create table if not exists kv (k text)" }]);
 await db.close();
+compat.console.show().setTitle("Debug");
+compat.console.log("debug", { ok: true });
+const timeout = compat.setTimeout(() => compat.console.info("tick"), 10);
+compat.clearTimeout(timeout);
 compat.unsupported("files.open");
 compat.blockedByDesign("importClass");
 compat.assertSupported("toast");
 ```
 
-`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs the implemented low-risk names: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, `files`, `base64`, `colors`, `fmt`, `cvt`, `mime`, `nanoid`, `util`, `opencc`, `pinyin`, `pinyin4j`, `storages`, and `sqlite`.
+`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs the implemented low-risk names: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, `files`, `base64`, `colors`, `fmt`, `cvt`, `mime`, `nanoid`, `util`, `opencc`, `pinyin`, `pinyin4j`, `storages`, `sqlite`, `console`, `setTimeout`, `clearTimeout`, `setInterval`, and `clearInterval`. Existing Node globals are not overwritten unless `overwrite: true` is passed.
 
 The S11-09 facade is async. Rhino `sleep()` blocks the Rhino script thread; Node compat `sleep()` returns a Promise and must be awaited. Toast and clipboard helpers also return Promises because they cross the Android bridge.
 
@@ -69,6 +73,8 @@ The S11-12 text utility facade is also synchronous and host-testable. It adds ba
 
 The S11-13 storage/sqlite facade is async-compatible. `storage` and `storages` remain scoped by package and working directory through the existing Node storage bridge; store names are part of every bridge call so independent stores stay isolated. Store-level `putSync`, `removeSync`, `clearSync`, and module-level `storages.removeSync()` aliases are available but return Promises in Node and must be awaited. `storages.names()` and `storages.all()` return stable `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` errors because the controlled bridge does not expose namespace enumeration. `sqlite` is callable as an alias for `sqlite.open()` and returns the same controlled database handle as `database.open()`. Database paths stay scoped names, handles must be closed, and transaction callback form is rejected; transactions use explicit operation arrays.
 
+The S11-14 console/timers/error facade is synchronous for console output and callback-based for timers. `require("console")`, `require("node:console")`, `compat.console`, and the installed `console` global expose Node-compatible `log`, `info`, `warn`, `error`, `assert`, `time`, `timeEnd`, `trace`, plus Rhino aliases such as `print`, `verbose`, `err`, and `clearConsole`. Floating-console window controls such as `show`, `hide`, `setSize`, and `setTitle` are no-op compatibility shims that return the console object so common debugging scripts continue to write readable output; they do not open or configure an Android floating console in Node. `console.input`, `console.rawInput`, and `console.build` remain stable unsupported paths. Standard `setTimeout`, `setInterval`, `clearTimeout`, and `clearInterval` come from the controlled Node timer implementation; Auto.js-specific `keepAlive`, `loop`, and `setIntervalExt` remain unsupported until a Node lifecycle design exists. Uncaught error envelopes continue to expose source-map-aware `errorStack` output through the existing source map diagnostics pipeline.
+
 Future tasks should extend the module in small commits:
 
 - S11-09: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, and basic globals.
@@ -76,7 +82,7 @@ Future tasks should extend the module in small commits:
 - S11-11: pure utility facades for `base64`, `colors`, `fmt.bytes`, `cvt.bytes`, `mime`, `nanoid`, and `util.inspect` migration.
 - S11-12: text utility facades for `opencc`, `pinyin`, and `pinyin4j`, with stable unsupported errors for missing dictionaries/resources.
 - S11-13: async-compatible `storages` and callable `sqlite` facades over the controlled storage/database bridge.
-- S11-14: console/timers/error compatibility.
+- S11-14: console/timers/error debugging compatibility with readable Node output and source-map-aware stack diagnostics.
 
 ## Error Codes
 
@@ -103,4 +109,4 @@ When later tasks add globals, they must keep these rules:
 
 ## Type Surface
 
-The checked-in type declaration is `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`. It declares only the loader and error helpers. Real facade methods should be added with the Task that implements them.
+The checked-in type declaration is `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`. It declares the loader, stable error helpers, and the implemented Phase 11 facade modules through S11-14.

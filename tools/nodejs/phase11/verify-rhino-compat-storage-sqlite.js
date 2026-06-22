@@ -163,7 +163,16 @@ function createHarness(storageSqliteBlock, compatBlock) {
         util: Object.freeze({ format(value) { return String(value); }, inspect(value) { return String(value); } }),
         opencc: Object.freeze(function opencc() { return ""; }),
         pinyin: Object.freeze(function pinyin() { return []; }),
-        pinyin4j: Object.freeze(function pinyin4j() { return ""; })
+        pinyin4j: Object.freeze(function pinyin4j() { return ""; }),
+        console: Object.freeze({ log() {}, info() {}, warn() {}, error() {}, verbose() {}, print() {}, show() { return this; } }),
+        timers: Object.freeze({
+          setTimeout() { return { type: "timeout" }; },
+          clearTimeout() {},
+          setInterval() { return { type: "interval" }; },
+          clearInterval() {},
+          setImmediate() { return { type: "immediate" }; },
+          clearImmediate() {}
+        })
       };
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
@@ -224,6 +233,8 @@ function createHarness(storageSqliteBlock, compatBlock) {
       function __autojs6_limited_opencc() { return __moduleStubs.opencc; }
       function __autojs6_limited_pinyin() { return __moduleStubs.pinyin; }
       function __autojs6_limited_pinyin4j() { return __moduleStubs.pinyin4j; }
+      function __autojs6_limited_console() { return __moduleStubs.console; }
+      function __autojs6_limited_timers() { return __moduleStubs.timers; }
       function __autojs6_limited_toast() { return { showToast() { return Promise.resolve(); } }; }
       function __autojs6_limited_clipboard() { return { setText() { return Promise.resolve(); }, getText() { return Promise.resolve(""); } }; }
       function __autojs6_define_global(name, value) {

@@ -14,6 +14,8 @@ import storage = require("storage");
 import storages = require("storages");
 import database = require("database");
 import sqlite = require("sqlite");
+import consoleModule = require("console");
+import timers = require("timers");
 import files = require("files");
 import base64 = require("base64");
 import colors = require("colors");
@@ -159,6 +161,17 @@ async function smoke(): Promise<void> {
   ], { timeoutMs: 1000 });
   const dbClosed: boolean = await db.close({ timeoutMs: 1000 });
   const sqliteClosed: boolean = await sqliteDb.close({ timeoutMs: 1000 });
+
+  consoleModule.log("types smoke", rows.length);
+  consoleModule.verbose("debug", oneRow);
+  consoleModule.err("stderr", runResult.rowsAffected);
+  consoleModule.show().setTitle("Types").setSize(320, 200).hide();
+  const timeoutHandle: timers.TimerHandle = timers.setTimeout(() => undefined, 1);
+  timers.clearTimeout(timeoutHandle);
+  const intervalHandle: AutoJs6NodeTimers.TimerHandle = setInterval(() => undefined, 10);
+  clearInterval(intervalHandle);
+  const immediateHandle: timers.TimerHandle = timers.setImmediate(() => undefined);
+  timers.clearImmediate(immediateHandle);
 
   const scopedPath: string | null = files.path("types.txt");
   const encoded: string = base64.encode("AutoJs6");
@@ -321,6 +334,9 @@ async function smoke(): Promise<void> {
   void transactionResults;
   void dbClosed;
   void sqliteClosed;
+  void timeoutHandle;
+  void intervalHandle;
+  void immediateHandle;
   void scopedPath;
   void encoded;
   void decoded;
