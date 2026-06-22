@@ -69,6 +69,47 @@ tasks.register<Exec>("generateNodeRhinoNodeCompatGap") {
     )
 }
 
+tasks.register<Exec>("verifyNodeRhinoCompatInventory") {
+    group = "verification"
+    description = "Verifies Phase 11A Rhino augment inventory, status manifest coverage, and Node bridge/types/docs evidence."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-inventory.js")
+    val statusManifestFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/rhino-compat-status-manifest.js")
+    val inventoryGeneratorFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-augment-inventory.js")
+    val gapGeneratorFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-node-compat-gap.js")
+    val scannerFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/scan-rhino-augment-inventory.js")
+    inputs.file(scriptFile)
+    inputs.file(statusManifestFile)
+    inputs.file(inventoryGeneratorFile)
+    inputs.file(gapGeneratorFile)
+    inputs.file(scannerFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/rhino-augment-inventory.schema.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/NODE_PROFILE_V1_1_USER_DRAFT.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.dir(rootProject.layout.projectDirectory.dir("docs/nodejs/types/autojs6-node"))
+    inputs.dir(project.layout.projectDirectory.dir("src/main/java/org/autojs/autojs/runtime/api/augment"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-compat-inventory-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-inventory-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCapabilityTruth") {
     group = "verification"
     description = "Writes build/reports/nodejs/final-capability-truth.json without failing on open Phase 11 blockers."

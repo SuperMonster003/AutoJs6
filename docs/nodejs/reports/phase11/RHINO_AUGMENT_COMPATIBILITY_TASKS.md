@@ -158,10 +158,15 @@ Inventory 和兼容矩阵统一使用以下状态：
     `generate-rhino-augment-inventory.js --require-status-manifest` 失败并输出
     `missing API global.__module`。
 
-- [ ] S11-06: 增加 `verifyNodeRhinoCompatInventory` gate。
+- [x] S11-06: 增加 `verifyNodeRhinoCompatInventory` gate。
   - 范围：校验 inventory、status manifest、bridge/types/docs diff。
   - 产物：Gradle verification task。
   - 验收：新增 Rhino augment API 如果没有 Node 迁移状态，gate 失败。
+  - Evidence：
+    `tools/nodejs/phase11/verify-rhino-compat-inventory.js`；
+    `:app:verifyNodeRhinoCompatInventory` 生成
+    `rhino-compat-inventory-verification.json` 和 `.md`；当前 gate 通过，73
+    个模块、879 个 API entry、0 个 policy violation。
 
 - [ ] S11-07: 发布第一版 Rhino-to-Node 兼容矩阵。
   - 范围：把 report 中的当前人工矩阵转换为生成或半生成文档。
