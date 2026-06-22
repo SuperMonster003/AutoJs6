@@ -78,6 +78,10 @@ function buildStaticChecks(files, compatBlock) {
   const appModule = moduleById.get("app");
   const deviceModule = moduleById.get("device");
   const shellModule = moduleById.get("shell");
+  const matrixSurfaceFor = (moduleId) => {
+    const row = files.matrix.text.split(/\r?\n/).find((line) => new RegExp(`\\| \\d+ \\| ${moduleId} \\| ${moduleId} \\|`).test(line)) || "";
+    return row.split("|")[5] || "";
+  };
   return [
     check("runtime-compat-shell-function", compatBlock.includes("function __autojs6_rhino_compat_shell()") && compatBlock.includes("function __autojs6_rhino_compat_shell_options"), "runtime must define the callable Rhino shell compatibility wrapper"),
     check("runtime-compat-app-device-shell", RHINO_GLOBALS.every((name) => compatBlock.includes(`"${name}"`)) && compatBlock.includes("app: __autojs6_limited_app()") && compatBlock.includes("device: __autojs6_limited_device()") && compatBlock.includes("shell: shell"), "autojs6:compat must expose app/device/shell and installable globals"),
@@ -93,7 +97,7 @@ function buildStaticChecks(files, compatBlock) {
     check("loader-design-s11-17", files.loaderDesign.text.includes("S11-17") && files.loaderDesign.text.includes("compat.app.launchPackage") && files.loaderDesign.text.includes("compat.shell(\"echo ok\""), "loader design must document S11-17 app/device/shell facade behavior"),
     check("migration-s11-17", files.migration.text.includes("compat.app.launchPackage") && files.migration.text.includes("compat.shell(\"echo ok\"") && files.migration.text.includes("root: true"), "migration guide must show S11-17 compat app/device/shell usage and explicit root shell"),
     check("security-shell-boundary", files.securityModel.text.includes("Root mode is explicit") && files.securityModel.text.includes("Shizuku execution remains unsupported") && files.securityModel.text.includes("compat.shell"), "security model must keep shell root/shizuku boundaries clear for S11-17"),
-    check("matrix-app-device-shell", /\| \d+ \| app \| app \| partial \| app \|/.test(files.matrix.text) && /\| \d+ \| shell \| shell \| partial \| shell \|/.test(files.matrix.text) && files.matrix.text.includes("device"), "compat matrix must retain app/device/shell module surfaces"),
+    check("matrix-app-device-shell", matrixSurfaceFor("app").includes("app") && matrixSurfaceFor("app").includes("autojs6:compat") && matrixSurfaceFor("device").includes("device") && matrixSurfaceFor("device").includes("autojs6:compat") && matrixSurfaceFor("shell").includes("shell") && matrixSurfaceFor("shell").includes("autojs6:compat"), "compat matrix must retain app/device/shell module surfaces"),
     check("task-plan-s11-17-complete", /\[x\]\s+S11-17/.test(files.taskPlan.text) && files.taskPlan.text.includes("verifyNodeRhinoCompatAppDeviceShell"), "Phase 11 task plan must mark S11-17 complete and name the verification gate"),
     check("gradle-task", files.gradle.text.includes("verifyNodeRhinoCompatAppDeviceShell") && files.gradle.text.includes("verify-rhino-compat-app-device-shell.js"), "Gradle must register verifyNodeRhinoCompatAppDeviceShell"),
   ];

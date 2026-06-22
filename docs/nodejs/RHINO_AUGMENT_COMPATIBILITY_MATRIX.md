@@ -15,37 +15,37 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ## Status Totals
 
 - blocked_by_design: 22
-- partial: 380
+- partial: 377
 - supported: 132
-- supported_async: 47
+- supported_async: 50
 - unsupported: 371
 
 ## Module Matrix
 
 | Order | Rhino Module | Key | Status | Node Surface | API Status | Risks | Next Step |
 | ---: | --- | --- | --- | --- | --- | --- | --- |
-| 0 | global | global | partial | autojs6:compat, toast | supported_async:4, unsupported:42 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 0 | global | global | partial | accessibility, app, autojs6:compat, clipboard, device, images, media_projection, shell, toast | supported_async:4, unsupported:42 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 1 | global.legacy | legacy | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 2 | global.is_nullish | isNullish | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
 | 3 | util | util | unsupported | util | unsupported:50 | provider_availability | Decide explicit mapping or mark blocked-by-design. |
 | 4 | util.java | java | blocked_by_design | java | blocked_by_design:6 | none | Keep denial documented and covered by policy tests. |
 | 5 | util.version | version | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
 | 6 | util.version_codes | versionCodes | unsupported | - | unsupported:5 | provider_availability | Design a Node facade or record a permanent non-goal. |
-| 7 | util.inspect | inspect | supported | util | supported:1 | none | Review status manifest decision. |
+| 7 | util.inspect | inspect | supported | autojs6:compat, util | supported:1 | none | Review status manifest decision. |
 | 8 | util.morse_code | morseCode | unsupported | - | unsupported:4 | none | Design a Node facade or record a permanent non-goal. |
 | 9 | global.species | species | unsupported | - | unsupported:36 | none | Design a Node facade or record a permanent non-goal. |
-| 10 | app | app | partial | app | partial:36, supported_async:4 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 10 | app | app | partial | app, autojs6:compat | partial:36, supported_async:4 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 11 | autojs | autojs | partial | engines | partial:19 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 12 | autojs.version | version | unsupported | - | unsupported:8 | none | Design a Node facade or record a permanent non-goal. |
-| 13 | shell | shell | partial | shell | partial:27 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 14 | timers | timers | partial | timers | supported:7, unsupported:4 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 13 | shell | shell | partial | autojs6:compat, shell | partial:27 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 14 | timers | timers | partial | autojs6:compat, timers, timers/promises | supported:7, unsupported:4 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 15 | automator.auto | auto | partial | accessibility | partial:24 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 16 | automator | automator | partial | accessibility | partial:27, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 17 | selector | selector | partial | accessibility | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 18 | events | events | unsupported | - | unsupported:2 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 19 | events.keys | keys | unsupported | - | unsupported:13 | none | Design a Node facade or record a permanent non-goal. |
 | 20 | canvas | Canvas | unsupported | - | unsupported:1 | lifecycle_resource, raw_android_object | Design a Node facade or record a permanent non-goal. |
-| 21 | images | images | partial | image, images | partial:63, supported_async:14 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
+| 21 | images | images | partial | autojs6:compat, image, images, media_projection | partial:60, supported_async:17 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
 | 22 | ocr | ocr | partial | ocr | partial:6, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 23 | ocr.ocr_ml_kit | mlkit | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 24 | ocr.ocr_paddle | paddle | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
@@ -54,7 +54,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 27 | barcode.qr_code | qrcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 28 | threads | threads | blocked_by_design | - | blocked_by_design:6 | provider_availability | Keep denial documented and covered by policy tests. |
 | 29 | ui | ui | partial | ui | partial:35 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
-| 30 | colors | colors | partial | colors | blocked_by_design:3, partial:2, supported:58 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 30 | colors | colors | partial | autojs6:compat, colors | blocked_by_design:3, partial:2, supported:58 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 31 | colors.color | Color | blocked_by_design | colors | blocked_by_design:1 | provider_availability | Keep denial documented and covered by policy tests. |
 | 32 | tasks | tasks | partial | work_manager | partial:16 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 33 | dialogs | dialogs | partial | dialogs | partial:5, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -63,11 +63,11 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 36 | web | web | partial | fetch, websocket | partial:4 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 37 | web.web_socket | WebSocket | partial | websocket | partial:1 | lifecycle_resource, provider_availability, raw_android_object | Implement explicit compat facade and promote mapped APIs one by one. |
 | 38 | s13n | s13n | unsupported | - | unsupported:6 | none | Design a Node facade or record a permanent non-goal. |
-| 39 | converter | cvt | supported | converter, cvt | supported:1 | none | Review status manifest decision. |
-| 40 | converter.bytes | bytes | supported | converter | supported:7 | none | Review status manifest decision. |
-| 41 | formatter | fmt | supported | fmt, formatter | supported:1 | none | Review status manifest decision. |
-| 42 | formatter.bytes | bytes | supported | formatter | supported:7 | none | Review status manifest decision. |
-| 43 | console | console | partial | console | partial:35, supported:16, unsupported:3 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
+| 39 | converter | cvt | supported | autojs6:compat, converter, cvt | supported:1 | none | Review status manifest decision. |
+| 40 | converter.bytes | bytes | supported | autojs6:compat, converter, cvt | supported:7 | none | Review status manifest decision. |
+| 41 | formatter | fmt | supported | autojs6:compat, fmt, formatter | supported:1 | none | Review status manifest decision. |
+| 42 | formatter.bytes | bytes | supported | autojs6:compat, fmt, formatter | supported:7 | none | Review status manifest decision. |
+| 43 | console | console | partial | autojs6:compat, console | partial:35, supported:16, unsupported:3 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
 | 44 | plugins | plugins | partial | plugins | partial:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 45 | jsox.arrayx | Arrayx | unsupported | - | unsupported:16 | none | Design a Node facade or record a permanent non-goal. |
 | 46 | jsox.numberx | Numberx | unsupported | - | unsupported:14 | none | Design a Node facade or record a permanent non-goal. |
@@ -78,24 +78,24 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 51 | automator.root_automator | RootAutomator | blocked_by_design | - | blocked_by_design:1 | lifecycle_resource, raw_android_object | Keep denial documented and covered by policy tests. |
 | 52 | engines | engines | partial | engines | partial:4, supported_async:5 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
 | 53 | floaty | floaty | unsupported | - | unsupported:8 | none | Design a Node facade or record a permanent non-goal. |
-| 54 | storages | storages | partial | storage, storages | partial:1, supported_async:3, unsupported:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 55 | device | device | partial | clipboard, device | partial:19, supported_async:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 54 | storages | storages | partial | autojs6:compat, storage, storages | partial:1, supported_async:3, unsupported:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 55 | device | device | partial | autojs6:compat, clipboard, device | partial:19, supported_async:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 56 | recorder | recorder | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 57 | toast | toast | partial | toast | partial:1, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 58 | media | media | partial | media_projection | partial:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 58 | media | media | partial | autojs6:compat, media_projection | partial:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 59 | sensors | sensors | partial | sensors | partial:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
-| 60 | base64 | base64 | supported | base64 | supported:3 | none | Review status manifest decision. |
+| 60 | base64 | base64 | supported | autojs6:compat, base64 | supported:3 | none | Review status manifest decision. |
 | 61 | notice | notice | partial | notifications | partial:6, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 62 | notice.channel | channel | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
 | 63 | shizuku | shizuku | unsupported | - | unsupported:7 | provider_availability | Design a Node facade or record a permanent non-goal. |
-| 64 | opencc | opencc | unsupported | opencc | unsupported:34 | none | Decide explicit mapping or mark blocked-by-design. |
-| 65 | mime | mime | supported | mime | supported:1 | provider_availability | Review status manifest decision. |
+| 64 | opencc | opencc | unsupported | autojs6:compat, opencc | unsupported:34 | none | Decide explicit mapping or mark blocked-by-design. |
+| 65 | mime | mime | supported | autojs6:compat, mime | supported:1 | provider_availability | Review status manifest decision. |
 | 66 | sysprops | sysprops | unsupported | - | unsupported:5 | none | Design a Node facade or record a permanent non-goal. |
-| 67 | sqlite | sqlite | supported_async | database, sqlite | supported_async:2 | none | Add compat examples and dual-engine tests. |
+| 67 | sqlite | sqlite | supported_async | autojs6:compat, database, sqlite | supported_async:2 | none | Add compat examples and dual-engine tests. |
 | 68 | zip | zip | unsupported | - | unsupported:6 | none | Design a Node facade or record a permanent non-goal. |
-| 69 | nanoid | nanoid | supported | nanoid | supported:1 | none | Review status manifest decision. |
-| 70 | pinyin | pinyin | partial | pinyin | supported:16, unsupported:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 71 | pinyin4j | pinyin4j | supported | pinyin4j | supported:2 | none | Review status manifest decision. |
+| 69 | nanoid | nanoid | supported | autojs6:compat, nanoid | supported:1 | none | Review status manifest decision. |
+| 70 | pinyin | pinyin | partial | autojs6:compat, pinyin | supported:16, unsupported:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 71 | pinyin4j | pinyin4j | supported | autojs6:compat, pinyin4j | supported:2 | none | Review status manifest decision. |
 | 72 | mediainfo | mediainfo | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
 
 ## Module Details
@@ -104,7 +104,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `global`
 - Status: `partial`
-- Node surface: autojs6:compat, toast
+- Node surface: accessibility, app, autojs6:compat, clipboard, device, images, media_projection, shell, toast
 - Coverage: `no_node_surface`
 - API status: supported_async:4, unsupported:42
 - Risks: provider_availability
@@ -174,7 +174,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `inspect`
 - Status: `supported`
-- Node surface: util
+- Node surface: autojs6:compat, util
 - Coverage: `no_node_surface`
 - API status: supported:1
 - Risks: none
@@ -204,7 +204,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `app`
 - Status: `partial`
-- Node surface: app
+- Node surface: app, autojs6:compat
 - Coverage: `bridge_and_types`
 - API status: partial:36, supported_async:4
 - Risks: provider_availability
@@ -234,7 +234,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `shell`
 - Status: `partial`
-- Node surface: shell
+- Node surface: autojs6:compat, shell
 - Coverage: `bridge_and_types`
 - API status: partial:27
 - Risks: none
@@ -244,7 +244,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `timers`
 - Status: `partial`
-- Node surface: timers
+- Node surface: autojs6:compat, timers, timers/promises
 - Coverage: `types_only`
 - API status: supported:7, unsupported:4
 - Risks: provider_availability
@@ -314,9 +314,9 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `images`
 - Status: `partial`
-- Node surface: image, images
+- Node surface: autojs6:compat, image, images, media_projection
 - Coverage: `bridge_and_types`
-- API status: partial:63, supported_async:14
+- API status: partial:60, supported_async:17
 - Risks: event_loop_semantics, lifecycle_resource
 - Next step: Implement explicit compat facade and promote mapped APIs one by one.
 
@@ -404,7 +404,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `colors`
 - Status: `partial`
-- Node surface: colors
+- Node surface: autojs6:compat, colors
 - Coverage: `types_only`
 - API status: blocked_by_design:3, partial:2, supported:58
 - Risks: provider_availability
@@ -494,7 +494,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `cvt`
 - Status: `supported`
-- Node surface: converter, cvt
+- Node surface: autojs6:compat, converter, cvt
 - Coverage: `types_only`
 - API status: supported:1
 - Risks: none
@@ -504,7 +504,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `bytes`
 - Status: `supported`
-- Node surface: converter
+- Node surface: autojs6:compat, converter, cvt
 - Coverage: `no_node_surface`
 - API status: supported:7
 - Risks: none
@@ -514,7 +514,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `fmt`
 - Status: `supported`
-- Node surface: fmt, formatter
+- Node surface: autojs6:compat, fmt, formatter
 - Coverage: `types_only`
 - API status: supported:1
 - Risks: none
@@ -524,7 +524,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `bytes`
 - Status: `supported`
-- Node surface: formatter
+- Node surface: autojs6:compat, fmt, formatter
 - Coverage: `no_node_surface`
 - API status: supported:7
 - Risks: none
@@ -534,7 +534,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `console`
 - Status: `partial`
-- Node surface: console
+- Node surface: autojs6:compat, console
 - Coverage: `types_only`
 - API status: partial:35, supported:16, unsupported:3
 - Risks: lifecycle_resource, provider_availability, thread_model
@@ -644,7 +644,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `storages`
 - Status: `partial`
-- Node surface: storage, storages
+- Node surface: autojs6:compat, storage, storages
 - Coverage: `bridge_and_types`
 - API status: partial:1, supported_async:3, unsupported:2
 - Risks: none
@@ -654,7 +654,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `device`
 - Status: `partial`
-- Node surface: clipboard, device
+- Node surface: autojs6:compat, clipboard, device
 - Coverage: `bridge_and_types`
 - API status: partial:19, supported_async:1
 - Risks: provider_availability
@@ -684,7 +684,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `media`
 - Status: `partial`
-- Node surface: media_projection
+- Node surface: autojs6:compat, media_projection
 - Coverage: `bridge_and_types`
 - API status: partial:1
 - Risks: provider_availability
@@ -704,7 +704,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `base64`
 - Status: `supported`
-- Node surface: base64
+- Node surface: autojs6:compat, base64
 - Coverage: `types_only`
 - API status: supported:3
 - Risks: none
@@ -744,7 +744,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `opencc`
 - Status: `unsupported`
-- Node surface: opencc
+- Node surface: autojs6:compat, opencc
 - Coverage: `types_only`
 - API status: unsupported:34
 - Risks: none
@@ -754,7 +754,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `mime`
 - Status: `supported`
-- Node surface: mime
+- Node surface: autojs6:compat, mime
 - Coverage: `types_only`
 - API status: supported:1
 - Risks: provider_availability
@@ -774,7 +774,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `sqlite`
 - Status: `supported_async`
-- Node surface: database, sqlite
+- Node surface: autojs6:compat, database, sqlite
 - Coverage: `bridge_and_types`
 - API status: supported_async:2
 - Risks: none
@@ -794,7 +794,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `nanoid`
 - Status: `supported`
-- Node surface: nanoid
+- Node surface: autojs6:compat, nanoid
 - Coverage: `types_only`
 - API status: supported:1
 - Risks: none
@@ -804,7 +804,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `pinyin`
 - Status: `partial`
-- Node surface: pinyin
+- Node surface: autojs6:compat, pinyin
 - Coverage: `types_only`
 - API status: supported:16, unsupported:1
 - Risks: none
@@ -814,7 +814,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `pinyin4j`
 - Status: `supported`
-- Node surface: pinyin4j
+- Node surface: autojs6:compat, pinyin4j
 - Coverage: `types_only`
 - API status: supported:2
 - Risks: none

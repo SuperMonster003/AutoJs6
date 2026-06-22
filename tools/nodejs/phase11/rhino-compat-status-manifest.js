@@ -276,6 +276,8 @@ function decideApiStatus(module, entry, gapModule, moduleDecision) {
 function migrationFromManifestRecord(record) {
   return withoutNullish({
     status: record.status,
+    nodeModules: record.nodeModules,
+    bridgeModules: record.bridgeModules,
     nodeModule: record.nodeModule || (record.nodeModules && record.nodeModules[0]) || undefined,
     bridgeModule: record.bridgeModule || (record.bridgeModules && record.bridgeModules[0]) || undefined,
     nodeName: record.nodeName,

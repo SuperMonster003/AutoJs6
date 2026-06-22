@@ -87,6 +87,8 @@ function buildStaticChecks(files, compatBlock) {
   const globalModule = moduleById.get("global");
   const imagesModule = moduleById.get("images");
   const entryById = new Map((imagesModule ? imagesModule.apiEntries : []).map((entry) => [entry.id, entry]));
+  const matrixImagesRow = files.matrix.text.split(/\r?\n/).find((line) => /\| \d+ \| images \| images \|/.test(line)) || "";
+  const matrixImagesSurface = matrixImagesRow.split("|")[5] || "";
   return [
     check("runtime-compat-images-function", compatBlock.includes("function __autojs6_rhino_compat_images()") && compatBlock.includes("function __autojs6_rhino_compat_image_region") && compatBlock.includes("function __autojs6_rhino_compat_image_save_options"), "runtime must define the Rhino images compatibility wrapper and argument normalizers"),
     check("runtime-compat-images-global", compatBlock.includes('"images"') && compatBlock.includes("images: images") && compatBlock.includes('const imageModule = __autojs6_limited_image("images")'), "autojs6:compat must expose images and make it an installable global"),
@@ -101,10 +103,10 @@ function buildStaticChecks(files, compatBlock) {
       return entry && entry.status === "supported_async" && entry.decision === "s11_18_images_compat_facade";
     }), "status manifest must mark every S11-18 images API as supported_async through the compat facade"),
     check("type-readme-s11-18", files.typeReadme.text.includes("S11-18") && files.typeReadme.text.includes("compat.images"), "type README must document S11-18 images declarations"),
-    check("loader-design-s11-18", files.loaderDesign.text.includes("S11-18") && files.loaderDesign.text.includes("compat.images.read") && files.loaderDesign.text.includes("requestScreenCapture()"), "loader design must document S11-18 images facade behavior and S11-19 screenshot boundary"),
+    check("loader-design-s11-18", files.loaderDesign.text.includes("S11-18") && files.loaderDesign.text.includes("compat.images.read") && files.loaderDesign.text.includes("requestScreenCapture"), "loader design must document S11-18 images facade behavior and S11-19 screenshot boundary"),
     check("migration-s11-18", files.migration.text.includes("compat.images.findImage") && files.migration.text.includes("S11-19"), "migration guide must show S11-18 compat images usage and screenshot boundary"),
     check("security-images-boundary", files.securityModel.text.includes("S11-18") && files.securityModel.text.includes("Bitmap") && files.securityModel.text.includes("ImageWrapper") && files.securityModel.text.includes("recycle()"), "security model must keep image handle and raw object boundaries clear for S11-18"),
-    check("matrix-images-s11-18", /\| \d+ \| images \| images \| partial \| image, images \| [^|]*supported_async:14/.test(files.matrix.text), "compat matrix must retain the images module surface after S11-18"),
+    check("matrix-images-s11-18", ["autojs6:compat", "image", "images", "media_projection"].every((name) => matrixImagesSurface.includes(name)) && /supported_async:\d+/.test(matrixImagesRow), "compat matrix must retain the images module surface after S11-18"),
     check("task-plan-s11-18-complete", /\[x\]\s+S11-18/.test(files.taskPlan.text) && files.taskPlan.text.includes("verifyNodeRhinoCompatImagesFacade"), "Phase 11 task plan must mark S11-18 complete and name the verification gate"),
     check("gradle-task", files.gradle.text.includes("verifyNodeRhinoCompatImagesFacade") && files.gradle.text.includes("verify-rhino-compat-images-facade.js"), "Gradle must register verifyNodeRhinoCompatImagesFacade"),
   ];

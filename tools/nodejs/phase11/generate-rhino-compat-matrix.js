@@ -127,6 +127,12 @@ function moduleMatrixRow(module, gapModule) {
 
 function nodeSurfaceFor(module, gapModule) {
   const modules = new Set();
+  if (Array.isArray(module.migration.nodeModules)) {
+    module.migration.nodeModules.forEach((name) => modules.add(name));
+  }
+  if (Array.isArray(module.migration.bridgeModules)) {
+    module.migration.bridgeModules.forEach((name) => modules.add(name));
+  }
   if (module.migration.nodeModule) {
     modules.add(module.migration.nodeModule);
   }

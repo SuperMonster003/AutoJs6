@@ -21,7 +21,7 @@ The loader is an AutoJs6 controlled module, not an npm package name and not a sc
 
 ## Runtime Contract
 
-S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, S11-12 adds text utility facades with stable dependency-missing degradation, S11-13 adds async-compatible storage/sqlite facades over the controlled bridge, S11-14 stabilizes console/timer/error debugging migration, S11-16 adds the first selector/accessibility facade over the controlled `accessibility` bridge, S11-17 exposes app/device/shell compatibility wrappers, and S11-18 adds the first `images` compatibility facade over opaque image handles. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, shell `Process` handles, raw `Bitmap`/`Mat`/`ImageWrapper` instances, or Pro 9 `require("rhino").install()` behavior.
+S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, S11-12 adds text utility facades with stable dependency-missing degradation, S11-13 adds async-compatible storage/sqlite facades over the controlled bridge, S11-14 stabilizes console/timer/error debugging migration, S11-16 adds the first selector/accessibility facade over the controlled `accessibility` bridge, S11-17 exposes app/device/shell compatibility wrappers, S11-18 adds the first `images` compatibility facade over opaque image handles, and S11-19 adds screenshot permission compatibility wrappers over `media_projection` and `images`. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, shell `Process` handles, raw `MediaProjection`, raw `Bitmap`/`Mat`/`ImageWrapper` instances, or Pro 9 `require("rhino").install()` behavior.
 
 The first runtime shape is:
 
@@ -75,12 +75,15 @@ await compat.images.save(binary, "out/template-binary.png", "png", 90);
 await compat.images.recycle(binary);
 await compat.images.recycle(clipped);
 await compat.images.recycle(template);
+await compat.requestScreenCapture(true);
+const screen = await compat.captureScreen({ timeoutMs: 5000 });
+await compat.images.recycle(screen);
 compat.unsupported("files.open");
 compat.blockedByDesign("importClass");
 compat.assertSupported("toast");
 ```
 
-`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs the implemented names: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, `files`, `base64`, `colors`, `fmt`, `cvt`, `mime`, `nanoid`, `util`, `opencc`, `pinyin`, `pinyin4j`, `storages`, `sqlite`, `console`, `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval`, `selector`, selector builders such as `text`, `desc`, `id`, accessibility action wrappers such as `click`, `back`, and `home`, plus `app`, `device`, callable `shell`, and `images`. Existing Node globals are not overwritten unless `overwrite: true` is passed.
+`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs the implemented names: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, `files`, `base64`, `colors`, `fmt`, `cvt`, `mime`, `nanoid`, `util`, `opencc`, `pinyin`, `pinyin4j`, `storages`, `sqlite`, `console`, `setTimeout`, `clearTimeout`, `setInterval`, `clearInterval`, `selector`, selector builders such as `text`, `desc`, `id`, accessibility action wrappers such as `click`, `back`, and `home`, plus `app`, `device`, callable `shell`, `images`, `requestScreenCapture`, `requestScreenCaptureAsync`, and `captureScreen`. Existing Node globals are not overwritten unless `overwrite: true` is passed.
 
 The S11-09 facade is async. Rhino `sleep()` blocks the Rhino script thread; Node compat `sleep()` returns a Promise and must be awaited. Toast and clipboard helpers also return Promises because they cross the Android bridge.
 
@@ -98,7 +101,9 @@ The S11-16 selector DSL facade is synchronous only while building a selector han
 
 The S11-17 app/device/shell facade is also explicit and Promise-based for bridge calls. `compat.app` and `compat.device` are the existing controlled bridge modules, exposed so migrated scripts can keep the Rhino object names after opting into the compat loader. `compat.shell(command, optionsOrRoot)` is a callable wrapper around `require("shell").exec()`, with `true` normalized to `{ root: true }` for common Rhino scripts. Root shell execution is never the default and still requires the shell root capability when manifest enforcement is active. Shizuku remains unavailable in v1.1; `compat.shell.checkAccess({ shizuku: true })` reports it as missing rather than executing through a fallback.
 
-The S11-18 images facade is Promise-based and handle-oriented. `compat.images.read()` maps to `images.readImage()`, `save()` maps to `saveImage()` and resolves `true` after the underlying save completes, region overloads such as `clip(image, [x, y, w, h])`, size overloads such as `resize(image, [w, h])`, numeric `threshold(image, threshold, maxValue, type)`, and Rhino region overloads for `findImage()`/`findColor()` are normalized before dispatch. Image values remain opaque bridge handles owned by the current execution; transforms create new handles that count against the image-handle limit until `compat.images.recycle()` is awaited. S11-18 does not add screenshot permission prompts: `requestScreenCapture()` and the Rhino global screenshot wrappers remain S11-19 work.
+The S11-18 images facade is Promise-based and handle-oriented. `compat.images.read()` maps to `images.readImage()`, `save()` maps to `saveImage()` and resolves `true` after the underlying save completes, region overloads such as `clip(image, [x, y, w, h])`, size overloads such as `resize(image, [w, h])`, numeric `threshold(image, threshold, maxValue, type)`, and Rhino region overloads for `findImage()`/`findColor()` are normalized before dispatch. Image values remain opaque bridge handles owned by the current execution; transforms create new handles that count against the image-handle limit until `compat.images.recycle()` is awaited.
+
+The S11-19 screenshot facade is also Promise-based. `compat.requestScreenCapture(true)` maps Rhino's landscape boolean to `{ orientation: "landscape" }` and requests a controlled `media_projection` capturer; `false` maps to portrait, strings can pass `"portrait"`, `"landscape"`, or `"auto"`, and object options are forwarded. `compat.captureScreen()` and `compat.images.captureScreen()` capture through the controlled `images.captureScreen()` path with `requireExistingPermission: true`; they do not request permission from the embedded Node service process. `captureScreen(path, options)` saves the captured handle through `images.saveImage()` and recycles the temporary handle before resolving `true`. Permission denial, missing Activity-owned provider, and packaged fallback denial preserve the stable bridge error instead of returning a fake `false`.
 
 Future tasks should extend the module in small commits:
 
@@ -111,6 +116,7 @@ Future tasks should extend the module in small commits:
 - S11-16: selector DSL handle facade and core accessibility action wrappers over `accessibility`.
 - S11-17: app/device/shell compatibility wrappers, including callable `shell(command, optionsOrRoot)`.
 - S11-18: images compatibility for read/save/transform/search methods over opaque handles.
+- S11-19: screenshot permission wrappers over `media_projection` and `images.captureScreen`.
 
 ## Error Codes
 
@@ -137,4 +143,4 @@ When later tasks add globals, they must keep these rules:
 
 ## Type Surface
 
-The checked-in type declaration is `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`. It declares the loader, stable error helpers, and the implemented Phase 11 facade modules through S11-18.
+The checked-in type declaration is `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`. It declares the loader, stable error helpers, and the implemented Phase 11 facade modules through S11-19.

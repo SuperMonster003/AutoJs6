@@ -335,11 +335,19 @@ Inventory 和兼容矩阵统一使用以下状态：
     默认不注入全局、显式安装 `images`、handle 创建/派生/回收路由和
     S11-19 screenshot permission 边界。
 
-- [ ] S11-19: 补齐 screenshot permission compatibility。
+- [x] S11-19: 补齐 screenshot permission compatibility。
   - 范围：`requestScreenCapture()`、`captureScreen()` 和 media projection
     provider 的 Rhino 风格 wrapper。
   - 产物：facade、permission flow docs、device smoke。
   - 验收：拒绝权限时错误稳定；packaged 行为有记录。
+  - 状态：已新增 `compat.requestScreenCapture()`、
+    `requestScreenCaptureAsync()`、`captureScreen()` 以及
+    `compat.images.requestScreenCapture/captureScreen/stopScreenCapture`
+    wrapper；请求权限走受控 `media_projection` provider，`captureScreen`
+    固定使用已有权限路径，不从 Node service 直接弹窗；拒绝权限和 packaged
+    fallback 保留稳定 bridge error；新增
+    `verifyNodeRhinoCompatScreenshotPermission` host gate 覆盖 boolean/object
+    orientation、显式 globals、capture-to-file recycle 和拒绝路径。
 
 - [ ] S11-20: 实现 OCR/barcode compatibility strategy。
   - 范围：`ocr.recognizeText()`、`ocr.detectTextBounds()`、`barcode`、

@@ -31,7 +31,8 @@
         "app",
         "device",
         "shell",
-        "images"
+        "images",
+        "media_projection"
       ],
       "decision": "compat_facade_partial",
       "notes": [
@@ -4378,15 +4379,18 @@
       "nodeModules": [
         "image",
         "images",
-        "autojs6:compat"
+        "autojs6:compat",
+        "media_projection"
       ],
       "bridgeModules": [
         "image",
-        "images"
+        "images",
+        "media_projection"
       ],
-      "decision": "s11_18_images_compat_facade_partial",
+      "decision": "s11_19_screenshot_compat_facade_partial",
       "notes": [
-        "S11-18 exposes compat.images over the controlled images bridge for read/save/clip/resize/grayscale/threshold/findImage/matchTemplate/findColor/findMultiColors/recycle; raw Bitmap/Mat/ImageWrapper objects and screenshot permission prompts remain out of scope."
+        "S11-18 exposes compat.images over the controlled images bridge for read/save/clip/resize/grayscale/threshold/findImage/matchTemplate/findColor/findMultiColors/recycle; raw Bitmap/Mat/ImageWrapper objects remain out of scope.",
+        "S11-19 adds Promise-based requestScreenCapture(), requestScreenCaptureAsync(), captureScreen(), and stopScreenCapture() wrappers over media_projection/images; permission denial preserves the stable bridge error and packaged fallback does not prompt directly."
       ],
       "apiEntries": [
         {
@@ -4453,12 +4457,12 @@
           "id": "images.captureScreen",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "images",
           "nodeName": "captureScreen",
-          "decision": "exact_node_method_match",
+          "decision": "s11_19_screenshot_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-19 maps this Rhino screenshot API through compat request/capture wrappers; calls remain Promise-based and permission denial preserves the bridge error."
           ]
         },
         {
@@ -5171,26 +5175,26 @@
         },
         {
           "id": "images.requestScreenCapture",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "media_projection",
+          "nodeName": "requestScreenCapture",
+          "decision": "s11_19_screenshot_compat_facade",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-19 maps this Rhino screenshot API through compat request/capture wrappers; calls remain Promise-based and permission denial preserves the bridge error."
           ]
         },
         {
           "id": "images.requestScreenCaptureAsync",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "media_projection",
+          "nodeName": "requestScreenCapture",
+          "decision": "s11_19_screenshot_compat_facade",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-19 maps this Rhino screenshot API through compat request/capture wrappers; calls remain Promise-based and permission denial preserves the bridge error."
           ]
         },
         {
@@ -5267,14 +5271,14 @@
         },
         {
           "id": "images.stopScreenCapture",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": "media_projection",
+          "nodeName": "stopScreenCapture",
+          "decision": "s11_19_screenshot_compat_facade",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-19 maps this Rhino screenshot API through compat request/capture wrappers; calls remain Promise-based and permission denial preserves the bridge error."
           ]
         },
         {
@@ -10387,14 +10391,15 @@
       "status": "partial",
       "asyncMode": "promise",
       "nodeModules": [
-        "media_projection"
+        "media_projection",
+        "autojs6:compat"
       ],
       "bridgeModules": [
         "media_projection"
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-19 uses the controlled media_projection bridge as the permission provider behind requestScreenCapture() compatibility wrappers; no raw MediaProjection object is exposed."
       ],
       "apiEntries": [
         {
@@ -11700,9 +11705,9 @@
     "apiEntryCount": 879,
     "byStatus": {
       "blocked_by_design": 22,
-      "partial": 380,
+      "partial": 377,
       "supported": 132,
-      "supported_async": 47,
+      "supported_async": 50,
       "unsupported": 371
     }
   }

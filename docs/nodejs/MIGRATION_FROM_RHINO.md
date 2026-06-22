@@ -357,7 +357,7 @@ Node:
 })();
 ```
 
-Node with the S11-18 compatibility facade:
+Node with the S11-19 compatibility facade:
 
 ```js
 "nodejs";
@@ -365,6 +365,7 @@ Node with the S11-18 compatibility facade:
 (async function main() {
   const compat = require("autojs6:compat");
 
+  await compat.requestScreenCapture(true);
   const capture = await compat.images.captureScreen({ timeoutMs: 5000 });
   const template = await compat.images.read("template.png", { timeoutMs: 1000 });
   const point = await compat.images.findImage(capture, template, 0, 0, 1080, 2400, 0.9);
@@ -375,7 +376,7 @@ Node with the S11-18 compatibility facade:
 })();
 ```
 
-Image values are handles owned by the current execution. They are recycled explicitly or when the service is destroyed. The S11-18 facade keeps Rhino names such as `images.read()` and `images.save()`, but bridge work is still asynchronous and must be awaited. `requestScreenCapture()` and permission-prompt compatibility remain separate S11-19 work; `captureScreen()` can only use the existing controlled screen-capture provider path.
+Image values are handles owned by the current execution. They are recycled explicitly or when the service is destroyed. The S11-18 facade keeps Rhino names such as `images.read()` and `images.save()`, but bridge work is still asynchronous and must be awaited. S11-19 adds `requestScreenCapture()`, `requestScreenCaptureAsync()`, and `captureScreen()` compatibility wrappers; permission requests still go through the controlled Activity-owned `media_projection` provider, so denial or packaged fallback rejection is reported as a stable bridge error.
 
 ### File Read And Write
 

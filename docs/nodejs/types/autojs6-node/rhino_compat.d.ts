@@ -9,6 +9,7 @@ declare module "autojs6:compat" {
   import device = require("device");
   import shellModule = require("shell");
   import image = require("image");
+  import mediaProjection = require("media_projection");
   import files = require("files");
   import base64 = require("base64");
   import colors = require("colors");
@@ -146,6 +147,15 @@ declare module "autojs6:compat" {
       setDefaultTimeout(ms: number): number;
     }
 
+    export type ScreenCaptureRequestOptions =
+      | boolean
+      | "portrait"
+      | "landscape"
+      | "auto"
+      | mediaProjection.ScreenCaptureOptions;
+
+    export interface CaptureScreenToFileOptions extends image.CaptureScreenOptions, image.SaveImageOptions {}
+
     export type ImageRegionInput =
       | readonly [number, number, number, number]
       | {
@@ -180,7 +190,11 @@ declare module "autojs6:compat" {
       | number;
 
     export interface RhinoImagesCompatModule {
+      requestScreenCapture(options?: ScreenCaptureRequestOptions): Promise<boolean>;
+      requestScreenCaptureAsync(options?: ScreenCaptureRequestOptions): Promise<boolean>;
       captureScreen(options?: image.CaptureScreenOptions): Promise<AutoJs6Node.ImageHandle>;
+      captureScreen(path: string, options?: CaptureScreenToFileOptions): Promise<boolean>;
+      stopScreenCapture(options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       read(path: string, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
       read(path: string, strict?: boolean, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
       readImage(path: string, options?: AutoJs6Node.BridgeCallOptions): Promise<AutoJs6Node.ImageHandle>;
@@ -269,6 +283,10 @@ declare module "autojs6:compat" {
       readonly device: device.DeviceModule;
       readonly shell: ShellCompatFunction;
       readonly images: RhinoImagesCompatModule;
+      requestScreenCapture(options?: ScreenCaptureRequestOptions): Promise<boolean>;
+      requestScreenCaptureAsync(options?: ScreenCaptureRequestOptions): Promise<boolean>;
+      captureScreen(options?: image.CaptureScreenOptions): Promise<AutoJs6Node.ImageHandle>;
+      captureScreen(path: string, options?: CaptureScreenToFileOptions): Promise<boolean>;
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;

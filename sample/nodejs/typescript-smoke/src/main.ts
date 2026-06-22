@@ -155,6 +155,11 @@ async function smoke(): Promise<void> {
   const compatColor = await rhinoCompat.images.findColor(compatBinary, "#ff0000", 0, 0, 5, 5, 4);
   const compatMultiColor = await rhinoCompat.images.findMultiColors(compatBinary, 0xff0000, [[1, 0, "#00ff00"]], { threshold: 4, timeoutMs: 1000 });
   const compatSaved: boolean = await rhinoCompat.images.save(compatBinary, "out/rhino-compat.png", "png", 90);
+  const compatScreenRequested: boolean = await rhinoCompat.requestScreenCapture(true);
+  const compatScreenCapture = await rhinoCompat.captureScreen({ timeoutMs: 1000 });
+  const compatImagesRequested: boolean = await rhinoCompat.images.requestScreenCapture({ orientation: "portrait", timeoutMs: 1000 });
+  const compatCapturedToFile: boolean = await rhinoCompat.images.captureScreen("out/rhino-screen.png", { format: "png", timeoutMs: 1000 });
+  const compatScreenStopped: boolean = await rhinoCompat.images.stopScreenCapture({ timeoutMs: 1000 });
   const ocrResults: readonly ocr.OcrResult[] = await ocr.recognize(capture, { lang: "auto", timeoutMs: 1000 });
   const ocrText: string = await ocr.recognizeText(capture, { timeoutMs: 1000 });
   const ocrBounds: readonly ocr.OcrResult[] = await ocr.detectTextBounds(capture, {
@@ -256,6 +261,7 @@ async function smoke(): Promise<void> {
   await rhinoCompat.images.recycle(compatResize, { timeoutMs: 1000 });
   await rhinoCompat.images.recycle(compatGray, { timeoutMs: 1000 });
   await rhinoCompat.images.recycle(compatBinary, { timeoutMs: 1000 });
+  await rhinoCompat.images.recycle(compatScreenCapture, { timeoutMs: 1000 });
   await image.recycle(template, { timeoutMs: 1000 });
   await images.recycle(frame, { timeoutMs: 1000 });
 
@@ -372,6 +378,10 @@ async function smoke(): Promise<void> {
   void compatColor;
   void compatMultiColor;
   void compatSaved;
+  void compatScreenRequested;
+  void compatImagesRequested;
+  void compatCapturedToFile;
+  void compatScreenStopped;
   void ocrResults;
   void ocrText;
   void ocrBounds;
