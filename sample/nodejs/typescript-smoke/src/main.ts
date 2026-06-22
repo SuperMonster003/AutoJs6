@@ -166,6 +166,16 @@ async function smoke(): Promise<void> {
     region: [0, 0, 10, 10],
     timeoutMs: 1000
   });
+  const compatOcrTexts: readonly string[] = await rhinoCompat.ocr.recognizeText(capture, {
+    region: [0, 0, 10, 10],
+    timeoutMs: 1000
+  });
+  const compatOcrPathTexts: readonly string[] = await rhinoCompat.ocr("fixtures/ocr.png", { timeoutMs: 1000 });
+  const compatOcrBounds: readonly ocr.OcrResult[] = await rhinoCompat.ocr.detectTextBounds(capture, {
+    region: { left: 0, top: 0, right: 10, bottom: 10 },
+    timeoutMs: 1000
+  });
+  const compatOcrMode: "mlkit" = rhinoCompat.ocr.tap("mlkit");
   const store: storage.StorageStore = storage.create("settings");
   await store.put("enabled", true, { timeoutMs: 1000 });
   const storedEnabled: boolean = (await storages.open("settings").get("enabled", false, { timeoutMs: 1000 })) === true;
@@ -385,6 +395,10 @@ async function smoke(): Promise<void> {
   void ocrResults;
   void ocrText;
   void ocrBounds;
+  void compatOcrTexts;
+  void compatOcrPathTexts;
+  void compatOcrBounds;
+  void compatOcrMode;
   void storedEnabled;
   void storageKeys;
   void storageContains;

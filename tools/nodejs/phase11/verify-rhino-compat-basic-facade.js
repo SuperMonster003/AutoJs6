@@ -283,6 +283,13 @@ function createHarness(compatBlock) {
       function __autojs6_limited_image() {
         return __pureUtilityStubs.images;
       }
+      function __autojs6_limited_ocr() {
+        return Object.freeze({
+          recognize() { return Promise.resolve([]); },
+          recognizeText() { return Promise.resolve(""); },
+          detectTextBounds() { return Promise.resolve([]); }
+        });
+      }
       function __autojs6_define_global(name, value) {
         Object.defineProperty(globalThis, name, {
           value,

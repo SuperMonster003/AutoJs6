@@ -378,6 +378,37 @@ Node with the S11-19 compatibility facade:
 
 Image values are handles owned by the current execution. They are recycled explicitly or when the service is destroyed. The S11-18 facade keeps Rhino names such as `images.read()` and `images.save()`, but bridge work is still asynchronous and must be awaited. S11-19 adds `requestScreenCapture()`, `requestScreenCaptureAsync()`, and `captureScreen()` compatibility wrappers; permission requests still go through the controlled Activity-owned `media_projection` provider, so denial or packaged fallback rejection is reported as a stable bridge error.
 
+### OCR And Barcode
+
+Rhino:
+
+```js
+requestScreenCapture();
+let textRows = ocr.recognizeText(captureScreen(), [0, 0, 400, 200]);
+let codes = qrcode.recognizeTexts(images.read("./qr.png"));
+log(textRows.join("\n"));
+```
+
+Node with the S11-20 compatibility facade:
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+
+  await compat.requestScreenCapture();
+  const capture = await compat.captureScreen({ timeoutMs: 5000 });
+  const textRows = await compat.ocr.recognizeText(capture, { region: [0, 0, 400, 200] });
+  const pathRows = await compat.ocr("fixtures/ocr.png", { timeoutMs: 5000 });
+
+  await compat.images.recycle(capture);
+  console.log(textRows.concat(pathRows).join("\n"));
+})();
+```
+
+`compat.ocr` is ML Kit-only in S11-20. It accepts an opaque image handle, a project-relative image path that is read and recycled after OCR completes, or no image argument to capture through the existing-permission screenshot path. `compat.ocr.recognizeText()` returns a string array like Rhino, while `compat.ocr.detect()` and `detectTextBounds()` return JSON-safe result snapshots. `ocr.tap("mlkit")` is accepted; Paddle/Rapid mode modules are not exposed in Node. `barcode` and `qrcode` remain a documented bridge gap until Node has a controlled barcode provider and JSON-safe barcode result contract.
+
 ### File Read And Write
 
 Rhino:

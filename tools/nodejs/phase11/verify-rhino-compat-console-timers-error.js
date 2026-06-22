@@ -326,6 +326,7 @@ function createCompatHarness(compatBlock) {
       function __autojs6_limited_device() { return moduleStubs.device; }
       function __autojs6_limited_shell() { return moduleStubs.shell; }
       function __autojs6_limited_image() { return moduleStubs.images; }
+      function __autojs6_limited_ocr() { return Object.freeze({ recognize() { return Promise.resolve([]); }, recognizeText() { return Promise.resolve(""); }, detectTextBounds() { return Promise.resolve([]); } }); }
       function __autojs6_define_global(name, value) {
         Object.defineProperty(globalThis, name, { value, configurable: true, enumerable: false, writable: false });
       }

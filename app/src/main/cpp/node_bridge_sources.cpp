@@ -16036,8 +16036,9 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_rhino_compat_shell_cache = null;
   let __autojs6_rhino_compat_images_cache = null;
   let __autojs6_rhino_compat_screen_capturer_cache = null;
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection"]);
+  let __autojs6_rhino_compat_ocr_cache = null;
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16426,6 +16427,148 @@ std::string buildEmbeddedScriptExecutionSource(
       });
     });
   }
+  function __autojs6_rhino_compat_ocr_region_like(value) {
+    if (Array.isArray(value)) {
+      return true;
+    }
+    if (!value || typeof value !== "object") {
+      return false;
+    }
+    if (value.region !== undefined) {
+      return false;
+    }
+    return value.x !== undefined || value.y !== undefined || value.width !== undefined || value.height !== undefined ||
+      value.left !== undefined || value.top !== undefined || value.right !== undefined || value.bottom !== undefined;
+  }
+  function __autojs6_rhino_compat_ocr_options(value, apiName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (__autojs6_rhino_compat_ocr_region_like(value)) {
+      return Object.freeze({
+        region: __autojs6_rhino_compat_image_region(value, undefined, undefined, undefined, apiName)
+      });
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      const output = {};
+      Object.keys(value).forEach(function(key) {
+        output[key] = value[key];
+      });
+      if (output.region !== undefined && output.region !== null) {
+        output.region = __autojs6_rhino_compat_image_region(output.region, undefined, undefined, undefined, apiName);
+      }
+      return Object.freeze(output);
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat." + apiName + " options must be an object or region tuple when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      apiName,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_ocr_source_args(imageOrOptions, maybeOptions, apiName) {
+    const hasImageSource = typeof imageOrOptions === "string" || !!__autojs6_normalize_image_handle(imageOrOptions);
+    return Object.freeze({
+      image: hasImageSource ? imageOrOptions : undefined,
+      options: __autojs6_rhino_compat_ocr_options(hasImageSource ? maybeOptions : imageOrOptions, apiName)
+    });
+  }
+  function __autojs6_rhino_compat_ocr_with_image(apiName, imageOrOptions, maybeOptions, continuation) {
+    const imageModule = __autojs6_limited_image("images");
+    let args;
+    try {
+      args = __autojs6_rhino_compat_ocr_source_args(imageOrOptions, maybeOptions, apiName);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    if (typeof args.image === "string") {
+      return imageModule.readImage(args.image, args.options).then(function(handle) {
+        return __autojs6_rhino_compat_recycle_after_settle(imageModule, handle, function() {
+          return continuation(handle, args.options);
+        });
+      });
+    }
+    if (args.image !== undefined) {
+      return continuation(args.image, args.options);
+    }
+    const captureOptions = __autojs6_rhino_compat_capture_options(args.options, apiName);
+    return imageModule.captureScreen(captureOptions).then(function(handle) {
+      return __autojs6_rhino_compat_recycle_after_settle(imageModule, handle, function() {
+        return continuation(handle, args.options);
+      });
+    });
+  }
+  function __autojs6_rhino_compat_ocr_texts(results) {
+    const output = [];
+    const values = Array.isArray(results) ? results : [];
+    for (let i = 0; i < values.length; i++) {
+      const text = values[i] && typeof values[i].text === "string" ? values[i].text : "";
+      if (text.length > 0) {
+        output.push(text);
+      }
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_ocr() {
+    if (__autojs6_rhino_compat_ocr_cache) {
+      return __autojs6_rhino_compat_ocr_cache;
+    }
+    const ocrModule = __autojs6_limited_ocr();
+    function recognize(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_ocr_with_image("ocr.recognize", imageOrOptions, maybeOptions, function(image, options) {
+        return ocrModule.recognize(image, options);
+      });
+    }
+    function recognizeText(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_ocr_with_image("ocr.recognizeText", imageOrOptions, maybeOptions, function(image, options) {
+        return ocrModule.recognize(image, options).then(__autojs6_rhino_compat_ocr_texts);
+      });
+    }
+    function detectTextBounds(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_ocr_with_image("ocr.detectTextBounds", imageOrOptions, maybeOptions, function(image, options) {
+        return ocrModule.detectTextBounds(image, options);
+      });
+    }
+    function tap(mode) {
+      const requested = mode === undefined || mode === null || mode === "" ? "mlkit" : String(mode).toLowerCase();
+      if (requested === "mlkit") {
+        return "mlkit";
+      }
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat.ocr.tap supports only the Activity-owned ML Kit provider in Node; Rhino OCR mode \"" + requested + "\" is not exposed.",
+        __autojs6_rhino_compat_error_codes.blockedByDesign,
+        "ocr.tap",
+        "blocked-by-design"
+      );
+    }
+    function summary() {
+      return [
+        "[ OCR summary ]",
+        "Current mode: mlkit",
+        "Available modes: [ mlkit ]",
+        "Unavailable Rhino modes in Node: paddle, rapid"
+      ].join("\n");
+    }
+    const callable = function(imageOrOptions, maybeOptions) {
+      return recognizeText(imageOrOptions, maybeOptions);
+    };
+    Object.defineProperties(callable, {
+      recognize: { value: recognize, enumerable: true },
+      recognizeText: { value: recognizeText, enumerable: true },
+      detect: { value: detectTextBounds, enumerable: true },
+      detectTextBounds: { value: detectTextBounds, enumerable: true },
+      tap: { value: tap, enumerable: true },
+      summary: { value: summary, enumerable: true },
+      toString: { value: summary, enumerable: true },
+      mode: {
+        get: function() { return "mlkit"; },
+        set: function(value) { tap(value); },
+        enumerable: true
+      }
+    });
+    __autojs6_rhino_compat_ocr_cache = Object.freeze(callable);
+    return __autojs6_rhino_compat_ocr_cache;
+  }
   function __autojs6_rhino_compat_images() {
     if (__autojs6_rhino_compat_images_cache) {
       return __autojs6_rhino_compat_images_cache;
@@ -16773,6 +16916,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const selector = __autojs6_rhino_selector_dsl();
     const shell = __autojs6_rhino_compat_shell();
     const images = __autojs6_rhino_compat_images();
+    const ocr = __autojs6_rhino_compat_ocr();
     __autojs6_rhino_compat_facade_cache = Object.freeze({
       toast: __autojs6_rhino_compat_toast,
       toastLog: __autojs6_rhino_compat_toast_log,
@@ -16827,6 +16971,7 @@ std::string buildEmbeddedScriptExecutionSource(
       device: __autojs6_limited_device(),
       shell: shell,
       images: images,
+      ocr: ocr,
       requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
       requestScreenCaptureAsync: __autojs6_rhino_compat_request_screen_capture,
       captureScreen: __autojs6_rhino_compat_capture_screen
@@ -16848,7 +16993,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -16883,7 +17028,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-19."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-20."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -16922,6 +17067,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const selector = __autojs6_rhino_selector_dsl();
     const shell = __autojs6_rhino_compat_shell();
     const images = __autojs6_rhino_compat_images();
+    const ocr = __autojs6_rhino_compat_ocr();
     __autojs6_limited_rhino_compat_cache = Object.freeze({
       name: "autojs6:compat",
       version: 1,
@@ -16982,6 +17128,7 @@ std::string buildEmbeddedScriptExecutionSource(
       device: __autojs6_limited_device(),
       shell: shell,
       images: images,
+      ocr: ocr,
       requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
       requestScreenCaptureAsync: __autojs6_rhino_compat_request_screen_capture,
       captureScreen: __autojs6_rhino_compat_capture_screen,

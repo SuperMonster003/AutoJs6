@@ -22,7 +22,8 @@
       "status": "partial",
       "asyncMode": "mixed",
       "nodeModules": [
-        "autojs6:compat"
+        "autojs6:compat",
+        "ocr"
       ],
       "bridgeModules": [
         "toast",
@@ -32,12 +33,14 @@
         "device",
         "shell",
         "images",
-        "media_projection"
+        "media_projection",
+        "ocr"
       ],
       "decision": "compat_facade_partial",
       "notes": [
         "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; S11-16 adds explicit selector/accessibility globals through compat.install({ globals: true }); S11-17 adds explicit app/device/shell globals and callable shell() migration; other Rhino globals remain unsupported or blocked by design.",
-        "S11-18 adds explicit images global compatibility over opaque image handles for read/save/transform/search/recycle; screenshot permission wrappers remain S11-19 work."
+        "S11-18 adds explicit images global compatibility over opaque image handles for read/save/transform/search/recycle; screenshot permission wrappers remain S11-19 work.",
+        "S11-20 adds the OCR compatibility facade as an explicit global over the controlled ocr/images bridges; barcode and qrcode remain documented bridge gaps until a JSON-safe barcode provider is added."
       ],
       "apiEntries": [
         {
@@ -5324,98 +5327,102 @@
       "status": "partial",
       "asyncMode": "promise",
       "nodeModules": [
-        "ocr"
+        "ocr",
+        "autojs6:compat",
+        "images"
       ],
       "bridgeModules": [
-        "ocr"
+        "ocr",
+        "images"
       ],
-      "decision": "node_surface_exists_compat_facade_pending",
+      "decision": "s11_20_ocr_compat_facade_partial",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-20 exposes compat.ocr as a callable ML Kit-only facade over the controlled ocr bridge; image inputs may be provider-owned handles, project paths loaded through images.readImage(), or existing-permission screen captures.",
+        "S11-20 keeps Rhino Paddle/Rapid mode switching blocked by design in Node and returns JSON-safe OCR result snapshots only."
       ],
       "apiEntries": [
         {
           "id": "ocr.__module",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "ocr",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "ocr",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "ocr.__module",
+          "decision": "s11_20_ocr_compat_facade",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 maps this Rhino OCR API to the Promise-based compat.ocr facade with path/handle/capture image inputs and JSON-safe output."
           ]
         },
         {
           "id": "ocr.detect",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "ocr",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "ocr",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "ocr.detectTextBounds",
+          "decision": "s11_20_ocr_compat_facade",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 maps this Rhino OCR API to the Promise-based compat.ocr facade with path/handle/capture image inputs and JSON-safe output."
           ]
         },
         {
           "id": "ocr.recognizeText",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "ocr",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "ocr",
-          "nodeName": "recognizeText",
-          "decision": "exact_node_method_match",
+          "nodeName": "ocr.recognizeText",
+          "decision": "s11_20_ocr_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-20 maps this Rhino OCR API to the Promise-based compat.ocr facade with path/handle/capture image inputs and JSON-safe output."
           ]
         },
         {
           "id": "ocr.summary",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ocr",
-          "bridgeModule": "ocr",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": null,
+          "nodeName": "ocr.summary",
+          "decision": "s11_20_ocr_mlkit_summary",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 provides a local ML Kit-only summary string for the Node OCR compatibility facade."
           ]
         },
         {
           "id": "ocr.tap",
           "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ocr",
-          "bridgeModule": "ocr",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "asyncMode": "sync",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": null,
+          "nodeName": "ocr.tap",
+          "decision": "s11_20_ocr_mlkit_only_mode",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 accepts only the ML Kit OCR mode in Node; Rhino Paddle/Rapid mode switching is blocked by design until safe providers exist."
           ]
         },
         {
           "id": "ocr.toString",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ocr",
-          "bridgeModule": "ocr",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": null,
+          "nodeName": "ocr.toString",
+          "decision": "s11_20_ocr_mlkit_summary",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 provides a local ML Kit-only summary string for the Node OCR compatibility facade."
           ]
         },
         {
           "id": "ocr.mode",
           "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ocr",
-          "bridgeModule": "ocr",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "asyncMode": "sync",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": null,
+          "nodeName": "ocr.mode",
+          "decision": "s11_20_ocr_mlkit_only_mode",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 accepts only the ML Kit OCR mode in Node; Rhino Paddle/Rapid mode switching is blocked by design until safe providers exist."
           ]
         }
       ]
@@ -5428,7 +5435,8 @@
       "bridgeModules": [],
       "decision": "no_node_surface_evidence",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "S11-20 routes Node OCR compatibility through compat.ocr instead of exposing raw Rhino mode modules; ML Kit is available through compat.ocr, while Paddle/Rapid remain blocked until safe Node providers exist."
       ],
       "apiEntries": [
         {
@@ -5477,7 +5485,8 @@
       "bridgeModules": [],
       "decision": "no_node_surface_evidence",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "S11-20 routes Node OCR compatibility through compat.ocr instead of exposing raw Rhino mode modules; ML Kit is available through compat.ocr, while Paddle/Rapid remain blocked until safe Node providers exist."
       ],
       "apiEntries": [
         {
@@ -5526,7 +5535,8 @@
       "bridgeModules": [],
       "decision": "no_node_surface_evidence",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "S11-20 routes Node OCR compatibility through compat.ocr instead of exposing raw Rhino mode modules; ML Kit is available through compat.ocr, while Paddle/Rapid remain blocked until safe Node providers exist."
       ],
       "apiEntries": [
         {
@@ -5577,9 +5587,10 @@
       "bridgeModules": [
         "image"
       ],
-      "decision": "node_surface_exists_compat_facade_pending",
+      "decision": "s11_20_barcode_bridge_gap_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers.",
+        "S11-20 records barcode/qrcode as a strategy-only bridge gap: no Node barcode bridge is exposed yet, so compat must not advertise barcode/qrcode as supported until JSON-safe provider output and lifecycle gates exist."
       ],
       "apiEntries": [
         {
@@ -5589,9 +5600,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         },
         {
@@ -5601,9 +5612,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         },
         {
@@ -5613,9 +5624,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         },
         {
@@ -5625,9 +5636,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         },
         {
@@ -5637,9 +5648,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         }
       ]
@@ -5654,9 +5665,10 @@
       "bridgeModules": [
         "image"
       ],
-      "decision": "node_surface_exists_compat_facade_pending",
+      "decision": "s11_20_barcode_bridge_gap_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers.",
+        "S11-20 records barcode/qrcode as a strategy-only bridge gap: no Node barcode bridge is exposed yet, so compat must not advertise barcode/qrcode as supported until JSON-safe provider output and lifecycle gates exist."
       ],
       "apiEntries": [
         {
@@ -5666,9 +5678,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         },
         {
@@ -5678,9 +5690,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         },
         {
@@ -5690,9 +5702,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         },
         {
@@ -5702,9 +5714,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         },
         {
@@ -5714,9 +5726,9 @@
           "nodeModule": "image",
           "bridgeModule": "image",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
           ]
         }
       ]
@@ -11705,9 +11717,9 @@
     "apiEntryCount": 879,
     "byStatus": {
       "blocked_by_design": 22,
-      "partial": 377,
-      "supported": 132,
-      "supported_async": 50,
+      "partial": 373,
+      "supported": 134,
+      "supported_async": 52,
       "unsupported": 371
     }
   }

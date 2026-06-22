@@ -255,6 +255,7 @@ function createCompatHarness(compatBlock) {
       function __autojs6_limited_device() { return device; }
       function __autojs6_limited_shell() { return shellModule; }
       function __autojs6_limited_image() { return moduleStubs.images; }
+      function __autojs6_limited_ocr() { return Object.freeze({ recognize() { return Promise.resolve([]); }, recognizeText() { return Promise.resolve(""); }, detectTextBounds() { return Promise.resolve([]); } }); }
       ${compatBlock}
       return {
         compat: __autojs6_limited_rhino_compat(),

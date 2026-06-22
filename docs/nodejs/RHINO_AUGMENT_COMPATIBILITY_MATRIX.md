@@ -15,16 +15,16 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ## Status Totals
 
 - blocked_by_design: 22
-- partial: 377
-- supported: 132
-- supported_async: 50
+- partial: 373
+- supported: 134
+- supported_async: 52
 - unsupported: 371
 
 ## Module Matrix
 
 | Order | Rhino Module | Key | Status | Node Surface | API Status | Risks | Next Step |
 | ---: | --- | --- | --- | --- | --- | --- | --- |
-| 0 | global | global | partial | accessibility, app, autojs6:compat, clipboard, device, images, media_projection, shell, toast | supported_async:4, unsupported:42 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
+| 0 | global | global | partial | accessibility, app, autojs6:compat, clipboard, device, images, media_projection, ocr, shell, toast | supported_async:4, unsupported:42 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 1 | global.legacy | legacy | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 2 | global.is_nullish | isNullish | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
 | 3 | util | util | unsupported | util | unsupported:50 | provider_availability | Decide explicit mapping or mark blocked-by-design. |
@@ -46,7 +46,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 19 | events.keys | keys | unsupported | - | unsupported:13 | none | Design a Node facade or record a permanent non-goal. |
 | 20 | canvas | Canvas | unsupported | - | unsupported:1 | lifecycle_resource, raw_android_object | Design a Node facade or record a permanent non-goal. |
 | 21 | images | images | partial | autojs6:compat, image, images, media_projection | partial:60, supported_async:17 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
-| 22 | ocr | ocr | partial | ocr | partial:6, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 22 | ocr | ocr | partial | autojs6:compat, images, ocr | partial:2, supported:2, supported_async:3 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 23 | ocr.ocr_ml_kit | mlkit | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 24 | ocr.ocr_paddle | paddle | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 25 | ocr.ocr_rapid | rapid | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
@@ -104,7 +104,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `global`
 - Status: `partial`
-- Node surface: accessibility, app, autojs6:compat, clipboard, device, images, media_projection, shell, toast
+- Node surface: accessibility, app, autojs6:compat, clipboard, device, images, media_projection, ocr, shell, toast
 - Coverage: `no_node_surface`
 - API status: supported_async:4, unsupported:42
 - Risks: provider_availability
@@ -324,9 +324,9 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `ocr`
 - Status: `partial`
-- Node surface: ocr
+- Node surface: autojs6:compat, images, ocr
 - Coverage: `bridge_and_types`
-- API status: partial:6, supported_async:1
+- API status: partial:2, supported:2, supported_async:3
 - Risks: none
 - Next step: Implement explicit compat facade and promote mapped APIs one by one.
 

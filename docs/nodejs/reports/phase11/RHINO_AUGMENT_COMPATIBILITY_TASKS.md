@@ -349,11 +349,18 @@ Inventory 和兼容矩阵统一使用以下状态：
     `verifyNodeRhinoCompatScreenshotPermission` host gate 覆盖 boolean/object
     orientation、显式 globals、capture-to-file recycle 和拒绝路径。
 
-- [ ] S11-20: 实现 OCR/barcode compatibility strategy。
+- [x] S11-20: 实现 OCR/barcode compatibility strategy。
   - 范围：`ocr.recognizeText()`、`ocr.detectTextBounds()`、`barcode`、
     `qrcode` 的可用子集。
   - 产物：facade、types、fixture tests。
   - 验收：图像输入支持 path/handle，输出为 JSON-safe object。
+  - 状态：新增 `compat.ocr` callable facade 和 explicit `ocr` global，
+    支持 handle、path、existing-permission capture 输入；`recognizeText()`
+    返回 Rhino 风格字符串数组，`detect()` / `detectTextBounds()` 返回
+    JSON-safe OCR result snapshots。barcode/qrcode 记录为 S11-20 bridge gap，
+    在受控 barcode provider 和 JSON-safe result contract 落地前不暴露为 supported。
+    新增 `verifyNodeRhinoCompatOcrBarcodeStrategy` gate 覆盖 path/handle/capture、
+    region normalization、临时 image recycle、MLKit-only mode 和 barcode gap。
 
 ### Track D: Lifecycle-heavy APIs
 

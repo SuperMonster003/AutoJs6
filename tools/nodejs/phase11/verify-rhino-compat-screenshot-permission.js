@@ -303,6 +303,7 @@ function createCompatHarness(compatBlock) {
       function __autojs6_limited_shell() { return shellModule; }
       function __autojs6_limited_image() { return imagesModule; }
       function __autojs6_limited_media_projection() { return mediaProjection; }
+      function __autojs6_limited_ocr() { return Object.freeze({ recognize() { return Promise.resolve([]); }, recognizeText() { return Promise.resolve(""); }, detectTextBounds() { return Promise.resolve([]); } }); }
       ${compatBlock}
       const compat = __autojs6_limited_rhino_compat();
       return {

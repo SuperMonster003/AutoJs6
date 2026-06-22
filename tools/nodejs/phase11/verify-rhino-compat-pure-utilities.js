@@ -260,6 +260,13 @@ function createHarness(pureBlock, compatBlock) {
       function __autojs6_limited_image() {
         return imageStub;
       }
+      function __autojs6_limited_ocr() {
+        return Object.freeze({
+          recognize() { return Promise.resolve([]); },
+          recognizeText() { return Promise.resolve(""); },
+          detectTextBounds() { return Promise.resolve([]); }
+        });
+      }
       function __autojs6_limited_toast() {
         return { showToast() { return Promise.resolve(); } };
       }

@@ -10,6 +10,7 @@ declare module "autojs6:compat" {
   import shellModule = require("shell");
   import image = require("image");
   import mediaProjection = require("media_projection");
+  import ocr = require("ocr");
   import files = require("files");
   import base64 = require("base64");
   import colors = require("colors");
@@ -221,6 +222,31 @@ declare module "autojs6:compat" {
       recycle(image: AutoJs6Node.ImageHandleLike, options?: AutoJs6Node.BridgeCallOptions): Promise<void>;
     }
 
+    export type OcrImageInput = string | AutoJs6Node.ImageHandleLike;
+
+    export type RhinoOcrOptions = Omit<ocr.OcrOptions, "region"> & {
+      readonly region?: ImageRegionInput;
+    };
+
+    export type OcrInputOptions = RhinoOcrOptions | ImageRegionInput;
+
+    export interface RhinoOcrCompatFunction {
+      (options?: OcrInputOptions): Promise<readonly string[]>;
+      (image: OcrImageInput, options?: OcrInputOptions): Promise<readonly string[]>;
+      recognize(options?: OcrInputOptions): Promise<readonly ocr.OcrResult[]>;
+      recognize(image: OcrImageInput, options?: OcrInputOptions): Promise<readonly ocr.OcrResult[]>;
+      recognizeText(options?: OcrInputOptions): Promise<readonly string[]>;
+      recognizeText(image: OcrImageInput, options?: OcrInputOptions): Promise<readonly string[]>;
+      detect(options?: OcrInputOptions): Promise<readonly ocr.OcrResult[]>;
+      detect(image: OcrImageInput, options?: OcrInputOptions): Promise<readonly ocr.OcrResult[]>;
+      detectTextBounds(options?: OcrInputOptions): Promise<readonly ocr.OcrResult[]>;
+      detectTextBounds(image: OcrImageInput, options?: OcrInputOptions): Promise<readonly ocr.OcrResult[]>;
+      tap(mode?: "mlkit"): "mlkit";
+      summary(): string;
+      toString(): string;
+      readonly mode: "mlkit";
+    }
+
     export interface RhinoCompatModule {
       readonly name: "autojs6:compat";
       readonly version: 1;
@@ -283,6 +309,7 @@ declare module "autojs6:compat" {
       readonly device: device.DeviceModule;
       readonly shell: ShellCompatFunction;
       readonly images: RhinoImagesCompatModule;
+      readonly ocr: RhinoOcrCompatFunction;
       requestScreenCapture(options?: ScreenCaptureRequestOptions): Promise<boolean>;
       requestScreenCaptureAsync(options?: ScreenCaptureRequestOptions): Promise<boolean>;
       captureScreen(options?: image.CaptureScreenOptions): Promise<AutoJs6Node.ImageHandle>;
