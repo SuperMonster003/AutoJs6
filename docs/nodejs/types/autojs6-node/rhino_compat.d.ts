@@ -1,4 +1,7 @@
 declare module "autojs6:compat" {
+  import storage = require("storage");
+  import database = require("database");
+  import sqlite = require("sqlite");
   import files = require("files");
   import base64 = require("base64");
   import colors = require("colors");
@@ -90,6 +93,10 @@ declare module "autojs6:compat" {
       readonly opencc: opencc.OpenccModule;
       readonly pinyin: pinyin.PinyinModule;
       readonly pinyin4j: pinyin4j.Pinyin4jModule;
+      readonly storage: storage.StorageModule;
+      readonly storages: storage.StorageModule;
+      readonly database: database.DatabaseModule;
+      readonly sqlite: sqlite.SQLiteModule;
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;

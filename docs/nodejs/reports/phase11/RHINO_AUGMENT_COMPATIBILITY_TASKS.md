@@ -251,11 +251,22 @@ Inventory 和兼容矩阵统一使用以下状态：
     `:app:verifyNodeRhinoCompatTextUtilities` 覆盖 fixture 拼音、pinyin4j
     格式化、OpenCC 降级、explicit globals 和 require 入口。
 
-- [ ] S11-13: 实现 storages/sqlite compatibility facade。
+- [x] S11-13: 实现 storages/sqlite compatibility facade。
   - 范围：把 Rhino `storages`、`sqlite` 常用形态映射到现有
     `storage/storages`、`database/sqlite` bridge。
   - 产物：facade、types、migration examples。
   - 验收：数据隔离、关闭、事务错误路径有测试。
+  - 状态：已接入 `autojs6:compat` 显式安装 `storages`、`sqlite`，
+    并通过 compat 聚合暴露 `storage`、`storages`、`database`、`sqlite`。
+  - 边界：`storages.names()`、`storages.all()` 缺少受控枚举后端时返回稳定
+    `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`；`putSync`、`removeSync`、
+    `clearSync` 和 `storages.removeSync()` 在 Node 中为 Promise 型 async
+    兼容入口；`sqlite` 仅接受受控 database bridge 的 scoped name，不恢复
+    Rhino 任意文件路径和 callback open 形态。
+  - 证据：`tools/nodejs/phase11/verify-rhino-compat-storage-sqlite.js` 和
+    `:app:verifyNodeRhinoCompatStorageSqlite` 覆盖 storage 数据隔离、sqlite
+    callable、database close、transaction 错误路径、explicit globals 和类型
+    smoke。
 
 - [ ] S11-14: 稳定 console/timers/error compatibility。
   - 范围：确认 `console`、`setTimeout`、`setInterval`、`clearTimeout`、

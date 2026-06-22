@@ -16028,8 +16028,8 @@ std::string buildEmbeddedScriptExecutionSource(
     unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
     blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16160,7 +16160,11 @@ std::string buildEmbeddedScriptExecutionSource(
       util: __autojs6_limited_util(),
       opencc: __autojs6_limited_opencc(),
       pinyin: __autojs6_limited_pinyin(),
-      pinyin4j: __autojs6_limited_pinyin4j()
+      pinyin4j: __autojs6_limited_pinyin4j(),
+      storage: __autojs6_limited_storage("storage"),
+      storages: __autojs6_limited_storage("storages"),
+      database: __autojs6_limited_database("database"),
+      sqlite: __autojs6_limited_database("sqlite")
     });
     return __autojs6_rhino_compat_facade_cache;
   }
@@ -16179,8 +16183,8 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12"]),
-      pendingTasks: Object.freeze(["S11-13", "S11-14"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13"]),
+      pendingTasks: Object.freeze(["S11-14"]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
       moduleNames: __autojs6_rhino_compat_basic_module_names
@@ -16275,6 +16279,10 @@ std::string buildEmbeddedScriptExecutionSource(
       opencc: __autojs6_limited_opencc(),
       pinyin: __autojs6_limited_pinyin(),
       pinyin4j: __autojs6_limited_pinyin4j(),
+      storage: __autojs6_limited_storage("storage"),
+      storages: __autojs6_limited_storage("storages"),
+      database: __autojs6_limited_database("database"),
+      sqlite: __autojs6_limited_database("sqlite"),
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {
@@ -18919,14 +18927,22 @@ std::string buildEmbeddedScriptExecutionSource(
           return result === true;
         });
       }
+      function selfRemove(options) {
+        return removeStorage(storeName, options);
+      }
       return Object.freeze({
         name: storeName,
         get,
         put,
+        putSync: put,
         remove,
+        removeSync: remove,
         clear,
+        clearSync: clear,
         keys,
-        contains
+        contains,
+        selfRemove,
+        selfRemoveSync: selfRemove
       });
     }
     function create(name) {
@@ -18935,9 +18951,29 @@ std::string buildEmbeddedScriptExecutionSource(
     function open(name) {
       return createStore(name);
     }
+    function removeStorage(name, options) {
+      const storeName = __autojs6_storage_name(moduleName, "remove", name, "storage name");
+      return createStore(storeName).clear(options);
+    }
+    function names() {
+      throw __autojs6_rhino_compat_unsupported(
+        "storages.names",
+        "The controlled Node storage bridge is scoped by package and working directory and does not expose storage namespace enumeration."
+      );
+    }
+    function all() {
+      throw __autojs6_rhino_compat_unsupported(
+        "storages.all",
+        "The controlled Node storage bridge is scoped by package and working directory and does not expose storage namespace enumeration."
+      );
+    }
     const moduleValue = Object.freeze({
       create,
-      open
+      open,
+      remove: removeStorage,
+      removeSync: removeStorage,
+      names,
+      all
     });
     if (moduleName === "storages") {
       __autojs6_limited_storages_cache = moduleValue;
@@ -19150,7 +19186,18 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_database_bridge_options(options, 10000)
       ).then(createDatabaseHandle);
     }
-    const moduleValue = Object.freeze({ open });
+    const moduleValue = moduleName === "sqlite"
+      ? (function() {
+          const sqlite = function(nameOrOptions, options) {
+            return open(nameOrOptions, options);
+          };
+          Object.defineProperty(sqlite, "open", {
+            value: open,
+            enumerable: true
+          });
+          return Object.freeze(sqlite);
+        })()
+      : Object.freeze({ open });
     if (moduleName === "sqlite") {
       __autojs6_limited_sqlite_cache = moduleValue;
     } else {

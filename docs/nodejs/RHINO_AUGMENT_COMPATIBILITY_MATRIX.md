@@ -15,10 +15,10 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ## Status Totals
 
 - blocked_by_design: 22
-- partial: 350
+- partial: 345
 - supported: 109
-- supported_async: 42
-- unsupported: 429
+- supported_async: 45
+- unsupported: 431
 
 ## Module Matrix
 
@@ -78,7 +78,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 51 | automator.root_automator | RootAutomator | blocked_by_design | - | blocked_by_design:1 | lifecycle_resource, raw_android_object | Keep denial documented and covered by policy tests. |
 | 52 | engines | engines | partial | engines | partial:4, supported_async:5 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
 | 53 | floaty | floaty | unsupported | - | unsupported:8 | none | Design a Node facade or record a permanent non-goal. |
-| 54 | storages | storages | partial | storage, storages | partial:4, supported_async:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 54 | storages | storages | partial | storage, storages | partial:1, supported_async:3, unsupported:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 55 | device | device | partial | clipboard, device | partial:19, supported_async:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 56 | recorder | recorder | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 57 | toast | toast | partial | toast | partial:1, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -91,7 +91,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 64 | opencc | opencc | unsupported | opencc | unsupported:34 | none | Decide explicit mapping or mark blocked-by-design. |
 | 65 | mime | mime | supported | mime | supported:1 | provider_availability | Review status manifest decision. |
 | 66 | sysprops | sysprops | unsupported | - | unsupported:5 | none | Design a Node facade or record a permanent non-goal. |
-| 67 | sqlite | sqlite | partial | database, sqlite | partial:1, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 67 | sqlite | sqlite | supported_async | database, sqlite | supported_async:2 | none | Add compat examples and dual-engine tests. |
 | 68 | zip | zip | unsupported | - | unsupported:6 | none | Design a Node facade or record a permanent non-goal. |
 | 69 | nanoid | nanoid | supported | nanoid | supported:1 | none | Review status manifest decision. |
 | 70 | pinyin | pinyin | partial | pinyin | supported:16, unsupported:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -646,7 +646,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Status: `partial`
 - Node surface: storage, storages
 - Coverage: `bridge_and_types`
-- API status: partial:4, supported_async:2
+- API status: partial:1, supported_async:3, unsupported:2
 - Risks: none
 - Next step: Implement explicit compat facade and promote mapped APIs one by one.
 
@@ -773,12 +773,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### sqlite
 
 - Key: `sqlite`
-- Status: `partial`
+- Status: `supported_async`
 - Node surface: database, sqlite
 - Coverage: `bridge_and_types`
-- API status: partial:1, supported_async:1
+- API status: supported_async:2
 - Risks: none
-- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+- Next step: Add compat examples and dual-engine tests.
 
 ### zip
 

@@ -144,7 +144,11 @@ function createHarness(textBlock, compatBlock) {
         converter: Object.freeze({ bytes() { return 0; } }),
         mime: Object.freeze(function mime() { return Object.freeze({ type: "", subtype: "", parameters: Object.freeze({}) }); }),
         nanoid: Object.freeze(function nanoid() { return ""; }),
-        util: Object.freeze({ format(value) { return String(value); }, inspect(value) { return String(value); } })
+        util: Object.freeze({ format(value) { return String(value); }, inspect(value) { return String(value); } }),
+        storage: Object.freeze({ create() { return {}; }, open() { return {}; } }),
+        storages: Object.freeze({ create() { return {}; }, open() { return {}; } }),
+        database: Object.freeze({ open() { return Promise.resolve({ close() { return Promise.resolve(true); } }); } }),
+        sqlite: Object.freeze(function sqlite() { return Promise.resolve({ close() { return Promise.resolve(true); } }); })
       };
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
@@ -168,6 +172,8 @@ function createHarness(textBlock, compatBlock) {
       function __autojs6_limited_mime() { return __moduleStubs.mime; }
       function __autojs6_limited_nanoid() { return __moduleStubs.nanoid; }
       function __autojs6_limited_util() { return __moduleStubs.util; }
+      function __autojs6_limited_storage(moduleName) { return moduleName === "storages" ? __moduleStubs.storages : __moduleStubs.storage; }
+      function __autojs6_limited_database(moduleName) { return moduleName === "sqlite" ? __moduleStubs.sqlite : __moduleStubs.database; }
       function __autojs6_limited_toast() { return { showToast() { return Promise.resolve(); } }; }
       function __autojs6_limited_clipboard() { return { setText() { return Promise.resolve(); }, getText() { return Promise.resolve(""); } }; }
       function __autojs6_define_global(name, value) {

@@ -88,6 +88,8 @@ private val nodeTypeDeclarationModules = listOf(
     "ocr",
     "storage",
     "storages",
+    "database",
+    "sqlite",
     "files",
     "base64",
     "colors",

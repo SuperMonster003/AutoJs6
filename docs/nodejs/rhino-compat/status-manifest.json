@@ -1,7 +1,7 @@
 {
   "schema": "autojs6-node-rhino-compat-status-manifest-v1",
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T08:48:55.612Z",
+  "generatedAt": "2026-06-22T09:20:24.616Z",
   "inventorySchema": "autojs6-node-rhino-augment-inventory-v1",
   "statusVocabulary": [
     "supported",
@@ -9952,87 +9952,88 @@
       "asyncMode": "promise",
       "nodeModules": [
         "storage",
-        "storages"
+        "storages",
+        "autojs6:compat"
       ],
       "bridgeModules": [
         "storage",
         "storages"
       ],
-      "decision": "node_surface_exists_compat_facade_pending",
+      "decision": "s11_13_storage_compat_facade_partial",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-13 maps Rhino storages common calls to the controlled async Node storage bridge; namespace enumeration remains unsupported because the bridge is scoped by package and working directory."
       ],
       "apiEntries": [
         {
           "id": "storages.__module",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "storage",
-          "bridgeModule": "storage",
+          "nodeModule": "storages",
+          "bridgeModule": "storages",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_13_storage_compat_facade_partial",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-13 maps Rhino storages common calls to the controlled async Node storage bridge; namespace enumeration remains unsupported because the bridge is scoped by package and working directory."
           ]
         },
         {
           "id": "storages.all",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": "storage",
-          "bridgeModule": "storage",
+          "nodeModule": "storages",
+          "bridgeModule": "storages",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_13_storage_namespace_enumeration_unsupported",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "The controlled Node storage bridge does not expose scoped storage namespace enumeration; the facade returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "storages.create",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "storage",
-          "bridgeModule": "storage",
+          "nodeModule": "storages",
+          "bridgeModule": "storages",
           "nodeName": "create",
-          "decision": "exact_node_method_match",
+          "decision": "s11_13_storage_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-13 maps Rhino storages common calls to the controlled async Node storage bridge; namespace enumeration remains unsupported because the bridge is scoped by package and working directory."
           ]
         },
         {
           "id": "storages.names",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": "storage",
-          "bridgeModule": "storage",
+          "nodeModule": "storages",
+          "bridgeModule": "storages",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_13_storage_namespace_enumeration_unsupported",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "The controlled Node storage bridge does not expose scoped storage namespace enumeration; the facade returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "storages.remove",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "storage",
-          "bridgeModule": "storage",
+          "nodeModule": "storages",
+          "bridgeModule": "storages",
           "nodeName": "remove",
-          "decision": "exact_node_method_match",
+          "decision": "s11_13_storage_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-13 maps Rhino storages common calls to the controlled async Node storage bridge; namespace enumeration remains unsupported because the bridge is scoped by package and working directory."
           ]
         },
         {
           "id": "storages.removeSync",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "storage",
-          "bridgeModule": "storage",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeModule": "storages",
+          "bridgeModule": "storages",
+          "nodeName": "remove",
+          "decision": "s11_13_storage_async_sync_alias",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-13 keeps the Rhino removeSync name as an async Promise-returning compatibility alias over the controlled storage clear path."
           ]
         }
       ]
@@ -11222,43 +11223,44 @@
     },
     {
       "id": "sqlite",
-      "status": "partial",
+      "status": "supported_async",
       "asyncMode": "promise",
       "nodeModules": [
         "database",
-        "sqlite"
+        "sqlite",
+        "autojs6:compat"
       ],
       "bridgeModules": [
         "database",
         "sqlite"
       ],
-      "decision": "node_surface_exists_compat_facade_pending",
+      "decision": "s11_13_sqlite_compat_facade",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-13 exposes sqlite as a callable async facade over the controlled database/sqlite bridge with scoped database names, explicit close, and operation-array transactions."
       ],
       "apiEntries": [
         {
           "id": "sqlite.__module",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "database",
-          "bridgeModule": "database",
+          "nodeModule": "sqlite",
+          "bridgeModule": "sqlite",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_13_sqlite_callable_facade",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "S11-13 exposes sqlite as a callable async facade over the controlled database/sqlite bridge with scoped database names, explicit close, and operation-array transactions."
           ]
         },
         {
           "id": "sqlite.open",
           "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "database",
-          "bridgeModule": "database",
+          "nodeModule": "sqlite",
+          "bridgeModule": "sqlite",
           "nodeName": "open",
-          "decision": "exact_node_method_match",
+          "decision": "s11_13_sqlite_compat_facade",
           "notes": [
-            "Rhino exposed name matches an existing Node bridge/type method; facade shape still controls sync-vs-async compatibility."
+            "S11-13 exposes sqlite as a callable async facade over the controlled database/sqlite bridge with scoped database names, explicit close, and operation-array transactions."
           ]
         }
       ]
@@ -11678,11 +11680,11 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "partial": 350,
-      "unsupported": 429,
-      "supported_async": 42,
-      "blocked_by_design": 22,
-      "supported": 109
+      "unsupported": 399,
+      "supported_async": 44,
+      "blocked_by_design": 18,
+      "supported": 100,
+      "partial": 318
     }
   }
 }

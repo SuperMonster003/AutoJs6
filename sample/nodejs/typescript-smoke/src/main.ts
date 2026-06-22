@@ -12,6 +12,8 @@ import images = require("images");
 import ocr = require("ocr");
 import storage = require("storage");
 import storages = require("storages");
+import database = require("database");
+import sqlite = require("sqlite");
 import files = require("files");
 import base64 = require("base64");
 import colors = require("colors");
@@ -137,8 +139,26 @@ async function smoke(): Promise<void> {
   const storedEnabled: boolean = (await storages.open("settings").get("enabled", false, { timeoutMs: 1000 })) === true;
   const storageKeys: readonly string[] = await store.keys({ timeoutMs: 1000 });
   const storageContains: boolean = await store.contains("enabled", { timeoutMs: 1000 });
+  await store.putSync("syncEnabled", true, { timeoutMs: 1000 });
+  await store.removeSync("syncEnabled", { timeoutMs: 1000 });
   await store.remove("enabled", { timeoutMs: 1000 });
   await store.clear({ timeoutMs: 1000 });
+  await store.clearSync({ timeoutMs: 1000 });
+  await storages.remove("settings", { timeoutMs: 1000 });
+
+  const db: database.DatabaseHandle = await database.open("types_smoke", { timeoutMs: 1000 });
+  const sqliteDb: database.DatabaseHandle = await sqlite("types_smoke_sqlite", { timeoutMs: 1000 });
+  await db.exec("create table if not exists kv (k text primary key, v text)", [], { timeoutMs: 1000 });
+  const runResult: database.RunResult = await db.run("insert or replace into kv (k, v) values (?, ?)", ["a", "b"], { timeoutMs: 1000 });
+  const oneRow: database.Row | null = await db.get("select v from kv where k = ?", ["a"], { timeoutMs: 1000 });
+  const rows: readonly database.Row[] = await db.all("select k, v from kv", [], { timeoutMs: 1000 });
+  const transactionResults: readonly database.TransactionResult[] = await sqliteDb.transaction([
+    { type: "exec", sql: "create table if not exists kv (k text primary key, v text)" },
+    { type: "run", sql: "insert or replace into kv (k, v) values (?, ?)", params: ["c", "d"] },
+    { type: "get", sql: "select v from kv where k = ?", params: ["c"] }
+  ], { timeoutMs: 1000 });
+  const dbClosed: boolean = await db.close({ timeoutMs: 1000 });
+  const sqliteClosed: boolean = await sqliteDb.close({ timeoutMs: 1000 });
 
   const scopedPath: string | null = files.path("types.txt");
   const encoded: string = base64.encode("AutoJs6");
@@ -295,6 +315,12 @@ async function smoke(): Promise<void> {
   void storedEnabled;
   void storageKeys;
   void storageContains;
+  void runResult;
+  void oneRow;
+  void rows;
+  void transactionResults;
+  void dbClosed;
+  void sqliteClosed;
   void scopedPath;
   void encoded;
   void decoded;

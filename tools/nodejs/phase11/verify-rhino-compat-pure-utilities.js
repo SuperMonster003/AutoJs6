@@ -146,6 +146,12 @@ function createHarness(pureBlock, compatBlock) {
         pinyin: Object.freeze(function pinyin() { return []; }),
         pinyin4j: Object.freeze(function pinyin4j() { return ""; })
       };
+      const __storageSqliteStubs = {
+        storage: Object.freeze({ create() { return {}; }, open() { return {}; } }),
+        storages: Object.freeze({ create() { return {}; }, open() { return {}; } }),
+        database: Object.freeze({ open() { return Promise.resolve({ close() { return Promise.resolve(true); } }); } }),
+        sqlite: Object.freeze(function sqlite() { return Promise.resolve({ close() { return Promise.resolve(true); } }); })
+      };
       const filesStub = Object.freeze({ path() { return null; } });
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
@@ -181,6 +187,12 @@ function createHarness(pureBlock, compatBlock) {
       }
       function __autojs6_limited_pinyin4j() {
         return __textUtilityStubs.pinyin4j;
+      }
+      function __autojs6_limited_storage(moduleName) {
+        return moduleName === "storages" ? __storageSqliteStubs.storages : __storageSqliteStubs.storage;
+      }
+      function __autojs6_limited_database(moduleName) {
+        return moduleName === "sqlite" ? __storageSqliteStubs.sqlite : __storageSqliteStubs.database;
       }
       function __autojs6_limited_toast() {
         return { showToast() { return Promise.resolve(); } };
