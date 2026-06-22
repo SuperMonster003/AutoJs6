@@ -4,11 +4,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const REQUIRED_TASKS = [
+const REQUIRED_STRICT_TASKS = [
   "verifyNodeFinalAdapterGate",
-  "collectNodeCrashBundle",
-  "symbolizeNodeCrash",
-  "verifyNodeCrashBundle",
   "verifyNodeFinalCrashGate",
   "verifyNodeFinalPackageManagerGate",
   "verifyNodeFinalLongRunningGate",
@@ -20,7 +17,33 @@ const REQUIRED_TASKS = [
   "verifyNodeFinalSoakGate",
   "verifyNodeFinalCapabilityTruth",
   "verifyNodeFinalIntegrationGate",
+];
+
+const REQUIRED_STATUS_TASKS = [
+  "generateNodeFinalCapabilityTruth",
+  "generateNodeFinalAdapterStatus",
+  "generateNodeFinalCrashStatus",
+  "generateNodeFinalPackageManagerStatus",
+  "generateNodeFinalLongRunningStatus",
+  "generateNodeFinalMultiInstanceStatus",
+  "generateNodeFinalWorkerDecisionStatus",
+  "generateNodeFinalProviderStatus",
+  "generateNodeFinalAbiStatus",
+  "generateNodeFinalSecurityStatus",
+  "generateNodeFinalSoakStatus",
   "generateNodeFinalIntegrationSummary",
+];
+
+const REQUIRED_SUPPORT_TASKS = [
+  "collectNodeCrashBundle",
+  "symbolizeNodeCrash",
+  "verifyNodeCrashBundle",
+];
+
+const REQUIRED_TASKS = [
+  ...REQUIRED_STRICT_TASKS.map((task) => ({ task, role: "strict" })),
+  ...REQUIRED_STATUS_TASKS.map((task) => ({ task, role: "status" })),
+  ...REQUIRED_SUPPORT_TASKS.map((task) => ({ task, role: "support" })),
 ];
 
 function main() {
@@ -36,10 +59,11 @@ function main() {
     relative,
     text: read(path.join(repoRoot, relative)),
   }));
-  const tasks = REQUIRED_TASKS.map((task) => {
+  const tasks = REQUIRED_TASKS.map(({ task, role }) => {
     const registration = files.find((file) => file.text.includes(`"${task}"`));
     return {
       task,
+      role,
       registeredIn: registration ? registration.relative : null,
       category: category(task),
     };
@@ -60,6 +84,9 @@ function main() {
     decision: {
       status: policyViolations.length === 0 ? "ready" : "failed",
       finalIntegrationGateIsStrict: true,
+      strictTasksRegistered: tasks.filter((entry) => entry.role === "strict").every((entry) => entry.registeredIn),
+      statusTasksRegistered: tasks.filter((entry) => entry.role === "status").every((entry) => entry.registeredIn),
+      supportTasksRegistered: tasks.filter((entry) => entry.role === "support").every((entry) => entry.registeredIn),
     },
   };
   fs.mkdirSync(reportDir, { recursive: true });
@@ -82,6 +109,7 @@ function category(task) {
   if (task.includes("Security")) return "security";
   if (task.includes("Soak")) return "soak";
   if (task.includes("CapabilityTruth")) return "capability_truth";
+  if (task.includes("IntegrationSummary")) return "aggregate";
   return "aggregate";
 }
 
@@ -93,11 +121,11 @@ function renderMarkdown(report) {
     `- Required tasks: ${report.tasks.length}`,
     `- Policy violations: ${report.policyViolations.length}`,
     "",
-    "| Task | Category | Registered In |",
-    "| --- | --- | --- |",
+    "| Task | Role | Category | Registered In |",
+    "| --- | --- | --- | --- |",
   ];
   report.tasks.forEach((task) => {
-    lines.push(`| ${task.task} | ${task.category} | ${task.registeredIn || "<missing>"} |`);
+    lines.push(`| ${task.task} | ${task.role} | ${task.category} | ${task.registeredIn || "<missing>"} |`);
   });
   lines.push("", "## Policy Violations", "");
   if (report.policyViolations.length === 0) {
