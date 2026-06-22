@@ -727,11 +727,75 @@ tasks.register<Exec>("verifyNodeFinalAbiGate") {
     )
 }
 
-tasks.register("verifyNodeFinalSecurityGate") {
+tasks.register<Exec>("generateNodeFinalSecurityStatus") {
+    group = "verification"
+    description = "Writes the current Phase 11 security/fuzz status without failing on policy-blocked final surfaces."
+
+    dependsOn("verifyNodePhase10SecurityCorpus", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-security-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-security-corpus.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("phase10-security-corpus.json") },
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-security-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-security-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeFinalSecurityGate") {
     group = "verification"
     description = "Strict final security/fuzz gate."
 
-    dependsOn("verifyNodePhase10SecurityCorpus", "verifyNodeFinalCapabilityTruth")
+    dependsOn("verifyNodePhase10SecurityCorpus", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-security-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-security-corpus.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("phase10-security-corpus.json") },
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-security-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-security-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-blocked",
+    )
 }
 
 tasks.register<Exec>("generateNodeFinalSoakStatus") {
@@ -829,6 +893,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         "generateNodeFinalSoakStatus",
         "generateNodeFinalProviderStatus",
         "generateNodeFinalAbiStatus",
+        "generateNodeFinalSecurityStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -846,6 +911,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
         nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
         nodePhase11ReportDir.map { it.file("final-abi-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-security-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },
@@ -879,6 +945,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         "generateNodeFinalSoakStatus",
         "generateNodeFinalProviderStatus",
         "generateNodeFinalAbiStatus",
+        "generateNodeFinalSecurityStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -896,6 +963,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
         nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
         nodePhase11ReportDir.map { it.file("final-abi-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-security-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },

@@ -16,6 +16,7 @@ const REPORTS = [
   ["soak_gate", "final-soak-gate.json", false],
   ["provider_gate", "final-provider-gate.json", false],
   ["abi_gate", "final-abi-gate.json", false],
+  ["security_gate", "final-security-gate.json", false],
 ];
 
 function main() {
