@@ -93,7 +93,7 @@ Do not migrate scripts by expecting these Rhino-era surfaces to appear inside No
 - direct `android.*`
 - old global AutoJs APIs such as `toast`, `files`, `images`, selector globals, or `threads`
 
-The recommended migration path is to rewrite those calls to explicit Node bridge modules. For low-risk helpers, `autojs6:compat` currently covers toast/sleep/clipboard, scoped files, pure/text utilities, storage/sqlite, readable `console`/timer debugging migration, and the first selector/accessibility compatibility facade. `console.show()` and related floating-console controls are no-op output-capture shims in Node; logs still go to captured stdout/stderr, and uncaught errors keep source-map-aware `errorStack` output. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing unrestricted Rhino globals into Node.
+The recommended migration path is to rewrite those calls to explicit Node bridge modules. For low-risk helpers, `autojs6:compat` currently covers toast/sleep/clipboard, scoped files, pure/text utilities, storage/sqlite, readable `console`/timer debugging migration, the first selector/accessibility compatibility facade, and common app/device/shell wrappers. `console.show()` and related floating-console controls are no-op output-capture shims in Node; logs still go to captured stdout/stderr, and uncaught errors keep source-map-aware `errorStack` output. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing unrestricted Rhino globals into Node.
 
 The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). Its recommendation is that any future shim should be explicit, isolated, JSON-serialized, timeout-bounded, and used only for migration.
 
@@ -151,8 +151,20 @@ const result = await shell.exec("echo ok", { timeoutMs: 1000 });
 console.log(result.code, result.stdout.trim());
 ```
 
+The S11-17 compatibility facade also supports common Rhino `shell()` migration:
+
+```js
+"nodejs";
+
+const compat = require("autojs6:compat");
+const result = await compat.shell("echo ok", { timeoutMs: 1000 });
+console.log(result.code, result.stdout.trim());
+```
+
 Projects that use a bridge permission manifest must declare `shell`; root execution also requires `shell.root`.
-`spawn()`, `fork()`, streaming stdio, and interactive shells are not supported.
+`compat.shell("id", true)` is accepted as shorthand for `{ root: true }`, but root is never enabled implicitly.
+Shizuku execution remains unsupported; `compat.shell.checkAccess({ shizuku: true })` reports the missing capability
+instead of escalating. `spawn()`, `fork()`, streaming stdio, and interactive shells are not supported.
 
 ## Threads And Async Work
 
@@ -263,6 +275,18 @@ Node:
 (async function main() {
   const app = require("app");
   const launched = await app.launchPackage("org.example.app", { timeoutMs: 5000 });
+  console.log("launched=" + launched);
+})();
+```
+
+Node with the compatibility facade:
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+  const launched = await compat.app.launchPackage("org.example.app", { timeoutMs: 5000 });
   console.log("launched=" + launched);
 })();
 ```

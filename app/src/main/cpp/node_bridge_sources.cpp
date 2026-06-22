@@ -16033,8 +16033,9 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_rhino_selector_action_names = Object.freeze(["click", "back", "home", "recentApps", "recents"]);
   const __autojs6_rhino_selector_global_names = Object.freeze(["selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents"]);
   let __autojs6_rhino_selector_dsl_cache = null;
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector"]);
+  let __autojs6_rhino_compat_shell_cache = null;
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16142,6 +16143,46 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_rhino_compat_get_clip(options) {
     return __autojs6_limited_clipboard().getText(options);
+  }
+  function __autojs6_rhino_compat_shell_options(value) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (typeof value === "boolean") {
+      return Object.freeze({ root: value });
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      return value;
+    }
+    throw __autojs6_rhino_compat_error(
+      "autojs6:compat.shell options must be a boolean root flag or an object when provided.",
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      "shell",
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_shell() {
+    if (__autojs6_rhino_compat_shell_cache) {
+      return __autojs6_rhino_compat_shell_cache;
+    }
+    const shellModule = __autojs6_limited_shell();
+    const shell = function(command, options) {
+      let shellOptions;
+      try {
+        shellOptions = __autojs6_rhino_compat_shell_options(options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return shellModule.exec(command, shellOptions);
+    };
+    Object.defineProperties(shell, {
+      exec: { value: shellModule.exec, enumerable: true },
+      execFile: { value: shellModule.execFile, enumerable: true },
+      checkAccess: { value: shellModule.checkAccess, enumerable: true },
+      setDefaultTimeout: { value: shellModule.setDefaultTimeout, enumerable: true }
+    });
+    __autojs6_rhino_compat_shell_cache = Object.freeze(shell);
+    return __autojs6_rhino_compat_shell_cache;
   }
   function __autojs6_rhino_selector_copy_field(target, source, fieldName) {
     if (Object.prototype.hasOwnProperty.call(source, fieldName) && source[fieldName] !== undefined) {
@@ -16356,6 +16397,7 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_rhino_compat_facade_cache;
     }
     const selector = __autojs6_rhino_selector_dsl();
+    const shell = __autojs6_rhino_compat_shell();
     __autojs6_rhino_compat_facade_cache = Object.freeze({
       toast: __autojs6_rhino_compat_toast,
       toastLog: __autojs6_rhino_compat_toast_log,
@@ -16405,7 +16447,10 @@ std::string buildEmbeddedScriptExecutionSource(
       back: selector.back,
       home: selector.home,
       recentApps: selector.recentApps,
-      recents: selector.recents
+      recents: selector.recents,
+      app: __autojs6_limited_app(),
+      device: __autojs6_limited_device(),
+      shell: shell
     });
     return __autojs6_rhino_compat_facade_cache;
   }
@@ -16424,7 +16469,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -16459,7 +16504,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-16."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-17."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -16496,6 +16541,7 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_limited_rhino_compat_cache;
     }
     const selector = __autojs6_rhino_selector_dsl();
+    const shell = __autojs6_rhino_compat_shell();
     __autojs6_limited_rhino_compat_cache = Object.freeze({
       name: "autojs6:compat",
       version: 1,
@@ -16552,6 +16598,9 @@ std::string buildEmbeddedScriptExecutionSource(
       home: selector.home,
       recentApps: selector.recentApps,
       recents: selector.recents,
+      app: __autojs6_limited_app(),
+      device: __autojs6_limited_device(),
+      shell: shell,
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {

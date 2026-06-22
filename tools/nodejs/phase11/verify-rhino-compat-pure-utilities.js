@@ -162,6 +162,30 @@ function createHarness(pureBlock, compatBlock) {
         setImmediate() { return { type: "immediate" }; },
         clearImmediate() {}
       });
+      const appStub = Object.freeze({
+        packageName: "org.autojs.autojs6",
+        versionName: "6.7.1",
+        versionCode: 3924,
+        launchPackage() { return Promise.resolve(true); },
+        launchApp() { return Promise.resolve(true); },
+        openAppSetting() { return Promise.resolve(undefined); },
+        startActivity() { return Promise.resolve(undefined); }
+      });
+      const deviceStub = Object.freeze({
+        sdkInt: 36,
+        width: 1080,
+        height: 2400,
+        density: 3,
+        isScreenOn() { return Promise.resolve(true); },
+        wakeUp() { return Promise.resolve(undefined); },
+        vibrate() { return Promise.resolve(undefined); }
+      });
+      const shellStub = Object.freeze({
+        exec(command) { return Promise.resolve(Object.freeze({ code: 0, stdout: String(command), stderr: "" })); },
+        execFile(path) { return Promise.resolve(Object.freeze({ code: 0, stdout: String(path), stderr: "" })); },
+        checkAccess(options) { return Object.freeze({ shell: true, root: !!(options && options.root === true), shizuku: false, missingCapabilities: Object.freeze([]) }); },
+        setDefaultTimeout(ms) { return Number(ms); }
+      });
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
       }
@@ -208,6 +232,15 @@ function createHarness(pureBlock, compatBlock) {
       }
       function __autojs6_limited_timers() {
         return timersStub;
+      }
+      function __autojs6_limited_app() {
+        return appStub;
+      }
+      function __autojs6_limited_device() {
+        return deviceStub;
+      }
+      function __autojs6_limited_shell() {
+        return shellStub;
       }
       function __autojs6_limited_toast() {
         return { showToast() { return Promise.resolve(); } };

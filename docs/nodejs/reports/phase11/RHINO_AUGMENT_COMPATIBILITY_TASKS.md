@@ -309,11 +309,17 @@ Inventory 和兼容矩阵统一使用以下状态：
     通过 fake bridge transport 覆盖 compat selector facade 的设备侧嵌入式
     Node 路径。
 
-- [ ] S11-17: 扩展 app/device/shell compatibility。
+- [x] S11-17: 扩展 app/device/shell compatibility。
   - 范围：`app.launchPackage`、`app.openAppSetting`、basic intent helpers、
     `device.wakeUp/vibrate/isScreenOn`、`shell()` 常用形态。
   - 产物：facade、types、permission docs。
   - 验收：shell 权限和 root/shizuku 边界清晰，不提升 Safe Node Profile。
+  - 状态：已在 `autojs6:compat` 中暴露 `app`、`device` 和 callable
+    `shell(command, optionsOrRoot)`；`shell(command, true)` 仅归一化为
+    `{ root: true }`，root 仍需显式能力，Shizuku 保持 unsupported；
+    `rhino_compat.d.ts`、TypeScript smoke、迁移/安全文档已更新；新增
+    `verifyNodeRhinoCompatAppDeviceShell` host gate 覆盖默认不注入全局、
+    显式安装 globals、app/device 路由和 shell root 边界。
 
 - [ ] S11-18: 实现 images compatibility 第一版。
   - 范围：`images.read/save/clip/resize/grayscale/threshold/findImage/

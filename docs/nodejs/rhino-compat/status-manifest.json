@@ -27,11 +27,14 @@
       "bridgeModules": [
         "toast",
         "clipboard",
-        "accessibility"
+        "accessibility",
+        "app",
+        "device",
+        "shell"
       ],
       "decision": "compat_facade_partial",
       "notes": [
-        "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; S11-16 adds explicit selector/accessibility globals through compat.install({ globals: true }); other Rhino globals remain unsupported or blocked by design."
+        "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; S11-16 adds explicit selector/accessibility globals through compat.install({ globals: true }); S11-17 adds explicit app/device/shell globals and callable shell() migration; other Rhino globals remain unsupported or blocked by design."
       ],
       "apiEntries": [
         {
@@ -2013,14 +2016,15 @@
       "status": "partial",
       "asyncMode": "promise",
       "nodeModules": [
-        "app"
+        "app",
+        "autojs6:compat"
       ],
       "bridgeModules": [
         "app"
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "S11-16 exposes core automator actions through the explicit autojs6:compat selector/accessibility facade; broader automator parity still needs explicit compatibility wrappers."
+        "S11-17 exposes app.launchPackage, app.launchApp, app.openAppSetting, and app.startActivity through require(\"app\") and autojs6:compat.app; broader Rhino app helpers remain partial."
       ],
       "apiEntries": [
         {
@@ -2864,14 +2868,15 @@
       "status": "partial",
       "asyncMode": "promise",
       "nodeModules": [
-        "shell"
+        "shell",
+        "autojs6:compat"
       ],
       "bridgeModules": [
         "shell"
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-17 exposes callable autojs6:compat.shell(command, optionsOrRoot) over the controlled shell.exec facade; root remains explicit and Shizuku remains unsupported."
       ],
       "apiEntries": [
         {
@@ -10054,7 +10059,8 @@
       "asyncMode": "promise",
       "nodeModules": [
         "clipboard",
-        "device"
+        "device",
+        "autojs6:compat"
       ],
       "bridgeModules": [
         "clipboard",
@@ -10062,7 +10068,7 @@
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-17 exposes device.isScreenOn, device.wakeUp, device.vibrate, and coarse device display properties through require(\"device\") and autojs6:compat.device; privacy-sensitive identifiers remain out of scope."
       ],
       "apiEntries": [
         {

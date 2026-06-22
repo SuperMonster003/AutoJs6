@@ -78,6 +78,11 @@ async function smoke(): Promise<void> {
   const shellFileResult: shell.ShellResult = await shell.execFile("scripts/run.sh", ["--dry-run"], {
     timeoutMs: 1000
   });
+  const compatLaunch: boolean = await rhinoCompat.app.launchPackage(app.packageName, { timeoutMs: 1000 });
+  const compatScreenOn: boolean = await rhinoCompat.device.isScreenOn({ timeoutMs: 1000 });
+  const compatShellResult: shell.ShellResult = await rhinoCompat.shell("echo compat", { timeoutMs: 1000 });
+  const compatRootShellResult: shell.ShellResult = await rhinoCompat.shell("id", true);
+  const compatShellAccess: shell.ShellAccessReport = rhinoCompat.shell.checkAccess({ shizuku: true });
 
   const currentEngine: engines.EngineSnapshot = engines.myEngine();
   const allEngines: readonly engines.EngineSnapshot[] = await engines.all({ timeoutMs: 1000 });
@@ -317,6 +322,11 @@ async function smoke(): Promise<void> {
   void shellDefaultTimeout;
   void shellAccess;
   void shellFileResult;
+  void compatLaunch;
+  void compatScreenOn;
+  void compatShellResult;
+  void compatRootShellResult;
+  void compatShellAccess;
   void currentEngine;
   void allEngines;
   void childEngine;

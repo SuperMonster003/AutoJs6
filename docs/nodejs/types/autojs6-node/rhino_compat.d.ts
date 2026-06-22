@@ -5,6 +5,9 @@ declare module "autojs6:compat" {
   import consoleModule = require("console");
   import timers = require("timers");
   import accessibility = require("accessibility");
+  import app = require("app");
+  import device = require("device");
+  import shellModule = require("shell");
   import files = require("files");
   import base64 = require("base64");
   import colors = require("colors");
@@ -132,6 +135,16 @@ declare module "autojs6:compat" {
       recents(options?: SelectorOptions): Promise<boolean>;
     }
 
+    export type ShellCompatOptions = boolean | shellModule.ShellExecOptions;
+
+    export interface ShellCompatFunction {
+      (command: string, options?: ShellCompatOptions): Promise<shellModule.ShellResult>;
+      exec(command: string, options?: shellModule.ShellExecOptions): Promise<shellModule.ShellResult>;
+      execFile(path: string, args?: readonly string[], options?: shellModule.ShellExecOptions): Promise<shellModule.ShellResult>;
+      checkAccess(options?: shellModule.ShellAccessOptions): shellModule.ShellAccessReport;
+      setDefaultTimeout(ms: number): number;
+    }
+
     export interface RhinoCompatModule {
       readonly name: "autojs6:compat";
       readonly version: 1;
@@ -190,6 +203,9 @@ declare module "autojs6:compat" {
       home(options?: SelectorOptions): Promise<boolean>;
       recentApps(options?: SelectorOptions): Promise<boolean>;
       recents(options?: SelectorOptions): Promise<boolean>;
+      readonly app: app.AppModule;
+      readonly device: device.DeviceModule;
+      readonly shell: ShellCompatFunction;
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;

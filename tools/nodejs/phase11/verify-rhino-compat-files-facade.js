@@ -152,6 +152,30 @@ function createHarness(filesBlock, compatBlock, root) {
           clearInterval() {},
           setImmediate() { return { type: "immediate" }; },
           clearImmediate() {}
+        }),
+        app: Object.freeze({
+          packageName: "org.autojs.autojs6",
+          versionName: "6.7.1",
+          versionCode: 3924,
+          launchPackage() { return Promise.resolve(true); },
+          launchApp() { return Promise.resolve(true); },
+          openAppSetting() { return Promise.resolve(undefined); },
+          startActivity() { return Promise.resolve(undefined); }
+        }),
+        device: Object.freeze({
+          sdkInt: 36,
+          width: 1080,
+          height: 2400,
+          density: 3,
+          isScreenOn() { return Promise.resolve(true); },
+          wakeUp() { return Promise.resolve(undefined); },
+          vibrate() { return Promise.resolve(undefined); }
+        }),
+        shell: Object.freeze({
+          exec(command) { return Promise.resolve(Object.freeze({ code: 0, stdout: String(command), stderr: "" })); },
+          execFile(path) { return Promise.resolve(Object.freeze({ code: 0, stdout: String(path), stderr: "" })); },
+          checkAccess(options) { return Object.freeze({ shell: true, root: !!(options && options.root === true), shizuku: false, missingCapabilities: Object.freeze([]) }); },
+          setDefaultTimeout(ms) { return Number(ms); }
         })
       };
       function __autojs6_define_error_property(error, name, value) {
@@ -276,6 +300,15 @@ function createHarness(filesBlock, compatBlock, root) {
       }
       function __autojs6_limited_timers() {
         return __pureUtilityStubs.timers;
+      }
+      function __autojs6_limited_app() {
+        return __pureUtilityStubs.app;
+      }
+      function __autojs6_limited_device() {
+        return __pureUtilityStubs.device;
+      }
+      function __autojs6_limited_shell() {
+        return __pureUtilityStubs.shell;
       }
       function __autojs6_define_global(name, value) {
         Object.defineProperty(globalThis, name, { value, configurable: true, enumerable: false, writable: false });
