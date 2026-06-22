@@ -8198,6 +8198,9 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_converter_cache = null;
   let __autojs6_limited_mime_cache = null;
   let __autojs6_limited_nanoid_cache = null;
+  let __autojs6_limited_opencc_cache = null;
+  let __autojs6_limited_pinyin_cache = null;
+  let __autojs6_limited_pinyin4j_cache = null;
   let __autojs6_rhino_compat_facade_cache = null;
   let __autojs6_lifecycle_config_cache = undefined;
   const __autojs6_lifecycle_checkpoint_handlers = [];
@@ -15652,13 +15655,381 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_limited_nanoid_cache = Object.freeze(nanoid);
     return __autojs6_limited_nanoid_cache;
   }
+  const __autojs6_opencc_methods = Object.freeze([
+    "convert",
+    "hk2s",
+    "hk2t",
+    "jp2t",
+    "s2hk",
+    "s2t",
+    "s2tw",
+    "s2twp",
+    "t2hk",
+    "t2s",
+    "t2tw",
+    "t2jp",
+    "tw2s",
+    "tw2t",
+    "tw2sp",
+    "s2twi",
+    "twi2s",
+    "s2jp",
+    "t2twi",
+    "hk2tw",
+    "hk2twi",
+    "hk2jp",
+    "tw2hk",
+    "tw2twi",
+    "tw2jp",
+    "twi2t",
+    "twi2hk",
+    "twi2tw",
+    "twi2jp",
+    "jp2s",
+    "jp2hk",
+    "jp2tw",
+    "jp2twi"
+  ]);
+  function __autojs6_text_resource_unsupported(apiName, dependency) {
+    throw __autojs6_rhino_compat_unsupported(
+      apiName,
+      dependency + " resources are not available in the host-testable Node text facade; use a supported pure subset or run the Rhino/Android provider."
+    );
+  }
+  function __autojs6_limited_opencc() {
+    if (__autojs6_limited_opencc_cache) {
+      return __autojs6_limited_opencc_cache;
+    }
+    const opencc = function(value, type) {
+      return opencc.convert(value, type);
+    };
+    __autojs6_opencc_methods.forEach(function(name) {
+      Object.defineProperty(opencc, name, {
+        value: function() {
+          __autojs6_text_resource_unsupported("opencc." + name, "OpenCC dictionary");
+        },
+        enumerable: true
+      });
+    });
+    __autojs6_limited_opencc_cache = Object.freeze(opencc);
+    return __autojs6_limited_opencc_cache;
+  }
+  const __autojs6_pinyin_styles = Object.freeze({
+    NORMAL: 0,
+    TONE: 1,
+    TONE2: 2,
+    INITIALS: 3,
+    FIRST_LETTER: 4,
+    TO3NE: 5
+  });
+  const __autojs6_pinyin_modes = Object.freeze({
+    NORMAL: 0,
+    SURNAME: 1,
+    PLACE_NAME: 2,
+    PLACENAME: 2
+  });
+  const __autojs6_pinyin_initials = Object.freeze(["zh", "ch", "sh", "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j", "q", "x", "r", "z", "c", "s"]);
+  const __autojs6_pinyin_dict = Object.freeze({
+    "\u4e2d": Object.freeze([Object.freeze({ tone: "zh\u014dng", normal: "zhong", tone2: "zhong1", to3ne: "zho1ng" })]),
+    "\u56fd": Object.freeze([Object.freeze({ tone: "gu\u00f3", normal: "guo", tone2: "guo2", to3ne: "guo2" })]),
+    "\u4eba": Object.freeze([Object.freeze({ tone: "r\u00e9n", normal: "ren", tone2: "ren2", to3ne: "re2n" })]),
+    "\u6c11": Object.freeze([Object.freeze({ tone: "m\u00edn", normal: "min", tone2: "min2", to3ne: "mi2n" })]),
+    "\u4f60": Object.freeze([Object.freeze({ tone: "n\u01d0", normal: "ni", tone2: "ni3", to3ne: "ni3" })]),
+    "\u597d": Object.freeze([Object.freeze({ tone: "h\u01ceo", normal: "hao", tone2: "hao3", to3ne: "ha3o" })]),
+    "\u6211": Object.freeze([Object.freeze({ tone: "w\u01d2", normal: "wo", tone2: "wo3", to3ne: "wo3" })]),
+    "\u662f": Object.freeze([Object.freeze({ tone: "sh\u00ec", normal: "shi", tone2: "shi4", to3ne: "shi4" })]),
+    "\u7684": Object.freeze([Object.freeze({ tone: "de", normal: "de", tone2: "de0", to3ne: "de0" })]),
+    "\u884c": Object.freeze([Object.freeze({ tone: "x\u00edng", normal: "xing", tone2: "xing2", to3ne: "xi2ng" }), Object.freeze({ tone: "h\u00e1ng", normal: "hang", tone2: "hang2", to3ne: "ha2ng" })]),
+    "\u91cd": Object.freeze([Object.freeze({ tone: "zh\u00f2ng", normal: "zhong", tone2: "zhong4", to3ne: "zho4ng" }), Object.freeze({ tone: "ch\u00f3ng", normal: "chong", tone2: "chong2", to3ne: "cho2ng" })]),
+    "\u957f": Object.freeze([Object.freeze({ tone: "ch\u00e1ng", normal: "chang", tone2: "chang2", to3ne: "cha2ng" }), Object.freeze({ tone: "zh\u01ceng", normal: "zhang", tone2: "zhang3", to3ne: "zha3ng" })]),
+    "\u674e": Object.freeze([Object.freeze({ tone: "l\u01d0", normal: "li", tone2: "li3", to3ne: "li3" })]),
+    "\u738b": Object.freeze([Object.freeze({ tone: "w\u00e1ng", normal: "wang", tone2: "wang2", to3ne: "wa2ng" })]),
+    "\u5f20": Object.freeze([Object.freeze({ tone: "zh\u0101ng", normal: "zhang", tone2: "zhang1", to3ne: "zha1ng" })])
+  });
+  const __autojs6_pinyin_phrase_dict = Object.freeze({
+    "\u4e2d\u56fd": Object.freeze([Object.freeze(["zh\u014dng"]), Object.freeze(["gu\u00f3"])]),
+    "\u4eba\u6c11": Object.freeze([Object.freeze(["r\u00e9n"]), Object.freeze(["m\u00edn"])]),
+    "\u4f60\u597d": Object.freeze([Object.freeze(["n\u01d0"]), Object.freeze(["h\u01ceo"])])
+  });
+  function __autojs6_pinyin_parse_style(value, fallback) {
+    if (value === undefined || value === null || value === "") {
+      return fallback;
+    }
+    if (typeof value === "number") {
+      const number = Math.floor(value);
+      if (number >= 0 && number <= 5) return number;
+    }
+    const key = String(value).trim().toUpperCase();
+    if (Object.prototype.hasOwnProperty.call(__autojs6_pinyin_styles, key)) {
+      return __autojs6_pinyin_styles[key];
+    }
+    throw __autojs6_rhino_compat_unsupported("pinyin.style", "Unsupported pinyin style: " + value);
+  }
+  function __autojs6_pinyin_parse_mode(value, fallback) {
+    if (value === undefined || value === null || value === "") {
+      return fallback;
+    }
+    if (typeof value === "number") {
+      const number = Math.floor(value);
+      if (number >= 0 && number <= 2) return number;
+    }
+    const key = String(value).trim().toUpperCase();
+    if (Object.prototype.hasOwnProperty.call(__autojs6_pinyin_modes, key)) {
+      return __autojs6_pinyin_modes[key];
+    }
+    throw __autojs6_rhino_compat_unsupported("pinyin.mode", "Unsupported pinyin mode: " + value);
+  }
+  function __autojs6_pinyin_options(options) {
+    const input = options && typeof options === "object" && !Array.isArray(options) ? options : {};
+    const mode = __autojs6_pinyin_parse_mode(input.mode, __autojs6_pinyin_modes.NORMAL);
+    if (input.segment === true) {
+      __autojs6_text_resource_unsupported("pinyin.convert", "Jieba segmentation");
+    }
+    if (mode === __autojs6_pinyin_modes.PLACE_NAME) {
+      __autojs6_text_resource_unsupported("pinyin.convert", "Pinyin place-name dictionary");
+    }
+    return {
+      style: __autojs6_pinyin_parse_style(input.style, __autojs6_pinyin_styles.TONE),
+      heteronym: input.heteronym === true,
+      group: input.group === true,
+      mode: mode
+    };
+  }
+  function __autojs6_pinyin_initial(value) {
+    for (let index = 0; index < __autojs6_pinyin_initials.length; index += 1) {
+      const initial = __autojs6_pinyin_initials[index];
+      if (value.indexOf(initial) === 0) return initial;
+    }
+    return "";
+  }
+  function __autojs6_pinyin_fixed(record, style) {
+    switch (style) {
+      case __autojs6_pinyin_styles.NORMAL:
+        return record.normal;
+      case __autojs6_pinyin_styles.TONE2:
+        return record.tone2;
+      case __autojs6_pinyin_styles.TO3NE:
+        return record.to3ne;
+      case __autojs6_pinyin_styles.INITIALS:
+        return __autojs6_pinyin_initial(record.normal);
+      case __autojs6_pinyin_styles.FIRST_LETTER:
+        return record.normal.charAt(0);
+      case __autojs6_pinyin_styles.TONE:
+      default:
+        return record.tone;
+    }
+  }
+  function __autojs6_pinyin_is_han_char(text) {
+    if (!text) return false;
+    const code = text.codePointAt(0);
+    return (code >= 0x3400 && code <= 0x9fff) || (code >= 0xf900 && code <= 0xfaff);
+  }
+  function __autojs6_pinyin_char_variants(charValue, options) {
+    const records = __autojs6_pinyin_dict[charValue];
+    if (!records) {
+      return [charValue];
+    }
+    const mapped = records.map(function(record) {
+      return __autojs6_pinyin_fixed(record, options.style);
+    });
+    return options.heteronym ? Array.from(new Set(mapped)) : [mapped[0]];
+  }
+  function __autojs6_pinyin_compact_rows(rows) {
+    if (!Array.isArray(rows)) return "";
+    return rows.map(function(row) {
+      return Array.isArray(row) ? String(row[0] === undefined ? "" : row[0]) : String(row);
+    }).join("");
+  }
+  function __autojs6_pinyin_combo(rows) {
+    let result = [""];
+    rows.forEach(function(row) {
+      const values = Array.isArray(row) && row.length > 0 ? row : [""];
+      const next = [];
+      result.forEach(function(prefix) {
+        values.forEach(function(value) {
+          next.push(prefix + value);
+        });
+      });
+      result = next;
+    });
+    return result;
+  }
+  function __autojs6_pinyin_convert(value, optionsInput) {
+    const options = __autojs6_pinyin_options(optionsInput);
+    const text = value === undefined || value === null ? "" : String(value);
+    const rows = [];
+    let nonHan = "";
+    for (const charValue of text) {
+      if (__autojs6_pinyin_is_han_char(charValue)) {
+        if (nonHan) {
+          rows.push([nonHan]);
+          nonHan = "";
+        }
+        rows.push(__autojs6_pinyin_char_variants(charValue, options));
+      } else {
+        nonHan += charValue;
+      }
+    }
+    if (nonHan) {
+      rows.push([nonHan]);
+    }
+    const result = options.group ? [__autojs6_pinyin_combo(rows)] : rows;
+    Object.defineProperty(result, "compact", {
+      value: function() {
+        return __autojs6_pinyin_compact_rows(result);
+      },
+      configurable: true
+    });
+    return result;
+  }
+  function __autojs6_limited_pinyin() {
+    if (__autojs6_limited_pinyin_cache) {
+      return __autojs6_limited_pinyin_cache;
+    }
+    const pinyin = function(value, options) {
+      return pinyin.convert(value, options);
+    };
+    Object.defineProperties(pinyin, {
+      STYLE_NORMAL: { value: __autojs6_pinyin_styles.NORMAL, enumerable: true },
+      STYLE_TONE: { value: __autojs6_pinyin_styles.TONE, enumerable: true },
+      STYLE_TONE2: { value: __autojs6_pinyin_styles.TONE2, enumerable: true },
+      STYLE_TO3NE: { value: __autojs6_pinyin_styles.TO3NE, enumerable: true },
+      STYLE_INITIALS: { value: __autojs6_pinyin_styles.INITIALS, enumerable: true },
+      STYLE_FIRST_LETTER: { value: __autojs6_pinyin_styles.FIRST_LETTER, enumerable: true },
+      MODE_NORMAL: { value: __autojs6_pinyin_modes.NORMAL, enumerable: true },
+      MODE_SURNAME: { value: __autojs6_pinyin_modes.SURNAME, enumerable: true },
+      MODE_PLACENAME: { value: __autojs6_pinyin_modes.PLACENAME, enumerable: true },
+      MODE_PLACE_NAME: { value: __autojs6_pinyin_modes.PLACE_NAME, enumerable: true },
+      convert: { value: __autojs6_pinyin_convert, enumerable: true },
+      simple: {
+        value: function(value, enableNumericTone, enableSegment) {
+          if (enableSegment === true) {
+            __autojs6_text_resource_unsupported("pinyin.simple", "Jieba segmentation");
+          }
+          const rows = __autojs6_pinyin_convert(value, {
+            style: enableNumericTone === true ? __autojs6_pinyin_styles.TONE2 : __autojs6_pinyin_styles.NORMAL
+          });
+          return __autojs6_pinyin_compact_rows(rows);
+        },
+        enumerable: true
+      },
+      compact: { value: __autojs6_pinyin_compact_rows, enumerable: true },
+      compare: {
+        value: function(left, right) {
+          return pinyin.simple(left).localeCompare(pinyin.simple(right));
+        },
+        enumerable: true
+      },
+      fromCodePoint: {
+        value: function(codePoint) {
+          const charValue = String.fromCodePoint(Number(codePoint));
+          const records = __autojs6_pinyin_dict[charValue];
+          return records && records[0] ? records[0].tone : null;
+        },
+        enumerable: true
+      },
+      fromPhrase: {
+        value: function(phrase) {
+          const text = phrase === undefined || phrase === null ? "" : String(phrase);
+          const rows = __autojs6_pinyin_phrase_dict[text];
+          if (rows) return rows.map(function(row) { return row.slice(); });
+          __autojs6_text_resource_unsupported("pinyin.fromPhrase", "Pinyin phrase dictionary");
+        },
+        enumerable: true
+      }
+    });
+    __autojs6_limited_pinyin_cache = Object.freeze(pinyin);
+    return __autojs6_limited_pinyin_cache;
+  }
+  const __autojs6_pinyin4j_tone_map = Object.freeze({
+    zhong1: "zh\u014dng",
+    zhong4: "zh\u00f2ng",
+    chong2: "ch\u00f3ng",
+    guo2: "gu\u00f3",
+    ren2: "r\u00e9n",
+    min2: "m\u00edn",
+    ni3: "n\u01d0",
+    hao3: "h\u01ceo",
+    wo3: "w\u01d2",
+    shi4: "sh\u00ec",
+    de0: "de",
+    xing2: "x\u00edng",
+    hang2: "h\u00e1ng",
+    chang2: "ch\u00e1ng",
+    zhang1: "zh\u0101ng",
+    zhang3: "zh\u01ceng",
+    li3: "l\u01d0",
+    wang2: "w\u00e1ng"
+  });
+  function __autojs6_pinyin4j_options(options) {
+    const input = options && typeof options === "object" && !Array.isArray(options) ? options : {};
+    let separator = "";
+    if (typeof options === "string") {
+      separator = options;
+    }
+    if (input.separator !== undefined) separator = String(input.separator);
+    if (input.sep !== undefined) separator = String(input.sep);
+    const caseText = String(input.case !== undefined ? input.case : input.caseType !== undefined ? input.caseType : "LOWERCASE").toUpperCase();
+    const toneText = String(input.tone !== undefined ? input.tone : input.toneType !== undefined ? input.toneType : "WITHOUT_TONE").toUpperCase();
+    return {
+      separator: separator,
+      upper: caseText === "UPPERCASE" || caseText === "UP" || caseText === "U" || caseText === "1",
+      tone: toneText === "WITH_TONE_NUMBER" || toneText === "WITH_NUMBER" || toneText === "NUMBER" || toneText === "NUM"
+        ? "number"
+        : toneText === "WITH_TONE_MARK" || toneText === "WITH_MARK" || toneText === "MARK" || toneText === "TRUE" || toneText === "1"
+          ? "mark"
+          : "none"
+    };
+  }
+  function __autojs6_pinyin4j_format_record(record, options) {
+    let text = record.normal;
+    if (options.tone === "number") text = record.tone2;
+    if (options.tone === "mark") text = record.tone;
+    return options.upper ? text.toUpperCase() : text;
+  }
+  function __autojs6_pinyin4j_of(value, optionsInput) {
+    const text = value === undefined || value === null ? "" : String(value);
+    if (!text) return "";
+    const options = __autojs6_pinyin4j_options(optionsInput);
+    const parts = [];
+    for (const charValue of text) {
+      const records = __autojs6_pinyin_dict[charValue];
+      if (records && records[0]) {
+        parts.push(__autojs6_pinyin4j_format_record(records[0], options));
+      } else {
+        parts.push(charValue);
+      }
+    }
+    return parts.join(options.separator);
+  }
+  function __autojs6_pinyin4j_as(value) {
+    return String(value === undefined || value === null ? "" : value).replace(/[a-z]+[0-4]/gi, function(match) {
+      const lower = match.toLowerCase();
+      const fixed = __autojs6_pinyin4j_tone_map[lower] || match;
+      return match === match.toUpperCase() ? fixed.toUpperCase() : fixed;
+    });
+  }
+  function __autojs6_limited_pinyin4j() {
+    if (__autojs6_limited_pinyin4j_cache) {
+      return __autojs6_limited_pinyin4j_cache;
+    }
+    const pinyin4j = function(value, options) {
+      return __autojs6_pinyin4j_of(value, options);
+    };
+    Object.defineProperties(pinyin4j, {
+      of: { value: __autojs6_pinyin4j_of, enumerable: true },
+      as: { value: __autojs6_pinyin4j_as, enumerable: true }
+    });
+    __autojs6_limited_pinyin4j_cache = Object.freeze(pinyin4j);
+    return __autojs6_limited_pinyin4j_cache;
+  }
   const __autojs6_rhino_compat_error_codes = Object.freeze({
     invalidOption: "ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION",
     unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
     blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -15786,7 +16157,10 @@ std::string buildEmbeddedScriptExecutionSource(
       converter: __autojs6_limited_converter(),
       mime: __autojs6_limited_mime(),
       nanoid: __autojs6_limited_nanoid(),
-      util: __autojs6_limited_util()
+      util: __autojs6_limited_util(),
+      opencc: __autojs6_limited_opencc(),
+      pinyin: __autojs6_limited_pinyin(),
+      pinyin4j: __autojs6_limited_pinyin4j()
     });
     return __autojs6_rhino_compat_facade_cache;
   }
@@ -15805,8 +16179,8 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11"]),
-      pendingTasks: Object.freeze(["S11-12", "S11-13", "S11-14"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12"]),
+      pendingTasks: Object.freeze(["S11-13", "S11-14"]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
       moduleNames: __autojs6_rhino_compat_basic_module_names
@@ -15840,7 +16214,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed low-risk Rhino compatibility globals for S11-09 through S11-11."
+        ? "Installed low-risk Rhino compatibility globals for S11-09 through S11-12."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -15898,6 +16272,9 @@ std::string buildEmbeddedScriptExecutionSource(
       mime: __autojs6_limited_mime(),
       nanoid: __autojs6_limited_nanoid(),
       util: __autojs6_limited_util(),
+      opencc: __autojs6_limited_opencc(),
+      pinyin: __autojs6_limited_pinyin(),
+      pinyin4j: __autojs6_limited_pinyin4j(),
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {
@@ -36525,6 +36902,15 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "nanoid") {
       return "nanoid";
     }
+    if (name === "opencc") {
+      return "opencc";
+    }
+    if (name === "pinyin") {
+      return "pinyin";
+    }
+    if (name === "pinyin4j") {
+      return "pinyin4j";
+    }
     if (name === "autojs6:lifecycle") {
       return "autojs6:lifecycle";
     }
@@ -36806,6 +37192,15 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "nanoid") {
       return __autojs6_limited_nanoid();
+    }
+    if (name === "opencc") {
+      return __autojs6_limited_opencc();
+    }
+    if (name === "pinyin") {
+      return __autojs6_limited_pinyin();
+    }
+    if (name === "pinyin4j") {
+      return __autojs6_limited_pinyin4j();
     }
     if (name === "autojs6:lifecycle") {
       return __autojs6_limited_lifecycle();

@@ -237,10 +237,19 @@ Inventory 和兼容矩阵统一使用以下状态：
     `:app:verifyNodeRhinoCompatPureUtilities` 覆盖 host-side base64、colors、
     bytes formatter/converter、mime、nanoid、explicit globals 和阻断策略。
 
-- [ ] S11-12: 实现 text utility facade。
+- [x] S11-12: 实现 text utility facade。
   - 范围：`opencc`、`pinyin`、`pinyin4j` 的可用子集和缺依赖降级。
   - 产物：facade、types、fixture tests。
   - 验收：缺少 native/resource 依赖时返回稳定 `unsupported` 错误。
+  - 状态：已接入 `require("opencc")`、`require("pinyin")`、
+    `require("pinyin4j")`，并通过 `autojs6:compat` 显式安装
+    `opencc`、`pinyin`、`pinyin4j`。
+  - 边界：`opencc.*`、`pinyin.segment`、`pinyin.fromPhrase()` 缺少完整
+    Android/native/resource 依赖时返回稳定
+    `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`。
+  - 证据：`tools/nodejs/phase11/verify-rhino-compat-text-utilities.js` 和
+    `:app:verifyNodeRhinoCompatTextUtilities` 覆盖 fixture 拼音、pinyin4j
+    格式化、OpenCC 降级、explicit globals 和 require 入口。
 
 - [ ] S11-13: 实现 storages/sqlite compatibility facade。
   - 范围：把 Rhino `storages`、`sqlite` 常用形态映射到现有

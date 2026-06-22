@@ -1,7 +1,7 @@
 {
   "schema": "autojs6-node-rhino-compat-status-manifest-v1",
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T08:18:40.870Z",
+  "generatedAt": "2026-06-22T08:48:55.612Z",
   "inventorySchema": "autojs6-node-rhino-augment-inventory-v1",
   "statusVocabulary": [
     "supported",
@@ -10698,420 +10698,423 @@
     {
       "id": "opencc",
       "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "asyncMode": "sync",
+      "nodeModules": [
+        "opencc",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_12_missing_text_resource_stable_unsupported",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "OpenCC conversion requires Android OpenCC dictionary resources; S11-12 provides stable Node unsupported errors for all OpenCC methods."
       ],
       "apiEntries": [
         {
           "id": "opencc.__module",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "__module",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.convert",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "convert",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.hk2jp",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hk2jp",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.hk2s",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hk2s",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.hk2t",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hk2t",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.hk2tw",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hk2tw",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.hk2twi",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "hk2twi",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.jp2hk",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "jp2hk",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.jp2s",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "jp2s",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.jp2t",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "jp2t",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.jp2tw",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "jp2tw",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.jp2twi",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "jp2twi",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.s2hk",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "s2hk",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.s2jp",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "s2jp",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.s2t",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "s2t",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.s2tw",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "s2tw",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.s2twi",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "s2twi",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.s2twp",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "s2twp",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.t2hk",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "t2hk",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.t2jp",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "t2jp",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.t2s",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "t2s",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.t2tw",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "t2tw",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.t2twi",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "t2twi",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.tw2hk",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "tw2hk",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.tw2jp",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "tw2jp",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.tw2s",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "tw2s",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.tw2sp",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "tw2sp",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.tw2t",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "tw2t",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.tw2twi",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "tw2twi",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.twi2hk",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "twi2hk",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.twi2jp",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "twi2jp",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.twi2s",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "twi2s",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.twi2t",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "twi2t",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         },
         {
           "id": "opencc.twi2tw",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "opencc",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "twi2tw",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes a stable facade, but this API still requires Android/native text resources and returns ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED."
           ]
         }
       ]
@@ -11375,254 +11378,260 @@
     },
     {
       "id": "pinyin",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "pinyin",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_12_text_utility_facade_partial",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-12 exposes a small host-testable pinyin dictionary and common style helpers; segmentation, full phrase dictionaries, and place-name dictionaries remain resource-backed."
       ],
       "apiEntries": [
         {
           "id": "pinyin.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "__module",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.MODE_NORMAL",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "MODE_NORMAL",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.MODE_PLACENAME",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "MODE_PLACENAME",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.MODE_PLACE_NAME",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "MODE_PLACE_NAME",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.MODE_SURNAME",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "MODE_SURNAME",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.STYLE_FIRST_LETTER",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "STYLE_FIRST_LETTER",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.STYLE_INITIALS",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "STYLE_INITIALS",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.STYLE_NORMAL",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "STYLE_NORMAL",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.STYLE_TO3NE",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "STYLE_TO3NE",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.STYLE_TONE",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "STYLE_TONE",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.STYLE_TONE2",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "STYLE_TONE2",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.compact",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "compact",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.compare",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "compare",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.convert",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "convert",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.fromCodePoint",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "fromCodePoint",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin.fromPhrase",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "fromPhrase",
+          "decision": "s11_12_missing_text_resource_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "pinyin.fromPhrase requires the full Android phrase dictionary; S11-12 returns fixture entries only when built in and otherwise stable unsupported."
           ]
         },
         {
           "id": "pinyin.simple",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "simple",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         }
       ]
     },
     {
       "id": "pinyin4j",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "supported",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "pinyin4j",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "s11_12_text_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-12 exposes pinyin4j.of through a synchronous fixture-backed Node facade."
       ],
       "apiEntries": [
         {
           "id": "pinyin4j.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin4j",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "__module",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         },
         {
           "id": "pinyin4j.of",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "pinyin4j",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "of",
+          "decision": "s11_12_text_utility_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-12 exposes this Rhino text utility API through a synchronous Node facade fixture subset."
           ]
         }
       ]
@@ -11669,11 +11678,11 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "partial": 349,
-      "unsupported": 449,
+      "partial": 350,
+      "unsupported": 429,
       "supported_async": 42,
       "blocked_by_design": 22,
-      "supported": 90
+      "supported": 109
     }
   }
 }

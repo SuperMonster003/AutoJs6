@@ -21,7 +21,7 @@ The loader is an AutoJs6 controlled module, not an npm package name and not a sc
 
 ## Runtime Contract
 
-S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, and S11-11 adds pure utility facades for APIs that do not require Android providers. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, or Pro 9 `require("rhino").install()` behavior.
+S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, and S11-12 adds text utility facades with stable dependency-missing degradation. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, or Pro 9 `require("rhino").install()` behavior.
 
 The first runtime shape is:
 
@@ -44,12 +44,15 @@ const bytes = compat.cvt.bytes("1 KB", "B");
 const parsed = compat.mime("text/plain; charset=utf-8");
 const id = compat.nanoid();
 const inspected = compat.util.inspect({ parsed, id });
+const py = compat.pinyin.simple("\u4f60\u597d");
+const py4j = compat.pinyin4j.of("\u4e2d\u56fd", { separator: " " });
+compat.opencc.s2t("\u6c49\u5b57"); // stable unsupported until OpenCC dictionaries are available.
 compat.unsupported("files.open");
 compat.blockedByDesign("importClass");
 compat.assertSupported("toast");
 ```
 
-`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs the implemented low-risk names: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, `files`, `base64`, `colors`, `fmt`, `cvt`, `mime`, `nanoid`, and `util`.
+`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs the implemented low-risk names: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, `files`, `base64`, `colors`, `fmt`, `cvt`, `mime`, `nanoid`, `util`, `opencc`, `pinyin`, and `pinyin4j`.
 
 The S11-09 facade is async. Rhino `sleep()` blocks the Rhino script thread; Node compat `sleep()` returns a Promise and must be awaited. Toast and clipboard helpers also return Promises because they cross the Android bridge.
 
@@ -57,12 +60,15 @@ The S11-10 `files` facade is synchronous and scoped to the script `workingDirect
 
 The S11-11 pure utility facade is synchronous and host-testable. It adds bare CommonJS modules `base64`, `colors`, `formatter`/`fmt`, `converter`/`cvt`, `mime`, and `nanoid`, plus the existing Node `util` module as the migration target for Rhino `util.inspect`. `colors.toColorStateList`, `colors.setPaintColor`, and `colors.themeColor` stay blocked by design because they would expose Android objects. The byte formatter/converter subset covers the Rhino `bytes` constants and common strict/loose calls; uncommon argument combinations remain a compatibility refinement area rather than Android bridge work.
 
+The S11-12 text utility facade is also synchronous and host-testable. It adds bare CommonJS modules `opencc`, `pinyin`, and `pinyin4j`. `pinyin` and `pinyin4j` include a small built-in dictionary for smoke-testable common Chinese text and style options. Resource-backed paths such as OpenCC dictionary conversion, Jieba segmentation, full phrase dictionaries, and place-name dictionaries return stable `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` errors until a Node-safe dictionary/resource provider is designed.
+
 Future tasks should extend the module in small commits:
 
 - S11-09: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, and basic globals.
 - S11-10: scoped `files` facade with `read`, `write`, `exists`, `listDir`, `join`, `path`, `remove`, `copy`, and `move`.
 - S11-11: pure utility facades for `base64`, `colors`, `fmt.bytes`, `cvt.bytes`, `mime`, `nanoid`, and `util.inspect` migration.
-- S11-12 to S11-14: text utilities, storage/sqlite, console/timers/error compatibility.
+- S11-12: text utility facades for `opencc`, `pinyin`, and `pinyin4j`, with stable unsupported errors for missing dictionaries/resources.
+- S11-13 to S11-14: storage/sqlite and console/timers/error compatibility.
 
 ## Error Codes
 

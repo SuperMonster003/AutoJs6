@@ -125,7 +125,10 @@ function createHarness(compatBlock) {
         converter: Object.freeze({ bytes() { return 0; } }),
         mime: Object.freeze(function mime() { return Object.freeze({ type: "", subtype: "", parameters: Object.freeze({}) }); }),
         nanoid: Object.freeze(function nanoid() { return ""; }),
-        util: Object.freeze({ format(value) { return String(value); }, inspect(value) { return String(value); } })
+        util: Object.freeze({ format(value) { return String(value); }, inspect(value) { return String(value); } }),
+        opencc: Object.freeze(function opencc() { return ""; }),
+        pinyin: Object.freeze(function pinyin() { return []; }),
+        pinyin4j: Object.freeze(function pinyin4j() { return ""; })
       };
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
@@ -194,6 +197,15 @@ function createHarness(compatBlock) {
       }
       function __autojs6_limited_util() {
         return __pureUtilityStubs.util;
+      }
+      function __autojs6_limited_opencc() {
+        return __pureUtilityStubs.opencc;
+      }
+      function __autojs6_limited_pinyin() {
+        return __pureUtilityStubs.pinyin;
+      }
+      function __autojs6_limited_pinyin4j() {
+        return __pureUtilityStubs.pinyin4j;
       }
       function __autojs6_define_global(name, value) {
         Object.defineProperty(globalThis, name, {

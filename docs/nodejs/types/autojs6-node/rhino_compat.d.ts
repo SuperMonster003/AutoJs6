@@ -7,6 +7,9 @@ declare module "autojs6:compat" {
   import mime = require("mime");
   import nanoid = require("nanoid");
   import util = require("util");
+  import opencc = require("opencc");
+  import pinyin = require("pinyin");
+  import pinyin4j = require("pinyin4j");
 
   namespace rhinoCompat {
     export type ErrorCode =
@@ -84,6 +87,9 @@ declare module "autojs6:compat" {
       readonly mime: mime.MimeModule;
       readonly nanoid: nanoid.NanoidModule;
       readonly util: util.UtilModule;
+      readonly opencc: opencc.OpenccModule;
+      readonly pinyin: pinyin.PinyinModule;
+      readonly pinyin4j: pinyin4j.Pinyin4jModule;
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;

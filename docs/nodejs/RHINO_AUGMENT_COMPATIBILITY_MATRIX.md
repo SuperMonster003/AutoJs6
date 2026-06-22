@@ -7,18 +7,18 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Rhino modules: 73
 - Rhino API entries: 879
 - Node bridge modules: 23
-- Node type modules: 37
+- Node type modules: 40
 - Modules with bridge evidence: 24
-- Modules with type evidence: 32
-- Modules without Node surface evidence: 40
+- Modules with type evidence: 35
+- Modules without Node surface evidence: 37
 
 ## Status Totals
 
 - blocked_by_design: 22
-- partial: 349
-- supported: 90
+- partial: 350
+- supported: 109
 - supported_async: 42
-- unsupported: 449
+- unsupported: 429
 
 ## Module Matrix
 
@@ -88,14 +88,14 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 61 | notice | notice | partial | notifications | partial:6, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 62 | notice.channel | channel | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
 | 63 | shizuku | shizuku | unsupported | - | unsupported:7 | provider_availability | Design a Node facade or record a permanent non-goal. |
-| 64 | opencc | opencc | unsupported | - | unsupported:34 | none | Design a Node facade or record a permanent non-goal. |
+| 64 | opencc | opencc | unsupported | opencc | unsupported:34 | none | Decide explicit mapping or mark blocked-by-design. |
 | 65 | mime | mime | supported | mime | supported:1 | provider_availability | Review status manifest decision. |
 | 66 | sysprops | sysprops | unsupported | - | unsupported:5 | none | Design a Node facade or record a permanent non-goal. |
 | 67 | sqlite | sqlite | partial | database, sqlite | partial:1, supported_async:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 68 | zip | zip | unsupported | - | unsupported:6 | none | Design a Node facade or record a permanent non-goal. |
 | 69 | nanoid | nanoid | supported | nanoid | supported:1 | none | Review status manifest decision. |
-| 70 | pinyin | pinyin | unsupported | - | unsupported:17 | none | Design a Node facade or record a permanent non-goal. |
-| 71 | pinyin4j | pinyin4j | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
+| 70 | pinyin | pinyin | partial | pinyin | supported:16, unsupported:1 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 71 | pinyin4j | pinyin4j | supported | pinyin4j | supported:2 | none | Review status manifest decision. |
 | 72 | mediainfo | mediainfo | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
 
 ## Module Details
@@ -744,11 +744,11 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `opencc`
 - Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
+- Node surface: opencc
+- Coverage: `types_only`
 - API status: unsupported:34
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Decide explicit mapping or mark blocked-by-design.
 
 ### mime
 
@@ -803,22 +803,22 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### pinyin
 
 - Key: `pinyin`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:17
+- Status: `partial`
+- Node surface: pinyin
+- Coverage: `types_only`
+- API status: supported:16, unsupported:1
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
 
 ### pinyin4j
 
 - Key: `pinyin4j`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:2
+- Status: `supported`
+- Node surface: pinyin4j
+- Coverage: `types_only`
+- API status: supported:2
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### mediainfo
 

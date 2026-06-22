@@ -141,6 +141,11 @@ function createHarness(pureBlock, compatBlock) {
       let __autojs6_limited_nanoid_cache = null;
       let __autojs6_limited_rhino_compat_cache = null;
       let __autojs6_rhino_compat_facade_cache = null;
+      const __textUtilityStubs = {
+        opencc: Object.freeze(function opencc() { return ""; }),
+        pinyin: Object.freeze(function pinyin() { return []; }),
+        pinyin4j: Object.freeze(function pinyin4j() { return ""; })
+      };
       const filesStub = Object.freeze({ path() { return null; } });
       function __autojs6_define_error_property(error, name, value) {
         Object.defineProperty(error, name, { value, configurable: true, enumerable: true, writable: true });
@@ -167,6 +172,15 @@ function createHarness(pureBlock, compatBlock) {
       }
       function __autojs6_limited_files() {
         return filesStub;
+      }
+      function __autojs6_limited_opencc() {
+        return __textUtilityStubs.opencc;
+      }
+      function __autojs6_limited_pinyin() {
+        return __textUtilityStubs.pinyin;
+      }
+      function __autojs6_limited_pinyin4j() {
+        return __textUtilityStubs.pinyin4j;
       }
       function __autojs6_limited_toast() {
         return { showToast() { return Promise.resolve(); } };
@@ -213,7 +227,9 @@ function createHarness(pureBlock, compatBlock) {
 
 function extractPureUtilityBlock(runtime) {
   const start = runtime.indexOf("function __autojs6_buffer_constructor_required");
-  const end = runtime.indexOf("  const __autojs6_rhino_compat_error_codes", start);
+  const textStart = runtime.indexOf("  const __autojs6_opencc_methods", start);
+  const fallbackEnd = runtime.indexOf("  const __autojs6_rhino_compat_error_codes", start);
+  const end = textStart > start ? textStart : fallbackEnd;
   if (start < 0 || end <= start) {
     return "";
   }

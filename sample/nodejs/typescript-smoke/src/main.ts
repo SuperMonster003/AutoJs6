@@ -12,6 +12,17 @@ import images = require("images");
 import ocr = require("ocr");
 import storage = require("storage");
 import storages = require("storages");
+import files = require("files");
+import base64 = require("base64");
+import colors = require("colors");
+import formatter = require("formatter");
+import converter = require("converter");
+import mime = require("mime");
+import nanoid = require("nanoid");
+import util = require("util");
+import opencc = require("opencc");
+import pinyin = require("pinyin");
+import pinyin4j = require("pinyin4j");
 import notifications = require("notifications");
 import sensors = require("sensors");
 import ui = require("ui");
@@ -128,6 +139,23 @@ async function smoke(): Promise<void> {
   const storageContains: boolean = await store.contains("enabled", { timeoutMs: 1000 });
   await store.remove("enabled", { timeoutMs: 1000 });
   await store.clear({ timeoutMs: 1000 });
+
+  const scopedPath: string | null = files.path("types.txt");
+  const encoded: string = base64.encode("AutoJs6");
+  const decoded: string = base64.decode(encoded);
+  const color: number = colors.rgb(1, 2, 3);
+  const hex: string = colors.toHex(color);
+  const formattedBytes: string = formatter.bytes(1536);
+  const convertedBytes: number = converter.bytes("1 KB", "B");
+  const parsedMime: mime.JsMime = mime("text/plain; charset=utf-8");
+  const nano: string = nanoid(8);
+  const inspected: string = util.inspect({ encoded, decoded });
+  const openccConvert: (value: unknown, type: opencc.ConversionType | string) => never = opencc.convert;
+  const openccS2t: (value: unknown) => never = opencc.s2t;
+  const pinyinText: string = pinyin.simple("\u4f60\u597d");
+  const pinyinRows: pinyin.PinyinResult = pinyin.convert("\u4e2d\u56fd", { style: pinyin.STYLE_TONE2 });
+  const pinyin4jText: string = pinyin4j.of("\u4e2d\u56fd", { separator: " ", tone: "WITH_TONE_NUMBER" });
+
   const notificationId: notifications.NotificationId = await notifications.notify({
     id: 710003,
     title: "AutoJs6 Node",
@@ -267,6 +295,20 @@ async function smoke(): Promise<void> {
   void storedEnabled;
   void storageKeys;
   void storageContains;
+  void scopedPath;
+  void encoded;
+  void decoded;
+  void hex;
+  void formattedBytes;
+  void convertedBytes;
+  void parsedMime;
+  void nano;
+  void inspected;
+  void openccConvert;
+  void openccS2t;
+  void pinyinText;
+  void pinyinRows;
+  void pinyin4jText;
   void notificationId;
   void availableSensors;
   void sensorEvent;
