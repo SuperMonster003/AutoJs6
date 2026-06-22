@@ -147,6 +147,36 @@ tasks.register<Exec>("generateNodeRhinoCompatMatrix") {
     )
 }
 
+tasks.register<Exec>("verifyNodeRhinoCompatLoader") {
+    group = "verification"
+    description = "Verifies the Phase 11A explicit Rhino compatibility loader entrypoint and no-default-global policy."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-loader.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeErrorCodes.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_COMPAT_LOADER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/index.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/ERROR_CATALOG.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-compat-loader-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-loader-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCapabilityTruth") {
     group = "verification"
     description = "Writes build/reports/nodejs/final-capability-truth.json without failing on open Phase 11 blockers."

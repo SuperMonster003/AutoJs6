@@ -181,11 +181,18 @@ Inventory 和兼容矩阵统一使用以下状态：
 
 ### Track B: Low-risk facade
 
-- [ ] S11-08: 确定 compat loader 和模块命名。
+- [x] S11-08: 确定 compat loader 和模块命名。
   - 范围：决策 `"nodejs compat"`、`require("autojs6:compat")`、
     `require("rhino-compat")` 或其他入口形态。
   - 产物：design note、runtime module stub、错误码策略。
   - 验收：不会默认污染 Node global；必须显式 opt-in。
+  - Evidence：
+    `docs/nodejs/design/RHINO_COMPAT_LOADER.md` 记录入口决策，选定
+    `require("autojs6:compat")`，拒绝默认 Rhino globals 和裸
+    `require("rhino-compat")` alias；`app/src/main/cpp/node_bridge_sources.cpp`
+    增加 `autojs6:compat` runtime stub；`docs/nodejs/types/autojs6-node/rhino_compat.d.ts`
+    增加类型声明；`tools/nodejs/phase11/verify-rhino-compat-loader.js` 和
+    `:app:verifyNodeRhinoCompatLoader` 校验 no-default-global、错误码和文档/类型覆盖。
 
 - [ ] S11-09: 实现 toast、sleep、clipboard、basic global facade。
   - 范围：`toast()`、`toastLog()`、`sleep()`、`setClip()`、`getClip()` 等

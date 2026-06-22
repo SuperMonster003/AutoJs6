@@ -8190,6 +8190,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
   let __autojs6_limited_lifecycle_cache = null;
+  let __autojs6_limited_rhino_compat_cache = null;
   let __autojs6_lifecycle_config_cache = undefined;
   const __autojs6_lifecycle_checkpoint_handlers = [];
   const __autojs6_lifecycle_stop_handlers = [];
@@ -14599,6 +14600,115 @@ std::string buildEmbeddedScriptExecutionSource(
       policy: __autojs6_lifecycle_policy_snapshot()
     });
     return __autojs6_limited_lifecycle_cache;
+  }
+  const __autojs6_rhino_compat_error_codes = Object.freeze({
+    invalidOption: "ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION",
+    unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
+    blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
+  });
+  function __autojs6_rhino_compat_error(message, code, apiName, category) {
+    const error = __autojs6_error(message, code);
+    __autojs6_define_error_property(error, "module", "autojs6:compat");
+    if (apiName !== undefined && apiName !== null && String(apiName).length > 0) {
+      __autojs6_define_error_property(error, "api", String(apiName));
+    }
+    if (category !== undefined && category !== null && String(category).length > 0) {
+      __autojs6_define_error_property(error, "category", String(category));
+    }
+    return error;
+  }
+  function __autojs6_rhino_compat_option_object(options, operation) {
+    if (options === undefined || options === null) {
+      return {};
+    }
+    if (typeof options !== "object" || Array.isArray(options)) {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat." + operation + " options must be an object when provided.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        operation,
+        "invalid-option"
+      );
+    }
+    return options;
+  }
+  function __autojs6_rhino_compat_status_snapshot() {
+    return Object.freeze({
+      schema: "autojs6-node-rhino-compat-loader-v1",
+      entry: "autojs6:compat",
+      mode: "explicit-opt-in",
+      defaultGlobalInjection: false,
+      installed: false,
+      implementedTasks: Object.freeze(["S11-08"]),
+      pendingTasks: Object.freeze(["S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14"]),
+      globalNames: Object.freeze([]),
+      moduleNames: Object.freeze([])
+    });
+  }
+  function __autojs6_rhino_compat_install(options) {
+    const input = __autojs6_rhino_compat_option_object(options, "install");
+    if (input.global === true || input.globals === true) {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat global installation is reserved for later Phase 11 facade tasks.",
+        __autojs6_rhino_compat_error_codes.unsupported,
+        "install",
+        "unsupported"
+      );
+    }
+    return Object.freeze({
+      schema: "autojs6-node-rhino-compat-install-result-v1",
+      installed: false,
+      explicit: true,
+      globals: Object.freeze([]),
+      modules: Object.freeze([]),
+      reason: "S11-08 installs the explicit loader stub only; facade APIs are implemented by later Phase 11 tasks."
+    });
+  }
+  function __autojs6_rhino_compat_unsupported(apiName, reason) {
+    const api = apiName === undefined || apiName === null || String(apiName).length === 0
+      ? "unknown"
+      : String(apiName);
+    const detail = reason === undefined || reason === null || String(reason).length === 0
+      ? "This Rhino compatibility API is not implemented in the current Node compat facade."
+      : String(reason);
+    return __autojs6_rhino_compat_error(
+      "autojs6:compat " + api + " is unsupported: " + detail,
+      __autojs6_rhino_compat_error_codes.unsupported,
+      api,
+      "unsupported"
+    );
+  }
+  function __autojs6_rhino_compat_blocked_by_design(apiName, reason) {
+    const api = apiName === undefined || apiName === null || String(apiName).length === 0
+      ? "unknown"
+      : String(apiName);
+    const detail = reason === undefined || reason === null || String(reason).length === 0
+      ? "The API would expose raw Rhino, Java, or Android objects outside the Safe Node Profile."
+      : String(reason);
+    return __autojs6_rhino_compat_error(
+      "autojs6:compat " + api + " is blocked by design: " + detail,
+      __autojs6_rhino_compat_error_codes.blockedByDesign,
+      api,
+      "blocked-by-design"
+    );
+  }
+  function __autojs6_limited_rhino_compat() {
+    if (__autojs6_limited_rhino_compat_cache) {
+      return __autojs6_limited_rhino_compat_cache;
+    }
+    __autojs6_limited_rhino_compat_cache = Object.freeze({
+      name: "autojs6:compat",
+      version: 1,
+      mode: "explicit-opt-in",
+      errorCodes: __autojs6_rhino_compat_error_codes,
+      status: __autojs6_rhino_compat_status_snapshot,
+      install: __autojs6_rhino_compat_install,
+      unsupported: __autojs6_rhino_compat_unsupported,
+      blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
+      assertSupported: function(apiName) {
+        throw __autojs6_rhino_compat_unsupported(apiName);
+      }
+    });
+    return __autojs6_limited_rhino_compat_cache;
   }
   function __autojs6_limited_work_manager() {
     if (__autojs6_limited_work_manager_cache) {
@@ -35195,6 +35305,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "autojs6:bridge") {
       return "autojs6:bridge";
     }
+    if (name === "autojs6:compat") {
+      return "autojs6:compat";
+    }
     if (name === "autojs6:lifecycle") {
       return "autojs6:lifecycle";
     }
@@ -35452,6 +35565,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "autojs6:bridge") {
       return __autojs6_bridge_module();
+    }
+    if (name === "autojs6:compat") {
+      return __autojs6_limited_rhino_compat();
     }
     if (name === "autojs6:lifecycle") {
       return __autojs6_limited_lifecycle();

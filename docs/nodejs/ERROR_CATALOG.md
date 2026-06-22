@@ -79,6 +79,30 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: pass an appropriate timeout where supported and handle the rejection path.
 - Related docs: [TESTING.md](TESTING.md), [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md).
 
+## ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN
+
+- Meaning: A Rhino-style compatibility API was rejected because it would cross the Safe Node Profile boundary.
+- Common cause: a migrated script expects raw Java, Rhino `Scriptable`, Android UI/accessibility objects, `importClass`, `importPackage`, or `JavaAdapter`.
+- Example: asking the compat loader to expose `importClass`.
+- How to fix: use a JSON-safe Node bridge facade, or keep the script on the Rhino engine until a safe migration path exists.
+- Related docs: [design/RHINO_COMPAT_LOADER.md](design/RHINO_COMPAT_LOADER.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
+
+## ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION
+
+- Meaning: A Rhino compatibility loader or facade option was malformed.
+- Common cause: passing a non-object options value to `require("autojs6:compat").install()`.
+- Example: `compat.install("globals")`.
+- How to fix: pass an options object and keep global installation explicit.
+- Related docs: [design/RHINO_COMPAT_LOADER.md](design/RHINO_COMPAT_LOADER.md).
+
+## ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED
+
+- Meaning: A Rhino-style compatibility API is not implemented in the current Node compat facade.
+- Common cause: using a Rhino API before its Phase 11 facade task has landed.
+- Example: `compat.assertSupported("files.read")` before the scoped files facade is implemented.
+- How to fix: use the current Node bridge module directly, or wait for the matching Phase 11 compat facade task.
+- Related docs: [design/RHINO_COMPAT_LOADER.md](design/RHINO_COMPAT_LOADER.md), [RHINO_AUGMENT_COMPATIBILITY_MATRIX.md](RHINO_AUGMENT_COMPATIBILITY_MATRIX.md).
+
 ## ERR_AUTOJS6_BUILTIN_DISABLED
 
 - Meaning: A Node builtin is disabled by the Safe Node Profile.
