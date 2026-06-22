@@ -646,11 +646,85 @@ tasks.register<Exec>("verifyNodeFinalProviderGate") {
     )
 }
 
-tasks.register("verifyNodeFinalAbiGate") {
+tasks.register<Exec>("generateNodeFinalAbiStatus") {
+    group = "verification"
+    description = "Writes the current Phase 11 ABI status without failing on bootstrap-only runtime artifact evidence."
+
+    dependsOn("verifyNodeRuntimeAdapterAbi", "verifyNodeRuntimeArtifactGate", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-abi-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(project.layout.projectDirectory.file("node-native-modernization.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_api_v1.h"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_adapter_24_5.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_jni.cpp"))
+    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("runtime-adapter-abi-v1.json") },
+        nodePhase11ReportDir.map { it.file("runtime-adapter-export.json") },
+        nodePhase11ReportDir.map { it.file("runtime-artifact-gate.json") },
+        nodePhase11ReportDir.map { it.file("runtime-artifact-manifest.json") },
+        nodePhase11ReportDir.map { it.file("runtime-distribution-policy.json") },
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-abi-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-abi-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeFinalAbiGate") {
     group = "verification"
     description = "Strict final ABI gate for the required Node runtime ABIs."
 
-    dependsOn("verifyNodeRuntimeArtifactGate", "verifyNodeFinalCapabilityTruth")
+    dependsOn("verifyNodeRuntimeAdapterAbi", "verifyNodeRuntimeArtifactGate", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-abi-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(project.layout.projectDirectory.file("node-native-modernization.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_api_v1.h"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_runtime_adapter_24_5.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_jni.cpp"))
+    inputs.dir(project.layout.projectDirectory.dir("src/main/jniLibs"))
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("runtime-adapter-abi-v1.json") },
+        nodePhase11ReportDir.map { it.file("runtime-adapter-export.json") },
+        nodePhase11ReportDir.map { it.file("runtime-artifact-gate.json") },
+        nodePhase11ReportDir.map { it.file("runtime-artifact-manifest.json") },
+        nodePhase11ReportDir.map { it.file("runtime-distribution-policy.json") },
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-abi-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-abi-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-blocked",
+    )
 }
 
 tasks.register("verifyNodeFinalSecurityGate") {
@@ -754,6 +828,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         "generateNodeFinalWorkerDecisionStatus",
         "generateNodeFinalSoakStatus",
         "generateNodeFinalProviderStatus",
+        "generateNodeFinalAbiStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -770,6 +845,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
         nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
         nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-abi-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },
@@ -802,6 +878,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         "generateNodeFinalWorkerDecisionStatus",
         "generateNodeFinalSoakStatus",
         "generateNodeFinalProviderStatus",
+        "generateNodeFinalAbiStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -818,6 +895,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
         nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
         nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-abi-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },

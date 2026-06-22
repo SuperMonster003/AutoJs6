@@ -15,6 +15,7 @@ const REPORTS = [
   ["worker_decision_gate", "final-worker-decision-gate.json", false],
   ["soak_gate", "final-soak-gate.json", false],
   ["provider_gate", "final-provider-gate.json", false],
+  ["abi_gate", "final-abi-gate.json", false],
 ];
 
 function main() {

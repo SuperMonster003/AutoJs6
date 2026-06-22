@@ -21,6 +21,7 @@ Host report tasks:
 .\gradlew.bat --console=plain :app:generateNodeFinalWorkerDecisionStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalSoakStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalProviderStatus
+.\gradlew.bat --console=plain :app:generateNodeFinalAbiStatus
 .\gradlew.bat --console=plain :app:generateNodeFinalIntegrationSummary
 ```
 
@@ -28,7 +29,8 @@ Strict final gates such as `verifyNodeFinalCapabilityTruth`,
 `verifyNodeFinalAdapterGate`, `verifyNodeFinalCrashGate`,
 `verifyNodeFinalPackageManagerGate`, `verifyNodeFinalLongRunningGate`,
 `verifyNodeFinalMultiInstanceGate`, `verifyNodeFinalWorkerDecisionGate`,
-`verifyNodeFinalSoakGate`, `verifyNodeFinalProviderGate`, and
+`verifyNodeFinalSoakGate`, `verifyNodeFinalProviderGate`,
+`verifyNodeFinalAbiGate`, and
 `verifyNodeFinalIntegrationGate` are expected to remain `blocked` until the
-required internal blockers, live-provider evidence, and conditional decisions
-are resolved.
+required internal blockers, live-provider evidence, bootstrap-only ABI/runtime
+artifact evidence, and conditional decisions are resolved.
