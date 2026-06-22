@@ -97,13 +97,17 @@ Inventory 和兼容矩阵统一使用以下状态：
 
 ### Track A: Inventory and gates
 
-- [ ] S11-01: 定义 Rhino augment inventory schema。
+- [x] S11-01: 定义 Rhino augment inventory schema。
   - 范围：定义 module、global assignment、self assignment、alias、
     getter、class assignment、withDollarPrefix、attributes、source location、
     migration status、notes 字段。
   - 产物：schema 文档和测试 fixture。
   - 验收：schema 能覆盖 `Augmentable`、`AugmentableProxy`、`Invokable`、
     `Constructable`、`AsEmitter`、simple getter proxy。
+  - Evidence：
+    `docs/nodejs/rhino-compat/AUGMENT_INVENTORY_SCHEMA.md`、
+    `docs/nodejs/rhino-compat/rhino-augment-inventory.schema.json`、
+    `docs/nodejs/rhino-compat/fixtures/rhino-augment-inventory.sample.json`。
 
 - [ ] S11-02: 实现 augment source scanner。
   - 范围：扫描 `org/autojs/autojs/runtime/api/augment` 和
