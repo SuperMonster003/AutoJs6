@@ -1,0 +1,326 @@
+# Phase 11A: Rhino Augment Compatibility Tasks
+
+盘点日期：2026-06-22
+
+本文件是 Phase 11 中面向脚本兼容性的任务轨道。它不替代
+`docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` 中的 Phase 11 completion
+blockers，而是把
+[`INTEGRATION_STATUS_PRO9_COMPARISON.md`](../../INTEGRATION_STATUS_PRO9_COMPARISON.md)
+中提出的 Rhino `augment` 迁移缺口拆成可逐个提交、可追踪、可验收的
+任务。
+
+## 目标
+
+让脚本开发者能在 Node.js 引擎中逐步使用 AutoJs6/Rhino 时代的主要脚本
+能力，尤其是 `org/autojs/autojs/runtime/api/augment` 中的全局 API、内置
+模块、自动化 DSL 和常用工具模块。
+
+第一阶段目标不是把 Rhino 对象模型搬进 V8，也不是实现 Pro 9 的完整
+`require("rhino").install()` 语义，而是建立一条安全、显式、可测试的
+compat 路径：
+
+- Rhino API inventory 可自动生成。
+- 每个 Rhino API 有 Node 迁移状态。
+- Node bridge、runtime module、types 和 docs 与 inventory 可做 diff。
+- 低风险模块先进入 Node facade。
+- 自动化核心 API 以 handle/bridge/Promise 模型实现 Rhino 风格 wrapper。
+- 缺能力时返回稳定错误码和迁移提示。
+- 每个 Task 独立提交，方便后续追踪和回滚。
+
+## 提交规则
+
+每个 Task 单独提交一次。提交应只覆盖该 Task 的代码、测试、文档和报告
+产物。
+
+推荐提交信息格式：
+
+```text
+nodejs phase11 S11-01: add rhino augment inventory schema
+```
+
+每个 Task 完成时需要：
+
+- 将本文件对应 checkbox 改为 `[x]`。
+- 在 Task 下方补充 evidence 路径或运行命令结果摘要。
+- 如有 Gradle gate，提交中必须包含 gate 任务或 gate 输出更新。
+- 如因设备、权限或外部条件无法运行，需要记录明确原因。
+- 不把多个 S11 Task 混在一个提交里。
+
+## 边界
+
+### 本轨道包含
+
+- Rhino `augment` API inventory。
+- Rhino API 到 Node bridge/runtime module/types/docs 的映射。
+- 低风险 utility facade。
+- scoped `files` facade。
+- `toast`、clipboard、timers、console、storages、sqlite 等常用兼容层。
+- selector/accessibility 核心 DSL。
+- image/OCR/screenshot 常用 wrapper。
+- app/device/shell 常用兼容 API。
+- UI、floaty、tasks、events、threads 的设计门禁和后续实现任务。
+- 显式 JSON-only Rhino shim 的可行性设计。
+- 示例、迁移文档、双引擎兼容测试和 packaged APK smoke。
+
+### 本轨道不包含
+
+- 默认向 Node 全局注入所有 Rhino globals。
+- 把 Rhino `Scriptable`、Android `View`、`Context`、
+  `AccessibilityNodeInfo` 或 Java raw object 暴露给 Node。
+- 支持 `importClass`、`importPackage`、`JavaAdapter` 穿透到 Node。
+- 默认实现 Pro 9 的 `$autojs.java` 或 `require("rhino").install()`。
+- 放开 native addon、unrestricted `child_process`、raw network、
+  raw `node:wasi`、private Node bindings 或 production Inspector。
+- 替代 `crash_evidence_automation`、`android_side_package_installation`、
+  `packaged_long_running`、`second_execution_slot`、
+  `full_heavy_resource_stress` 这些 Phase 11 required internal blockers。
+
+## 状态词汇
+
+Inventory 和兼容矩阵统一使用以下状态：
+
+- `supported`：Node 中已有同步或等价语义。
+- `supported_async`：Node 中可用，但必须通过 Promise/async API。
+- `renamed`：能力可用，但模块名、方法名或参数形态不同。
+- `partial`：部分可用，缺关键参数、权限路径、资源释放或 packaged 覆盖。
+- `blocked_by_design`：违反 Safe Node Profile 边界，明确不实现。
+- `unsupported`：尚未实现，且暂未判定为永久拒绝。
+
+## 总体 checklist
+
+### Track 0: Phase bootstrap
+
+- [x] S11-00: 提交本 Phase 11A 任务文档。
+  - 产物：`docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md`
+  - 验收：文档包含范围、边界、任务拆分、提交规则和验收标准。
+  - Evidence：本文件创建并作为 Phase 11A bootstrap 任务提交。
+
+### Track A: Inventory and gates
+
+- [ ] S11-01: 定义 Rhino augment inventory schema。
+  - 范围：定义 module、global assignment、self assignment、alias、
+    getter、class assignment、withDollarPrefix、attributes、source location、
+    migration status、notes 字段。
+  - 产物：schema 文档和测试 fixture。
+  - 验收：schema 能覆盖 `Augmentable`、`AugmentableProxy`、`Invokable`、
+    `Constructable`、`AsEmitter`、simple getter proxy。
+
+- [ ] S11-02: 实现 augment source scanner。
+  - 范围：扫描 `org/autojs/autojs/runtime/api/augment` 和
+    `ScriptRuntime.augment(...)` 的实际注册顺序。
+  - 产物：scanner task 或 Kotlin utility。
+  - 验收：能输出所有已注册 augment module，包含文件路径和行号。
+
+- [ ] S11-03: 生成 `rhino-augment-api-inventory.json` 和 `.md`。
+  - 范围：新增 Gradle 任务，例如 `generateNodeRhinoAugmentInventory`。
+  - 产物：`build/reports/nodejs/rhino-augment-api-inventory.json`、
+    `build/reports/nodejs/rhino-augment-api-inventory.md`。
+  - 验收：报告稳定排序，连续运行无非确定性 diff。
+
+- [ ] S11-04: 生成 Node bridge/types/docs 差距报告。
+  - 范围：对比 `NodeBridgeModules`、
+    `docs/nodejs/types/autojs6-node/index.d.ts`、runtime module source 和
+    inventory。
+  - 产物：`build/reports/nodejs/rhino-node-compat-gap.json`、
+    `build/reports/nodejs/rhino-node-compat-gap.md`。
+  - 验收：每个 Rhino API 至少落到一个状态词汇。
+
+- [ ] S11-05: 增加 inventory status manifest。
+  - 范围：建立人工维护的 status/decision manifest，避免 scanner 只知道
+    "存在"，不知道 "迁移策略"。
+  - 产物：例如 `docs/nodejs/rhino-compat/status-manifest.json`。
+  - 验收：manifest 缺项时 gate 能失败并指出具体 API。
+
+- [ ] S11-06: 增加 `verifyNodeRhinoCompatInventory` gate。
+  - 范围：校验 inventory、status manifest、bridge/types/docs diff。
+  - 产物：Gradle verification task。
+  - 验收：新增 Rhino augment API 如果没有 Node 迁移状态，gate 失败。
+
+- [ ] S11-07: 发布第一版 Rhino-to-Node 兼容矩阵。
+  - 范围：把 report 中的当前人工矩阵转换为生成或半生成文档。
+  - 产物：`docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`。
+  - 验收：矩阵按模块分组，包含状态、Node 替代模块、风险和下一步。
+
+### Track B: Low-risk facade
+
+- [ ] S11-08: 确定 compat loader 和模块命名。
+  - 范围：决策 `"nodejs compat"`、`require("autojs6:compat")`、
+    `require("rhino-compat")` 或其他入口形态。
+  - 产物：design note、runtime module stub、错误码策略。
+  - 验收：不会默认污染 Node global；必须显式 opt-in。
+
+- [ ] S11-09: 实现 toast、sleep、clipboard、basic global facade。
+  - 范围：`toast()`、`toastLog()`、`sleep()`、`setClip()`、`getClip()` 等
+    低风险常用 API。
+  - 产物：runtime module、types、host tests。
+  - 验收：Node compat 示例可运行；缺 clipboard provider 时有稳定错误码。
+
+- [ ] S11-10: 实现 scoped `files` compatibility facade。
+  - 范围：覆盖常用 `files.read/write/exists/listDir/join/path/remove/copy/move`
+    等，并严格遵守 scoped fs。
+  - 产物：facade、types、path traversal tests。
+  - 验收：拒绝越界路径；错误消息包含迁移建议。
+
+- [ ] S11-11: 实现 pure utility facade。
+  - 范围：`base64`、`colors`、`formatter`、`converter`、`mime`、
+    `nanoid` 的优先子集。
+  - 产物：runtime module 或 JS facade、types、unit tests。
+  - 验收：不依赖 Android provider；可在 host gate 中跑。
+
+- [ ] S11-12: 实现 text utility facade。
+  - 范围：`opencc`、`pinyin`、`pinyin4j` 的可用子集和缺依赖降级。
+  - 产物：facade、types、fixture tests。
+  - 验收：缺少 native/resource 依赖时返回稳定 `unsupported` 错误。
+
+- [ ] S11-13: 实现 storages/sqlite compatibility facade。
+  - 范围：把 Rhino `storages`、`sqlite` 常用形态映射到现有
+    `storage/storages`、`database/sqlite` bridge。
+  - 产物：facade、types、migration examples。
+  - 验收：数据隔离、关闭、事务错误路径有测试。
+
+- [ ] S11-14: 稳定 console/timers/error compatibility。
+  - 范围：确认 `console`、`setTimeout`、`setInterval`、`clearTimeout`、
+    `clearInterval`、异常格式和 source map 输出。
+  - 产物：compat tests、docs。
+  - 验收：常用 Rhino 调试脚本迁移到 Node 后输出可读。
+
+### Track C: Automation core facade
+
+- [ ] S11-15: 设计 selector DSL handle 模型。
+  - 范围：定义 `text()`、`desc()`、`id()`、链式过滤、`findOne()`、
+    `find()`、`click()` 的异步/同步外观策略。
+  - 产物：design doc、types draft、bridge method gap list。
+  - 验收：明确哪些 API 是 `await`，哪些仅提供 compatibility wrapper。
+
+- [ ] S11-16: 实现 selector/accessibility 第一版 facade。
+  - 范围：覆盖最常见的 `text("...").findOne(timeout)`、
+    `text("...").click()`、`back()`、`home()`、`click(x,y)`。
+  - 产物：facade、types、instrumentation tests。
+  - 验收：无 raw `AccessibilityNodeInfo` 泄漏；handle 超时后释放。
+
+- [ ] S11-17: 扩展 app/device/shell compatibility。
+  - 范围：`app.launchPackage`、`app.openAppSetting`、basic intent helpers、
+    `device.wakeUp/vibrate/isScreenOn`、`shell()` 常用形态。
+  - 产物：facade、types、permission docs。
+  - 验收：shell 权限和 root/shizuku 边界清晰，不提升 Safe Node Profile。
+
+- [ ] S11-18: 实现 images compatibility 第一版。
+  - 范围：`images.read/save/clip/resize/grayscale/threshold/findImage/
+    matchTemplate/findColor/findMultiColors/recycle`。
+  - 产物：facade、types、image handle lifecycle tests。
+  - 验收：每个 image handle 在 stop/timeout/destroy 后可追踪释放。
+
+- [ ] S11-19: 补齐 screenshot permission compatibility。
+  - 范围：`requestScreenCapture()`、`captureScreen()` 和 media projection
+    provider 的 Rhino 风格 wrapper。
+  - 产物：facade、permission flow docs、device smoke。
+  - 验收：拒绝权限时错误稳定；packaged 行为有记录。
+
+- [ ] S11-20: 实现 OCR/barcode compatibility strategy。
+  - 范围：`ocr.recognizeText()`、`ocr.detectTextBounds()`、`barcode`、
+    `qrcode` 的可用子集。
+  - 产物：facade、types、fixture tests。
+  - 验收：图像输入支持 path/handle，输出为 JSON-safe object。
+
+### Track D: Lifecycle-heavy APIs
+
+- [ ] S11-21: 设计 events/keys/input observer compatibility。
+  - 范围：事件订阅、按键监听、触摸/key observer 的权限和资源释放。
+  - 产物：design gate、capability manifest diff。
+  - 验收：没有未释放 listener；后台/packaged 语义有明确边界。
+
+- [ ] S11-22: 设计 tasks 到 WorkManager/用户任务数据库的迁移。
+  - 范围：Rhino `tasks` 与现有 `work_manager` 的 API 映射和不可映射项。
+  - 产物：design doc、migration table。
+  - 验收：不把长期任务误映射为一次性 bridge call。
+
+- [ ] S11-23: 设计 UI compatibility。
+  - 范围：Rhino UI DSL、`ui.run()`、`ui.post()`、layout update、event drain。
+  - 产物：design gate、sample migration。
+  - 验收：UI thread/Node event loop 关系明确；无跨线程 raw object 泄漏。
+
+- [ ] S11-24: 设计 floaty compatibility。
+  - 范围：overlay permission、foreground disclosure、window handle、
+    close/cleanup、packaged 行为。
+  - 产物：design gate、provider gap list。
+  - 验收：没有后台静默 overlay；关闭路径可审计。
+
+- [ ] S11-25: 明确 threads migration policy。
+  - 范围：Rhino `threads` 到 Node async/process slot/worker policy 的迁移。
+  - 产物：policy doc、examples。
+  - 验收：不承诺默认 `worker_threads`；同步共享对象模型标记为
+    `blocked_by_design` 或替代方案。
+
+- [ ] S11-26: 设计 explicit Rhino JSON-only shim。
+  - 范围：`rhino.run({ source, timeoutMs, args })` 或等价显式 API。
+  - 产物：design doc、security boundary、POC gate 计划。
+  - 验收：只允许 JSON-safe input/output；不安装 Rhino globals 到 V8。
+
+### Track E: Examples, tests, release evidence
+
+- [ ] S11-27: 建立常用 Rhino 脚本迁移示例集。
+  - 范围：toast/files/storage/selector/image/ocr/app/device/shell 的旧写法和
+    Node compat 写法。
+  - 产物：`docs/nodejs/examples/rhino-compat/` 或同等目录。
+  - 验收：示例都能被 example gate 编译或执行。
+
+- [ ] S11-28: 建立双引擎兼容测试集。
+  - 范围：同一用例在 Rhino 和 Node compat mode 下验证核心行为。
+  - 产物：host tests、device instrumentation tests。
+  - 验收：测试报告能区分 `supported_async` 和 `blocked_by_design`。
+
+- [ ] S11-29: 建立 packaged APK compatibility smoke。
+  - 范围：packaged 脚本验证 compat loader、bridge permission、资源释放。
+  - 产物：Gradle device gate 和报告。
+  - 验收：至少覆盖 toast/files/storage/selector/image 基础路径。
+
+- [ ] S11-30: 建立 resource cleanup/security gate。
+  - 范围：compat facade 下的 image、selector、event、ui、floaty、db、
+    websocket/fetch 资源释放和拒绝路径。
+  - 产物：gate、security report。
+  - 验收：stop/timeout/destroy 后 active resource 归零或有可解释残留。
+
+- [ ] S11-31: 发布 Phase 11A summary。
+  - 范围：汇总 inventory、compat matrix、已支持 API、剩余缺口、blocked
+    decisions、推荐迁移路径。
+  - 产物：`docs/nodejs/reports/phase11/PHASE11A_SUMMARY.md` 和生成报告。
+  - 验收：summary 可直接支撑下一阶段任务拆分。
+
+## 推荐执行顺序
+
+1. S11-00 到 S11-07：先建立 inventory、状态词汇和 gate。
+2. S11-08 到 S11-14：完成低风险 facade，快速改善旧脚本迁移体验。
+3. S11-15 到 S11-20：推进脚本作者最常用的自动化核心。
+4. S11-21 到 S11-26：处理生命周期复杂或安全边界敏感的 API。
+5. S11-27 到 S11-31：补齐示例、双引擎测试、packaged smoke 和 summary。
+
+Track B 可以在 S11-06 之后并行推进，但每个模块提交仍应保持单 Task。
+Track C 必须等待 selector/image/OCR 的 bridge method gap 明确后再实现。
+Track D 不应在没有 design gate 的情况下直接开放 provider。
+
+## Phase 11A 完成标准
+
+Phase 11A 可以判定完成，当且仅当：
+
+- Rhino `augment` inventory 可自动生成。
+- Inventory 中每个 API 都有 Node 迁移状态。
+- 新增 Rhino API 未标注迁移状态时 gate 会失败。
+- Node bridge/runtime module/types/docs 与 inventory 的差距可报告。
+- 低风险 facade 至少覆盖 toast、sleep、clipboard、files、base64、colors、
+  formatter、converter、mime、nanoid、storages、sqlite。
+- 自动化核心至少覆盖 selector/accessibility、app、device、shell、images、
+  screenshot、OCR 的基础路径。
+- 常用 Rhino 脚本有 Node compat 示例。
+- 兼容层不泄漏 raw Java/Rhino/Android object。
+- stop/timeout/destroy 后 compat 资源可追踪释放。
+- packaged APK smoke 覆盖核心 compat API。
+- Phase summary 明确下一阶段仍需处理的 UI、floaty、tasks、events、
+  threads、Rhino shim 和 required internal blockers。
+
+## 当前初始判断
+
+当前 AutoJs6 已具备 Node runtime、bridge、types、provider registry 和 Phase
+10 门禁基础，因此 Phase 11A 的首要风险不是 Node 能否启动，而是 Rhino
+API 表面太大、同步写法多、对象模型与 Safe Node Profile 冲突。先做
+inventory 和状态门禁，可以避免在没有完整地图的情况下零散补 facade，
+也能让后续每个 Task 的提交边界更清晰。
