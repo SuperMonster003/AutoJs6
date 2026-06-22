@@ -14,6 +14,7 @@ const REPORTS = [
   ["multi_instance_gate", "final-multi-instance-gate.json", false],
   ["worker_decision_gate", "final-worker-decision-gate.json", false],
   ["soak_gate", "final-soak-gate.json", false],
+  ["provider_gate", "final-provider-gate.json", false],
 ];
 
 function main() {

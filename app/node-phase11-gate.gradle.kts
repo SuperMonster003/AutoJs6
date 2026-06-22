@@ -565,11 +565,85 @@ tasks.register<Exec>("verifyNodeFinalWorkerDecisionGate") {
     )
 }
 
-tasks.register("verifyNodeFinalProviderGate") {
+tasks.register<Exec>("generateNodeFinalProviderStatus") {
+    group = "verification"
+    description = "Writes the current Phase 11 provider status without failing on missing live-provider evidence."
+
+    dependsOn("verifyNodePhase10ProviderRegistryV2", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-provider-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-provider-registry-v2.js"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("embedded-node-packaging-preflight.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/ui/settings/NodeDoctorReportGenerator.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeProviderRegistryInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/ui/settings/NodeDoctorReportGeneratorInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("phase10-provider-registry-v2.json") },
+        nodePhase11ReportDir.map { it.file("live-provider-summary.json") },
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-provider-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeFinalProviderGate") {
     group = "verification"
     description = "Strict final provider stability gate."
 
-    dependsOn("verifyNodeLiveProviderGate", "verifyNodeFinalCapabilityTruth")
+    dependsOn("verifyNodePhase10ProviderRegistryV2", "generateNodeFinalCapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-provider-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase10/verify-provider-registry-v2.js"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("embedded-node-packaging-preflight.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase10-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/ui/settings/NodeDoctorReportGenerator.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeProviderRegistryInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/ui/settings/NodeDoctorReportGeneratorInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("phase10-provider-registry-v2.json") },
+        nodePhase11ReportDir.map { it.file("live-provider-summary.json") },
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-provider-gate.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-blocked",
+    )
 }
 
 tasks.register("verifyNodeFinalAbiGate") {
@@ -679,6 +753,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         "generateNodeFinalMultiInstanceStatus",
         "generateNodeFinalWorkerDecisionStatus",
         "generateNodeFinalSoakStatus",
+        "generateNodeFinalProviderStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -694,6 +769,7 @@ tasks.register<Exec>("generateNodeFinalIntegrationSummary") {
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
         nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
         nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },
@@ -725,6 +801,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         "generateNodeFinalMultiInstanceStatus",
         "generateNodeFinalWorkerDecisionStatus",
         "generateNodeFinalSoakStatus",
+        "generateNodeFinalProviderStatus",
     )
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-final-integration-summary.js")
@@ -740,6 +817,7 @@ tasks.register<Exec>("verifyNodeFinalIntegrationGate") {
         nodePhase11ReportDir.map { it.file("final-multi-instance-gate.json") },
         nodePhase11ReportDir.map { it.file("final-worker-decision-gate.json") },
         nodePhase11ReportDir.map { it.file("final-soak-gate.json") },
+        nodePhase11ReportDir.map { it.file("final-provider-gate.json") },
     )
     outputs.files(
         nodePhase11ReportDir.map { it.file("final-integration-summary.json") },
