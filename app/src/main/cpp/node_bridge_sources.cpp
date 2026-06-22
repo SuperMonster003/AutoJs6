@@ -8191,6 +8191,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_work_manager_cache = null;
   let __autojs6_limited_lifecycle_cache = null;
   let __autojs6_limited_rhino_compat_cache = null;
+  let __autojs6_limited_files_cache = null;
   let __autojs6_rhino_compat_facade_cache = null;
   let __autojs6_lifecycle_config_cache = undefined;
   const __autojs6_lifecycle_checkpoint_handlers = [];
@@ -14602,13 +14603,310 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     return __autojs6_limited_lifecycle_cache;
   }
+  function __autojs6_files_is_nullish(value) {
+    return value === undefined || value === null;
+  }
+  function __autojs6_files_text(value) {
+    return __autojs6_files_is_nullish(value) ? "" : String(value);
+  }
+  function __autojs6_files_encoding(value) {
+    if (value === undefined || value === null || value === "") {
+      return "utf8";
+    }
+    return String(value);
+  }
+  function __autojs6_files_migration_hint(error, apiName) {
+    if (!error || typeof error !== "object") {
+      return error;
+    }
+    const hint = " Migration: AutoJs6 Node files compatibility is scoped to the script workingDirectory; use relative paths under that directory or switch to require('fs')/require('path') for explicit Node code.";
+    try {
+      const message = error && error.message ? String(error.message) : String(error);
+      if (message.indexOf("Migration: AutoJs6 Node files compatibility") < 0) {
+        error.message = message + hint;
+      }
+    } catch (_) {}
+    __autojs6_define_error_property(error, "module", "files");
+    __autojs6_define_error_property(error, "api", "files." + apiName);
+    return error;
+  }
+  function __autojs6_files_call(apiName, action) {
+    try {
+      return action();
+    } catch (error) {
+      throw __autojs6_files_migration_hint(error, apiName);
+    }
+  }
+  function __autojs6_files_required_path(pathValue, apiName, argumentName) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      throw __autojs6_invalid_arg_type(
+        "files." + apiName + " " + (argumentName || "path") + " must not be nullish."
+      );
+    }
+    return String(pathValue);
+  }
+  function __autojs6_files_resolve(pathValue, apiName, options) {
+    const mergedOptions = Object.assign({ allowAbsolute: true }, options || {});
+    return __autojs6_validate_fs_path(pathValue, "files." + apiName, mergedOptions);
+  }
+  function __autojs6_files_resolve_required(pathValue, apiName, argumentName, options) {
+    return __autojs6_files_resolve(
+      __autojs6_files_required_path(pathValue, apiName, argumentName),
+      apiName,
+      options
+    );
+  }
+  function __autojs6_files_parent_directory(resolvedPath, apiName) {
+    const path = __autojs6_path_module();
+    if (!path || typeof path.dirname !== "function") {
+      throw new Error("files." + apiName + " needs allowlisted path.dirname.");
+    }
+    return path.dirname(resolvedPath);
+  }
+  function __autojs6_files_ensure_parent_directory(resolvedPath, apiName) {
+    const nodeFs = __autojs6_fs_module();
+    if (!nodeFs || typeof nodeFs.mkdirSync !== "function") {
+      throw new Error("files." + apiName + " needs allowlisted fs.mkdirSync.");
+    }
+    const parent = __autojs6_files_parent_directory(resolvedPath, apiName);
+    __autojs6_files_resolve(parent, apiName + " parent", {
+      allowAbsolute: true,
+      checkParent: true
+    });
+    if (!nodeFs.existsSync(parent)) {
+      nodeFs.mkdirSync(parent, { recursive: true });
+    }
+  }
+  function __autojs6_files_path(pathValue) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return null;
+    }
+    return __autojs6_files_call("path", function() {
+      return __autojs6_files_resolve(String(pathValue), "path", {});
+    });
+  }
+  function __autojs6_files_join() {
+    const path = __autojs6_path_module();
+    if (!path || typeof path.join !== "function") {
+      throw new Error("files.join needs allowlisted path.join.");
+    }
+    const args = Array.prototype.slice.call(arguments).map(function(value) {
+      return __autojs6_files_is_nullish(value) ? "" : String(value);
+    });
+    return path.join.apply(path, args);
+  }
+  function __autojs6_files_read(pathValue, encoding) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return "";
+    }
+    return __autojs6_files_call("read", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), "read", { mustExist: true });
+      return String(nodeFs.readFileSync(resolved, __autojs6_files_encoding(encoding)));
+    });
+  }
+  function __autojs6_files_write(pathValue, text, encoding) {
+    return __autojs6_files_call("write", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve_required(pathValue, "write", "path", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      nodeFs.writeFileSync(resolved, __autojs6_files_text(text), __autojs6_files_encoding(encoding));
+    });
+  }
+  function __autojs6_files_append(pathValue, text, encoding) {
+    return __autojs6_files_call("append", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve_required(pathValue, "append", "path", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      nodeFs.appendFileSync(resolved, __autojs6_files_text(text), __autojs6_files_encoding(encoding));
+    });
+  }
+  function __autojs6_files_exists(pathValue) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return false;
+    }
+    return __autojs6_files_call("exists", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), "exists", {});
+      return nodeFs.existsSync(resolved);
+    });
+  }
+  function __autojs6_files_list_dir(pathValue, filter) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return [];
+    }
+    return __autojs6_files_call("listDir", function() {
+      if (filter !== undefined && filter !== null && typeof filter !== "function") {
+        throw __autojs6_invalid_arg_type("files.listDir filter must be a function when provided.");
+      }
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), "listDir", {});
+      if (!nodeFs.existsSync(resolved)) {
+        return [];
+      }
+      const entries = nodeFs.readdirSync(resolved).map(String);
+      return typeof filter === "function"
+        ? entries.filter(function(name) { return filter(name) === true; })
+        : entries;
+    });
+  }
+  function __autojs6_files_remove(pathValue) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return false;
+    }
+    return __autojs6_files_call("remove", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), "remove", { rejectRoot: true });
+      if (!nodeFs.existsSync(resolved)) {
+        return false;
+      }
+      const lstat = nodeFs.lstatSync(resolved);
+      if (lstat && typeof lstat.isDirectory === "function" && lstat.isDirectory()) {
+        nodeFs.rmdirSync(resolved);
+      } else {
+        nodeFs.unlinkSync(resolved);
+      }
+      return !nodeFs.existsSync(resolved);
+    });
+  }
+  function __autojs6_files_copy(sourcePath, destinationPath) {
+    return __autojs6_files_call("copy", function() {
+      const nodeFs = __autojs6_fs_module();
+      const source = __autojs6_files_resolve_required(sourcePath, "copy source", "pathFrom", {});
+      const destination = __autojs6_files_resolve_required(destinationPath, "copy destination", "pathTo", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      if (!nodeFs.existsSync(source)) {
+        return false;
+      }
+      const sourceStat = nodeFs.statSync(source);
+      if (!sourceStat || typeof sourceStat.isFile !== "function" || !sourceStat.isFile()) {
+        return false;
+      }
+      __autojs6_files_ensure_parent_directory(destination, "copy");
+      nodeFs.copyFileSync(source, destination);
+      return true;
+    });
+  }
+  function __autojs6_files_move(sourcePath, destinationPath) {
+    return __autojs6_files_call("move", function() {
+      const nodeFs = __autojs6_fs_module();
+      const source = __autojs6_files_resolve_required(sourcePath, "move source", "path", {});
+      const destination = __autojs6_files_resolve_required(destinationPath, "move destination", "newPath", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      if (!nodeFs.existsSync(source)) {
+        return false;
+      }
+      try {
+        nodeFs.renameSync(source, destination);
+        return true;
+      } catch (error) {
+        if (error && error.code === "ENOENT") {
+          return false;
+        }
+        throw error;
+      }
+    });
+  }
+  function __autojs6_files_ensure_dir(pathValue) {
+    return __autojs6_files_call("ensureDir", function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve_required(pathValue, "ensureDir", "path", {
+        checkParent: true,
+        rejectRoot: true
+      });
+      const text = String(pathValue);
+      const target = /[\\\/]$/.test(text)
+        ? resolved
+        : __autojs6_files_parent_directory(resolved, "ensureDir");
+      __autojs6_files_resolve(target, "ensureDir target", {
+        allowAbsolute: true,
+        checkParent: true,
+        rejectRoot: true
+      });
+      if (!nodeFs.existsSync(target)) {
+        nodeFs.mkdirSync(target, { recursive: true });
+      }
+      return nodeFs.existsSync(target);
+    });
+  }
+  function __autojs6_files_stat_boolean(pathValue, apiName, predicateName) {
+    if (__autojs6_files_is_nullish(pathValue)) {
+      return false;
+    }
+    return __autojs6_files_call(apiName, function() {
+      const nodeFs = __autojs6_fs_module();
+      const resolved = __autojs6_files_resolve(String(pathValue), apiName, {});
+      if (!nodeFs.existsSync(resolved)) {
+        return false;
+      }
+      const stat = nodeFs.statSync(resolved);
+      return !!(stat && typeof stat[predicateName] === "function" && stat[predicateName]());
+    });
+  }
+  function __autojs6_limited_files() {
+    if (__autojs6_limited_files_cache) {
+      return __autojs6_limited_files_cache;
+    }
+    const path = __autojs6_path_module();
+    if (!path || typeof path.basename !== "function" || typeof path.extname !== "function") {
+      throw new Error("require('files') needs the allowlisted path module.");
+    }
+    const filesModule = Object.freeze({
+      path: __autojs6_files_path,
+      join: __autojs6_files_join,
+      read: __autojs6_files_read,
+      write: __autojs6_files_write,
+      append: __autojs6_files_append,
+      exists: __autojs6_files_exists,
+      listDir: __autojs6_files_list_dir,
+      remove: __autojs6_files_remove,
+      copy: __autojs6_files_copy,
+      move: __autojs6_files_move,
+      ensureDir: __autojs6_files_ensure_dir,
+      isFile: function(pathValue) {
+        return __autojs6_files_stat_boolean(pathValue, "isFile", "isFile");
+      },
+      isDir: function(pathValue) {
+        return __autojs6_files_stat_boolean(pathValue, "isDir", "isDirectory");
+      },
+      getName: function(pathValue) {
+        return path.basename(__autojs6_files_required_path(pathValue, "getName", "filePath"));
+      },
+      getExtension: function(fileName) {
+        const ext = path.extname(__autojs6_files_required_path(fileName, "getExtension", "fileName"));
+        return ext.charAt(0) === "." ? ext.slice(1) : ext;
+      },
+      open: function() {
+        throw __autojs6_rhino_compat_unsupported(
+          "files.open",
+          "The Rhino PFileInterface is not exposed in Node; use require('fs') scoped file handles instead."
+        );
+      },
+      toFile: function() {
+        throw __autojs6_rhino_compat_blocked_by_design(
+          "files.toFile",
+          "Returning a raw java.io.File object would cross the Safe Node Profile boundary."
+        );
+      }
+    });
+    __autojs6_limited_files_cache = filesModule;
+    return __autojs6_limited_files_cache;
+  }
   const __autojs6_rhino_compat_error_codes = Object.freeze({
     invalidOption: "ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION",
     unsupported: "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
     blockedByDesign: "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "timers", "files"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -14726,7 +15024,8 @@ std::string buildEmbeddedScriptExecutionSource(
       toastLog: __autojs6_rhino_compat_toast_log,
       sleep: __autojs6_rhino_compat_sleep,
       setClip: __autojs6_rhino_compat_set_clip,
-      getClip: __autojs6_rhino_compat_get_clip
+      getClip: __autojs6_rhino_compat_get_clip,
+      files: __autojs6_limited_files()
     });
     return __autojs6_rhino_compat_facade_cache;
   }
@@ -14745,8 +15044,8 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09"]),
-      pendingTasks: Object.freeze(["S11-10", "S11-11", "S11-12", "S11-13", "S11-14"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10"]),
+      pendingTasks: Object.freeze(["S11-11", "S11-12", "S11-13", "S11-14"]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
       moduleNames: __autojs6_rhino_compat_basic_module_names
@@ -14780,7 +15079,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed low-risk Rhino compatibility globals for S11-09."
+        ? "Installed low-risk Rhino compatibility globals for S11-09 and S11-10."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -14828,6 +15127,7 @@ std::string buildEmbeddedScriptExecutionSource(
       sleep: __autojs6_rhino_compat_sleep,
       setClip: __autojs6_rhino_compat_set_clip,
       getClip: __autojs6_rhino_compat_get_clip,
+      files: __autojs6_limited_files(),
       unsupported: __autojs6_rhino_compat_unsupported,
       blockedByDesign: __autojs6_rhino_compat_blocked_by_design,
       assertSupported: function(apiName) {
@@ -35434,6 +35734,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "autojs6:compat") {
       return "autojs6:compat";
     }
+    if (name === "files") {
+      return "files";
+    }
     if (name === "autojs6:lifecycle") {
       return "autojs6:lifecycle";
     }
@@ -35694,6 +35997,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "autojs6:compat") {
       return __autojs6_limited_rhino_compat();
+    }
+    if (name === "files") {
+      return __autojs6_limited_files();
     }
     if (name === "autojs6:lifecycle") {
       return __autojs6_limited_lifecycle();

@@ -9563,37 +9563,41 @@
     },
     {
       "id": "files",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "autojs6:compat",
+        "files"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "scoped_files_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-10 exposes a synchronous scoped files facade through require(\"files\") and autojs6:compat.files.",
+        "All file operations remain constrained to the Safe Node Profile workingDirectory."
       ],
       "apiEntries": [
         {
           "id": "files.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "files",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "scoped_files_module_available",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "require(\"files\") and autojs6:compat.files expose the S11-10 scoped facade; raw Java file handles are not exposed."
           ]
         },
         {
           "id": "files.join",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "files",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "join",
+          "decision": "scoped_files_method_match",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-10 maps Rhino files.join to the scoped files facade."
           ]
         },
         {
@@ -9610,26 +9614,26 @@
         },
         {
           "id": "files.path",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "files",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "path",
+          "decision": "scoped_files_method_match",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "S11-10 maps Rhino files.path to a scoped absolute path resolver."
           ]
         },
         {
           "id": "files.toFile",
-          "status": "unsupported",
-          "asyncMode": "unknown",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "raw_java_file_boundary",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Returning java.io.File would expose a raw Java object outside the Safe Node Profile."
           ]
         }
       ]
@@ -11632,9 +11636,10 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "unsupported": 550,
-      "blocked_by_design": 16,
-      "partial": 344,
+      "unsupported": 545,
+      "blocked_by_design": 17,
+      "partial": 346,
+      "supported": 2,
       "supported_async": 42
     }
   }

@@ -21,7 +21,7 @@ The loader is an AutoJs6 controlled module, not an npm package name and not a sc
 
 ## Runtime Contract
 
-S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, or Pro 9 `require("rhino").install()` behavior.
+S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, and S11-10 adds the scoped synchronous `files` facade. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, or Pro 9 `require("rhino").install()` behavior.
 
 The first runtime shape is:
 
@@ -35,19 +35,23 @@ await compat.toastLog("hello");
 await compat.sleep(100);
 await compat.setClip("text");
 const text = await compat.getClip();
-compat.unsupported("files.read");
+compat.files.write("logs/a.txt", "hello");
+const body = compat.files.read("logs/a.txt");
+compat.unsupported("files.open");
 compat.blockedByDesign("importClass");
 compat.assertSupported("toast");
 ```
 
-`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs only the S11-09 low-risk names: `toast`, `toastLog`, `sleep`, `setClip`, and `getClip`.
+`compat.install()` is intentionally explicit. Calling it with no options does not install globals. `compat.install({ globals: true })` installs the implemented low-risk names: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, and `files`.
 
 The S11-09 facade is async. Rhino `sleep()` blocks the Rhino script thread; Node compat `sleep()` returns a Promise and must be awaited. Toast and clipboard helpers also return Promises because they cross the Android bridge.
+
+The S11-10 `files` facade is synchronous and scoped to the script `workingDirectory`. It is also available as `require("files")`. `files.path()` resolves to a scoped absolute path, while file operations reject paths that escape the Safe Node Profile sandbox and append a migration hint. `files.open()` remains unsupported until a Node-safe file-handle wrapper is designed. `files.toFile()` is blocked by design because returning `java.io.File` would expose a raw Java object.
 
 Future tasks should extend the module in small commits:
 
 - S11-09: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, and basic globals.
-- S11-10: scoped `files` facade.
+- S11-10: scoped `files` facade with `read`, `write`, `exists`, `listDir`, `join`, `path`, `remove`, `copy`, and `move`.
 - S11-11 to S11-14: pure utilities, text utilities, storage/sqlite, console/timers/error compatibility.
 
 ## Error Codes

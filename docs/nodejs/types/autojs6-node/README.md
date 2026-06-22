@@ -27,6 +27,7 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `work_manager`
 - `autojs6:lifecycle`
 - `autojs6:compat`
+- `files`
 - `plugins`
 
 The `autojs6:lifecycle` module is available only inside the explicit interactive long-running runtime. It stores JSON-only project-scoped checkpoints for explicit restore and does not enable automatic restart.

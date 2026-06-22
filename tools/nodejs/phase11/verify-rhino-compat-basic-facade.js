@@ -148,6 +148,23 @@ function createHarness(compatBlock) {
           }
         };
       }
+      function __autojs6_limited_files() {
+        return {
+          path(value) {
+            return value === undefined || value === null ? null : String(value);
+          },
+          read() {
+            return "";
+          },
+          write() {},
+          exists() {
+            return false;
+          },
+          listDir() {
+            return [];
+          }
+        };
+      }
       function __autojs6_define_global(name, value) {
         Object.defineProperty(globalThis, name, {
           value,

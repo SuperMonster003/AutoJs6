@@ -208,11 +208,17 @@ Inventory 和兼容矩阵统一使用以下状态：
     `:app:verifyNodeRhinoCompatBasicFacade` 使用 fake toast/clipboard provider 验证
     facade、async sleep 和显式 global install。
 
-- [ ] S11-10: 实现 scoped `files` compatibility facade。
+- [x] S11-10: 实现 scoped `files` compatibility facade。
   - 范围：覆盖常用 `files.read/write/exists/listDir/join/path/remove/copy/move`
     等，并严格遵守 scoped fs。
   - 产物：facade、types、path traversal tests。
   - 验收：拒绝越界路径；错误消息包含迁移建议。
+  - 完成：`require("files")`、`compat.files` 和显式 `files` global install
+    已接入；`files.toFile()` 标记为 Safe Node Profile 边界阻断，
+    `files.open()` 保持稳定 unsupported。
+  - 证据：`tools/nodejs/phase11/verify-rhino-compat-files-facade.js` 和
+    `:app:verifyNodeRhinoCompatFilesFacade` 覆盖 scoped read/write/copy/move/remove
+    以及 path traversal migration hint。
 
 - [ ] S11-11: 实现 pure utility facade。
   - 范围：`base64`、`colors`、`formatter`、`converter`、`mime`、

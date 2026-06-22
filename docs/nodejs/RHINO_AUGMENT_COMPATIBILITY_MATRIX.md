@@ -7,17 +7,18 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Rhino modules: 73
 - Rhino API entries: 879
 - Node bridge modules: 23
-- Node type modules: 26
+- Node type modules: 27
 - Modules with bridge evidence: 24
-- Modules with type evidence: 24
-- Modules without Node surface evidence: 48
+- Modules with type evidence: 25
+- Modules without Node surface evidence: 47
 
 ## Status Totals
 
-- blocked_by_design: 16
-- partial: 344
+- blocked_by_design: 17
+- partial: 346
+- supported: 2
 - supported_async: 42
-- unsupported: 550
+- unsupported: 545
 
 ## Module Matrix
 
@@ -72,7 +73,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 46 | jsox.numberx | Numberx | unsupported | - | unsupported:14 | none | Design a Node facade or record a permanent non-goal. |
 | 47 | jsox.mathx | Mathx | unsupported | - | unsupported:25 | none | Design a Node facade or record a permanent non-goal. |
 | 48 | jsox | jsox | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
-| 49 | files | files | unsupported | - | unsupported:5 | provider_availability | Design a Node facade or record a permanent non-goal. |
+| 49 | files | files | partial | autojs6:compat, files | blocked_by_design:1, partial:1, supported:2, unsupported:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 50 | cryptyo.crypto | crypto | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 51 | automator.root_automator | RootAutomator | blocked_by_design | - | blocked_by_design:1 | lifecycle_resource, raw_android_object | Keep denial documented and covered by policy tests. |
 | 52 | engines | engines | partial | engines | partial:4, supported_async:5 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -592,12 +593,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### files
 
 - Key: `files`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:5
+- Status: `partial`
+- Node surface: autojs6:compat, files
+- Coverage: `types_only`
+- API status: blocked_by_design:1, partial:1, supported:2, unsupported:1
 - Risks: provider_availability
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Implement explicit compat facade and promote mapped APIs one by one.
 
 ### cryptyo.crypto
 

@@ -23,5 +23,6 @@
 /// <reference path="./websocket.d.ts" />
 /// <reference path="./work_manager.d.ts" />
 /// <reference path="./lifecycle.d.ts" />
+/// <reference path="./files.d.ts" />
 /// <reference path="./rhino_compat.d.ts" />
 /// <reference path="./plugins.d.ts" />

@@ -1,4 +1,6 @@
 declare module "autojs6:compat" {
+  import files = require("files");
+
   namespace rhinoCompat {
     export type ErrorCode =
       | "ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION"
@@ -65,6 +67,7 @@ declare module "autojs6:compat" {
       sleep(millisMin: number | string, millisMax?: number | string): Promise<void>;
       setClip(text?: unknown, options?: AutoJs6Node.BridgeCallOptions): Promise<void>;
       getClip(options?: AutoJs6Node.BridgeCallOptions): Promise<string>;
+      readonly files: files.FilesModule;
       unsupported(apiName?: string, reason?: string): RhinoCompatError;
       blockedByDesign(apiName?: string, reason?: string): RhinoCompatError;
       assertSupported(apiName?: string): never;
