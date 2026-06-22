@@ -282,11 +282,17 @@ Inventory 和兼容矩阵统一使用以下状态：
 
 ### Track C: Automation core facade
 
-- [ ] S11-15: 设计 selector DSL handle 模型。
+- [x] S11-15: 设计 selector DSL handle 模型。
   - 范围：定义 `text()`、`desc()`、`id()`、链式过滤、`findOne()`、
     `find()`、`click()` 的异步/同步外观策略。
   - 产物：design doc、types draft、bridge method gap list。
   - 验收：明确哪些 API 是 `await`，哪些仅提供 compatibility wrapper。
+  - 状态：已新增 `docs/nodejs/design/RHINO_SELECTOR_DSL_HANDLE.md`、
+    `RHINO_SELECTOR_DSL_TYPES_DRAFT.md` 和 `RHINO_SELECTOR_DSL_BRIDGE_GAPS.md`；
+    结论为 selector builder/chain 同步生成 frozen JSON descriptor，所有
+    accessibility 查询/动作方法返回 Promise；S11-16 MVP 不需要新增 Java
+    bridge method，主要实现 Node 侧 Rhino selector handle wrapper；新增
+    `verifyNodeRhinoSelectorDslHandleDesign` 锁定设计、类型草案和 bridge gap。
 
 - [ ] S11-16: 实现 selector/accessibility 第一版 facade。
   - 范围：覆盖最常见的 `text("...").findOne(timeout)`、
