@@ -92,6 +92,7 @@ function indexAugmentSources(repoRoot, augmentRoot) {
         construction: "unknown",
         requiresScriptRuntime: /scriptRuntime\s*:\s*ScriptRuntime/.test(header) || /scriptRuntime\s*:\s*ScriptRuntime/.test(text),
         originatesKeyName: text.includes("originateKeyName()"),
+        keyOverride: detectKeyOverride(text, simpleName),
         simpleGetterProxyInterface: text.includes("@AugmentableSimpleGetterProxyInterface"),
         assignmentSummary: extractAssignmentSummary(text),
       };
@@ -363,6 +364,27 @@ function detectTraits(text, header) {
   return traits;
 }
 
+function detectKeyOverride(text, simpleName) {
+  const stringMatch = text.match(/override\s+val\s+key(?::\s*String)?\s*=\s*"([^"]+)"/);
+  if (stringMatch) {
+    return stringMatch[1];
+  }
+  if (/override\s+val\s+key(?::\s*String)?\s*=\s*super\.key\.lowercase\(\)/.test(text)) {
+    return lowercaseFirstChar(simpleName).toLowerCase();
+  }
+  if (/override\s+val\s+key(?::\s*String)?\s*=\s*javaClass\.simpleName\.lowercaseFirstChar\(\)/.test(text)) {
+    return lowercaseFirstChar(simpleName);
+  }
+  if (/override\s+val\s+key(?::\s*String)?\s*=\s*javaClass\.simpleName/.test(text)) {
+    return simpleName;
+  }
+  const ocrModeMatch = text.match(/override\s+val\s+key(?::\s*String)?\s*=\s*OcrMode\.([A-Z0-9_]+)\.value/);
+  if (ocrModeMatch) {
+    return ocrModeMatch[1].toLowerCase();
+  }
+  return null;
+}
+
 function constructionFor(metadata) {
   if (metadata.baseClass === "AugmentableProxy") {
     return "proxy_object";
@@ -513,10 +535,17 @@ function keyFor(simpleName, metadata) {
   if (!simpleName) {
     return null;
   }
+  if (metadata && metadata.keyOverride) {
+    return metadata.keyOverride;
+  }
   if (metadata && metadata.originatesKeyName) {
     return simpleName;
   }
-  return simpleName[0].toLowerCase() + simpleName.slice(1);
+  return lowercaseFirstChar(simpleName);
+}
+
+function lowercaseFirstChar(value) {
+  return value ? value[0].toLowerCase() + value.slice(1) : value;
 }
 
 function expressionSymbol(expression) {
@@ -623,4 +652,10 @@ function parseBoolean(value) {
   return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  scan,
+};

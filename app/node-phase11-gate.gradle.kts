@@ -1,5 +1,34 @@
 val nodePhase11ReportDir = rootProject.layout.buildDirectory.dir("reports/nodejs")
 
+tasks.register<Exec>("generateNodeRhinoAugmentInventory") {
+    group = "verification"
+    description = "Generates the Phase 11A Rhino augment API inventory from ScriptRuntime augment registrations."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-augment-inventory.js")
+    val scannerFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/scan-rhino-augment-inventory.js")
+    inputs.file(scriptFile)
+    inputs.file(scannerFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/rhino-augment-inventory.schema.json"))
+    inputs.dir(project.layout.projectDirectory.dir("src/main/java/org/autojs/autojs/runtime/api/augment"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-augment-api-inventory.json") },
+        nodePhase11ReportDir.map { it.file("rhino-augment-api-inventory.md") },
+        nodePhase11ReportDir.map { it.file("rhino-augment-source-scan.json") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+        "--fail-on-unresolved",
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCapabilityTruth") {
     group = "verification"
     description = "Writes build/reports/nodejs/final-capability-truth.json without failing on open Phase 11 blockers."

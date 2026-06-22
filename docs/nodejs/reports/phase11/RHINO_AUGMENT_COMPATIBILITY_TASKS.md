@@ -120,11 +120,17 @@ Inventory 和兼容矩阵统一使用以下状态：
     `node tools/nodejs/phase11/scan-rhino-augment-inventory.js --output build/reports/nodejs/rhino-augment-source-scan.json --fail-on-unresolved`
     输出 73 个注册模块、21 个 proto reference、0 个未解析 receiver。
 
-- [ ] S11-03: 生成 `rhino-augment-api-inventory.json` 和 `.md`。
+- [x] S11-03: 生成 `rhino-augment-api-inventory.json` 和 `.md`。
   - 范围：新增 Gradle 任务，例如 `generateNodeRhinoAugmentInventory`。
   - 产物：`build/reports/nodejs/rhino-augment-api-inventory.json`、
     `build/reports/nodejs/rhino-augment-api-inventory.md`。
   - 验收：报告稳定排序，连续运行无非确定性 diff。
+  - Evidence：
+    `tools/nodejs/phase11/generate-rhino-augment-inventory.js`；
+    `:app:generateNodeRhinoAugmentInventory` 生成
+    `rhino-augment-api-inventory.json`、`rhino-augment-api-inventory.md` 和
+    `rhino-augment-source-scan.json`；当前输出 73 个注册模块、879 个 API
+    entry、0 个未解析 receiver。
 
 - [ ] S11-04: 生成 Node bridge/types/docs 差距报告。
   - 范围：对比 `NodeBridgeModules`、
