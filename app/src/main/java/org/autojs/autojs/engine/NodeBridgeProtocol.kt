@@ -727,6 +727,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private val notificationIdCounter = AtomicInteger(1_000_000)
     private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
     private val uiSessionIds = ConcurrentHashMap.newKeySet<String>()
+    private val overlaySessionIds = ConcurrentHashMap.newKeySet<String>()
+    private val overlayPermissionSettingsLaunches = AtomicInteger(0)
     private val inputObserverSubscriptions = ConcurrentHashMap<String, ControlledInputObserverSubscription>()
     private val sensorManager by lazy {
         appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
@@ -790,6 +792,10 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.ocr_active_operation_count", ocrOperations.size.toString())
         put("embedded_script.database_active_handle_count", databaseHandles.size.toString())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
+        put("embedded_script.overlay_active_session_count", overlaySessionIds.size.toString())
+        put("embedded_script.overlay_permission_granted", overlayPermissionGranted().toString())
+        put("embedded_script.overlay_permission_settings_launch_count", overlayPermissionSettingsLaunches.get().toString())
+        put("embedded_script.overlay_live_provider_state", "p12_14_live_gate_only")
         put("embedded_script.input_observer_active_subscription_count", inputObserverSubscriptions.size.toString())
         put("embedded_script.input_observer_pending_event_count", inputObserverSubscriptions.values.sumOf { it.pendingEventCount() }.toString())
         put("embedded_script.input_observer_dropped_event_count", inputObserverSubscriptions.values.sumOf { it.droppedEventCount() }.toString())
@@ -818,6 +824,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
                 "ui" to uiSessionIds.size,
+                "ui.overlay" to overlaySessionIds.size,
                 "input_observer" to inputObserverSubscriptions.size,
                 "work_manager" to workManagerTasks.size,
                 "shell" to activeShellCommands.get(),
@@ -850,6 +857,7 @@ class AndroidNodeBridgeCapabilityProvider(
         notificationHandles.clear()
         sensorSubscriptions.clear()
         uiSessionIds.clear()
+        overlaySessionIds.clear()
         inputObserverSubscriptions.clear()
     }
 
@@ -956,16 +964,89 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchUiOverlay(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        callback(
-            NodeBridgeResponse.failure(
-                request.id,
-                NodeBridgeError.capabilityProviderMissing(
-                    module = request.module,
-                    method = request.method,
-                    requirement = "a promoted overlay capability provider; P12-13 exposes only fake-transport POC coverage",
-                ),
-            ),
+        val response = when (request.method) {
+            "hasPermission" -> NodeBridgeResponse.success(request.id, overlayPermissionSnapshot().toString())
+            "openPermissionSettings" -> dispatchOverlayOpenPermissionSettings(request)
+            "closeAll" -> NodeBridgeResponse.success(request.id, overlayCloseAllSummary("p12_14_live_gate_no_active_provider").toString())
+            else -> NodeBridgeResponse.failure(request.id, overlayLiveProviderMissing(request))
+        }
+        callback(response)
+    }
+
+    private fun dispatchOverlayOpenPermissionSettings(request: NodeBridgeRequest): NodeBridgeResponse {
+        val options = request.args().optJSONObject(0) ?: JSONObject()
+        val dryRun = options.optBoolean("dryRun", false)
+        val intent = overlayPermissionSettingsIntent()
+        val canOpenSettings = overlayPermissionSettingsIntentAvailable(intent)
+        var opened = false
+        var reason = if (canOpenSettings) "settings-intent-ready" else "settings-intent-unavailable"
+        if (canOpenSettings && !dryRun) {
+            runCatching {
+                appContext.startActivity(intent)
+                overlayPermissionSettingsLaunches.incrementAndGet()
+                opened = true
+                reason = "settings-intent-opened"
+            }.onFailure { error ->
+                reason = "settings-intent-failed:${error.javaClass.simpleName}"
+            }
+        } else if (dryRun) {
+            reason = "settings-intent-dry-run"
+        }
+        return NodeBridgeResponse.success(
+            request.id,
+            JSONObject()
+                .put("opened", opened)
+                .put("canOpenSettings", canOpenSettings)
+                .put("dryRun", dryRun)
+                .put("reason", reason)
+                .put("providerState", "p12_14_live_gate_only")
+                .toString(),
         )
+    }
+
+    private fun overlayPermissionSnapshot(): JSONObject {
+        val granted = overlayPermissionGranted()
+        return JSONObject()
+            .put("granted", granted)
+            .put("canOpenSettings", overlayPermissionSettingsIntentAvailable())
+            .put("reason", if (granted) "permission-granted" else "permission-required")
+            .put("providerState", "p12_14_live_gate_only")
+            .put("packagedManifestPermission", "android.permission.SYSTEM_ALERT_WINDOW")
+            .put("foregroundDisclosure", "required_before_live_overlay")
+            .put("activeOverlayCount", overlaySessionIds.size)
+    }
+
+    private fun overlayCloseAllSummary(reason: String): JSONObject {
+        val closedCount = overlaySessionIds.size
+        overlaySessionIds.clear()
+        return JSONObject()
+            .put("closedCount", closedCount)
+            .put("remainingCount", overlaySessionIds.size)
+            .put("reason", reason)
+            .put("providerState", "p12_14_live_gate_only")
+            .put("rawWindowLeaked", false)
+    }
+
+    private fun overlayLiveProviderMissing(request: NodeBridgeRequest): NodeBridgeError {
+        return NodeBridgeError.capabilityProviderMissing(
+            module = request.module,
+            method = request.method,
+            requirement = "a promoted overlay capability provider; P12-14 exposes only permission/settings/cleanup live-gate evidence and keeps live overlay creation fail-closed",
+        )
+    }
+
+    private fun overlayPermissionGranted(): Boolean {
+        return runCatching { Settings.canDrawOverlays(appContext) }.getOrDefault(false)
+    }
+
+    private fun overlayPermissionSettingsIntent(): Intent {
+        return Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            .setData(Uri.parse("package:${appContext.packageName}"))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
+    private fun overlayPermissionSettingsIntentAvailable(intent: Intent = overlayPermissionSettingsIntent()): Boolean {
+        return appContext.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
     }
 
     private fun dispatchUiShowLayout(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {

@@ -171,6 +171,12 @@ function riskSummary(module) {
 function nextStepFor(module, gapModule) {
   if (
     module.id === "floaty" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-14 overlay live gate landed"))
+  ) {
+    return "Proceed to P12-15 tasks disposable migration; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";
+  }
+  if (
+    module.id === "floaty" &&
     (module.migration.notes || []).some((note) => note.includes("P12-13 overlay fake provider POC landed"))
   ) {
     return "Complete P12-14 live overlay packaged and cleanup gate; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";

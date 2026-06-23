@@ -669,16 +669,19 @@ There is no current Node equivalent for `floaty.window()` or
 `floaty.rawWindow()`. Do not migrate these APIs by expecting
 `require("floaty")`, `compat.floaty`, or a global `floaty` to exist. P12-13
 adds `require("ui.overlay")` as a fake-provider POC for JSON-only overlay
-shape, capability, and handle-lifecycle checks. Production/live overlay support
-remains gated until permission flow, foreground disclosure, packaged behavior,
-opaque window handles, event drain, and close/cleanup gates are implemented.
+shape, capability, and handle-lifecycle checks. P12-14 adds the live gate for
+permission snapshots, settings dry-run/launch evidence, packaged metadata, and
+cleanup summaries. Production/live overlay support remains gated until
+foreground disclosure, opaque window handles, event drain, and live
+show/update/close behavior are implemented.
 
 P12-11 selects the Provider path for a controlled JSON-only overlay provider,
 and P12-12A locks the contract in
 [OVERLAY_PROVIDER_V1.md](design/OVERLAY_PROVIDER_V1.md). Treat exact Rhino
 `floaty.window()` and `floaty.rawWindow()` raw-wrapper semantics as a permanent
 non-goal in Node; keep production scripts that need real overlay windows on
-Rhino until the P12-14 live packaged/cleanup gate lands.
+Rhino after the P12-14 live gate, because live overlay creation remains
+fail-closed.
 
 The current Node profile has only the P12-13 `require("ui.overlay")`
 fake-provider POC. `require("floaty")`, `compat.floaty`, and global `floaty`

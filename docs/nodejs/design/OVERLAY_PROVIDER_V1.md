@@ -1,14 +1,19 @@
 # Overlay Provider V1
 
 Status: P12-12A design-locked contract for the P12-11 Provider path; P12-13
-adds the fake-provider runtime POC over `require("ui.overlay")`.
+adds the fake-provider runtime POC over `require("ui.overlay")`; P12-14 adds
+the Android live gate while keeping overlay creation fail-closed.
 
 ## Decision
 
 P12-12A freezes the first Node overlay provider contract. It is a controlled
 JSON-only provider, not Rhino `floaty.window()` or `floaty.rawWindow()` parity.
-P12-13 adds the fake-provider runtime POC after this contract, and P12-14 owns
-live overlay packaged and cleanup evidence.
+P12-13 adds the fake-provider runtime POC after this contract. P12-14 records
+the live gate for Android permission snapshots, explicit settings launch or
+dry-run evidence, packaged `SYSTEM_ALERT_WINDOW` metadata, foreground
+disclosure requirements, and cleanup summaries. It does not promote live
+overlay creation; `show`, `update`, `drainEvents`, and per-handle `close`
+remain fail-closed until a controlled Android provider is reviewed.
 
 The first module name is:
 
@@ -159,8 +164,9 @@ global touch capture, view references, callbacks, or native pointers.
 ## Bridge Methods
 
 The controlled bridge module is `ui.overlay`. P12-13 registers these bridge
-methods for fake-transport POC coverage; the Android live provider remains
-fail-closed until P12-14:
+methods for fake-transport POC coverage. P12-14 wires live-gate evidence for
+`hasPermission`, `openPermissionSettings`, and no-op `closeAll` cleanup, while
+live overlay creation remains fail-closed:
 
 | Method | Request Args | Response |
 | --- | --- | --- |

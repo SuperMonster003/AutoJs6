@@ -524,7 +524,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-overlay-fake-provider-verification.md`
 
-- [ ] P12-14: Provider path - live overlay packaged and cleanup gate。
+- [x] P12-14: Provider path - live overlay packaged and cleanup gate。
   - 适用条件：P12-11 选择 Provider path 且 P12-13 已完成。
   - 范围：验证真实 overlay 或明确设备 skip policy。
   - 验收：
@@ -532,7 +532,34 @@ Phase 12 task 本身可使用以下执行状态：
       execution stop、packaged manifest 均有记录。
     - 没有后台静默 overlay。
     - raw window/control object 不泄漏。
-  - Evidence：待补充。
+  - Evidence：
+    - Android provider 将 `ui.overlay` 提升为 live gate：`hasPermission` 返回
+      Android permission snapshot，`openPermissionSettings({ dryRun: true })`
+      返回 `settings-intent-dry-run`，`closeAll` 返回 cleanup summary。
+    - `show`、`update`、`drainEvents`、`close` 仍 fail-closed，不创建真实
+      overlay；raw window/control object 仍 blocked_by_design 且不泄漏。
+    - packaged metadata 记录 `SYSTEM_ALERT_WINDOW`、foreground disclosure、
+      skip policy、raw-wrapper leak policy；scheduled/background silent overlays
+      仍被 execution-mode policy 拒绝。
+    - 覆盖文件：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`,
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt`,
+      `app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt`,
+      `app/src/main/cpp/node_bridge_sources.cpp`,
+      `app/src/main/AndroidManifest.xml`,
+      `app/src/main/java/org/autojs/autojs/project/ProjectConfig.java`,
+      `docs/nodejs/types/autojs6-node/ui_overlay.d.ts`,
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeOverlayBridgeInstrumentationTest.kt`,
+      `docs/nodejs/rhino-compat/status-manifest.json`,
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`,
+      `docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md`,
+      `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`.
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-overlay-live-gate.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatOverlayLiveGate`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-overlay-live-gate-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-overlay-live-gate-verification.md`
 
 ### Track D: Tasks compatibility over WorkManager and task database
 

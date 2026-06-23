@@ -50,7 +50,7 @@ The `autojs6:compat` module is the explicit Rhino compatibility loader. It does 
 
 `input_observer` is a P12 provider POC. It exposes `observeKeys`, `drainEvents`, `close`, and `getAvailableSources` against fake-source JSON snapshots and the P12-06 `accessibility` live-source gate. Live key observation requires an operational AutoJs6 accessibility service and still remains subject to P12-07 cleanup/security/packaged policy evidence.
 
-`ui.overlay` is a P12-13 fake-provider POC over the P12-12A overlay contract. It exposes JSON-only `show`, `update`, `drainEvents`, `close`, `closeAll`, `hasPermission`, and `openPermissionSettings` shapes with opaque handles. The Android live overlay provider and packaged `SYSTEM_ALERT_WINDOW` behavior remain gated by P12-14.
+`ui.overlay` is a P12-13 fake-provider POC over the P12-12A overlay contract. It exposes JSON-only `show`, `update`, `drainEvents`, `close`, `closeAll`, `hasPermission`, and `openPermissionSettings` shapes with opaque handles. P12-14 adds the Android live gate for permission snapshots, explicit settings dry-run/launch evidence, packaged `SYSTEM_ALERT_WINDOW` metadata, foreground disclosure requirements, and cleanup summaries; live overlay creation remains fail-closed.
 
 They intentionally do not declare experimental Java interop, native plugin loading, Android plugin adapters, or unrestricted desktop Node.js capabilities. The declarations are checked by `:app:verifyAutoJs6NodeTypeDeclarations`; the sample project at `sample/nodejs/typescript-smoke` can be type-checked with:
 

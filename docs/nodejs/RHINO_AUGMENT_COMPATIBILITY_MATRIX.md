@@ -78,7 +78,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 50 | cryptyo.crypto | crypto | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 51 | automator.root_automator | RootAutomator | blocked_by_design | - | blocked_by_design:1 | lifecycle_resource, raw_android_object | Keep denial documented and covered by policy tests. |
 | 52 | engines | engines | partial | engines | partial:4, supported_async:5 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
-| 53 | floaty | floaty | unsupported | autojs6:compat, clipboard, ui.overlay | blocked_by_design:2, renamed:1, unsupported:5 | none | Complete P12-14 live overlay packaged and cleanup gate; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design. |
+| 53 | floaty | floaty | unsupported | autojs6:compat, clipboard, ui.overlay | blocked_by_design:2, renamed:1, unsupported:5 | none | Proceed to P12-15 tasks disposable migration; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design. |
 | 54 | storages | storages | partial | autojs6:compat, storage, storages | partial:1, supported_async:3, unsupported:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 55 | device | device | partial | autojs6:compat, clipboard, device | partial:19, supported_async:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 56 | recorder | recorder | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
@@ -639,7 +639,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Coverage: `no_node_surface`
 - API status: blocked_by_design:2, renamed:1, unsupported:5
 - Risks: none
-- Next step: Complete P12-14 live overlay packaged and cleanup gate; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.
+- Next step: Proceed to P12-15 tasks disposable migration; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.
 
 ### storages
 

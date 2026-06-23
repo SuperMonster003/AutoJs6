@@ -6,6 +6,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.json.JSONObject
 import java.io.File
 
 class NodeOverlayBridgeInstrumentationTest {
@@ -51,15 +52,78 @@ class NodeOverlayBridgeInstrumentationTest {
         assertEquals(emptyList<String>(), NodeBridgePermissionManifest.androidPermissionsForCapabilities(listOf(NodeBridgePermissionManifest.UI_OVERLAY)))
 
         val provider = AndroidNodeBridgeCapabilityProvider(context)
+        val overlayHealth = NodeBridgeProviderRegistry.androidHealth(context)
+            .first { it.definition.id == "ui.overlay" }
+        assertEquals(NodeBridgeProviderStatus.DEGRADED, overlayHealth.status)
+        assertEquals(0, overlayHealth.activeResourceCount)
+        assertEquals("hasPermission,openPermissionSettings,closeAll", overlayHealth.details["liveGateMethods"])
+        assertEquals("show,update,drainEvents,close", overlayHealth.details["blockedLiveMethods"])
+        assertEquals("android.permission.SYSTEM_ALERT_WINDOW", overlayHealth.details["packagedManifestPermission"])
+        assertEquals("required_before_live_overlay", overlayHealth.details["foregroundDisclosure"])
+        assertTrue(overlayHealth.details["rawWindowLeakPolicy"].orEmpty().contains("WindowManager"))
+
+        val permission = dispatch(
+            provider,
+            method = "hasPermission",
+            permissions = listOf(NodeBridgePermissionManifest.UI_OVERLAY_PERMISSION),
+        )
+        assertTrue(permission.toString(), permission.ok)
+        val permissionJson = JSONObject(permission.resultJson.orEmpty())
+        assertEquals("p12_14_live_gate_only", permissionJson.getString("providerState"))
+        assertEquals("android.permission.SYSTEM_ALERT_WINDOW", permissionJson.getString("packagedManifestPermission"))
+        assertEquals("required_before_live_overlay", permissionJson.getString("foregroundDisclosure"))
+        assertEquals(0, permissionJson.getInt("activeOverlayCount"))
+
+        val settings = dispatch(
+            provider,
+            method = "openPermissionSettings",
+            argsJson = """[{"dryRun":true}]""",
+            permissions = listOf(NodeBridgePermissionManifest.UI_OVERLAY_PERMISSION),
+        )
+        assertTrue(settings.toString(), settings.ok)
+        val settingsJson = JSONObject(settings.resultJson.orEmpty())
+        assertFalse(settingsJson.getBoolean("opened"))
+        assertTrue(settingsJson.getBoolean("dryRun"))
+        assertEquals("settings-intent-dry-run", settingsJson.getString("reason"))
+
+        val closeAll = dispatch(
+            provider,
+            method = "closeAll",
+            permissions = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
+        )
+        assertTrue(closeAll.toString(), closeAll.ok)
+        val closeAllJson = JSONObject(closeAll.resultJson.orEmpty())
+        assertEquals(0, closeAllJson.getInt("closedCount"))
+        assertEquals(0, closeAllJson.getInt("remainingCount"))
+        assertFalse(closeAllJson.getBoolean("rawWindowLeaked"))
+
         val show = dispatch(
             provider,
             method = "show",
             argsJson = """[{"content":{"type":"Text","text":"Overlay"},"disclosure":{"title":"AutoJs6 overlay","text":"Script overlay is visible"}}]""",
             permissions = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
         )
-        assertFalse("ui.overlay live provider must fail closed before P12-14", show.ok)
+        assertFalse("ui.overlay live creation must remain fail-closed after the P12-14 live gate", show.ok)
         assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, show.error?.code)
         assertEquals(NodeBridgeErrorCategory.UNAVAILABLE, show.error?.category)
+        assertTrue(show.error?.message.orEmpty().contains("P12-14"))
+
+        listOf(
+            NodeExecutionModePolicy.nativeValues(NodeExecutionModePolicy.MODE_ONE_SHOT),
+            NodeExecutionModePolicy.nativeValues(
+                NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+            ),
+            NodeExecutionModePolicy.nativeValues(
+                NodeExecutionModePolicy.MODE_SCHEDULED,
+                NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+            ),
+        ).forEach { nativeValues ->
+            assertFalse(
+                nativeValues.getValue("embedded_script.execution_mode_allowed_providers"),
+                nativeValues.getValue("embedded_script.execution_mode_allowed_providers").split(",").contains("ui.overlay"),
+            )
+        }
     }
 
     @Test

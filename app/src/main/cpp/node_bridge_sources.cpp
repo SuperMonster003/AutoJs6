@@ -18535,10 +18535,13 @@ std::string buildEmbeddedScriptExecutionSource(
     if (opts.timeoutMs !== undefined) {
       request.timeoutMs = __autojs6_ui_overlay_number(opts.timeoutMs, __autojs6_ui_overlay_policy.defaultTimeoutMs, 1, __autojs6_ui_overlay_policy.maxTimeoutMs);
     }
-    if (opts.maxEvents !== undefined) {
-      request.maxEvents = __autojs6_ui_overlay_number(opts.maxEvents, __autojs6_ui_overlay_policy.defaultDrainBatchSize, 1, __autojs6_ui_overlay_policy.maxDrainBatchSize);
-    }
-    return Object.freeze(request);
+      if (opts.maxEvents !== undefined) {
+        request.maxEvents = __autojs6_ui_overlay_number(opts.maxEvents, __autojs6_ui_overlay_policy.defaultDrainBatchSize, 1, __autojs6_ui_overlay_policy.maxDrainBatchSize);
+      }
+      if (opts.dryRun !== undefined) {
+        request.dryRun = Boolean(opts.dryRun);
+      }
+      return Object.freeze(request);
   }
   function __autojs6_ui_overlay_dimension(value, propertyName, methodName) {
     if (value === undefined || value === null) return undefined;
@@ -18764,12 +18767,14 @@ std::string buildEmbeddedScriptExecutionSource(
         [__autojs6_ui_overlay_request_options(opts)],
         __autojs6_ui_overlay_bridge_options(opts, "openPermissionSettings", 5000)
       ).then(function(result) {
-        const source = result && typeof result === "object" ? result : {};
-        return Object.freeze({
-          opened: Boolean(source.opened),
-          reason: source.reason === undefined || source.reason === null ? undefined : String(source.reason)
+          const source = result && typeof result === "object" ? result : {};
+          return Object.freeze({
+            opened: Boolean(source.opened),
+            canOpenSettings: Boolean(source.canOpenSettings),
+            dryRun: Boolean(source.dryRun),
+            reason: source.reason === undefined || source.reason === null ? undefined : String(source.reason)
+          });
         });
-      });
     }
     __autojs6_limited_ui_overlay_cache = Object.freeze({
       policy: __autojs6_ui_overlay_policy,

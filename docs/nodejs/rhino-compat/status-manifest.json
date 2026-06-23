@@ -9906,7 +9906,8 @@
         "floaty.window/rawWindow exact Rhino XML and live window-wrapper semantics are blocked by design; floaty.getClip migrates to the controlled clipboard bridge or autojs6:compat.getClip without hidden overlay windows.",
         "P12-11 provider path selected: Phase 12 will define a controlled JSON-only overlay provider while exact Rhino floaty.window/rawWindow raw-wrapper semantics remain blocked by design.",
         "P12-12A overlay provider v1 contract locked: ui.overlay uses explicit overlay capability, foreground disclosure, packaged SYSTEM_ALERT_WINDOW metadata, opaque handles, and cleanup rules; P12-13 owns the fake provider POC.",
-        "P12-13 overlay fake provider POC landed: require(\"ui.overlay\") exposes JSON-only show/update/drainEvents/close/closeAll/hasPermission/openPermissionSettings through fake transport, while P12-14 owns live overlay packaged and cleanup gates; exact Rhino raw-wrapper semantics remain blocked by design."
+        "P12-13 overlay fake provider POC landed: require(\"ui.overlay\") exposes JSON-only show/update/drainEvents/close/closeAll/hasPermission/openPermissionSettings through fake transport, while P12-14 owns live overlay packaged and cleanup gates; exact Rhino raw-wrapper semantics remain blocked by design.",
+        "P12-14 overlay live gate landed: Android provider exposes permission/settings/closeAll cleanup evidence, records SYSTEM_ALERT_WINDOW packaged metadata and foreground disclosure requirements, keeps show/update/drainEvents/close live creation fail-closed, and keeps scheduled/background silent overlays rejected; exact Rhino raw-wrapper semantics remain blocked by design."
       ],
       "apiEntries": [
         {
@@ -9930,7 +9931,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_session_provider_deferred",
           "notes": [
-            "P12-12A defines closeAll ownership over provider-owned opaque ui.overlay handles; P12-13 exposes ui.overlay.closeAll() through fake transport, while Rhino floaty.closeAll remains unavailable and P12-14 owns the live cleanup gate."
+            "P12-12A defines closeAll ownership over provider-owned opaque ui.overlay handles; P12-13 exposes ui.overlay.closeAll() through fake transport; P12-14 returns a live-gate closeAll cleanup summary with zero active overlays until live creation is promoted. Rhino floaty.closeAll remains unavailable."
           ]
         },
         {
@@ -9942,7 +9943,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-13 exposes fake transport permission-state methods under ui.overlay.permission; no silent service-process grant/emulation exists and P12-14 owns live Android permission behavior."
+            "P12-13 exposes fake transport permission-state methods under ui.overlay.permission; P12-14 exposes Android permission snapshot and settings dry-run/launch evidence without granting permission or creating live overlays."
           ]
         },
         {
@@ -9966,7 +9967,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-13 exposes ui.overlay.hasPermission() under ui.overlay.permission through fake transport; Rhino floaty.hasPermission remains unavailable until a compatibility facade is explicitly promoted."
+            "P12-13 exposes ui.overlay.hasPermission() under ui.overlay.permission through fake transport; P12-14 wires the Android live-gate permission snapshot. Rhino floaty.hasPermission remains unavailable until a compatibility facade is explicitly promoted."
           ]
         },
         {
@@ -9990,7 +9991,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-13 exposes ui.overlay.openPermissionSettings() under ui.overlay.permission through fake transport; P12-14 owns the live settings intent gate and no silent prompt path is exposed."
+            "P12-13 exposes ui.overlay.openPermissionSettings() under ui.overlay.permission through fake transport; P12-14 wires the explicit settings intent gate with dry-run evidence, no silent prompt path, and no silent service-process grant/emulation."
           ]
         },
         {

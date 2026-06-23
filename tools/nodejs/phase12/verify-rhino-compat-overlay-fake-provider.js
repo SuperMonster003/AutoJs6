@@ -124,8 +124,9 @@ function buildChecks(files) {
         'const val UI_OVERLAY = "ui.overlay"',
         'val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")',
         "dispatchUiOverlay",
-        "P12-13 exposes only fake-transport POC coverage",
-      ]),
+      ]) &&
+        (files.protocol.text.includes("P12-13 exposes only fake-transport POC coverage") ||
+          files.protocol.text.includes("P12-14 exposes only permission/settings/cleanup live-gate evidence")),
       "Kotlin bridge registry must register ui.overlay methods and keep Android live dispatch fail-closed.",
     ),
     check(
@@ -147,12 +148,14 @@ function buildChecks(files) {
           "UI_OVERLAY_PROVIDER",
           "NodeBridgeModules.UI_OVERLAY",
           "NodeBridgePermissionManifest.UI_OVERLAY",
-          "P12-13 fake provider POC",
           "liveProvider",
-          "not_promoted",
           "OVERLAY_SESSION",
-        ]),
-      "Resource and provider registries must record overlay sessions and fake-only provider status.",
+        ]) &&
+        (files.providerRegistry.text.includes("P12-13 fake provider POC") ||
+          files.providerRegistry.text.includes("P12-14 live gate")) &&
+        (files.providerRegistry.text.includes("not_promoted") ||
+          files.providerRegistry.text.includes("permission_settings_cleanup_gate_only")),
+      "Resource and provider registries must record overlay sessions and provider promotion status.",
     ),
     check(
       "types",
@@ -211,13 +214,15 @@ function buildChecks(files) {
       includesAll(files.matrixGenerator.text, [
         "P12-13 overlay fake provider POC landed",
         "Complete P12-14 live overlay packaged and cleanup gate",
+        "Proceed to P12-15 tasks disposable migration",
       ]) &&
         includesAll(matrixFloatyRow, [
           "| 53 | floaty | floaty | unsupported |",
           "ui.overlay",
-          "Complete P12-14 live overlay packaged and cleanup gate",
-        ]),
-      "Generated matrix must point floaty to P12-14 after P12-13 lands the fake provider.",
+        ]) &&
+        (matrixFloatyRow.includes("Complete P12-14 live overlay packaged and cleanup gate") ||
+          matrixFloatyRow.includes("Proceed to P12-15 tasks disposable migration")),
+      "Generated matrix must point floaty to P12-14 or later after P12-13 lands the fake provider.",
     ),
     check(
       "surface-manifest-provider-poc",

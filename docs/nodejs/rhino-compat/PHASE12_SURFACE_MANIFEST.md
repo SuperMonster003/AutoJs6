@@ -39,7 +39,9 @@ which Phase 12 workstream owns the next implementation or rejection.
   `OVERLAY_PROVIDER_V1.md`; P12-13 adds the `require("ui.overlay")` provider
   POC over fake transport as a provider POC, with runtime module, types, capability preflight,
   fake-provider instrumentation, and `OVERLAY_SESSION` registry evidence.
-  P12-14 owns live packaged/cleanup gates. Exact Rhino
+  P12-14 adds the live gate for Android permission/settings dry-run,
+  `SYSTEM_ALERT_WINDOW` packaged metadata, foreground disclosure requirements,
+  closeAll cleanup summaries, and fail-closed live overlay creation. Exact Rhino
   `floaty.window()` / `floaty.rawWindow()` raw-wrapper parity remains
   `blocked_by_design` and must not be exposed as raw Android/Rhino objects.
 

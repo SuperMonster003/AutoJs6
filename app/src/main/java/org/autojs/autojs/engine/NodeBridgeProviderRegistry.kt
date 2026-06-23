@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.os.Build
+import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs6.BuildConfig
@@ -207,7 +208,7 @@ object NodeBridgeProviderRegistry {
             id = UI_OVERLAY_PROVIDER,
             modules = listOf(NodeBridgeModules.UI_OVERLAY),
             capabilities = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
-            packagedSupport = packagedProviderDependent("P12-13 fake provider POC is available through test transport; live packaged overlay waits for P12-14 permission and cleanup gate"),
+            packagedSupport = packagedProviderDependent("P12-14 live gate records SYSTEM_ALERT_WINDOW metadata, permission/settings methods, foreground disclosure requirements, and cleanup policy; live overlay creation remains fail-closed"),
         ),
         provider(
             id = INPUT_OBSERVER_PROVIDER,
@@ -315,7 +316,7 @@ object NodeBridgeProviderRegistry {
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
         IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
-        UI_OVERLAY_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
+        UI_OVERLAY_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         INPUT_OBSERVER_PROVIDER -> inputObserverStatus()
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
@@ -338,12 +339,25 @@ object NodeBridgeProviderRegistry {
         )
         UI_OVERLAY_PROVIDER -> linkedMapOf(
             "fakeMethods" to "show,update,drainEvents,close,closeAll,hasPermission,openPermissionSettings",
+            "liveGateMethods" to "hasPermission,openPermissionSettings,closeAll",
+            "blockedLiveMethods" to "show,update,drainEvents,close",
             "capability" to NodeBridgePermissionManifest.UI_OVERLAY,
             "permissionCapability" to NodeBridgePermissionManifest.UI_OVERLAY_PERMISSION,
+            "foregroundCapability" to NodeBridgePermissionManifest.UI_OVERLAY_FOREGROUND,
+            "packagedCapability" to NodeBridgePermissionManifest.UI_OVERLAY_PACKAGED,
+            "packagedManifestPermission" to "android.permission.SYSTEM_ALERT_WINDOW",
+            "packagedManifestDeclared" to packageDeclaresPermission(context, "android.permission.SYSTEM_ALERT_WINDOW").toString(),
+            "defaultProjectPermission" to "android.permission.SYSTEM_ALERT_WINDOW",
+            "permissionGranted" to runCatching { Settings.canDrawOverlays(context) }.getOrDefault(false).toString(),
             "resourceType" to NodeBridgeResourceType.OVERLAY_SESSION.name,
-            "liveProvider" to "not_promoted",
-            "packagedPolicy" to "live overlay waits for P12-14 SYSTEM_ALERT_WINDOW metadata, foreground disclosure, and cleanup gate",
-            "statusReason" to "P12-13 fake transport POC only; Android provider fails closed",
+            "p12_13LiveProviderState" to "not_promoted",
+            "liveProvider" to "permission_settings_cleanup_gate_only",
+            "packagedPolicy" to "SYSTEM_ALERT_WINDOW metadata is recorded; scheduled/background silent overlays remain rejected until a foreground disclosure provider is promoted",
+            "foregroundDisclosure" to "required_before_live_overlay",
+            "cleanupPolicy" to "closeAll no-op cleanup summary plus provider destroy clears overlay session registry",
+            "skipPolicy" to "device/live overlay creation is skipped until a controlled JSON-only Android overlay provider is promoted",
+            "rawWindowLeakPolicy" to "WindowManager, LayoutParams, FloatyWindow, WindowBridge, View, and NativeView are not exposed",
+            "statusReason" to "P12-14 live gate only; permission/settings/cleanup evidence is available and Android show/update/drainEvents/close creation path fails closed",
         )
         INPUT_OBSERVER_PROVIDER -> linkedMapOf(
             "liveMethods" to "getAvailableSources,observeKeys,drainEvents,close",
@@ -456,5 +470,12 @@ object NodeBridgeProviderRegistry {
         return AutoJsAccessibilityService.hasInstance() &&
                 AutoJsAccessibilityService.hasOperationalState &&
                 AutoJsAccessibilityService.instance != null
+    }
+
+    private fun packageDeclaresPermission(context: Context, permission: String): Boolean {
+        return runCatching {
+            val packageInfo = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
+            packageInfo.requestedPermissions?.contains(permission) == true
+        }.getOrDefault(false)
     }
 }

@@ -54,6 +54,7 @@ declare module "ui.overlay" {
   export interface OverlayRequestOptions {
     readonly timeoutMs?: number;
     readonly maxEvents?: number;
+    readonly dryRun?: boolean;
     readonly signal?: AutoJs6Node.AbortSignalLike;
   }
 
@@ -70,6 +71,8 @@ declare module "ui.overlay" {
 
   export interface OverlayPermissionSettingsResult {
     readonly opened: boolean;
+    readonly canOpenSettings?: boolean;
+    readonly dryRun?: boolean;
     readonly reason?: string;
   }
 

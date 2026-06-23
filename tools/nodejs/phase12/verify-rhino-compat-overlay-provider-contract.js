@@ -293,6 +293,7 @@ function buildChecks(files) {
         "P12-12A overlay provider v1 contract locked",
         "Implement P12-13 overlay fake provider POC",
         "Complete P12-14 live overlay packaged and cleanup gate",
+        "Proceed to P12-15 tasks disposable migration",
       ]) &&
         includesAll(matrixFloatyRow, [
           "| 53 | floaty | floaty | unsupported |",
@@ -301,7 +302,8 @@ function buildChecks(files) {
           "unsupported:5",
         ]) &&
         (matrixFloatyRow.includes("Implement P12-13 overlay fake provider POC") ||
-          matrixFloatyRow.includes("Complete P12-14 live overlay packaged and cleanup gate")),
+          matrixFloatyRow.includes("Complete P12-14 live overlay packaged and cleanup gate") ||
+          matrixFloatyRow.includes("Proceed to P12-15 tasks disposable migration")),
       "Generated matrix must point floaty to the next provider-path gate after P12-12A locks the provider contract.",
     ),
     check(

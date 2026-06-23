@@ -148,7 +148,7 @@
         "P12-13",
         "P12-14"
       ],
-      "summary": "P12-11 selects the Provider path for a controlled JSON-only overlay provider. P12-12A locks the provider v1 contract; P12-13 lands the fake-provider POC for require(\"ui.overlay\"). P12-14 owns the live Android overlay packaged and cleanup gate. Exact Rhino floaty.window/rawWindow raw-wrapper parity remains blocked_by_design.",
+      "summary": "P12-11 selects the Provider path for a controlled JSON-only overlay provider. P12-12A locks the provider v1 contract; P12-13 lands the fake-provider POC for require(\"ui.overlay\"). P12-14 overlay live gate records Android permission/settings/closeAll cleanup evidence, SYSTEM_ALERT_WINDOW packaged metadata, foreground disclosure requirements, and keeps live show/update/drainEvents/close fail-closed. Exact Rhino floaty.window/rawWindow raw-wrapper parity remains blocked_by_design.",
       "runtimeSurface": [
         "ui.overlay",
         "require(\"ui.overlay\")",
@@ -162,7 +162,10 @@
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt",
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeOverlayBridgeInstrumentationTest.kt",
+        "app/src/main/AndroidManifest.xml",
+        "app/src/main/java/org/autojs/autojs/project/ProjectConfig.java",
         "docs/nodejs/types/autojs6-node/ui_overlay.d.ts",
         "docs/nodejs/design/FLOATY_OVERLAY_PHASE12_DECISION.md",
         "docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md",
@@ -177,9 +180,11 @@
         "tools/nodejs/phase12/verify-rhino-compat-floaty-overlay-decision.js",
         "tools/nodejs/phase12/verify-rhino-compat-overlay-provider-contract.js",
         "tools/nodejs/phase12/verify-rhino-compat-overlay-fake-provider.js",
+        "tools/nodejs/phase12/verify-rhino-compat-overlay-live-gate.js",
         ":app:verifyNodeRhinoCompatFloatyOverlayDecision",
         ":app:verifyNodeRhinoCompatOverlayProviderContract",
-        ":app:verifyNodeRhinoCompatOverlayFakeProvider"
+        ":app:verifyNodeRhinoCompatOverlayFakeProvider",
+        ":app:verifyNodeRhinoCompatOverlayLiveGate"
       ]
     },
     {
