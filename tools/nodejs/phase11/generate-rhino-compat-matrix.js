@@ -170,6 +170,12 @@ function riskSummary(module) {
 
 function nextStepFor(module, gapModule) {
   if (
+    module.id === "tasks" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-15 compat.tasks v1 scope locked"))
+  ) {
+    return "Implement P12-16 compat.tasks disposable facade over work_manager.scheduleOnce/cancel/list; keep daily/weekly, intent/broadcast, and raw task objects gated.";
+  }
+  if (
     module.id === "floaty" &&
     (module.migration.notes || []).some((note) => note.includes("P12-14 overlay live gate landed"))
   ) {

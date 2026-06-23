@@ -2,8 +2,10 @@
 
 ## Decision
 
-S11-22 is a design gate only. It does not add `require("tasks")`,
-`require("autojs6:compat").tasks`, or a `tasks` global to Embedded Node.
+S11-22 is a design gate only. P12-15 locks the future `compat.tasks` v1
+disposable-task scope in [COMPAT_TASKS_V1.md](COMPAT_TASKS_V1.md), but it still
+does not add `require("tasks")`, `require("autojs6:compat").tasks`, or a
+`tasks` global to Embedded Node.
 
 The current Node surface is `require("work_manager")`. It is a controlled
 WorkManager-backed MVP for scoped embedded Node one-shot and bounded periodic work.
@@ -22,6 +24,22 @@ The migration rule is conservative:
 
 This avoids the main failure mode for S11-22: treating a persistent user task or
 long-running background behavior as a one-shot bridge call.
+
+## P12-15 Compat Tasks V1 Scope
+
+P12-15 chooses only the disposable migration subset for the first
+`compat.tasks` facade:
+
+- `compat.tasks.addDisposableTask({ path, date|delayMs, ... })` may map to
+  `work_manager.scheduleOnce({ scriptPath|entry, delayMs, backend: "embedded" })`.
+- `compat.tasks.removeTask(id)` may map to `work_manager.cancel(id)` for
+  provider-owned string task ids only.
+- `compat.tasks.queryTasks(options?)` may map to `work_manager.list()` and return
+  JSON-safe snapshots for Node-owned WorkManager records only.
+
+P12-15 does not include daily/weekly wall-clock task database behavior,
+IntentTask/broadcast triggers, raw `TimedTask`/`IntentTask` Java object transfer,
+or pure time-flag helpers. P12-16 owns the runtime facade implementation.
 
 ## Current Rhino Surface
 

@@ -7082,7 +7082,8 @@
       "decision": "s11_22_tasks_work_manager_migration_design",
       "notes": [
         "S11-22 maps Rhino tasks to the controlled work_manager MVP only where semantics are equivalent enough: scoped embedded Node one-shot/periodic records, cancel, and list.",
-        "Daily/weekly wall-clock tasks, IntentTask/broadcast triggers, raw TimedTask/IntentTask objects, task update mutation, and user task database parity remain design-gated; S11-22 does not add compat.tasks."
+        "Daily/weekly wall-clock tasks, IntentTask/broadcast triggers, raw TimedTask/IntentTask objects, task update mutation, and user task database parity remain design-gated; S11-22 does not add compat.tasks.",
+        "P12-15 compat.tasks v1 scope locked: only disposable one-shot add/remove/query over work_manager is eligible for P12-16; daily/weekly moves to P12-17, intent/broadcast moves to P12-18, and raw task objects remain blocked_by_design."
       ],
       "apiEntries": [
         {
@@ -7092,9 +7093,9 @@
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": "work_manager",
-          "decision": "s11_22_tasks_module_design_gate",
+          "decision": "p12_15_compat_tasks_v1_scope_locked",
           "notes": [
-            "Use require(\"work_manager\") for current Node scheduled work; require(\"tasks\") and compat.tasks are not exposed in S11-22."
+            "Use require(\"work_manager\") for current Node scheduled work. P12-15 locks future compat.tasks v1 scope but still does not expose require(\"tasks\"), compat.tasks, or a global tasks object."
           ]
         },
         {
@@ -7104,9 +7105,9 @@
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": null,
-          "decision": "s11_22_wall_clock_task_database_deferred",
+          "decision": "p12_15_wall_clock_task_database_deferred",
           "notes": [
-            "Do not map daily wall-clock TimedTask semantics to work_manager.schedulePeriodic(); WorkManager periodic cadence does not preserve local time-of-day task behavior."
+            "P12-15 excludes daily wall-clock TimedTask semantics from compat.tasks v1; do not map to work_manager.schedulePeriodic(). P12-17 owns the task database/provider decision."
           ]
         },
         {
@@ -7116,9 +7117,9 @@
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": "scheduleOnce",
-          "decision": "s11_22_disposable_task_schedule_once_candidate",
+          "decision": "p12_15_disposable_task_facade_v1",
           "notes": [
-            "A future tasks compat facade may translate a future absolute date/time into work_manager.scheduleOnce({ delayMs }) for scoped embedded Node entries, returning JSON task records rather than raw TimedTask objects."
+            "P12-15 locks compat.tasks.addDisposableTask({ path, date|delayMs, ... }) as the v1 candidate over work_manager.scheduleOnce({ delayMs }) for scoped embedded Node entries, returning JSON-safe ids/snapshots rather than raw TimedTask objects."
           ]
         },
         {
@@ -7128,9 +7129,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_intent_task_broadcast_deferred",
+          "decision": "p12_15_intent_task_broadcast_deferred",
           "notes": [
-            "IntentTask maps to boot/broadcast/custom trigger policy, not the work_manager timed MVP; follow the broadcast task design gate before exposing it to Node."
+            "P12-15 excludes IntentTask creation from compat.tasks v1; boot/broadcast/custom trigger policy remains deferred to the P12-18 broadcast task decision."
           ]
         },
         {
@@ -7140,9 +7141,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_raw_task_object_blocked",
+          "decision": "p12_15_raw_task_object_blocked",
           "notes": [
-            "Rhino addTask requires a raw TimedTask or IntentTask Java object; Node migration must use explicit JSON descriptors instead."
+            "Rhino addTask requires a raw TimedTask or IntentTask Java object; P12-15 keeps this blocked_by_design and requires explicit JSON descriptors instead."
           ]
         },
         {
@@ -7152,9 +7153,9 @@
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": null,
-          "decision": "s11_22_wall_clock_task_database_deferred",
+          "decision": "p12_15_wall_clock_task_database_deferred",
           "notes": [
-            "Do not map weekly weekday/time TimedTask semantics to work_manager.schedulePeriodic(); weekday, next-run, and user task database behavior need a future provider."
+            "P12-15 excludes weekly weekday/time TimedTask semantics from compat.tasks v1; weekday, next-run, and user task database behavior need the P12-17 provider decision."
           ]
         },
         {
@@ -7164,9 +7165,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_pure_timeflag_utility_pending",
+          "decision": "p12_15_pure_timeflag_utility_out_of_v1",
           "notes": [
-            "Pure Rhino time-flag utility identified; it can be added later without a scheduler provider."
+            "Pure Rhino time-flag utility identified; P12-15 keeps it outside disposable-task v1 because it does not require scheduler provider access."
           ]
         },
         {
@@ -7176,9 +7177,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_intent_task_broadcast_deferred",
+          "decision": "p12_15_intent_task_broadcast_deferred",
           "notes": [
-            "IntentTask database reads are deferred with the broadcast/user task database provider; Node must not receive raw IntentTask objects."
+            "P12-15 keeps IntentTask database reads outside compat.tasks v1; P12-18 must define JSON snapshots without raw IntentTask objects before promotion."
           ]
         },
         {
@@ -7188,9 +7189,9 @@
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": "list",
-          "decision": "s11_22_json_task_snapshot_only",
+          "decision": "p12_15_json_task_snapshot_only",
           "notes": [
-            "Current work_manager.list() can return JSON WorkTask snapshots for Node-owned scheduled work; raw TimedTask return values remain blocked."
+            "Current work_manager.list() can return JSON WorkTask snapshots for Node-owned scheduled work; P12-15 allows future compat.tasks.queryTasks/get-style wrappers to use JSON snapshots only, with raw TimedTask return values blocked."
           ]
         },
         {
@@ -7200,9 +7201,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_intent_task_broadcast_deferred",
+          "decision": "p12_15_intent_task_broadcast_deferred",
           "notes": [
-            "IntentTask query semantics depend on the AutoJs6 user task database and broadcast trigger policy, not the current work_manager timed MVP."
+            "P12-15 keeps IntentTask query semantics out of compat.tasks v1 because they depend on the AutoJs6 user task database and P12-18 broadcast trigger policy."
           ]
         },
         {
@@ -7212,9 +7213,9 @@
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": "list",
-          "decision": "s11_22_work_manager_list_node_owned_tasks",
+          "decision": "p12_15_work_manager_list_node_owned_tasks",
           "notes": [
-            "work_manager.list() returns Node-owned scheduled task snapshots only; full Rhino TimedTask database query parity is deferred."
+            "work_manager.list() returns Node-owned scheduled task snapshots only; P12-15 allows compat.tasks.queryTasks(options?) over that JSON-safe subset while full Rhino TimedTask database query parity remains deferred."
           ]
         },
         {
@@ -7224,9 +7225,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_intent_task_broadcast_deferred",
+          "decision": "p12_15_intent_task_broadcast_deferred",
           "notes": [
-            "IntentTask cancellation is deferred until broadcast/user task database ownership is designed."
+            "P12-15 keeps IntentTask cancellation outside compat.tasks v1 until P12-18 defines broadcast/user task database ownership and receiver cleanup."
           ]
         },
         {
@@ -7236,9 +7237,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_raw_task_object_blocked",
+          "decision": "p12_15_raw_remove_task_object_blocked_with_id_wrapper",
           "notes": [
-            "Rhino removeTask accepts raw TimedTask/IntentTask Java objects; Node cancellation must use explicit task ids and controlled providers."
+            "Rhino removeTask accepts raw TimedTask/IntentTask Java objects, so that overload stays blocked_by_design. P12-15 separately reserves compat.tasks.removeTask(id) for explicit WorkManager-owned string ids."
           ]
         },
         {
@@ -7248,9 +7249,9 @@
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": "cancel",
-          "decision": "s11_22_cancel_node_owned_work_task",
+          "decision": "p12_15_cancel_node_owned_work_task",
           "notes": [
-            "work_manager.cancel() can cancel Node-owned task ids; numeric Rhino TimedTask database ids are not automatically equivalent."
+            "work_manager.cancel() can cancel Node-owned task ids; P12-15 allows the future compat.tasks.removeTask(id) wrapper for those ids only, and numeric Rhino TimedTask database ids are not automatically equivalent."
           ]
         },
         {
@@ -7260,9 +7261,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_pure_timeflag_utility_pending",
+          "decision": "p12_15_pure_timeflag_utility_out_of_v1",
           "notes": [
-            "Pure Rhino time-flag utility identified; it can be added later without a scheduler provider."
+            "Pure Rhino time-flag utility identified; P12-15 keeps it outside disposable-task v1 because it does not require scheduler provider access."
           ]
         },
         {
@@ -7272,9 +7273,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_22_raw_task_object_blocked",
+          "decision": "p12_15_raw_task_object_blocked",
           "notes": [
-            "Rhino updateTask mutates raw TimedTask/IntentTask objects; future Node updates need JSON patch descriptors and user-visible task database ownership."
+            "Rhino updateTask mutates raw TimedTask/IntentTask objects; P12-15 keeps updateTask blocked_by_design until a future JSON patch descriptor and user-visible task database owner exists."
           ]
         }
       ]

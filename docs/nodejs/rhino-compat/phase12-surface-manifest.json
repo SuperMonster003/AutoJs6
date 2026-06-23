@@ -189,7 +189,7 @@
     },
     {
       "id": "tasks.compat",
-      "status": "planned",
+      "status": "design_locked",
       "tasks": [
         "P12-15",
         "P12-16",
@@ -197,13 +197,20 @@
         "P12-18",
         "P12-19"
       ],
-      "summary": "JSON-safe Rhino tasks migration over work_manager and explicit task decisions.",
+      "summary": "P12-15 locks compat.tasks v1 scope to disposable one-shot add/remove/query over work_manager with JSON-safe ids/snapshots only. P12-16 owns runtime facade implementation; daily/weekly user task database decisions move to P12-17, intent/broadcast decisions move to P12-18, and raw TimedTask/IntentTask objects remain blocked_by_design.",
       "runtimeSurface": [
         "autojs6:compat.tasks"
       ],
       "evidence": [
+        "docs/nodejs/design/COMPAT_TASKS_V1.md",
         "docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md",
-        "docs/nodejs/design/WORK_MANAGER.md"
+        "docs/nodejs/design/WORK_MANAGER.md",
+        "docs/nodejs/MIGRATION_FROM_RHINO.md",
+        "docs/nodejs/SECURITY_MODEL.md",
+        "docs/nodejs/rhino-compat/status-manifest.json",
+        "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
+        "tools/nodejs/phase12/verify-rhino-compat-tasks-v1-scope.js",
+        ":app:verifyNodeRhinoCompatTasksV1Scope"
       ]
     },
     {

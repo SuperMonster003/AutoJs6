@@ -333,7 +333,12 @@ The safe migration subset is intentionally narrow:
   design when they depend on raw `TimedTask` or `IntentTask` Java objects.
 
 See `docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md` for the S11-22
-mapping table and status manifest decisions.
+mapping table and status manifest decisions. P12-15 narrows the future
+`compat.tasks` v1 surface in `docs/nodejs/design/COMPAT_TASKS_V1.md` to
+disposable one-shot migration only: `addDisposableTask` over
+`work_manager.scheduleOnce`, `removeTask(id)` over `work_manager.cancel`, and
+`queryTasks(options?)` over `work_manager.list`, all returning JSON-safe task ids
+or snapshots.
 
 ## Tests Required
 

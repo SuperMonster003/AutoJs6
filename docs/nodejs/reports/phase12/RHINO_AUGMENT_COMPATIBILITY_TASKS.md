@@ -563,7 +563,7 @@ Phase 12 task 本身可使用以下执行状态：
 
 ### Track D: Tasks compatibility over WorkManager and task database
 
-- [ ] P12-15: 锁定 `compat.tasks` v1 范围。
+- [x] P12-15: 锁定 `compat.tasks` v1 范围。
   - 范围：从 S11-22 的 migration design 中选出可落地子集。
   - 推荐 v1 子集：
     - `compat.tasks.addDisposableTask({ path, date|delayMs, ... })`
@@ -576,7 +576,35 @@ Phase 12 task 本身可使用以下执行状态：
   - 验收：
     - v1 明确映射到 `work_manager`，而不是 Rhino task database parity。
     - status manifest 中每个 `tasks.*` API 有新的 P12 决策。
-  - Evidence：待补充。
+  - Evidence：
+    - `docs/nodejs/design/COMPAT_TASKS_V1.md` 锁定 v1 scope：
+      `compat.tasks.addDisposableTask({ path, date|delayMs, ... })` →
+      `work_manager.scheduleOnce()`、`compat.tasks.removeTask(id)` →
+      `work_manager.cancel()`、`compat.tasks.queryTasks(options?)` →
+      `work_manager.list()`。
+    - v1 仅返回 JSON-safe task ids/snapshots；不接受或返回 raw
+      `TimedTask` / `IntentTask` / Android scheduler objects。
+    - `tasks.addDailyTask`、`tasks.addWeeklyTask` 移交 P12-17；
+      `tasks.addIntentTask` / broadcast triggers 移交 P12-18；
+      raw task-object APIs 继续 blocked_by_design。
+    - P12-15 只锁 scope，不暴露 `require("tasks")`、`compat.tasks` 或
+      global `tasks`；runtime facade 由 P12-16 落地。
+    - 覆盖文件：
+      `docs/nodejs/design/COMPAT_TASKS_V1.md`,
+      `docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md`,
+      `docs/nodejs/design/WORK_MANAGER.md`,
+      `docs/nodejs/MIGRATION_FROM_RHINO.md`,
+      `docs/nodejs/SECURITY_MODEL.md`,
+      `docs/nodejs/rhino-compat/status-manifest.json`,
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`,
+      `docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md`,
+      `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`.
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-tasks-v1-scope.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatTasksV1Scope`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-v1-scope-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-v1-scope-verification.md`
 
 - [ ] P12-16: 实现 `compat.tasks` disposable-task facade。
   - 范围：将 Rhino disposable task 的常见脚本迁移到

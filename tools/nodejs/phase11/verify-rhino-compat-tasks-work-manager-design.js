@@ -6,10 +6,15 @@ const path = require("path");
 
 const REPORT_BASENAME = "rhino-compat-tasks-work-manager-design-verification";
 const MODULE_DECISION = "s11_22_tasks_work_manager_migration_design";
-const RAW_TASK_DECISION = "s11_22_raw_task_object_blocked";
-const WALL_CLOCK_DECISION = "s11_22_wall_clock_task_database_deferred";
-const INTENT_DECISION = "s11_22_intent_task_broadcast_deferred";
-const TIMEFLAG_DECISION = "s11_22_pure_timeflag_utility_pending";
+const TASK_MODULE_DECISIONS = ["s11_22_tasks_module_design_gate", "p12_15_compat_tasks_v1_scope_locked"];
+const DISPOSABLE_DECISIONS = ["s11_22_disposable_task_schedule_once_candidate", "p12_15_disposable_task_facade_v1"];
+const JSON_SNAPSHOT_DECISIONS = ["s11_22_json_task_snapshot_only", "p12_15_json_task_snapshot_only"];
+const LIST_DECISIONS = ["s11_22_work_manager_list_node_owned_tasks", "p12_15_work_manager_list_node_owned_tasks"];
+const CANCEL_DECISIONS = ["s11_22_cancel_node_owned_work_task", "p12_15_cancel_node_owned_work_task"];
+const RAW_TASK_DECISIONS = ["s11_22_raw_task_object_blocked", "p12_15_raw_task_object_blocked", "p12_15_raw_remove_task_object_blocked_with_id_wrapper"];
+const WALL_CLOCK_DECISIONS = ["s11_22_wall_clock_task_database_deferred", "p12_15_wall_clock_task_database_deferred"];
+const INTENT_DECISIONS = ["s11_22_intent_task_broadcast_deferred", "p12_15_intent_task_broadcast_deferred"];
+const TIMEFLAG_DECISIONS = ["s11_22_pure_timeflag_utility_pending", "p12_15_pure_timeflag_utility_out_of_v1"];
 
 const FILES = {
   design: "docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md",
@@ -138,22 +143,22 @@ function buildChecks(files) {
     ),
     check(
       "status-work-manager-partial-apis",
-      entryIs(entries, "tasks.__module", "partial", "s11_22_tasks_module_design_gate", "work_manager") &&
-        entryIs(entries, "tasks.addDisposableTask", "partial", "s11_22_disposable_task_schedule_once_candidate", "scheduleOnce") &&
-        entryIs(entries, "tasks.getTimedTask", "partial", "s11_22_json_task_snapshot_only", "list") &&
-        entryIs(entries, "tasks.queryTimedTasks", "partial", "s11_22_work_manager_list_node_owned_tasks", "list") &&
-        entryIs(entries, "tasks.removeTimedTask", "partial", "s11_22_cancel_node_owned_work_task", "cancel"),
+      entryIs(entries, "tasks.__module", "partial", TASK_MODULE_DECISIONS, "work_manager") &&
+        entryIs(entries, "tasks.addDisposableTask", "partial", DISPOSABLE_DECISIONS, "scheduleOnce") &&
+        entryIs(entries, "tasks.getTimedTask", "partial", JSON_SNAPSHOT_DECISIONS, "list") &&
+        entryIs(entries, "tasks.queryTimedTasks", "partial", LIST_DECISIONS, "list") &&
+        entryIs(entries, "tasks.removeTimedTask", "partial", CANCEL_DECISIONS, "cancel"),
       "status manifest must identify the WorkManager-compatible partial tasks APIs",
     ),
     check(
       "status-wall-clock-deferred",
-      entryIs(entries, "tasks.addDailyTask", "unsupported", WALL_CLOCK_DECISION) &&
-        entryIs(entries, "tasks.addWeeklyTask", "unsupported", WALL_CLOCK_DECISION),
+      entryIs(entries, "tasks.addDailyTask", "unsupported", WALL_CLOCK_DECISIONS) &&
+        entryIs(entries, "tasks.addWeeklyTask", "unsupported", WALL_CLOCK_DECISIONS),
       "status manifest must keep daily/weekly wall-clock tasks deferred rather than mapping them to periodic WorkManager",
     ),
     check(
       "status-intent-deferred",
-      ["tasks.addIntentTask", "tasks.getIntentTask", "tasks.queryIntentTasks", "tasks.removeIntentTask"].every((id) => entryIs(entries, id, "unsupported", INTENT_DECISION)),
+      ["tasks.addIntentTask", "tasks.getIntentTask", "tasks.queryIntentTasks", "tasks.removeIntentTask"].every((id) => entryIs(entries, id, "unsupported", INTENT_DECISIONS)),
       "status manifest must keep IntentTask and broadcast-triggered APIs deferred",
     ),
     check(
@@ -163,7 +168,7 @@ function buildChecks(files) {
         return entry &&
           entry.status === "blocked_by_design" &&
           entry.asyncMode === "not_applicable" &&
-          entry.decision === RAW_TASK_DECISION &&
+          RAW_TASK_DECISIONS.includes(entry.decision) &&
           !entry.nodeModule &&
           !entry.bridgeModule;
       }),
@@ -176,7 +181,7 @@ function buildChecks(files) {
         return entry &&
           entry.status === "unsupported" &&
           entry.asyncMode === "sync" &&
-          entry.decision === TIMEFLAG_DECISION;
+          TIMEFLAG_DECISIONS.includes(entry.decision);
       }),
       "status manifest must keep pure time-flag utilities pending without scheduler provider access",
     ),
@@ -224,7 +229,7 @@ function buildChecks(files) {
         "does not add `compat.tasks`",
         "require(\"tasks\")",
         "raw `TimedTask`/`IntentTask`",
-        "no `events`, `keys`, `input_observer`, or `tasks` compat type surface",
+        "S11-22 is design-only and intentionally adds no `tasks` compat type surface",
       ]),
       "compat loader design must record S11-22 as design-only with no tasks runtime/type facade",
     ),
@@ -277,9 +282,10 @@ function buildChecks(files) {
   ];
 }
 
-function entryIs(entries, id, status, decision, nodeName) {
+function entryIs(entries, id, status, decisions, nodeName) {
   const entry = entries.get(id);
-  if (!entry || entry.status !== status || entry.decision !== decision) {
+  const acceptedDecisions = Array.isArray(decisions) ? decisions : [decisions];
+  if (!entry || entry.status !== status || !acceptedDecisions.includes(entry.decision)) {
     return false;
   }
   if (nodeName !== undefined && entry.nodeName !== nodeName) {

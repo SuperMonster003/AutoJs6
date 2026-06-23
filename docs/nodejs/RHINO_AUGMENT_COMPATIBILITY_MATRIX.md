@@ -57,7 +57,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 29 | ui | ui | partial | autojs6:compat, ui | blocked_by_design:15, partial:3, supported_async:2, unsupported:15 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
 | 30 | colors | colors | partial | autojs6:compat, colors | blocked_by_design:3, partial:2, supported:58 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 31 | colors.color | Color | blocked_by_design | colors | blocked_by_design:1 | provider_availability | Keep denial documented and covered by policy tests. |
-| 32 | tasks | tasks | partial | work_manager | blocked_by_design:3, partial:5, unsupported:8 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 32 | tasks | tasks | partial | work_manager | blocked_by_design:3, partial:5, unsupported:8 | none | Implement P12-16 compat.tasks disposable facade over work_manager.scheduleOnce/cancel/list; keep daily/weekly, intent/broadcast, and raw task objects gated. |
 | 33 | dialogs | dialogs | partial | dialogs | partial:5, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 34 | continuation | continuation | unsupported | - | unsupported:4 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 35 | http | http | unsupported | - | unsupported:21 | provider_availability | Design a Node facade or record a permanent non-goal. |
@@ -429,7 +429,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Coverage: `bridge_and_types`
 - API status: blocked_by_design:3, partial:5, unsupported:8
 - Risks: none
-- Next step: Implement explicit compat facade and promote mapped APIs one by one.
+- Next step: Implement P12-16 compat.tasks disposable facade over work_manager.scheduleOnce/cancel/list; keep daily/weekly, intent/broadcast, and raw task objects gated.
 
 ### dialogs
 

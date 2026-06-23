@@ -47,7 +47,13 @@ which Phase 12 workstream owns the next implementation or rejection.
 
 ## Current Design-Locked Surfaces
 
-- None in the current Phase 12 surface manifest.
+- `tasks.compat`: P12-15 locks `compat.tasks` v1 to disposable one-shot
+  migration over `work_manager`: `addDisposableTask({ path, date|delayMs, ... })`
+  maps to `scheduleOnce`, `removeTask(id)` maps to `cancel`, and
+  `queryTasks(options?)` maps to `list`. The design keeps JSON-safe ids/snapshots
+  only, leaves runtime facade work to P12-16, defers daily/weekly user task
+  database semantics to P12-17, defers intent/broadcast triggers to P12-18, and
+  keeps raw `TimedTask` / `IntentTask` objects blocked by design.
 
 ## Current Rejected Surfaces
 
