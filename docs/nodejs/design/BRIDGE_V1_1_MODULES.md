@@ -322,6 +322,12 @@ Task 183 records the overlay-specific gate in
 permission flow, foreground disclosure, packaged APK behavior, resource
 cleanup, and no-raw-Window/View tests are accepted.
 
+S11-24 records Rhino `floaty` migration details in
+[RHINO_FLOATY_COMPATIBILITY.md](RHINO_FLOATY_COMPATIBILITY.md): exact
+`floaty.window()` / `floaty.rawWindow()` compatibility is blocked, provider
+permission and close semantics remain deferred, and `floaty.getClip()` migrates
+to the controlled clipboard surface instead of a hidden overlay window.
+
 #### `plugins`
 
 Plugins can imply downloaded code, Java/Android interop, native code, signatures,

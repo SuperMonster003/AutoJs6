@@ -109,6 +109,7 @@ function buildChecks(files) {
   const entries = uiModule ? uiModule.apiEntries || [] : [];
   const matrixUiRow = findMatrixRow(files.matrix.text, "ui");
   const compatFactory = extractBetween(files.runtime.text, "function __autojs6_limited_rhino_compat()", "function __autojs6_limited_ui()");
+  const manifestTotalsMatch = totalsMatch(manifest.totals, countManifestStatuses(manifest));
 
   return [
     check(
@@ -199,13 +200,8 @@ function buildChecks(files) {
     ),
     check(
       "status-totals",
-      manifest.totals &&
-        manifest.totals.partial === 332 &&
-        manifest.totals.unsupported === 391 &&
-        manifest.totals.blocked_by_design === 43 &&
-        manifest.totals.supported_async === 52 &&
-        manifest.totals.supported === 134,
-      "status manifest totals must reflect the S11-23 ui split",
+      manifestTotalsMatch,
+      "status manifest totals must match the actual module and API entry status counts",
     ),
     check(
       "matrix-ui-row",
@@ -349,6 +345,30 @@ function buildChecks(files) {
 
 function entriesFor(entries, id) {
   return entries.filter((entry) => entry.id === id);
+}
+
+function countManifestStatuses(manifest) {
+  const counts = {};
+  (manifest.modules || []).forEach((module) => {
+    counts[module.status] = (counts[module.status] || 0) + 1;
+    (module.apiEntries || []).forEach((entry) => {
+      counts[entry.status] = (counts[entry.status] || 0) + 1;
+    });
+  });
+  return counts;
+}
+
+function totalsMatch(actual, expected) {
+  if (!actual || typeof actual !== "object") {
+    return false;
+  }
+  const keys = new Set([...Object.keys(actual), ...Object.keys(expected)]);
+  for (const key of keys) {
+    if ((actual[key] || 0) !== (expected[key] || 0)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function findMatrixRow(matrix, moduleId) {

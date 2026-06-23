@@ -4,6 +4,11 @@ Status: design gate only. No `require("floaty")`, `require("ui.overlay")`,
 overlay provider, packaged manifest injection, or runtime permission flow is
 implemented by this document.
 
+Task S11-24 records the Rhino `floaty` compatibility boundary in
+[RHINO_FLOATY_COMPATIBILITY.md](RHINO_FLOATY_COMPATIBILITY.md). It does not
+promote a Node runtime module; it only fixes the migration and provider-gap
+contract for future work.
+
 ## Goal
 
 Node floaty support must let scripts create user-visible overlay surfaces
@@ -30,6 +35,23 @@ Existing Rhino floaty APIs and AutoJs6 internal floating-window classes remain
 implementation references only. Node must not receive raw `WindowManager`,
 `FloatyService`, `FloatyWindow`, `View`, `WindowBridge`, `LayoutParams`, Rhino
 `NativeView`, or Java objects.
+
+## S11-24 Rhino Compatibility Boundary
+
+Rhino `floaty.window(xml)` and `floaty.rawWindow(xml)` are blocked as exact Node
+compatibility targets because they return live window wrappers over XML-inflated
+Android views. Future Node overlay work may translate only constrained JSON
+descriptors into provider-owned windows and opaque handles.
+
+`floaty.hasPermission()`, `floaty.requestPermission()`,
+`floaty.ensurePermission()`, and `floaty.closeAll()` remain unsupported until an
+overlay provider owns permission checks, disclosure, handles, close paths, and
+packaged behavior. `floaty.getClip()` should migrate to the controlled
+`clipboard` bridge or `require("autojs6:compat").getClip()`, not to a hidden
+temporary overlay window.
+
+The provider gap list for S11-24 is tracked in
+[RHINO_FLOATY_COMPATIBILITY.md](RHINO_FLOATY_COMPATIBILITY.md).
 
 ## Non-Goals
 

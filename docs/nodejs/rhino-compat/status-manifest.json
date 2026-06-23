@@ -9880,108 +9880,114 @@
     {
       "id": "floaty",
       "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
-      "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "asyncMode": "promise",
+      "nodeModules": [
+        "autojs6:compat",
+        "clipboard"
+      ],
+      "bridgeModules": [
+        "clipboard"
+      ],
+      "decision": "s11_24_floaty_overlay_design_gate",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "S11-24 keeps Rhino floaty/overlay compatibility design-gated: no require(\"floaty\"), require(\"ui.overlay\"), compat.floaty, or global floaty is exposed.",
+        "floaty.window/rawWindow exact Rhino XML and live window-wrapper semantics are blocked by design; floaty.getClip migrates to the controlled clipboard bridge or autojs6:compat.getClip without hidden overlay windows."
       ],
       "apiEntries": [
         {
           "id": "floaty.__module",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "promise",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_24_overlay_module_deferred",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "No Node floaty module is exposed in S11-24; future overlay work must define an explicit ui.overlay or floaty provider first."
           ]
         },
         {
           "id": "floaty.closeAll",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "promise",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_24_overlay_session_provider_deferred",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Future support may close only provider-owned windows for the current Node execution; there is no overlay handle registry in S11-24."
           ]
         },
         {
           "id": "floaty.ensurePermission",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "promise",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Future support must report overlay permission state through a controlled provider and stable errors; Node service code must not grant or emulate permission."
           ]
         },
         {
           "id": "floaty.getClip",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
-          "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "status": "renamed",
+          "asyncMode": "promise",
+          "nodeModule": "clipboard",
+          "bridgeModule": "clipboard",
+          "nodeName": "getText",
+          "decision": "s11_24_clipboard_replacement_no_overlay",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Use require(\"clipboard\").getText() or require(\"autojs6:compat\").getClip(); do not create a hidden temporary overlay window for clipboard access."
           ]
         },
         {
           "id": "floaty.hasPermission",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "promise",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Future support may expose an async overlay permission-state query after the provider and capability gate exist."
           ]
         },
         {
           "id": "floaty.rawWindow",
-          "status": "unsupported",
-          "asyncMode": "unknown",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_24_raw_overlay_window_blocked",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Rhino rawWindow exposes raw overlay WindowManager/LayoutParams and live View/NativeView semantics; Node overlay work must use JSON descriptors and opaque handles."
           ]
         },
         {
           "id": "floaty.requestPermission",
           "status": "unsupported",
-          "asyncMode": "unknown",
+          "asyncMode": "promise",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Future support may open platform overlay settings only through explicit user action and provider policy; no silent prompt path is exposed in S11-24."
           ]
         },
         {
           "id": "floaty.window",
-          "status": "unsupported",
-          "asyncMode": "unknown",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "s11_24_xml_window_wrapper_blocked",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "Rhino window(xml) returns a live JsResizableWindow over XML-inflated Android views; future Node overlay must use JSON descriptors and opaque FloatyHandle objects."
           ]
         }
       ]
@@ -11720,9 +11726,10 @@
   ],
   "totals": {
     "partial": 332,
-    "unsupported": 391,
+    "unsupported": 388,
     "supported_async": 52,
-    "blocked_by_design": 43,
-    "supported": 134
+    "blocked_by_design": 45,
+    "supported": 134,
+    "renamed": 1
   }
 }

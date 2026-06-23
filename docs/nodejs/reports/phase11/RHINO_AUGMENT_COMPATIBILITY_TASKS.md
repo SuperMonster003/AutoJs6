@@ -407,11 +407,19 @@ Inventory 和兼容矩阵统一使用以下状态：
   - Evidence: `tools/nodejs/phase11/verify-rhino-compat-ui-design.js` and
     `:app:verifyNodeRhinoCompatUiDesign`.
 
-- [ ] S11-24: 设计 floaty compatibility。
+- [x] S11-24: 设计 floaty compatibility。
   - 范围：overlay permission、foreground disclosure、window handle、
     close/cleanup、packaged 行为。
   - 产物：design gate、provider gap list。
   - 验收：没有后台静默 overlay；关闭路径可审计。
+  - Status: added `docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md` and kept
+    Node overlay support behind the existing `FLOATY_NODE.md` design gate.
+  - Boundary: no `compat.floaty`, no `require("floaty")`, no
+    `require("ui.overlay")`, no default global `floaty`, no hidden overlay
+    permission prompt, and no raw `WindowManager` / `FloatyWindow` /
+    `NativeView` object leakage.
+  - Evidence: `tools/nodejs/phase11/verify-rhino-compat-floaty-design.js` and
+    `:app:verifyNodeRhinoCompatFloatyDesign`.
 
 - [ ] S11-25: 明确 threads migration policy。
   - 范围：Rhino `threads` 到 Node async/process slot/worker policy 的迁移。

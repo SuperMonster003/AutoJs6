@@ -309,6 +309,12 @@ Overlay support uses the separate [FLOATY_NODE.md](FLOATY_NODE.md) design gate
 and should be exposed, if ever implemented, through a separate `ui.overlay` or
 `floaty` capability.
 
+S11-24 adds the Rhino migration boundary in
+[RHINO_FLOATY_COMPATIBILITY.md](RHINO_FLOATY_COMPATIBILITY.md): Rhino
+`floaty.window()` and `floaty.rawWindow()` remain blocked as exact Node
+compatibility targets, `floaty.getClip()` migrates to the controlled clipboard
+surface, and no base `ui` capability may imply overlay authority.
+
 ## Security Requirements
 
 Any future implementation must enforce:

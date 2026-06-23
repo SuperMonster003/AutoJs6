@@ -529,6 +529,49 @@ after UI events are drained as JSON snapshots. Layout mutation goes through
 `View`, `ui.findView()`, `ui.root`, or dynamic view properties. See
 [RHINO_UI_COMPATIBILITY.md](design/RHINO_UI_COMPATIBILITY.md).
 
+### Floaty And Overlay
+
+Rhino floaty scripts create overlay windows and return live window/view
+wrappers:
+
+```js
+const window = floaty.window(
+  <vertical>
+    <text id="status" text="Running" />
+    <button id="stop" text="Stop" />
+  </vertical>
+);
+
+window.stop.click(() => {
+  window.close();
+});
+```
+
+There is no current Node equivalent for `floaty.window()` or
+`floaty.rawWindow()`. Do not migrate these APIs by expecting
+`require("floaty")`, `require("ui.overlay")`, `compat.floaty`, or a global
+`floaty` to exist. Overlay support remains design-gated until permission flow,
+foreground disclosure, packaged behavior, opaque window handles, event drain,
+and close/cleanup gates are implemented.
+
+For in-app UI, use `require("ui").showLayout(...)`. For clipboard reads that
+previously used `floaty.getClip()`, use the controlled clipboard bridge:
+
+```js
+"nodejs";
+
+(async function main() {
+  const clipboard = require("clipboard");
+  console.log(await clipboard.getText());
+})();
+```
+
+`floaty.window()` and `floaty.rawWindow()` are blocked as exact Node
+compatibility targets because they depend on XML inflation, `FloatyService`,
+`WindowManager.LayoutParams`, live `JsWindow` wrappers, and raw `View` /
+`NativeView` lookup. See
+[RHINO_FLOATY_COMPATIBILITY.md](design/RHINO_FLOATY_COMPATIBILITY.md).
+
 ### File Read And Write
 
 Rhino:
