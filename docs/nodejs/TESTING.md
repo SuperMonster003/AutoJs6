@@ -192,6 +192,18 @@ The instrumentation smoke runs `hello-node`, `cjs-package`, `fs-scoped`, `fs-pro
 `accessibility-click-text`, `screenshot-find-image`, and `disabled-features-demo` from the `androidTest` asset source set.
 `packaged-node-apk` remains marked packaged-compatible and is covered by packaged APK smoke gates.
 
+Rhino dual-engine compatibility fixtures:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeRhinoDualEngineCompatTests
+```
+
+This S11-28 host gate validates `docs/nodejs/dual-engine-compat`, writes the
+`rhino-dual-engine-compat-tests-verification` report, and keeps
+`supported_async` cases separate from `blocked_by_design` cases. The planned
+device instrumentation result contract is documented in
+`docs/nodejs/reports/phase11/RHINO_DUAL_ENGINE_COMPAT_TESTS.md`.
+
 Focused packaged `app` bridge smoke:
 
 ```powershell

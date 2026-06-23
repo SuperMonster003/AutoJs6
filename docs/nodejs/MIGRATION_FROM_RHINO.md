@@ -45,6 +45,12 @@ covers toast/files/storage/selector/image/ocr/app/device/shell with old Rhino
 snippets and Node `autojs6:compat` rewrites. The examples are statically
 verified by `verifyNodeRhinoCompatExamples`.
 
+S11-28 adds dual-engine compatibility fixtures in
+`docs/nodejs/dual-engine-compat`. These pair Rhino snippets with Node
+compat-mode snippets and separate `supported_async` cases from
+`blocked_by_design` cases. Run `verifyNodeRhinoDualEngineCompatTests` to
+produce the host report and device instrumentation plan evidence.
+
 ## Mental Model Changes
 
 Rhino scripts historically rely on many global AutoJs APIs. Node scripts should import capability modules:
@@ -734,5 +740,7 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Confirm unsupported builtins still fail with `ERR_AUTOJS6_*`.
 - Review `docs/nodejs/examples/rhino-compat` for checked
   toast/files/storage/selector/image/ocr/app/device/shell migration pairs.
+- Review `docs/nodejs/dual-engine-compat` for S11-28 dual-engine fixtures that
+  distinguish `supported_async` from `blocked_by_design`.
 - Run examples under `sample/nodejs/` for reference.
 - Re-run packaged APK verification when the script is packaged.

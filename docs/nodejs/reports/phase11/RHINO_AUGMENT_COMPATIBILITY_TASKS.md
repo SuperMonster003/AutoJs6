@@ -461,10 +461,15 @@ Inventory 和兼容矩阵统一使用以下状态：
     `tools/nodejs/phase11/verify-rhino-compat-examples.js` and
     `:app:verifyNodeRhinoCompatExamples`.
 
-- [ ] S11-28: 建立双引擎兼容测试集。
+- [x] S11-28: 建立双引擎兼容测试集。
   - 范围：同一用例在 Rhino 和 Node compat mode 下验证核心行为。
   - 产物：host tests、device instrumentation tests。
   - 验收：测试报告能区分 `supported_async` 和 `blocked_by_design`。
+  - 完成记录：新增 `docs/nodejs/dual-engine-compat/` 测试集、
+    `docs/nodejs/reports/phase11/RHINO_DUAL_ENGINE_COMPAT_TESTS.md` 与
+    `verifyNodeRhinoDualEngineCompatTests` host gate；报告 schema 显式输出
+    `statusCounts.supported_async` 和 `statusCounts.blocked_by_design`，并记录
+    后续 device instrumentation tests 的结果字段契约。
 
 - [ ] S11-29: 建立 packaged APK compatibility smoke。
   - 范围：packaged 脚本验证 compat loader、bridge permission、资源释放。

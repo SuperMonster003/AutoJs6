@@ -858,6 +858,35 @@ tasks.register<Exec>("verifyNodeRhinoCompatExamples") {
     )
 }
 
+tasks.register<Exec>("verifyNodeRhinoDualEngineCompatTests") {
+    group = "verification"
+    description = "Verifies the Phase 11A Rhino/Node dual-engine compatibility test corpus."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-dual-engine-compat-tests.js")
+    inputs.file(scriptFile)
+    inputs.dir(rootProject.layout.projectDirectory.dir("docs/nodejs/dual-engine-compat"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_DUAL_ENGINE_COMPAT_TESTS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-dual-engine-compat-tests-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-dual-engine-compat-tests-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCapabilityTruth") {
     group = "verification"
     description = "Writes build/reports/nodejs/final-capability-truth.json without failing on open Phase 11 blockers."
