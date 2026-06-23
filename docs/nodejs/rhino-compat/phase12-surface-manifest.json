@@ -140,7 +140,7 @@
     },
     {
       "id": "floaty.overlay",
-      "status": "rejected",
+      "status": "design_locked",
       "tasks": [
         "P12-11",
         "P12-12A",
@@ -148,7 +148,7 @@
         "P12-13",
         "P12-14"
       ],
-      "summary": "P12-11 selects the Rejection path and P12-12B stabilizes the negative runtime gate for exact Rhino floaty.window/rawWindow compatibility; a future JSON-only overlay provider remains separate.",
+      "summary": "P12-11 selects the Provider path for a controlled JSON-only overlay provider. P12-12A owns the provider v1 contract; exact Rhino floaty.window/rawWindow raw-wrapper parity remains blocked_by_design.",
       "runtimeSurface": [
         "ui.overlay",
         "floaty"
@@ -157,14 +157,12 @@
         "docs/nodejs/design/FLOATY_OVERLAY_PHASE12_DECISION.md",
         "docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md",
         "docs/nodejs/design/FLOATY_NODE.md",
-        "docs/nodejs/reports/phase12/RHINO_FLOATY_REJECTION.md",
-        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
-        "docs/nodejs/dual-engine-compat/manifest.json",
-        "docs/nodejs/dual-engine-compat/cases/floaty-window.node.cjs",
+        "docs/nodejs/MIGRATION_FROM_RHINO.md",
+        "docs/nodejs/SECURITY_MODEL.md",
+        "docs/nodejs/rhino-compat/status-manifest.json",
+        "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
         "tools/nodejs/phase12/verify-rhino-compat-floaty-overlay-decision.js",
-        "tools/nodejs/phase12/verify-rhino-compat-floaty-rejection.js",
-        ":app:verifyNodeRhinoCompatFloatyOverlayDecision",
-        ":app:verifyNodeRhinoCompatFloatyRejection"
+        ":app:verifyNodeRhinoCompatFloatyOverlayDecision"
       ]
     },
     {

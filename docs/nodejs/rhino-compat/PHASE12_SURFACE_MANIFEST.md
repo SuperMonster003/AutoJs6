@@ -35,13 +35,17 @@ which Phase 12 workstream owns the next implementation or rejection.
   fake/device instrumentation evidence, a packaged smoke marker, and
   `UI_SESSION` cleanup reporting; live packaged UI remains unpromoted.
 
+## Current Design-Locked Surfaces
+
+- `floaty.overlay`: P12-11 selects the Provider path for a controlled JSON-only
+  overlay provider. P12-12A owns the provider v1 contract; P12-13/P12-14 own
+  fake-provider and live packaged/cleanup gates. Exact Rhino
+  `floaty.window()` / `floaty.rawWindow()` raw-wrapper parity remains
+  `blocked_by_design` and must not be exposed as raw Android/Rhino objects.
+
 ## Current Rejected Surfaces
 
-- `floaty.overlay`: P12-11 selects the Rejection path for exact Rhino
-  `floaty.window()` / `floaty.rawWindow()` compatibility. P12-12B stabilizes
-  the negative runtime gate for `require("floaty")`, `require("ui.overlay")`,
-  `compat.floaty`, and global `floaty`; any future JSON-only overlay provider
-  remains a separate surface and must not claim raw Rhino window parity.
+- None in the current Phase 12 surface manifest.
 
 ## Rules
 

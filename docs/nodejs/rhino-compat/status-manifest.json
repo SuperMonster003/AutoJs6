@@ -9902,8 +9902,8 @@
       "notes": [
         "S11-24 keeps Rhino floaty/overlay compatibility design-gated: no require(\"floaty\"), require(\"ui.overlay\"), compat.floaty, or global floaty is exposed.",
         "floaty.window/rawWindow exact Rhino XML and live window-wrapper semantics are blocked by design; floaty.getClip migrates to the controlled clipboard bridge or autojs6:compat.getClip without hidden overlay windows.",
-        "P12-11 rejection path selected: exact Rhino floaty.window/rawWindow compatibility is a permanent non-goal for Node; P12-12B owns the follow-up negative runtime gate.",
-        "P12-12B stabilizes the negative runtime gate: require(\"floaty\"), require(\"ui.overlay\"), compat.floaty, and global floaty remain unavailable; examples use ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN."
+        "P12-11 provider path selected: Phase 12 will define a controlled JSON-only overlay provider while exact Rhino floaty.window/rawWindow raw-wrapper semantics remain blocked by design.",
+        "P12-12A owns the overlay provider v1 contract; no require(\"ui.overlay\"), require(\"floaty\"), compat.floaty, or global floaty surface is promoted until that contract and follow-up provider gates land."
       ],
       "apiEntries": [
         {
@@ -9915,7 +9915,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_module_deferred",
           "notes": [
-            "No Node floaty module is exposed in S11-24; P12-11 selects rejection for exact Rhino floaty compatibility instead of the Phase 12 provider path; P12-12B verifies require(\"floaty\") remains unavailable."
+            "No Node floaty module is exposed in S11-24; P12-11 selects the Provider path for a separate JSON-only overlay provider, with P12-12A defining the contract before any module name is promoted."
           ]
         },
         {
@@ -9927,7 +9927,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_session_provider_deferred",
           "notes": [
-            "P12-11 keeps floaty.closeAll unavailable because no overlay handle registry exists; P12-12B verifies the negative runtime gate and destroy cleanup no-op boundary."
+            "P12-11 keeps floaty.closeAll unavailable until the Provider path defines a provider-owned overlay handle registry, closeAll ownership rules, and destroy cleanup in P12-12A."
           ]
         },
         {
@@ -9939,7 +9939,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-11 does not select the provider path; P12-12B keeps overlay permission flow unavailable so Node service code must not grant, emulate, or request overlay permission for Rhino floaty compatibility."
+            "P12-11 selects the Provider path, but overlay permission flow remains unavailable until P12-12A defines explicit capability, user action, foreground disclosure, and no silent service-process grant/emulation."
           ]
         },
         {
@@ -9975,7 +9975,7 @@
           "nodeName": null,
           "decision": "s11_24_raw_overlay_window_blocked",
           "notes": [
-            "Rhino rawWindow exposes raw overlay WindowManager/LayoutParams and live View/NativeView semantics; P12-11 treats exact rawWindow compatibility as a permanent non-goal for Node; P12-12B examples use ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN."
+            "Rhino rawWindow exposes raw overlay WindowManager/LayoutParams and live View/NativeView semantics; P12-11 treats exact rawWindow compatibility as a permanent non-goal while the Provider path may only expose JSON descriptors and opaque handles."
           ]
         },
         {
@@ -9987,7 +9987,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-11 leaves overlay permission requests unavailable for Rhino floaty compatibility; P12-12B keeps no silent prompt or settings launch path exposed."
+            "P12-11 leaves overlay permission requests unavailable until the Provider path defines an explicit settings-launch flow; no silent prompt or settings launch path is exposed."
           ]
         },
         {
@@ -9999,7 +9999,7 @@
           "nodeName": null,
           "decision": "s11_24_xml_window_wrapper_blocked",
           "notes": [
-            "Rhino window(xml) returns a live JsResizableWindow over XML-inflated Android views; P12-11 treats exact window compatibility as a permanent non-goal for Node; P12-12B examples use ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN."
+            "Rhino window(xml) returns a live JsResizableWindow over XML-inflated Android views; P12-11 treats exact window compatibility as a permanent non-goal while the Provider path may only expose JSON descriptors and opaque handles."
           ]
         }
       ]

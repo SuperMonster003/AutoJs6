@@ -171,9 +171,9 @@ function riskSummary(module) {
 function nextStepFor(module, gapModule) {
   if (
     module.id === "floaty" &&
-    (module.migration.notes || []).some((note) => note.includes("P12-11 rejection path selected"))
+    (module.migration.notes || []).some((note) => note.includes("P12-11 provider path selected"))
   ) {
-    return "Complete P12-12B negative runtime gate; keep exact Rhino floaty/window as a Node non-goal.";
+    return "Define P12-12A overlay provider v1 contract; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";
   }
   if (module.migration.status === "blocked_by_design") {
     return "Keep denial documented and covered by policy tests.";

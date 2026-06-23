@@ -22,17 +22,19 @@ capability, not as an automatic extension of `require("ui")`.
 
 ## Current Decision
 
-Do not expose Node floaty or overlay windows in v1.1.
+Do not expose Node floaty or overlay windows until the Phase 12 provider
+contract and follow-up provider gates land.
 
-P12-11 selects the rejection path for exact Rhino `floaty.window()` and
-`floaty.rawWindow()` compatibility. The Provider path is not selected for
-Phase 12; P12-12B owns the follow-up negative runtime gate. A future
-JSON-only `ui.overlay` provider may still be designed later, but it must not
-claim parity with Rhino raw window wrappers.
+P12-11 selects the Provider path for a controlled JSON-only overlay provider.
+Exact Rhino `floaty.window()` and `floaty.rawWindow()` compatibility remains a
+permanent non-goal for Node because those APIs return raw window wrappers and
+view objects. P12-12A owns the provider v1 contract; P12-13 may add the
+fake-provider facade POC, and P12-14 may add live packaged/cleanup evidence.
 
-P12-12B keeps `require("floaty")`, `require("ui.overlay")`, `compat.floaty`,
-and global `floaty` unavailable. Script examples that need a stable policy
-marker use `compat.blockedByDesign(...)` and
+Until that work lands, the current Node profile still has no `require("floaty")`,
+`require("ui.overlay")`, `compat.floaty`, or global `floaty` runtime surface.
+Script examples for exact Rhino raw window APIs may use
+`compat.blockedByDesign(...)` and
 `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`; they do not create an overlay
 provider request.
 

@@ -207,17 +207,6 @@ class NodeBridgeConformanceInstrumentationTest {
                 assert(value && typeof value.then === "function", name + " must return a Promise");
                 return value;
               }
-              function expectRequireUnavailable(name) {
-                let unavailable = false;
-                try {
-                  require(name);
-                } catch (error) {
-                  unavailable = true;
-                  assert(String(error && (error.message || error)).length > 0, name + " must fail with a stable resolver error");
-                }
-                assert.strictEqual(unavailable, true, name + " must not be require-able");
-              }
-
               const toast = require("toast");
               const app = require("app");
               const dialogs = require("dialogs");
@@ -290,15 +279,9 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(typeof compat.ui.run, "undefined");
               assert.strictEqual(typeof compat.ui.post, "undefined");
               assert.strictEqual(typeof compat.ui.findById, "undefined");
-              assert.strictEqual(typeof compat.floaty, "undefined");
-              assert.strictEqual(globalThis.floaty, undefined);
-              assert.strictEqual(compat.status().availableGlobalNames.indexOf("floaty"), -1);
-              expectRequireUnavailable("floaty");
-              expectRequireUnavailable("ui.overlay");
               const compatInstall = compat.install({ globals: true });
               assert(compatInstall.globals.indexOf("ui") >= 0, "compat.install({ globals: true }) must install constrained ui global");
               assert.strictEqual(globalThis.ui, compat.ui);
-              assert.strictEqual(globalThis.floaty, undefined);
               assert.strictEqual(typeof globalThis.ui.layout, "undefined");
 
               assert.strictEqual(typeof app.packageName, "string");

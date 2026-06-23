@@ -406,8 +406,9 @@ Phase 12 task 本身可使用以下执行状态：
     - 不能同时声称 provider path 和 permanent rejection。
     - 决策必须覆盖 permission、foreground disclosure、packaged manifest、
       closeAll/destroy cleanup、raw window object denial。
-  - Decision：Rejection path；exact Rhino `floaty.window/rawWindow` 为 Node
-    permanent non-goal，未来 JSON-only overlay provider 必须作为单独 surface。
+  - Decision：Provider path；Phase 12 继续推进受控 JSON-only overlay provider。
+    exact Rhino `floaty.window/rawWindow` raw-wrapper 语义仍为 Node permanent
+    non-goal，Provider path 不声明 Rhino raw window parity。
   - Evidence：
     - Decision doc：`docs/nodejs/design/FLOATY_OVERLAY_PHASE12_DECISION.md`
     - Floaty design：`docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md`
@@ -439,8 +440,9 @@ Phase 12 task 本身可使用以下执行状态：
     - raw `WindowManager`、`LayoutParams`、`FloatyWindow` 不跨 bridge。
   - Evidence：待补充。
 
-- [x] P12-12B: Rejection path - 固化 floaty permanent non-goal。
-  - 适用条件：P12-11 选择 Rejection path。
+- [ ] P12-12B: Rejection path - 固化 floaty permanent non-goal。
+  - 适用条件：P12-11 选择 Rejection path。当前不适用；P12-11 已重新切换至
+    Provider path。
   - 范围：把 Rhino `floaty.window`、`floaty.rawWindow`、overlay permission
     flow 设为长期或永久非目标，同时保留 `floaty.getClip` 的 clipboard 迁移路径。
   - 建议产物：
@@ -452,20 +454,8 @@ Phase 12 task 本身可使用以下执行状态：
       global `floaty` 均不可用或稳定拒绝。
     - migration docs 明确建议改用 `clipboard`、`compat.getClip()` 或
       Activity-owned `require("ui")`。
-  - Evidence：
-    - Rejection report：`docs/nodejs/reports/phase12/RHINO_FLOATY_REJECTION.md`
-    - Runtime negative instrumentation：`app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
-    - Dual-engine manifest：`docs/nodejs/dual-engine-compat/manifest.json`
-    - Dual-engine Node marker：`docs/nodejs/dual-engine-compat/cases/floaty-window.node.cjs`
-    - Dual-engine Rhino legacy case：`docs/nodejs/dual-engine-compat/cases/floaty-window.rhino.js`
-    - Stable marker：`ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`
-    - Migration docs：`docs/nodejs/MIGRATION_FROM_RHINO.md`
-    - Security docs：`docs/nodejs/SECURITY_MODEL.md`
-    - Status manifest：`docs/nodejs/rhino-compat/status-manifest.json`
-    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-floaty-rejection.js`
-    - Gradle gate：`:app:verifyNodeRhinoCompatFloatyRejection`
-    - 报告产物：`build/reports/nodejs/rhino-compat-floaty-rejection-verification.json`
-    - 报告产物：`build/reports/nodejs/rhino-compat-floaty-rejection-verification.md`
+  - Evidence：当前无。该分支保留为 checklist 分支任务；除非后续重新选择
+    Rejection path，否则不登记 runtime negative gate。
 
 - [ ] P12-13: Provider path - 实现 overlay fake provider 和 facade POC。
   - 适用条件：P12-11 选择 Provider path。

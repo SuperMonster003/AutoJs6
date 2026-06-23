@@ -19,10 +19,6 @@ const FILES = {
   surfaceDocs: "docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md",
   phase12Tasks: "docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md",
   gradle: "app/node-phase12-gate.gradle.kts",
-  runtime: "app/src/main/cpp/node_bridge_sources.cpp",
-  permissionManifest: "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
-  resourceRegistry: "app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt",
-  compatTypes: "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
 };
 
 function main() {
@@ -41,9 +37,9 @@ function main() {
     policyViolations,
     decision: {
       status: policyViolations.length === 0 ? "passed" : "failed",
-      selectedPath: checkById(checks, "decision-rejection-path"),
+      selectedPath: checkById(checks, "decision-provider-path"),
       statusManifest: checkById(checks, "status-manifest-p12-11"),
-      noRuntimeSurface: checkById(checks, "no-runtime-floaty-overlay-surface"),
+      surfaceManifest: checkById(checks, "surface-manifest-evidence"),
     },
   };
   fs.mkdirSync(reportDir, { recursive: true });
@@ -74,16 +70,17 @@ function buildChecks(files) {
   const matrixFloatyRow = findMatrixRow(files.matrix.text, "floaty");
   return [
     check(
-      "decision-rejection-path",
+      "decision-provider-path",
       includesAll(files.decision.text, [
         "P12-11",
-        "Selected path: Rejection path",
-        "Provider path: not selected for Phase 12",
-        "P12-12B",
+        "Selected path: Provider path",
+        "Rejection path: not selected for Phase 12",
+        "P12-12A",
+        "JSON-only overlay provider",
         "permanent non-goal",
       ]) &&
-        !files.decision.text.includes("Selected path: Provider path"),
-      "P12-11 decision must select only the Rejection path and name P12-12B as the follow-up.",
+        !files.decision.text.includes("Selected path: Rejection path"),
+      "P12-11 decision must select only the Provider path and name P12-12A as the follow-up.",
     ),
     check(
       "decision-acceptance-coverage",
@@ -93,6 +90,7 @@ function buildChecks(files) {
         "Packaged manifest:",
         "closeAll/destroy cleanup:",
         "Raw window object denial:",
+        "overlay provider v1 contract",
         "SYSTEM_ALERT_WINDOW",
         "foreground notification",
         "WindowManager.LayoutParams",
@@ -106,11 +104,11 @@ function buildChecks(files) {
     ),
     check(
       "docs-updated",
-      includesAll(files.rhinoFloaty.text, ["P12-11", "rejection path", "permanent non-goal", "P12-12B"]) &&
-        includesAll(files.floatyNode.text, ["P12-11", "rejection path", "Provider path is not selected", "P12-12B"]) &&
-        includesAll(files.migration.text, ["P12-11", "rejection path", "permanent", "JSON-only overlay provider"]) &&
-        includesAll(files.securityModel.text, ["P12-11", "rejection path", "packaged manifest", "cleanup gates"]),
-      "Floaty design, migration, and security docs must record the P12-11 rejection decision.",
+      includesAll(files.rhinoFloaty.text, ["P12-11", "Provider path", "P12-12A", "JSON-only overlay provider", "blocked_by_design"]) &&
+        includesAll(files.floatyNode.text, ["P12-11", "Provider path", "P12-12A", "fake-provider facade POC", "permanent non-goal"]) &&
+        includesAll(files.migration.text, ["P12-11", "Provider path", "P12-12A", "P12-13", "P12-14"]) &&
+        includesAll(files.securityModel.text, ["P12-11", "Provider path", "explicit overlay capability", "packaged manifest", "cleanup gates"]),
+      "Floaty design, migration, and security docs must record the P12-11 Provider path decision.",
     ),
     check(
       "status-manifest-p12-11",
@@ -118,54 +116,55 @@ function buildChecks(files) {
         floatyModule.status === "unsupported" &&
         floatyModule.decision === "s11_24_floaty_overlay_design_gate" &&
         includesAll(JSON.stringify(floatyModule), [
-          "P12-11 rejection path selected",
-          "permanent non-goal",
-          "P12-12B",
-          "floaty.closeAll unavailable",
-          "must not grant, emulate, or request overlay permission",
-          "hidden temporary overlay windows rejected",
+          "P12-11 provider path selected",
+          "P12-12A owns the overlay provider v1 contract",
+          "exact Rhino floaty.window/rawWindow raw-wrapper semantics remain blocked by design",
+          "floaty.closeAll unavailable until the Provider path defines",
+          "no silent service-process grant/emulation",
         ]) &&
         entryIs(entries, "floaty.window", "blocked_by_design", "s11_24_xml_window_wrapper_blocked") &&
         entryIs(entries, "floaty.rawWindow", "blocked_by_design", "s11_24_raw_overlay_window_blocked") &&
         entryIs(entries, "floaty.getClip", "renamed", "s11_24_clipboard_replacement_no_overlay"),
-      "Status manifest must preserve S11 decisions while adding P12-11 rejection notes for module, permission, closeAll, raw windows, and getClip.",
+      "Status manifest must preserve S11 raw-window decisions while adding P12-11 Provider path notes for module, permission, closeAll, and raw windows.",
     ),
     check(
       "matrix-updated",
       includesAll(files.matrixGenerator.text, [
-        "P12-11 rejection path selected",
-        "Complete P12-12B negative runtime gate",
+        "P12-11 provider path selected",
+        "Define P12-12A overlay provider v1 contract",
       ]) &&
         includesAll(matrixFloatyRow, [
           "| 53 | floaty | floaty | unsupported |",
           "blocked_by_design:2",
           "renamed:1",
           "unsupported:5",
-          "Complete P12-12B negative runtime gate",
+          "Define P12-12A overlay provider v1 contract",
         ]),
-      "Generated matrix must point floaty to the P12-12B negative runtime gate after P12-11.",
+      "Generated matrix must point floaty to the P12-12A provider contract after P12-11.",
     ),
     check(
       "surface-manifest-evidence",
       floatySurface &&
-        ["design_locked", "rejected"].includes(floatySurface.status) &&
+        floatySurface.status === "design_locked" &&
         (floatySurface.tasks || []).includes("P12-11") &&
+        (floatySurface.tasks || []).includes("P12-12A") &&
         includesAll(JSON.stringify(floatySurface), [
-          "Rejection path",
-          "P12-12B",
+          "Provider path",
+          "P12-12A",
           "FLOATY_OVERLAY_PHASE12_DECISION.md",
           "verify-rhino-compat-floaty-overlay-decision.js",
           "verifyNodeRhinoCompatFloatyOverlayDecision",
         ]) &&
-        includesAll(files.surfaceDocs.text, ["floaty.overlay", "P12-11", "Rejection path", "P12-12B"]),
-      "Phase 12 surface manifest must record P12-11 rejection-path evidence without promoting a provider.",
+        includesAll(files.surfaceDocs.text, ["Current Design-Locked Surfaces", "floaty.overlay", "P12-11", "Provider path", "P12-12A"]),
+      "Phase 12 surface manifest must record P12-11 Provider path evidence without promoting a runtime provider yet.",
     ),
     check(
       "phase12-task-complete",
       /\[x\]\s+P12-11/.test(files.phase12Tasks.text) &&
         files.phase12Tasks.text.includes("FLOATY_OVERLAY_PHASE12_DECISION.md") &&
         files.phase12Tasks.text.includes("verifyNodeRhinoCompatFloatyOverlayDecision") &&
-        files.phase12Tasks.text.includes("Rejection path"),
+        files.phase12Tasks.text.includes("Decision：Provider path") &&
+        files.phase12Tasks.text.includes("P12-12A"),
       "Phase 12 task plan must mark P12-11 complete with decision and gate evidence.",
     ),
     check(
@@ -175,22 +174,6 @@ function buildChecks(files) {
         files.gradle.text.includes("FLOATY_OVERLAY_PHASE12_DECISION.md") &&
         files.gradle.text.includes("RHINO_FLOATY_COMPATIBILITY.md"),
       "Gradle must register verifyNodeRhinoCompatFloatyOverlayDecision.",
-    ),
-    check(
-      "no-runtime-floaty-overlay-surface",
-      !files.runtime.text.includes("function __autojs6_limited_floaty") &&
-        !files.runtime.text.includes("function __autojs6_rhino_compat_floaty") &&
-        !files.runtime.text.includes("compat.floaty") &&
-        !files.runtime.text.includes('name === "floaty"') &&
-        !files.runtime.text.includes('name === "ui.overlay"') &&
-        !files.compatTypes.text.includes("floaty") &&
-        !files.compatTypes.text.includes("ui.overlay") &&
-        !files.permissionManifest.text.includes("ui.overlay") &&
-        !files.permissionManifest.text.includes('"floaty"') &&
-        !/\bFLOATY\b/.test(files.permissionManifest.text) &&
-        !/\bFLOATY\b/.test(files.resourceRegistry.text) &&
-        !/\bOVERLAY_WINDOW\b/.test(files.resourceRegistry.text),
-      "P12-11 must not add runtime floaty/ui.overlay modules, compat types, capabilities, or resource registry types.",
     ),
   ];
 }

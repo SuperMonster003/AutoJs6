@@ -363,56 +363,10 @@ tasks.register<Exec>("verifyNodeRhinoCompatFloatyOverlayDecision") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
-    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
     inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
     outputs.files(
         nodePhase12ReportDir.map { it.file("rhino-compat-floaty-overlay-decision-verification.json") },
         nodePhase12ReportDir.map { it.file("rhino-compat-floaty-overlay-decision-verification.md") },
-    )
-    outputs.upToDateWhen { false }
-    workingDir = rootProject.projectDir
-    commandLine(
-        "node",
-        scriptFile.asFile.absolutePath,
-        "--repo-root",
-        rootProject.projectDir.absolutePath,
-        "--report-dir",
-        nodePhase12ReportDir.get().asFile.absolutePath,
-    )
-}
-
-tasks.register<Exec>("verifyNodeRhinoCompatFloatyRejection") {
-    group = "verification"
-    description = "Verifies the Phase 12 floaty/overlay rejection gate."
-
-    dependsOn("verifyNodeRhinoCompatFloatyOverlayDecision")
-
-    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-floaty-rejection.js")
-    inputs.file(scriptFile)
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_FLOATY_REJECTION.md"))
-    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/manifest.json"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/cases/floaty-window.node.cjs"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/cases/floaty-window.rhino.js"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/FLOATY_NODE.md"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
-    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
-    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
-    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt"))
-    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
-    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
-    outputs.files(
-        nodePhase12ReportDir.map { it.file("rhino-compat-floaty-rejection-verification.json") },
-        nodePhase12ReportDir.map { it.file("rhino-compat-floaty-rejection-verification.md") },
     )
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir

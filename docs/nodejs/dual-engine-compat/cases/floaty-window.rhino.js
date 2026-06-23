@@ -2,7 +2,7 @@ const windowHandle = floaty.window({
   text: "S11-28 legacy floaty window",
 });
 const rawWindowHandle = floaty.rawWindow({
-  text: "P12-12B legacy raw floaty window",
+  text: "P12-11 legacy raw floaty window boundary",
 });
 
 windowHandle.close();
