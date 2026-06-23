@@ -495,11 +495,17 @@ Inventory 和兼容矩阵统一使用以下状态：
     image/selector/ui/db/websocket/fetch 的 pending/active resource 归零证据，
     并记录 event/floaty/ui.run 的 design-gated no-resource residual policy。
 
-- [ ] S11-31: 发布 Phase 11A summary。
+- [x] S11-31: 发布 Phase 11A summary。
   - 范围：汇总 inventory、compat matrix、已支持 API、剩余缺口、blocked
     decisions、推荐迁移路径。
   - 产物：`docs/nodejs/reports/phase11/PHASE11A_SUMMARY.md` 和生成报告。
   - 验收：summary 可直接支撑下一阶段任务拆分。
+  - 完成：新增 `docs/nodejs/reports/phase11/PHASE11A_SUMMARY.md`、
+    `generateNodeRhinoCompatPhase11Summary` 和
+    `tools/nodejs/phase11/generate-rhino-compat-phase11-summary.js`；生成报告
+    `phase11a-summary.json/.md` 汇总 73 个 Rhino augment module、879 个
+    API entry、已通过的 Phase11A host reports、blocked decisions、迁移规则和
+    P12-01 到 P12-09 的下一阶段任务拆分。
 
 ## 推荐执行顺序
 

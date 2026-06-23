@@ -261,6 +261,18 @@ plus the design-gated no-resource boundaries for `event`, `floaty`, and Rhino
 close, or destroy, or a documented design-gated residual policy. See
 `docs/nodejs/reports/phase11/RHINO_COMPAT_RESOURCE_CLEANUP_SECURITY.md`.
 
+Phase 11A Rhino compat summary:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodeRhinoCompatPhase11Summary
+```
+
+The S11-31 summary task refreshes the Phase 11A host reports and writes
+`build/reports/nodejs/phase11a-summary.json` plus
+`build/reports/nodejs/phase11a-summary.md`. The static planning summary lives at
+`docs/nodejs/reports/phase11/PHASE11A_SUMMARY.md` and records supported
+surfaces, blocked decisions, migration paths, and next-phase task splits.
+
 Current bridge protocol instrumentation:
 
 ```powershell

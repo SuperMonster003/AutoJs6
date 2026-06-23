@@ -976,6 +976,89 @@ tasks.register("verifyNodeRhinoCompatResourceCleanupSecurity") {
     )
 }
 
+tasks.register<Exec>("generateNodeRhinoCompatPhase11Summary") {
+    group = "verification"
+    description = "Writes the Phase 11A Rhino augment compatibility summary report."
+
+    dependsOn(
+        "generateNodeRhinoAugmentInventory",
+        "generateNodeRhinoNodeCompatGap",
+        "verifyNodeRhinoCompatInventory",
+        "generateNodeRhinoCompatMatrix",
+        "verifyNodeRhinoCompatLoader",
+        "verifyNodeRhinoCompatBasicFacade",
+        "verifyNodeRhinoCompatFilesFacade",
+        "verifyNodeRhinoCompatPureUtilities",
+        "verifyNodeRhinoCompatTextUtilities",
+        "verifyNodeRhinoCompatStorageSqlite",
+        "verifyNodeRhinoCompatConsoleTimersError",
+        "verifyNodeRhinoSelectorDslHandleDesign",
+        "verifyNodeRhinoCompatSelectorAccessibility",
+        "verifyNodeRhinoCompatAppDeviceShell",
+        "verifyNodeRhinoCompatImagesFacade",
+        "verifyNodeRhinoCompatScreenshotPermission",
+        "verifyNodeRhinoCompatOcrBarcodeStrategy",
+        "verifyNodeRhinoCompatEventsInputObserverDesign",
+        "verifyNodeRhinoCompatTasksWorkManagerDesign",
+        "verifyNodeRhinoCompatUiDesign",
+        "verifyNodeRhinoCompatFloatyDesign",
+        "verifyNodeRhinoCompatThreadsPolicy",
+        "verifyNodeRhinoJsonOnlyShimDesign",
+        "verifyNodeRhinoCompatExamples",
+        "verifyNodeRhinoDualEngineCompatTests",
+        "verifyNodeRhinoCompatPackagedSmokeHost",
+        "verifyNodeRhinoCompatResourceCleanupSecurityHost",
+    )
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-compat-phase11-summary.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/PHASE11A_SUMMARY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md"))
+    inputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-augment-api-inventory.json") },
+        nodePhase11ReportDir.map { it.file("rhino-node-compat-gap.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-inventory-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-loader-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-basic-facade-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-files-facade-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-pure-utilities-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-text-utilities-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-storage-sqlite-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-console-timers-error-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-selector-dsl-handle-design-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-selector-accessibility-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-app-device-shell-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-images-facade-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-screenshot-permission-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-ocr-barcode-strategy-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-events-input-observer-design-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-tasks-work-manager-design-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-ui-design-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-floaty-design-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-threads-policy-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-json-only-shim-design-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-examples-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-dual-engine-compat-tests-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-packaged-smoke-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-resource-cleanup-security-verification.json") },
+    )
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("phase11a-summary.json") },
+        nodePhase11ReportDir.map { it.file("phase11a-summary.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCapabilityTruth") {
     group = "verification"
     description = "Writes build/reports/nodejs/final-capability-truth.json without failing on open Phase 11 blockers."
