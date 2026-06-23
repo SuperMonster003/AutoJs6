@@ -102,10 +102,10 @@ launches embedded Node through `executionMode=scheduled` and
 | `tasks.queryTimedTasks()` | `partial` | `compat.tasks.queryTimedTasks()` | Lists Node-owned one-shot WorkManager records only; full Rhino TimedTask database parity is rejected for P12-17. |
 | `tasks.getTimedTask(id)` | `partial` | `compat.tasks.getTimedTask(id)` | Filters Node-owned one-shot JSON snapshots by explicit id and returns `null` when absent. |
 | `tasks.removeTimedTask(id)` | `partial` | `compat.tasks.removeTimedTask(id)` | Cancels only Node-owned WorkManager ids; numeric Rhino database ids are not automatically equivalent. |
-| `tasks.addIntentTask(...)` | `unsupported` | Future broadcast task provider | Startup, boot, package, and custom broadcast triggers follow `BROADCAST_TASKS.md`. |
-| `tasks.queryIntentTasks(...)` | `unsupported` | Future broadcast/user task database provider | No raw `IntentTask` snapshots or receiver registration in S11-22. |
-| `tasks.getIntentTask(id)` | `unsupported` | Future broadcast/user task database provider | Must return JSON snapshots only when designed. |
-| `tasks.removeIntentTask(id)` | `unsupported` | Future broadcast/user task database provider | Must own receiver cleanup and UI visibility. |
+| `tasks.addIntentTask(...)` | `unsupported` | `compat.tasks.addIntentTask()` rejection stub | P12-18 rejects provider promotion with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`; startup, boot, package, exact-alarm, and custom broadcast triggers follow `BROADCAST_TASKS.md`. |
+| `tasks.queryIntentTasks(...)` | `unsupported` | `compat.tasks.queryIntentTasks()` rejection stub | P12-18 does not query Rhino `IntentTask` records or expose raw `IntentTask` snapshots. |
+| `tasks.getIntentTask(id)` | `unsupported` | `compat.tasks.getIntentTask()` rejection stub | P12-18 rejects before bridge dispatch until JSON snapshots and task ownership are designed. |
+| `tasks.removeIntentTask(id)` | `unsupported` | `compat.tasks.removeIntentTask()` rejection stub | P12-18 does not own receiver cleanup or user-visible broadcast task deletion. |
 | `tasks.addTask(task)` | `blocked_by_design` | Explicit JSON descriptors | Raw `TimedTask` / `IntentTask` Java objects must not cross into Node. |
 | `tasks.removeTask(task)` | `blocked_by_design` | Explicit ids | Raw task object identity is a Rhino model, not a V8 bridge contract. |
 | `tasks.updateTask(task)` | `blocked_by_design` | `compat.tasks.updateTask()` rejection stub | P12-17 rejects raw task mutation with `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`; mutating raw Java task objects from Node is not allowed. |
@@ -163,6 +163,15 @@ Future provider responsibilities:
 - never return raw `TimedTask`, `IntentTask`, `WorkRequest`, `PendingIntent`,
   `IntentFilter`, `BroadcastReceiver`, `AlarmManager`, `JobScheduler`, or
   `WorkManager` objects to JavaScript.
+
+P12-18 keeps the broadcast task provider unpromoted. It adds stable
+`ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` stubs for
+`compat.tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask(id)`, and
+`removeIntentTask(id)`; no receiver lifecycle, custom broadcast authority,
+manifest mutation, trigger payload serialization, or Rhino `IntentTask`
+database access is provided. See
+`TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md` for the capability split and
+packaged behavior preconditions.
 
 ## Packaged APK Boundaries
 

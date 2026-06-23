@@ -67,8 +67,9 @@ These Rhino APIs are outside P12-15/P12-16 v1:
   promotion for wall-clock task database semantics. The methods exist only as
   `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` stubs in `compat.tasks`.
 - `tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask()`, and
-  `removeIntentTask()`: broadcast/startup/boot/package/custom trigger ownership
-  needs the P12-18 broadcast task decision.
+  `removeIntentTask()`: P12-18 rejects provider promotion for
+  broadcast/startup/boot/package/custom trigger ownership. The methods exist
+  only as `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` stubs in `compat.tasks`.
 - `tasks.addTask(task)`, `removeTask(task)`, and `updateTask(task)`: raw
   `TimedTask`/`IntentTask` Java object transfer remains blocked by design.
 - `tasks.daysToTimeFlag()` and `tasks.timeFlagToDays()`: pure utilities can be
@@ -128,3 +129,24 @@ The rejection stubs do not dispatch bridge requests. The aliases do not read or
 mutate the Rhino `TimedTask` database and still never return raw `TimedTask` or
 `IntentTask` objects. The decision details are tracked in
 `TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md`.
+
+## P12-18 Intent/Broadcast Decision
+
+P12-18 keeps `IntentTask` and broadcast-triggered task compatibility rejected
+until a dedicated provider exists. The runtime adds stable compatibility
+behavior without receiver or task database promotion:
+
+- `compat.tasks.addIntentTask()` rejects with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`;
+- `compat.tasks.queryIntentTasks()` rejects with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`;
+- `compat.tasks.getIntentTask(id)` rejects with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`;
+- `compat.tasks.removeIntentTask(id)` rejects with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`.
+
+The stubs do not dispatch bridge requests, mutate manifests, register or
+unregister receivers, query Rhino `IntentTask` records, or expose raw
+`BroadcastReceiver`, `IntentFilter`, `PendingIntent`, `Intent`, or custom
+broadcast authority. The decision details are tracked in
+`TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md`.

@@ -13,7 +13,7 @@ const LIST_DECISIONS = ["s11_22_work_manager_list_node_owned_tasks", "p12_15_wor
 const CANCEL_DECISIONS = ["s11_22_cancel_node_owned_work_task", "p12_15_cancel_node_owned_work_task", "p12_16_cancel_node_owned_work_task", "p12_17_remove_timed_task_node_owned_id_alias"];
 const RAW_TASK_DECISIONS = ["s11_22_raw_task_object_blocked", "p12_15_raw_task_object_blocked", "p12_15_raw_remove_task_object_blocked_with_id_wrapper", "p12_17_raw_update_task_json_patch_rejected"];
 const WALL_CLOCK_DECISIONS = ["s11_22_wall_clock_task_database_deferred", "p12_15_wall_clock_task_database_deferred", "p12_17_wall_clock_user_task_database_rejected"];
-const INTENT_DECISIONS = ["s11_22_intent_task_broadcast_deferred", "p12_15_intent_task_broadcast_deferred"];
+const INTENT_DECISIONS = ["s11_22_intent_task_broadcast_deferred", "p12_15_intent_task_broadcast_deferred", "p12_18_intent_broadcast_provider_rejected"];
 const TIMEFLAG_DECISIONS = ["s11_22_pure_timeflag_utility_pending", "p12_15_pure_timeflag_utility_out_of_v1"];
 
 const FILES = {

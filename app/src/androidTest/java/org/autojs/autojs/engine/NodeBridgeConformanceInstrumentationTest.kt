@@ -285,7 +285,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
               expectExports("autojs6:compat.ui", compat.ui, ["showLayout", "state", "bind"]);
-              expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "addDailyTask", "addWeeklyTask", "removeTask", "queryTasks", "queryTimedTasks", "getTimedTask", "removeTimedTask", "updateTask"]);
+              expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "addDailyTask", "addWeeklyTask", "addIntentTask", "removeTask", "queryTasks", "queryIntentTasks", "queryTimedTasks", "getIntentTask", "getTimedTask", "removeIntentTask", "removeTimedTask", "updateTask"]);
               assert.strictEqual(globalThis.ui, undefined, "compat.ui must not install a default global");
               assert.strictEqual(globalThis.tasks, undefined, "compat.tasks must not install a default global");
               assert.strictEqual(typeof compat.ui.run, "undefined");
@@ -466,6 +466,10 @@ class NodeBridgeConformanceInstrumentationTest {
               await expectRejectCode("compat.tasks.addDailyTask", compat.tasks.addDailyTask({ path: "main.cjs", time: "08:30" }), "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED");
               await expectRejectCode("compat.tasks.addWeeklyTask", compat.tasks.addWeeklyTask({ path: "main.cjs", time: "08:30", daysOfWeek: [1] }), "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED");
               await expectRejectCode("compat.tasks.updateTask", compat.tasks.updateTask({ id: compatTaskId }), "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN");
+              await expectRejectCode("compat.tasks.addIntentTask", compat.tasks.addIntentTask({ path: "main.cjs", action: "org.autojs6.TEST" }), "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED");
+              await expectRejectCode("compat.tasks.queryIntentTasks", compat.tasks.queryIntentTasks({ action: "org.autojs6.TEST" }), "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED");
+              await expectRejectCode("compat.tasks.getIntentTask", compat.tasks.getIntentTask("intent-1"), "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED");
+              await expectRejectCode("compat.tasks.removeIntentTask", compat.tasks.removeIntentTask("intent-1"), "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED");
               assert.strictEqual(requests.length, beforeTaskRejects, "compat.tasks rejected stubs must not dispatch bridge requests");
 
               assert.strictEqual(bridge.__test.pendingCount(), 0);

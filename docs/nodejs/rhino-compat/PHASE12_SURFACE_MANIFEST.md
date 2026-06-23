@@ -31,9 +31,11 @@ which Phase 12 workstream owns the next implementation or rejection.
     absent, and P12-17 adds stable `addDailyTask()` / `addWeeklyTask()`
     unsupported stubs plus `queryTimedTasks()`, `getTimedTask(id)`, and
     `removeTimedTask(id)` aliases for Node-owned one-shot snapshots. The
-    daily/weekly user task database provider remains rejected, intent/broadcast
-    triggers defer to P12-18, and raw `TimedTask` / `IntentTask` objects remain
-    blocked by design.
+    daily/weekly user task database provider remains rejected. P12-18 adds
+    stable `addIntentTask()` / `queryIntentTasks()` / `getIntentTask(id)` /
+    `removeIntentTask(id)` unsupported stubs without receiver registration,
+    manifest mutation, custom broadcast authority, or raw `Intent` exposure.
+    Raw `TimedTask` / `IntentTask` objects remain blocked by design.
 
 ## Current Provider POC Surfaces
 

@@ -7086,7 +7086,8 @@
         "Daily/weekly wall-clock tasks, IntentTask/broadcast triggers, raw TimedTask/IntentTask objects, task update mutation, and user task database parity remain design-gated; S11-22 does not add compat.tasks.",
         "P12-15 compat.tasks v1 scope locked: only disposable one-shot add/remove/query over work_manager is eligible for P12-16; daily/weekly moves to P12-17, intent/broadcast moves to P12-18, and raw task objects remain blocked_by_design.",
         "P12-16 compat.tasks disposable facade landed: require(\"autojs6:compat\").tasks exposes addDisposableTask, removeTask(id), and queryTasks over work_manager.scheduleOnce/cancel/list, returns JSON-safe ids/snapshots, keeps require(\"tasks\") and global tasks absent, and keeps daily/weekly/intent/raw task object parity gated.",
-        "P12-17 daily/weekly user-task database provider rejected: compat.tasks adds stable addDailyTask/addWeeklyTask unsupported stubs, queryTimedTasks/getTimedTask/removeTimedTask Node-owned aliases, and updateTask blocked_by_design stub without promoting the AutoJs6 task database provider."
+        "P12-17 daily/weekly user-task database provider rejected: compat.tasks adds stable addDailyTask/addWeeklyTask unsupported stubs, queryTimedTasks/getTimedTask/removeTimedTask Node-owned aliases, and updateTask blocked_by_design stub without promoting the AutoJs6 task database provider.",
+        "P12-18 IntentTask/broadcast provider rejected: compat.tasks adds stable addIntentTask/queryIntentTasks/getIntentTask/removeIntentTask unsupported stubs without registering receivers, mutating manifests, granting custom broadcast authority, or exposing raw IntentTask/Intent objects."
       ],
       "apiEntries": [
         {
@@ -7129,12 +7130,12 @@
           "id": "tasks.addIntentTask",
           "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "p12_15_intent_task_broadcast_deferred",
+          "nodeName": "tasks.addIntentTask",
+          "decision": "p12_18_intent_broadcast_provider_rejected",
           "notes": [
-            "P12-15 excludes IntentTask creation from compat.tasks v1; boot/broadcast/custom trigger policy remains deferred to the P12-18 broadcast task decision."
+            "P12-18 rejects IntentTask/broadcast provider promotion. compat.tasks.addIntentTask() fails before bridge dispatch with ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED; boot/package/custom receivers and exact-alarm authority require separate capabilities."
           ]
         },
         {
@@ -7177,12 +7178,12 @@
           "id": "tasks.getIntentTask",
           "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "p12_15_intent_task_broadcast_deferred",
+          "nodeName": "tasks.getIntentTask",
+          "decision": "p12_18_intent_broadcast_provider_rejected",
           "notes": [
-            "P12-15 keeps IntentTask database reads outside compat.tasks v1; P12-18 must define JSON snapshots without raw IntentTask objects before promotion."
+            "P12-18 rejects IntentTask database reads in Node. compat.tasks.getIntentTask(id) fails before bridge dispatch with ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED; JSON snapshots need a dedicated provider and raw IntentTask objects remain denied."
           ]
         },
         {
@@ -7201,12 +7202,12 @@
           "id": "tasks.queryIntentTasks",
           "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "p12_15_intent_task_broadcast_deferred",
+          "nodeName": "tasks.queryIntentTasks",
+          "decision": "p12_18_intent_broadcast_provider_rejected",
           "notes": [
-            "P12-15 keeps IntentTask query semantics out of compat.tasks v1 because they depend on the AutoJs6 user task database and P12-18 broadcast trigger policy."
+            "P12-18 rejects IntentTask query semantics in Node. compat.tasks.queryIntentTasks(options?) fails before bridge dispatch with ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED; AutoJs6 user task database and broadcast trigger ownership remain unpromoted."
           ]
         },
         {
@@ -7225,12 +7226,12 @@
           "id": "tasks.removeIntentTask",
           "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "p12_15_intent_task_broadcast_deferred",
+          "nodeName": "tasks.removeIntentTask",
+          "decision": "p12_18_intent_broadcast_provider_rejected",
           "notes": [
-            "P12-15 keeps IntentTask cancellation outside compat.tasks v1 until P12-18 defines broadcast/user task database ownership and receiver cleanup."
+            "P12-18 rejects IntentTask cancellation in Node. compat.tasks.removeIntentTask(id) fails before bridge dispatch with ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED; receiver cleanup and user-visible task deletion need a dedicated provider."
           ]
         },
         {

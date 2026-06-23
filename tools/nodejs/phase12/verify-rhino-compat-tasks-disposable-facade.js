@@ -181,7 +181,8 @@ function buildChecks(files) {
           "work_manager",
         ]) &&
         (matrixTasksRow.includes("Proceed to P12-17 daily/weekly user-task database decision") ||
-          matrixTasksRow.includes("Proceed to P12-18 intent/broadcast task compatibility decision")),
+          matrixTasksRow.includes("Proceed to P12-18 intent/broadcast task compatibility decision") ||
+          matrixTasksRow.includes("Proceed to P12-19 tasks migration examples and smoke")),
       "Generated matrix must move tasks to P12-17 after P12-16 lands.",
     ),
     check(

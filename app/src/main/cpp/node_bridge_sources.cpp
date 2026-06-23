@@ -17093,6 +17093,12 @@ std::string buildEmbeddedScriptExecutionSource(
       "P12-17 has no JSON patch/update provider for the AutoJs6 user task database; raw TimedTask/IntentTask objects cannot cross into Node."
     ));
   }
+  function __autojs6_rhino_compat_tasks_reject_intent(apiName) {
+    return Promise.reject(__autojs6_rhino_compat_unsupported(
+      apiName,
+      "P12-18 keeps IntentTask and broadcast-triggered task compatibility unpromoted; Node cannot register boot, package-event, exact-alarm, startup, or custom broadcast receivers until a user-visible broadcast task provider is designed."
+    ));
+  }
   function __autojs6_rhino_compat_tasks() {
     if (__autojs6_rhino_compat_tasks_cache) {
       return __autojs6_rhino_compat_tasks_cache;
@@ -17113,14 +17119,23 @@ std::string buildEmbeddedScriptExecutionSource(
       addWeeklyTask: function(options) {
         return __autojs6_rhino_compat_tasks_reject_wall_clock("tasks.addWeeklyTask");
       },
+      addIntentTask: function(options) {
+        return __autojs6_rhino_compat_tasks_reject_intent("tasks.addIntentTask");
+      },
       removeTask: function(taskId, options) {
         return __autojs6_rhino_compat_tasks_remove_node_owned(taskId, options, "removeTask");
       },
       queryTasks: function(options) {
         return __autojs6_rhino_compat_tasks_query_node_owned(options, "queryTasks");
       },
+      queryIntentTasks: function(options) {
+        return __autojs6_rhino_compat_tasks_reject_intent("tasks.queryIntentTasks");
+      },
       queryTimedTasks: function(options) {
         return __autojs6_rhino_compat_tasks_query_node_owned(options, "queryTimedTasks");
+      },
+      getIntentTask: function(taskId, options) {
+        return __autojs6_rhino_compat_tasks_reject_intent("tasks.getIntentTask");
       },
       getTimedTask: function(taskId, options) {
         let id;
@@ -17138,6 +17153,9 @@ std::string buildEmbeddedScriptExecutionSource(
       },
       removeTimedTask: function(taskId, options) {
         return __autojs6_rhino_compat_tasks_remove_node_owned(taskId, options, "removeTimedTask");
+      },
+      removeIntentTask: function(taskId, options) {
+        return __autojs6_rhino_compat_tasks_reject_intent("tasks.removeIntentTask");
       },
       updateTask: function(task) {
         return __autojs6_rhino_compat_tasks_reject_update();
@@ -17233,7 +17251,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17", "P12-18"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,

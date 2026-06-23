@@ -330,8 +330,9 @@ The safe migration subset is intentionally narrow:
   with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` because wall-clock time, weekdays,
   next-run calculation, exact-alarm policy, and task UI state are not WorkManager
   periodic cadence.
-- `tasks.addIntentTask()`, intent queries, startup, boot, package, and custom
-  broadcast triggers stay with `BROADCAST_TASKS.md`.
+- `tasks.addIntentTask()`, intent queries, startup, boot, package, exact-alarm,
+  and custom broadcast triggers remain rejected in P12-18 with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` and stay with `BROADCAST_TASKS.md`.
 - `tasks.addTask()`, `removeTask(task)`, and `updateTask(task)` are blocked by
   design when they depend on raw `TimedTask` or `IntentTask` Java objects.
 
@@ -344,7 +345,11 @@ disposable one-shot migration only, and P12-16 implements that facade:
 returning JSON-safe task ids or snapshots. P12-17 adds daily/weekly stable
 rejection stubs plus `queryTimedTasks()`, `getTimedTask(id)`, and
 `removeTimedTask(id)` aliases for Node-owned one-shot snapshots only; the
-user-visible task database provider remains unpromoted.
+user-visible task database provider remains unpromoted. P12-18 adds
+`IntentTask`/broadcast stable rejection stubs for `addIntentTask()`,
+`queryIntentTasks()`, `getIntentTask(id)`, and `removeIntentTask(id)`; the
+broadcast receiver provider, packaged manifest mutation, custom broadcast
+authority, and trigger payload serialization remain unpromoted.
 
 ## Tests Required
 

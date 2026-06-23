@@ -698,14 +698,57 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-tasks-daily-weekly-decision-verification.md`
 
-- [ ] P12-18: 决策 intent/broadcast task compatibility。
+- [x] P12-18: 决策 intent/broadcast task compatibility。
   - 范围：处理 `tasks.addIntentTask`、`queryIntentTasks`、broadcast triggers。
   - 验收：
     - 不暴露 raw `BroadcastReceiver`、`IntentFilter`、`PendingIntent`、
       custom broadcast authority。
     - boot/package-event/exact-alarm 等高风险触发必须单独 capability。
     - packaged 行为必须明确。
-  - Evidence：待补充。
+  - Evidence：
+    - 决策文档：
+      `docs/nodejs/design/TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md`
+      明确 P12-18 不提升 `IntentTask` / broadcast provider；未来 provider
+      必须先覆盖 capability split、task ownership、receiver lifecycle、
+      trigger descriptor schema、trigger payload serialization、custom
+      broadcast authority、packaged APK behavior、background policy 和 error
+      policy。
+    - Broadcast design：
+      `docs/nodejs/design/BROADCAST_TASKS.md` 记录 P12-18 stable rejection；
+      boot、user-unlocked、package-event、startup、exact-alarm 和 custom
+      broadcast trigger 仍需单独 capability。
+    - Runtime：
+      `app/src/main/cpp/node_bridge_sources.cpp` 在
+      `require("autojs6:compat").tasks` 中加入
+      `addIntentTask()`、`queryIntentTasks()`、`getIntentTask(id)`、
+      `removeIntentTask(id)`，全部以
+      `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` 在 bridge dispatch 前拒绝。
+    - Types：
+      `docs/nodejs/types/autojs6-node/rhino_compat.d.ts` 声明 P12-18 stub；
+      仍不声明 `require("tasks")` 或 global `tasks`。
+    - Instrumentation：
+      `NodeWorkManagerBridgeInstrumentationTest.kt` 和
+      `NodeBridgeConformanceInstrumentationTest.kt` 覆盖 stable error code、
+      no bridge dispatch rejection、无 receiver/provider 调用和无 global
+      `tasks`。
+    - Docs/status：
+      `docs/nodejs/design/COMPAT_TASKS_V1.md`,
+      `docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md`,
+      `docs/nodejs/design/WORK_MANAGER.md`,
+      `docs/nodejs/design/RHINO_COMPAT_LOADER.md`,
+      `docs/nodejs/MIGRATION_FROM_RHINO.md`,
+      `docs/nodejs/SECURITY_MODEL.md`,
+      `docs/nodejs/rhino-compat/status-manifest.json`,
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`,
+      `docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md`,
+      `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-tasks-intent-broadcast-decision.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatTasksIntentBroadcastDecision`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-intent-broadcast-decision-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-intent-broadcast-decision-verification.md`
 
 - [ ] P12-19: 增加 tasks migration examples and smoke。
   - 范围：为 disposable task、daily/weekly rejection 或 provider path、

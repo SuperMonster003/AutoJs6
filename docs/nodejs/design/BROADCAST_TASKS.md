@@ -1,6 +1,10 @@
 # Broadcast Task Design Gate
 
-Status: design gate only. No runtime behavior is enabled by this document. Embedded Node scripts cannot register boot, package-event, startup, or custom broadcast-triggered tasks yet.
+Status: design gate only. P12-18 rejects provider promotion for Node
+IntentTask/broadcast compatibility and exposes only stable unsupported stubs
+through `require("autojs6:compat").tasks`. Embedded Node scripts cannot
+register boot, package-event, startup, exact-alarm, or custom
+broadcast-triggered tasks yet.
 
 ## Goal
 
@@ -278,4 +282,22 @@ Before implementation, add tests for:
 
 ## Current Decision
 
-Task 66 does not implement boot or broadcast-triggered Node tasks. It records the design gate for future work. The current scheduling runtime surface is the S7-15 controlled `require("work_manager")` WorkManager timed MVP. Boot, package-event, startup, and custom broadcast execution stay disabled until a later implementation provides user-visible persistence, manifest verification, scoped descriptor storage, rate limits, trigger payload serialization, and focused tests.
+Task 66 does not implement boot or broadcast-triggered Node tasks. It records
+the design gate for future work. The current scheduling runtime surface is the
+S7-15 controlled `require("work_manager")` WorkManager timed MVP.
+
+P12-18 keeps broadcast provider promotion rejected. The only Rhino-name runtime
+surface is stable rejection under `require("autojs6:compat").tasks`:
+
+- `addIntentTask()`
+- `queryIntentTasks()`
+- `getIntentTask()`
+- `removeIntentTask()`
+
+These methods reject with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` before bridge
+dispatch. Boot, package-event, startup, exact-alarm, and custom broadcast
+execution stay disabled until a later implementation provides user-visible
+persistence, manifest verification, scoped descriptor storage, rate limits,
+trigger payload serialization, packaged diagnostics, receiver cleanup, and
+focused tests. See `TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md` for the
+P12-18 compatibility decision.

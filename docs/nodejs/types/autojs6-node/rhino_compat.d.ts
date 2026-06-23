@@ -291,11 +291,15 @@ declare module "autojs6:compat" {
       addDisposableTask(options: RhinoDisposableTaskOptions): Promise<string>;
       addDailyTask(options?: unknown): Promise<never>;
       addWeeklyTask(options?: unknown): Promise<never>;
+      addIntentTask(options?: unknown): Promise<never>;
       removeTask(id: string, options?: RhinoTasksRemoveOptions): Promise<boolean>;
       queryTasks(options?: RhinoTasksQueryOptions): Promise<readonly workManager.WorkTask[]>;
+      queryIntentTasks(options?: unknown): Promise<never>;
       queryTimedTasks(options?: RhinoTasksQueryOptions): Promise<readonly workManager.WorkTask[]>;
+      getIntentTask(id: string | number, options?: unknown): Promise<never>;
       getTimedTask(id: string | number, options?: RhinoTasksQueryOptions): Promise<workManager.WorkTask | null>;
       removeTimedTask(id: string | number, options?: RhinoTasksRemoveOptions): Promise<boolean>;
+      removeIntentTask(id: string | number, options?: unknown): Promise<never>;
       updateTask(task: unknown): Promise<never>;
     }
 
