@@ -667,22 +667,23 @@ window.stop.click(() => {
 
 There is no current Node equivalent for `floaty.window()` or
 `floaty.rawWindow()`. Do not migrate these APIs by expecting
-`require("floaty")`, `require("ui.overlay")`, `compat.floaty`, or a global
-`floaty` to exist. Overlay support remains design-gated until permission flow,
-foreground disclosure, packaged behavior, opaque window handles, event drain,
-and close/cleanup gates are implemented.
+`require("floaty")`, `compat.floaty`, or a global `floaty` to exist. P12-13
+adds `require("ui.overlay")` as a fake-provider POC for JSON-only overlay
+shape, capability, and handle-lifecycle checks. Production/live overlay support
+remains gated until permission flow, foreground disclosure, packaged behavior,
+opaque window handles, event drain, and close/cleanup gates are implemented.
 
 P12-11 selects the Provider path for a controlled JSON-only overlay provider,
 and P12-12A locks the contract in
 [OVERLAY_PROVIDER_V1.md](design/OVERLAY_PROVIDER_V1.md). Treat exact Rhino
 `floaty.window()` and `floaty.rawWindow()` raw-wrapper semantics as a permanent
-non-goal in Node; keep such scripts on Rhino until the P12-13 fake-provider POC
-and P12-14 live packaged/cleanup gates land.
+non-goal in Node; keep production scripts that need real overlay windows on
+Rhino until the P12-14 live packaged/cleanup gate lands.
 
-The current Node profile still has no overlay runtime surface, so
-`require("floaty")`, `require("ui.overlay")`, `compat.floaty`, and global
-`floaty` are unavailable until an explicit provider task promotes them. When a
-migration example needs a stable marker for the raw Rhino APIs, use
+The current Node profile has only the P12-13 `require("ui.overlay")`
+fake-provider POC. `require("floaty")`, `compat.floaty`, and global `floaty`
+remain unavailable until an explicit compatibility facade task promotes them.
+When a migration example needs a stable marker for the raw Rhino APIs, use
 `compat.blockedByDesign("floaty.window", reason)` or
 `compat.blockedByDesign("floaty.rawWindow", reason)` and check
 `compat.errorCodes.blockedByDesign`

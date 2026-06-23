@@ -24,6 +24,7 @@ enum class NodeBridgeResourceType(val idPrefix: String) {
     NOTIFICATION("notification"),
     SENSOR_SUBSCRIPTION("sensor"),
     UI_SESSION("ui"),
+    OVERLAY_SESSION("overlay"),
     INPUT_OBSERVER_SUBSCRIPTION("input-observer"),
 }
 

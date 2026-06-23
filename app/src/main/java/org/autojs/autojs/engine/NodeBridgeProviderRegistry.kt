@@ -129,6 +129,7 @@ object NodeBridgeProviderRegistry {
     private const val MEDIA_PROJECTION_PROVIDER = "media_projection"
     private const val IMAGE_PROVIDER = "image"
     private const val UI_PROVIDER = "ui"
+    private const val UI_OVERLAY_PROVIDER = "ui.overlay"
     private const val WORK_MANAGER_PROVIDER = "work_manager"
     private const val SHELL_PROVIDER = "shell"
     private const val INPUT_OBSERVER_PROVIDER = "input_observer"
@@ -201,6 +202,12 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.UI),
             capabilities = listOf(NodeBridgePermissionManifest.UI),
             packagedSupport = packagedSupported("Activity-owned declarative UI sessions are handle-based and project-owned"),
+        ),
+        provider(
+            id = UI_OVERLAY_PROVIDER,
+            modules = listOf(NodeBridgeModules.UI_OVERLAY),
+            capabilities = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
+            packagedSupport = packagedProviderDependent("P12-13 fake provider POC is available through test transport; live packaged overlay waits for P12-14 permission and cleanup gate"),
         ),
         provider(
             id = INPUT_OBSERVER_PROVIDER,
@@ -308,6 +315,7 @@ object NodeBridgeProviderRegistry {
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
         IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        UI_OVERLAY_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
         INPUT_OBSERVER_PROVIDER -> inputObserverStatus()
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
@@ -327,6 +335,15 @@ object NodeBridgeProviderRegistry {
             "eventDelivery" to "bounded drainEvents JSON snapshots",
             "maxActiveSessionsPerExecution" to "4",
             "statusReason" to "Activity-owned declarative UI MVP",
+        )
+        UI_OVERLAY_PROVIDER -> linkedMapOf(
+            "fakeMethods" to "show,update,drainEvents,close,closeAll,hasPermission,openPermissionSettings",
+            "capability" to NodeBridgePermissionManifest.UI_OVERLAY,
+            "permissionCapability" to NodeBridgePermissionManifest.UI_OVERLAY_PERMISSION,
+            "resourceType" to NodeBridgeResourceType.OVERLAY_SESSION.name,
+            "liveProvider" to "not_promoted",
+            "packagedPolicy" to "live overlay waits for P12-14 SYSTEM_ALERT_WINDOW metadata, foreground disclosure, and cleanup gate",
+            "statusReason" to "P12-13 fake transport POC only; Android provider fails closed",
         )
         INPUT_OBSERVER_PROVIDER -> linkedMapOf(
             "liveMethods" to "getAvailableSources,observeKeys,drainEvents,close",

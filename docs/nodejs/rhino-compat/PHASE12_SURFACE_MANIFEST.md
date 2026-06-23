@@ -34,15 +34,18 @@ which Phase 12 workstream owns the next implementation or rejection.
   `autojs6:compat.ui` over the existing `require("ui")` provider. P12-10 adds
   fake/device instrumentation evidence, a packaged smoke marker, and
   `UI_SESSION` cleanup reporting; live packaged UI remains unpromoted.
+- `floaty.overlay`: P12-11 selects the Provider path for a controlled JSON-only
+  overlay provider. P12-12A locks the provider v1 contract in
+  `OVERLAY_PROVIDER_V1.md`; P12-13 adds the `require("ui.overlay")` provider
+  POC over fake transport as a provider POC, with runtime module, types, capability preflight,
+  fake-provider instrumentation, and `OVERLAY_SESSION` registry evidence.
+  P12-14 owns live packaged/cleanup gates. Exact Rhino
+  `floaty.window()` / `floaty.rawWindow()` raw-wrapper parity remains
+  `blocked_by_design` and must not be exposed as raw Android/Rhino objects.
 
 ## Current Design-Locked Surfaces
 
-- `floaty.overlay`: P12-11 selects the Provider path for a controlled JSON-only
-  overlay provider. P12-12A locks the provider v1 contract in
-  `OVERLAY_PROVIDER_V1.md`; P12-13/P12-14 own fake-provider and live
-  packaged/cleanup gates. Exact Rhino
-  `floaty.window()` / `floaty.rawWindow()` raw-wrapper parity remains
-  `blocked_by_design` and must not be exposed as raw Android/Rhino objects.
+- None in the current Phase 12 surface manifest.
 
 ## Current Rejected Surfaces
 

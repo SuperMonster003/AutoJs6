@@ -565,6 +565,7 @@ object NodeBridgeModules {
     const val NOTIFICATIONS = "notifications"
     const val SENSORS = "sensors"
     const val UI = "ui"
+    const val UI_OVERLAY = "ui.overlay"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -618,6 +619,7 @@ object NodeBridgeModules {
     val notificationsMethods = setOf("notify", "cancel", "cancelAll")
     val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
     val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents")
+    val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
     val shellMethods = setOf("exec")
@@ -644,6 +646,7 @@ object NodeBridgeModules {
         NOTIFICATIONS to notificationsMethods,
         SENSORS to sensorsMethods,
         UI to uiMethods,
+        UI_OVERLAY to uiOverlayMethods,
         CLIPBOARD to clipboardMethods,
         DEVICE to deviceMethods,
         SHELL to shellMethods,
@@ -765,6 +768,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, auditedCallback)
             request.module == NodeBridgeModules.SENSORS && request.method in NodeBridgeModules.sensorsMethods -> dispatchSensors(request, auditedCallback)
             request.module == NodeBridgeModules.UI && request.method in NodeBridgeModules.uiMethods -> dispatchUi(request, auditedCallback)
+            request.module == NodeBridgeModules.UI_OVERLAY && request.method in NodeBridgeModules.uiOverlayMethods -> dispatchUiOverlay(request, auditedCallback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
             request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, auditedCallback)
             request.module == NodeBridgeModules.SHELL && request.method in NodeBridgeModules.shellMethods -> dispatchShell(request, auditedCallback)
@@ -949,6 +953,19 @@ class AndroidNodeBridgeCapabilityProvider(
             "update", "batchUpdate", "drainEvents" -> dispatchOwnedUiRequest(request, releaseOnClose = false, callback = callback)
             else -> callback(unavailable(request))
         }
+    }
+
+    private fun dispatchUiOverlay(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        callback(
+            NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.capabilityProviderMissing(
+                    module = request.module,
+                    method = request.method,
+                    requirement = "a promoted overlay capability provider; P12-13 exposes only fake-transport POC coverage",
+                ),
+            ),
+        )
     }
 
     private fun dispatchUiShowLayout(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {

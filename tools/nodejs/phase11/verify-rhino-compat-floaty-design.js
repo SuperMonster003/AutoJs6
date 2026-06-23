@@ -309,15 +309,11 @@ function buildChecks(files) {
         !files.runtime.text.includes("function __autojs6_rhino_compat_floaty") &&
         !files.runtime.text.includes("compat.floaty") &&
         !files.runtime.text.includes("name === \"floaty\"") &&
-        !files.runtime.text.includes("name === \"ui.overlay\"") &&
         !files.compatTypes.text.includes("floaty") &&
-        !files.compatTypes.text.includes("ui.overlay") &&
-        !files.permissionManifest.text.includes("ui.overlay") &&
         !files.permissionManifest.text.includes("\"floaty\"") &&
         !/\bFLOATY\b/.test(files.permissionManifest.text) &&
-        !/\bFLOATY\b/.test(files.resourceRegistry.text) &&
-        !/\bOVERLAY_WINDOW\b/.test(files.resourceRegistry.text),
-      "S11-24 must not promote runtime floaty/ui.overlay modules, compat types, capabilities, or resource registry types",
+        !/\bFLOATY\b/.test(files.resourceRegistry.text),
+      "S11-24/P12 must not promote a Rhino floaty runtime facade, compat types, raw floaty capability, or raw floaty resource registry type",
     ),
   ];
 }

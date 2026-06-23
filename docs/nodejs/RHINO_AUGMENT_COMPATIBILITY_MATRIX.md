@@ -6,8 +6,8 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Rhino modules: 73
 - Rhino API entries: 879
-- Node bridge modules: 24
-- Node type modules: 47
+- Node bridge modules: 25
+- Node type modules: 48
 - Modules with bridge evidence: 24
 - Modules with type evidence: 37
 - Modules without Node surface evidence: 35
@@ -78,7 +78,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 50 | cryptyo.crypto | crypto | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 51 | automator.root_automator | RootAutomator | blocked_by_design | - | blocked_by_design:1 | lifecycle_resource, raw_android_object | Keep denial documented and covered by policy tests. |
 | 52 | engines | engines | partial | engines | partial:4, supported_async:5 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
-| 53 | floaty | floaty | unsupported | autojs6:compat, clipboard | blocked_by_design:2, renamed:1, unsupported:5 | none | Implement P12-13 overlay fake provider POC over ui.overlay; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design. |
+| 53 | floaty | floaty | unsupported | autojs6:compat, clipboard, ui.overlay | blocked_by_design:2, renamed:1, unsupported:5 | none | Complete P12-14 live overlay packaged and cleanup gate; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design. |
 | 54 | storages | storages | partial | autojs6:compat, storage, storages | partial:1, supported_async:3, unsupported:2 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 55 | device | device | partial | autojs6:compat, clipboard, device | partial:19, supported_async:1 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 56 | recorder | recorder | unsupported | - | unsupported:1 | provider_availability | Design a Node facade or record a permanent non-goal. |
@@ -635,11 +635,11 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `floaty`
 - Status: `unsupported`
-- Node surface: autojs6:compat, clipboard
+- Node surface: autojs6:compat, clipboard, ui.overlay
 - Coverage: `no_node_surface`
 - API status: blocked_by_design:2, renamed:1, unsupported:5
 - Risks: none
-- Next step: Implement P12-13 overlay fake provider POC over ui.overlay; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.
+- Next step: Complete P12-14 live overlay packaged and cleanup gate; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.
 
 ### storages
 

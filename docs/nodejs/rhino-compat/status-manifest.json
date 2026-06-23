@@ -9893,17 +9893,20 @@
       "asyncMode": "promise",
       "nodeModules": [
         "autojs6:compat",
-        "clipboard"
+        "clipboard",
+        "ui.overlay"
       ],
       "bridgeModules": [
-        "clipboard"
+        "clipboard",
+        "ui.overlay"
       ],
       "decision": "s11_24_floaty_overlay_design_gate",
       "notes": [
-        "S11-24 keeps Rhino floaty/overlay compatibility design-gated: no require(\"floaty\"), require(\"ui.overlay\"), compat.floaty, or global floaty is exposed.",
+        "S11-24 originally kept Rhino floaty/overlay compatibility design-gated: no require(\"floaty\"), require(\"ui.overlay\"), compat.floaty, or global floaty was exposed.",
         "floaty.window/rawWindow exact Rhino XML and live window-wrapper semantics are blocked by design; floaty.getClip migrates to the controlled clipboard bridge or autojs6:compat.getClip without hidden overlay windows.",
         "P12-11 provider path selected: Phase 12 will define a controlled JSON-only overlay provider while exact Rhino floaty.window/rawWindow raw-wrapper semantics remain blocked by design.",
-        "P12-12A overlay provider v1 contract locked: ui.overlay uses explicit overlay capability, foreground disclosure, packaged SYSTEM_ALERT_WINDOW metadata, opaque handles, and cleanup rules; P12-13 owns the fake provider POC."
+        "P12-12A overlay provider v1 contract locked: ui.overlay uses explicit overlay capability, foreground disclosure, packaged SYSTEM_ALERT_WINDOW metadata, opaque handles, and cleanup rules; P12-13 owns the fake provider POC.",
+        "P12-13 overlay fake provider POC landed: require(\"ui.overlay\") exposes JSON-only show/update/drainEvents/close/closeAll/hasPermission/openPermissionSettings through fake transport, while P12-14 owns live overlay packaged and cleanup gates; exact Rhino raw-wrapper semantics remain blocked by design."
       ],
       "apiEntries": [
         {
@@ -9915,7 +9918,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_module_deferred",
           "notes": [
-            "No Node floaty module is exposed in S11-24; P12-12A locks ui.overlay as the first provider module name and keeps require(\"floaty\") out of v1; P12-13 owns the fake provider POC."
+            "No Node floaty module is exposed; P12-12A locks ui.overlay as the first provider module name and keeps require(\"floaty\") out of v1. P12-13 exposes require(\"ui.overlay\") as the fake transport POC."
           ]
         },
         {
@@ -9927,7 +9930,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_session_provider_deferred",
           "notes": [
-            "P12-12A defines closeAll ownership over provider-owned opaque ui.overlay handles only; floaty.closeAll remains unavailable until the P12-13 provider POC promotes the controlled surface."
+            "P12-12A defines closeAll ownership over provider-owned opaque ui.overlay handles; P12-13 exposes ui.overlay.closeAll() through fake transport, while Rhino floaty.closeAll remains unavailable and P12-14 owns the live cleanup gate."
           ]
         },
         {
@@ -9939,7 +9942,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-12A defines explicit overlay capability, user action, foreground disclosure, packaged SYSTEM_ALERT_WINDOW metadata, and no silent service-process grant/emulation; runtime permission flow waits for P12-13/P12-14."
+            "P12-13 exposes fake transport permission-state methods under ui.overlay.permission; no silent service-process grant/emulation exists and P12-14 owns live Android permission behavior."
           ]
         },
         {
@@ -9963,7 +9966,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-12A assigns permission-state queries to ui.overlay.hasPermission() under ui.overlay.permission; Rhino floaty.hasPermission remains unavailable until a controlled provider is promoted."
+            "P12-13 exposes ui.overlay.hasPermission() under ui.overlay.permission through fake transport; Rhino floaty.hasPermission remains unavailable until a compatibility facade is explicitly promoted."
           ]
         },
         {
@@ -9987,7 +9990,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-12A assigns explicit settings launch to ui.overlay.openPermissionSettings() under ui.overlay.permission; no silent prompt or settings launch path is exposed before provider promotion."
+            "P12-13 exposes ui.overlay.openPermissionSettings() under ui.overlay.permission through fake transport; P12-14 owns the live settings intent gate and no silent prompt path is exposed."
           ]
         },
         {

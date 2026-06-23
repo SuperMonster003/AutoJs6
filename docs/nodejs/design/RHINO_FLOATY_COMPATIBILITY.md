@@ -6,8 +6,9 @@ any Node overlay runtime is exposed.
 
 ## Decision
 
-Do not add `require("floaty")`, `require("ui.overlay")`, `compat.floaty`, or a
-global `floaty` in S11-24.
+Do not add `require("floaty")`, `compat.floaty`, or a global `floaty` in
+S11-24. P12-13 adds `require("ui.overlay")` only as the controlled provider
+POC, not as Rhino raw-window compatibility.
 
 P12-11 selects the Provider path for a controlled JSON-only overlay provider.
 This does not change the S11-24 raw-window boundary: exact Rhino
@@ -17,8 +18,12 @@ contract in [OVERLAY_PROVIDER_V1.md](OVERLAY_PROVIDER_V1.md), and that contract
 must not expose Rhino `JsWindow`, `WindowBridge`, `NativeView`, or raw Android
 window objects. P12-13 owns the fake provider POC.
 
-Until P12-13 lands, the current Node profile still has no `require("floaty")`,
-`require("ui.overlay")`, `compat.floaty`, or global `floaty` runtime surface.
+P12-13 lands the `ui.overlay` fake provider POC over fake transport for
+JSON-only `show`, `update`, `drainEvents`, `close`, `closeAll`,
+`hasPermission`, and `openPermissionSettings`. The current Node profile still
+has no `require("floaty")`, `compat.floaty`, or global `floaty` runtime
+surface, and the live Android overlay provider remains fail-closed until
+P12-14.
 Dual-engine examples for the raw Rhino APIs may keep
 using `compat.blockedByDesign("floaty.window", ...)` or
 `compat.blockedByDesign("floaty.rawWindow", ...)`, which returns
@@ -62,10 +67,10 @@ objects.
 
 | Rhino API | S11-24 status | Node migration |
 | --- | --- | --- |
-| `floaty.__module` | unsupported | No `require("floaty")`, `require("ui.overlay")`, `compat.floaty`, or global `floaty` is exposed. |
-| `floaty.hasPermission()` | unsupported | Future overlay provider may expose a Promise permission-state query; no current surface. |
-| `floaty.requestPermission()` | unsupported | Future provider may open overlay settings only through explicit user action; no silent prompt path. |
-| `floaty.ensurePermission()` | unsupported | Future provider should fail with a stable permission error; no current surface. |
+| `floaty.__module` | unsupported | No `require("floaty")`, `compat.floaty`, or global `floaty` is exposed; use the P12-13 `require("ui.overlay")` provider POC for JSON-only overlay migration experiments. |
+| `floaty.hasPermission()` | unsupported | P12-13 exposes `ui.overlay.hasPermission()` over fake transport under `ui.overlay.permission`; Rhino-name facade remains unavailable. |
+| `floaty.requestPermission()` | unsupported | P12-13 exposes `ui.overlay.openPermissionSettings()` over fake transport; P12-14 owns the live settings intent gate and no silent prompt path is allowed. |
+| `floaty.ensurePermission()` | unsupported | P12-13 fake provider POC can model permission denial; live Android permission behavior waits for P12-14. |
 | `floaty.closeAll()` | unsupported | Future provider may close only windows owned by the current Node execution; no current handle registry. |
 | `floaty.window(xml)` | blocked_by_design | Exact Rhino XML/`JsResizableWindow` object shape is rejected; future overlay must use JSON descriptors and opaque handles. |
 | `floaty.rawWindow(xml)` | blocked_by_design | Raw window flags, focus/touch controls, and raw view access are rejected. |

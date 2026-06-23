@@ -472,7 +472,7 @@ Phase 12 task 本身可使用以下执行状态：
   - Evidence：当前无。该分支保留为 checklist 分支任务；除非后续重新选择
     Rejection path，否则不登记 runtime negative gate。
 
-- [ ] P12-13: Provider path - 实现 overlay fake provider 和 facade POC。
+- [x] P12-13: Provider path - 实现 overlay fake provider 和 facade POC。
   - 适用条件：P12-11 选择 Provider path。
   - 范围：先以 fake provider 验证 JS shape、capability、handle lifecycle、
     closeAll 和 denial path。
@@ -485,7 +485,44 @@ Phase 12 task 本身可使用以下执行状态：
     - provider fake path 不打开真实 overlay。
     - handle close/destroy 后 active overlay count 为 0。
     - 未声明 overlay capability 时 dispatch 前失败。
-  - Evidence：待补充。
+  - Evidence：
+    - Runtime module：`app/src/main/cpp/node_bridge_sources.cpp`
+      (`require("ui.overlay")` fake-transport facade, JSON descriptor
+      validation, hidden/raw overlay rejection, frozen snapshots/handles).
+    - Bridge registry：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`
+      (`ui.overlay` methods registered; Android live provider remains
+      fail-closed before P12-14).
+    - Permission manifest：`app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt`
+      (`ui.overlay`, `ui.overlay.permission`, foreground/packaged metadata,
+      reserved `floaty.raw`/`floaty.touch`).
+    - Resource/provider registry：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt`
+      and
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt`
+      (`OVERLAY_SESSION`, fake-only provider metadata, live provider
+      `not_promoted`).
+    - Types：`docs/nodejs/types/autojs6-node/ui_overlay.d.ts`,
+      `docs/nodejs/types/autojs6-node/index.d.ts`,
+      `docs/nodejs/types/autojs6-node/README.md`.
+    - Instrumentation：
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeOverlayBridgeInstrumentationTest.kt`
+      (fake transport, module shadowing protection, capability pre-dispatch
+      denial, handle close lifecycle, live provider fail-closed path).
+    - Docs/status：`docs/nodejs/design/OVERLAY_PROVIDER_V1.md`,
+      `docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md`,
+      `docs/nodejs/design/FLOATY_NODE.md`,
+      `docs/nodejs/MIGRATION_FROM_RHINO.md`,
+      `docs/nodejs/SECURITY_MODEL.md`,
+      `docs/nodejs/rhino-compat/status-manifest.json`,
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`,
+      `docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md`,
+      `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`.
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-overlay-fake-provider.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatOverlayFakeProvider`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-overlay-fake-provider-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-overlay-fake-provider-verification.md`
 
 - [ ] P12-14: Provider path - live overlay packaged and cleanup gate。
   - 适用条件：P12-11 选择 Provider path 且 P12-13 已完成。

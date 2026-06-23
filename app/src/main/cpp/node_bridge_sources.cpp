@@ -8181,6 +8181,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_notifications_cache = null;
   let __autojs6_limited_sensors_cache = null;
   let __autojs6_limited_ui_cache = null;
+  let __autojs6_limited_ui_overlay_cache = null;
   let __autojs6_limited_input_observer_cache = null;
   let __autojs6_limited_clipboard_cache = null;
   let __autojs6_limited_device_cache = null;
@@ -9111,6 +9112,10 @@ std::string buildEmbeddedScriptExecutionSource(
     if (moduleName === "notifications") return ["notifications"];
     if (moduleName === "sensors") return ["sensors"];
     if (moduleName === "ui") return ["ui"];
+    if (moduleName === "ui.overlay") {
+      if (methodName === "hasPermission" || methodName === "openPermissionSettings") return ["ui.overlay.permission"];
+      return ["ui.overlay"];
+    }
     if (moduleName === "input_observer") {
       if (methodName === "getAvailableSources") return ["input_observer"];
       return ["input_observer", "input_observer.keys"];
@@ -18476,6 +18481,304 @@ std::string buildEmbeddedScriptExecutionSource(
       bind: __autojs6_ui_bind
     });
     return __autojs6_limited_ui_cache;
+  }
+  const __autojs6_ui_overlay_policy = Object.freeze({
+    maxActiveOverlays: 4,
+    maxDescriptorBytes: 65536,
+    maxDescriptorDepth: 16,
+    defaultEventQueueSize: 64,
+    maxEventQueueSize: 128,
+    defaultDrainBatchSize: 32,
+    maxDrainBatchSize: 64,
+    defaultTimeoutMs: 10000,
+    maxTimeoutMs: 60000,
+    minAlpha: 0.2
+  });
+  function __autojs6_ui_overlay_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "ui.overlay",
+      methodName
+    );
+  }
+  function __autojs6_ui_overlay_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_ui_overlay_number(value, fallback, min, max) {
+    const numberValue = value === undefined || value === null ? fallback : Number(value);
+    if (!Number.isFinite(numberValue)) return fallback;
+    return Math.min(max, Math.max(min, Math.trunc(numberValue)));
+  }
+  function __autojs6_ui_overlay_timeout_from_options(options, fallbackMs) {
+    return __autojs6_bridge_timeout_ms(
+      __autojs6_ui_overlay_number(
+        options && options.timeoutMs,
+        fallbackMs,
+        1,
+        __autojs6_ui_overlay_policy.maxTimeoutMs
+      )
+    );
+  }
+  function __autojs6_ui_overlay_bridge_options(options, methodName, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_ui_overlay_timeout_from_options(options, fallbackMs),
+      permissions: methodName === "hasPermission" || methodName === "openPermissionSettings"
+        ? ["ui.overlay.permission"]
+        : ["ui.overlay"],
+      signal: __autojs6_bridge_signal_from_options(options)
+    };
+  }
+  function __autojs6_ui_overlay_request_options(options) {
+    const opts = __autojs6_ui_overlay_options(options);
+    const request = {};
+    if (opts.timeoutMs !== undefined) {
+      request.timeoutMs = __autojs6_ui_overlay_number(opts.timeoutMs, __autojs6_ui_overlay_policy.defaultTimeoutMs, 1, __autojs6_ui_overlay_policy.maxTimeoutMs);
+    }
+    if (opts.maxEvents !== undefined) {
+      request.maxEvents = __autojs6_ui_overlay_number(opts.maxEvents, __autojs6_ui_overlay_policy.defaultDrainBatchSize, 1, __autojs6_ui_overlay_policy.maxDrainBatchSize);
+    }
+    return Object.freeze(request);
+  }
+  function __autojs6_ui_overlay_dimension(value, propertyName, methodName) {
+    if (value === undefined || value === null) return undefined;
+    if (value === "wrap_content" || value === "match_parent") return value;
+    const numberValue = Number(value);
+    if (!Number.isFinite(numberValue) || numberValue < 1 || numberValue > 4096) {
+      throw __autojs6_ui_overlay_invalid_argument_error(
+        methodName,
+        "ui.overlay." + methodName + " window." + propertyName + " must be a positive bounded number, wrap_content, or match_parent."
+      );
+    }
+    return Math.trunc(numberValue);
+  }
+  function __autojs6_ui_overlay_disclosure(value, methodName) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_ui_overlay_invalid_argument_error(
+        methodName,
+        "ui.overlay." + methodName + " requires disclosure title and text."
+      );
+    }
+    const title = String(value.title === undefined || value.title === null ? "" : value.title).trim();
+    const text = String(value.text === undefined || value.text === null ? "" : value.text).trim();
+    if (!title || !text) {
+      throw __autojs6_ui_overlay_invalid_argument_error(
+        methodName,
+        "ui.overlay." + methodName + " requires non-empty disclosure title and text."
+      );
+    }
+    return Object.freeze({ title, text });
+  }
+  function __autojs6_ui_overlay_window(value, methodName) {
+    const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    if (source.layoutParams !== undefined || source.flags !== undefined || String(source.type || "").indexOf("WindowManager") >= 0) {
+      throw __autojs6_ui_overlay_invalid_argument_error(
+        methodName,
+        "ui.overlay." + methodName + " rejects raw WindowManager.LayoutParams, flags, and platform window types."
+      );
+    }
+    if (source.visible === false) {
+      throw __autojs6_ui_overlay_invalid_argument_error(methodName, "ui.overlay." + methodName + " does not allow hidden overlays.");
+    }
+    if (source.alpha !== undefined && Number(source.alpha) < __autojs6_ui_overlay_policy.minAlpha) {
+      throw __autojs6_ui_overlay_invalid_argument_error(methodName, "ui.overlay." + methodName + " does not allow fully transparent overlays.");
+    }
+    const output = {};
+    const width = __autojs6_ui_overlay_dimension(source.width, "width", methodName);
+    const height = __autojs6_ui_overlay_dimension(source.height, "height", methodName);
+    if (width !== undefined) output.width = width;
+    if (height !== undefined) output.height = height;
+    if (source.x !== undefined) output.x = __autojs6_ui_overlay_number(source.x, 0, -4096, 4096);
+    if (source.y !== undefined) output.y = __autojs6_ui_overlay_number(source.y, 0, -4096, 4096);
+    if (source.touchable !== undefined) output.touchable = Boolean(source.touchable);
+    if (source.focusable !== undefined) output.focusable = Boolean(source.focusable);
+    if (source.draggable !== undefined) output.draggable = Boolean(source.draggable);
+    output.visible = true;
+    if (source.alpha !== undefined) output.alpha = Math.min(1, Math.max(__autojs6_ui_overlay_policy.minAlpha, Number(source.alpha)));
+    return Object.freeze(output);
+  }
+  function __autojs6_ui_overlay_descriptor(value, methodName) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw __autojs6_ui_overlay_invalid_argument_error(methodName, "ui.overlay." + methodName + " requires a descriptor object.");
+    }
+    const contentValue = value.content;
+    if (!contentValue || typeof contentValue !== "object" || Array.isArray(contentValue)) {
+      throw __autojs6_ui_overlay_invalid_argument_error(methodName, "ui.overlay." + methodName + " requires a JSON content descriptor.");
+    }
+    const prepared = __autojs6_ui_prepare_descriptor(contentValue, "ui.overlay." + methodName);
+    const content = __autojs6_ui_descriptor(prepared.descriptor, "ui.overlay." + methodName);
+    return Object.freeze({
+      content,
+      window: __autojs6_ui_overlay_window(value.window, methodName),
+      disclosure: __autojs6_ui_overlay_disclosure(value.disclosure, methodName)
+    });
+  }
+  function __autojs6_ui_overlay_snapshot(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const bounds = source.bounds && typeof source.bounds === "object" ? source.bounds : null;
+    const disclosure = source.disclosure && typeof source.disclosure === "object" ? source.disclosure : null;
+    const output = {
+      id: String(source.id || ""),
+      type: "overlay",
+      closed: Boolean(source.closed),
+      visible: source.visible !== false,
+      createdAt: Number(source.createdAt || 0)
+    };
+    if (bounds) {
+      output.bounds = Object.freeze({
+        x: Number(bounds.x || 0),
+        y: Number(bounds.y || 0),
+        width: Number(bounds.width || 0),
+        height: Number(bounds.height || 0)
+      });
+    }
+    if (disclosure) {
+      output.disclosure = Object.freeze({ title: String(disclosure.title || "") });
+    }
+    if (source.droppedCount !== undefined) {
+      output.droppedCount = Number(source.droppedCount || 0);
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_ui_overlay_event(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const output = {
+      type: String(source.type || ""),
+      overlayId: String(source.overlayId || ""),
+      eventTime: Number(source.eventTime || 0)
+    };
+    if (source.targetId !== undefined && source.targetId !== null) output.targetId = String(source.targetId);
+    if (source.reason !== undefined && source.reason !== null) output.reason = String(source.reason);
+    if (source.state && typeof source.state === "object" && !Array.isArray(source.state)) output.state = Object.freeze(Object.assign({}, source.state));
+    return Object.freeze(output);
+  }
+  function __autojs6_ui_overlay_handle(record, moduleOptions) {
+    const snapshot = __autojs6_ui_overlay_snapshot(record);
+    const state = { id: snapshot.id, closed: snapshot.closed };
+    function update(patch, options) {
+      if (state.closed) {
+        return Promise.reject(__autojs6_ui_overlay_invalid_argument_error("update", "ui.overlay.update requires an active overlay handle."));
+      }
+      const opts = __autojs6_ui_overlay_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "update",
+        [state.id, patch || {}, __autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "update", 5000)
+      ).then(__autojs6_ui_overlay_snapshot);
+    }
+    function drainEvents(options) {
+      if (state.closed) return Promise.resolve(Object.freeze([]));
+      const opts = __autojs6_ui_overlay_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "drainEvents",
+        [state.id, __autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "drainEvents", 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(__autojs6_ui_overlay_event));
+      });
+    }
+    function close(options) {
+      if (state.closed) return Promise.resolve(false);
+      const opts = __autojs6_ui_overlay_options(options || moduleOptions);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "close",
+        [state.id, __autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "close", 5000)
+      ).then(function(result) {
+        state.closed = true;
+        return Boolean(result);
+      }, function(error) {
+        state.closed = true;
+        throw error;
+      });
+    }
+    return Object.freeze({
+      get id() { return state.id; },
+      get type() { return "overlay"; },
+      get closed() { return state.closed; },
+      update,
+      drainEvents,
+      close
+    });
+  }
+  function __autojs6_limited_ui_overlay() {
+    if (__autojs6_limited_ui_overlay_cache) {
+      return __autojs6_limited_ui_overlay_cache;
+    }
+    function show(descriptor, options) {
+      let prepared;
+      try {
+        prepared = __autojs6_ui_overlay_descriptor(descriptor, "show");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const opts = __autojs6_ui_overlay_options(options);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "show",
+        [prepared, __autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "show", 10000)
+      ).then(function(result) {
+        return __autojs6_ui_overlay_handle(result, opts);
+      });
+    }
+    function closeAll(options) {
+      const opts = __autojs6_ui_overlay_options(options);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "closeAll",
+        [__autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "closeAll", 5000)
+      ).then(function(result) {
+        const source = result && typeof result === "object" ? result : {};
+        return Object.freeze({
+          closedCount: Number(source.closedCount || 0),
+          remainingCount: Number(source.remainingCount || 0)
+        });
+      });
+    }
+    function hasPermission(options) {
+      const opts = __autojs6_ui_overlay_options(options);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "hasPermission",
+        [__autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "hasPermission", 5000)
+      ).then(function(result) {
+        const source = result && typeof result === "object" ? result : {};
+        return Object.freeze({
+          granted: Boolean(source.granted),
+          canOpenSettings: Boolean(source.canOpenSettings),
+          reason: source.reason === undefined || source.reason === null ? undefined : String(source.reason)
+        });
+      });
+    }
+    function openPermissionSettings(options) {
+      const opts = __autojs6_ui_overlay_options(options);
+      return __autojs6_call_autojs(
+        "ui.overlay",
+        "openPermissionSettings",
+        [__autojs6_ui_overlay_request_options(opts)],
+        __autojs6_ui_overlay_bridge_options(opts, "openPermissionSettings", 5000)
+      ).then(function(result) {
+        const source = result && typeof result === "object" ? result : {};
+        return Object.freeze({
+          opened: Boolean(source.opened),
+          reason: source.reason === undefined || source.reason === null ? undefined : String(source.reason)
+        });
+      });
+    }
+    __autojs6_limited_ui_overlay_cache = Object.freeze({
+      policy: __autojs6_ui_overlay_policy,
+      show,
+      closeAll,
+      hasPermission,
+      openPermissionSettings
+    });
+    return __autojs6_limited_ui_overlay_cache;
   }
   function __autojs6_accessibility_timeout_from_options(options, fallbackMs) {
     return options && typeof options === "object" && options.timeoutMs !== undefined
@@ -38508,6 +38811,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "ui") {
       return __autojs6_limited_ui();
+    }
+    if (name === "ui.overlay") {
+      return __autojs6_limited_ui_overlay();
     }
     if (name === "input_observer") {
       return __autojs6_limited_input_observer();

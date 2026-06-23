@@ -292,20 +292,22 @@ function buildChecks(files) {
       includesAll(files.matrixGenerator.text, [
         "P12-12A overlay provider v1 contract locked",
         "Implement P12-13 overlay fake provider POC",
+        "Complete P12-14 live overlay packaged and cleanup gate",
       ]) &&
         includesAll(matrixFloatyRow, [
           "| 53 | floaty | floaty | unsupported |",
           "blocked_by_design:2",
           "renamed:1",
           "unsupported:5",
-          "Implement P12-13 overlay fake provider POC",
-        ]),
-      "Generated matrix must point floaty to P12-13 after P12-12A locks the provider contract.",
+        ]) &&
+        (matrixFloatyRow.includes("Implement P12-13 overlay fake provider POC") ||
+          matrixFloatyRow.includes("Complete P12-14 live overlay packaged and cleanup gate")),
+      "Generated matrix must point floaty to the next provider-path gate after P12-12A locks the provider contract.",
     ),
     check(
       "surface-manifest-design-locked",
       floatySurface &&
-        floatySurface.status === "design_locked" &&
+        ["design_locked", "provider_poc"].includes(floatySurface.status) &&
         (floatySurface.tasks || []).includes("P12-12A") &&
         includesAll(JSON.stringify(floatySurface), [
           "OVERLAY_PROVIDER_V1.md",
@@ -315,7 +317,7 @@ function buildChecks(files) {
           "verifyNodeRhinoCompatOverlayProviderContract",
         ]) &&
         includesAll(files.surfaceDocs.text, ["floaty.overlay", "P12-12A", "OVERLAY_PROVIDER_V1.md", "P12-13"]),
-      "Phase 12 surface manifest must record P12-12A as design-locked contract evidence.",
+      "Phase 12 surface manifest must record P12-12A contract evidence while allowing later provider POC promotion.",
     ),
     check(
       "phase12-task-complete",

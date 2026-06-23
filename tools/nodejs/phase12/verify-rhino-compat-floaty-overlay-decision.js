@@ -132,20 +132,22 @@ function buildChecks(files) {
       includesAll(files.matrixGenerator.text, [
         "P12-12A overlay provider v1 contract locked",
         "Implement P12-13 overlay fake provider POC",
+        "Complete P12-14 live overlay packaged and cleanup gate",
       ]) &&
         includesAll(matrixFloatyRow, [
           "| 53 | floaty | floaty | unsupported |",
           "blocked_by_design:2",
           "renamed:1",
           "unsupported:5",
-          "Implement P12-13 overlay fake provider POC",
-        ]),
-      "Generated matrix must point floaty to the P12-13 provider POC after the P12-11/P12-12A provider path gates.",
+        ]) &&
+        (matrixFloatyRow.includes("Implement P12-13 overlay fake provider POC") ||
+          matrixFloatyRow.includes("Complete P12-14 live overlay packaged and cleanup gate")),
+      "Generated matrix must point floaty to the next provider-path gate after P12-11/P12-12A evidence.",
     ),
     check(
       "surface-manifest-evidence",
       floatySurface &&
-        floatySurface.status === "design_locked" &&
+        ["design_locked", "provider_poc"].includes(floatySurface.status) &&
         (floatySurface.tasks || []).includes("P12-11") &&
         (floatySurface.tasks || []).includes("P12-12A") &&
         includesAll(JSON.stringify(floatySurface), [
@@ -155,8 +157,10 @@ function buildChecks(files) {
           "verify-rhino-compat-floaty-overlay-decision.js",
           "verifyNodeRhinoCompatFloatyOverlayDecision",
         ]) &&
-        includesAll(files.surfaceDocs.text, ["Current Design-Locked Surfaces", "floaty.overlay", "P12-11", "Provider path", "P12-12A"]),
-      "Phase 12 surface manifest must record P12-11 Provider path evidence without promoting a runtime provider yet.",
+        (files.surfaceDocs.text.includes("Current Design-Locked Surfaces") ||
+          files.surfaceDocs.text.includes("Current Provider POC Surfaces")) &&
+        includesAll(files.surfaceDocs.text, ["floaty.overlay", "P12-11", "Provider path", "P12-12A"]),
+      "Phase 12 surface manifest must record P12-11 Provider path evidence while allowing later provider promotion.",
     ),
     check(
       "phase12-task-complete",

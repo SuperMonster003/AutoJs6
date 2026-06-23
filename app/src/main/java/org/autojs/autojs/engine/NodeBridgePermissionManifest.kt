@@ -27,6 +27,10 @@ object NodeBridgePermissionManifest {
     const val NOTIFICATIONS = "notifications"
     const val SENSORS = "sensors"
     const val UI = "ui"
+    const val UI_OVERLAY = "ui.overlay"
+    const val UI_OVERLAY_PERMISSION = "ui.overlay.permission"
+    const val UI_OVERLAY_FOREGROUND = "ui.overlay.foreground"
+    const val UI_OVERLAY_PACKAGED = "ui.overlay.packaged"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
     const val SHELL = "shell"
@@ -38,6 +42,8 @@ object NodeBridgePermissionManifest {
     const val INPUT_OBSERVER_KEYS = "input_observer.keys"
     const val INPUT_OBSERVER_TOUCH = "input_observer.touch"
     const val INPUT_OBSERVER_INTERCEPT = "input_observer.intercept"
+    const val FLOATY_RAW = "floaty.raw"
+    const val FLOATY_TOUCH = "floaty.touch"
 
     const val ANDROID_PERMISSION_INTERNET = "android.permission.INTERNET"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE"
@@ -65,6 +71,10 @@ object NodeBridgePermissionManifest {
         NOTIFICATIONS,
         SENSORS,
         UI,
+        UI_OVERLAY,
+        UI_OVERLAY_PERMISSION,
+        UI_OVERLAY_FOREGROUND,
+        UI_OVERLAY_PACKAGED,
         CLIPBOARD,
         DEVICE,
         SHELL,
@@ -76,6 +86,8 @@ object NodeBridgePermissionManifest {
         INPUT_OBSERVER_KEYS,
         INPUT_OBSERVER_TOUCH,
         INPUT_OBSERVER_INTERCEPT,
+        FLOATY_RAW,
+        FLOATY_TOUCH,
     )
 
     private val definedCapabilitySet = definedCapabilities.toSet()
@@ -100,6 +112,16 @@ object NodeBridgePermissionManifest {
         "input.observer.touch" to INPUT_OBSERVER_TOUCH,
         "input-observer.intercept" to INPUT_OBSERVER_INTERCEPT,
         "input.observer.intercept" to INPUT_OBSERVER_INTERCEPT,
+        "ui-overlay" to UI_OVERLAY,
+        "ui:overlay" to UI_OVERLAY,
+        "overlay" to UI_OVERLAY,
+        "overlay.permission" to UI_OVERLAY_PERMISSION,
+        "ui-overlay.permission" to UI_OVERLAY_PERMISSION,
+        "ui:overlay.permission" to UI_OVERLAY_PERMISSION,
+        "overlay.foreground" to UI_OVERLAY_FOREGROUND,
+        "ui-overlay.foreground" to UI_OVERLAY_FOREGROUND,
+        "overlay.packaged" to UI_OVERLAY_PACKAGED,
+        "ui-overlay.packaged" to UI_OVERLAY_PACKAGED,
     )
 
     private val androidPermissionsByCapability = linkedMapOf(
@@ -237,6 +259,10 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.NOTIFICATIONS -> listOf(NOTIFICATIONS)
             NodeBridgeModules.SENSORS -> listOf(SENSORS)
             NodeBridgeModules.UI -> listOf(UI)
+            NodeBridgeModules.UI_OVERLAY -> when (method) {
+                "hasPermission", "openPermissionSettings" -> listOf(UI_OVERLAY_PERMISSION)
+                else -> listOf(UI_OVERLAY)
+            }
             NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
             NodeBridgeModules.DEVICE -> listOf(DEVICE)
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)
