@@ -11669,6 +11669,8 @@ class EmbeddedNodePackagedApkSmokeTest {
               const stores = Object.create(null);
               const activeImages = new Set();
               let imageSequence = 0;
+              let uiSequence = 0;
+              const uiDrained = Object.create(null);
 
               function respond(request, ok, result, error) {
                 setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
@@ -11772,6 +11774,24 @@ class EmbeddedNodePackagedApkSmokeTest {
                     }
                   }
 
+                  if (request.module === "ui") {
+                    if (request.method === "showLayout") {
+                      uiSequence += 1;
+                      respond(request, true, { id: "packaged-rhino-ui-" + uiSequence });
+                      return;
+                    }
+                    if (request.method === "drainEvents") {
+                      const handleId = args[0];
+                      respond(request, true, uiDrained[handleId] ? [] : [{ type: "click", id: "compatOk", text: "OK" }]);
+                      uiDrained[handleId] = true;
+                      return;
+                    }
+                    if (request.method === "update" || request.method === "batchUpdate" || request.method === "close") {
+                      respond(request, true, null);
+                      return;
+                    }
+                  }
+
                   respond(request, false, null, {
                     code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
                     message: "unexpected packaged Rhino compat request",
@@ -11832,6 +11852,30 @@ class EmbeddedNodePackagedApkSmokeTest {
                 match.x === 3 &&
                 match.y === 5;
 
+              const compatUiHandle = await compat.ui.showLayout({
+                type: "Column",
+                children: [
+                  { type: "Text", id: "compatTitle", text: "P12-10 compat UI" },
+                  { type: "Button", id: "compatOk", text: "OK" }
+                ]
+              }, { timeoutMs: 1000, drainIntervalMs: 1 });
+              let compatUiClicked = "";
+              await new Promise((resolve) => {
+                const off = compatUiHandle.on("click", (event) => {
+                  compatUiClicked = event.id + ":" + event.handleId;
+                  off();
+                  resolve();
+                }, { timeoutMs: 1000, drainIntervalMs: 1 });
+              });
+              await compatUiHandle.update({ id: "compatTitle", text: "P12-10 updated" }, { timeoutMs: 1000 });
+              await compatUiHandle.batchUpdate([{ id: "compatOk", text: "Done", enabled: false }], { timeoutMs: 1000 });
+              await compatUiHandle.close({ timeoutMs: 1000 });
+              const compatUiOk = compat.ui &&
+                Object.isFrozen(compat.ui) &&
+                Object.isFrozen(compatUiHandle) &&
+                compatUiHandle.id === "packaged-rhino-ui-1" &&
+                compatUiClicked === "compatOk:packaged-rhino-ui-1";
+
               function hasPermission(request, permission) {
                 return (request.permissions || []).indexOf(permission) >= 0;
               }
@@ -11849,11 +11893,14 @@ class EmbeddedNodePackagedApkSmokeTest {
                 if (request.module === "image" || request.module === "images") {
                   return hasPermission(request, "image");
                 }
+                if (request.module === "ui") {
+                  return hasPermission(request, "ui");
+                }
                 return false;
               });
               const cleanupOk = activeImages.size === 0;
               const pending = bridge.__test.pendingCount();
-              const ready = loaderOk && toastOk && filesOk && storageOk && selectorOk && imageOk &&
+              const ready = loaderOk && toastOk && filesOk && storageOk && selectorOk && imageOk && compatUiOk &&
                 requiredPermissionsOk && cleanupOk && pending === 0;
 
               console.log("packaged.rhino_compat.ready=" + ready);
@@ -11863,6 +11910,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.rhino_compat.storage=" + storageOk);
               console.log("packaged.rhino_compat.selector=" + selectorOk);
               console.log("packaged.rhino_compat.image=" + imageOk);
+              console.log("packaged.rhino_compat.compat_ui=" + compatUiOk);
               console.log("packaged.rhino_compat.permissions=" + requiredPermissionsOk);
               console.log("packaged.rhino_compat.cleanup=" + cleanupOk);
               console.log("packaged.rhino_compat.pending=" + pending);
@@ -14432,6 +14480,7 @@ $nodeConfigJson
             "storage",
             "accessibility",
             "image",
+            "ui",
         )
         private val RHINO_COMPAT_PACKAGED_RUNTIME_MARKERS = listOf(
             "packaged.rhino_compat.ready=true",
@@ -14441,6 +14490,7 @@ $nodeConfigJson
             "packaged.rhino_compat.storage=true",
             "packaged.rhino_compat.selector=true",
             "packaged.rhino_compat.image=true",
+            "packaged.rhino_compat.compat_ui=true",
             "packaged.rhino_compat.permissions=true",
             "packaged.rhino_compat.cleanup=true",
             "packaged.rhino_compat.pending=0",

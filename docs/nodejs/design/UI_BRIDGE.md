@@ -11,7 +11,8 @@ Task S11-23 records the Rhino `ui` compatibility boundary in
 JSON-only migration subset in
 [RHINO_UI_JSON_LAYOUT_SUBSET.md](RHINO_UI_JSON_LAYOUT_SUBSET.md). P12-09 adds
 `autojs6:compat.ui` as a constrained wrapper over this provider and keeps
-default global `ui` injection disabled.
+default global `ui` injection disabled. P12-10 adds a compat.ui packaged marker
+and UI_SESSION cleanup evidence without promoting live packaged background UI.
 
 ## Goal
 
@@ -351,6 +352,8 @@ Task S7-14 and S7-44 tests now cover:
 - unsupported descriptor, WebView security-gate, and foreign handle denial
 - active UI session limit denial
 - TypeScript declaration smoke
+- P12-10 `compat.ui` packaged marker, fake-transport event/update/batch/close
+  smoke, and `UI_SESSION` cleanup evidence
 
 Minimum tests before promoting packaged live UI or WebView:
 

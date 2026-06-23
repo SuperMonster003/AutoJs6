@@ -28,6 +28,12 @@ receives only an opaque `UiHandle` and event snapshots. `UI_SESSION` entries in
 `NodeBridgeResourceRegistry` own cleanup on script stop, provider destroy, and
 Activity destroy.
 
+P12-10 adds packaged Rhino compat smoke evidence for `compat.ui` through the
+deterministic packaged fake bridge transport. The marker
+`packaged.rhino_compat.compat_ui=true` covers facade routing, permission
+metadata, event delivery, update, batch update, close, and zero pending bridge
+calls; it does not promote live packaged Activity UI as a background surface.
+
 ## Rhino Surface
 
 Rhino `ui` is not a single declarative API. The augment module combines:
@@ -160,8 +166,7 @@ Future UI compatibility work must be split into small tasks:
 - constrained XML-to-JSON migration helper for common `ui.layout(...)` scripts
 - provider schema coverage for status/navigation/background options
 - inset snapshots for status/navigation bar height queries
-- packaged APK UI behavior and Back/Recents policy
-- device and packaged smoke for the P12-09 constrained `compat.ui` facade
+- live packaged APK UI behavior and Back/Recents policy
 
 Floaty and overlay compatibility remains separate and is tracked by
 [FLOATY_NODE.md](FLOATY_NODE.md).

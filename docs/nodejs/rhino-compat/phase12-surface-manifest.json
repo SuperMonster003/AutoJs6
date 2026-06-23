@@ -109,7 +109,7 @@
         "P12-09",
         "P12-10"
       ],
-      "summary": "P12-08 locks the Rhino UI JSON descriptor subset; P12-09 adds constrained autojs6:compat.ui over the existing require(\"ui\") provider, with device/packaged smoke still tracked by P12-10.",
+      "summary": "P12-08 locks the Rhino UI JSON descriptor subset; P12-09 adds constrained autojs6:compat.ui over the existing require(\"ui\") provider; P12-10 adds fake/device instrumentation evidence, packaged smoke markers, and UI_SESSION cleanup reporting while live packaged UI remains unpromoted.",
       "runtimeSurface": [
         "autojs6:compat.ui",
         "ui global after compat.install({ globals: true })",
@@ -127,10 +127,15 @@
         "docs/nodejs/rhino-compat/status-manifest.json",
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeUiProvider.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeResourceLeakStressInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
+        "docs/nodejs/reports/phase12/RHINO_UI_COMPAT_SMOKE.md",
         "tools/nodejs/phase12/verify-rhino-compat-ui-json-layout-subset.js",
         "tools/nodejs/phase12/verify-rhino-compat-ui-facade.js",
+        "tools/nodejs/phase12/verify-rhino-compat-ui-smoke.js",
         ":app:verifyNodeRhinoCompatUiJsonLayoutSubset",
-        ":app:verifyNodeRhinoCompatUiFacade"
+        ":app:verifyNodeRhinoCompatUiFacade",
+        ":app:verifyNodeRhinoCompatUiSmoke"
       ]
     },
     {

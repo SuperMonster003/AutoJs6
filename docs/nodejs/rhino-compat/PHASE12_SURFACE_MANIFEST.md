@@ -31,8 +31,9 @@ which Phase 12 workstream owns the next implementation or rejection.
   evidence.
 - `ui.compat`: P12-08 locks the Rhino UI to Node JSON layout descriptor subset
   with schema, fixtures, and a host verifier. P12-09 adds constrained
-  `autojs6:compat.ui` over the existing `require("ui")` provider; device and
-  packaged smoke remain tracked by P12-10.
+  `autojs6:compat.ui` over the existing `require("ui")` provider. P12-10 adds
+  fake/device instrumentation evidence, a packaged smoke marker, and
+  `UI_SESSION` cleanup reporting; live packaged UI remains unpromoted.
 
 ## Rules
 

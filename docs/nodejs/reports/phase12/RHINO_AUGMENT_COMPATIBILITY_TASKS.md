@@ -369,7 +369,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：`build/reports/nodejs/rhino-compat-ui-facade-verification.json`
     - 报告产物：`build/reports/nodejs/rhino-compat-ui-facade-verification.md`
 
-- [ ] P12-10: 增加 UI compat device and packaged smoke。
+- [x] P12-10: 增加 UI compat device and packaged smoke。
   - 范围：验证 `compat.ui` 在设备侧和 packaged 场景下的最小路径。
   - 建议产物：
     - Android instrumentation test
@@ -379,7 +379,18 @@ Phase 12 task 本身可使用以下执行状态：
     - show/update/batchUpdate/event/close 路径可运行或有明确 skip reason。
     - stop、timeout、destroy 后 `UI_SESSION` resource 为 0。
     - packaged 若不支持 live UI，必须稳定拒绝且不留下 pending bridge calls。
-  - Evidence：待补充。
+  - Evidence：
+    - 报告：`docs/nodejs/reports/phase12/RHINO_UI_COMPAT_SMOKE.md`
+    - Packaged smoke marker：`packaged.rhino_compat.compat_ui=true`
+    - Packaged smoke marker：`packaged.rhino_compat.pending=0`
+    - Packaged instrumentation：`app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt`
+    - Fake-transport instrumentation：`app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
+    - Resource cleanup instrumentation：`app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeResourceLeakStressInstrumentationTest.kt`
+    - Provider cleanup：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-ui-smoke.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatUiSmoke`
+    - 报告产物：`build/reports/nodejs/rhino-compat-ui-smoke-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-ui-smoke-verification.md`
 
 ### Track C: Floaty and overlay decision
 
