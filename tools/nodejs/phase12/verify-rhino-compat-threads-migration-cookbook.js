@@ -8,6 +8,7 @@ const path = require("path");
 const REPORT_BASENAME = "rhino-compat-threads-migration-cookbook-verification";
 const P12_21_NOTE = "P12-21 threads migration cookbook landed";
 const P12_22_NEXT = "Proceed to P12-22 compute/process-worker replacement API decision";
+const P12_23_NEXT = "Proceed to P12-23 Rhino JSON-only shim POC gate";
 
 const THREAD_CASE_IDS = Object.freeze([
   "threads-start",
@@ -253,9 +254,11 @@ function buildChecks(files, repoRoot) {
       includesAll(files.matrixGenerator.text, [
         P12_21_NOTE,
         P12_22_NEXT,
+        P12_23_NEXT,
       ]) &&
         includesAll(files.p12_20Verifier.text, [
           P12_22_NEXT,
+          P12_23_NEXT,
           "P12_21_NEXT",
         ]) &&
         includesAll(matrixThreadsRow, [
@@ -265,9 +268,9 @@ function buildChecks(files, repoRoot) {
           "work_manager",
           "blocked_by_design:6",
           "provider_availability",
-          P12_22_NEXT,
-        ]),
-      "Generated matrix must advance threads from P12-21 to P12-22 while preserving blocked_by_design status.",
+        ]) &&
+        (matrixThreadsRow.includes(P12_22_NEXT) || matrixThreadsRow.includes(P12_23_NEXT)),
+      "Generated matrix must advance threads from P12-21 toward P12-22/P12-23 while preserving blocked_by_design status.",
     ),
     check(
       "surface-manifest-p12-21",

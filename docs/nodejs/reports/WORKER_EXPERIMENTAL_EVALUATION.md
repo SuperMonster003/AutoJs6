@@ -6,6 +6,8 @@ Latest v1.1 recheck: 2026-06-17
 
 Latest S7-24 bootstrap recheck: 2026-06-19
 
+Latest P12-22 compute/process-worker decision: deferred for Phase 12
+
 Device: Sony XQ-AT72 (`QV710AF65F`), Android 12
 
 Branch/package identity: initial GA evaluation on `feature/nodejs-runtime`, `org.autojs.autojs6.nodejs`; v1.1 recheck on `feature/nodejs-runtime-v1.1`.
@@ -26,6 +28,12 @@ AutoJs6 experimental worker_threads is unavailable in this Embedded Node build.
 Until a libnode build exposes a usable native `worker_threads` module and the focused worker suites pass on the Sony gate
 device, the release contract should treat workers as unavailable, not as a supported or advertised experimental runtime
 surface.
+
+P12-22 keeps the same conclusion for Rhino `threads` replacement: AutoJs6 does
+not add a Phase 12 compute/process-worker runtime API, and any future
+separately named API must pass worker/process permissions, scoped script path,
+message-size, cleanup, nested worker denial, bridge module isolation, resource
+stress, packaged behavior, and `second_execution_slot` gates.
 
 S7-24 does not change that release decision. It adds an explicit
 `NodeWorkerThreadsBootstrapInstrumentationTest` and a native-availability

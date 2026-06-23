@@ -228,6 +228,15 @@ It expands the script-author replacements for `threads.start()`,
 fixtures, matrix, and status manifest still keep `threads.*`
 `blocked_by_design`.
 
+P12-22 explicitly defers the compute/process-worker replacement API for Phase
+12. No `compute_worker`, `process_worker`, `worker`, `threads`, or
+`worker_threads` compatibility runtime surface is promoted. Future worker-like
+APIs must be separately named, must not claim Rhino parity, and must pass
+worker/process permissions, scoped script path, message size, cleanup, nested
+worker denial, bridge module isolation, resource stress, packaged behavior, and
+`second_execution_slot` gates. See
+[RHINO_COMPUTE_PROCESS_WORKER_DECISION.md](reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md).
+
 `threads.start()`, `threads.pool()`, `threads.interrupt()`,
 `threads.disposable()`, and `sync(fn, lock)` are all `blocked_by_design` as
 exact Node compatibility targets. They depend on shared Rhino `ScriptRuntime`

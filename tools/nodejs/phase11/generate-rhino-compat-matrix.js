@@ -171,6 +171,12 @@ function riskSummary(module) {
 function nextStepFor(module, gapModule) {
   if (
     module.id === "threads" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-22 compute/process-worker replacement decision deferred"))
+  ) {
+    return "Proceed to P12-23 Rhino JSON-only shim POC gate; keep threads.* blocked_by_design and compute/process-worker deferred.";
+  }
+  if (
+    module.id === "threads" &&
     (module.migration.notes || []).some((note) => note.includes("P12-21 threads migration cookbook landed"))
   ) {
     return "Proceed to P12-22 compute/process-worker replacement API decision; keep worker_threads default-off and no Rhino parity.";

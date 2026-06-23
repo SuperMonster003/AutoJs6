@@ -239,7 +239,7 @@
         "P12-21",
         "P12-22"
       ],
-      "summary": "P12-20 design-locks Rhino threads replacement maturity: worker_threads remains default-off and native-availability gated, worker_computation remains reserved, second_execution_slot stays open, and no require(\"threads\"), compat.threads, global threads/sync, or Rhino synchronous/shared-object parity is claimed. P12-21 publishes the migration cookbook and dual-engine blocked cases for threads.start, threads.disposable, and threads.sync using async/await, AbortController, explicit engines slots, work_manager, bounded async queues, Promise queues, and MessageChannel-style handoffs; P12-22 may evaluate a separately named compute/process-worker API.",
+      "summary": "P12-20 design-locks Rhino threads replacement maturity: worker_threads remains default-off and native-availability gated, worker_computation remains reserved, second_execution_slot stays open, and no require(\"threads\"), compat.threads, global threads/sync, or Rhino synchronous/shared-object parity is claimed. P12-21 publishes the migration cookbook and dual-engine blocked cases for threads.start, threads.disposable, and threads.sync using async/await, AbortController, explicit engines slots, work_manager, bounded async queues, Promise queues, and MessageChannel-style handoffs. P12-22 defers a compute/process-worker replacement API for Phase 12: no runtime API is promoted, future APIs must be separately named and must pass worker/process permissions, scoped script path, message size, cleanup, nested worker denial, bridge module isolation, resource stress, packaged behavior, and second_execution_slot gates.",
       "runtimeSurface": [
         "worker_threads experimental",
         "future compute/process worker"
@@ -248,6 +248,7 @@
         "docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md",
         "docs/nodejs/design/WORKER_THREADS.md",
         "docs/nodejs/reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md",
+        "docs/nodejs/reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md",
         "docs/nodejs/releases/V1_1_WORKER_POLICY.md",
         "docs/nodejs/reports/WORKER_EXPERIMENTAL_EVALUATION.md",
         "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.md",
@@ -262,8 +263,10 @@
         "docs/nodejs/dual-engine-compat/cases/threads-sync-queue.rhino.js",
         "tools/nodejs/phase12/verify-rhino-compat-threads-maturity-review.js",
         "tools/nodejs/phase12/verify-rhino-compat-threads-migration-cookbook.js",
+        "tools/nodejs/phase12/verify-rhino-compat-compute-process-worker-decision.js",
         ":app:verifyNodeRhinoCompatThreadsMaturityReview",
-        ":app:verifyNodeRhinoCompatThreadsMigrationCookbook"
+        ":app:verifyNodeRhinoCompatThreadsMigrationCookbook",
+        ":app:verifyNodeRhinoCompatComputeProcessWorkerDecision"
       ]
     },
     {

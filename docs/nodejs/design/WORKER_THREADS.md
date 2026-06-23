@@ -1,6 +1,6 @@
 # Worker Threads Design Gate v1
 
-Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds. S7-29 adds stress and packaged `.mjs` worker smoke coverage to the same internal gate, but it does not promote workers to a user-visible release surface. P12-20 rechecked this as part of Rhino `threads` migration and kept worker_threads out of the default migration path.
+Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds. S7-29 adds stress and packaged `.mjs` worker smoke coverage to the same internal gate, but it does not promote workers to a user-visible release surface. P12-20 rechecked this as part of Rhino `threads` migration and kept worker_threads out of the default migration path. P12-22 defers a compute/process-worker replacement API and requires separate naming plus permissions, scoped path, message, cleanup, nested-worker denial, bridge-isolation, stress, packaged, and `second_execution_slot` gates before any future script-author surface.
 
 ## Goal
 
@@ -240,6 +240,14 @@ P12-20 records the same maturity state for Rhino migration in
 `worker_threads` is not a default replacement for Rhino `threads`, the
 experimental path remains native-availability gated, and future compute/process
 workers must be separately named and must not claim same-runtime Rhino parity.
+
+P12-22 records the current compute/process-worker decision in
+[../reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md](../reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md):
+Phase 12 does not add a new worker/process runtime API. `worker_computation`
+remains reserved, `second_execution_slot` remains open, and any future
+script-author API must pass worker/process permissions, scoped script path,
+message-size, cleanup, nested worker denial, bridge module isolation, resource
+stress, packaged behavior, and final blocker gates before promotion.
 
 Follow-up gates should add stronger native handle/thread leak diagnostics once
 worker support graduates beyond experimental mode.

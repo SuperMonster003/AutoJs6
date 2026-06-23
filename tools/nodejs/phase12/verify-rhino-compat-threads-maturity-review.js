@@ -8,6 +8,7 @@ const REPORT_BASENAME = "rhino-compat-threads-maturity-review-verification";
 const P12_20_NOTE = "P12-20 threads maturity review";
 const P12_21_NEXT = "Proceed to P12-21 threads migration cookbook";
 const P12_22_NEXT = "Proceed to P12-22 compute/process-worker replacement API decision";
+const P12_23_NEXT = "Proceed to P12-23 Rhino JSON-only shim POC gate";
 
 const FILES = {
   report: "docs/nodejs/reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md",
@@ -271,6 +272,7 @@ function buildChecks(files) {
         P12_20_NOTE,
         P12_21_NEXT,
         P12_22_NEXT,
+        P12_23_NEXT,
       ]) &&
         includesAll(matrixThreadsRow, [
           "| 28 | threads | threads | blocked_by_design |",
@@ -280,8 +282,8 @@ function buildChecks(files) {
           "blocked_by_design:6",
           "provider_availability",
         ]) &&
-        (matrixThreadsRow.includes(P12_21_NEXT) || matrixThreadsRow.includes(P12_22_NEXT)),
-      "Generated matrix must preserve the P12-20 threads handoff and may advance from P12-21 cookbook work to P12-22.",
+        [P12_21_NEXT, P12_22_NEXT, P12_23_NEXT].some((nextStep) => matrixThreadsRow.includes(nextStep)),
+      "Generated matrix must preserve the P12-20 threads handoff and may advance through later threads replacement decisions.",
     ),
     check(
       "surface-manifest",

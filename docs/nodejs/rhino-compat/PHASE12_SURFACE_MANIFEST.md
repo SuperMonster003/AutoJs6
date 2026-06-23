@@ -74,7 +74,11 @@ which Phase 12 workstream owns the next implementation or rejection.
   `threads-disposable`, and `threads-sync-queue` cases. The cookbook uses
   `async` / `await`, `AbortController`, explicit `engines` slots,
   `work_manager`, bounded async queues, Promise queues, and MessageChannel-style
-  handoffs; P12-22 may evaluate a separately named compute/process-worker API.
+  handoffs. P12-22 defers the compute/process-worker replacement API for Phase
+  12: no runtime API is promoted, future APIs must be separately named, and
+  worker/process permissions, scoped script path, message size, cleanup, nested
+  worker denial, bridge module isolation, resource stress, packaged behavior,
+  and `second_execution_slot` gates remain required.
 
 ## Current Rejected Surfaces
 

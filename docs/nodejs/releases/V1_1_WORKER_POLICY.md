@@ -6,6 +6,8 @@ Latest S7-29 worker-stress/packaged-smoke gate update: 2026-06-19
 
 Latest S8-44 partial-promotion recheck: 2026-06-20
 
+Latest P12-22 compute/process-worker decision: deferred for Phase 12
+
 Branch: `feature/nodejs-runtime-v1.1`
 
 Device: Sony XQ-AT72 `QV710AF65F`, Android 12
@@ -25,6 +27,12 @@ thread semantics. Rhino thread migration uses `Promise`, `async` / `await`,
 `AbortController`, explicit `engines` execution slots, `work_manager`, or a
 future explicitly named process/compute worker policy. See
 `docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md`.
+
+P12-22 defers that future process/compute worker policy for Phase 12. No
+script-author worker/process runtime API is promoted while native worker
+availability, `worker_computation`, `second_execution_slot`, packaged worker
+behavior, stress, cleanup, nested worker denial, and bridge isolation remain
+promotion gates.
 
 The default-denial and design-gate behavior remains healthy under production
 identity, but the explicitly enabled worker path is still blocked by native

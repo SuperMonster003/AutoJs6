@@ -857,7 +857,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-threads-migration-cookbook-verification.md`
 
-- [ ] P12-22: 决策 compute/process-worker replacement API。
+- [x] P12-22: 决策 compute/process-worker replacement API。
   - 范围：如果 Phase 12 需要给 Rhino `threads` 用户提供更强替代能力，
     设计单独命名的 compute/process-worker API；否则明确延后。
   - 验收：
@@ -865,7 +865,33 @@ Phase 12 task 本身可使用以下执行状态：
     - worker/process 权限、scoped script path、message size、cleanup、
       nested worker denial、bridge module isolation 都有 gate。
     - 与 `second_execution_slot` blocker 的关系明确，不越权关闭 final blocker。
-  - Evidence：待补充。
+  - Evidence：
+    - 决策报告：
+      `docs/nodejs/reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md`
+      明确 Phase 12 延后 compute/process-worker runtime API，不发布
+      `compute_worker`、`process_worker`、`worker`、`threads` 或
+      `worker_threads` 兼容 runtime surface。
+    - Gate 要求：
+      future API 必须单独命名，不复用 `threads` / `worker_threads`；
+      worker/process permissions、scoped script path、message size、
+      cleanup、nested worker denial、bridge module isolation、resource
+      stress、packaged behavior 都是 promotion gates。
+    - Final blocker：
+      `docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` 仍保持
+      `second_execution_slot` 为 `open`，`worker_threads` 为
+      `decision_required`；P12-22 不关闭 final blocker。
+    - Surface/status：
+      `docs/nodejs/rhino-compat/status-manifest.json` 保持全部
+      `threads.*` 为 `blocked_by_design`，`worker_computation` 仍为
+      `reserved` 且无 supported launch surface，matrix 推进至 P12-23
+      Rhino JSON-only shim POC gate。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-compute-process-worker-decision.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatComputeProcessWorkerDecision`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-compute-process-worker-decision-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-compute-process-worker-decision-verification.md`
 
 ### Track F: Explicit Rhino JSON-only shim POC
 

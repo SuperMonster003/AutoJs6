@@ -1,9 +1,10 @@
 # Rhino Threads Migration Policy
 
 Status: S11-25 design and policy gate; P12-20 maturity review keeps the same
-blocked-by-design decision; P12-21 publishes the migration cookbook without
-changing the runtime surface. This document records how Rhino `threads` scripts
-should migrate to Embedded Node without adding a Rhino-style thread facade.
+blocked-by-design decision; P12-21 publishes the migration cookbook; P12-22
+defers a compute/process-worker replacement API without changing the runtime
+surface. This document records how Rhino `threads` scripts should migrate to
+Embedded Node without adding a Rhino-style thread facade.
 
 ## Decision
 
@@ -225,6 +226,19 @@ The cookbook keeps the same `blocked_by_design` status for every `threads.*`
 entry and shows replacements based on `async` / `await`, `AbortController`,
 explicit `engines` slots, `work_manager`, bounded async queues, Promise queues,
 and MessageChannel-style handoffs.
+
+## P12-22 Compute/Process Worker Decision
+
+P12-22 records that Phase 12 does not promote a compute/process-worker
+replacement API. `worker_computation` remains `reserved`,
+`second_execution_slot` remains open, and `worker_threads` remains default-off
+and native-availability gated. Any future API must be separately named, must not
+reuse `threads` or `worker_threads`, and must pass worker/process permissions,
+scoped script path, message size, cleanup, nested worker denial, bridge module
+isolation, resource stress, packaged behavior, and final blocker gates before
+becoming a script-author surface.
+
+See `docs/nodejs/reports/phase12/RHINO_COMPUTE_PROCESS_WORKER_DECISION.md`.
 
 ## Acceptance
 
