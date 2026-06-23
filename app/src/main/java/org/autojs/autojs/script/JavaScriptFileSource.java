@@ -119,6 +119,14 @@ public class JavaScriptFileSource extends JavaScriptSource {
     @NonNull
     @Override
     public String toString() {
+        String originPath = getOriginPath();
+        if (originPath != null) {
+            return originPath;
+        }
+        String originUri = getOriginUri();
+        if (originUri != null) {
+            return originUri;
+        }
         if (mCustomsName) {
             return super.toString();
         }

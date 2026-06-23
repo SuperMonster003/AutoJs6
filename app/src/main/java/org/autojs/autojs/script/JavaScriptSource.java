@@ -72,6 +72,14 @@ public abstract class JavaScriptSource extends ScriptSource {
 
     @NonNull
     public String toString() {
+        String originPath = getOriginPath();
+        if (originPath != null) {
+            return originPath;
+        }
+        String originUri = getOriginUri();
+        if (originUri != null) {
+            return originUri;
+        }
         String prefix = getPrefix();
         return prefix == null ? getFullName() : prefix + getFullName();
     }

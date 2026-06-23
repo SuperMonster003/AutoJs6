@@ -96,10 +96,12 @@ import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DisplayUtils.pxToSp
 import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ScriptOriginResolver
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
+import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.R.string.text_unknown
 import org.autojs.autojs6.databinding.EditorViewBinding
@@ -1662,16 +1664,23 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     )
 
     @JvmOverloads
-    fun run(showMessage: Boolean, file: File? = uri?.path?.let { File(it) }, overriddenFullPath: String? = null): ScriptExecution? {
-        file ?: return null
+    fun run(showMessage: Boolean, file: File? = null, overriddenFullPath: String? = null): ScriptExecution? {
+        val originPath = overriddenFullPath
+            ?: ScriptOriginResolver.resolveFilePath(context, uri)
+        val executableFile = file
+            ?: originPath?.let(::File)
+            ?: return null
         if (showMessage) {
             showSnack(this, R.string.text_start_running)
         }
-        // TODO by Stardust on Oct 24, 2018.
+        val workingDirectory = originPath
+            ?.let { File(it).parent }
+            ?: WorkingDirectoryUtils.path
         val execution = runWithBroadcastSender(
-            file,
-            workingDirectory = uri?.path?.let { File(it).parent },
-            overriddenFullPath,
+            file = executableFile,
+            workingDirectory = workingDirectory,
+            overriddenFullPath = originPath,
+            originUri = uri?.toString(),
         ) ?: return null
         scriptExecutionId = execution.id
         syncPrimaryMenuState()
@@ -1679,8 +1688,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return execution
     }
 
-    private fun runTmpFile(file: File? = uri?.path?.let { File(it) }): ScriptExecution? {
-        return run(!shouldAutoShowLogBottomSheetOnRun(), file, uri?.path)
+    private fun runTmpFile(file: File): ScriptExecution? {
+        return run(!shouldAutoShowLogBottomSheetOnRun(), file)
     }
 
     private fun undo() {

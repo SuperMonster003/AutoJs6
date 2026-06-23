@@ -13,6 +13,11 @@ abstract class ScriptSource(private val sourceName: String) : Serializable {
 
     var overriddenFullPath: String? = null
 
+    var originUri: String? = null
+
+    val originPath: String?
+        get() = overriddenFullPath
+
     var prefix: String? = null
 
     val extension = FileUtils.TYPE.JAVASCRIPT.extension
@@ -24,7 +29,7 @@ abstract class ScriptSource(private val sourceName: String) : Serializable {
         get() = "$name.$extension"
 
     val fullPath: String
-        get() = toString()
+        get() = originPath ?: originUri ?: toString()
 
     val elegantPath: String
         get() {

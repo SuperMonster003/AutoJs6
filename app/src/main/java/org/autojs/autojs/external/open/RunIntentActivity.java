@@ -11,10 +11,14 @@ import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.script.StringScriptSource;
+import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.ScriptOriginResolver;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -34,14 +38,28 @@ public class RunIntentActivity extends Activity {
         finish();
     }
 
-    private void handleIntent(Intent intent) throws FileNotFoundException {
+    private void handleIntent(Intent intent) throws IOException {
         Uri uri = intent.getData();
-        if (uri != null && "content".equals(uri.getScheme())) {
-            InputStream stream = getContentResolver().openInputStream(uri);
-            Scripts.run(this, new StringScriptSource(PFiles.read(stream)));
-        } else {
+        if (uri == null || !"content".equalsIgnoreCase(uri.getScheme())) {
             ScriptIntents.handleIntent(this, intent);
+            return;
         }
+
+        String originPath = ScriptOriginResolver.resolveFilePath(this, uri);
+        String displayName = IntentUtils.getFileName(this, uri);
+        String sourceName = PFiles.getNameWithoutExtension(displayName);
+
+        InputStream stream = getContentResolver().openInputStream(uri);
+        if (stream == null) {
+            throw new FileNotFoundException(uri.toString());
+        }
+
+        StringScriptSource source = new StringScriptSource(sourceName, PFiles.read(stream));
+        source.setOverriddenFullPath(originPath);
+        source.setOriginUri(uri.toString());
+
+        String workingDirectory = originPath == null ? null : new File(originPath).getParent();
+        Scripts.run(this, source, workingDirectory);
     }
 
 }

@@ -124,8 +124,13 @@ object Scripts {
     }
 
     @JvmStatic
-    fun run(context: Context, source: ScriptSource): ScriptExecution? = try {
-        val launch = ScriptLaunchSourceFactory.createSourceLaunch(source)
+    fun run(context: Context, source: ScriptSource): ScriptExecution? {
+        return run(context, source, null)
+    }
+
+    @JvmStatic
+    fun run(context: Context, source: ScriptSource, workingDirectory: String?): ScriptExecution? = try {
+        val launch = ScriptLaunchSourceFactory.createSourceLaunch(source, workingDirectory)
         executeLaunch(context, launch)
     } catch (e: Exception) {
         e.printStackTrace()
@@ -159,14 +164,18 @@ object Scripts {
     }
 
     @JvmStatic
-    fun runWithBroadcastSender(file: File, workingDirectory: String?, overriddenFullPath: String?): ScriptExecution? {
+    @JvmOverloads
+    fun runWithBroadcastSender(file: File, workingDirectory: String?, overriddenFullPath: String?, originUri: String? = null): ScriptExecution? {
         val launch = ScriptLaunchSourceFactory.createFileLaunch(
             file = file,
             workingDirectory = workingDirectory,
             defaultWorkingDirectory = file.parent ?: "",
         )
         return AutoJs.instance.scriptEngineService.execute(
-            launch.source.apply { this.overriddenFullPath = overriddenFullPath },
+            launch.source.apply {
+                this.overriddenFullPath = overriddenFullPath
+                this.originUri = originUri
+            },
             BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
             launch.createExecutionConfig()
         )
