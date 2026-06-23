@@ -1,6 +1,15 @@
 # Rhino Compatibility Shim Design Gate
 
-Status: design gate plus disabled runtime facade. Embedded Node scripts can `require("rhino")` only to receive the P12-24 disabled facade; they still cannot execute Rhino, install Rhino globals, call `importClass`, call `importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects. S11-26 fixes the concrete future JSON-only run shape in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md), P12-23 records the default-disabled Phase 12 POC gate in `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`, and P12-24 reserves the default denial path.
+Status: design gate plus disabled runtime facade and P12-25 JSON-only execution
+adapter POC. Embedded Node scripts can `require("rhino")` to receive the P12-24
+disabled facade; only calls with `experimental: true` can enter the P12-25 POC.
+They still cannot install Rhino globals, call `importClass`, call
+`importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects from
+Node. S11-26 fixes the concrete JSON-only run shape in
+[RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md), P12-23 records the
+default-disabled Phase 12 POC gate in
+`docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`, P12-24 reserves
+the default denial path, and P12-25 implements the explicit adapter POC.
 
 ## Goal
 
@@ -17,11 +26,11 @@ Any future shim must preserve:
 
 ## Current Decision
 
-Do not implement Rhino execution in the Embedded Node runtime yet.
+Do not implement default Rhino execution in the Embedded Node runtime.
 
 The following remain unavailable in Node scripts:
 
-- Rhino execution through `rhino.run()`
+- Rhino execution through `rhino.run()` without `experimental: true`
 - `require("rhino").install()`
 - global `importClass`
 - global `importPackage`
@@ -35,8 +44,9 @@ Users should migrate Rhino scripts to explicit Node bridge modules where possibl
 
 P12-24 reserves `require("rhino")` as a controlled disabled facade. The facade is
 frozen, reports `enabled: false`, returns `ERR_AUTOJS6_RHINO_SHIM_DISABLED` from
-`rhino.run()`, throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED` from
-`rhino.install()`, and does not install globals.
+`rhino.run()` calls that lack `experimental: true`, throws
+`ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED` from `rhino.install()`, and does not
+install globals.
 
 ## S11-26 JSON-Only Module Candidate
 
@@ -46,8 +56,8 @@ A future module, if implemented, should be explicit and JSON-only:
 const rhino = require("rhino");
 ```
 
-The module is present by default only as the P12-24 disabled facade until a
-later adapter task defines execution behavior and tests.
+The module is present by default as the P12-24 disabled facade. P12-25 defines
+the explicitly gated execution behavior and tests.
 
 Possible future shape:
 
@@ -55,13 +65,14 @@ Possible future shape:
 const rhino = require("rhino");
 
 const result = await rhino.run({
-  source: "toast('legacy')",
+  experimental: true,
+  source: "({ ok: true })",
   timeoutMs: 5000,
   args: []
 });
 ```
 
-This shape is intentionally different from installing globals into Node. It makes the engine boundary visible and keeps legacy execution isolated. The current profile exposes only the disabled `require("rhino")` facade; it still does not execute `rhino.run()`, support `rhino.install()`, expose `compat.rhino`, or install Rhino globals. S11-26 records the future API and gate plan, while P12-24 records the stable default denial path.
+This shape is intentionally different from installing globals into Node. It makes the engine boundary visible and keeps legacy execution isolated. The current profile exposes the disabled `require("rhino")` facade plus the P12-25 `experimental: true` JSON-only execution adapter POC; it still does not support `rhino.install()`, expose `compat.rhino`, or install Rhino globals. S11-26 records the API and gate plan, P12-24 records the stable default denial path, and P12-25 records the POC evidence in `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md`.
 
 The detailed request/response shape, JSON-safe value definition, timeout and cancellation requirements, packaging policy, and POC gate plan live in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md).
 
@@ -76,7 +87,7 @@ The detailed request/response shape, JSON-safe value definition, timeout and can
 | `Packages`, `java.*`, `android.*` | Unsupported in Node | They expose raw object graphs and class-loader surfaces. |
 | `JavaAdapter` | Unsupported | It creates cross-runtime proxy objects with complex lifetime and threading semantics. |
 | Running a legacy Rhino script from Node | Future candidate | Must be explicit, serialized, timeout-bounded, and owned by the script manager. |
-| `rhino.run({ source, timeoutMs, args })` | S11-26 candidate, P12-24 disabled | JSON-only request/response candidate; no V8 global installation; default runtime rejects execution with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`. |
+| `rhino.run({ experimental: true, source, timeoutMs, args })` | P12-25 provider POC | JSON-only request/response adapter; no V8 global installation; default runtime rejects calls without `experimental: true` with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`. |
 
 ## Recommended Direction
 
@@ -182,9 +193,11 @@ Future denials should use stable errors:
 - `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 
 P12-24 current behavior is a disabled facade for `require("rhino")`;
-`rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, `rhino.install()`
-throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, and `require("node:rhino")`
-remains unavailable.
+`rhino.run()` without `experimental: true` rejects with
+`ERR_AUTOJS6_RHINO_SHIM_DISABLED`, `rhino.install()` throws
+`ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, and `require("node:rhino")` remains
+unavailable. P12-25 implements the JSON-only execution adapter POC for explicit
+`experimental: true` requests only.
 
 ## Test Gate For Future Implementation
 

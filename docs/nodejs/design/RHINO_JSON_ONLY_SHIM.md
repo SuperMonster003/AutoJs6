@@ -1,8 +1,8 @@
 # Rhino JSON-Only Shim
 
 Status: S11-26 design and POC gate plan; P12-23 establishes the Phase 12 POC
-gate; P12-24 reserves a disabled runtime facade. No Rhino execution adapter is
-enabled by this document.
+gate; P12-24 reserves a disabled runtime facade; P12-25 implements the explicit
+JSON-only execution adapter POC behind `experimental: true`.
 
 ## Decision
 
@@ -19,10 +19,13 @@ const result = await rhino.run({
 });
 ```
 
-Current Node Profile v1.1 default behavior after P12-24:
+Current Node Profile v1.1 default behavior after P12-25:
 
 - `require("rhino")` resolves to a disabled facade;
-- `rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- `rhino.run()` without `experimental: true` rejects with
+  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- `rhino.run({ experimental: true, source|path, timeoutMs, args })` dispatches
+  to the Android Rhino JSON-only execution adapter POC;
 - `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
 - `require("node:rhino")` remains unavailable;
 - no `compat.rhino`;
@@ -250,13 +253,28 @@ P12-24 reserves `require("rhino")` as the stable default-denial path:
 - no `compat.rhino`, Rhino globals, Java bridge globals, execution adapter, or
   packaged metadata behavior is enabled.
 
+## P12-25 Execution Adapter POC
+
+P12-25 implements the explicit POC in
+`docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md`.
+
+The runtime request must carry `experimental: true` and exactly one of `source`
+or `path`. The current POC uses an `args` Rhino global for JSON-safe arguments,
+returns schema `autojs6-rhino-json-only-run-result-v1`, captures a bounded
+console summary, converts Rhino exceptions to JSON-safe errors, rejects raw
+Java/Android/Rhino wrapper returns, and destroys the `RhinoJavaScriptEngine` in
+the provider `finally` path. This POC does not install Rhino globals into V8,
+does not add `compat.rhino`, and does not promote packaged metadata support.
+
 ## S11-26 Acceptance
 
 - The design fixes a concrete explicit API candidate:
   `rhino.run({ source, timeoutMs, args })` plus a scoped `path` variant.
 - All input and output is JSON-safe.
 - Rhino globals are not installed into V8.
-- Current runtime and type declarations expose only the P12-24 disabled
-  `require("rhino")` facade; they still do not expose a Rhino execution adapter,
-  `compat.rhino`, or Rhino globals.
-- Follow-up implementation work has a POC gate plan before any runtime enablement.
+- Current runtime and type declarations expose the P12-24 disabled
+  `require("rhino")` facade plus the P12-25 explicit `experimental: true`
+  execution adapter POC; they still do not expose `compat.rhino`, Rhino globals,
+  or packaged metadata behavior.
+- Follow-up P12-26 work must cover packaged metadata before any packaged
+  promotion.

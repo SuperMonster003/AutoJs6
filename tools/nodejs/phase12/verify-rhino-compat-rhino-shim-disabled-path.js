@@ -49,7 +49,7 @@ function main() {
       status: policyViolations.length === 0 ? "passed" : "failed",
       runtimeDisabledFacade: checkById(checks, "runtime-disabled-facade"),
       docsAndTypesConsistent: checkById(checks, "types-and-docs"),
-      noExecutionAdapter: checkById(checks, "no-execution-or-globals"),
+      defaultStillNoGlobals: checkById(checks, "no-execution-or-globals"),
     },
   };
   fs.mkdirSync(reportDir, { recursive: true });
@@ -90,12 +90,12 @@ function buildChecks(files, repoRoot) {
         "`require.resolve(\"rhino\")` returns `rhino`",
         "local `node_modules/rhino` package cannot shadow",
         "`require(\"node:rhino\")` remains unavailable",
-        "`rhino.run()` returns a rejected Promise",
+        "`rhino.run()` without `experimental: true` returns a rejected Promise",
         "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
         "`rhino.install()` throws",
         "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
         "does not add `compat.rhino`",
-        "P12-25 remains responsible",
+        "P12-25 adds",
         "P12-26 remains responsible",
       ]),
       "P12-24 report must document the disabled facade, stable denial, shadowing, no globals, and follow-up boundaries.",
@@ -117,7 +117,10 @@ function buildChecks(files, repoRoot) {
         "globalsInstalled: false",
         "nodeAlias: false",
         "shadowing: \"reserved\"",
-        "return Promise.reject(__autojs6_rhino_shim_disabled_error(\"run\"));",
+        "function __autojs6_rhino_run_request(request)",
+        "if (input.experimental !== true)",
+        "throw __autojs6_rhino_shim_disabled_error(\"run\");",
+        "return Promise.reject(error);",
         "throw __autojs6_rhino_install_unsupported_error();",
         "Object.freeze({",
       ]) &&
@@ -150,8 +153,6 @@ function buildChecks(files, repoRoot) {
     check(
       "no-execution-or-globals",
       !includesAny(runtimeFacade, [
-        "__autojs6_call_autojs",
-        "NodeBridge",
         "ScriptRuntime",
         "RhinoEngine",
         "importClass",
@@ -163,14 +164,12 @@ function buildChecks(files, repoRoot) {
         !includesAny(files.runtime.text, [
           "compat.rhino",
           "__autojs6_rhino_json_only_shim_adapter",
-          "__autojs6_rhino_run_provider",
-          "function __autojs6_rhino_run",
         ]) &&
         !includesAny(files.compatTypes.text, [
           "readonly rhino",
           "compat.rhino",
         ]),
-      "P12-24 must not add Rhino execution, bridge dispatch, globals, or compat.rhino.",
+      "P12-24/P12-25 must keep Rhino globals and compat.rhino absent; P12-25 may add only the explicit rhino.run provider.",
     ),
     check(
       "types-and-docs",
@@ -181,6 +180,10 @@ function buildChecks(files, repoRoot) {
         "schema: \"autojs6-rhino-json-only-shim-disabled-v1\"",
         "mode: \"disabled\"",
         "enabled: false",
+        "export interface RunBaseRequest",
+        "readonly experimental: true",
+        "export type RunResult",
+        "run<T extends JsonValue = JsonValue>(request: RunRequest): Promise<RunResult<T>>",
         "run(request?: unknown): Promise<never>",
         "install(options?: unknown): never",
         "status(): Status",
@@ -190,15 +193,18 @@ function buildChecks(files, repoRoot) {
         includesAll(files.typesReadme.text, [
           "- `rhino`",
           "P12-24 reserves `require(\"rhino\")` as a disabled JSON-only shim facade",
+          "P12-25 adds an explicit",
           "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
           "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
-          "no Rhino globals or `compat.rhino`",
+          "never installs Rhino globals",
+          "no `compat.rhino` surface",
         ]) &&
         includesAll(files.typeSmoke.text, [
           "import rhino = require(\"rhino\")",
           "const rhinoEnabled: false = rhino.isEnabled()",
           "const rhinoStatus: rhino.Status = rhino.status()",
           "const rhinoRunDenied: Promise<never> = rhino.run",
+          "const rhinoRunPoc: Promise<rhino.RunResult",
           "const rhinoInstallDenied: (options?: unknown) => never = rhino.install",
         ]) &&
         files.nodeExamplesGradle.text.includes("\"rhino\"") &&
@@ -212,30 +218,35 @@ function buildChecks(files, repoRoot) {
       includesAll(files.jsonDesign.text, [
         "P12-24 reserves a disabled runtime facade",
         "`require(\"rhino\")` resolves to a disabled facade",
-        "`rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`",
+        "`rhino.run()` without `experimental: true` rejects",
+        "P12-25 implements",
         "`rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`",
         "local `node_modules/rhino`",
         "## P12-24 Disabled Facade",
       ]) &&
         includesAll(files.shimDesign.text, [
           "P12-24 disabled facade",
+          "P12-25",
           "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
           "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
           "`require(\"node:rhino\")`",
         ]) &&
         includesAll(files.loaderDesign.text, [
           "P12-24 reserves `require(\"rhino\")` as a disabled default-denial facade",
+          "P12-25 adds the explicit",
           "local `node_modules/rhino` cannot shadow it",
           "no `compat.rhino` or Rhino globals",
         ]) &&
         includesAll(files.migration.text, [
           "P12-24 reserves `require(\"rhino\")`",
-          "`rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`",
+          "P12-25 implements",
+          "`rhino.run()` without `experimental: true` rejects",
           "`rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`",
         ]) &&
         includesAll(files.securityModel.text, [
-          "P12-24 reserves `require(\"rhino\")` only as a disabled facade",
-          "`rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`",
+          "P12-24 reserves `require(\"rhino\")` as a disabled facade",
+          "P12-25 implements",
+          "`rhino.run()` without `experimental: true` rejects",
           "local `node_modules/rhino` cannot shadow",
         ]),
       "Design, loader, migration, and security docs must agree on the P12-24 disabled/default denial path.",
@@ -245,9 +256,10 @@ function buildChecks(files, repoRoot) {
       includesAll(files.pocGate.text, [
         "P12-24 follows by reserving",
         "runtime `require(\"rhino\")` returns only a frozen disabled facade",
-        "runtime `rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`",
+        "runtime `rhino.run()` without `experimental: true` rejects",
+        "P12-25 implementation report",
         "runtime `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`",
-        "TypeScript declares only the disabled `rhino` facade",
+        "TypeScript declares the disabled `rhino` facade plus explicit P12-25",
       ]) &&
         includesAll(files.phase12PocVerifier.text, [
           "disabled-runtime-facade",
@@ -280,13 +292,15 @@ function buildChecks(files, repoRoot) {
     check(
       "surface-manifest-p12-24",
       rhinoSurface &&
-        rhinoSurface.status === "design_locked" &&
+        (rhinoSurface.status === "design_locked" || rhinoSurface.status === "provider_poc") &&
         (rhinoSurface.tasks || []).includes("P12-24") &&
         includesAll(JSON.stringify(rhinoSurface), [
           "P12-24 reserves require(\\\"rhino\\\") as a disabled facade",
+          "P12-25 adds",
           "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
           "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
           "RHINO_SHIM_DISABLED_PATH.md",
+          "RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md",
           "docs/nodejs/types/autojs6-node/rhino.d.ts",
           "NodeRhinoShimDesignGateInstrumentationTest.kt",
           "verify-rhino-compat-rhino-shim-disabled-path.js",
@@ -295,6 +309,7 @@ function buildChecks(files, repoRoot) {
         includesAll(files.surfaceDocs.text, [
           "P12-24 reserves `require(\"rhino\")` as a disabled facade",
           "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+          "P12-25 adds",
           "local `node_modules/rhino`",
         ]),
       "Phase 12 surface manifest must include P12-24 disabled facade evidence.",

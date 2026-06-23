@@ -8864,6 +8864,10 @@ std::string buildEmbeddedScriptExecutionSource(
         requireEsmUnsupported: "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
         rhinoShimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
         rhinoInstallUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+        rhinoInvalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST",
+        rhinoExecutionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR",
+        rhinoExecutionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT",
+        rhinoJsonUnsafeResult: "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT",
         fsScopedPath: "ERR_AUTOJS6_FS_SCOPED_PATH",
         fsAbsolutePathDenied: "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED",
         fsPathEscape: "ERR_AUTOJS6_FS_PATH_ESCAPE",
@@ -8909,6 +8913,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (text === "java") {
       return "java_interop";
+    }
+    if (text === "rhino.run") {
+      return "rhino";
     }
     if (text === "sqlite") {
       return "database";
@@ -9129,6 +9136,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (moduleName === "fetch" || moduleName === "websocket") return ["network"];
     if (moduleName === "work_manager") return ["work_manager"];
     if (moduleName === "java") return ["java_interop"];
+    if (moduleName === "rhino") return ["rhino"];
     return [];
   }
   function __autojs6_bridge_effective_permissions(moduleName, methodName, optionPermissions) {
@@ -9531,6 +9539,9 @@ std::string buildEmbeddedScriptExecutionSource(
         request.method === "stopAll" ||
         request.method === "stopSelf";
     }
+    if (request.module === "rhino") {
+      return request.method === "run";
+    }
     if (request.module === "accessibility") {
       return request.method === "isEnabled" || request.method === "ensureEnabled";
     }
@@ -9559,6 +9570,35 @@ std::string buildEmbeddedScriptExecutionSource(
       if (request.method === "stopSelf") {
         return true;
       }
+    }
+    if (request && request.module === "rhino" && request.method === "run") {
+      return {
+        schema: "autojs6-rhino-json-only-run-result-v1",
+        mode: "json-only-poc",
+        provider: "queued-host",
+        ok: false,
+        timedOut: false,
+        sourceName: "",
+        durationMs: 0,
+        error: {
+          name: "RhinoProviderUnavailableError",
+          message: "AutoJs6 queued host transport cannot execute Rhino; use the Android live provider.",
+          code: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+          category: "provider-unavailable"
+        },
+        console: {
+          schema: "autojs6-rhino-json-only-console-v1",
+          lines: [],
+          truncated: false,
+          maxLines: 0,
+          maxBytes: 0
+        },
+        lifecycle: {
+          engineCreated: false,
+          forceStopRequested: false,
+          destroyed: true
+        }
+      };
     }
     if (request && request.module === "accessibility") {
       return false;
@@ -16038,7 +16078,11 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   const __autojs6_rhino_shim_error_codes = Object.freeze({
     shimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
-    installUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED"
+    installUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+    invalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST",
+    executionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR",
+    executionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT",
+    jsonUnsafeResult: "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT"
   });
   function __autojs6_rhino_shim_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16071,6 +16115,183 @@ std::string buildEmbeddedScriptExecutionSource(
       "unsupported"
     );
   }
+  function __autojs6_rhino_invalid_request_error(message, apiName) {
+    return __autojs6_rhino_shim_error(
+      message,
+      __autojs6_rhino_shim_error_codes.invalidRequest,
+      apiName || "run",
+      "invalid-request"
+    );
+  }
+  function __autojs6_rhino_utf8ish_size(value) {
+    const text = String(value === undefined || value === null ? "" : value);
+    if (typeof Buffer === "function" && Buffer && typeof Buffer.byteLength === "function") {
+      return Buffer.byteLength(text, "utf8");
+    }
+    return unescape(encodeURIComponent(text)).length;
+  }
+  function __autojs6_rhino_relative_text(value, fieldName, allowEmpty) {
+    const text = value === undefined || value === null ? "" : String(value);
+    if (!allowEmpty && text.length === 0) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run " + fieldName + " must be non-empty.");
+    }
+    if (text.indexOf("\u0000") !== -1) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run " + fieldName + " must not contain NUL bytes.");
+    }
+    if (text.charAt(0) === "/" || /^[A-Za-z]:[\\/]/.test(text)) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run " + fieldName + " must be relative to the scoped working directory.");
+    }
+    const parts = text.split(/[\\/]+/);
+    if (parts.some(function(part) { return part === ".."; })) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run " + fieldName + " must not escape the scoped working directory.");
+    }
+    return allowEmpty && text.length === 0 ? "." : text;
+  }
+  function __autojs6_rhino_run_timeout_ms(value) {
+    if (value === undefined || value === null) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run requires timeoutMs.");
+    }
+    const timeoutMs = Number(value);
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run timeoutMs must be a positive number.");
+    }
+    return Math.min(Math.trunc(timeoutMs), 30000);
+  }
+  function __autojs6_rhino_run_args(value) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    if (!Array.isArray(value)) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run args must be a JSON array.");
+    }
+    let text;
+    try {
+      text = JSON.stringify(value);
+    } catch (error) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run args must be JSON-serializable.");
+    }
+    if (typeof text !== "string") {
+      throw __autojs6_rhino_invalid_request_error("rhino.run args must be JSON-serializable.");
+    }
+    if (__autojs6_rhino_utf8ish_size(text) > 16384) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run args exceed 16384 bytes.");
+    }
+    return JSON.parse(text);
+  }
+  function __autojs6_rhino_run_request(request) {
+    const input = request && typeof request === "object" && !Array.isArray(request) ? request : null;
+    if (!input) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run requires a request object.");
+    }
+    if (input.experimental !== true) {
+      throw __autojs6_rhino_shim_disabled_error("run");
+    }
+    const hasSource = Object.prototype.hasOwnProperty.call(input, "source") && input.source !== undefined && input.source !== null;
+    const hasPath = Object.prototype.hasOwnProperty.call(input, "path") && input.path !== undefined && input.path !== null;
+    if (hasSource === hasPath) {
+      throw __autojs6_rhino_invalid_request_error("rhino.run requires exactly one of source or path.");
+    }
+    const timeoutMs = __autojs6_rhino_run_timeout_ms(input.timeoutMs);
+    const payload = {
+      experimental: true,
+      timeoutMs,
+      args: __autojs6_rhino_run_args(input.args),
+      cwd: __autojs6_rhino_relative_text(input.cwd, "cwd", true),
+      __autojs6BaseCwd: __autojs6_current_engine_info().cwd || __autojs6_engine_info_fallback_cwd()
+    };
+    if (hasSource) {
+      const source = String(input.source);
+      if (source.length === 0 || source.indexOf("\u0000") !== -1) {
+        throw __autojs6_rhino_invalid_request_error("rhino.run source must be non-empty and must not contain NUL bytes.");
+      }
+      if (__autojs6_rhino_utf8ish_size(source) > 65536) {
+        throw __autojs6_rhino_invalid_request_error("rhino.run source exceeds 65536 bytes.");
+      }
+      payload.source = source;
+      if (input.name !== undefined && input.name !== null && String(input.name).length > 0) {
+        const name = String(input.name);
+        if (name.indexOf("\u0000") !== -1) {
+          throw __autojs6_rhino_invalid_request_error("rhino.run name must not contain NUL bytes.");
+        }
+        payload.name = name;
+      }
+    } else {
+      payload.path = __autojs6_rhino_relative_text(input.path, "path", false);
+    }
+    return payload;
+  }
+  function __autojs6_rhino_deep_freeze_json(value) {
+    if (!value || typeof value !== "object") {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(value.map(__autojs6_rhino_deep_freeze_json));
+    }
+    const output = {};
+    Object.keys(value).forEach(function(key) {
+      output[key] = __autojs6_rhino_deep_freeze_json(value[key]);
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_error_result(value) {
+    const input = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      name: input.name === undefined || input.name === null ? "Error" : String(input.name),
+      message: input.message === undefined || input.message === null ? "" : String(input.message),
+      code: input.code === undefined || input.code === null ? __autojs6_rhino_shim_error_codes.executionError : String(input.code),
+      category: input.category === undefined || input.category === null ? "rhino-exception" : String(input.category),
+      sourceName: input.sourceName === undefined || input.sourceName === null ? "" : String(input.sourceName),
+      lineNumber: Number.isFinite(Number(input.lineNumber)) ? Math.trunc(Number(input.lineNumber)) : 0,
+      columnNumber: Number.isFinite(Number(input.columnNumber)) ? Math.trunc(Number(input.columnNumber)) : 0,
+      stack: input.stack === undefined || input.stack === null ? "" : String(input.stack)
+    });
+  }
+  function __autojs6_rhino_console_result(value) {
+    const input = value && typeof value === "object" ? value : {};
+    const lines = Array.isArray(input.lines) ? input.lines : [];
+    return Object.freeze({
+      schema: input.schema === undefined || input.schema === null ? "autojs6-rhino-json-only-console-v1" : String(input.schema),
+      lines: Object.freeze(lines.map(function(line) {
+        const item = line && typeof line === "object" ? line : {};
+        return Object.freeze({
+          level: item.level === undefined || item.level === null ? "log" : String(item.level),
+          message: item.message === undefined || item.message === null ? "" : String(item.message)
+        });
+      })),
+      truncated: input.truncated === true,
+      maxLines: Number.isFinite(Number(input.maxLines)) ? Math.trunc(Number(input.maxLines)) : 0,
+      maxBytes: Number.isFinite(Number(input.maxBytes)) ? Math.trunc(Number(input.maxBytes)) : 0
+    });
+  }
+  function __autojs6_rhino_lifecycle_result(value) {
+    const input = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      engineCreated: input.engineCreated === true,
+      forceStopRequested: input.forceStopRequested === true,
+      destroyed: input.destroyed === true
+    });
+  }
+  function __autojs6_rhino_run_result(value) {
+    const input = value && typeof value === "object" ? value : {};
+    const ok = input.ok === true;
+    const output = {
+      schema: input.schema === undefined || input.schema === null ? "autojs6-rhino-json-only-run-result-v1" : String(input.schema),
+      mode: input.mode === undefined || input.mode === null ? "json-only-poc" : String(input.mode),
+      provider: input.provider === undefined || input.provider === null ? "" : String(input.provider),
+      ok,
+      timedOut: input.timedOut === true,
+      sourceName: input.sourceName === undefined || input.sourceName === null ? "" : String(input.sourceName),
+      durationMs: Number.isFinite(Number(input.durationMs)) ? Math.max(0, Math.trunc(Number(input.durationMs))) : 0,
+      console: __autojs6_rhino_console_result(input.console),
+      lifecycle: __autojs6_rhino_lifecycle_result(input.lifecycle)
+    };
+    if (ok) {
+      output.value = __autojs6_rhino_deep_freeze_json(input.value === undefined ? null : input.value);
+    } else {
+      output.error = __autojs6_rhino_error_result(input.error);
+    }
+    return Object.freeze(output);
+  }
   function __autojs6_rhino_disabled_status() {
     return Object.freeze({
       schema: "autojs6-rhino-json-only-shim-disabled-v1",
@@ -16088,8 +16309,23 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_limited_rhino_cache) {
       return __autojs6_limited_rhino_cache;
     }
-    function run() {
-      return Promise.reject(__autojs6_rhino_shim_disabled_error("run"));
+    function run(request) {
+      let payload;
+      try {
+        payload = __autojs6_rhino_run_request(request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "rhino",
+        "run",
+        [payload],
+        {
+          timeoutMs: Math.min(payload.timeoutMs + 1000, 2147483647),
+          permissions: ["rhino"],
+          signal: __autojs6_bridge_signal_from_options(request)
+        }
+      ).then(__autojs6_rhino_run_result);
     }
     function install() {
       throw __autojs6_rhino_install_unsupported_error();

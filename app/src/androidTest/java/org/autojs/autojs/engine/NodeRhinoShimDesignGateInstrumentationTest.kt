@@ -140,4 +140,109 @@ class NodeRhinoShimDesignGateInstrumentationTest {
             workDir.deleteRecursively()
         }
     }
+
+    @Test
+    fun rhinoJsonOnlyPocRunsBehindExplicitExperimentalRequest() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Rhino JSON-only POC")
+
+        val workDir = File(context.cacheDir, "node-rhino-json-only-poc-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create Rhino JSON-only POC work dir: $absolutePath" }
+        }
+        try {
+            File(workDir, "legacy.rhino.js").writeText(
+                """
+                    console.warn("path", args[0].label);
+                    ({ fromPath: true, label: args[0].label });
+                """.trimIndent() + "\n",
+                StandardCharsets.UTF_8,
+            )
+
+            val source = """
+                "nodejs";
+                (async function main() {
+                  const assert = require("assert/strict");
+                  const rhino = require("rhino");
+
+                  const inline = await rhino.run({
+                    experimental: true,
+                    name: "inline.rhino.js",
+                    source: 'console.log("source", args[0], args[1]); ({ sum: args[0] + args[1], nested: { ok: true } });',
+                    args: [2, 3],
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(Object.isFrozen(inline), true);
+                  assert.strictEqual(Object.isFrozen(inline.value), true);
+                  assert.strictEqual(inline.ok, true);
+                  assert.strictEqual(inline.value.sum, 5);
+                  assert.strictEqual(inline.value.nested.ok, true);
+                  assert.strictEqual(inline.lifecycle.destroyed, true);
+                  assert.strictEqual(inline.console.lines[0].level, "log");
+                  assert.match(inline.console.lines[0].message, /source 2 3/);
+
+                  const fromPath = await rhino.run({
+                    experimental: true,
+                    path: "legacy.rhino.js",
+                    args: [{ label: "ok" }],
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(fromPath.ok, true);
+                  assert.deepStrictEqual(fromPath.value, { fromPath: true, label: "ok" });
+                  assert.strictEqual(fromPath.console.lines[0].level, "warn");
+                  assert.match(fromPath.sourceName, /legacy\.rhino\.js$/);
+
+                  const thrown = await rhino.run({
+                    experimental: true,
+                    source: 'throw new Error("boom");',
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(thrown.ok, false);
+                  assert.strictEqual(thrown.error.code, "ERR_AUTOJS6_RHINO_EXECUTION_ERROR");
+                  assert.strictEqual(thrown.error.category, "rhino-exception");
+                  assert.match(thrown.error.message, /boom/);
+
+                  const unsafe = await rhino.run({
+                    experimental: true,
+                    source: "runtime;",
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(unsafe.ok, false);
+                  assert.strictEqual(unsafe.error.code, "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT");
+
+                  const timedOut = await rhino.run({
+                    experimental: true,
+                    source: "sleep(5000); 1;",
+                    timeoutMs: 100
+                  });
+                  assert.strictEqual(timedOut.ok, false);
+                  assert.strictEqual(timedOut.timedOut, true);
+                  assert.strictEqual(timedOut.error.code, "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT");
+                  assert.strictEqual(timedOut.lifecycle.forceStopRequested, true);
+                  assert.strictEqual(timedOut.lifecycle.destroyed, true);
+
+                  console.log("rhino.poc.inline=" + inline.value.sum);
+                  console.log("rhino.poc.path=" + fromPath.value.label);
+                  console.log("rhino.poc.error=" + thrown.error.code);
+                  console.log("rhino.poc.unsafe=" + unsafe.error.code);
+                  console.log("rhino.poc.timeout=" + timedOut.error.code);
+                })();
+            """.trimIndent()
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = source,
+                sourceName = "<node-rhino-json-only-poc.js>",
+                workingDirectory = workDir,
+                timeoutMs = 20_000L,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("Rhino JSON-only POC", result)
+            assertTrue(result.stdout, result.stdout.contains("rhino.poc.inline=5"))
+            assertTrue(result.stdout, result.stdout.contains("rhino.poc.path=ok"))
+            assertTrue(result.stdout, result.stdout.contains("rhino.poc.error=ERR_AUTOJS6_RHINO_EXECUTION_ERROR"))
+            assertTrue(result.stdout, result.stdout.contains("rhino.poc.unsafe=ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT"))
+            assertTrue(result.stdout, result.stdout.contains("rhino.poc.timeout=ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT"))
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
 }

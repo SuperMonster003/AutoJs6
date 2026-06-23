@@ -95,7 +95,7 @@ If a script needs Android or AutoJs functionality, use an AutoJs bridge module.
 
 ## Rhino Compatibility Shim
 
-P12-24 reserves `require("rhino")` in the default Safe Node Profile only as a disabled JSON-only shim facade. Node still does not execute Rhino through `rhino.run()`, does not support `rhino.install()`, and does not automatically install old AutoJs globals. The explicit migration helper for implemented Rhino-style APIs remains `require("autojs6:compat")`; it does not install globals unless the script calls `compat.install({ globals: true })`.
+P12-24 reserves `require("rhino")` in the default Safe Node Profile as a disabled JSON-only shim facade. P12-25 implements an explicit `experimental: true` JSON-only execution adapter POC for small Rhino snippets or scoped files. Calls without `experimental: true` still reject, Node still does not support `rhino.install()`, and Node does not automatically install old AutoJs globals. The explicit migration helper for implemented Rhino-style APIs remains `require("autojs6:compat")`; it does not install globals unless the script calls `compat.install({ globals: true })`.
 
 Do not migrate scripts by expecting these Rhino-era surfaces to appear inside Node:
 
@@ -109,29 +109,30 @@ Do not migrate scripts by expecting these Rhino-era surfaces to appear inside No
 
 The recommended migration path is to rewrite those calls to explicit Node bridge modules. For low-risk helpers, `autojs6:compat` currently covers toast/sleep/clipboard, scoped files, pure/text utilities, storage/sqlite, readable `console`/timer debugging migration, the first selector/accessibility compatibility facade, and common app/device/shell wrappers. `console.show()` and related floating-console controls are no-op output-capture shims in Node; logs still go to captured stdout/stderr, and uncaught errors keep source-map-aware `errorStack` output. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing unrestricted Rhino globals into Node.
 
-The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). S11-26 narrows the only acceptable future shape to a JSON-only `rhino.run({ source, timeoutMs, args })` / scoped `path` API, documented in [RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md). P12-24 exposes only the disabled facade; the following execution shape remains a future POC plan, not a current runtime feature:
+The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). S11-26 narrows the only acceptable shape to a JSON-only `rhino.run({ source, timeoutMs, args })` / scoped `path` API, documented in [RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md). P12-25 implements the following explicit POC shape:
 
 ```js
 "nodejs";
 
-const rhino = require("rhino"); // disabled facade in P12-24
+const rhino = require("rhino");
 
 const result = await rhino.run({
-  source: "var input = arguments[0]; ({ value: input.value + 1 })",
+  experimental: true,
+  source: "({ value: args[0].value + 1 })",
   args: [{ value: 41 }],
   timeoutMs: 5000
 });
 ```
 
-In P12-24, `rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, and `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`. If implemented later, `rhino.run()` must accept and return only JSON-safe values, must be timeout-bounded, and must not install Rhino globals into V8. It must reject Java objects, Rhino `Scriptable`, Android objects, functions, image/UI/accessibility handles, native pointers, threads, locks, process handles, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects at the engine boundary.
+In P12-25, `rhino.run()` without `experimental: true` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, and `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`. The POC accepts and returns only JSON-safe values, is timeout-bounded, and does not install Rhino globals into V8. It must reject Java objects, Rhino `Scriptable`, Android objects, functions, image/UI/accessibility handles, native pointers, threads, locks, process handles, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects at the engine boundary.
 
 P12-23 establishes the default-disabled POC gate in
 [RHINO_JSON_ONLY_SHIM_POC_GATE.md](reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md).
-The gate keeps release/default Safe Node Profile execution disabled, allows
-future POC execution only through an explicit experimental flag or test
-metadata, requires `rhino.install()` to reject with
-`ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, and keeps the JSON
-validator/no-globals requirements locked before P12-25 and P12-26.
+P12-25 implements the runtime adapter in
+[RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md](reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md).
+The POC uses the `args` Rhino global, not the implicit Rhino `arguments`
+object, and returns a `RunResult` record rather than throwing Rhino exceptions
+directly into Node. P12-26 still owns packaged metadata behavior.
 
 ## Modules Instead Of Globals
 
@@ -814,7 +815,7 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Replace `files` helpers with scoped `fs` or `fs/promises`.
 - Keep file paths relative to the project working directory.
 - Remove direct Java object access.
-- Do not rely on `require("rhino")` for execution; P12-24 exposes only a disabled facade. `rhino.install()`, `importClass`, `importPackage`, `Packages`, and `JavaAdapter` remain unsupported inside Node.
+- Do not rely on default `require("rhino")` execution; P12-25 requires an explicit `experimental: true` JSON-only POC request. `rhino.install()`, `importClass`, `importPackage`, `Packages`, and `JavaAdapter` remain unsupported inside Node.
 - Confirm unsupported builtins still fail with `ERR_AUTOJS6_*`.
 - Review `docs/nodejs/examples/rhino-compat` for checked
   toast/files/storage/selector/image/ocr/app/device/shell/tasks migration pairs.

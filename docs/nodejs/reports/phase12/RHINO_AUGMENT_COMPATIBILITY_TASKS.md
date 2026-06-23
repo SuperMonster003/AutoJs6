@@ -986,7 +986,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-rhino-shim-disabled-path-verification.md`
 
-- [ ] P12-25: 实现 Rhino JSON-only execution adapter POC。
+- [x] P12-25: 实现 Rhino JSON-only execution adapter POC。
   - 范围：通过 script manager 或 dedicated compatibility process 执行小段
     Rhino source/path，返回 JSON-safe result。
   - 验收：
@@ -995,7 +995,45 @@ Phase 12 task 本身可使用以下执行状态：
     - stdout/stderr 或 console 摘要有上限。
     - Rhino exception 转为稳定 JSON error object。
     - 不能返回 raw Rhino/Java/Android object。
-  - Evidence：待补充。
+  - Evidence：
+    - Runtime facade：
+      `app/src/main/cpp/node_bridge_sources.cpp` 增加
+      `rhino.run({ experimental: true, source|path, timeoutMs, args })`
+      请求校验、`ERR_AUTOJS6_RHINO_INVALID_REQUEST`、
+      `ERR_AUTOJS6_RHINO_EXECUTION_ERROR`、
+      `ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT`、
+      `ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT` 和 JSON-only
+      `RunResult` 归一化；未携带 `experimental: true` 的调用仍以
+      `ERR_AUTOJS6_RHINO_SHIM_DISABLED` 拒绝。
+    - Provider：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeRhinoExecutionService.kt`
+      通过独立 `RhinoJavaScriptEngine` 执行 source/path，使用
+      timeout-bounded `Future.get()`、timeout 后 `forceStop()`、`finally`
+      中 `engine.destroy()`、bounded `RhinoConsoleCapture` 和
+      `JSON.stringify()` result snapshot。
+    - Bridge/capability：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`、
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt`、
+      `app/src/main/java/org/autojs/autojs/engine/NodeRuntimeErrorCodes.kt`、
+      `app/src/main/AndroidManifest.xml`。
+    - Types/smoke：
+      `docs/nodejs/types/autojs6-node/rhino.d.ts`、
+      `docs/nodejs/types/autojs6-node/README.md`、
+      `sample/nodejs/typescript-smoke/src/main.ts`。
+    - Instrumentation evidence：
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt`
+      覆盖 inline source、scoped path、Rhino exception、
+      unsafe result、timeout 和 lifecycle cleanup。
+    - Report：
+      `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md`
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-execution-adapter-poc.js`
+    - Gradle gate：
+      `:app:verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-rhino-json-only-execution-adapter-poc-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-rhino-json-only-execution-adapter-poc-verification.md`
 
 - [ ] P12-26: 增加 Rhino shim packaged metadata gate。
   - 范围：如果 P12-25 支持 packaged，则必须要求显式 packaged metadata

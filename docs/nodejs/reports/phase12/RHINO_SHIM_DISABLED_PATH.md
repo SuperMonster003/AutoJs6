@@ -4,8 +4,9 @@ Status: P12-24 disabled/default denial path implemented.
 
 P12-24 reserves `require("rhino")` as a controlled AutoJs6 module name in the
 default Safe Node Profile. The module is intentionally a disabled facade: it
-does not execute Rhino, does not dispatch to Android or Rhino bridge providers,
-and does not install any globals.
+does not execute Rhino without an explicit P12-25 `experimental: true` request,
+does not dispatch default calls to Android or Rhino bridge providers, and does
+not install any globals.
 
 ## Runtime Contract
 
@@ -22,8 +23,10 @@ Default behavior:
   `mode: "disabled"`, `run: "disabled"`, `install: "unsupported"`,
   `globalsInstalled: false`, `nodeAlias: false`, and
   `shadowing: "reserved"`;
-- `rhino.run()` returns a rejected Promise with
+- `rhino.run()` without `experimental: true` returns a rejected Promise with
   `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- `rhino.run({ experimental: true, source|path, timeoutMs, args })` is the
+  separate P12-25 JSON-only execution adapter POC;
 - `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`.
 
 The disabled facade is not `autojs6:compat`. It does not add `compat.rhino`,
@@ -33,7 +36,7 @@ does not add a global `rhino`, and does not install `importClass`,
 
 ## Stable Error Shape
 
-`rhino.run()` denial:
+`rhino.run()` default denial:
 
 ```text
 code: ERR_AUTOJS6_RHINO_SHIM_DISABLED
@@ -59,13 +62,16 @@ The Safe Node Profile also exposes these codes through
 
 ## Type Contract
 
-`docs/nodejs/types/autojs6-node/rhino.d.ts` declares only the disabled facade:
+`docs/nodejs/types/autojs6-node/rhino.d.ts` declares the disabled facade and
+the explicit P12-25 POC request/result types:
 
 - `mode: "disabled"`;
 - `enabled: false`;
 - `isEnabled(): false`;
 - `status(): Status`;
-- `run(request?: unknown): Promise<never>`;
+- `run<T>(request: RunRequest): Promise<RunResult<T>>` for requests that carry
+  `experimental: true`;
+- `run(request?: unknown): Promise<never>` for default-denied requests;
 - `install(options?: unknown): never`;
 - `errorCodes.shimDisabled`;
 - `errorCodes.installUnsupported`.
@@ -74,9 +80,9 @@ The type package still declares no `compat.rhino` surface and no Rhino globals.
 
 ## P12-25 Boundary
 
-P12-24 does not add the execution adapter. P12-25 remains responsible for any
-experimental JSON-only `rhino.run({ source, timeoutMs, args })` or scoped
-`path` adapter. If that adapter is enabled later, `rhino.install()` must remain
+P12-24 did not add the execution adapter. P12-25 adds the experimental
+JSON-only `rhino.run({ experimental: true, source|path, timeoutMs, args })`
+adapter while preserving this default-denial path. `rhino.install()` remains
 unsupported and must not become available because of the experimental flag.
 
 P12-26 remains responsible for packaged metadata behavior. Packaged APKs without
@@ -85,6 +91,8 @@ explicit shim metadata still cannot execute Rhino through Node.
 ## Evidence
 
 - Runtime facade: `app/src/main/cpp/node_bridge_sources.cpp`
+- P12-25 execution adapter:
+  `app/src/main/java/org/autojs/autojs/engine/NodeBridgeRhinoExecutionService.kt`
 - Types: `docs/nodejs/types/autojs6-node/rhino.d.ts`
 - Type smoke: `sample/nodejs/typescript-smoke/src/main.ts`
 - Type declaration gate: `app/node-examples.gradle.kts`
@@ -92,4 +100,6 @@ explicit shim metadata still cannot execute Rhino through Node.
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt`
 - Host verifier:
   `tools/nodejs/phase12/verify-rhino-compat-rhino-shim-disabled-path.js`
+- P12-25 host verifier:
+  `tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-execution-adapter-poc.js`
 - Gradle gate: `:app:verifyNodeRhinoCompatRhinoShimDisabledPath`

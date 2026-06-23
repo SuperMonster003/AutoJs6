@@ -2,11 +2,19 @@ declare module "rhino" {
   namespace rhino {
     export type ErrorCode =
       | "ERR_AUTOJS6_RHINO_SHIM_DISABLED"
-      | "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED";
+      | "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED"
+      | "ERR_AUTOJS6_RHINO_INVALID_REQUEST"
+      | "ERR_AUTOJS6_RHINO_EXECUTION_ERROR"
+      | "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT"
+      | "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT";
 
     export interface ErrorCodes {
       readonly shimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED";
       readonly installUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED";
+      readonly invalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST";
+      readonly executionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR";
+      readonly executionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT";
+      readonly jsonUnsafeResult: "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT";
     }
 
     export interface Status {
@@ -29,7 +37,85 @@ declare module "rhino" {
       readonly category?: "disabled" | "unsupported" | string;
     }
 
-    export interface RhinoDisabledModule {
+    export type JsonPrimitive = string | number | boolean | null;
+    export type JsonValue = JsonPrimitive | readonly JsonValue[] | { readonly [key: string]: JsonValue };
+
+    export interface RunBaseRequest {
+      readonly experimental: true;
+      readonly timeoutMs: number;
+      readonly args?: readonly JsonValue[];
+      readonly cwd?: string;
+      readonly signal?: AutoJs6Node.AbortSignalLike;
+    }
+
+    export interface RunSourceRequest extends RunBaseRequest {
+      readonly source: string;
+      readonly name?: string;
+      readonly path?: never;
+    }
+
+    export interface RunPathRequest extends RunBaseRequest {
+      readonly path: string;
+      readonly source?: never;
+      readonly name?: never;
+    }
+
+    export type RunRequest = RunSourceRequest | RunPathRequest;
+
+    export interface ConsoleLine {
+      readonly level: "log" | "info" | "warn" | "error" | string;
+      readonly message: string;
+    }
+
+    export interface ConsoleSummary {
+      readonly schema: "autojs6-rhino-json-only-console-v1";
+      readonly lines: readonly ConsoleLine[];
+      readonly truncated: boolean;
+      readonly maxLines: number;
+      readonly maxBytes: number;
+    }
+
+    export interface LifecycleSummary {
+      readonly engineCreated: boolean;
+      readonly forceStopRequested: boolean;
+      readonly destroyed: boolean;
+    }
+
+    export interface RunError {
+      readonly name: string;
+      readonly message: string;
+      readonly code: ErrorCode;
+      readonly category: string;
+      readonly sourceName?: string;
+      readonly lineNumber?: number;
+      readonly columnNumber?: number;
+      readonly stack?: string;
+    }
+
+    export interface RunResultBase {
+      readonly schema: "autojs6-rhino-json-only-run-result-v1";
+      readonly mode: "json-only-poc";
+      readonly provider: "android-rhino-json-only-poc" | "queued-host" | string;
+      readonly timedOut: boolean;
+      readonly sourceName: string;
+      readonly durationMs: number;
+      readonly console: ConsoleSummary;
+      readonly lifecycle: LifecycleSummary;
+    }
+
+    export interface RunSuccess<T extends JsonValue = JsonValue> extends RunResultBase {
+      readonly ok: true;
+      readonly value: T;
+    }
+
+    export interface RunFailure extends RunResultBase {
+      readonly ok: false;
+      readonly error: RunError;
+    }
+
+    export type RunResult<T extends JsonValue = JsonValue> = RunSuccess<T> | RunFailure;
+
+    export interface RhinoModule {
       readonly name: "rhino";
       readonly version: 1;
       readonly schema: "autojs6-rhino-json-only-shim-disabled-v1";
@@ -38,11 +124,12 @@ declare module "rhino" {
       readonly errorCodes: ErrorCodes;
       isEnabled(): false;
       status(): Status;
+      run<T extends JsonValue = JsonValue>(request: RunRequest): Promise<RunResult<T>>;
       run(request?: unknown): Promise<never>;
       install(options?: unknown): never;
     }
   }
 
-  const rhino: rhino.RhinoDisabledModule;
+  const rhino: rhino.RhinoModule;
   export = rhino;
 }

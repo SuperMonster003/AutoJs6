@@ -82,14 +82,18 @@ which Phase 12 workstream owns the next implementation or rejection.
 - `rhino.json_only_shim`: P12-23 establishes the default-disabled POC gate for
   the explicit `rhino.run({ source, timeoutMs, args })` / scoped `path` API.
   P12-24 reserves `require("rhino")` as a disabled facade:
-  `rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`,
+  `rhino.run()` without `experimental: true` rejects with
+  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`,
   `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`,
   `require("node:rhino")` remains unavailable, and local `node_modules/rhino`
   cannot shadow the controlled module. Release/default Safe Node Profile still
-  exposes no executable `rhino.run()`, no supported `rhino.install()`,
-  no `compat.rhino`, and no Rhino globals. Future POC execution requires an
-  explicit experimental flag or test metadata, and JSON validator/no-globals
-  requirements remain locked before P12-25 and P12-26.
+  exposes no executable `rhino.run()` unless each request carries
+  `experimental: true`, no supported `rhino.install()`, no `compat.rhino`, and
+  no Rhino globals. P12-25 adds a provider POC for
+  `rhino.run({ experimental: true, source|path, timeoutMs, args })` through a
+  dedicated Android Rhino JSON-only execution adapter. P12-26 remains
+  responsible for packaged metadata; packaged support is not promoted by the
+  P12-25 POC.
 
 ## Current Rejected Surfaces
 

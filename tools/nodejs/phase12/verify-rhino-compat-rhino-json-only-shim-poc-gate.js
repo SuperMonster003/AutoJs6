@@ -86,9 +86,9 @@ function buildChecks(files, repoRoot) {
         "rhino.run({",
         "source:",
         "path:",
-        "P12-24 owns the default-disabled runtime",
-        "P12-25 owns any execution adapter POC",
-        "P12-26 owns packaged",
+        "P12-24 owns the default-disabled",
+        "P12-25 now owns the execution adapter POC",
+        "P12-26 owns",
       ]),
       "P12-23 report must establish the POC gate, preserve default non-exposure, and route follow-up tasks.",
     ),
@@ -165,7 +165,8 @@ function buildChecks(files, repoRoot) {
         "no Rhino globals are installed into V8",
       ]) &&
         includesAll(files.shimDesign.text, [
-          "P12-23 records the default-disabled Phase 12 POC gate",
+          "P12-23 records the",
+          "default-disabled Phase 12 POC gate",
           "RHINO_JSON_ONLY_SHIM_POC_GATE.md",
         ]) &&
         includesAll(files.phase11Verifier.text, [
@@ -177,14 +178,14 @@ function buildChecks(files, repoRoot) {
     ),
     check(
       "migration-security-loader-docs",
-      includesAll(files.migration.text, [
-        "P12-23 establishes the default-disabled POC gate",
-        "RHINO_JSON_ONLY_SHIM_POC_GATE.md",
-        "experimental flag",
-        "metadata",
-        "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
-        "validator/no-globals requirements",
-      ]) &&
+        includesAll(files.migration.text, [
+          "P12-23 establishes the default-disabled POC gate",
+          "RHINO_JSON_ONLY_SHIM_POC_GATE.md",
+          "experimental: true",
+          "metadata",
+          "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+          "JSON-safe values",
+        ]) &&
         includesAll(files.securityModel.text, [
           "P12-23 establishes a default-disabled POC gate",
           "explicit experimental flag or test metadata",
@@ -208,7 +209,10 @@ function buildChecks(files, repoRoot) {
         "function __autojs6_limited_rhino()",
         "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
         "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
-        "return Promise.reject(__autojs6_rhino_shim_disabled_error(\"run\"));",
+        "function __autojs6_rhino_run_request(request)",
+        "if (input.experimental !== true)",
+        "throw __autojs6_rhino_shim_disabled_error(\"run\");",
+        "return Promise.reject(error);",
         "throw __autojs6_rhino_install_unsupported_error();",
         "name === \"rhino\"",
         "return __autojs6_limited_rhino();",
@@ -217,6 +221,7 @@ function buildChecks(files, repoRoot) {
           "declare module \"rhino\"",
           "mode: \"disabled\"",
           "enabled: false",
+          "run<T extends JsonValue = JsonValue>(request: RunRequest): Promise<RunResult<T>>",
           "run(request?: unknown): Promise<never>",
           "install(options?: unknown): never",
         ]) &&
@@ -231,14 +236,13 @@ function buildChecks(files, repoRoot) {
           "name === \"node:rhino\"",
           "compat.rhino",
           "__autojs6_rhino_json_only_shim_adapter",
-          "__autojs6_rhino_run_provider",
         ]),
-      "P12-23/P12-24 may expose only the disabled rhino facade; execution, node:rhino, and compat.rhino must remain absent.",
+      "P12-23/P12-24 must preserve the disabled default facade; P12-25 may add only the explicit rhino.run provider while node:rhino and compat.rhino remain absent.",
     ),
     check(
       "surface-manifest-p12-23",
       rhinoSurface &&
-        rhinoSurface.status === "design_locked" &&
+        (rhinoSurface.status === "design_locked" || rhinoSurface.status === "provider_poc") &&
         (rhinoSurface.tasks || []).includes("P12-23") &&
         includesAll(JSON.stringify(rhinoSurface), [
           "P12-23 establishes the default-disabled POC gate",
@@ -248,10 +252,12 @@ function buildChecks(files, repoRoot) {
           "compat.rhino",
           "P12-24 reserves require(\\\"rhino\\\") as a disabled facade",
           "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
-          "explicit experimental flag or test metadata",
+          "explicit experimental Rhino",
+          "P12-25 adds",
           "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
           "RHINO_JSON_ONLY_SHIM_POC_GATE.md",
           "RHINO_SHIM_DISABLED_PATH.md",
+          "RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md",
           "verify-rhino-compat-rhino-json-only-shim-poc-gate.js",
           "verifyNodeRhinoCompatRhinoJsonOnlyShimPocGate",
         ]) &&
@@ -260,9 +266,10 @@ function buildChecks(files, repoRoot) {
           "P12-23 establishes",
           "default-disabled POC gate",
           "P12-24 reserves",
+          "P12-25 adds",
           "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
         ]),
-      "Phase 12 surface manifest must design-lock rhino.json_only_shim with P12-23 evidence.",
+      "Phase 12 surface manifest must record rhino.json_only_shim with P12-23 gate evidence and any later P12-25 provider evidence.",
     ),
     check(
       "phase12-task-complete",

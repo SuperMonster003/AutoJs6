@@ -573,6 +573,7 @@ object NodeBridgeModules {
     const val WEBSOCKET = "websocket"
     const val WORK_MANAGER = "work_manager"
     const val JAVA = "java"
+    const val RHINO = "rhino"
     const val INPUT_OBSERVER = "input_observer"
 
     val toastMethods = setOf("showToast", "toast")
@@ -627,6 +628,7 @@ object NodeBridgeModules {
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
     val javaMethods = setOf("type", "callStatic", "new")
+    val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
@@ -654,6 +656,7 @@ object NodeBridgeModules {
         WEBSOCKET to websocketMethods,
         WORK_MANAGER to workManagerMethods,
         JAVA to javaMethods,
+        RHINO to rhinoMethods,
         INPUT_OBSERVER to inputObserverMethods,
     )
 
@@ -779,6 +782,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, auditedCallback)
             request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, auditedCallback)
             request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, auditedCallback)
+            request.module == NodeBridgeModules.RHINO && request.method in NodeBridgeModules.rhinoMethods -> dispatchRhino(request, auditedCallback)
             request.module == NodeBridgeModules.INPUT_OBSERVER && request.method in NodeBridgeModules.inputObserverMethods -> dispatchInputObserver(request, auditedCallback)
             else -> auditedCallback(unavailable(request))
         }
@@ -2965,6 +2969,10 @@ class AndroidNodeBridgeCapabilityProvider(
             )
         }
         callback(response)
+    }
+
+    private fun dispatchRhino(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        NodeBridgeRhinoExecutionService.dispatch(appContext, request, callback)
     }
 
     private fun describeJavaType(request: NodeBridgeRequest): NodeBridgeResponse {

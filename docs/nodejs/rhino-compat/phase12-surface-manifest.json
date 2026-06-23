@@ -271,34 +271,42 @@
     },
     {
       "id": "rhino.json_only_shim",
-      "status": "design_locked",
+      "status": "provider_poc",
       "tasks": [
         "P12-23",
         "P12-24",
         "P12-25",
         "P12-26"
       ],
-      "summary": "P12-23 establishes the default-disabled POC gate for an explicit timeout-bounded Rhino JSON-only run API. P12-24 reserves require(\"rhino\") as a disabled facade: rhino.run() rejects with ERR_AUTOJS6_RHINO_SHIM_DISABLED, rhino.install() throws ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED, require(\"node:rhino\") remains unavailable, node_modules/rhino cannot shadow it, compat.rhino and Rhino globals remain absent, and future POC execution still requires an explicit experimental flag or test metadata.",
+      "summary": "P12-23 establishes the default-disabled POC gate for an explicit timeout-bounded Rhino JSON-only run API. P12-24 reserves require(\"rhino\") as a disabled facade: rhino.run() without experimental:true rejects with ERR_AUTOJS6_RHINO_SHIM_DISABLED, rhino.install() throws ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED, require(\"node:rhino\") remains unavailable, node_modules/rhino cannot shadow it, compat.rhino and Rhino globals remain absent. P12-25 adds the explicit experimental Rhino JSON-only execution adapter POC through rhino.run({ experimental: true, source, timeoutMs, args }) and the scoped path variant; P12-26 packaged metadata remains open.",
       "runtimeSurface": [
         "require(\"rhino\") disabled facade",
-        "rhino.run() disabled rejection",
+        "rhino.run() default disabled rejection",
         "rhino.install() unsupported rejection",
-        "rhino.run({ source, timeoutMs, args })",
-        "rhino.run({ path, timeoutMs, args })"
+        "rhino.run({ experimental: true, source, timeoutMs, args })",
+        "rhino.run({ experimental: true, path, timeoutMs, args })"
       ],
       "evidence": [
         "docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md",
         "docs/nodejs/design/RHINO_SHIM.md",
         "docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md",
         "docs/nodejs/reports/phase12/RHINO_SHIM_DISABLED_PATH.md",
+        "docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeRhinoExecutionService.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeErrorCodes.kt",
+        "app/src/main/AndroidManifest.xml",
         "docs/nodejs/types/autojs6-node/rhino.d.ts",
         "sample/nodejs/typescript-smoke/src/main.ts",
         "app/node-examples.gradle.kts",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt",
         "tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-shim-poc-gate.js",
         "tools/nodejs/phase12/verify-rhino-compat-rhino-shim-disabled-path.js",
+        "tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-execution-adapter-poc.js",
         ":app:verifyNodeRhinoCompatRhinoJsonOnlyShimPocGate",
-        ":app:verifyNodeRhinoCompatRhinoShimDisabledPath"
+        ":app:verifyNodeRhinoCompatRhinoShimDisabledPath",
+        ":app:verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc"
       ]
     },
     {

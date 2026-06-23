@@ -3,10 +3,12 @@
 Status: P12-23 POC gate established.
 
 P12-23 turns the S11-26 Rhino JSON-only shim design into a Phase 12 POC gate.
-It does not enable Rhino execution. P12-24 follows by reserving
+It does not enable Rhino execution by itself. P12-24 follows by reserving
 `require("rhino")` as a disabled facade; default and release Safe Node Profile
-behavior still has no executable `rhino.run()`, no supported
-`rhino.install()`, no `compat.rhino`, and no Rhino globals installed into V8.
+behavior still has no executable `rhino.run()` without an explicit
+`experimental: true` request, no supported `rhino.install()`, no
+`compat.rhino`, and no Rhino globals installed into V8. P12-25 consumes this
+gate by adding the explicit JSON-only execution adapter POC.
 
 ## Gate Decision
 
@@ -32,16 +34,18 @@ const result = await rhino.run({
 });
 ```
 
-This is a future POC target only. P12-24 owns the default-disabled runtime
-denial path, P12-25 owns any execution adapter POC, and P12-26 owns packaged
-metadata behavior.
+This was a future POC target in P12-23. P12-24 owns the default-disabled
+runtime denial path, P12-25 now owns the execution adapter POC, and P12-26 owns
+packaged metadata behavior.
 
 ## Default State
 
-- Release/default Safe Node Profile must reject the shim.
+- Release/default Safe Node Profile must reject the shim unless a request
+  carries `experimental: true`.
 - POC execution can only be considered when an explicit experimental flag or
   test metadata opts in. This is the explicit experimental flag or test metadata
-  rule.
+  rule. P12-25 implements the runtime side of that rule with
+  `rhino.run({ experimental: true, source|path, timeoutMs, args })`.
 - Source text containing `require("rhino")` must not implicitly reserve Android
   manifest entries, receivers, services, permissions, or providers.
 - P12-24 reserves `require("rhino")` as a controlled module name so a local
@@ -122,19 +126,26 @@ Packaged support remains fail-closed until P12-26:
 - Packaged timeout, crash, cancellation, and destroy behavior require evidence
   before promotion.
 
-## Current P12-24 Disabled Exposure
+## Current P12-24/P12-25 Exposure
 
-After P12-24 the runtime and type boundary is:
+After P12-25 the runtime and type boundary is:
 
 - runtime `require("rhino")` returns only a frozen disabled facade;
-- runtime `rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- runtime `rhino.run()` without `experimental: true` rejects with
+  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- runtime `rhino.run({ experimental: true, source|path, timeoutMs, args })`
+  dispatches to the Android Rhino JSON-only execution adapter POC;
 - runtime `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
 - `require.resolve("rhino")` resolves to the controlled module name `rhino`;
 - local `node_modules/rhino` cannot shadow the controlled module;
 - `require("node:rhino")` remains unavailable;
 - no runtime `compat.rhino`;
-- TypeScript declares only the disabled `rhino` facade;
+- TypeScript declares the disabled `rhino` facade plus explicit P12-25
+  `RunRequest` / `RunResult` POC types;
 - no `compat.rhino` type surface.
+
+The P12-25 implementation report is
+`docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md`.
 
 ## Verification
 
