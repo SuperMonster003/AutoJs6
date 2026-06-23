@@ -393,10 +393,19 @@ Inventory 和兼容矩阵统一使用以下状态：
     table、status manifest、matrix、迁移/安全/loader/WorkManager 文档和未提前
     开放 runtime facade。
 
-- [ ] S11-23: 设计 UI compatibility。
+- [x] S11-23: 设计 UI compatibility。
   - 范围：Rhino UI DSL、`ui.run()`、`ui.post()`、layout update、event drain。
   - 产物：design gate、sample migration。
   - 验收：UI thread/Node event loop 关系明确；无跨线程 raw object 泄漏。
+  - Status: added `docs/nodejs/design/RHINO_UI_COMPATIBILITY.md` and recorded
+    that current Node UI migration uses `require("ui")`, `showLayout`,
+    `UiHandle.on`, `update`, `batchUpdate`, `close`, and provider-drained JSON
+    events.
+  - Boundary: no `compat.ui`, no default global `ui`, no `ui.run()` /
+    `ui.post()` main-thread JavaScript execution, and no Rhino `NativeView` /
+    Android `View` object leakage.
+  - Evidence: `tools/nodejs/phase11/verify-rhino-compat-ui-design.js` and
+    `:app:verifyNodeRhinoCompatUiDesign`.
 
 - [ ] S11-24: 设计 floaty compatibility。
   - 范围：overlay permission、foreground disclosure、window handle、

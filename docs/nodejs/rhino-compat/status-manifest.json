@@ -5832,9 +5832,10 @@
       "bridgeModules": [
         "ui"
       ],
-      "decision": "node_surface_exists_compat_facade_pending",
+      "decision": "s11_23_rhino_ui_bridge_migration_design",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-23 keeps require(\"ui\") as the current Node UI migration target and does not add compat.ui or a default global ui.",
+        "Rhino layout declarations may migrate only through constrained JSON descriptors, UiHandle updates, and provider-drained JSON events; NativeView/View leakage and ui.run()/ui.post() main-thread JavaScript execution are blocked by design."
       ],
       "apiEntries": [
         {
@@ -5843,70 +5844,70 @@
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "ui",
+          "decision": "s11_23_require_ui_entrypoint",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Use require(\"ui\") explicitly; S11-23 does not inject a Rhino global ui or compat.ui facade."
           ]
         },
         {
           "id": "ui.inflate",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_raw_native_view_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino inflate returns NativeView or Android View wrappers; Node UI must use JSON descriptors and opaque UiHandle ids."
           ]
         },
         {
           "id": "ui.backgroundColor",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_window_option_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation/background window mutation requires explicit provider options and is deferred in S11-23."
           ]
         },
         {
           "id": "ui.findById",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_raw_view_lookup_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Finding views would expose live NativeView/View wrappers; Node widgets stay scoped to a UiHandle and emit JSON snapshots."
           ]
         },
         {
           "id": "ui.findByStringId",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_raw_view_lookup_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "String-id view lookup would expose live NativeView/View wrappers; Node widgets stay scoped to a UiHandle."
           ]
         },
         {
           "id": "ui.findView",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_raw_view_lookup_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino view lookup depends on live Android View objects; Node uses JSON events and patches."
           ]
         },
         {
@@ -5915,82 +5916,82 @@
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "close",
+          "decision": "s11_23_ui_handle_close_candidate",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Close the current provider-owned UI session through UiHandle.close(); Node has no implicit current Activity."
           ]
         },
         {
           "id": "ui.getNavigationBarHeight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_inset_snapshot_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation inset snapshots require explicit provider support and are deferred in S11-23."
           ]
         },
         {
           "id": "ui.getStatusBarHeight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_inset_snapshot_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation inset snapshots require explicit provider support and are deferred in S11-23."
           ]
         },
         {
           "id": "ui.getVisibleNavigationBarHeight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_inset_snapshot_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation inset snapshots require explicit provider support and are deferred in S11-23."
           ]
         },
         {
           "id": "ui.getVisibleStatusBarHeight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_inset_snapshot_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation inset snapshots require explicit provider support and are deferred in S11-23."
           ]
         },
         {
           "id": "ui.inflate",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_raw_native_view_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino inflate returns NativeView or Android View wrappers; Node UI must use JSON descriptors and opaque UiHandle ids."
           ]
         },
         {
           "id": "ui.isUiThread",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_node_not_ui_thread",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Node JavaScript never runs as the Android UI thread; bridge calls marshal to the provider main-thread path."
           ]
         },
         {
@@ -5999,10 +6000,10 @@
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "showLayout",
+          "decision": "s11_23_session_option_candidate",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "May become a JSON session/window option on showLayout; it must not expose Activity or Window objects."
           ]
         },
         {
@@ -6011,10 +6012,10 @@
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "showLayout",
+          "decision": "s11_23_layout_json_descriptor_candidate",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Translate only constrained declarative layouts to require(\"ui\").showLayout(layoutJson); XML execution and raw views are not accepted."
           ]
         },
         {
@@ -6023,238 +6024,238 @@
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "showLayout",
+          "decision": "s11_23_layout_file_json_descriptor_candidate",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "A future migration helper may parse project-local layout files into JSON descriptors before showLayout; arbitrary Rhino XML semantics remain out of scope."
           ]
         },
         {
           "id": "ui.navigationBarColor",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_window_option_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation/background window mutation requires explicit provider options and is deferred in S11-23."
           ]
         },
         {
           "id": "ui.navigationBarIconLight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_window_option_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation/background window mutation requires explicit provider options and is deferred in S11-23."
           ]
         },
         {
           "id": "ui.navigationBarIconLightBy",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_window_option_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation/background window mutation requires explicit provider options and is deferred in S11-23."
           ]
         },
         {
           "id": "ui.post",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_main_thread_js_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Do not post Node JavaScript functions to Android main looper; use event callbacks and UiHandle updates."
           ]
         },
         {
           "id": "ui.registerWidget",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_rhino_widget_registry_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino widget registration depends on Scriptable/NativeView classes and is not a JSON UI descriptor contract."
           ]
         },
         {
           "id": "ui.run",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_main_thread_js_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Do not run Node JavaScript functions on Android main looper; callbacks stay on the Node event loop."
           ]
         },
         {
           "id": "ui.setContentView",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_raw_content_view_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino setContentView(view) requires an Android View; Node creates provider-owned views from JSON descriptors only."
           ]
         },
         {
           "id": "ui.statusBarColor",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_window_option_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation/background window mutation requires explicit provider options and is deferred in S11-23."
           ]
         },
         {
           "id": "ui.statusBarIconLight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_window_option_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation/background window mutation requires explicit provider options and is deferred in S11-23."
           ]
         },
         {
           "id": "ui.statusBarIconLightBy",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_window_option_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation/background window mutation requires explicit provider options and is deferred in S11-23."
           ]
         },
         {
           "id": "ui.useAndroidLayout",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_rhino_xml_inflater_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Android XML inflater semantics are tied to Rhino runtime objects and are not imported into Node."
           ]
         },
         {
           "id": "ui.R",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_android_resource_object_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Android resource objects must not be exposed to Node; future descriptors may reference scoped packaged resources explicitly."
           ]
         },
         {
           "id": "ui.widgets",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_rhino_widget_registry_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino widget registries expose runtime widget classes and are outside the Safe Node Profile."
           ]
         },
         {
           "id": "ui.emitter",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_activity_emitter_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Activity emitters are live Java/Rhino objects; Node events are drained JSON snapshots through UiHandle.on()."
           ]
         },
         {
           "id": "ui.navigationBarHeight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_inset_snapshot_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation inset snapshots require explicit provider support and are deferred in S11-23."
           ]
         },
         {
           "id": "ui.root",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "ui",
-          "bridgeModule": "ui",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_raw_root_view_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Root view access would leak a NativeView/View wrapper; Node holds only the opaque UiHandle."
           ]
         },
         {
           "id": "ui.statusBarHeight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_inset_snapshot_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation inset snapshots require explicit provider support and are deferred in S11-23."
           ]
         },
         {
           "id": "ui.visibleNavigationBarHeight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_inset_snapshot_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation inset snapshots require explicit provider support and are deferred in S11-23."
           ]
         },
         {
           "id": "ui.visibleStatusBarHeight",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "ui",
           "bridgeModule": "ui",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_23_inset_snapshot_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Status/navigation inset snapshots require explicit provider support and are deferred in S11-23."
           ]
         }
       ]
@@ -11718,14 +11719,10 @@
     }
   ],
   "totals": {
-    "moduleCount": 73,
-    "apiEntryCount": 879,
-    "byStatus": {
-      "blocked_by_design": 28,
-      "partial": 362,
-      "supported": 134,
-      "supported_async": 52,
-      "unsupported": 376
-    }
+    "partial": 332,
+    "unsupported": 391,
+    "supported_async": 52,
+    "blocked_by_design": 43,
+    "supported": 134
   }
 }

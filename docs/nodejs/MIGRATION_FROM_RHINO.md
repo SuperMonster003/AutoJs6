@@ -474,6 +474,61 @@ Do not migrate `tasks.addDailyTask()` or `tasks.addWeeklyTask()` by mechanically
 
 `tasks.addIntentTask()`, `queryIntentTasks()`, boot/startup/package/custom broadcast triggers, and `removeIntentTask()` remain design-gated with the broadcast task policy. Raw `tasks.addTask(task)`, `removeTask(task)`, and `updateTask(task)` are blocked by design in Node because they depend on raw `TimedTask` / `IntentTask` Java objects. See [RHINO_TASKS_WORK_MANAGER_MIGRATION.md](design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md).
 
+### UI Scripts
+
+Rhino UI scripts mix XML layout declarations, direct view wrappers, and
+main-thread helpers:
+
+```js
+"ui";
+
+ui.layout(
+  <vertical>
+    <input id="name" hint="Name" />
+    <button id="ok" text="OK" />
+  </vertical>
+);
+
+ui.ok.click(() => {
+  ui.run(() => {
+    ui.ok.setText("Done");
+  });
+});
+```
+
+Node UI uses the explicit `require("ui")` module and a JSON-only Activity-owned
+provider:
+
+```js
+"nodejs";
+
+(async function main() {
+  const ui = require("ui");
+
+  const handle = await ui.showLayout({
+    type: "Column",
+    children: [
+      { id: "name", type: "Input", hint: "Name" },
+      { id: "ok", type: "Button", text: "OK" }
+    ]
+  }, { timeoutMs: 10000 });
+
+  handle.on("click", async (event) => {
+    if (event.id === "ok") {
+      await handle.update({ id: "ok", text: "Done" });
+      await handle.close();
+    }
+  });
+})();
+```
+
+Do not migrate Rhino `ui.run()` or `ui.post()` by trying to execute Node
+JavaScript on Android's UI thread. Node callbacks run on the Node event loop
+after UI events are drained as JSON snapshots. Layout mutation goes through
+`handle.update()` or `handle.batchUpdate()`, not through `NativeView`,
+`View`, `ui.findView()`, `ui.root`, or dynamic view properties. See
+[RHINO_UI_COMPATIBILITY.md](design/RHINO_UI_COMPATIBILITY.md).
+
 ### File Read And Write
 
 Rhino:

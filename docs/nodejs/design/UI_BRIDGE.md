@@ -6,6 +6,11 @@ form/list/navigation components, one-way JSON state binding, batched updates,
 TypeScript declarations, and focused live gates while keeping WebView blocked
 behind a separate security gate.
 
+Task S11-23 records the Rhino `ui` compatibility boundary in
+[RHINO_UI_COMPATIBILITY.md](RHINO_UI_COMPATIBILITY.md). It keeps the existing
+Node module as the migration target and does not add `compat.ui` or a Rhino
+global `ui`.
+
 ## Goal
 
 Node-driven UI must not destabilize the Safe Node Profile or bypass Android
@@ -183,6 +188,24 @@ If a compatibility layer is ever added, it should translate a narrow subset of
 Rhino UI declarations into the Node UI provider's JSON protocol. It should not
 expose Rhino globals by default.
 
+## S11-23 Rhino UI Mapping
+
+The S11-23 compatibility decision is:
+
+- use `require("ui")` as the only current Node UI entrypoint
+- map Rhino `ui.layout(...)` / `ui.layoutFile(...)` only through constrained
+  JSON descriptors passed to `showLayout`
+- migrate updates to `UiHandle.update(...)` and `UiHandle.batchUpdate(...)`
+- deliver events through bounded provider `drainEvents` calls and
+  `UiHandle.on(...)` callbacks on the Node event loop
+- treat `ui.run()` and `ui.post()` as blocked by design for Node because they
+  imply main-thread JavaScript execution
+- reject `NativeView`, Android `View`, `Activity`, resource objects, widget
+  registries, and Activity emitter leakage into Node
+
+This keeps Android view work on the main thread while Node receives only JSON
+results and event snapshots.
+
 ## Relation To AutoX v7 And Auto.js Pro Styles
 
 AutoX v7 and Auto.js Pro style APIs are useful migration references, but they
@@ -351,7 +374,7 @@ Minimum tests before promoting packaged live UI or WebView:
 
 ## Recommendation
 
-Keep real UI rendering as a v1.1 design gate. The reserved `require("ui")`
-protocol should remain fail-closed on Android until the Activity-owned provider,
-lifecycle, packaged APK behavior, Rhino compatibility boundary, and provider
-test gate above are accepted.
+Keep the base Activity UI provider narrow and JSON-only. Further expansion,
+including packaged APK UI behavior, WebView, overlay/floaty, and Rhino `ui`
+compatibility helpers, should remain behind focused design and verification
+gates.
