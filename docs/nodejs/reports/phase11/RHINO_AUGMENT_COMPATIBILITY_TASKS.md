@@ -482,11 +482,18 @@ Inventory 和兼容矩阵统一使用以下状态：
     markers 覆盖 compat loader、bridge permission、resource cleanup、pending=0
     以及 toast/files/storage/selector/image 基础路径。
 
-- [ ] S11-30: 建立 resource cleanup/security gate。
+- [x] S11-30: 建立 resource cleanup/security gate。
   - 范围：compat facade 下的 image、selector、event、ui、floaty、db、
     websocket/fetch 资源释放和拒绝路径。
   - 产物：gate、security report。
   - 验收：stop/timeout/destroy 后 active resource 归零或有可解释残留。
+  - 完成：新增 `verifyNodeRhinoCompatResourceCleanupSecurityHost` 与
+    `verifyNodeRhinoCompatResourceCleanupSecurity`，报告见
+    `docs/nodejs/reports/phase11/RHINO_COMPAT_RESOURCE_CLEANUP_SECURITY.md`；
+    host gate 输出
+    `rhino-compat-resource-cleanup-security-verification.json/.md`，覆盖
+    image/selector/ui/db/websocket/fetch 的 pending/active resource 归零证据，
+    并记录 event/floaty/ui.run 的 design-gated no-resource residual policy。
 
 - [ ] S11-31: 发布 Phase 11A summary。
   - 范围：汇总 inventory、compat matrix、已支持 API、剩余缺口、blocked

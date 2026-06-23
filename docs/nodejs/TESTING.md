@@ -244,6 +244,23 @@ and verifies packaged `autojs6:compat` loader, bridge permission markers,
 resource cleanup, and the toast/files/storage/selector/image baseline paths.
 See `docs/nodejs/reports/phase11/RHINO_COMPAT_PACKAGED_SMOKE.md`.
 
+Focused Rhino compat resource cleanup/security gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeRhinoCompatResourceCleanupSecurityHost
+.\gradlew.bat --console=plain :app:verifyNodeRhinoCompatResourceCleanupSecurity "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+The S11-30 host task writes
+`build/reports/nodejs/rhino-compat-resource-cleanup-security-verification.json`
+and `build/reports/nodejs/rhino-compat-resource-cleanup-security-verification.md`.
+The connected-device gate selects focused cleanup/security instrumentation for
+Rhino compat `image`, `selector`, `ui`, `db`, and `websocket/fetch` resources,
+plus the design-gated no-resource boundaries for `event`, `floaty`, and Rhino
+`ui.run`. The acceptance rule is active resource zero after stop, timeout,
+close, or destroy, or a documented design-gated residual policy. See
+`docs/nodejs/reports/phase11/RHINO_COMPAT_RESOURCE_CLEANUP_SECURITY.md`.
+
 Current bridge protocol instrumentation:
 
 ```powershell

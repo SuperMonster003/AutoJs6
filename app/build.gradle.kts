@@ -387,6 +387,27 @@ val nodeJsPackagedParityGateInstrumentationClasses = nodeJsPackagedEsmGateInstru
 val nodeJsRhinoCompatPackagedSmokeInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRhinoCompatEmbeddedNodePackagedApk",
 )
+val nodeJsRhinoCompatResourceCleanupSecurityInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
+    "org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest",
+    "org.autojs.autojs.engine.NodeImageBridgeExpansionInstrumentationTest#jsImageExpansionUsesFakeTransportAndBlocksShadowing",
+    "org.autojs.autojs.engine.NodeAutoJsBridgeInstrumentationTest#mediaProjectionAndImageModulesUseFakeTransportAndBlockShadowing",
+    "org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest#jsRhinoCompatSelectorFacadeUsesFakeTransport",
+    "org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest#jsAccessibilitySelectorV2HonorsTimeoutAndCancellation",
+    "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest#jsUiModuleUsesFakeTransportForLayoutEventsAndPolicy",
+    "org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest#androidUiProviderOpensActivityDeliversEventsAndCleansOwnedResource",
+    "org.autojs.autojs.engine.NodeDatabaseBridgeInstrumentationTest#jsDatabaseBridgeUsesFakeTransportAndBlocksShadowing",
+    "org.autojs.autojs.engine.NodeDatabaseBridgeInstrumentationTest#androidDatabaseProviderPersistsTransactionsAndDeniesEscapes",
+    "org.autojs.autojs.engine.NodeDatabaseBridgeInstrumentationTest#androidDatabaseProviderRegistersAndClosesResources",
+    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#jsFetchModuleUsesFakeTransportAndKeepsRawModulesDisabled",
+    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#jsFetchPolicyHardeningUsesFakeTransport",
+    "org.autojs.autojs.engine.NodeFetchBridgeInstrumentationTest#androidFetchProviderStaysDisabledInNormalBuilds",
+    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#websocketMvpUsesControlledBridgeAndKeepsRawSocketsDisabled",
+    "org.autojs.autojs.engine.NodeWebSocketBridgeInstrumentationTest#androidWebSocketProviderStaysDisabledInNormalBuilds",
+    "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest#phase5BridgeNetworkUiAndShellBoundariesStayDenied",
+    "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest#phase7CapabilityBypassDeniesBeforeProviderDispatch",
+    "org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest#phase7ProviderPolicyAndPluginEscapesStayDeniedBeforeDispatch",
+)
 val nodeJsLiveProviderSummaryTaskName = "generateNodeLiveProviderSummary"
 val nodeJsLiveProviderGateCases = listOf(
     mapOf(
@@ -891,6 +912,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
     "verifyNodePackagedParityGate" to nodeJsPackagedParityGateInstrumentationClasses,
     "verifyNodeRhinoCompatPackagedSmoke" to nodeJsRhinoCompatPackagedSmokeInstrumentationClasses,
+    "verifyNodeRhinoCompatResourceCleanupSecurity" to nodeJsRhinoCompatResourceCleanupSecurityInstrumentationClasses,
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodeLiveFetchGate" to nodeJsLiveFetchGateInstrumentationClasses,
     "verifyNodeLiveWebSocketGate" to nodeJsLiveWebSocketGateInstrumentationClasses,
