@@ -23,6 +23,21 @@ For the smallest stable entry-point shape, see [QUICK_START.md](QUICK_START.md).
 [NODE_PROFILE_V1_1_USER_DRAFT.md](NODE_PROFILE_V1_1_USER_DRAFT.md). For current release limitations and workarounds, see
 [releases/NODE_PROFILE_V1_KNOWN_ISSUES.md](releases/NODE_PROFILE_V1_KNOWN_ISSUES.md).
 
+## Rhino Compat Migration Examples
+
+S11-27 adds static Rhino compatibility migration examples under
+`docs/nodejs/examples/rhino-compat`. They pair `*.rhino.js` legacy snippets with
+`*.node.cjs` `require("autojs6:compat")` rewrites for
+toast/files/storage/selector/image/ocr/app/device/shell. They are separate from
+the runnable `sample/nodejs` project catalog because they are source migration
+pairs rather than full project smoke tests.
+
+Verify them with:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeRhinoCompatExamples
+```
+
 To create a new user project from a checked template or validate an existing
 project directory, use [PROJECT_WIZARD.md](PROJECT_WIZARD.md):
 

@@ -831,6 +831,33 @@ tasks.register<Exec>("verifyNodeRhinoJsonOnlyShimDesign") {
     )
 }
 
+tasks.register<Exec>("verifyNodeRhinoCompatExamples") {
+    group = "verification"
+    description = "Verifies the Phase 11A Rhino compatibility migration examples."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-examples.js")
+    inputs.file(scriptFile)
+    inputs.dir(rootProject.layout.projectDirectory.dir("docs/nodejs/examples/rhino-compat"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/EXAMPLES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-compat-examples-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-examples-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCapabilityTruth") {
     group = "verification"
     description = "Writes build/reports/nodejs/final-capability-truth.json without failing on open Phase 11 blockers."

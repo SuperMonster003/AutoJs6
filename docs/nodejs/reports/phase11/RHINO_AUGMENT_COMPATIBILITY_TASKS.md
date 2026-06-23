@@ -449,11 +449,17 @@ Inventory 和兼容矩阵统一使用以下状态：
 
 ### Track E: Examples, tests, release evidence
 
-- [ ] S11-27: 建立常用 Rhino 脚本迁移示例集。
+- [x] S11-27: 建立常用 Rhino 脚本迁移示例集。
   - 范围：toast/files/storage/selector/image/ocr/app/device/shell 的旧写法和
     Node compat 写法。
   - 产物：`docs/nodejs/examples/rhino-compat/` 或同等目录。
   - 验收：示例都能被 example gate 编译或执行。
+  - 状态：已新增 `docs/nodejs/examples/rhino-compat/manifest.json` 和
+    8 组 `*.rhino.js` / `*.node.cjs` 示例；覆盖
+    toast/files/storage/selector/image/ocr/app/device/shell。
+  - Evidence:
+    `tools/nodejs/phase11/verify-rhino-compat-examples.js` and
+    `:app:verifyNodeRhinoCompatExamples`.
 
 - [ ] S11-28: 建立双引擎兼容测试集。
   - 范围：同一用例在 Rhino 和 Node compat mode 下验证核心行为。
