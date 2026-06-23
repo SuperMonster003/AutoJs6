@@ -603,9 +603,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_split_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer util as a split utility-heavy surface; future work must separate Node util aliases, pure type helpers, and Android density helpers instead of promoting the whole module at once."
       ],
       "apiEntries": [
         {
@@ -652,9 +653,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_canvas_provider_design",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer canvas until a JSON-only drawing provider is designed; exact raw Android Canvas/Paint/View parity is a permanent non-goal for Node."
       ],
       "apiEntries": [
         {
@@ -677,9 +679,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_split_utility_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer util as a split utility-heavy surface; future work must separate Node util aliases, pure type helpers, and Android density helpers instead of promoting the whole module at once."
       ],
       "apiEntries": [
         {
@@ -1379,9 +1382,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_jsox_mathx_batch",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer jsox.mathx as a pure JS batch after the smaller s13n pilot; it has too many helpers for a single P12-32 pilot."
       ],
       "apiEntries": [
         {
@@ -1416,9 +1420,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_recorder_provider_design",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer recorder until a privacy-reviewed audio/screen recording provider defines runtime permissions, foreground disclosure, cleanup, and packaged behavior."
       ],
       "apiEntries": [
         {
@@ -4362,9 +4367,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_canvas_provider_design",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer canvas until a JSON-only drawing provider is designed; exact raw Android Canvas/Paint/View parity is a permanent non-goal for Node."
       ],
       "apiEntries": [
         {
@@ -7861,9 +7867,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_promote_s13n_bytes_pilot",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: promote s13n.bytes as the P12-32 low-risk pure JS pilot; keep s13n.color/point/time/throwable deferred until individual JSON-safe contracts exist."
       ],
       "apiEntries": [
         {
@@ -9296,9 +9303,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_jsox_mathx_batch",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer jsox.mathx as a pure JS batch after the smaller s13n pilot; it has too many helpers for a single P12-32 pilot."
       ],
       "apiEntries": [
         {
@@ -10383,9 +10391,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_recorder_provider_design",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer recorder until a privacy-reviewed audio/screen recording provider defines runtime permissions, foreground disclosure, cleanup, and packaged behavior."
       ],
       "apiEntries": [
         {
@@ -10456,7 +10465,8 @@
       ],
       "decision": "node_surface_exists_compat_facade_pending",
       "notes": [
-        "S11-19 uses the controlled media_projection bridge as the permission provider behind requestScreenCapture() compatibility wrappers; no raw MediaProjection object is exposed."
+        "S11-19 uses the controlled media_projection bridge as the permission provider behind requestScreenCapture() compatibility wrappers; no raw MediaProjection object is exposed.",
+        "P12-31 decision: defer media/audio helper parity beyond screenshot/media_projection wrappers until playback, audio manager, MediaStore, and recorder providers have separate permission and lifecycle gates."
       ],
       "apiEntries": [
         {
@@ -10788,7 +10798,8 @@
       "bridgeModules": [],
       "decision": "s11_12_missing_text_resource_stable_unsupported",
       "notes": [
-        "OpenCC conversion requires Android OpenCC dictionary resources; S11-12 provides stable Node unsupported errors for all OpenCC methods."
+        "OpenCC conversion requires Android OpenCC dictionary resources; S11-12 provides stable Node unsupported errors for all OpenCC methods.",
+        "P12-31 decision: defer OpenCC promotion until dictionary packaging, resource lookup, and stable missing-resource diagnostics are designed as a text-resource provider."
       ],
       "apiEntries": [
         {
@@ -11235,9 +11246,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_zip_archive_provider",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer zip until a scoped archive provider covers zip-slip/path traversal denial, archive size budgets, compression ratio budgets, overwrite policy, cleanup, and packaged smoke."
       ],
       "apiEntries": [
         {
@@ -11352,9 +11364,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_zip_archive_provider",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer zip until a scoped archive provider covers zip-slip/path traversal denial, archive size budgets, compression ratio budgets, overwrite policy, cleanup, and packaged smoke."
       ],
       "apiEntries": [
         {
@@ -11470,7 +11483,8 @@
       "bridgeModules": [],
       "decision": "s11_12_text_utility_facade_partial",
       "notes": [
-        "S11-12 exposes a small host-testable pinyin dictionary and common style helpers; segmentation, full phrase dictionaries, and place-name dictionaries remain resource-backed."
+        "S11-12 exposes a small host-testable pinyin dictionary and common style helpers; segmentation, full phrase dictionaries, and place-name dictionaries remain resource-backed.",
+        "P12-31 decision: defer pinyin.fromPhrase and full dictionary parity until text resource packaging and missing-resource diagnostics are promoted beyond the fixture-backed subset."
       ],
       "apiEntries": [
         {
@@ -11725,9 +11739,10 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p12_31_defer_mediainfo_provider_design",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
+        "P12-31 decision: defer mediainfo until a scoped metadata provider defines path policy, media permissions, JSON-safe snapshots, and no raw MediaMetadataRetriever leakage."
       ],
       "apiEntries": [
         {

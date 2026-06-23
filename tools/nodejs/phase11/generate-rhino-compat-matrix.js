@@ -169,6 +169,36 @@ function riskSummary(module) {
 }
 
 function nextStepFor(module, gapModule) {
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: promote s13n.bytes"))) {
+    return "Implement P12-32 s13n.bytes pure utility pilot; keep the rest of s13n deferred until per-helper JSON-safe contracts exist.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer util"))) {
+    return "Defer whole-module util promotion; split Node util aliases, pure type helpers, and Android density helpers into smaller decisions.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer jsox.mathx"))) {
+    return "Defer jsox.mathx as a later pure utility batch after the smaller s13n pilot proves the promotion pattern.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer canvas"))) {
+    return "Defer until a JSON-only drawing provider is designed; keep raw Canvas/Paint/View parity as a permanent non-goal.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer recorder"))) {
+    return "Defer until recorder has privacy, permission, foreground disclosure, cleanup, and packaged behavior gates.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer media/audio helper"))) {
+    return "Defer media/audio helper parity beyond screenshot wrappers to dedicated playback/audio/MediaStore provider tasks.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer OpenCC"))) {
+    return "Defer OpenCC promotion until dictionary packaging, resource lookup, and missing-resource diagnostics are designed.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer zip"))) {
+    return "Defer zip until a scoped archive provider covers zip-slip denial, archive budgets, overwrite policy, cleanup, and packaged smoke.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer pinyin.fromPhrase"))) {
+    return "Keep the fixture-backed pinyin subset; defer full dictionary paths to a text-resource provider.";
+  }
+  if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer mediainfo"))) {
+    return "Defer mediainfo until a scoped metadata provider returns JSON-safe snapshots without raw MediaMetadataRetriever leakage.";
+  }
   if (
     (module.id === "barcode" || module.id === "barcode.qr_code") &&
     (module.migration.notes || []).some((note) => note.includes("P12-30 adds barcode/qrcode migration examples"))

@@ -154,6 +154,28 @@ const shell = require("shell");
 
 Use Node builtins only within the supported profile. Raw `child_process`, native addons, unrestricted network modules, and unrestricted filesystem access remain disabled by default.
 
+## Unsupported Utility Modules
+
+P12-31 triages the remaining utility-heavy Rhino gaps in
+[RHINO_UNSUPPORTED_UTILITY_TRIAGE.md](reports/phase12/RHINO_UNSUPPORTED_UTILITY_TRIAGE.md).
+The only P12-32 pilot candidate is `s13n.bytes`, because it can be promoted as
+a pure JavaScript helper without Android provider authority.
+
+Do not migrate production scripts by assuming these modules are available in
+Node yet:
+
+- `zip`: deferred until a scoped archive provider covers zip-slip denial,
+  archive budgets, overwrite policy, cleanup, and packaged smoke.
+- `canvas`: deferred until a JSON-only drawing provider exists; raw
+  `Canvas`/`Paint`/`View` parity is a permanent non-goal.
+- `recorder`, `media` audio helpers, and `mediainfo`: deferred until separate
+  provider gates define permissions, foreground disclosure, lifecycle cleanup,
+  and JSON-safe snapshots.
+- `opencc` and `pinyin.fromPhrase`: deferred until dictionary resource
+  packaging and stable missing-resource diagnostics are available.
+- `util` and `jsox.mathx`: deferred as split pure utility batches instead of
+  whole-module promotion.
+
 ## TypeScript Declarations
 
 AutoJs6 Node bridge declarations are checked in under [types/autojs6-node](types/autojs6-node). They cover the Safe Node

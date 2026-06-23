@@ -379,16 +379,21 @@
     },
     {
       "id": "unsupported.utility_triage",
-      "status": "planned",
+      "status": "design_locked",
       "tasks": [
         "P12-31",
         "P12-32"
       ],
-      "summary": "Triage and pilot promotion for unsupported utility-heavy modules.",
+      "summary": "P12-31 locks decisions for unsupported utility-heavy modules, selects s13n.bytes as the P12-32 low-risk pure JS pilot, and defers zip/canvas/recorder/media/mediainfo/opencc/pinyin resource-heavy paths to separate provider or resource gates.",
       "runtimeSurface": [],
       "evidence": [
+        "docs/nodejs/reports/phase12/RHINO_UNSUPPORTED_UTILITY_TRIAGE.md",
         "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
-        "docs/nodejs/rhino-compat/status-manifest.json"
+        "docs/nodejs/MIGRATION_FROM_RHINO.md",
+        "docs/nodejs/rhino-compat/status-manifest.json",
+        "tools/nodejs/phase11/generate-rhino-compat-matrix.js",
+        "tools/nodejs/phase12/verify-rhino-compat-unsupported-utility-triage.js",
+        ":app:verifyNodeRhinoCompatUnsupportedUtilityTriage"
       ]
     },
     {

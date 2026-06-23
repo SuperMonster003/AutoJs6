@@ -1200,7 +1200,7 @@ Phase 12 task 本身可使用以下执行状态：
 
 ### Track H: Unsupported utility-heavy modules triage
 
-- [ ] P12-31: 盘点 `unsupported` utility-heavy modules 的 P12 决策。
+- [x] P12-31: 盘点 `unsupported` utility-heavy modules 的 P12 决策。
   - 范围：从 388 个 `unsupported` API 中挑出可通过纯 JS 或现有 provider
     低风险补齐的模块。
   - 候选：
@@ -1213,7 +1213,33 @@ Phase 12 task 本身可使用以下执行状态：
     - 每个候选模块得到 `promote`、`defer` 或 `permanent_non_goal` 决策。
     - 不在同一个 task 中实现多个大模块。
     - matrix 和 migration docs 更新。
-  - Evidence：待补充。
+  - Evidence：
+    - 决策报告：
+      `docs/nodejs/reports/phase12/RHINO_UNSUPPORTED_UTILITY_TRIAGE.md`
+      记录 `s13n` -> `promote`、`util` / `jsox.mathx` -> `defer`、
+      `zip` / `canvas` / `recorder` / `media` / `mediainfo` -> `defer`、
+      `opencc` / `pinyin.fromPhrase` -> `defer`，并明确 P12-32 只选择
+      `s13n.bytes` 作为 low-risk pure JS pilot。
+    - Status/matrix：
+      `docs/nodejs/rhino-compat/status-manifest.json` 增加 P12-31
+      模块级 decision notes；`docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`
+      和 `tools/nodejs/phase11/generate-rhino-compat-matrix.js`
+      推进候选模块 next step。
+    - Migration docs：
+      `docs/nodejs/MIGRATION_FROM_RHINO.md` 增加 unsupported utility modules
+      迁移说明，避免脚本开发者误认为 `zip`、`canvas`、`recorder`、
+      `opencc` 或 `pinyin.fromPhrase` 已经可用。
+    - Surface manifest：
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+      将 `unsupported.utility_triage` 标为 `design_locked`，保留 P12-32
+      runtime promotion 未完成状态。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-unsupported-utility-triage.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatUnsupportedUtilityTriage`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-unsupported-utility-triage-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-unsupported-utility-triage-verification.md`
 
 - [ ] P12-32: 对一个低风险 utility module 做 promotion pilot。
   - 范围：从 P12-31 中选择一个纯 JS 或低风险 provider 模块，完成端到端
