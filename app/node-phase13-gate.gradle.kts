@@ -90,3 +90,35 @@ tasks.register<Exec>("generateNodePhase13CapabilityTruth") {
         nodePhase13ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("generateNodeBuiltinDesktopParityMatrix") {
+    group = "verification"
+    description = "Generates the Phase 13 desktop Node builtin parity matrix."
+
+    dependsOn("generateNodePhase13CapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/generate-node-builtin-parity-matrix.js")
+    val docsOutput = rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("node-builtin-parity.json") },
+        nodePhase13ReportDir.map { it.file("node-builtin-parity.md") },
+        docsOutput,
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+        "--docs-output",
+        docsOutput.asFile.absolutePath,
+    )
+}

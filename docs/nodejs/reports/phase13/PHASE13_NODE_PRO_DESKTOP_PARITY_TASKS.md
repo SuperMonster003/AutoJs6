@@ -406,7 +406,7 @@ P13 task 本身使用以下执行状态：
 
 ### Track C: Desktop Node.js parity
 
-- [ ] P13-28: 建立 Node builtin desktop parity matrix。
+- [x] P13-28: 建立 Node builtin desktop parity matrix。
   - 范围：以当前 Node 24.5.0 runtime 为基线，列出每个 builtin 的 Safe/Pro/Desktop
     状态。
   - 建议产物：
@@ -416,6 +416,12 @@ P13 task 本身使用以下执行状态：
     - 每个 builtin 至少是 `supported`、`partial`、`opt_in`、`debug_only`、
       `unsupported` 或 `android_not_applicable`。
     - matrix 由 runtime allowlist/denylist 和 tests 生成或校验。
+  - Evidence：
+    - Generator：`tools/nodejs/phase13/generate-node-builtin-parity-matrix.js`
+    - Gradle task：`:app:generateNodeBuiltinDesktopParityMatrix`
+    - Matrix：`docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md`
+    - 报告产物：`build/reports/nodejs/node-builtin-parity.json`
+    - 报告产物：`build/reports/nodejs/node-builtin-parity.md`
 
 - [ ] P13-29: 推进 raw `http` / `https` client compatibility。
   - 范围：在 Desktop profile 中逐步允许 Node core `http`/`https` client。

@@ -222,7 +222,13 @@
         "expanded fs roots",
         "fs.watch/opendir/fd APIs"
       ],
-      "evidence": [],
+      "evidence": [
+        "tools/nodejs/phase13/generate-node-builtin-parity-matrix.js",
+        ":app:generateNodeBuiltinDesktopParityMatrix",
+        "docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md",
+        "build/reports/nodejs/node-builtin-parity.json",
+        "build/reports/nodejs/node-builtin-parity.md"
+      ],
       "rollback": "Revert Desktop profile allowlist entries and keep raw network and broad filesystem access denied."
     },
     {
