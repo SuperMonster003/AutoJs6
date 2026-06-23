@@ -247,6 +247,25 @@ declare module "autojs6:compat" {
       readonly mode: "mlkit";
     }
 
+    export interface RhinoEventKeysCompatModule {
+      readonly home: 3;
+      readonly HOME: 3;
+      readonly menu: 82;
+      readonly MENU: 82;
+      readonly back: 4;
+      readonly BACK: 4;
+      readonly volumeUp: 24;
+      readonly volume_up: 24;
+      readonly VOLUME_UP: 24;
+      readonly volumeDown: 25;
+      readonly volume_down: 25;
+      readonly VOLUME_DOWN: 25;
+    }
+
+    export interface RhinoEventsCompatModule {
+      readonly keys: RhinoEventKeysCompatModule;
+    }
+
     export interface RhinoCompatModule {
       readonly name: "autojs6:compat";
       readonly version: 1;
@@ -272,6 +291,8 @@ declare module "autojs6:compat" {
       readonly opencc: opencc.OpenccModule;
       readonly pinyin: pinyin.PinyinModule;
       readonly pinyin4j: pinyin4j.Pinyin4jModule;
+      readonly keys: RhinoEventKeysCompatModule;
+      readonly events: RhinoEventsCompatModule;
       readonly storage: storage.StorageModule;
       readonly storages: storage.StorageModule;
       readonly database: database.DatabaseModule;

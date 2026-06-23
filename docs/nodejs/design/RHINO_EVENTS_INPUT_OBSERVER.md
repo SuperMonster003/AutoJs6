@@ -23,9 +23,10 @@ Rhino key and touch observers are lifecycle-heavy and privacy-sensitive:
 These APIs require a future controlled `input_observer` bridge provider before any
 Node facade is promoted.
 
-`events.keys` is a safe pure-constant subset. It can be added later as constants
-without an Android provider, but S11-21 intentionally records only the design and
-does not add a runtime facade or global.
+`events.keys` is a safe pure-constant subset. P12-03 promotes that subset through
+`compat.keys` and `compat.events.keys` without an Android provider. It does not
+add key observers, touch observers, key interception, an `events` global, or a
+`require("events")` override.
 
 ## Current Rhino Shape
 
@@ -190,11 +191,16 @@ surface cannot own input observation.
 | `events.on("key_down", fn)` | Design-gated | Subscribe to key snapshots through a JS-only listener helper. |
 | `events.setKeyInterceptionEnabled(true)` | Design-gated, separate privilege | Requires `input_observer.intercept` and foreground disclosure. |
 | `events.observeTouch()` | Design-gated | `inputObserver.observeTouch(...)` after privacy review. |
-| `events.keys.*` | Pending pure facade | Add constants later without bridge/provider access. |
+| `events.keys.*` | P12-03 promoted pure constants | Use `compat.keys.*` or `compat.events.keys.*`; no bridge/provider access. |
 
 ## Verification Gate
 
-`verifyNodeRhinoCompatEventsInputObserverDesign` locks this decision by checking the
-design document, status manifest, generated matrix, migration guide, security model,
-loader design, Gradle task registration, and the absence of promoted
-`input_observer` runtime capability entries in S11-21.
+`verifyNodeRhinoCompatEventsInputObserverDesign` locks the S11-21 observer
+decision by checking the design document, status manifest, generated matrix,
+migration guide, security model, loader design, Gradle task registration, and the
+absence of promoted `input_observer` runtime capability entries.
+
+`verifyNodeRhinoCompatEventsKeysFacade` locks the P12-03 exception: only
+`compat.keys` and `compat.events.keys` constants are promoted, while the runtime
+still does not add key observers, touch observers, `input_observer`, a Rhino
+`events` global, or a Node core `events` override.

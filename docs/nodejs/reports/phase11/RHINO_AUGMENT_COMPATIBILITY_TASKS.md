@@ -545,3 +545,12 @@ Phase 11A 可以判定完成，当且仅当：
 API 表面太大、同步写法多、对象模型与 Safe Node Profile 冲突。先做
 inventory 和状态门禁，可以避免在没有完整地图的情况下零散补 facade，
 也能让后续每个 Task 的提交边界更清晰。
+
+## 后续 Phase
+
+Phase 11A 已完成。新的落地清单位于
+[`../phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md`](../phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md)。
+Phase 12 将本文件和 `PHASE11A_SUMMARY.md` 中的 P12-01 到 P12-09 展开为
+更细的 checklist，重点处理 events/input observer、UI、floaty、tasks、
+threads 替代、Rhino JSON-only shim、barcode/qrcode、unsupported utility
+triage 以及 device/packaged evidence。

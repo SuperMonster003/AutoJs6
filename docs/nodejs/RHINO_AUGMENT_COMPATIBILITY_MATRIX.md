@@ -17,9 +17,9 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - blocked_by_design: 45
 - partial: 332
 - renamed: 1
-- supported: 134
+- supported: 148
 - supported_async: 52
-- unsupported: 388
+- unsupported: 374
 
 ## Module Matrix
 
@@ -44,7 +44,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 16 | automator | automator | partial | accessibility | partial:27, supported_async:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 17 | selector | selector | partial | accessibility | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 18 | events | events | blocked_by_design | node:events | blocked_by_design:2 | provider_availability | Keep denial documented and covered by policy tests. |
-| 19 | events.keys | keys | unsupported | - | unsupported:13 | none | Design a Node facade or record a permanent non-goal. |
+| 19 | events.keys | keys | supported | autojs6:compat | supported:13 | none | Review status manifest decision. |
 | 20 | canvas | Canvas | unsupported | - | unsupported:1 | lifecycle_resource, raw_android_object | Design a Node facade or record a permanent non-goal. |
 | 21 | images | images | partial | autojs6:compat, image, images, media_projection | partial:60, supported_async:17 | event_loop_semantics, lifecycle_resource | Implement explicit compat facade and promote mapped APIs one by one. |
 | 22 | ocr | ocr | partial | autojs6:compat, images, ocr | partial:2, supported:2, supported_async:3 | none | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -294,12 +294,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### events.keys
 
 - Key: `keys`
-- Status: `unsupported`
-- Node surface: -
+- Status: `supported`
+- Node surface: autojs6:compat
 - Coverage: `no_node_surface`
-- API status: unsupported:13
+- API status: supported:13
 - Risks: none
-- Next step: Design a Node facade or record a permanent non-goal.
+- Next step: Review status manifest decision.
 
 ### canvas
 

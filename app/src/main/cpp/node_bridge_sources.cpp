@@ -16037,8 +16037,25 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_rhino_compat_images_cache = null;
   let __autojs6_rhino_compat_screen_capturer_cache = null;
   let __autojs6_rhino_compat_ocr_cache = null;
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr"]);
+  const __autojs6_rhino_compat_key_constants = Object.freeze({
+    home: 3,
+    HOME: 3,
+    menu: 82,
+    MENU: 82,
+    back: 4,
+    BACK: 4,
+    volumeUp: 24,
+    volume_up: 24,
+    VOLUME_UP: 24,
+    volumeDown: 25,
+    volume_down: 25,
+    VOLUME_DOWN: 25
+  });
+  const __autojs6_rhino_compat_events = Object.freeze({
+    keys: __autojs6_rhino_compat_key_constants
+  });
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "keys"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "events.keys"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16993,7 +17010,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -17028,7 +17045,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-20."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -17093,6 +17110,8 @@ std::string buildEmbeddedScriptExecutionSource(
       opencc: __autojs6_limited_opencc(),
       pinyin: __autojs6_limited_pinyin(),
       pinyin4j: __autojs6_limited_pinyin4j(),
+      keys: __autojs6_rhino_compat_key_constants,
+      events: __autojs6_rhino_compat_events,
       storage: __autojs6_limited_storage("storage"),
       storages: __autojs6_limited_storage("storages"),
       database: __autojs6_limited_database("database"),

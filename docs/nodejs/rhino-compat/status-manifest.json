@@ -4186,170 +4186,172 @@
     },
     {
       "id": "events.keys",
-      "status": "unsupported",
+      "status": "supported",
       "asyncMode": "sync",
-      "nodeModules": [],
+      "nodeModules": [
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "s11_21_key_constants_pending_facade",
+      "decision": "p12_03_events_keys_constants_facade",
       "notes": [
-        "S11-21 identifies events.keys as a safe pure-constant subset, but no runtime facade or global is added in this design-only task.",
-        "A later small task may expose HOME, MENU, BACK, VOLUME_UP, and VOLUME_DOWN aliases without an Android provider."
+        "P12-03 exposes events.keys as pure constants through compat.keys and compat.events.keys.",
+        "Explicit global installation may expose keys, but Node core events and Android input observers remain unchanged."
       ],
       "apiEntries": [
         {
           "id": "events.keys.__module",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "events.keys",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "The constants-only events.keys facade is pending a later runtime/types task."
+            "P12-03 exposes the constants-only events.keys facade without an Android provider."
           ]
         },
         {
           "id": "events.keys.BACK",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.BACK",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.HOME",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.HOME",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.MENU",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.MENU",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.VOLUME_DOWN",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.VOLUME_DOWN",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.VOLUME_UP",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.VOLUME_UP",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.back",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.back",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.home",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.home",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.menu",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.menu",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.volumeDown",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.volumeDown",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.volumeUp",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.volumeUp",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.volume_down",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.volume_down",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         },
         {
           "id": "events.keys.volume_up",
-          "status": "unsupported",
+          "status": "supported",
           "asyncMode": "sync",
-          "nodeModule": null,
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "s11_21_key_constants_pending_facade",
+          "nodeName": "keys.volume_up",
+          "decision": "p12_03_events_keys_constants_facade",
           "notes": [
-            "Safe constant alias identified; not exposed in S11-21."
+            "P12-03 exposes this safe constant alias through compat.keys and compat.events.keys."
           ]
         }
       ]

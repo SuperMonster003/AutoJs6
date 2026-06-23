@@ -1,0 +1,235 @@
+{
+  "schema": "autojs6-node-rhino-compat-phase12-surface-manifest-v1",
+  "phase": "Phase 12: Rhino Compatibility Runtime Promotion",
+  "updatedAt": "2026-06-23",
+  "statusVocabulary": [
+    "planned",
+    "design_locked",
+    "provider_poc",
+    "promoted",
+    "rejected"
+  ],
+  "surfaces": [
+    {
+      "id": "phase12.baseline",
+      "status": "promoted",
+      "tasks": [
+        "P12-00",
+        "P12-01"
+      ],
+      "summary": "Phase 12 task plan and baseline verification gate.",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md",
+        "tools/nodejs/phase12/verify-rhino-compat-phase12-baseline.js",
+        ":app:verifyNodeRhinoCompatPhase12Baseline"
+      ]
+    },
+    {
+      "id": "phase12.surface_manifest",
+      "status": "promoted",
+      "tasks": [
+        "P12-02"
+      ],
+      "summary": "Machine-readable manifest for Phase 12 surface promotion state.",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/rhino-compat/phase12-surface-manifest.json",
+        "docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md",
+        "tools/nodejs/phase12/verify-rhino-compat-phase12-surface-manifest.js",
+        ":app:verifyNodeRhinoCompatPhase12SurfaceManifest"
+      ]
+    },
+    {
+      "id": "events.keys",
+      "status": "promoted",
+      "tasks": [
+        "P12-03"
+      ],
+      "summary": "Pure constants facade for Rhino events.keys aliases.",
+      "runtimeSurface": [
+        "autojs6:compat.keys",
+        "autojs6:compat.events.keys",
+        "keys global after compat.install({ globals: true })"
+      ],
+      "evidence": [
+        "app/src/main/cpp/node_bridge_sources.cpp",
+        "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
+        "docs/nodejs/rhino-compat/status-manifest.json",
+        "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
+        "tools/nodejs/phase12/verify-rhino-compat-events-keys-facade.js",
+        ":app:verifyNodeRhinoCompatEventsKeysFacade"
+      ]
+    },
+    {
+      "id": "input_observer",
+      "status": "planned",
+      "tasks": [
+        "P12-04",
+        "P12-05",
+        "P12-06",
+        "P12-07"
+      ],
+      "summary": "Controlled key/touch observer provider and cleanup gates.",
+      "runtimeSurface": [
+        "input_observer"
+      ],
+      "evidence": [
+        "docs/nodejs/design/RHINO_EVENTS_INPUT_OBSERVER.md"
+      ]
+    },
+    {
+      "id": "ui.compat",
+      "status": "planned",
+      "tasks": [
+        "P12-08",
+        "P12-09",
+        "P12-10"
+      ],
+      "summary": "Constrained Rhino UI facade over JSON descriptors and UiHandle.",
+      "runtimeSurface": [
+        "autojs6:compat.ui"
+      ],
+      "evidence": [
+        "docs/nodejs/design/RHINO_UI_COMPATIBILITY.md",
+        "docs/nodejs/design/UI_BRIDGE.md"
+      ]
+    },
+    {
+      "id": "floaty.overlay",
+      "status": "design_locked",
+      "tasks": [
+        "P12-11",
+        "P12-12A",
+        "P12-12B",
+        "P12-13",
+        "P12-14"
+      ],
+      "summary": "Branch decision for overlay provider path or permanent non-goal.",
+      "runtimeSurface": [
+        "ui.overlay",
+        "floaty"
+      ],
+      "evidence": [
+        "docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md",
+        "docs/nodejs/design/FLOATY_NODE.md"
+      ]
+    },
+    {
+      "id": "tasks.compat",
+      "status": "planned",
+      "tasks": [
+        "P12-15",
+        "P12-16",
+        "P12-17",
+        "P12-18",
+        "P12-19"
+      ],
+      "summary": "JSON-safe Rhino tasks migration over work_manager and explicit task decisions.",
+      "runtimeSurface": [
+        "autojs6:compat.tasks"
+      ],
+      "evidence": [
+        "docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md",
+        "docs/nodejs/design/WORK_MANAGER.md"
+      ]
+    },
+    {
+      "id": "threads.replacement",
+      "status": "planned",
+      "tasks": [
+        "P12-20",
+        "P12-21",
+        "P12-22"
+      ],
+      "summary": "Rhino threads replacement policy through async, slots, work_manager, or future workers.",
+      "runtimeSurface": [
+        "worker_threads experimental",
+        "future compute/process worker"
+      ],
+      "evidence": [
+        "docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md",
+        "docs/nodejs/design/WORKER_THREADS.md"
+      ]
+    },
+    {
+      "id": "rhino.json_only_shim",
+      "status": "planned",
+      "tasks": [
+        "P12-23",
+        "P12-24",
+        "P12-25",
+        "P12-26"
+      ],
+      "summary": "Explicit timeout-bounded Rhino JSON-only run POC with default denial.",
+      "runtimeSurface": [
+        "rhino.run({ source, timeoutMs, args })",
+        "rhino.run({ path, timeoutMs, args })"
+      ],
+      "evidence": [
+        "docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md",
+        "docs/nodejs/design/RHINO_SHIM.md"
+      ]
+    },
+    {
+      "id": "barcode.qrcode",
+      "status": "planned",
+      "tasks": [
+        "P12-27",
+        "P12-28",
+        "P12-29",
+        "P12-30"
+      ],
+      "summary": "JSON-safe barcode/qrcode provider and Rhino facade.",
+      "runtimeSurface": [
+        "barcode",
+        "autojs6:compat.barcode",
+        "autojs6:compat.qrcode"
+      ],
+      "evidence": [
+        "docs/nodejs/design/RHINO_COMPAT_LOADER.md",
+        "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md"
+      ]
+    },
+    {
+      "id": "unsupported.utility_triage",
+      "status": "planned",
+      "tasks": [
+        "P12-31",
+        "P12-32"
+      ],
+      "summary": "Triage and pilot promotion for unsupported utility-heavy modules.",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
+        "docs/nodejs/rhino-compat/status-manifest.json"
+      ]
+    },
+    {
+      "id": "dual_engine.device_evidence",
+      "status": "planned",
+      "tasks": [
+        "P12-33",
+        "P12-34"
+      ],
+      "summary": "Device instrumentation promotion and developer-facing documentation updates.",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/dual-engine-compat/manifest.json",
+        "docs/nodejs/reports/phase11/RHINO_DUAL_ENGINE_COMPAT_TESTS.md"
+      ]
+    },
+    {
+      "id": "phase12.summary",
+      "status": "planned",
+      "tasks": [
+        "P12-35"
+      ],
+      "summary": "Phase 12 completion summary and next-phase split.",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"
+      ]
+    }
+  ]
+}
