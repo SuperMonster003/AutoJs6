@@ -261,11 +261,17 @@ P13 task 本身使用以下执行状态：
     - transactional、cancellable、locked、integrity checked。
     - 能服务后续 npm/package manager 和 plugin distribution。
 
-- [ ] P13-10: 发布 Phase 13 capability truth report。
+- [x] P13-10: 发布 Phase 13 capability truth report。
   - 范围：生成 Safe/Pro/Desktop/Debug 四个 profile 的能力真值表。
   - 验收：
     - Kotlin registry、JS bootstrap allowlist、docs、types、Gradle flags 一致。
     - 报告明确每个 Node builtin 和 AutoJs bridge module 的 profile 状态。
+  - Evidence：
+    - Generator：`tools/nodejs/phase13/generate-node-phase13-capability-truth.js`
+    - Gradle task：`:app:generateNodePhase13CapabilityTruth`
+    - Surface manifest：`docs/nodejs/phase13/phase13-surface-manifest.json`
+    - 报告产物：`build/reports/nodejs/phase13-capability-truth.json`
+    - 报告产物：`build/reports/nodejs/phase13-capability-truth.md`
 
 ### Track B: Auto.js Pro capability parity
 

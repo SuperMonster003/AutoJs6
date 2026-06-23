@@ -86,7 +86,11 @@
         "docs/nodejs/INTEGRATION_PLAN.md",
         "docs/nodejs/COMPATIBILITY_PROFILE.md",
         "docs/nodejs/NODE_PROFILE_V1_1_USER_DRAFT.md",
-        "docs/nodejs/security/CAPABILITY_RELAXATION_RUBRIC.md"
+        "docs/nodejs/security/CAPABILITY_RELAXATION_RUBRIC.md",
+        "tools/nodejs/phase13/generate-node-phase13-capability-truth.js",
+        ":app:generateNodePhase13CapabilityTruth",
+        "build/reports/nodejs/phase13-capability-truth.json",
+        "build/reports/nodejs/phase13-capability-truth.md"
       ],
       "rollback": "Keep Safe Node Profile as the only accepted profile and reject Pro/Desktop profile metadata."
     },
