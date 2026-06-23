@@ -346,7 +346,7 @@ function buildChecks(files, repoRoot) {
     check(
       "surface-manifest",
       barcodeSurface &&
-        ["design_locked", "provider_poc"].includes(barcodeSurface.status) &&
+        ["design_locked", "provider_poc", "promoted"].includes(barcodeSurface.status) &&
         (barcodeSurface.tasks || []).includes("P12-27") &&
         includesAll(JSON.stringify(barcodeSurface), [
           "P12-27 locks the barcode provider v1 JSON-safe schema",

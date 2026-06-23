@@ -17,6 +17,7 @@ const REQUIRED_IDS = Object.freeze([
   "app-device",
   "shell",
   "tasks",
+  "barcode-qrcode",
 ]);
 const REQUIRED_COVERAGE = Object.freeze([
   "toast",
@@ -30,6 +31,8 @@ const REQUIRED_COVERAGE = Object.freeze([
   "shell",
   "tasks",
   "work_manager",
+  "barcode",
+  "qrcode",
 ]);
 const NODE_EXPECTATIONS = Object.freeze({
   toast: ["compat.toast(", "compat.toastLog("],
@@ -58,6 +61,14 @@ const NODE_EXPECTATIONS = Object.freeze({
     "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
     "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN",
   ],
+  "barcode-qrcode": [
+    "compat.barcode.detectAll(",
+    "compat.barcode.recognizeText(",
+    "compat.qrcode.detectAll(",
+    "compat.images.read(",
+    "compat.images.recycle(",
+    "AUTOJS6_RUN_BARCODE_EXAMPLE",
+  ],
 });
 const RHINO_EXPECTATIONS = Object.freeze({
   toast: ["toast(", "toastLog("],
@@ -84,6 +95,13 @@ const RHINO_EXPECTATIONS = Object.freeze({
     "tasks.removeTask(",
     "tasks.daysToTimeFlag(",
     "tasks.timeFlagToDays(",
+  ],
+  "barcode-qrcode": [
+    "barcode.detectAll(",
+    "barcode.recognizeText(",
+    "qrcode.detectAll(",
+    "images.read(",
+    "images.recycle(",
   ],
 });
 
@@ -167,7 +185,7 @@ function buildChecks(files, manifest, examplesRoot) {
   checks.push(check(
     "manifest-required-coverage",
     REQUIRED_COVERAGE.every((name) => coverage.has(name)),
-    "manifest coverage must include toast, files, storage, selector, image, ocr, app, device, shell, tasks, and work_manager",
+    "manifest coverage must include toast, files, storage, selector, image, ocr, app, device, shell, tasks, work_manager, barcode, and qrcode",
   ));
   checks.push(check(
     "readme-core",
@@ -187,6 +205,7 @@ function buildChecks(files, manifest, examplesRoot) {
       "app-device",
       "shell",
       "tasks",
+      "barcode-qrcode",
     ]),
     "README must describe the S11-27 Rhino compat example suite, manifest, coverage, and gate",
   ));

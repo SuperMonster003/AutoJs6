@@ -30,7 +30,7 @@ S11-27 adds static Rhino compatibility migration examples under
 `*.node.cjs` `require("autojs6:compat")` rewrites for
 toast/files/storage/selector/image/ocr/app/device/shell. P12-19 extends the
 same static suite with tasks migration buckets for disposable-task async support
-and stable daily/weekly/intent-task rejections. They are separate from the
+and stable daily/weekly/intent-task rejections. P12-30 adds barcode/qrcode examples for path input, image-handle input, QR-only filtering, and explicit temporary image recycle. They are separate from the
 runnable `sample/nodejs` project catalog because they are source migration pairs
 rather than full project smoke tests.
 

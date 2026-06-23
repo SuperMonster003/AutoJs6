@@ -63,7 +63,7 @@
     },
     {
       "id": "input_observer",
-      "status": "provider_poc",
+      "status": "promoted",
       "tasks": [
         "P12-04",
         "P12-05",
@@ -316,14 +316,14 @@
     },
     {
       "id": "barcode.qrcode",
-      "status": "provider_poc",
+      "status": "promoted",
       "tasks": [
         "P12-27",
         "P12-28",
         "P12-29",
         "P12-30"
       ],
-      "summary": "P12-27 locks the barcode provider v1 JSON-safe schema for barcode and qrcode compatibility. P12-28 promotes the direct require(\"barcode\") provider POC with barcode capability, provider registry health, fake transport conformance, live ML Kit image-handle gate, timeout/cleanup diagnostics, and JSON barcode snapshots. P12-29 adds Rhino-style autojs6:compat.barcode and QR-only autojs6:compat.qrcode facades over that provider; packaged barcode/qrcode smoke remains P12-30.",
+      "summary": "P12-27 locks the barcode provider v1 JSON-safe schema for barcode and qrcode compatibility. P12-28 promotes the direct require(\"barcode\") provider POC with barcode capability, provider registry health, fake transport conformance, live ML Kit image-handle gate, timeout/cleanup diagnostics, and JSON barcode snapshots. P12-29 adds Rhino-style autojs6:compat.barcode and QR-only autojs6:compat.qrcode facades over that provider. P12-30 adds migration examples plus packaged provider-dependent smoke policy evidence; live packaged execution remains model/provider dependent.",
       "runtimeSurface": [
         "require(\"barcode\")",
         "barcode.detect(image, options?)",
@@ -357,6 +357,12 @@
         "docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_CONTRACT.md",
         "docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_IMPLEMENTATION.md",
         "docs/nodejs/reports/phase12/RHINO_BARCODE_COMPAT_FACADE.md",
+        "docs/nodejs/reports/phase12/RHINO_BARCODE_QRCODE_EXAMPLES.md",
+        "docs/nodejs/examples/rhino-compat/10-barcode.node.cjs",
+        "docs/nodejs/examples/rhino-compat/10-barcode.rhino.js",
+        "docs/nodejs/examples/rhino-compat/manifest.json",
+        "docs/nodejs/examples/rhino-compat/README.md",
+        "docs/nodejs/EXAMPLES.md",
         "docs/nodejs/design/RHINO_COMPAT_LOADER.md",
         "docs/nodejs/MIGRATION_FROM_RHINO.md",
         "docs/nodejs/SECURITY_MODEL.md",
@@ -364,9 +370,11 @@
         "tools/nodejs/phase12/verify-rhino-compat-barcode-provider-contract.js",
         "tools/nodejs/phase12/verify-rhino-compat-barcode-provider-implementation.js",
         "tools/nodejs/phase12/verify-rhino-compat-barcode-facade.js",
+        "tools/nodejs/phase12/verify-rhino-compat-barcode-examples.js",
         ":app:verifyNodeRhinoCompatBarcodeProviderContract",
         ":app:verifyNodeRhinoCompatBarcodeProviderImplementation",
-        ":app:verifyNodeRhinoCompatBarcodeFacade"
+        ":app:verifyNodeRhinoCompatBarcodeFacade",
+        ":app:verifyNodeRhinoCompatBarcodeExamples"
       ]
     },
     {

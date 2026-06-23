@@ -39,6 +39,16 @@ which Phase 12 workstream owns the next implementation or rejection.
     plus `RHINO_TASKS_COMPAT.md`, bucketing `supported_async`, `unsupported`,
     and `blocked_by_design` cases. Raw `TimedTask` / `IntentTask` objects remain
     blocked by design.
+- `barcode.qrcode`: P12-27 locks the barcode provider v1 JSON-safe schema for
+  barcode and qrcode compatibility. P12-28 adds the direct `require("barcode")`
+  provider POC with `detect`, `detectAll`, `recognizeText`, and
+  `recognizeTexts`, a `barcode` capability, provider registry health, fake
+  transport conformance, live ML Kit image-handle gate, timeout/cleanup
+  diagnostics, and JSON barcode snapshots. P12-29 adds Rhino-style
+  `autojs6:compat.barcode` and QR-only `autojs6:compat.qrcode` facades over
+  that provider. P12-30 adds migration examples plus packaged
+  provider-dependent smoke policy evidence; live packaged execution remains
+  model/provider dependent.
 
 ## Current Provider POC Surfaces
 
@@ -61,15 +71,6 @@ which Phase 12 workstream owns the next implementation or rejection.
   closeAll cleanup summaries, and fail-closed live overlay creation. Exact Rhino
   `floaty.window()` / `floaty.rawWindow()` raw-wrapper parity remains
   `blocked_by_design` and must not be exposed as raw Android/Rhino objects.
-- `barcode.qrcode`: P12-27 locks the barcode provider v1 JSON-safe schema for
-  barcode and qrcode compatibility. P12-28 adds the direct `require("barcode")`
-  provider POC with `detect`, `detectAll`, `recognizeText`, and
-  `recognizeTexts`, a `barcode` capability, provider registry health, fake
-  transport conformance, live ML Kit image-handle gate, timeout/cleanup
-  diagnostics, and JSON barcode snapshots. P12-29 adds Rhino-style
-  `autojs6:compat.barcode` and QR-only `autojs6:compat.qrcode` facades over
-  that provider; packaged barcode/qrcode smoke remains P12-30.
-
 ## Current Design-Locked Surfaces
 
 - `threads.replacement`: P12-20 keeps Rhino `threads` as a

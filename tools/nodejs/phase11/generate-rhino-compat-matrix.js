@@ -170,6 +170,18 @@ function riskSummary(module) {
 
 function nextStepFor(module, gapModule) {
   if (
+    (module.id === "barcode" || module.id === "barcode.qr_code") &&
+    (module.migration.notes || []).some((note) => note.includes("P12-30 adds barcode/qrcode migration examples"))
+  ) {
+    return "Proceed to P12-31 unsupported utility-heavy module triage; keep packaged barcode model availability provider-dependent.";
+  }
+  if (
+    (module.id === "barcode" || module.id === "barcode.qr_code") &&
+    (module.migration.notes || []).some((note) => note.includes("P12-29 exposes compat."))
+  ) {
+    return "Add P12-30 barcode/qrcode examples and packaged provider-dependent smoke policy evidence.";
+  }
+  if (
     module.id === "threads" &&
     (module.migration.notes || []).some((note) => note.includes("P12-22 compute/process-worker replacement decision deferred"))
   ) {

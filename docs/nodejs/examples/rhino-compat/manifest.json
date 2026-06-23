@@ -73,6 +73,14 @@
       "rhino": "09-tasks.rhino.js",
       "node": "09-tasks.node.cjs",
       "status": "static_verified"
+    },
+    {
+      "id": "barcode-qrcode",
+      "title": "Barcode And QR Code",
+      "coverage": ["barcode", "qrcode", "image"],
+      "rhino": "10-barcode.rhino.js",
+      "node": "10-barcode.node.cjs",
+      "status": "static_verified"
     }
   ]
 }

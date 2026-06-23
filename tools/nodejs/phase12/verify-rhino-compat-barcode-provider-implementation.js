@@ -228,7 +228,7 @@ function buildChecks(files, repoRoot) {
     check(
       "surface-manifest",
       barcodeSurface &&
-        barcodeSurface.status === "provider_poc" &&
+        ["provider_poc", "promoted"].includes(barcodeSurface.status) &&
         (barcodeSurface.tasks || []).includes("P12-28") &&
         includesAll(JSON.stringify(barcodeSurface), [
           "require(\\\"barcode\\\")",

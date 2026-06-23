@@ -1174,13 +1174,29 @@ Phase 12 task 本身可使用以下执行状态：
       `build/reports/nodejs/rhino-compat-barcode-facade-verification.json`
       `build/reports/nodejs/rhino-compat-barcode-facade-verification.md`
 
-- [ ] P12-30: 增加 barcode/qrcode examples and packaged smoke。
+- [x] P12-30: 增加 barcode/qrcode examples and packaged smoke。
   - 范围：补齐迁移示例、fixture、device 或 packaged 验证。
   - 验收：
     - 示例覆盖 image path、image handle、QR-only。
     - packaged 如果模型资源未随包提供，必须稳定拒绝并说明模型策略。
     - image temp handle 在 OCR/barcode 共用路径中正确 recycle。
-  - Evidence：待补充。
+  - Evidence：
+    - Examples：
+      `docs/nodejs/examples/rhino-compat/10-barcode.node.cjs`
+      `docs/nodejs/examples/rhino-compat/10-barcode.rhino.js`
+      `docs/nodejs/examples/rhino-compat/manifest.json`
+      `docs/nodejs/examples/rhino-compat/README.md`
+    - Packaged policy report：
+      `docs/nodejs/reports/phase12/RHINO_BARCODE_QRCODE_EXAMPLES.md`
+    - Example/static gate：
+      `tools/nodejs/phase11/verify-rhino-compat-examples.js`
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-barcode-examples.js`
+    - Gradle gate：
+      `:app:verifyNodeRhinoCompatBarcodeExamples`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-barcode-examples-verification.json`
+      `build/reports/nodejs/rhino-compat-barcode-examples-verification.md`
 
 ### Track H: Unsupported utility-heavy modules triage
 

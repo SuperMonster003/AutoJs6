@@ -5599,7 +5599,8 @@
       "decision": "p12_29_barcode_compat_facade",
       "notes": [
         "P12-29 exposes compat.barcode over the P12-28 direct require(\"barcode\") provider with path/handle/capture inputs and JSON-safe frozen snapshots.",
-        "Barcode compatibility remains Promise-based in Node; raw ML Kit Barcode, Bitmap, ImageWrapper, and Java objects are not exposed."
+        "Barcode compatibility remains Promise-based in Node; raw ML Kit Barcode, Bitmap, ImageWrapper, and Java objects are not exposed.",
+        "P12-30 adds barcode/qrcode migration examples and packaged provider-dependent smoke policy evidence in RHINO_BARCODE_QRCODE_EXAMPLES.md."
       ],
       "apiEntries": [
         {
@@ -5680,7 +5681,8 @@
       "decision": "p12_29_qrcode_compat_facade",
       "notes": [
         "P12-29 exposes compat.qrcode over the P12-28 barcode provider with qrOnly forced to true and formats fixed to QR_CODE.",
-        "Qrcode compatibility remains Promise-based in Node and returns the same JSON-safe snapshot/string shapes as compat.barcode."
+        "Qrcode compatibility remains Promise-based in Node and returns the same JSON-safe snapshot/string shapes as compat.barcode.",
+        "P12-30 adds barcode/qrcode migration examples and packaged provider-dependent smoke policy evidence in RHINO_BARCODE_QRCODE_EXAMPLES.md."
       ],
       "apiEntries": [
         {
