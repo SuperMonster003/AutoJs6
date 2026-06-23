@@ -4,12 +4,11 @@
 
 P12-04 freezes the `input_observer` provider v1 contract for Node. P12-05 adds
 the fake provider and JavaScript module POC. P12-06 adds a controlled
-accessibility live-source gate for key observation. This is still not a fully
-promoted input observer surface because packaged/background policy evidence is
-left to P12-07:
+accessibility live-source gate for key observation. P12-07 adds cleanup,
+security, and packaged/background rejection evidence:
 
 - P12-06: accessibility live key observer provider gate.
-- P12-07: cleanup, security, packaged, and device policy gate.
+- P12-07: cleanup, security, packaged rejection, and device policy gate.
 
 The first module name is:
 
@@ -167,10 +166,12 @@ events and JS-only listener helpers must be cleared when the resource is closed.
 
 ## Background And Packaged Policy
 
-P12-05 fake provider tests may run without live Android input. P12-06
+P12-05 fake provider tests may run without live Android input. P12-06/P12-07
 accessibility live observation requires an operational AutoJs6 accessibility
-service in the current process and must reject service-process-only or hidden
-background observation.
+service in the current process plus an active one-shot script or interactive
+visible session. Scheduled/background launch surfaces, service-process-only
+observation, and hidden background observation must reject before listener
+registration.
 
 - One-shot embedded Node may observe only while the execution is active.
 - Interactive long-running mode requires a visible session state and user
@@ -182,6 +183,9 @@ background observation.
 - Hidden overlay/touch capture is not allowed.
 - Key interception requires `input_observer.intercept`, foreground disclosure,
   and a separate provider gate.
+
+P12-07 publishes the packaged/background rejection report in
+`docs/nodejs/reports/phase12/RHINO_INPUT_OBSERVER_SECURITY.md`.
 
 ## Type Declaration Draft
 

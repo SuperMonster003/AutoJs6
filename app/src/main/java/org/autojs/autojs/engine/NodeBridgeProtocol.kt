@@ -787,6 +787,9 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.database_active_handle_count", databaseHandles.size.toString())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
         put("embedded_script.input_observer_active_subscription_count", inputObserverSubscriptions.size.toString())
+        put("embedded_script.input_observer_pending_event_count", inputObserverSubscriptions.values.sumOf { it.pendingEventCount() }.toString())
+        put("embedded_script.input_observer_dropped_event_count", inputObserverSubscriptions.values.sumOf { it.droppedEventCount() }.toString())
+        put("embedded_script.input_observer_live_listener_count", inputObserverSubscriptions.values.sumOf { it.liveListenerCount() }.toString())
         putAll(NodeLifecycleCheckpointStore.nativeDiagnostics(appContext, engineInfo))
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
         putAll(capabilityBrokerAudit.nativeDiagnostics())
@@ -2397,7 +2400,8 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchInputObserverAvailableSources(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
-        val accessibilityAvailable = accessibilityBridgeOperational()
+        val livePolicyError = inputObserverLivePolicyError(request)
+        val accessibilityAvailable = livePolicyError == null && accessibilityBridgeOperational()
         callback(
             NodeBridgeResponse.success(
                 request.id,
@@ -2408,7 +2412,11 @@ class AndroidNodeBridgeCapabilityProvider(
                             "accessibility",
                             available = accessibilityAvailable,
                             live = true,
-                            reason = if (accessibilityAvailable) "" else "accessibility service is not operational",
+                            reason = when {
+                                accessibilityAvailable -> ""
+                                livePolicyError != null -> livePolicyError.message
+                                else -> "accessibility service is not operational"
+                            },
                         ),
                     )
                     .toString(),
@@ -2441,6 +2449,13 @@ class AndroidNodeBridgeCapabilityProvider(
             )
             return
         }
+        if (descriptor.source == "accessibility") {
+            val livePolicyError = inputObserverLivePolicyError(request)
+            if (livePolicyError != null) {
+                callback(NodeBridgeResponse.failure(request.id, livePolicyError))
+                return
+            }
+        }
         val subscriptionId = "input-observer-${UUID.randomUUID()}"
         val subscription = ControlledInputObserverSubscription(
             id = subscriptionId,
@@ -2462,11 +2477,15 @@ class AndroidNodeBridgeCapabilityProvider(
             inputObserverSubscriptions.remove(subscriptionId)?.close()
         }
         if (descriptor.source == "fake") {
-            subscription.queueEvent(
-                key = descriptor.keys.first(),
-                keyCode = ControlledInputObserverPolicy.keyCodeFor(descriptor.keys.first()),
-                action = descriptor.actions.firstOrNull() ?: "down",
-            )
+            descriptor.keys.forEach { key ->
+                descriptor.actions.forEach { action ->
+                    subscription.queueEvent(
+                        key = key,
+                        keyCode = ControlledInputObserverPolicy.keyCodeFor(key),
+                        action = action,
+                    )
+                }
+            }
         } else if (!attachAccessibilityInputObserver(subscriptionId, subscription)) {
             resourceRegistry.close(subscriptionId, "input_observer.accessibility_unavailable")
             callback(
@@ -2507,8 +2526,10 @@ class AndroidNodeBridgeCapabilityProvider(
         subscription.addCloseAction {
             runCatching { service.onKeyObserver.removeListener(listener) }
             AutoJsAccessibilityService.removeDisconnectCallback(disconnectCallback)
+            subscription.markLiveListenerDetached()
         }
         service.onKeyObserver.addListener(listener)
+        subscription.markLiveListenerAttached()
         AutoJsAccessibilityService.addDisconnectCallback(disconnectCallback)
         return true
     }
@@ -2516,6 +2537,24 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun inputObserverInvalidSourceError(request: NodeBridgeRequest, source: String): NodeBridgeError {
         return NodeBridgeError.invalidRequest(
             message = "input_observer.${request.method} source is not supported: $source.",
+            module = request.module,
+            method = request.method,
+        )
+    }
+
+    private fun inputObserverLivePolicyError(request: NodeBridgeRequest): NodeBridgeError? {
+        val mode = NodeExecutionModePolicy.normalize(engineInfo.executionMode)
+        val launchSurface = engineInfo.launchSurface
+        val allowed = when (mode) {
+            NodeExecutionModePolicy.MODE_ONE_SHOT -> launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT
+            NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING -> launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
+            else -> false
+        }
+        if (allowed) {
+            return null
+        }
+        return NodeBridgeError.permissionDenied(
+            message = "input_observer accessibility source requires an active one-shot script or an interactive visible session; current executionMode=$mode launchSurface=$launchSurface.",
             module = request.module,
             method = request.method,
         )
@@ -5450,6 +5489,7 @@ private class ControlledInputObserverSubscription(
     private val events = ConcurrentLinkedQueue<JSONObject>()
     private val closeActions = ConcurrentLinkedQueue<() -> Unit>()
     private val droppedCount = AtomicInteger(0)
+    private val liveListenerAttached = AtomicBoolean(false)
     private val closed = AtomicBoolean(false)
     private val createdAt = System.currentTimeMillis()
 
@@ -5500,6 +5540,20 @@ private class ControlledInputObserverSubscription(
         closeActions.add(action)
     }
 
+    fun markLiveListenerAttached() {
+        liveListenerAttached.set(true)
+    }
+
+    fun markLiveListenerDetached() {
+        liveListenerAttached.set(false)
+    }
+
+    fun pendingEventCount(): Int = events.size
+
+    fun droppedEventCount(): Int = droppedCount.get()
+
+    fun liveListenerCount(): Int = if (!closed.get() && liveListenerAttached.get()) 1 else 0
+
     fun close() {
         if (closed.getAndSet(true)) {
             return
@@ -5521,7 +5575,9 @@ private class ControlledInputObserverSubscription(
             .put("ready", true)
             .put("closed", closed.get())
             .put("createdAt", createdAt)
+            .put("pendingEventCount", pendingEventCount())
             .put("droppedCount", droppedCount.get())
+            .put("liveListenerCount", liveListenerCount())
     }
 
     private fun queue(event: JSONObject) {

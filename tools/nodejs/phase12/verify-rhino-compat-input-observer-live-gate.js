@@ -81,9 +81,11 @@ function buildChecks(files) {
     check(
       "source-availability",
       includesAll(files.protocol.text, [
-        "val accessibilityAvailable = accessibilityBridgeOperational()",
+        "val livePolicyError = inputObserverLivePolicyError(request)",
+        "livePolicyError == null && accessibilityBridgeOperational()",
         "\"accessibility\"",
         "available = accessibilityAvailable",
+        "livePolicyError.message",
         "accessibility service is not operational",
       ]),
       "getAvailableSources must expose accessibility live-source availability without claiming it when service is missing.",
@@ -124,7 +126,7 @@ function buildChecks(files) {
         "liveSourceAvailable",
         "\"accessibility\"",
         "packagedPolicy",
-        "P12-06 adds controlled accessibility key observation",
+        "P12-07 cleanup/security gate covers bounded queues",
       ]),
       "Provider health must report live accessibility source state and packaged policy constraints.",
     ),

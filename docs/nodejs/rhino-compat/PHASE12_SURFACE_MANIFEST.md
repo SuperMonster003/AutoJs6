@@ -27,7 +27,8 @@ which Phase 12 workstream owns the next implementation or rejection.
 
 - `input_observer`: P12-04 provider v1 contract, P12-05 fake-source
   `require("input_observer")` POC, and P12-06 accessibility live-source gate.
-  Cleanup/security/packaged policy evidence remains pending for P12-07.
+  P12-07 adds cleanup/security diagnostics and packaged/background rejection
+  evidence.
 
 ## Rules
 

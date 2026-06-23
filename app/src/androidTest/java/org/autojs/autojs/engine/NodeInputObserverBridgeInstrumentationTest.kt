@@ -130,6 +130,78 @@ class NodeInputObserverBridgeInstrumentationTest {
     }
 
     @Test
+    fun kotlinInputObserverCleanupDiagnosticsAndQueueOverflowAreBounded() {
+        val provider = AndroidNodeBridgeCapabilityProvider(context)
+        val observe = dispatch(
+            provider,
+            method = "observeKeys",
+            argsJson = """[{"type":"key","keys":["volume_up","volume_down"],"actions":["down","up"],"source":"fake"},{"maxQueueSize":1}]""",
+            permissions = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
+        )
+        assertTrue(observe.toString(), observe.ok)
+        val snapshot = JSONObject(observe.resultJson.orEmpty())
+        assertEquals(1, snapshot.getInt("pendingEventCount"))
+        assertEquals(3, snapshot.getInt("droppedCount"))
+        assertEquals(0, snapshot.getInt("liveListenerCount"))
+
+        val beforeDestroy = provider.nativeDiagnostics()
+        assertEquals("1", beforeDestroy.getValue("embedded_script.input_observer_active_subscription_count"))
+        assertEquals("1", beforeDestroy.getValue("embedded_script.input_observer_pending_event_count"))
+        assertEquals("3", beforeDestroy.getValue("embedded_script.input_observer_dropped_event_count"))
+        assertEquals("0", beforeDestroy.getValue("embedded_script.input_observer_live_listener_count"))
+
+        provider.destroy(NodeBridgeError.processDead())
+        val afterDestroy = provider.nativeDiagnostics()
+        assertEquals("0", afterDestroy.getValue("embedded_script.input_observer_active_subscription_count"))
+        assertEquals("0", afterDestroy.getValue("embedded_script.input_observer_pending_event_count"))
+        assertEquals("0", afterDestroy.getValue("embedded_script.input_observer_dropped_event_count"))
+        assertEquals("0", afterDestroy.getValue("embedded_script.input_observer_live_listener_count"))
+    }
+
+    @Test
+    fun kotlinInputObserverRejectsUnsafeObserverModesAndBackgroundLiveSource() {
+        val provider = AndroidNodeBridgeCapabilityProvider(context)
+
+        val intercept = dispatch(
+            provider,
+            method = "observeKeys",
+            argsJson = """[{"type":"key","keys":["volume_up"],"actions":["down"],"source":"fake","intercept":true}]""",
+            permissions = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
+        )
+        assertFalse(intercept.toString(), intercept.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, intercept.error?.code)
+        assertEquals(NodeBridgeErrorCategory.PERMISSION_DENIED, intercept.error?.category)
+
+        val unknownSource = dispatch(
+            provider,
+            method = "observeKeys",
+            argsJson = """[{"type":"key","keys":["volume_up"],"actions":["down"],"source":"shell"}]""",
+            permissions = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
+        )
+        assertFalse(unknownSource.toString(), unknownSource.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST, unknownSource.error?.code)
+        assertFalse(NodeBridgeModules.supports("input_observer", "observeTouch"))
+
+        val scheduledProvider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            engineInfo = NodeBridgeEngineInfo.fromContext(
+                context,
+                executionMode = NodeExecutionModePolicy.MODE_SCHEDULED,
+                launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+            ),
+        )
+        val scheduledLive = dispatch(
+            scheduledProvider,
+            method = "observeKeys",
+            argsJson = """[{"type":"key","keys":["volume_up"],"actions":["down"],"source":"accessibility"}]""",
+            permissions = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
+        )
+        assertFalse(scheduledLive.toString(), scheduledLive.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, scheduledLive.error?.code)
+        assertEquals(NodeBridgeErrorCategory.PERMISSION_DENIED, scheduledLive.error?.category)
+    }
+
+    @Test
     fun jsInputObserverUsesFakeTransportAndBlocksShadowing() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node input_observer fake transport regression")
 

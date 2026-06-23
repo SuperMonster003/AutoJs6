@@ -288,7 +288,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-live-gate-verification.json`
     - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-live-gate-verification.md`
 
-- [ ] P12-07: 完成 input observer cleanup/security/packaged policy gate。
+- [x] P12-07: 完成 input observer cleanup/security/packaged policy gate。
   - 范围：把 P12-05/P12-06 的资源释放、安全拒绝和 packaged 行为纳入统一 gate。
   - 建议产物：
     - `tools/nodejs/phase12/verify-rhino-compat-input-observer-security.js`
@@ -299,7 +299,17 @@ Phase 12 task 本身可使用以下执行状态：
     - queue overflow 被记录且不会 OOM。
     - hidden listener、silent intercept、overlay-based capture、shell fallback
       均有负向验证。
-  - Evidence：待补充。
+  - Evidence：
+    - Security report：`docs/nodejs/reports/phase12/RHINO_INPUT_OBSERVER_SECURITY.md`
+    - Runtime cleanup/diagnostics：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`
+    - Accessibility disconnect callback：`app/src/main/java/org/autojs/autojs/core/accessibility/AccessibilityService.kt`
+    - Execution mode policy：`app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt`
+    - Provider packaged policy：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt`
+    - Negative/overflow instrumentation：`app/src/androidTest/java/org/autojs/autojs/engine/NodeInputObserverBridgeInstrumentationTest.kt`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-input-observer-security.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatInputObserverSecurity`
+    - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-security-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-security-verification.md`
 
 ### Track B: UI compatibility runtime facade
 

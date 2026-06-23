@@ -206,7 +206,7 @@ object NodeBridgeProviderRegistry {
             id = INPUT_OBSERVER_PROVIDER,
             modules = listOf(NodeBridgeModules.INPUT_OBSERVER),
             capabilities = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
-            packagedSupport = packagedProviderDependent("P12-05 supports fake-source POC only; live key observation requires P12-06 foreground/user-visible policy"),
+            packagedSupport = packagedProviderDependent("fake source is available for tests; accessibility live source requires an active one-shot script or interactive visible session and rejects scheduled/background launch surfaces"),
         ),
         provider(
             id = WORK_MANAGER_PROVIDER,
@@ -335,8 +335,8 @@ object NodeBridgeProviderRegistry {
             "liveSourceAvailable" to accessibilityOperational().toString(),
             "maxActiveSubscriptionsPerExecution" to "8",
             "eventDelivery" to "bounded drainEvents JSON snapshots",
-            "packagedPolicy" to "requires foreground/user-visible state; final packaged smoke/rejection gate remains P12-07",
-            "statusReason" to "P12-06 adds controlled accessibility key observation; fake source remains available for tests",
+            "packagedPolicy" to "scheduled/background launch surfaces reject accessibility live observation; fake source remains available for tests",
+            "statusReason" to "P12-07 cleanup/security gate covers bounded queues, listener cleanup, and live-source launch-surface rejection",
         )
         WORK_MANAGER_PROVIDER -> linkedMapOf(
             "liveMethods" to "scheduleOnce,schedulePeriodic,cancel,list",

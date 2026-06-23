@@ -70,7 +70,7 @@
         "P12-06",
         "P12-07"
       ],
-      "summary": "Controlled key observer contract, fake-source provider POC, and accessibility live-source gate; cleanup/security/packaged gate remains pending.",
+      "summary": "Controlled key observer contract, fake-source provider POC, accessibility live-source gate, and cleanup/security/packaged rejection gate.",
       "runtimeSurface": [
         "require(\"input_observer\")",
         "input_observer.observeKeys({ source: \"fake\" })",
@@ -93,9 +93,12 @@
         "tools/nodejs/phase12/verify-rhino-compat-input-observer-contract.js",
         "tools/nodejs/phase12/verify-rhino-compat-input-observer-fake-provider.js",
         "tools/nodejs/phase12/verify-rhino-compat-input-observer-live-gate.js",
+        "tools/nodejs/phase12/verify-rhino-compat-input-observer-security.js",
+        "docs/nodejs/reports/phase12/RHINO_INPUT_OBSERVER_SECURITY.md",
         ":app:verifyNodeRhinoCompatInputObserverContract",
         ":app:verifyNodeRhinoCompatInputObserverFakeProvider",
-        ":app:verifyNodeRhinoCompatInputObserverLiveGate"
+        ":app:verifyNodeRhinoCompatInputObserverLiveGate",
+        ":app:verifyNodeRhinoCompatInputObserverSecurity"
       ]
     },
     {
