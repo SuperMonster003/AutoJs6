@@ -103,6 +103,7 @@ private val nodeTypeDeclarationModules = listOf(
     "opencc",
     "pinyin",
     "pinyin4j",
+    "rhino",
     "notifications",
     "sensors",
     "fetch",

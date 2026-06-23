@@ -16,6 +16,7 @@ const FILES = {
   taskPlan: "docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md",
   gradle: "app/node-phase11-gate.gradle.kts",
   runtime: "app/src/main/cpp/node_bridge_sources.cpp",
+  rhinoTypes: "docs/nodejs/types/autojs6-node/rhino.d.ts",
   compatTypes: "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
   indexTypes: "docs/nodejs/types/autojs6-node/index.d.ts",
 };
@@ -43,7 +44,7 @@ function main() {
       status: policyViolations.length === 0 ? "passed" : "failed",
       explicitRunShapeDocumented: checkById(checks, "design-api-shape"),
       jsonOnlyBoundaryDocumented: checkById(checks, "design-json-only-boundary"),
-      noRuntimeRhinoModule: checkById(checks, "no-runtime-rhino-module"),
+      noRuntimeRhinoExecution: checkById(checks, "runtime-rhino-disabled-facade"),
     },
   };
 
@@ -64,17 +65,17 @@ function buildChecks(files) {
       "design-core-decision",
       includesAll(files.design.text, [
         "S11-26",
-        "No runtime module is enabled",
+        "P12-24 reserves a disabled runtime facade",
         "const rhino = require(\"rhino\")",
         "rhino.run",
-        "Current Node Profile v1.1 behavior remains unchanged",
-        "no `require(\"rhino\")`",
-        "no `rhino.run()`",
-        "no `rhino.install()`",
+        "Current Node Profile v1.1 default behavior after P12-24",
+        "`require(\"rhino\")` resolves to a disabled facade",
+        "`rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`",
+        "`rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`",
         "no `compat.rhino`",
         "no Rhino globals installed into V8",
       ]),
-      "S11-26 design must be explicit that rhino.run is only a future JSON-only candidate and current runtime stays disabled",
+      "S11-26/P12-24 design must be explicit that rhino.run execution is only a future JSON-only candidate and current runtime stays disabled",
     ),
     check(
       "design-api-shape",
@@ -164,18 +165,21 @@ function buildChecks(files) {
       "design-resolution-policy",
       includesAll(files.design.text, [
         "Module Resolution Policy",
-        "`require(\"rhino\")` remains unavailable",
+        "P12-24 reserves `require(\"rhino\")` as a controlled AutoJs module name",
+        "disabled facade",
         "controlled AutoJs module",
-        "`node_modules/rhino` package cannot shadow it",
+        "`node_modules/rhino`",
+        "cannot shadow it",
         "There is no `node:rhino` alias",
       ]),
-      "S11-26 design must document current unavailability and future controlled-module/shadowing policy",
+      "S11-26/P12-24 design must document controlled-module reservation and shadowing policy",
     ),
     check(
       "design-poc-gate-plan",
       includesAll(files.design.text, [
         "## POC Gate Plan",
-        "default Safe Node Profile still denies `require(\"rhino\")`",
+        "default Safe Node Profile reports `ERR_AUTOJS6_RHINO_SHIM_DISABLED`",
+        "does not execute Rhino",
         "`require(\"node:rhino\")` is unavailable",
         "local `node_modules/rhino` shadowing behavior",
         "`rhino.install()` rejects",
@@ -196,12 +200,12 @@ function buildChecks(files) {
         "RHINO_JSON_ONLY_SHIM.md",
         "explicit and JSON-only",
         "rhino.run",
-        "current profile still does not expose `require(\"rhino\")`",
+        "disabled `require(\"rhino\")` facade",
         "`rhino.install()`",
         "`compat.rhino`",
         "JSON-only request validation",
       ]),
-      "RHINO_SHIM must point to the S11-26 JSON-only shim design and keep current runtime disabled",
+      "RHINO_SHIM must point to the S11-26 JSON-only shim design and keep current runtime execution disabled",
     ),
     check(
       "migration-guide-s11-26",
@@ -210,7 +214,8 @@ function buildChecks(files) {
         "rhino.run({ source, timeoutMs, args })",
         "RHINO_JSON_ONLY_SHIM.md",
         "not a current runtime feature",
-        "const rhino = require(\"rhino\"); // not available",
+        "const rhino = require(\"rhino\"); // disabled facade in P12-24",
+        "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
         "must accept and return only JSON-safe values",
         "must not install Rhino globals into V8",
         "must reject Java objects",
@@ -222,7 +227,8 @@ function buildChecks(files) {
       includesAll(files.securityModel.text, [
         "S11-26",
         "rhino.run({ source, timeoutMs, args })",
-        "current Safe Node Profile still has no `require(\"rhino\")`",
+        "P12-24 reserves `require(\"rhino\")` only as a disabled facade",
+        "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
         "`rhino.install()`",
         "`compat.rhino`",
         "execute outside the V8 isolate",
@@ -239,13 +245,13 @@ function buildChecks(files) {
       includesAll(files.loaderDesign.text, [
         "S11-26",
         "explicit Rhino JSON-only shim design",
-        "without adding `require(\"rhino\")` or `rhino.run()`",
-        "does not add `require(\"rhino\")`",
+        "P12-24 reserves `require(\"rhino\")` as a frozen disabled facade",
+        "executable Rhino",
         "`rhino.install()`",
         "`compat.rhino`",
-        "no `rhino`, `rhino.run`, `rhino.install`, or `compat.rhino` type surface",
+        "disabled `require(\"rhino\")` facade only",
       ]),
-      "compat loader design must record S11-26 as design-only with no runtime/type Rhino module",
+      "compat loader design must record S11-26/P12-24 as disabled facade only with no execution or compat.rhino",
     ),
     check(
       "comparison-source-s11-26",
@@ -260,26 +266,35 @@ function buildChecks(files) {
       "Pro 9 comparison status must still contain the original explicit JSON-only shim recommendation that S11-26 formalizes",
     ),
     check(
-      "no-runtime-rhino-module",
-      !files.runtime.text.includes("function __autojs6_limited_rhino()") &&
-        !files.runtime.text.includes("function __autojs6_rhino_json_only_shim") &&
-        !files.runtime.text.includes("name === \"rhino\"") &&
+      "runtime-rhino-disabled-facade",
+      includesAll(files.runtime.text, [
+        "function __autojs6_limited_rhino()",
+        "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+        "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+        "return Promise.reject(__autojs6_rhino_shim_disabled_error(\"run\"));",
+        "throw __autojs6_rhino_install_unsupported_error();",
+        "return __autojs6_limited_rhino();",
+      ]) &&
         !files.runtime.text.includes("name === \"node:rhino\"") &&
         !files.runtime.text.includes("compat.rhino") &&
-        !files.runtime.text.includes("rhino.run") &&
-        !files.runtime.text.includes("rhino.install"),
-      "S11-26 must not add runtime require(\"rhino\"), rhino.run, rhino.install, or compat.rhino",
+        !files.runtime.text.includes("__autojs6_rhino_json_only_shim_adapter") &&
+        !files.runtime.text.includes("__autojs6_rhino_run_provider"),
+      "S11-26/P12-24 must allow only disabled runtime require(\"rhino\") and no execution, node:rhino, or compat.rhino",
     ),
     check(
-      "no-type-rhino-module",
-      !files.compatTypes.text.includes("declare module \"rhino\"") &&
-        !files.indexTypes.text.includes("declare module \"rhino\"") &&
-        !files.compatTypes.text.includes("rhino.run") &&
-        !files.indexTypes.text.includes("rhino.run") &&
+      "type-rhino-disabled-facade",
+      includesAll(files.rhinoTypes.text, [
+        "declare module \"rhino\"",
+        "mode: \"disabled\"",
+        "enabled: false",
+        "run(request?: unknown): Promise<never>",
+        "install(options?: unknown): never",
+      ]) &&
+        files.indexTypes.text.includes("/// <reference path=\"./rhino.d.ts\" />") &&
         !files.compatTypes.text.includes("readonly rhino") &&
         !files.compatTypes.text.includes("compat.rhino") &&
         !files.indexTypes.text.includes("compat.rhino"),
-      "S11-26 must not add TypeScript declarations for rhino, rhino.run, rhino.install, or compat.rhino",
+      "S11-26/P12-24 must add only disabled rhino TypeScript declarations and no compat.rhino",
     ),
     check(
       "task-plan-s11-26-complete",

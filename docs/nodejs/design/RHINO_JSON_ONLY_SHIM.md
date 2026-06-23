@@ -1,7 +1,8 @@
 # Rhino JSON-Only Shim
 
 Status: S11-26 design and POC gate plan; P12-23 establishes the Phase 12 POC
-gate. No runtime module is enabled by this document.
+gate; P12-24 reserves a disabled runtime facade. No Rhino execution adapter is
+enabled by this document.
 
 ## Decision
 
@@ -18,11 +19,12 @@ const result = await rhino.run({
 });
 ```
 
-Current Node Profile v1.1 behavior remains unchanged:
+Current Node Profile v1.1 default behavior after P12-24:
 
-- no `require("rhino")`;
-- no `rhino.run()`;
-- no `rhino.install()`;
+- `require("rhino")` resolves to a disabled facade;
+- `rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
+- `require("node:rhino")` remains unavailable;
 - no `compat.rhino`;
 - no Rhino globals installed into V8;
 - no `importClass`, `importPackage`, `Packages`, `java.*`, `android.*`, or
@@ -159,14 +161,13 @@ In either model:
 
 ## Module Resolution Policy
 
-Until a runtime implementation task reserves the name, `require("rhino")` remains unavailable
-in the Safe Node Profile. When implemented, it must be a
-controlled AutoJs module, not an npm package compatibility alias.
+P12-24 reserves `require("rhino")` as a controlled AutoJs module name. In the
+default Safe Node Profile it returns only the disabled facade; it does not
+execute Rhino and does not expose a bridge provider.
 
-The implementation task must decide and test shadowing. The recommended policy
-is that the controlled `rhino` module is reserved and a local
-`node_modules/rhino` package cannot shadow it. This prevents scripts from
-depending on different behavior between packaged and live runs.
+The controlled `rhino` module is reserved and a local `node_modules/rhino`
+package cannot shadow it. This prevents scripts from depending on different
+behavior between packaged and live runs.
 
 There is no `node:rhino` alias.
 
@@ -189,8 +190,8 @@ globals, or any old AutoJs global into Node.
 
 A future implementation gate must prove:
 
-- default Safe Node Profile still denies `require("rhino")` or reports
-  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- default Safe Node Profile reports `ERR_AUTOJS6_RHINO_SHIM_DISABLED` for
+  `rhino.run()` and does not execute Rhino;
 - `require("node:rhino")` is unavailable;
 - local `node_modules/rhino` shadowing behavior is documented and tested;
 - `rhino.install()` rejects with `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
@@ -216,8 +217,8 @@ A future implementation gate must prove:
 ## P12-23 POC Gate
 
 P12-23 records the Phase 12 POC gate in
-`docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`. It keeps the
-default runtime disabled and fixes the implementation preconditions before any
+`docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`. It keeps
+execution disabled and fixes the implementation preconditions before any
 adapter work:
 
 - release/default Safe Node Profile still denies the shim;
@@ -231,12 +232,31 @@ adapter work:
   file descriptor values;
 - no Rhino globals are installed into V8.
 
+## P12-24 Disabled Facade
+
+P12-24 reserves `require("rhino")` as the stable default-denial path:
+
+- the module is a frozen disabled facade with schema
+  `autojs6-rhino-json-only-shim-disabled-v1`;
+- `rhino.run()` returns a rejected Promise with
+  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
+- the disabled facade reports `enabled: false`, `mode: "disabled"`,
+  `status().run: "disabled"`, and `status().install: "unsupported"`;
+- `require.resolve("rhino")` resolves to `rhino`, so
+  `node_modules/rhino` cannot shadow the controlled module;
+- `require("node:rhino")` remains unavailable because there is no Node builtin
+  alias;
+- no `compat.rhino`, Rhino globals, Java bridge globals, execution adapter, or
+  packaged metadata behavior is enabled.
+
 ## S11-26 Acceptance
 
 - The design fixes a concrete explicit API candidate:
   `rhino.run({ source, timeoutMs, args })` plus a scoped `path` variant.
 - All input and output is JSON-safe.
 - Rhino globals are not installed into V8.
-- Current runtime and type declarations still do not expose `require("rhino")`,
-  `rhino.run()`, `rhino.install()`, or `compat.rhino`.
+- Current runtime and type declarations expose only the P12-24 disabled
+  `require("rhino")` facade; they still do not expose a Rhino execution adapter,
+  `compat.rhino`, or Rhino globals.
 - Follow-up implementation work has a POC gate plan before any runtime enablement.

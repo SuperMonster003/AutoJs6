@@ -8192,6 +8192,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
   let __autojs6_limited_lifecycle_cache = null;
+  let __autojs6_limited_rhino_cache = null;
   let __autojs6_limited_rhino_compat_cache = null;
   let __autojs6_limited_files_cache = null;
   let __autojs6_limited_base64_cache = null;
@@ -8861,6 +8862,8 @@ std::string buildEmbeddedScriptExecutionSource(
         dynamicImportUnsupported: "ERR_AUTOJS6_DYNAMIC_IMPORT_UNSUPPORTED",
         esmUnsupported: "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED",
         requireEsmUnsupported: "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
+        rhinoShimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+        rhinoInstallUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
         fsScopedPath: "ERR_AUTOJS6_FS_SCOPED_PATH",
         fsAbsolutePathDenied: "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED",
         fsPathEscape: "ERR_AUTOJS6_FS_PATH_ESCAPE",
@@ -16032,6 +16035,80 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     __autojs6_limited_pinyin4j_cache = Object.freeze(pinyin4j);
     return __autojs6_limited_pinyin4j_cache;
+  }
+  const __autojs6_rhino_shim_error_codes = Object.freeze({
+    shimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+    installUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED"
+  });
+  function __autojs6_rhino_shim_error(message, code, apiName, category) {
+    const error = __autojs6_error(message, code);
+    __autojs6_define_error_property(error, "module", "rhino");
+    if (apiName !== undefined && apiName !== null && String(apiName).length > 0) {
+      __autojs6_define_error_property(error, "api", String(apiName));
+    }
+    if (category !== undefined && category !== null && String(category).length > 0) {
+      __autojs6_define_error_property(error, "category", String(category));
+    }
+    return error;
+  }
+  function __autojs6_rhino_shim_disabled_error(apiName) {
+    const api = apiName === undefined || apiName === null || String(apiName).length === 0
+      ? "rhino"
+      : String(apiName);
+    return __autojs6_rhino_shim_error(
+      "AutoJs6 Rhino JSON-only shim is disabled in the current Safe Node Profile; " +
+        api + " cannot execute Rhino without an explicit experimental adapter gate.",
+      __autojs6_rhino_shim_error_codes.shimDisabled,
+      api,
+      "disabled"
+    );
+  }
+  function __autojs6_rhino_install_unsupported_error() {
+    return __autojs6_rhino_shim_error(
+      "AutoJs6 Rhino JSON-only shim does not support rhino.install(); installing Rhino globals into V8 is permanently unsupported.",
+      __autojs6_rhino_shim_error_codes.installUnsupported,
+      "install",
+      "unsupported"
+    );
+  }
+  function __autojs6_rhino_disabled_status() {
+    return Object.freeze({
+      schema: "autojs6-rhino-json-only-shim-disabled-v1",
+      module: "rhino",
+      mode: "disabled",
+      enabled: false,
+      run: "disabled",
+      install: "unsupported",
+      globalsInstalled: false,
+      nodeAlias: false,
+      shadowing: "reserved"
+    });
+  }
+  function __autojs6_limited_rhino() {
+    if (__autojs6_limited_rhino_cache) {
+      return __autojs6_limited_rhino_cache;
+    }
+    function run() {
+      return Promise.reject(__autojs6_rhino_shim_disabled_error("run"));
+    }
+    function install() {
+      throw __autojs6_rhino_install_unsupported_error();
+    }
+    __autojs6_limited_rhino_cache = Object.freeze({
+      name: "rhino",
+      version: 1,
+      schema: "autojs6-rhino-json-only-shim-disabled-v1",
+      mode: "disabled",
+      enabled: false,
+      errorCodes: __autojs6_rhino_shim_error_codes,
+      isEnabled: function() {
+        return false;
+      },
+      status: __autojs6_rhino_disabled_status,
+      run,
+      install
+    });
+    return __autojs6_limited_rhino_cache;
   }
   const __autojs6_rhino_compat_error_codes = Object.freeze({
     invalidOption: "ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION",
@@ -37740,6 +37817,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_esm_builtin_specifier(name) {
     return name === "node:test" ||
+      name === "rhino" ||
       __autojs6_has_own(__autojs6_require_builtin_allowlist, name) ||
       __autojs6_has_own(__autojs6_limited_builtin_module_map, name) ||
       __autojs6_denied_builtin_module_name(name);
@@ -38044,6 +38122,9 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_import_meta_builtin_url(name) {
     if (name === "node:test") {
       return "node:test";
+    }
+    if (name === "rhino") {
+      return "rhino";
     }
     if (__autojs6_has_own(__autojs6_limited_builtin_module_map, name)) {
       return name.indexOf("node:") === 0 ? name : "node:" + name;
@@ -38673,6 +38754,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "autojs6:compat") {
       return "autojs6:compat";
     }
+    if (name === "rhino") {
+      return "rhino";
+    }
     if (name === "files") {
       return "files";
     }
@@ -38966,6 +39050,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "autojs6:compat") {
       return __autojs6_limited_rhino_compat();
+    }
+    if (name === "rhino") {
+      return __autojs6_limited_rhino();
     }
     if (name === "files") {
       return __autojs6_limited_files();

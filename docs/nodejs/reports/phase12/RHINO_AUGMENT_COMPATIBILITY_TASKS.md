@@ -24,8 +24,10 @@ Phase 12 以以下事实为起点：
 - 已有显式 compat 入口：`require("autojs6:compat")`。
 - 默认不向 V8 安装 Rhino globals；只有
   `compat.install({ globals: true })` 才能显式安装已支持的兼容全局。
-- 当前没有运行时 `require("rhino")`、`rhino.run()`、`rhino.install()` 或
-  `compat.rhino`。
+- Phase 12 起点没有运行时 `require("rhino")`、`rhino.run()`、
+  `rhino.install()` 或 `compat.rhino`；P12-24 已将 `require("rhino")`
+  保留为 disabled facade，但仍没有 Rhino execution、supported
+  `rhino.install()` 或 `compat.rhino`。
 - `events`/input observer、UI compat、floaty/overlay、tasks、threads、
   Rhino JSON-only shim、barcode/qrcode 是 Phase 11A summary 中列出的主要
   下一阶段方向。
@@ -939,14 +941,50 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-rhino-json-only-shim-poc-gate-verification.md`
 
-- [ ] P12-24: 实现 Rhino shim disabled/default denial path。
+- [x] P12-24: 实现 Rhino shim disabled/default denial path。
   - 范围：在默认 profile 下固定 `require("rhino")` 或 `rhino.run()` 的稳定
     拒绝行为。是否允许 `require("rhino")` 返回 disabled facade 由 P12-23 决策。
   - 验收：
     - 默认无 experimental flag 时不能执行 Rhino。
     - denial error code、message、docs、types 一致。
     - `rhino.install()` 不因 experimental flag 变为可用。
-  - Evidence：待补充。
+  - Evidence：
+    - Runtime：
+      `app/src/main/cpp/node_bridge_sources.cpp` 保留受控裸模块名
+      `require("rhino")`，返回冻结 disabled facade；`require.resolve("rhino")`
+      返回 `rhino`，本地 `node_modules/rhino` 不可 shadow；
+      `require("node:rhino")` 仍不可用。
+    - Disabled facade：
+      `rhino.status()` 返回
+      `autojs6-rhino-json-only-shim-disabled-v1`，`enabled: false`、
+      `mode: "disabled"`、`run: "disabled"`、`install: "unsupported"`、
+      `globalsInstalled: false`、`nodeAlias: false`、`shadowing: "reserved"`。
+    - Stable denial：
+      `rhino.run()` 返回 rejected Promise：
+      `ERR_AUTOJS6_RHINO_SHIM_DISABLED`；
+      `rhino.install()` 同步抛出：
+      `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`；两者都带
+      `module: "rhino"`、`api`、`category` 和 `autojs6Code`。
+    - No globals / no compat：
+      不安装 `rhino`、`importClass`、`importPackage`、`Packages`、`java`、
+      `android`、`JavaAdapter` 或旧 AutoJs globals；不增加 `compat.rhino`。
+    - Types：
+      `docs/nodejs/types/autojs6-node/rhino.d.ts` 仅声明 disabled facade；
+      `docs/nodejs/types/autojs6-node/index.d.ts` 纳入该声明；
+      `app/node-examples.gradle.kts` 将 `rhino` 纳入
+      `verifyAutoJs6NodeTypeDeclarations`；`sample/nodejs/typescript-smoke/src/main.ts`
+      覆盖 disabled facade 类型；`rhino_compat.d.ts` 仍无 `compat.rhino`。
+    - Report：
+      `docs/nodejs/reports/phase12/RHINO_SHIM_DISABLED_PATH.md`
+    - Instrumentation evidence：
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt`
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-rhino-shim-disabled-path.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatRhinoShimDisabledPath`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-rhino-shim-disabled-path-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-rhino-shim-disabled-path-verification.md`
 
 - [ ] P12-25: 实现 Rhino JSON-only execution adapter POC。
   - 范围：通过 script manager 或 dedicated compatibility process 执行小段

@@ -37,5 +37,6 @@
 /// <reference path="./opencc.d.ts" />
 /// <reference path="./pinyin.d.ts" />
 /// <reference path="./pinyin4j.d.ts" />
+/// <reference path="./rhino.d.ts" />
 /// <reference path="./rhino_compat.d.ts" />
 /// <reference path="./plugins.d.ts" />

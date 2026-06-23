@@ -6,6 +6,7 @@ import device = require("device");
 import shell = require("shell");
 import engines = require("engines");
 import accessibility = require("accessibility");
+import rhino = require("rhino");
 import rhinoCompat = require("autojs6:compat");
 import mediaProjection = require("media_projection");
 import image = require("image");
@@ -122,6 +123,10 @@ async function smoke(): Promise<void> {
   const rhinoClicked: boolean = await rhinoSelector.click({ timeoutMs: 1000 });
   const rhinoExists: boolean = await rhinoCompat.selector.id("submit").enabled().exists(1000);
   const rhinoPointClicked: boolean = await rhinoCompat.click(1, 2, { timeoutMs: 1000 });
+  const rhinoEnabled: false = rhino.isEnabled();
+  const rhinoStatus: rhino.Status = rhino.status();
+  const rhinoRunDenied: Promise<never> = rhino.run({ source: "1 + 1", timeoutMs: 1000, args: [] });
+  const rhinoInstallDenied: (options?: unknown) => never = rhino.install;
   await rhinoCompat.back({ timeoutMs: 1000 });
   await rhinoCompat.home({ timeoutMs: 1000 });
 
@@ -394,6 +399,10 @@ async function smoke(): Promise<void> {
   void rhinoClicked;
   void rhinoExists;
   void rhinoPointClicked;
+  void rhinoEnabled;
+  void rhinoStatus;
+  void rhinoRunDenied;
+  void rhinoInstallDenied;
   void clickedText;
   void point;
   void matches;

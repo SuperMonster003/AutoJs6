@@ -878,6 +878,7 @@ tasks.register<Exec>("verifyNodeRhinoCompatRhinoJsonOnlyShimPocGate") {
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
     inputs.file(rootProject.layout.projectDirectory.file("app/src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino.d.ts"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/index.d.ts"))
     inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-json-only-shim-design.js"))
@@ -885,6 +886,51 @@ tasks.register<Exec>("verifyNodeRhinoCompatRhinoJsonOnlyShimPocGate") {
     outputs.files(
         nodePhase12ReportDir.map { it.file("rhino-compat-rhino-json-only-shim-poc-gate-verification.json") },
         nodePhase12ReportDir.map { it.file("rhino-compat-rhino-json-only-shim-poc-gate-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeRhinoCompatRhinoShimDisabledPath") {
+    group = "verification"
+    description = "Verifies the Phase 12 Rhino shim disabled/default denial path."
+
+    dependsOn("verifyNodeRhinoCompatRhinoJsonOnlyShimPocGate")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-rhino-shim-disabled-path.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_SHIM_DISABLED_PATH.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_SHIM.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_COMPAT_LOADER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/index.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/src/main.ts"))
+    inputs.file(project.layout.projectDirectory.file("node-examples.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-json-only-shim-design.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-shim-poc-gate.js"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-rhino-shim-disabled-path-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-rhino-shim-disabled-path-verification.md") },
     )
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir

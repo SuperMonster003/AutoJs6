@@ -1,6 +1,6 @@
 # Rhino Compatibility Shim Design Gate
 
-Status: design gate only. No runtime behavior is enabled by this document. Embedded Node scripts cannot `require("rhino")`, install Rhino globals, call `importClass`, call `importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects. S11-26 fixes the concrete future JSON-only run shape in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md), and P12-23 records the default-disabled Phase 12 POC gate in `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`.
+Status: design gate plus disabled runtime facade. Embedded Node scripts can `require("rhino")` only to receive the P12-24 disabled facade; they still cannot execute Rhino, install Rhino globals, call `importClass`, call `importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects. S11-26 fixes the concrete future JSON-only run shape in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md), P12-23 records the default-disabled Phase 12 POC gate in `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`, and P12-24 reserves the default denial path.
 
 ## Goal
 
@@ -17,11 +17,11 @@ Any future shim must preserve:
 
 ## Current Decision
 
-Do not implement a Rhino shim in the Embedded Node runtime yet.
+Do not implement Rhino execution in the Embedded Node runtime yet.
 
 The following remain unavailable in Node scripts:
 
-- `require("rhino")`
+- Rhino execution through `rhino.run()`
 - `require("rhino").install()`
 - global `importClass`
 - global `importPackage`
@@ -33,6 +33,11 @@ The following remain unavailable in Node scripts:
 
 Users should migrate Rhino scripts to explicit Node bridge modules where possible.
 
+P12-24 reserves `require("rhino")` as a controlled disabled facade. The facade is
+frozen, reports `enabled: false`, returns `ERR_AUTOJS6_RHINO_SHIM_DISABLED` from
+`rhino.run()`, throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED` from
+`rhino.install()`, and does not install globals.
+
 ## S11-26 JSON-Only Module Candidate
 
 A future module, if implemented, should be explicit and JSON-only:
@@ -41,7 +46,8 @@ A future module, if implemented, should be explicit and JSON-only:
 const rhino = require("rhino");
 ```
 
-The module must not be present by default until a later implementation task defines the exact API and tests.
+The module is present by default only as the P12-24 disabled facade until a
+later adapter task defines execution behavior and tests.
 
 Possible future shape:
 
@@ -55,7 +61,7 @@ const result = await rhino.run({
 });
 ```
 
-This shape is intentionally different from installing globals into Node. It makes the engine boundary visible and keeps legacy execution isolated. The current profile still does not expose `require("rhino")`, `rhino.run()`, `rhino.install()`, or `compat.rhino`; S11-26 only records the future API and gate plan.
+This shape is intentionally different from installing globals into Node. It makes the engine boundary visible and keeps legacy execution isolated. The current profile exposes only the disabled `require("rhino")` facade; it still does not execute `rhino.run()`, support `rhino.install()`, expose `compat.rhino`, or install Rhino globals. S11-26 records the future API and gate plan, while P12-24 records the stable default denial path.
 
 The detailed request/response shape, JSON-safe value definition, timeout and cancellation requirements, packaging policy, and POC gate plan live in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md).
 
@@ -63,14 +69,14 @@ The detailed request/response shape, JSON-safe value definition, timeout and can
 
 | Surface | Decision | Reason |
 | --- | --- | --- |
-| `require("rhino")` | Deferred | Needs lifecycle, permission, and serialization design. |
+| `require("rhino")` | Disabled facade | Reserved by P12-24 so scripts get stable denial instead of npm shadowing. |
 | `rhino.install()` | Unsupported by default | Installing old globals into Node hides migration work and can bypass bridge policy. |
 | Old global AutoJs APIs | Unsupported by default | Node code should use explicit bridge modules such as `toast`, `app`, `image`, and `accessibility`. |
 | `importClass` / `importPackage` | Unsupported in Node | They imply broad Java class access and conflict with `JAVA_INTEROP.md`. |
 | `Packages`, `java.*`, `android.*` | Unsupported in Node | They expose raw object graphs and class-loader surfaces. |
 | `JavaAdapter` | Unsupported | It creates cross-runtime proxy objects with complex lifetime and threading semantics. |
 | Running a legacy Rhino script from Node | Future candidate | Must be explicit, serialized, timeout-bounded, and owned by the script manager. |
-| `rhino.run({ source, timeoutMs, args })` | S11-26 candidate | JSON-only request/response; no V8 global installation; current runtime remains disabled. |
+| `rhino.run({ source, timeoutMs, args })` | S11-26 candidate, P12-24 disabled | JSON-only request/response candidate; no V8 global installation; default runtime rejects execution with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`. |
 
 ## Recommended Direction
 
@@ -99,7 +105,8 @@ If a separate process is used, it should have its own service lifecycle and cras
 
 ## `install()` Policy
 
-`rhino.install()` should remain unsupported by default.
+`rhino.install()` remains unsupported by default and is rejected by the P12-24
+disabled facade with `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`.
 
 Reasons:
 
@@ -109,7 +116,11 @@ Reasons:
 - It creates confusing behavior for npm packages that expect normal Node globals.
 - It risks exposing Java/Android objects that the Safe Node Profile deliberately denies.
 
-If `install()` is ever added, it must require an explicit experimental flag and should install only harmless compatibility aliases. It must not install Java bridge globals, `importClass`, `Packages`, selector globals, image globals, or filesystem globals.
+`install()` must not become available merely because a future experimental
+`rhino.run()` adapter is enabled. If a future phase proposes any install-like
+helper, it must be a separately reviewed API and must not install Java bridge
+globals, `importClass`, `Packages`, selector globals, image globals, or
+filesystem globals.
 
 ## Legacy Global Policy
 
@@ -170,13 +181,16 @@ Future denials should use stable errors:
 - `ERR_AUTOJS6_RHINO_JAVA_OBJECT_DENIED`
 - `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
 
-Current behavior should be a normal unavailable module error for `require("rhino")` until a runtime task deliberately reserves the module name.
+P12-24 current behavior is a disabled facade for `require("rhino")`;
+`rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, `rhino.install()`
+throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, and `require("node:rhino")`
+remains unavailable.
 
 ## Test Gate For Future Implementation
 
 Any implementation task must include:
 
-- default `require("rhino")` denial or disabled error
+- default `require("rhino")` disabled facade and `rhino.run()` denial
 - `node_modules/rhino` shadowing decision documented and tested
 - `rhino.install()` default rejection
 - no old globals installed by default

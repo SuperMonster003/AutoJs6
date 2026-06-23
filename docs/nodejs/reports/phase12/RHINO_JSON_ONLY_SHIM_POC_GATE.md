@@ -3,8 +3,9 @@
 Status: P12-23 POC gate established.
 
 P12-23 turns the S11-26 Rhino JSON-only shim design into a Phase 12 POC gate.
-It does not enable a runtime module. Default and release Safe Node Profile
-behavior still has no `require("rhino")`, no `rhino.run()`, no
+It does not enable Rhino execution. P12-24 follows by reserving
+`require("rhino")` as a disabled facade; default and release Safe Node Profile
+behavior still has no executable `rhino.run()`, no supported
 `rhino.install()`, no `compat.rhino`, and no Rhino globals installed into V8.
 
 ## Gate Decision
@@ -31,8 +32,9 @@ const result = await rhino.run({
 });
 ```
 
-This is a future POC target only. P12-24 owns the default-disabled runtime denial path.
-P12-25 owns any execution adapter POC, and P12-26 owns packaged metadata behavior.
+This is a future POC target only. P12-24 owns the default-disabled runtime
+denial path, P12-25 owns any execution adapter POC, and P12-26 owns packaged
+metadata behavior.
 
 ## Default State
 
@@ -42,8 +44,8 @@ P12-25 owns any execution adapter POC, and P12-26 owns packaged metadata behavio
   rule.
 - Source text containing `require("rhino")` must not implicitly reserve Android
   manifest entries, receivers, services, permissions, or providers.
-- A local `node_modules/rhino` shadowing policy must be documented before any
-  runtime reservation. Until then, no runtime module is enabled.
+- P12-24 reserves `require("rhino")` as a controlled module name so a local
+  `node_modules/rhino` package cannot shadow the disabled facade.
 - `require("node:rhino")` remains unavailable.
 
 ## Required Denials
@@ -120,15 +122,18 @@ Packaged support remains fail-closed until P12-26:
 - Packaged timeout, crash, cancellation, and destroy behavior require evidence
   before promotion.
 
-## Current Non-Exposure
+## Current P12-24 Disabled Exposure
 
-P12-23 keeps the current runtime and type boundary:
+After P12-24 the runtime and type boundary is:
 
-- no runtime `require("rhino")`;
-- no runtime `rhino.run()`;
-- no runtime `rhino.install()`;
+- runtime `require("rhino")` returns only a frozen disabled facade;
+- runtime `rhino.run()` rejects with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`;
+- runtime `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
+- `require.resolve("rhino")` resolves to the controlled module name `rhino`;
+- local `node_modules/rhino` cannot shadow the controlled module;
+- `require("node:rhino")` remains unavailable;
 - no runtime `compat.rhino`;
-- no TypeScript `declare module "rhino"`;
+- TypeScript declares only the disabled `rhino` facade;
 - no `compat.rhino` type surface.
 
 ## Verification
@@ -140,5 +145,5 @@ Run:
 ```
 
 The gate checks this report, the S11-26 design docs, migration/security docs,
-runtime/type non-exposure, Phase 12 surface manifest evidence, and the P12-23
-checklist entry.
+the P12-24 disabled facade boundary, Phase 12 surface manifest evidence, and
+the P12-23 checklist entry.

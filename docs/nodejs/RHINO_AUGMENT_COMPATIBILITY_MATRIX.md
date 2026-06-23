@@ -7,7 +7,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Rhino modules: 73
 - Rhino API entries: 879
 - Node bridge modules: 25
-- Node type modules: 48
+- Node type modules: 49
 - Modules with bridge evidence: 24
 - Modules with type evidence: 37
 - Modules without Node surface evidence: 35
