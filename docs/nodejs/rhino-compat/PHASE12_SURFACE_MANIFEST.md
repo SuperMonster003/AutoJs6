@@ -66,6 +66,11 @@ which Phase 12 workstream owns the next implementation or rejection.
   developer-facing migration, Pro 9 comparison, security, testing, matrix, and
   type-declaration guidance, plus the `verifyNodeRhinoCompatDeveloperDocsSync`
   gate.
+- `phase12.summary`: P12-35 publishes the generated Phase 12 summary from the
+  task checklist, surface manifest, and final blocker registry. It enumerates
+  P12-00 through P12-35, records promoted/rejected/deferred surface counts,
+  rejected decisions, device and packaged evidence, remaining blockers, and
+  Phase 13 recommendations through `generateNodeRhinoCompatPhase12Summary`.
 
 ## Current Provider POC Surfaces
 

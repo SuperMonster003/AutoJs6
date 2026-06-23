@@ -1369,7 +1369,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-developer-docs-sync-verification.md`
 
-- [ ] P12-35: 发布 Phase 12 summary。
+- [x] P12-35: 发布 Phase 12 summary。
   - 范围：汇总 Phase 12 完成项、rejected decisions、remaining blockers、
     device/packaged evidence、下一阶段建议。
   - 建议产物：
@@ -1382,7 +1382,20 @@ Phase 12 task 本身可使用以下执行状态：
     - summary 能枚举 P12-00 到 P12-35 状态。
     - promoted/rejected/deferred surface 有 counts。
     - Phase 13 建议来自实际 evidence，不是泛化愿望。
-  - Evidence：待补充。
+  - Evidence：
+    - summary：
+      `docs/nodejs/reports/phase12/PHASE12_SUMMARY.md`
+    - generator：
+      `tools/nodejs/phase12/generate-rhino-compat-phase12-summary.js`
+    - Phase 12 surface manifest 将 `phase12.summary` 推进为 `promoted`：
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+      `docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md`
+    - Gradle task：
+      `:app:generateNodeRhinoCompatPhase12Summary`
+    - 报告产物：
+      `build/reports/nodejs/phase12-summary.json`
+    - 报告产物：
+      `build/reports/nodejs/phase12-summary.md`
 
 ## 推荐执行顺序
 

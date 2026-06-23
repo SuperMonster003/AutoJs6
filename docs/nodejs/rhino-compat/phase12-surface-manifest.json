@@ -446,14 +446,26 @@
     },
     {
       "id": "phase12.summary",
-      "status": "planned",
+      "status": "promoted",
       "tasks": [
         "P12-35"
       ],
-      "summary": "Phase 12 completion summary and next-phase split.",
-      "runtimeSurface": [],
+      "summary": "P12-35 publishes the Phase 12 completion summary generated from the task checklist, surface manifest, and final blocker registry. The summary enumerates P12-00 through P12-35, records promoted/rejected/deferred surface counts, device and packaged evidence, rejected decisions, remaining blockers, and Phase 13 recommendations sourced from actual evidence.",
+      "runtimeSurface": [
+        "Phase 12 generated summary",
+        "phase12-summary.json",
+        "phase12-summary.md"
+      ],
       "evidence": [
-        "docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"
+        "docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md",
+        "docs/nodejs/reports/phase12/PHASE12_SUMMARY.md",
+        "docs/nodejs/rhino-compat/phase12-surface-manifest.json",
+        "docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md",
+        "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
+        "tools/nodejs/phase12/generate-rhino-compat-phase12-summary.js",
+        ":app:generateNodeRhinoCompatPhase12Summary",
+        "build/reports/nodejs/phase12-summary.json",
+        "build/reports/nodejs/phase12-summary.md"
       ]
     }
   ]
