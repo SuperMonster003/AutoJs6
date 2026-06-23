@@ -23,6 +23,7 @@ declare module "autojs6:compat" {
   import opencc = require("opencc");
   import pinyin = require("pinyin");
   import pinyin4j = require("pinyin4j");
+  import workManager = require("work_manager");
 
   namespace rhinoCompat {
     export type ErrorCode =
@@ -267,6 +268,31 @@ declare module "autojs6:compat" {
       readonly keys: RhinoEventKeysCompatModule;
     }
 
+    export type DisposableTaskDateInput = Date | number | string;
+
+    export interface RhinoDisposableTaskOptions extends AutoJs6Node.BridgeCallOptions {
+      readonly path?: string;
+      readonly scriptPath?: string;
+      readonly entry?: string;
+      readonly date?: DisposableTaskDateInput;
+      readonly time?: DisposableTaskDateInput;
+      readonly delayMs?: number;
+      readonly taskTimeoutMs?: number;
+      readonly constraints?: workManager.WorkConstraints;
+      readonly packaged?: boolean;
+      readonly backend?: "embedded";
+    }
+
+    export interface RhinoTasksQueryOptions extends AutoJs6Node.BridgeCallOptions {}
+
+    export interface RhinoTasksRemoveOptions extends AutoJs6Node.BridgeCallOptions {}
+
+    export interface RhinoTasksCompatModule {
+      addDisposableTask(options: RhinoDisposableTaskOptions): Promise<string>;
+      removeTask(id: string, options?: RhinoTasksRemoveOptions): Promise<boolean>;
+      queryTasks(options?: RhinoTasksQueryOptions): Promise<readonly workManager.WorkTask[]>;
+    }
+
     export type RhinoUiCompatModule = ui.UiModule;
 
     export interface RhinoCompatModule {
@@ -335,6 +361,7 @@ declare module "autojs6:compat" {
       readonly images: RhinoImagesCompatModule;
       readonly ocr: RhinoOcrCompatFunction;
       readonly ui: RhinoUiCompatModule;
+      readonly tasks: RhinoTasksCompatModule;
       requestScreenCapture(options?: ScreenCaptureRequestOptions): Promise<boolean>;
       requestScreenCaptureAsync(options?: ScreenCaptureRequestOptions): Promise<boolean>;
       captureScreen(options?: image.CaptureScreenOptions): Promise<AutoJs6Node.ImageHandle>;

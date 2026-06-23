@@ -174,6 +174,7 @@ class NodeWorkManagerBridgeInstrumentationTest {
               });
 
               const work = require("work_manager");
+              const compat = require("autojs6:compat");
               const resolved = require.resolve("work_manager");
               const onceId = await work.scheduleOnce({
                 scriptPath: "./main.cjs",
@@ -191,6 +192,34 @@ class NodeWorkManagerBridgeInstrumentationTest {
               const beforeCancel = await work.list();
               await work.cancel(onceId);
               const afterCancel = await work.list();
+              const compatId = await compat.tasks.addDisposableTask({
+                path: "./main.cjs",
+                delayMs: 2345,
+                taskTimeoutMs: 5432,
+                timeoutMs: 778,
+                constraints: { idle: true }
+              });
+              const compatBefore = await compat.tasks.queryTasks({ timeoutMs: 779 });
+              const compatRemoved = await compat.tasks.removeTask(compatId, { timeoutMs: 780 });
+              const compatAfter = await compat.tasks.queryTasks();
+              let compatRawCode = "";
+              try {
+                await compat.tasks.removeTask({ id: compatId });
+              } catch (error) {
+                compatRawCode = codeOf(error);
+              }
+              let compatUnknownCode = "";
+              try {
+                await compat.tasks.addDisposableTask({ path: "main.cjs", delayMs: 10, repeat: true });
+              } catch (error) {
+                compatUnknownCode = codeOf(error);
+              }
+              let compatPastCode = "";
+              try {
+                await compat.tasks.addDisposableTask({ path: "main.cjs", date: new Date(Date.now() - 1000) });
+              } catch (error) {
+                compatPastCode = codeOf(error);
+              }
 
               const beforeInvalid = requests.length;
               let pathEscapeCode = "";
@@ -227,6 +256,13 @@ class NodeWorkManagerBridgeInstrumentationTest {
               console.log("work.before=" + beforeCancel.map((task) => [task.id, task.type, task.scriptPath || "", task.entry || "", task.entryKind, task.packaged, task.constraints.network, task.constraints.charging].join(":")).join("|"));
               console.log("work.request_entry=" + [requests[0].args[0].scriptPath || "", requests[0].args[0].entry || "", requests[1].args[0].scriptPath || "", requests[1].args[0].entry || ""].join("|"));
               console.log("work.after=" + afterCancel.map((task) => task.id).join("|"));
+              console.log("compat.tasks.methods=" + [typeof compat.tasks.addDisposableTask, typeof compat.tasks.removeTask, typeof compat.tasks.queryTasks].join("|"));
+              console.log("compat.tasks.id=" + compatId);
+              console.log("compat.tasks.before=" + compatBefore.map((task) => [task.id, task.type, task.scriptPath || "", task.constraints.idle].join(":")).join("|"));
+              console.log("compat.tasks.removed=" + [compatRemoved, compatAfter.length].join("|"));
+              console.log("compat.tasks.codes=" + [compatRawCode, compatUnknownCode, compatPastCode].join("|"));
+              console.log("compat.tasks.global=" + ("tasks" in globalThis));
+              console.log("compat.tasks.status=" + [compat.status().implementedTasks.indexOf("P12-16") >= 0, compat.status().moduleNames.indexOf("tasks") >= 0, compat.status().availableGlobalNames.indexOf("tasks") >= 0].join("|"));
               console.log("work.requests=" + requests.map((request) => request.method).join("|"));
               console.log("work.permissions=" + requests.slice(0, 3).every((request) => request.permissions.indexOf("work_manager") >= 0));
               console.log("work.timeout=" + requests[0].timeoutMs);
@@ -252,6 +288,13 @@ class NodeWorkManagerBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("fake-work-2:periodic::main.cjs:projectEntry:true:false:true"))
         assertTrue(result.stdout.contains("work.request_entry=main.cjs|||main.cjs"))
         assertTrue(result.stdout.contains("work.after=fake-work-2"))
+        assertTrue(result.stdout.contains("compat.tasks.methods=function|function|function"))
+        assertTrue(result.stdout.contains("compat.tasks.id=fake-work-3"))
+        assertTrue(result.stdout.contains("compat.tasks.before=fake-work-3:once:main.cjs:true"))
+        assertTrue(result.stdout.contains("compat.tasks.removed=true|0"))
+        assertTrue(result.stdout.contains("compat.tasks.codes=ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN|ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION|ERR_AUTOJS6_RHINO_COMPAT_INVALID_OPTION"))
+        assertTrue(result.stdout.contains("compat.tasks.global=false"))
+        assertTrue(result.stdout.contains("compat.tasks.status=true|true|false"))
         assertTrue(result.stdout.contains("work.permissions=true"))
         assertTrue(result.stdout.contains("work.timeout=777"))
         assertTrue(result.stdout.contains("work.invalid_no_request=true"))

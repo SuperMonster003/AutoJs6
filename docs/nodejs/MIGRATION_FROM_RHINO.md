@@ -582,12 +582,13 @@ Node with the current WorkManager MVP:
 
 `work_manager` is Promise-based and schedules scoped embedded Node entries only. It returns string task ids and JSON task snapshots; it does not return Rhino `TimedTask` or `IntentTask` objects.
 
-P12-15 locks the future `compat.tasks` v1 scope to disposable one-shot migration
-only: `compat.tasks.addDisposableTask({ path, date|delayMs, ... })` may become a
-wrapper over `work_manager.scheduleOnce()`, `compat.tasks.removeTask(id)` may wrap
-`work_manager.cancel()`, and `compat.tasks.queryTasks(options?)` may wrap
-`work_manager.list()`. P12-15 does not expose that facade yet; P12-16 owns the
-runtime implementation.
+P12-15 locks the `compat.tasks` v1 scope to disposable one-shot migration only,
+and P12-16 exposes that facade:
+`compat.tasks.addDisposableTask({ path, date|time|delayMs, ... })` wraps
+`work_manager.scheduleOnce()`, `compat.tasks.removeTask(id)` wraps
+`work_manager.cancel()`, and `compat.tasks.queryTasks(options?)` wraps
+`work_manager.list()` for one-shot JSON snapshots. `require("tasks")` and global
+`tasks` remain absent.
 
 Do not migrate `tasks.addDailyTask()` or `tasks.addWeeklyTask()` by mechanically calling `workManager.schedulePeriodic()`. Rhino daily/weekly tasks are wall-clock user tasks with next-run calculation, task UI/database state, and scheduler fallback semantics. WorkManager periodic work is OS-managed cadence with minimum interval and quota behavior. S11-22 keeps daily/weekly task compatibility design-gated until a user-visible task database provider exists.
 

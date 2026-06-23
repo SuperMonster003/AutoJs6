@@ -606,7 +606,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-tasks-v1-scope-verification.md`
 
-- [ ] P12-16: 实现 `compat.tasks` disposable-task facade。
+- [x] P12-16: 实现 `compat.tasks` disposable-task facade。
   - 范围：将 Rhino disposable task 的常见脚本迁移到
     `work_manager.scheduleOnce()`。
   - 建议产物：
@@ -619,7 +619,34 @@ Phase 12 task 本身可使用以下执行状态：
     - 返回 JSON-safe task snapshot 或 id，不返回 raw task object。
     - cancel/list 能清理 ResourceRegistry task registration。
     - packaged queued fallback 不能创建一方向持久任务。
-  - Evidence：待补充。
+  - Evidence：
+    - `require("autojs6:compat").tasks` 暴露
+      `addDisposableTask(options)`、`removeTask(id)`、`queryTasks(options?)`。
+    - `addDisposableTask({ path|scriptPath|entry, date|time|delayMs, ... })`
+      归一化为 `work_manager.scheduleOnce()`；path validation、backend、
+      constraints、timeout、packaged metadata 继续复用 work_manager policy。
+    - `removeTask(id)` 调用 `work_manager.cancel()` 并返回 `true`；
+      raw `TimedTask` / `IntentTask` object 被
+      `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN` 拒绝。
+    - `queryTasks(options?)` 调用 `work_manager.list()` 并只返回 one-shot
+      JSON-safe snapshots；`require("tasks")` 和 global `tasks` 仍不存在。
+    - 覆盖文件：
+      `app/src/main/cpp/node_bridge_sources.cpp`,
+      `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`,
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkManagerBridgeInstrumentationTest.kt`,
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`,
+      `docs/nodejs/design/COMPAT_TASKS_V1.md`,
+      `docs/nodejs/design/RHINO_COMPAT_LOADER.md`,
+      `docs/nodejs/rhino-compat/status-manifest.json`,
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`,
+      `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`.
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-tasks-disposable-facade.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatTasksDisposableFacade`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-disposable-facade-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-disposable-facade-verification.md`
 
 - [ ] P12-17: 决策 daily/weekly/user-task database 兼容路径。
   - 范围：评估 `tasks.addDailyTask`、`addWeeklyTask`、`queryTimedTasks`、

@@ -1,21 +1,23 @@
 # Compat Tasks V1 Scope
 
-Status: P12-15 design-locked scope only. This document does not expose
-`require("tasks")`, `require("autojs6:compat").tasks`, a `tasks` global, or a new
-canonical `tasks` capability.
+Status: P12-15 design-locked the scope. P12-16 implements
+`require("autojs6:compat").tasks` as the disposable one-shot facade over
+`work_manager`. This document still does not expose `require("tasks")`, a
+`tasks` global, or a new canonical `tasks` capability.
 
 ## Decision
 
 `compat.tasks` v1 is a narrow Rhino migration facade over the existing
 `work_manager` bridge. It is for disposable, one-shot Node-owned scheduled work
-only. P12-16 may implement this facade, but P12-15 only locks the contract.
+only. P12-16 implements the facade without promoting raw task objects or a
+`require("tasks")` module.
 
 The v1 surface is:
 
 | Future API | WorkManager target | Result |
 | --- | --- | --- |
-| `compat.tasks.addDisposableTask({ path, date|delayMs, ... })` | `work_manager.scheduleOnce({ scriptPath|entry, delayMs, backend: "embedded" })` | JSON-safe task id/snapshot |
-| `compat.tasks.removeTask(id)` | `work_manager.cancel(id)` | JSON-safe cancellation result |
+| `compat.tasks.addDisposableTask({ path, date|time|delayMs, ... })` | `work_manager.scheduleOnce({ scriptPath|entry, delayMs, backend: "embedded" })` | JSON-safe task id |
+| `compat.tasks.removeTask(id)` | `work_manager.cancel(id)` | `true` after cancellation completes |
 | `compat.tasks.queryTasks(options?)` | `work_manager.list()` | Frozen JSON-safe task snapshots |
 
 The facade must not return or accept raw Rhino `TimedTask` or `IntentTask`
@@ -91,12 +93,12 @@ entry, packaged metadata policy, and verifier are added.
 
 ## P12-16 Handoff
 
-P12-16 may implement only the disposable facade above:
+P12-16 implements only the disposable facade above:
 
-- add `compat.tasks` under `autojs6:compat`;
-- map `addDisposableTask` to `work_manager.scheduleOnce`;
-- map `removeTask(id)` to `work_manager.cancel`;
-- map `queryTasks(options?)` to JSON snapshots from `work_manager.list`;
-- add types and fake/live bridge tests;
+- `compat.tasks` is available under `autojs6:compat`;
+- `addDisposableTask` maps to `work_manager.scheduleOnce`;
+- `removeTask(id)` maps to `work_manager.cancel`;
+- `queryTasks(options?)` maps to JSON snapshots from `work_manager.list`;
+- types and fake bridge tests cover the facade;
 - keep daily/weekly, intent/broadcast, raw task object, and time-flag APIs out
   of the v1 runtime surface.

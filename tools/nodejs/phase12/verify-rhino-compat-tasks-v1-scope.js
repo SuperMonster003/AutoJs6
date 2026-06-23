@@ -27,20 +27,20 @@ const FILES = {
 };
 
 const EXPECTED_DECISIONS = new Map([
-  ["tasks.__module", "p12_15_compat_tasks_v1_scope_locked"],
+  ["tasks.__module", ["p12_15_compat_tasks_v1_scope_locked", "p12_16_compat_tasks_v1_facade"]],
   ["tasks.addDailyTask", "p12_15_wall_clock_task_database_deferred"],
-  ["tasks.addDisposableTask", "p12_15_disposable_task_facade_v1"],
+  ["tasks.addDisposableTask", ["p12_15_disposable_task_facade_v1", "p12_16_disposable_task_facade"]],
   ["tasks.addIntentTask", "p12_15_intent_task_broadcast_deferred"],
   ["tasks.addTask", "p12_15_raw_task_object_blocked"],
   ["tasks.addWeeklyTask", "p12_15_wall_clock_task_database_deferred"],
   ["tasks.daysToTimeFlag", "p12_15_pure_timeflag_utility_out_of_v1"],
   ["tasks.getIntentTask", "p12_15_intent_task_broadcast_deferred"],
-  ["tasks.getTimedTask", "p12_15_json_task_snapshot_only"],
+  ["tasks.getTimedTask", ["p12_15_json_task_snapshot_only", "p12_16_json_task_snapshot_query_only"]],
   ["tasks.queryIntentTasks", "p12_15_intent_task_broadcast_deferred"],
-  ["tasks.queryTimedTasks", "p12_15_work_manager_list_node_owned_tasks"],
+  ["tasks.queryTimedTasks", ["p12_15_work_manager_list_node_owned_tasks", "p12_16_query_tasks_node_owned_work"]],
   ["tasks.removeIntentTask", "p12_15_intent_task_broadcast_deferred"],
   ["tasks.removeTask", "p12_15_raw_remove_task_object_blocked_with_id_wrapper"],
-  ["tasks.removeTimedTask", "p12_15_cancel_node_owned_work_task"],
+  ["tasks.removeTimedTask", ["p12_15_cancel_node_owned_work_task", "p12_16_cancel_node_owned_work_task"]],
   ["tasks.timeFlagToDays", "p12_15_pure_timeflag_utility_out_of_v1"],
   ["tasks.updateTask", "p12_15_raw_task_object_blocked"],
 ]);
@@ -98,7 +98,7 @@ function buildChecks(files) {
     check(
       "compat-tasks-v1-scope",
       includesAll(files.compatTasks.text, [
-        "P12-15 design-locked scope only",
+        "P12-15 design-locked",
         "compat.tasks.addDisposableTask",
         "compat.tasks.removeTask(id)",
         "compat.tasks.queryTasks(options?)",
@@ -135,7 +135,7 @@ function buildChecks(files) {
         includesAll(files.workManager.text, ["P12-15", "COMPAT_TASKS_V1.md", "queryTasks(options?)"]) &&
         includesAll(files.migration.text, ["P12-15", "compat.tasks.addDisposableTask", "P12-16"]) &&
         includesAll(files.securityModel.text, ["P12-15", "compat.tasks", "JSON-safe ids and snapshots only"]) &&
-        includesAll(files.typeReadme.text, ["P12-15", "does not expose `compat.tasks`"]),
+        includesAll(files.typeReadme.text, ["P12-15", "P12-16", "module-only facade"]),
       "Design, migration, security, and type README docs must record the P12-15 compat.tasks v1 scope lock.",
     ),
     check(
@@ -149,9 +149,10 @@ function buildChecks(files) {
           "P12-17",
           "P12-18",
         ]) &&
-        [...EXPECTED_DECISIONS].every(([id, decision]) => {
+        [...EXPECTED_DECISIONS].every(([id, decisions]) => {
           const entry = entries.get(id);
-          return entry && entry.decision === decision;
+          const acceptedDecisions = Array.isArray(decisions) ? decisions : [decisions];
+          return entry && acceptedDecisions.includes(entry.decision);
         }),
       "Status manifest must add the P12-15 module note and give every tasks.* API a P12-15 decision.",
     ),
@@ -160,9 +161,9 @@ function buildChecks(files) {
       statusCounts.partial === 5 &&
         statusCounts.unsupported === 8 &&
         statusCounts.blocked_by_design === 3 &&
-        entryStatus(entries, "tasks.addDisposableTask", "partial", "scheduleOnce") &&
-        entryStatus(entries, "tasks.queryTimedTasks", "partial", "list") &&
-        entryStatus(entries, "tasks.removeTimedTask", "partial", "cancel") &&
+        entryStatus(entries, "tasks.addDisposableTask", "partial", ["scheduleOnce", "tasks.addDisposableTask"]) &&
+        entryStatus(entries, "tasks.queryTimedTasks", "partial", ["list", "tasks.queryTasks"]) &&
+        entryStatus(entries, "tasks.removeTimedTask", "partial", ["cancel", "tasks.removeTask"]) &&
         entryStatus(entries, "tasks.removeTask", "blocked_by_design", null),
       "P12-15 must keep tasks status buckets stable while narrowing the future compat.tasks v1 facade.",
     ),
@@ -171,6 +172,7 @@ function buildChecks(files) {
       includesAll(files.matrixGenerator.text, [
         P12_15_NOTE,
         "Implement P12-16 compat.tasks disposable facade",
+        "Proceed to P12-17 daily/weekly user-task database decision",
       ]) &&
         includesAll(matrixTasksRow, [
           "| 32 | tasks | tasks | partial |",
@@ -178,14 +180,15 @@ function buildChecks(files) {
           "partial:5",
           "unsupported:8",
           "blocked_by_design:3",
-          "Implement P12-16 compat.tasks disposable facade",
-        ]),
-      "Generated matrix must point tasks to P12-16 after P12-15 scope lock.",
+        ]) &&
+        (matrixTasksRow.includes("Implement P12-16 compat.tasks disposable facade") ||
+          matrixTasksRow.includes("Proceed to P12-17 daily/weekly user-task database decision")),
+      "Generated matrix must point tasks to P12-16 or later after P12-15 scope lock.",
     ),
     check(
       "surface-manifest-design-locked",
       tasksSurface &&
-        tasksSurface.status === "design_locked" &&
+        ["design_locked", "promoted"].includes(tasksSurface.status) &&
         (tasksSurface.tasks || []).includes("P12-15") &&
         includesAll(JSON.stringify(tasksSurface), [
           "P12-15 locks compat.tasks v1 scope",
@@ -198,13 +201,10 @@ function buildChecks(files) {
     ),
     check(
       "no-runtime-facade",
-      !files.runtime.text.includes("compat.tasks") &&
-        !files.runtime.text.includes("function __autojs6_limited_tasks") &&
-        !files.runtime.text.includes("function __autojs6_rhino_compat_tasks") &&
-        !files.rhinoCompatTypes.text.includes("readonly tasks") &&
-        !files.rhinoCompatTypes.text.includes("RhinoTasks") &&
+      !files.runtime.text.includes("function __autojs6_limited_tasks") &&
+        !/__autojs6_rhino_compat_basic_global_names[^\n]+\"tasks\"/.test(files.runtime.text) &&
         includesAll(files.workManagerTypes.text, ["scheduleOnce", "cancel", "list", "WorkTask"]),
-      "P12-15 must not expose runtime/type compat.tasks, require(\"tasks\"), or task globals before P12-16.",
+      "P12-15 must not expose require(\"tasks\"), task globals, or a separate tasks provider; P12-16 may add module-only compat.tasks within the locked scope.",
     ),
     check(
       "phase12-task-complete",
@@ -225,12 +225,13 @@ function buildChecks(files) {
   ];
 }
 
-function entryStatus(entries, id, status, nodeName) {
+function entryStatus(entries, id, status, nodeNames) {
   const entry = entries.get(id);
   if (!entry || entry.status !== status) {
     return false;
   }
-  if (nodeName !== undefined && entry.nodeName !== nodeName) {
+  const acceptedNodeNames = Array.isArray(nodeNames) ? nodeNames : [nodeNames];
+  if (nodeNames !== undefined && !acceptedNodeNames.includes(entry.nodeName)) {
     return false;
   }
   return true;

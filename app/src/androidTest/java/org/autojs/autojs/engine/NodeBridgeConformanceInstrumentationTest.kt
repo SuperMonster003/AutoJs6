@@ -251,7 +251,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["ui", ui],
                 ["work_manager", workManager],
                 ["autojs6:compat", compat],
-                ["autojs6:compat.ui", compat.ui]
+                ["autojs6:compat.ui", compat.ui],
+                ["autojs6:compat.tasks", compat.tasks]
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
               expectExports("toast", toast, ["showToast", "toast"]);
@@ -275,13 +276,16 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
               expectExports("autojs6:compat.ui", compat.ui, ["showLayout", "state", "bind"]);
+              expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "removeTask", "queryTasks"]);
               assert.strictEqual(globalThis.ui, undefined, "compat.ui must not install a default global");
+              assert.strictEqual(globalThis.tasks, undefined, "compat.tasks must not install a default global");
               assert.strictEqual(typeof compat.ui.run, "undefined");
               assert.strictEqual(typeof compat.ui.post, "undefined");
               assert.strictEqual(typeof compat.ui.findById, "undefined");
               const compatInstall = compat.install({ globals: true });
               assert(compatInstall.globals.indexOf("ui") >= 0, "compat.install({ globals: true }) must install constrained ui global");
               assert.strictEqual(globalThis.ui, compat.ui);
+              assert.strictEqual(globalThis.tasks, undefined, "compat.install({ globals: true }) must not install tasks global");
               assert.strictEqual(typeof globalThis.ui.layout, "undefined");
 
               assert.strictEqual(typeof app.packageName, "string");
@@ -442,6 +446,10 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
               assert.strictEqual((await expectPromise("work_manager.list", workManager.list({ timeoutMs: 1058 }))).length, 1);
+              const compatTaskId = await expectPromise("compat.tasks.addDisposableTask", compat.tasks.addDisposableTask({ path: "main.cjs", delayMs: 0, timeoutMs: 1059 }));
+              assert.strictEqual(compatTaskId, "work-once");
+              assert.strictEqual((await expectPromise("compat.tasks.queryTasks", compat.tasks.queryTasks({ timeoutMs: 1060 }))).length, 0);
+              assert.strictEqual(await expectPromise("compat.tasks.removeTask", compat.tasks.removeTask(compatTaskId, { timeoutMs: 1061 })), true);
 
               assert.strictEqual(bridge.__test.pendingCount(), 0);
               const trace = requests.map((request) => request.module + "." + request.method);
@@ -477,6 +485,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "ui.update",
                 "ui.batchUpdate",
                 "ui.close",
+                "work_manager.scheduleOnce",
+                "work_manager.cancel",
                 "work_manager.list"
               ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));
               console.log("bridge.conformance.request_count=" + requests.length);

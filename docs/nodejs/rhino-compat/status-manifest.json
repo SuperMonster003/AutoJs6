@@ -7074,6 +7074,7 @@
       "status": "partial",
       "asyncMode": "promise",
       "nodeModules": [
+        "autojs6:compat",
         "work_manager"
       ],
       "bridgeModules": [
@@ -7083,19 +7084,20 @@
       "notes": [
         "S11-22 maps Rhino tasks to the controlled work_manager MVP only where semantics are equivalent enough: scoped embedded Node one-shot/periodic records, cancel, and list.",
         "Daily/weekly wall-clock tasks, IntentTask/broadcast triggers, raw TimedTask/IntentTask objects, task update mutation, and user task database parity remain design-gated; S11-22 does not add compat.tasks.",
-        "P12-15 compat.tasks v1 scope locked: only disposable one-shot add/remove/query over work_manager is eligible for P12-16; daily/weekly moves to P12-17, intent/broadcast moves to P12-18, and raw task objects remain blocked_by_design."
+        "P12-15 compat.tasks v1 scope locked: only disposable one-shot add/remove/query over work_manager is eligible for P12-16; daily/weekly moves to P12-17, intent/broadcast moves to P12-18, and raw task objects remain blocked_by_design.",
+        "P12-16 compat.tasks disposable facade landed: require(\"autojs6:compat\").tasks exposes addDisposableTask, removeTask(id), and queryTasks over work_manager.scheduleOnce/cancel/list, returns JSON-safe ids/snapshots, keeps require(\"tasks\") and global tasks absent, and keeps daily/weekly/intent/raw task object parity gated."
       ],
       "apiEntries": [
         {
           "id": "tasks.__module",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "work_manager",
-          "nodeName": "work_manager",
-          "decision": "p12_15_compat_tasks_v1_scope_locked",
+          "nodeName": "tasks",
+          "decision": "p12_16_compat_tasks_v1_facade",
           "notes": [
-            "Use require(\"work_manager\") for current Node scheduled work. P12-15 locks future compat.tasks v1 scope but still does not expose require(\"tasks\"), compat.tasks, or a global tasks object."
+            "P12-16 exposes require(\"autojs6:compat\").tasks as the Rhino-name disposable facade over work_manager, while require(\"tasks\") and global tasks remain absent."
           ]
         },
         {
@@ -7114,12 +7116,12 @@
           "id": "tasks.addDisposableTask",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "work_manager",
-          "nodeName": "scheduleOnce",
-          "decision": "p12_15_disposable_task_facade_v1",
+          "nodeName": "tasks.addDisposableTask",
+          "decision": "p12_16_disposable_task_facade",
           "notes": [
-            "P12-15 locks compat.tasks.addDisposableTask({ path, date|delayMs, ... }) as the v1 candidate over work_manager.scheduleOnce({ delayMs }) for scoped embedded Node entries, returning JSON-safe ids/snapshots rather than raw TimedTask objects."
+            "P12-16 implements compat.tasks.addDisposableTask({ path, date|time|delayMs, ... }) over work_manager.scheduleOnce({ delayMs }) for scoped embedded Node entries, returning a JSON-safe task id rather than a raw TimedTask object."
           ]
         },
         {
@@ -7186,12 +7188,12 @@
           "id": "tasks.getTimedTask",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "work_manager",
-          "nodeName": "list",
-          "decision": "p12_15_json_task_snapshot_only",
+          "nodeName": "tasks.queryTasks",
+          "decision": "p12_16_json_task_snapshot_query_only",
           "notes": [
-            "Current work_manager.list() can return JSON WorkTask snapshots for Node-owned scheduled work; P12-15 allows future compat.tasks.queryTasks/get-style wrappers to use JSON snapshots only, with raw TimedTask return values blocked."
+            "P12-16 exposes JSON WorkTask snapshots through compat.tasks.queryTasks(); getTimedTask-style single-record lookup remains a query/filter migration pattern, and raw TimedTask return values stay blocked."
           ]
         },
         {
@@ -7210,12 +7212,12 @@
           "id": "tasks.queryTimedTasks",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "work_manager",
-          "nodeName": "list",
-          "decision": "p12_15_work_manager_list_node_owned_tasks",
+          "nodeName": "tasks.queryTasks",
+          "decision": "p12_16_query_tasks_node_owned_work",
           "notes": [
-            "work_manager.list() returns Node-owned scheduled task snapshots only; P12-15 allows compat.tasks.queryTasks(options?) over that JSON-safe subset while full Rhino TimedTask database query parity remains deferred."
+            "P12-16 implements compat.tasks.queryTasks(options?) over work_manager.list(), returning Node-owned one-shot WorkManager snapshots only while full Rhino TimedTask database query parity remains deferred."
           ]
         },
         {
@@ -7239,19 +7241,19 @@
           "nodeName": null,
           "decision": "p12_15_raw_remove_task_object_blocked_with_id_wrapper",
           "notes": [
-            "Rhino removeTask accepts raw TimedTask/IntentTask Java objects, so that overload stays blocked_by_design. P12-15 separately reserves compat.tasks.removeTask(id) for explicit WorkManager-owned string ids."
+            "Rhino removeTask accepts raw TimedTask/IntentTask Java objects, so that overload stays blocked_by_design. P12-16 separately exposes compat.tasks.removeTask(id) for explicit WorkManager-owned string ids."
           ]
         },
         {
           "id": "tasks.removeTimedTask",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "work_manager",
-          "nodeName": "cancel",
-          "decision": "p12_15_cancel_node_owned_work_task",
+          "nodeName": "tasks.removeTask",
+          "decision": "p12_16_cancel_node_owned_work_task",
           "notes": [
-            "work_manager.cancel() can cancel Node-owned task ids; P12-15 allows the future compat.tasks.removeTask(id) wrapper for those ids only, and numeric Rhino TimedTask database ids are not automatically equivalent."
+            "P12-16 implements compat.tasks.removeTask(id) over work_manager.cancel() for Node-owned task ids only; numeric Rhino TimedTask database ids are not automatically equivalent."
           ]
         },
         {

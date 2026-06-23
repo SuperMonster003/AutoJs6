@@ -16047,6 +16047,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_rhino_compat_images_cache = null;
   let __autojs6_rhino_compat_screen_capturer_cache = null;
   let __autojs6_rhino_compat_ocr_cache = null;
+  let __autojs6_rhino_compat_tasks_cache = null;
   const __autojs6_rhino_compat_key_constants = Object.freeze({
     home: 3,
     HOME: 3,
@@ -16065,7 +16066,7 @@ std::string buildEmbeddedScriptExecutionSource(
     keys: __autojs6_rhino_compat_key_constants
   });
   const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "keys", "ui"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "events.keys", "ui"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "events.keys", "ui", "tasks"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16936,6 +16937,155 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_rhino_selector_dsl_cache = Object.freeze(selector);
     return __autojs6_rhino_selector_dsl_cache;
   }
+  function __autojs6_rhino_compat_tasks_invalid(operation, message) {
+    return __autojs6_rhino_compat_error(
+      "autojs6:compat.tasks." + operation + " " + message,
+      __autojs6_rhino_compat_error_codes.invalidOption,
+      "tasks." + operation,
+      "invalid-option"
+    );
+  }
+  function __autojs6_rhino_compat_tasks_option_object(value, operation) {
+    return __autojs6_rhino_compat_option_object(value, "tasks." + operation);
+  }
+  function __autojs6_rhino_compat_tasks_check_keys(input, operation, allowedKeys) {
+    Object.keys(input).forEach(function(key) {
+      if (allowedKeys.indexOf(key) < 0) {
+        throw __autojs6_rhino_compat_tasks_invalid(operation, "does not accept option " + key + ".");
+      }
+    });
+  }
+  function __autojs6_rhino_compat_tasks_has(input, key) {
+    return Object.prototype.hasOwnProperty.call(input, key) &&
+      input[key] !== undefined &&
+      input[key] !== null;
+  }
+  function __autojs6_rhino_compat_tasks_date_epoch(value, operation) {
+    if (value instanceof Date) {
+      return value.getTime();
+    }
+    if (typeof value === "number") {
+      return value;
+    }
+    if (typeof value === "string") {
+      return Date.parse(value);
+    }
+    if (value && typeof value.valueOf === "function") {
+      const epoch = Number(value.valueOf());
+      if (Number.isFinite(epoch)) {
+        return epoch;
+      }
+    }
+    throw __autojs6_rhino_compat_tasks_invalid(operation, "requires date/time to be a Date, epoch millisecond number, or parseable string.");
+  }
+  function __autojs6_rhino_compat_tasks_delay(input, operation) {
+    const hasDate = __autojs6_rhino_compat_tasks_has(input, "date");
+    const hasTime = __autojs6_rhino_compat_tasks_has(input, "time");
+    const hasDelay = __autojs6_rhino_compat_tasks_has(input, "delayMs");
+    const count = (hasDate ? 1 : 0) + (hasTime ? 1 : 0) + (hasDelay ? 1 : 0);
+    if (count !== 1) {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires exactly one of date, time, or delayMs.");
+    }
+    if (hasDelay) {
+      return input.delayMs;
+    }
+    const epoch = __autojs6_rhino_compat_tasks_date_epoch(hasDate ? input.date : input.time, operation);
+    const delayMs = Math.trunc(epoch - Date.now());
+    if (!Number.isFinite(delayMs) || delayMs < 0) {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires a future date/time.");
+    }
+    return delayMs;
+  }
+  function __autojs6_rhino_compat_tasks_descriptor(options) {
+    const operation = "addDisposableTask";
+    const input = __autojs6_rhino_compat_tasks_option_object(options, operation);
+    __autojs6_rhino_compat_tasks_check_keys(input, operation, ["path", "scriptPath", "entry", "date", "time", "delayMs", "taskTimeoutMs", "constraints", "packaged", "backend", "timeoutMs", "signal"]);
+    const pathCount = (__autojs6_rhino_compat_tasks_has(input, "path") ? 1 : 0) +
+      (__autojs6_rhino_compat_tasks_has(input, "scriptPath") ? 1 : 0) +
+      (__autojs6_rhino_compat_tasks_has(input, "entry") ? 1 : 0);
+    if (pathCount !== 1) {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires exactly one of path, scriptPath, or entry.");
+    }
+    const descriptor = {};
+    if (__autojs6_rhino_compat_tasks_has(input, "entry")) {
+      descriptor.entry = input.entry;
+    } else {
+      descriptor.scriptPath = __autojs6_rhino_compat_tasks_has(input, "path") ? input.path : input.scriptPath;
+    }
+    descriptor.delayMs = __autojs6_rhino_compat_tasks_delay(input, operation);
+    if (__autojs6_rhino_compat_tasks_has(input, "taskTimeoutMs")) descriptor.taskTimeoutMs = input.taskTimeoutMs;
+    if (__autojs6_rhino_compat_tasks_has(input, "constraints")) descriptor.constraints = input.constraints;
+    if (__autojs6_rhino_compat_tasks_has(input, "packaged")) descriptor.packaged = input.packaged === true;
+    if (__autojs6_rhino_compat_tasks_has(input, "backend")) descriptor.backend = input.backend;
+    if (__autojs6_rhino_compat_tasks_has(input, "timeoutMs")) descriptor.timeoutMs = input.timeoutMs;
+    if (__autojs6_rhino_compat_tasks_has(input, "signal")) descriptor.signal = input.signal;
+    return descriptor;
+  }
+  function __autojs6_rhino_compat_tasks_query_options(options) {
+    const operation = "queryTasks";
+    const input = __autojs6_rhino_compat_tasks_option_object(options, operation);
+    __autojs6_rhino_compat_tasks_check_keys(input, operation, ["timeoutMs", "signal"]);
+    return input;
+  }
+  function __autojs6_rhino_compat_tasks_remove_options(options) {
+    const operation = "removeTask";
+    const input = __autojs6_rhino_compat_tasks_option_object(options, operation);
+    __autojs6_rhino_compat_tasks_check_keys(input, operation, ["timeoutMs", "signal"]);
+    return input;
+  }
+  function __autojs6_rhino_compat_task_id(value) {
+    if (value && typeof value === "object") {
+      throw __autojs6_rhino_compat_blocked_by_design("tasks.removeTask", "Pass an explicit WorkManager-owned string id; raw TimedTask/IntentTask objects are not accepted.");
+    }
+    const id = value === undefined || value === null ? "" : String(value).trim();
+    if (!id) {
+      throw __autojs6_rhino_compat_tasks_invalid("removeTask", "requires a non-empty task id string.");
+    }
+    return id;
+  }
+  function __autojs6_rhino_compat_tasks() {
+    if (__autojs6_rhino_compat_tasks_cache) {
+      return __autojs6_rhino_compat_tasks_cache;
+    }
+    __autojs6_rhino_compat_tasks_cache = Object.freeze({
+      addDisposableTask: function(options) {
+        let descriptor;
+        try {
+          descriptor = __autojs6_rhino_compat_tasks_descriptor(options);
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return __autojs6_limited_work_manager().scheduleOnce(descriptor);
+      },
+      removeTask: function(taskId, options) {
+        let id;
+        let input;
+        try {
+          id = __autojs6_rhino_compat_task_id(taskId);
+          input = __autojs6_rhino_compat_tasks_remove_options(options);
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return __autojs6_limited_work_manager().cancel(id, input).then(function() {
+          return true;
+        });
+      },
+      queryTasks: function(options) {
+        let input;
+        try {
+          input = __autojs6_rhino_compat_tasks_query_options(options);
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return __autojs6_limited_work_manager().list(input).then(function(tasks) {
+          return Object.freeze(tasks.filter(function(task) {
+            return task && task.type === "once";
+          }));
+        });
+      }
+    });
+    return __autojs6_rhino_compat_tasks_cache;
+  }
   function __autojs6_rhino_compat_facade() {
     if (__autojs6_rhino_compat_facade_cache) {
       return __autojs6_rhino_compat_facade_cache;
@@ -16945,6 +17095,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const images = __autojs6_rhino_compat_images();
     const ocr = __autojs6_rhino_compat_ocr();
     const ui = __autojs6_limited_ui();
+    const tasks = __autojs6_rhino_compat_tasks();
     __autojs6_rhino_compat_facade_cache = Object.freeze({
       toast: __autojs6_rhino_compat_toast,
       toastLog: __autojs6_rhino_compat_toast_log,
@@ -17001,6 +17152,7 @@ std::string buildEmbeddedScriptExecutionSource(
       images: images,
       ocr: ocr,
       ui: ui,
+      tasks: tasks,
       requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
       requestScreenCaptureAsync: __autojs6_rhino_compat_request_screen_capture,
       captureScreen: __autojs6_rhino_compat_capture_screen
@@ -17022,7 +17174,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -17057,7 +17209,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants and P12-09 constrained UI."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants and P12-09 constrained UI; P12-16 compat.tasks stays module-only."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -17098,6 +17250,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const images = __autojs6_rhino_compat_images();
     const ocr = __autojs6_rhino_compat_ocr();
     const ui = __autojs6_limited_ui();
+    const tasks = __autojs6_rhino_compat_tasks();
     __autojs6_limited_rhino_compat_cache = Object.freeze({
       name: "autojs6:compat",
       version: 1,
@@ -17162,6 +17315,7 @@ std::string buildEmbeddedScriptExecutionSource(
       images: images,
       ocr: ocr,
       ui: ui,
+      tasks: tasks,
       requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
       requestScreenCaptureAsync: __autojs6_rhino_compat_request_screen_capture,
       captureScreen: __autojs6_rhino_compat_capture_screen,

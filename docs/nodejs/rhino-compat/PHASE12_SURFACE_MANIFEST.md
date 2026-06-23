@@ -22,6 +22,15 @@ which Phase 12 workstream owns the next implementation or rejection.
 - `phase12.baseline`: Phase 12 checklist and baseline verifier.
 - `phase12.surface_manifest`: this manifest and its verifier.
 - `events.keys`: pure Rhino key constants through `autojs6:compat`.
+- `tasks.compat`: P12-15 locks `compat.tasks` v1 to disposable one-shot
+  migration over `work_manager`; P12-16 promotes
+  `require("autojs6:compat").tasks` with `addDisposableTask({ path,
+  date|time|delayMs, ... })` over `scheduleOnce`, `removeTask(id)` over
+  `cancel`, and `queryTasks(options?)` over `list`. The runtime returns
+  JSON-safe ids/snapshots only, keeps `require("tasks")` and global `tasks`
+  absent, defers daily/weekly user task database semantics to P12-17, defers
+  intent/broadcast triggers to P12-18, and keeps raw `TimedTask` / `IntentTask`
+  objects blocked by design.
 
 ## Current Provider POC Surfaces
 
@@ -47,13 +56,7 @@ which Phase 12 workstream owns the next implementation or rejection.
 
 ## Current Design-Locked Surfaces
 
-- `tasks.compat`: P12-15 locks `compat.tasks` v1 to disposable one-shot
-  migration over `work_manager`: `addDisposableTask({ path, date|delayMs, ... })`
-  maps to `scheduleOnce`, `removeTask(id)` maps to `cancel`, and
-  `queryTasks(options?)` maps to `list`. The design keeps JSON-safe ids/snapshots
-  only, leaves runtime facade work to P12-16, defers daily/weekly user task
-  database semantics to P12-17, defers intent/broadcast triggers to P12-18, and
-  keeps raw `TimedTask` / `IntentTask` objects blocked by design.
+- None in the current Phase 12 surface manifest.
 
 ## Current Rejected Surfaces
 
