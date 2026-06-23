@@ -202,7 +202,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：`build/reports/nodejs/rhino-compat-events-keys-facade-verification.json`
     - 报告产物：`build/reports/nodejs/rhino-compat-events-keys-facade-verification.md`
 
-- [ ] P12-04: 锁定 `input_observer` provider v1 contract。
+- [x] P12-04: 锁定 `input_observer` provider v1 contract。
   - 范围：将 S11-21 设计门禁变成可实现的 provider contract。
   - 建议 API：
     - `require("input_observer").observeKeys(descriptor, options?)`
@@ -223,9 +223,18 @@ Phase 12 task 本身可使用以下执行状态：
       `eventTime`、`repeatCount`。
     - queue size、event size、subscription count、timeout 和 close 行为有上限。
     - raw `KeyEvent`、`MotionEvent`、listener、thread 不跨过 bridge。
-  - Evidence：待补充。
+  - Evidence：
+    - Contract：`docs/nodejs/design/INPUT_OBSERVER_PROVIDER_V1.md`
+    - Schema fixture：`docs/nodejs/schemas/input_observer_provider_v1.schema.json`
+    - 既有设计同步：`docs/nodejs/design/RHINO_EVENTS_INPUT_OBSERVER.md`
+    - Loader 边界同步：`docs/nodejs/design/RHINO_COMPAT_LOADER.md`
+    - Surface manifest：`docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-input-observer-contract.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatInputObserverContract`
+    - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-contract-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-contract-verification.md`
 
-- [ ] P12-05: 实现 `input_observer` fake provider 和 JS module POC。
+- [x] P12-05: 实现 `input_observer` fake provider 和 JS module POC。
   - 范围：先使用 fake provider 验证 JS API、capability denial、queue drain 和
     cleanup，不要求 live Android key capture。
   - 建议产物：
@@ -240,7 +249,18 @@ Phase 12 task 本身可使用以下执行状态：
     - `close()` 幂等。
     - destroy 后 active observer count 为 0。
     - 未声明 capability 时 bridge dispatch 前失败。
-  - Evidence：待补充。
+  - Evidence：
+    - Runtime module：`app/src/main/cpp/node_bridge_sources.cpp`
+    - Bridge registry/provider：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`
+    - Capability manifest：`app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt`
+    - Resource cleanup type：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt`
+    - Provider health：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt`
+    - Types：`docs/nodejs/types/autojs6-node/input_observer.d.ts`
+    - Instrumentation fake transport：`app/src/androidTest/java/org/autojs/autojs/engine/NodeInputObserverBridgeInstrumentationTest.kt`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-input-observer-fake-provider.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatInputObserverFakeProvider`
+    - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-fake-provider-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-fake-provider-verification.md`
 
 - [ ] P12-06: 实现 live key observer provider gate。
   - 范围：在可用 Android 环境上接入受控 key observation；如果 live path

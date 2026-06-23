@@ -23,6 +23,12 @@ which Phase 12 workstream owns the next implementation or rejection.
 - `phase12.surface_manifest`: this manifest and its verifier.
 - `events.keys`: pure Rhino key constants through `autojs6:compat`.
 
+## Current Provider POC Surfaces
+
+- `input_observer`: P12-04 provider v1 contract plus P12-05 fake-source
+  `require("input_observer")` POC. Live Android key observation remains pending
+  for P12-06/P12-07.
+
 ## Rules
 
 - Every P12 task must map to exactly one surface group.

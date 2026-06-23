@@ -81,6 +81,7 @@ function buildChecks(files) {
   const keyEntries = eventsKeys ? eventsKeys.apiEntries || [] : [];
   const runtime = files.runtime.text;
   const keysBlock = extractBetween(runtime, "const __autojs6_rhino_compat_key_constants", "  function __autojs6_rhino_compat_error");
+  const compatBlock = extractBetween(runtime, "function __autojs6_limited_rhino_compat()", "  function __autojs6_limited_work_manager()");
   return [
     check(
       "runtime-key-constant-values",
@@ -172,9 +173,9 @@ function buildChecks(files) {
     ),
     check(
       "no-input-observer-promotion",
-      !runtime.includes("observeKeys") &&
-        !runtime.includes("input_observer") &&
-        !runtime.includes("compat.events.observe"),
+      !compatBlock.includes("observeKeys") &&
+        !compatBlock.includes("input_observer") &&
+        !compatBlock.includes("compat.events.observe"),
       "P12-03 must not promote input_observer, key listeners, touch listeners, or observer facades.",
     ),
   ];

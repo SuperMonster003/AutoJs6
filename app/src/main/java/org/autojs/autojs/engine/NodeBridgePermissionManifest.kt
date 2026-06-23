@@ -34,6 +34,10 @@ object NodeBridgePermissionManifest {
     const val NETWORK = "network"
     const val WORK_MANAGER = "work_manager"
     const val JAVA_INTEROP = "java_interop"
+    const val INPUT_OBSERVER = "input_observer"
+    const val INPUT_OBSERVER_KEYS = "input_observer.keys"
+    const val INPUT_OBSERVER_TOUCH = "input_observer.touch"
+    const val INPUT_OBSERVER_INTERCEPT = "input_observer.intercept"
 
     const val ANDROID_PERMISSION_INTERNET = "android.permission.INTERNET"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE"
@@ -68,6 +72,10 @@ object NodeBridgePermissionManifest {
         NETWORK,
         WORK_MANAGER,
         JAVA_INTEROP,
+        INPUT_OBSERVER,
+        INPUT_OBSERVER_KEYS,
+        INPUT_OBSERVER_TOUCH,
+        INPUT_OBSERVER_INTERCEPT,
     )
 
     private val definedCapabilitySet = definedCapabilities.toSet()
@@ -83,6 +91,15 @@ object NodeBridgePermissionManifest {
         "storages" to STORAGE,
         "sqlite" to DATABASE,
         "java" to JAVA_INTEROP,
+        "input-observer" to INPUT_OBSERVER,
+        "input.observer" to INPUT_OBSERVER,
+        "inputobserver" to INPUT_OBSERVER,
+        "input-observer.keys" to INPUT_OBSERVER_KEYS,
+        "input.observer.keys" to INPUT_OBSERVER_KEYS,
+        "input-observer.touch" to INPUT_OBSERVER_TOUCH,
+        "input.observer.touch" to INPUT_OBSERVER_TOUCH,
+        "input-observer.intercept" to INPUT_OBSERVER_INTERCEPT,
+        "input.observer.intercept" to INPUT_OBSERVER_INTERCEPT,
     )
 
     private val androidPermissionsByCapability = linkedMapOf(
@@ -226,6 +243,10 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.FETCH, NodeBridgeModules.WEBSOCKET -> listOf(NETWORK)
             NodeBridgeModules.WORK_MANAGER -> listOf(WORK_MANAGER)
             NodeBridgeModules.JAVA -> listOf(JAVA_INTEROP)
+            NodeBridgeModules.INPUT_OBSERVER -> when (method) {
+                "getAvailableSources" -> listOf(INPUT_OBSERVER)
+                else -> listOf(INPUT_OBSERVER, INPUT_OBSERVER_KEYS)
+            }
             else -> emptyList()
         }
         return required.map(::normalizeCapability).distinct()

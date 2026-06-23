@@ -14,7 +14,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(13, definitions.size)
+        assertEquals(14, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -41,6 +41,11 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             capabilities = listOf(NodeBridgePermissionManifest.WORK_MANAGER),
         )
         assertProvider(
+            id = "input_observer",
+            modules = listOf(NodeBridgeModules.INPUT_OBSERVER),
+            capabilities = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
+        )
+        assertProvider(
             id = "shell",
             modules = listOf(NodeBridgeModules.SHELL),
             capabilities = listOf(NodeBridgePermissionManifest.SHELL),
@@ -63,9 +68,11 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("media_projection").status)
         assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("image").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ui").status)
+        assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("input_observer").status)
         assertEquals("mlkit-chinese", healthById.getValue("ocr").details.getValue("defaultEngine"))
         assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))
         assertTrue(healthById.getValue("ui").details.getValue("liveMethods").contains("showLayout"))
+        assertEquals("fake", healthById.getValue("input_observer").details.getValue("availableSource"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("storage").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("database").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("work_manager").status)

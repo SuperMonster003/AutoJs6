@@ -131,6 +131,7 @@ object NodeBridgeProviderRegistry {
     private const val UI_PROVIDER = "ui"
     private const val WORK_MANAGER_PROVIDER = "work_manager"
     private const val SHELL_PROVIDER = "shell"
+    private const val INPUT_OBSERVER_PROVIDER = "input_observer"
 
     val definitions: List<NodeBridgeProviderDefinition> = listOf(
         provider(
@@ -200,6 +201,12 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.UI),
             capabilities = listOf(NodeBridgePermissionManifest.UI),
             packagedSupport = packagedSupported("Activity-owned declarative UI sessions are handle-based and project-owned"),
+        ),
+        provider(
+            id = INPUT_OBSERVER_PROVIDER,
+            modules = listOf(NodeBridgeModules.INPUT_OBSERVER),
+            capabilities = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
+            packagedSupport = packagedProviderDependent("P12-05 supports fake-source POC only; live key observation requires P12-06 foreground/user-visible policy"),
         ),
         provider(
             id = WORK_MANAGER_PROVIDER,
@@ -301,6 +308,7 @@ object NodeBridgeProviderRegistry {
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
         IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        INPUT_OBSERVER_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
@@ -319,6 +327,14 @@ object NodeBridgeProviderRegistry {
             "eventDelivery" to "bounded drainEvents JSON snapshots",
             "maxActiveSessionsPerExecution" to "4",
             "statusReason" to "Activity-owned declarative UI MVP",
+        )
+        INPUT_OBSERVER_PROVIDER -> linkedMapOf(
+            "pocMethods" to "getAvailableSources,observeKeys,drainEvents,close",
+            "availableSource" to "fake",
+            "blockedLiveSource" to "accessibility",
+            "maxActiveSubscriptionsPerExecution" to "8",
+            "eventDelivery" to "bounded drainEvents JSON snapshots",
+            "statusReason" to "P12-05 fake-source provider POC; live Android key capture remains P12-06",
         )
         WORK_MANAGER_PROVIDER -> linkedMapOf(
             "liveMethods" to "scheduleOnce,schedulePeriodic,cancel,list",

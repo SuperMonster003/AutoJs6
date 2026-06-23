@@ -47,8 +47,10 @@ Node compatibility contract.
 
 ## Future Node Module Shape
 
-The proposed module name is `input_observer`. A later implementation may expose it
-directly and optionally wrap a small Rhino-name facade after the provider is stable.
+The proposed module name is `input_observer`. P12-04 freezes the provider v1
+contract in `INPUT_OBSERVER_PROVIDER_V1.md`; P12-05 exposes it directly through a
+fake provider POC for JSON snapshot, queue drain, capability denial, and close
+semantics. The live `accessibility` source remains unavailable until P12-06.
 
 ```js
 const inputObserver = require("input_observer");
@@ -60,7 +62,7 @@ const keys = await inputObserver.observeKeys(["volume_up"], {
 });
 
 keys.on("event", (event) => {
-  console.log(event.keyName, event.action);
+  console.log(event.key, event.action);
 });
 
 await keys.close();
@@ -89,9 +91,9 @@ Key events should be serialized as frozen JSON snapshots:
 {
   "type": "key",
   "action": "down",
-  "keyName": "volume_up",
+  "key": "volume_up",
   "keyCode": 24,
-  "eventTimeMs": 123456789,
+  "eventTime": 123456789,
   "repeatCount": 0,
   "source": "accessibility"
 }
@@ -204,3 +206,14 @@ absence of promoted `input_observer` runtime capability entries.
 `compat.keys` and `compat.events.keys` constants are promoted, while the runtime
 still does not add key observers, touch observers, `input_observer`, a Rhino
 `events` global, or a Node core `events` override.
+
+`verifyNodeRhinoCompatInputObserverContract` locks the P12-04 provider v1
+contract, including the canonical `source`, `key`, `keyCode`, `action`,
+`eventTime`, and `repeatCount` key event fields, the fake-provider schema, and the
+capability split between `input_observer.keys`, `input_observer.touch`, and
+`input_observer.intercept`.
+
+`verifyNodeRhinoCompatInputObserverFakeProvider` locks the P12-05 fake provider
+POC: `require("input_observer")` is available, `source: "fake"` returns opaque
+subscription handles and drained JSON events, and `source: "accessibility"` still
+fails closed until the live provider gate.

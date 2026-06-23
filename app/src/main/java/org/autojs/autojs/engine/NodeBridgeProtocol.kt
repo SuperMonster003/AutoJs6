@@ -569,6 +569,7 @@ object NodeBridgeModules {
     const val WEBSOCKET = "websocket"
     const val WORK_MANAGER = "work_manager"
     const val JAVA = "java"
+    const val INPUT_OBSERVER = "input_observer"
 
     val toastMethods = setOf("showToast", "toast")
     val appMethods = setOf("launchPackage", "launchApp", "openAppSetting", "startActivity")
@@ -621,6 +622,7 @@ object NodeBridgeModules {
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
     val javaMethods = setOf("type", "callStatic", "new")
+    val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
         TOAST to toastMethods,
@@ -646,6 +648,7 @@ object NodeBridgeModules {
         WEBSOCKET to websocketMethods,
         WORK_MANAGER to workManagerMethods,
         JAVA to javaMethods,
+        INPUT_OBSERVER to inputObserverMethods,
     )
 
     fun supports(module: String, method: String): Boolean {
@@ -718,6 +721,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val notificationIdCounter = AtomicInteger(1_000_000)
     private val sensorSubscriptions = ConcurrentHashMap<String, ControlledSensorSubscription>()
     private val uiSessionIds = ConcurrentHashMap.newKeySet<String>()
+    private val inputObserverSubscriptions = ConcurrentHashMap<String, ControlledInputObserverSubscription>()
     private val sensorManager by lazy {
         appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
     }
@@ -766,6 +770,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, auditedCallback)
             request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, auditedCallback)
             request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, auditedCallback)
+            request.module == NodeBridgeModules.INPUT_OBSERVER && request.method in NodeBridgeModules.inputObserverMethods -> dispatchInputObserver(request, auditedCallback)
             else -> auditedCallback(unavailable(request))
         }
     }
@@ -778,6 +783,7 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.ocr_active_operation_count", ocrOperations.size.toString())
         put("embedded_script.database_active_handle_count", databaseHandles.size.toString())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
+        put("embedded_script.input_observer_active_subscription_count", inputObserverSubscriptions.size.toString())
         putAll(NodeLifecycleCheckpointStore.nativeDiagnostics(appContext, engineInfo))
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
         putAll(capabilityBrokerAudit.nativeDiagnostics())
@@ -802,6 +808,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "notifications" to notificationHandles.size,
                 "sensors" to sensorSubscriptions.size,
                 "ui" to uiSessionIds.size,
+                "input_observer" to inputObserverSubscriptions.size,
                 "work_manager" to workManagerTasks.size,
                 "shell" to activeShellCommands.get(),
             ),
@@ -833,6 +840,7 @@ class AndroidNodeBridgeCapabilityProvider(
         notificationHandles.clear()
         sensorSubscriptions.clear()
         uiSessionIds.clear()
+        inputObserverSubscriptions.clear()
     }
 
     private fun unavailable(request: NodeBridgeRequest): NodeBridgeResponse {
@@ -2373,6 +2381,113 @@ class AndroidNodeBridgeCapabilityProvider(
             module = request.module,
             method = request.method,
         )
+    }
+
+    private fun dispatchInputObserver(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        when (request.method) {
+            "getAvailableSources" -> dispatchInputObserverAvailableSources(request, callback)
+            "observeKeys" -> dispatchInputObserverObserveKeys(request, callback)
+            "drainEvents" -> dispatchInputObserverDrainEvents(request, callback)
+            "close" -> dispatchInputObserverClose(request, callback)
+            else -> callback(unavailable(request))
+        }
+    }
+
+    private fun dispatchInputObserverAvailableSources(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        callback(
+            NodeBridgeResponse.success(
+                request.id,
+                JSONArray()
+                    .put(ControlledInputObserverPolicy.sourceJson("fake", available = true, live = false))
+                    .put(
+                        ControlledInputObserverPolicy.sourceJson(
+                            "accessibility",
+                            available = false,
+                            live = true,
+                            reason = "P12-06 live input observer provider is not promoted.",
+                        ),
+                    )
+                    .toString(),
+            ),
+        )
+    }
+
+    private fun dispatchInputObserverObserveKeys(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val parsed = ControlledInputObserverDescriptor.fromRequest(request)
+        if (parsed.error != null || parsed.value == null) {
+            callback(NodeBridgeResponse.failure(request.id, parsed.error ?: NodeBridgeError.processDead()))
+            return
+        }
+        val descriptor = parsed.value
+        if (descriptor.source != "fake") {
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "P12-06 live input observer provider for source=${descriptor.source}",
+                    ),
+                ),
+            )
+            return
+        }
+        if (inputObserverSubscriptions.size >= ControlledInputObserverPolicy.MAX_ACTIVE_SUBSCRIPTIONS) {
+            bridgeResourceLimitRejections.incrementAndGet()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.resourceLimit(
+                        message = "AutoJs6 input_observer bridge reached the active subscription limit.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val subscriptionId = "input-observer-${UUID.randomUUID()}"
+        val subscription = ControlledInputObserverSubscription(
+            id = subscriptionId,
+            source = descriptor.source,
+            keys = descriptor.keys,
+            actions = descriptor.actions,
+            maxQueueSize = descriptor.maxQueueSize,
+        )
+        subscription.queueEvent(
+            key = descriptor.keys.first(),
+            keyCode = ControlledInputObserverPolicy.keyCodeFor(descriptor.keys.first()),
+            action = descriptor.actions.firstOrNull() ?: "down",
+        )
+        inputObserverSubscriptions[subscriptionId] = subscription
+        resourceRegistry.register(
+            type = NodeBridgeResourceType.INPUT_OBSERVER_SUBSCRIPTION,
+            id = subscriptionId,
+            metadata = mapOf(
+                "source" to descriptor.source,
+                "keys" to descriptor.keys.joinToString(","),
+                "actions" to descriptor.actions.joinToString(","),
+            ),
+        ) {
+            inputObserverSubscriptions.remove(subscriptionId)?.close()
+        }
+        callback(NodeBridgeResponse.success(request.id, subscription.toJson().toString()))
+    }
+
+    private fun dispatchInputObserverDrainEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val subscriptionId = args.optString(0, "")
+        val maxEvents = (args.optJSONObject(1)?.optInt("maxEvents", ControlledInputObserverPolicy.DEFAULT_DRAIN_BATCH_SIZE)
+            ?: ControlledInputObserverPolicy.DEFAULT_DRAIN_BATCH_SIZE)
+            .coerceIn(1, ControlledInputObserverPolicy.MAX_DRAIN_BATCH_SIZE)
+        val subscription = inputObserverSubscriptions[subscriptionId]
+        callback(NodeBridgeResponse.success(request.id, (subscription?.drainEvents(maxEvents) ?: JSONArray()).toString()))
+    }
+
+    private fun dispatchInputObserverClose(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val subscriptionId = request.argsArray().optString(0, "")
+        val closed = subscriptionId.isNotBlank() && resourceRegistry.close(subscriptionId, "input_observer.close")
+        callback(NodeBridgeResponse.success(request.id, closed.toString()))
     }
 
     private fun dispatchClipboard(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -5116,6 +5231,206 @@ private object ControlledNotificationPolicy {
 }
 
 private class NotificationBridgeException(val bridgeError: NodeBridgeError) : RuntimeException(bridgeError.message)
+
+private data class ControlledInputObserverRequest(
+    val source: String,
+    val keys: List<String>,
+    val actions: List<String>,
+    val maxQueueSize: Int,
+)
+
+private data class ControlledInputObserverDescriptor(
+    val value: ControlledInputObserverRequest? = null,
+    val error: NodeBridgeError? = null,
+) {
+    companion object {
+        fun fromRequest(request: NodeBridgeRequest): ControlledInputObserverDescriptor {
+            val args = runCatching { JSONArray(request.argsJson.ifBlank { "[]" }) }.getOrDefault(JSONArray())
+            val payload = args.optJSONObject(0)
+                ?: return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "input_observer.${request.method} requires a descriptor object.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            if (payload.optString("type", "key") != "key") {
+                return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "input_observer.${request.method} supports only type=key.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            if (payload.optBoolean("intercept", false)) {
+                return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.permissionDenied(
+                        message = "input_observer key interception requires the separate input_observer.intercept provider gate.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val keys = payload.optJSONArray("keys")?.toStringList()
+                .orEmpty()
+                .map { it.trim().lowercase(Locale.US) }
+                .filter { it.isNotEmpty() }
+                .distinct()
+            if (keys.isEmpty()) {
+                return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "input_observer.${request.method} requires at least one key name.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val actions = payload.optJSONArray("actions")?.toStringList()
+                .orEmpty()
+                .map { it.trim().lowercase(Locale.US) }
+                .filter { it.isNotEmpty() }
+                .ifEmpty { listOf("down", "up") }
+                .distinct()
+            if (actions.any { it !in ControlledInputObserverPolicy.allowedActions }) {
+                return ControlledInputObserverDescriptor(
+                    error = NodeBridgeError.invalidRequest(
+                        message = "input_observer.${request.method} actions may contain only down and up.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+            val options = args.optJSONObject(1) ?: JSONObject()
+            val maxQueueSize = parseInt(
+                options.opt("maxQueueSize"),
+                fallback = ControlledInputObserverPolicy.DEFAULT_QUEUE_SIZE,
+            ).coerceIn(1, ControlledInputObserverPolicy.MAX_QUEUE_SIZE)
+            return ControlledInputObserverDescriptor(
+                value = ControlledInputObserverRequest(
+                    source = payload.optString("source", "fake").trim().lowercase(Locale.US).ifBlank { "fake" },
+                    keys = keys,
+                    actions = actions,
+                    maxQueueSize = maxQueueSize,
+                ),
+            )
+        }
+
+        private fun JSONArray.toStringList(): List<String> {
+            return (0 until length()).mapNotNull { index -> optString(index).takeIf { it.isNotBlank() } }
+        }
+
+        private fun parseInt(value: Any?, fallback: Int): Int {
+            return when (value) {
+                is Int -> value
+                is Long -> value.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
+                is Number -> value.toDouble().takeIf { it.isFinite() }?.toInt()
+                is String -> value.toIntOrNull()
+                else -> null
+            } ?: fallback
+        }
+    }
+}
+
+private object ControlledInputObserverPolicy {
+    const val MAX_ACTIVE_SUBSCRIPTIONS = 8
+    const val DEFAULT_QUEUE_SIZE = 64
+    const val MAX_QUEUE_SIZE = 256
+    const val DEFAULT_DRAIN_BATCH_SIZE = 32
+    const val MAX_DRAIN_BATCH_SIZE = 128
+
+    val allowedActions: Set<String> = setOf("down", "up")
+
+    fun sourceJson(id: String, available: Boolean, live: Boolean, reason: String = ""): JSONObject {
+        return JSONObject()
+            .put("id", id)
+            .put("type", "key")
+            .put("available", available)
+            .put("live", live)
+            .apply {
+                if (reason.isNotBlank()) {
+                    put("reason", reason)
+                }
+            }
+    }
+
+    fun keyCodeFor(key: String): Int {
+        return when (key.lowercase(Locale.US)) {
+            "home" -> 3
+            "back" -> 4
+            "menu" -> 82
+            "volumeup", "volume_up" -> 24
+            "volumedown", "volume_down" -> 25
+            else -> 0
+        }
+    }
+}
+
+private class ControlledInputObserverSubscription(
+    val id: String,
+    private val source: String,
+    private val keys: List<String>,
+    private val actions: List<String>,
+    private val maxQueueSize: Int,
+) {
+    private val events = ConcurrentLinkedQueue<JSONObject>()
+    private val droppedCount = AtomicInteger(0)
+    private val closed = AtomicBoolean(false)
+    private val createdAt = System.currentTimeMillis()
+
+    fun queueEvent(key: String, keyCode: Int, action: String) {
+        if (closed.get()) {
+            return
+        }
+        queue(
+            JSONObject()
+                .put("type", "key")
+                .put("source", source)
+                .put("key", key)
+                .put("keyCode", keyCode)
+                .put("action", action)
+                .put("eventTime", System.currentTimeMillis())
+                .put("repeatCount", 0),
+        )
+    }
+
+    fun drainEvents(maxEvents: Int): JSONArray {
+        val result = JSONArray()
+        repeat(maxEvents.coerceAtLeast(0)) {
+            val event = events.poll() ?: return@repeat
+            result.put(event)
+        }
+        return result
+    }
+
+    fun close() {
+        closed.set(true)
+        events.clear()
+    }
+
+    fun toJson(): JSONObject {
+        return JSONObject()
+            .put("id", id)
+            .put("type", "key")
+            .put("source", source)
+            .put("keys", JSONArray(keys))
+            .put("actions", JSONArray(actions))
+            .put("ready", true)
+            .put("closed", closed.get())
+            .put("createdAt", createdAt)
+            .put("droppedCount", droppedCount.get())
+    }
+
+    private fun queue(event: JSONObject) {
+        while (events.size >= maxQueueSize) {
+            if (events.poll() == null) {
+                break
+            }
+            droppedCount.incrementAndGet()
+        }
+        events.add(event)
+    }
+}
 
 private data class ControlledSensorRequest(
     val type: String,

@@ -636,6 +636,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.NOTIFICATIONS to setOf("notify", "cancel", "cancelAll"),
             NodeBridgeModules.SENSORS to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             NodeBridgeModules.UI to setOf("showLayout", "update", "batchUpdate", "close", "drainEvents"),
+            NodeBridgeModules.INPUT_OBSERVER to setOf("observeKeys", "drainEvents", "close", "getAvailableSources"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
         )
     }

@@ -550,7 +550,7 @@ bus.emit("ready");
 
 `node:events` is only the pure JavaScript event-emitter replacement. It is not a Rhino `events` facade and does not observe Android keys or touch input. `events.__asEmitter__()` / `events.asEmitter()` is blocked by design because it depends on Rhino `ScriptableObject`, Java `EventEmitter`, `Thread`, and `MainThreadProxy` semantics.
 
-`events.observeKey()`, `events.onKeyDown()`, `events.onKeyUp()`, `events.setKeyInterceptionEnabled()`, and `events.observeTouch()` remain design-gated in S11-21. A future `input_observer` provider must return opaque subscription handles, drain JSON event snapshots through bounded queues, close every listener on script stop/provider destroy, and reject packaged/background usage unless a foreground user-visible provider state is valid. The `events.keys` constants are a safe pure subset but are not exposed by the S11-21 design-only task.
+`events.observeKey()`, `events.onKeyDown()`, `events.onKeyUp()`, `events.setKeyInterceptionEnabled()`, and `events.observeTouch()` remain live-provider gated. P12-05 exposes `require("input_observer")` only as a fake-source provider POC so scripts and tests can validate opaque subscription handles, drained JSON event snapshots, close behavior, and capability denial before live Android key capture is promoted. Use `source: "fake"` for that POC path; the `accessibility` live source still fails closed until P12-06/P12-07. The `events.keys` constants are available through `require("autojs6:compat").keys` and `require("autojs6:compat").events.keys`.
 
 ### Scheduled Tasks
 

@@ -63,19 +63,35 @@
     },
     {
       "id": "input_observer",
-      "status": "planned",
+      "status": "provider_poc",
       "tasks": [
         "P12-04",
         "P12-05",
         "P12-06",
         "P12-07"
       ],
-      "summary": "Controlled key/touch observer provider and cleanup gates.",
+      "summary": "Controlled key observer contract and fake-source provider POC; live provider and cleanup/security gates remain pending.",
       "runtimeSurface": [
-        "input_observer"
+        "require(\"input_observer\")",
+        "input_observer.observeKeys({ source: \"fake\" })",
+        "InputObserverSubscription.drainEvents()",
+        "InputObserverSubscription.close()"
       ],
       "evidence": [
-        "docs/nodejs/design/RHINO_EVENTS_INPUT_OBSERVER.md"
+        "docs/nodejs/design/RHINO_EVENTS_INPUT_OBSERVER.md",
+        "docs/nodejs/design/INPUT_OBSERVER_PROVIDER_V1.md",
+        "docs/nodejs/schemas/input_observer_provider_v1.schema.json",
+        "app/src/main/cpp/node_bridge_sources.cpp",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt",
+        "docs/nodejs/types/autojs6-node/input_observer.d.ts",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeInputObserverBridgeInstrumentationTest.kt",
+        "tools/nodejs/phase12/verify-rhino-compat-input-observer-contract.js",
+        "tools/nodejs/phase12/verify-rhino-compat-input-observer-fake-provider.js",
+        ":app:verifyNodeRhinoCompatInputObserverContract",
+        ":app:verifyNodeRhinoCompatInputObserverFakeProvider"
       ]
     },
     {

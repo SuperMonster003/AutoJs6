@@ -8181,6 +8181,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_notifications_cache = null;
   let __autojs6_limited_sensors_cache = null;
   let __autojs6_limited_ui_cache = null;
+  let __autojs6_limited_input_observer_cache = null;
   let __autojs6_limited_clipboard_cache = null;
   let __autojs6_limited_device_cache = null;
   let __autojs6_limited_shell_cache = null;
@@ -9110,6 +9111,10 @@ std::string buildEmbeddedScriptExecutionSource(
     if (moduleName === "notifications") return ["notifications"];
     if (moduleName === "sensors") return ["sensors"];
     if (moduleName === "ui") return ["ui"];
+    if (moduleName === "input_observer") {
+      if (methodName === "getAvailableSources") return ["input_observer"];
+      return ["input_observer", "input_observer.keys"];
+    }
     if (moduleName === "clipboard") return ["clipboard"];
     if (moduleName === "device") return ["device"];
     if (moduleName === "shell") return ["shell"];
@@ -20417,6 +20422,252 @@ std::string buildEmbeddedScriptExecutionSource(
       subscribe
     });
     return __autojs6_limited_sensors_cache;
+  }
+  const __autojs6_input_observer_policy = Object.freeze({
+    maxActiveSubscriptions: 8,
+    defaultQueueSize: 64,
+    maxQueueSize: 256,
+    defaultDrainBatchSize: 32,
+    maxDrainBatchSize: 128,
+    defaultTimeoutMs: 10000,
+    maxTimeoutMs: 60000,
+    allowedActions: Object.freeze(["down", "up"]),
+    allowedSources: Object.freeze(["fake", "accessibility"])
+  });
+  function __autojs6_input_observer_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_input_observer_invalid_argument_error(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "input_observer",
+      methodName
+    );
+  }
+  function __autojs6_input_observer_number(value, fallback, min, max) {
+    const numberValue = value === undefined || value === null ? fallback : Number(value);
+    if (!Number.isFinite(numberValue)) {
+      return fallback;
+    }
+    return Math.min(max, Math.max(min, Math.trunc(numberValue)));
+  }
+  function __autojs6_input_observer_string_list(value, methodName, propertyName) {
+    const values = Array.isArray(value) ? value : [];
+    const output = [];
+    for (const item of values) {
+      const text = String(item === undefined || item === null ? "" : item).trim().toLowerCase();
+      if (!text) continue;
+      if (output.indexOf(text) < 0) {
+        output.push(text);
+      }
+    }
+    if (output.length === 0) {
+      throw __autojs6_input_observer_invalid_argument_error(
+        methodName,
+        "input_observer." + methodName + " requires at least one " + propertyName + "."
+      );
+    }
+    return output;
+  }
+  function __autojs6_input_observer_descriptor(value, methodName) {
+    const source = Array.isArray(value) ? { keys: value } : value;
+    if (!source || typeof source !== "object" || Array.isArray(source)) {
+      throw __autojs6_input_observer_invalid_argument_error(
+        methodName,
+        "input_observer." + methodName + " requires a descriptor object or key-name array."
+      );
+    }
+    const keys = __autojs6_input_observer_string_list(source.keys, methodName, "key name");
+    const actionValues = source.actions === undefined || source.actions === null
+      ? ["down", "up"]
+      : __autojs6_input_observer_string_list(source.actions, methodName, "action");
+    for (const action of actionValues) {
+      if (__autojs6_input_observer_policy.allowedActions.indexOf(action) < 0) {
+        throw __autojs6_input_observer_invalid_argument_error(
+          methodName,
+          "input_observer." + methodName + " actions may contain only down and up."
+        );
+      }
+    }
+    if (source.intercept === true) {
+      throw __autojs6_input_observer_invalid_argument_error(
+        methodName,
+        "input_observer." + methodName + " does not support key interception in P12-05."
+      );
+    }
+    const sourceName = String(source.source === undefined || source.source === null ? "fake" : source.source)
+      .trim()
+      .toLowerCase() || "fake";
+    if (__autojs6_input_observer_policy.allowedSources.indexOf(sourceName) < 0) {
+      throw __autojs6_input_observer_invalid_argument_error(
+        methodName,
+        "input_observer." + methodName + " source must be fake or accessibility."
+      );
+    }
+    return Object.freeze({
+      type: "key",
+      keys: Object.freeze(keys),
+      actions: Object.freeze(actionValues),
+      source: sourceName,
+      intercept: false
+    });
+  }
+  function __autojs6_input_observer_bridge_options(options, methodName, fallbackMs) {
+    const opts = __autojs6_input_observer_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(
+        __autojs6_input_observer_number(
+          opts.timeoutMs,
+          fallbackMs,
+          1,
+          __autojs6_input_observer_policy.maxTimeoutMs
+        )
+      ),
+      permissions: methodName === "getAvailableSources"
+        ? ["input_observer"]
+        : ["input_observer", "input_observer.keys"],
+      signal: __autojs6_bridge_signal_from_options(opts)
+    };
+  }
+  function __autojs6_input_observer_request_options(options) {
+    const opts = __autojs6_input_observer_options(options);
+    const request = {};
+    if (opts.maxQueueSize !== undefined) {
+      request.maxQueueSize = __autojs6_input_observer_number(
+        opts.maxQueueSize,
+        __autojs6_input_observer_policy.defaultQueueSize,
+        1,
+        __autojs6_input_observer_policy.maxQueueSize
+      );
+    }
+    if (opts.maxEvents !== undefined) {
+      request.maxEvents = __autojs6_input_observer_number(
+        opts.maxEvents,
+        __autojs6_input_observer_policy.defaultDrainBatchSize,
+        1,
+        __autojs6_input_observer_policy.maxDrainBatchSize
+      );
+    }
+    if (opts.timeoutMs !== undefined) {
+      request.timeoutMs = __autojs6_input_observer_number(
+        opts.timeoutMs,
+        __autojs6_input_observer_policy.defaultTimeoutMs,
+        1,
+        __autojs6_input_observer_policy.maxTimeoutMs
+      );
+    }
+    return request;
+  }
+  function __autojs6_input_observer_freeze_event(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      type: "key",
+      source: String(source.source || ""),
+      key: String(source.key || ""),
+      keyCode: Number(source.keyCode || 0),
+      action: String(source.action || ""),
+      eventTime: Number(source.eventTime || 0),
+      repeatCount: Number(source.repeatCount || 0)
+    });
+  }
+  function __autojs6_input_observer_source(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const output = {
+      id: String(source.id || ""),
+      type: String(source.type || "key"),
+      available: Boolean(source.available),
+      live: Boolean(source.live)
+    };
+    if (source.reason !== undefined && source.reason !== null) {
+      output.reason = String(source.reason);
+    }
+    return Object.freeze(output);
+  }
+  function __autojs6_input_observer_subscription(record) {
+    const source = record && typeof record === "object" ? record : {};
+    const state = {
+      id: String(source.id || ""),
+      type: String(source.type || "key"),
+      source: String(source.source || "fake"),
+      ready: Boolean(source.ready !== false),
+      closed: Boolean(source.closed)
+    };
+    function drainEvents(options) {
+      if (state.closed) {
+        return Promise.resolve(Object.freeze([]));
+      }
+      const requestOptions = __autojs6_input_observer_request_options(options);
+      return __autojs6_call_autojs(
+        "input_observer",
+        "drainEvents",
+        [state.id, requestOptions],
+        __autojs6_input_observer_bridge_options(options, "drainEvents", 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(__autojs6_input_observer_freeze_event));
+      });
+    }
+    function close(options) {
+      if (state.closed) {
+        return Promise.resolve(false);
+      }
+      return __autojs6_call_autojs(
+        "input_observer",
+        "close",
+        [state.id, __autojs6_input_observer_request_options(options)],
+        __autojs6_input_observer_bridge_options(options, "close", 5000)
+      ).then(function(result) {
+        state.closed = true;
+        return Boolean(result);
+      }, function(error) {
+        state.closed = true;
+        throw error;
+      });
+    }
+    return Object.freeze({
+      get id() { return state.id; },
+      get type() { return state.type; },
+      get source() { return state.source; },
+      get ready() { return state.ready; },
+      get closed() { return state.closed; },
+      drainEvents,
+      close
+    });
+  }
+  function __autojs6_limited_input_observer() {
+    if (__autojs6_limited_input_observer_cache) {
+      return __autojs6_limited_input_observer_cache;
+    }
+    function observeKeys(descriptor, options) {
+      let prepared;
+      try {
+        prepared = __autojs6_input_observer_descriptor(descriptor, "observeKeys");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "input_observer",
+        "observeKeys",
+        [prepared, __autojs6_input_observer_request_options(options)],
+        __autojs6_input_observer_bridge_options(options, "observeKeys", 10000)
+      ).then(__autojs6_input_observer_subscription);
+    }
+    function getAvailableSources(options) {
+      return __autojs6_call_autojs(
+        "input_observer",
+        "getAvailableSources",
+        [__autojs6_input_observer_request_options(options)],
+        __autojs6_input_observer_bridge_options(options, "getAvailableSources", 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(__autojs6_input_observer_source));
+      });
+    }
+    __autojs6_limited_input_observer_cache = Object.freeze({
+      policy: __autojs6_input_observer_policy,
+      observeKeys,
+      getAvailableSources
+    });
+    return __autojs6_limited_input_observer_cache;
   }
   function __autojs6_call_autojs(moduleName, methodName, args, options) {
     const moduleValue = moduleName === undefined || moduleName === null ? "" : String(moduleName);
@@ -37960,6 +38211,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "ui") {
       return "ui";
     }
+    if (name === "input_observer") {
+      return "input_observer";
+    }
     if (name === "clipboard") {
       return "clipboard";
     }
@@ -38250,6 +38504,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "ui") {
       return __autojs6_limited_ui();
+    }
+    if (name === "input_observer") {
+      return __autojs6_limited_input_observer();
     }
     if (name === "clipboard") {
       return __autojs6_limited_clipboard();
