@@ -65,6 +65,14 @@
       "rhino": "08-shell.rhino.js",
       "node": "08-shell.node.cjs",
       "status": "static_verified"
+    },
+    {
+      "id": "tasks",
+      "title": "Task Migration Buckets",
+      "coverage": ["tasks", "work_manager"],
+      "rhino": "09-tasks.rhino.js",
+      "node": "09-tasks.node.cjs",
+      "status": "static_verified"
     }
   ]
 }

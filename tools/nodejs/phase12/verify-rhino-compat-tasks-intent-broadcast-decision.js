@@ -219,8 +219,9 @@ function buildChecks(files) {
           "partial:5",
           "unsupported:8",
           "blocked_by_design:3",
-          "Proceed to P12-19 tasks migration examples and smoke",
-        ]),
+        ]) &&
+        (matrixTasksRow.includes("Proceed to P12-19 tasks migration examples and smoke") ||
+          matrixTasksRow.includes("Proceed to P12-20 threads replacement maturity review")),
       "Generated matrix must advance tasks from P12-18 to P12-19.",
     ),
     check(

@@ -28,9 +28,11 @@ For the smallest stable entry-point shape, see [QUICK_START.md](QUICK_START.md).
 S11-27 adds static Rhino compatibility migration examples under
 `docs/nodejs/examples/rhino-compat`. They pair `*.rhino.js` legacy snippets with
 `*.node.cjs` `require("autojs6:compat")` rewrites for
-toast/files/storage/selector/image/ocr/app/device/shell. They are separate from
-the runnable `sample/nodejs` project catalog because they are source migration
-pairs rather than full project smoke tests.
+toast/files/storage/selector/image/ocr/app/device/shell. P12-19 extends the
+same static suite with tasks migration buckets for disposable-task async support
+and stable daily/weekly/intent-task rejections. They are separate from the
+runnable `sample/nodejs` project catalog because they are source migration pairs
+rather than full project smoke tests.
 
 Verify them with:
 

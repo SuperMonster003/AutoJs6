@@ -750,7 +750,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-tasks-intent-broadcast-decision-verification.md`
 
-- [ ] P12-19: 增加 tasks migration examples and smoke。
+- [x] P12-19: 增加 tasks migration examples and smoke。
   - 范围：为 disposable task、daily/weekly rejection 或 provider path、
     intent-task rejection 或 provider path 增加示例和 gate。
   - 建议产物：
@@ -759,7 +759,27 @@ Phase 12 task 本身可使用以下执行状态：
   - 验收：
     - 示例能被 example gate 编译。
     - supported_async 与 blocked_by_design cases 在报告中分桶。
-  - Evidence：待补充。
+  - Evidence：
+    - 示例：
+      `docs/nodejs/examples/rhino-compat/09-tasks.node.cjs` 和
+      `docs/nodejs/examples/rhino-compat/09-tasks.rhino.js` 覆盖
+      disposable task async migration、daily/weekly unsupported rejection、
+      intent-task unsupported rejection、`updateTask()` blocked_by_design，以及
+      raw task-object Rhino patterns。
+    - 报告：`docs/nodejs/reports/phase12/RHINO_TASKS_COMPAT.md` 将
+      `supported_async`、`unsupported`、`blocked_by_design` cases 分桶，并记录
+      `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` /
+      `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`。
+    - Example suite：`docs/nodejs/examples/rhino-compat/manifest.json`、
+      `docs/nodejs/examples/rhino-compat/README.md` 和
+      `tools/nodejs/phase11/verify-rhino-compat-examples.js` 纳入 tasks 覆盖。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-tasks-migration-examples.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatTasksMigrationExamples`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-migration-examples-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-migration-examples-verification.md`
 
 ### Track E: Threads replacement and worker/process policy
 

@@ -171,6 +171,12 @@ function riskSummary(module) {
 function nextStepFor(module, gapModule) {
   if (
     module.id === "tasks" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-19 tasks migration examples and smoke landed"))
+  ) {
+    return "Proceed to P12-20 threads replacement maturity review; keep raw task objects gated.";
+  }
+  if (
+    module.id === "tasks" &&
     (module.migration.notes || []).some((note) => note.includes("P12-18 IntentTask/broadcast provider rejected"))
   ) {
     return "Proceed to P12-19 tasks migration examples and smoke; keep raw task objects gated.";

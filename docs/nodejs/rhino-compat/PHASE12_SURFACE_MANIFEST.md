@@ -35,7 +35,10 @@ which Phase 12 workstream owns the next implementation or rejection.
     stable `addIntentTask()` / `queryIntentTasks()` / `getIntentTask(id)` /
     `removeIntentTask(id)` unsupported stubs without receiver registration,
     manifest mutation, custom broadcast authority, or raw `Intent` exposure.
-    Raw `TimedTask` / `IntentTask` objects remain blocked by design.
+    P12-19 adds checked examples in `docs/nodejs/examples/rhino-compat/09-tasks.*`
+    plus `RHINO_TASKS_COMPAT.md`, bucketing `supported_async`, `unsupported`,
+    and `blocked_by_design` cases. Raw `TimedTask` / `IntentTask` objects remain
+    blocked by design.
 
 ## Current Provider POC Surfaces
 

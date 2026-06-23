@@ -42,8 +42,11 @@ Rhino projects should keep their Rhino project type and should not add the Node 
 
 For checked migration pairs, see `docs/nodejs/examples/rhino-compat`. S11-27
 covers toast/files/storage/selector/image/ocr/app/device/shell with old Rhino
-snippets and Node `autojs6:compat` rewrites. The examples are statically
-verified by `verifyNodeRhinoCompatExamples`.
+snippets and Node `autojs6:compat` rewrites. P12-19 adds tasks migration
+examples covering supported async disposable tasks, unsupported daily/weekly and
+IntentTask rejections, and blocked raw task-object mutation. The examples are
+statically verified by `verifyNodeRhinoCompatExamples`, and the tasks-specific
+bucket report is verified by `verifyNodeRhinoCompatTasksMigrationExamples`.
 
 S11-28 adds dual-engine compatibility fixtures in
 `docs/nodejs/dual-engine-compat`. These pair Rhino snippets with Node
@@ -781,7 +784,7 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Do not rely on `require("rhino")`, `rhino.install()`, `importClass`, `importPackage`, `Packages`, or `JavaAdapter` inside Node.
 - Confirm unsupported builtins still fail with `ERR_AUTOJS6_*`.
 - Review `docs/nodejs/examples/rhino-compat` for checked
-  toast/files/storage/selector/image/ocr/app/device/shell migration pairs.
+  toast/files/storage/selector/image/ocr/app/device/shell/tasks migration pairs.
 - Review `docs/nodejs/dual-engine-compat` for S11-28 dual-engine fixtures that
   distinguish `supported_async` from `blocked_by_design`.
 - Run examples under `sample/nodejs/` for reference.

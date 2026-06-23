@@ -7087,7 +7087,8 @@
         "P12-15 compat.tasks v1 scope locked: only disposable one-shot add/remove/query over work_manager is eligible for P12-16; daily/weekly moves to P12-17, intent/broadcast moves to P12-18, and raw task objects remain blocked_by_design.",
         "P12-16 compat.tasks disposable facade landed: require(\"autojs6:compat\").tasks exposes addDisposableTask, removeTask(id), and queryTasks over work_manager.scheduleOnce/cancel/list, returns JSON-safe ids/snapshots, keeps require(\"tasks\") and global tasks absent, and keeps daily/weekly/intent/raw task object parity gated.",
         "P12-17 daily/weekly user-task database provider rejected: compat.tasks adds stable addDailyTask/addWeeklyTask unsupported stubs, queryTimedTasks/getTimedTask/removeTimedTask Node-owned aliases, and updateTask blocked_by_design stub without promoting the AutoJs6 task database provider.",
-        "P12-18 IntentTask/broadcast provider rejected: compat.tasks adds stable addIntentTask/queryIntentTasks/getIntentTask/removeIntentTask unsupported stubs without registering receivers, mutating manifests, granting custom broadcast authority, or exposing raw IntentTask/Intent objects."
+        "P12-18 IntentTask/broadcast provider rejected: compat.tasks adds stable addIntentTask/queryIntentTasks/getIntentTask/removeIntentTask unsupported stubs without registering receivers, mutating manifests, granting custom broadcast authority, or exposing raw IntentTask/Intent objects.",
+        "P12-19 tasks migration examples and smoke landed: docs/nodejs/examples/rhino-compat/09-tasks.* and RHINO_TASKS_COMPAT.md bucket supported_async, unsupported, and blocked_by_design cases without changing provider or runtime surface behavior."
       ],
       "apiEntries": [
         {

@@ -16,6 +16,7 @@ const REQUIRED_IDS = Object.freeze([
   "ocr",
   "app-device",
   "shell",
+  "tasks",
 ]);
 const REQUIRED_COVERAGE = Object.freeze([
   "toast",
@@ -27,6 +28,8 @@ const REQUIRED_COVERAGE = Object.freeze([
   "app",
   "device",
   "shell",
+  "tasks",
+  "work_manager",
 ]);
 const NODE_EXPECTATIONS = Object.freeze({
   toast: ["compat.toast(", "compat.toastLog("],
@@ -37,6 +40,24 @@ const NODE_EXPECTATIONS = Object.freeze({
   ocr: ["compat.requestScreenCapture(", "compat.captureScreen(", "compat.ocr.recognizeText(", "compat.images.recycle("],
   "app-device": ["compat.app.launchPackage(", "compat.device.isScreenOn(", "compat.device.vibrate("],
   shell: ["compat.shell(", "compat.shell.checkAccess("],
+  tasks: [
+    "compat.tasks",
+    "tasks.addDisposableTask(",
+    "tasks.queryTasks(",
+    "tasks.queryTimedTasks(",
+    "tasks.getTimedTask(",
+    "tasks.removeTask(",
+    "tasks.removeTimedTask(",
+    "tasks.addDailyTask(",
+    "tasks.addWeeklyTask(",
+    "tasks.addIntentTask(",
+    "tasks.queryIntentTasks(",
+    "tasks.getIntentTask(",
+    "tasks.removeIntentTask(",
+    "tasks.updateTask(",
+    "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED",
+    "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN",
+  ],
 });
 const RHINO_EXPECTATIONS = Object.freeze({
   toast: ["toast(", "toastLog("],
@@ -47,6 +68,23 @@ const RHINO_EXPECTATIONS = Object.freeze({
   ocr: ["requestScreenCapture(", "captureScreen(", "ocr.recognizeText(", "images.recycle("],
   "app-device": ["app.launchPackage(", "device.isScreenOn(", "device.vibrate("],
   shell: ["shell("],
+  tasks: [
+    "tasks.addDisposableTask(",
+    "tasks.queryTimedTasks(",
+    "tasks.getTimedTask(",
+    "tasks.removeTimedTask(",
+    "tasks.addDailyTask(",
+    "tasks.addWeeklyTask(",
+    "tasks.addIntentTask(",
+    "tasks.queryIntentTasks(",
+    "tasks.getIntentTask(",
+    "tasks.removeIntentTask(",
+    "tasks.addTask(",
+    "tasks.updateTask(",
+    "tasks.removeTask(",
+    "tasks.daysToTimeFlag(",
+    "tasks.timeFlagToDays(",
+  ],
 });
 
 const FILES = {
@@ -129,7 +167,7 @@ function buildChecks(files, manifest, examplesRoot) {
   checks.push(check(
     "manifest-required-coverage",
     REQUIRED_COVERAGE.every((name) => coverage.has(name)),
-    "manifest coverage must include toast, files, storage, selector, image, ocr, app, device, and shell",
+    "manifest coverage must include toast, files, storage, selector, image, ocr, app, device, shell, tasks, and work_manager",
   ));
   checks.push(check(
     "readme-core",
@@ -148,6 +186,7 @@ function buildChecks(files, manifest, examplesRoot) {
       "ocr",
       "app-device",
       "shell",
+      "tasks",
     ]),
     "README must describe the S11-27 Rhino compat example suite, manifest, coverage, and gate",
   ));
@@ -212,6 +251,7 @@ function buildChecks(files, manifest, examplesRoot) {
       "docs/nodejs/examples/rhino-compat",
       "verifyNodeRhinoCompatExamples",
       "toast/files/storage/selector/image/ocr/app/device/shell",
+      "tasks",
     ]),
     "migration guide must link the S11-27 Rhino compat example suite and gate",
   ));
@@ -222,6 +262,7 @@ function buildChecks(files, manifest, examplesRoot) {
       "docs/nodejs/examples/rhino-compat",
       "verifyNodeRhinoCompatExamples",
       "toast/files/storage/selector/image/ocr/app/device/shell",
+      "tasks",
     ]),
     "EXAMPLES.md must document the S11-27 Rhino compat migration examples",
   ));

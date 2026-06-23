@@ -677,3 +677,42 @@ tasks.register<Exec>("verifyNodeRhinoCompatTasksIntentBroadcastDecision") {
         nodePhase12ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodeRhinoCompatTasksMigrationExamples") {
+    group = "verification"
+    description = "Verifies the Phase 12 compat.tasks migration examples and bucket report."
+
+    dependsOn("verifyNodeRhinoCompatTasksIntentBroadcastDecision")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-tasks-migration-examples.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/examples/rhino-compat/09-tasks.node.cjs"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/examples/rhino-compat/09-tasks.rhino.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/examples/rhino-compat/manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/examples/rhino-compat/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/EXAMPLES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-examples.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_TASKS_COMPAT.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-compat-matrix.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-tasks-migration-examples-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-tasks-migration-examples-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}

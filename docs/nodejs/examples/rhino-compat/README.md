@@ -1,6 +1,6 @@
 # Rhino Compat Migration Examples
 
-Status: S11-27 static example set. These examples document common Rhino to
+Status: S11-27 static example set plus P12-19 tasks migration coverage. These examples document common Rhino to
 Embedded Node compatibility rewrites. They are not a runtime smoke suite; the
 gate verifies that every checked-in snippet compiles and that the Node examples
 use the expected `autojs6:compat` surface.
@@ -27,6 +27,7 @@ API family and source pair for each example.
 | `ocr` | `requestScreenCapture()`, `captureScreen()`, `ocr.recognizeText()` | `compat.requestScreenCapture()`, `compat.captureScreen()`, `compat.ocr.recognizeText()` |
 | `app-device` | `app.launchPackage()`, `device.*` | `compat.app.launchPackage()`, `compat.device.*` |
 | `shell` | `shell()` | `compat.shell()` |
+| `tasks` | `tasks.addDisposableTask()`, `tasks.addDailyTask()`, `tasks.addIntentTask()` | `compat.tasks.addDisposableTask()`, `compat.tasks.queryTasks()`, stable rejection stubs |
 
 ## Verification
 
@@ -40,7 +41,7 @@ The gate checks:
 
 - `manifest.json` schema and duplicate ids;
 - all Rhino and Node snippet files exist;
-- every required coverage family is present;
+- every required coverage family is present, including P12-19 `tasks`;
 - Node snippets start with `"nodejs";` and use `require("autojs6:compat")`;
 - Rhino and Node snippets pass `node --check` syntax compilation;
 - the migration guide and `EXAMPLES.md` link to this directory.

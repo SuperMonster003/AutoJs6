@@ -206,7 +206,8 @@ function buildChecks(files) {
           "blocked_by_design:3",
         ]) &&
         (matrixTasksRow.includes("Proceed to P12-18 intent/broadcast task compatibility decision") ||
-          matrixTasksRow.includes("Proceed to P12-19 tasks migration examples and smoke")),
+          matrixTasksRow.includes("Proceed to P12-19 tasks migration examples and smoke") ||
+          matrixTasksRow.includes("Proceed to P12-20 threads replacement maturity review")),
       "Generated matrix must advance tasks from P12-17 to P12-18.",
     ),
     check(
