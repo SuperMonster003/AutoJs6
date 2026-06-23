@@ -1,7 +1,8 @@
 # Rhino Threads Migration Policy
 
 Status: S11-25 design and policy gate; P12-20 maturity review keeps the same
-blocked-by-design decision. This document records how Rhino `threads` scripts
+blocked-by-design decision; P12-21 publishes the migration cookbook without
+changing the runtime surface. This document records how Rhino `threads` scripts
 should migrate to Embedded Node without adding a Rhino-style thread facade.
 
 ## Decision
@@ -214,6 +215,16 @@ for Phase 12 and kept the S11-25 conclusion:
   must not reuse `threads` or claim same-runtime Rhino parity.
 
 See `docs/nodejs/reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md`.
+
+## P12-21 Cookbook
+
+P12-21 turns the policy into script-author cookbook guidance in
+`docs/nodejs/reports/phase12/RHINO_THREADS_MIGRATION_COOKBOOK.md` and extends
+the dual-engine corpus with `threads-disposable` and `threads-sync-queue`.
+The cookbook keeps the same `blocked_by_design` status for every `threads.*`
+entry and shows replacements based on `async` / `await`, `AbortController`,
+explicit `engines` slots, `work_manager`, bounded async queues, Promise queues,
+and MessageChannel-style handoffs.
 
 ## Acceptance
 

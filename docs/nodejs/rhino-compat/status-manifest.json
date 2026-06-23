@@ -5755,7 +5755,8 @@
       "decision": "s11_25_threads_migration_policy",
       "notes": [
         "Rhino threads are not exposed in Node; migrate to async/await, AbortController, explicit engines slots, or work_manager.",
-        "P12-20 threads maturity review keeps worker_threads default-off and native-availability gated, leaves worker_computation reserved and second_execution_slot open, and advances cookbook work to P12-21 without claiming Rhino thread parity."
+        "P12-20 threads maturity review keeps worker_threads default-off and native-availability gated, leaves worker_computation reserved and second_execution_slot open, and advances cookbook work to P12-21 without claiming Rhino thread parity.",
+        "P12-21 threads migration cookbook landed: RHINO_THREADS_MIGRATION_COOKBOOK.md and dual-engine cases threads-disposable/threads-sync-queue document async/await, AbortController, engines slots, work_manager, bounded async queue, single-owner state, Promise queue, and MessageChannel replacements while keeping worker_threads default-off and threads.* blocked_by_design."
       ],
       "apiEntries": [
         {

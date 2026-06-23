@@ -13,6 +13,8 @@ const REQUIRED_CASES = Object.freeze([
   "clipboard-roundtrip",
   "sleep-yield",
   "threads-start",
+  "threads-disposable",
+  "threads-sync-queue",
   "ui-run",
   "floaty-window",
 ]);
@@ -21,6 +23,8 @@ const NODE_EXPECTATIONS = Object.freeze({
   "clipboard-roundtrip": ["compat.setClip(", "compat.getClip(", "await compat.setClip(", "await compat.getClip("],
   "sleep-yield": ["compat.sleep(", "await compat.sleep("],
   "threads-start": ["compat.blockedByDesign(", "compat.errorCodes.blockedByDesign", "\"threads.start\""],
+  "threads-disposable": ["compat.blockedByDesign(", "compat.errorCodes.blockedByDesign", "\"threads.disposable\""],
+  "threads-sync-queue": ["compat.blockedByDesign(", "compat.errorCodes.blockedByDesign", "\"threads.sync\""],
   "ui-run": ["compat.blockedByDesign(", "compat.errorCodes.blockedByDesign", "\"ui.run\""],
   "floaty-window": ["compat.blockedByDesign(", "compat.errorCodes.blockedByDesign", "\"floaty.window\""],
 });
@@ -29,6 +33,8 @@ const RHINO_EXPECTATIONS = Object.freeze({
   "clipboard-roundtrip": ["setClip(", "getClip("],
   "sleep-yield": ["sleep("],
   "threads-start": ["threads.start(", ".join("],
+  "threads-disposable": ["threads.disposable(", "threads.start(", ".blockedGet(", ".setAndNotify("],
+  "threads-sync-queue": ["sync(", "threads.start(", ".join("],
   "ui-run": ["ui.run("],
   "floaty-window": ["floaty.window(", ".close("],
 });

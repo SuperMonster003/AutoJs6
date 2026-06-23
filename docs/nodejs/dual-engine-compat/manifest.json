@@ -106,6 +106,48 @@
       }
     },
     {
+      "id": "threads-disposable",
+      "title": "Threads disposable is blocked",
+      "status": "blocked_by_design",
+      "rhino": "cases/threads-disposable.rhino.js",
+      "node": "cases/threads-disposable.node.cjs",
+      "statusManifestIds": [
+        "threads.disposable"
+      ],
+      "expected": {
+        "rhino": "legacy_blocking_disposable",
+        "node": "blocked_by_design_marker"
+      },
+      "devicePlan": {
+        "mode": "policy_only",
+        "assertions": [
+          "Rhino remains the owner of legacy threads.disposable blockedGet/setAndNotify behavior.",
+          "Node compat mode reports blocked_by_design and does not expose compat.threads."
+        ]
+      }
+    },
+    {
+      "id": "threads-sync-queue",
+      "title": "Threads sync is blocked",
+      "status": "blocked_by_design",
+      "rhino": "cases/threads-sync-queue.rhino.js",
+      "node": "cases/threads-sync-queue.node.cjs",
+      "statusManifestIds": [
+        "threads.sync"
+      ],
+      "expected": {
+        "rhino": "legacy_synchronized_callback",
+        "node": "blocked_by_design_marker"
+      },
+      "devicePlan": {
+        "mode": "policy_only",
+        "assertions": [
+          "Rhino remains the owner of legacy sync(fn, lock) Synchronizer and Java lock behavior.",
+          "Node compat mode reports blocked_by_design and does not expose compat.threads."
+        ]
+      }
+    },
+    {
       "id": "ui-run",
       "title": "UI run is blocked",
       "status": "blocked_by_design",

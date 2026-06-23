@@ -218,6 +218,16 @@ release migration target; `worker_computation` remains reserved, and
 `second_execution_slot` remains open. See
 [RHINO_THREADS_MATURITY_REVIEW.md](reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md).
 
+P12-21 adds the Rhino threads migration cookbook:
+[RHINO_THREADS_MIGRATION_COOKBOOK.md](reports/phase12/RHINO_THREADS_MIGRATION_COOKBOOK.md).
+It expands the script-author replacements for `threads.start()`,
+`threads.interrupt()`, `threads.pool()`, `threads.disposable()`, and
+`sync(fn, lock)`, and adds the dual-engine `threads-disposable` and
+`threads-sync-queue` blocked cases. Run
+`verifyNodeRhinoCompatThreadsMigrationCookbook` to verify that the cookbook,
+fixtures, matrix, and status manifest still keep `threads.*`
+`blocked_by_design`.
+
 `threads.start()`, `threads.pool()`, `threads.interrupt()`,
 `threads.disposable()`, and `sync(fn, lock)` are all `blocked_by_design` as
 exact Node compatibility targets. They depend on shared Rhino `ScriptRuntime`

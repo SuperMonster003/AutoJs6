@@ -822,7 +822,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-threads-maturity-review-verification.md`
 
-- [ ] P12-21: 发布 Rhino threads migration cookbook。
+- [x] P12-21: 发布 Rhino threads migration cookbook。
   - 范围：为常见 Rhino `threads` 模式提供 Node 替代写法。
   - 覆盖模式：
     - `threads.start(fn)` -> `async`/`await` 或显式 engine/process slot。
@@ -833,7 +833,29 @@ Phase 12 task 本身可使用以下执行状态：
     - cookbook 示例不依赖默认 `worker_threads`。
     - `threads.*` status 仍为 `blocked_by_design` 或明确 `renamed` 迁移。
     - dual-engine corpus 增加至少 2 个 blocked/migrated cases。
-  - Evidence：待补充。
+  - Evidence：
+    - Cookbook：
+      `docs/nodejs/reports/phase12/RHINO_THREADS_MIGRATION_COOKBOOK.md`
+      覆盖 `threads.start(fn)`、`threads.interrupt()`、`threads.pool()`、
+      `threads.disposable()`、`sync(fn, lock)`，并记录 `async`/`await`、
+      `AbortController`、explicit `engines` slots、`work_manager`、
+      bounded async queue、single-owner state、Promise queue、
+      MessageChannel-style handoff，不依赖默认 `worker_threads`。
+    - Dual-engine corpus：
+      `docs/nodejs/dual-engine-compat/cases/threads-disposable.*` 与
+      `docs/nodejs/dual-engine-compat/cases/threads-sync-queue.*`
+      增加 blocked/migrated cases；`threads-start` 继续作为基线 case。
+    - Surface/status：
+      `docs/nodejs/rhino-compat/status-manifest.json` 保持全部
+      `threads.*` 为 `blocked_by_design`，matrix 推进至 P12-22
+      compute/process-worker replacement API decision。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-threads-migration-cookbook.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatThreadsMigrationCookbook`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-threads-migration-cookbook-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-threads-migration-cookbook-verification.md`
 
 - [ ] P12-22: 决策 compute/process-worker replacement API。
   - 范围：如果 Phase 12 需要给 Rhino `threads` 用户提供更强替代能力，

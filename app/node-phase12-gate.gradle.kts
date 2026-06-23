@@ -764,3 +764,46 @@ tasks.register<Exec>("verifyNodeRhinoCompatThreadsMaturityReview") {
         nodePhase12ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodeRhinoCompatThreadsMigrationCookbook") {
+    group = "verification"
+    description = "Verifies the Phase 12 Rhino threads migration cookbook and dual-engine cases."
+
+    dependsOn("verifyNodeRhinoCompatThreadsMaturityReview")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-threads-migration-cookbook.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_THREADS_MIGRATION_COOKBOOK.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/cases/threads-start.node.cjs"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/cases/threads-start.rhino.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/cases/threads-disposable.node.cjs"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/cases/threads-disposable.rhino.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/cases/threads-sync-queue.node.cjs"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/cases/threads-sync-queue.rhino.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-dual-engine-compat-tests.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-compat-matrix.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-threads-maturity-review.js"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-threads-migration-cookbook-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-threads-migration-cookbook-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}

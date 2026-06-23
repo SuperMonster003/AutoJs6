@@ -171,6 +171,12 @@ function riskSummary(module) {
 function nextStepFor(module, gapModule) {
   if (
     module.id === "threads" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-21 threads migration cookbook landed"))
+  ) {
+    return "Proceed to P12-22 compute/process-worker replacement API decision; keep worker_threads default-off and no Rhino parity.";
+  }
+  if (
+    module.id === "threads" &&
     (module.migration.notes || []).some((note) => note.includes("P12-20 threads maturity review"))
   ) {
     return "Proceed to P12-21 threads migration cookbook; keep worker_threads default-off and no Rhino parity.";
