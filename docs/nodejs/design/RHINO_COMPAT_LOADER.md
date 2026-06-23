@@ -21,7 +21,7 @@ The loader is an AutoJs6 controlled module, not an npm package name and not a sc
 
 ## Runtime Contract
 
-S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, S11-12 adds text utility facades with stable dependency-missing degradation, S11-13 adds async-compatible storage/sqlite facades over the controlled bridge, S11-14 stabilizes console/timer/error debugging migration, S11-16 adds the first selector/accessibility facade over the controlled `accessibility` bridge, S11-17 exposes app/device/shell compatibility wrappers, S11-18 adds the first `images` compatibility facade over opaque image handles, S11-19 adds screenshot permission compatibility wrappers over `media_projection` and `images`, S11-20 adds an ML Kit-only OCR compatibility facade over `ocr`/`images`, and S11-21 records the events/keys/input observer design gate without adding runtime observer APIs. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, shell `Process` handles, raw `MediaProjection`, raw OCR engines, raw `Bitmap`/`Mat`/`ImageWrapper` instances, Rhino `events.__asEmitter__()`, Java `EventEmitter`, `Thread`, `MainThreadProxy`, raw key/touch listeners, or Pro 9 `require("rhino").install()` behavior.
+S11-08 installed the loader stub. S11-09 extends it with the first low-risk async facade, S11-10 adds the scoped synchronous `files` facade, S11-11 adds pure utility facades for APIs that do not require Android providers, S11-12 adds text utility facades with stable dependency-missing degradation, S11-13 adds async-compatible storage/sqlite facades over the controlled bridge, S11-14 stabilizes console/timer/error debugging migration, S11-16 adds the first selector/accessibility facade over the controlled `accessibility` bridge, S11-17 exposes app/device/shell compatibility wrappers, S11-18 adds the first `images` compatibility facade over opaque image handles, S11-19 adds screenshot permission compatibility wrappers over `media_projection` and `images`, S11-20 adds an ML Kit-only OCR compatibility facade over `ocr`/`images`, S11-21 records the events/keys/input observer design gate without adding runtime observer APIs, and S11-22 records the Rhino `tasks` to `work_manager` migration design without adding a tasks facade. It does not expose raw Java objects, Rhino `Scriptable`, Android `View`, `AccessibilityNodeInfo`, shell `Process` handles, raw `MediaProjection`, raw OCR engines, raw `Bitmap`/`Mat`/`ImageWrapper` instances, Rhino `events.__asEmitter__()`, Java `EventEmitter`, `Thread`, `MainThreadProxy`, raw key/touch listeners, raw `TimedTask`/`IntentTask` objects, or Pro 9 `require("rhino").install()` behavior.
 
 The first runtime shape is:
 
@@ -110,6 +110,8 @@ The S11-20 OCR facade is Promise-based and ML Kit-only. `compat.ocr.recognizeTex
 
 S11-21 does not add `compat.events`, `compat.keys`, `events` globals, key observers, touch observers, or key interception wrappers. Rhino `events.__asEmitter__()` is blocked by design because it depends on Rhino `ScriptableObject`, Java `EventEmitter`, `Thread`, and `MainThreadProxy` behavior. Scripts that only need in-process JavaScript events should use `require("node:events").EventEmitter`. Android key/touch observation remains gated behind a future `input_observer` provider with opaque subscription handles, bounded `drainEvents`, explicit `close()`, and provider-destroy cleanup.
 
+S11-22 does not add `compat.tasks`, `require("tasks")`, or a `tasks` global. Current Node scheduled work uses `require("work_manager")` directly. Future Rhino task compatibility may wrap only JSON-safe, Node-owned scheduled entries; it must not expose raw `TimedTask`/`IntentTask` objects, map daily/weekly wall-clock user tasks to ordinary WorkManager periodic cadence, or create broadcast/startup/boot/package triggers without the separate task database and broadcast gates.
+
 Future tasks should extend the module in small commits:
 
 - S11-09: `toast`, `toastLog`, `sleep`, `setClip`, `getClip`, and basic globals.
@@ -124,6 +126,7 @@ Future tasks should extend the module in small commits:
 - S11-19: screenshot permission wrappers over `media_projection` and `images.captureScreen`.
 - S11-20: ML Kit-only OCR compatibility over `ocr` and `images`, with barcode/qrcode recorded as bridge gaps.
 - S11-21: events/keys/input observer design gate; no runtime observer facade until a controlled `input_observer` provider exists.
+- S11-22: tasks to WorkManager/user task database migration design; no runtime `tasks` facade until JSON-safe provider boundaries exist.
 
 ## Error Codes
 
@@ -150,4 +153,4 @@ When later tasks add globals, they must keep these rules:
 
 ## Type Surface
 
-The checked-in type declaration is `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`. It declares the loader, stable error helpers, and the implemented Phase 11 facade modules through S11-20. S11-21 is design-only and intentionally adds no `events`, `keys`, or `input_observer` compat type surface.
+The checked-in type declaration is `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`. It declares the loader, stable error helpers, and the implemented Phase 11 facade modules through S11-20. S11-21 and S11-22 are design-only and intentionally add no `events`, `keys`, `input_observer`, or `tasks` compat type surface.

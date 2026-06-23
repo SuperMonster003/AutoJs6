@@ -1,6 +1,6 @@
 # Work Manager Design And MVP Gate
 
-Status: Tasks 65, 180, S7-15, and S7-21 expose `require("work_manager")` as a controlled bridge MVP for scheduled-task registration and execution. S7-15 promotes the Android provider from metadata-only storage to WorkManager-backed embedded Node execution for scoped one-shot and periodic entries. S7-21 routes fired work through a dedicated `scheduled_runner` launch surface with `executionMode=scheduled`, CJS/ESM entry support, persisted `lastRun`/`runHistory`, and stable runner diagnostics. `require("tasks")` remains unavailable to Embedded Node scripts.
+Status: Tasks 65, 180, S7-15, and S7-21 expose `require("work_manager")` as a controlled bridge MVP for scheduled-task registration and execution. S7-15 promotes the Android provider from metadata-only storage to WorkManager-backed embedded Node execution for scoped one-shot and periodic entries. S7-21 routes fired work through a dedicated `scheduled_runner` launch surface with `executionMode=scheduled`, CJS/ESM entry support, persisted `lastRun`/`runHistory`, and stable runner diagnostics. S11-22 documents Rhino `tasks` migration in `RHINO_TASKS_WORK_MANAGER_MIGRATION.md`; `require("tasks")` remains unavailable to Embedded Node scripts.
 
 ## Goal
 
@@ -103,6 +103,8 @@ MVP exclusions:
 - no unrestricted background execution process
 - no persisted task database entry yet
 - no user-visible task UI entry yet
+- no Rhino `tasks` compatibility facade yet
+- no raw `TimedTask` or `IntentTask` object transfer
 - no interactive UI from a scheduled background run
 - no automatic restart or retry policy beyond the explicit WorkManager schedule cadence
 - no `createBroadcastTask`
@@ -309,6 +311,29 @@ Before enabling broadcast, startup, boot, or package-event tasks from Node, writ
 - how task invocations receive the triggering intent payload without exposing raw `Intent`
 
 The JavaScript result should receive a serialized trigger object, not a raw Android intent.
+
+## Rhino Tasks Migration Gate
+
+S11-22 keeps `work_manager` as the only current Node scheduled-task surface. It
+does not add `require("tasks")`, `compat.tasks`, or task globals.
+
+The safe migration subset is intentionally narrow:
+
+- `tasks.addDisposableTask()` can become a future wrapper over
+  `work_manager.scheduleOnce()` only when its absolute date/time is converted to a
+  bounded future `delayMs` and the script entry is scoped.
+- `tasks.queryTimedTasks()`, `getTimedTask()`, and `removeTimedTask()` can target
+  JSON snapshots and ids for Node-owned WorkManager records only.
+- `tasks.addDailyTask()` and `tasks.addWeeklyTask()` must wait for a user-visible
+  task database provider because wall-clock time, weekdays, next-run calculation,
+  exact-alarm policy, and task UI state are not WorkManager periodic cadence.
+- `tasks.addIntentTask()`, intent queries, startup, boot, package, and custom
+  broadcast triggers stay with `BROADCAST_TASKS.md`.
+- `tasks.addTask()`, `removeTask(task)`, and `updateTask(task)` are blocked by
+  design when they depend on raw `TimedTask` or `IntentTask` Java objects.
+
+See `docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md` for the S11-22
+mapping table and status manifest decisions.
 
 ## Tests Required
 

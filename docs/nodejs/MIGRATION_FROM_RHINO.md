@@ -440,6 +440,40 @@ bus.emit("ready");
 
 `events.observeKey()`, `events.onKeyDown()`, `events.onKeyUp()`, `events.setKeyInterceptionEnabled()`, and `events.observeTouch()` remain design-gated in S11-21. A future `input_observer` provider must return opaque subscription handles, drain JSON event snapshots through bounded queues, close every listener on script stop/provider destroy, and reject packaged/background usage unless a foreground user-visible provider state is valid. The `events.keys` constants are a safe pure subset but are not exposed by the S11-21 design-only task.
 
+### Scheduled Tasks
+
+Rhino disposable task:
+
+```js
+tasks.addDisposableTask({
+  path: "./jobs/cleanup.js",
+  date: new Date(Date.now() + 60 * 1000),
+});
+```
+
+Node with the current WorkManager MVP:
+
+```js
+"nodejs";
+
+(async function main() {
+  const workManager = require("work_manager");
+  const taskId = await workManager.scheduleOnce({
+    scriptPath: "jobs/cleanup.cjs",
+    backend: "embedded",
+    delayMs: 60 * 1000,
+    taskTimeoutMs: 30 * 1000,
+  });
+  console.log(taskId);
+})();
+```
+
+`work_manager` is Promise-based and schedules scoped embedded Node entries only. It returns string task ids and JSON task snapshots; it does not return Rhino `TimedTask` or `IntentTask` objects.
+
+Do not migrate `tasks.addDailyTask()` or `tasks.addWeeklyTask()` by mechanically calling `workManager.schedulePeriodic()`. Rhino daily/weekly tasks are wall-clock user tasks with next-run calculation, task UI/database state, and scheduler fallback semantics. WorkManager periodic work is OS-managed cadence with minimum interval and quota behavior. S11-22 keeps daily/weekly task compatibility design-gated until a user-visible task database provider exists.
+
+`tasks.addIntentTask()`, `queryIntentTasks()`, boot/startup/package/custom broadcast triggers, and `removeIntentTask()` remain design-gated with the broadcast task policy. Raw `tasks.addTask(task)`, `removeTask(task)`, and `updateTask(task)` are blocked by design in Node because they depend on raw `TimedTask` / `IntentTask` Java objects. See [RHINO_TASKS_WORK_MANAGER_MIGRATION.md](design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md).
+
 ### File Read And Write
 
 Rhino:

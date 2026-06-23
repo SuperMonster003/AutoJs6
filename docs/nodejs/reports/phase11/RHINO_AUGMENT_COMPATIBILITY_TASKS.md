@@ -379,10 +379,19 @@ Inventory 和兼容矩阵统一使用以下状态：
     status manifest、matrix、迁移/安全/loader 文档、Gradle 注册，以及 S11-21
     没有提前开放 `input_observer` runtime capability。
 
-- [ ] S11-22: 设计 tasks 到 WorkManager/用户任务数据库的迁移。
+- [x] S11-22: 设计 tasks 到 WorkManager/用户任务数据库的迁移。
   - 范围：Rhino `tasks` 与现有 `work_manager` 的 API 映射和不可映射项。
   - 产物：design doc、migration table。
   - 验收：不把长期任务误映射为一次性 bridge call。
+  - 状态：新增 `docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md`，
+    将 Rhino `tasks` 拆分为 `work_manager` 可部分迁移项、用户任务数据库/广播
+    设计延后项，以及 raw `TimedTask` / `IntentTask` 对象阻断项。当前仅保留
+    `require("work_manager")` 作为 Node scheduled-task surface，不新增
+    `require("tasks")`、`compat.tasks` 或 `tasks` global；`addDailyTask()` /
+    `addWeeklyTask()` 不机械映射为 `schedulePeriodic()`。新增
+    `verifyNodeRhinoCompatTasksWorkManagerDesign` gate 校验 design/migration
+    table、status manifest、matrix、迁移/安全/loader/WorkManager 文档和未提前
+    开放 runtime facade。
 
 - [ ] S11-23: 设计 UI compatibility。
   - 范围：Rhino UI DSL、`ui.run()`、`ui.post()`、layout update、event drain。

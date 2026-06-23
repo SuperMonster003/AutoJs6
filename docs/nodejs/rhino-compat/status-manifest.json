@@ -7068,9 +7068,10 @@
       "bridgeModules": [
         "work_manager"
       ],
-      "decision": "node_surface_exists_compat_facade_pending",
+      "decision": "s11_22_tasks_work_manager_migration_design",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers."
+        "S11-22 maps Rhino tasks to the controlled work_manager MVP only where semantics are equivalent enough: scoped embedded Node one-shot/periodic records, cancel, and list.",
+        "Daily/weekly wall-clock tasks, IntentTask/broadcast triggers, raw TimedTask/IntentTask objects, task update mutation, and user task database parity remain design-gated; S11-22 does not add compat.tasks."
       ],
       "apiEntries": [
         {
@@ -7079,22 +7080,22 @@
           "asyncMode": "promise",
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "work_manager",
+          "decision": "s11_22_tasks_module_design_gate",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Use require(\"work_manager\") for current Node scheduled work; require(\"tasks\") and compat.tasks are not exposed in S11-22."
           ]
         },
         {
           "id": "tasks.addDailyTask",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_wall_clock_task_database_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Do not map daily wall-clock TimedTask semantics to work_manager.schedulePeriodic(); WorkManager periodic cadence does not preserve local time-of-day task behavior."
           ]
         },
         {
@@ -7103,70 +7104,70 @@
           "asyncMode": "promise",
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "scheduleOnce",
+          "decision": "s11_22_disposable_task_schedule_once_candidate",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "A future tasks compat facade may translate a future absolute date/time into work_manager.scheduleOnce({ delayMs }) for scoped embedded Node entries, returning JSON task records rather than raw TimedTask objects."
           ]
         },
         {
           "id": "tasks.addIntentTask",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_intent_task_broadcast_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "IntentTask maps to boot/broadcast/custom trigger policy, not the work_manager timed MVP; follow the broadcast task design gate before exposing it to Node."
           ]
         },
         {
           "id": "tasks.addTask",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_raw_task_object_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino addTask requires a raw TimedTask or IntentTask Java object; Node migration must use explicit JSON descriptors instead."
           ]
         },
         {
           "id": "tasks.addWeeklyTask",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_wall_clock_task_database_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Do not map weekly weekday/time TimedTask semantics to work_manager.schedulePeriodic(); weekday, next-run, and user task database behavior need a future provider."
           ]
         },
         {
           "id": "tasks.daysToTimeFlag",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "status": "unsupported",
+          "asyncMode": "sync",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_pure_timeflag_utility_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Pure Rhino time-flag utility identified; it can be added later without a scheduler provider."
           ]
         },
         {
           "id": "tasks.getIntentTask",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_intent_task_broadcast_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "IntentTask database reads are deferred with the broadcast/user task database provider; Node must not receive raw IntentTask objects."
           ]
         },
         {
@@ -7175,22 +7176,22 @@
           "asyncMode": "promise",
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "list",
+          "decision": "s11_22_json_task_snapshot_only",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Current work_manager.list() can return JSON WorkTask snapshots for Node-owned scheduled work; raw TimedTask return values remain blocked."
           ]
         },
         {
           "id": "tasks.queryIntentTasks",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_intent_task_broadcast_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "IntentTask query semantics depend on the AutoJs6 user task database and broadcast trigger policy, not the current work_manager timed MVP."
           ]
         },
         {
@@ -7199,34 +7200,34 @@
           "asyncMode": "promise",
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "list",
+          "decision": "s11_22_work_manager_list_node_owned_tasks",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "work_manager.list() returns Node-owned scheduled task snapshots only; full Rhino TimedTask database query parity is deferred."
           ]
         },
         {
           "id": "tasks.removeIntentTask",
-          "status": "partial",
+          "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_intent_task_broadcast_deferred",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "IntentTask cancellation is deferred until broadcast/user task database ownership is designed."
           ]
         },
         {
           "id": "tasks.removeTask",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_raw_task_object_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino removeTask accepts raw TimedTask/IntentTask Java objects; Node cancellation must use explicit task ids and controlled providers."
           ]
         },
         {
@@ -7235,34 +7236,34 @@
           "asyncMode": "promise",
           "nodeModule": "work_manager",
           "bridgeModule": "work_manager",
-          "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "nodeName": "cancel",
+          "decision": "s11_22_cancel_node_owned_work_task",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "work_manager.cancel() can cancel Node-owned task ids; numeric Rhino TimedTask database ids are not automatically equivalent."
           ]
         },
         {
           "id": "tasks.timeFlagToDays",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "status": "unsupported",
+          "asyncMode": "sync",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_pure_timeflag_utility_pending",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Pure Rhino time-flag utility identified; it can be added later without a scheduler provider."
           ]
         },
         {
           "id": "tasks.updateTask",
-          "status": "partial",
-          "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
+          "status": "blocked_by_design",
+          "asyncMode": "not_applicable",
+          "nodeModule": null,
+          "bridgeModule": null,
           "nodeName": null,
-          "decision": "module_surface_exists_api_mapping_pending",
+          "decision": "s11_22_raw_task_object_blocked",
           "notes": [
-            "A related Node surface exists, but this Rhino API needs an explicit mapping decision."
+            "Rhino updateTask mutates raw TimedTask/IntentTask objects; future Node updates need JSON patch descriptors and user-visible task database ownership."
           ]
         }
       ]
@@ -11720,11 +11721,11 @@
     "moduleCount": 73,
     "apiEntryCount": 879,
     "byStatus": {
-      "blocked_by_design": 25,
-      "partial": 373,
+      "blocked_by_design": 28,
+      "partial": 362,
       "supported": 134,
       "supported_async": 52,
-      "unsupported": 368
+      "unsupported": 376
     }
   }
 }
