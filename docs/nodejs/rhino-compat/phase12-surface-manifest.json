@@ -103,19 +103,27 @@
     },
     {
       "id": "ui.compat",
-      "status": "planned",
+      "status": "design_locked",
       "tasks": [
         "P12-08",
         "P12-09",
         "P12-10"
       ],
-      "summary": "Constrained Rhino UI facade over JSON descriptors and UiHandle.",
+      "summary": "P12-08 locks the constrained Rhino UI to Node JSON layout descriptor subset; runtime compat.ui facade remains tracked by P12-09/P12-10.",
       "runtimeSurface": [
-        "autojs6:compat.ui"
+        "future autojs6:compat.ui",
+        "existing require(\"ui\") JSON provider"
       ],
       "evidence": [
+        "docs/nodejs/design/RHINO_UI_JSON_LAYOUT_SUBSET.md",
+        "docs/nodejs/schemas/rhino_ui_json_layout_subset.schema.json",
+        "docs/nodejs/fixtures/rhino-ui-json-layout-subset-fixtures.json",
         "docs/nodejs/design/RHINO_UI_COMPATIBILITY.md",
-        "docs/nodejs/design/UI_BRIDGE.md"
+        "docs/nodejs/design/UI_BRIDGE.md",
+        "app/src/main/cpp/node_bridge_sources.cpp",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeUiProvider.kt",
+        "tools/nodejs/phase12/verify-rhino-compat-ui-json-layout-subset.js",
+        ":app:verifyNodeRhinoCompatUiJsonLayoutSubset"
       ]
     },
     {

@@ -313,7 +313,7 @@ Phase 12 task 本身可使用以下执行状态：
 
 ### Track B: UI compatibility runtime facade
 
-- [ ] P12-08: 锁定 Rhino UI 到 Node JSON layout 的映射子集。
+- [x] P12-08: 锁定 Rhino UI 到 Node JSON layout 的映射子集。
   - 范围：把 S11-23 设计文档中的可迁移 UI DSL 子集转成明确 schema。
   - 建议产物：
     - `docs/nodejs/design/RHINO_UI_JSON_LAYOUT_SUBSET.md`
@@ -325,7 +325,18 @@ Phase 12 task 本身可使用以下执行状态：
     - 明确 `ui.layout(...)`、`ui.layoutFile(...)`、`ui.findById(...)`、
       `ui.run()`、`ui.post()` 的迁移状态。
     - `ui.run()` 和 `ui.post()` 继续 `blocked_by_design`。
-  - Evidence：待补充。
+  - Evidence：
+    - Subset contract：`docs/nodejs/design/RHINO_UI_JSON_LAYOUT_SUBSET.md`
+    - Layout descriptor schema：`docs/nodejs/schemas/rhino_ui_json_layout_subset.schema.json`
+    - Fixtures：`docs/nodejs/fixtures/rhino-ui-json-layout-subset-fixtures.json`
+    - Existing UI design：`docs/nodejs/design/RHINO_UI_COMPATIBILITY.md`
+    - Existing UI bridge：`docs/nodejs/design/UI_BRIDGE.md`
+    - Runtime JSON preflight：`app/src/main/cpp/node_bridge_sources.cpp`
+    - Provider validation：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeUiProvider.kt`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-ui-json-layout-subset.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatUiJsonLayoutSubset`
+    - 报告产物：`build/reports/nodejs/rhino-compat-ui-json-layout-subset-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-ui-json-layout-subset-verification.md`
 
 - [ ] P12-09: 实现 `compat.ui` constrained facade。
   - 范围：在 `autojs6:compat` 中新增受限 `compat.ui`，映射到现有

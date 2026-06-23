@@ -638,8 +638,10 @@ Do not migrate Rhino `ui.run()` or `ui.post()` by trying to execute Node
 JavaScript on Android's UI thread. Node callbacks run on the Node event loop
 after UI events are drained as JSON snapshots. Layout mutation goes through
 `handle.update()` or `handle.batchUpdate()`, not through `NativeView`,
-`View`, `ui.findView()`, `ui.root`, or dynamic view properties. See
-[RHINO_UI_COMPATIBILITY.md](design/RHINO_UI_COMPATIBILITY.md).
+`View`, `ui.findView()`, `ui.root`, or dynamic view properties. P12-08 locks
+the accepted JSON descriptor subset and fixture set in
+[RHINO_UI_JSON_LAYOUT_SUBSET.md](design/RHINO_UI_JSON_LAYOUT_SUBSET.md); see
+also [RHINO_UI_COMPATIBILITY.md](design/RHINO_UI_COMPATIBILITY.md).
 
 ### Floaty And Overlay
 

@@ -7,9 +7,11 @@ TypeScript declarations, and focused live gates while keeping WebView blocked
 behind a separate security gate.
 
 Task S11-23 records the Rhino `ui` compatibility boundary in
-[RHINO_UI_COMPATIBILITY.md](RHINO_UI_COMPATIBILITY.md). It keeps the existing
-Node module as the migration target and does not add `compat.ui` or a Rhino
-global `ui`.
+[RHINO_UI_COMPATIBILITY.md](RHINO_UI_COMPATIBILITY.md). P12-08 locks the
+JSON-only migration subset in
+[RHINO_UI_JSON_LAYOUT_SUBSET.md](RHINO_UI_JSON_LAYOUT_SUBSET.md). It keeps the
+existing Node module as the migration target and does not add `compat.ui` or a
+Rhino global `ui`.
 
 ## Goal
 

@@ -1,8 +1,9 @@
 # Rhino UI Compatibility Design
 
-Status: S11-23 design gate. This document records how Rhino `ui` scripts may
-migrate to the existing Node `require("ui")` Activity-owned provider without
-copying Rhino's Android object model into V8.
+Status: S11-23 design gate, with the P12-08 JSON layout subset locked in
+[RHINO_UI_JSON_LAYOUT_SUBSET.md](RHINO_UI_JSON_LAYOUT_SUBSET.md). This document
+records how Rhino `ui` scripts may migrate to the existing Node `require("ui")`
+Activity-owned provider without copying Rhino's Android object model into V8.
 
 ## Decision
 
@@ -153,6 +154,7 @@ S11-23 rejects these shortcuts:
 
 Future UI compatibility work must be split into small tasks:
 
+- `compat.ui` constrained facade over the P12-08 JSON descriptor subset
 - constrained XML-to-JSON migration helper for common `ui.layout(...)` scripts
 - provider schema coverage for status/navigation/background options
 - inset snapshots for status/navigation bar height queries

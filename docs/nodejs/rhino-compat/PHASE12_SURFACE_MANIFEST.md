@@ -30,6 +30,12 @@ which Phase 12 workstream owns the next implementation or rejection.
   P12-07 adds cleanup/security diagnostics and packaged/background rejection
   evidence.
 
+## Current Design-Locked Surfaces
+
+- `ui.compat`: P12-08 locks the Rhino UI to Node JSON layout descriptor subset
+  with schema, fixtures, and a host verifier. The runtime `compat.ui` facade
+  remains planned for P12-09/P12-10.
+
 ## Rules
 
 - Every P12 task must map to exactly one surface group.
