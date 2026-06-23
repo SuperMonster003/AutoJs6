@@ -558,7 +558,7 @@ Node with the S11-20 compatibility facade:
 })();
 ```
 
-`compat.ocr` is ML Kit-only in S11-20. It accepts an opaque image handle, a project-relative image path that is read and recycled after OCR completes, or no image argument to capture through the existing-permission screenshot path. `compat.ocr.recognizeText()` returns a string array like Rhino, while `compat.ocr.detect()` and `detectTextBounds()` return JSON-safe result snapshots. `ocr.tap("mlkit")` is accepted; Paddle/Rapid mode modules are not exposed in Node. `barcode` and `qrcode` remain a documented bridge gap until Node has a controlled barcode provider and JSON-safe barcode result contract.
+`compat.ocr` is ML Kit-only in S11-20. It accepts an opaque image handle, a project-relative image path that is read and recycled after OCR completes, or no image argument to capture through the existing-permission screenshot path. `compat.ocr.recognizeText()` returns a string array like Rhino, while `compat.ocr.detect()` and `detectTextBounds()` return JSON-safe result snapshots. `ocr.tap("mlkit")` is accepted; Paddle/Rapid mode modules are not exposed in Node. P12-27 locks the barcode provider v1 schema for future path, opaque image handle, and existing-permission capture inputs, but barcode/qrcode remain unavailable at runtime until provider and facade tasks land.
 
 ### Key And Touch Events
 

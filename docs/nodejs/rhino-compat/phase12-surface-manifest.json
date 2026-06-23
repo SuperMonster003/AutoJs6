@@ -316,22 +316,30 @@
     },
     {
       "id": "barcode.qrcode",
-      "status": "planned",
+      "status": "design_locked",
       "tasks": [
         "P12-27",
         "P12-28",
         "P12-29",
         "P12-30"
       ],
-      "summary": "JSON-safe barcode/qrcode provider and Rhino facade.",
+      "summary": "P12-27 locks the barcode provider v1 JSON-safe schema for future barcode and qrcode compatibility: path, opaque image handle, and existing-permission capture inputs; region, format filter, QR-only mode, JSON barcode snapshots, selected structured payloads, and raw MLKit/Bitmap/ImageWrapper denial are documented. Runtime provider and compat facades remain pending P12-28/P12-29.",
       "runtimeSurface": [
         "barcode",
         "autojs6:compat.barcode",
         "autojs6:compat.qrcode"
       ],
       "evidence": [
+        "docs/nodejs/design/BARCODE_PROVIDER_V1.md",
+        "docs/nodejs/schemas/barcode_provider_v1.schema.json",
+        "docs/nodejs/fixtures/barcode-provider-v1-fixtures.json",
+        "docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_CONTRACT.md",
         "docs/nodejs/design/RHINO_COMPAT_LOADER.md",
-        "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md"
+        "docs/nodejs/MIGRATION_FROM_RHINO.md",
+        "docs/nodejs/SECURITY_MODEL.md",
+        "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
+        "tools/nodejs/phase12/verify-rhino-compat-barcode-provider-contract.js",
+        ":app:verifyNodeRhinoCompatBarcodeProviderContract"
       ]
     },
     {

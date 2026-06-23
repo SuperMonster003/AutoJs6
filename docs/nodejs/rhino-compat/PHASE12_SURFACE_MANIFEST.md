@@ -92,6 +92,12 @@ which Phase 12 workstream owns the next implementation or rejection.
   no Rhino globals. P12-25 adds a provider POC for
   `rhino.run({ experimental: true, source|path, timeoutMs, args })` through a
   dedicated Android Rhino JSON-only execution adapter. P12-26 records packaged metadata behavior as fail-closed: no packaged metadata shape is accepted in Phase 12 and packaged APK execution remains rejected.
+- `barcode.qrcode`: P12-27 locks the design-locked barcode provider v1
+  JSON-safe schema for future `barcode` and `qrcode` compatibility. The schema
+  covers path, opaque image handle, and existing-permission capture inputs;
+  region, format filter, QR-only mode, JSON barcode snapshots, selected
+  structured payloads, and raw MLKit/Bitmap/ImageWrapper denial. Runtime
+  provider and compat facades remain pending P12-28/P12-29.
 
 ## Current Rejected Surfaces
 

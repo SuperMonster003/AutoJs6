@@ -1,0 +1,755 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autojs6.local/schemas/nodejs/barcode_provider_v1.schema.json",
+  "title": "AutoJs6 Node barcode provider v1 contract",
+  "type": "object",
+  "required": [
+    "schema",
+    "module",
+    "qrcodeFacade",
+    "capabilities",
+    "limits",
+    "methods",
+    "result"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "autojs6-node-barcode-provider-v1"
+    },
+    "module": {
+      "const": "barcode"
+    },
+    "qrcodeFacade": {
+      "const": "qr-only-format-filter"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "barcode",
+          "image",
+          "screen_capture"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "limits": {
+      "$ref": "#/$defs/BarcodeLimits"
+    },
+    "methods": {
+      "type": "object",
+      "required": [
+        "detect",
+        "detectAll",
+        "recognizeText",
+        "recognizeTexts"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "detect": {
+          "$ref": "#/$defs/DetectMethod"
+        },
+        "detectAll": {
+          "$ref": "#/$defs/DetectAllMethod"
+        },
+        "recognizeText": {
+          "$ref": "#/$defs/RecognizeTextMethod"
+        },
+        "recognizeTexts": {
+          "$ref": "#/$defs/RecognizeTextsMethod"
+        }
+      }
+    },
+    "result": {
+      "$ref": "#/$defs/BarcodeSnapshot"
+    }
+  },
+  "$defs": {
+    "BarcodeLimits": {
+      "type": "object",
+      "required": [
+        "maxResults",
+        "maxFormats",
+        "maxImageInputPathBytes",
+        "maxRegionPixels",
+        "maxStructuredPayloadDepth",
+        "maxRawValueBytes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "maxResults": {
+          "const": 128
+        },
+        "maxFormats": {
+          "const": 16
+        },
+        "maxImageInputPathBytes": {
+          "const": 4096
+        },
+        "maxRegionPixels": {
+          "const": 16777216
+        },
+        "maxStructuredPayloadDepth": {
+          "const": 8
+        },
+        "maxRawValueBytes": {
+          "const": 8192
+        }
+      }
+    },
+    "DetectMethod": {
+      "type": "object",
+      "required": [
+        "args",
+        "response"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "$ref": "#/$defs/BarcodeRequest"
+        },
+        "response": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/BarcodeSnapshot"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "DetectAllMethod": {
+      "type": "object",
+      "required": [
+        "args",
+        "response"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "$ref": "#/$defs/BarcodeRequest"
+        },
+        "response": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BarcodeSnapshot"
+          },
+          "maxItems": 128
+        }
+      }
+    },
+    "RecognizeTextMethod": {
+      "type": "object",
+      "required": [
+        "args",
+        "response"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "$ref": "#/$defs/BarcodeRequest"
+        },
+        "response": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 8192
+        }
+      }
+    },
+    "RecognizeTextsMethod": {
+      "type": "object",
+      "required": [
+        "args",
+        "response"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "$ref": "#/$defs/BarcodeRequest"
+        },
+        "response": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "maxItems": 128
+        }
+      }
+    },
+    "BarcodeRequest": {
+      "type": "object",
+      "required": [
+        "image",
+        "options"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "$ref": "#/$defs/BarcodeImageInput"
+        },
+        "options": {
+          "$ref": "#/$defs/BarcodeOptions"
+        }
+      }
+    },
+    "BarcodeImageInput": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/PathImageInput"
+        },
+        {
+          "$ref": "#/$defs/ImageHandleInput"
+        },
+        {
+          "$ref": "#/$defs/CaptureImageInput"
+        }
+      ]
+    },
+    "PathImageInput": {
+      "type": "object",
+      "required": [
+        "type",
+        "path"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "path"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      }
+    },
+    "ImageHandleInput": {
+      "type": "object",
+      "required": [
+        "type",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "imageHandle"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "__autojs6ImageHandle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "CaptureImageInput": {
+      "type": "object",
+      "required": [
+        "type",
+        "requireExistingPermission"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "capture"
+        },
+        "requireExistingPermission": {
+          "const": true
+        }
+      }
+    },
+    "BarcodeOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "region": {
+          "$ref": "#/$defs/Region"
+        },
+        "formats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BarcodeFormatName"
+          },
+          "uniqueItems": true,
+          "maxItems": 16
+        },
+        "qrOnly": {
+          "type": "boolean"
+        },
+        "maxResults": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "enableAllPotentialBarcodes": {
+          "type": "boolean"
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30000
+        }
+      }
+    },
+    "Region": {
+      "oneOf": [
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        },
+        {
+          "type": "object",
+          "required": [
+            "x",
+            "y",
+            "width",
+            "height"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "BarcodeFormatName": {
+      "enum": [
+        "ALL",
+        "AZTEC",
+        "CODABAR",
+        "CODE_39",
+        "CODE_93",
+        "CODE_128",
+        "DATA_MATRIX",
+        "EAN_8",
+        "EAN_13",
+        "ITF",
+        "PDF_417",
+        "QR_CODE",
+        "UPC_A",
+        "UPC_E"
+      ]
+    },
+    "BarcodeSnapshot": {
+      "type": "object",
+      "required": [
+        "schema",
+        "rawValue",
+        "displayValue",
+        "format",
+        "formatName",
+        "valueType",
+        "valueTypeName"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "autojs6-node-barcode-snapshot-v1"
+        },
+        "rawValue": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 8192
+        },
+        "displayValue": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 8192
+        },
+        "format": {
+          "type": "integer"
+        },
+        "formatName": {
+          "$ref": "#/$defs/BarcodeFormatName"
+        },
+        "valueType": {
+          "type": "integer"
+        },
+        "valueTypeName": {
+          "$ref": "#/$defs/BarcodeValueTypeName"
+        },
+        "boundingBox": {
+          "$ref": "#/$defs/Bounds"
+        },
+        "cornerPoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Point"
+          },
+          "minItems": 1,
+          "maxItems": 8
+        },
+        "structured": {
+          "$ref": "#/$defs/StructuredPayload"
+        }
+      }
+    },
+    "BarcodeValueTypeName": {
+      "enum": [
+        "UNKNOWN",
+        "CONTACT_INFO",
+        "EMAIL",
+        "ISBN",
+        "PHONE",
+        "PRODUCT",
+        "SMS",
+        "TEXT",
+        "URL",
+        "WIFI",
+        "GEO",
+        "CALENDAR_EVENT",
+        "DRIVER_LICENSE"
+      ]
+    },
+    "Bounds": {
+      "type": "object",
+      "required": [
+        "left",
+        "top",
+        "right",
+        "bottom",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "left": {
+          "type": "number"
+        },
+        "top": {
+          "type": "number"
+        },
+        "right": {
+          "type": "number"
+        },
+        "bottom": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "Point": {
+      "type": "object",
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      }
+    },
+    "StructuredPayload": {
+      "type": "object",
+      "required": [
+        "payloadType"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "payloadType": {
+          "enum": [
+            "email",
+            "phone",
+            "sms",
+            "url",
+            "wifi",
+            "geoPoint",
+            "contactInfo",
+            "calendarEvent",
+            "driverLicense",
+            "text",
+            "unknown"
+          ]
+        },
+        "email": {
+          "$ref": "#/$defs/EmailPayload"
+        },
+        "phone": {
+          "$ref": "#/$defs/PhonePayload"
+        },
+        "sms": {
+          "$ref": "#/$defs/SmsPayload"
+        },
+        "url": {
+          "$ref": "#/$defs/UrlPayload"
+        },
+        "wifi": {
+          "$ref": "#/$defs/WifiPayload"
+        },
+        "geoPoint": {
+          "$ref": "#/$defs/GeoPointPayload"
+        },
+        "contactInfo": {
+          "$ref": "#/$defs/ContactInfoPayload"
+        },
+        "calendarEvent": {
+          "$ref": "#/$defs/CalendarEventPayload"
+        },
+        "driverLicense": {
+          "$ref": "#/$defs/DriverLicensePayload"
+        }
+      }
+    },
+    "EmailPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer"
+        }
+      }
+    },
+    "PhonePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer"
+        }
+      }
+    },
+    "SmsPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string"
+        }
+      }
+    },
+    "UrlPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "WifiPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ssid": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "encryptionType": {
+          "type": "integer"
+        }
+      }
+    },
+    "GeoPointPayload": {
+      "type": "object",
+      "required": [
+        "lat",
+        "lng"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    },
+    "ContactInfoPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "organization": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "phones": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PhonePayload"
+          },
+          "maxItems": 16
+        },
+        "emails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EmailPayload"
+          },
+          "maxItems": 16
+        },
+        "urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16
+        },
+        "addresses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16
+        }
+      }
+    },
+    "CalendarEventPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "organizer": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string"
+        },
+        "end": {
+          "type": "string"
+        }
+      }
+    },
+    "DriverLicensePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "documentType": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "middleName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "licenseNumber": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "birthDate": {
+          "type": "string"
+        },
+        "expiryDate": {
+          "type": "string"
+        },
+        "issuingDate": {
+          "type": "string"
+        },
+        "issuingCountry": {
+          "type": "string"
+        },
+        "addressStreet": {
+          "type": "string"
+        },
+        "addressCity": {
+          "type": "string"
+        },
+        "addressState": {
+          "type": "string"
+        },
+        "addressZip": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

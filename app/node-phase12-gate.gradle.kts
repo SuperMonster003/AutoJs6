@@ -1038,3 +1038,40 @@ tasks.register<Exec>("verifyNodeRhinoCompatRhinoShimPackagedMetadataGate") {
         nodePhase12ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodeRhinoCompatBarcodeProviderContract") {
+    group = "verification"
+    description = "Verifies the Phase 12 barcode/qrcode provider schema contract."
+
+    dependsOn("verifyNodeRhinoCompatRhinoShimPackagedMetadataGate")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-barcode-provider-contract.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_CONTRACT.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/BARCODE_PROVIDER_V1.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/schemas/barcode_provider_v1.schema.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/fixtures/barcode-provider-v1-fixtures.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_COMPAT_LOADER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-barcode-provider-contract-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-barcode-provider-contract-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}

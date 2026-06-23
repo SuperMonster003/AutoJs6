@@ -306,6 +306,7 @@ function createCompatHarness(compatBlock) {
       function __autojs6_limited_image() { return imagesModule; }
       function __autojs6_limited_media_projection() { return mediaProjection; }
       function __autojs6_limited_ocr() { return ocrModule; }
+      function __autojs6_limited_ui() { return Object.freeze({}); }
       ${compatBlock}
       const compat = __autojs6_limited_rhino_compat();
       return {

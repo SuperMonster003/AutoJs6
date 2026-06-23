@@ -1062,7 +1062,7 @@ Phase 12 task 本身可使用以下执行状态：
 
 ### Track G: Barcode and qrcode JSON-safe provider
 
-- [ ] P12-27: 定义 barcode/qrcode bridge schema。
+- [x] P12-27: 定义 barcode/qrcode bridge schema。
   - 范围：把 Rhino `barcode`、`qrcode` 的 MLKit 结果转成 Node JSON-safe
     snapshot contract。
   - 建议结果字段：
@@ -1079,7 +1079,25 @@ Phase 12 task 本身可使用以下执行状态：
     - 不暴露 MLKit `Barcode`、`WrappedBarcode`、`ImageWrapper`、`Bitmap`。
     - image input 支持 path、opaque image handle、existing-permission capture。
     - region、format filter、QR-only mode 有明确 schema。
-  - Evidence：待补充。
+  - Evidence：
+    - Contract：
+      `docs/nodejs/design/BARCODE_PROVIDER_V1.md`
+    - Schema：
+      `docs/nodejs/schemas/barcode_provider_v1.schema.json`
+    - Fixtures：
+      `docs/nodejs/fixtures/barcode-provider-v1-fixtures.json`
+    - Report：
+      `docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_CONTRACT.md`
+    - Surface manifest：
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-barcode-provider-contract.js`
+    - Gradle gate：
+      `:app:verifyNodeRhinoCompatBarcodeProviderContract`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-barcode-provider-contract-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-barcode-provider-contract-verification.md`
 
 - [ ] P12-28: 实现 barcode bridge fake provider and live provider。
   - 范围：新增受控 `barcode` bridge module，先 fake provider，再接入 live
