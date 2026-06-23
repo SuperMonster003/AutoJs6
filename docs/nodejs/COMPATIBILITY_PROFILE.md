@@ -1,6 +1,9 @@
 # AutoJs6 Node.js Compatibility Profile
 
-This profile describes the current Safe Node surface. It is intentionally smaller than desktop Node.js and should be updated whenever runtime behavior changes.
+This profile describes the current Safe Node surface. It is intentionally
+smaller than desktop Node.js today, but Phase 13 defines a staged path toward
+explicit Auto.js Pro and desktop Node.js compatibility profiles. This document
+must be updated whenever runtime behavior changes.
 
 For the GA-facing v1 release contract, see
 [releases/NODE_PROFILE_V1_STABLE_SURFACE.md](releases/NODE_PROFILE_V1_STABLE_SURFACE.md). For user-visible caveats and
@@ -42,6 +45,29 @@ The release/debug gate also runs:
 ```
 
 `verifyNodeCompatibilityProfile` fails if this document omits registry entries from `NodeRuntimeCapabilities` or `NodeBridgeModules`.
+
+## Phase 13 Profile Model
+
+The default runtime remains `AutoJs6 Safe Node Profile`. Phase 13 adds a
+planning vocabulary for future opt-in profiles; these names are not runtime
+promises until the matching surface manifest, capability gate, tests, packaged
+smoke, and rollback evidence land.
+
+| Profile | Purpose | Current default behavior |
+| --- | --- | --- |
+| `safe_default` | Existing Safe Node Profile for ordinary scripts and release defaults. | Enabled by default. |
+| `pro_compat_opt_in` | Auto.js Pro-style compatibility for Java/Android interop, UI, floaty, tasks, plugins, and Rhino migration helpers. | Planned; metadata must fail closed until a task promotes each surface. |
+| `desktop_compat_opt_in` | Broader desktop Node.js compatibility for raw network, wider fs, worker, WASI, inspector, child process, native addon, npm, and stdlib parity. | Planned; metadata must fail closed until a task promotes each surface. |
+| `debug_unsafe_lab` | Debug-build validation profile for high-risk capabilities before release opt-in. | Debug-only planning lane; release builds must reject it. |
+| `permanently_unsupported` | Capability reviewed and intentionally unavailable. | Stable denial with documentation and tests. |
+
+Any move from denied or experimental behavior into `pro_compat_opt_in` or
+`desktop_compat_opt_in` must follow
+[CAPABILITY_RELAXATION_RUBRIC.md](security/CAPABILITY_RELAXATION_RUBRIC.md).
+The Phase 13 source of truth is
+[PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md](reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md),
+with surface ownership in
+[phase13-surface-manifest.json](phase13/phase13-surface-manifest.json).
 
 ## Feature Flag Registry
 

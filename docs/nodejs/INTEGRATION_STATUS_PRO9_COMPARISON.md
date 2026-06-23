@@ -5,12 +5,12 @@ v9 文档说明哪些能力已经具备、哪些能力尚需完成，以及 Rhin
 JavaScript API，尤其是 `org/autojs/autojs/runtime/api/augment` 中主要 API，
 在 Node.js 引擎中的迁移状态。
 
-盘点时间：2026-06-23。
+盘点时间：2026-06-24。
 
 当前版本基线来自根目录 `version.properties`：
 
 - `VERSION_NAME=6.7.1 Alpha4`
-- `VERSION_BUILD=3924`
+- `VERSION_BUILD=3923`
 - `MIN_SDK_VERSION=24`
 - `TARGET_SDK_VERSION=36`
 - `COMPILE_SDK_VERSION=36`

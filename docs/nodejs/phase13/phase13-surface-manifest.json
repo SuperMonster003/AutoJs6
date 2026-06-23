@@ -1,0 +1,352 @@
+{
+  "schema": "autojs6-node-phase13-surface-manifest-v1",
+  "phase": "Phase 13: Auto.js Pro And Desktop Node Parity Expansion",
+  "updatedAt": "2026-06-24",
+  "profileVocabulary": [
+    "safe_default",
+    "pro_compat_opt_in",
+    "desktop_compat_opt_in",
+    "debug_unsafe_lab",
+    "permanently_unsupported"
+  ],
+  "statusVocabulary": [
+    "planned",
+    "design_locked",
+    "debug_poc",
+    "provider_poc",
+    "opt_in_promoted",
+    "default_promoted",
+    "rejected"
+  ],
+  "surfaces": [
+    {
+      "id": "phase13.baseline",
+      "status": "default_promoted",
+      "profiles": [
+        "safe_default"
+      ],
+      "tasks": [
+        "P13-00",
+        "P13-01"
+      ],
+      "summary": "Phase 13 checklist and baseline verifier for Phase 12 completion, version.properties, open blockers, and Pro/Desktop profile planning.",
+      "risk": "low",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md",
+        "tools/nodejs/phase13/verify-node-phase13-baseline.js",
+        ":app:verifyNodePhase13Baseline"
+      ],
+      "rollback": "Remove the Phase 13 Gradle gate and keep Phase 12 summary as the latest planning source."
+    },
+    {
+      "id": "phase13.surface_manifest",
+      "status": "default_promoted",
+      "profiles": [
+        "safe_default"
+      ],
+      "tasks": [
+        "P13-02"
+      ],
+      "summary": "Machine-readable manifest and verifier for Phase 13 task ownership, status, profile, risk, evidence, and rollback tracking.",
+      "risk": "low",
+      "runtimeSurface": [],
+      "evidence": [
+        "docs/nodejs/phase13/phase13-surface-manifest.json",
+        "docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md",
+        "docs/nodejs/schemas/phase13_surface_manifest.schema.json",
+        "tools/nodejs/phase13/verify-node-phase13-surface-manifest.js",
+        ":app:verifyNodePhase13SurfaceManifest"
+      ],
+      "rollback": "Revert the Phase 13 manifest and verifier without changing runtime behavior."
+    },
+    {
+      "id": "profile.promotion_model",
+      "status": "design_locked",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "tasks": [
+        "P13-03",
+        "P13-04",
+        "P13-10",
+        "P13-49"
+      ],
+      "summary": "Shared profile vocabulary, capability relaxation rubric, truth reporting, and user-facing profile diagnostics for staged Safe/Pro/Desktop/Debug promotion.",
+      "risk": "medium",
+      "runtimeSurface": [
+        "future profile selection metadata",
+        "future capability truth report",
+        "future profile diagnostics"
+      ],
+      "evidence": [
+        "docs/nodejs/INTEGRATION_PLAN.md",
+        "docs/nodejs/COMPATIBILITY_PROFILE.md",
+        "docs/nodejs/NODE_PROFILE_V1_1_USER_DRAFT.md",
+        "docs/nodejs/security/CAPABILITY_RELAXATION_RUBRIC.md"
+      ],
+      "rollback": "Keep Safe Node Profile as the only accepted profile and reject Pro/Desktop profile metadata."
+    },
+    {
+      "id": "runtime.graduation_blockers",
+      "status": "planned",
+      "profiles": [
+        "safe_default"
+      ],
+      "tasks": [
+        "P13-05",
+        "P13-06",
+        "P13-07",
+        "P13-08",
+        "P13-09"
+      ],
+      "summary": "Close required internal blockers: crash evidence automation, second execution slot scheduling, packaged long-running service mode, full heavy resource stress, and Android-side package installation.",
+      "risk": "high",
+      "runtimeSurface": [
+        "crash evidence bundle",
+        "multi-slot scheduler",
+        "packaged long-running service",
+        "Android package manager"
+      ],
+      "evidence": [],
+      "rollback": "Disable the promoted runtime path by profile flag and keep one-shot primary embedded execution as the fallback."
+    },
+    {
+      "id": "pro.entry_java_rhino",
+      "status": "planned",
+      "profiles": [
+        "pro_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "tasks": [
+        "P13-11",
+        "P13-12",
+        "P13-13",
+        "P13-14",
+        "P13-15",
+        "P13-16"
+      ],
+      "summary": "Auto.js Pro-style Node entry directives, $autojs global, Java interop, rhino.install(), importClass/importPackage, and JavaAdapter replacement decisions.",
+      "risk": "critical",
+      "runtimeSurface": [
+        "\"nodejs ui\" directive",
+        "\"nodejs ui-thread\" directive",
+        "$autojs",
+        "$autojs.java",
+        "require(\"rhino\").install()"
+      ],
+      "evidence": [],
+      "rollback": "Reject Pro Java/Rhino interop flags and keep require(\"rhino\") in the default disabled JSON-only path."
+    },
+    {
+      "id": "pro.ui_automation_media",
+      "status": "planned",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "tasks": [
+        "P13-17",
+        "P13-18",
+        "P13-19",
+        "P13-20"
+      ],
+      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces.",
+      "risk": "high",
+      "runtimeSurface": [
+        "require(\"ui\") live provider",
+        "require(\"ui.overlay\") live provider",
+        "accessibility selector bridge",
+        "media_projection/image/OCR bridge"
+      ],
+      "evidence": [],
+      "rollback": "Fail closed to existing provider POC or stable denial errors for UI, overlay, accessibility, and media projection."
+    },
+    {
+      "id": "pro.tasks_app_shell_media_utils",
+      "status": "planned",
+      "profiles": [
+        "pro_compat_opt_in"
+      ],
+      "tasks": [
+        "P13-21",
+        "P13-22",
+        "P13-23",
+        "P13-24",
+        "P13-25",
+        "P13-26",
+        "P13-27"
+      ],
+      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules.",
+      "risk": "high",
+      "runtimeSurface": [
+        "daily/weekly task provider",
+        "IntentTask/broadcast provider",
+        "app intent helpers",
+        "root/Shizuku shell capability",
+        "media and utility providers"
+      ],
+      "evidence": [],
+      "rollback": "Keep P12 stable unsupported or blocked_by_design stubs and require explicit migration to supported Node bridge modules."
+    },
+    {
+      "id": "desktop.network_fs",
+      "status": "planned",
+      "profiles": [
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "tasks": [
+        "P13-28",
+        "P13-29",
+        "P13-30",
+        "P13-31",
+        "P13-32",
+        "P13-33"
+      ],
+      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: http/https, net/tls/dns, dgram, broader roots, and advanced fs APIs.",
+      "risk": "high",
+      "runtimeSurface": [
+        "node:http",
+        "node:https",
+        "node:net",
+        "node:tls",
+        "node:dns",
+        "node:dgram",
+        "expanded fs roots",
+        "fs.watch/opendir/fd APIs"
+      ],
+      "evidence": [],
+      "rollback": "Revert Desktop profile allowlist entries and keep raw network and broad filesystem access denied."
+    },
+    {
+      "id": "desktop.execution_runtime",
+      "status": "planned",
+      "profiles": [
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "tasks": [
+        "P13-34",
+        "P13-35",
+        "P13-36",
+        "P13-37",
+        "P13-38",
+        "P13-39",
+        "P13-40"
+      ],
+      "summary": "Stage desktop execution capabilities: worker_threads, process-worker replacement, vm, inspector, WASI, native addon loading, and child_process scoped runner.",
+      "risk": "critical",
+      "runtimeSurface": [
+        "node:worker_threads",
+        "process-worker API",
+        "node:vm",
+        "node:inspector",
+        "autojs:wasi",
+        "native .node addon policy",
+        "child_process scoped runner"
+      ],
+      "evidence": [],
+      "rollback": "Disable desktop execution flags and keep high-risk builtins on stable denial paths."
+    },
+    {
+      "id": "desktop.modules_npm_process",
+      "status": "planned",
+      "profiles": [
+        "desktop_compat_opt_in"
+      ],
+      "tasks": [
+        "P13-41",
+        "P13-42",
+        "P13-43",
+        "P13-44"
+      ],
+      "summary": "Improve desktop module and process parity: full ESM loader, Android-side npm/package manager, broader stdlib conformance, and process/env/argv behavior.",
+      "risk": "high",
+      "runtimeSurface": [
+        "full ESM loader",
+        "npm/package manager on Android",
+        "expanded Node stdlib",
+        "process/env/argv parity"
+      ],
+      "evidence": [],
+      "rollback": "Return to current CommonJS/partial ESM resolver and deny Android-side install or unsafe process features."
+    },
+    {
+      "id": "packaging.plugins_distribution",
+      "status": "planned",
+      "profiles": [
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "tasks": [
+        "P13-45",
+        "P13-46",
+        "P13-47",
+        "P13-48"
+      ],
+      "summary": "Expand packaged APK capability metadata, plugin system, dependency compatibility corpus, and lock/integrity policy for Pro/Desktop distribution.",
+      "risk": "high",
+      "runtimeSurface": [
+        "packaged profile metadata",
+        "plugin installation and distribution",
+        "dependency compatibility corpus",
+        "lock and integrity policy"
+      ],
+      "evidence": [],
+      "rollback": "Reject packaged Pro/Desktop profile metadata and keep JS-only local plugins plus host-side dependency validation."
+    },
+    {
+      "id": "security.rollback_privacy",
+      "status": "planned",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in",
+        "debug_unsafe_lab"
+      ],
+      "tasks": [
+        "P13-50",
+        "P13-51",
+        "P13-52"
+      ],
+      "summary": "Security corpus, rollback playbooks, privacy, foreground disclosure, and user prompts for relaxed capabilities.",
+      "risk": "critical",
+      "runtimeSurface": [
+        "per-profile security corpus",
+        "per-profile rollback controls",
+        "privacy and disclosure policy"
+      ],
+      "evidence": [],
+      "rollback": "Disable relaxed capability groups and keep existing Safe Node Profile security corpus as the release gate."
+    },
+    {
+      "id": "docs.examples.final_gate",
+      "status": "planned",
+      "profiles": [
+        "safe_default",
+        "pro_compat_opt_in",
+        "desktop_compat_opt_in"
+      ],
+      "tasks": [
+        "P13-53",
+        "P13-54",
+        "P13-55",
+        "P13-56",
+        "P13-57"
+      ],
+      "summary": "Publish Pro/Desktop examples, type declarations, migration docs, Pro9 comparison updates, summary generator, and final Phase 13 gate.",
+      "risk": "medium",
+      "runtimeSurface": [
+        "sample/nodejs Pro parity examples",
+        "sample/nodejs desktop parity examples",
+        "autojs6-node TypeScript declarations",
+        "Phase 13 generated summary"
+      ],
+      "evidence": [],
+      "rollback": "Keep Phase 13 examples and docs marked as gated until runtime promotion evidence lands."
+    }
+  ]
+}

@@ -18,6 +18,25 @@ matrix, read
   provider support; behavior may still change.
 - `blocked`: documented shape only; normal user scripts should not rely on it.
 
+## Phase 13 Profile Direction
+
+Node Profile v1.1 remains the current safe user surface. Phase 13 introduces a
+forward-looking profile model so AutoJs6 can grow toward Auto.js Pro
+compatibility and desktop Node.js compatibility without silently changing the
+default runtime:
+
+- `safe_default`: the current Safe Node Profile.
+- `pro_compat_opt_in`: future explicit profile for Auto.js Pro-style Java,
+  Android, UI, floaty, task, plugin, and Rhino migration helpers.
+- `desktop_compat_opt_in`: future explicit profile for broader Node builtins,
+  npm, workers, WASI, inspector, child process, native addon, and filesystem
+  compatibility.
+- `debug_unsafe_lab`: debug-only validation lane for high-risk surfaces.
+
+Until a Phase 13 task promotes a surface, scripts should assume current v1.1
+behavior: high-risk desktop Node and raw Java/Android capabilities continue to
+fail closed with stable diagnostics.
+
 ## Stable Base
 
 These v1 foundations remain the recommended path for production-like scripts:

@@ -1,10 +1,12 @@
 # AutoJs6 Embedded Node.js Integration Plan
 
-This document is the engineering map for the AutoJs6 Safe Node Profile. It records the current integration boundary and the order in which future work should land.
+This document is the engineering map for the AutoJs6 Node runtime. It records
+the current Safe Node Profile boundary and the staged expansion path toward
+Auto.js Pro compatibility plus broader desktop Node.js compatibility.
 
 ## Product Goal
 
-AutoJs6 embeds Node.js as a controlled Android script runtime:
+AutoJs6 currently embeds Node.js as a controlled Android script runtime:
 
 - real Node/V8/libuv runtime through `libnode.so`
 - AutoJs6-owned bootstrap and CommonJS loader
@@ -15,7 +17,11 @@ AutoJs6 embeds Node.js as a controlled Android script runtime:
 - diagnostics and release gates
 - native crash diagnostics through native dependency and symbol archive reports
 
-The target is not unrestricted desktop Node.js. The target is a stable AutoJs6 Safe Node Profile that can grow deliberately.
+The default product surface remains the Safe Node Profile, but the long-term
+target is broader: explicit profiles should gradually approach Auto.js Pro
+capabilities and desktop Node.js capabilities where Android can support them.
+High-risk capabilities must move through design, opt-in profile, verification,
+packaged evidence, and rollback gates before becoming user-facing.
 
 ## Current Runtime Chain
 
@@ -159,13 +165,25 @@ Important: `.mjs` currently routes to the Node backend, but ESM execution is sti
 - Each high-risk feature needs a design document, flag, tests, packaged smoke, and rollback path.
 - Keep current design gates in `docs/nodejs/design/` synchronized when broad compatibility surfaces change.
 
+### P13 Pro/Desktop Parity Expansion
+
+- Use `docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md`
+  as the next implementation checklist after Phase 12.
+- Split runtime behavior into Safe, Pro compatibility, Desktop compatibility,
+  and debug lab profiles.
+- Revisit selected Phase 12 disabled or blocked surfaces through explicit
+  capability, permission, testing, packaged smoke, and rollback gates.
+- Treat Auto.js Pro parity and desktop Node.js parity as long-term opt-in
+  targets, not silent changes to the default runtime.
+
 ## Global Invariants
 
 1. Preserve Rhino compatibility.
 2. Keep `embedded` as the default backend while retaining `rhino`, `native`, and `auto` switches.
 3. Keep the native one-shot backend until embedded lifecycle stress coverage is mature.
 4. Support both the main app and packaged APKs.
-5. Treat the exposed runtime as AutoJs6 Safe Node Profile, not desktop Node.js.
+5. Treat the default exposed runtime as AutoJs6 Safe Node Profile while Pro and
+   Desktop parity expand only through explicit opt-in profiles and gates.
 6. Do not open high-risk capabilities without an explicit task and gate.
 7. Android and AutoJs API calls from Node must be asynchronous from the JavaScript perspective.
 8. Callbacks into JavaScript must be marshalled onto the Node event loop thread.

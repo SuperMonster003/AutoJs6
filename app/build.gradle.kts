@@ -2553,6 +2553,7 @@ apply(from = "node-native-modernization.gradle.kts")
 apply(from = "node-phase10-gate.gradle.kts")
 apply(from = "node-phase11-gate.gradle.kts")
 apply(from = "node-phase12-gate.gradle.kts")
+apply(from = "node-phase13-gate.gradle.kts")
 
 tasks {
     withType(JavaCompile::class.java) {
