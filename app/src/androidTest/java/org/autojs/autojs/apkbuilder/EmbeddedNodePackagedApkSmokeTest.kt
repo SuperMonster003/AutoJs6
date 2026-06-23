@@ -8219,6 +8219,29 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun buildRhinoCompatEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged Rhino compat smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        buildPackagedRhinoCompatApk()
+    }
+
+    @Test
+    fun installAndRunRhinoCompatEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged Rhino compat install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged Rhino compat install-and-run smoke")
+
+        val outputApk = buildPackagedRhinoCompatApk()
+        assertInstallAndRunPackagedRhinoCompatSmoke(outputApk)
+    }
+
+    @Test
     fun buildPackageScriptLaunchEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged package script launch smoke requires embedded script execution build support.",
@@ -11634,6 +11657,242 @@ class EmbeddedNodePackagedApkSmokeTest {
         )
     }
 
+    private fun buildPackagedRhinoCompatApk(): File {
+        val mainScriptName = "main.js"
+        val mainScript = """
+            "nodejs";
+
+            async function main() {
+              const bridge = require("autojs6:bridge");
+              const compat = require("autojs6:compat");
+              const requests = [];
+              const stores = Object.create(null);
+              const activeImages = new Set();
+              let imageSequence = 0;
+
+              function respond(request, ok, result, error) {
+                setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                  id: request.id,
+                  ok,
+                  result,
+                  error
+                })));
+              }
+
+              function makeImage(label, width, height) {
+                imageSequence += 1;
+                const id = "rhino-compat-" + label + "-" + imageSequence;
+                activeImages.add(id);
+                return { id, __autojs6ImageHandle: id, width, height };
+              }
+
+              function imageId(handle) {
+                return handle && (handle.__autojs6ImageHandle || handle.id);
+              }
+
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  const request = JSON.parse(message);
+                  requests.push(request);
+                  const args = request.args || [];
+
+                  if (request.module === "toast" && request.method === "showToast") {
+                    respond(request, true, null);
+                    return;
+                  }
+
+                  if (request.module === "storage" || request.module === "storages") {
+                    const storeName = args[0];
+                    const key = args[1];
+                    const bucket = stores[storeName] || (stores[storeName] = Object.create(null));
+                    if (request.method === "clear") {
+                      Object.keys(bucket).forEach((entry) => delete bucket[entry]);
+                      respond(request, true, null);
+                    } else if (request.method === "put") {
+                      bucket[key] = args[2];
+                      respond(request, true, null);
+                    } else if (request.method === "get") {
+                      respond(request, true, Object.prototype.hasOwnProperty.call(bucket, key)
+                        ? { found: true, value: bucket[key] }
+                        : { found: false });
+                    } else if (request.method === "contains") {
+                      respond(request, true, Object.prototype.hasOwnProperty.call(bucket, key));
+                    } else if (request.method === "keys") {
+                      respond(request, true, Object.keys(bucket).sort());
+                    } else if (request.method === "remove") {
+                      delete bucket[key];
+                      respond(request, true, null);
+                    } else {
+                      respond(request, false, null, {
+                        code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                        message: "unexpected storage method"
+                      });
+                    }
+                    return;
+                  }
+
+                  if (request.module === "accessibility") {
+                    if (request.method === "findOne") {
+                      respond(request, true, {
+                        text: "S11-29",
+                        desc: "Rhino compat packaged smoke",
+                        id: "rhino_compat",
+                        className: "android.widget.TextView",
+                        bounds: { left: 1, top: 2, right: 101, bottom: 42 },
+                        clickable: true,
+                        enabled: true
+                      });
+                      return;
+                    }
+                    if (request.method === "click" || request.method === "back" ||
+                        request.method === "home" || request.method === "recentApps") {
+                      respond(request, true, true);
+                      return;
+                    }
+                  }
+
+                  if (request.module === "image" || request.module === "images") {
+                    if (request.method === "readImage") {
+                      respond(request, true, makeImage("read", 16, 16));
+                      return;
+                    }
+                    if (request.method === "clip") {
+                      const region = args[1] || {};
+                      respond(request, true, makeImage("clip", region.width || 4, region.height || 4));
+                      return;
+                    }
+                    if (request.method === "findImage") {
+                      respond(request, true, { x: 3, y: 5 });
+                      return;
+                    }
+                    if (request.method === "recycle") {
+                      activeImages.delete(imageId(args[0]));
+                      respond(request, true, null);
+                      return;
+                    }
+                  }
+
+                  respond(request, false, null, {
+                    code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                    message: "unexpected packaged Rhino compat request",
+                    module: request.module,
+                    method: request.method
+                  });
+                }
+              });
+
+              const status = compat.status();
+              const loaderOk = compat.name === "autojs6:compat" &&
+                status.entry === "autojs6:compat" &&
+                status.defaultGlobalInjection === false &&
+                status.implementedTasks.indexOf("S11-20") >= 0 &&
+                status.availableGlobalNames.indexOf("images") >= 0;
+
+              const toastResult = await compat.toastLog("S11-29 packaged Rhino compat smoke");
+              const toastOk = toastResult === null;
+
+              const fileName = compat.files.join(".", "rhino-compat-packaged.txt");
+              compat.files.write(fileName, "S11-29 packaged files");
+              const filesOk = compat.files.exists(fileName) &&
+                compat.files.read(fileName) === "S11-29 packaged files" &&
+                compat.files.remove(fileName) === true &&
+                compat.files.exists(fileName) === false;
+
+              const store = compat.storages.create("phase11_packaged");
+              await store.clear({ timeoutMs: 1000 });
+              await store.put("mode", { value: "packaged", count: 29 }, { timeoutMs: 1000 });
+              const stored = await store.get("mode", null, { timeoutMs: 1000 });
+              const storageContains = await store.contains("mode", { timeoutMs: 1000 });
+              const storageKeys = await store.keys({ timeoutMs: 1000 });
+              await store.remove("mode", { timeoutMs: 1000 });
+              const storageOk = stored &&
+                stored.value === "packaged" &&
+                stored.count === 29 &&
+                storageContains === true &&
+                storageKeys.join(",") === "mode";
+
+              const selectorHandle = compat.text("S11-29").clickable(true);
+              const foundNode = await selectorHandle.findOne({ timeoutMs: 1000 });
+              const selectorClicked = await selectorHandle.click({ timeoutMs: 1000 });
+              const pointClicked = await compat.click(9, 29, { timeoutMs: 1000 });
+              const selectorOk = foundNode &&
+                foundNode.text === "S11-29" &&
+                foundNode.clickable === true &&
+                selectorClicked === true &&
+                pointClicked === true;
+
+              const source = await compat.images.read("fixtures/source.png", { timeoutMs: 1000 });
+              const clipped = await compat.images.clip(source, 0, 0, 4, 4, { timeoutMs: 1000 });
+              const match = await compat.images.findImage(source, clipped, { threshold: 0.8, timeoutMs: 1000 });
+              await compat.images.recycle(clipped, { timeoutMs: 1000 });
+              await compat.images.recycle(source, { timeoutMs: 1000 });
+              const imageOk = source.width === 16 &&
+                clipped.width === 4 &&
+                match &&
+                match.x === 3 &&
+                match.y === 5;
+
+              function hasPermission(request, permission) {
+                return (request.permissions || []).indexOf(permission) >= 0;
+              }
+
+              const requiredPermissionsOk = requests.every((request) => {
+                if (request.module === "toast") {
+                  return hasPermission(request, "toast");
+                }
+                if (request.module === "storage" || request.module === "storages") {
+                  return hasPermission(request, "storage");
+                }
+                if (request.module === "accessibility") {
+                  return hasPermission(request, "accessibility");
+                }
+                if (request.module === "image" || request.module === "images") {
+                  return hasPermission(request, "image");
+                }
+                return false;
+              });
+              const cleanupOk = activeImages.size === 0;
+              const pending = bridge.__test.pendingCount();
+              const ready = loaderOk && toastOk && filesOk && storageOk && selectorOk && imageOk &&
+                requiredPermissionsOk && cleanupOk && pending === 0;
+
+              console.log("packaged.rhino_compat.ready=" + ready);
+              console.log("packaged.rhino_compat.loader=" + loaderOk);
+              console.log("packaged.rhino_compat.toast=" + toastOk);
+              console.log("packaged.rhino_compat.files=" + filesOk);
+              console.log("packaged.rhino_compat.storage=" + storageOk);
+              console.log("packaged.rhino_compat.selector=" + selectorOk);
+              console.log("packaged.rhino_compat.image=" + imageOk);
+              console.log("packaged.rhino_compat.permissions=" + requiredPermissionsOk);
+              console.log("packaged.rhino_compat.cleanup=" + cleanupOk);
+              console.log("packaged.rhino_compat.pending=" + pending);
+            }
+
+            return main().catch(error => {
+              console.error("packaged.rhino_compat.error=" + (error && (error.stack || error.message) || error));
+              process.exitCode = 1;
+            });
+        """.trimIndent() + "\n"
+        return buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-rhino-compat-smoke",
+            outputApkName = RHINO_COMPAT_PACKAGED_APK_NAME,
+            projectName = RHINO_COMPAT_PACKAGED_PROJECT_NAME,
+            packageName = RHINO_COMPAT_PACKAGED_PACKAGE_NAME,
+            mainScriptName = mainScriptName,
+            mainScript = mainScript,
+            extraFiles = mapOf(
+                "node_modules/toast/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/storage/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/storages/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/accessibility/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/image/index.js" to """module.exports = { shadow: true };""" + "\n",
+                "node_modules/images/index.js" to """module.exports = { shadow: true };""" + "\n",
+            ),
+            nodePermissions = RHINO_COMPAT_PACKAGED_NODE_PERMISSIONS,
+            runtimeMarkers = RHINO_COMPAT_PACKAGED_RUNTIME_MARKERS,
+        )
+    }
+
     private fun buildPackagedGateDiagnosticsApk(
         rootName: String,
         outputApkName: String,
@@ -12985,6 +13244,16 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedRhinoCompatSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = RHINO_COMPAT_PACKAGED_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-rhino-compat-smoke.apk",
+            label = "packaged Rhino compat smoke",
+            requiredMarkers = RHINO_COMPAT_PACKAGED_RUNTIME_MARKERS,
+        )
+    }
+
     private fun assertInstallAndRunPackagedScriptLaunchSmoke(outputApk: File) {
         assertInstallAndRunPackagedApk(
             outputApk = outputApk,
@@ -13816,6 +14085,9 @@ $nodeConfigJson
         private const val V11_BRIDGE_PROJECT_NAME = "PackagedNodeV11BridgeSmoke"
         private const val V11_BRIDGE_PACKAGE_NAME = "org.autojs6.packaged.node.v11.bridge.smoke"
         private const val V11_BRIDGE_APK_NAME = "PackagedNodeV11BridgeSmoke_v1.0.0.apk"
+        private const val RHINO_COMPAT_PACKAGED_PROJECT_NAME = "PackagedNodeRhinoCompatSmoke"
+        private const val RHINO_COMPAT_PACKAGED_PACKAGE_NAME = "org.autojs6.packaged.node.rhino.compat.smoke"
+        private const val RHINO_COMPAT_PACKAGED_APK_NAME = "PackagedNodeRhinoCompatSmoke_v1.0.0.apk"
         private const val SCRIPT_LAUNCH_PROJECT_NAME = "PackagedNodeScriptLaunchSmoke"
         private const val SCRIPT_LAUNCH_PACKAGE_NAME = "org.autojs6.packaged.node.script.launch.smoke"
         private const val SCRIPT_LAUNCH_APK_NAME = "PackagedNodeScriptLaunchSmoke_v1.0.0.apk"
@@ -14154,6 +14426,24 @@ $nodeConfigJson
             "packaged.v1_1_bridge.permissions=true",
             "packaged.v1_1_bridge.no_shadow=true",
             "packaged.v1_1_bridge.pending=0",
+        )
+        private val RHINO_COMPAT_PACKAGED_NODE_PERMISSIONS = listOf(
+            "toast",
+            "storage",
+            "accessibility",
+            "image",
+        )
+        private val RHINO_COMPAT_PACKAGED_RUNTIME_MARKERS = listOf(
+            "packaged.rhino_compat.ready=true",
+            "packaged.rhino_compat.loader=true",
+            "packaged.rhino_compat.toast=true",
+            "packaged.rhino_compat.files=true",
+            "packaged.rhino_compat.storage=true",
+            "packaged.rhino_compat.selector=true",
+            "packaged.rhino_compat.image=true",
+            "packaged.rhino_compat.permissions=true",
+            "packaged.rhino_compat.cleanup=true",
+            "packaged.rhino_compat.pending=0",
         )
         private val SCRIPT_LAUNCH_RUNTIME_MARKERS = listOf(
             "packaged.script_launch.ready=true",

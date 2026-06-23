@@ -230,6 +230,20 @@ Focused packaged v1.1 bridge smoke:
 
 This smoke proves the v1.1 bridge modules are not main-app-only by packaging fake-provider coverage for controlled `fetch`, OCR opaque image handles, JSON storage, notifications, UI handles/events/update/batch update, `work_manager` metadata serialization, and a project-local JS-only plugin that uses storage, notifications, UI, and controlled fetch. It also verifies declared `node.permissions` including `plugin.<id>`, bridge-module shadowing denial, plugin resource cleanup/unload isolation, and zero pending bridge calls without granting live Android provider authority.
 
+Focused packaged Rhino compat smoke:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeRhinoCompatPackagedSmokeHost
+.\gradlew.bat --console=plain :app:verifyNodeRhinoCompatPackagedSmoke "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
+The S11-29 host task writes the Rhino compat packaged smoke contract report.
+The device gate selects
+`org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRhinoCompatEmbeddedNodePackagedApk`
+and verifies packaged `autojs6:compat` loader, bridge permission markers,
+resource cleanup, and the toast/files/storage/selector/image baseline paths.
+See `docs/nodejs/reports/phase11/RHINO_COMPAT_PACKAGED_SMOKE.md`.
+
 Current bridge protocol instrumentation:
 
 ```powershell

@@ -471,10 +471,16 @@ Inventory 和兼容矩阵统一使用以下状态：
     `statusCounts.supported_async` 和 `statusCounts.blocked_by_design`，并记录
     后续 device instrumentation tests 的结果字段契约。
 
-- [ ] S11-29: 建立 packaged APK compatibility smoke。
+- [x] S11-29: 建立 packaged APK compatibility smoke。
   - 范围：packaged 脚本验证 compat loader、bridge permission、资源释放。
   - 产物：Gradle device gate 和报告。
   - 验收：至少覆盖 toast/files/storage/selector/image 基础路径。
+  - 完成记录：新增 `EmbeddedNodePackagedApkSmokeTest#installAndRunRhinoCompatEmbeddedNodePackagedApk`、
+    `verifyNodeRhinoCompatPackagedSmoke` device gate、
+    `verifyNodeRhinoCompatPackagedSmokeHost` host report gate 与
+    `docs/nodejs/reports/phase11/RHINO_COMPAT_PACKAGED_SMOKE.md`；runtime
+    markers 覆盖 compat loader、bridge permission、resource cleanup、pending=0
+    以及 toast/files/storage/selector/image 基础路径。
 
 - [ ] S11-30: 建立 resource cleanup/security gate。
   - 范围：compat facade 下的 image、selector、event、ui、floaty、db、

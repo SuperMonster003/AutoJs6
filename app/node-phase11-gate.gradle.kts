@@ -887,6 +887,44 @@ tasks.register<Exec>("verifyNodeRhinoDualEngineCompatTests") {
     )
 }
 
+tasks.register<Exec>("verifyNodeRhinoCompatPackagedSmokeHost") {
+    group = "verification"
+    description = "Verifies the Phase 11A Rhino compat packaged APK smoke contract and report schema."
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-packaged-smoke.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_COMPAT_PACKAGED_SMOKE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-compat-packaged-smoke-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-packaged-smoke-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register("verifyNodeRhinoCompatPackagedSmoke") {
+    group = "verification"
+    description = "Runs the focused Phase 11A Rhino compat packaged APK smoke on a connected device."
+
+    dependsOn(
+        "verifyNodeRhinoCompatPackagedSmokeHost",
+        "connectedAppDebugAndroidTest",
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCapabilityTruth") {
     group = "verification"
     description = "Writes build/reports/nodejs/final-capability-truth.json without failing on open Phase 11 blockers."

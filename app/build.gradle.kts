@@ -384,6 +384,9 @@ val nodeJsPackagedEsmGateInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRuntimeCompatibilityDescriptorMismatchEmbeddedNodePackagedApk",
 )
 val nodeJsPackagedParityGateInstrumentationClasses = nodeJsPackagedEsmGateInstrumentationClasses
+val nodeJsRhinoCompatPackagedSmokeInstrumentationClasses = listOf(
+    "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRhinoCompatEmbeddedNodePackagedApk",
+)
 val nodeJsLiveProviderSummaryTaskName = "generateNodeLiveProviderSummary"
 val nodeJsLiveProviderGateCases = listOf(
     mapOf(
@@ -887,6 +890,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     nodeJsLiveProviderSummaryTaskName to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
     "verifyNodePackagedParityGate" to nodeJsPackagedParityGateInstrumentationClasses,
+    "verifyNodeRhinoCompatPackagedSmoke" to nodeJsRhinoCompatPackagedSmokeInstrumentationClasses,
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodeLiveFetchGate" to nodeJsLiveFetchGateInstrumentationClasses,
     "verifyNodeLiveWebSocketGate" to nodeJsLiveWebSocketGateInstrumentationClasses,
