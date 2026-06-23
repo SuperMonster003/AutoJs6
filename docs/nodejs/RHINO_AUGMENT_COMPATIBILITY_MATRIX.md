@@ -15,10 +15,10 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ## Status Totals
 
 - blocked_by_design: 45
-- partial: 332
+- partial: 330
 - renamed: 1
 - supported: 148
-- supported_async: 52
+- supported_async: 54
 - unsupported: 374
 
 ## Module Matrix
@@ -54,7 +54,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 26 | barcode | barcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 27 | barcode.qr_code | qrcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 28 | threads | threads | blocked_by_design | engines, timers/promises, work_manager | blocked_by_design:6 | provider_availability | Keep denial documented and covered by policy tests. |
-| 29 | ui | ui | partial | ui | blocked_by_design:15, partial:5, unsupported:15 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
+| 29 | ui | ui | partial | autojs6:compat, ui | blocked_by_design:15, partial:3, supported_async:2, unsupported:15 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
 | 30 | colors | colors | partial | autojs6:compat, colors | blocked_by_design:3, partial:2, supported:58 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 31 | colors.color | Color | blocked_by_design | colors | blocked_by_design:1 | provider_availability | Keep denial documented and covered by policy tests. |
 | 32 | tasks | tasks | partial | work_manager | blocked_by_design:3, partial:5, unsupported:8 | none | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -395,9 +395,9 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `ui`
 - Status: `partial`
-- Node surface: ui
+- Node surface: autojs6:compat, ui
 - Coverage: `bridge_and_types`
-- API status: blocked_by_design:15, partial:5, unsupported:15
+- API status: blocked_by_design:15, partial:3, supported_async:2, unsupported:15
 - Risks: lifecycle_resource, provider_availability, thread_model
 - Next step: Implement explicit compat facade and promote mapped APIs one by one.
 

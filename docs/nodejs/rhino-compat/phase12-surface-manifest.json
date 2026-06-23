@@ -103,15 +103,16 @@
     },
     {
       "id": "ui.compat",
-      "status": "design_locked",
+      "status": "provider_poc",
       "tasks": [
         "P12-08",
         "P12-09",
         "P12-10"
       ],
-      "summary": "P12-08 locks the constrained Rhino UI to Node JSON layout descriptor subset; runtime compat.ui facade remains tracked by P12-09/P12-10.",
+      "summary": "P12-08 locks the Rhino UI JSON descriptor subset; P12-09 adds constrained autojs6:compat.ui over the existing require(\"ui\") provider, with device/packaged smoke still tracked by P12-10.",
       "runtimeSurface": [
-        "future autojs6:compat.ui",
+        "autojs6:compat.ui",
+        "ui global after compat.install({ globals: true })",
         "existing require(\"ui\") JSON provider"
       ],
       "evidence": [
@@ -121,9 +122,15 @@
         "docs/nodejs/design/RHINO_UI_COMPATIBILITY.md",
         "docs/nodejs/design/UI_BRIDGE.md",
         "app/src/main/cpp/node_bridge_sources.cpp",
+        "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
+        "sample/nodejs/typescript-smoke/src/main.ts",
+        "docs/nodejs/rhino-compat/status-manifest.json",
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeUiProvider.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
         "tools/nodejs/phase12/verify-rhino-compat-ui-json-layout-subset.js",
-        ":app:verifyNodeRhinoCompatUiJsonLayoutSubset"
+        "tools/nodejs/phase12/verify-rhino-compat-ui-facade.js",
+        ":app:verifyNodeRhinoCompatUiJsonLayoutSubset",
+        ":app:verifyNodeRhinoCompatUiFacade"
       ]
     },
     {

@@ -228,6 +228,7 @@ class NodeBridgeConformanceInstrumentationTest {
               const sensors = require("sensors");
               const ui = require("ui");
               const workManager = require("work_manager");
+              const compat = require("autojs6:compat");
 
               [
                 ["toast", toast],
@@ -249,7 +250,9 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["notifications", notifications],
                 ["sensors", sensors],
                 ["ui", ui],
-                ["work_manager", workManager]
+                ["work_manager", workManager],
+                ["autojs6:compat", compat],
+                ["autojs6:compat.ui", compat.ui]
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
               expectExports("toast", toast, ["showToast", "toast"]);
@@ -270,8 +273,17 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("sqlite", sqlite, ["open"]);
               expectExports("notifications", notifications, ["notify", "cancel", "cancelAll"]);
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
-             expectExports("ui", ui, ["showLayout", "state", "bind"]);
+              expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
+              expectExports("autojs6:compat.ui", compat.ui, ["showLayout", "state", "bind"]);
+              assert.strictEqual(globalThis.ui, undefined, "compat.ui must not install a default global");
+              assert.strictEqual(typeof compat.ui.run, "undefined");
+              assert.strictEqual(typeof compat.ui.post, "undefined");
+              assert.strictEqual(typeof compat.ui.findById, "undefined");
+              const compatInstall = compat.install({ globals: true });
+              assert(compatInstall.globals.indexOf("ui") >= 0, "compat.install({ globals: true }) must install constrained ui global");
+              assert.strictEqual(globalThis.ui, compat.ui);
+              assert.strictEqual(typeof globalThis.ui.layout, "undefined");
 
               assert.strictEqual(typeof app.packageName, "string");
               assert.strictEqual(typeof app.versionName, "string");
@@ -407,6 +419,26 @@ class NodeBridgeConformanceInstrumentationTest {
               await expectPromise("ui.update", uiHandle.update({ id: "title", text: "Updated" }, { timeoutMs: 1072 }));
               await expectPromise("ui.close", uiHandle.close({ timeoutMs: 1073 }));
               assert(uiClickCount >= 1, "ui click callback did not run");
+              uiDrained = false;
+              const compatUiHandle = await expectPromise("compat.ui.showLayout", compat.ui.showLayout({ type: "Column", children: [{ type: "Text", id: "compatTitle", text: "Compat" }, { type: "Button", id: "compatOk", text: "OK" }] }, { timeoutMs: 1074, drainIntervalMs: 1 }));
+              expectFrozen("compat.ui.handle", compatUiHandle);
+              expectExports("compat.ui.handle", compatUiHandle, ["on", "update", "batchUpdate", "close"]);
+              let compatUiClickCount = 0;
+              let compatUiOff = function() {};
+              const compatUiReady = new Promise((resolve) => {
+                compatUiOff = compatUiHandle.on("click", (event) => {
+                  if (event.id === "ok" && event.handleId === "ui-conformance") {
+                    compatUiClickCount += 1;
+                    compatUiOff();
+                    resolve();
+                  }
+                }, { drainIntervalMs: 1, timeoutMs: 1075 });
+              });
+              await compatUiReady;
+              await expectPromise("compat.ui.update", compatUiHandle.update({ id: "compatTitle", text: "Compat Updated" }, { timeoutMs: 1076 }));
+              await expectPromise("compat.ui.batchUpdate", compatUiHandle.batchUpdate([{ id: "compatOk", text: "Done", enabled: false }], { timeoutMs: 1077 }));
+              await expectPromise("compat.ui.close", compatUiHandle.close({ timeoutMs: 1078 }));
+              assert(compatUiClickCount >= 1, "compat.ui click callback did not run");
               assert.strictEqual(await expectPromise("work_manager.scheduleOnce", workManager.scheduleOnce({ scriptPath: "main.cjs", timeoutMs: 1055 })), "work-once");
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
@@ -444,6 +476,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 "ui.showLayout",
                 "ui.drainEvents",
                 "ui.update",
+                "ui.batchUpdate",
                 "ui.close",
                 "work_manager.list"
               ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));

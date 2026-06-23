@@ -1,7 +1,7 @@
 {
   "schema": "autojs6-node-rhino-compat-status-manifest-v1",
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T10:23:51.965Z",
+  "generatedAt": "2026-06-23T00:00:00.000Z",
   "inventorySchema": "autojs6-node-rhino-augment-inventory-v1",
   "statusVocabulary": [
     "supported",
@@ -5836,27 +5836,28 @@
       "status": "partial",
       "asyncMode": "promise",
       "nodeModules": [
-        "ui"
+        "ui",
+        "autojs6:compat"
       ],
       "bridgeModules": [
         "ui"
       ],
-      "decision": "s11_23_rhino_ui_bridge_migration_design",
+      "decision": "p12_09_compat_ui_constrained_facade_partial",
       "notes": [
-        "S11-23 keeps require(\"ui\") as the current Node UI migration target and does not add compat.ui or a default global ui.",
-        "Rhino layout declarations may migrate only through constrained JSON descriptors, UiHandle updates, and provider-drained JSON events; NativeView/View leakage and ui.run()/ui.post() main-thread JavaScript execution are blocked by design."
+        "P12-09 exposes require(\"autojs6:compat\").ui as a constrained facade over the existing require(\"ui\") JSON provider; no global ui is installed unless compat.install({ globals: true }) is called explicitly.",
+        "Rhino layout declarations may migrate only through the P12-08 JSON descriptor subset, UiHandle updates, batch updates, and provider-drained JSON events; NativeView/View leakage and ui.run()/ui.post() main-thread JavaScript execution remain blocked by design."
       ],
       "apiEntries": [
         {
           "id": "ui.__module",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "ui",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "ui",
           "nodeName": "ui",
-          "decision": "s11_23_require_ui_entrypoint",
+          "decision": "p12_09_compat_ui_facade_entrypoint",
           "notes": [
-            "Use require(\"ui\") explicitly; S11-23 does not inject a Rhino global ui or compat.ui facade."
+            "Use require(\"autojs6:compat\").ui for the constrained Rhino UI migration facade, or require(\"ui\") directly. No global ui is installed unless compat.install({ globals: true }) is called explicitly."
           ]
         },
         {
@@ -5890,9 +5891,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_23_raw_view_lookup_blocked",
+          "decision": "p12_09_raw_view_lookup_blocked",
           "notes": [
-            "Finding views would expose live NativeView/View wrappers; Node widgets stay scoped to a UiHandle and emit JSON snapshots."
+            "Finding views would expose live NativeView/View wrappers; compat.ui keeps widget ids scoped to an opaque UiHandle and uses JSON patches/events."
           ]
         },
         {
@@ -5902,9 +5903,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_23_raw_view_lookup_blocked",
+          "decision": "p12_09_raw_view_lookup_blocked",
           "notes": [
-            "String-id view lookup would expose live NativeView/View wrappers; Node widgets stay scoped to a UiHandle."
+            "String-id view lookup would expose live NativeView/View wrappers; compat.ui keeps widget ids scoped to an opaque UiHandle."
           ]
         },
         {
@@ -5914,21 +5915,21 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_23_raw_view_lookup_blocked",
+          "decision": "p12_09_raw_view_lookup_blocked",
           "notes": [
-            "Rhino view lookup depends on live Android View objects; Node uses JSON events and patches."
+            "Rhino view lookup depends on live Android View objects; compat.ui uses JSON events and patches."
           ]
         },
         {
           "id": "ui.finish",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "ui",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "ui",
-          "nodeName": "close",
-          "decision": "s11_23_ui_handle_close_candidate",
+          "nodeName": "ui.handle.close",
+          "decision": "p12_09_ui_handle_close_facade",
           "notes": [
-            "Close the current provider-owned UI session through UiHandle.close(); Node has no implicit current Activity."
+            "Close the explicit provider-owned UI session through UiHandle.close(); Node has no implicit current Rhino Activity."
           ]
         },
         {
@@ -6007,36 +6008,36 @@
           "id": "ui.keepScreenOn",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "ui",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "ui",
-          "nodeName": "showLayout",
-          "decision": "s11_23_session_option_candidate",
+          "nodeName": "ui.showLayout",
+          "decision": "p12_09_session_option_deferred",
           "notes": [
-            "May become a JSON session/window option on showLayout; it must not expose Activity or Window objects."
+            "May become a JSON session/window option on compat.ui.showLayout; it must not expose Activity or Window objects."
           ]
         },
         {
           "id": "ui.layout",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "ui",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "ui",
-          "nodeName": "showLayout",
-          "decision": "s11_23_layout_json_descriptor_candidate",
+          "nodeName": "ui.showLayout",
+          "decision": "p12_09_layout_json_descriptor_facade",
           "notes": [
-            "Translate only constrained declarative layouts to require(\"ui\").showLayout(layoutJson); XML execution and raw views are not accepted."
+            "Translate only the P12-08 JSON descriptor subset to compat.ui.showLayout(layoutJson); XML raw strings, executable attributes, and raw views are not accepted."
           ]
         },
         {
           "id": "ui.layoutFile",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "ui",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "ui",
-          "nodeName": "showLayout",
-          "decision": "s11_23_layout_file_json_descriptor_candidate",
+          "nodeName": "ui.showLayout",
+          "decision": "p12_09_layout_file_json_descriptor_deferred",
           "notes": [
-            "A future migration helper may parse project-local layout files into JSON descriptors before showLayout; arbitrary Rhino XML semantics remain out of scope."
+            "P12-09 does not parse Rhino XML layout files; project-local JSON descriptor file migration remains planned and must still feed compat.ui.showLayout(json)."
           ]
         },
         {
@@ -6082,9 +6083,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_23_main_thread_js_blocked",
+          "decision": "p12_09_main_thread_js_blocked",
           "notes": [
-            "Do not post Node JavaScript functions to Android main looper; use event callbacks and UiHandle updates."
+            "compat.ui does not expose ui.post(); use Node timers/promises and then send JSON updates."
           ]
         },
         {
@@ -6106,9 +6107,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_23_main_thread_js_blocked",
+          "decision": "p12_09_main_thread_js_blocked",
           "notes": [
-            "Do not run Node JavaScript functions on Android main looper; callbacks stay on the Node event loop."
+            "compat.ui does not expose ui.run(); callbacks stay on the Node event loop and UI changes go through JSON updates."
           ]
         },
         {
@@ -6226,9 +6227,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "s11_23_raw_root_view_blocked",
+          "decision": "p12_09_raw_root_view_blocked",
           "notes": [
-            "Root view access would leak a NativeView/View wrapper; Node holds only the opaque UiHandle."
+            "Root view access would leak a NativeView/View wrapper; compat.ui holds only the opaque UiHandle."
           ]
         },
         {
@@ -11734,9 +11735,9 @@
     }
   ],
   "totals": {
-    "partial": 332,
+    "partial": 330,
     "unsupported": 388,
-    "supported_async": 52,
+    "supported_async": 54,
     "blocked_by_design": 45,
     "supported": 134,
     "renamed": 1

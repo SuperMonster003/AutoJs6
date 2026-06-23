@@ -266,6 +266,23 @@ async function smoke(): Promise<void> {
   unsubscribeUi();
   await uiHandle.close({ timeoutMs: 1000 });
 
+  const compatUi: rhinoCompat.RhinoUiCompatModule = rhinoCompat.ui;
+  const compatUiHandle: ui.UiHandle = await compatUi.showLayout({
+    type: "Column",
+    children: [
+      { id: "compatTitle", type: "Text", text: "Compat UI" },
+      { id: "compatOk", type: "Button", text: "OK" }
+    ]
+  }, { timeoutMs: 1000, drainIntervalMs: 50 });
+  const unsubscribeCompatUi: () => void = compatUiHandle.on("click", (event: ui.UiEvent) => {
+    const eventType: string = event.type;
+    void eventType;
+  }, { drainIntervalMs: 50, timeoutMs: 1000 });
+  await compatUiHandle.update({ id: "compatTitle", text: "Compat Updated" }, { timeoutMs: 1000 });
+  await compatUiHandle.batchUpdate([{ id: "compatOk", text: "Done", enabled: false }], { timeoutMs: 1000 });
+  unsubscribeCompatUi();
+  await compatUiHandle.close({ timeoutMs: 1000 });
+
   await rhinoCompat.images.recycle(compatTemplate, { timeoutMs: 1000 });
   await rhinoCompat.images.recycle(compatClip, { timeoutMs: 1000 });
   await rhinoCompat.images.recycle(compatResize, { timeoutMs: 1000 });
@@ -431,6 +448,9 @@ async function smoke(): Promise<void> {
   void sensorSub;
   void uiHandle;
   void unsubscribeUi;
+  void compatUi;
+  void compatUiHandle;
+  void unsubscribeCompatUi;
   void responseText;
   void responseJson;
   void fetchDiagnostics;

@@ -13,13 +13,13 @@ declare module "input_observer" {
   export interface InputObserverOptions {
     readonly maxQueueSize?: number;
     readonly timeoutMs?: number;
-    readonly signal?: AbortSignal;
+    readonly signal?: AutoJs6Node.AbortSignalLike;
   }
 
   export interface InputObserverDrainOptions {
     readonly maxEvents?: number;
     readonly timeoutMs?: number;
-    readonly signal?: AbortSignal;
+    readonly signal?: AutoJs6Node.AbortSignalLike;
   }
 
   export interface InputObserverKeyEvent {

@@ -270,3 +270,40 @@ tasks.register<Exec>("verifyNodeRhinoCompatUiJsonLayoutSubset") {
         nodePhase12ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodeRhinoCompatUiFacade") {
+    group = "verification"
+    description = "Verifies the Phase 12 constrained compat.ui facade gate."
+
+    dependsOn("verifyNodeRhinoCompatUiJsonLayoutSubset")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-ui-facade.js")
+    inputs.file(scriptFile)
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ui.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/src/main.ts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_UI_JSON_LAYOUT_SUBSET.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_UI_COMPATIBILITY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_COMPAT_LOADER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-ui-facade-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-ui-facade-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}

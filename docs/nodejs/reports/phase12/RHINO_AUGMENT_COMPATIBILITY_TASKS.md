@@ -338,7 +338,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：`build/reports/nodejs/rhino-compat-ui-json-layout-subset-verification.json`
     - 报告产物：`build/reports/nodejs/rhino-compat-ui-json-layout-subset-verification.md`
 
-- [ ] P12-09: 实现 `compat.ui` constrained facade。
+- [x] P12-09: 实现 `compat.ui` constrained facade。
   - 范围：在 `autojs6:compat` 中新增受限 `compat.ui`，映射到现有
     `require("ui")` 的 `showLayout`、`update`、`batchUpdate`、`on`、`close`。
   - 边界：
@@ -357,7 +357,17 @@ Phase 12 task 本身可使用以下执行状态：
     - invalid descriptor 在 bridge dispatch 前失败。
     - status manifest 中可迁移 UI API 更新为 `partial` 或
       `supported_async`，raw view API 保持 `blocked_by_design`。
-  - Evidence：待补充。
+  - Evidence：
+    - Runtime facade：`app/src/main/cpp/node_bridge_sources.cpp`
+    - Types：`docs/nodejs/types/autojs6-node/rhino_compat.d.ts`
+    - TypeScript smoke：`sample/nodejs/typescript-smoke/src/main.ts`
+    - Status manifest：`docs/nodejs/rhino-compat/status-manifest.json`
+    - Fake-transport instrumentation：`app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
+    - Subset contract：`docs/nodejs/design/RHINO_UI_JSON_LAYOUT_SUBSET.md`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-ui-facade.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatUiFacade`
+    - 报告产物：`build/reports/nodejs/rhino-compat-ui-facade-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-ui-facade-verification.md`
 
 - [ ] P12-10: 增加 UI compat device and packaged smoke。
   - 范围：验证 `compat.ui` 在设备侧和 packaged 场景下的最小路径。

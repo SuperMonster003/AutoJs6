@@ -29,12 +29,10 @@ which Phase 12 workstream owns the next implementation or rejection.
   `require("input_observer")` POC, and P12-06 accessibility live-source gate.
   P12-07 adds cleanup/security diagnostics and packaged/background rejection
   evidence.
-
-## Current Design-Locked Surfaces
-
 - `ui.compat`: P12-08 locks the Rhino UI to Node JSON layout descriptor subset
-  with schema, fixtures, and a host verifier. The runtime `compat.ui` facade
-  remains planned for P12-09/P12-10.
+  with schema, fixtures, and a host verifier. P12-09 adds constrained
+  `autojs6:compat.ui` over the existing `require("ui")` provider; device and
+  packaged smoke remain tracked by P12-10.
 
 ## Rules
 

@@ -11,6 +11,7 @@ declare module "autojs6:compat" {
   import image = require("image");
   import mediaProjection = require("media_projection");
   import ocr = require("ocr");
+  import ui = require("ui");
   import files = require("files");
   import base64 = require("base64");
   import colors = require("colors");
@@ -266,6 +267,8 @@ declare module "autojs6:compat" {
       readonly keys: RhinoEventKeysCompatModule;
     }
 
+    export type RhinoUiCompatModule = ui.UiModule;
+
     export interface RhinoCompatModule {
       readonly name: "autojs6:compat";
       readonly version: 1;
@@ -331,6 +334,7 @@ declare module "autojs6:compat" {
       readonly shell: ShellCompatFunction;
       readonly images: RhinoImagesCompatModule;
       readonly ocr: RhinoOcrCompatFunction;
+      readonly ui: RhinoUiCompatModule;
       requestScreenCapture(options?: ScreenCaptureRequestOptions): Promise<boolean>;
       requestScreenCaptureAsync(options?: ScreenCaptureRequestOptions): Promise<boolean>;
       captureScreen(options?: image.CaptureScreenOptions): Promise<AutoJs6Node.ImageHandle>;

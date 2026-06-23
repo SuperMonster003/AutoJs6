@@ -608,14 +608,15 @@ ui.ok.click(() => {
 });
 ```
 
-Node UI uses the explicit `require("ui")` module and a JSON-only Activity-owned
-provider:
+Node UI uses either the explicit `require("ui")` module or the constrained
+`require("autojs6:compat").ui` facade. Both route to the same JSON-only
+Activity-owned provider:
 
 ```js
 "nodejs";
 
 (async function main() {
-  const ui = require("ui");
+  const ui = require("autojs6:compat").ui;
 
   const handle = await ui.showLayout({
     type: "Column",
@@ -642,6 +643,9 @@ after UI events are drained as JSON snapshots. Layout mutation goes through
 the accepted JSON descriptor subset and fixture set in
 [RHINO_UI_JSON_LAYOUT_SUBSET.md](design/RHINO_UI_JSON_LAYOUT_SUBSET.md); see
 also [RHINO_UI_COMPATIBILITY.md](design/RHINO_UI_COMPATIBILITY.md).
+`require("autojs6:compat")` still does not install a default global `ui`; a
+global `ui` appears only after an explicit `compat.install({ globals: true })`
+call and is the same constrained `compat.ui` JSON facade.
 
 ### Floaty And Overlay
 

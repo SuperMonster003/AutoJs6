@@ -3,9 +3,10 @@
 Status: P12-08 design-locked schema gate.
 
 This document turns the S11-23 Rhino UI compatibility decision into a concrete
-JSON-only migration subset for Phase 12. It does not add `compat.ui`, a global
-`ui`, XML parsing, or direct Android view access. Runtime promotion is tracked
-separately by P12-09 and P12-10.
+JSON-only migration subset for Phase 12. P12-09 adds constrained `compat.ui`
+over this subset, but there is still no default global `ui`, XML parsing, or
+direct Android view access. Device and packaged promotion are tracked
+separately by P12-10.
 
 ## Entry Points
 
@@ -18,10 +19,10 @@ The only accepted runtime target for this subset is the existing Node
 - `UiHandle.on(event, callback, options?)`
 - `UiHandle.close(options?)`
 
-The future `autojs6:compat.ui` facade may wrap this shape, but P12-08 is
-schema-only. The facade must not install a default global `ui`; if a future
-`compat.install({ globals: true })` exposes `globalThis.ui`, that global must be
-the constrained facade described here, not Rhino's raw UI module.
+P12-09 exposes `autojs6:compat.ui` as a constrained wrapper for this shape.
+The facade does not install a default global `ui`; when
+`compat.install({ globals: true })` exposes `globalThis.ui`, that global is the
+constrained facade described here, not Rhino's raw UI module.
 
 ## Accepted Descriptor
 
@@ -85,7 +86,7 @@ unsupported component types and nested component structure.
 
 | Rhino API | P12-08 status | Node migration |
 | --- | --- | --- |
-| `ui.layout(...)` | `partial` | Manually translate the supported declarative tree into a JSON descriptor and pass it to `ui.showLayout(json)` or future `compat.ui.showLayout(json)`. XML raw strings and executable attributes are rejected. |
+| `ui.layout(...)` | `partial` | Manually translate the supported declarative tree into a JSON descriptor and pass it to `ui.showLayout(json)` or `compat.ui.showLayout(json)`. XML raw strings and executable attributes are rejected. |
 | `ui.layoutFile(path)` | `planned` | May be migrated later only through a constrained project-local JSON descriptor file. XML file parsing is not part of P12-08. |
 | `ui.findById(...)`, `ui.findByStringId(...)`, `ui.findView(...)`, `ui.root` | `blocked_by_design` | Widget ids are scoped inside an opaque `UiHandle`; updates use JSON patches and events carry JSON snapshots. |
 | `ui.run(fn)` | `blocked_by_design` | Use normal Node async code plus `handle.update()` or `handle.batchUpdate()`. JavaScript never moves to the Android main looper. |

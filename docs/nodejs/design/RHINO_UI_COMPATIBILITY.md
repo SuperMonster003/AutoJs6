@@ -7,9 +7,11 @@ Activity-owned provider without copying Rhino's Android object model into V8.
 
 ## Decision
 
-Do not add `compat.ui`, `require("tasks")`-style aliases, or a global `ui` in
-S11-23. The current supported Node surface remains the explicit
-`require("ui")` module.
+S11-23 kept the explicit `require("ui")` module as the supported Node UI
+surface. P12-09 adds `require("autojs6:compat").ui` as a constrained wrapper
+over the same JSON provider. It still does not add a default global `ui`;
+`globalThis.ui` is exposed only after `compat.install({ globals: true })` and
+uses the constrained facade, not Rhino's raw UI module.
 
 The Node module is intentionally declarative and JSON-only:
 
@@ -159,8 +161,7 @@ Future UI compatibility work must be split into small tasks:
 - provider schema coverage for status/navigation/background options
 - inset snapshots for status/navigation bar height queries
 - packaged APK UI behavior and Back/Recents policy
-- optional `compat.ui` facade only after the JSON mapping is testable and does
-  not expose raw Android/Rhino objects
+- device and packaged smoke for the P12-09 constrained `compat.ui` facade
 
 Floaty and overlay compatibility remains separate and is tracked by
 [FLOATY_NODE.md](FLOATY_NODE.md).

@@ -9,9 +9,9 @@ behind a separate security gate.
 Task S11-23 records the Rhino `ui` compatibility boundary in
 [RHINO_UI_COMPATIBILITY.md](RHINO_UI_COMPATIBILITY.md). P12-08 locks the
 JSON-only migration subset in
-[RHINO_UI_JSON_LAYOUT_SUBSET.md](RHINO_UI_JSON_LAYOUT_SUBSET.md). It keeps the
-existing Node module as the migration target and does not add `compat.ui` or a
-Rhino global `ui`.
+[RHINO_UI_JSON_LAYOUT_SUBSET.md](RHINO_UI_JSON_LAYOUT_SUBSET.md). P12-09 adds
+`autojs6:compat.ui` as a constrained wrapper over this provider and keeps
+default global `ui` injection disabled.
 
 ## Goal
 

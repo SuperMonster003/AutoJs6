@@ -101,7 +101,8 @@ function buildChecks(files) {
       "subset-doc-boundary",
       includesAll(files.subsetDoc.text, [
         "P12-08",
-        "schema-only",
+        "P12-09 adds constrained `compat.ui`",
+        "JSON-only",
         "ui.showLayout",
         "UiHandle.update",
         "UiHandle.batchUpdate",
