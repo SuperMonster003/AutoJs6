@@ -394,7 +394,7 @@ Phase 12 task 本身可使用以下执行状态：
 
 ### Track C: Floaty and overlay decision
 
-- [ ] P12-11: 做出 floaty/overlay Phase 12 路径决策。
+- [x] P12-11: 做出 floaty/overlay Phase 12 路径决策。
   - 范围：从两个路径中选择一个，并记录理由：
     - Provider path：实现受控 overlay provider。
     - Rejection path：将 Rhino `floaty.window/rawWindow` 设为更长期或永久非目标。
@@ -406,7 +406,21 @@ Phase 12 task 本身可使用以下执行状态：
     - 不能同时声称 provider path 和 permanent rejection。
     - 决策必须覆盖 permission、foreground disclosure、packaged manifest、
       closeAll/destroy cleanup、raw window object denial。
-  - Evidence：待补充。
+  - Decision：Rejection path；exact Rhino `floaty.window/rawWindow` 为 Node
+    permanent non-goal，未来 JSON-only overlay provider 必须作为单独 surface。
+  - Evidence：
+    - Decision doc：`docs/nodejs/design/FLOATY_OVERLAY_PHASE12_DECISION.md`
+    - Floaty design：`docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md`
+    - Overlay design：`docs/nodejs/design/FLOATY_NODE.md`
+    - Migration docs：`docs/nodejs/MIGRATION_FROM_RHINO.md`
+    - Security docs：`docs/nodejs/SECURITY_MODEL.md`
+    - Status manifest：`docs/nodejs/rhino-compat/status-manifest.json`
+    - Matrix：`docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`
+    - Surface manifest：`docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-floaty-overlay-decision.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatFloatyOverlayDecision`
+    - 报告产物：`build/reports/nodejs/rhino-compat-floaty-overlay-decision-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-floaty-overlay-decision-verification.md`
 
 - [ ] P12-12A: Provider path - 定义 overlay provider v1 contract。
   - 适用条件：P12-11 选择 Provider path。

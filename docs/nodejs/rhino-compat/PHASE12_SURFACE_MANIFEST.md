@@ -35,6 +35,13 @@ which Phase 12 workstream owns the next implementation or rejection.
   fake/device instrumentation evidence, a packaged smoke marker, and
   `UI_SESSION` cleanup reporting; live packaged UI remains unpromoted.
 
+## Current Design-Locked Surfaces
+
+- `floaty.overlay`: P12-11 selects the Rejection path for exact Rhino
+  `floaty.window()` / `floaty.rawWindow()` compatibility. P12-12B owns the
+  negative runtime gate; any future JSON-only overlay provider remains a
+  separate surface and must not claim raw Rhino window parity.
+
 ## Rules
 
 - Every P12 task must map to exactly one surface group.

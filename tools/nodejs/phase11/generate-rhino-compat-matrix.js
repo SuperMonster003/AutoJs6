@@ -169,6 +169,12 @@ function riskSummary(module) {
 }
 
 function nextStepFor(module, gapModule) {
+  if (
+    module.id === "floaty" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-11 rejection path selected"))
+  ) {
+    return "Complete P12-12B negative runtime gate; keep exact Rhino floaty/window as a Node non-goal.";
+  }
   if (module.migration.status === "blocked_by_design") {
     return "Keep denial documented and covered by policy tests.";
   }

@@ -672,6 +672,11 @@ There is no current Node equivalent for `floaty.window()` or
 foreground disclosure, packaged behavior, opaque window handles, event drain,
 and close/cleanup gates are implemented.
 
+P12-11 selects the rejection path for exact Rhino `floaty.window()` and
+`floaty.rawWindow()` compatibility. Treat those raw overlay APIs as a permanent
+non-goal in Node; keep such scripts on Rhino or wait for a future separate
+JSON-only overlay provider.
+
 For in-app UI, use `require("ui").showLayout(...)`. For clipboard reads that
 previously used `floaty.getClip()`, use the controlled clipboard bridge:
 

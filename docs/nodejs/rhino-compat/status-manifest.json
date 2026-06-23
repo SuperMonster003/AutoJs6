@@ -9901,7 +9901,8 @@
       "decision": "s11_24_floaty_overlay_design_gate",
       "notes": [
         "S11-24 keeps Rhino floaty/overlay compatibility design-gated: no require(\"floaty\"), require(\"ui.overlay\"), compat.floaty, or global floaty is exposed.",
-        "floaty.window/rawWindow exact Rhino XML and live window-wrapper semantics are blocked by design; floaty.getClip migrates to the controlled clipboard bridge or autojs6:compat.getClip without hidden overlay windows."
+        "floaty.window/rawWindow exact Rhino XML and live window-wrapper semantics are blocked by design; floaty.getClip migrates to the controlled clipboard bridge or autojs6:compat.getClip without hidden overlay windows.",
+        "P12-11 rejection path selected: exact Rhino floaty.window/rawWindow compatibility is a permanent non-goal for Node; P12-12B owns the follow-up negative runtime gate."
       ],
       "apiEntries": [
         {
@@ -9913,7 +9914,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_module_deferred",
           "notes": [
-            "No Node floaty module is exposed in S11-24; future overlay work must define an explicit ui.overlay or floaty provider first."
+            "No Node floaty module is exposed in S11-24; P12-11 selects rejection for exact Rhino floaty compatibility instead of the Phase 12 provider path."
           ]
         },
         {
@@ -9925,7 +9926,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_session_provider_deferred",
           "notes": [
-            "Future support may close only provider-owned windows for the current Node execution; there is no overlay handle registry in S11-24."
+            "P12-11 keeps floaty.closeAll unavailable because no overlay handle registry exists; P12-12B must verify the negative runtime gate and destroy cleanup no-op boundary."
           ]
         },
         {
@@ -9937,7 +9938,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "Future support must report overlay permission state through a controlled provider and stable errors; Node service code must not grant or emulate permission."
+            "P12-11 does not select the provider path; Node service code must not grant, emulate, or request overlay permission for Rhino floaty compatibility."
           ]
         },
         {
@@ -9949,7 +9950,7 @@
           "nodeName": "getText",
           "decision": "s11_24_clipboard_replacement_no_overlay",
           "notes": [
-            "Use require(\"clipboard\").getText() or require(\"autojs6:compat\").getClip(); do not create a hidden temporary overlay window for clipboard access."
+            "Use require(\"clipboard\").getText() or require(\"autojs6:compat\").getClip(); P12-11 keeps hidden temporary overlay windows rejected for clipboard access."
           ]
         },
         {
@@ -9961,7 +9962,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "Future support may expose an async overlay permission-state query after the provider and capability gate exist."
+            "P12-11 leaves overlay permission-state queries unavailable for Rhino floaty compatibility; any future query belongs to a separate provider."
           ]
         },
         {
@@ -9973,7 +9974,7 @@
           "nodeName": null,
           "decision": "s11_24_raw_overlay_window_blocked",
           "notes": [
-            "Rhino rawWindow exposes raw overlay WindowManager/LayoutParams and live View/NativeView semantics; Node overlay work must use JSON descriptors and opaque handles."
+            "Rhino rawWindow exposes raw overlay WindowManager/LayoutParams and live View/NativeView semantics; P12-11 treats exact rawWindow compatibility as a permanent non-goal for Node."
           ]
         },
         {
@@ -9985,7 +9986,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "Future support may open platform overlay settings only through explicit user action and provider policy; no silent prompt path is exposed in S11-24."
+            "P12-11 leaves overlay permission requests unavailable for Rhino floaty compatibility; no silent prompt or settings launch path is exposed."
           ]
         },
         {
@@ -9997,7 +9998,7 @@
           "nodeName": null,
           "decision": "s11_24_xml_window_wrapper_blocked",
           "notes": [
-            "Rhino window(xml) returns a live JsResizableWindow over XML-inflated Android views; future Node overlay must use JSON descriptors and opaque FloatyHandle objects."
+            "Rhino window(xml) returns a live JsResizableWindow over XML-inflated Android views; P12-11 treats exact window compatibility as a permanent non-goal for Node."
           ]
         }
       ]
@@ -11736,10 +11737,10 @@
   ],
   "totals": {
     "partial": 330,
-    "unsupported": 388,
+    "unsupported": 374,
     "supported_async": 54,
     "blocked_by_design": 45,
-    "supported": 134,
+    "supported": 148,
     "renamed": 1
   }
 }

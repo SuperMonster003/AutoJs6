@@ -9,6 +9,13 @@ any Node overlay runtime is exposed.
 Do not add `require("floaty")`, `require("ui.overlay")`, `compat.floaty`, or a
 global `floaty` in S11-24.
 
+P12-11 selects the rejection path for exact Rhino `floaty.window()` and
+`floaty.rawWindow()` compatibility. These raw window APIs are a permanent non-goal
+for the Safe Node Profile; P12-12B owns the follow-up negative runtime gate. A
+future JSON-only overlay provider may be considered separately, but it must not
+expose Rhino `JsWindow`, `WindowBridge`, `NativeView`, or raw Android window
+objects.
+
 The current Node profile has no overlay provider, no overlay capability, no
 packaged manifest injection for `SYSTEM_ALERT_WINDOW`, and no foreground
 notification/disclosure model for script-owned overlay windows. The existing

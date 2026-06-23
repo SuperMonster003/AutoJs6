@@ -24,6 +24,12 @@ capability, not as an automatic extension of `require("ui")`.
 
 Do not expose Node floaty or overlay windows in v1.1.
 
+P12-11 selects the rejection path for exact Rhino `floaty.window()` and
+`floaty.rawWindow()` compatibility. The Provider path is not selected for
+Phase 12; P12-12B owns the follow-up negative runtime gate. A future
+JSON-only `ui.overlay` provider may still be designed later, but it must not
+claim parity with Rhino raw window wrappers.
+
 The Task 182 `require("ui")` protocol reservation remains Activity/provider
 owned and fail-closed on Android. It does not imply overlay authority. Any
 future floaty implementation must use a separate capability such as
@@ -303,8 +309,7 @@ Minimum tests before implementation:
 
 ## Recommendation
 
-Keep Node floaty as a v1.1 design gate. Implement only after the base
-Activity-owned UI provider lifecycle is accepted, or after a separate overlay
-provider design proves permission flow, foreground disclosure, packaged APK
-behavior, resource cleanup, and security tests without exposing raw Android
-window objects.
+Keep exact Rhino floaty window compatibility rejected for Node. Implement only
+a future separate JSON overlay provider after permission flow, foreground
+disclosure, packaged APK behavior, resource cleanup, and security tests prove
+that no raw Android window objects cross the bridge.
