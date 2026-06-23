@@ -308,7 +308,7 @@ object NodeBridgeProviderRegistry {
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
         IMAGE_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         UI_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
-        INPUT_OBSERVER_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
+        INPUT_OBSERVER_PROVIDER -> inputObserverStatus()
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
@@ -329,12 +329,14 @@ object NodeBridgeProviderRegistry {
             "statusReason" to "Activity-owned declarative UI MVP",
         )
         INPUT_OBSERVER_PROVIDER -> linkedMapOf(
-            "pocMethods" to "getAvailableSources,observeKeys,drainEvents,close",
+            "liveMethods" to "getAvailableSources,observeKeys,drainEvents,close",
             "availableSource" to "fake",
-            "blockedLiveSource" to "accessibility",
+            "liveSource" to "accessibility",
+            "liveSourceAvailable" to accessibilityOperational().toString(),
             "maxActiveSubscriptionsPerExecution" to "8",
             "eventDelivery" to "bounded drainEvents JSON snapshots",
-            "statusReason" to "P12-05 fake-source provider POC; live Android key capture remains P12-06",
+            "packagedPolicy" to "requires foreground/user-visible state; final packaged smoke/rejection gate remains P12-07",
+            "statusReason" to "P12-06 adds controlled accessibility key observation; fake source remains available for tests",
         )
         WORK_MANAGER_PROVIDER -> linkedMapOf(
             "liveMethods" to "scheduleOnce,schedulePeriodic,cancel,list",
@@ -418,13 +420,24 @@ object NodeBridgeProviderRegistry {
     }
 
     private fun accessibilityStatus(): NodeBridgeProviderStatus {
-        return if (AutoJsAccessibilityService.hasInstance() &&
-            AutoJsAccessibilityService.hasOperationalState &&
-            AutoJsAccessibilityService.instance != null
-        ) {
+        return if (accessibilityOperational()) {
             NodeBridgeProviderStatus.AVAILABLE
         } else {
             NodeBridgeProviderStatus.PERMISSION_REQUIRED
         }
+    }
+
+    private fun inputObserverStatus(): NodeBridgeProviderStatus {
+        return if (accessibilityOperational()) {
+            NodeBridgeProviderStatus.AVAILABLE
+        } else {
+            NodeBridgeProviderStatus.DEGRADED
+        }
+    }
+
+    private fun accessibilityOperational(): Boolean {
+        return AutoJsAccessibilityService.hasInstance() &&
+                AutoJsAccessibilityService.hasOperationalState &&
+                AutoJsAccessibilityService.instance != null
     }
 }

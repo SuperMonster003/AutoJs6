@@ -34,6 +34,7 @@ import android.os.VibratorManager
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -50,7 +51,9 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
+import org.autojs.autojs.core.accessibility.OnKeyListener
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.json.JSONArray
@@ -2394,6 +2397,7 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchInputObserverAvailableSources(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val accessibilityAvailable = accessibilityBridgeOperational()
         callback(
             NodeBridgeResponse.success(
                 request.id,
@@ -2402,9 +2406,9 @@ class AndroidNodeBridgeCapabilityProvider(
                     .put(
                         ControlledInputObserverPolicy.sourceJson(
                             "accessibility",
-                            available = false,
+                            available = accessibilityAvailable,
                             live = true,
-                            reason = "P12-06 live input observer provider is not promoted.",
+                            reason = if (accessibilityAvailable) "" else "accessibility service is not operational",
                         ),
                     )
                     .toString(),
@@ -2419,17 +2423,8 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
         val descriptor = parsed.value
-        if (descriptor.source != "fake") {
-            callback(
-                NodeBridgeResponse.failure(
-                    request.id,
-                    NodeBridgeError.capabilityProviderMissing(
-                        module = request.module,
-                        method = request.method,
-                        requirement = "P12-06 live input observer provider for source=${descriptor.source}",
-                    ),
-                ),
-            )
+        if (descriptor.source !in ControlledInputObserverPolicy.allowedSources) {
+            callback(NodeBridgeResponse.failure(request.id, inputObserverInvalidSourceError(request, descriptor.source)))
             return
         }
         if (inputObserverSubscriptions.size >= ControlledInputObserverPolicy.MAX_ACTIVE_SUBSCRIPTIONS) {
@@ -2454,11 +2449,6 @@ class AndroidNodeBridgeCapabilityProvider(
             actions = descriptor.actions,
             maxQueueSize = descriptor.maxQueueSize,
         )
-        subscription.queueEvent(
-            key = descriptor.keys.first(),
-            keyCode = ControlledInputObserverPolicy.keyCodeFor(descriptor.keys.first()),
-            action = descriptor.actions.firstOrNull() ?: "down",
-        )
         inputObserverSubscriptions[subscriptionId] = subscription
         resourceRegistry.register(
             type = NodeBridgeResourceType.INPUT_OBSERVER_SUBSCRIPTION,
@@ -2471,7 +2461,64 @@ class AndroidNodeBridgeCapabilityProvider(
         ) {
             inputObserverSubscriptions.remove(subscriptionId)?.close()
         }
+        if (descriptor.source == "fake") {
+            subscription.queueEvent(
+                key = descriptor.keys.first(),
+                keyCode = ControlledInputObserverPolicy.keyCodeFor(descriptor.keys.first()),
+                action = descriptor.actions.firstOrNull() ?: "down",
+            )
+        } else if (!attachAccessibilityInputObserver(subscriptionId, subscription)) {
+            resourceRegistry.close(subscriptionId, "input_observer.accessibility_unavailable")
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "an operational AutoJs6 accessibility service with key observation enabled",
+                    ),
+                ),
+            )
+            return
+        }
         callback(NodeBridgeResponse.success(request.id, subscription.toJson().toString()))
+    }
+
+    private fun attachAccessibilityInputObserver(
+        subscriptionId: String,
+        subscription: ControlledInputObserverSubscription,
+    ): Boolean {
+        val service = AutoJsAccessibilityService.instance
+        if (service == null || !AutoJsAccessibilityService.hasOperationalState) {
+            return false
+        }
+        val listener = object : OnKeyListener {
+            override fun onKeyEvent(keyCode: Int, event: KeyEvent) {
+                subscription.queueKeyEvent(keyCode, event)
+            }
+        }
+        val disconnectCallback = object : AccessibilityServiceCallback {
+            override fun onConnected() = Unit
+
+            override fun onDisconnected() {
+                resourceRegistry.close(subscriptionId, "input_observer.accessibility_service_destroy")
+            }
+        }
+        subscription.addCloseAction {
+            runCatching { service.onKeyObserver.removeListener(listener) }
+            AutoJsAccessibilityService.removeDisconnectCallback(disconnectCallback)
+        }
+        service.onKeyObserver.addListener(listener)
+        AutoJsAccessibilityService.addDisconnectCallback(disconnectCallback)
+        return true
+    }
+
+    private fun inputObserverInvalidSourceError(request: NodeBridgeRequest, source: String): NodeBridgeError {
+        return NodeBridgeError.invalidRequest(
+            message = "input_observer.${request.method} source is not supported: $source.",
+            module = request.module,
+            method = request.method,
+        )
     }
 
     private fun dispatchInputObserverDrainEvents(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -5274,7 +5321,7 @@ private data class ControlledInputObserverDescriptor(
             }
             val keys = payload.optJSONArray("keys")?.toStringList()
                 .orEmpty()
-                .map { it.trim().lowercase(Locale.US) }
+                .map { ControlledInputObserverPolicy.normalizeKeyName(it) }
                 .filter { it.isNotEmpty() }
                 .distinct()
             if (keys.isEmpty()) {
@@ -5340,6 +5387,7 @@ private object ControlledInputObserverPolicy {
     const val MAX_DRAIN_BATCH_SIZE = 128
 
     val allowedActions: Set<String> = setOf("down", "up")
+    val allowedSources: Set<String> = setOf("fake", "accessibility")
 
     fun sourceJson(id: String, available: Boolean, live: Boolean, reason: String = ""): JSONObject {
         return JSONObject()
@@ -5354,13 +5402,39 @@ private object ControlledInputObserverPolicy {
             }
     }
 
+    fun normalizeKeyName(key: String): String {
+        val raw = key
+            .trim()
+            .lowercase(Locale.US)
+            .removePrefix("keycode_")
+            .replace('-', '_')
+            .replace(' ', '_')
+        return when (raw) {
+            "volumeup" -> "volume_up"
+            "volumedown" -> "volume_down"
+            else -> raw
+        }
+    }
+
+    fun keyNameForKeyCode(keyCode: Int): String {
+        return normalizeKeyName(KeyEvent.keyCodeToString(keyCode))
+    }
+
+    fun actionNameFor(action: Int): String {
+        return when (action) {
+            KeyEvent.ACTION_DOWN -> "down"
+            KeyEvent.ACTION_UP -> "up"
+            else -> "unknown"
+        }
+    }
+
     fun keyCodeFor(key: String): Int {
-        return when (key.lowercase(Locale.US)) {
+        return when (normalizeKeyName(key)) {
             "home" -> 3
             "back" -> 4
             "menu" -> 82
-            "volumeup", "volume_up" -> 24
-            "volumedown", "volume_down" -> 25
+            "volume_up" -> 24
+            "volume_down" -> 25
             else -> 0
         }
     }
@@ -5374,6 +5448,7 @@ private class ControlledInputObserverSubscription(
     private val maxQueueSize: Int,
 ) {
     private val events = ConcurrentLinkedQueue<JSONObject>()
+    private val closeActions = ConcurrentLinkedQueue<() -> Unit>()
     private val droppedCount = AtomicInteger(0)
     private val closed = AtomicBoolean(false)
     private val createdAt = System.currentTimeMillis()
@@ -5394,6 +5469,24 @@ private class ControlledInputObserverSubscription(
         )
     }
 
+    fun queueKeyEvent(keyCode: Int, event: KeyEvent) {
+        val keyName = ControlledInputObserverPolicy.keyNameForKeyCode(keyCode)
+        val actionName = ControlledInputObserverPolicy.actionNameFor(event.action)
+        if (keyName !in keys || actionName !in actions) {
+            return
+        }
+        queue(
+            JSONObject()
+                .put("type", "key")
+                .put("source", source)
+                .put("key", keyName)
+                .put("keyCode", keyCode)
+                .put("action", actionName)
+                .put("eventTime", event.eventTime)
+                .put("repeatCount", event.repeatCount),
+        )
+    }
+
     fun drainEvents(maxEvents: Int): JSONArray {
         val result = JSONArray()
         repeat(maxEvents.coerceAtLeast(0)) {
@@ -5403,9 +5496,19 @@ private class ControlledInputObserverSubscription(
         return result
     }
 
+    fun addCloseAction(action: () -> Unit) {
+        closeActions.add(action)
+    }
+
     fun close() {
-        closed.set(true)
+        if (closed.getAndSet(true)) {
+            return
+        }
         events.clear()
+        while (true) {
+            val action = closeActions.poll() ?: return
+            runCatching { action() }
+        }
     }
 
     fun toJson(): JSONObject {

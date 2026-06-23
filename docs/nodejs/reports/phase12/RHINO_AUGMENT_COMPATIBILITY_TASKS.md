@@ -262,7 +262,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-fake-provider-verification.json`
     - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-fake-provider-verification.md`
 
-- [ ] P12-06: 实现 live key observer provider gate。
+- [x] P12-06: 实现 live key observer provider gate。
   - 范围：在可用 Android 环境上接入受控 key observation；如果 live path
     不可行，需要将 task 转为明确的 design-locked blocker。
   - 建议产物：
@@ -275,7 +275,18 @@ Phase 12 task 本身可使用以下执行状态：
     - close、timeout、engine stop、service destroy 后 listener 全部释放。
     - 不启用 key interception；intercept 仍需单独 task。
     - packaged 模式无前台/可见状态时拒绝。
-  - Evidence：待补充。
+  - Evidence：
+    - Live provider gate：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`
+    - Accessibility disconnect cleanup：`app/src/main/java/org/autojs/autojs/core/accessibility/AccessibilityService.kt`
+    - Doctor provider health：`app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt`
+    - Runtime facade boundary：`app/src/main/cpp/node_bridge_sources.cpp`
+    - Android instrumentation accessibility live source gate：`app/src/androidTest/java/org/autojs/autojs/engine/NodeInputObserverBridgeInstrumentationTest.kt`
+    - Surface manifest：`docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-input-observer-live-gate.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatInputObserverLiveGate`
+    - 限制：packaged foreground smoke / rejection report 仍由 P12-07 收口。
+    - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-live-gate-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-input-observer-live-gate-verification.md`
 
 - [ ] P12-07: 完成 input observer cleanup/security/packaged policy gate。
   - 范围：把 P12-05/P12-06 的资源释放、安全拒绝和 packaged 行为纳入统一 gate。

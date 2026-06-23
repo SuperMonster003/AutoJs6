@@ -70,10 +70,11 @@
         "P12-06",
         "P12-07"
       ],
-      "summary": "Controlled key observer contract and fake-source provider POC; live provider and cleanup/security gates remain pending.",
+      "summary": "Controlled key observer contract, fake-source provider POC, and accessibility live-source gate; cleanup/security/packaged gate remains pending.",
       "runtimeSurface": [
         "require(\"input_observer\")",
         "input_observer.observeKeys({ source: \"fake\" })",
+        "input_observer.observeKeys({ source: \"accessibility\" })",
         "InputObserverSubscription.drainEvents()",
         "InputObserverSubscription.close()"
       ],
@@ -86,12 +87,15 @@
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt",
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt",
+        "app/src/main/java/org/autojs/autojs/core/accessibility/AccessibilityService.kt",
         "docs/nodejs/types/autojs6-node/input_observer.d.ts",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeInputObserverBridgeInstrumentationTest.kt",
         "tools/nodejs/phase12/verify-rhino-compat-input-observer-contract.js",
         "tools/nodejs/phase12/verify-rhino-compat-input-observer-fake-provider.js",
+        "tools/nodejs/phase12/verify-rhino-compat-input-observer-live-gate.js",
         ":app:verifyNodeRhinoCompatInputObserverContract",
-        ":app:verifyNodeRhinoCompatInputObserverFakeProvider"
+        ":app:verifyNodeRhinoCompatInputObserverFakeProvider",
+        ":app:verifyNodeRhinoCompatInputObserverLiveGate"
       ]
     },
     {

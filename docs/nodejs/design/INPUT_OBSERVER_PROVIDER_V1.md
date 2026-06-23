@@ -3,10 +3,12 @@
 ## Decision
 
 P12-04 freezes the `input_observer` provider v1 contract for Node. P12-05 adds
-the fake provider and JavaScript module POC. This is still not a live Android
-key-capture implementation. Live promotion is left to P12-06 and P12-07:
+the fake provider and JavaScript module POC. P12-06 adds a controlled
+accessibility live-source gate for key observation. This is still not a fully
+promoted input observer surface because packaged/background policy evidence is
+left to P12-07:
 
-- P12-06: live key observer provider or explicit live-path blocker.
+- P12-06: accessibility live key observer provider gate.
 - P12-07: cleanup, security, packaged, and device policy gate.
 
 The first module name is:
@@ -70,8 +72,9 @@ Rules:
 - `type` must be `key`.
 - `keys` must contain normalized string key names, not `KeyEvent` instances.
 - `actions` may contain `down` and `up`; omitted actions mean both.
-- `source` may be `fake` for P12-05 tests or `accessibility` for a future live
-  provider. A live provider must reject unavailable sources explicitly.
+- `source` may be `fake` for P12-05 tests or `accessibility` for the P12-06
+  live provider gate. A live provider must reject unavailable service state
+  explicitly.
 - `intercept` must be absent or `false` in v1.
 
 ## Event Snapshot
@@ -97,7 +100,7 @@ Android class.
 
 ## Bridge Methods
 
-The controlled bridge module is `input_observer`. P12-05 may register these
+The controlled bridge module is `input_observer`. P12-05/P12-06 register these
 methods:
 
 | Method | Request Args | Response |
@@ -164,8 +167,10 @@ events and JS-only listener helpers must be cleared when the resource is closed.
 
 ## Background And Packaged Policy
 
-P12-05 fake provider tests may run without live Android input. A live provider must
-reject service-process-only or hidden background observation.
+P12-05 fake provider tests may run without live Android input. P12-06
+accessibility live observation requires an operational AutoJs6 accessibility
+service in the current process and must reject service-process-only or hidden
+background observation.
 
 - One-shot embedded Node may observe only while the execution is active.
 - Interactive long-running mode requires a visible session state and user
@@ -243,11 +248,11 @@ declare module "input_observer" {
 }
 ```
 
-The checked-in P12-05 declaration is
+The checked-in P12-05/P12-06 declaration is
 `docs/nodejs/types/autojs6-node/input_observer.d.ts`.
 
 ## Schema
 
 `docs/nodejs/schemas/input_observer_provider_v1.schema.json` is the fake-provider
 request/response schema fixture. It locks the method names, event snapshot
-fields, capability names, and limits that P12-05 must implement.
+fields, capability names, and limits that P12-05/P12-06 must implement.

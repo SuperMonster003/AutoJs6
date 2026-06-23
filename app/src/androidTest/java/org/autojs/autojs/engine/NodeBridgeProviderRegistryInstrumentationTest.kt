@@ -68,11 +68,17 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("media_projection").status)
         assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("image").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ui").status)
-        assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("input_observer").status)
+        assertTrue(
+            healthById.getValue("input_observer").status in setOf(
+                NodeBridgeProviderStatus.AVAILABLE,
+                NodeBridgeProviderStatus.DEGRADED,
+            ),
+        )
         assertEquals("mlkit-chinese", healthById.getValue("ocr").details.getValue("defaultEngine"))
         assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))
         assertTrue(healthById.getValue("ui").details.getValue("liveMethods").contains("showLayout"))
         assertEquals("fake", healthById.getValue("input_observer").details.getValue("availableSource"))
+        assertEquals("accessibility", healthById.getValue("input_observer").details.getValue("liveSource"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("storage").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("database").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("work_manager").status)

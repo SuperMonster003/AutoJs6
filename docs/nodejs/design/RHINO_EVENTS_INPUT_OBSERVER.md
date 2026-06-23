@@ -50,7 +50,8 @@ Node compatibility contract.
 The proposed module name is `input_observer`. P12-04 freezes the provider v1
 contract in `INPUT_OBSERVER_PROVIDER_V1.md`; P12-05 exposes it directly through a
 fake provider POC for JSON snapshot, queue drain, capability denial, and close
-semantics. The live `accessibility` source remains unavailable until P12-06.
+semantics. P12-06 adds the `accessibility` live source gate for operational
+AutoJs6 accessibility service instances.
 
 ```js
 const inputObserver = require("input_observer");
@@ -215,5 +216,7 @@ capability split between `input_observer.keys`, `input_observer.touch`, and
 
 `verifyNodeRhinoCompatInputObserverFakeProvider` locks the P12-05 fake provider
 POC: `require("input_observer")` is available, `source: "fake"` returns opaque
-subscription handles and drained JSON events, and `source: "accessibility"` still
-fails closed until the live provider gate.
+subscription handles and drained JSON events. `verifyNodeRhinoCompatInputObserverLiveGate`
+locks the P12-06 accessibility live source gate: `source: "accessibility"`
+registers an `OnKeyListener` only when the AutoJs6 accessibility service is
+operational, otherwise it fails closed with a stable unavailable error.

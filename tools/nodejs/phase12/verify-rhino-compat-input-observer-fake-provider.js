@@ -111,10 +111,10 @@ function buildChecks(files) {
         "val inputObserverMethods = setOf(\"observeKeys\", \"drainEvents\", \"close\", \"getAvailableSources\")",
         "dispatchInputObserver",
         "ControlledInputObserverSubscription",
-        "source != \"fake\"",
-        "P12-06 live input observer provider",
+        "descriptor.source == \"fake\"",
+        "attachAccessibilityInputObserver",
       ]),
-      "Kotlin bridge registry must register input_observer methods and keep live source unavailable in P12-05.",
+      "Kotlin bridge registry must register input_observer methods and keep the fake source path available.",
     ),
     check(
       "permission-manifest",
@@ -141,10 +141,10 @@ function buildChecks(files) {
         "NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS",
         "availableSource",
         "fake",
-        "blockedLiveSource",
+        "liveSource",
         "accessibility",
       ]),
-      "Provider registry must report input_observer as fake-source/degraded until live P12-06 promotion.",
+      "Provider registry must report fake and accessibility source health for input_observer.",
     ),
     check(
       "types",
@@ -157,8 +157,8 @@ function buildChecks(files) {
         "readonly keyCode: number",
         "readonly eventTime: number",
       ]) &&
-        files.typeReadme.text.includes("`input_observer` is a P12-05 provider POC"),
-      "Type declarations and README must expose the P12-05 input_observer POC surface.",
+        files.typeReadme.text.includes("`input_observer` is a P12 provider POC"),
+      "Type declarations and README must expose the input_observer POC surface.",
     ),
     check(
       "instrumentation-fake-provider",
@@ -177,7 +177,8 @@ function buildChecks(files) {
       "test-registry-updates",
       files.conformance.text.includes("NodeBridgeModules.INPUT_OBSERVER") &&
         files.providerRegistryTest.text.includes("input_observer") &&
-        files.providerRegistryTest.text.includes("NodeBridgeProviderStatus.DEGRADED"),
+        files.providerRegistryTest.text.includes("NodeBridgeProviderStatus.DEGRADED") &&
+        files.providerRegistryTest.text.includes("NodeBridgeProviderStatus.AVAILABLE"),
       "Existing conformance/provider registry tests must include input_observer.",
     ),
     check(

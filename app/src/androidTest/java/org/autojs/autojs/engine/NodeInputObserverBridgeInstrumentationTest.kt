@@ -90,6 +90,46 @@ class NodeInputObserverBridgeInstrumentationTest {
     }
 
     @Test
+    fun kotlinInputObserverAccessibilityLiveSourceHasStableGate() {
+        val provider = AndroidNodeBridgeCapabilityProvider(context)
+        val sources = dispatch(
+            provider,
+            method = "getAvailableSources",
+            permissions = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER),
+        )
+        assertTrue(sources.toString(), sources.ok)
+        val sourceArray = JSONArray(sources.resultJson.orEmpty())
+        val accessibility = (0 until sourceArray.length())
+            .map { sourceArray.getJSONObject(it) }
+            .first { it.getString("id") == "accessibility" }
+
+        val observe = dispatch(
+            provider,
+            method = "observeKeys",
+            argsJson = """[{"type":"key","keys":["volumeUp"],"actions":["down"],"source":"accessibility"},{"maxQueueSize":4}]""",
+            permissions = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
+        )
+
+        if (accessibility.getBoolean("available")) {
+            assertTrue(observe.toString(), observe.ok)
+            val snapshot = JSONObject(observe.resultJson.orEmpty())
+            assertEquals("accessibility", snapshot.getString("source"))
+            assertEquals("volume_up", snapshot.getJSONArray("keys").getString(0))
+            val close = dispatch(
+                provider,
+                method = "close",
+                argsJson = """["${snapshot.getString("id")}"]""",
+                permissions = listOf(NodeBridgePermissionManifest.INPUT_OBSERVER, NodeBridgePermissionManifest.INPUT_OBSERVER_KEYS),
+            )
+            assertTrue(close.toString(), close.ok)
+        } else {
+            assertFalse(observe.toString(), observe.ok)
+            assertEquals(NodeRuntimeErrorCodes.BRIDGE_PERMISSION_DENIED, observe.error?.code)
+            assertEquals(NodeBridgeErrorCategory.UNAVAILABLE, observe.error?.category)
+        }
+    }
+
+    @Test
     fun jsInputObserverUsesFakeTransportAndBlocksShadowing() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node input_observer fake transport regression")
 

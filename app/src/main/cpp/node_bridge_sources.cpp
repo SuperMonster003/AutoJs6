@@ -20493,7 +20493,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (source.intercept === true) {
       throw __autojs6_input_observer_invalid_argument_error(
         methodName,
-        "input_observer." + methodName + " does not support key interception in P12-05."
+        "input_observer." + methodName + " requires the separate input_observer.intercept provider gate for key interception."
       );
     }
     const sourceName = String(source.source === undefined || source.source === null ? "fake" : source.source)
