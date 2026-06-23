@@ -97,6 +97,7 @@ private val nodeTypeDeclarationModules = listOf(
     "colors",
     "formatter",
     "converter",
+    "s13n",
     "mime",
     "nanoid",
     "util",

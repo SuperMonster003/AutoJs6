@@ -18,6 +18,7 @@ declare module "autojs6:compat" {
   import colors = require("colors");
   import formatter = require("formatter");
   import converter = require("converter");
+  import s13n = require("s13n");
   import mime = require("mime");
   import nanoid = require("nanoid");
   import util = require("util");
@@ -346,6 +347,7 @@ declare module "autojs6:compat" {
       readonly formatter: formatter.FormatterModule;
       readonly cvt: converter.ConverterModule;
       readonly converter: converter.ConverterModule;
+      readonly s13n: s13n.S13nModule;
       readonly mime: mime.MimeModule;
       readonly nanoid: nanoid.NanoidModule;
       readonly util: util.UtilModule;

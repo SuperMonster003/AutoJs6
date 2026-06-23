@@ -49,6 +49,15 @@ which Phase 12 workstream owns the next implementation or rejection.
   that provider. P12-30 adds migration examples plus packaged
   provider-dependent smoke policy evidence; live packaged execution remains
   model/provider dependent.
+- `unsupported.utility_triage`: P12-31 locks decisions for the remaining
+  utility-heavy Rhino gaps. P12-32 promotes only `s13n.bytes` as a low-risk
+  pure JavaScript pilot through `require("s13n")` and
+  `autojs6:compat.s13n.bytes`. `s13n.color`, `s13n.point`,
+  `s13n.throwable`, and `s13n.time` remain stable unsupported until
+  per-helper JSON-safe contracts exist. `util`, `jsox.mathx`, `zip`,
+  `canvas`, `recorder`, `media` audio helpers, `mediainfo`, `opencc`, and
+  `pinyin.fromPhrase` stay deferred to smaller pure utility batches or
+  dedicated provider/resource gates.
 
 ## Current Provider POC Surfaces
 
@@ -101,14 +110,6 @@ which Phase 12 workstream owns the next implementation or rejection.
   no Rhino globals. P12-25 adds a provider POC for
   `rhino.run({ experimental: true, source|path, timeoutMs, args })` through a
   dedicated Android Rhino JSON-only execution adapter. P12-26 records packaged metadata behavior as fail-closed: no packaged metadata shape is accepted in Phase 12 and packaged APK execution remains rejected.
-- `unsupported.utility_triage`: P12-31 locks decisions for the remaining
-  utility-heavy Rhino gaps. `s13n.bytes` is the only P12-32 low-risk pure JS
-  pilot. `util` and `jsox.mathx` are deferred as split pure utility batches.
-  `zip`, `canvas`, `recorder`, `media` audio helpers, `mediainfo`, `opencc`,
-  and `pinyin.fromPhrase` remain deferred until archive, drawing, recording,
-  media metadata, or text-resource provider gates exist. Exact raw Android
-  `Canvas`/`Paint`/`View`, recorder/player, media metadata retriever, archive
-  handle, dictionary handle, and Java exception parity is not promoted.
 ## Current Rejected Surfaces
 
 - None in the current Phase 12 surface manifest.

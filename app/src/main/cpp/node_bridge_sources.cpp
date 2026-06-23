@@ -8200,6 +8200,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_colors_cache = null;
   let __autojs6_limited_formatter_cache = null;
   let __autojs6_limited_converter_cache = null;
+  let __autojs6_limited_s13n_cache = null;
   let __autojs6_limited_mime_cache = null;
   let __autojs6_limited_nanoid_cache = null;
   let __autojs6_limited_opencc_cache = null;
@@ -15605,6 +15606,38 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_limited_converter_cache = Object.freeze({ bytes: Object.freeze(bytes) });
     return __autojs6_limited_converter_cache;
   }
+  function __autojs6_s13n_unsupported(methodName) {
+    throw __autojs6_rhino_compat_unsupported(
+      "s13n." + methodName,
+      "P12-32 promotes only s13n.bytes in Node; this s13n helper is deferred until a JSON-safe contract exists."
+    );
+  }
+  function __autojs6_s13n_bytes() {
+    const args = Array.prototype.slice.call(arguments);
+    if (args.length < 1 || args.length > 2) {
+      throw __autojs6_invalid_arg_type("s13n.bytes expects source and optional fromUnit.");
+    }
+    if (args.length === 2 && typeof args[1] !== "string") {
+      throw __autojs6_invalid_arg_type("s13n.bytes fromUnit must be a string when provided.");
+    }
+    const normalized = args.length === 2
+      ? [args[0], args[1], "B", { fractionDigits: 0 }]
+      : [args[0], "B", { fractionDigits: 0 }];
+    return __autojs6_bytes_number(normalized, "none");
+  }
+  function __autojs6_limited_s13n() {
+    if (__autojs6_limited_s13n_cache) {
+      return __autojs6_limited_s13n_cache;
+    }
+    __autojs6_limited_s13n_cache = Object.freeze({
+      bytes: __autojs6_s13n_bytes,
+      color: function() { __autojs6_s13n_unsupported("color"); },
+      point: function() { __autojs6_s13n_unsupported("point"); },
+      throwable: function() { __autojs6_s13n_unsupported("throwable"); },
+      time: function() { __autojs6_s13n_unsupported("time"); }
+    });
+    return __autojs6_limited_s13n_cache;
+  }
   function __autojs6_mime_parse(value) {
     const raw = value === undefined || value === null ? "" : String(value);
     const parts = raw.split(/\s*;\s*/).filter(function(part) { return part.length > 0; });
@@ -16385,8 +16418,8 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_rhino_compat_events = Object.freeze({
     keys: __autojs6_rhino_compat_key_constants
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "keys", "ui"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "events.keys", "ui", "tasks"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "keys", "ui"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "events.keys", "ui", "tasks"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -17624,6 +17657,7 @@ std::string buildEmbeddedScriptExecutionSource(
       formatter: __autojs6_limited_formatter(),
       cvt: __autojs6_limited_converter(),
       converter: __autojs6_limited_converter(),
+      s13n: __autojs6_limited_s13n(),
       mime: __autojs6_limited_mime(),
       nanoid: __autojs6_limited_nanoid(),
       util: __autojs6_limited_util(),
@@ -17691,7 +17725,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17", "P12-18", "P12-29"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17", "P12-18", "P12-29", "P12-32"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -17726,7 +17760,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants, P12-09 constrained UI, and P12-29 barcode/qrcode facades; P12-17 compat.tasks stays module-only."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants, P12-09 constrained UI, P12-29 barcode/qrcode facades, and P12-32 s13n.bytes; P12-17 compat.tasks stays module-only."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -17789,6 +17823,7 @@ std::string buildEmbeddedScriptExecutionSource(
       formatter: __autojs6_limited_formatter(),
       cvt: __autojs6_limited_converter(),
       converter: __autojs6_limited_converter(),
+      s13n: __autojs6_limited_s13n(),
       mime: __autojs6_limited_mime(),
       nanoid: __autojs6_limited_nanoid(),
       util: __autojs6_limited_util(),
@@ -39399,6 +39434,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "converter" || name === "cvt") {
       return "converter";
     }
+    if (name === "s13n") {
+      return "s13n";
+    }
     if (name === "mime") {
       return "mime";
     }
@@ -39698,6 +39736,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "converter" || name === "cvt") {
       return __autojs6_limited_converter();
+    }
+    if (name === "s13n") {
+      return __autojs6_limited_s13n();
     }
     if (name === "mime") {
       return __autojs6_limited_mime();

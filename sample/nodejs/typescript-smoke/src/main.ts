@@ -23,6 +23,7 @@ import base64 = require("base64");
 import colors = require("colors");
 import formatter = require("formatter");
 import converter = require("converter");
+import s13n = require("s13n");
 import mime = require("mime");
 import nanoid = require("nanoid");
 import util = require("util");
@@ -231,6 +232,8 @@ async function smoke(): Promise<void> {
   const hex: string = colors.toHex(color);
   const formattedBytes: string = formatter.bytes(1536);
   const convertedBytes: number = converter.bytes("1 KB", "B");
+  const standardizedBytes: number = s13n.bytes("1 KB");
+  const compatStandardizedBytes: number = rhinoCompat.s13n.bytes("2", "MB");
   const parsedMime: mime.JsMime = mime("text/plain; charset=utf-8");
   const nano: string = nanoid(8);
   const inspected: string = util.inspect({ encoded, decoded });
@@ -450,6 +453,8 @@ async function smoke(): Promise<void> {
   void hex;
   void formattedBytes;
   void convertedBytes;
+  void standardizedBytes;
+  void compatStandardizedBytes;
   void parsedMime;
   void nano;
   void inspected;

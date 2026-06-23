@@ -158,8 +158,26 @@ Use Node builtins only within the supported profile. Raw `child_process`, native
 
 P12-31 triages the remaining utility-heavy Rhino gaps in
 [RHINO_UNSUPPORTED_UTILITY_TRIAGE.md](reports/phase12/RHINO_UNSUPPORTED_UTILITY_TRIAGE.md).
-The only P12-32 pilot candidate is `s13n.bytes`, because it can be promoted as
-a pure JavaScript helper without Android provider authority.
+P12-32 promotes the first low-risk pilot, `s13n.bytes`, as a pure JavaScript
+helper without Android provider authority:
+
+```js
+// Rhino
+const bytes = s13n.bytes("1 KB");
+
+// Node direct facade
+const s13n = require("s13n");
+const bytesFromNode = s13n.bytes("1 KB");
+
+// Node Rhino compatibility facade
+const compat = require("autojs6:compat");
+const bytesFromCompat = compat.s13n.bytes("1", "MB");
+```
+
+The Node facade returns bytes as a number and is equivalent to
+`converter.bytes(source, fromUnit, "B", { fractionDigits: 0 })`.
+`s13n.color`, `s13n.point`, `s13n.throwable`, and `s13n.time` are present only
+as stable unsupported calls until each helper has a separate JSON-safe contract.
 
 Do not migrate production scripts by assuming these modules are available in
 Node yet:

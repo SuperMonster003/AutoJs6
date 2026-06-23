@@ -1241,14 +1241,47 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-unsupported-utility-triage-verification.md`
 
-- [ ] P12-32: 对一个低风险 utility module 做 promotion pilot。
+- [x] P12-32: 对一个低风险 utility module 做 promotion pilot。
   - 范围：从 P12-31 中选择一个纯 JS 或低风险 provider 模块，完成端到端
     promotion。
   - 验收：
-    - runtime facade、types、host tests、status manifest、matrix、docs 全部同步。
-    - 缺依赖路径有 stable unsupported error。
-    - 不引入新的 Android raw object leakage。
-  - Evidence：待补充。
+    - `s13n.bytes` 通过 `require("s13n").bytes(source, fromUnit?)`
+      和 `require("autojs6:compat").s13n.bytes(...)` promoted 为同步纯 JS
+      facade，复用既有 byte parser 并返回 `B` 数值。
+    - `s13n.color` / `s13n.point` / `s13n.throwable` / `s13n.time`
+      保留 stable `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`，等待各自
+      JSON-safe contract。
+    - runtime facade、types、type smoke、status manifest、matrix、migration
+      docs、surface manifest 和 host verifier 全部同步。
+    - 不引入新的 Android raw object leakage，也不新增 provider authority。
+  - Evidence：
+    - 报告：
+      `docs/nodejs/reports/phase12/RHINO_S13N_BYTES_PROMOTION.md`
+    - Runtime：
+      `app/src/main/cpp/node_bridge_sources.cpp` 新增 `__autojs6_limited_s13n()`
+      以及 `require("s13n")` / `autojs6:compat.s13n` 映射。
+    - Types：
+      `docs/nodejs/types/autojs6-node/s13n.d.ts`、
+      `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`、
+      `docs/nodejs/types/autojs6-node/index.d.ts`、
+      `docs/nodejs/types/autojs6-node/README.md` 和
+      `sample/nodejs/typescript-smoke/src/main.ts`。
+    - Status/matrix/docs：
+      `docs/nodejs/rhino-compat/status-manifest.json` 将 `s13n` 标为
+      `partial`、`s13n.bytes` 标为 `supported`；
+      `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md` next step 推进到
+      P12-33；`docs/nodejs/MIGRATION_FROM_RHINO.md` 增加脚本迁移示例。
+    - Surface manifest：
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+      将 `unsupported.utility_triage` 推进为 `promoted`，但仅代表
+      P12-31 decisions + P12-32 `s13n.bytes` pilot 完成。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-s13n-bytes-promotion.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatS13nBytesPromotion`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-s13n-bytes-promotion-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-s13n-bytes-promotion-verification.md`
 
 ### Track I: Dual-engine and release evidence
 

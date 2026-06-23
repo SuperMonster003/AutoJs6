@@ -603,10 +603,9 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "p12_31_defer_split_utility_facade",
+      "decision": "no_node_surface_evidence",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
-        "P12-31 decision: defer util as a split utility-heavy surface; future work must separate Node util aliases, pure type helpers, and Android density helpers instead of promoting the whole module at once."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module."
       ],
       "apiEntries": [
         {
@@ -653,10 +652,9 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "p12_31_defer_canvas_provider_design",
+      "decision": "no_node_surface_evidence",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
-        "P12-31 decision: defer canvas until a JSON-only drawing provider is designed; exact raw Android Canvas/Paint/View parity is a permanent non-goal for Node."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module."
       ],
       "apiEntries": [
         {
@@ -1382,10 +1380,9 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "p12_31_defer_jsox_mathx_batch",
+      "decision": "no_node_surface_evidence",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
-        "P12-31 decision: defer jsox.mathx as a pure JS batch after the smaller s13n pilot; it has too many helpers for a single P12-32 pilot."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module."
       ],
       "apiEntries": [
         {
@@ -1420,10 +1417,9 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "p12_31_defer_recorder_provider_design",
+      "decision": "no_node_surface_evidence",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
-        "P12-31 decision: defer recorder until a privacy-reviewed audio/screen recording provider defines runtime permissions, foreground disclosure, cleanup, and packaged behavior."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module."
       ],
       "apiEntries": [
         {
@@ -7863,86 +7859,89 @@
     },
     {
       "id": "s13n",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "s13n",
+        "autojs6:compat"
+      ],
       "bridgeModules": [],
-      "decision": "p12_31_promote_s13n_bytes_pilot",
+      "decision": "p12_32_s13n_bytes_pure_utility_pilot",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
-        "P12-31 decision: promote s13n.bytes as the P12-32 low-risk pure JS pilot; keep s13n.color/point/time/throwable deferred until individual JSON-safe contracts exist."
+        "P12-31 decision: promote s13n.bytes as the P12-32 low-risk pure JS pilot; keep s13n.color/point/time/throwable deferred until individual JSON-safe contracts exist.",
+        "P12-32 promotes s13n.bytes as a pure JS Node facade through require(\"s13n\") and autojs6:compat.s13n.bytes; s13n.color/point/throwable/time remain stable unsupported until JSON-safe contracts exist."
       ],
       "apiEntries": [
         {
           "id": "s13n.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "s13n",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "__module",
+          "decision": "p12_32_s13n_module_partial",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P12-32 exposes require(\"s13n\") as a partial pure JS module: bytes is supported, while color/point/throwable/time are stable unsupported."
           ]
         },
         {
           "id": "s13n.bytes",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "supported",
+          "asyncMode": "sync",
+          "nodeModule": "s13n",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "bytes",
+          "decision": "p12_32_s13n_bytes_pure_utility_pilot",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P12-32 implements s13n.bytes(source, fromUnit?) as a pure JS facade equivalent to converter.bytes(source, fromUnit, \"B\", { fractionDigits: 0 })."
           ]
         },
         {
           "id": "s13n.color",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "s13n",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "color",
+          "decision": "p12_32_s13n_sibling_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P12-32 keeps s13n.color as a stable ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED facade until a JSON-safe color contract exists."
           ]
         },
         {
           "id": "s13n.point",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "s13n",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "point",
+          "decision": "p12_32_s13n_sibling_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P12-32 keeps s13n.point as a stable ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED facade until a JSON-safe point contract exists."
           ]
         },
         {
           "id": "s13n.throwable",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "s13n",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "throwable",
+          "decision": "p12_32_s13n_sibling_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P12-32 keeps s13n.throwable as a stable ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED facade until a JSON-safe throwable contract exists."
           ]
         },
         {
           "id": "s13n.time",
           "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "asyncMode": "sync",
+          "nodeModule": "s13n",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "time",
+          "decision": "p12_32_s13n_sibling_stable_unsupported",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P12-32 keeps s13n.time as a stable ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED facade until a JSON-safe time contract exists."
           ]
         }
       ]
@@ -11246,10 +11245,9 @@
       "asyncMode": "unknown",
       "nodeModules": [],
       "bridgeModules": [],
-      "decision": "p12_31_defer_zip_archive_provider",
+      "decision": "no_node_surface_evidence",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
-        "P12-31 decision: defer zip until a scoped archive provider covers zip-slip/path traversal denial, archive size budgets, compression ratio budgets, overwrite policy, cleanup, and packaged smoke."
+        "No matching Node bridge/types/runtime surface was found for this Rhino module."
       ],
       "apiEntries": [
         {
@@ -11774,10 +11772,10 @@
   ],
   "totals": {
     "partial": 320,
-    "unsupported": 374,
-    "supported_async": 64,
+    "unsupported": 371,
+    "supported_async": 66,
     "blocked_by_design": 45,
-    "supported": 148,
+    "supported": 149,
     "renamed": 1
   }
 }

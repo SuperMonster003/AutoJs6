@@ -7,31 +7,31 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Rhino modules: 73
 - Rhino API entries: 879
 - Node bridge modules: 27
-- Node type modules: 50
+- Node type modules: 51
 - Modules with bridge evidence: 24
-- Modules with type evidence: 37
-- Modules without Node surface evidence: 35
+- Modules with type evidence: 38
+- Modules without Node surface evidence: 34
 
 ## Status Totals
 
 - blocked_by_design: 45
-- partial: 318
+- partial: 320
 - renamed: 1
-- supported: 148
+- supported: 149
 - supported_async: 66
-- unsupported: 374
+- unsupported: 371
 
 ## Module Matrix
 
 | Order | Rhino Module | Key | Status | Node Surface | API Status | Risks | Next Step |
 | ---: | --- | --- | --- | --- | --- | --- | --- |
 | 0 | global | global | partial | accessibility, app, autojs6:compat, clipboard, device, images, media_projection, ocr, shell, toast | supported_async:4, unsupported:42 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
-| 1 | global.legacy | legacy | unsupported | - | unsupported:3 | none | Defer whole-module util promotion; split Node util aliases, pure type helpers, and Android density helpers into smaller decisions. |
-| 2 | global.is_nullish | isNullish | unsupported | - | unsupported:1 | none | Defer until a JSON-only drawing provider is designed; keep raw Canvas/Paint/View parity as a permanent non-goal. |
+| 1 | global.legacy | legacy | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
+| 2 | global.is_nullish | isNullish | unsupported | - | unsupported:1 | none | Design a Node facade or record a permanent non-goal. |
 | 3 | util | util | unsupported | util | unsupported:50 | provider_availability | Defer whole-module util promotion; split Node util aliases, pure type helpers, and Android density helpers into smaller decisions. |
 | 4 | util.java | java | blocked_by_design | java | blocked_by_design:6 | none | Keep denial documented and covered by policy tests. |
-| 5 | util.version | version | unsupported | - | unsupported:2 | none | Defer jsox.mathx as a later pure utility batch after the smaller s13n pilot proves the promotion pattern. |
-| 6 | util.version_codes | versionCodes | unsupported | - | unsupported:5 | provider_availability | Defer until recorder has privacy, permission, foreground disclosure, cleanup, and packaged behavior gates. |
+| 5 | util.version | version | unsupported | - | unsupported:2 | none | Design a Node facade or record a permanent non-goal. |
+| 6 | util.version_codes | versionCodes | unsupported | - | unsupported:5 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 7 | util.inspect | inspect | supported | autojs6:compat, util | supported:1 | none | Review status manifest decision. |
 | 8 | util.morse_code | morseCode | unsupported | - | unsupported:4 | none | Design a Node facade or record a permanent non-goal. |
 | 9 | global.species | species | unsupported | - | unsupported:36 | none | Design a Node facade or record a permanent non-goal. |
@@ -63,7 +63,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 35 | http | http | unsupported | - | unsupported:21 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 36 | web | web | partial | fetch, websocket | partial:4 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 37 | web.web_socket | WebSocket | partial | websocket | partial:1 | lifecycle_resource, provider_availability, raw_android_object | Implement explicit compat facade and promote mapped APIs one by one. |
-| 38 | s13n | s13n | unsupported | - | unsupported:6 | none | Implement P12-32 s13n.bytes pure utility pilot; keep the rest of s13n deferred until per-helper JSON-safe contracts exist. |
+| 38 | s13n | s13n | partial | autojs6:compat, s13n | partial:1, supported:1, unsupported:4 | none | Proceed to P12-33 dual-engine device evidence; keep s13n sibling helpers stable unsupported until per-helper contracts exist. |
 | 39 | converter | cvt | supported | autojs6:compat, converter, cvt | supported:1 | none | Review status manifest decision. |
 | 40 | converter.bytes | bytes | supported | autojs6:compat, converter, cvt | supported:7 | none | Review status manifest decision. |
 | 41 | formatter | fmt | supported | autojs6:compat, fmt, formatter | supported:1 | none | Review status manifest decision. |
@@ -91,7 +91,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 63 | shizuku | shizuku | unsupported | - | unsupported:7 | provider_availability | Design a Node facade or record a permanent non-goal. |
 | 64 | opencc | opencc | unsupported | autojs6:compat, opencc | unsupported:34 | none | Defer OpenCC promotion until dictionary packaging, resource lookup, and missing-resource diagnostics are designed. |
 | 65 | mime | mime | supported | autojs6:compat, mime | supported:1 | provider_availability | Review status manifest decision. |
-| 66 | sysprops | sysprops | unsupported | - | unsupported:5 | none | Defer zip until a scoped archive provider covers zip-slip denial, archive budgets, overwrite policy, cleanup, and packaged smoke. |
+| 66 | sysprops | sysprops | unsupported | - | unsupported:5 | none | Design a Node facade or record a permanent non-goal. |
 | 67 | sqlite | sqlite | supported_async | autojs6:compat, database, sqlite | supported_async:2 | none | Add compat examples and dual-engine tests. |
 | 68 | zip | zip | unsupported | - | unsupported:6 | none | Defer zip until a scoped archive provider covers zip-slip denial, archive budgets, overwrite policy, cleanup, and packaged smoke. |
 | 69 | nanoid | nanoid | supported | autojs6:compat, nanoid | supported:1 | none | Review status manifest decision. |
@@ -119,7 +119,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Coverage: `no_node_surface`
 - API status: unsupported:3
 - Risks: none
-- Next step: Defer whole-module util promotion; split Node util aliases, pure type helpers, and Android density helpers into smaller decisions.
+- Next step: Design a Node facade or record a permanent non-goal.
 
 ### global.is_nullish
 
@@ -129,7 +129,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Coverage: `no_node_surface`
 - API status: unsupported:1
 - Risks: none
-- Next step: Defer until a JSON-only drawing provider is designed; keep raw Canvas/Paint/View parity as a permanent non-goal.
+- Next step: Design a Node facade or record a permanent non-goal.
 
 ### util
 
@@ -159,7 +159,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Coverage: `no_node_surface`
 - API status: unsupported:2
 - Risks: none
-- Next step: Defer jsox.mathx as a later pure utility batch after the smaller s13n pilot proves the promotion pattern.
+- Next step: Design a Node facade or record a permanent non-goal.
 
 ### util.version_codes
 
@@ -169,7 +169,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Coverage: `no_node_surface`
 - API status: unsupported:5
 - Risks: provider_availability
-- Next step: Defer until recorder has privacy, permission, foreground disclosure, cleanup, and packaged behavior gates.
+- Next step: Design a Node facade or record a permanent non-goal.
 
 ### util.inspect
 
@@ -484,12 +484,12 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 ### s13n
 
 - Key: `s13n`
-- Status: `unsupported`
-- Node surface: -
-- Coverage: `no_node_surface`
-- API status: unsupported:6
+- Status: `partial`
+- Node surface: autojs6:compat, s13n
+- Coverage: `types_only`
+- API status: partial:1, supported:1, unsupported:4
 - Risks: none
-- Next step: Implement P12-32 s13n.bytes pure utility pilot; keep the rest of s13n deferred until per-helper JSON-safe contracts exist.
+- Next step: Proceed to P12-33 dual-engine device evidence; keep s13n sibling helpers stable unsupported until per-helper contracts exist.
 
 ### converter
 
@@ -769,7 +769,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 - Coverage: `no_node_surface`
 - API status: unsupported:5
 - Risks: none
-- Next step: Defer zip until a scoped archive provider covers zip-slip denial, archive budgets, overwrite policy, cleanup, and packaged smoke.
+- Next step: Design a Node facade or record a permanent non-goal.
 
 ### sqlite
 

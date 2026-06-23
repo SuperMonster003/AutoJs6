@@ -169,6 +169,12 @@ function riskSummary(module) {
 }
 
 function nextStepFor(module, gapModule) {
+  if (
+    module.id === "s13n" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-32 promotes s13n.bytes"))
+  ) {
+    return "Proceed to P12-33 dual-engine device evidence; keep s13n sibling helpers stable unsupported until per-helper contracts exist.";
+  }
   if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: promote s13n.bytes"))) {
     return "Implement P12-32 s13n.bytes pure utility pilot; keep the rest of s13n deferred until per-helper JSON-safe contracts exist.";
   }

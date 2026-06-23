@@ -50,7 +50,7 @@ function main() {
       status: policyViolations.length === 0 ? "passed" : "failed",
       candidateCoverage: checkById(checks, "candidate-decision-coverage"),
       p12Pilot: checkById(checks, "p12-32-pilot-selection"),
-      surfaceDesignLocked: checkById(checks, "surface-manifest"),
+      surfaceStateCurrent: checkById(checks, "surface-manifest"),
     },
   };
   fs.mkdirSync(reportDir, { recursive: true });
@@ -118,7 +118,7 @@ function buildChecks(files, repoRoot) {
     check(
       "status-manifest-notes",
       CANDIDATES.every((candidate) => moduleHasNote(moduleById.get(candidate.id), candidate.phrase)) &&
-        moduleById.get("s13n").decision === "p12_31_promote_s13n_bytes_pilot" &&
+        ["p12_31_promote_s13n_bytes_pilot", "p12_32_s13n_bytes_pure_utility_pilot"].includes(moduleById.get("s13n").decision) &&
         moduleById.get("zip").decision === "p12_31_defer_zip_archive_provider" &&
         moduleById.get("canvas").decision === "p12_31_defer_canvas_provider_design" &&
         moduleById.get("recorder").decision === "p12_31_defer_recorder_provider_design" &&
@@ -127,7 +127,9 @@ function buildChecks(files, repoRoot) {
     ),
     check(
       "status-manifest-no-premature-promotion",
-      moduleById.get("s13n").status === "unsupported" &&
+      ["unsupported", "partial"].includes(moduleById.get("s13n").status) &&
+        ["unsupported", "supported"].includes(entryStatus(moduleById.get("s13n"), "s13n.bytes")) &&
+        ["s13n.color", "s13n.point", "s13n.throwable", "s13n.time"].every((id) => entryStatus(moduleById.get("s13n"), id) === "unsupported") &&
         moduleById.get("util").status === "unsupported" &&
         moduleById.get("jsox.mathx").status === "unsupported" &&
         moduleById.get("zip").status === "unsupported" &&
@@ -138,13 +140,22 @@ function buildChecks(files, repoRoot) {
         moduleById.get("media").status === "partial" &&
         moduleById.get("pinyin").status === "partial" &&
         entryStatus(moduleById.get("pinyin"), "pinyin.fromPhrase") === "unsupported",
-      "P12-31 must not prematurely promote runtime status for triaged modules.",
+      "P12-31 must not promote triaged modules except the later P12-32 s13n.bytes pilot.",
+    ),
+    check(
+      "status-manifest-no-extra-p12-31-notes",
+      (statusManifest.modules || [])
+        .filter((module) => (module.notes || []).some((note) => note.includes("P12-31 decision:")))
+        .every((module) => CANDIDATES.some((candidate) => candidate.id === module.id)),
+      "P12-31 decision notes must not appear on non-candidate modules.",
     ),
     check(
       "matrix-generator-next-steps",
       includesAll(files.matrixGenerator.text, [
         "P12-31 decision: promote s13n.bytes",
         "Implement P12-32 s13n.bytes pure utility pilot",
+        "P12-32 promotes s13n.bytes",
+        "Proceed to P12-33 dual-engine device evidence",
         "P12-31 decision: defer zip",
         "P12-31 decision: defer canvas",
         "P12-31 decision: defer recorder",
@@ -158,9 +169,9 @@ function buildChecks(files, repoRoot) {
     check(
       "matrix-next-steps",
       includesAll(findMatrixRow(files.matrix.text, "s13n"), [
-        "| 38 | s13n | s13n | unsupported |",
-        "unsupported:6",
-        "Implement P12-32 s13n.bytes pure utility pilot",
+        "| 38 | s13n | s13n | partial |",
+        "partial:1, supported:1, unsupported:4",
+        "Proceed to P12-33 dual-engine device evidence",
       ]) &&
         includesAll(findMatrixRow(files.matrix.text, "zip"), [
           "| 68 | zip | zip | unsupported |",
@@ -197,7 +208,9 @@ function buildChecks(files, repoRoot) {
       includesAll(files.migration.text, [
         "## Unsupported Utility Modules",
         "RHINO_UNSUPPORTED_UTILITY_TRIAGE.md",
-        "only P12-32 pilot candidate is `s13n.bytes`",
+        "P12-32 promotes the first low-risk pilot, `s13n.bytes`",
+        "require(\"s13n\")",
+        "compat.s13n.bytes",
         "`zip`: deferred until a scoped archive provider",
         "`canvas`: deferred until a JSON-only drawing provider",
         "`recorder`, `media` audio helpers, and `mediainfo`",
@@ -209,24 +222,27 @@ function buildChecks(files, repoRoot) {
     check(
       "surface-manifest",
       triageSurface &&
-        triageSurface.status === "design_locked" &&
+        triageSurface.status === "promoted" &&
         (triageSurface.tasks || []).includes("P12-31") &&
         (triageSurface.tasks || []).includes("P12-32") &&
         includesAll(JSON.stringify(triageSurface), [
           "RHINO_UNSUPPORTED_UTILITY_TRIAGE.md",
+          "RHINO_S13N_BYTES_PROMOTION.md",
+          "require(\\\"s13n\\\")",
           "verify-rhino-compat-unsupported-utility-triage.js",
+          "verify-rhino-compat-s13n-bytes-promotion.js",
           "verifyNodeRhinoCompatUnsupportedUtilityTriage",
+          "verifyNodeRhinoCompatS13nBytesPromotion",
           "s13n.bytes",
           "zip/canvas/recorder/media/mediainfo/opencc/pinyin",
         ]) &&
         includesAll(files.surfaceDocs.text, [
           "`unsupported.utility_triage`",
           "P12-31 locks decisions",
-          "`s13n.bytes` is the only P12-32 low-risk pure JS",
-          "pilot",
-          "raw Android",
+          "P12-32 promotes only `s13n.bytes`",
+          "stable unsupported",
         ]),
-      "Phase 12 surface manifest must mark unsupported.utility_triage design_locked with P12-31 evidence, not promoted.",
+      "Phase 12 surface manifest must mark unsupported.utility_triage promoted once P12-32 s13n.bytes lands while preserving P12-31 evidence.",
     ),
     check(
       "phase12-task-complete",
@@ -237,7 +253,7 @@ function buildChecks(files, repoRoot) {
           "verify-rhino-compat-unsupported-utility-triage.js",
           "verifyNodeRhinoCompatUnsupportedUtilityTriage",
           "unsupported.utility_triage",
-          "design_locked",
+          "promoted",
         ]),
       "Phase 12 task plan must mark P12-31 complete with report, manifest, docs, and gate evidence.",
     ),

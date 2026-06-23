@@ -32,6 +32,7 @@
 /// <reference path="./colors.d.ts" />
 /// <reference path="./formatter.d.ts" />
 /// <reference path="./converter.d.ts" />
+/// <reference path="./s13n.d.ts" />
 /// <reference path="./mime.d.ts" />
 /// <reference path="./nanoid.d.ts" />
 /// <reference path="./util.d.ts" />
