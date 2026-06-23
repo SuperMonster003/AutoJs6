@@ -123,10 +123,10 @@ Default behavior remains fail-closed:
 - no `compat.rhino` surface is added;
 - no Rhino globals are installed into V8.
 
-P12-26 remains responsible for packaged metadata behavior. Packaged APKs
-without explicit shim metadata still cannot claim promoted Rhino execution
-support, and the P12-25 POC should be treated as an embedded/live-provider
-adapter only.
+P12-26 records packaged metadata behavior as fail-closed. No packaged metadata shape is accepted in Phase 12, so packaged APK execution remains rejected even when a project contains `require("rhino")` or P12-25 POC-shaped source.
+Packaged APKs without explicit shim metadata still cannot claim promoted Rhino
+execution support, and the P12-25 POC should be treated as an
+embedded/live-provider adapter only.
 
 ## Evidence
 
@@ -150,5 +150,7 @@ adapter only.
   `sample/nodejs/typescript-smoke/src/main.ts`
 - Host verifier:
   `tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-execution-adapter-poc.js`
+- P12-26 packaged metadata gate:
+  `docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md`
 - Gradle gate:
   `:app:verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc`

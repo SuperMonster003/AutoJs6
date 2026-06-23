@@ -91,9 +91,7 @@ which Phase 12 workstream owns the next implementation or rejection.
   `experimental: true`, no supported `rhino.install()`, no `compat.rhino`, and
   no Rhino globals. P12-25 adds a provider POC for
   `rhino.run({ experimental: true, source|path, timeoutMs, args })` through a
-  dedicated Android Rhino JSON-only execution adapter. P12-26 remains
-  responsible for packaged metadata; packaged support is not promoted by the
-  P12-25 POC.
+  dedicated Android Rhino JSON-only execution adapter. P12-26 records packaged metadata behavior as fail-closed: no packaged metadata shape is accepted in Phase 12 and packaged APK execution remains rejected.
 
 ## Current Rejected Surfaces
 

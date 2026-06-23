@@ -96,7 +96,7 @@ function buildChecks(files, repoRoot) {
         "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
         "does not add `compat.rhino`",
         "P12-25 adds",
-        "P12-26 remains responsible",
+        "P12-26 records packaged metadata behavior as fail-closed",
       ]),
       "P12-24 report must document the disabled facade, stable denial, shadowing, no globals, and follow-up boundaries.",
     ),

@@ -1035,14 +1035,30 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-rhino-json-only-execution-adapter-poc-verification.md`
 
-- [ ] P12-26: 增加 Rhino shim packaged metadata gate。
+- [x] P12-26: 增加 Rhino shim packaged metadata gate。
   - 范围：如果 P12-25 支持 packaged，则必须要求显式 packaged metadata
     opt-in；否则记录 packaged rejection。
   - 验收：
     - 无 metadata 的 APK 不能执行 shim。
     - metadata 只授权 JSON-only run，不授权 `install()` 或 globals。
     - packaged timeout、crash、destroy 有 evidence。
-  - Evidence：待补充。
+  - 状态：P12-26 选择记录 packaged rejection；Phase 12 不接受任何 Rhino
+    packaged metadata shape，`rhino` provider 的 `packagedSupport.status = unsupported`。
+  - Evidence：
+    - Report：
+      `docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md`
+    - Provider metadata：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt`
+    - Execution mode policy：
+      `app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt`
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-rhino-shim-packaged-metadata-gate.js`
+    - Gradle gate：
+      `:app:verifyNodeRhinoCompatRhinoShimPackagedMetadataGate`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-rhino-shim-packaged-metadata-gate-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-rhino-shim-packaged-metadata-gate-verification.md`
 
 ### Track G: Barcode and qrcode JSON-safe provider
 

@@ -133,6 +133,7 @@ object NodeBridgeProviderRegistry {
     private const val UI_OVERLAY_PROVIDER = "ui.overlay"
     private const val WORK_MANAGER_PROVIDER = "work_manager"
     private const val SHELL_PROVIDER = "shell"
+    private const val RHINO_PROVIDER = "rhino"
     private const val INPUT_OBSERVER_PROVIDER = "input_observer"
 
     val definitions: List<NodeBridgeProviderDefinition> = listOf(
@@ -228,6 +229,15 @@ object NodeBridgeProviderRegistry {
             capabilities = listOf(NodeBridgePermissionManifest.SHELL),
             packagedSupport = packagedProviderDependent("controlled shell bridge requires explicit capability and remains separate from child_process"),
         ),
+        provider(
+            id = RHINO_PROVIDER,
+            displayName = "rhino JSON-only shim",
+            modules = listOf(NodeBridgeModules.RHINO),
+            capabilities = listOf(NodeBridgePermissionManifest.RHINO),
+            packagedSupport = packagedUnsupported(
+                "P12-26 rejects packaged Rhino JSON-only execution until explicit shim metadata authorizes only JSON-only run and packaged timeout/crash/destroy evidence exists",
+            ),
+        ),
     )
 
     val definitionsById: Map<String, NodeBridgeProviderDefinition> = definitions.associateBy { it.id }
@@ -320,6 +330,7 @@ object NodeBridgeProviderRegistry {
         INPUT_OBSERVER_PROVIDER -> inputObserverStatus()
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        RHINO_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
     }
 
@@ -377,6 +388,17 @@ object NodeBridgeProviderRegistry {
             "retryPolicy" to "no implicit retry; workers never return Result.retry",
             "android16JobQuotaPolicy" to NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics().optString("quotaState"),
             "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
+        )
+        RHINO_PROVIDER -> linkedMapOf(
+            "liveMethods" to "run",
+            "mode" to "json-only-poc",
+            "defaultPolicy" to "rhino.run without experimental:true rejects with ERR_AUTOJS6_RHINO_SHIM_DISABLED",
+            "packagedSupport" to "unsupported",
+            "packagedPolicy" to "P12-26 rejects packaged Rhino JSON-only execution until explicit shim metadata is designed; future metadata may authorize only JSON-only run, never install or globals",
+            "installPolicy" to "rhino.install remains unsupported with ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+            "globalsPolicy" to "no importClass, importPackage, Packages, java, android, JavaAdapter, compat.rhino, or Rhino globals are installed into V8",
+            "timeoutPolicy" to "timeoutMs is required; provider calls forceStop and destroy before reporting timeout lifecycle",
+            "statusReason" to "P12-25 live provider POC is available only for explicit experimental one-shot requests; P12-26 keeps packaged APK execution fail-closed",
         )
         else -> emptyMap()
     }

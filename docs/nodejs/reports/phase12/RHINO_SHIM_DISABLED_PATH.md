@@ -85,8 +85,7 @@ JSON-only `rhino.run({ experimental: true, source|path, timeoutMs, args })`
 adapter while preserving this default-denial path. `rhino.install()` remains
 unsupported and must not become available because of the experimental flag.
 
-P12-26 remains responsible for packaged metadata behavior. Packaged APKs without
-explicit shim metadata still cannot execute Rhino through Node.
+P12-26 records packaged metadata behavior as fail-closed. Packaged APKs without explicit shim metadata cannot execute Rhino through Node, and Phase 12 accepts no packaged metadata shape that would enable the P12-25 POC in an APK.
 
 ## Evidence
 
@@ -102,4 +101,6 @@ explicit shim metadata still cannot execute Rhino through Node.
   `tools/nodejs/phase12/verify-rhino-compat-rhino-shim-disabled-path.js`
 - P12-25 host verifier:
   `tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-execution-adapter-poc.js`
+- P12-26 packaged metadata gate:
+  `docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md`
 - Gradle gate: `:app:verifyNodeRhinoCompatRhinoShimDisabledPath`

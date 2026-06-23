@@ -132,7 +132,9 @@ P12-25 implements the runtime adapter in
 [RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md](reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md).
 The POC uses the `args` Rhino global, not the implicit Rhino `arguments`
 object, and returns a `RunResult` record rather than throwing Rhino exceptions
-directly into Node. P12-26 still owns packaged metadata behavior.
+directly into Node. P12-26 records packaged metadata behavior as fail-closed:
+no packaged metadata shape is accepted in Phase 12, and packaged APK execution
+remains rejected. Do not ship packaged APK code that depends on the Rhino JSON-only POC; keep those snippets in live validation or rewrite them to explicit Node bridge modules before packaging.
 
 ## Modules Instead Of Globals
 

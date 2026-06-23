@@ -9,6 +9,7 @@ const REPORT_BASENAME = "rhino-compat-rhino-json-only-execution-adapter-poc-veri
 
 const FILES = {
   pocReport: "docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md",
+  packagedReport: "docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md",
   pocGate: "docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md",
   disabledReport: "docs/nodejs/reports/phase12/RHINO_SHIM_DISABLED_PATH.md",
   surfaceManifest: "docs/nodejs/rhino-compat/phase12-surface-manifest.json",
@@ -51,7 +52,7 @@ function main() {
       adapterImplemented: checkById(checks, "android-rhino-provider"),
       defaultStillDisabled: checkById(checks, "default-disabled-gate"),
       jsonBoundary: checkById(checks, "json-only-boundary"),
-      packagedStillFuture: checkById(checks, "packaged-boundary"),
+      packagedGate: checkById(checks, "packaged-boundary"),
     },
   };
   fs.mkdirSync(reportDir, { recursive: true });
@@ -95,7 +96,8 @@ function buildChecks(files, repoRoot) {
         "ERR_AUTOJS6_RHINO_JSON_UNSAFE_RESULT",
         "maximum 32 lines",
         "maximum 8192 UTF-8 bytes",
-        "P12-26 remains responsible for packaged metadata behavior",
+        "P12-26 records packaged metadata behavior as fail-closed",
+        "packaged APK execution remains rejected",
         "verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc",
       ]),
       "P12-25 report must document the explicit gate, provider path, timeout, cleanup, console, JSON-only result, and packaged boundary.",
@@ -293,16 +295,19 @@ function buildChecks(files, repoRoot) {
         includesAll(JSON.stringify(rhinoSurface), [
           "P12-25 adds the explicit experimental Rhino JSON-only execution adapter POC",
           "rhino.run({ experimental: true, source, timeoutMs, args })",
+          "P12-26 records packaged metadata behavior as fail-closed",
           "RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md",
+          "RHINO_SHIM_PACKAGED_METADATA_GATE.md",
           "NodeBridgeRhinoExecutionService.kt",
           "verify-rhino-compat-rhino-json-only-execution-adapter-poc.js",
+          "verify-rhino-compat-rhino-shim-packaged-metadata-gate.js",
           "verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc",
         ]) &&
         includesAll(files.surfaceDocs.text, [
           "provider POC",
           "P12-25 adds",
           "experimental: true",
-          "P12-26 remains",
+          "P12-26 records packaged metadata behavior as fail-closed",
         ]),
       "Phase 12 surface manifest must advance rhino.json_only_shim to provider_poc with P12-25 evidence.",
     ),
@@ -322,11 +327,19 @@ function buildChecks(files, repoRoot) {
     check(
       "packaged-boundary",
       includesAll(files.pocReport.text, [
-        "P12-26 remains responsible for packaged metadata behavior",
-        "without explicit shim metadata",
+        "P12-26 records packaged metadata behavior as fail-closed",
+        "No packaged metadata shape is accepted in Phase 12",
+        "packaged APK execution remains rejected",
       ]) &&
-        /\[ \]\s+P12-26/.test(files.phase12Tasks.text),
-      "P12-25 must not claim packaged metadata support; P12-26 must remain open.",
+        includesAll(files.packagedReport.text, [
+          "Status: P12-26 packaged metadata gate recorded as fail-closed",
+          "packagedSupport.status = unsupported",
+          "metadata may authorize only JSON-only run",
+          "metadata never authorizes install or globals",
+          "therefore packaged execution remains rejected",
+      ]) &&
+        /\[x\]\s+P12-26/.test(files.phase12Tasks.text),
+      "P12-25 must not claim packaged metadata support; P12-26 must record fail-closed packaged rejection.",
     ),
     check(
       "syntax-verifier",

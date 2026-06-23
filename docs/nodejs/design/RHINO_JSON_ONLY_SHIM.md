@@ -2,7 +2,8 @@
 
 Status: S11-26 design and POC gate plan; P12-23 establishes the Phase 12 POC
 gate; P12-24 reserves a disabled runtime facade; P12-25 implements the explicit
-JSON-only execution adapter POC behind `experimental: true`.
+JSON-only execution adapter POC behind `experimental: true`; P12-26 records
+packaged metadata behavior as fail-closed.
 
 ## Decision
 
@@ -153,8 +154,11 @@ runtime enablement:
 
 In either model:
 
-- packaged APKs must opt in through explicit metadata;
+- P12-26 records packaged metadata behavior as fail-closed;
+- No packaged metadata shape is accepted in Phase 12;
+- future packaged APK support must opt in through explicit metadata;
 - missing metadata fails closed;
+- metadata may authorize only JSON-only run, never `install()` or globals;
 - no Android manifest entry, receiver, service, permission, or provider is
   injected only because source text contains `require("rhino")`;
 - package diagnostics must report mixed Rhino/Node execution support and
@@ -214,6 +218,7 @@ A future implementation gate must prove:
 - stdout/stderr capture is bounded and attributed to the Rhino execution id;
 - concurrent runs are bounded, and overflow rejects before creating engines;
 - packaged APKs without explicit shim metadata fail closed;
+- no Phase 12 packaged metadata shape enables the P12-25 POC;
 - diagnostics record mixed-engine runs, denials, timeout, cancellation, and
   cleanup counts.
 
@@ -266,6 +271,18 @@ Java/Android/Rhino wrapper returns, and destroys the `RhinoJavaScriptEngine` in
 the provider `finally` path. This POC does not install Rhino globals into V8,
 does not add `compat.rhino`, and does not promote packaged metadata support.
 
+## P12-26 Packaged Metadata Gate
+
+P12-26 records packaged metadata behavior as fail-closed in
+`docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md`.
+
+No packaged metadata shape is accepted in Phase 12. The provider registry marks
+the `rhino` bridge provider with `packagedSupport.status = unsupported`, and
+packaged APK execution remains rejected until a later phase defines metadata,
+package-builder preflight, packaged APK smoke, and timeout/crash/destroy
+evidence. Any future metadata may authorize only JSON-only run, not
+`install()` or globals.
+
 ## S11-26 Acceptance
 
 - The design fixes a concrete explicit API candidate:
@@ -275,6 +292,7 @@ does not add `compat.rhino`, and does not promote packaged metadata support.
 - Current runtime and type declarations expose the P12-24 disabled
   `require("rhino")` facade plus the P12-25 explicit `experimental: true`
   execution adapter POC; they still do not expose `compat.rhino`, Rhino globals,
-  or packaged metadata behavior.
-- Follow-up P12-26 work must cover packaged metadata before any packaged
-  promotion.
+  or packaged execution support.
+- P12-26 records packaged metadata behavior as fail-closed: no packaged metadata
+  shape is accepted in Phase 12, and any future metadata may authorize only
+  JSON-only run.

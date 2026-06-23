@@ -88,7 +88,7 @@ function buildChecks(files, repoRoot) {
         "path:",
         "P12-24 owns the default-disabled",
         "P12-25 now owns the execution adapter POC",
-        "P12-26 owns",
+        "P12-26 records packaged metadata behavior as fail-closed",
       ]),
       "P12-23 report must establish the POC gate, preserve default non-exposure, and route follow-up tasks.",
     ),
@@ -147,12 +147,13 @@ function buildChecks(files, repoRoot) {
     check(
       "poc-packaged-gate",
       includesAll(files.pocGate.text, [
-        "Packaged support remains fail-closed until P12-26",
+        "Packaged support remains fail-closed after P12-26",
         "APKs without explicit shim metadata cannot execute the shim",
         "Metadata may authorize only JSON-only `run`, not `install()` or globals",
-        "Packaged timeout, crash, cancellation, and destroy behavior require evidence",
+        "No packaged metadata shape is accepted in Phase 12",
+        "Packaged timeout, crash, cancellation, and destroy behavior still require",
       ]),
-      "P12-23 report must leave packaged support fail-closed until P12-26 metadata evidence.",
+      "P12-23 report must leave packaged support fail-closed after the P12-26 rejection gate.",
     ),
     check(
       "s11-design-updated",

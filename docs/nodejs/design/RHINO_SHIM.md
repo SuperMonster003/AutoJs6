@@ -9,7 +9,8 @@ Node. S11-26 fixes the concrete JSON-only run shape in
 [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md), P12-23 records the
 default-disabled Phase 12 POC gate in
 `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`, P12-24 reserves
-the default denial path, and P12-25 implements the explicit adapter POC.
+the default denial path, P12-25 implements the explicit adapter POC, and P12-26
+records the packaged metadata gate as fail-closed.
 
 ## Goal
 
@@ -171,6 +172,12 @@ If a legacy Rhino snippet needs Java access, the snippet may use it inside Rhino
 
 Packaged APKs must not gain a Rhino shim merely because they include Embedded Node.
 
+P12-26 records the current packaged metadata gate as fail-closed. No packaged
+metadata shape is accepted in Phase 12, and the `rhino` provider is published
+with `packagedSupport.status = unsupported`. Packaged APK execution remains
+rejected until a later phase proves metadata preflight, packaged timeout,
+packaged crash containment, and destroy evidence.
+
 Future packaged support must declare:
 
 - whether Rhino runtime classes are packaged
@@ -181,6 +188,8 @@ Future packaged support must declare:
 - how diagnostics report mixed Rhino/Node executions
 
 No packaged manifest entry, permission, or receiver should be injected only because a project uses `require("rhino")` in source text. The packaged metadata must opt in explicitly.
+That future metadata may authorize only JSON-only run; it must not authorize
+`rhino.install()`, `compat.rhino`, or Rhino globals.
 
 ## Errors
 
@@ -197,7 +206,8 @@ P12-24 current behavior is a disabled facade for `require("rhino")`;
 `ERR_AUTOJS6_RHINO_SHIM_DISABLED`, `rhino.install()` throws
 `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, and `require("node:rhino")` remains
 unavailable. P12-25 implements the JSON-only execution adapter POC for explicit
-`experimental: true` requests only.
+`experimental: true` requests only. P12-26 keeps packaged APK support
+fail-closed.
 
 ## Test Gate For Future Implementation
 

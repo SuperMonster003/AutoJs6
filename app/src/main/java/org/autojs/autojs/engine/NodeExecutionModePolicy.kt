@@ -151,6 +151,7 @@ object NodeExecutionModePolicy {
         "input_observer",
         "notifications",
         "ocr",
+        "rhino",
         "sensors",
         "shell",
         "storage",

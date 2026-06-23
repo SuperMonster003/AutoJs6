@@ -953,6 +953,7 @@ tasks.register<Exec>("verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc") {
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-execution-adapter-poc.js")
     inputs.file(scriptFile)
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_SHIM_DISABLED_PATH.md"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
@@ -967,6 +968,8 @@ tasks.register<Exec>("verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc") {
     inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeRhinoExecutionService.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeRuntimeErrorCodes.kt"))
     inputs.file(rootProject.layout.projectDirectory.file("app/src/main/AndroidManifest.xml"))
     inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt"))
@@ -977,6 +980,52 @@ tasks.register<Exec>("verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc") {
     outputs.files(
         nodePhase12ReportDir.map { it.file("rhino-compat-rhino-json-only-execution-adapter-poc-verification.json") },
         nodePhase12ReportDir.map { it.file("rhino-compat-rhino-json-only-execution-adapter-poc-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}
+
+tasks.register<Exec>("verifyNodeRhinoCompatRhinoShimPackagedMetadataGate") {
+    group = "verification"
+    description = "Verifies the Phase 12 Rhino shim packaged metadata rejection gate."
+
+    dependsOn("verifyNodeRhinoCompatRhinoJsonOnlyExecutionAdapterPoc")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-rhino-shim-packaged-metadata-gate.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_SHIM_PACKAGED_METADATA_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_JSON_ONLY_EXECUTION_ADAPTER_POC.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_SHIM_DISABLED_PATH.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_SHIM.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_COMPAT_LOADER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeRhinoExecutionService.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-execution-adapter-poc.js"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-rhino-shim-packaged-metadata-gate-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-rhino-shim-packaged-metadata-gate-verification.md") },
     )
     outputs.upToDateWhen { false }
     workingDir = rootProject.projectDir
