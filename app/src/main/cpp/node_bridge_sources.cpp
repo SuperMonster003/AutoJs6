@@ -8174,6 +8174,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_image_cache = null;
   let __autojs6_limited_images_cache = null;
   let __autojs6_limited_ocr_cache = null;
+  let __autojs6_limited_barcode_cache = null;
   let __autojs6_limited_storage_cache = null;
   let __autojs6_limited_storages_cache = null;
   let __autojs6_limited_database_cache = null;
@@ -9117,6 +9118,7 @@ std::string buildEmbeddedScriptExecutionSource(
       return ["image"];
     }
     if (moduleName === "ocr") return ["ocr", "image"];
+    if (moduleName === "barcode") return ["barcode", "image"];
     if (moduleName === "storage" || moduleName === "storages") return ["storage"];
     if (moduleName === "database" || moduleName === "sqlite") return ["database"];
     if (moduleName === "notifications") return ["notifications"];
@@ -9179,6 +9181,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (text === "notification" || text === "notifications") return "notifications";
     if (text === "sensor" || text === "sensors") return "sensors";
     if (text === "ocr") return "ocr";
+    if (text === "barcode" || text === "qrcode" || text === "qr_code") return "barcode";
     return text;
   }
   function __autojs6_process_permission_manifest_allows(capability) {
@@ -9232,7 +9235,8 @@ std::string buildEmbeddedScriptExecutionSource(
       normalizedScope === "screen_capture" ||
       normalizedScope === "notifications" ||
       normalizedScope === "sensors" ||
-      normalizedScope === "ocr"
+      normalizedScope === "ocr" ||
+      normalizedScope === "barcode"
     ) {
       return __autojs6_process_permission_manifest_allows(normalizedScope);
     }
@@ -9249,7 +9253,8 @@ std::string buildEmbeddedScriptExecutionSource(
       "screen_capture",
       "notifications",
       "sensors",
-      "ocr"
+      "ocr",
+      "barcode"
     ];
     const scopes = Object.create(null);
     scopeNames.forEach(function(scope) {
@@ -20556,6 +20561,266 @@ std::string buildEmbeddedScriptExecutionSource(
       detectTextBounds
     });
     return __autojs6_limited_ocr_cache;
+  }
+  function __autojs6_barcode_bridge_options(options, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_image_timeout_from_options(options, fallbackMs),
+      signal: __autojs6_bridge_signal_from_options(options),
+      permissions: ["barcode", "image"]
+    };
+  }
+  function __autojs6_barcode_format_name(value, apiName) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return Math.trunc(value);
+    }
+    const text = String(value === undefined || value === null ? "" : value)
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+    let normalized = text;
+    if (normalized.indexOf("FORMAT_") === 0) {
+      normalized = normalized.slice("FORMAT_".length);
+    }
+    if (normalized === "PDF417") {
+      normalized = "PDF_417";
+    } else if (normalized === "QRCODE") {
+      normalized = "QR_CODE";
+    }
+    const allowed = [
+      "ALL",
+      "AZTEC",
+      "CODABAR",
+      "CODE_39",
+      "CODE_93",
+      "CODE_128",
+      "DATA_MATRIX",
+      "EAN_8",
+      "EAN_13",
+      "ITF",
+      "PDF_417",
+      "QR_CODE",
+      "UPC_A",
+      "UPC_E"
+    ];
+    if (allowed.indexOf(normalized) < 0) {
+      throw __autojs6_image_invalid_argument_error(
+        "barcode",
+        apiName,
+        "barcode." + apiName + " received an unsupported barcode format."
+      );
+    }
+    return normalized;
+  }
+  function __autojs6_barcode_options(value, apiName) {
+    const input = __autojs6_image_options(value);
+    const output = {};
+    if (input.region !== undefined) {
+      output.region = input.region;
+    }
+    if (input.timeoutMs !== undefined) {
+      output.timeoutMs = input.timeoutMs;
+    }
+    if (input.qrOnly !== undefined) {
+      output.qrOnly = input.qrOnly === true;
+    }
+    const formatInput = input.formats !== undefined ? input.formats : input.format;
+    if (formatInput !== undefined && formatInput !== null) {
+      const formatValues = Array.isArray(formatInput) ? formatInput : [formatInput];
+      if (formatValues.length > 16) {
+        throw __autojs6_image_invalid_argument_error(
+          "barcode",
+          apiName,
+          "barcode." + apiName + " options.formats must contain at most 16 entries."
+        );
+      }
+      output.formats = Object.freeze(formatValues.map(function(formatValue) {
+        return __autojs6_barcode_format_name(formatValue, apiName);
+      }));
+    }
+    if (output.qrOnly && output.formats && output.formats.some(function(format) { return format !== "QR_CODE"; })) {
+      throw __autojs6_image_invalid_argument_error(
+        "barcode",
+        apiName,
+        "barcode." + apiName + " qrOnly mode accepts only QR_CODE format."
+      );
+    }
+    if (output.qrOnly) {
+      output.formats = Object.freeze(["QR_CODE"]);
+    }
+    if (input.maxResults !== undefined) {
+      const maxResults = Number(input.maxResults);
+      if (!Number.isFinite(maxResults) || maxResults < 1 || maxResults > 128) {
+        throw __autojs6_image_invalid_argument_error(
+          "barcode",
+          apiName,
+          "barcode." + apiName + " options.maxResults must be between 1 and 128."
+        );
+      }
+      output.maxResults = Math.trunc(maxResults);
+    }
+    if (input.enableAllPotentialBarcodes !== undefined || input.enableAllPotentialQrCodes !== undefined) {
+      output.enableAllPotentialBarcodes = input.enableAllPotentialBarcodes === true || input.enableAllPotentialQrCodes === true;
+    }
+    return output;
+  }
+  function __autojs6_barcode_deep_freeze_json(value) {
+    if (!value || typeof value !== "object") {
+      return value === undefined ? null : value;
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(value.map(__autojs6_barcode_deep_freeze_json));
+    }
+    const output = {};
+    Object.keys(value).forEach(function(key) {
+      output[key] = __autojs6_barcode_deep_freeze_json(value[key]);
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_barcode_normalize_snapshot(value) {
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+    return __autojs6_barcode_deep_freeze_json(value);
+  }
+  function __autojs6_barcode_normalize_snapshots(value) {
+    const values = Array.isArray(value)
+      ? value
+      : (value && typeof value === "object" && Array.isArray(value.results) ? value.results : []);
+    const results = [];
+    for (let i = 0; i < values.length; i++) {
+      const snapshot = __autojs6_barcode_normalize_snapshot(values[i]);
+      if (snapshot) {
+        results.push(snapshot);
+      }
+    }
+    return Object.freeze(results);
+  }
+  function __autojs6_barcode_recycle_after(handle, promise, options) {
+    const imageModule = __autojs6_limited_image("images");
+    function recycle() {
+      return imageModule.recycle(handle, options).catch(function() {
+        return undefined;
+      });
+    }
+    return Promise.resolve(promise).then(function(result) {
+      return recycle().then(function() { return result; });
+    }, function(error) {
+      return recycle().then(function() { throw error; });
+    });
+  }
+  function __autojs6_limited_barcode() {
+    if (__autojs6_limited_barcode_cache) {
+      return __autojs6_limited_barcode_cache;
+    }
+    function callProvider(methodName, image, options) {
+      const imageHandle = __autojs6_normalize_image_handle(image);
+      if (!imageHandle) {
+        return Promise.reject(__autojs6_image_invalid_argument_error(
+          "barcode",
+          methodName,
+          "barcode." + methodName + " requires an image handle."
+        ));
+      }
+      let detectOptions;
+      const bridgeOptionsSource = __autojs6_image_options(options);
+      try {
+        detectOptions = __autojs6_barcode_options(options, methodName);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "barcode",
+        methodName,
+        [imageHandle, detectOptions],
+        __autojs6_barcode_bridge_options(bridgeOptionsSource, 30000)
+      );
+    }
+    function callBarcode(methodName, image, options) {
+      const imageModule = __autojs6_limited_image("images");
+      const directHandle = __autojs6_normalize_image_handle(image);
+      if (directHandle) {
+        return callProvider(methodName, directHandle, options);
+      }
+      if (typeof image === "string") {
+        let target;
+        try {
+          target = __autojs6_image_relative_text("barcode", methodName, "path", image, false);
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return imageModule.readImage(target, options).then(function(handle) {
+          return __autojs6_barcode_recycle_after(handle, callProvider(methodName, handle, options), options);
+        });
+      }
+      if (image && typeof image === "object") {
+        const type = String(image.type === undefined || image.type === null ? "" : image.type);
+        if (type === "imageHandle") {
+          const imageHandle = __autojs6_normalize_image_handle(image);
+          if (imageHandle) {
+            return callProvider(methodName, imageHandle, options);
+          }
+        }
+        if (type === "path") {
+          let target;
+          try {
+            target = __autojs6_image_relative_text("barcode", methodName, "path", image.path, false);
+          } catch (error) {
+            return Promise.reject(error);
+          }
+          return imageModule.readImage(target, options).then(function(handle) {
+            return __autojs6_barcode_recycle_after(handle, callProvider(methodName, handle, options), options);
+          });
+        }
+        if (type === "capture") {
+          if (image.requireExistingPermission !== true) {
+            return Promise.reject(__autojs6_image_invalid_argument_error(
+              "barcode",
+              methodName,
+              "barcode." + methodName + " capture input requires requireExistingPermission: true."
+            ));
+          }
+          const captureOptions = Object.assign({}, __autojs6_image_options(options), {
+            orientation: image.orientation,
+            requireExistingPermission: true
+          });
+          return imageModule.captureScreen(captureOptions).then(function(handle) {
+            return __autojs6_barcode_recycle_after(handle, callProvider(methodName, handle, options), options);
+          });
+        }
+      }
+      return Promise.reject(__autojs6_image_invalid_argument_error(
+        "barcode",
+        methodName,
+        "barcode." + methodName + " requires a path, capture input, or provider-owned image handle."
+      ));
+    }
+    function detect(image, options) {
+      return callBarcode("detect", image, options).then(__autojs6_barcode_normalize_snapshot);
+    }
+    function detectAll(image, options) {
+      return callBarcode("detectAll", image, options).then(__autojs6_barcode_normalize_snapshots);
+    }
+    function recognizeText(image, options) {
+      return callBarcode("recognizeText", image, options).then(function(value) {
+        return typeof value === "string" ? value : null;
+      });
+    }
+    function recognizeTexts(image, options) {
+      return callBarcode("recognizeTexts", image, options).then(function(value) {
+        if (!Array.isArray(value)) {
+          return Object.freeze([]);
+        }
+        return Object.freeze(value.filter(function(item) { return typeof item === "string"; }));
+      });
+    }
+    __autojs6_limited_barcode_cache = Object.freeze({
+      detect,
+      detectAll,
+      recognizeText,
+      recognizeTexts
+    });
+    return __autojs6_limited_barcode_cache;
   }
   function __autojs6_storage_options(value) {
     return value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -39053,6 +39318,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "ocr") {
       return "ocr";
     }
+    if (name === "barcode") {
+      return "barcode";
+    }
     if (name === "storage") {
       return "storage";
     }
@@ -39349,6 +39617,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "ocr") {
       return __autojs6_limited_ocr();
+    }
+    if (name === "barcode") {
+      return __autojs6_limited_barcode();
     }
     if (name === "storage") {
       return __autojs6_limited_storage("storage");

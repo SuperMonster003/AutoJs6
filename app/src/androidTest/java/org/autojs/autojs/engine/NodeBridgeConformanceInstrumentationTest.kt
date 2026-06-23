@@ -151,6 +151,22 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "saveImage" || method === "recycle") result = null;
                   } else if (moduleName === "ocr") {
                     result = [{ text: "hello", confidence: 0.91, bounds: { left: 1, top: 2, right: 3, bottom: 4 } }];
+                  } else if (moduleName === "barcode") {
+                    const barcodeSnapshot = {
+                      schema: "autojs6-node-barcode-snapshot-v1",
+                      rawValue: "https://example.com",
+                      displayValue: "https://example.com",
+                      format: 256,
+                      formatName: "QR_CODE",
+                      valueType: 8,
+                      valueTypeName: "URL",
+                      boundingBox: { left: 1, top: 2, right: 3, bottom: 4, width: 2, height: 2 },
+                      structured: { payloadType: "url", url: { title: "Example", url: "https://example.com" } }
+                    };
+                    if (method === "detect") result = barcodeSnapshot;
+                    else if (method === "detectAll") result = [barcodeSnapshot];
+                    else if (method === "recognizeText") result = "https://example.com";
+                    else if (method === "recognizeTexts") result = ["https://example.com", "WIFI:T:WPA;S:AutoJs6;P:secret;;"];
                   } else if (moduleName === "storage" || moduleName === "storages") {
                     if (method === "get") result = { found: true, value: { ok: true } };
                     else if (method === "keys") result = ["alpha"];
@@ -228,6 +244,7 @@ class NodeBridgeConformanceInstrumentationTest {
               const image = require("image");
               const images = require("images");
               const ocr = require("ocr");
+              const barcode = require("barcode");
               const storage = require("storage");
               const storages = require("storages");
               const database = require("database");
@@ -251,6 +268,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["image", image],
                 ["images", images],
                 ["ocr", ocr],
+                ["barcode", barcode],
                 ["storage", storage],
                 ["storages", storages],
                 ["database", database],
@@ -276,6 +294,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("image", image, ["captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "getSize", "recycle"]);
               expectExports("images", images, ["captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "getSize", "recycle"]);
               expectExports("ocr", ocr, ["recognize", "recognizeText", "detectTextBounds"]);
+              expectExports("barcode", barcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("storage", storage, ["create", "open"]);
               expectExports("storages", storages, ["create", "open"]);
               expectExports("database", database, ["open"]);
@@ -372,6 +391,12 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(ocrResults[0].bounds.bottom, 4);
               assert.strictEqual(await expectPromise("ocr.recognizeText", ocr.recognizeText(capture, { timeoutMs: 1055 })), "hello");
               assert.strictEqual((await expectPromise("ocr.detectTextBounds", ocr.detectTextBounds(capture, { timeoutMs: 1056 })))[0].bounds.right, 3);
+              const barcodeOne = await expectPromise("barcode.detect", barcode.detect(capture, { formats: ["QR_CODE"], timeoutMs: 1056 }));
+              assert.strictEqual(barcodeOne.rawValue, "https://example.com");
+              assert.strictEqual(barcodeOne.structured.url.url, "https://example.com");
+              assert.strictEqual((await expectPromise("barcode.detectAll", barcode.detectAll(capture, { qrOnly: true, timeoutMs: 1056 })))[0].formatName, "QR_CODE");
+              assert.strictEqual(await expectPromise("barcode.recognizeText", barcode.recognizeText(capture, { timeoutMs: 1056 })), "https://example.com");
+              assert.strictEqual((await expectPromise("barcode.recognizeTexts", barcode.recognizeTexts(capture, { timeoutMs: 1056 }))).length, 2);
               const store = storage.create("settings");
               expectFrozen("storage.store", store);
               expectExports("storage.store", store, ["get", "put", "remove", "clear", "keys", "contains"]);
@@ -492,6 +517,10 @@ class NodeBridgeConformanceInstrumentationTest {
                 "ocr.recognize",
                 "ocr.recognizeText",
                 "ocr.detectTextBounds",
+                "barcode.detect",
+                "barcode.detectAll",
+                "barcode.recognizeText",
+                "barcode.recognizeTexts",
                 "storage.put",
                 "storages.clear",
                 "database.open",
@@ -692,6 +721,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.IMAGE to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
             NodeBridgeModules.IMAGES to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
+            NodeBridgeModules.BARCODE to setOf("detect", "detectAll", "recognizeText", "recognizeTexts"),
             NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.DATABASE to setOf("open", "exec", "run", "get", "all", "transaction", "close"),

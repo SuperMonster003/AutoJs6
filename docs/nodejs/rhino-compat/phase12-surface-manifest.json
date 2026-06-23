@@ -316,30 +316,45 @@
     },
     {
       "id": "barcode.qrcode",
-      "status": "design_locked",
+      "status": "provider_poc",
       "tasks": [
         "P12-27",
         "P12-28",
         "P12-29",
         "P12-30"
       ],
-      "summary": "P12-27 locks the barcode provider v1 JSON-safe schema for future barcode and qrcode compatibility: path, opaque image handle, and existing-permission capture inputs; region, format filter, QR-only mode, JSON barcode snapshots, selected structured payloads, and raw MLKit/Bitmap/ImageWrapper denial are documented. Runtime provider and compat facades remain pending P12-28/P12-29.",
+      "summary": "P12-27 locks the barcode provider v1 JSON-safe schema for future barcode and qrcode compatibility. P12-28 promotes the direct require(\"barcode\") provider POC with barcode capability, provider registry health, fake transport conformance, live ML Kit image-handle gate, timeout/cleanup diagnostics, and JSON barcode snapshots. Rhino compat.barcode and compat.qrcode facades remain pending P12-29.",
       "runtimeSurface": [
-        "barcode",
-        "autojs6:compat.barcode",
-        "autojs6:compat.qrcode"
+        "require(\"barcode\")",
+        "barcode.detect(image, options?)",
+        "barcode.detectAll(image, options?)",
+        "barcode.recognizeText(image, options?)",
+        "barcode.recognizeTexts(image, options?)",
+        "future autojs6:compat.barcode",
+        "future autojs6:compat.qrcode"
       ],
       "evidence": [
+        "app/src/main/cpp/node_bridge_sources.cpp",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBarcodeBridgeInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
+        "docs/nodejs/types/autojs6-node/barcode.d.ts",
         "docs/nodejs/design/BARCODE_PROVIDER_V1.md",
         "docs/nodejs/schemas/barcode_provider_v1.schema.json",
         "docs/nodejs/fixtures/barcode-provider-v1-fixtures.json",
         "docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_CONTRACT.md",
+        "docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_IMPLEMENTATION.md",
         "docs/nodejs/design/RHINO_COMPAT_LOADER.md",
         "docs/nodejs/MIGRATION_FROM_RHINO.md",
         "docs/nodejs/SECURITY_MODEL.md",
         "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
         "tools/nodejs/phase12/verify-rhino-compat-barcode-provider-contract.js",
-        ":app:verifyNodeRhinoCompatBarcodeProviderContract"
+        "tools/nodejs/phase12/verify-rhino-compat-barcode-provider-implementation.js",
+        ":app:verifyNodeRhinoCompatBarcodeProviderContract",
+        ":app:verifyNodeRhinoCompatBarcodeProviderImplementation"
       ]
     },
     {

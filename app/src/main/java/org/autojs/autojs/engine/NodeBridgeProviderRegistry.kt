@@ -122,6 +122,7 @@ object NodeBridgeProviderRegistry {
     private const val FETCH_PROVIDER = "fetch"
     private const val WEBSOCKET_PROVIDER = "websocket"
     private const val OCR_PROVIDER = "ocr"
+    private const val BARCODE_PROVIDER = "barcode"
     private const val STORAGE_PROVIDER = "storage"
     private const val DATABASE_PROVIDER = "database"
     private const val NOTIFICATIONS_PROVIDER = "notifications"
@@ -155,6 +156,12 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.OCR),
             capabilities = listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
             packagedSupport = packagedProviderDependent("requires device OCR engine availability and packaged image-handle assets"),
+        ),
+        provider(
+            id = BARCODE_PROVIDER,
+            modules = listOf(NodeBridgeModules.BARCODE),
+            capabilities = listOf(NodeBridgePermissionManifest.BARCODE, NodeBridgePermissionManifest.IMAGE),
+            packagedSupport = packagedProviderDependent("requires device barcode engine availability and packaged image-handle assets; capture input remains permission-gated"),
         ),
         provider(
             id = STORAGE_PROVIDER,
@@ -318,6 +325,7 @@ object NodeBridgeProviderRegistry {
             NodeBridgeProviderStatus.UNAVAILABLE
         }
         OCR_PROVIDER -> if (mlKitOcrAvailable()) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
+        BARCODE_PROVIDER -> if (mlKitBarcodeAvailable()) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
@@ -336,6 +344,7 @@ object NodeBridgeProviderRegistry {
 
     private fun androidDetails(id: String, context: Context): Map<String, String> = when (id) {
         OCR_PROVIDER -> ocrDetails(context)
+        BARCODE_PROVIDER -> barcodeDetails(context)
         IMAGE_PROVIDER -> linkedMapOf(
             "liveMethods" to "readImage,recycle",
             "blockedMethods" to "captureScreen,saveImage,clip,resize,grayscale,threshold,findImage,matchTemplate,findColor,findMultiColors",
@@ -426,6 +435,28 @@ object NodeBridgeProviderRegistry {
         return runCatching {
             Class.forName("com.google.mlkit.vision.text.TextRecognition")
             Class.forName("com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions")
+        }.isSuccess
+    }
+
+    private fun barcodeDetails(context: Context): Map<String, String> {
+        return linkedMapOf(
+            "defaultEngine" to "mlkit-barcode",
+            "mlkitAvailable" to mlKitBarcodeAvailable().toString(),
+            "liveMethods" to "detect,detectAll,recognizeText,recognizeTexts",
+            "inputModes" to "providerImageHandle,pathViaTemporaryImageHandle,captureExistingPermission",
+            "capability" to NodeBridgePermissionManifest.BARCODE,
+            "imageCapability" to NodeBridgePermissionManifest.IMAGE,
+            "captureCapability" to NodeBridgePermissionManifest.SCREEN_CAPTURE,
+            "qrcodePolicy" to "P12-29 compat.qrcode must force QR_CODE over this provider",
+            "statusReason" to "ML Kit barcode provider is exposed through JSON-only snapshots and provider-owned image handles",
+        )
+    }
+
+    private fun mlKitBarcodeAvailable(): Boolean {
+        return runCatching {
+            Class.forName("com.google.mlkit.vision.barcode.BarcodeScanning")
+            Class.forName("com.google.mlkit.vision.barcode.BarcodeScannerOptions")
+            Class.forName("com.google.mlkit.vision.barcode.common.Barcode")
         }.isSuccess
     }
 

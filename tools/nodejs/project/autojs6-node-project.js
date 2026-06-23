@@ -17,6 +17,7 @@ const KNOWN_CAPABILITIES = new Set([
   "screen_capture",
   "image",
   "ocr",
+  "barcode",
   "storage",
   "notifications",
   "sensors",
@@ -39,7 +40,9 @@ const CAPABILITY_ALIASES = new Map([
   ["engine.exec", "engines.exec"],
   ["shell:root", "shell.root"],
   ["storages", "storage"],
-  ["java", "java_interop"]
+  ["java", "java_interop"],
+  ["qrcode", "barcode"],
+  ["qr_code", "barcode"]
 ]);
 
 const SUPPORTED_ENTRY_EXTENSIONS = new Set([".js", ".cjs", ".mjs", ".ts", ".cts", ".mts"]);
@@ -133,6 +136,7 @@ const BRIDGE_MODULE_CAPABILITIES = new Map([
   ["image", "image"],
   ["images", "image"],
   ["ocr", "ocr"],
+  ["barcode", "barcode"],
   ["storage", "storage"],
   ["storages", "storage"],
   ["notifications", "notifications"],
@@ -700,7 +704,7 @@ function validatePermissions(projectJson, packageJson, issues) {
           "UNKNOWN_PERMISSION",
           label,
           "Unknown Node bridge capability '" + item + "'.",
-          "Use a known capability such as toast, app, app.launch, image, ocr, network, storage, shell, or plugin.<id>."
+          "Use a known capability such as toast, app, app.launch, image, ocr, barcode, network, storage, shell, or plugin.<id>."
         );
       }
     });

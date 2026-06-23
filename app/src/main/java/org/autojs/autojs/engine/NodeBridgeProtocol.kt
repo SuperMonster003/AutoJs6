@@ -39,7 +39,10 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.barcode.common.Barcode as MLKitBarcode
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
@@ -558,6 +561,7 @@ object NodeBridgeModules {
     const val IMAGE = "image"
     const val IMAGES = "images"
     const val OCR = "ocr"
+    const val BARCODE = "barcode"
     const val STORAGE = "storage"
     const val STORAGES = "storages"
     const val DATABASE = "database"
@@ -613,6 +617,7 @@ object NodeBridgeModules {
         "recycle",
     )
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
+    val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
     val storageModules = setOf(STORAGE, STORAGES)
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
     val databaseModules = setOf(DATABASE, SQLITE)
@@ -641,6 +646,7 @@ object NodeBridgeModules {
         IMAGE to imageMethods,
         IMAGES to imageMethods,
         OCR to ocrMethods,
+        BARCODE to barcodeMethods,
         STORAGE to storageMethods,
         STORAGES to storageMethods,
         DATABASE to databaseMethods,
@@ -711,6 +717,8 @@ class AndroidNodeBridgeCapabilityProvider(
     private val imageHandles = ConcurrentHashMap<String, ControlledImageHandle>()
     private val ocrOperations = ConcurrentHashMap<String, ControlledOcrOperation>()
     private val ocrDiagnostics = ControlledOcrDiagnostics()
+    private val barcodeOperations = ConcurrentHashMap<String, ControlledBarcodeOperation>()
+    private val barcodeDiagnostics = ControlledBarcodeDiagnostics()
     private val ocrRecognizerDelegate = lazy {
         TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
     }
@@ -768,6 +776,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, auditedCallback)
             request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, auditedCallback)
             request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, auditedCallback)
+            request.module == NodeBridgeModules.BARCODE && request.method in NodeBridgeModules.barcodeMethods -> dispatchBarcode(request, auditedCallback)
             request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, auditedCallback)
             request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, auditedCallback)
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, auditedCallback)
@@ -792,8 +801,10 @@ class AndroidNodeBridgeCapabilityProvider(
         putAll(networkDiagnostics.nativeValues())
         putAll(websocketDiagnostics.nativeValues())
         putAll(ocrDiagnostics.nativeValues())
+        putAll(barcodeDiagnostics.nativeValues())
         put("embedded_script.image_active_handle_count", imageHandles.size.toString())
         put("embedded_script.ocr_active_operation_count", ocrOperations.size.toString())
+        put("embedded_script.barcode_active_operation_count", barcodeOperations.size.toString())
         put("embedded_script.database_active_handle_count", databaseHandles.size.toString())
         put("embedded_script.work_manager_registered_task_count", workManagerTasks.size.toString())
         put("embedded_script.overlay_active_session_count", overlaySessionIds.size.toString())
@@ -823,6 +834,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "fetch" to networkCalls.size,
                 "websocket" to websocketSessions.size,
                 "ocr" to ocrOperations.size,
+                "barcode" to barcodeOperations.size,
                 "image" to imageHandles.size,
                 "database" to databaseHandles.size,
                 "notifications" to notificationHandles.size,
@@ -841,8 +853,11 @@ class AndroidNodeBridgeCapabilityProvider(
         networkDiagnostics.recordServiceDestroyCancellation(networkCalls.size)
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
         ocrDiagnostics.recordServiceDestroyCancellation(ocrOperations.size)
+        barcodeDiagnostics.recordServiceDestroyCancellation(barcodeOperations.size)
         ocrOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
         ocrOperations.clear()
+        barcodeOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
+        barcodeOperations.clear()
         databaseDestroyed.set(true)
         databaseExecutor.shutdownNow()
         resourceRegistry.closeAll(destroyReason)
@@ -1712,6 +1727,201 @@ class AndroidNodeBridgeCapabilityProvider(
                                 module = request.module,
                                 method = request.method,
                                 stack = error.stackTraceToString(),
+                            ),
+                        ),
+                    )
+                }
+            }
+    }
+
+    private fun dispatchBarcode(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val args = request.argsArray()
+        val imageArg = args.optJSONObject(0)
+        val options = args.optJSONObject(1) ?: JSONObject()
+        val imageId = imageArg?.optNonBlankString("__autojs6ImageHandle")
+            ?: imageArg?.optNonBlankString("id")
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 barcode requires an existing provider-owned image handle.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val handle = imageHandles[imageId]
+            ?: return callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = "AutoJs6 barcode image handle is not active or has been recycled: $imageId",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        val barcodeOptions = runCatching { ControlledBarcodeOptions.fromOptions(options) }.getOrElse { error ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 barcode options are invalid.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val barcodeInput = runCatching { handle.barcodeBitmap(options) }.getOrElse { error ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 barcode region is invalid.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+            return
+        }
+        val scanner = runCatching { BarcodeScanning.getClient(barcodeOptions.scannerOptions()) }.getOrElse { error ->
+            barcodeInput.recycleIfNeeded()
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.providerFailed(
+                        message = error.message ?: error.javaClass.name,
+                        module = request.module,
+                        method = request.method,
+                        stack = error.stackTraceToString(),
+                        code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                    ),
+                ),
+            )
+            return
+        }
+        val operationResource = resourceRegistry.register(
+            type = NodeBridgeResourceType.BARCODE_OPERATION,
+            id = "barcode-${request.id}",
+            metadata = mapOf(
+                "method" to request.method,
+                "image" to imageId,
+            ),
+        ) {
+            barcodeInput.recycleIfNeeded()
+            runCatching { scanner.close() }
+        }
+        val operation = ControlledBarcodeOperation(resource = operationResource)
+        barcodeOperations[request.id] = operation
+        barcodeDiagnostics.recordDispatch()
+        val timeoutMs = request.timeoutMs.coerceIn(1L, MAX_TIMEOUT_MS)
+        val timeoutRunnable = Runnable {
+            if (operation.finish()) {
+                barcodeOperations.remove(request.id)
+                operation.resource.close("timeout:$timeoutMs")
+                barcodeDiagnostics.recordFailure()
+                callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.timeout(request.module, request.method),
+                    ),
+                )
+            }
+        }
+        operation.timeoutRunnable = timeoutRunnable
+        mainHandler.postDelayed(timeoutRunnable, timeoutMs)
+
+        val task = runCatching { scanner.process(InputImage.fromBitmap(barcodeInput.bitmap, 0)) }
+            .getOrElse { error ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    barcodeOperations.remove(request.id)
+                    operation.resource.close("failed")
+                    barcodeDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = error.message ?: error.javaClass.name,
+                                module = request.module,
+                                method = request.method,
+                                stack = error.stackTraceToString(),
+                                code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                            ),
+                        ),
+                    )
+                }
+                return
+            }
+        task
+            .addOnSuccessListener { barcodes ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    barcodeOperations.remove(request.id)
+                    operation.resource.close("success")
+                    val resultJson = runCatching {
+                        barcodes.toBarcodeResponseJson(
+                            method = request.method,
+                            maxResults = barcodeOptions.maxResults,
+                            offsetX = barcodeInput.offsetX,
+                            offsetY = barcodeInput.offsetY,
+                        )
+                    }.getOrElse { error ->
+                        barcodeDiagnostics.recordFailure()
+                        callback(
+                            NodeBridgeResponse.failure(
+                                request.id,
+                                NodeBridgeError.providerFailed(
+                                    message = error.message ?: error.javaClass.name,
+                                    module = request.module,
+                                    method = request.method,
+                                    stack = error.stackTraceToString(),
+                                    code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                                ),
+                            ),
+                        )
+                        return@addOnSuccessListener
+                    }
+                    callback(NodeBridgeResponse.success(request.id, resultJson))
+                }
+            }
+            .addOnCanceledListener {
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    barcodeOperations.remove(request.id)
+                    operation.resource.close("cancelled")
+                    barcodeDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = "AutoJs6 barcode provider cancelled the scan task.",
+                                module = request.module,
+                                method = request.method,
+                                code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                            ),
+                        ),
+                    )
+                }
+            }
+            .addOnFailureListener { error ->
+                if (operation.finish()) {
+                    mainHandler.removeCallbacks(timeoutRunnable)
+                    barcodeOperations.remove(request.id)
+                    operation.resource.close("failed")
+                    barcodeDiagnostics.recordFailure()
+                    callback(
+                        NodeBridgeResponse.failure(
+                            request.id,
+                            NodeBridgeError.providerFailed(
+                                message = error.message ?: error.javaClass.name,
+                                module = request.module,
+                                method = request.method,
+                                stack = error.stackTraceToString(),
+                                code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
                             ),
                         ),
                     )
@@ -5112,15 +5322,19 @@ private data class ControlledImageHandle(
         .put("width", bitmap.width)
         .put("height", bitmap.height)
 
-    fun ocrBitmap(options: JSONObject): ControlledOcrInput {
+    fun ocrBitmap(options: JSONObject): ControlledOcrInput = processingBitmap(options, "OCR")
+
+    fun barcodeBitmap(options: JSONObject): ControlledOcrInput = processingBitmap(options, "barcode")
+
+    private fun processingBitmap(options: JSONObject, apiName: String): ControlledOcrInput {
         check(!bitmap.isRecycled) { "AutoJs6 image handle has been recycled: $id" }
-        val region = ControlledOcrRegion.fromOptions(options)
+        val region = ControlledOcrRegion.fromOptions(options, apiName)
             ?: return ControlledOcrInput(bitmap = bitmap)
         require(region.x >= 0 && region.y >= 0 && region.width > 0 && region.height > 0) {
-            "AutoJs6 OCR region must use non-negative x/y and positive width/height."
+            "AutoJs6 $apiName region must use non-negative x/y and positive width/height."
         }
         require(region.x + region.width <= bitmap.width && region.y + region.height <= bitmap.height) {
-            "AutoJs6 OCR region must stay inside the image bounds."
+            "AutoJs6 $apiName region must stay inside the image bounds."
         }
         return ControlledOcrInput(
             bitmap = Bitmap.createBitmap(bitmap, region.x, region.y, region.width, region.height),
@@ -5151,32 +5365,32 @@ private data class ControlledOcrRegion(
     val height: Int,
 ) {
     companion object {
-        fun fromOptions(options: JSONObject): ControlledOcrRegion? {
+        fun fromOptions(options: JSONObject, apiName: String = "OCR"): ControlledOcrRegion? {
             if (!options.has("region") || options.isNull("region")) {
                 return null
             }
             val value = options.opt("region")
             return when (value) {
                 is JSONObject -> ControlledOcrRegion(
-                    x = finiteInt(value.opt("x"), "region.x"),
-                    y = finiteInt(value.opt("y"), "region.y"),
-                    width = finiteInt(value.opt("width"), "region.width"),
-                    height = finiteInt(value.opt("height"), "region.height"),
+                    x = finiteInt(value.opt("x"), "region.x", apiName),
+                    y = finiteInt(value.opt("y"), "region.y", apiName),
+                    width = finiteInt(value.opt("width"), "region.width", apiName),
+                    height = finiteInt(value.opt("height"), "region.height", apiName),
                 )
                 is JSONArray -> {
-                    require(value.length() >= 4) { "AutoJs6 OCR region array must contain x, y, width, and height." }
+                    require(value.length() >= 4) { "AutoJs6 $apiName region array must contain x, y, width, and height." }
                     ControlledOcrRegion(
-                        x = finiteInt(value.opt(0), "region[0]"),
-                        y = finiteInt(value.opt(1), "region[1]"),
-                        width = finiteInt(value.opt(2), "region[2]"),
-                        height = finiteInt(value.opt(3), "region[3]"),
+                        x = finiteInt(value.opt(0), "region[0]", apiName),
+                        y = finiteInt(value.opt(1), "region[1]", apiName),
+                        width = finiteInt(value.opt(2), "region[2]", apiName),
+                        height = finiteInt(value.opt(3), "region[3]", apiName),
                     )
                 }
-                else -> throw IllegalArgumentException("AutoJs6 OCR region must be an object or array.")
+                else -> throw IllegalArgumentException("AutoJs6 $apiName region must be an object or array.")
             }
         }
 
-        private fun finiteInt(value: Any?, label: String): Int {
+        private fun finiteInt(value: Any?, label: String, apiName: String): Int {
             val number = when (value) {
                 is Int -> value.toDouble()
                 is Long -> value.toDouble()
@@ -5184,7 +5398,7 @@ private data class ControlledOcrRegion(
                 is String -> value.toDoubleOrNull()
                 else -> null
             }
-            require(number != null && number.isFinite()) { "AutoJs6 OCR $label must be a finite number." }
+            require(number != null && number.isFinite()) { "AutoJs6 $apiName $label must be a finite number." }
             return number.toInt()
         }
     }
@@ -5256,6 +5470,376 @@ private fun Text.toOcrResultsJson(offsetX: Int, offsetY: Int): String {
     }
     return results.toString()
 }
+
+private data class ControlledBarcodeOptions(
+    val formats: IntArray,
+    val maxResults: Int,
+    val enableAllPotentialBarcodes: Boolean,
+) {
+    fun scannerOptions(): BarcodeScannerOptions {
+        val builder = BarcodeScannerOptions.Builder()
+        val effectiveFormats = formats
+            .filter { it != MLKitBarcode.FORMAT_UNKNOWN }
+            .distinct()
+        if (effectiveFormats.isEmpty() || effectiveFormats.contains(MLKitBarcode.FORMAT_ALL_FORMATS)) {
+            builder.setBarcodeFormats(MLKitBarcode.FORMAT_ALL_FORMATS)
+        } else {
+            builder.setBarcodeFormats(effectiveFormats.first(), *effectiveFormats.drop(1).toIntArray())
+        }
+        if (enableAllPotentialBarcodes) {
+            builder.enableAllPotentialBarcodes()
+        }
+        return builder.build()
+    }
+
+    companion object {
+        private const val MAX_RESULTS = 128
+        private const val MAX_FORMATS = 16
+
+        fun fromOptions(options: JSONObject): ControlledBarcodeOptions {
+            val qrOnly = options.optBoolean("qrOnly", false)
+            val parsedFormats = parseFormats(options)
+            if (qrOnly && parsedFormats.any { it != MLKitBarcode.FORMAT_QR_CODE }) {
+                throw IllegalArgumentException("AutoJs6 barcode qrOnly mode accepts only QR_CODE format.")
+            }
+            val effectiveFormats = if (qrOnly) {
+                intArrayOf(MLKitBarcode.FORMAT_QR_CODE)
+            } else {
+                parsedFormats
+            }
+            return ControlledBarcodeOptions(
+                formats = effectiveFormats,
+                maxResults = parseMaxResults(options),
+                enableAllPotentialBarcodes = options.optBoolean("enableAllPotentialBarcodes", false),
+            )
+        }
+
+        private fun parseFormats(options: JSONObject): IntArray {
+            val rawFormats = when {
+                options.has("formats") && !options.isNull("formats") -> options.opt("formats")
+                options.has("format") && !options.isNull("format") -> options.opt("format")
+                else -> return intArrayOf()
+            }
+            val values = when (rawFormats) {
+                is JSONArray -> (0 until rawFormats.length()).map { index -> rawFormats.opt(index) }
+                else -> listOf(rawFormats)
+            }
+            require(values.size <= MAX_FORMATS) { "AutoJs6 barcode formats must contain at most $MAX_FORMATS entries." }
+            return values
+                .map(::parseFormat)
+                .distinct()
+                .toIntArray()
+        }
+
+        private fun parseFormat(value: Any?): Int {
+            val format = when (value) {
+                is Int -> value
+                is Long -> value.toInt()
+                is Number -> {
+                    val number = value.toDouble()
+                    require(number.isFinite()) { "AutoJs6 barcode format number must be finite." }
+                    number.toInt()
+                }
+                is String -> {
+                    val name = normalizeFormatName(value)
+                    BARCODE_FORMATS_BY_NAME[name]
+                        ?: throw IllegalArgumentException("AutoJs6 barcode format is not supported: $value")
+                }
+                else -> throw IllegalArgumentException("AutoJs6 barcode format must be a number or string.")
+            }
+            require(format == MLKitBarcode.FORMAT_ALL_FORMATS || BARCODE_FORMAT_NAMES_BY_VALUE.containsKey(format)) {
+                "AutoJs6 barcode format is not supported: $value"
+            }
+            return format
+        }
+
+        private fun parseMaxResults(options: JSONObject): Int {
+            if (!options.has("maxResults") || options.isNull("maxResults")) {
+                return MAX_RESULTS
+            }
+            val value = options.opt("maxResults")
+            val number = when (value) {
+                is Int -> value.toDouble()
+                is Long -> value.toDouble()
+                is Number -> value.toDouble()
+                is String -> value.toDoubleOrNull()
+                else -> null
+            }
+            require(number != null && number.isFinite()) { "AutoJs6 barcode maxResults must be a finite number." }
+            val maxResults = number.toInt()
+            require(maxResults in 1..MAX_RESULTS) { "AutoJs6 barcode maxResults must be between 1 and $MAX_RESULTS." }
+            return maxResults
+        }
+
+        private fun normalizeFormatName(value: String): String {
+            val normalized = value
+                .trim()
+                .uppercase(Locale.US)
+                .replace(Regex("[^A-Z0-9]+"), "_")
+                .trim('_')
+            return when {
+                normalized == "PDF417" -> "PDF_417"
+                normalized == "QRCODE" -> "QR_CODE"
+                normalized.startsWith("FORMAT_") -> normalizeFormatName(normalized.removePrefix("FORMAT_"))
+                else -> normalized
+            }
+        }
+    }
+}
+
+private class ControlledBarcodeOperation(
+    val resource: NodeBridgeResourceHandle,
+) {
+    private val completed = AtomicBoolean(false)
+
+    @Volatile
+    var timeoutRunnable: Runnable? = null
+
+    fun finish(): Boolean = completed.compareAndSet(false, true)
+
+    fun cancel(reason: String) {
+        if (finish()) {
+            resource.close(reason)
+        }
+    }
+}
+
+private class ControlledBarcodeDiagnostics {
+    private val dispatchCount = AtomicInteger(0)
+    private val failedCount = AtomicInteger(0)
+    private val serviceDestroyCancellationCount = AtomicInteger(0)
+
+    fun recordDispatch() {
+        dispatchCount.incrementAndGet()
+    }
+
+    fun recordFailure() {
+        failedCount.incrementAndGet()
+    }
+
+    fun recordServiceDestroyCancellation(count: Int) {
+        if (count > 0) {
+            serviceDestroyCancellationCount.addAndGet(count)
+        }
+    }
+
+    fun nativeValues(): Map<String, String> = linkedMapOf(
+        "embedded_script.barcode_live_dispatch_count" to dispatchCount.get().toString(),
+        "embedded_script.barcode_live_dispatch_failed_count" to failedCount.get().toString(),
+        "embedded_script.barcode_service_destroy_cancel_count" to serviceDestroyCancellationCount.get().toString(),
+    )
+}
+
+private fun List<MLKitBarcode>.toBarcodeResponseJson(method: String, maxResults: Int, offsetX: Int, offsetY: Int): String {
+    val snapshots = take(maxResults).map { barcode -> barcode.toBarcodeSnapshotJson(offsetX, offsetY) }
+    return when (method) {
+        "detect" -> snapshots.firstOrNull()?.toString() ?: "null"
+        "detectAll" -> JSONArray().apply { snapshots.forEach(::put) }.toString()
+        "recognizeText" -> barcodeJsonStringOrNull(snapshots.firstOrNull()?.optStringOrNull("rawValue"))
+        "recognizeTexts" -> JSONArray().apply {
+            snapshots.mapNotNull { snapshot -> snapshot.optStringOrNull("rawValue") }.forEach(::put)
+        }.toString()
+        else -> "null"
+    }
+}
+
+private fun MLKitBarcode.toBarcodeSnapshotJson(offsetX: Int, offsetY: Int): JSONObject {
+    val snapshot = JSONObject()
+        .put("schema", BARCODE_SNAPSHOT_SCHEMA)
+        .put("rawValue", barcodeJsonNullableString(rawValue))
+        .put("displayValue", barcodeJsonNullableString(displayValue))
+        .put("format", format)
+        .put("formatName", BARCODE_FORMAT_NAMES_BY_VALUE[format] ?: "ALL")
+        .put("valueType", valueType)
+        .put("valueTypeName", BARCODE_VALUE_TYPE_NAMES_BY_VALUE[valueType] ?: "UNKNOWN")
+    boundingBox?.let { bounds ->
+        snapshot.put(
+            "boundingBox",
+            JSONObject()
+                .put("left", bounds.left + offsetX)
+                .put("top", bounds.top + offsetY)
+                .put("right", bounds.right + offsetX)
+                .put("bottom", bounds.bottom + offsetY)
+                .put("width", bounds.width())
+                .put("height", bounds.height()),
+        )
+    }
+    cornerPoints?.takeIf { it.isNotEmpty() }?.let { points ->
+        snapshot.put(
+            "cornerPoints",
+            JSONArray().apply {
+                points.take(8).forEach { point ->
+                    put(
+                        JSONObject()
+                            .put("x", point.x + offsetX)
+                            .put("y", point.y + offsetY),
+                    )
+                }
+            },
+        )
+    }
+    structuredPayloadJson()?.let { structured -> snapshot.put("structured", structured) }
+    return snapshot
+}
+
+private fun MLKitBarcode.structuredPayloadJson(): JSONObject? = when (valueType) {
+    MLKitBarcode.TYPE_EMAIL -> email?.let { payload("email").put("email", it.toJsonObject()) }
+    MLKitBarcode.TYPE_PHONE -> phone?.let { payload("phone").put("phone", it.toJsonObject()) }
+    MLKitBarcode.TYPE_SMS -> sms?.let {
+        payload("sms").put(
+            "sms",
+            JSONObject()
+                .putNullableString("message", it.message)
+                .putNullableString("phoneNumber", it.phoneNumber),
+        )
+    }
+    MLKitBarcode.TYPE_URL -> url?.let {
+        payload("url").put(
+            "url",
+            JSONObject()
+                .putNullableString("title", it.title)
+                .putNullableString("url", it.url),
+        )
+    }
+    MLKitBarcode.TYPE_WIFI -> wifi?.let {
+        payload("wifi").put(
+            "wifi",
+            JSONObject()
+                .putNullableString("ssid", it.ssid)
+                .putNullableString("password", it.password)
+                .put("encryptionType", it.encryptionType),
+        )
+    }
+    MLKitBarcode.TYPE_GEO -> geoPoint?.let {
+        payload("geoPoint").put(
+            "geoPoint",
+            JSONObject()
+                .put("lat", it.lat)
+                .put("lng", it.lng),
+        )
+    }
+    MLKitBarcode.TYPE_CONTACT_INFO -> contactInfo?.let { payload("contactInfo").put("contactInfo", it.toJsonObject()) }
+    MLKitBarcode.TYPE_CALENDAR_EVENT -> calendarEvent?.let { payload("calendarEvent").put("calendarEvent", it.toJsonObject()) }
+    MLKitBarcode.TYPE_DRIVER_LICENSE -> driverLicense?.let { payload("driverLicense").put("driverLicense", it.toJsonObject()) }
+    else -> null
+}
+
+private fun MLKitBarcode.Email.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("address", address)
+    .putNullableString("subject", subject)
+    .putNullableString("body", body)
+    .put("type", type)
+
+private fun MLKitBarcode.Phone.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("number", number)
+    .put("type", type)
+
+private fun MLKitBarcode.ContactInfo.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("organization", organization)
+    .putNullableString("title", title)
+    .putNullableString("name", name?.formattedName)
+    .put("phones", JSONArray().apply { phones.orEmpty().take(16).forEach { put(it.toJsonObject()) } })
+    .put("emails", JSONArray().apply { emails.orEmpty().take(16).forEach { put(it.toJsonObject()) } })
+    .put("urls", JSONArray().apply { urls.orEmpty().take(16).forEach { put(it) } })
+    .put(
+        "addresses",
+        JSONArray().apply {
+            addresses.orEmpty().take(16).mapNotNull { address ->
+                address.addressLines.joinToString("\n").takeIf { it.isNotBlank() }
+            }.forEach { put(it) }
+        },
+    )
+
+private fun MLKitBarcode.CalendarEvent.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("summary", summary)
+    .putNullableString("description", description)
+    .putNullableString("location", location)
+    .putNullableString("organizer", organizer)
+    .putNullableString("status", status)
+    .putNullableString("start", start?.rawValue)
+    .putNullableString("end", end?.rawValue)
+
+private fun MLKitBarcode.DriverLicense.toJsonObject(): JSONObject = JSONObject()
+    .putNullableString("documentType", documentType)
+    .putNullableString("firstName", firstName)
+    .putNullableString("middleName", middleName)
+    .putNullableString("lastName", lastName)
+    .putNullableString("licenseNumber", licenseNumber)
+    .putNullableString("gender", gender)
+    .putNullableString("birthDate", birthDate)
+    .putNullableString("expiryDate", expiryDate)
+    .putNullableString("issuingDate", issueDate)
+    .putNullableString("issuingCountry", issuingCountry)
+    .putNullableString("addressStreet", addressStreet)
+    .putNullableString("addressCity", addressCity)
+    .putNullableString("addressState", addressState)
+    .putNullableString("addressZip", addressZip)
+
+private fun payload(payloadType: String): JSONObject = JSONObject().put("payloadType", payloadType)
+
+private fun JSONObject.putNullableString(name: String, value: String?): JSONObject {
+    if (value != null) {
+        put(name, value)
+    }
+    return this
+}
+
+private fun JSONObject.optStringOrNull(name: String): String? {
+    return if (has(name) && !isNull(name)) optString(name) else null
+}
+
+private fun barcodeJsonNullableString(value: String?): Any {
+    if (value == null) {
+        return JSONObject.NULL
+    }
+    require(value.toByteArray(Charsets.UTF_8).size <= BARCODE_MAX_RAW_VALUE_BYTES) {
+        "AutoJs6 barcode raw/display value exceeded $BARCODE_MAX_RAW_VALUE_BYTES bytes."
+    }
+    return value
+}
+
+private fun barcodeJsonStringOrNull(value: String?): String = value?.let { JSONObject.quote(it) } ?: "null"
+
+private const val BARCODE_SNAPSHOT_SCHEMA = "autojs6-node-barcode-snapshot-v1"
+private const val BARCODE_MAX_RAW_VALUE_BYTES = 8192
+
+private val BARCODE_FORMATS_BY_NAME: Map<String, Int> = linkedMapOf(
+    "ALL" to MLKitBarcode.FORMAT_ALL_FORMATS,
+    "AZTEC" to MLKitBarcode.FORMAT_AZTEC,
+    "CODABAR" to MLKitBarcode.FORMAT_CODABAR,
+    "CODE_39" to MLKitBarcode.FORMAT_CODE_39,
+    "CODE_93" to MLKitBarcode.FORMAT_CODE_93,
+    "CODE_128" to MLKitBarcode.FORMAT_CODE_128,
+    "DATA_MATRIX" to MLKitBarcode.FORMAT_DATA_MATRIX,
+    "EAN_8" to MLKitBarcode.FORMAT_EAN_8,
+    "EAN_13" to MLKitBarcode.FORMAT_EAN_13,
+    "ITF" to MLKitBarcode.FORMAT_ITF,
+    "PDF_417" to MLKitBarcode.FORMAT_PDF417,
+    "QR_CODE" to MLKitBarcode.FORMAT_QR_CODE,
+    "UPC_A" to MLKitBarcode.FORMAT_UPC_A,
+    "UPC_E" to MLKitBarcode.FORMAT_UPC_E,
+)
+
+private val BARCODE_FORMAT_NAMES_BY_VALUE: Map<Int, String> = BARCODE_FORMATS_BY_NAME
+    .filterKeys { it != "ALL" }
+    .entries
+    .associate { (name, value) -> value to name }
+
+private val BARCODE_VALUE_TYPE_NAMES_BY_VALUE: Map<Int, String> = mapOf(
+    MLKitBarcode.TYPE_UNKNOWN to "UNKNOWN",
+    MLKitBarcode.TYPE_CONTACT_INFO to "CONTACT_INFO",
+    MLKitBarcode.TYPE_EMAIL to "EMAIL",
+    MLKitBarcode.TYPE_ISBN to "ISBN",
+    MLKitBarcode.TYPE_PHONE to "PHONE",
+    MLKitBarcode.TYPE_PRODUCT to "PRODUCT",
+    MLKitBarcode.TYPE_SMS to "SMS",
+    MLKitBarcode.TYPE_TEXT to "TEXT",
+    MLKitBarcode.TYPE_URL to "URL",
+    MLKitBarcode.TYPE_WIFI to "WIFI",
+    MLKitBarcode.TYPE_GEO to "GEO",
+    MLKitBarcode.TYPE_CALENDAR_EVENT to "CALENDAR_EVENT",
+    MLKitBarcode.TYPE_DRIVER_LICENSE to "DRIVER_LICENSE",
+)
 
 private data class ControlledNotificationDescriptor(
     val id: Int,

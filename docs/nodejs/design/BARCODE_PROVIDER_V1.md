@@ -4,8 +4,12 @@ Status: P12-27 design-locked contract for a future controlled `barcode`
 bridge provider and later `compat.barcode` / `compat.qrcode` facades.
 
 P12-27 does not expose a runtime module. It locks the JSON-safe request and
-result shape that P12-28 must implement before P12-29 can add Rhino-style
-compat facades.
+result shape that P12-28 implements before P12-29 can add Rhino-style compat
+facades.
+
+Implementation note: P12-28 exposes the direct `require("barcode")` provider
+POC over this contract. `compat.barcode` and `compat.qrcode` remain pending
+P12-29.
 
 ## Decision
 

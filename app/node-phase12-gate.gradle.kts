@@ -1075,3 +1075,50 @@ tasks.register<Exec>("verifyNodeRhinoCompatBarcodeProviderContract") {
         nodePhase12ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodeRhinoCompatBarcodeProviderImplementation") {
+    group = "verification"
+    description = "Verifies the Phase 12 barcode provider implementation POC."
+
+    dependsOn("verifyNodeRhinoCompatBarcodeProviderContract")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-barcode-provider-implementation.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_IMPLEMENTATION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_CONTRACT.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/BARCODE_PROVIDER_V1.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/schemas/barcode_provider_v1.schema.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/fixtures/barcode-provider-v1-fixtures.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeBarcodeBridgeInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeProviderRegistryInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/ui/settings/NodeDoctorReportGeneratorInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/barcode.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/index.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/project/autojs6-node-project.js"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-barcode-provider-implementation-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-barcode-provider-implementation-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}

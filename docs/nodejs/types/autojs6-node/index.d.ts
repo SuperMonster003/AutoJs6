@@ -11,6 +11,7 @@
 /// <reference path="./image.d.ts" />
 /// <reference path="./images.d.ts" />
 /// <reference path="./ocr.d.ts" />
+/// <reference path="./barcode.d.ts" />
 /// <reference path="./storage.d.ts" />
 /// <reference path="./storages.d.ts" />
 /// <reference path="./database.d.ts" />

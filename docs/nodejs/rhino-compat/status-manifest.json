@@ -40,7 +40,7 @@
       "notes": [
         "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; S11-16 adds explicit selector/accessibility globals through compat.install({ globals: true }); S11-17 adds explicit app/device/shell globals and callable shell() migration; other Rhino globals remain unsupported or blocked by design.",
         "S11-18 adds explicit images global compatibility over opaque image handles for read/save/transform/search/recycle; screenshot permission wrappers remain S11-19 work.",
-        "S11-20 adds the OCR compatibility facade as an explicit global over the controlled ocr/images bridges; barcode and qrcode remain documented bridge gaps until a JSON-safe barcode provider is added."
+        "S11-20 adds the OCR compatibility facade as an explicit global over the controlled ocr/images bridges; P12-28 adds a direct JSON-safe barcode provider, while barcode and qrcode Rhino compatibility facades remain documented bridge gaps until P12-29."
       ],
       "apiEntries": [
         {
@@ -5588,75 +5588,77 @@
       "status": "partial",
       "asyncMode": "promise",
       "nodeModules": [
+        "barcode",
         "image"
       ],
       "bridgeModules": [
+        "barcode",
         "image"
       ],
       "decision": "s11_20_barcode_bridge_gap_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers.",
-        "S11-20 records barcode/qrcode as a strategy-only bridge gap: no Node barcode bridge is exposed yet, so compat must not advertise barcode/qrcode as supported until JSON-safe provider output and lifecycle gates exist."
+        "P12-28 exposes a direct require(\"barcode\") provider with JSON-safe snapshots, but Rhino facade parity still needs explicit compatibility wrappers.",
+        "Barcode/qrcode remains a compat bridge gap: compat must not advertise barcode/qrcode as supported until P12-29 adds wrappers over the P12-28 provider."
       ],
       "apiEntries": [
         {
           "id": "barcode.__module",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
           "nodeName": null,
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes the direct barcode provider, but the Rhino barcode module facade is pending P12-29."
           ]
         },
         {
           "id": "barcode.detect",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
+          "nodeName": "detect",
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes barcode.detect() as a direct provider API; Rhino facade argument parity remains pending P12-29."
           ]
         },
         {
           "id": "barcode.detectAll",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
+          "nodeName": "detectAll",
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes barcode.detectAll() as a direct provider API; Rhino facade argument parity remains pending P12-29."
           ]
         },
         {
           "id": "barcode.recognizeText",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
+          "nodeName": "recognizeText",
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes barcode.recognizeText() as a direct provider API; Rhino facade return-shape parity remains pending P12-29."
           ]
         },
         {
           "id": "barcode.recognizeTexts",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
+          "nodeName": "recognizeTexts",
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes barcode.recognizeTexts() as a direct provider API; Rhino facade return-shape parity remains pending P12-29."
           ]
         }
       ]
@@ -5666,75 +5668,77 @@
       "status": "partial",
       "asyncMode": "promise",
       "nodeModules": [
+        "barcode",
         "image"
       ],
       "bridgeModules": [
+        "barcode",
         "image"
       ],
       "decision": "s11_20_barcode_bridge_gap_pending",
       "notes": [
-        "Node bridge/types evidence exists, but Rhino facade parity still needs explicit compatibility wrappers.",
-        "S11-20 records barcode/qrcode as a strategy-only bridge gap: no Node barcode bridge is exposed yet, so compat must not advertise barcode/qrcode as supported until JSON-safe provider output and lifecycle gates exist."
+        "P12-28 exposes a direct require(\"barcode\") provider with QR-only options, but Rhino qrcode facade parity still needs explicit compatibility wrappers.",
+        "Qrcode remains a compat bridge gap: compat must not advertise qrcode as supported until P12-29 adds the QR-only wrapper over the P12-28 provider."
       ],
       "apiEntries": [
         {
           "id": "barcode.qr_code.__module",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
           "nodeName": null,
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes the direct barcode provider, but the Rhino qrcode module facade is pending P12-29."
           ]
         },
         {
           "id": "barcode.qr_code.detect",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
+          "nodeName": "detect",
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes barcode.detect({ qrOnly: true }) as a direct provider path; Rhino qrcode facade parity remains pending P12-29."
           ]
         },
         {
           "id": "barcode.qr_code.detectAll",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
+          "nodeName": "detectAll",
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes barcode.detectAll({ qrOnly: true }) as a direct provider path; Rhino qrcode facade parity remains pending P12-29."
           ]
         },
         {
           "id": "barcode.qr_code.recognizeText",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
+          "nodeName": "recognizeText",
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes barcode.recognizeText({ qrOnly: true }) as a direct provider path; Rhino qrcode facade parity remains pending P12-29."
           ]
         },
         {
           "id": "barcode.qr_code.recognizeTexts",
           "status": "partial",
           "asyncMode": "promise",
-          "nodeModule": "image",
-          "bridgeModule": "image",
-          "nodeName": null,
+          "nodeModule": "barcode",
+          "bridgeModule": "barcode",
+          "nodeName": "recognizeTexts",
           "decision": "s11_20_barcode_bridge_gap_pending",
           "notes": [
-            "S11-20 keeps this barcode/qrcode API pending because Node has no controlled barcode bridge or JSON-safe barcode result contract yet."
+            "P12-28 exposes barcode.recognizeTexts({ qrOnly: true }) as a direct provider path; Rhino qrcode facade parity remains pending P12-29."
           ]
         }
       ]

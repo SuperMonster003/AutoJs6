@@ -1099,7 +1099,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-barcode-provider-contract-verification.md`
 
-- [ ] P12-28: 实现 barcode bridge fake provider and live provider。
+- [x] P12-28: 实现 barcode bridge fake provider and live provider。
   - 范围：新增受控 `barcode` bridge module，先 fake provider，再接入 live
     MLKit provider。
   - 建议产物：
@@ -1113,7 +1113,35 @@ Phase 12 task 本身可使用以下执行状态：
     - live provider 使用 provider-owned image handles。
     - handle validation、unknown/recycled handle denial、timeout、cleanup 通过。
     - MLKit model unavailable 时稳定 degraded/unavailable。
-  - Evidence：待补充。
+  - Evidence：
+    - Runtime JS module：
+      `app/src/main/cpp/node_bridge_sources.cpp`
+    - Android bridge provider：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt`
+    - Permission manifest：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt`
+    - Provider health：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt`
+    - Resource cleanup：
+      `app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt`
+    - Types：
+      `docs/nodejs/types/autojs6-node/barcode.d.ts`
+    - Report：
+      `docs/nodejs/reports/phase12/RHINO_BARCODE_PROVIDER_IMPLEMENTATION.md`
+    - Fake/live instrumentation：
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeBarcodeBridgeInstrumentationTest.kt`
+    - Conformance：
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
+    - Surface manifest：
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-barcode-provider-implementation.js`
+    - Gradle gate：
+      `:app:verifyNodeRhinoCompatBarcodeProviderImplementation`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-barcode-provider-implementation-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-barcode-provider-implementation-verification.md`
 
 - [ ] P12-29: 实现 `compat.barcode` and `compat.qrcode` facade。
   - 范围：提供 Rhino 风格 `detect`、`detectAll`、`recognizeText`、

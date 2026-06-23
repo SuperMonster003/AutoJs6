@@ -22,6 +22,7 @@ object NodeBridgePermissionManifest {
     const val SCREEN_CAPTURE = "screen_capture"
     const val IMAGE = "image"
     const val OCR = "ocr"
+    const val BARCODE = "barcode"
     const val STORAGE = "storage"
     const val DATABASE = "database"
     const val NOTIFICATIONS = "notifications"
@@ -67,6 +68,7 @@ object NodeBridgePermissionManifest {
         SCREEN_CAPTURE,
         IMAGE,
         OCR,
+        BARCODE,
         STORAGE,
         DATABASE,
         NOTIFICATIONS,
@@ -99,6 +101,17 @@ object NodeBridgePermissionManifest {
         "media.projection" to SCREEN_CAPTURE,
         "screen.capture" to SCREEN_CAPTURE,
         "screencapture" to SCREEN_CAPTURE,
+        "qrcode" to BARCODE,
+        "qr_code" to BARCODE,
+        "qr-code" to BARCODE,
+        "barcode.detect" to BARCODE,
+        "barcode.detectall" to BARCODE,
+        "barcode.recognizetext" to BARCODE,
+        "barcode.recognizetexts" to BARCODE,
+        "qrcode.detect" to BARCODE,
+        "qrcode.detectall" to BARCODE,
+        "qrcode.recognizetext" to BARCODE,
+        "qrcode.recognizetexts" to BARCODE,
         "engines:exec" to ENGINES_EXEC,
         "engine.exec" to ENGINES_EXEC,
         "shell:root" to SHELL_ROOT,
@@ -257,6 +270,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(IMAGE)
             }
             NodeBridgeModules.OCR -> listOf(OCR, IMAGE)
+            NodeBridgeModules.BARCODE -> listOf(BARCODE, IMAGE)
             NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
             NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE -> listOf(DATABASE)
             NodeBridgeModules.NOTIFICATIONS -> listOf(NOTIFICATIONS)

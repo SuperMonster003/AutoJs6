@@ -6,8 +6,8 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Rhino modules: 73
 - Rhino API entries: 879
-- Node bridge modules: 26
-- Node type modules: 49
+- Node bridge modules: 27
+- Node type modules: 50
 - Modules with bridge evidence: 24
 - Modules with type evidence: 37
 - Modules without Node surface evidence: 35
@@ -51,8 +51,8 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 23 | ocr.ocr_ml_kit | mlkit | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 24 | ocr.ocr_paddle | paddle | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 25 | ocr.ocr_rapid | rapid | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
-| 26 | barcode | barcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 27 | barcode.qr_code | qrcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 26 | barcode | barcode | partial | barcode, image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
+| 27 | barcode.qr_code | qrcode | partial | barcode, image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 28 | threads | threads | blocked_by_design | engines, timers/promises, work_manager | blocked_by_design:6 | provider_availability | Proceed to P12-23 Rhino JSON-only shim POC gate; keep threads.* blocked_by_design and compute/process-worker deferred. |
 | 29 | ui | ui | partial | autojs6:compat, ui | blocked_by_design:15, partial:3, supported_async:2, unsupported:15 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
 | 30 | colors | colors | partial | autojs6:compat, colors | blocked_by_design:3, partial:2, supported:58 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
@@ -365,7 +365,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `barcode`
 - Status: `partial`
-- Node surface: image
+- Node surface: barcode, image
 - Coverage: `bridge_and_types`
 - API status: partial:5
 - Risks: none
@@ -375,7 +375,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `qrcode`
 - Status: `partial`
-- Node surface: image
+- Node surface: barcode, image
 - Coverage: `bridge_and_types`
 - API status: partial:5
 - Risks: none

@@ -3,8 +3,8 @@
 Status: P12-27 barcode/qrcode bridge schema design-locked.
 
 P12-27 defines the JSON-safe contract for a future `barcode` bridge provider
-and later `compat.barcode` / `compat.qrcode` Rhino facades. It does not expose
-runtime barcode APIs yet.
+and later `compat.barcode` / `compat.qrcode` Rhino facades. At the P12-27
+checkpoint it did not expose runtime barcode APIs.
 
 ## Contract Files
 
@@ -61,12 +61,12 @@ pointers, Java objects, Android objects, and arbitrary handles.
 
 ## Current Runtime State
 
-Barcode/qrcode remains a bridge gap after P12-27. The status manifest still
-keeps `barcode` and `barcode.qr_code` on the S11-20 bridge-gap decision until
-P12-28 lands the provider and P12-29 lands the compat facades.
+Barcode/qrcode remains a bridge gap after P12-27. P12-28 now lands the direct
+`require("barcode")` provider, but the status manifest still keeps `barcode`
+and `barcode.qr_code` partial until P12-29 lands the compat facades.
 
 ## Next Work
 
-P12-28 should implement `NodeBridgeModules.BARCODE`, the `barcode` capability,
+P12-28 implements `NodeBridgeModules.BARCODE`, the `barcode` capability,
 fake-provider shape tests, live ML Kit provider evidence, provider health, and
 handle cleanup. P12-29 should add `compat.barcode` and `compat.qrcode` wrappers.

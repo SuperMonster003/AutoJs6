@@ -76,7 +76,7 @@ function main() {
       status: policyViolations.length === 0 ? "passed" : "failed",
       schemaLocked: checkById(checks, "schema-contract"),
       fixturesLocked: checkById(checks, "fixtures"),
-      runtimeStillClosed: checkById(checks, "runtime-still-closed"),
+      compatStillClosed: checkById(checks, "compat-still-closed"),
     },
   };
   fs.mkdirSync(reportDir, { recursive: true });
@@ -287,19 +287,22 @@ function buildChecks(files, repoRoot) {
         "P12-27 locks",
         "BARCODE_PROVIDER_V1.md",
         "barcode_provider_v1.schema.json",
-        "barcode/qrcode remain unexposed",
+        "P12-28 exposes the direct `require(\"barcode\")` provider",
+        "compat.barcode",
+        "compat.qrcode",
       ]) &&
         includesAll(files.migration.text, [
-          "P12-27 locks",
-          "barcode provider v1 schema",
-          "barcode/qrcode remain unavailable at runtime",
+        "P12-27 locks",
+        "barcode provider v1 schema",
+          "P12-28 exposes the direct `require(\"barcode\")` provider",
+          "P12-29",
         ]) &&
         includesAll(files.securityModel.text, [
-          "P12-27 locks",
-          "controlled barcode provider v1 schema",
+          "P12-28 exposes the direct `barcode` bridge provider",
+          "Barcode and qrcode Rhino compat facades remain bridge gaps",
           "raw ML Kit `Barcode`",
         ]),
-      "Loader, migration, and security docs must record the P12-27 schema lock without runtime exposure.",
+      "Loader, migration, and security docs must record the P12-27 schema lock, P12-28 direct provider, and P12-29 compat handoff.",
     ),
     check(
       "status-manifest-gap-preserved",
@@ -312,20 +315,27 @@ function buildChecks(files, repoRoot) {
       "Status manifest must keep barcode/qrcode as bridge gaps until provider and facade tasks land.",
     ),
     check(
-      "runtime-still-closed",
+      "compat-still-closed",
       !includesAny(files.runtime.text, [
-        "__autojs6_limited_barcode",
         "__autojs6_rhino_compat_barcode",
         "__autojs6_rhino_compat_qrcode",
         "compat.barcode",
         "compat.qrcode",
-      ]),
-      "P12-27 must not expose runtime barcode/qrcode modules or compat facades.",
+      ]) &&
+        (
+          !files.runtime.text.includes("__autojs6_limited_barcode") ||
+          includesAll(files.runtime.text, [
+            "function __autojs6_limited_barcode()",
+            "return __autojs6_limited_barcode()",
+            "permissions: [\"barcode\", \"image\"]",
+          ])
+        ),
+      "Barcode compat facades must remain closed; a later direct provider may exist only through the controlled barcode bridge.",
     ),
     check(
       "surface-manifest",
       barcodeSurface &&
-        barcodeSurface.status === "design_locked" &&
+        ["design_locked", "provider_poc"].includes(barcodeSurface.status) &&
         (barcodeSurface.tasks || []).includes("P12-27") &&
         includesAll(JSON.stringify(barcodeSurface), [
           "P12-27 locks the barcode provider v1 JSON-safe schema",
@@ -338,9 +348,9 @@ function buildChecks(files, repoRoot) {
         includesAll(files.surfaceDocs.text, [
           "barcode.qrcode",
           "P12-27 locks",
-          "design-locked",
+          "barcode provider v1",
         ]),
-      "Phase 12 surface manifest must move barcode.qrcode to design_locked with P12-27 evidence.",
+      "Phase 12 surface manifest must keep barcode.qrcode tied to P12-27 schema evidence.",
     ),
     check(
       "phase12-task-complete",

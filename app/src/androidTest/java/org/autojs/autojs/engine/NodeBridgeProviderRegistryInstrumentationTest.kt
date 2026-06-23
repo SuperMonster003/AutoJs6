@@ -14,7 +14,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(14, definitions.size)
+        assertEquals(15, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -29,6 +29,11 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             id = "ocr",
             modules = listOf(NodeBridgeModules.OCR),
             capabilities = listOf(NodeBridgePermissionManifest.OCR, NodeBridgePermissionManifest.IMAGE),
+        )
+        assertProvider(
+            id = "barcode",
+            modules = listOf(NodeBridgeModules.BARCODE),
+            capabilities = listOf(NodeBridgePermissionManifest.BARCODE, NodeBridgePermissionManifest.IMAGE),
         )
         assertProvider(
             id = "database",
@@ -65,6 +70,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             healthById.getValue("fetch").status,
         )
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ocr").status)
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("barcode").status)
         assertEquals(NodeBridgeProviderStatus.UNAVAILABLE, healthById.getValue("media_projection").status)
         assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("image").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ui").status)
@@ -75,6 +81,8 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             ),
         )
         assertEquals("mlkit-chinese", healthById.getValue("ocr").details.getValue("defaultEngine"))
+        assertEquals("mlkit-barcode", healthById.getValue("barcode").details.getValue("defaultEngine"))
+        assertTrue(healthById.getValue("barcode").details.getValue("liveMethods").contains("detectAll"))
         assertTrue(healthById.getValue("image").details.getValue("liveMethods").contains("readImage"))
         assertTrue(healthById.getValue("ui").details.getValue("liveMethods").contains("showLayout"))
         assertEquals("fake", healthById.getValue("input_observer").details.getValue("availableSource"))

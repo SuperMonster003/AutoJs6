@@ -78,6 +78,7 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         val providersById = bridgeProviders.byId()
         val fetchProvider = providersById.getValue("fetch")
         val ocrProvider = providersById.getValue("ocr")
+        val barcodeProvider = providersById.getValue("barcode")
         val shellProvider = providersById.getValue("shell")
         val workManagerProvider = providersById.getValue("work_manager")
         assertEquals(NodeBridgeProviderRegistry.PROVIDER_SCHEMA, fetchProvider.getString("schema"))
@@ -90,6 +91,9 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertEquals(NodeBridgeProviderStatus.AVAILABLE.phase10WireName, ocrProvider.getString("statusCode"))
         assertEquals("mlkit-chinese", ocrProvider.getJSONObject("details").getString("defaultEngine"))
         assertTrue(text.contains("defaultEngine=mlkit-chinese"))
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE.wireName, barcodeProvider.getString("status"))
+        assertEquals("mlkit-barcode", barcodeProvider.getJSONObject("details").getString("defaultEngine"))
+        assertTrue(text.contains("defaultEngine=mlkit-barcode"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE.wireName, workManagerProvider.getString("status"))
         assertEquals(
             NodeWorkManagerBridgeScheduler.SCHEDULER_NAME,
