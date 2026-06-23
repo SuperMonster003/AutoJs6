@@ -439,7 +439,7 @@ Phase 12 task 本身可使用以下执行状态：
     - raw `WindowManager`、`LayoutParams`、`FloatyWindow` 不跨 bridge。
   - Evidence：待补充。
 
-- [ ] P12-12B: Rejection path - 固化 floaty permanent non-goal。
+- [x] P12-12B: Rejection path - 固化 floaty permanent non-goal。
   - 适用条件：P12-11 选择 Rejection path。
   - 范围：把 Rhino `floaty.window`、`floaty.rawWindow`、overlay permission
     flow 设为长期或永久非目标，同时保留 `floaty.getClip` 的 clipboard 迁移路径。
@@ -452,7 +452,20 @@ Phase 12 task 本身可使用以下执行状态：
       global `floaty` 均不可用或稳定拒绝。
     - migration docs 明确建议改用 `clipboard`、`compat.getClip()` 或
       Activity-owned `require("ui")`。
-  - Evidence：待补充。
+  - Evidence：
+    - Rejection report：`docs/nodejs/reports/phase12/RHINO_FLOATY_REJECTION.md`
+    - Runtime negative instrumentation：`app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
+    - Dual-engine manifest：`docs/nodejs/dual-engine-compat/manifest.json`
+    - Dual-engine Node marker：`docs/nodejs/dual-engine-compat/cases/floaty-window.node.cjs`
+    - Dual-engine Rhino legacy case：`docs/nodejs/dual-engine-compat/cases/floaty-window.rhino.js`
+    - Stable marker：`ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`
+    - Migration docs：`docs/nodejs/MIGRATION_FROM_RHINO.md`
+    - Security docs：`docs/nodejs/SECURITY_MODEL.md`
+    - Status manifest：`docs/nodejs/rhino-compat/status-manifest.json`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-floaty-rejection.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatFloatyRejection`
+    - 报告产物：`build/reports/nodejs/rhino-compat-floaty-rejection-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-floaty-rejection-verification.md`
 
 - [ ] P12-13: Provider path - 实现 overlay fake provider 和 facade POC。
   - 适用条件：P12-11 选择 Provider path。

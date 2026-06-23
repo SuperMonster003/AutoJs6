@@ -133,7 +133,8 @@
       "rhino": "cases/floaty-window.rhino.js",
       "node": "cases/floaty-window.node.cjs",
       "statusManifestIds": [
-        "floaty.window"
+        "floaty.window",
+        "floaty.rawWindow"
       ],
       "expected": {
         "rhino": "legacy_overlay_window",
@@ -142,7 +143,7 @@
       "devicePlan": {
         "mode": "policy_only",
         "assertions": [
-          "Rhino remains the owner of legacy floaty.window overlay semantics.",
+          "Rhino remains the owner of legacy floaty.window/rawWindow overlay semantics.",
           "Node compat mode reports blocked_by_design and does not expose compat.floaty."
         ]
       }

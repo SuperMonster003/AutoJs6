@@ -148,7 +148,7 @@ function buildChecks(files) {
     check(
       "surface-manifest-evidence",
       floatySurface &&
-        floatySurface.status === "design_locked" &&
+        ["design_locked", "rejected"].includes(floatySurface.status) &&
         (floatySurface.tasks || []).includes("P12-11") &&
         includesAll(JSON.stringify(floatySurface), [
           "Rejection path",

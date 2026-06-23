@@ -9902,7 +9902,8 @@
       "notes": [
         "S11-24 keeps Rhino floaty/overlay compatibility design-gated: no require(\"floaty\"), require(\"ui.overlay\"), compat.floaty, or global floaty is exposed.",
         "floaty.window/rawWindow exact Rhino XML and live window-wrapper semantics are blocked by design; floaty.getClip migrates to the controlled clipboard bridge or autojs6:compat.getClip without hidden overlay windows.",
-        "P12-11 rejection path selected: exact Rhino floaty.window/rawWindow compatibility is a permanent non-goal for Node; P12-12B owns the follow-up negative runtime gate."
+        "P12-11 rejection path selected: exact Rhino floaty.window/rawWindow compatibility is a permanent non-goal for Node; P12-12B owns the follow-up negative runtime gate.",
+        "P12-12B stabilizes the negative runtime gate: require(\"floaty\"), require(\"ui.overlay\"), compat.floaty, and global floaty remain unavailable; examples use ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN."
       ],
       "apiEntries": [
         {
@@ -9914,7 +9915,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_module_deferred",
           "notes": [
-            "No Node floaty module is exposed in S11-24; P12-11 selects rejection for exact Rhino floaty compatibility instead of the Phase 12 provider path."
+            "No Node floaty module is exposed in S11-24; P12-11 selects rejection for exact Rhino floaty compatibility instead of the Phase 12 provider path; P12-12B verifies require(\"floaty\") remains unavailable."
           ]
         },
         {
@@ -9926,7 +9927,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_session_provider_deferred",
           "notes": [
-            "P12-11 keeps floaty.closeAll unavailable because no overlay handle registry exists; P12-12B must verify the negative runtime gate and destroy cleanup no-op boundary."
+            "P12-11 keeps floaty.closeAll unavailable because no overlay handle registry exists; P12-12B verifies the negative runtime gate and destroy cleanup no-op boundary."
           ]
         },
         {
@@ -9938,7 +9939,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-11 does not select the provider path; Node service code must not grant, emulate, or request overlay permission for Rhino floaty compatibility."
+            "P12-11 does not select the provider path; P12-12B keeps overlay permission flow unavailable so Node service code must not grant, emulate, or request overlay permission for Rhino floaty compatibility."
           ]
         },
         {
@@ -9974,7 +9975,7 @@
           "nodeName": null,
           "decision": "s11_24_raw_overlay_window_blocked",
           "notes": [
-            "Rhino rawWindow exposes raw overlay WindowManager/LayoutParams and live View/NativeView semantics; P12-11 treats exact rawWindow compatibility as a permanent non-goal for Node."
+            "Rhino rawWindow exposes raw overlay WindowManager/LayoutParams and live View/NativeView semantics; P12-11 treats exact rawWindow compatibility as a permanent non-goal for Node; P12-12B examples use ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN."
           ]
         },
         {
@@ -9986,7 +9987,7 @@
           "nodeName": null,
           "decision": "s11_24_overlay_permission_provider_deferred",
           "notes": [
-            "P12-11 leaves overlay permission requests unavailable for Rhino floaty compatibility; no silent prompt or settings launch path is exposed."
+            "P12-11 leaves overlay permission requests unavailable for Rhino floaty compatibility; P12-12B keeps no silent prompt or settings launch path exposed."
           ]
         },
         {
@@ -9998,7 +9999,7 @@
           "nodeName": null,
           "decision": "s11_24_xml_window_wrapper_blocked",
           "notes": [
-            "Rhino window(xml) returns a live JsResizableWindow over XML-inflated Android views; P12-11 treats exact window compatibility as a permanent non-goal for Node."
+            "Rhino window(xml) returns a live JsResizableWindow over XML-inflated Android views; P12-11 treats exact window compatibility as a permanent non-goal for Node; P12-12B examples use ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN."
           ]
         }
       ]

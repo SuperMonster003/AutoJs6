@@ -30,6 +30,12 @@ Phase 12; P12-12B owns the follow-up negative runtime gate. A future
 JSON-only `ui.overlay` provider may still be designed later, but it must not
 claim parity with Rhino raw window wrappers.
 
+P12-12B keeps `require("floaty")`, `require("ui.overlay")`, `compat.floaty`,
+and global `floaty` unavailable. Script examples that need a stable policy
+marker use `compat.blockedByDesign(...)` and
+`ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`; they do not create an overlay
+provider request.
+
 The Task 182 `require("ui")` protocol reservation remains Activity/provider
 owned and fail-closed on Android. It does not imply overlay authority. Any
 future floaty implementation must use a separate capability such as

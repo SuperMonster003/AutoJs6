@@ -16,6 +16,13 @@ future JSON-only overlay provider may be considered separately, but it must not
 expose Rhino `JsWindow`, `WindowBridge`, `NativeView`, or raw Android window
 objects.
 
+P12-12B stabilizes the rejection gate: `require("floaty")`,
+`require("ui.overlay")`, `compat.floaty`, and global `floaty` remain absent.
+Dual-engine examples must use `compat.blockedByDesign("floaty.window", ...)` or
+`compat.blockedByDesign("floaty.rawWindow", ...)`, which returns
+`ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN` via
+`compat.errorCodes.blockedByDesign`.
+
 The current Node profile has no overlay provider, no overlay capability, no
 packaged manifest injection for `SYSTEM_ALERT_WINDOW`, and no foreground
 notification/disclosure model for script-owned overlay windows. The existing
