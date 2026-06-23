@@ -64,7 +64,15 @@ which Phase 12 workstream owns the next implementation or rejection.
 
 ## Current Design-Locked Surfaces
 
-- None in the current Phase 12 surface manifest.
+- `threads.replacement`: P12-20 keeps Rhino `threads` as a
+  `blocked_by_design` compatibility surface. `worker_threads` remains
+  default-off and native-availability gated, `worker_computation` remains
+  reserved, `second_execution_slot` remains open, and no `require("threads")`,
+  `compat.threads`, global `threads`, global `sync`, or same-runtime Rhino
+  thread/shared-object parity is claimed. P12-21 cookbook work must use
+  `async` / `await`, `AbortController`, explicit `engines` slots, and
+  `work_manager`; P12-22 may evaluate a separately named compute/process-worker
+  API.
 
 ## Current Rejected Surfaces
 

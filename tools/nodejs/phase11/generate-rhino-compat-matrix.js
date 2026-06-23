@@ -170,6 +170,12 @@ function riskSummary(module) {
 
 function nextStepFor(module, gapModule) {
   if (
+    module.id === "threads" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-20 threads maturity review"))
+  ) {
+    return "Proceed to P12-21 threads migration cookbook; keep worker_threads default-off and no Rhino parity.";
+  }
+  if (
     module.id === "tasks" &&
     (module.migration.notes || []).some((note) => note.includes("P12-19 tasks migration examples and smoke landed"))
   ) {

@@ -716,3 +716,51 @@ tasks.register<Exec>("verifyNodeRhinoCompatTasksMigrationExamples") {
         nodePhase12ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodeRhinoCompatThreadsMaturityReview") {
+    group = "verification"
+    description = "Verifies the Phase 12 Rhino threads worker/process-slot maturity review."
+
+    dependsOn("verifyNodeRhinoCompatTasksMigrationExamples")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-threads-maturity-review.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/WORKER_THREADS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/V1_1_WORKER_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/WORKER_EXPERIMENTAL_EVALUATION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsExperimentalInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/generate-rhino-compat-matrix.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-threads-maturity-review-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-threads-maturity-review-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}

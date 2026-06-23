@@ -212,6 +212,12 @@ The `threads` module is not available in Node scripts, and Node
 expecting `require("threads")`, `compat.threads`, a global `threads`, a global
 `sync`, or default `worker_threads` to exist.
 
+P12-20 rechecked `worker_threads`, process slot, and execution-mode maturity and
+kept that boundary. The internal worker path is native-availability gated, not a
+release migration target; `worker_computation` remains reserved, and
+`second_execution_slot` remains open. See
+[RHINO_THREADS_MATURITY_REVIEW.md](reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md).
+
 `threads.start()`, `threads.pool()`, `threads.interrupt()`,
 `threads.disposable()`, and `sync(fn, lock)` are all `blocked_by_design` as
 exact Node compatibility targets. They depend on shared Rhino `ScriptRuntime`

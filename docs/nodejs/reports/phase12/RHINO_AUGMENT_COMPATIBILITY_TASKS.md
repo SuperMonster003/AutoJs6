@@ -783,7 +783,7 @@ Phase 12 task 本身可使用以下执行状态：
 
 ### Track E: Threads replacement and worker/process policy
 
-- [ ] P12-20: 复核 worker_threads 与 process slot 当前成熟度。
+- [x] P12-20: 复核 worker_threads 与 process slot 当前成熟度。
   - 范围：基于已有 worker_threads experimental tests、process slot、
     `second_execution_slot` blocker，决定 Phase 12 是否能承接 Rhino threads
     迁移的一部分。
@@ -792,7 +792,35 @@ Phase 12 task 本身可使用以下执行状态：
     - 如果推荐 experimental worker path，必须说明 native availability、
       capability isolation、resource cleanup 和 packaged 状态。
     - 不声称兼容 Rhino 同步线程和共享对象模型。
-  - Evidence：待补充。
+  - Evidence：
+    - Maturity review：
+      `docs/nodejs/reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md`
+      明确 P12-20 不把 Rhino `threads` 承接到默认 `worker_threads`，
+      仅保留 internal native-availability/preflight worker path。
+    - Design docs：
+      `docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md` 和
+      `docs/nodejs/design/WORKER_THREADS.md` 记录 P12-20 结论：
+      `worker_threads` default-off，`worker_computation` reserved，
+      `second_execution_slot` 仍 open。
+    - Runtime/capability evidence：
+      `NodeRuntimeCapabilities.kt` 仍保持
+      `WORKER_THREADS_EXPERIMENTAL_DEFAULT=false`；
+      `NodeExecutionModePolicy.kt` 仍保持 `worker_computation` 为
+      `reserved` 且无 supported launch surface。
+    - Worker gate evidence：
+      `NodeWorkerThreadsTestSupport.kt` 的 native-availability preflight 只接受
+      usable limited worker surface 或
+      `ERR_AUTOJS6_WORKER_DISABLED` + zero active workers。
+    - Surface/status：
+      `docs/nodejs/rhino-compat/status-manifest.json` 保持全部
+      `threads.*` 为 `blocked_by_design`，matrix 推进至 P12-21 cookbook。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-threads-maturity-review.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatThreadsMaturityReview`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-threads-maturity-review-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-threads-maturity-review-verification.md`
 
 - [ ] P12-21: 发布 Rhino threads migration cookbook。
   - 范围：为常见 Rhino `threads` 模式提供 Node 替代写法。

@@ -1,6 +1,6 @@
 # Worker Threads Design Gate v1
 
-Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds. S7-29 adds stress and packaged `.mjs` worker smoke coverage to the same internal gate, but it does not promote workers to a user-visible release surface.
+Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds. S7-29 adds stress and packaged `.mjs` worker smoke coverage to the same internal gate, but it does not promote workers to a user-visible release surface. P12-20 rechecked this as part of Rhino `threads` migration and kept worker_threads out of the default migration path.
 
 ## Goal
 
@@ -234,6 +234,12 @@ Current gates:
 - `NodeSecurityRegressionInstrumentationTest` keeps `worker_threads` in the dangerous builtin denial corpus.
 
 Current evaluation: [../reports/WORKER_EXPERIMENTAL_EVALUATION.md](../reports/WORKER_EXPERIMENTAL_EVALUATION.md). The default design gate passes, but worker execution/stress suites are blocked by native module availability. The 2026-06-17 v1.1 recheck confirmed that Task 170 cannot graduate workers to runnable partial support without changing the Embedded Node native build. The 2026-06-19 S7-24 recheck added bootstrap/preflight coverage and verified the experimental gate fails closed with skips, not false runnable support, on the current native build.
+
+P12-20 records the same maturity state for Rhino migration in
+[../reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md](../reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md):
+`worker_threads` is not a default replacement for Rhino `threads`, the
+experimental path remains native-availability gated, and future compute/process
+workers must be separately named and must not claim same-runtime Rhino parity.
 
 Follow-up gates should add stronger native handle/thread leak diagnostics once
 worker support graduates beyond experimental mode.

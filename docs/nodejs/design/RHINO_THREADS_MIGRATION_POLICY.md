@@ -1,8 +1,8 @@
 # Rhino Threads Migration Policy
 
-Status: S11-25 design and policy gate. This document records how Rhino
-`threads` scripts should migrate to Embedded Node without adding a Rhino-style
-thread facade.
+Status: S11-25 design and policy gate; P12-20 maturity review keeps the same
+blocked-by-design decision. This document records how Rhino `threads` scripts
+should migrate to Embedded Node without adding a Rhino-style thread facade.
 
 ## Decision
 
@@ -193,6 +193,27 @@ restricted module loading, scoped filesystem wrappers, bounded messages,
 structured-clone-safe data, no AutoJs bridge modules, no Java/Android objects,
 no raw shared mutable objects, no same-runtime callbacks, and no nested worker
 authority unless a separate gate approves it.
+
+## P12-20 Maturity Review
+
+P12-20 rechecked `worker_threads`, process slot, and execution-mode maturity
+for Phase 12 and kept the S11-25 conclusion:
+
+- default `worker_threads` remains closed;
+- the experimental worker path is an internal native-availability/preflight
+  gate, not a user-facing migration target;
+- runnable worker creation, stress, and packaged worker source graph evidence
+  remain blocked until native workers are available and the focused suites pass;
+- `worker_computation` remains reserved and is not a `threads` replacement;
+- `second_execution_slot` remains open for default scheduling, packaged
+  behavior, per-slot crash evidence, and stress promotion;
+- P12-21 cookbook examples must avoid default workers and use `async` /
+  `await`, `AbortController`, explicit `engines` execution slots, or
+  `work_manager`;
+- P12-22 may evaluate a separately named compute/process-worker API, but it
+  must not reuse `threads` or claim same-runtime Rhino parity.
+
+See `docs/nodejs/reports/phase12/RHINO_THREADS_MATURITY_REVIEW.md`.
 
 ## Acceptance
 
