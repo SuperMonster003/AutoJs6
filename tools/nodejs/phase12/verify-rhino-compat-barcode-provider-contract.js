@@ -104,6 +104,21 @@ function buildChecks(files, repoRoot) {
   const statusManifest = JSON.parse(files.statusManifest.text);
   const barcodeModule = (statusManifest.modules || []).find((module) => module.id === "barcode");
   const qrcodeModule = (statusManifest.modules || []).find((module) => module.id === "barcode.qr_code");
+  const barcodeCompatPending = [barcodeModule, qrcodeModule].every((module) =>
+    module &&
+      module.status === "partial" &&
+      module.decision === "s11_20_barcode_bridge_gap_pending" &&
+      (module.apiEntries || []).every((entry) => entry.status !== "supported_async"),
+  );
+  const barcodeCompatPromoted = [barcodeModule, qrcodeModule].every((module) =>
+    module &&
+      module.status === "supported_async" &&
+      String(module.decision || "").indexOf("p12_29_") === 0 &&
+      (module.apiEntries || []).every((entry) =>
+        entry.status === "supported_async" &&
+        entry.nodeModule === "autojs6:compat" &&
+        entry.bridgeModule === "barcode"),
+  );
   const surfaceManifest = JSON.parse(files.surfaceManifest.text);
   const barcodeSurface = (surfaceManifest.surfaces || []).find((surface) => surface.id === "barcode.qrcode");
   const schemaText = JSON.stringify(schema);
@@ -136,9 +151,9 @@ function buildChecks(files, repoRoot) {
         "barcode_provider_v1.schema.json",
         "barcode-provider-v1-fixtures.json",
         "verifyNodeRhinoCompatBarcodeProviderContract",
-        "Barcode/qrcode remains a bridge gap after P12-27",
+        "Barcode/qrcode was a bridge gap after P12-27",
       ]),
-      "P12-27 report must record design-locked schema evidence and current non-exposure.",
+      "P12-27 report must record design-locked schema evidence and later P12-28/P12-29 handoff state.",
     ),
     check(
       "contract-api",
@@ -168,7 +183,7 @@ function buildChecks(files, repoRoot) {
           "format filter",
           "qrOnly: true",
           "formats: [\"QR_CODE\"]",
-          "reject any non-QR format filter",
+          "rejects any non-QR format filter",
         ]),
       "Contract doc must define path/handle/capture inputs, region, format filter, and QR-only behavior.",
     ),
@@ -299,29 +314,25 @@ function buildChecks(files, repoRoot) {
         ]) &&
         includesAll(files.securityModel.text, [
           "P12-28 exposes the direct `barcode` bridge provider",
-          "Barcode and qrcode Rhino compat facades remain bridge gaps",
+          "compat.barcode",
+          "compat.qrcode",
           "raw ML Kit `Barcode`",
         ]),
       "Loader, migration, and security docs must record the P12-27 schema lock, P12-28 direct provider, and P12-29 compat handoff.",
     ),
     check(
       "status-manifest-gap-preserved",
-      [barcodeModule, qrcodeModule].every((module) =>
-        module &&
-          module.status === "partial" &&
-          module.decision === "s11_20_barcode_bridge_gap_pending" &&
-          (module.apiEntries || []).every((entry) => entry.status !== "supported_async"),
-      ),
-      "Status manifest must keep barcode/qrcode as bridge gaps until provider and facade tasks land.",
+      barcodeCompatPending || barcodeCompatPromoted,
+      "Status manifest must either keep barcode/qrcode as bridge gaps before P12-29 or promote them through the P12-29 compat facade.",
     ),
     check(
       "compat-still-closed",
-      !includesAny(files.runtime.text, [
-        "__autojs6_rhino_compat_barcode",
-        "__autojs6_rhino_compat_qrcode",
-        "compat.barcode",
-        "compat.qrcode",
-      ]) &&
+      (barcodeCompatPromoted || !includesAny(files.runtime.text, [
+          "__autojs6_rhino_compat_barcode",
+          "__autojs6_rhino_compat_qrcode",
+          "compat.barcode",
+          "compat.qrcode",
+        ])) &&
         (
           !files.runtime.text.includes("__autojs6_limited_barcode") ||
           includesAll(files.runtime.text, [
@@ -330,7 +341,7 @@ function buildChecks(files, repoRoot) {
             "permissions: [\"barcode\", \"image\"]",
           ])
         ),
-      "Barcode compat facades must remain closed; a later direct provider may exist only through the controlled barcode bridge.",
+      "Barcode compat facades must remain closed before P12-29; after P12-29 they may exist only over the controlled barcode bridge.",
     ),
     check(
       "surface-manifest",

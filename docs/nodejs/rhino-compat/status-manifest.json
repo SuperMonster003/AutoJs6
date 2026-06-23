@@ -40,7 +40,7 @@
       "notes": [
         "S11-09 maps toastLog, sleep, setClip, and getClip through the explicit autojs6:compat async facade; S11-16 adds explicit selector/accessibility globals through compat.install({ globals: true }); S11-17 adds explicit app/device/shell globals and callable shell() migration; other Rhino globals remain unsupported or blocked by design.",
         "S11-18 adds explicit images global compatibility over opaque image handles for read/save/transform/search/recycle; screenshot permission wrappers remain S11-19 work.",
-        "S11-20 adds the OCR compatibility facade as an explicit global over the controlled ocr/images bridges; P12-28 adds a direct JSON-safe barcode provider, while barcode and qrcode Rhino compatibility facades remain documented bridge gaps until P12-29."
+        "S11-20 adds the OCR compatibility facade as an explicit global over the controlled ocr/images bridges; P12-28 adds a direct JSON-safe barcode provider, and P12-29 exposes barcode/qrcode Rhino compatibility facades over that provider."
       ],
       "apiEntries": [
         {
@@ -5585,9 +5585,10 @@
     },
     {
       "id": "barcode",
-      "status": "partial",
+      "status": "supported_async",
       "asyncMode": "promise",
       "nodeModules": [
+        "autojs6:compat",
         "barcode",
         "image"
       ],
@@ -5595,79 +5596,80 @@
         "barcode",
         "image"
       ],
-      "decision": "s11_20_barcode_bridge_gap_pending",
+      "decision": "p12_29_barcode_compat_facade",
       "notes": [
-        "P12-28 exposes a direct require(\"barcode\") provider with JSON-safe snapshots, but Rhino facade parity still needs explicit compatibility wrappers.",
-        "Barcode/qrcode remains a compat bridge gap: compat must not advertise barcode/qrcode as supported until P12-29 adds wrappers over the P12-28 provider."
+        "P12-29 exposes compat.barcode over the P12-28 direct require(\"barcode\") provider with path/handle/capture inputs and JSON-safe frozen snapshots.",
+        "Barcode compatibility remains Promise-based in Node; raw ML Kit Barcode, Bitmap, ImageWrapper, and Java objects are not exposed."
       ],
       "apiEntries": [
         {
           "id": "barcode.__module",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": null,
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "barcode.__module",
+          "decision": "p12_29_barcode_compat_facade",
           "notes": [
-            "P12-28 exposes the direct barcode provider, but the Rhino barcode module facade is pending P12-29."
+            "P12-29 maps the Rhino barcode module to require(\"autojs6:compat\").barcode."
           ]
         },
         {
           "id": "barcode.detect",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": "detect",
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "barcode.detect",
+          "decision": "p12_29_barcode_compat_facade",
           "notes": [
-            "P12-28 exposes barcode.detect() as a direct provider API; Rhino facade argument parity remains pending P12-29."
+            "P12-29 maps barcode.detect() to compat.barcode.detect() with frozen JSON snapshot output."
           ]
         },
         {
           "id": "barcode.detectAll",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": "detectAll",
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "barcode.detectAll",
+          "decision": "p12_29_barcode_compat_facade",
           "notes": [
-            "P12-28 exposes barcode.detectAll() as a direct provider API; Rhino facade argument parity remains pending P12-29."
+            "P12-29 maps barcode.detectAll() to compat.barcode.detectAll() with frozen JSON snapshot array output."
           ]
         },
         {
           "id": "barcode.recognizeText",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": "recognizeText",
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "barcode.recognizeText",
+          "decision": "p12_29_barcode_compat_facade",
           "notes": [
-            "P12-28 exposes barcode.recognizeText() as a direct provider API; Rhino facade return-shape parity remains pending P12-29."
+            "P12-29 maps barcode.recognizeText() to compat.barcode.recognizeText(), returning string or null."
           ]
         },
         {
           "id": "barcode.recognizeTexts",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": "recognizeTexts",
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "barcode.recognizeTexts",
+          "decision": "p12_29_barcode_compat_facade",
           "notes": [
-            "P12-28 exposes barcode.recognizeTexts() as a direct provider API; Rhino facade return-shape parity remains pending P12-29."
+            "P12-29 maps barcode.recognizeTexts() and callable compat.barcode(...) to string array output."
           ]
         }
       ]
     },
     {
       "id": "barcode.qr_code",
-      "status": "partial",
+      "status": "supported_async",
       "asyncMode": "promise",
       "nodeModules": [
+        "autojs6:compat",
         "barcode",
         "image"
       ],
@@ -5675,70 +5677,70 @@
         "barcode",
         "image"
       ],
-      "decision": "s11_20_barcode_bridge_gap_pending",
+      "decision": "p12_29_qrcode_compat_facade",
       "notes": [
-        "P12-28 exposes a direct require(\"barcode\") provider with QR-only options, but Rhino qrcode facade parity still needs explicit compatibility wrappers.",
-        "Qrcode remains a compat bridge gap: compat must not advertise qrcode as supported until P12-29 adds the QR-only wrapper over the P12-28 provider."
+        "P12-29 exposes compat.qrcode over the P12-28 barcode provider with qrOnly forced to true and formats fixed to QR_CODE.",
+        "Qrcode compatibility remains Promise-based in Node and returns the same JSON-safe snapshot/string shapes as compat.barcode."
       ],
       "apiEntries": [
         {
           "id": "barcode.qr_code.__module",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": null,
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "qrcode.__module",
+          "decision": "p12_29_qrcode_compat_facade",
           "notes": [
-            "P12-28 exposes the direct barcode provider, but the Rhino qrcode module facade is pending P12-29."
+            "P12-29 maps the Rhino qrcode module to require(\"autojs6:compat\").qrcode."
           ]
         },
         {
           "id": "barcode.qr_code.detect",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": "detect",
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "qrcode.detect",
+          "decision": "p12_29_qrcode_compat_facade",
           "notes": [
-            "P12-28 exposes barcode.detect({ qrOnly: true }) as a direct provider path; Rhino qrcode facade parity remains pending P12-29."
+            "P12-29 maps qrcode.detect() to compat.qrcode.detect() with QR_CODE-only format filtering."
           ]
         },
         {
           "id": "barcode.qr_code.detectAll",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": "detectAll",
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "qrcode.detectAll",
+          "decision": "p12_29_qrcode_compat_facade",
           "notes": [
-            "P12-28 exposes barcode.detectAll({ qrOnly: true }) as a direct provider path; Rhino qrcode facade parity remains pending P12-29."
+            "P12-29 maps qrcode.detectAll() to compat.qrcode.detectAll() with QR_CODE-only format filtering."
           ]
         },
         {
           "id": "barcode.qr_code.recognizeText",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": "recognizeText",
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "qrcode.recognizeText",
+          "decision": "p12_29_qrcode_compat_facade",
           "notes": [
-            "P12-28 exposes barcode.recognizeText({ qrOnly: true }) as a direct provider path; Rhino qrcode facade parity remains pending P12-29."
+            "P12-29 maps qrcode.recognizeText() to compat.qrcode.recognizeText(), returning string or null."
           ]
         },
         {
           "id": "barcode.qr_code.recognizeTexts",
-          "status": "partial",
+          "status": "supported_async",
           "asyncMode": "promise",
-          "nodeModule": "barcode",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": "barcode",
-          "nodeName": "recognizeTexts",
-          "decision": "s11_20_barcode_bridge_gap_pending",
+          "nodeName": "qrcode.recognizeTexts",
+          "decision": "p12_29_qrcode_compat_facade",
           "notes": [
-            "P12-28 exposes barcode.recognizeTexts({ qrOnly: true }) as a direct provider path; Rhino qrcode facade parity remains pending P12-29."
+            "P12-29 maps qrcode.recognizeTexts() and callable compat.qrcode(...) to QR-only string array output."
           ]
         }
       ]
@@ -11754,9 +11756,9 @@
     }
   ],
   "totals": {
-    "partial": 330,
+    "partial": 320,
     "unsupported": 374,
-    "supported_async": 54,
+    "supported_async": 64,
     "blocked_by_design": 45,
     "supported": 148,
     "renamed": 1

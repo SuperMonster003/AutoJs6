@@ -62,12 +62,13 @@ which Phase 12 workstream owns the next implementation or rejection.
   `floaty.window()` / `floaty.rawWindow()` raw-wrapper parity remains
   `blocked_by_design` and must not be exposed as raw Android/Rhino objects.
 - `barcode.qrcode`: P12-27 locks the barcode provider v1 JSON-safe schema for
-  future barcode and qrcode compatibility. P12-28 adds the direct
-  `require("barcode")` provider POC with `detect`, `detectAll`,
-  `recognizeText`, and `recognizeTexts`, a `barcode` capability, provider
-  registry health, fake transport conformance, live ML Kit image-handle gate,
-  timeout/cleanup diagnostics, and JSON barcode snapshots. Rhino
-  `compat.barcode` and `compat.qrcode` facades remain pending P12-29.
+  barcode and qrcode compatibility. P12-28 adds the direct `require("barcode")`
+  provider POC with `detect`, `detectAll`, `recognizeText`, and
+  `recognizeTexts`, a `barcode` capability, provider registry health, fake
+  transport conformance, live ML Kit image-handle gate, timeout/cleanup
+  diagnostics, and JSON barcode snapshots. P12-29 adds Rhino-style
+  `autojs6:compat.barcode` and QR-only `autojs6:compat.qrcode` facades over
+  that provider; packaged barcode/qrcode smoke remains P12-30.
 
 ## Current Design-Locked Surfaces
 

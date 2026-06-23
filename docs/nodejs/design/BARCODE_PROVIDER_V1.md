@@ -1,15 +1,15 @@
 # Barcode Provider V1
 
-Status: P12-27 design-locked contract for a future controlled `barcode`
-bridge provider and later `compat.barcode` / `compat.qrcode` facades.
+Status: P12-27 design-locked contract for the controlled `barcode` bridge
+provider and `compat.barcode` / `compat.qrcode` facades.
 
 P12-27 does not expose a runtime module. It locks the JSON-safe request and
-result shape that P12-28 implements before P12-29 can add Rhino-style compat
+result shape that P12-28 implements and P12-29 wraps with Rhino-style compat
 facades.
 
 Implementation note: P12-28 exposes the direct `require("barcode")` provider
-POC over this contract. `compat.barcode` and `compat.qrcode` remain pending
-P12-29.
+POC over this contract. P12-29 exposes `compat.barcode` and QR-only
+`compat.qrcode` over that provider.
 
 ## Decision
 
@@ -79,8 +79,8 @@ exposing the ML Kit class: `QR_CODE`, `AZTEC`, `CODABAR`, `CODE_39`, `CODE_93`,
 `UPC_E`, and `ALL`.
 
 `qrOnly: true` is the qrcode compatibility mode. It is equivalent to
-`formats: ["QR_CODE"]`. A future `compat.qrcode` facade must always set this
-mode and must reject any non-QR format filter.
+`formats: ["QR_CODE"]`. The P12-29 `compat.qrcode` facade always sets this mode
+and rejects any non-QR format filter.
 
 ## Result Snapshot
 
@@ -191,7 +191,7 @@ model assets or Google Play services are unavailable in a packaged APK, the
 provider must return a stable degraded/unavailable error. Packaged code must not
 receive raw `Bitmap`, ML Kit scanner, or model path objects.
 
-## P12-28 And P12-29 Handoff
+## P12-28 And P12-29 Implementation
 
 P12-28 owns runtime provider implementation:
 
@@ -209,5 +209,4 @@ P12-29 owns compatibility facades:
 - `qrcode` fixed QR-only filter;
 - `recognizeText`/`recognizeTexts` Rhino return shape.
 
-Until those tasks land, barcode/qrcode remain a documented bridge gap in the
-status manifest.
+P12-30 still owns examples and packaged smoke evidence.

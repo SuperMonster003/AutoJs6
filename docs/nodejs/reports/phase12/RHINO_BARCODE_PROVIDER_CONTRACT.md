@@ -61,12 +61,13 @@ pointers, Java objects, Android objects, and arbitrary handles.
 
 ## Current Runtime State
 
-Barcode/qrcode remains a bridge gap after P12-27. P12-28 now lands the direct
-`require("barcode")` provider, but the status manifest still keeps `barcode`
-and `barcode.qr_code` partial until P12-29 lands the compat facades.
+Barcode/qrcode was a bridge gap after P12-27. P12-28 lands the direct
+`require("barcode")` provider, and P12-29 lands `compat.barcode` plus QR-only
+`compat.qrcode` over that provider.
 
 ## Next Work
 
 P12-28 implements `NodeBridgeModules.BARCODE`, the `barcode` capability,
 fake-provider shape tests, live ML Kit provider evidence, provider health, and
-handle cleanup. P12-29 should add `compat.barcode` and `compat.qrcode` wrappers.
+handle cleanup. P12-29 adds `compat.barcode` and `compat.qrcode` wrappers.
+P12-30 remains responsible for examples and packaged smoke.

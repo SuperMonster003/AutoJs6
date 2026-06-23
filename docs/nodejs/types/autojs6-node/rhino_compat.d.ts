@@ -11,6 +11,7 @@ declare module "autojs6:compat" {
   import image = require("image");
   import mediaProjection = require("media_projection");
   import ocr = require("ocr");
+  import barcodeModule = require("barcode");
   import ui = require("ui");
   import files = require("files");
   import base64 = require("base64");
@@ -249,6 +250,27 @@ declare module "autojs6:compat" {
       readonly mode: "mlkit";
     }
 
+    export type BarcodeImageInput = string | AutoJs6Node.ImageHandleLike | barcodeModule.PathImageInput | barcodeModule.HandleImageInput | barcodeModule.CaptureImageInput;
+
+    export type RhinoBarcodeOptions = Omit<barcodeModule.BarcodeOptions, "region"> & {
+      readonly region?: ImageRegionInput;
+    };
+
+    export type BarcodeInputOptions = RhinoBarcodeOptions | ImageRegionInput;
+
+    export interface RhinoBarcodeCompatFunction {
+      (options?: BarcodeInputOptions): Promise<readonly string[]>;
+      (image: BarcodeImageInput, options?: BarcodeInputOptions): Promise<readonly string[]>;
+      detect(options?: BarcodeInputOptions): Promise<barcodeModule.BarcodeSnapshot | null>;
+      detect(image: BarcodeImageInput, options?: BarcodeInputOptions): Promise<barcodeModule.BarcodeSnapshot | null>;
+      detectAll(options?: BarcodeInputOptions): Promise<readonly barcodeModule.BarcodeSnapshot[]>;
+      detectAll(image: BarcodeImageInput, options?: BarcodeInputOptions): Promise<readonly barcodeModule.BarcodeSnapshot[]>;
+      recognizeText(options?: BarcodeInputOptions): Promise<string | null>;
+      recognizeText(image: BarcodeImageInput, options?: BarcodeInputOptions): Promise<string | null>;
+      recognizeTexts(options?: BarcodeInputOptions): Promise<readonly string[]>;
+      recognizeTexts(image: BarcodeImageInput, options?: BarcodeInputOptions): Promise<readonly string[]>;
+    }
+
     export interface RhinoEventKeysCompatModule {
       readonly home: 3;
       readonly HOME: 3;
@@ -370,6 +392,8 @@ declare module "autojs6:compat" {
       readonly shell: ShellCompatFunction;
       readonly images: RhinoImagesCompatModule;
       readonly ocr: RhinoOcrCompatFunction;
+      readonly barcode: RhinoBarcodeCompatFunction;
+      readonly qrcode: RhinoBarcodeCompatFunction;
       readonly ui: RhinoUiCompatModule;
       readonly tasks: RhinoTasksCompatModule;
       requestScreenCapture(options?: ScreenCaptureRequestOptions): Promise<boolean>;

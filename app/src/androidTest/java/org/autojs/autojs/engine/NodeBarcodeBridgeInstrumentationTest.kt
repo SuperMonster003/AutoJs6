@@ -136,11 +136,18 @@ class NodeBarcodeBridgeInstrumentationTest {
               });
 
               const barcode = require("barcode");
+              const compat = require("autojs6:compat");
               const handle = imageHandle("image-1", 10, 20);
               const one = await barcode.detect(handle, { formats: ["QR_CODE"], timeoutMs: 1201 });
               const all = await barcode.detectAll({ type: "path", path: "fixtures/qr.png" }, { format: "QR_CODE", maxResults: 1, timeoutMs: 1202 });
               const text = await barcode.recognizeText(handle, { timeoutMs: 1203 });
               const texts = await barcode.recognizeTexts({ type: "capture", requireExistingPermission: true }, { qrOnly: true, timeoutMs: 1204 });
+              const compatOne = await compat.barcode.detect(handle, { format: "QR_CODE", timeoutMs: 1210 });
+              const compatAll = await compat.barcode.detectAll("fixtures/qr-compat.png", { format: "QR_CODE", maxResults: 1, timeoutMs: 1211 });
+              const compatText = await compat.barcode.recognizeText({ timeoutMs: 1212 });
+              const compatTexts = await compat.qrcode.recognizeTexts(handle, { maxResults: 2, timeoutMs: 1213 });
+              const compatQrOne = await compat.qrcode.detect(handle, { timeoutMs: 1214 });
+              const compatQrCallable = await compat.qrcode(handle, { timeoutMs: 1215 });
 
               let qrOnlyReject = "";
               try {
@@ -148,12 +155,19 @@ class NodeBarcodeBridgeInstrumentationTest {
               } catch (error) {
                 qrOnlyReject = error.autojs6Code || error.code;
               }
+              let compatQrReject = "";
+              try {
+                await compat.qrcode.detect(handle, { formats: ["EAN_13"] });
+              } catch (error) {
+                compatQrReject = error.autojs6Code || error.code;
+              }
               let captureReject = "";
               try {
                 await barcode.detect({ type: "capture", requireExistingPermission: false });
               } catch (error) {
                 captureReject = error.autojs6Code || error.code;
               }
+              const compatInstall = compat.install({ globals: true });
 
               console.log("barcode.resolve=" + require.resolve("barcode"));
               console.log("barcode.shadow=" + (barcode.shadow === true));
@@ -162,10 +176,15 @@ class NodeBarcodeBridgeInstrumentationTest {
               console.log("barcode.snapshot=" + [Object.isFrozen(one), Object.isFrozen(one.boundingBox), one.rawValue, one.formatName, one.structured.url.url].join("|"));
               console.log("barcode.all=" + [Object.isFrozen(all), all.length, all[0].rawValue].join("|"));
               console.log("barcode.text=" + [text, texts.join(",")].join("|"));
-              console.log("barcode.rejects=" + [qrOnlyReject, captureReject].join("|"));
+              console.log("compat.barcode.methods=" + [Object.isFrozen(compat.barcode), Object.isFrozen(compat.qrcode), typeof compat.barcode.detect, typeof compat.qrcode.detectAll, typeof compat.qrcode.rawScanner].join("|"));
+              console.log("compat.barcode.results=" + [Object.isFrozen(compatOne), Object.isFrozen(compatAll), compatOne.rawValue, compatAll[0].rawValue, compatText, compatTexts.join(","), compatQrOne.formatName, compatQrCallable.length].join("|"));
+              console.log("compat.barcode.global=" + [globalThis.barcode === compat.barcode, globalThis.qrcode === compat.qrcode, compatInstall.globals.indexOf("barcode") >= 0, compatInstall.globals.indexOf("qrcode") >= 0, compat.status().implementedTasks.indexOf("P12-29") >= 0, compat.status().moduleNames.indexOf("qrcode") >= 0].join("|"));
+              console.log("barcode.rejects=" + [qrOnlyReject, compatQrReject, captureReject].join("|"));
               console.log("barcode.requests=" + requests.map((request) => request.module + "." + request.method).join("|"));
               const barcodeCall = requests.find((request) => request.module === "barcode" && request.method === "detectAll");
               console.log("barcode.request=" + [barcodeCall.module, barcodeCall.method, barcodeCall.args[0].id, barcodeCall.args[1].formats[0], barcodeCall.timeoutMs, barcodeCall.permissions.join(",")].join("|"));
+              const qrcodeCall = requests.find((request) => request.module === "barcode" && request.method === "detect" && request.timeoutMs === 1214);
+              console.log("qrcode.request=" + [qrcodeCall.module, qrcodeCall.method, qrcodeCall.args[0].id, qrcodeCall.args[1].qrOnly, qrcodeCall.args[1].formats[0], qrcodeCall.timeoutMs].join("|"));
               console.log("barcode.pending=" + bridge.__test.pendingCount());
             })();
             """.trimIndent(),
@@ -181,10 +200,14 @@ class NodeBarcodeBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("barcode.snapshot=true|true|https://example.com/one|QR_CODE|https://example.com/one"))
         assertTrue(result.stdout.contains("barcode.all=true|1|https://example.com/all"))
         assertTrue(result.stdout.contains("barcode.text=https://example.com/text|https://example.com/a,https://example.com/b"))
-        assertTrue(result.stdout.contains("barcode.rejects=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
+        assertTrue(result.stdout.contains("compat.barcode.methods=true|true|function|function|undefined"))
+        assertTrue(result.stdout.contains("compat.barcode.results=true|true|https://example.com/one|https://example.com/all|https://example.com/text|https://example.com/a,https://example.com/b|QR_CODE|2"))
+        assertTrue(result.stdout.contains("compat.barcode.global=true|true|true|true|true|true"))
+        assertTrue(result.stdout.contains("barcode.rejects=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED|ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.stdout.contains("images.readImage|barcode.detectAll|images.recycle"))
         assertTrue(result.stdout.contains("images.captureScreen|barcode.recognizeTexts|images.recycle"))
         assertTrue(result.stdout.contains("barcode.request=barcode|detectAll|read-fixtures/qr.png|QR_CODE|1202|barcode,image"))
+        assertTrue(result.stdout.contains("qrcode.request=barcode|detect|image-1|true|QR_CODE|1214"))
         assertTrue(result.stdout.contains("barcode.pending=0"))
     }
 

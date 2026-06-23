@@ -1,7 +1,7 @@
 # Rhino Barcode/Qrcode Provider Implementation
 
-Status: P12-28 direct `barcode` bridge provider POC implemented; Rhino
-`compat.barcode` and `compat.qrcode` facades remain pending P12-29.
+Status: P12-28 direct `barcode` bridge provider POC implemented; P12-29 now
+layers Rhino `compat.barcode` and `compat.qrcode` facades over this provider.
 
 ## Runtime Surface
 
@@ -86,7 +86,6 @@ calendarEvent, and driverLicense.
 
 ## Handoff
 
-P12-29 should add `compat.barcode` and `compat.qrcode` wrappers over this
-provider. `compat.qrcode` must force QR-only mode and reject non-QR format
-filters. Until then, the Rhino API status manifest keeps barcode/qrcode entries
-as partial compatibility surfaces even though the direct provider exists.
+P12-29 adds `compat.barcode` and `compat.qrcode` wrappers over this provider.
+`compat.qrcode` forces QR-only mode and rejects non-QR format filters. P12-30
+still owns examples and packaged smoke evidence.

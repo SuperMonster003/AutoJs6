@@ -16365,6 +16365,8 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_rhino_compat_images_cache = null;
   let __autojs6_rhino_compat_screen_capturer_cache = null;
   let __autojs6_rhino_compat_ocr_cache = null;
+  let __autojs6_rhino_compat_barcode_cache = null;
+  let __autojs6_rhino_compat_qrcode_cache = null;
   let __autojs6_rhino_compat_tasks_cache = null;
   const __autojs6_rhino_compat_key_constants = Object.freeze({
     home: 3,
@@ -16383,8 +16385,8 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_rhino_compat_events = Object.freeze({
     keys: __autojs6_rhino_compat_key_constants
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "keys", "ui"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "events.keys", "ui", "tasks"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "keys", "ui"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "events.keys", "ui", "tasks"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -16914,6 +16916,122 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     __autojs6_rhino_compat_ocr_cache = Object.freeze(callable);
     return __autojs6_rhino_compat_ocr_cache;
+  }
+  function __autojs6_rhino_compat_barcode_image_source(value) {
+    if (typeof value === "string" || !!__autojs6_normalize_image_handle(value)) {
+      return true;
+    }
+    if (!value || typeof value !== "object") {
+      return false;
+    }
+    const type = String(value.type === undefined || value.type === null ? "" : value.type);
+    return type === "path" || type === "imageHandle" || type === "capture";
+  }
+  function __autojs6_rhino_compat_barcode_options(value, apiName, qrOnly) {
+    if (value === undefined || value === null) {
+      return qrOnly ? Object.freeze({ qrOnly: true, formats: Object.freeze(["QR_CODE"]) }) : undefined;
+    }
+    let output;
+    if (__autojs6_rhino_compat_ocr_region_like(value)) {
+      output = {
+        region: __autojs6_rhino_compat_image_region(value, undefined, undefined, undefined, apiName)
+      };
+    } else if (typeof value === "object" && !Array.isArray(value)) {
+      output = {};
+      Object.keys(value).forEach(function(key) {
+        output[key] = value[key];
+      });
+      if (output.region !== undefined && output.region !== null) {
+        output.region = __autojs6_rhino_compat_image_region(output.region, undefined, undefined, undefined, apiName);
+      }
+    } else {
+      throw __autojs6_rhino_compat_error(
+        "autojs6:compat." + apiName + " options must be an object or region tuple when provided.",
+        __autojs6_rhino_compat_error_codes.invalidOption,
+        apiName,
+        "invalid-option"
+      );
+    }
+    if (qrOnly) {
+      output.qrOnly = true;
+    }
+    const normalized = __autojs6_barcode_options(output, apiName);
+    Object.keys(normalized).forEach(function(key) {
+      output[key] = normalized[key];
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_rhino_compat_barcode_source_args(imageOrOptions, maybeOptions, apiName, qrOnly) {
+    const hasImageSource = __autojs6_rhino_compat_barcode_image_source(imageOrOptions);
+    return Object.freeze({
+      image: hasImageSource ? imageOrOptions : undefined,
+      options: __autojs6_rhino_compat_barcode_options(hasImageSource ? maybeOptions : imageOrOptions, apiName, qrOnly)
+    });
+  }
+  function __autojs6_rhino_compat_barcode_with_image(apiName, qrOnly, imageOrOptions, maybeOptions, continuation) {
+    const imageModule = __autojs6_limited_image("images");
+    let args;
+    try {
+      args = __autojs6_rhino_compat_barcode_source_args(imageOrOptions, maybeOptions, apiName, qrOnly);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    if (args.image !== undefined) {
+      return continuation(args.image, args.options);
+    }
+    const captureOptions = __autojs6_rhino_compat_capture_options(args.options, apiName);
+    return imageModule.captureScreen(captureOptions).then(function(handle) {
+      return __autojs6_rhino_compat_recycle_after_settle(imageModule, handle, function() {
+        return continuation(handle, args.options);
+      });
+    });
+  }
+  function __autojs6_rhino_compat_barcode_facade(moduleName, qrOnly) {
+    const barcodeModule = __autojs6_limited_barcode();
+    function detect(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_barcode_with_image(moduleName + ".detect", qrOnly, imageOrOptions, maybeOptions, function(image, options) {
+        return barcodeModule.detect(image, options);
+      });
+    }
+    function detectAll(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_barcode_with_image(moduleName + ".detectAll", qrOnly, imageOrOptions, maybeOptions, function(image, options) {
+        return barcodeModule.detectAll(image, options);
+      });
+    }
+    function recognizeText(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_barcode_with_image(moduleName + ".recognizeText", qrOnly, imageOrOptions, maybeOptions, function(image, options) {
+        return barcodeModule.recognizeText(image, options);
+      });
+    }
+    function recognizeTexts(imageOrOptions, maybeOptions) {
+      return __autojs6_rhino_compat_barcode_with_image(moduleName + ".recognizeTexts", qrOnly, imageOrOptions, maybeOptions, function(image, options) {
+        return barcodeModule.recognizeTexts(image, options);
+      });
+    }
+    const callable = function(imageOrOptions, maybeOptions) {
+      return recognizeTexts(imageOrOptions, maybeOptions);
+    };
+    Object.defineProperties(callable, {
+      detect: { value: detect, enumerable: true },
+      detectAll: { value: detectAll, enumerable: true },
+      recognizeText: { value: recognizeText, enumerable: true },
+      recognizeTexts: { value: recognizeTexts, enumerable: true }
+    });
+    return Object.freeze(callable);
+  }
+  function __autojs6_rhino_compat_barcode() {
+    if (__autojs6_rhino_compat_barcode_cache) {
+      return __autojs6_rhino_compat_barcode_cache;
+    }
+    __autojs6_rhino_compat_barcode_cache = __autojs6_rhino_compat_barcode_facade("barcode", false);
+    return __autojs6_rhino_compat_barcode_cache;
+  }
+  function __autojs6_rhino_compat_qrcode() {
+    if (__autojs6_rhino_compat_qrcode_cache) {
+      return __autojs6_rhino_compat_qrcode_cache;
+    }
+    __autojs6_rhino_compat_qrcode_cache = __autojs6_rhino_compat_barcode_facade("qrcode", true);
+    return __autojs6_rhino_compat_qrcode_cache;
   }
   function __autojs6_rhino_compat_images() {
     if (__autojs6_rhino_compat_images_cache) {
@@ -17489,6 +17607,8 @@ std::string buildEmbeddedScriptExecutionSource(
     const shell = __autojs6_rhino_compat_shell();
     const images = __autojs6_rhino_compat_images();
     const ocr = __autojs6_rhino_compat_ocr();
+    const barcode = __autojs6_rhino_compat_barcode();
+    const qrcode = __autojs6_rhino_compat_qrcode();
     const ui = __autojs6_limited_ui();
     const tasks = __autojs6_rhino_compat_tasks();
     __autojs6_rhino_compat_facade_cache = Object.freeze({
@@ -17546,6 +17666,8 @@ std::string buildEmbeddedScriptExecutionSource(
       shell: shell,
       images: images,
       ocr: ocr,
+      barcode: barcode,
+      qrcode: qrcode,
       ui: ui,
       tasks: tasks,
       requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
@@ -17569,7 +17691,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17", "P12-18"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17", "P12-18", "P12-29"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -17604,7 +17726,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants and P12-09 constrained UI; P12-17 compat.tasks stays module-only."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants, P12-09 constrained UI, and P12-29 barcode/qrcode facades; P12-17 compat.tasks stays module-only."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }
@@ -17644,6 +17766,8 @@ std::string buildEmbeddedScriptExecutionSource(
     const shell = __autojs6_rhino_compat_shell();
     const images = __autojs6_rhino_compat_images();
     const ocr = __autojs6_rhino_compat_ocr();
+    const barcode = __autojs6_rhino_compat_barcode();
+    const qrcode = __autojs6_rhino_compat_qrcode();
     const ui = __autojs6_limited_ui();
     const tasks = __autojs6_rhino_compat_tasks();
     __autojs6_limited_rhino_compat_cache = Object.freeze({
@@ -17709,6 +17833,8 @@ std::string buildEmbeddedScriptExecutionSource(
       shell: shell,
       images: images,
       ocr: ocr,
+      barcode: barcode,
+      qrcode: qrcode,
       ui: ui,
       tasks: tasks,
       requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,

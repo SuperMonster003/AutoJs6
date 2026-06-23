@@ -78,6 +78,21 @@ function buildChecks(files, repoRoot) {
   const surfaceManifest = JSON.parse(files.surfaceManifest.text);
   const barcodeModule = (statusManifest.modules || []).find((module) => module.id === "barcode");
   const qrcodeModule = (statusManifest.modules || []).find((module) => module.id === "barcode.qr_code");
+  const barcodeCompatPending = [barcodeModule, qrcodeModule].every((module) =>
+    module &&
+      module.status === "partial" &&
+      module.decision === "s11_20_barcode_bridge_gap_pending" &&
+      (module.apiEntries || []).every((entry) => entry.status !== "supported_async"),
+  );
+  const barcodeCompatPromoted = [barcodeModule, qrcodeModule].every((module) =>
+    module &&
+      module.status === "supported_async" &&
+      String(module.decision || "").indexOf("p12_29_") === 0 &&
+      (module.apiEntries || []).every((entry) =>
+        entry.status === "supported_async" &&
+        entry.nodeModule === "autojs6:compat" &&
+        entry.bridgeModule === "barcode"),
+  );
   const barcodeSurface = (surfaceManifest.surfaces || []).find((surface) => surface.id === "barcode.qrcode");
   const verifierSyntax = checkSyntax(
     path.join(repoRoot, "tools/nodejs/phase12/verify-rhino-compat-barcode-provider-implementation.js"),
@@ -156,19 +171,16 @@ function buildChecks(files, repoRoot) {
     ),
     check(
       "compat-facades-still-pending",
-      !includesAny(files.runtime.text, [
-        "__autojs6_rhino_compat_barcode",
-        "__autojs6_rhino_compat_qrcode",
-        "compat.barcode",
-        "compat.qrcode",
-      ]) &&
-        [barcodeModule, qrcodeModule].every((module) =>
-          module &&
-          module.status === "partial" &&
-          module.decision === "s11_20_barcode_bridge_gap_pending" &&
-          (module.apiEntries || []).every((entry) => entry.status !== "supported_async"),
-        ),
-      "P12-28 must expose only the direct provider; Rhino compat.barcode/qrcode remain partial until P12-29.",
+      barcodeCompatPromoted || (
+        !includesAny(files.runtime.text, [
+          "__autojs6_rhino_compat_barcode",
+          "__autojs6_rhino_compat_qrcode",
+          "compat.barcode",
+          "compat.qrcode",
+        ]) &&
+          barcodeCompatPending
+      ),
+      "P12-28 must expose the direct provider; Rhino compat.barcode/qrcode may remain pending before P12-29 or be promoted by the later P12-29 facade.",
     ),
     check(
       "types",
@@ -190,7 +202,7 @@ function buildChecks(files, repoRoot) {
           "compat.barcode",
           "compat.qrcode",
         ]),
-      "Type declarations must expose the direct barcode module without claiming compat facade support.",
+      "Type declarations must expose the direct barcode module and remain compatible with later P12-29 compat facade declarations.",
     ),
     check(
       "tests",

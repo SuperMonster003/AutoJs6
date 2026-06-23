@@ -1143,7 +1143,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-barcode-provider-implementation-verification.md`
 
-- [ ] P12-29: 实现 `compat.barcode` and `compat.qrcode` facade。
+- [x] P12-29: 实现 `compat.barcode` and `compat.qrcode` facade。
   - 范围：提供 Rhino 风格 `detect`、`detectAll`、`recognizeText`、
     `recognizeTexts` wrapper。
   - 验收：
@@ -1152,7 +1152,27 @@ Phase 12 task 本身可使用以下执行状态：
     - `detect`/`detectAll` 返回 frozen JSON snapshots。
     - status manifest 中 `barcode` 和 `barcode.qr_code` 从 provider gap 更新为
       `supported_async` 或 `partial`。
-  - Evidence：待补充。
+  - Evidence：
+    - Runtime facade：
+      `app/src/main/cpp/node_bridge_sources.cpp`
+    - Type declarations：
+      `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`
+    - Fake/conformance instrumentation：
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeBarcodeBridgeInstrumentationTest.kt`
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
+    - Status/surface manifests：
+      `docs/nodejs/rhino-compat/status-manifest.json`
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+      `docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md`
+    - Report：
+      `docs/nodejs/reports/phase12/RHINO_BARCODE_COMPAT_FACADE.md`
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-barcode-facade.js`
+    - Gradle gate：
+      `:app:verifyNodeRhinoCompatBarcodeFacade`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-barcode-facade-verification.json`
+      `build/reports/nodejs/rhino-compat-barcode-facade-verification.md`
 
 - [ ] P12-30: 增加 barcode/qrcode examples and packaged smoke。
   - 范围：补齐迁移示例、fixture、device 或 packaged 验证。

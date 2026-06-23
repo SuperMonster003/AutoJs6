@@ -278,6 +278,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["ui", ui],
                 ["work_manager", workManager],
                 ["autojs6:compat", compat],
+                ["autojs6:compat.barcode", compat.barcode],
+                ["autojs6:compat.qrcode", compat.qrcode],
                 ["autojs6:compat.ui", compat.ui],
                 ["autojs6:compat.tasks", compat.tasks]
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
@@ -303,18 +305,27 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
+              expectExports("autojs6:compat.barcode", compat.barcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
+              expectExports("autojs6:compat.qrcode", compat.qrcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("autojs6:compat.ui", compat.ui, ["showLayout", "state", "bind"]);
               expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "addDailyTask", "addWeeklyTask", "addIntentTask", "removeTask", "queryTasks", "queryIntentTasks", "queryTimedTasks", "getIntentTask", "getTimedTask", "removeIntentTask", "removeTimedTask", "updateTask"]);
+              assert.strictEqual(globalThis.barcode, undefined, "compat.barcode must not install a default global");
+              assert.strictEqual(globalThis.qrcode, undefined, "compat.qrcode must not install a default global");
               assert.strictEqual(globalThis.ui, undefined, "compat.ui must not install a default global");
               assert.strictEqual(globalThis.tasks, undefined, "compat.tasks must not install a default global");
               assert.strictEqual(typeof compat.ui.run, "undefined");
               assert.strictEqual(typeof compat.ui.post, "undefined");
               assert.strictEqual(typeof compat.ui.findById, "undefined");
               const compatInstall = compat.install({ globals: true });
+              assert(compatInstall.globals.indexOf("barcode") >= 0, "compat.install({ globals: true }) must install barcode global");
+              assert(compatInstall.globals.indexOf("qrcode") >= 0, "compat.install({ globals: true }) must install qrcode global");
+              assert.strictEqual(globalThis.barcode, compat.barcode);
+              assert.strictEqual(globalThis.qrcode, compat.qrcode);
               assert(compatInstall.globals.indexOf("ui") >= 0, "compat.install({ globals: true }) must install constrained ui global");
               assert.strictEqual(globalThis.ui, compat.ui);
               assert.strictEqual(globalThis.tasks, undefined, "compat.install({ globals: true }) must not install tasks global");
               assert.strictEqual(typeof globalThis.ui.layout, "undefined");
+              assert(compat.status().implementedTasks.indexOf("P12-29") >= 0, "compat.status must include P12-29");
 
               assert.strictEqual(typeof app.packageName, "string");
               assert.strictEqual(typeof app.versionName, "string");
@@ -397,6 +408,11 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual((await expectPromise("barcode.detectAll", barcode.detectAll(capture, { qrOnly: true, timeoutMs: 1056 })))[0].formatName, "QR_CODE");
               assert.strictEqual(await expectPromise("barcode.recognizeText", barcode.recognizeText(capture, { timeoutMs: 1056 })), "https://example.com");
               assert.strictEqual((await expectPromise("barcode.recognizeTexts", barcode.recognizeTexts(capture, { timeoutMs: 1056 }))).length, 2);
+              assert.strictEqual((await expectPromise("compat.barcode.detect", compat.barcode.detect(capture, { timeoutMs: 1056 }))).rawValue, "https://example.com");
+              assert.strictEqual((await expectPromise("compat.barcode.detectAll", compat.barcode.detectAll(capture, { format: "QR_CODE", timeoutMs: 1056 })))[0].formatName, "QR_CODE");
+              assert.strictEqual(await expectPromise("compat.barcode.recognizeText", compat.barcode.recognizeText(capture, { timeoutMs: 1056 })), "https://example.com");
+              assert.strictEqual((await expectPromise("compat.qrcode.recognizeTexts", compat.qrcode.recognizeTexts(capture, { timeoutMs: 1056 }))).length, 2);
+              assert.strictEqual((await expectPromise("compat.qrcode.detectAll", compat.qrcode.detectAll(capture, { timeoutMs: 1056 })))[0].formatName, "QR_CODE");
               const store = storage.create("settings");
               expectFrozen("storage.store", store);
               expectExports("storage.store", store, ["get", "put", "remove", "clear", "keys", "contains"]);
