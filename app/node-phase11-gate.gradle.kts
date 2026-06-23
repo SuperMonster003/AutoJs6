@@ -756,6 +756,48 @@ tasks.register<Exec>("verifyNodeRhinoCompatFloatyDesign") {
     )
 }
 
+tasks.register<Exec>("verifyNodeRhinoCompatThreadsPolicy") {
+    group = "verification"
+    description = "Verifies the Phase 11A Rhino threads migration policy gate."
+
+    dependsOn("generateNodeRhinoCompatMatrix")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-compat-threads-policy.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_COMPAT_LOADER.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/MIGRATION_FROM_RHINO.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/V1_1_WORKER_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/WORKER_THREADS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/LONG_RUNNING_SERVICE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase9/ISOLATION_POLICY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase10/WORKER_WASI_BOUNDARY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/status-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/rhino_compat.d.ts"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/api/augment/threads/Threads.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/api/Threads.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/runtime/api/augment/threads/VolatileDisposeNativeObject.kt"))
+    outputs.files(
+        nodePhase11ReportDir.map { it.file("rhino-compat-threads-policy-verification.json") },
+        nodePhase11ReportDir.map { it.file("rhino-compat-threads-policy-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase11ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeFinalCapabilityTruth") {
     group = "verification"
     description = "Writes build/reports/nodejs/final-capability-truth.json without failing on open Phase 11 blockers."

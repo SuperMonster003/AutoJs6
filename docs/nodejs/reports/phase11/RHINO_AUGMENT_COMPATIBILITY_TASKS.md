@@ -421,11 +421,19 @@ Inventory 和兼容矩阵统一使用以下状态：
   - Evidence: `tools/nodejs/phase11/verify-rhino-compat-floaty-design.js` and
     `:app:verifyNodeRhinoCompatFloatyDesign`.
 
-- [ ] S11-25: 明确 threads migration policy。
+- [x] S11-25: 明确 threads migration policy。
   - 范围：Rhino `threads` 到 Node async/process slot/worker policy 的迁移。
   - 产物：policy doc、examples。
   - 验收：不承诺默认 `worker_threads`；同步共享对象模型标记为
     `blocked_by_design` 或替代方案。
+  - Decision: `threads.start()` / `threads.pool()` / `threads.disposable()` /
+    `sync(fn, lock)` 均保持 `blocked_by_design`；迁移目标为 `async` /
+    `await`、`AbortController`、显式 `engines` execution slot、`work_manager`
+    或未来单独命名的 compute/process worker policy。
+  - Evidence:
+    `docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md`,
+    `tools/nodejs/phase11/verify-rhino-compat-threads-policy.js` and
+    `:app:verifyNodeRhinoCompatThreadsPolicy`.
 
 - [ ] S11-26: 设计 explicit Rhino JSON-only shim。
   - 范围：`rhino.run({ source, timeoutMs, args })` 或等价显式 API。

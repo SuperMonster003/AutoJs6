@@ -172,10 +172,25 @@ Rhino scripts may use older thread APIs. Node scripts should prefer:
 
 - `Promise`
 - `async` / `await`
-- timers
+- timers and `timers/promises`
+- `AbortController`
 - bridge APIs with timeout options
+- explicit `engines.execScriptFile()` / `engines.execScript()` slots for
+  separate bounded executions
+- `work_manager` for scheduled bounded work
 
-The `threads` module is not available in Node scripts, and Node `worker_threads` remains disabled by default.
+The `threads` module is not available in Node scripts, and Node
+`worker_threads` remains disabled by default. Do not migrate Rhino code by
+expecting `require("threads")`, `compat.threads`, a global `threads`, a global
+`sync`, or default `worker_threads` to exist.
+
+`threads.start()`, `threads.pool()`, `threads.interrupt()`,
+`threads.disposable()`, and `sync(fn, lock)` are all `blocked_by_design` as
+exact Node compatibility targets. They depend on shared Rhino `ScriptRuntime`
+state, raw Java `Thread` / `ThreadPoolExecutor` handles, Rhino `Synchronizer`,
+Java locks, and blocking `VolatileDispose` waits. Node code must not block the
+event loop or share mutable Rhino/Java objects across execution slots. See
+[RHINO_THREADS_MIGRATION_POLICY.md](design/RHINO_THREADS_MIGRATION_POLICY.md).
 
 Before:
 
@@ -276,6 +291,78 @@ Node:
   const app = require("app");
   const launched = await app.launchPackage("org.example.app", { timeoutMs: 5000 });
   console.log("launched=" + launched);
+})();
+```
+
+Rhino `threads.disposable()` code that waits with `blockedGet()` should become
+a Promise flow:
+
+```js
+"nodejs";
+
+(async function main() {
+  const fs = require("fs/promises");
+  const value = await Promise.race([
+    fs.readFile("value.txt", "utf8"),
+    new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000))
+  ]);
+  console.log(value);
+})();
+```
+
+Rhino `sync(fn, lock)` should become an async serialized owner rather than a
+shared lock:
+
+```js
+"nodejs";
+
+function createQueue() {
+  let tail = Promise.resolve();
+  return function enqueue(task) {
+    tail = tail.then(task, task);
+    return tail;
+  };
+}
+
+(async function main() {
+  let count = 0;
+  const enqueue = createQueue();
+  await Promise.all([
+    enqueue(() => { count += 1; }),
+    enqueue(() => { count += 1; })
+  ]);
+  console.log(count);
+})();
+```
+
+For work that really needs a separate execution slot, use a bounded script
+entry or scheduled work. This is not a same-runtime thread:
+
+```js
+"nodejs";
+
+(async function main() {
+  const engines = require("engines");
+  await engines.execScriptFile("jobs/cleanup.cjs", {
+    args: { source: "main" },
+    timeoutMs: 30000
+  });
+})();
+```
+
+Scheduled work should use `work_manager`:
+
+```js
+"nodejs";
+
+(async function main() {
+  const workManager = require("work_manager");
+  await workManager.scheduleOnce({
+    scriptPath: "jobs/cleanup.cjs",
+    backend: "embedded",
+    delayMs: 1000,
+    taskTimeoutMs: 30000
+  });
 })();
 ```
 

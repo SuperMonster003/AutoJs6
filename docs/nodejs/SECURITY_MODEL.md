@@ -321,6 +321,20 @@ success/failure cleanup. Packaged worker source graphs remain follow-up work.
 
 See `docs/nodejs/design/WORKER_THREADS.md` for the current worker boundary.
 
+S11-25 records the Rhino `threads` migration policy separately from the
+internal worker policy. Rhino `threads.start()`, `threads.pool()`,
+`threads.interrupt()`, `threads.disposable()`, and global `sync(fn, lock)` are
+`blocked_by_design` for Node because they depend on shared Rhino
+`ScriptRuntime` objects, raw Java `Thread` / `ThreadPoolExecutor` handles,
+Rhino `Synchronizer`, Java locks, and blocking `VolatileDispose` waits. The
+Safe Node Profile must not add `require("threads")`, `compat.threads`, a
+global `threads`, a global `sync`, or default `worker_threads` as a migration
+shortcut. Supported migration directions are `Promise`, `async` / `await`,
+timers, `AbortController`, bridge `timeoutMs`, explicit
+`engines.execScriptFile()` / `engines.execScript()` execution slots, and
+`work_manager` scheduled work. See
+`docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md`.
+
 ## Native Code Policy
 
 Native addons are disabled by default. Any CommonJS path that resolves to a `.node` binary must fail with
@@ -454,6 +468,8 @@ The `ui` bridge module exposes an Activity-owned live MVP under the `ui` capabil
 S11-23 records Rhino `ui` compatibility as design-gated. `ui.layout()` and `ui.layoutFile()` may migrate only through constrained JSON descriptors passed to `require("ui").showLayout()`, and updates must use `UiHandle.update()` / `UiHandle.batchUpdate()`. `ui.run()` and `ui.post()` are blocked by design for Node because they imply JavaScript execution on Android's main thread; Node callbacks run on the Node event loop after bounded `drainEvents` snapshots. `ui.inflate()`, `setContentView(view)`, `findView()`, `root`, widget registries, `R`, and Activity emitters must not expose `NativeView` or Android `View` objects to Node.
 
 S11-24 keeps Rhino `floaty` and overlay compatibility design-gated. There is no `require("floaty")`, `require("ui.overlay")`, `compat.floaty`, global `floaty`, overlay provider, packaged `SYSTEM_ALERT_WINDOW` injection, or foreground notification/disclosure model in the current Node profile. `floaty.window()` and `floaty.rawWindow()` are blocked as exact compatibility targets because they depend on XML inflation, `FloatyService`, `WindowManager`, `LayoutParams`, live `JsWindow` wrappers, and raw `View`/`NativeView` lookup. Future overlay support must use explicit overlay capability declaration, Android permission checks, user-visible foreground disclosure where required, provider-owned opaque handles, bounded `drainEvents`, and auditable close paths for handle close, script stop, service destroy, notification stop, permission revocation, packaged task removal, and process death. `floaty.getClip()` must migrate to the controlled `clipboard` bridge or `autojs6:compat.getClip()` rather than creating a hidden temporary overlay window.
+
+S11-25 keeps Rhino `threads` compatibility blocked by design. There is no `require("threads")`, `compat.threads`, global `threads`, global `sync`, default `worker_threads`, raw `Thread`, raw `ThreadPoolExecutor`, Rhino `Synchronizer`, Java lock, or `VolatileDispose` object exposed to Node. `threads.start()` and `threads.pool()` must migrate to `async` / `await`, timeout-bounded bridge calls, explicit `engines` execution slots, or `work_manager` scheduled work. `threads.interrupt()` must migrate to `AbortController`, bridge `timeoutMs`, script stop, and provider cleanup. `threads.disposable()` and `sync(fn, lock)` must migrate to Promise, `EventEmitter` / `MessageChannel`, immutable JSON snapshots, or an async queue with a single state owner. Future compute workers remain policy-gated and must not claim same-runtime Rhino thread semantics.
 
 Image and node handles must be opaque ids with explicit lifecycle cleanup.
 

@@ -17,6 +17,15 @@ Package identity: production, `org.autojs.autojs6`
 Keep `worker_threads` disabled by default and do not expose it as a release
 opt-in experiment for Node Profile v1.1.
 
+S11-25 also keeps Rhino `threads` migration separate from this internal worker
+policy. `worker_threads` is not the default replacement for
+`threads.start()`, `threads.pool()`, `threads.disposable()`, or `sync(fn,
+lock)`, and future native-available workers must not claim same-runtime Rhino
+thread semantics. Rhino thread migration uses `Promise`, `async` / `await`,
+`AbortController`, explicit `engines` execution slots, `work_manager`, or a
+future explicitly named process/compute worker policy. See
+`docs/nodejs/design/RHINO_THREADS_MIGRATION_POLICY.md`.
+
 The default-denial and design-gate behavior remains healthy under production
 identity, but the explicitly enabled worker path is still blocked by native
 availability in the current Embedded Node build:

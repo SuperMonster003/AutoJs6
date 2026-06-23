@@ -5741,11 +5741,18 @@
       "id": "threads",
       "status": "blocked_by_design",
       "asyncMode": "not_applicable",
-      "nodeModules": [],
-      "bridgeModules": [],
-      "decision": "safe_node_profile_boundary",
+      "nodeModules": [
+        "engines",
+        "timers/promises",
+        "work_manager"
+      ],
+      "bridgeModules": [
+        "engines",
+        "work_manager"
+      ],
+      "decision": "s11_25_threads_migration_policy",
       "notes": [
-        "Raw Java/thread/root automation compatibility is not exposed by default in Node."
+        "Rhino threads are not exposed in Node; migrate to async/await, AbortController, explicit engines slots, or work_manager."
       ],
       "apiEntries": [
         {
@@ -5755,9 +5762,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "safe_node_profile_boundary",
+          "decision": "s11_25_no_threads_module",
           "notes": [
-            "Raw Java/thread/root automation compatibility is not exposed by default in Node."
+            "No require(\"threads\"), compat.threads, global threads, or threads type surface is exposed."
           ]
         },
         {
@@ -5767,9 +5774,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "safe_node_profile_boundary",
+          "decision": "s11_25_blocking_disposable_blocked",
           "notes": [
-            "Raw Java/thread/root automation compatibility is not exposed by default in Node."
+            "VolatileDispose blockedGet/setAndNotify semantics block the Node event loop; use Promise, EventEmitter, or MessageChannel."
           ]
         },
         {
@@ -5779,9 +5786,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "safe_node_profile_boundary",
+          "decision": "s11_25_raw_thread_handle_blocked",
           "notes": [
-            "Raw Java/thread/root automation compatibility is not exposed by default in Node."
+            "Raw Java Thread/TimerThread handles are not exposed; use AbortController, timeoutMs, script stop, and provider cleanup."
           ]
         },
         {
@@ -5791,9 +5798,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "safe_node_profile_boundary",
+          "decision": "s11_25_thread_pool_executor_blocked",
           "notes": [
-            "Raw Java/thread/root automation compatibility is not exposed by default in Node."
+            "Java ThreadPoolExecutor and shared runtime pools are blocked; worker_threads is not default and future pools must be policy-gated pure compute."
           ]
         },
         {
@@ -5803,9 +5810,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "safe_node_profile_boundary",
+          "decision": "s11_25_shared_runtime_thread_blocked",
           "notes": [
-            "Raw Java/thread/root automation compatibility is not exposed by default in Node."
+            "Rhino TimerThread callbacks share ScriptRuntime state; migrate to async/await, engines execution slots, or work_manager."
           ]
         },
         {
@@ -5815,9 +5822,9 @@
           "nodeModule": null,
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "safe_node_profile_boundary",
+          "decision": "s11_25_synchronizer_lock_blocked",
           "notes": [
-            "Raw Java/thread/root automation compatibility is not exposed by default in Node."
+            "Rhino Synchronizer, Java locks, and shared mutable object locking are blocked; use an async queue or one-owner state model."
           ]
         }
       ]

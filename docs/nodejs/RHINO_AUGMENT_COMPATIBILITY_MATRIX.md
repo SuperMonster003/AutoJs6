@@ -53,7 +53,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 | 25 | ocr.ocr_rapid | rapid | unsupported | - | unsupported:3 | none | Design a Node facade or record a permanent non-goal. |
 | 26 | barcode | barcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
 | 27 | barcode.qr_code | qrcode | partial | image | partial:5 | none | Implement explicit compat facade and promote mapped APIs one by one. |
-| 28 | threads | threads | blocked_by_design | - | blocked_by_design:6 | provider_availability | Keep denial documented and covered by policy tests. |
+| 28 | threads | threads | blocked_by_design | engines, timers/promises, work_manager | blocked_by_design:6 | provider_availability | Keep denial documented and covered by policy tests. |
 | 29 | ui | ui | partial | ui | blocked_by_design:15, partial:5, unsupported:15 | lifecycle_resource, provider_availability, thread_model | Implement explicit compat facade and promote mapped APIs one by one. |
 | 30 | colors | colors | partial | autojs6:compat, colors | blocked_by_design:3, partial:2, supported:58 | provider_availability | Implement explicit compat facade and promote mapped APIs one by one. |
 | 31 | colors.color | Color | blocked_by_design | colors | blocked_by_design:1 | provider_availability | Keep denial documented and covered by policy tests. |
@@ -385,7 +385,7 @@ This Phase 11A matrix is generated from the Rhino augment inventory, the checked
 
 - Key: `threads`
 - Status: `blocked_by_design`
-- Node surface: -
+- Node surface: engines, timers/promises, work_manager
 - Coverage: `no_node_surface`
 - API status: blocked_by_design:6
 - Risks: provider_availability
