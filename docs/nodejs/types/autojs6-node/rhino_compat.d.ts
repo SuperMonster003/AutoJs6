@@ -289,8 +289,14 @@ declare module "autojs6:compat" {
 
     export interface RhinoTasksCompatModule {
       addDisposableTask(options: RhinoDisposableTaskOptions): Promise<string>;
+      addDailyTask(options?: unknown): Promise<never>;
+      addWeeklyTask(options?: unknown): Promise<never>;
       removeTask(id: string, options?: RhinoTasksRemoveOptions): Promise<boolean>;
       queryTasks(options?: RhinoTasksQueryOptions): Promise<readonly workManager.WorkTask[]>;
+      queryTimedTasks(options?: RhinoTasksQueryOptions): Promise<readonly workManager.WorkTask[]>;
+      getTimedTask(id: string | number, options?: RhinoTasksQueryOptions): Promise<workManager.WorkTask | null>;
+      removeTimedTask(id: string | number, options?: RhinoTasksRemoveOptions): Promise<boolean>;
+      updateTask(task: unknown): Promise<never>;
     }
 
     export type RhinoUiCompatModule = ui.UiModule;

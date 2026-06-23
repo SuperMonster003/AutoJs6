@@ -197,7 +197,7 @@
         "P12-18",
         "P12-19"
       ],
-      "summary": "P12-15 locks compat.tasks v1 scope to disposable one-shot add/remove/query over work_manager with JSON-safe ids/snapshots only. P12-16 promotes require(\"autojs6:compat\").tasks with addDisposableTask/removeTask/queryTasks over work_manager.scheduleOnce/cancel/list while keeping require(\"tasks\") and global tasks absent. Daily/weekly user task database decisions move to P12-17, intent/broadcast decisions move to P12-18, and raw TimedTask/IntentTask objects remain blocked_by_design.",
+      "summary": "P12-15 locks compat.tasks v1 scope to disposable one-shot add/remove/query over work_manager with JSON-safe ids/snapshots only. P12-16 promotes require(\"autojs6:compat\").tasks with addDisposableTask/removeTask/queryTasks over work_manager.scheduleOnce/cancel/list while keeping require(\"tasks\") and global tasks absent. P12-17 rejects daily/weekly user task database provider promotion with stable unsupported stubs, adds queryTimedTasks/getTimedTask/removeTimedTask aliases for Node-owned one-shot snapshots, and keeps updateTask blocked_by_design. Intent/broadcast decisions move to P12-18, and raw TimedTask/IntentTask objects remain blocked_by_design.",
       "runtimeSurface": [
         "autojs6:compat.tasks"
       ],
@@ -207,6 +207,7 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
         "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
         "docs/nodejs/design/COMPAT_TASKS_V1.md",
+        "docs/nodejs/design/TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md",
         "docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md",
         "docs/nodejs/design/WORK_MANAGER.md",
         "docs/nodejs/MIGRATION_FROM_RHINO.md",
@@ -215,8 +216,10 @@
         "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
         "tools/nodejs/phase12/verify-rhino-compat-tasks-v1-scope.js",
         "tools/nodejs/phase12/verify-rhino-compat-tasks-disposable-facade.js",
+        "tools/nodejs/phase12/verify-rhino-compat-tasks-daily-weekly-decision.js",
         ":app:verifyNodeRhinoCompatTasksV1Scope",
-        ":app:verifyNodeRhinoCompatTasksDisposableFacade"
+        ":app:verifyNodeRhinoCompatTasksDisposableFacade",
+        ":app:verifyNodeRhinoCompatTasksDailyWeeklyDecision"
       ]
     },
     {

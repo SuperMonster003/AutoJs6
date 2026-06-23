@@ -164,8 +164,8 @@ function buildChecks(files) {
         ]) &&
         entryIs(entries, "tasks.__module", "partial", "p12_16_compat_tasks_v1_facade", "tasks") &&
         entryIs(entries, "tasks.addDisposableTask", "partial", "p12_16_disposable_task_facade", "tasks.addDisposableTask") &&
-        entryIs(entries, "tasks.queryTimedTasks", "partial", "p12_16_query_tasks_node_owned_work", "tasks.queryTasks") &&
-        entryIs(entries, "tasks.removeTimedTask", "partial", "p12_16_cancel_node_owned_work_task", "tasks.removeTask") &&
+        entryIs(entries, "tasks.queryTimedTasks", "partial", ["p12_16_query_tasks_node_owned_work", "p12_17_query_timed_tasks_node_owned_snapshot_alias"], ["tasks.queryTasks", "tasks.queryTimedTasks"]) &&
+        entryIs(entries, "tasks.removeTimedTask", "partial", ["p12_16_cancel_node_owned_work_task", "p12_17_remove_timed_task_node_owned_id_alias"], ["tasks.removeTask", "tasks.removeTimedTask"]) &&
         entryIs(entries, "tasks.removeTask", "blocked_by_design", "p12_15_raw_remove_task_object_blocked_with_id_wrapper", null),
       "Status manifest must record P12-16 compat.tasks promotion while keeping raw removeTask(task) blocked.",
     ),
@@ -179,8 +179,9 @@ function buildChecks(files) {
           "| 32 | tasks | tasks | partial |",
           "autojs6:compat",
           "work_manager",
-          "Proceed to P12-17 daily/weekly user-task database decision",
-        ]),
+        ]) &&
+        (matrixTasksRow.includes("Proceed to P12-17 daily/weekly user-task database decision") ||
+          matrixTasksRow.includes("Proceed to P12-18 intent/broadcast task compatibility decision")),
       "Generated matrix must move tasks to P12-17 after P12-16 lands.",
     ),
     check(
@@ -219,10 +220,12 @@ function buildChecks(files) {
 
 function entryIs(entries, id, status, decision, nodeName) {
   const entry = entries.get(id);
-  if (!entry || entry.status !== status || entry.decision !== decision) {
+  const acceptedDecisions = Array.isArray(decision) ? decision : [decision];
+  if (!entry || entry.status !== status || !acceptedDecisions.includes(entry.decision)) {
     return false;
   }
-  if (nodeName !== undefined && entry.nodeName !== nodeName) {
+  const acceptedNodeNames = Array.isArray(nodeName) ? nodeName : [nodeName];
+  if (nodeName !== undefined && !acceptedNodeNames.includes(entry.nodeName)) {
     return false;
   }
   return true;

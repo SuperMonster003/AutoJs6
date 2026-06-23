@@ -17021,17 +17021,27 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_rhino_compat_tasks_has(input, "signal")) descriptor.signal = input.signal;
     return descriptor;
   }
-  function __autojs6_rhino_compat_tasks_query_options(options) {
-    const operation = "queryTasks";
+  function __autojs6_rhino_compat_tasks_query_options(options, operationName) {
+    const operation = operationName || "queryTasks";
     const input = __autojs6_rhino_compat_tasks_option_object(options, operation);
     __autojs6_rhino_compat_tasks_check_keys(input, operation, ["timeoutMs", "signal"]);
     return input;
   }
-  function __autojs6_rhino_compat_tasks_remove_options(options) {
-    const operation = "removeTask";
+  function __autojs6_rhino_compat_tasks_remove_options(options, operationName) {
+    const operation = operationName || "removeTask";
     const input = __autojs6_rhino_compat_tasks_option_object(options, operation);
     __autojs6_rhino_compat_tasks_check_keys(input, operation, ["timeoutMs", "signal"]);
     return input;
+  }
+  function __autojs6_rhino_compat_timed_task_id(value, operation) {
+    if (value && typeof value === "object") {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires a non-empty Node-owned task id string.");
+    }
+    const id = value === undefined || value === null ? "" : String(value).trim();
+    if (!id) {
+      throw __autojs6_rhino_compat_tasks_invalid(operation, "requires a non-empty Node-owned task id string.");
+    }
+    return id;
   }
   function __autojs6_rhino_compat_task_id(value) {
     if (value && typeof value === "object") {
@@ -17042,6 +17052,46 @@ std::string buildEmbeddedScriptExecutionSource(
       throw __autojs6_rhino_compat_tasks_invalid("removeTask", "requires a non-empty task id string.");
     }
     return id;
+  }
+  function __autojs6_rhino_compat_tasks_query_node_owned(options, operation) {
+    let input;
+    try {
+      input = __autojs6_rhino_compat_tasks_query_options(options, operation);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_limited_work_manager().list(input).then(function(tasks) {
+      return Object.freeze(tasks.filter(function(task) {
+        return task && task.type === "once";
+      }));
+    });
+  }
+  function __autojs6_rhino_compat_tasks_remove_node_owned(taskId, options, operation) {
+    let id;
+    let input;
+    try {
+      id = operation === "removeTask"
+        ? __autojs6_rhino_compat_task_id(taskId)
+        : __autojs6_rhino_compat_timed_task_id(taskId, operation);
+      input = __autojs6_rhino_compat_tasks_remove_options(options, operation);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_limited_work_manager().cancel(id, input).then(function() {
+      return true;
+    });
+  }
+  function __autojs6_rhino_compat_tasks_reject_wall_clock(apiName) {
+    return Promise.reject(__autojs6_rhino_compat_unsupported(
+      apiName,
+      "P12-17 keeps daily/weekly wall-clock user task database compatibility unpromoted; use compat.tasks.addDisposableTask for one-shot work, keep Rhino for AutoJs6 user-visible wall-clock tasks, or use work_manager.schedulePeriodic only when OS-managed cadence is intended."
+    ));
+  }
+  function __autojs6_rhino_compat_tasks_reject_update() {
+    return Promise.reject(__autojs6_rhino_compat_blocked_by_design(
+      "tasks.updateTask",
+      "P12-17 has no JSON patch/update provider for the AutoJs6 user task database; raw TimedTask/IntentTask objects cannot cross into Node."
+    ));
   }
   function __autojs6_rhino_compat_tasks() {
     if (__autojs6_rhino_compat_tasks_cache) {
@@ -17057,31 +17107,40 @@ std::string buildEmbeddedScriptExecutionSource(
         }
         return __autojs6_limited_work_manager().scheduleOnce(descriptor);
       },
+      addDailyTask: function(options) {
+        return __autojs6_rhino_compat_tasks_reject_wall_clock("tasks.addDailyTask");
+      },
+      addWeeklyTask: function(options) {
+        return __autojs6_rhino_compat_tasks_reject_wall_clock("tasks.addWeeklyTask");
+      },
       removeTask: function(taskId, options) {
-        let id;
-        let input;
-        try {
-          id = __autojs6_rhino_compat_task_id(taskId);
-          input = __autojs6_rhino_compat_tasks_remove_options(options);
-        } catch (error) {
-          return Promise.reject(error);
-        }
-        return __autojs6_limited_work_manager().cancel(id, input).then(function() {
-          return true;
-        });
+        return __autojs6_rhino_compat_tasks_remove_node_owned(taskId, options, "removeTask");
       },
       queryTasks: function(options) {
-        let input;
+        return __autojs6_rhino_compat_tasks_query_node_owned(options, "queryTasks");
+      },
+      queryTimedTasks: function(options) {
+        return __autojs6_rhino_compat_tasks_query_node_owned(options, "queryTimedTasks");
+      },
+      getTimedTask: function(taskId, options) {
+        let id;
         try {
-          input = __autojs6_rhino_compat_tasks_query_options(options);
+          id = __autojs6_rhino_compat_timed_task_id(taskId, "getTimedTask");
         } catch (error) {
           return Promise.reject(error);
         }
-        return __autojs6_limited_work_manager().list(input).then(function(tasks) {
-          return Object.freeze(tasks.filter(function(task) {
-            return task && task.type === "once";
-          }));
+        return __autojs6_rhino_compat_tasks_query_node_owned(options, "getTimedTask").then(function(tasks) {
+          const matches = tasks.filter(function(task) {
+            return task && String(task.id) === id;
+          });
+          return matches.length > 0 ? matches[0] : null;
         });
+      },
+      removeTimedTask: function(taskId, options) {
+        return __autojs6_rhino_compat_tasks_remove_node_owned(taskId, options, "removeTimedTask");
+      },
+      updateTask: function(task) {
+        return __autojs6_rhino_compat_tasks_reject_update();
       }
     });
     return __autojs6_rhino_compat_tasks_cache;
@@ -17174,7 +17233,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -17209,7 +17268,7 @@ std::string buildEmbeddedScriptExecutionSource(
       modules: __autojs6_rhino_compat_basic_module_names,
       warnings: Object.freeze(warnings),
       reason: installGlobals
-        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants and P12-09 constrained UI; P12-16 compat.tasks stays module-only."
+        ? "Installed Rhino compatibility globals for S11-09 through S11-20 plus P12-03 key constants and P12-09 constrained UI; P12-17 compat.tasks stays module-only."
         : "No globals installed; use the returned autojs6:compat module methods or pass { globals: true }."
     });
   }

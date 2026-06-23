@@ -323,10 +323,13 @@ The safe migration subset is intentionally narrow:
   `work_manager.scheduleOnce()` only when its absolute date/time is converted to a
   bounded future `delayMs` and the script entry is scoped.
 - `tasks.queryTimedTasks()`, `getTimedTask()`, and `removeTimedTask()` can target
-  JSON snapshots and ids for Node-owned WorkManager records only.
-- `tasks.addDailyTask()` and `tasks.addWeeklyTask()` must wait for a user-visible
-  task database provider because wall-clock time, weekdays, next-run calculation,
-  exact-alarm policy, and task UI state are not WorkManager periodic cadence.
+  JSON snapshots and ids for Node-owned WorkManager one-shot records only. P12-17
+  exposes these as `compat.tasks` Rhino-name aliases without reading the Rhino
+  task database.
+- `tasks.addDailyTask()` and `tasks.addWeeklyTask()` remain rejected in P12-17
+  with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` because wall-clock time, weekdays,
+  next-run calculation, exact-alarm policy, and task UI state are not WorkManager
+  periodic cadence.
 - `tasks.addIntentTask()`, intent queries, startup, boot, package, and custom
   broadcast triggers stay with `BROADCAST_TASKS.md`.
 - `tasks.addTask()`, `removeTask(task)`, and `updateTask(task)` are blocked by
@@ -338,7 +341,10 @@ mapping table and status manifest decisions. P12-15 narrows the
 disposable one-shot migration only, and P12-16 implements that facade:
 `addDisposableTask` over `work_manager.scheduleOnce`, `removeTask(id)` over
 `work_manager.cancel`, and `queryTasks(options?)` over `work_manager.list`, all
-returning JSON-safe task ids or snapshots.
+returning JSON-safe task ids or snapshots. P12-17 adds daily/weekly stable
+rejection stubs plus `queryTimedTasks()`, `getTimedTask(id)`, and
+`removeTimedTask(id)` aliases for Node-owned one-shot snapshots only; the
+user-visible task database provider remains unpromoted.
 
 ## Tests Required
 

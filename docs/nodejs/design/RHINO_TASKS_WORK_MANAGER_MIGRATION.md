@@ -97,18 +97,18 @@ launches embedded Node through `executionMode=scheduled` and
 | --- | --- | --- | --- |
 | `tasks.__module` | `partial` | `require("work_manager")` | Current Node scripts use the explicit WorkManager module, not `tasks`. |
 | `tasks.addDisposableTask({ path, date/time })` | `partial` | `workManager.scheduleOnce({ scriptPath, delayMs })` | Only future absolute times can be translated to `delayMs`; return a JSON task id/record, not `TimedTask`. |
-| `tasks.addDailyTask({ path, time })` | `unsupported` | Future task database provider | Do not map to `schedulePeriodic()`: daily wall-clock behavior, next-run calculation, exact-alarm policy, and user task UI differ. |
-| `tasks.addWeeklyTask({ path, time, daysOfWeek })` | `unsupported` | Future task database provider | Weekday/time semantics require TimedTask-style storage and UI ownership. |
-| `tasks.queryTimedTasks()` | `partial` | `workManager.list()` | Lists Node-owned WorkManager records only; full Rhino TimedTask database parity is deferred. |
-| `tasks.getTimedTask(id)` | `partial` | `workManager.list()` plus filter | A future facade may return frozen JSON snapshots for Node-owned tasks only. |
-| `tasks.removeTimedTask(id)` | `partial` | `workManager.cancel(id)` | Works only for Node-owned task ids; numeric Rhino database ids are not automatically equivalent. |
+| `tasks.addDailyTask({ path, time })` | `unsupported` | `compat.tasks.addDailyTask()` rejection stub | P12-17 rejects provider promotion with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`; do not map to `schedulePeriodic()`. |
+| `tasks.addWeeklyTask({ path, time, daysOfWeek })` | `unsupported` | `compat.tasks.addWeeklyTask()` rejection stub | P12-17 rejects provider promotion with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`; weekday/time semantics require TimedTask-style storage and UI ownership. |
+| `tasks.queryTimedTasks()` | `partial` | `compat.tasks.queryTimedTasks()` | Lists Node-owned one-shot WorkManager records only; full Rhino TimedTask database parity is rejected for P12-17. |
+| `tasks.getTimedTask(id)` | `partial` | `compat.tasks.getTimedTask(id)` | Filters Node-owned one-shot JSON snapshots by explicit id and returns `null` when absent. |
+| `tasks.removeTimedTask(id)` | `partial` | `compat.tasks.removeTimedTask(id)` | Cancels only Node-owned WorkManager ids; numeric Rhino database ids are not automatically equivalent. |
 | `tasks.addIntentTask(...)` | `unsupported` | Future broadcast task provider | Startup, boot, package, and custom broadcast triggers follow `BROADCAST_TASKS.md`. |
 | `tasks.queryIntentTasks(...)` | `unsupported` | Future broadcast/user task database provider | No raw `IntentTask` snapshots or receiver registration in S11-22. |
 | `tasks.getIntentTask(id)` | `unsupported` | Future broadcast/user task database provider | Must return JSON snapshots only when designed. |
 | `tasks.removeIntentTask(id)` | `unsupported` | Future broadcast/user task database provider | Must own receiver cleanup and UI visibility. |
 | `tasks.addTask(task)` | `blocked_by_design` | Explicit JSON descriptors | Raw `TimedTask` / `IntentTask` Java objects must not cross into Node. |
 | `tasks.removeTask(task)` | `blocked_by_design` | Explicit ids | Raw task object identity is a Rhino model, not a V8 bridge contract. |
-| `tasks.updateTask(task)` | `blocked_by_design` | Future JSON patch/update API | Mutating raw Java task objects from Node is not allowed. |
+| `tasks.updateTask(task)` | `blocked_by_design` | `compat.tasks.updateTask()` rejection stub | P12-17 rejects raw task mutation with `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`; mutating raw Java task objects from Node is not allowed. |
 | `tasks.timeFlagToDays(flag)` | `unsupported` | Future pure utility | Can be added later without scheduler provider access. |
 | `tasks.daysToTimeFlag(days)` | `unsupported` | Future pure utility | Can be added later without scheduler provider access. |
 
@@ -123,6 +123,14 @@ Mapping `addDailyTask()` or `addWeeklyTask()` to `schedulePeriodic()` would sile
 change behavior after reboot, clock changes, Doze, WorkManager quota throttling, and
 task enable/disable operations. A future compatibility facade must route these APIs
 through an AutoJs6-owned task database provider, not through a single bridge call.
+
+P12-17 therefore keeps the user task database provider unpromoted. It adds
+stable rejection stubs for `compat.tasks.addDailyTask()` and
+`compat.tasks.addWeeklyTask()`, plus Rhino-name aliases for Node-owned
+`queryTimedTasks()`, `getTimedTask(id)`, and `removeTimedTask(id)`. See
+`TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md` for the task ownership, database
+schema, migration snapshot, update/delete policy, and scheduler backend policy
+preconditions that must exist before revisiting provider promotion.
 
 ## Future Provider Split
 
@@ -206,10 +214,19 @@ tasks.addDailyTask({
 });
 ```
 
-Node S11-22:
+Node P12-17:
 
 ```js
-throw new Error("daily wall-clock task migration is design-gated");
+const { tasks } = require("autojs6:compat");
+
+try {
+  await tasks.addDailyTask({
+    path: "jobs/report.cjs",
+    time: "08:30",
+  });
+} catch (error) {
+  console.log(error.code); // ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED
+}
 ```
 
 Use `work_manager.schedulePeriodic()` only when the intended behavior is OS-managed

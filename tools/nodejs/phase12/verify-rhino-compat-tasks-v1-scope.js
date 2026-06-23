@@ -28,21 +28,21 @@ const FILES = {
 
 const EXPECTED_DECISIONS = new Map([
   ["tasks.__module", ["p12_15_compat_tasks_v1_scope_locked", "p12_16_compat_tasks_v1_facade"]],
-  ["tasks.addDailyTask", "p12_15_wall_clock_task_database_deferred"],
+  ["tasks.addDailyTask", ["p12_15_wall_clock_task_database_deferred", "p12_17_wall_clock_user_task_database_rejected"]],
   ["tasks.addDisposableTask", ["p12_15_disposable_task_facade_v1", "p12_16_disposable_task_facade"]],
   ["tasks.addIntentTask", "p12_15_intent_task_broadcast_deferred"],
   ["tasks.addTask", "p12_15_raw_task_object_blocked"],
-  ["tasks.addWeeklyTask", "p12_15_wall_clock_task_database_deferred"],
+  ["tasks.addWeeklyTask", ["p12_15_wall_clock_task_database_deferred", "p12_17_wall_clock_user_task_database_rejected"]],
   ["tasks.daysToTimeFlag", "p12_15_pure_timeflag_utility_out_of_v1"],
   ["tasks.getIntentTask", "p12_15_intent_task_broadcast_deferred"],
-  ["tasks.getTimedTask", ["p12_15_json_task_snapshot_only", "p12_16_json_task_snapshot_query_only"]],
+  ["tasks.getTimedTask", ["p12_15_json_task_snapshot_only", "p12_16_json_task_snapshot_query_only", "p12_17_get_timed_task_node_owned_snapshot_alias"]],
   ["tasks.queryIntentTasks", "p12_15_intent_task_broadcast_deferred"],
-  ["tasks.queryTimedTasks", ["p12_15_work_manager_list_node_owned_tasks", "p12_16_query_tasks_node_owned_work"]],
+  ["tasks.queryTimedTasks", ["p12_15_work_manager_list_node_owned_tasks", "p12_16_query_tasks_node_owned_work", "p12_17_query_timed_tasks_node_owned_snapshot_alias"]],
   ["tasks.removeIntentTask", "p12_15_intent_task_broadcast_deferred"],
   ["tasks.removeTask", "p12_15_raw_remove_task_object_blocked_with_id_wrapper"],
-  ["tasks.removeTimedTask", ["p12_15_cancel_node_owned_work_task", "p12_16_cancel_node_owned_work_task"]],
+  ["tasks.removeTimedTask", ["p12_15_cancel_node_owned_work_task", "p12_16_cancel_node_owned_work_task", "p12_17_remove_timed_task_node_owned_id_alias"]],
   ["tasks.timeFlagToDays", "p12_15_pure_timeflag_utility_out_of_v1"],
-  ["tasks.updateTask", "p12_15_raw_task_object_blocked"],
+  ["tasks.updateTask", ["p12_15_raw_task_object_blocked", "p12_17_raw_update_task_json_patch_rejected"]],
 ]);
 
 function main() {
@@ -162,8 +162,8 @@ function buildChecks(files) {
         statusCounts.unsupported === 8 &&
         statusCounts.blocked_by_design === 3 &&
         entryStatus(entries, "tasks.addDisposableTask", "partial", ["scheduleOnce", "tasks.addDisposableTask"]) &&
-        entryStatus(entries, "tasks.queryTimedTasks", "partial", ["list", "tasks.queryTasks"]) &&
-        entryStatus(entries, "tasks.removeTimedTask", "partial", ["cancel", "tasks.removeTask"]) &&
+        entryStatus(entries, "tasks.queryTimedTasks", "partial", ["list", "tasks.queryTasks", "tasks.queryTimedTasks"]) &&
+        entryStatus(entries, "tasks.removeTimedTask", "partial", ["cancel", "tasks.removeTask", "tasks.removeTimedTask"]) &&
         entryStatus(entries, "tasks.removeTask", "blocked_by_design", null),
       "P12-15 must keep tasks status buckets stable while narrowing the future compat.tasks v1 facade.",
     ),
@@ -182,7 +182,8 @@ function buildChecks(files) {
           "blocked_by_design:3",
         ]) &&
         (matrixTasksRow.includes("Implement P12-16 compat.tasks disposable facade") ||
-          matrixTasksRow.includes("Proceed to P12-17 daily/weekly user-task database decision")),
+          matrixTasksRow.includes("Proceed to P12-17 daily/weekly user-task database decision") ||
+          matrixTasksRow.includes("Proceed to P12-18 intent/broadcast task compatibility decision")),
       "Generated matrix must point tasks to P12-16 or later after P12-15 scope lock.",
     ),
     check(

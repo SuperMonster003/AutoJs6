@@ -207,6 +207,15 @@ class NodeBridgeConformanceInstrumentationTest {
                 assert(value && typeof value.then === "function", name + " must return a Promise");
                 return value;
               }
+              async function expectRejectCode(name, promise, code) {
+                try {
+                  await promise;
+                } catch (error) {
+                  assert.strictEqual(String(error && (error.autojs6Code || error.code || "")), code, name);
+                  return;
+                }
+                throw new Error(name + " must reject");
+              }
               const toast = require("toast");
               const app = require("app");
               const dialogs = require("dialogs");
@@ -276,7 +285,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
               expectExports("autojs6:compat.ui", compat.ui, ["showLayout", "state", "bind"]);
-              expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "removeTask", "queryTasks"]);
+              expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "addDailyTask", "addWeeklyTask", "removeTask", "queryTasks", "queryTimedTasks", "getTimedTask", "removeTimedTask", "updateTask"]);
               assert.strictEqual(globalThis.ui, undefined, "compat.ui must not install a default global");
               assert.strictEqual(globalThis.tasks, undefined, "compat.tasks must not install a default global");
               assert.strictEqual(typeof compat.ui.run, "undefined");
@@ -450,6 +459,14 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(compatTaskId, "work-once");
               assert.strictEqual((await expectPromise("compat.tasks.queryTasks", compat.tasks.queryTasks({ timeoutMs: 1060 }))).length, 0);
               assert.strictEqual(await expectPromise("compat.tasks.removeTask", compat.tasks.removeTask(compatTaskId, { timeoutMs: 1061 })), true);
+              assert.strictEqual((await expectPromise("compat.tasks.queryTimedTasks", compat.tasks.queryTimedTasks({ timeoutMs: 1062 }))).length, 0);
+              assert.strictEqual(await expectPromise("compat.tasks.getTimedTask", compat.tasks.getTimedTask(compatTaskId, { timeoutMs: 1063 })), null);
+              assert.strictEqual(await expectPromise("compat.tasks.removeTimedTask", compat.tasks.removeTimedTask(compatTaskId, { timeoutMs: 1064 })), true);
+              const beforeTaskRejects = requests.length;
+              await expectRejectCode("compat.tasks.addDailyTask", compat.tasks.addDailyTask({ path: "main.cjs", time: "08:30" }), "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED");
+              await expectRejectCode("compat.tasks.addWeeklyTask", compat.tasks.addWeeklyTask({ path: "main.cjs", time: "08:30", daysOfWeek: [1] }), "ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED");
+              await expectRejectCode("compat.tasks.updateTask", compat.tasks.updateTask({ id: compatTaskId }), "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN");
+              assert.strictEqual(requests.length, beforeTaskRejects, "compat.tasks rejected stubs must not dispatch bridge requests");
 
               assert.strictEqual(bridge.__test.pendingCount(), 0);
               const trace = requests.map((request) => request.module + "." + request.method);

@@ -648,7 +648,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-tasks-disposable-facade-verification.md`
 
-- [ ] P12-17: 决策 daily/weekly/user-task database 兼容路径。
+- [x] P12-17: 决策 daily/weekly/user-task database 兼容路径。
   - 范围：评估 `tasks.addDailyTask`、`addWeeklyTask`、`queryTimedTasks`、
     `getTimedTask`、`updateTimedTask` 是否进入 Node provider 或保持拒绝。
   - 验收：
@@ -656,7 +656,47 @@ Phase 12 task 本身可使用以下执行状态：
       snapshot、update/delete policy 和 scheduler backend policy。
     - 如果拒绝，必须有稳定错误码和迁移建议。
     - 不把 daily/weekly 机械映射到 `schedulePeriodic()`。
-  - Evidence：待补充。
+  - Evidence：
+    - 决策文档：
+      `docs/nodejs/design/TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md`
+      明确 P12-17 不提升 daily/weekly user task database provider；未来 provider
+      必须先覆盖 task ownership、database schema、migration snapshot、
+      update/delete policy、scheduler backend policy、packaged APK policy 和
+      error policy。
+    - Runtime：
+      `app/src/main/cpp/node_bridge_sources.cpp` 在
+      `require("autojs6:compat").tasks` 中加入稳定拒绝和别名：
+      `addDailyTask()` / `addWeeklyTask()` →
+      `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`；
+      `updateTask()` →
+      `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`；
+      `queryTimedTasks()` / `getTimedTask(id)` / `removeTimedTask(id)` 仅映射
+      Node-owned one-shot WorkManager JSON snapshots/ids。
+    - Types：
+      `docs/nodejs/types/autojs6-node/rhino_compat.d.ts` 声明 P12-17 stub 和
+      alias；仍不声明 `require("tasks")` 或 global `tasks`。
+    - Instrumentation：
+      `NodeWorkManagerBridgeInstrumentationTest.kt` 和
+      `NodeBridgeConformanceInstrumentationTest.kt` 覆盖 stable error code、
+      no bridge dispatch rejection、Rhino-name alias 和无 global `tasks`。
+    - Docs/status：
+      `docs/nodejs/design/COMPAT_TASKS_V1.md`,
+      `docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md`,
+      `docs/nodejs/design/WORK_MANAGER.md`,
+      `docs/nodejs/design/RHINO_COMPAT_LOADER.md`,
+      `docs/nodejs/MIGRATION_FROM_RHINO.md`,
+      `docs/nodejs/SECURITY_MODEL.md`,
+      `docs/nodejs/rhino-compat/status-manifest.json`,
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`,
+      `docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md`,
+      `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-tasks-daily-weekly-decision.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatTasksDailyWeeklyDecision`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-daily-weekly-decision-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-tasks-daily-weekly-decision-verification.md`
 
 - [ ] P12-18: 决策 intent/broadcast task compatibility。
   - 范围：处理 `tasks.addIntentTask`、`queryIntentTasks`、broadcast triggers。

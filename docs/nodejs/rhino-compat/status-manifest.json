@@ -7085,7 +7085,8 @@
         "S11-22 maps Rhino tasks to the controlled work_manager MVP only where semantics are equivalent enough: scoped embedded Node one-shot/periodic records, cancel, and list.",
         "Daily/weekly wall-clock tasks, IntentTask/broadcast triggers, raw TimedTask/IntentTask objects, task update mutation, and user task database parity remain design-gated; S11-22 does not add compat.tasks.",
         "P12-15 compat.tasks v1 scope locked: only disposable one-shot add/remove/query over work_manager is eligible for P12-16; daily/weekly moves to P12-17, intent/broadcast moves to P12-18, and raw task objects remain blocked_by_design.",
-        "P12-16 compat.tasks disposable facade landed: require(\"autojs6:compat\").tasks exposes addDisposableTask, removeTask(id), and queryTasks over work_manager.scheduleOnce/cancel/list, returns JSON-safe ids/snapshots, keeps require(\"tasks\") and global tasks absent, and keeps daily/weekly/intent/raw task object parity gated."
+        "P12-16 compat.tasks disposable facade landed: require(\"autojs6:compat\").tasks exposes addDisposableTask, removeTask(id), and queryTasks over work_manager.scheduleOnce/cancel/list, returns JSON-safe ids/snapshots, keeps require(\"tasks\") and global tasks absent, and keeps daily/weekly/intent/raw task object parity gated.",
+        "P12-17 daily/weekly user-task database provider rejected: compat.tasks adds stable addDailyTask/addWeeklyTask unsupported stubs, queryTimedTasks/getTimedTask/removeTimedTask Node-owned aliases, and updateTask blocked_by_design stub without promoting the AutoJs6 task database provider."
       ],
       "apiEntries": [
         {
@@ -7104,12 +7105,12 @@
           "id": "tasks.addDailyTask",
           "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
-          "nodeName": null,
-          "decision": "p12_15_wall_clock_task_database_deferred",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": null,
+          "nodeName": "tasks.addDailyTask",
+          "decision": "p12_17_wall_clock_user_task_database_rejected",
           "notes": [
-            "P12-15 excludes daily wall-clock TimedTask semantics from compat.tasks v1; do not map to work_manager.schedulePeriodic(). P12-17 owns the task database/provider decision."
+            "P12-17 rejects daily wall-clock user task database provider promotion. compat.tasks.addDailyTask() fails before bridge dispatch with ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED; do not map to work_manager.schedulePeriodic()."
           ]
         },
         {
@@ -7152,12 +7153,12 @@
           "id": "tasks.addWeeklyTask",
           "status": "unsupported",
           "asyncMode": "promise",
-          "nodeModule": "work_manager",
-          "bridgeModule": "work_manager",
-          "nodeName": null,
-          "decision": "p12_15_wall_clock_task_database_deferred",
+          "nodeModule": "autojs6:compat",
+          "bridgeModule": null,
+          "nodeName": "tasks.addWeeklyTask",
+          "decision": "p12_17_wall_clock_user_task_database_rejected",
           "notes": [
-            "P12-15 excludes weekly weekday/time TimedTask semantics from compat.tasks v1; weekday, next-run, and user task database behavior need the P12-17 provider decision."
+            "P12-17 rejects weekly wall-clock user task database provider promotion. compat.tasks.addWeeklyTask() fails before bridge dispatch with ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED; weekday, next-run, and user task database behavior are not WorkManager periodic cadence."
           ]
         },
         {
@@ -7190,10 +7191,10 @@
           "asyncMode": "promise",
           "nodeModule": "autojs6:compat",
           "bridgeModule": "work_manager",
-          "nodeName": "tasks.queryTasks",
-          "decision": "p12_16_json_task_snapshot_query_only",
+          "nodeName": "tasks.getTimedTask",
+          "decision": "p12_17_get_timed_task_node_owned_snapshot_alias",
           "notes": [
-            "P12-16 exposes JSON WorkTask snapshots through compat.tasks.queryTasks(); getTimedTask-style single-record lookup remains a query/filter migration pattern, and raw TimedTask return values stay blocked."
+            "P12-17 exposes compat.tasks.getTimedTask(id) as a query/filter alias over Node-owned one-shot WorkManager JSON snapshots only; raw TimedTask return values and Rhino task database ids stay blocked."
           ]
         },
         {
@@ -7214,10 +7215,10 @@
           "asyncMode": "promise",
           "nodeModule": "autojs6:compat",
           "bridgeModule": "work_manager",
-          "nodeName": "tasks.queryTasks",
-          "decision": "p12_16_query_tasks_node_owned_work",
+          "nodeName": "tasks.queryTimedTasks",
+          "decision": "p12_17_query_timed_tasks_node_owned_snapshot_alias",
           "notes": [
-            "P12-16 implements compat.tasks.queryTasks(options?) over work_manager.list(), returning Node-owned one-shot WorkManager snapshots only while full Rhino TimedTask database query parity remains deferred."
+            "P12-17 exposes compat.tasks.queryTimedTasks(options?) as a Rhino-name alias over compat.tasks.queryTasks(), returning Node-owned one-shot WorkManager snapshots only while full Rhino TimedTask database query parity remains rejected."
           ]
         },
         {
@@ -7250,10 +7251,10 @@
           "asyncMode": "promise",
           "nodeModule": "autojs6:compat",
           "bridgeModule": "work_manager",
-          "nodeName": "tasks.removeTask",
-          "decision": "p12_16_cancel_node_owned_work_task",
+          "nodeName": "tasks.removeTimedTask",
+          "decision": "p12_17_remove_timed_task_node_owned_id_alias",
           "notes": [
-            "P12-16 implements compat.tasks.removeTask(id) over work_manager.cancel() for Node-owned task ids only; numeric Rhino TimedTask database ids are not automatically equivalent."
+            "P12-17 exposes compat.tasks.removeTimedTask(id) as a Rhino-name alias over work_manager.cancel() for Node-owned task ids only; numeric Rhino TimedTask database ids are not automatically equivalent."
           ]
         },
         {
@@ -7271,13 +7272,13 @@
         {
           "id": "tasks.updateTask",
           "status": "blocked_by_design",
-          "asyncMode": "not_applicable",
-          "nodeModule": null,
+          "asyncMode": "promise",
+          "nodeModule": "autojs6:compat",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "p12_15_raw_task_object_blocked",
+          "nodeName": "tasks.updateTask",
+          "decision": "p12_17_raw_update_task_json_patch_rejected",
           "notes": [
-            "Rhino updateTask mutates raw TimedTask/IntentTask objects; P12-15 keeps updateTask blocked_by_design until a future JSON patch descriptor and user-visible task database owner exists."
+            "P12-17 exposes compat.tasks.updateTask(task) only as an ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN rejection stub; raw TimedTask/IntentTask mutation and JSON patch provider promotion remain unavailable."
           ]
         }
       ]

@@ -2,8 +2,10 @@
 
 Status: P12-15 design-locked the scope. P12-16 implements
 `require("autojs6:compat").tasks` as the disposable one-shot facade over
-`work_manager`. This document still does not expose `require("tasks")`, a
-`tasks` global, or a new canonical `tasks` capability.
+`work_manager`. P12-17 adds stable rejection stubs and Rhino-name aliases for
+the Node-owned subset, but does not promote a daily/weekly user task database
+provider. This document still does not expose `require("tasks")`, a `tasks`
+global, or a new canonical `tasks` capability.
 
 ## Decision
 
@@ -61,9 +63,9 @@ row, cursor, or receiver handle may cross into Node.
 
 These Rhino APIs are outside P12-15/P12-16 v1:
 
-- `tasks.addDailyTask()` and `tasks.addWeeklyTask()`: wall-clock task database
-  semantics, next-run calculation, exact-alarm policy, and task UI state need a
-  separate P12-17 decision.
+- `tasks.addDailyTask()` and `tasks.addWeeklyTask()`: P12-17 rejects provider
+  promotion for wall-clock task database semantics. The methods exist only as
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` stubs in `compat.tasks`.
 - `tasks.addIntentTask()`, `queryIntentTasks()`, `getIntentTask()`, and
   `removeIntentTask()`: broadcast/startup/boot/package/custom trigger ownership
   needs the P12-18 broadcast task decision.
@@ -100,5 +102,29 @@ P12-16 implements only the disposable facade above:
 - `removeTask(id)` maps to `work_manager.cancel`;
 - `queryTasks(options?)` maps to JSON snapshots from `work_manager.list`;
 - types and fake bridge tests cover the facade;
-- keep daily/weekly, intent/broadcast, raw task object, and time-flag APIs out
-  of the v1 runtime surface.
+- keep daily/weekly providers, intent/broadcast providers, raw task object
+  transfer, and time-flag APIs out of the v1 promoted provider surface.
+
+## P12-17 Daily/Weekly Decision
+
+P12-17 keeps daily/weekly user task database compatibility rejected until a
+dedicated provider exists. The runtime adds stable compatibility behavior
+without database promotion:
+
+- `compat.tasks.addDailyTask()` rejects with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`;
+- `compat.tasks.addWeeklyTask()` rejects with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`;
+- `compat.tasks.queryTimedTasks()` aliases `queryTasks()` for Node-owned
+  one-shot JSON snapshots only;
+- `compat.tasks.getTimedTask(id)` filters Node-owned one-shot JSON snapshots
+  by explicit id and returns `null` when absent;
+- `compat.tasks.removeTimedTask(id)` aliases `removeTask(id)` for explicit
+  WorkManager-owned ids;
+- `compat.tasks.updateTask()` rejects with
+  `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`.
+
+The rejection stubs do not dispatch bridge requests. The aliases do not read or
+mutate the Rhino `TimedTask` database and still never return raw `TimedTask` or
+`IntentTask` objects. The decision details are tracked in
+`TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md`.

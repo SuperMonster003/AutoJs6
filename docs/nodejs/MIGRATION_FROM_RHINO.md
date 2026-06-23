@@ -590,9 +590,15 @@ and P12-16 exposes that facade:
 `work_manager.list()` for one-shot JSON snapshots. `require("tasks")` and global
 `tasks` remain absent.
 
-Do not migrate `tasks.addDailyTask()` or `tasks.addWeeklyTask()` by mechanically calling `workManager.schedulePeriodic()`. Rhino daily/weekly tasks are wall-clock user tasks with next-run calculation, task UI/database state, and scheduler fallback semantics. WorkManager periodic work is OS-managed cadence with minimum interval and quota behavior. S11-22 keeps daily/weekly task compatibility design-gated until a user-visible task database provider exists.
+P12-17 adds Rhino-name compatibility aliases for the same Node-owned subset:
+`compat.tasks.queryTimedTasks()`, `compat.tasks.getTimedTask(id)`, and
+`compat.tasks.removeTimedTask(id)`. They operate only on JSON-safe
+WorkManager-owned ids and snapshots created by Node. They do not read Rhino
+`TimedTask` database rows.
 
-`tasks.addIntentTask()`, `queryIntentTasks()`, boot/startup/package/custom broadcast triggers, and `removeIntentTask()` remain design-gated with the broadcast task policy. Raw `tasks.addTask(task)`, `removeTask(task)`, and `updateTask(task)` are blocked by design in Node because they depend on raw `TimedTask` / `IntentTask` Java objects. See [RHINO_TASKS_WORK_MANAGER_MIGRATION.md](design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md) and [COMPAT_TASKS_V1.md](design/COMPAT_TASKS_V1.md).
+Do not migrate `tasks.addDailyTask()` or `tasks.addWeeklyTask()` by mechanically calling `workManager.schedulePeriodic()`. Rhino daily/weekly tasks are wall-clock user tasks with next-run calculation, task UI/database state, and scheduler fallback semantics. WorkManager periodic work is OS-managed cadence with minimum interval and quota behavior. P12-17 keeps daily/weekly task compatibility rejected until a user-visible task database provider exists; the compatibility stubs reject with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`.
+
+`tasks.addIntentTask()`, `queryIntentTasks()`, boot/startup/package/custom broadcast triggers, and `removeIntentTask()` remain design-gated with the broadcast task policy. Raw `tasks.addTask(task)`, `removeTask(task)`, and `updateTask(task)` are blocked by design in Node because they depend on raw `TimedTask` / `IntentTask` Java objects. P12-17 exposes `compat.tasks.updateTask()` only as a stable `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN` rejection stub. See [RHINO_TASKS_WORK_MANAGER_MIGRATION.md](design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md), [COMPAT_TASKS_V1.md](design/COMPAT_TASKS_V1.md), and [TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md](design/TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md).
 
 ### UI Scripts
 

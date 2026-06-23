@@ -8,11 +8,11 @@ const REPORT_BASENAME = "rhino-compat-tasks-work-manager-design-verification";
 const MODULE_DECISION = "s11_22_tasks_work_manager_migration_design";
 const TASK_MODULE_DECISIONS = ["s11_22_tasks_module_design_gate", "p12_15_compat_tasks_v1_scope_locked", "p12_16_compat_tasks_v1_facade"];
 const DISPOSABLE_DECISIONS = ["s11_22_disposable_task_schedule_once_candidate", "p12_15_disposable_task_facade_v1", "p12_16_disposable_task_facade"];
-const JSON_SNAPSHOT_DECISIONS = ["s11_22_json_task_snapshot_only", "p12_15_json_task_snapshot_only", "p12_16_json_task_snapshot_query_only"];
-const LIST_DECISIONS = ["s11_22_work_manager_list_node_owned_tasks", "p12_15_work_manager_list_node_owned_tasks", "p12_16_query_tasks_node_owned_work"];
-const CANCEL_DECISIONS = ["s11_22_cancel_node_owned_work_task", "p12_15_cancel_node_owned_work_task", "p12_16_cancel_node_owned_work_task"];
-const RAW_TASK_DECISIONS = ["s11_22_raw_task_object_blocked", "p12_15_raw_task_object_blocked", "p12_15_raw_remove_task_object_blocked_with_id_wrapper"];
-const WALL_CLOCK_DECISIONS = ["s11_22_wall_clock_task_database_deferred", "p12_15_wall_clock_task_database_deferred"];
+const JSON_SNAPSHOT_DECISIONS = ["s11_22_json_task_snapshot_only", "p12_15_json_task_snapshot_only", "p12_16_json_task_snapshot_query_only", "p12_17_get_timed_task_node_owned_snapshot_alias"];
+const LIST_DECISIONS = ["s11_22_work_manager_list_node_owned_tasks", "p12_15_work_manager_list_node_owned_tasks", "p12_16_query_tasks_node_owned_work", "p12_17_query_timed_tasks_node_owned_snapshot_alias"];
+const CANCEL_DECISIONS = ["s11_22_cancel_node_owned_work_task", "p12_15_cancel_node_owned_work_task", "p12_16_cancel_node_owned_work_task", "p12_17_remove_timed_task_node_owned_id_alias"];
+const RAW_TASK_DECISIONS = ["s11_22_raw_task_object_blocked", "p12_15_raw_task_object_blocked", "p12_15_raw_remove_task_object_blocked_with_id_wrapper", "p12_17_raw_update_task_json_patch_rejected"];
+const WALL_CLOCK_DECISIONS = ["s11_22_wall_clock_task_database_deferred", "p12_15_wall_clock_task_database_deferred", "p12_17_wall_clock_user_task_database_rejected"];
 const INTENT_DECISIONS = ["s11_22_intent_task_broadcast_deferred", "p12_15_intent_task_broadcast_deferred"];
 const TIMEFLAG_DECISIONS = ["s11_22_pure_timeflag_utility_pending", "p12_15_pure_timeflag_utility_out_of_v1"];
 
@@ -145,9 +145,9 @@ function buildChecks(files) {
       "status-work-manager-partial-apis",
       entryIs(entries, "tasks.__module", "partial", TASK_MODULE_DECISIONS, ["work_manager", "tasks"]) &&
         entryIs(entries, "tasks.addDisposableTask", "partial", DISPOSABLE_DECISIONS, ["scheduleOnce", "tasks.addDisposableTask"]) &&
-        entryIs(entries, "tasks.getTimedTask", "partial", JSON_SNAPSHOT_DECISIONS, ["list", "tasks.queryTasks"]) &&
-        entryIs(entries, "tasks.queryTimedTasks", "partial", LIST_DECISIONS, ["list", "tasks.queryTasks"]) &&
-        entryIs(entries, "tasks.removeTimedTask", "partial", CANCEL_DECISIONS, ["cancel", "tasks.removeTask"]),
+        entryIs(entries, "tasks.getTimedTask", "partial", JSON_SNAPSHOT_DECISIONS, ["list", "tasks.queryTasks", "tasks.getTimedTask"]) &&
+        entryIs(entries, "tasks.queryTimedTasks", "partial", LIST_DECISIONS, ["list", "tasks.queryTasks", "tasks.queryTimedTasks"]) &&
+        entryIs(entries, "tasks.removeTimedTask", "partial", CANCEL_DECISIONS, ["cancel", "tasks.removeTask", "tasks.removeTimedTask"]),
       "status manifest must identify the WorkManager-compatible partial tasks APIs",
     ),
     check(
@@ -163,7 +163,7 @@ function buildChecks(files) {
     ),
     check(
       "status-raw-task-objects",
-      ["tasks.addTask", "tasks.removeTask", "tasks.updateTask"].every((id) => {
+      ["tasks.addTask", "tasks.removeTask"].every((id) => {
         const entry = entries.get(id);
         return entry &&
           entry.status === "blocked_by_design" &&
@@ -171,7 +171,13 @@ function buildChecks(files) {
           RAW_TASK_DECISIONS.includes(entry.decision) &&
           !entry.nodeModule &&
           !entry.bridgeModule;
-      }),
+      }) && (() => {
+        const entry = entries.get("tasks.updateTask");
+        return entry &&
+          entry.status === "blocked_by_design" &&
+          RAW_TASK_DECISIONS.includes(entry.decision) &&
+          !entry.bridgeModule;
+      })(),
       "status manifest must block raw TimedTask/IntentTask object APIs by design",
     ),
     check(
