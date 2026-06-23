@@ -1,6 +1,6 @@
 # Rhino Compatibility Shim Design Gate
 
-Status: design gate only. No runtime behavior is enabled by this document. Embedded Node scripts cannot `require("rhino")`, install Rhino globals, call `importClass`, call `importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects. S11-26 fixes the concrete future JSON-only run shape in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md).
+Status: design gate only. No runtime behavior is enabled by this document. Embedded Node scripts cannot `require("rhino")`, install Rhino globals, call `importClass`, call `importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects. S11-26 fixes the concrete future JSON-only run shape in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md), and P12-23 records the default-disabled Phase 12 POC gate in `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`.
 
 ## Goal
 

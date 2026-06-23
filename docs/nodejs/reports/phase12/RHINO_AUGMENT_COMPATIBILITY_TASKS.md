@@ -895,7 +895,7 @@ Phase 12 task 本身可使用以下执行状态：
 
 ### Track F: Explicit Rhino JSON-only shim POC
 
-- [ ] P12-23: 建立 Rhino JSON-only shim POC gate。
+- [x] P12-23: 建立 Rhino JSON-only shim POC gate。
   - 范围：把 S11-26 设计转成默认禁用的 POC gate。
   - 建议 API：
     - `const rhino = require("rhino")`
@@ -910,7 +910,34 @@ Phase 12 task 本身可使用以下执行状态：
     - JSON validator 能拒绝 function、symbol、bigint、undefined、cycle、
       prototype object、handle、Java object marker。
     - 不向 V8 安装 Rhino globals。
-  - Evidence：待补充。
+  - Evidence：
+    - POC gate 报告：
+      `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`
+      固定 `rhino.run({ source, timeoutMs, args })` 与 scoped `path`
+      变体为 future POC target，当前不启用 runtime module。
+    - 默认禁用：
+      release/default Safe Node Profile 仍没有 `require("rhino")`、
+      `rhino.run()`、`rhino.install()`、`compat.rhino` 或 Rhino globals；
+      POC 执行只能由显式 experimental flag 或 test metadata 进入
+      (explicit experimental flag or test metadata)。
+    - JSON validator gate：
+      必须拒绝 function、symbol、bigint、undefined、cycle、prototype
+      object、handle marker、Java object marker、Rhino `Scriptable` marker、
+      Android object marker、thread/lock/process/native pointer/file
+      descriptor marker 和 oversized payload。
+    - `install()` gate：
+      `rhino.install()` 不属于 JSON-only POC，必须固定拒绝并返回
+      `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`。
+    - No-globals gate：
+      不向 V8 安装 `importClass`、`importPackage`、`Packages`、`java`、
+      `android`、`JavaAdapter` 或旧 AutoJs globals。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-shim-poc-gate.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatRhinoJsonOnlyShimPocGate`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-rhino-json-only-shim-poc-gate-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-rhino-json-only-shim-poc-gate-verification.md`
 
 - [ ] P12-24: 实现 Rhino shim disabled/default denial path。
   - 范围：在默认 profile 下固定 `require("rhino")` 或 `rhino.run()` 的稳定

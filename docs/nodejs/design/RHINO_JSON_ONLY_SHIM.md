@@ -1,7 +1,7 @@
 # Rhino JSON-Only Shim
 
-Status: S11-26 design and POC gate plan. No runtime module is enabled by this
-document.
+Status: S11-26 design and POC gate plan; P12-23 establishes the Phase 12 POC
+gate. No runtime module is enabled by this document.
 
 ## Decision
 
@@ -212,6 +212,24 @@ A future implementation gate must prove:
 - packaged APKs without explicit shim metadata fail closed;
 - diagnostics record mixed-engine runs, denials, timeout, cancellation, and
   cleanup counts.
+
+## P12-23 POC Gate
+
+P12-23 records the Phase 12 POC gate in
+`docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`. It keeps the
+default runtime disabled and fixes the implementation preconditions before any
+adapter work:
+
+- release/default Safe Node Profile still denies the shim;
+- POC execution can only be considered behind an explicit experimental flag or
+  test metadata. This is the explicit experimental flag or test metadata rule;
+- `rhino.install()` remains permanently outside the JSON-only POC and must use
+  `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`;
+- the JSON validator must reject function, symbol, bigint, undefined, cycle,
+  prototype object, handle marker, Java object marker, Rhino `Scriptable`
+  marker, Android object marker, thread, lock, process, native pointer, and
+  file descriptor values;
+- no Rhino globals are installed into V8.
 
 ## S11-26 Acceptance
 

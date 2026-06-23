@@ -1,0 +1,144 @@
+# Rhino JSON-Only Shim POC Gate
+
+Status: P12-23 POC gate established.
+
+P12-23 turns the S11-26 Rhino JSON-only shim design into a Phase 12 POC gate.
+It does not enable a runtime module. Default and release Safe Node Profile
+behavior still has no `require("rhino")`, no `rhino.run()`, no
+`rhino.install()`, no `compat.rhino`, and no Rhino globals installed into V8.
+
+## Gate Decision
+
+The POC API shape remains explicit and JSON-only:
+
+```js
+const rhino = require("rhino");
+
+const result = await rhino.run({
+  source: "var input = arguments[0]; ({ value: input.value + 1 })",
+  args: [{ value: 41 }],
+  timeoutMs: 5000,
+});
+```
+
+The scoped file variant remains:
+
+```js
+const result = await rhino.run({
+  path: "legacy/snippet.js",
+  args: [{ value: 41 }],
+  timeoutMs: 5000,
+});
+```
+
+This is a future POC target only. P12-24 owns the default-disabled runtime denial path.
+P12-25 owns any execution adapter POC, and P12-26 owns packaged metadata behavior.
+
+## Default State
+
+- Release/default Safe Node Profile must reject the shim.
+- POC execution can only be considered when an explicit experimental flag or
+  test metadata opts in. This is the explicit experimental flag or test metadata
+  rule.
+- Source text containing `require("rhino")` must not implicitly reserve Android
+  manifest entries, receivers, services, permissions, or providers.
+- A local `node_modules/rhino` shadowing policy must be documented before any
+  runtime reservation. Until then, no runtime module is enabled.
+- `require("node:rhino")` remains unavailable.
+
+## Required Denials
+
+`rhino.install()` is never part of the JSON-only POC. It must reject with:
+
+```text
+ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED
+```
+
+The POC must not install or expose these V8 globals:
+
+- no `rhino.install()`
+- `importClass`
+- `importPackage`
+- `Packages`
+- `java`
+- `android`
+- `JavaAdapter`
+- old AutoJs globals such as `toast`, `files`, `images`, selector globals, or
+  `threads`
+
+The POC must not expose raw Java, Android, Rhino, thread, lock, image, UI,
+accessibility, process, native pointer, file descriptor, or bridge handle
+objects to Node.
+
+## JSON Validator Gate
+
+Before dispatch, the POC validator must accept only JSON-safe snapshots and
+must reject:
+
+| Denied value | Required behavior |
+| --- | --- |
+| `undefined` | `ERR_AUTOJS6_RHINO_SHIM_JSON_DENIED` or invalid-request denial. |
+| function | Stable JSON-denied error; no source dispatch. |
+| symbol | Stable JSON-denied error; no source dispatch. |
+| `bigint` | Stable JSON-denied error; no source dispatch. |
+| cycle | Stable JSON-denied error; no source dispatch. |
+| prototype object or class instance | Stable JSON-denied error; no source dispatch. |
+| Java object marker | Stable Java-object-denied error; no source dispatch. |
+| Rhino `Scriptable` marker | Stable Java-object-denied error; no source dispatch. |
+| Android object marker | Stable Java-object-denied error; no source dispatch. |
+| image/UI/accessibility handle marker | Stable Java-object-denied error; no source dispatch. |
+| thread/lock/process/native pointer/file descriptor marker | Stable Java-object-denied error; no source dispatch. |
+| oversized payload, excessive depth, array length, or object key count | Stable invalid-request or JSON-denied error; no source dispatch. |
+
+Returned values from Rhino must pass the same JSON-safe validator before they
+are visible to Node.
+
+## Execution Boundary Gate
+
+Any POC execution adapter must prove:
+
+- `timeoutMs` is required, finite, positive, and capped before dispatch;
+- exactly one of `source` or `path` is provided;
+- `path` is scoped project-relative and rejects absolute paths, `..`, NUL, and
+  symlink/realpath escapes;
+- Rhino execution is owned by the script manager or a dedicated compatibility
+  process, not by the V8 isolate. This is the script manager or a dedicated compatibility process boundary;
+- parent Node stop, service destroy, user stop, timeout, and provider cleanup
+  cancel active Rhino runs;
+- stdout/stderr capture is bounded and attributed to the Rhino execution id;
+- Rhino exceptions become stable JSON-safe Node errors;
+- concurrent runs are bounded and overflow rejects before creating engines;
+- diagnostics record mixed-engine run count, denial count, timeout count,
+  cancellation count, cleanup count, and active-run count.
+
+## Packaged Gate
+
+Packaged support remains fail-closed until P12-26:
+
+- APKs without explicit shim metadata cannot execute the shim.
+- Metadata may authorize only JSON-only `run`, not `install()` or globals.
+- Packaged timeout, crash, cancellation, and destroy behavior require evidence
+  before promotion.
+
+## Current Non-Exposure
+
+P12-23 keeps the current runtime and type boundary:
+
+- no runtime `require("rhino")`;
+- no runtime `rhino.run()`;
+- no runtime `rhino.install()`;
+- no runtime `compat.rhino`;
+- no TypeScript `declare module "rhino"`;
+- no `compat.rhino` type surface.
+
+## Verification
+
+Run:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodeRhinoCompatRhinoJsonOnlyShimPocGate
+```
+
+The gate checks this report, the S11-26 design docs, migration/security docs,
+runtime/type non-exposure, Phase 12 surface manifest evidence, and the P12-23
+checklist entry.

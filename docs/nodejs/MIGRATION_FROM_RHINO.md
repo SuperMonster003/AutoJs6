@@ -125,6 +125,13 @@ const result = await rhino.run({
 
 If implemented later, `rhino.run()` must accept and return only JSON-safe values, must be timeout-bounded, and must not install Rhino globals into V8. It must reject Java objects, Rhino `Scriptable`, Android objects, functions, image/UI/accessibility handles, native pointers, threads, locks, process handles, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects at the engine boundary.
 
+P12-23 establishes the default-disabled POC gate in
+[RHINO_JSON_ONLY_SHIM_POC_GATE.md](reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md).
+The gate keeps release/default Safe Node Profile disabled, allows future POC
+execution only through an explicit experimental flag or test metadata, requires
+`rhino.install()` to reject with `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, and
+locks the JSON validator/no-globals requirements before P12-24 through P12-26.
+
 ## Modules Instead Of Globals
 
 Common bridge modules:

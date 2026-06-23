@@ -271,21 +271,24 @@
     },
     {
       "id": "rhino.json_only_shim",
-      "status": "planned",
+      "status": "design_locked",
       "tasks": [
         "P12-23",
         "P12-24",
         "P12-25",
         "P12-26"
       ],
-      "summary": "Explicit timeout-bounded Rhino JSON-only run POC with default denial.",
+      "summary": "P12-23 establishes the default-disabled POC gate for an explicit timeout-bounded Rhino JSON-only run API. Release/default Safe Node Profile still has no require(\"rhino\"), rhino.run(), rhino.install(), compat.rhino, or Rhino globals; future POC execution requires an explicit experimental flag or test metadata, rhino.install() must reject with ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED, and JSON validator/no-globals requirements are locked before P12-24 through P12-26.",
       "runtimeSurface": [
         "rhino.run({ source, timeoutMs, args })",
         "rhino.run({ path, timeoutMs, args })"
       ],
       "evidence": [
         "docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md",
-        "docs/nodejs/design/RHINO_SHIM.md"
+        "docs/nodejs/design/RHINO_SHIM.md",
+        "docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md",
+        "tools/nodejs/phase12/verify-rhino-compat-rhino-json-only-shim-poc-gate.js",
+        ":app:verifyNodeRhinoCompatRhinoJsonOnlyShimPocGate"
       ]
     },
     {

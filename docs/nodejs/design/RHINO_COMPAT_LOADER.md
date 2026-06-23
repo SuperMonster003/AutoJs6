@@ -118,7 +118,7 @@ S11-24 does not add `compat.floaty`, `require("floaty")`, `require("ui.overlay")
 
 S11-25 does not add `compat.threads`, `require("threads")`, a global `threads`, or a global `sync`. Current Node scripts should migrate Rhino `threads.start()` / `threads.pool()` to `async` / `await`, timeout-bounded bridge calls, explicit `engines` execution slots, or `work_manager` scheduled work. `threads.disposable()` and `sync(fn, lock)` remain blocked because they imply blocking waits, raw `VolatileDispose`, Rhino `Synchronizer`, Java locks, and shared mutable Rhino/Java objects on the Node event loop. `worker_threads` remains default-disabled and is not a Rhino thread replacement.
 
-S11-26 does not add `require("rhino")`, `rhino.run()`, `rhino.install()`, `compat.rhino`, or any Rhino globals in V8. The future JSON-only shim candidate is explicitly `rhino.run({ source, timeoutMs, args })` plus a scoped `path` variant, owned by the script manager or a dedicated compatibility process. It must accept and return only JSON-safe snapshots, reject Java objects, Rhino `Scriptable`, Android objects, functions, handles, native pointers, threads, locks, file descriptors, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects, and remain timeout-bounded.
+S11-26 does not add `require("rhino")`, `rhino.run()`, `rhino.install()`, `compat.rhino`, or any Rhino globals in V8. The future JSON-only shim candidate is explicitly `rhino.run({ source, timeoutMs, args })` plus a scoped `path` variant, owned by the script manager or a dedicated compatibility process. It must accept and return only JSON-safe snapshots, reject Java objects, Rhino `Scriptable`, Android objects, functions, handles, native pointers, threads, locks, file descriptors, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects, and remain timeout-bounded. P12-23 establishes the default-disabled POC gate without adding runtime or type exposure; future execution requires an explicit experimental flag or test metadata, and `rhino.install()` remains outside the JSON-only POC with `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`.
 
 Future tasks should extend the module in small commits:
 
@@ -138,7 +138,7 @@ Future tasks should extend the module in small commits:
 - S11-23/P12-08/P12-09: UI compatibility design gate, JSON layout subset, and constrained `compat.ui` wrapper; no raw Rhino UI globals, `NativeView`, `ui.run()`, or `ui.post()`.
 - S11-24: floaty/overlay compatibility design gate; no runtime `compat.floaty`, `require("floaty")`, or `require("ui.overlay")` until overlay provider boundaries exist.
 - S11-25: threads migration policy; no runtime `compat.threads`, `require("threads")`, global `threads`, global `sync`, or default `worker_threads`.
-- S11-26: explicit Rhino JSON-only shim design; no runtime `require("rhino")`, `rhino.run()`, `rhino.install()`, or `compat.rhino` until the POC gate exists.
+- S11-26/P12-23: explicit Rhino JSON-only shim design and POC gate; no runtime `require("rhino")`, `rhino.run()`, `rhino.install()`, or `compat.rhino` until a later disabled/default path or adapter task deliberately adds it.
 
 ## Error Codes
 
