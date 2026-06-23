@@ -20,10 +20,10 @@ permission/disclosure policy, packaged manifest policy, and audited cleanup. It
 must not claim parity with Rhino `JsWindow`, `JsResizableWindow`, or
 `JsRawWindow`.
 
-P12-12A is the follow-up path. It must define the overlay provider v1 contract
-before any runtime module, capability, type declaration, or packaged overlay
-behavior is promoted. P12-13 may then add a fake-provider facade POC, and
-P12-14 may add live overlay packaged/cleanup evidence.
+P12-12A locks the overlay provider v1 contract in
+[OVERLAY_PROVIDER_V1.md](OVERLAY_PROVIDER_V1.md). P12-13 may then add a
+fake-provider facade POC, and P12-14 may add live overlay packaged/cleanup
+evidence.
 
 ## Rationale
 
@@ -98,9 +98,14 @@ packaged/cleanup gates land. Do not expect exact Rhino `floaty.window()` or
 
 - `docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md`
 - `docs/nodejs/design/FLOATY_NODE.md`
+- `docs/nodejs/design/OVERLAY_PROVIDER_V1.md`
+- `docs/nodejs/schemas/overlay_provider_v1.schema.json`
+- `docs/nodejs/fixtures/overlay-provider-v1-fixtures.json`
 - `docs/nodejs/MIGRATION_FROM_RHINO.md`
 - `docs/nodejs/SECURITY_MODEL.md`
 - `docs/nodejs/rhino-compat/status-manifest.json`
 - `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`
 - `tools/nodejs/phase12/verify-rhino-compat-floaty-overlay-decision.js`
+- `tools/nodejs/phase12/verify-rhino-compat-overlay-provider-contract.js`
 - `:app:verifyNodeRhinoCompatFloatyOverlayDecision`
+- `:app:verifyNodeRhinoCompatOverlayProviderContract`

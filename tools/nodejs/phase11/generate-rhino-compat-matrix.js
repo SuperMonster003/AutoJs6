@@ -171,6 +171,12 @@ function riskSummary(module) {
 function nextStepFor(module, gapModule) {
   if (
     module.id === "floaty" &&
+    (module.migration.notes || []).some((note) => note.includes("P12-12A overlay provider v1 contract locked"))
+  ) {
+    return "Implement P12-13 overlay fake provider POC over ui.overlay; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";
+  }
+  if (
+    module.id === "floaty" &&
     (module.migration.notes || []).some((note) => note.includes("P12-11 provider path selected"))
   ) {
     return "Define P12-12A overlay provider v1 contract; keep exact Rhino floaty.window/rawWindow raw-wrapper parity blocked by design.";

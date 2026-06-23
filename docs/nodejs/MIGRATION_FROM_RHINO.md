@@ -672,11 +672,12 @@ There is no current Node equivalent for `floaty.window()` or
 foreground disclosure, packaged behavior, opaque window handles, event drain,
 and close/cleanup gates are implemented.
 
-P12-11 selects the Provider path for a controlled JSON-only overlay provider.
-Treat exact Rhino `floaty.window()` and `floaty.rawWindow()` raw-wrapper
-semantics as a permanent non-goal in Node; keep such scripts on Rhino until the
-P12-12A provider contract, P12-13 fake-provider POC, and P12-14 live
-packaged/cleanup gates land.
+P12-11 selects the Provider path for a controlled JSON-only overlay provider,
+and P12-12A locks the contract in
+[OVERLAY_PROVIDER_V1.md](design/OVERLAY_PROVIDER_V1.md). Treat exact Rhino
+`floaty.window()` and `floaty.rawWindow()` raw-wrapper semantics as a permanent
+non-goal in Node; keep such scripts on Rhino until the P12-13 fake-provider POC
+and P12-14 live packaged/cleanup gates land.
 
 The current Node profile still has no overlay runtime surface, so
 `require("floaty")`, `require("ui.overlay")`, `compat.floaty`, and global

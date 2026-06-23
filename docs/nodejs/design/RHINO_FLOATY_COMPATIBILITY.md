@@ -12,13 +12,14 @@ global `floaty` in S11-24.
 P12-11 selects the Provider path for a controlled JSON-only overlay provider.
 This does not change the S11-24 raw-window boundary: exact Rhino
 `floaty.window()` and `floaty.rawWindow()` compatibility remains a permanent
-non-goal for the Safe Node Profile. P12-12A owns the overlay provider v1
-contract, and that contract must not expose Rhino `JsWindow`, `WindowBridge`,
-`NativeView`, or raw Android window objects.
+non-goal for the Safe Node Profile. P12-12A locks the overlay provider v1
+contract in [OVERLAY_PROVIDER_V1.md](OVERLAY_PROVIDER_V1.md), and that contract
+must not expose Rhino `JsWindow`, `WindowBridge`, `NativeView`, or raw Android
+window objects. P12-13 owns the fake provider POC.
 
-Until P12-12A/P12-13 land, the current Node profile still has no
-`require("floaty")`, `require("ui.overlay")`, `compat.floaty`, or global
-`floaty` runtime surface. Dual-engine examples for the raw Rhino APIs may keep
+Until P12-13 lands, the current Node profile still has no `require("floaty")`,
+`require("ui.overlay")`, `compat.floaty`, or global `floaty` runtime surface.
+Dual-engine examples for the raw Rhino APIs may keep
 using `compat.blockedByDesign("floaty.window", ...)` or
 `compat.blockedByDesign("floaty.rawWindow", ...)`, which returns
 `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN` via

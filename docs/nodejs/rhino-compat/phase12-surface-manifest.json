@@ -148,7 +148,7 @@
         "P12-13",
         "P12-14"
       ],
-      "summary": "P12-11 selects the Provider path for a controlled JSON-only overlay provider. P12-12A owns the provider v1 contract; exact Rhino floaty.window/rawWindow raw-wrapper parity remains blocked_by_design.",
+      "summary": "P12-11 selects the Provider path for a controlled JSON-only overlay provider. P12-12A locks the provider v1 contract; P12-13 owns the fake provider POC. Exact Rhino floaty.window/rawWindow raw-wrapper parity remains blocked_by_design.",
       "runtimeSurface": [
         "ui.overlay",
         "floaty"
@@ -157,12 +157,17 @@
         "docs/nodejs/design/FLOATY_OVERLAY_PHASE12_DECISION.md",
         "docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md",
         "docs/nodejs/design/FLOATY_NODE.md",
+        "docs/nodejs/design/OVERLAY_PROVIDER_V1.md",
+        "docs/nodejs/schemas/overlay_provider_v1.schema.json",
+        "docs/nodejs/fixtures/overlay-provider-v1-fixtures.json",
         "docs/nodejs/MIGRATION_FROM_RHINO.md",
         "docs/nodejs/SECURITY_MODEL.md",
         "docs/nodejs/rhino-compat/status-manifest.json",
         "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
         "tools/nodejs/phase12/verify-rhino-compat-floaty-overlay-decision.js",
-        ":app:verifyNodeRhinoCompatFloatyOverlayDecision"
+        "tools/nodejs/phase12/verify-rhino-compat-overlay-provider-contract.js",
+        ":app:verifyNodeRhinoCompatFloatyOverlayDecision",
+        ":app:verifyNodeRhinoCompatOverlayProviderContract"
       ]
     },
     {

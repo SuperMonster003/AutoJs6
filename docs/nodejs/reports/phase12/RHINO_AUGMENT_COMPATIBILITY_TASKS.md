@@ -423,7 +423,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：`build/reports/nodejs/rhino-compat-floaty-overlay-decision-verification.json`
     - 报告产物：`build/reports/nodejs/rhino-compat-floaty-overlay-decision-verification.md`
 
-- [ ] P12-12A: Provider path - 定义 overlay provider v1 contract。
+- [x] P12-12A: Provider path - 定义 overlay provider v1 contract。
   - 适用条件：P12-11 选择 Provider path。
   - 范围：只设计 JSON descriptor overlay 和 opaque handle，不兼容 Rhino raw
     window object。
@@ -438,7 +438,22 @@ Phase 12 task 本身可使用以下执行状态：
     - `ui.overlay` 或 `floaty` capability 不得被 base `ui` 暗含。
     - 没有 hidden overlay；必须有用户可见 disclosure。
     - raw `WindowManager`、`LayoutParams`、`FloatyWindow` 不跨 bridge。
-  - Evidence：待补充。
+  - Evidence：
+    - Contract：`docs/nodejs/design/OVERLAY_PROVIDER_V1.md`
+    - Schema：`docs/nodejs/schemas/overlay_provider_v1.schema.json`
+    - Fixtures：`docs/nodejs/fixtures/overlay-provider-v1-fixtures.json`
+    - Decision doc：`docs/nodejs/design/FLOATY_OVERLAY_PHASE12_DECISION.md`
+    - Floaty design：`docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md`
+    - Overlay design：`docs/nodejs/design/FLOATY_NODE.md`
+    - Migration docs：`docs/nodejs/MIGRATION_FROM_RHINO.md`
+    - Security docs：`docs/nodejs/SECURITY_MODEL.md`
+    - Status manifest：`docs/nodejs/rhino-compat/status-manifest.json`
+    - Matrix：`docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`
+    - Surface manifest：`docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+    - Host verifier：`tools/nodejs/phase12/verify-rhino-compat-overlay-provider-contract.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatOverlayProviderContract`
+    - 报告产物：`build/reports/nodejs/rhino-compat-overlay-provider-contract-verification.json`
+    - 报告产物：`build/reports/nodejs/rhino-compat-overlay-provider-contract-verification.md`
 
 - [ ] P12-12B: Rejection path - 固化 floaty permanent non-goal。
   - 适用条件：P12-11 选择 Rejection path。当前不适用；P12-11 已重新切换至

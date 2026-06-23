@@ -107,7 +107,7 @@ function buildChecks(files) {
       includesAll(files.rhinoFloaty.text, ["P12-11", "Provider path", "P12-12A", "JSON-only overlay provider", "blocked_by_design"]) &&
         includesAll(files.floatyNode.text, ["P12-11", "Provider path", "P12-12A", "fake-provider facade POC", "permanent non-goal"]) &&
         includesAll(files.migration.text, ["P12-11", "Provider path", "P12-12A", "P12-13", "P12-14"]) &&
-        includesAll(files.securityModel.text, ["P12-11", "Provider path", "explicit overlay capability", "packaged manifest", "cleanup gates"]),
+        includesAll(files.securityModel.text, ["P12-11", "Provider path", "P12-12A locks", "ui.overlay", "packaged manifest", "cleanup contract"]),
       "Floaty design, migration, and security docs must record the P12-11 Provider path decision.",
     ),
     check(
@@ -117,9 +117,9 @@ function buildChecks(files) {
         floatyModule.decision === "s11_24_floaty_overlay_design_gate" &&
         includesAll(JSON.stringify(floatyModule), [
           "P12-11 provider path selected",
-          "P12-12A owns the overlay provider v1 contract",
+          "P12-12A overlay provider v1 contract locked",
           "exact Rhino floaty.window/rawWindow raw-wrapper semantics remain blocked by design",
-          "floaty.closeAll unavailable until the Provider path defines",
+          "P12-12A defines closeAll",
           "no silent service-process grant/emulation",
         ]) &&
         entryIs(entries, "floaty.window", "blocked_by_design", "s11_24_xml_window_wrapper_blocked") &&
@@ -130,17 +130,17 @@ function buildChecks(files) {
     check(
       "matrix-updated",
       includesAll(files.matrixGenerator.text, [
-        "P12-11 provider path selected",
-        "Define P12-12A overlay provider v1 contract",
+        "P12-12A overlay provider v1 contract locked",
+        "Implement P12-13 overlay fake provider POC",
       ]) &&
         includesAll(matrixFloatyRow, [
           "| 53 | floaty | floaty | unsupported |",
           "blocked_by_design:2",
           "renamed:1",
           "unsupported:5",
-          "Define P12-12A overlay provider v1 contract",
+          "Implement P12-13 overlay fake provider POC",
         ]),
-      "Generated matrix must point floaty to the P12-12A provider contract after P12-11.",
+      "Generated matrix must point floaty to the P12-13 provider POC after the P12-11/P12-12A provider path gates.",
     ),
     check(
       "surface-manifest-evidence",

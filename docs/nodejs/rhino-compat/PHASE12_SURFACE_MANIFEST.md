@@ -38,8 +38,9 @@ which Phase 12 workstream owns the next implementation or rejection.
 ## Current Design-Locked Surfaces
 
 - `floaty.overlay`: P12-11 selects the Provider path for a controlled JSON-only
-  overlay provider. P12-12A owns the provider v1 contract; P12-13/P12-14 own
-  fake-provider and live packaged/cleanup gates. Exact Rhino
+  overlay provider. P12-12A locks the provider v1 contract in
+  `OVERLAY_PROVIDER_V1.md`; P12-13/P12-14 own fake-provider and live
+  packaged/cleanup gates. Exact Rhino
   `floaty.window()` / `floaty.rawWindow()` raw-wrapper parity remains
   `blocked_by_design` and must not be exposed as raw Android/Rhino objects.
 

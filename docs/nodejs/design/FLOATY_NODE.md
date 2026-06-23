@@ -28,7 +28,8 @@ contract and follow-up provider gates land.
 P12-11 selects the Provider path for a controlled JSON-only overlay provider.
 Exact Rhino `floaty.window()` and `floaty.rawWindow()` compatibility remains a
 permanent non-goal for Node because those APIs return raw window wrappers and
-view objects. P12-12A owns the provider v1 contract; P12-13 may add the
+view objects. P12-12A locks the provider v1 contract in
+[OVERLAY_PROVIDER_V1.md](OVERLAY_PROVIDER_V1.md); P12-13 may add the
 fake-provider facade POC, and P12-14 may add live packaged/cleanup evidence.
 
 Until that work lands, the current Node profile still has no `require("floaty")`,
