@@ -37,20 +37,25 @@ The JSON report uses schema `autojs6-node-rhino-dual-engine-compat-verification-
 
 ## Device Instrumentation Tests
 
-Device instrumentation is intentionally planned but not promoted by this task. The planned class is:
+S11-28 intentionally left device instrumentation planned. P12-33 adds the
+first fake device evidence contract and the planned class now exists:
 
 ```text
 org.autojs.autojs.engine.RhinoNodeDualEngineCompatInstrumentationTest
 ```
 
-The device runner should execute the same manifest cases and report:
+The device runner reports:
 
 - `caseId`;
-- `engine` as `rhino` or `node_compat`;
-- `compatStatus` as `supported_async` or `blocked_by_design`;
-- `outcome` as `passed`, `failed`, or `skipped_with_reason`;
-- provider mode as `fake`, `live`, or `policy_only`;
-- error code when the Node compat path is expected to be blocked.
+- `engine` as `rhino` or `node`;
+- `compatStatus`;
+- `providerMode`;
+- `resourceCleanupStatus`;
+- `skipReason`.
+
+The P12-33 fixture lives at
+`docs/nodejs/dual-engine-compat/device-evidence/p12-33-fake-device-results.json`
+and is verified by `:app:verifyNodeRhinoCompatDualEngineDeviceEvidence`.
 
 Supported async cases may use fake providers where the provider already has a stable fake transport. Policy-only cases must not open a live UI, overlay, or thread surface in Node; they should assert that the compat marker remains `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`.
 

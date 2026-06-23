@@ -1277,3 +1277,38 @@ tasks.register<Exec>("verifyNodeRhinoCompatS13nBytesPromotion") {
         nodePhase12ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodeRhinoCompatDualEngineDeviceEvidence") {
+    group = "verification"
+    description = "Verifies the Phase 12 dual-engine fake device evidence contract."
+
+    dependsOn("verifyNodeRhinoCompatS13nBytesPromotion")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-dual-engine-device-evidence.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/dual-engine-compat/device-evidence/p12-33-fake-device-results.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_DUAL_ENGINE_DEVICE_EVIDENCE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase11/RHINO_DUAL_ENGINE_COMPAT_TESTS.md"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/RhinoNodeDualEngineCompatInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-rhino-dual-engine-compat-tests.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/phase12-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/RHINO_AUGMENT_COMPATIBILITY_TASKS.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase12-gate.gradle.kts"))
+    outputs.files(
+        nodePhase12ReportDir.map { it.file("rhino-compat-dual-engine-device-evidence-verification.json") },
+        nodePhase12ReportDir.map { it.file("rhino-compat-dual-engine-device-evidence-verification.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase12ReportDir.get().asFile.absolutePath,
+    )
+}

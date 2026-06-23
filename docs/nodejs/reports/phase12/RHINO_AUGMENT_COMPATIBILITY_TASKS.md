@@ -1285,7 +1285,7 @@ Phase 12 task 本身可使用以下执行状态：
 
 ### Track I: Dual-engine and release evidence
 
-- [ ] P12-33: 将高价值 dual-engine cases 提升到 device instrumentation。
+- [x] P12-33: 将高价值 dual-engine cases 提升到 device instrumentation。
   - 范围：从 Phase 11A 的 dual-engine corpus 中选择支持价值最高的 cases，
     用真实或 fake bridge transport 在设备侧执行。
   - 候选：
@@ -1298,7 +1298,34 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告字段包含 `engine`、`compatStatus`、`providerMode`、
       `resourceCleanupStatus`、`skipReason`。
     - `supported_async` 与 `blocked_by_design` 继续分桶。
-  - Evidence：待补充。
+  - Evidence：
+    - 设备证据报告：
+      `docs/nodejs/reports/phase12/RHINO_DUAL_ENGINE_DEVICE_EVIDENCE.md`
+    - Fake device result fixture：
+      `docs/nodejs/dual-engine-compat/device-evidence/p12-33-fake-device-results.json`
+      覆盖 `events-keys`、`ui-compat-show-update-close`、
+      `tasks-disposable`、`barcode-qrcode`、`rhino-shim-disabled`，
+      并为每个 case 记录 Rhino / Node 双 engine result。
+    - Dual-engine manifest：
+      `docs/nodejs/dual-engine-compat/manifest.json` 将
+      `deviceInstrumentation.status` 推进为 `fake_device_evidence`，
+      增加 `requiredResultFields`、`selectedDeviceCaseIds` 和
+      P12-33 fixture 路径。
+    - Instrumentation hook：
+      `app/src/androidTest/java/org/autojs/autojs/engine/RhinoNodeDualEngineCompatInstrumentationTest.kt`
+      校验 fake device result shape，并输出
+      `rhino.dual_engine.device_evidence=` JSON 报告行。
+    - Surface manifest：
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+      将 `dual_engine.device_evidence` 推进为 `provider_poc`；P12-34
+      仍负责开发者文档和 connected-device run guidance。
+    - Host verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-dual-engine-device-evidence.js`
+    - Gradle gate：`:app:verifyNodeRhinoCompatDualEngineDeviceEvidence`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-dual-engine-device-evidence-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-dual-engine-device-evidence-verification.md`
 
 - [ ] P12-34: 更新正式迁移文档和 Pro 9 对比文档。
   - 范围：同步 Phase 12 结果到脚本开发者可读文档。

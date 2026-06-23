@@ -11,11 +11,31 @@
     "reportBasename": "rhino-dual-engine-compat-tests-verification"
   },
   "deviceInstrumentation": {
-    "status": "planned",
+    "status": "fake_device_evidence",
+    "task": "P12-33",
     "testClass": "org.autojs.autojs.engine.RhinoNodeDualEngineCompatInstrumentationTest",
+    "runnerMode": "fake_device_transport",
+    "evidenceReport": "docs/nodejs/reports/phase12/RHINO_DUAL_ENGINE_DEVICE_EVIDENCE.md",
+    "resultFixture": "device-evidence/p12-33-fake-device-results.json",
+    "selectedDeviceCaseIds": [
+      "events-keys",
+      "ui-compat-show-update-close",
+      "tasks-disposable",
+      "barcode-qrcode",
+      "rhino-shim-disabled"
+    ],
     "resultStatusField": "compatStatus",
+    "requiredResultFields": [
+      "engine",
+      "compatStatus",
+      "providerMode",
+      "resourceCleanupStatus",
+      "skipReason"
+    ],
     "requiredStatuses": [
+      "supported",
       "supported_async",
+      "partial",
       "blocked_by_design"
     ]
   },

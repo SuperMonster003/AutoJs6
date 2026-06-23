@@ -412,16 +412,27 @@
     },
     {
       "id": "dual_engine.device_evidence",
-      "status": "planned",
+      "status": "provider_poc",
       "tasks": [
         "P12-33",
         "P12-34"
       ],
-      "summary": "Device instrumentation promotion and developer-facing documentation updates.",
-      "runtimeSurface": [],
+      "summary": "P12-33 adds fake device instrumentation evidence for high-value dual-engine Rhino/Node compatibility cases. The result contract records engine, compatStatus, providerMode, resourceCleanupStatus, and skipReason for each Rhino and Node record while keeping supported_async and blocked_by_design buckets visible. P12-34 still owns developer-facing documentation updates and any broader connected-device instructions.",
+      "runtimeSurface": [
+        "dual-engine fake device evidence",
+        "RhinoNodeDualEngineCompatInstrumentationTest",
+        "p12-33-fake-device-results.json"
+      ],
       "evidence": [
         "docs/nodejs/dual-engine-compat/manifest.json",
-        "docs/nodejs/reports/phase11/RHINO_DUAL_ENGINE_COMPAT_TESTS.md"
+        "docs/nodejs/dual-engine-compat/device-evidence/p12-33-fake-device-results.json",
+        "docs/nodejs/reports/phase11/RHINO_DUAL_ENGINE_COMPAT_TESTS.md",
+        "docs/nodejs/reports/phase12/RHINO_DUAL_ENGINE_DEVICE_EVIDENCE.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/RhinoNodeDualEngineCompatInstrumentationTest.kt",
+        "app/build.gradle.kts",
+        "tools/nodejs/phase11/verify-rhino-dual-engine-compat-tests.js",
+        "tools/nodejs/phase12/verify-rhino-compat-dual-engine-device-evidence.js",
+        ":app:verifyNodeRhinoCompatDualEngineDeviceEvidence"
       ]
     },
     {

@@ -387,6 +387,9 @@ val nodeJsPackagedParityGateInstrumentationClasses = nodeJsPackagedEsmGateInstru
 val nodeJsRhinoCompatPackagedSmokeInstrumentationClasses = listOf(
     "org.autojs.autojs.apkbuilder.EmbeddedNodePackagedApkSmokeTest#installAndRunRhinoCompatEmbeddedNodePackagedApk",
 )
+val nodeJsRhinoDualEngineDeviceEvidenceInstrumentationClasses = listOf(
+    "org.autojs.autojs.engine.RhinoNodeDualEngineCompatInstrumentationTest",
+)
 val nodeJsRhinoCompatResourceCleanupSecurityInstrumentationClasses = listOf(
     "org.autojs.autojs.engine.NodeBridgeResourceRegistryInstrumentationTest",
     "org.autojs.autojs.engine.NodeBridgeResourceLeakStressInstrumentationTest",
@@ -912,6 +915,7 @@ val nodeJsFocusedGateInstrumentationClasses = mapOf(
     "verifyNodePackagedEsmGate" to nodeJsPackagedEsmGateInstrumentationClasses,
     "verifyNodePackagedParityGate" to nodeJsPackagedParityGateInstrumentationClasses,
     "verifyNodeRhinoCompatPackagedSmoke" to nodeJsRhinoCompatPackagedSmokeInstrumentationClasses,
+    "verifyNodeRhinoCompatDualEngineDeviceEvidence" to nodeJsRhinoDualEngineDeviceEvidenceInstrumentationClasses,
     "verifyNodeRhinoCompatResourceCleanupSecurity" to nodeJsRhinoCompatResourceCleanupSecurityInstrumentationClasses,
     "verifyNodeLiveProviderGate" to nodeJsLiveProviderGateInstrumentationClasses,
     "verifyNodeLiveFetchGate" to nodeJsLiveFetchGateInstrumentationClasses,

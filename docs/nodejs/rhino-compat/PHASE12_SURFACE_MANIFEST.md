@@ -80,6 +80,12 @@ which Phase 12 workstream owns the next implementation or rejection.
   closeAll cleanup summaries, and fail-closed live overlay creation. Exact Rhino
   `floaty.window()` / `floaty.rawWindow()` raw-wrapper parity remains
   `blocked_by_design` and must not be exposed as raw Android/Rhino objects.
+- `dual_engine.device_evidence`: P12-33 adds fake device instrumentation
+  evidence for high-value dual-engine Rhino/Node compatibility cases. Each
+  result record carries `engine`, `compatStatus`, `providerMode`,
+  `resourceCleanupStatus`, and `skipReason`, with `supported_async` and
+  `blocked_by_design` still visible as separate buckets. P12-34 still owns
+  developer-facing documentation and broader connected-device run guidance.
 ## Current Design-Locked Surfaces
 
 - `threads.replacement`: P12-20 keeps Rhino `threads` as a

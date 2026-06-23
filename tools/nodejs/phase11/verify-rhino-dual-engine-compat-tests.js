@@ -140,10 +140,10 @@ function buildChecks(files, manifest, statusIndex, testsRoot) {
   checks.push(check(
     "manifest-device-plan",
     manifest.deviceInstrumentation &&
-      manifest.deviceInstrumentation.status === "planned" &&
+      ["planned", "fake_device_evidence"].includes(manifest.deviceInstrumentation.status) &&
       manifest.deviceInstrumentation.resultStatusField === "compatStatus" &&
       includesAll(manifest.deviceInstrumentation.requiredStatuses || [], REQUIRED_STATUSES),
-    "manifest must define the device instrumentation result field and required status buckets",
+    "manifest must define the device instrumentation result field and required status buckets, allowing the later P12-33 fake device evidence state",
   ));
 
   for (const entry of cases) {
