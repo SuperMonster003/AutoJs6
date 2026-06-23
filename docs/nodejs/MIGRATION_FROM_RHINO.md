@@ -95,7 +95,21 @@ Do not migrate scripts by expecting these Rhino-era surfaces to appear inside No
 
 The recommended migration path is to rewrite those calls to explicit Node bridge modules. For low-risk helpers, `autojs6:compat` currently covers toast/sleep/clipboard, scoped files, pure/text utilities, storage/sqlite, readable `console`/timer debugging migration, the first selector/accessibility compatibility facade, and common app/device/shell wrappers. `console.show()` and related floating-console controls are no-op output-capture shims in Node; logs still go to captured stdout/stderr, and uncaught errors keep source-map-aware `errorStack` output. If a legacy Rhino script must remain Rhino, keep it on the Rhino engine or dispatch it explicitly through the script manager rather than mixing unrestricted Rhino globals into Node.
 
-The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). Its recommendation is that any future shim should be explicit, isolated, JSON-serialized, timeout-bounded, and used only for migration.
+The design gate for broader Rhino interop is documented in [RHINO_SHIM.md](design/RHINO_SHIM.md). S11-26 narrows the only acceptable future shape to a JSON-only `rhino.run({ source, timeoutMs, args })` / scoped `path` API, documented in [RHINO_JSON_ONLY_SHIM.md](design/RHINO_JSON_ONLY_SHIM.md). This is a future POC plan, not a current runtime feature:
+
+```js
+"nodejs";
+
+const rhino = require("rhino"); // not available in the current Safe Node Profile
+
+const result = await rhino.run({
+  source: "var input = arguments[0]; ({ value: input.value + 1 })",
+  args: [{ value: 41 }],
+  timeoutMs: 5000
+});
+```
+
+If implemented later, `rhino.run()` must accept and return only JSON-safe values, must be timeout-bounded, and must not install Rhino globals into V8. It must reject Java objects, Rhino `Scriptable`, Android objects, functions, image/UI/accessibility handles, native pointers, threads, locks, process handles, cycles, `undefined`, `bigint`, symbols, and prototype-bearing objects at the engine boundary.
 
 ## Modules Instead Of Globals
 

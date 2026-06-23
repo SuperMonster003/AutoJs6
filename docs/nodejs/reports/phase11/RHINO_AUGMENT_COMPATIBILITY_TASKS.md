@@ -435,10 +435,17 @@ Inventory 和兼容矩阵统一使用以下状态：
     `tools/nodejs/phase11/verify-rhino-compat-threads-policy.js` and
     `:app:verifyNodeRhinoCompatThreadsPolicy`.
 
-- [ ] S11-26: 设计 explicit Rhino JSON-only shim。
+- [x] S11-26: 设计 explicit Rhino JSON-only shim。
   - 范围：`rhino.run({ source, timeoutMs, args })` 或等价显式 API。
   - 产物：design doc、security boundary、POC gate 计划。
   - 验收：只允许 JSON-safe input/output；不安装 Rhino globals 到 V8。
+  - Decision: 仅固定未来显式 `rhino.run({ source, timeoutMs, args })`
+    / scoped `path` 形态与 POC gate；当前仍不开放 `require("rhino")`、
+    `rhino.run()`、`rhino.install()`、`compat.rhino` 或 V8 Rhino globals。
+  - Evidence:
+    `docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md`,
+    `tools/nodejs/phase11/verify-rhino-json-only-shim-design.js` and
+    `:app:verifyNodeRhinoJsonOnlyShimDesign`.
 
 ### Track E: Examples, tests, release evidence
 

@@ -1,6 +1,6 @@
 # Rhino Compatibility Shim Design Gate
 
-Status: design gate only. No runtime behavior is enabled by this document. Embedded Node scripts cannot `require("rhino")`, install Rhino globals, call `importClass`, call `importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects.
+Status: design gate only. No runtime behavior is enabled by this document. Embedded Node scripts cannot `require("rhino")`, install Rhino globals, call `importClass`, call `importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects. S11-26 fixes the concrete future JSON-only run shape in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md).
 
 ## Goal
 
@@ -33,9 +33,9 @@ The following remain unavailable in Node scripts:
 
 Users should migrate Rhino scripts to explicit Node bridge modules where possible.
 
-## Possible Module
+## S11-26 JSON-Only Module Candidate
 
-A future module, if implemented, could be named:
+A future module, if implemented, should be explicit and JSON-only:
 
 ```js
 const rhino = require("rhino");
@@ -55,7 +55,9 @@ const result = await rhino.run({
 });
 ```
 
-This shape is intentionally different from installing globals into Node. It makes the engine boundary visible and keeps legacy execution isolated.
+This shape is intentionally different from installing globals into Node. It makes the engine boundary visible and keeps legacy execution isolated. The current profile still does not expose `require("rhino")`, `rhino.run()`, `rhino.install()`, or `compat.rhino`; S11-26 only records the future API and gate plan.
+
+The detailed request/response shape, JSON-safe value definition, timeout and cancellation requirements, packaging policy, and POC gate plan live in [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md).
 
 ## API Decisions
 
@@ -68,6 +70,7 @@ This shape is intentionally different from installing globals into Node. It make
 | `Packages`, `java.*`, `android.*` | Unsupported in Node | They expose raw object graphs and class-loader surfaces. |
 | `JavaAdapter` | Unsupported | It creates cross-runtime proxy objects with complex lifetime and threading semantics. |
 | Running a legacy Rhino script from Node | Future candidate | Must be explicit, serialized, timeout-bounded, and owned by the script manager. |
+| `rhino.run({ source, timeoutMs, args })` | S11-26 candidate | JSON-only request/response; no V8 global installation; current runtime remains disabled. |
 
 ## Recommended Direction
 
@@ -179,6 +182,8 @@ Any implementation task must include:
 - no old globals installed by default
 - `importClass`, `importPackage`, `Packages`, `JavaAdapter`, `java.*`, and `android.*` unavailable in Node by default
 - explicit Rhino run success for a safe snippet if `rhino.run()` is implemented
+- JSON-only request validation for `source`, `path`, `args`, and result values
+- `rhino.install()` rejection and no `compat.rhino`
 - timeout and cancellation of Rhino executions launched from Node
 - no Java object returned from Rhino to Node
 - packaged APK verifier behavior for any shim metadata

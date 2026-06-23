@@ -360,7 +360,7 @@ The `java_interop` feature flag is critical, disabled by default, build-time exp
 
 See `docs/nodejs/design/JAVA_INTEROP.md` for the mode comparison, allowlist candidates, Rhino compatibility boundary, and future test gate.
 
-Rhino compatibility shims are a separate migration concern. Node must not install Rhino globals, `importClass`, `Packages`, or `JavaAdapter` by default. See `docs/nodejs/design/RHINO_SHIM.md`.
+Rhino compatibility shims are a separate migration concern. Node must not install Rhino globals, `importClass`, `Packages`, or `JavaAdapter` by default. S11-26 fixes only a future explicit `rhino.run({ source, timeoutMs, args })` / scoped `path` design; the current Safe Node Profile still has no `require("rhino")`, `rhino.run()`, `rhino.install()`, or `compat.rhino`. Any future shim must execute outside the V8 isolate through the script manager or a dedicated compatibility process, accept and return only JSON-safe snapshots, enforce required timeouts, reject Java objects, Rhino `Scriptable`, Android objects, functions, handles, threads, locks, native pointers, process/file descriptors, cycles, and prototype-bearing objects, and require explicit packaged metadata before APK support. See `docs/nodejs/design/RHINO_SHIM.md` and `docs/nodejs/design/RHINO_JSON_ONLY_SHIM.md`.
 
 ## AutoJs API Bridge Policy
 
