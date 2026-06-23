@@ -412,12 +412,12 @@
     },
     {
       "id": "dual_engine.device_evidence",
-      "status": "provider_poc",
+      "status": "promoted",
       "tasks": [
         "P12-33",
         "P12-34"
       ],
-      "summary": "P12-33 adds fake device instrumentation evidence for high-value dual-engine Rhino/Node compatibility cases. The result contract records engine, compatStatus, providerMode, resourceCleanupStatus, and skipReason for each Rhino and Node record while keeping supported_async and blocked_by_design buckets visible. P12-34 still owns developer-facing documentation updates and any broader connected-device instructions.",
+      "summary": "P12-33 adds fake device instrumentation evidence for high-value dual-engine Rhino/Node compatibility cases. The result contract records engine, compatStatus, providerMode, resourceCleanupStatus, and skipReason for each Rhino and Node record while keeping supported_async and blocked_by_design buckets visible. P12-34 publishes the formal migration, Pro 9 comparison, matrix, security, testing, and type declaration guidance plus a developer-docs sync gate.",
       "runtimeSurface": [
         "dual-engine fake device evidence",
         "RhinoNodeDualEngineCompatInstrumentationTest",
@@ -432,7 +432,16 @@
         "app/build.gradle.kts",
         "tools/nodejs/phase11/verify-rhino-dual-engine-compat-tests.js",
         "tools/nodejs/phase12/verify-rhino-compat-dual-engine-device-evidence.js",
-        ":app:verifyNodeRhinoCompatDualEngineDeviceEvidence"
+        "tools/nodejs/phase12/verify-rhino-compat-developer-docs-sync.js",
+        "docs/nodejs/MIGRATION_FROM_RHINO.md",
+        "docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md",
+        "docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md",
+        "docs/nodejs/SECURITY_MODEL.md",
+        "docs/nodejs/TESTING.md",
+        "docs/nodejs/types/autojs6-node/README.md",
+        "docs/nodejs/reports/phase12/RHINO_DEVELOPER_DOCS_SYNC.md",
+        ":app:verifyNodeRhinoCompatDualEngineDeviceEvidence",
+        ":app:verifyNodeRhinoCompatDeveloperDocsSync"
       ]
     },
     {

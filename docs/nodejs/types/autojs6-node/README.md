@@ -59,6 +59,13 @@ P12-24 reserves `require("rhino")` as a disabled JSON-only shim facade. P12-25 a
 
 `ui.overlay` is a P12-13 fake-provider POC over the P12-12A overlay contract. It exposes JSON-only `show`, `update`, `drainEvents`, `close`, `closeAll`, `hasPermission`, and `openPermissionSettings` shapes with opaque handles. P12-14 adds the Android live gate for permission snapshots, explicit settings dry-run/launch evidence, packaged `SYSTEM_ALERT_WINDOW` metadata, foreground disclosure requirements, and cleanup summaries; live overlay creation remains fail-closed.
 
+P12-34 is a documentation synchronization gate rather than a new declaration
+surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9
+comparison, `RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`, `SECURITY_MODEL.md`, and
+`TESTING.md`: promoted APIs keep examples, stable unsupported calls keep their
+error codes, and the P12-33 fake dual-engine device evidence remains testing
+evidence only.
+
 They intentionally do not declare experimental Java interop, native plugin loading, Android plugin adapters, or unrestricted desktop Node.js capabilities. The declarations are checked by `:app:verifyAutoJs6NodeTypeDeclarations`; the sample project at `sample/nodejs/typescript-smoke` can be type-checked with:
 
 ```powershell

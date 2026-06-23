@@ -2,6 +2,8 @@
 
 This Phase 11A matrix is generated from the Rhino augment inventory, the checked-in status manifest, and the Node bridge/types/docs gap report. It is a module-level tracking document; API-level details remain in `build/reports/nodejs/rhino-augment-api-inventory.json` and `build/reports/nodejs/rhino-node-compat-gap.json`.
 
+P12-34 keeps promoted Phase 12 examples and stable rejection guidance synchronized with `MIGRATION_FROM_RHINO.md`, the Pro 9 comparison, `SECURITY_MODEL.md`, `TESTING.md`, and the type declaration README.
+
 ## Summary
 
 - Rhino modules: 73

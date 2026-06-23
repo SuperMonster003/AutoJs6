@@ -1327,7 +1327,7 @@ Phase 12 task 本身可使用以下执行状态：
     - 报告产物：
       `build/reports/nodejs/rhino-compat-dual-engine-device-evidence-verification.md`
 
-- [ ] P12-34: 更新正式迁移文档和 Pro 9 对比文档。
+- [x] P12-34: 更新正式迁移文档和 Pro 9 对比文档。
   - 范围：同步 Phase 12 结果到脚本开发者可读文档。
   - 必改文档：
     - `docs/nodejs/MIGRATION_FROM_RHINO.md`
@@ -1340,7 +1340,34 @@ Phase 12 task 本身可使用以下执行状态：
     - 已 promoted API 有示例。
     - rejected API 有稳定错误码和迁移建议。
     - 不再把已完成 P12 surface 标为 provider gap。
-  - Evidence：待补充。
+  - Evidence：
+    - 报告：
+      `docs/nodejs/reports/phase12/RHINO_DEVELOPER_DOCS_SYNC.md`
+    - 正式迁移文档补齐 promoted examples、stable rejection guidance 和
+      P12-33 fake device evidence gate：
+      `docs/nodejs/MIGRATION_FROM_RHINO.md`
+    - Pro 9 对比文档不再将 `events.keys`、`barcode` / `qrcode`、
+      `compat.tasks` one-shot disposable、`s13n.bytes` 标为 provider gap：
+      `docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md`
+    - matrix 生成器和输出增加 P12-34 文档同步提示：
+      `tools/nodejs/phase11/generate-rhino-compat-matrix.js`
+      `docs/nodejs/RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`
+    - 安全、测试和类型 README 同步 P12-32/P12-33/P12-34 边界：
+      `docs/nodejs/SECURITY_MODEL.md`
+      `docs/nodejs/TESTING.md`
+      `docs/nodejs/types/autojs6-node/README.md`
+    - Phase 12 surface manifest 将 `dual_engine.device_evidence` 推进为
+      `promoted`：
+      `docs/nodejs/rhino-compat/phase12-surface-manifest.json`
+      `docs/nodejs/rhino-compat/PHASE12_SURFACE_MANIFEST.md`
+    - verifier：
+      `tools/nodejs/phase12/verify-rhino-compat-developer-docs-sync.js`
+    - Gradle gate：
+      `:app:verifyNodeRhinoCompatDeveloperDocsSync`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-developer-docs-sync-verification.json`
+    - 报告产物：
+      `build/reports/nodejs/rhino-compat-developer-docs-sync-verification.md`
 
 - [ ] P12-35: 发布 Phase 12 summary。
   - 范围：汇总 Phase 12 完成项、rejected decisions、remaining blockers、

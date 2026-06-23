@@ -196,13 +196,25 @@ Rhino dual-engine compatibility fixtures:
 
 ```powershell
 .\gradlew.bat --console=plain :app:verifyNodeRhinoDualEngineCompatTests
+.\gradlew.bat --console=plain :app:verifyNodeRhinoCompatDualEngineDeviceEvidence
+.\gradlew.bat --console=plain :app:verifyNodeRhinoCompatDeveloperDocsSync
 ```
 
 This S11-28 host gate validates `docs/nodejs/dual-engine-compat`, writes the
 `rhino-dual-engine-compat-tests-verification` report, and keeps
-`supported_async` cases separate from `blocked_by_design` cases. The planned
-device instrumentation result contract is documented in
-`docs/nodejs/reports/phase11/RHINO_DUAL_ENGINE_COMPAT_TESTS.md`.
+`supported_async` cases separate from `blocked_by_design` cases. P12-33 adds
+fake device instrumentation evidence for the selected high-value cases and
+verifies the required `engine`, `compatStatus`, `providerMode`,
+`resourceCleanupStatus`, and `skipReason` result fields. P12-34 verifies that
+the formal migration guide, Pro 9 comparison, matrix, security model, testing
+guide, and type declaration README no longer mark completed P12 surfaces as
+provider gaps and keep stable rejection guidance visible.
+
+Focused dual-engine fake device evidence hook:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.RhinoNodeDualEngineCompatInstrumentationTest"
+```
 
 Focused packaged `app` bridge smoke:
 

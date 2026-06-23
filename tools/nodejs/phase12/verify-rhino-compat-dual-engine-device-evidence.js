@@ -181,7 +181,7 @@ function buildChecks(files, repoRoot) {
     check(
       "surface-manifest",
       surface &&
-        surface.status === "provider_poc" &&
+        ["provider_poc", "promoted"].includes(surface.status) &&
         (surface.tasks || []).includes("P12-33") &&
         (surface.tasks || []).includes("P12-34") &&
         includesAll(JSON.stringify(surface), [
@@ -198,7 +198,7 @@ function buildChecks(files, repoRoot) {
           "`engine`",
           "`compatStatus`",
         ]),
-      "Phase 12 surface manifest must move dual_engine.device_evidence to provider_poc with P12-33 evidence.",
+      "Phase 12 surface manifest must keep dual_engine.device_evidence at provider_poc or promoted with P12-33 evidence.",
     ),
     check(
       "phase12-task-complete",

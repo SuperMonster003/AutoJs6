@@ -52,7 +52,12 @@ S11-28 adds dual-engine compatibility fixtures in
 `docs/nodejs/dual-engine-compat`. These pair Rhino snippets with Node
 compat-mode snippets and separate `supported_async` cases from
 `blocked_by_design` cases. Run `verifyNodeRhinoDualEngineCompatTests` to
-produce the host report and device instrumentation plan evidence.
+produce the host report. P12-33 adds fake device instrumentation evidence for
+the high-value `events-keys`, `ui-compat-show-update-close`,
+`tasks-disposable`, `barcode-qrcode`, and `rhino-shim-disabled` cases. Run
+`verifyNodeRhinoCompatDualEngineDeviceEvidence` for the host-side fixture gate;
+the focused connected-device hook is
+`RhinoNodeDualEngineCompatInstrumentationTest`.
 
 ## Mental Model Changes
 
@@ -153,6 +158,93 @@ const shell = require("shell");
 ```
 
 Use Node builtins only within the supported profile. Raw `child_process`, native addons, unrestricted network modules, and unrestricted filesystem access remain disabled by default.
+
+## Phase 12 Promoted Compatibility Examples
+
+P12-34 keeps the promoted Phase 12 compatibility surfaces visible in this
+formal migration guide. These examples use explicit imports and keep completed
+surfaces out of the provider-gap bucket.
+
+### Events Keys Constants
+
+Rhino key-code constants are available as pure compatibility constants. This
+does not enable Android key observation or interception.
+
+```js
+"nodejs";
+
+const compat = require("autojs6:compat");
+
+console.log(compat.keys.HOME);
+console.log(compat.events.keys.BACK);
+```
+
+### Disposable Scheduled Tasks
+
+Rhino one-shot disposable task migration uses the `compat.tasks` facade over
+`work_manager`. The facade returns a Node-owned string id and JSON task
+snapshots only.
+
+```js
+"nodejs";
+
+(async function main() {
+  const compat = require("autojs6:compat");
+
+  const taskId = await compat.tasks.addDisposableTask({
+    path: "jobs/cleanup.cjs",
+    delayMs: 60 * 1000,
+    taskTimeoutMs: 30 * 1000,
+  });
+
+  await compat.tasks.removeTask(taskId);
+})();
+```
+
+### Barcode And QRCode
+
+P12-28 promotes the direct `barcode` provider and P12-29 promotes
+`compat.barcode` plus QR-only `compat.qrcode`. Inputs are project-relative
+paths, provider-owned image handles, or existing-permission capture descriptors;
+raw `Bitmap`, `ImageWrapper`, ML Kit `Barcode`, scanners, and Java objects do
+not cross into Node.
+
+```js
+"nodejs";
+
+(async function main() {
+  const barcode = require("barcode");
+  const compat = require("autojs6:compat");
+
+  const allCodes = await barcode.detectAll("fixtures/barcodes.png", {
+    formats: ["QR_CODE", "EAN_13"],
+    timeoutMs: 10_000,
+  });
+
+  const image = await compat.images.read("fixtures/qrcode.png", { timeoutMs: 10_000 });
+  try {
+    const qrTexts = await compat.qrcode.recognizeTexts(image, { timeoutMs: 10_000 });
+    console.log(JSON.stringify({ allCodes: allCodes.length, qrTexts }));
+  } finally {
+    await compat.images.recycle(image);
+  }
+})();
+```
+
+### Stable Rejections
+
+Rejected compatibility APIs should fail with stable error codes instead of
+silently falling back to unsafe behavior:
+
+- `rhino.run()` without `experimental: true` rejects with
+  `ERR_AUTOJS6_RHINO_SHIM_DISABLED`.
+- `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`.
+- `s13n.color`, `s13n.point`, `s13n.throwable`, and `s13n.time` reject with
+  `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED`.
+- raw task objects, exact Rhino `threads`, `floaty.window()`, and
+  `floaty.rawWindow()` are blocked by design; compatibility docs and examples
+  use `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN` where a stable callable stub
+  exists.
 
 ## Unsupported Utility Modules
 
@@ -860,8 +952,11 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Do not rely on default `require("rhino")` execution; P12-25 requires an explicit `experimental: true` JSON-only POC request. `rhino.install()`, `importClass`, `importPackage`, `Packages`, and `JavaAdapter` remain unsupported inside Node.
 - Confirm unsupported builtins still fail with `ERR_AUTOJS6_*`.
 - Review `docs/nodejs/examples/rhino-compat` for checked
-  toast/files/storage/selector/image/ocr/app/device/shell/tasks migration pairs.
+  toast/files/storage/selector/image/ocr/app/device/shell/tasks/barcode
+  migration pairs.
 - Review `docs/nodejs/dual-engine-compat` for S11-28 dual-engine fixtures that
-  distinguish `supported_async` from `blocked_by_design`.
+  distinguish `supported_async` from `blocked_by_design`, and run the P12-33
+  `verifyNodeRhinoCompatDualEngineDeviceEvidence` gate when validating the fake
+  device evidence contract.
 - Run examples under `sample/nodejs/` for reference.
 - Re-run packaged APK verification when the script is packaged.
