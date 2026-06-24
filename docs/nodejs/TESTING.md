@@ -1508,6 +1508,21 @@ and release matrix text. It keeps UDP client sockets, UDP server bind/listen,
 multicast, broadcast, packaged INTERNET/multicast proof, fd leak proof, and
 live Android UDP evidence open.
 
+Phase 13 filesystem profile decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13FilesystemProfileDecision
+```
+
+This host gate records P13-32 as partial. It requires the frozen
+`autojs6:profile.filesystemProfile` diagnostic, focused device evidence for
+Safe scoped reads plus `/sdcard`, `/proc`, `/sys`, `/dev`, NUL, `..`,
+symlink, and realpath denials, existing scoped fs security/fuzzer evidence,
+desktop builtin matrix updates, security/profile docs, and release matrix text.
+It keeps user-authorized roots, SAF/document roots, app-private roots,
+`/sdcard` expansion, grant persistence/revocation, packaged expanded-root
+evidence, and P13-33 advanced desktop fs API decisions open.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

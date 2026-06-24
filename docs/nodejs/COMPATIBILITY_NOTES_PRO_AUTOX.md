@@ -302,6 +302,13 @@ server bind/listen, multicast, broadcast, or raw datagram sockets on
 Rhino/Android APIs until a future UDP provider and packaged permission policy
 land.
 
+P13-32 records filesystem profile expansion as partial. AutoJs6 Node still
+keeps `fs` and `fs/promises` scoped to the script working directory by default;
+`autojs6:profile.filesystemProfile` is diagnostic-only and reports no extra
+roots. Keep Pro/AutoX scripts that depend on `/sdcard`, SAF/document trees,
+user-selected directories, app-private shared roots, or broad Android storage
+on Rhino/Android APIs until a future explicit filesystem root provider lands.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

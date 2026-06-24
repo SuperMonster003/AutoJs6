@@ -697,6 +697,13 @@ patterns and rejects parent-segment, absolute, protocol, invalid exclude, and
 by S8-31; existing wrappers remain bounded by scoped path policy and platform
 permission failures.
 
+P13-32 records filesystem profile expansion as partial. The current Safe
+profile remains `workingDirectory` scoped and exposes
+`autojs6:profile.filesystemProfile` only as frozen diagnostics:
+`mode="scoped_working_directory"` and `additionalRoots=[]`. User-authorized
+roots, `/sdcard`, SAF/document roots, app-private roots, grant persistence,
+revocation, and packaged expanded-root evidence remain unpromoted.
+
 The `zlib` wrapper exposes bounded transform streams for `createGzip()`,
 `createGunzip()`, `createDeflate()`, `createInflate()`, raw deflate/inflate,
 and Brotli compression/decompression. Active zlib transform tracking starts
@@ -1020,6 +1027,12 @@ the builtin-disabled policy. UDP client sockets, UDP server bind/listen,
 multicast, broadcast, Android multicast state, fd/native handles, packaged
 INTERNET proof, multicast permission proof, and live Android UDP evidence are
 not part of the current v1.1 Desktop profile.
+
+P13-32 records filesystem profile expansion as partial for the Desktop track.
+It does not change the default scoped `fs` authority: broader roots require a
+future explicit provider, user/manifest authorization model, per-root
+symlink/realpath/sensitive-path audit, and packaged evidence before scripts can
+read or write outside their working directory.
 
 The controlled request policy is bounded even when fake or experimental live providers are used:
 

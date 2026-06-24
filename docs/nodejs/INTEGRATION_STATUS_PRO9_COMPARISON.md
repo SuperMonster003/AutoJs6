@@ -1086,6 +1086,13 @@ client sockets, server bind/listen, multicast, broadcast, Android multicast
 state, fd/native handles, packaged permission proof, and live Android UDP
 evidence are not part of the current v1.1 Desktop profile.
 
+P13-32 records filesystem profile expansion as partial: Safe Node remains
+`workingDirectory` scoped, `autojs6:profile.filesystemProfile` reports
+`mode="scoped_working_directory"` with `additionalRoots=[]`, and `/sdcard`,
+SAF/document roots, app-private roots, user-authorized roots, and Android
+shared storage remain unavailable until an explicit Pro/Desktop root provider,
+grant lifecycle, packaged smoke, and per-root symlink/realpath audit land.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

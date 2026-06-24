@@ -668,6 +668,14 @@ decision gate for UDP and keeps the desktop network/fs surface partial:
 local shadow attempts remain disabled, while UDP client sockets, server
 bind/listen, multicast, broadcast, packaged INTERNET/multicast proof, fd leak
 instrumentation, and live Android UDP evidence require separate evidence.
+P13-32 additionally uses `verifyNodePhase13FilesystemProfileDecision` as the
+host decision gate for filesystem profile expansion and keeps the desktop
+network/fs surface partial: Safe `workingDirectory` scoped fs, frozen
+`filesystemProfile` diagnostics, `/sdcard`, `/proc`, `/sys`, `/dev`, NUL,
+`..`, symlink, and realpath denial evidence are covered, while
+user-authorized roots, SAF/document roots, app-private roots, Android shared
+storage expansion, packaged expanded-root smoke, grant revocation diagnostics,
+and P13-33 advanced desktop fs API decisions require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

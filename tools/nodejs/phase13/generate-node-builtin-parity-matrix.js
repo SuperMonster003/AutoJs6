@@ -166,7 +166,7 @@ function classifyBuiltin(name, sets) {
       status: "partial",
       targetProfile: "safe_default",
       source: sourceTags({ disabled, network, limited, commonJs }),
-      nextStep: "Keep current Safe subset unless P13-43 promotes broader desktop conformance.",
+      nextStep: nextStepForLimited(bareName),
     };
   }
   if (commonJs) {
@@ -195,6 +195,13 @@ function networkNextStepFor(name) {
     return "P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open.";
   }
   return "P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy.";
+}
+
+function nextStepForLimited(name) {
+  if (name === "fs" || name === "fs/promises") {
+    return "P13-32 records scoped filesystem profile as partial; Safe profile stays working-directory scoped while user-authorized roots, SAF, app-private roots, /sdcard expansion, and packaged expanded-root evidence remain future work.";
+  }
+  return "Keep current Safe subset unless P13-43 promotes broader desktop conformance.";
 }
 
 function highRiskProfileFor(name) {

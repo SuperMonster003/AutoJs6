@@ -173,6 +173,22 @@
   packaged INTERNET/multicast permission proof, fd leak instrumentation, and
   live Android UDP evidence.
 
+## P13-32 Partial Landing Note
+
+- P13-32 partial filesystem profile gate records the current Safe profile as
+  scoped to `workingDirectory` and exposes a frozen diagnostic
+  `filesystemProfile` snapshot without adding any extra root authority.
+- Host verifier:
+  `tools/nodejs/phase13/verify-filesystem-profile-decision.js`.
+- Gradle gate: `:app:verifyNodePhase13FilesystemProfileDecision`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_32_FILESYSTEM_PROFILE_DECISION.md`.
+- Surface manifest evidence: `phase13-filesystem-profile-decision`.
+- Remaining P13-32 blockers: explicit root authority provider,
+  user-authorized directory grants, SAF/document roots, app-private roots,
+  `/sdcard` expansion, grant persistence/revocation diagnostics, packaged
+  expanded-root smoke, and per-root symlink/realpath/sensitive-path audit.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -1011,6 +1027,20 @@ P13 task 本身使用以下执行状态：
     - Safe profile 仍保持 scoped fs。
     - Pro/Desktop profile 可通过 manifest/用户授权获得额外根。
     - symlink、realpath、`..`、NUL、`/proc`、`/sys`、`/dev` 边界重新审计。
+  - Decision progress:
+    - 当前 Safe profile 明确保持 `workingDirectory` scoped fs，不在 P13-32
+      中静默开放 `/sdcard`、SAF、app-private 或用户授权根。
+    - `autojs6:profile.filesystemProfile` 暴露冻结诊断：
+      `mode="scoped_working_directory"` 且 `additionalRoots=[]`。
+    - `NodeFilesystemProfileDecisionInstrumentationTest` 覆盖 scoped 读写、
+      `realpath`、绝对 outside path、`/sdcard`、`/proc`、`/sys`、`/dev`、
+      NUL、`..`、promise escape、symlink/realpath escape。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-filesystem-profile-decision.js`.
+    - Gradle gate: `:app:verifyNodePhase13FilesystemProfileDecision`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_32_FILESYSTEM_PROFILE_DECISION.md`.
+    - Surface manifest evidence: `phase13-filesystem-profile-decision`.
 
 - [ ] P13-33: 推进 desktop fs advanced APIs。
   - 范围：`fs.watch`、`fs.opendir`、FileHandle、fd API、stream、realpath 等。
