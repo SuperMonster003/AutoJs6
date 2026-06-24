@@ -1,4 +1,5 @@
 /// <reference path="./common.d.ts" />
+/// <reference path="./autojs_global.d.ts" />
 /// <reference path="./toast.d.ts" />
 /// <reference path="./app.d.ts" />
 /// <reference path="./dialogs.d.ts" />

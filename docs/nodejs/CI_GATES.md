@@ -305,6 +305,7 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
 .\gradlew.bat --console=plain :app:verifyNodePhase13AndroidPackageInstallManager
 .\gradlew.bat --console=plain :app:verifyNodePhase13ProEntryDirectives
+.\gradlew.bat --console=plain :app:verifyNodePhase13AutoJsGlobalV1
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
@@ -346,6 +347,11 @@ directive state for `"nodejs ui"` and `"nodejs ui-thread"`, including
 `NodeEntryDirective`, descriptor/project config metadata, debug/native values,
 and focused instrumentation. It remains partial until Activity lifecycle,
 Back/Recents, and concrete UI-thread dispatch evidence land.
+`verifyNodePhase13AutoJsGlobalV1` records the P13-12 read-only `$autojs`
+global v1 state: frozen global installation, `$autojs.version`,
+`$autojs.profile`, diagnostic-only `$autojs.androidContext`, gated
+`$autojs.java`, TypeScript declarations, and focused instrumentation. It does
+not promote full Java/Rhino parity.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through

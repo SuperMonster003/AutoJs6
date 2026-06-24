@@ -8152,6 +8152,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_v8_cache = null;
   let __autojs6_limited_tty_cache = null;
   let __autojs6_profile_cache = null;
+  let __autojs6_autojs_global_cache = null;
   let __autojs6_process_permission_cache = null;
   let __autojs6_bridge_cache = null;
   let __autojs6_bridge_transport = null;
@@ -18185,6 +18186,141 @@ std::string buildEmbeddedScriptExecutionSource(
       policy: __autojs6_java_policy_snapshot()
     });
     return __autojs6_limited_java_cache;
+  }
+  function __autojs6_autojs_java_class_name(value) {
+    if (typeof value === "string") {
+      return value;
+    }
+    if (value && typeof value === "object") {
+      if (typeof value.className === "string") {
+        return value.className;
+      }
+      if (typeof value.name === "string") {
+        return value.name;
+      }
+    }
+    return "";
+  }
+  function __autojs6_autojs_java_find_class(className) {
+    return __autojs6_limited_java().type(className);
+  }
+  function __autojs6_autojs_java_call_static(classOrName, methodName, args, options) {
+    return __autojs6_limited_java().callStatic(
+      __autojs6_autojs_java_class_name(classOrName),
+      methodName,
+      args,
+      options
+    );
+  }
+  function __autojs6_autojs_java_new(classOrName, args, options) {
+    return __autojs6_limited_java().new(__autojs6_autojs_java_class_name(classOrName), args, options);
+  }
+  function __autojs6_autojs_java_create(classOrName, args, threadModeOrOptions, maybeOptions) {
+    if (!__autojs6_java_interop_experimental_enabled) {
+      throw __autojs6_java_interop_disabled_error();
+    }
+    if (
+      typeof threadModeOrOptions === "string" &&
+      threadModeOrOptions.length > 0 &&
+      threadModeOrOptions !== "default"
+    ) {
+      throw __autojs6_java_interop_error(
+        "$autojs.java.create thread mode dispatch is not implemented in $autojs global v1.",
+        "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+        __autojs6_autojs_java_class_name(classOrName),
+        "create"
+      );
+    }
+    const options = typeof threadModeOrOptions === "object" && threadModeOrOptions !== null
+      ? threadModeOrOptions
+      : maybeOptions;
+    return __autojs6_autojs_java_new(classOrName, args, options);
+  }
+  function __autojs6_autojs_java_stable_rejection(methodName, reason) {
+    return function() {
+      if (!__autojs6_java_interop_experimental_enabled) {
+        throw __autojs6_java_interop_disabled_error();
+      }
+      throw __autojs6_java_interop_error(
+        "$autojs.java." + methodName + " is not implemented in $autojs global v1: " + reason,
+        "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+        "",
+        methodName
+      );
+    };
+  }
+  function __autojs6_autojs_java_facade() {
+    const enabled = __autojs6_java_interop_experimental_enabled;
+    return Object.freeze({
+      schema: "autojs6-node-autojs-java-v1",
+      enabled,
+      experimental: enabled,
+      mode: enabled ? "allowlist" : "disabled",
+      reason: enabled
+        ? "Experimental allowlist-only Java interop is enabled for this build."
+        : "AutoJs6 Java interop is disabled; enable autojs.nodejs.javaInterop.experimental for an allowlist-only experiment.",
+      policy: __autojs6_java_policy_snapshot(),
+      findClass: __autojs6_autojs_java_find_class,
+      type: __autojs6_autojs_java_find_class,
+      callStatic: __autojs6_autojs_java_call_static,
+      new: __autojs6_autojs_java_new,
+      create: __autojs6_autojs_java_create,
+      loadDex: __autojs6_autojs_java_stable_rejection("loadDex", "dynamic dex loading remains blocked."),
+      loadJar: __autojs6_autojs_java_stable_rejection("loadJar", "dynamic jar loading remains blocked."),
+      setThreadMode: __autojs6_autojs_java_stable_rejection("setThreadMode", "Java object thread dispatch remains blocked."),
+      setDefaultThreadMode: __autojs6_autojs_java_stable_rejection("setDefaultThreadMode", "Java class thread dispatch remains blocked."),
+      wrap: __autojs6_autojs_java_stable_rejection("wrap", "callback wrapping remains blocked.")
+    });
+  }
+  function __autojs6_autojs_android_context_descriptor(host) {
+    return Object.freeze({
+      schema: "autojs6-node-autojs-android-context-v1",
+      available: false,
+      proxy: true,
+      type: "android.content.Context",
+      packageName: host.packageName,
+      reason: "Raw Android Context is not exposed in the Safe Node Profile."
+    });
+  }
+  function __autojs6_autojs_global() {
+    if (__autojs6_autojs_global_cache) {
+      return __autojs6_autojs_global_cache;
+    }
+    const profile = __autojs6_profile();
+    const host = __autojs6_host_app_info();
+    const version = Object.freeze({
+      name: host.versionName,
+      code: host.versionCode,
+      engine: profile.engineVersion,
+      node: profile.node
+    });
+    __autojs6_autojs_global_cache = Object.freeze({
+      schema: "autojs6-node-autojs-global-v1",
+      version,
+      versionName: host.versionName,
+      versionCode: host.versionCode,
+      packageName: host.packageName,
+      profile,
+      androidContext: __autojs6_autojs_android_context_descriptor(host),
+      java: __autojs6_autojs_java_facade()
+    });
+    return __autojs6_autojs_global_cache;
+  }
+  function __autojs6_install_autojs_global() {
+    const value = __autojs6_autojs_global();
+    try {
+      Object.defineProperty(globalThis, "$autojs", {
+        value,
+        configurable: false,
+        enumerable: false,
+        writable: false
+      });
+    } catch (_) {
+      try {
+        if (globalThis.$autojs === value) return;
+        globalThis.$autojs = value;
+      } catch (_) {}
+    }
   }
   function __autojs6_host_app_info() {
     const fallback = {
@@ -40281,6 +40417,7 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_module_cache[__autojs6_main_module.filename] = __autojs6_main_module;
     __autojs6_install_require_guard(__autojs6_main_module);
     __autojs6_install_builtin_module_guard();
+    __autojs6_install_autojs_global();
     __autojs6_install_error_handlers();
     const __autojs6_run_entry_as_esm = __autojs6_should_run_entry_as_esm();
     __autojs6_install_dynamic_code_guard();

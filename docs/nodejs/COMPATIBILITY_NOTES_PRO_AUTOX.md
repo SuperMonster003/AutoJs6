@@ -150,10 +150,15 @@ Auto.js Pro 9 public docs describe `$autojs.java` and a `rhino` module for Java/
 AutoJs6 behavior:
 
 - direct Java/Android object access is not part of the default Safe Node Profile.
+- P13-12 provides `$autojs` global v1 as a read-only diagnostic and gated entry
+  surface: `$autojs.androidContext` is not a raw `Context`, and `$autojs.java`
+  rejects by default unless the Java interop experiment is enabled.
 - AutoJs capabilities should be requested through bridge modules.
 - raw Android services, activities, accessibility nodes, media projection objects, and bitmap pointers are not exposed directly.
 
-Porting note: replace `$autojs`, `java.*`, `android.*`, `importClass`, and Rhino-style Java access with explicit bridge APIs where available.
+Porting note: treat `$autojs global v1`, `java.*`, `android.*`,
+`importClass`, and Rhino-style Java access as gated migration work. Prefer
+explicit bridge APIs where available.
 
 ## Threads
 

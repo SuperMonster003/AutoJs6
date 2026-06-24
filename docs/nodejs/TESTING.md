@@ -663,6 +663,19 @@ metadata and flow through descriptor, source, project request, debug descriptor,
 native values, and failure markers. The gate stays partial until Activity
 lifecycle, Back/Recents behavior, and concrete UI-thread dispatch evidence land.
 
+Phase 13 `$autojs` global v1:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13AutoJsGlobalV1
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.EmbeddedScriptMvpInstrumentationTest#autojsGlobalV1ExposesFrozenDiagnosticsAndGatedJavaFacade"
+```
+
+`EmbeddedScriptMvpInstrumentationTest#autojsGlobalV1ExposesFrozenDiagnosticsAndGatedJavaFacade`
+verifies that `globalThis.$autojs` is installed before user code as a frozen
+read-only global, that `$autojs.profile` matches `require("autojs6:profile")`,
+that `$autojs.androidContext` is diagnostic-only, and that default
+`$autojs.java` calls reject with `ERR_AUTOJS6_JAVA_INTEROP_DISABLED`.
+
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground
 long-running, runtime budget/heartbeat, queueing, scheduled runner,

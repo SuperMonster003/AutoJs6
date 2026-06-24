@@ -346,7 +346,7 @@ P13 task 本身使用以下执行状态：
   - 未关闭原因：Activity lifecycle、Back/Recents 和实际 UI-thread dispatch
     evidence 尚未完成，因此保持 `partial`。
 
-- [ ] P13-12: 定义并实现 `$autojs` global v1。
+- [x] P13-12: 定义并实现 `$autojs` global v1。
   - 范围：提供 Pro 风格 `$autojs` 入口，但分层暴露能力。
   - 建议子项：
     - `$autojs.version`
@@ -357,6 +357,24 @@ P13 task 本身使用以下执行状态：
     - Safe profile 中只暴露只读诊断或稳定拒绝。
     - Pro profile 中可进入受控 Java interop。
     - 不泄漏 raw Context 到默认 Node userland。
+  - 进度：
+    - 已在 Node bridge 启动用户代码前安装冻结的 `globalThis.$autojs`。
+    - `$autojs.profile` 与 `require("autojs6:profile")` 保持同一对象。
+    - `$autojs.androidContext` 仅暴露冻结诊断 descriptor，不暴露 raw
+      `Context`。
+    - `$autojs.java` 复用现有 Java interop allowlist gate；默认稳定拒绝为
+      `ERR_AUTOJS6_JAVA_INTEROP_DISABLED`。
+    - 已补 TypeScript declaration 与 type-smoke。
+  - 证据：
+    - Runtime：`app/src/main/cpp/node_bridge_sources.cpp`.
+    - Focused test：
+      `EmbeddedScriptMvpInstrumentationTest#autojsGlobalV1ExposesFrozenDiagnosticsAndGatedJavaFacade`.
+    - Types：`docs/nodejs/types/autojs6-node/autojs_global.d.ts`.
+    - Host verifier：`tools/nodejs/phase13/verify-autojs-global-v1.js`.
+    - Gradle gate：`:app:verifyNodePhase13AutoJsGlobalV1`.
+    - Report：`docs/nodejs/reports/phase13/P13_12_AUTOJS_GLOBAL_V1.md`.
+  - 边界：完整 Java object/thread parity 仍归 P13-13；`rhino.install`、
+    `importClass`/`importPackage` 和 `JavaAdapter` 仍归 P13-14 到 P13-16。
 
 - [ ] P13-13: 推进 `$autojs.java` / Java interop allowlist。
   - 范围：从默认关闭的 `java_interop` 实验推进到 Pro profile opt-in。

@@ -443,7 +443,7 @@ TypeScript 声明还覆盖：
 | npm | Android 终端内 `npm i --no-bin-links` | Android 运行时 npm install 尚未完成，当前偏 host/vendor |
 | Node builtins | 文档示例更接近普通 Node 使用 | 受 Safe Profile 约束，很多 builtin 是 wrapper 或 denial |
 | 文件系统 | 示例可读 Android 绝对路径 | scoped fs，默认拒绝越权路径 |
-| Java/Android | `$autojs.java`、`require("rhino").install()` | 默认无 `$autojs.java`，无 `require("rhino")`，只有 experimental `java` allowlist |
+| Java/Android | `$autojs.java`、`require("rhino").install()` | P13-12 已有只读 `$autojs` 和 gated `$autojs.java` facade；默认拒绝 Java 调用，完整 Java/Rhino parity 仍在 P13-13 到 P13-16 |
 | Rhino 全局兼容 | 第一代 API 保留在 Rhino；Node 需 require 新模块 | Rhino 保留；Node 有显式 `autojs6:compat`，但不默认安装 globals |
 | 线程 | Node event loop，`worker_threads` 方向受限 | `worker_threads` 默认关闭，Rhino `threads` 不作为 Node 兼容目标 |
 | UI 线程 | `"nodejs ui"` / `"ui-thread"` | P13-11 已补 `NodeEntryDirective` metadata、descriptor/project config 透传和 gate；Activity lifecycle、Back/Recents、实际 UI-thread dispatch 仍未等价 |
@@ -810,7 +810,8 @@ blockers：
 ### 与 Pro v9 的能力差距
 
 - Android 端运行时 `npm install` 和全局 npm 安装能力未完成。
-- `$autojs.java` 不存在。
+- P13-12 已提供 `$autojs` global v1 和 gated `$autojs.java` facade；默认仍拒绝
+  Java 调用，完整 Java object/thread parity 尚未完成。
 - `require("rhino").install()` 不存在。
 - `java.*`、`android.*`、`Packages`、`JavaAdapter` 不是默认 Node 能力。
 - `"nodejs ui"` / `"ui-thread"` 已有 P13-11 metadata partial，但 Pro v9

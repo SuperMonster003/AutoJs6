@@ -191,7 +191,14 @@
         ":app:verifyNodePhase13ProEntryDirectives",
         "app/src/main/java/org/autojs/autojs/script/NodeEntryDirective.kt",
         "build/reports/nodejs/phase13-pro-entry-directives.json",
-        "build/reports/nodejs/phase13-pro-entry-directives.md"
+        "build/reports/nodejs/phase13-pro-entry-directives.md",
+        "docs/nodejs/reports/phase13/P13_12_AUTOJS_GLOBAL_V1.md",
+        "tools/nodejs/phase13/verify-autojs-global-v1.js",
+        ":app:verifyNodePhase13AutoJsGlobalV1",
+        "app/src/main/cpp/node_bridge_sources.cpp",
+        "docs/nodejs/types/autojs6-node/autojs_global.d.ts",
+        "build/reports/nodejs/phase13-autojs-global-v1.json",
+        "build/reports/nodejs/phase13-autojs-global-v1.md"
       ],
       "rollback": "Reject Pro Java/Rhino interop flags and keep require(\"rhino\") in the default disabled JSON-only path."
     },

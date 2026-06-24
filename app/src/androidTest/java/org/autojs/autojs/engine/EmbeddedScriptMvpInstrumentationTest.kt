@@ -1653,6 +1653,101 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun autojsGlobalV1ExposesFrozenDiagnosticsAndGatedJavaFacade() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            const profile = require("autojs6:profile");
+            const autojs = globalThis.${'$'}autojs;
+            const descriptor = Object.getOwnPropertyDescriptor(globalThis, "${'$'}autojs");
+            const beforeVersion = autojs.version;
+            function codeOf(error) {
+              return String(error && (error.autojs6Code || error.code || error.name || ""));
+            }
+            try {
+              globalThis.${'$'}autojs = { mutated: true };
+            } catch (_) {}
+            try {
+              autojs.version = { name: "mutated" };
+            } catch (_) {}
+            let findClassCode = "";
+            let createUiCode = "";
+            let loadDexCode = "";
+            try {
+              autojs.java.findClass("java.lang.Math");
+            } catch (error) {
+              findClassCode = codeOf(error);
+            }
+            try {
+              autojs.java.create("android.view.View", [], "ui");
+            } catch (error) {
+              createUiCode = codeOf(error);
+            }
+            try {
+              autojs.java.loadDex("plugin.dex");
+            } catch (error) {
+              loadDexCode = codeOf(error);
+            }
+            console.log("autojs.global=" + [
+              typeof autojs,
+              descriptor.writable,
+              descriptor.configurable,
+              descriptor.enumerable,
+              globalThis.${'$'}autojs === autojs
+            ].join("/"));
+            console.log("autojs.identity=" + [
+              autojs.profile === profile,
+              autojs.version === beforeVersion,
+              typeof autojs.version.name,
+              typeof autojs.version.code,
+              autojs.version.engine,
+              autojs.version.node === profile.node
+            ].join("/"));
+            console.log("autojs.frozen=" + [
+              Object.isFrozen(autojs),
+              Object.isFrozen(autojs.version),
+              Object.isFrozen(autojs.profile),
+              Object.isFrozen(autojs.androidContext),
+              Object.isFrozen(autojs.java),
+              Object.isFrozen(autojs.java.policy),
+              Object.isFrozen(autojs.java.policy.allowedClasses),
+              Object.isFrozen(autojs.java.policy.deniedClassPrefixes)
+            ].join("/"));
+            console.log("autojs.context=" + [
+              autojs.androidContext.available,
+              autojs.androidContext.proxy,
+              autojs.androidContext.type,
+              typeof autojs.androidContext.packageName,
+              autojs.androidContext.reason.indexOf("Raw Android Context") >= 0
+            ].join("/"));
+            console.log("autojs.java=" + [
+              autojs.java.enabled,
+              autojs.java.experimental,
+              autojs.java.mode,
+              typeof autojs.java.findClass,
+              typeof autojs.java.type,
+              typeof autojs.java.callStatic,
+              typeof autojs.java.new,
+              typeof autojs.java.create,
+              autojs.java.policy.allowedClasses.includes("java.lang.Math")
+            ].join("/"));
+            console.log("autojs.java.codes=" + [findClassCode, createUiCode, loadDexCode].join("/"));
+            """.trimIndent(),
+            "<embedded-autojs-global-v1-source.js>",
+        )
+
+        assertTrue(result.errorMessage.orEmpty(), result.succeeded)
+        assertTrue(result.stdout.contains("autojs.global=object/false/false/false/true"))
+        assertTrue(result.stdout.contains("autojs.identity=true/true/string/number/autojs6-node-profile-v1.1/true"))
+        assertTrue(result.stdout.contains("autojs.frozen=true/true/true/true/true/true/true/true"))
+        assertTrue(result.stdout.contains("autojs.context=false/true/android.content.Context/string/true"))
+        assertTrue(result.stdout.contains("autojs.java=false/false/disabled/function/function/function/function/function/true"))
+        assertTrue(result.stdout.contains("autojs.java.codes=ERR_AUTOJS6_JAVA_INTEROP_DISABLED/ERR_AUTOJS6_JAVA_INTEROP_DISABLED/ERR_AUTOJS6_JAVA_INTEROP_DISABLED"))
+    }
+
+    @Test
     fun autojs6ErrorsExposeCanonicalCodesAndLegacyCodes() {
         assumeEmbeddedScriptExecutionEnabled()
 

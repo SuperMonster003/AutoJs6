@@ -38,6 +38,7 @@ import axios = require("axios");
 import websocket = require("websocket");
 import workManager = require("work_manager");
 import plugins = require("plugins");
+import autojsProfile = require("autojs6:profile");
 
 interface TypeSmokePlugin {
   readonly ready: boolean;
@@ -368,6 +369,16 @@ async function smoke(): Promise<void> {
   const pluginEntry: string = plugins.resolve("org.example.types");
   const typedPlugin: TypeSmokePlugin = plugins.load<TypeSmokePlugin>("org.example.types");
   const pluginResult: string = typedPlugin.run();
+  const profileEngine: string = autojsProfile.engineVersion;
+  const globalProfile: AutoJs6Node.AutoJsProfile = $autojs.profile;
+  const autojsVersionCode: number = $autojs.version.code;
+  const autojsPackageName: string = $autojs.androidContext.packageName;
+  const autojsContextAvailable: false = $autojs.androidContext.available;
+  const autojsJavaEnabled: boolean = $autojs.java.enabled;
+  const autojsJavaPolicy: AutoJs6Node.AutoJsJavaPolicy = $autojs.java.policy;
+  const autojsJavaClass: AutoJs6Node.AutoJsJavaClassDescriptor = $autojs.java.findClass("java.lang.Math");
+  const autojsJavaCall: Promise<unknown> = $autojs.java.callStatic(autojsJavaClass, "max", [1, 2], { timeoutMs: 1000 });
+  const autojsLoadDex: (dexFile: string) => never = $autojs.java.loadDex;
 
   void launched;
   void launchByName;
@@ -484,6 +495,16 @@ async function smoke(): Promise<void> {
   void pluginInfo;
   void pluginEntry;
   void pluginResult;
+  void profileEngine;
+  void globalProfile;
+  void autojsVersionCode;
+  void autojsPackageName;
+  void autojsContextAvailable;
+  void autojsJavaEnabled;
+  void autojsJavaPolicy;
+  void autojsJavaClass;
+  void autojsJavaCall;
+  void autojsLoadDex;
 }
 
 void smoke;

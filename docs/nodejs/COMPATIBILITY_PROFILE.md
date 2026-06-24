@@ -91,6 +91,12 @@ with surface ownership in
 
 Runtime diagnostics expose the same state through `require("autojs6:profile").featureFlags`, `enabledExperimentalFlags`, and `deniedFeatureFlags`. The legacy `experimentalFlags` and `highRiskCapabilities` snapshots are retained for compatibility.
 
+P13-12 also exposes a read-only `$autojs` global v1. In the Safe Node Profile,
+`$autojs.version` and `$autojs.profile` are diagnostics, `$autojs.androidContext`
+is a frozen unavailable descriptor, and `$autojs.java` is a gated facade over
+the existing Java interop experiment. Normal builds keep `$autojs.java.enabled`
+false and reject calls with `ERR_AUTOJS6_JAVA_INTEROP_DISABLED`.
+
 ## Supported Entry Points
 
 - `"nodejs";` directive
@@ -113,6 +119,8 @@ and concrete UI-thread dispatch parity remain unpromoted.
 - `require()`
 - `module.require()`
 - `require("autojs6:profile")` for a read-only AutoJs6 profile descriptor
+- global `$autojs` for the P13-12 read-only Pro-style diagnostics and gated
+  Java entry facade
 - `module.exports` and `exports`
 - JSON modules
 - local `.js`, `.cjs`, and `.json` modules
