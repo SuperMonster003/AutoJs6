@@ -5,6 +5,7 @@ import android.os.Build
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
+import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs6.BuildConfig
@@ -20,7 +21,11 @@ object NodeDoctorReportGenerator {
         val jsonFile: File,
     )
 
-    fun generate(context: Context, includeNativeProbe: Boolean = true): ReportFiles {
+    fun generate(
+        context: Context,
+        includeNativeProbe: Boolean = true,
+        projectRoot: File? = null,
+    ): ReportFiles {
         val appContext = context.applicationContext
         val generatedAt = ZonedDateTime.now().toString()
         val probeResult = if (includeNativeProbe) {
@@ -29,7 +34,7 @@ object NodeDoctorReportGenerator {
         } else {
             null
         }
-        val reportJson = buildJson(appContext, generatedAt, probeResult, includeNativeProbe)
+        val reportJson = buildJson(appContext, generatedAt, probeResult, includeNativeProbe, projectRoot)
         val reportText = buildText(appContext, generatedAt, reportJson)
         val reportDir = File(appContext.filesDir, REPORT_DIR_NAME).apply { mkdirs() }
         val textFile = File(reportDir, "node-doctor-report.txt")
@@ -44,6 +49,7 @@ object NodeDoctorReportGenerator {
         generatedAt: String,
         probeResult: NativeNodeEmbeddedRuntimeBridge.ProbeResult?,
         includeNativeProbe: Boolean,
+        projectRoot: File?,
     ): JSONObject {
         return JSONObject().apply {
             put("schema", "autojs6-node-doctor-device-v1")
@@ -53,6 +59,7 @@ object NodeDoctorReportGenerator {
             put("runtime", runtimeJson(probeResult))
             put("compileCache", compileCacheJson(context))
             put("featureFlags", featureFlagsJson())
+            put("profileSelection", profileSelectionJson(projectRoot))
             put("nativeLibraries", nativeLibrariesJson(context, probeResult))
             put("capabilityProfile", capabilityProfileJson())
             put("bridgeCapabilities", bridgeCapabilitiesJson())
@@ -148,6 +155,15 @@ object NodeDoctorReportGenerator {
         else -> NodeRuntimeCapabilities.featureFlagsById[id]?.defaultEnabled ?: false
     }
 
+    private fun profileSelectionJson(projectRoot: File?): JSONObject {
+        val diagnostics = if (projectRoot != null) {
+            NodeProfileSelectionDiagnostics.fromWorkingDirectory(projectRoot.absolutePath)
+        } else {
+            NodeProfileSelectionDiagnostics.fromManifest(NodeBridgePermissionManifest.Manifest.empty(), "runtime_default")
+        }
+        return diagnostics.toJsonObject()
+    }
+
     private fun nativeLibrariesJson(
         context: Context,
         probeResult: NativeNodeEmbeddedRuntimeBridge.ProbeResult?,
@@ -238,6 +254,7 @@ object NodeDoctorReportGenerator {
     private fun buildText(context: Context, generatedAt: String, json: JSONObject): String {
         val runtime = json.getJSONObject("runtime")
         val compileCache = json.getJSONObject("compileCache")
+        val profileSelection = json.getJSONObject("profileSelection")
         val nativeLibraries = json.getJSONObject("nativeLibraries")
         val packagedTemplate = json.getJSONObject("packagedTemplate")
         val lastNodeError = json.getJSONObject("lastNodeError")
@@ -274,6 +291,17 @@ object NodeDoctorReportGenerator {
             appendLine("  dynamic import: ${runtimeVersions.getString("dynamicImport")}")
             appendLine("  bridge protocol: ${runtimeVersions.getString("bridgeProtocol")}")
             appendLine("  moduleSources schema: ${runtimeVersions.getString("moduleSourcesSchema")}")
+            appendLine()
+            appendLine("Profile Selection:")
+            appendLine("  status: ${profileSelection.getString("status")}")
+            appendLine("  effective profile: ${profileSelection.getString("effectiveProfile")}")
+            appendLine("  requested profiles: ${profileSelection.getJSONArray("requestedProfiles").join(", ")}")
+            appendLine("  selection mode: ${profileSelection.getString("selectionMode")}")
+            appendLine("  profile promotion: ${profileSelection.getBoolean("profilePromotion")}")
+            appendLine("  user selectable: ${profileSelection.getBoolean("userSelectable")}")
+            appendLine("  declared node permissions: ${profileSelection.getJSONArray("declaredNodePermissions").join(", ")}")
+            appendLine("  high-risk capabilities: ${profileSelection.getJSONArray("highRiskCapabilities").length()}")
+            appendLine("  blocked profile promotions: ${profileSelection.getJSONArray("blockedProfilePromotions").join(", ")}")
             appendLine()
             appendLine("Compile Cache:")
             appendLine("  status: ${compileCache.getString("status")}")

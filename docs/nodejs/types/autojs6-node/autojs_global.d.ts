@@ -255,6 +255,84 @@ declare namespace AutoJs6Node {
     readonly warnings: readonly string[];
   }
 
+  export interface ProfileSelectionProfileDescriptor {
+    readonly id: "safe_default" | "pro_compat_opt_in" | "desktop_compat_opt_in" | "debug_unsafe_lab" | string;
+    readonly requested: boolean;
+    readonly effective: boolean;
+    readonly available: boolean;
+    readonly status: "effective" | "diagnostic_only" | string;
+    readonly description: string;
+  }
+
+  export interface ProfileSelectionHighRiskCapability {
+    readonly id: string;
+    readonly source: "permission_manifest" | "feature_flag" | string;
+    readonly declared: boolean;
+    readonly effectiveProfile: "safe_default" | string;
+    readonly requiredProfile: "safe_default" | "pro_compat_opt_in" | "desktop_compat_opt_in" | "debug_unsafe_lab" | string;
+    readonly profilePromoted?: boolean;
+    readonly requiredAndroidPermissions?: readonly string[];
+    readonly enabledByDefault?: boolean;
+    readonly status?: string;
+    readonly securityLevel?: "high" | "critical" | string;
+    readonly releaseForbidden?: boolean;
+  }
+
+  export interface ProfileSelectionFailureHint {
+    readonly schema: "autojs6-node-profile-selection-failure-hint-v1" | string;
+    readonly module: string;
+    readonly method: string;
+    readonly effectiveProfile: "safe_default" | string;
+    readonly requiredProfiles: readonly string[];
+    readonly requiredNodePermissions: readonly string[];
+    readonly requiredAndroidPermissions: readonly string[];
+    readonly profileSelectionRequired: boolean;
+    readonly message: string;
+    readonly declarationHint: string;
+  }
+
+  export interface ProfileSelectionFailureHints {
+    readonly capabilityNotDeclared: ProfileSelectionFailureHint;
+    readonly profilePromotionBlocked: string;
+  }
+
+  export interface ProfileSelectionDiagnostics {
+    readonly schema: "autojs6-node-profile-selection-diagnostics-v1" | string;
+    readonly status: "diagnostic_only" | string;
+    readonly source: string;
+    readonly defaultProfile: "safe_default" | string;
+    readonly selectedProfile: "safe_default" | string;
+    readonly effectiveProfile: "safe_default" | string;
+    readonly declaredProfile: string;
+    readonly requestedProfiles: readonly string[];
+    readonly selectionMode: "safe_default_effective_metadata_only" | string;
+    readonly profilePromotion: boolean;
+    readonly userSelectable: boolean;
+    readonly projectSettingsSupported: boolean;
+    readonly packagedSettingsSupported: boolean;
+    readonly debugProfileReleaseDenied: boolean;
+    readonly metadataOnly: boolean;
+    readonly grantsAuthority: boolean;
+    readonly declaredNodePermissions: readonly string[];
+    readonly declaredAndroidPermissions: readonly string[];
+    readonly profileCatalog: readonly ProfileSelectionProfileDescriptor[];
+    readonly highRiskCapabilities: readonly ProfileSelectionHighRiskCapability[];
+    readonly blockedProfilePromotions: readonly string[];
+    readonly failureHints: ProfileSelectionFailureHints;
+    readonly warnings: readonly string[];
+  }
+
+  export interface AutoJsBridgeCapabilityNotDeclaredError extends Error {
+    readonly code: "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED";
+    readonly module?: string;
+    readonly method?: string;
+    readonly missingCapabilities: readonly string[];
+    readonly requiredProfiles: readonly string[];
+    readonly requiredNodePermissions: readonly string[];
+    readonly requiredAndroidPermissions: readonly string[];
+    readonly profileSelectionHint: ProfileSelectionFailureHint;
+  }
+
   export interface FilesystemAdvancedApis {
     readonly streams: "partial" | "unsupported" | string;
     readonly fileHandle: "partial" | "unsupported" | string;
@@ -521,6 +599,7 @@ declare namespace AutoJs6Node {
     readonly deniedFeatureFlags: readonly string[];
     readonly errorCodes: Readonly<Record<string, string | Readonly<Record<string, string>>>>;
     readonly compileCache: Readonly<Record<string, unknown>>;
+    readonly profileSelection: ProfileSelectionDiagnostics;
     readonly bridgePermissions: BridgePermissionsReport;
     readonly bridgeLimits: Readonly<Record<string, unknown>>;
   }

@@ -8828,6 +8828,8 @@ std::string buildEmbeddedScriptExecutionSource(
       const flag = featureFlags[name];
       return !flag || flag.enabled !== true;
     }));
+    const bridgePermissionsReport = __autojs6_bridge_permission_report();
+    const profileSelection = __autojs6_profile_selection_report(featureFlags, bridgePermissionsReport);
     const legacyAliases = Object.create(null);
     for (const name of Object.keys(__autojs6_error_code_aliases)) {
       legacyAliases[name] = __autojs6_error_code_aliases[name];
@@ -9355,7 +9357,8 @@ std::string buildEmbeddedScriptExecutionSource(
         legacyAliases: Object.freeze(legacyAliases)
       }),
       compileCache: __autojs6_compile_cache_profile_snapshot(),
-      bridgePermissions: __autojs6_bridge_permission_report(),
+      profileSelection,
+      bridgePermissions: bridgePermissionsReport,
       bridgeLimits: __autojs6_bridge_limits_report()
     });
     return __autojs6_profile_cache;
@@ -9522,6 +9525,249 @@ std::string buildEmbeddedScriptExecutionSource(
       serviceRequired: manifest.serviceRequired,
       packagedMetadata: manifest.packagedMetadata,
       warnings: Object.freeze(manifest.warnings.slice())
+    });
+  }
+  function __autojs6_profile_profile_order() {
+    return Object.freeze([
+      "safe_default",
+      "pro_compat_opt_in",
+      "desktop_compat_opt_in",
+      "debug_unsafe_lab"
+    ]);
+  }
+  function __autojs6_profile_sort_profiles(values) {
+    const order = __autojs6_profile_profile_order();
+    const seen = Object.create(null);
+    const output = [];
+    for (let i = 0; i < values.length; i++) {
+      const value = String(values[i] === undefined || values[i] === null ? "" : values[i]).trim();
+      if (!value || seen[value]) {
+        continue;
+      }
+      seen[value] = true;
+      output.push(value);
+    }
+    output.sort(function(left, right) {
+      const leftIndex = order.indexOf(left);
+      const rightIndex = order.indexOf(right);
+      const leftRank = leftIndex < 0 ? 999 : leftIndex;
+      const rightRank = rightIndex < 0 ? 999 : rightIndex;
+      if (leftRank !== rightRank) return leftRank - rightRank;
+      return left < right ? -1 : left > right ? 1 : 0;
+    });
+    return output;
+  }
+  function __autojs6_profile_required_profile_for_capability(capability) {
+    const normalized = __autojs6_bridge_normalize_capability(capability);
+    if (normalized === "network") return "desktop_compat_opt_in";
+    if (
+      normalized === "accessibility" ||
+      normalized === "screen_capture" ||
+      normalized === "image" ||
+      normalized === "ocr" ||
+      normalized === "barcode" ||
+      normalized === "media" ||
+      normalized === "media.audio" ||
+      normalized === "media.metadata" ||
+      normalized === "media.recording" ||
+      normalized === "notifications" ||
+      normalized === "notifications.settings" ||
+      normalized === "sensors" ||
+      normalized === "ui" ||
+      normalized === "ui.overlay" ||
+      normalized === "ui.overlay.permission" ||
+      normalized === "ui.overlay.foreground" ||
+      normalized === "ui.overlay.packaged" ||
+      normalized === "device.power" ||
+      normalized === "shell" ||
+      normalized === "shell.root" ||
+      normalized === "shell.shizuku" ||
+      normalized === "java_interop" ||
+      normalized === "rhino" ||
+      normalized === "input_observer" ||
+      normalized === "input_observer.keys" ||
+      normalized === "input_observer.touch" ||
+      normalized === "input_observer.intercept" ||
+      normalized === "floaty.raw" ||
+      normalized === "floaty.touch" ||
+      normalized.indexOf("plugin.") === 0
+    ) {
+      return "pro_compat_opt_in";
+    }
+    if (
+      normalized === "raw_node_network_modules" ||
+      normalized === "websocket" ||
+      normalized === "worker_threads" ||
+      normalized === "vm" ||
+      normalized === "native_addon" ||
+      normalized === "child_process"
+    ) {
+      return "desktop_compat_opt_in";
+    }
+    if (normalized === "inspector") return "debug_unsafe_lab";
+    return "safe_default";
+  }
+  function __autojs6_profile_required_profiles_for_capabilities(capabilities) {
+    const profiles = [];
+    for (let i = 0; i < capabilities.length; i++) {
+      profiles.push(__autojs6_profile_required_profile_for_capability(capabilities[i]));
+    }
+    return Object.freeze(__autojs6_profile_sort_profiles(profiles));
+  }
+  function __autojs6_profile_android_permissions_for_capabilities(capabilities) {
+    const order = [
+      "android.permission.POST_NOTIFICATIONS",
+      "android.permission.RECORD_AUDIO",
+      "android.permission.INTERNET",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+      "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+      "android.permission.FOREGROUND_SERVICE_MICROPHONE"
+    ];
+    const output = [];
+    function add(permission) {
+      if (output.indexOf(permission) < 0) output.push(permission);
+    }
+    for (let i = 0; i < capabilities.length; i++) {
+      const capability = __autojs6_bridge_normalize_capability(capabilities[i]);
+      if (capability === "notifications") {
+        add("android.permission.POST_NOTIFICATIONS");
+      } else if (capability === "media.recording") {
+        add("android.permission.RECORD_AUDIO");
+        add("android.permission.FOREGROUND_SERVICE");
+        add("android.permission.FOREGROUND_SERVICE_MICROPHONE");
+      } else if (capability === "network") {
+        add("android.permission.INTERNET");
+      } else if (capability === "screen_capture") {
+        add("android.permission.FOREGROUND_SERVICE");
+        add("android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION");
+        add("android.permission.FOREGROUND_SERVICE_SPECIAL_USE");
+      }
+    }
+    output.sort(function(left, right) {
+      const leftIndex = order.indexOf(left);
+      const rightIndex = order.indexOf(right);
+      const leftRank = leftIndex < 0 ? 999 : leftIndex;
+      const rightRank = rightIndex < 0 ? 999 : rightIndex;
+      if (leftRank !== rightRank) return leftRank - rightRank;
+      return left < right ? -1 : left > right ? 1 : 0;
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_profile_missing_capability_message(moduleName, methodName, missingCapabilities) {
+    const missing = Object.freeze(missingCapabilities.slice());
+    const requiredProfiles = __autojs6_profile_required_profiles_for_capabilities(missing);
+    const androidPermissions = __autojs6_profile_android_permissions_for_capabilities(missing);
+    let message = "AutoJs6 bridge capability is not declared for " +
+      moduleName + "." + methodName + ": " + missing.join(", ") +
+      "; required profile: " + (requiredProfiles.length > 0 ? requiredProfiles.join(", ") : "safe_default") +
+      "; declare node.permissions: " + missing.join(", ");
+    if (androidPermissions.length > 0) {
+      message += "; required Android permissions: " + androidPermissions.join(", ");
+    }
+    return message;
+  }
+  function __autojs6_profile_failure_hint_for_missing_capabilities(moduleName, methodName, missingCapabilities) {
+    const missing = Object.freeze(missingCapabilities.slice());
+    const requiredProfiles = __autojs6_profile_required_profiles_for_capabilities(missing);
+    const androidPermissions = __autojs6_profile_android_permissions_for_capabilities(missing);
+    return Object.freeze({
+      schema: "autojs6-node-profile-selection-failure-hint-v1",
+      module: String(moduleName),
+      method: String(methodName),
+      effectiveProfile: "safe_default",
+      requiredProfiles,
+      requiredNodePermissions: missing,
+      requiredAndroidPermissions: androidPermissions,
+      profileSelectionRequired: requiredProfiles.some(function(profile) { return profile !== "safe_default"; }),
+      message: __autojs6_profile_missing_capability_message(moduleName, methodName, missing),
+      declarationHint: "Declare node.permissions/project autojs6.node.permissions for the missing capabilities; profile metadata is diagnostic-only until promotion is implemented."
+    });
+  }
+  function __autojs6_profile_catalog(requestedProfiles) {
+    const order = __autojs6_profile_profile_order();
+    return Object.freeze(order.map(function(profile) {
+      return Object.freeze({
+        id: profile,
+        requested: requestedProfiles.indexOf(profile) >= 0,
+        effective: profile === "safe_default",
+        available: profile === "safe_default",
+        status: profile === "safe_default" ? "effective" : "diagnostic_only",
+        description: profile === "safe_default"
+          ? "Safe default Node.js profile currently enforced at runtime."
+          : "Requested profile metadata is visible but not promoted yet."
+      });
+    }));
+  }
+  function __autojs6_profile_selection_report(featureFlags, bridgePermissionsReport) {
+    const manifest = bridgePermissionsReport || __autojs6_bridge_permission_report();
+    const metadata = manifest.packagedMetadata || __autojs6_bridge_packaged_metadata_fallback();
+    const requestedSeed = metadata.requestedProfiles && metadata.requestedProfiles.length > 0
+      ? metadata.requestedProfiles.slice()
+      : [metadata.profile || "safe_default"];
+    const requestedProfiles = Object.freeze(__autojs6_profile_sort_profiles(requestedSeed));
+    const declaredNodePermissions = Object.freeze((manifest.normalizedPermissions || []).slice().sort());
+    const highRisk = [];
+    for (let i = 0; i < declaredNodePermissions.length; i++) {
+      const capability = declaredNodePermissions[i];
+      const requiredProfile = __autojs6_profile_required_profile_for_capability(capability);
+      const androidPermissions = __autojs6_profile_android_permissions_for_capabilities([capability]);
+      if (requiredProfile !== "safe_default" || androidPermissions.length > 0) {
+        highRisk.push(Object.freeze({
+          id: capability,
+          source: "permission_manifest",
+          declared: true,
+          effectiveProfile: "safe_default",
+          requiredProfile,
+          profilePromoted: false,
+          requiredAndroidPermissions: androidPermissions
+        }));
+      }
+    }
+    for (const name of Object.keys(featureFlags || {})) {
+      const flag = featureFlags[name];
+      if (!flag || (flag.securityLevel !== "high" && flag.securityLevel !== "critical")) {
+        continue;
+      }
+      highRisk.push(Object.freeze({
+        id: flag.id,
+        source: "feature_flag",
+        declared: false,
+        effectiveProfile: "safe_default",
+        requiredProfile: __autojs6_profile_required_profile_for_capability(flag.id),
+        enabledByDefault: flag.defaultEnabled === true,
+        status: String(flag.status || ""),
+        securityLevel: String(flag.securityLevel || ""),
+        releaseForbidden: flag.releaseForbidden === true
+      }));
+    }
+    return Object.freeze({
+      schema: "autojs6-node-profile-selection-diagnostics-v1",
+      status: "diagnostic_only",
+      source: "runtime",
+      defaultProfile: "safe_default",
+      selectedProfile: "safe_default",
+      effectiveProfile: "safe_default",
+      declaredProfile: metadata.profile || "safe_default",
+      requestedProfiles,
+      selectionMode: "safe_default_effective_metadata_only",
+      profilePromotion: false,
+      userSelectable: false,
+      projectSettingsSupported: true,
+      packagedSettingsSupported: true,
+      debugProfileReleaseDenied: true,
+      metadataOnly: metadata.metadataOnly !== false,
+      grantsAuthority: metadata.grantsAuthority === true,
+      declaredNodePermissions,
+      declaredAndroidPermissions: Object.freeze((manifest.androidPermissions || []).slice()),
+      profileCatalog: __autojs6_profile_catalog(requestedProfiles),
+      highRiskCapabilities: Object.freeze(highRisk),
+      blockedProfilePromotions: Object.freeze(requestedProfiles.filter(function(profile) { return profile !== "safe_default"; })),
+      failureHints: Object.freeze({
+        capabilityNotDeclared: __autojs6_profile_failure_hint_for_missing_capabilities("module", "method", ["capability"]),
+        profilePromotionBlocked: "Requested Pro/Desktop/Debug profile metadata is visible but does not grant authority in Phase 13."
+      }),
+      warnings: Object.freeze((manifest.warnings || []).slice().concat((metadata.warnings || []).slice()))
     });
   }
   function __autojs6_bridge_limit_defaults() {
@@ -9869,14 +10115,19 @@ std::string buildEmbeddedScriptExecutionSource(
     return missing;
   }
   function __autojs6_bridge_capability_not_declared_error(moduleName, methodName, missingCapabilities) {
-    const missing = missingCapabilities.slice();
+    const missing = Object.freeze(missingCapabilities.slice());
+    const profileSelectionHint = __autojs6_profile_failure_hint_for_missing_capabilities(moduleName, methodName, missing);
     const error = __autojs6_bridge_error(
-      "AutoJs6 bridge capability is not declared for " + moduleName + "." + methodName + ": " + missing.join(", "),
+      profileSelectionHint.message,
       "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED",
       moduleName,
       methodName
     );
-    __autojs6_define_error_property(error, "missingCapabilities", Object.freeze(missing));
+    __autojs6_define_error_property(error, "missingCapabilities", missing);
+    __autojs6_define_error_property(error, "requiredProfiles", profileSelectionHint.requiredProfiles);
+    __autojs6_define_error_property(error, "requiredNodePermissions", profileSelectionHint.requiredNodePermissions);
+    __autojs6_define_error_property(error, "requiredAndroidPermissions", profileSelectionHint.requiredAndroidPermissions);
+    __autojs6_define_error_property(error, "profileSelectionHint", profileSelectionHint);
     return error;
   }
   function __autojs6_bridge_next_id() {

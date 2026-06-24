@@ -5,6 +5,7 @@ import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NodeBridgeProviderStatus
 import org.autojs.autojs.engine.NodeEmbeddedTestHarness
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
+import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
 import org.autojs.autojs.engine.NodeWorkManagerBridgeScheduler
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.json.JSONArray
@@ -13,6 +14,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.File
 
 class NodeDoctorReportGeneratorInstrumentationTest {
 
@@ -51,6 +53,14 @@ class NodeDoctorReportGeneratorInstrumentationTest {
             NodeProjectRuntimeCompatibilityDescriptor.MODULE_SOURCES_SCHEMA_VERSION,
             descriptorVersions.getString("moduleSourcesSchema"),
         )
+        val profileSelection = json.getJSONObject("profileSelection")
+        assertEquals(NodeProfileSelectionDiagnostics.SCHEMA, profileSelection.getString("schema"))
+        assertEquals(NodeProfileSelectionDiagnostics.STATUS, profileSelection.getString("status"))
+        assertEquals(NodeProfileSelectionDiagnostics.SAFE_DEFAULT, profileSelection.getString("effectiveProfile"))
+        assertFalse(profileSelection.getBoolean("profilePromotion"))
+        assertFalse(profileSelection.getBoolean("userSelectable"))
+        assertTrue(profileSelection.getBoolean("projectSettingsSupported"))
+        assertTrue(profileSelection.getBoolean("packagedSettingsSupported"))
         val compileCache = json.getJSONObject("compileCache")
         assertEquals(NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_SCHEMA_VERSION, compileCache.getString("schema"))
         assertTrue(compileCache.getBoolean("appPrivateOnly"))
@@ -105,6 +115,8 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertTrue(shellProvider.has("lastError"))
         assertTrue(text.contains("Bridge Capabilities:"))
         assertTrue(text.contains("Bridge Providers:"))
+        assertTrue(text.contains("Profile Selection:"))
+        assertTrue(text.contains("effective profile: safe_default"))
         assertTrue(text.contains("fetch/axios: status="))
         assertTrue(text.contains("Runtime Compatibility:"))
         assertTrue(text.contains("Compile Cache:"))
@@ -114,6 +126,52 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertTrue(text.contains("network capability: requires declaration=true"))
         assertFalse(text.contains(context.filesDir.absolutePath))
         assertFalse(jsonText.contains(context.filesDir.absolutePath))
+    }
+
+    @Test
+    fun generatesProjectProfileSelectionDiagnostics() {
+        val workDir = File(context.cacheDir, "node-doctor-profile-selection").apply {
+            deleteRecursively()
+            mkdirs()
+        }
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "type": "node",
+              "node": {
+                "profile": "desktop_compat_opt_in",
+                "profiles": ["pro_compat_opt_in", "debug_unsafe_lab"],
+                "permissions": ["network", "shell.root"],
+                "network": true
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val reports = NodeDoctorReportGenerator.generate(
+            context = context,
+            includeNativeProbe = false,
+            projectRoot = workDir,
+        )
+        val text = reports.textFile.readText()
+        val json = JSONObject(reports.jsonFile.readText())
+        val profileSelection = json.getJSONObject("profileSelection")
+
+        assertEquals("working_directory", profileSelection.getString("source"))
+        assertEquals(NodeProfileSelectionDiagnostics.SAFE_DEFAULT, profileSelection.getString("effectiveProfile"))
+        assertFalse(profileSelection.getBoolean("profilePromotion"))
+        assertTrue(profileSelection.getJSONArray("requestedProfiles").toString().contains("pro_compat_opt_in"))
+        assertTrue(profileSelection.getJSONArray("requestedProfiles").toString().contains("desktop_compat_opt_in"))
+        assertTrue(profileSelection.getJSONArray("requestedProfiles").toString().contains("debug_unsafe_lab"))
+        assertTrue(profileSelection.getJSONArray("declaredNodePermissions").toString().contains("network"))
+        assertTrue(profileSelection.getJSONArray("declaredNodePermissions").toString().contains("shell.root"))
+        assertTrue(profileSelection.getJSONArray("declaredAndroidPermissions").toString().contains("android.permission.INTERNET"))
+        assertTrue(profileSelection.getJSONArray("highRiskCapabilities").toString().contains("network"))
+        assertTrue(profileSelection.getJSONArray("highRiskCapabilities").toString().contains("shell.root"))
+        assertTrue(profileSelection.getJSONArray("blockedProfilePromotions").length() >= 3)
+        assertTrue(text.contains("Profile Selection:"))
+        assertTrue(text.contains("requested profiles:"))
+        assertTrue(text.contains("blocked profile promotions:"))
     }
 
     private fun JSONArray.byId(): Map<String, JSONObject> {

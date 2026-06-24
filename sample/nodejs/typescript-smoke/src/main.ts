@@ -558,6 +558,17 @@ async function smoke(): Promise<void> {
   const packageIntegrityProfileHash: string = autojsProfile.packageIntegrityProfile.hashAlgorithm;
   const packageIntegrityProfileSubjects: readonly string[] = autojsProfile.packageIntegrityProfile.subjects;
   const packageIntegrityProfileUnsignedNative: boolean = autojsProfile.packageIntegrityProfile.unsignedNativeAddonLoad;
+  const profileSelectionStatus: string = autojsProfile.profileSelection.status;
+  const profileSelectionEffective: string = autojsProfile.profileSelection.effectiveProfile;
+  const profileSelectionRequested: readonly string[] = autojsProfile.profileSelection.requestedProfiles;
+  const profileSelectionHighRisk: readonly AutoJs6Node.ProfileSelectionHighRiskCapability[] =
+    autojsProfile.profileSelection.highRiskCapabilities;
+  const profileSelectionFailureHint: AutoJs6Node.ProfileSelectionFailureHint =
+    autojsProfile.profileSelection.failureHints.capabilityNotDeclared;
+  const typedCapabilityError = {} as AutoJs6Node.AutoJsBridgeCapabilityNotDeclaredError;
+  const capabilityErrorProfiles: readonly string[] = typedCapabilityError.requiredProfiles;
+  const capabilityErrorNodePermissions: readonly string[] = typedCapabilityError.requiredNodePermissions;
+  const capabilityErrorAndroidPermissions: readonly string[] = typedCapabilityError.requiredAndroidPermissions;
   const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
   const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
   const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
@@ -828,6 +839,14 @@ async function smoke(): Promise<void> {
   void packageIntegrityProfileHash;
   void packageIntegrityProfileSubjects;
   void packageIntegrityProfileUnsignedNative;
+  void profileSelectionStatus;
+  void profileSelectionEffective;
+  void profileSelectionRequested;
+  void profileSelectionHighRisk;
+  void profileSelectionFailureHint;
+  void capabilityErrorProfiles;
+  void capabilityErrorNodePermissions;
+  void capabilityErrorAndroidPermissions;
   void filesystemProfileMode;
   void filesystemProfileRoots;
   void filesystemAdvancedWatch;
