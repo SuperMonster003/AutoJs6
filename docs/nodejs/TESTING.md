@@ -691,6 +691,21 @@ reflection / native-library / process boundaries. It remains partial until
 thread dispatch, a complete method budget model, and Pro profile promotion
 land.
 
+Phase 13 `rhino.install` Java proxy:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13RhinoInstallJavaProxy
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRhinoShimDesignGateInstrumentationTest"
+```
+
+`verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 partial Rhino
+install state: default `rhino.install()` rejection, `node_modules/rhino`
+shadowing protection, explicit experimental `Packages` / `java` / `android`
+proxy installation, Java allowlist routing, and continued absence of
+`importClass`, `importPackage`, and `JavaAdapter`. It remains partial until a
+real Pro profile selector, packaged policy, and P13-15/P13-16 migration helper
+decisions land.
+
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground
 long-running, runtime budget/heartbeat, queueing, scheduled runner,

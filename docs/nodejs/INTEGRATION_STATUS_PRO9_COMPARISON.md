@@ -443,7 +443,7 @@ TypeScript 声明还覆盖：
 | npm | Android 终端内 `npm i --no-bin-links` | Android 运行时 npm install 尚未完成，当前偏 host/vendor |
 | Node builtins | 文档示例更接近普通 Node 使用 | 受 Safe Profile 约束，很多 builtin 是 wrapper 或 denial |
 | 文件系统 | 示例可读 Android 绝对路径 | scoped fs，默认拒绝越权路径 |
-| Java/Android | `$autojs.java`、`require("rhino").install()` | P13-12 已有只读 `$autojs` 和 gated `$autojs.java` facade；P13-13 增加实验 allowlist 下的 `java.lang.Math`、`java.util.UUID`、`android.graphics.Rect` handle 构造/实例调用/字段读取/释放；默认仍拒绝 Java 调用，线程 dispatch 和完整 Java/Rhino parity 仍在 P13-13 到 P13-16 |
+| Java/Android | `$autojs.java`、`require("rhino").install()` | P13-12 已有只读 `$autojs` 和 gated `$autojs.java` facade；P13-13 增加实验 allowlist 下的 `java.lang.Math`、`java.util.UUID`、`android.graphics.Rect` handle 构造/实例调用/字段读取/释放；P13-14 增加显式 experimental `rhino.install` Java proxy，可安装 `Packages`、`java`、`android` 代理但仍只走 allowlist；默认仍拒绝 Java 调用，线程 dispatch 和完整 Java/Rhino parity 仍在 P13-15/P13-16 |
 | Rhino 全局兼容 | 第一代 API 保留在 Rhino；Node 需 require 新模块 | Rhino 保留；Node 有显式 `autojs6:compat`，但不默认安装 globals |
 | 线程 | Node event loop，`worker_threads` 方向受限 | `worker_threads` 默认关闭，Rhino `threads` 不作为 Node 兼容目标 |
 | UI 线程 | `"nodejs ui"` / `"ui-thread"` | P13-11 已补 `NodeEntryDirective` metadata、descriptor/project config 透传和 gate；Activity lifecycle、Back/Recents、实际 UI-thread dispatch 仍未等价 |
@@ -518,8 +518,10 @@ const compat = require("autojs6:compat");
 - `"nodejs compat"` directive 在 Phase 11A 中被拒绝，原因是过于隐式，不利于
   source scanning 和 packaged 行为审计。
 - `require("rhino-compat")` 被保留，不作为当前入口。
-- `require("rhino")`、`rhino.run()`、`rhino.install()` 当前没有运行时实现。
-- Pro v9 的 `require("rhino").install()` 行为没有实现。
+- `require("rhino")` 已保留为受控 facade；`rhino.run({ experimental: true })`
+  是 JSON-only POC；默认 `rhino.install()` 仍拒绝。
+- P13-14 只实现了显式 experimental `rhino.install` Java proxy POC，尚不是
+  Pro v9 的完整 `require("rhino").install()` 等价行为。
 
 当前 `autojs6:compat` 已覆盖或部分覆盖：
 
@@ -628,7 +630,7 @@ await ok.click({ timeoutMs: 3000 });
 | `formatter` / `converter` | 格式化、单位转换 | `formatter/fmt`, `converter/cvt` | 已有子集 |
 | `s13n` / `jsox` / `util` | 序列化、JS 扩展、工具 | `s13n.bytes`, `autojs6:compat.s13n.bytes`, Node builtin 或暂无对应 | `s13n.bytes` 已支持，其余继续分批决策 |
 | `continuation` | Rhino continuation/coroutine | Node Promise/async 模型 | 不建议等价迁移 |
-| Java bridge | `Packages`, `java.*`, `android.*`, `importClass`, `JavaAdapter` | experimental `java` allowlist；无 `require("rhino")` | 默认不等价 |
+| Java bridge | `Packages`, `java.*`, `android.*`, `importClass`, `JavaAdapter` | P13-13 experimental `java` allowlist；P13-14 `rhino.install` Java proxy POC | 默认不等价 |
 
 ### 最关键的脚本开发者缺口
 
@@ -813,7 +815,8 @@ blockers：
 - P13-12 已提供 `$autojs` global v1 和 gated `$autojs.java` facade；P13-13
   已在实验 allowlist 下补充 Rect handle 实例调用、字段读取和释放；默认仍拒绝
   Java 调用，完整 Java object/thread parity 尚未完成。
-- `require("rhino").install()` 不存在。
+- 默认 `require("rhino").install()` 仍拒绝；P13-14 仅提供
+  `rhino.install({ experimental: true })` Java proxy POC。
 - `java.*`、`android.*`、`Packages`、`JavaAdapter` 不是默认 Node 能力。
 - `"nodejs ui"` / `"ui-thread"` 已有 P13-11 metadata partial，但 Pro v9
   等价的 Activity lifecycle、Back/Recents 和实际 UI-thread dispatch 尚未完成。
@@ -841,7 +844,9 @@ blockers：
   `barcode` / `qrcode` 已完成 JSON-safe provider/facade/examples，但 live
   packaged 可用性仍取决于 ML Kit provider。
 - `shizuku` / root advanced shell 的权限和生命周期模型尚未完成。
-- Java/Rhino JSON-only shim 目前只是设计候选，不是运行时能力。
+- Java/Rhino compatibility 目前只有受控 POC：P12-25 `rhino.run`
+  JSON-only execution adapter，以及 P13-14 `rhino.install` Java proxy；完整
+  Pro/Rhino parity 仍未完成。
 
 ## 建议路线
 
@@ -871,10 +876,10 @@ blockers：
 - `tasks` 继续拆分用户任务数据库和 broadcast trigger；WorkManager one-shot
   disposable 兼容路径已经 promoted。
 - 线程迁移策略和示例库。
-- 显式 Rhino JSON-only shim POC。
+- 显式 Rhino JSON-only shim POC 和 P13-14 `rhino.install` Java proxy POC。
 
-显式 Rhino JSON-only shim 只是未来候选，不是当前运行时能力。若后续确实要
-提供 `require("rhino")`，建议只允许如下受控形态：
+显式 Rhino JSON-only shim 已有 P12-25 POC，但仍不是默认能力。继续提供
+`require("rhino")` 时，只允许如下受控形态：
 
 ```js
 const rhino = require("rhino");

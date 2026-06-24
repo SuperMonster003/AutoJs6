@@ -8195,6 +8195,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_work_manager_cache = null;
   let __autojs6_limited_lifecycle_cache = null;
   let __autojs6_limited_rhino_cache = null;
+  let __autojs6_rhino_install_state = null;
   let __autojs6_limited_rhino_compat_cache = null;
   let __autojs6_limited_files_cache = null;
   let __autojs6_limited_base64_cache = null;
@@ -16148,7 +16149,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_rhino_install_unsupported_error() {
     return __autojs6_rhino_shim_error(
-      "AutoJs6 Rhino JSON-only shim does not support rhino.install(); installing Rhino globals into V8 is permanently unsupported.",
+      "AutoJs6 Rhino JSON-only shim does not support rhino.install() by default; explicit experimental Java proxy install requires the Java interop gate.",
       __autojs6_rhino_shim_error_codes.installUnsupported,
       "install",
       "unsupported"
@@ -16344,6 +16345,111 @@ std::string buildEmbeddedScriptExecutionSource(
       shadowing: "reserved"
     });
   }
+  const __autojs6_rhino_java_global_names = Object.freeze(["Packages", "java", "android"]);
+  function __autojs6_rhino_java_proxy_path(pathValue) {
+    return pathValue === undefined || pathValue === null ? "" : String(pathValue);
+  }
+  function __autojs6_rhino_java_proxy(pathValue) {
+    const path = __autojs6_rhino_java_proxy_path(pathValue);
+    const proxyTarget = function AutoJs6RhinoJavaProxy() {};
+    return new Proxy(proxyTarget, {
+      get: function(_target, property) {
+        if (property === Symbol.toStringTag) {
+          return "AutoJs6RhinoJavaProxy";
+        }
+        if (property === Symbol.toPrimitive) {
+          return function() {
+            return path;
+          };
+        }
+        if (property === "then") {
+          return undefined;
+        }
+        if (property === "__autojs6RhinoJavaProxy") {
+          return true;
+        }
+        if (property === "className" || property === "name" || property === "path") {
+          return path;
+        }
+        if (property === "toString" || property === "valueOf") {
+          return function() {
+            return path;
+          };
+        }
+        if (typeof property === "symbol") {
+          return undefined;
+        }
+        const segment = String(property);
+        return __autojs6_rhino_java_proxy(path ? path + "." + segment : segment);
+      },
+      apply: function(_target, _thisArg, args) {
+        const segments = path.split(".").filter(function(segment) { return segment.length > 0; });
+        if (segments.length < 2) {
+          return Promise.reject(__autojs6_rhino_invalid_request_error(
+            "rhino.install Java proxy requires a class and method path.",
+            "install"
+          ));
+        }
+        const methodName = segments.pop();
+        const className = segments.join(".");
+        return __autojs6_java_call_static(className, methodName, Array.prototype.slice.call(args || []));
+      },
+      construct: function(_target, args) {
+        return __autojs6_java_new(path, Array.prototype.slice.call(args || []));
+      }
+    });
+  }
+  function __autojs6_rhino_install_options(options) {
+    const input = options && typeof options === "object" && !Array.isArray(options) ? options : null;
+    if (!input || input.experimental !== true) {
+      throw __autojs6_rhino_install_unsupported_error();
+    }
+    const target = input.target && typeof input.target === "object"
+      ? input.target
+      : input.globals === true
+        ? globalThis
+        : {};
+    return {
+      target,
+      globals: target === globalThis
+    };
+  }
+  function __autojs6_rhino_install(options) {
+    const parsed = __autojs6_rhino_install_options(options);
+    __autojs6_java_check_enabled();
+    const packagesProxy = __autojs6_rhino_java_proxy("");
+    const javaProxy = __autojs6_rhino_java_proxy("java");
+    const androidProxy = __autojs6_rhino_java_proxy("android");
+    const definitions = {
+      Packages: packagesProxy,
+      java: javaProxy,
+      android: androidProxy
+    };
+    const installed = [];
+    __autojs6_rhino_java_global_names.forEach(function(name) {
+      Object.defineProperty(parsed.target, name, {
+        value: definitions[name],
+        enumerable: false,
+        writable: false,
+        configurable: true
+      });
+      installed.push(name);
+    });
+    __autojs6_rhino_install_state = Object.freeze({
+      schema: "autojs6-rhino-install-java-proxy-v1",
+      module: "rhino",
+      mode: "java-allowlist-proxy",
+      experimental: true,
+      globalsInstalled: parsed.globals,
+      installed: Object.freeze(installed.slice()),
+      javaInterop: __autojs6_java_policy_snapshot(),
+      importClass: false,
+      importPackage: false,
+      JavaAdapter: false,
+      shadowing: "reserved"
+    });
+    return __autojs6_rhino_install_state;
+  }
   function __autojs6_limited_rhino() {
     if (__autojs6_limited_rhino_cache) {
       return __autojs6_limited_rhino_cache;
@@ -16366,8 +16472,8 @@ std::string buildEmbeddedScriptExecutionSource(
         }
       ).then(__autojs6_rhino_run_result);
     }
-    function install() {
-      throw __autojs6_rhino_install_unsupported_error();
+    function install(options) {
+      return __autojs6_rhino_install(options);
     }
     __autojs6_limited_rhino_cache = Object.freeze({
       name: "rhino",

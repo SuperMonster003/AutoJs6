@@ -205,7 +205,14 @@
         "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeJavaInteropBridgeInstrumentationTest.kt",
         "build/reports/nodejs/phase13-java-interop-allowlist.json",
-        "build/reports/nodejs/phase13-java-interop-allowlist.md"
+        "build/reports/nodejs/phase13-java-interop-allowlist.md",
+        "docs/nodejs/reports/phase13/P13_14_RHINO_INSTALL_JAVA_PROXY.md",
+        "tools/nodejs/phase13/verify-rhino-install-java-proxy.js",
+        ":app:verifyNodePhase13RhinoInstallJavaProxy",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt",
+        "docs/nodejs/types/autojs6-node/rhino.d.ts",
+        "build/reports/nodejs/phase13-rhino-install-java-proxy.json",
+        "build/reports/nodejs/phase13-rhino-install-java-proxy.md"
       ],
       "rollback": "Reject Pro Java/Rhino interop flags and keep require(\"rhino\") in the default disabled JSON-only path."
     },

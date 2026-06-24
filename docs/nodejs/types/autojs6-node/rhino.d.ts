@@ -29,6 +29,26 @@ declare module "rhino" {
       readonly shadowing: "reserved";
     }
 
+    export interface InstallOptions {
+      readonly experimental: true;
+      readonly globals?: boolean;
+      readonly target?: object;
+    }
+
+    export interface InstallResult {
+      readonly schema: "autojs6-rhino-install-java-proxy-v1";
+      readonly module: "rhino";
+      readonly mode: "java-allowlist-proxy";
+      readonly experimental: true;
+      readonly globalsInstalled: boolean;
+      readonly installed: readonly ["Packages", "java", "android"];
+      readonly javaInterop: AutoJs6Node.AutoJsJavaPolicy;
+      readonly importClass: false;
+      readonly importPackage: false;
+      readonly JavaAdapter: false;
+      readonly shadowing: "reserved";
+    }
+
     export interface RhinoShimError extends Error {
       readonly code: ErrorCode;
       readonly autojs6Code?: ErrorCode;
@@ -126,6 +146,7 @@ declare module "rhino" {
       status(): Status;
       run<T extends JsonValue = JsonValue>(request: RunRequest): Promise<RunResult<T>>;
       run(request?: unknown): Promise<never>;
+      install(options: InstallOptions): InstallResult;
       install(options?: unknown): never;
     }
   }

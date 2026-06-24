@@ -104,6 +104,13 @@ provider-owned `android.graphics.Rect` handle surface, including selected Rect
 instance calls, field reads, and explicit `release` / `dispose` cleanup. Thread
 dispatch and Pro profile promotion remain unpromoted.
 
+P13-14 adds an explicit experimental `require("rhino").install({ experimental:
+true })` Java proxy installer. It can install `Packages`, `java`, and `android`
+proxies onto `globalThis` or a caller-provided target only when Java interop is
+enabled. The default Safe Node Profile still rejects `rhino.install()` without
+that explicit option, and `importClass`, `importPackage`, and `JavaAdapter`
+remain unavailable.
+
 ## Supported Entry Points
 
 - `"nodejs";` directive

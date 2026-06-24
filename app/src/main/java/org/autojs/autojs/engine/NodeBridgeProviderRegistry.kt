@@ -404,8 +404,8 @@ object NodeBridgeProviderRegistry {
             "defaultPolicy" to "rhino.run without experimental:true rejects with ERR_AUTOJS6_RHINO_SHIM_DISABLED",
             "packagedSupport" to "unsupported",
             "packagedPolicy" to "P12-26 rejects packaged Rhino JSON-only execution until explicit shim metadata is designed; future metadata may authorize only JSON-only run, never install or globals",
-            "installPolicy" to "rhino.install remains unsupported with ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
-            "globalsPolicy" to "no importClass, importPackage, Packages, java, android, JavaAdapter, compat.rhino, or Rhino globals are installed into V8",
+            "installPolicy" to "rhino.install remains unsupported by default; P13-14 allows explicit experimental Java proxy globals only when Java interop is enabled",
+            "globalsPolicy" to "no importClass, importPackage, JavaAdapter, compat.rhino, or unrestricted Rhino globals are installed into V8; P13-14 Packages/java/android proxies route only through the Java allowlist experiment",
             "timeoutPolicy" to "timeoutMs is required; provider calls forceStop and destroy before reporting timeout lifecycle",
             "statusReason" to "P12-25 live provider POC is available only for explicit experimental one-shot requests; P12-26 keeps packaged APK execution fail-closed",
         )

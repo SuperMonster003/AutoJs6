@@ -401,6 +401,19 @@ P13 task 本身使用以下执行状态：
     - 默认 Safe profile 中继续拒绝。
     - Pro profile opt-in 后可运行 Pro 9 文档中的基础 Java interop 示例。
     - `node_modules/rhino` shadowing 仍不可绕过受控模块。
+  - 2026-06-24 partial landing:
+    - `rhino.install()` without explicit experimental options still rejects
+      with `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`.
+    - `rhino.install({ experimental: true, globals: true })` can install
+      `Packages` / `java` / `android` proxies when Java interop is enabled.
+    - Installed proxies route static calls and constructors through the P13-13
+      Java allowlist bridge; `importClass` / `importPackage` / `JavaAdapter`
+      remain absent.
+    - Host verifier: `tools/nodejs/phase13/verify-rhino-install-java-proxy.js`.
+    - Gradle gate: `:app:verifyNodePhase13RhinoInstallJavaProxy`.
+    - Report: `docs/nodejs/reports/phase13/P13_14_RHINO_INSTALL_JAVA_PROXY.md`.
+  - Remaining: real Pro profile selector, packaged policy, and P13-15/P13-16
+    Java/Rhino migration helpers still block full P13-14 closure.
 
 - [ ] P13-15: 决策并实现 `importClass` / `importPackage` compatibility。
   - 范围：评估是否在 Pro profile 中提供 Rhino 迁移 helper。

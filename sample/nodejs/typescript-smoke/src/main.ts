@@ -135,7 +135,8 @@ async function smoke(): Promise<void> {
     args: [2, 3],
     timeoutMs: 1000
   });
-  const rhinoInstallDenied: (options?: unknown) => never = rhino.install;
+  const rhinoInstallDenied: () => never = rhino.install;
+  const rhinoInstallResult: rhino.InstallResult = rhino.install({ experimental: true, target: {} });
   await rhinoCompat.back({ timeoutMs: 1000 });
   await rhinoCompat.home({ timeoutMs: 1000 });
 
@@ -432,6 +433,7 @@ async function smoke(): Promise<void> {
   void rhinoRunDenied;
   void rhinoRunPoc;
   void rhinoInstallDenied;
+  void rhinoInstallResult;
   void clickedText;
   void point;
   void matches;

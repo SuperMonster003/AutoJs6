@@ -245,4 +245,204 @@ class NodeRhinoShimDesignGateInstrumentationTest {
             workDir.deleteRecursively()
         }
     }
+
+    @Test
+    fun rhinoInstallExperimentalJavaProxyUsesAllowlistWhenJavaInteropEnabled() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Rhino install Java proxy POC")
+
+        val workDir = File(context.cacheDir, "node-rhino-install-java-proxy-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create Rhino install Java proxy work dir: $absolutePath" }
+        }
+        try {
+            File(workDir, "node_modules/rhino").apply {
+                mkdirs()
+                File(this, "index.js").writeText(
+                    """module.exports = { shadowed: true };""" + "\n",
+                    StandardCharsets.UTF_8,
+                )
+            }
+
+            val source = """
+                "nodejs";
+                (async function main() {
+                  const assert = require("assert/strict");
+                  const bridge = require("autojs6:bridge");
+                  const rhino = require("rhino");
+                  const requests = [];
+                  const releasedHandles = new Set();
+
+                  function codeOf(error) {
+                    return String(error && (error.autojs6Code || error.code || error.name || ""));
+                  }
+                  function respond(request, ok, result, error) {
+                    setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                      id: request.id,
+                      ok,
+                      result,
+                      error
+                    })));
+                  }
+                  bridge.__test.setTransport({
+                    postMessage(message) {
+                      const request = JSON.parse(message);
+                      requests.push(request);
+                      const descriptor = request.args[0] || {};
+                      if (request.module !== "java") {
+                        respond(request, false, null, {
+                          code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                          message: "unexpected module"
+                        });
+                        return;
+                      }
+                      if (request.method === "callStatic" && descriptor.className === "java.lang.Math" && descriptor.method === "max") {
+                        respond(request, true, Math.max(descriptor.args[0], descriptor.args[1]));
+                        return;
+                      }
+                      if (request.method === "callStatic" && descriptor.className === "java.util.UUID" && descriptor.method === "fromString") {
+                        respond(request, true, String(descriptor.args[0]).toLowerCase());
+                        return;
+                      }
+                      if (request.method === "new" && descriptor.className === "android.graphics.Rect") {
+                        respond(request, true, {
+                          __autojs6JavaHandle: "java-rhino-rect",
+                          className: "android.graphics.Rect",
+                          value: {
+                            left: descriptor.args[0],
+                            top: descriptor.args[1],
+                            right: descriptor.args[2],
+                            bottom: descriptor.args[3]
+                          }
+                        });
+                        return;
+                      }
+                      if (request.method === "call" && descriptor.handle === "java-rhino-rect" && descriptor.method === "width") {
+                        respond(request, true, 5);
+                        return;
+                      }
+                      if (request.method === "getField" && descriptor.handle === "java-rhino-rect" && descriptor.field === "left") {
+                        respond(request, true, 1);
+                        return;
+                      }
+                      if (request.method === "release" && descriptor.handle === "java-rhino-rect") {
+                        const firstRelease = !releasedHandles.has(descriptor.handle);
+                        releasedHandles.add(descriptor.handle);
+                        respond(request, true, firstRelease);
+                        return;
+                      }
+                      respond(request, false, null, {
+                        code: "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+                        message: "unexpected java proxy call"
+                      });
+                    }
+                  });
+
+                  assert.strictEqual(require.resolve("rhino"), "rhino");
+                  assert.notStrictEqual(rhino.shadowed, true);
+                  assert.strictEqual(globalThis.Packages, undefined);
+                  assert.strictEqual(globalThis.java, undefined);
+                  assert.strictEqual(globalThis.android, undefined);
+
+                  let defaultInstallCode = "";
+                  try {
+                    rhino.install();
+                  } catch (error) {
+                    defaultInstallCode = codeOf(error);
+                  }
+                  assert.strictEqual(defaultInstallCode, "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED");
+
+                  const installed = rhino.install({ experimental: true, globals: true });
+                  assert.strictEqual(Object.isFrozen(installed), true);
+                  assert.deepStrictEqual(installed.installed, ["Packages", "java", "android"]);
+                  assert.strictEqual(installed.globalsInstalled, true);
+                  assert.strictEqual(installed.importClass, false);
+                  assert.strictEqual(installed.importPackage, false);
+                  assert.strictEqual(installed.JavaAdapter, false);
+                  assert.strictEqual(globalThis.importClass, undefined);
+                  assert.strictEqual(globalThis.importPackage, undefined);
+                  assert.strictEqual(globalThis.JavaAdapter, undefined);
+
+                  const max = await Packages.java.lang.Math.max(6, 9);
+                  const uuid = await java.util.UUID.fromString("00000000-0000-0000-0000-000000000004");
+                  const rect = await new android.graphics.Rect(1, 2, 6, 8);
+                  const width = await rect.call("width");
+                  const left = await rect.getField("left");
+                  const released = await rect.release();
+
+                  const beforeInvalid = requests.length;
+                  let runtimeCode = "";
+                  try {
+                    await Packages.java.lang.Runtime.exec("id");
+                  } catch (error) {
+                    runtimeCode = codeOf(error);
+                  }
+
+                  console.log("rhino.install.default=" + defaultInstallCode);
+                  console.log("rhino.install.result=" + [
+                    installed.schema,
+                    installed.mode,
+                    installed.globalsInstalled,
+                    installed.installed.join("|"),
+                    installed.importClass,
+                    installed.importPackage,
+                    installed.JavaAdapter
+                  ].join("/"));
+                  console.log("rhino.install.globals=" + [
+                    typeof Packages,
+                    typeof java,
+                    typeof android,
+                    typeof importClass,
+                    typeof importPackage,
+                    typeof JavaAdapter
+                  ].join("|"));
+                  console.log("rhino.install.results=" + [
+                    max,
+                    uuid,
+                    rect.__autojs6JavaHandle,
+                    rect.value.left,
+                    rect.value.bottom,
+                    width,
+                    left,
+                    released
+                  ].join("|"));
+                  console.log("rhino.install.requests=" + requests.map((request) => {
+                    const descriptor = request.args[0] || {};
+                    return request.method + ":" + (descriptor.className || descriptor.handle || descriptor.field);
+                  }).join("|"));
+                  console.log("rhino.install.permissions=" + requests.every((request) => request.permissions.indexOf("java_interop") >= 0));
+                  console.log("rhino.install.denied=" + runtimeCode + "|" + (requests.length === beforeInvalid));
+                  console.log("rhino.install.pending=" + bridge.__test.pendingCount());
+                })();
+            """.trimIndent()
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = source,
+                sourceName = "<node-rhino-install-java-proxy.js>",
+                workingDirectory = workDir,
+                timeoutMs = 10_000L,
+                javaInteropExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("Rhino install Java proxy POC", result)
+            assertTrue(result.stdout, result.stdout.contains("rhino.install.default=ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED"))
+            assertTrue(
+                result.stdout,
+                result.stdout.contains("rhino.install.result=autojs6-rhino-install-java-proxy-v1/java-allowlist-proxy/true/Packages|java|android/false/false/false"),
+            )
+            assertTrue(result.stdout, result.stdout.contains("rhino.install.globals=function|function|function|undefined|undefined|undefined"))
+            assertTrue(
+                result.stdout,
+                result.stdout.contains("rhino.install.results=9|00000000-0000-0000-0000-000000000004|java-rhino-rect|1|8|5|1|true"),
+            )
+            assertTrue(
+                result.stdout,
+                result.stdout.contains("rhino.install.requests=callStatic:java.lang.Math|callStatic:java.util.UUID|new:android.graphics.Rect|call:java-rhino-rect|getField:java-rhino-rect|release:java-rhino-rect"),
+            )
+            assertTrue(result.stdout, result.stdout.contains("rhino.install.permissions=true"))
+            assertTrue(result.stdout, result.stdout.contains("rhino.install.denied=ERR_AUTOJS6_JAVA_CLASS_DENIED|true"))
+            assertTrue(result.stdout, result.stdout.contains("rhino.install.pending=0"))
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
 }

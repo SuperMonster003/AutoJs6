@@ -156,6 +156,10 @@ AutoJs6 behavior:
 - P13-13 extends the experiment with allowlist-only `java.lang.Math`,
   `java.util.UUID`, and `android.graphics.Rect` handle construction, selected
   instance calls, field reads, and explicit release/dispose cleanup.
+- P13-14 adds an explicit `rhino.install({ experimental: true })` Java proxy
+  POC: `Packages`, `java`, and `android` can be installed only when the Java
+  interop experiment is enabled, and all calls still route through the same
+  allowlist. Default `rhino.install()` remains rejected.
 - AutoJs capabilities should be requested through bridge modules.
 - raw Android services, activities, accessibility nodes, media projection objects, and bitmap pointers are not exposed directly.
 
