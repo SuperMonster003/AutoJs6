@@ -748,6 +748,14 @@ TypeScript declarations, surface manifest evidence, and docs updates while
 keeping callable inspector sessions, DevTools attach, loopback ADB forwarding,
 CPU/heap profiler artifacts, redaction proof, and packaged debug behavior
 unpromoted. P13-37 records inspector/devtools debug profile as partial.
+`verifyNodePhase13ControlledWasiProfileDecision` records P13-38 as the
+controlled WASI profile decision gate. It requires `wasiProfile` diagnostics,
+pure WebAssembly evidence, stable `wasi`/`node:wasi` require/resolve denial,
+local shadow-package protection, existing Phase 9/10 WASM/WASI evidence,
+TypeScript declarations, surface manifest evidence, and docs updates while
+keeping callable WASI facades, scoped preopen broker, virtual fd/env/args
+policy, resource budgets, worker integration, and packaged `.wasm`/WASI
+behavior unpromoted. P13-38 records controlled WASI profile as partial.
 `verifyNodeModernCoreGate` covers the S7-31 through S7-36 modern core surface:
 `AsyncLocalStorage` propagation, diagnostics channel runtime telemetry,
 `perf_hooks`, single-runtime `node:test`, promise-based timers/streams/readline,

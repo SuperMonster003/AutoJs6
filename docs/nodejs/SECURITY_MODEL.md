@@ -728,6 +728,15 @@ prove explicit user action, visible/revocable session state, loopback-only
 binding, deterministic ADB forward cleanup, DevTools attach lifecycle,
 CPU/heap artifact redaction, app-private export, and packaged release denial.
 
+P13-38 records controlled WASI profile as partial. `wasiProfile` is diagnostic
+metadata only and does not expose raw WASI imports or a controlled facade.
+Pure WebAssembly remains available, but raw `wasi` and `node:wasi` remain
+denied. Any future controlled WASI opt-in must prove scoped or
+user-authorized preopens, realpath/symlink escape denial, virtual fd tables,
+bounded stdio, explicit args, empty-by-default env, limited clock/random,
+network and process-exit denial, resource budgets, hostile corpus coverage,
+and packaged behavior.
+
 ## Release Security Gate
 
 Every Node release candidate must verify:

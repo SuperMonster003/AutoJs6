@@ -70,7 +70,7 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `util/types` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `v8` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `vm` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-36 records vm module diagnostics as partial; Safe/default keeps vm denied while vm.Script/context/timeout, escape denial, memory budget, and packaged behavior evidence remain future work. |
-| `wasi` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-38 must define controlled preopens and raw WASI denial. |
+| `wasi` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-38 records controlled WASI diagnostics as partial; pure WebAssembly stays available while raw WASI remains denied and controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remain future work. |
 | `worker_threads` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, and native preflight are covered while native runnable evidence, crash/resource stress, packaged worker smoke, and final Desktop worker policy remain open. |
 | `zlib` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `zlib/promises` | `disabled` | `desktop_compat_opt_in` | `disabled` | Keep stable denial unless a future Phase 13 task assigns an opt-in profile. |

@@ -1131,6 +1131,21 @@ callable inspector session, debugger endpoint, DevTools attach, loopback ADB
 forwarding, CPU/heap profiler artifact pipeline, redaction proof, and packaged
 debug behavior open.
 
+Phase 13 controlled WASI profile decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ControlledWasiProfileDecision
+```
+
+This host gate records that P13-38 records controlled WASI profile as partial.
+It requires `wasiProfile` diagnostics, pure WebAssembly evidence, default
+`wasi`/`node:wasi` denial, `require.resolve()` denial, shadowing protection,
+existing Phase 9/10 WASM/WASI evidence, TypeScript declarations, the desktop
+builtin matrix, and Phase13 docs. It keeps any callable `autojs6:wasi` facade,
+controlled `node:wasi` profile, scoped preopen broker, virtual fd/env/args
+policy, resource budgets, worker integration, and packaged `.wasm`/WASI
+behavior open.
+
 Current `os` privacy focused instrumentation:
 
 ```powershell

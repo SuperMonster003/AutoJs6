@@ -1130,6 +1130,14 @@ explicit debug-session UI, loopback ADB forwarding, attach lifecycle, profiler
 artifact redaction, app-private export, and packaged release/debug behavior
 remain open.
 
+P13-38 records controlled WASI profile as partial: Safe Node now exposes
+`wasiProfile` diagnostics while keeping raw `wasi` and `node:wasi` denied.
+Pure WebAssembly remains available, but this is not yet Pro/desktop parity for
+WASI-oriented packages; scoped or user-authorized preopens, virtual fd tables,
+explicit args/env policy, limited clock/random, network/process-exit denial,
+resource budgets, worker integration, packaged `.wasm`/WASI behavior, and
+hostile corpus coverage remain open.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

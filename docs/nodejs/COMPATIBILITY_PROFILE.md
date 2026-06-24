@@ -901,6 +901,14 @@ WebAssembly is available as a pure JavaScript/V8 capability. The Phase 9
 the scoped-fs broker before promotion. See
 `docs/nodejs/reports/phase9/WASM_WASI.md`.
 
+P13-38 records controlled WASI profile as partial. The runtime exposes
+`autojs6:profile.wasiProfile` to document that pure WebAssembly remains
+available while raw `wasi` / `node:wasi` stays denied. Any future controlled
+WASI profile must prove scoped or user-authorized preopens, virtual fd and
+bounded stdio behavior, explicit args, empty-by-default env, limited
+clock/random, network/process-exit denial, resource budgets, worker
+integration, and packaged `.wasm`/WASI behavior before promotion.
+
 `vm` is intentionally disabled, including local `node_modules/vm` shadowing, until a future design gate explicitly proves a safe subset. See `docs/nodejs/design/VM.md`.
 
 `inspector` is intentionally disabled, including debugger port binding and script-visible inspector APIs. S8-37 adds a focused disabled-state gate that proves metadata cannot enable the feature flag, `node_modules/inspector` cannot shadow the policy, process debugging APIs remain inert, and `NODE_OPTIONS` / `NODE_INSPECT_RESUME_ON_START` are filtered from script-visible `process.env`. S8-40 extends the boundary by stripping Node startup/debugger/cache env keys before native startup, initializing embedded Node with `NODE_OPTIONS` parsing disabled, proving hostile `--inspect` host/port attempts leave no checked listener after stop or timeout, and proving profiler artifacts / sensitive marker data remain absent. A future positive implementation must be debug-build-only and must prove explicit user action, loopback binding, visible/revocable active-session state, lifecycle close, and packaged APK denial. See `docs/nodejs/design/INSPECTOR.md`, `docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`, and `docs/nodejs/reports/phase8/INSPECTOR_SECURITY_GATE.md`.

@@ -343,6 +343,13 @@ profiling exports remain unavailable. Scripts that depend on desktop debugging
 workflows still need a future debug-only profile with explicit user action,
 loopback ADB forwarding, artifact redaction, and packaged behavior evidence.
 
+P13-38 records controlled WASI profile as partial. AutoJs6 Node exposes
+`wasiProfile` diagnostics, and pure WebAssembly remains available, but raw
+`wasi`, `node:wasi`, controlled preopens, WASI fd/env/args surfaces, and
+packaged WASI behavior remain unavailable. Packages that require desktop WASI
+still need a future controlled profile with scoped or user-authorized roots,
+resource budgets, and escape-denial evidence.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

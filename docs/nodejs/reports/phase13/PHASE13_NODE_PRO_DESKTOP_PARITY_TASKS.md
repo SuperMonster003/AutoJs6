@@ -1216,6 +1216,23 @@ P13 task 本身使用以下执行状态：
     - preopen 目录受 scoped/authorized roots 控制。
     - fd、env、args、clock/random、network 权限明确。
     - raw unrestricted WASI 仍拒绝。
+  - 进展：
+    - P13-38 partial landing 已添加 `wasiProfile` 诊断，保持 pure
+      WebAssembly 可用、raw `wasi` / `node:wasi` 默认稳定拒绝。
+    - 新增 focused gate:
+      `NodeWasiPhase13DecisionInstrumentationTest`。
+    - Existing WASM/WASI gate:
+      `NodeWasmWasiInstrumentationTest`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-controlled-wasi-profile-decision.js`。
+    - Gradle gate: `:app:verifyNodePhase13ControlledWasiProfileDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_38_CONTROLLED_WASI_PROFILE.md`。
+    - Surface manifest evidence:
+      `phase13-controlled-wasi-profile-decision`。
+  - Remaining: controlled facade、scoped/authorized preopen broker、
+    fd/env/args/stdio/clock/random/resource budget、worker integration、
+    packaged `.wasm`/WASI behavior 仍未完成。
 
 - [ ] P13-39: 决策 native addon `.node` loading。
   - 范围：为 Desktop profile 评估 signed/packaged native addon。
