@@ -80,6 +80,12 @@ disclosure evidence lands.
 
 `ui.overlay` is a P12-13 fake-provider POC over the P12-12A overlay contract. It exposes JSON-only `show`, `update`, `drainEvents`, `close`, `closeAll`, `hasPermission`, and `openPermissionSettings` shapes with opaque handles. P12-14 adds the Android live gate for permission snapshots, explicit settings dry-run/launch evidence, packaged `SYSTEM_ALERT_WINDOW` metadata, foreground disclosure requirements, and cleanup summaries; live overlay creation remains fail-closed.
 
+P13-18 records the partial overlay provider promotion gate for these
+declarations. The TypeScript smoke sample imports `ui.overlay` and checks
+permission, settings, closeAll, show, handle, and event types, while Android
+live `show`/`update`/`drainEvents`/per-handle `close` remains fail-closed until
+a promoted overlay provider lands.
+
 P12-34 is a documentation synchronization gate rather than a new declaration
 surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9
 comparison, `RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`, `SECURITY_MODEL.md`, and

@@ -612,7 +612,7 @@ await ok.click({ timeoutMs: 3000 });
 | `threads` | `threads.start`, shared runtime 对象 | async/await、`engines`、`work_manager` 方向 | `blocked_by_design`，不是 Node 默认兼容目标 |
 | `timers` | `setTimeout/setInterval` 和 AutoJs 扩展 | Node timers, `autojs6:compat` | 部分，AutoJs 特有扩展仍需核对 |
 | `ui` | Rhino XML/DSL UI、raw View | `ui` JSON descriptor/opaque handle | 部分，不暴露 raw View，不支持 `ui.run/ui.post` 等价 |
-| `floaty` | 悬浮窗、`floaty.window`, `floaty.getClip` | `getClip` 迁移到 clipboard/compat；overlay 未开放 | 大部分未实现，overlay 设计门禁 |
+| `floaty` | 悬浮窗、`floaty.window`, `floaty.getClip` | `getClip` 迁移到 clipboard/compat；P13-18 记录 `ui.overlay` JS facade/types、permission/settings/closeAll live gate 和 packaged `SYSTEM_ALERT_WINDOW` metadata；live overlay creation 仍 fail-closed | `require("floaty")`、`compat.floaty`、raw `floaty.window/rawWindow` View parity 和真实 overlay provider 仍未实现 |
 | `storages` | 本地存储 | `storage/storages`, `autojs6:compat.storages` | 部分，JSON-only、命名空间隔离 |
 | `sqlite` | SQLite helpers | `database/sqlite`, callable `compat.sqlite` | `supported_async` |
 | `shell` / `shizuku` | shell/root/shizuku | `shell.exec`, callable `compat.shell` | shell 部分；Shizuku 未开放 |
@@ -850,7 +850,7 @@ blockers：
 - `events.keys` 纯常量已支持；按键观察、拦截和 touch observer 仍是 provider
   gated。
 - `threads` 需要明确迁移模式和示例，而不是照搬 Rhino 线程。
-- `floaty` 和 overlay permission flow 尚未实现 Node provider。
+- `floaty` 仍未实现 Node provider；P13-18 仅固定 `ui.overlay` permission/settings/cleanup live gate，真实 overlay `show`/`update`/`drainEvents`/`close` provider 仍缺。
 - Rhino UI DSL 到 Node UI bridge 的迁移层尚未实现。
 - `tasks` 的一次性 disposable task 已迁移到 `work_manager`；用户任务数据库、
   daily/weekly 和 IntentTask 迁移尚未完成。
@@ -886,7 +886,7 @@ blockers：
 
 - `input_observer` provider；`events.keys` 纯常量已经 promoted。
 - UI compat runtime facade，仍保持 `UiHandle` 和 JSON event snapshots。
-- floaty/overlay provider 或永久非目标决策。
+- floaty/overlay 的真实 provider 仍需后续 gate；P13-18 已将 raw window parity 保持为非目标，并记录 `ui.overlay` partial promotion gate。
 - `tasks` 继续拆分用户任务数据库和 broadcast trigger；WorkManager one-shot
   disposable 兼容路径已经 promoted。
 - 线程迁移策略和示例库。

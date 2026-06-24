@@ -218,7 +218,7 @@ object NodeBridgeProviderRegistry {
             id = UI_OVERLAY_PROVIDER,
             modules = listOf(NodeBridgeModules.UI_OVERLAY),
             capabilities = listOf(NodeBridgePermissionManifest.UI_OVERLAY),
-            packagedSupport = packagedProviderDependent("P12-14 live gate records SYSTEM_ALERT_WINDOW metadata, permission/settings methods, foreground disclosure requirements, and cleanup policy; live overlay creation remains fail-closed"),
+            packagedSupport = packagedProviderDependent("P13-18 records partial overlay promotion evidence over the P12-14 live gate; live packaged overlay creation remains blocked until a promoted show/update/drainEvents/close provider and foreground disclosure flow land"),
         ),
         provider(
             id = INPUT_OBSERVER_PROVIDER,
@@ -377,12 +377,15 @@ object NodeBridgeProviderRegistry {
             "resourceType" to NodeBridgeResourceType.OVERLAY_SESSION.name,
             "p12_13LiveProviderState" to "not_promoted",
             "liveProvider" to "permission_settings_cleanup_gate_only",
+            "phase13Promotion" to "P13-18 partial overlay promotion evidence gate",
+            "liveCreationPromotion" to "blocked_until_promoted_show_update_drainEvents_close_provider",
+            "packagedPromotion" to "blocked_until_live_packaged_overlay_permission_foreground_disclosure_cleanup_and_leak_evidence",
             "packagedPolicy" to "SYSTEM_ALERT_WINDOW metadata is recorded; scheduled/background silent overlays remain rejected until a foreground disclosure provider is promoted",
             "foregroundDisclosure" to "required_before_live_overlay",
             "cleanupPolicy" to "closeAll no-op cleanup summary plus provider destroy clears overlay session registry",
             "skipPolicy" to "device/live overlay creation is skipped until a controlled JSON-only Android overlay provider is promoted",
             "rawWindowLeakPolicy" to "WindowManager, LayoutParams, FloatyWindow, WindowBridge, View, and NativeView are not exposed",
-            "statusReason" to "P12-14 live gate only; permission/settings/cleanup evidence is available and Android show/update/drainEvents/close creation path fails closed",
+            "statusReason" to "P13-18 partial gate over P12-14 live permission/settings/cleanup evidence; Android show/update/drainEvents/close creation path fails closed",
         )
         INPUT_OBSERVER_PROVIDER -> linkedMapOf(
             "liveMethods" to "getAvailableSources,observeKeys,drainEvents,close",

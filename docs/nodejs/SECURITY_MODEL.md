@@ -501,6 +501,14 @@ P12-11 selects the Provider path for a controlled JSON-only overlay provider. Th
 
 After P12-14, `require("floaty")`, `compat.floaty`, and global `floaty` remain absent; `require("ui.overlay")` is a fake transport POC plus live gate and not live overlay authority. Raw Rhino-window examples may use `compat.blockedByDesign()` with `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`, but provider work must move through the JSON-only overlay contract instead of dispatching raw Rhino window bridge requests. No Node execution mode may create a hidden overlay, silently request overlay permission, inject `SYSTEM_ALERT_WINDOW` without explicit package metadata, or register overlay resources outside the provider lifecycle.
 
+P13-18 records the overlay provider promotion state as partial. Permission
+snapshots, settings dry-run/launch evidence, explicit overlay capabilities,
+packaged `SYSTEM_ALERT_WINDOW` metadata records, type coverage, and cleanup
+summaries are checked, but live overlay creation remains fail-closed. The
+surface cannot move to `pro_compat_opt_in` until foreground disclosure
+ownership, packaged install-run denial/positive cases, task-removal cleanup,
+crash/relaunch behavior, and real overlay leak/stress evidence are available.
+
 S11-25 keeps Rhino `threads` compatibility blocked by design. There is no `require("threads")`, `compat.threads`, global `threads`, global `sync`, default `worker_threads`, raw `Thread`, raw `ThreadPoolExecutor`, Rhino `Synchronizer`, Java lock, or `VolatileDispose` object exposed to Node. `threads.start()` and `threads.pool()` must migrate to `async` / `await`, timeout-bounded bridge calls, explicit `engines` execution slots, or `work_manager` scheduled work. `threads.interrupt()` must migrate to `AbortController`, bridge `timeoutMs`, script stop, and provider cleanup. `threads.disposable()` and `sync(fn, lock)` must migrate to Promise, `EventEmitter` / `MessageChannel`, immutable JSON snapshots, or an async queue with a single state owner. Future compute workers remain policy-gated and must not claim same-runtime Rhino thread semantics.
 
 Image and node handles must be opaque ids with explicit lifecycle cleanup.

@@ -1,8 +1,9 @@
 # Rhino Floaty Compatibility Design
 
-Status: S11-24 design gate. This document maps Rhino `floaty` APIs to the
-current Embedded Node state and records the provider gaps that must close before
-any Node overlay runtime is exposed.
+Status: S11-24 design gate plus P13-18 partial overlay promotion record. This
+document maps Rhino `floaty` APIs to the current Embedded Node state and
+records the provider gaps that must close before any live Node overlay runtime
+is promoted.
 
 ## Decision
 
@@ -24,6 +25,9 @@ JSON-only `show`, `update`, `drainEvents`, `close`, `closeAll`,
 has no `require("floaty")`, `compat.floaty`, or global `floaty` runtime
 surface. P12-14 adds the overlay live gate for Android permission/settings/cleanup
 evidence, but the live Android overlay creation path remains fail-closed.
+P13-18 records this state in Phase 13 as partial overlay provider promotion
+evidence only; it does not add `require("floaty")`, `compat.floaty`, a global
+`floaty`, or exact Rhino raw-window parity.
 Dual-engine examples for the raw Rhino APIs may keep
 using `compat.blockedByDesign("floaty.window", ...)` or
 `compat.blockedByDesign("floaty.rawWindow", ...)`, which returns
@@ -37,6 +41,13 @@ overlay window provider, no packaged manifest injection beyond recorded
 for script-owned overlay windows. The existing
 [FLOATY_NODE.md](FLOATY_NODE.md) gate remains the authoritative overlay
 provider design boundary.
+
+P13-18 additionally ties this boundary to the checked `ui.overlay` TypeScript
+surface and provider registry metadata. `ui.overlay.hasPermission()`,
+`ui.overlay.openPermissionSettings()`, and `ui.overlay.closeAll()` have
+live-gate evidence; `ui.overlay.show()`, handle `update()`, `drainEvents()`,
+and handle `close()` still fail closed on Android until a reviewed provider
+owns real windows, foreground disclosure, packaged behavior, and leak cleanup.
 
 `floaty.getClip()` is the only Rhino `floaty` entry with a current non-overlay
 migration path: use the controlled `clipboard` bridge or

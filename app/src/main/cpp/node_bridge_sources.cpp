@@ -39968,6 +39968,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "ui") {
       return "ui";
     }
+    if (name === "ui.overlay") {
+      return "ui.overlay";
+    }
     if (name === "input_observer") {
       return "input_observer";
     }

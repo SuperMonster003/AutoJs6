@@ -139,6 +139,7 @@ Current user-facing bridge modules include:
 - `clipboard`
 - `device`
 - `ui`
+- `ui.overlay`
 - `shell`
 - controlled `fetch` when the network experiment is explicitly enabled
 
@@ -164,6 +165,30 @@ AutoJs6 behavior:
 Porting note: migrate Rhino UI scripts to explicit `require("ui")` or
 `compat.ui` JSON descriptors instead of relying on raw `View`, `NativeView`,
 `ui.run()`, `ui.post()`, or implicit current-Activity behavior.
+
+## Floaty And Overlay
+
+Auto.js Pro and AutoX scripts commonly use Rhino `floaty.window()` /
+`floaty.rawWindow()` and overlay permission helpers.
+
+AutoJs6 behavior:
+
+- P13-18 records the partial `ui.overlay` provider promotion gate over the
+  P12-14 Android live gate.
+- `require("ui.overlay")` has JSON-only facade/types for `show`, `update`,
+  `drainEvents`, `close`, `closeAll`, `hasPermission`, and
+  `openPermissionSettings`.
+- `hasPermission`, `openPermissionSettings`, and `closeAll` have Android
+  permission/settings/cleanup live-gate evidence.
+- live `show`, `update`, `drainEvents`, and per-handle `close` still fail
+  closed until a real Android overlay provider, foreground disclosure,
+  packaged install-run behavior, and leak/stress evidence land.
+- `require("floaty")`, `compat.floaty`, global `floaty`, and exact Rhino raw
+  `floaty.window()` / `floaty.rawWindow()` View parity remain unavailable.
+
+Porting note: use `ui.overlay` only for JSON-only overlay migration
+experiments. Production scripts should not depend on live overlay windows until
+the provider is promoted.
 
 ## Java And Android Interop
 

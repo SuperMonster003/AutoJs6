@@ -1,9 +1,10 @@
 # Node Floaty And Overlay Design Gate
 
 Status: Provider path in progress. P12-13 exposes `require("ui.overlay")` as a
-fake-provider facade POC; no `require("floaty")`, `compat.floaty`, global
-`floaty`, live overlay provider, packaged manifest injection, or runtime
-permission flow is implemented by this document.
+fake-provider facade POC; P12-14 adds the Android permission/settings/cleanup
+live gate; P13-18 records partial overlay promotion evidence. There is still no
+`require("floaty")`, `compat.floaty`, global `floaty`, promoted live overlay
+creation provider, packaged overlay runtime, or silent permission flow.
 
 Task S11-24 records the Rhino `floaty` compatibility boundary in
 [RHINO_FLOATY_COMPATIBILITY.md](RHINO_FLOATY_COMPATIBILITY.md). It does not
@@ -41,6 +42,14 @@ transport surface for JSON-only provider experiments. It still has no
 P12-14 live gate exposes permission/settings/cleanup evidence only; the Android
 live overlay provider remains fail-closed for `show`, `update`, `drainEvents`,
 and per-handle `close`.
+
+P13-18 records this as a partial Phase 13 overlay provider promotion gate. The
+checked evidence covers the JS facade, type declarations, explicit
+capabilities, packaged `SYSTEM_ALERT_WINDOW` metadata records, settings dry-run
+or launch path, and closeAll cleanup summary. It does not promote live overlay
+creation; `show`, `update`, `drainEvents`, and per-handle `close` still require
+a controlled Android overlay provider, foreground disclosure ownership,
+packaged install-run evidence, and leak/stress coverage.
 Script examples for exact Rhino raw window APIs may use
 `compat.blockedByDesign(...)` and
 `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`; they do not create an overlay

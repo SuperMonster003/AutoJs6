@@ -383,6 +383,13 @@ provider state: direct `require("ui")` Activity evidence is present for JSON
 layout, event drain, updates, close, and provider cleanup, while live packaged
 UI, Back/Recents, orientation/configuration-change, relaunch/crash, and
 packaged capability/disclosure denial evidence still block opt-in promotion.
+`verifyNodePhase13OverlayProviderPromotion` records the P13-18 partial
+`ui.overlay` provider state: JS facade/types, explicit capabilities, Android
+permission/settings/closeAll live gate, packaged `SYSTEM_ALERT_WINDOW` metadata
+records, and raw Window/View denial are present, while live overlay
+`show`/`update`/`drainEvents`/per-handle `close`, foreground disclosure,
+packaged install-run behavior, and real overlay leak/stress evidence still
+block opt-in promotion.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -513,6 +520,11 @@ P13-17 additionally uses `verifyNodePhase13LiveUiProviderPromotion` as the host
 promotion-status gate for this same provider and keeps packaged live UI
 provider-dependent until Back/Recents, orientation, relaunch/crash, and
 disclosure evidence lands.
+P13-18 additionally uses `verifyNodePhase13OverlayProviderPromotion` as the host
+promotion-status gate for `ui.overlay` and keeps the Android provider degraded:
+permission/settings/closeAll are live-gate methods, but live overlay creation
+methods remain fail-closed until a reviewed provider and packaged/leak evidence
+land.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

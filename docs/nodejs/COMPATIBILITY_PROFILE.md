@@ -1555,6 +1555,19 @@ runtime.
   - P13-17 records this as a partial live-provider promotion gate; packaged support is provider-dependent until Back/Recents, orientation, relaunch/crash, and disclosure evidence lands
   - `WebView` descriptors reject with a stable invalid-request error until a separate WebView security gate is designed
   - JavaScript receives only an opaque handle; no raw `Context`, `Activity`, `View`, `Window`, `Fragment`, `Handler`, Rhino `NativeView`, overlay window, Binder, or Java object crosses into Node
+- `ui.overlay`
+  - `show(descriptor, options?): Promise<OverlayHandle>`
+  - `OverlayHandle.update(patch, options?): Promise<OverlaySnapshot>`
+  - `OverlayHandle.drainEvents(options?): Promise<readonly OverlayEvent[]>`
+  - `OverlayHandle.close(options?): Promise<boolean>`
+  - `closeAll(options?): Promise<OverlayCloseSummary>`
+  - `hasPermission(options?): Promise<OverlayPermissionSnapshot>`
+  - `openPermissionSettings(options?): Promise<OverlayPermissionSettingsResult>`
+  - descriptors are JSON-only and require user-visible disclosure text; raw `WindowManager.LayoutParams`, hidden overlays, and fully transparent overlays are rejected before dispatch
+  - requests require explicit `ui.overlay` or `ui.overlay.permission`; base `ui` never implies overlay authority
+  - P13-18 records this as a partial overlay-provider promotion gate over the P12-14 Android permission/settings/closeAll live gate
+  - live `show`, `update`, `drainEvents`, and per-handle `close` remain fail-closed until a controlled Android overlay provider, foreground disclosure ownership, packaged install-run evidence, and leak/stress coverage land
+  - `require("floaty")`, `compat.floaty`, global `floaty`, exact Rhino `floaty.window()` / `floaty.rawWindow()` raw View parity, and raw `WindowManager`, `FloatyWindow`, `WindowBridge`, `View`, `NativeView`, Binder, or Java objects remain unavailable
 - `clipboard`
   - `getText(options?): Promise<string>`
   - `setText(text, options?): Promise<void>`

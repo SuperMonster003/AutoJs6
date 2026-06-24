@@ -605,6 +605,59 @@ tasks.register<Exec>("verifyNodePhase13LiveUiProviderPromotion") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase13OverlayProviderPromotion") {
+    group = "verification"
+    description = "Verifies Phase 13 overlay provider promotion progress."
+
+    dependsOn("verifyNodePhase13LiveUiProviderPromotion")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-overlay-provider-promotion.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_18_OVERLAY_PROVIDER_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/AndroidManifest.xml"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/project/ProjectConfig.java"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/apkbuilder/ApkBuilder.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeOverlayBridgeInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/ui_overlay.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/src/main.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/FLOATY_NODE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/OVERLAY_PROVIDER_V1.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/RHINO_FLOATY_COMPATIBILITY.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase12/verify-rhino-compat-overlay-live-gate.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase12/PHASE12_SUMMARY.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("phase13-overlay-provider-promotion.json") },
+        nodePhase13ReportDir.map { it.file("phase13-overlay-provider-promotion.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeBuiltinDesktopParityMatrix") {
     group = "verification"
     description = "Generates the Phase 13 desktop Node builtin parity matrix."

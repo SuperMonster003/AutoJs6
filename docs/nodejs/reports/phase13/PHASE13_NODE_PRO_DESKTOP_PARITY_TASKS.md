@@ -495,6 +495,20 @@ P13 task 本身使用以下执行状态：
     - SYSTEM_ALERT_WINDOW、foreground disclosure、permission settings flow 完整。
     - packaged metadata、closeAll cleanup、leak stress 有 evidence。
     - raw `floaty.window/rawWindow` View parity 继续单独决策，不混入本任务。
+  - 2026-06-24 partial landing:
+    - Host verifier: `tools/nodejs/phase13/verify-overlay-provider-promotion.js`.
+    - Gradle gate: `:app:verifyNodePhase13OverlayProviderPromotion`.
+    - Report: `docs/nodejs/reports/phase13/P13_18_OVERLAY_PROVIDER_PROMOTION.md`.
+    - Surface manifest evidence: `phase13-overlay-provider-promotion`.
+    - Current state: `require("ui.overlay")` has JS facade/types plus the
+      P12-14 Android permission/settings/closeAll live gate; live
+      `show`/`update`/`drainEvents`/per-handle `close` remains fail-closed.
+    - Raw `floaty.window()` / `floaty.rawWindow()` View parity remains outside
+      this task and stays blocked by design.
+  - Remaining: promoted Android overlay provider, permission granted/denied
+    device matrix, foreground notification/disclosure ownership, packaged
+    install-run smoke, task-removal cleanup, relaunch/crash evidence, and real
+    overlay leak/stress evidence.
 
 - [ ] P13-19: 扩展 accessibility/selector Pro parity。
   - 范围：补齐常用全局自动化函数和 selector DSL。

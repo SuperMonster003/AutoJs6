@@ -2,7 +2,8 @@
 
 Status: P12-12A design-locked contract for the P12-11 Provider path; P12-13
 adds the fake-provider runtime POC over `require("ui.overlay")`; P12-14 adds
-the Android live gate while keeping overlay creation fail-closed.
+the Android live gate while keeping overlay creation fail-closed; P13-18
+records partial Phase 13 promotion evidence without enabling live creation.
 
 ## Decision
 
@@ -14,6 +15,14 @@ dry-run evidence, packaged `SYSTEM_ALERT_WINDOW` metadata, foreground
 disclosure requirements, and cleanup summaries. It does not promote live
 overlay creation; `show`, `update`, `drainEvents`, and per-handle `close`
 remain fail-closed until a controlled Android provider is reviewed.
+
+P13-18 keeps the same boundary and adds a Phase 13 verifier/report for the
+promotion state. The gate proves permission snapshots, settings dry-run/launch,
+closeAll cleanup summaries, explicit capabilities, packaged
+`SYSTEM_ALERT_WINDOW` metadata records, TypeScript coverage, and raw
+Window/View denial. It intentionally leaves live overlay creation blocked until
+foreground disclosure, packaged install-run, task-removal cleanup, crash/relaunch,
+and real overlay leak/stress evidence exist.
 
 The first module name is:
 

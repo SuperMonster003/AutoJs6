@@ -33,6 +33,7 @@ import pinyin4j = require("pinyin4j");
 import notifications = require("notifications");
 import sensors = require("sensors");
 import ui = require("ui");
+import overlay = require("ui.overlay");
 import fetchModule = require("fetch");
 import axios = require("axios");
 import websocket = require("websocket");
@@ -303,6 +304,21 @@ async function smoke(): Promise<void> {
   unsubscribeCompatUi();
   await compatUiHandle.close({ timeoutMs: 1000 });
 
+  const overlayPermission: overlay.OverlayPermissionSnapshot = await overlay.hasPermission({ timeoutMs: 1000 });
+  const overlaySettings: overlay.OverlayPermissionSettingsResult = await overlay.openPermissionSettings({
+    dryRun: true,
+    timeoutMs: 1000
+  });
+  const overlayCloseSummary: overlay.OverlayCloseSummary = await overlay.closeAll({ timeoutMs: 1000 });
+  const overlayShow: Promise<overlay.OverlayHandle> = overlay.show({
+    content: { type: "Text", text: "Overlay" },
+    window: { width: "wrap_content", height: "wrap_content", touchable: true, focusable: false, visible: true },
+    disclosure: { title: "AutoJs6 overlay", text: "Script overlay is visible" }
+  }, { timeoutMs: 1000 });
+  const overlayHandlePromise: Promise<readonly overlay.OverlayEvent[]> = overlayShow.then((handle) =>
+    handle.drainEvents({ maxEvents: overlay.policy.defaultDrainBatchSize, timeoutMs: 1000 }),
+  );
+
   await rhinoCompat.images.recycle(compatTemplate, { timeoutMs: 1000 });
   await rhinoCompat.images.recycle(compatClip, { timeoutMs: 1000 });
   await rhinoCompat.images.recycle(compatResize, { timeoutMs: 1000 });
@@ -501,6 +517,11 @@ async function smoke(): Promise<void> {
   void compatUi;
   void compatUiHandle;
   void unsubscribeCompatUi;
+  void overlayPermission;
+  void overlaySettings;
+  void overlayCloseSummary;
+  void overlayShow;
+  void overlayHandlePromise;
   void responseText;
   void responseJson;
   void fetchDiagnostics;

@@ -245,7 +245,7 @@
         "P13-19",
         "P13-20"
       ],
-      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence while live packaged UI remains blocked.",
+      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence while live packaged UI remains blocked. P13-18 records partial overlay provider evidence over the P12-14 permission/settings/cleanup live gate while live overlay creation remains fail-closed.",
       "risk": "high",
       "runtimeSurface": [
         "require(\"ui\") live provider",
@@ -263,7 +263,15 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeUiBridgeInstrumentationTest.kt",
         "docs/nodejs/types/autojs6-node/ui.d.ts",
         "build/reports/nodejs/phase13-live-ui-provider-promotion.json",
-        "build/reports/nodejs/phase13-live-ui-provider-promotion.md"
+        "build/reports/nodejs/phase13-live-ui-provider-promotion.md",
+        "docs/nodejs/reports/phase13/P13_18_OVERLAY_PROVIDER_PROMOTION.md",
+        "tools/nodejs/phase13/verify-overlay-provider-promotion.js",
+        ":app:verifyNodePhase13OverlayProviderPromotion",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeOverlayBridgeInstrumentationTest.kt",
+        "docs/nodejs/types/autojs6-node/ui_overlay.d.ts",
+        "build/reports/nodejs/phase13-overlay-provider-promotion.json",
+        "build/reports/nodejs/phase13-overlay-provider-promotion.md"
       ],
       "rollback": "Fail closed to existing provider POC or stable denial errors for UI, overlay, accessibility, and media projection."
     },
