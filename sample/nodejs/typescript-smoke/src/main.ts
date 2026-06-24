@@ -538,6 +538,10 @@ async function smoke(): Promise<void> {
   const inspectorProfileTargetProfiles: readonly string[] = autojsProfile.inspectorProfile.targetProfiles;
   const inspectorProfileAdbForwarding: string = autojsProfile.inspectorProfile.adbForwarding;
   const inspectorProfileRawSockets: boolean = autojsProfile.inspectorProfile.rawSockets;
+  const wasiProfileStatus: string = autojsProfile.wasiProfile.status;
+  const wasiProfileTargetProfiles: readonly string[] = autojsProfile.wasiProfile.targetProfiles;
+  const wasiProfilePreopens: string = autojsProfile.wasiProfile.preopens;
+  const wasiProfileRawFdNumbers: boolean = autojsProfile.wasiProfile.rawFdNumbers;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -751,6 +755,10 @@ async function smoke(): Promise<void> {
   void inspectorProfileTargetProfiles;
   void inspectorProfileAdbForwarding;
   void inspectorProfileRawSockets;
+  void wasiProfileStatus;
+  void wasiProfileTargetProfiles;
+  void wasiProfilePreopens;
+  void wasiProfileRawFdNumbers;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;

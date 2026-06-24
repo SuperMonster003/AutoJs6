@@ -166,6 +166,32 @@ declare namespace AutoJs6Node {
     readonly rawSockets: boolean;
   }
 
+  export interface WasiProfile {
+    readonly status: "disabled_by_default" | "controlled_opt_in" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly pureWebAssembly: "available" | string;
+    readonly rawNodeWasi: "denied" | string;
+    readonly controlledFacade: "deferred" | "partial" | string;
+    readonly module: "denied" | "partial" | string;
+    readonly preopens: "scoped_or_authorized_roots_required" | string;
+    readonly workingDirectoryPreopen: "deferred" | "partial" | string;
+    readonly authorizedRoots: "required_before_enablement" | string;
+    readonly args: "explicit_only" | string;
+    readonly env: "empty_by_default" | string;
+    readonly fd: "virtualized_required" | string;
+    readonly stdio: "bounded_required" | string;
+    readonly clock: "limited_required" | string;
+    readonly random: "limited_required" | string;
+    readonly network: "denied" | string;
+    readonly processExit: "denied" | string;
+    readonly symlinkEscape: "must_deny" | string;
+    readonly workerIntegration: "deferred" | "partial" | string;
+    readonly packagedBehavior: "not_promoted" | string;
+    readonly rawHostPaths: boolean;
+    readonly rawFdNumbers: boolean;
+  }
+
   export interface AutoJsProfile {
     readonly name: string;
     readonly engineVersion: string;
@@ -183,6 +209,7 @@ declare namespace AutoJs6Node {
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
     readonly vmProfile: VmProfile;
     readonly inspectorProfile: InspectorProfile;
+    readonly wasiProfile: WasiProfile;
     readonly directBuiltinAliases: Readonly<Record<string, string>>;
     readonly limitedBuiltins: readonly string[];
     readonly disabledBuiltins: readonly string[];
