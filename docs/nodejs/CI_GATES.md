@@ -768,6 +768,15 @@ evidence, TypeScript declarations, surface manifest evidence, and docs updates
 while keeping full desktop stdlib parity, raw native handles, unrestricted
 network behavior, broad terminal control, `process.getBuiltinModule`, and
 `zlib/promises` unpromoted. P13-43 records Node stdlib conformance as partial.
+`verifyNodePhase13ProcessParityDecision` records P13-44 as the process/env/argv
+parity decision gate. It requires `processParityProfile` diagnostics, focused
+process parity instrumentation, existing process sweep evidence, embedded
+project-runner argv/env/cwd evidence, env filtering evidence, modern-core
+process permission evidence, TypeScript declarations, surface manifest
+evidence, and docs updates while keeping raw `process.exit()` lifecycle,
+Android signal delivery, raw inherited env, raw process handles, native
+bindings, and full desktop process parity unpromoted. P13-44 records
+process/env/argv parity as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

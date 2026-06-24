@@ -1398,6 +1398,36 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - env 写入、敏感变量、Android process signal 差异有 policy。
     - `process.exit()` 与 AutoJs script lifecycle 协调。
+  - Progress:
+    - P13-44 partial landing 已添加 `processParityProfile` 诊断，记录当前
+      Safe process subset: `argv`、controlled mutable `env`、scoped
+      cwd/chdir、`exitCode`、versions、timing、cpu/memory/resourceUsage、
+      `process.permission`、`process.report.getReport()`、bounded stdio、
+      `process` / `node:process` alias，以及 Android signal/native/process
+      handle 差异。
+    - Focused instrumentation:
+      `NodeProcessParityPhase13DecisionInstrumentationTest` 验证
+      `processParityProfile`、env 敏感变量过滤、script-local env 写入、
+      scoped cwd/chdir、`process.exit()` / signal/native API 稳定拒绝、
+      versions/resource/timing/report/permission/stdio 行为。
+    - Existing evidence:
+      `NodeProcessSweepInstrumentationTest`、`EmbeddedScriptMvpInstrumentationTest`、
+      inspector env filtering tests、compile-cache env filtering tests 和
+      modern-core process permission differential fixture 继续覆盖
+      process/env/argv 关键行为。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-process-parity-decision.js` 生成
+      `phase13-process-parity-decision`。
+    - Gradle gate:
+      `:app:verifyNodePhase13ProcessParityDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_44_PROCESS_PARITY.md`。
+    - Surface manifest evidence:
+      `phase13-process-parity-decision`。
+  - Remaining: full desktop process parity、raw Android signal delivery、
+    raw `process.exit()` lifecycle 协调、raw inherited env policy、raw process
+    handles/native bindings、`process.dlopen`/`process.binding`、
+    `report.writeReport()` 和 packaged lifecycle evidence 仍未完成。
 
 ### Track D: Packaging, plugins, and distribution
 

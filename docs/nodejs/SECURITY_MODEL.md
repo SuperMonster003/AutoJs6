@@ -759,6 +759,13 @@ URL, OS, readline, TTY, `perf_hooks`, and `async_hooks`, but
 network/OS surfaces, raw terminal control, and full desktop parity remain
 denied until separate Desktop-profile evidence proves them safe.
 
+P13-44 records process/env/argv parity as partial. `processParityProfile` is
+diagnostic metadata only and does not grant raw process authority. The Safe
+subset keeps env script-local and filtered, cwd scoped, `process.exit()` and
+signals denied, raw process handles unavailable, native bindings denied, and
+`report.writeReport()` blocked until separate Desktop-profile and lifecycle
+evidence proves them safe.
+
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
 metadata only and does not make a second JavaScript context a security
 boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,

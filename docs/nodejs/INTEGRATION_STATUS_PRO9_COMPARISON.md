@@ -1157,6 +1157,14 @@ module conformance, Android OS/terminal edge cases, `process.getBuiltinModule`,
 `zlib/promises`, raw native handles, unrestricted network behavior, and real
 npm corpus pass-rate growth remain open.
 
+P13-44 records process/env/argv parity as partial: Safe Node now exposes
+`processParityProfile` diagnostics for controlled `process.env`, script-local
+env writes, filtered sensitive env, scoped cwd/chdir, argv metadata,
+`exitCode`, timing, resource snapshots, permission/report facades, and bounded
+stdio. Full desktop process parity still requires raw exit lifecycle
+coordination, Android signal policy, raw inherited env policy, native binding
+decisions, raw process handles, and packaged lifecycle evidence.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

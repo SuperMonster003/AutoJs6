@@ -1925,6 +1925,33 @@ subset behavior for `crypto`, streams, zlib, Buffer, URL, OS, readline, TTY,
 `process.getBuiltinModule` and `zlib/promises`, plus native callback/stream
 cleanup counters. P13-43 records Node stdlib conformance as partial.
 
+Phase 13 process/env/argv parity decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProcessParityDecision
+```
+
+This host gate records P13-44 as partial. It requires `processParityProfile`
+diagnostics, focused P13-44 instrumentation, existing process sweep evidence,
+project-runner argv/env/cwd evidence, inspector and compile-cache env filtering
+evidence, modern-core process permission evidence, TypeScript declarations,
+surface manifest evidence, release matrix updates, and Phase13 docs. It keeps
+raw `process.exit()` lifecycle, Android signals, raw inherited env, raw process
+handles, native bindings, and full desktop process parity open.
+
+Phase 13 process/env/argv parity focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeProcessParityPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies `processParityProfile` diagnostics, `process` /
+`node:process` aliases, argv metadata, script-local env mutation, sensitive env
+filtering, scoped cwd/chdir, `exitCode`, stable denial for raw exit and signal
+APIs, versions, timing, CPU/memory/resource snapshots, permission/report
+facades, bounded stdio, and denial of private process/native entry points.
+P13-44 records process/env/argv parity as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

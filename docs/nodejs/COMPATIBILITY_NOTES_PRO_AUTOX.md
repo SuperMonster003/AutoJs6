@@ -365,6 +365,14 @@ P13-43 records Node stdlib conformance as partial. AutoJs6 Node exposes
 `process.getBuiltinModule`, `zlib/promises`, unrestricted network/native
 handles, or full Node stdlib parity still need later Desktop-profile work.
 
+P13-44 records process/env/argv parity as partial. AutoJs6 Node exposes
+`processParityProfile` diagnostics for controlled `process.env`, script-local
+env writes, filtered sensitive env variables, scoped cwd/chdir, argv metadata,
+`exitCode`, versions, timing/resource snapshots, permission/report facades, and
+bounded stdio. Desktop packages that need raw `process.exit()`, signal
+delivery, inherited host env, raw process handles, native bindings,
+`process.dlopen`, or report file writes still need later Desktop-profile work.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

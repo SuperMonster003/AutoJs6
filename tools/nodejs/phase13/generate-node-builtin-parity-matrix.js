@@ -201,6 +201,9 @@ function nextStepForLimited(name) {
   if (name === "fs" || name === "fs/promises") {
     return "P13-32 records scoped filesystem profile and P13-33 records advanced fs APIs as partial; Safe profile stays working-directory scoped while expanded roots, packaged watcher/fd/FileHandle close-on-destroy, Android unsupported behavior notes, and full desktop fs semantics remain future work.";
   }
+  if (name === "process") {
+    return "P13-44 records process/env/argv parity as partial; argv/env/cwd/timing/resource/report/permission evidence is present while raw exit, signals, native bindings, raw environment inheritance, and full desktop process parity remain future work.";
+  }
   if ([
     "async_hooks",
     "buffer",
@@ -219,7 +222,7 @@ function nextStepForLimited(name) {
   ].includes(name)) {
     return "P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work.";
   }
-  return "Keep current Safe subset unless P13-43 promotes broader desktop conformance.";
+  return "Keep current Safe subset unless a future Phase 13 task promotes broader desktop conformance.";
 }
 
 function highRiskProfileFor(name) {
