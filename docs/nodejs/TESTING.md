@@ -1952,6 +1952,33 @@ APIs, versions, timing, CPU/memory/resource snapshots, permission/report
 facades, bounded stdio, and denial of private process/native entry points.
 P13-44 records process/env/argv parity as partial.
 
+Phase 13 packaged APK capability metadata decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13PackagedCapabilityMetadataDecision
+```
+
+This host gate records P13-45 as partial. It requires
+`packagedCapabilityProfile`, structured `bridgePermissions.packagedMetadata`,
+focused P13-45 instrumentation, existing bridge permission manifest evidence,
+APK builder Android permission synthesis evidence, packaged runtime/launch
+descriptor evidence, TypeScript declarations, surface manifest evidence,
+release matrix updates, and Phase13 docs. It keeps profile selection, builtin
+promotion, native asset loading, expanded filesystem roots, and unreviewed
+Android permission synthesis unpromoted.
+
+Phase 13 packaged APK capability metadata focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies packaged metadata parsing from `project.json` and
+`package.json`, `network` to `android.permission.INTERNET` mapping,
+read-only JavaScript reports, diagnostic-only builtin/native/fs-root metadata,
+and stable pre-dispatch denial for undeclared bridge capabilities. P13-45
+records packaged APK capability metadata as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

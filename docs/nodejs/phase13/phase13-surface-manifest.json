@@ -628,7 +628,7 @@
         "P13-47",
         "P13-48"
       ],
-      "summary": "Expand packaged APK capability metadata, plugin system, dependency compatibility corpus, and lock/integrity policy for Pro/Desktop distribution.",
+      "summary": "Expand packaged APK capability metadata, plugin system, dependency compatibility corpus, and lock/integrity policy for Pro/Desktop distribution. P13-45 records packaged APK capability metadata as partial with packagedCapabilityProfile, packagedMetadata, node.permissions manifest enforcement, Android permission synthesis evidence, and stable denial for undeclared bridge capabilities while profile/builtin/native asset/filesystem-root metadata remains diagnostic-only.",
       "risk": "high",
       "runtimeSurface": [
         "packaged profile metadata",
@@ -636,7 +636,21 @@
         "dependency compatibility corpus",
         "lock and integrity policy"
       ],
-      "evidence": [],
+      "evidence": [
+        "tools/nodejs/phase13/verify-packaged-capability-metadata-decision.js",
+        ":app:verifyNodePhase13PackagedCapabilityMetadataDecision",
+        "docs/nodejs/reports/phase13/P13_45_PACKAGED_CAPABILITY_METADATA.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt",
+        "app/src/main/java/org/autojs/autojs/apkbuilder/ApkBuilder.kt",
+        "app/src/main/java/org/autojs/autojs/script/NodeProjectRuntimeCompatibilityDescriptor.kt",
+        "app/src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgePermissionManifestInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkManagerBridgeInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-packaged-capability-metadata-decision.json",
+        "build/reports/nodejs/phase13-packaged-capability-metadata-decision.md"
+      ],
       "rollback": "Reject packaged Pro/Desktop profile metadata and keep JS-only local plugins plus host-side dependency validation."
     },
     {

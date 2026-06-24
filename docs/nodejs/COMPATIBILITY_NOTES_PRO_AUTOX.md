@@ -373,6 +373,14 @@ bounded stdio. Desktop packages that need raw `process.exit()`, signal
 delivery, inherited host env, raw process handles, native bindings,
 `process.dlopen`, or report file writes still need later Desktop-profile work.
 
+P13-45 records packaged APK capability metadata as partial. AutoJs6 Node
+exposes `packagedCapabilityProfile` and typed
+`bridgePermissions.packagedMetadata` diagnostics for packaged profile,
+permissions, builtins, native assets, filesystem roots, execution mode, and
+network intent. These fields do not yet grant Pro/Desktop authority; they
+prepare reviewed packaged synthesis while undeclared bridge capabilities still
+reject before dispatch.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

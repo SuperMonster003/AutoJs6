@@ -1165,6 +1165,13 @@ stdio. Full desktop process parity still requires raw exit lifecycle
 coordination, Android signal policy, raw inherited env policy, native binding
 decisions, raw process handles, and packaged lifecycle evidence.
 
+P13-45 records packaged APK capability metadata as partial: packaged projects
+can now expose diagnostic `packagedMetadata` for profile, builtin, native asset,
+filesystem-root, execution-mode, network, and Android permission intent.
+This narrows the gap toward Pro/Desktop packaged declarations, but the metadata
+does not yet select a real profile, widen builtins, load native assets, expand
+filesystem roots, or grant undeclared Android/bridge authority.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

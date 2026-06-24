@@ -1254,6 +1254,15 @@ and bounded stdio. Raw `process.exit()` lifecycle, Android signal delivery,
 raw inherited env, raw process handles, native bindings, `process.dlopen`,
 `process.binding`, and `report.writeReport()` remain unpromoted.
 
+P13-45 records packaged APK capability metadata as partial. The runtime exposes
+`autojs6:profile.packagedCapabilityProfile` and
+`bridgePermissions.packagedMetadata` to document packaged profile, builtin,
+native asset, filesystem-root, execution-mode, network, and Android permission
+metadata. The metadata is diagnostic-only: `node.permissions` remains the
+bridge authority source, Android manifest synthesis currently maps bridge
+capabilities to Android permissions, and profile/builtin/native/fs-root
+metadata does not widen runtime authority.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context

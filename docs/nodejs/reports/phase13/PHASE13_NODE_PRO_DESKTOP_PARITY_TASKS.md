@@ -1437,6 +1437,36 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - manifest synthesis 与 project/package metadata 一致。
     - 未声明能力在 packaged runtime 中拒绝。
+  - Progress:
+    - P13-45 partial landing 已添加 `packagedCapabilityProfile` 诊断，记录
+      packaged profile/builtin/native asset/filesystem root metadata 当前仍是
+      diagnostic-only，不会自动提升权限。
+    - `NodeBridgePermissionManifest` 现在输出
+      `packagedMetadata`，从 `project.json node.*` 和
+      `package.json autojs6(.node).*` 汇总 profile、profiles、builtins、
+      nativeAssets、filesystemRoots、executionMode、network 和权限映射。
+    - Focused instrumentation:
+      `NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest`
+      验证 metadata 解析、JS 冻结报告、`network` 到
+      `android.permission.INTERNET` 的映射、以及未声明 `accessibility`
+      在 dispatch 前稳定拒绝。
+    - Existing evidence:
+      `NodeBridgePermissionManifestInstrumentationTest`、`ApkBuilder`、
+      `NodeProjectRuntimeCompatibilityDescriptor`、`NodeProjectLaunchDescriptor`、
+      `EmbeddedNodePackagedApkSmokeTest` 和 `NodeWorkManagerBridgeInstrumentationTest`
+      继续覆盖 packaged permissions、descriptor 版本和 packaged metadata 序列化。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-packaged-capability-metadata-decision.js`
+      生成 `phase13-packaged-capability-metadata-decision`。
+    - Gradle gate:
+      `:app:verifyNodePhase13PackagedCapabilityMetadataDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_45_PACKAGED_CAPABILITY_METADATA.md`。
+    - Surface manifest evidence:
+      `phase13-packaged-capability-metadata-decision`。
+  - Remaining: profile/builtin/native asset/filesystem root metadata 尚不能驱动
+    reviewed packaged synthesis；完整 install-run packaged APK smoke、用户披露、
+    rollback、权限提示和 Pro/Desktop profile device matrix 仍未完成。
 
 - [ ] P13-46: 推进 plugin system toward Pro/Desktop parity。
   - 范围：从 JS-only local plugin 扩展到安装、更新、签名、权限、资源、packaged

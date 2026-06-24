@@ -766,6 +766,13 @@ signals denied, raw process handles unavailable, native bindings denied, and
 `report.writeReport()` blocked until separate Desktop-profile and lifecycle
 evidence proves them safe.
 
+P13-45 records packaged APK capability metadata as partial.
+`packagedCapabilityProfile` and `bridgePermissions.packagedMetadata` are
+diagnostic metadata only. They must not grant profile selection, builtin
+promotion, native asset loading, expanded filesystem roots, or unreviewed
+Android permissions. Packaged bridge authority remains tied to declared
+`node.permissions`, and undeclared capabilities reject before provider dispatch.
+
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
 metadata only and does not make a second JavaScript context a security
 boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,

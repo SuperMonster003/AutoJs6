@@ -777,6 +777,16 @@ evidence, and docs updates while keeping raw `process.exit()` lifecycle,
 Android signal delivery, raw inherited env, raw process handles, native
 bindings, and full desktop process parity unpromoted. P13-44 records
 process/env/argv parity as partial.
+`verifyNodePhase13PackagedCapabilityMetadataDecision` records P13-45 as the
+packaged APK capability metadata decision gate. It requires
+`packagedCapabilityProfile`, structured `bridgePermissions.packagedMetadata`,
+focused packaged metadata instrumentation, existing bridge permission manifest
+evidence, APK builder Android permission synthesis evidence, packaged
+runtime/launch descriptor evidence, TypeScript declarations, surface manifest
+evidence, and docs updates while keeping profile selection, builtin promotion,
+native asset loading, expanded filesystem roots, and unreviewed Android
+permission synthesis unpromoted. P13-45 records packaged APK capability
+metadata as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design
