@@ -522,6 +522,10 @@ async function smoke(): Promise<void> {
   const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
   const filesystemRawFd: boolean = autojsProfile.filesystemProfile.advancedApis.rawFd;
   const filesystemWatcherLimit: number = autojsProfile.filesystemProfile.limits.watcherLimit;
+  const workerThreadsProfileStatus: string = autojsProfile.workerThreadsProfile.status;
+  const workerThreadsRequestLocalOptIn: boolean = autojsProfile.workerThreadsProfile.requestLocalOptIn;
+  const workerThreadsMaxWorkers: number = autojsProfile.workerThreadsProfile.policy.maxWorkers;
+  const workerThreadsBridgeModules: string = autojsProfile.workerThreadsProfile.bridgeModules;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -719,6 +723,10 @@ async function smoke(): Promise<void> {
   void filesystemAdvancedWatch;
   void filesystemRawFd;
   void filesystemWatcherLimit;
+  void workerThreadsProfileStatus;
+  void workerThreadsRequestLocalOptIn;
+  void workerThreadsMaxWorkers;
+  void workerThreadsBridgeModules;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;

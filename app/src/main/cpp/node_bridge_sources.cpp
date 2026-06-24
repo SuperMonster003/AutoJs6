@@ -8870,6 +8870,20 @@ std::string buildEmbeddedScriptExecutionSource(
           watchEventWindowMs: __autojs6_scoped_fs_watch_event_window_ms
         })
       }),
+      workerThreadsProfile: Object.freeze({
+        status: __autojs6_worker_threads_experimental_enabled ? "experimental_opt_in_preflight" : "disabled_by_default",
+        defaultEnabled: false,
+        requestLocalOptIn: __autojs6_worker_threads_experimental_enabled,
+        nativeAvailability: "preflight_required",
+        messageChannel: "partial",
+        transferList: "partial",
+        workerPool: "partial",
+        bridgeModules: "denied",
+        nestedWorkers: false,
+        rawNativeHandles: false,
+        packagedBehavior: "native_available_only",
+        policy: __autojs6_worker_threads_policy_snapshot()
+      }),
       processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
       limitedBuiltins: __autojs6_freeze_sorted_copy(

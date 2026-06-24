@@ -48,6 +48,61 @@ declare namespace AutoJs6Node {
     readonly limits: FilesystemProfileLimits;
   }
 
+  export interface WorkerThreadsFsProfile {
+    readonly read: "workingDirectory" | "denied" | string;
+    readonly write: "workingDirectory" | "denied" | string;
+  }
+
+  export interface WorkerThreadsWorkerProfile {
+    readonly fs: WorkerThreadsFsProfile;
+    readonly network: "denied" | string;
+    readonly autoJsBridge: "denied" | string;
+    readonly shell: "denied" | string;
+    readonly javaInterop: "denied" | string;
+    readonly inspector: "denied" | string;
+  }
+
+  export interface WorkerThreadsPoolPolicy {
+    readonly minWorkers: number;
+    readonly maxWorkers: number;
+    readonly idleTimeoutMs: number;
+    readonly taskTimeoutMs: number;
+    readonly queueLimit: number;
+  }
+
+  export interface WorkerThreadsResourceLimits {
+    readonly maxOldGenerationSizeMb: number;
+    readonly maxYoungGenerationSizeMb: number;
+    readonly codeRangeSizeMb: number;
+    readonly stackSizeMb: number;
+  }
+
+  export interface WorkerThreadsPolicy {
+    readonly maxWorkers: number;
+    readonly startupTimeoutMs: number;
+    readonly maxMessageBytes: number;
+    readonly maxQueuedMessages: number;
+    readonly allowedBuiltins: readonly string[];
+    readonly workerProfile: WorkerThreadsWorkerProfile;
+    readonly workerPool: WorkerThreadsPoolPolicy;
+    readonly resourceLimits: WorkerThreadsResourceLimits;
+  }
+
+  export interface WorkerThreadsProfile {
+    readonly status: "disabled_by_default" | "experimental_opt_in_preflight" | string;
+    readonly defaultEnabled: boolean;
+    readonly requestLocalOptIn: boolean;
+    readonly nativeAvailability: "preflight_required" | string;
+    readonly messageChannel: "partial" | "unsupported" | string;
+    readonly transferList: "partial" | "unsupported" | string;
+    readonly workerPool: "partial" | "unsupported" | string;
+    readonly bridgeModules: "denied" | string;
+    readonly nestedWorkers: boolean;
+    readonly rawNativeHandles: boolean;
+    readonly packagedBehavior: "native_available_only" | "partial" | string;
+    readonly policy: WorkerThreadsPolicy;
+  }
+
   export interface AutoJsProfile {
     readonly name: string;
     readonly engineVersion: string;
@@ -61,6 +116,7 @@ declare namespace AutoJs6Node {
     readonly nativeAddon: boolean;
     readonly scopedFs: boolean;
     readonly filesystemProfile: FilesystemProfile;
+    readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly directBuiltinAliases: Readonly<Record<string, string>>;
     readonly limitedBuiltins: readonly string[];
     readonly disabledBuiltins: readonly string[];
