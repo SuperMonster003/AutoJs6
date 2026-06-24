@@ -3,11 +3,14 @@
 Status: design gate plus disabled runtime facade and P12-25 JSON-only execution
 adapter POC. Embedded Node scripts can `require("rhino")` to receive the P12-24
 disabled facade; only calls with `experimental: true` can enter the P12-25 POC.
-They still cannot install Rhino globals by default, call `importClass`, call
-`importPackage`, use `JavaAdapter`, or access Rhino Java bridge objects from
-Node. P13-14 adds an explicit experimental Java proxy installer for
+They still cannot install Rhino globals by default, use Rhino `importClass` /
+`importPackage` semantics, use `JavaAdapter`, or access Rhino Java bridge
+objects from Node. P13-14 adds an explicit experimental Java proxy installer for
 `Packages` / `java` / `android` that routes through `JAVA_INTEROP.md` instead
-of exposing Rhino Java objects. S11-26 fixes the concrete JSON-only run shape in
+of exposing Rhino Java objects. P13-15 exposes explicit
+`rhino.importClass()` / `rhino.importPackage()` helpers only as stable
+`ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` denials with assignment-style migration
+guidance. S11-26 fixes the concrete JSON-only run shape in
 [RHINO_JSON_ONLY_SHIM.md](RHINO_JSON_ONLY_SHIM.md), P12-23 records the
 default-disabled Phase 12 POC gate in
 `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`, P12-24 reserves
@@ -96,7 +99,7 @@ The detailed request/response shape, JSON-safe value definition, timeout and can
 | `require("rhino")` | Disabled facade | Reserved by P12-24 so scripts get stable denial instead of npm shadowing. |
 | `rhino.install()` | Unsupported by default; P13-14 explicit Java proxy POC | Installing old globals into Node hides migration work and can bypass bridge policy, but the P13-14 proxy installs only `Packages` / `java` / `android` wrappers that route through the Java allowlist experiment. |
 | Old global AutoJs APIs | Unsupported by default | Node code should use explicit bridge modules such as `toast`, `app`, `image`, and `accessibility`. |
-| `importClass` / `importPackage` | Unsupported in Node | They imply broad Java class access and conflict with `JAVA_INTEROP.md`. |
+| `importClass` / `importPackage` | Stable unsupported helpers in Node | P13-15 keeps global helpers absent and exposes only `rhino.importClass()` / `rhino.importPackage()` denials with `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; assignment from the P13-14 proxy target is the migration path. |
 | `Packages`, `java.*`, `android.*` | Explicit Java proxy POC only | P13-14 may install JavaScript proxies for allowlisted Java bridge calls; raw object graphs and class-loader surfaces remain denied. |
 | `JavaAdapter` | Unsupported | It creates cross-runtime proxy objects with complex lifetime and threading semantics. |
 | Running a legacy Rhino script from Node | Future candidate | Must be explicit, serialized, timeout-bounded, and owned by the script manager. |
@@ -147,6 +150,29 @@ The P13-14 install-like helper is separately reviewed and must not install
 `importClass`, `importPackage`, `JavaAdapter`, selector globals, image globals,
 filesystem globals, or unrestricted Java bridge globals. Its `Packages`,
 `java`, and `android` values are proxies over the existing Java allowlist.
+
+## `importClass()` / `importPackage()` Policy
+
+P13-15 decides not to emulate Rhino's dynamic import helpers inside Node.
+`require("rhino").importClass()` and `require("rhino").importPackage()` are
+present only so scripts receive a stable
+`ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` error and migration text. They are never
+installed on `globalThis`, even after `rhino.install({ experimental: true })`.
+
+Use explicit assignment from a proxy target instead:
+
+```js
+const rhino = require("rhino");
+const scope = {};
+
+rhino.install({ experimental: true, target: scope });
+
+const Rect = scope.android.graphics.Rect;
+const MathClass = scope.Packages.java.lang.Math;
+```
+
+This keeps the imported names local to the current module and preserves the
+P13-13 Java allowlist checks for every constructor or method call.
 
 ## Legacy Global Policy
 

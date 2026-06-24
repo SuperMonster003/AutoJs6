@@ -183,7 +183,9 @@
         "\"nodejs ui-thread\" directive",
         "$autojs",
         "$autojs.java",
-        "require(\"rhino\").install()"
+        "require(\"rhino\").install()",
+        "require(\"rhino\").importClass()",
+        "require(\"rhino\").importPackage()"
       ],
       "evidence": [
         "docs/nodejs/reports/phase13/P13_11_PRO_ENTRY_DIRECTIVES.md",
@@ -212,7 +214,12 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeRhinoShimDesignGateInstrumentationTest.kt",
         "docs/nodejs/types/autojs6-node/rhino.d.ts",
         "build/reports/nodejs/phase13-rhino-install-java-proxy.json",
-        "build/reports/nodejs/phase13-rhino-install-java-proxy.md"
+        "build/reports/nodejs/phase13-rhino-install-java-proxy.md",
+        "docs/nodejs/reports/phase13/P13_15_IMPORT_HELPERS_DECISION.md",
+        "tools/nodejs/phase13/verify-rhino-import-helpers-decision.js",
+        ":app:verifyNodePhase13RhinoImportHelpersDecision",
+        "build/reports/nodejs/phase13-rhino-import-helpers-decision.json",
+        "build/reports/nodejs/phase13-rhino-import-helpers-decision.md"
       ],
       "rollback": "Reject Pro Java/Rhino interop flags and keep require(\"rhino\") in the default disabled JSON-only path."
     },

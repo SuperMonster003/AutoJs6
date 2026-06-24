@@ -111,6 +111,13 @@ enabled. The default Safe Node Profile still rejects `rhino.install()` without
 that explicit option, and `importClass`, `importPackage`, and `JavaAdapter`
 remain unavailable.
 
+P13-15 closes the `importClass` / `importPackage` decision by keeping Rhino
+dynamic import semantics unsupported in Node. `require("rhino").importClass()`
+and `.importPackage()` are explicit module helpers that throw
+`ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; scripts should migrate by assigning
+local names from a `rhino.install({ experimental: true, target })` Java proxy
+scope.
+
 ## Supported Entry Points
 
 - `"nodejs";` directive

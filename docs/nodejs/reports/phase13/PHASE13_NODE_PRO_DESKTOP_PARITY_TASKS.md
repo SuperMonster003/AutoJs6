@@ -412,14 +412,26 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-rhino-install-java-proxy.js`.
     - Gradle gate: `:app:verifyNodePhase13RhinoInstallJavaProxy`.
     - Report: `docs/nodejs/reports/phase13/P13_14_RHINO_INSTALL_JAVA_PROXY.md`.
-  - Remaining: real Pro profile selector, packaged policy, and P13-15/P13-16
-    Java/Rhino migration helpers still block full P13-14 closure.
+  - Remaining: real Pro profile selector, packaged policy, and P13-16
+    `JavaAdapter` replacement still block full P13-14 closure.
 
 - [ ] P13-15: 决策并实现 `importClass` / `importPackage` compatibility。
   - 范围：评估是否在 Pro profile 中提供 Rhino 迁移 helper。
   - 验收：
     - 如果实现，必须只绑定到显式 scope，不默认污染所有模块。
     - 如果拒绝，文档给出赋值式迁移方案和稳定错误码。
+  - 2026-06-24 decision landing:
+    - Direct Rhino `importClass` / `importPackage` compatibility remains
+      unsupported in Node and uses stable
+      `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`.
+    - `require("rhino").importClass()` and `.importPackage()` are explicit
+      module helpers only; no global helpers are installed.
+    - Migration path is explicit assignment from
+      `rhino.install({ experimental: true, target })` Java proxies.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-rhino-import-helpers-decision.js`.
+    - Gradle gate: `:app:verifyNodePhase13RhinoImportHelpersDecision`.
+    - Report: `docs/nodejs/reports/phase13/P13_15_IMPORT_HELPERS_DECISION.md`.
 
 - [ ] P13-16: 决策 `JavaAdapter` / `$java.defineClass` replacement。
   - 范围：提供 Java interface implementation 的迁移路径。

@@ -160,6 +160,10 @@ AutoJs6 behavior:
   POC: `Packages`, `java`, and `android` can be installed only when the Java
   interop experiment is enabled, and all calls still route through the same
   allowlist. Default `rhino.install()` remains rejected.
+- P13-15 keeps Rhino `importClass` / `importPackage` semantics unsupported in
+  Node. Explicit `require("rhino").importClass()` / `.importPackage()` calls
+  throw `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; assign local names from a
+  P13-14 proxy target instead.
 - AutoJs capabilities should be requested through bridge modules.
 - raw Android services, activities, accessibility nodes, media projection objects, and bitmap pointers are not exposed directly.
 

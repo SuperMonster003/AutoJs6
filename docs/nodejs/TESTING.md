@@ -703,8 +703,22 @@ install state: default `rhino.install()` rejection, `node_modules/rhino`
 shadowing protection, explicit experimental `Packages` / `java` / `android`
 proxy installation, Java allowlist routing, and continued absence of
 `importClass`, `importPackage`, and `JavaAdapter`. It remains partial until a
-real Pro profile selector, packaged policy, and P13-15/P13-16 migration helper
-decisions land.
+real Pro profile selector, packaged policy, and the P13-16 `JavaAdapter`
+replacement decision land.
+
+Phase 13 Rhino import helper decision:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13RhinoImportHelpersDecision
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRhinoShimDesignGateInstrumentationTest"
+```
+
+`verifyNodePhase13RhinoImportHelpersDecision` records the P13-15 decision that
+Rhino `importClass` / `importPackage` semantics stay unsupported in Node.
+Explicit `require("rhino").importClass()` / `.importPackage()` calls return
+`ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`, global helpers remain absent, and the
+documented migration path is local assignment from a
+`rhino.install({ experimental: true, target })` Java proxy scope.
 
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground

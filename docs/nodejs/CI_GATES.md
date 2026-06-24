@@ -308,6 +308,7 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase13AutoJsGlobalV1
 .\gradlew.bat --console=plain :app:verifyNodePhase13JavaInteropAllowlist
 .\gradlew.bat --console=plain :app:verifyNodePhase13RhinoInstallJavaProxy
+.\gradlew.bat --console=plain :app:verifyNodePhase13RhinoImportHelpersDecision
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
@@ -363,9 +364,12 @@ and Pro profile promotion remain fail-closed.
 `verifyNodePhase13RhinoInstallJavaProxy` records the P13-14 partial
 `rhino.install` state: default install rejection remains, while explicit
 experimental installs can add `Packages`, `java`, and `android` Java proxies
-that route through the same allowlist bridge. `importClass`, `importPackage`,
-`JavaAdapter`, packaged metadata, and full Pro profile promotion remain
-fail-closed.
+that route through the same allowlist bridge. `JavaAdapter`, packaged metadata,
+and full Pro profile promotion remain fail-closed.
+`verifyNodePhase13RhinoImportHelpersDecision` records the P13-15 decision:
+`require("rhino").importClass()` and `.importPackage()` are stable
+`ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` helpers, no global helpers are installed,
+and migration uses local assignment from a P13-14 Java proxy target.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through

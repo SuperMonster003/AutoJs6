@@ -30,7 +30,16 @@ packagedApkOverrideAllowed: false
 status: experimental
 ```
 
-With the flag off, the runtime keeps `require("java")`, `$autojs.java`, `Packages`, `importClass`, direct `java.*`, direct `android.*`, reflection, and Rhino Java adapter style APIs unavailable. With the flag on, only `require("java")` and the gated `$autojs.java` facade are exposed, and both are restricted to a bridge-backed allowlist.
+With the flag off, the runtime keeps `require("java")`, `$autojs.java`,
+`Packages`, `importClass`, direct `java.*`, direct `android.*`, reflection, and
+Rhino Java adapter style APIs unavailable. With the flag on, `require("java")`
+and the gated `$autojs.java` facade are restricted to a bridge-backed allowlist.
+P13-14 can additionally expose `Packages`, `java`, and `android` JavaScript
+proxies only through explicit `rhino.install({ experimental: true })`; those
+proxies still route through the same allowlist. P13-15 keeps Rhino
+`importClass` / `importPackage` semantics unsupported and returns the stable
+`ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` error from explicit `require("rhino")`
+helpers.
 
 ## Mode Comparison
 

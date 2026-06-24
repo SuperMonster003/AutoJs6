@@ -8868,6 +8868,7 @@ std::string buildEmbeddedScriptExecutionSource(
         requireEsmUnsupported: "ERR_AUTOJS6_REQUIRE_ESM_UNSUPPORTED",
         rhinoShimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
         rhinoInstallUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+        rhinoImportUnsupported: "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED",
         rhinoInvalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST",
         rhinoExecutionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR",
         rhinoExecutionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT",
@@ -16119,6 +16120,7 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_rhino_shim_error_codes = Object.freeze({
     shimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
     installUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
+    importUnsupported: "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED",
     invalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST",
     executionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR",
     executionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT",
@@ -16152,6 +16154,15 @@ std::string buildEmbeddedScriptExecutionSource(
       "AutoJs6 Rhino JSON-only shim does not support rhino.install() by default; explicit experimental Java proxy install requires the Java interop gate.",
       __autojs6_rhino_shim_error_codes.installUnsupported,
       "install",
+      "unsupported"
+    );
+  }
+  function __autojs6_rhino_import_unsupported_error(apiName) {
+    const api = apiName === "importPackage" ? "importPackage" : "importClass";
+    return __autojs6_rhino_shim_error(
+      "AutoJs6 Node does not support Rhino " + api + "; use explicit assignment from rhino.install({ experimental: true, target }) Java proxies instead.",
+      __autojs6_rhino_shim_error_codes.importUnsupported,
+      api,
       "unsupported"
     );
   }
@@ -16475,6 +16486,12 @@ std::string buildEmbeddedScriptExecutionSource(
     function install(options) {
       return __autojs6_rhino_install(options);
     }
+    function importClass() {
+      throw __autojs6_rhino_import_unsupported_error("importClass");
+    }
+    function importPackage() {
+      throw __autojs6_rhino_import_unsupported_error("importPackage");
+    }
     __autojs6_limited_rhino_cache = Object.freeze({
       name: "rhino",
       version: 1,
@@ -16487,7 +16504,9 @@ std::string buildEmbeddedScriptExecutionSource(
       },
       status: __autojs6_rhino_disabled_status,
       run,
-      install
+      install,
+      importClass,
+      importPackage
     });
     return __autojs6_limited_rhino_cache;
   }
