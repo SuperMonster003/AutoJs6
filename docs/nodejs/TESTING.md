@@ -1523,6 +1523,22 @@ It keeps user-authorized roots, SAF/document roots, app-private roots,
 `/sdcard` expansion, grant persistence/revocation, packaged expanded-root
 evidence, and P13-33 advanced desktop fs API decisions open.
 
+Phase 13 filesystem advanced API gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13FilesystemAdvancedApis
+```
+
+This host gate records P13-33 as partial. It requires the frozen
+`filesystemProfile.advancedApis` and `filesystemProfile.limits` diagnostics,
+focused device evidence for scoped stream/FileHandle/fd/opendir/watch/realpath
+use, existing S8 FileHandle, fd API, opendir, watcher, safe-file-operation, and
+fuzzer evidence, packaged realpath and opendir markers, desktop matrix updates,
+security/profile docs, TypeScript declarations, and release matrix text. It
+keeps packaged watcher/fd/FileHandle/stream lifecycle smoke, pending watcher
+diagnostics, expanded-root reruns, Android unsupported behavior notes, and full
+desktop fs semantics open.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

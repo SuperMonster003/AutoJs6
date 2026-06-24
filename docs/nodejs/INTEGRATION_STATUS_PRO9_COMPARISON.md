@@ -1093,6 +1093,13 @@ SAF/document roots, app-private roots, user-authorized roots, and Android
 shared storage remain unavailable until an explicit Pro/Desktop root provider,
 grant lifecycle, packaged smoke, and per-root symlink/realpath audit land.
 
+P13-33 records desktop fs advanced APIs as partial: scoped streams,
+`FileHandle`, fd APIs, `opendir`, watchers, and `realpath` are present enough
+for current Node Profile v1.1 evidence, but remain scoped, execution-owned, and
+Android-platform-limited. Pro scripts that expect broad filesystem roots, raw
+native fds, recursive watchers, or desktop-identical packaged watcher/fd
+lifecycle behavior still need future profile promotion work.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

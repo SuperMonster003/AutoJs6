@@ -199,7 +199,7 @@ function networkNextStepFor(name) {
 
 function nextStepForLimited(name) {
   if (name === "fs" || name === "fs/promises") {
-    return "P13-32 records scoped filesystem profile as partial; Safe profile stays working-directory scoped while user-authorized roots, SAF, app-private roots, /sdcard expansion, and packaged expanded-root evidence remain future work.";
+    return "P13-32 records scoped filesystem profile and P13-33 records advanced fs APIs as partial; Safe profile stays working-directory scoped while expanded roots, packaged watcher/fd/FileHandle close-on-destroy, Android unsupported behavior notes, and full desktop fs semantics remain future work.";
   }
   return "Keep current Safe subset unless P13-43 promotes broader desktop conformance.";
 }

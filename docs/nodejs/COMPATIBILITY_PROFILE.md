@@ -704,6 +704,12 @@ profile remains `workingDirectory` scoped and exposes
 roots, `/sdcard`, SAF/document roots, app-private roots, grant persistence,
 revocation, and packaged expanded-root evidence remain unpromoted.
 
+P13-33 records desktop fs advanced APIs as partial. The same diagnostic object
+now reports `filesystemProfile.advancedApis` for streams, `FileHandle`, fd
+APIs, `opendir`, watchers, and `realpath`, plus watcher limits. These APIs stay
+scoped and execution-owned: `rawFd=false`, recursive watch remains unsupported,
+and broader roots still depend on the future P13-32 root authority provider.
+
 The `zlib` wrapper exposes bounded transform streams for `createGzip()`,
 `createGunzip()`, `createDeflate()`, `createInflate()`, raw deflate/inflate,
 and Brotli compression/decompression. Active zlib transform tracking starts
@@ -1033,6 +1039,14 @@ It does not change the default scoped `fs` authority: broader roots require a
 future explicit provider, user/manifest authorization model, per-root
 symlink/realpath/sensitive-path audit, and packaged evidence before scripts can
 read or write outside their working directory.
+
+P13-33 records desktop fs advanced APIs as partial for the Desktop track.
+Existing S8 and P13 gates cover scoped `fs.watch`, `fs.promises.watch`,
+`fs.watchFile`, `fs.opendir`, `fs.promises.opendir`, `FileHandle`, callback and
+sync fd APIs, scoped streams, and `realpath`; packaged realpath and opendir
+markers also exist. Full Desktop promotion still needs packaged watcher/fd/
+FileHandle/stream lifecycle evidence, pending watcher diagnostics, expanded
+root reruns, Android unsupported behavior notes, and final full `fs` semantics.
 
 The controlled request policy is bounded even when fake or experimental live providers are used:
 

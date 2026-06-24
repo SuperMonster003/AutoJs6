@@ -189,6 +189,19 @@
   `/sdcard` expansion, grant persistence/revocation diagnostics, packaged
   expanded-root smoke, and per-root symlink/realpath/sensitive-path audit.
 
+## P13-33 Partial Landing Note
+
+- P13-33 partial desktop fs advanced API gate records scoped streams,
+  `FileHandle`, fd APIs, `opendir`, watchers, and `realpath` as current partial
+  evidence without expanding roots or exposing raw native fds.
+- Host verifier: `tools/nodejs/phase13/verify-filesystem-advanced-apis.js`.
+- Gradle gate: `:app:verifyNodePhase13FilesystemAdvancedApis`.
+- Report: `docs/nodejs/reports/phase13/P13_33_FILESYSTEM_ADVANCED_APIS.md`.
+- Surface manifest evidence: `phase13-filesystem-advanced-apis`.
+- Remaining P13-33 blockers: packaged watcher/fd/FileHandle/stream lifecycle
+  smoke, pending watcher/watchFile Kotlin diagnostics, expanded-root reruns,
+  Android unsupported behavior notes, and final full desktop fs semantics.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -1047,6 +1060,17 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - watcher 数量、fd 数量、close-on-destroy、packaged behavior 完整。
     - Android 文件系统不支持的行为有兼容说明。
+  - 进展：
+    - P13-33 partial landing 已添加 `filesystemProfile.advancedApis` 与
+      `filesystemProfile.limits` 诊断，保持 `rawFd=false` 且不扩展 roots。
+    - 新增 focused gate:
+      `NodeFilesystemAdvancedDecisionInstrumentationTest`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-filesystem-advanced-apis.js`。
+    - Gradle gate: `:app:verifyNodePhase13FilesystemAdvancedApis`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_33_FILESYSTEM_ADVANCED_APIS.md`。
+    - Surface manifest evidence: `phase13-filesystem-advanced-apis`。
 
 - [ ] P13-34: 推进 `worker_threads` 到 opt-in promoted。
   - 范围：启用真实 worker runtime，并定义 AutoJs bridge module 隔离规则。

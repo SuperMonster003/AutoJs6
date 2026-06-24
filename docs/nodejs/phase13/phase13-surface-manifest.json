@@ -408,7 +408,7 @@
         "P13-32",
         "P13-33"
       ],
-      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as partial; P13-30 records limited net/tls/dns facades as partial; P13-31 records dgram/UDP as stable-denied; P13-32 records Safe filesystem profile diagnostics while real sockets, network DNS, TLS sessions, broader roots, and advanced fs APIs remain staged.",
+      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as partial; P13-30 records limited net/tls/dns facades as partial; P13-31 records dgram/UDP as stable-denied; P13-32 records Safe filesystem profile diagnostics; P13-33 records scoped advanced fs APIs as partial while real sockets, network DNS, TLS sessions, broader roots, and full desktop fs semantics remain staged.",
       "risk": "high",
       "runtimeSurface": [
         "controlled node:http/node:https client facade",
@@ -455,7 +455,13 @@
         "docs/nodejs/reports/phase13/P13_32_FILESYSTEM_PROFILE_DECISION.md",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeFilesystemProfileDecisionInstrumentationTest.kt",
         "build/reports/nodejs/phase13-filesystem-profile-decision.json",
-        "build/reports/nodejs/phase13-filesystem-profile-decision.md"
+        "build/reports/nodejs/phase13-filesystem-profile-decision.md",
+        "tools/nodejs/phase13/verify-filesystem-advanced-apis.js",
+        ":app:verifyNodePhase13FilesystemAdvancedApis",
+        "docs/nodejs/reports/phase13/P13_33_FILESYSTEM_ADVANCED_APIS.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeFilesystemAdvancedDecisionInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-filesystem-advanced-apis.json",
+        "build/reports/nodejs/phase13-filesystem-advanced-apis.md"
       ],
       "rollback": "Revert Desktop profile allowlist entries and keep raw network and broad filesystem access denied."
     },

@@ -309,6 +309,13 @@ roots. Keep Pro/AutoX scripts that depend on `/sdcard`, SAF/document trees,
 user-selected directories, app-private shared roots, or broad Android storage
 on Rhino/Android APIs until a future explicit filesystem root provider lands.
 
+P13-33 records desktop fs advanced APIs as partial. AutoJs6 Node can already
+exercise scoped streams, `FileHandle`, fd APIs, `opendir`, watchers, and
+`realpath` in focused tests, and `filesystemProfile.advancedApis` reports that
+state. Scripts should still treat these as scoped compatibility APIs: raw native
+fd access, recursive watchers, expanded roots, and full packaged
+watcher/fd/FileHandle lifecycle parity are not yet Pro/Desktop-promoted.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

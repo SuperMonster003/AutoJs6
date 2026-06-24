@@ -676,6 +676,13 @@ network/fs surface partial: Safe `workingDirectory` scoped fs, frozen
 user-authorized roots, SAF/document roots, app-private roots, Android shared
 storage expansion, packaged expanded-root smoke, grant revocation diagnostics,
 and P13-33 advanced desktop fs API decisions require separate evidence.
+P13-33 additionally uses `verifyNodePhase13FilesystemAdvancedApis` as the host
+decision gate for advanced filesystem APIs. It requires profile diagnostics,
+focused scoped stream/FileHandle/fd/opendir/watch/realpath evidence, existing
+S8 lifecycle/fuzzer suites, packaged realpath/opendir markers, and documentation
+updates while keeping raw fd exposure, expanded roots, packaged advanced-fs
+lifecycle smoke, pending watcher diagnostics, Android unsupported behavior
+notes, and full desktop `fs` semantics unpromoted.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability
