@@ -20,7 +20,7 @@
       "id": "crash_evidence_automation",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Crash evidence bundle tooling can import resource snapshots and timeline tails from runtime evidence, but fatal marker, next-launch collection, and chaos injection are not automatic.",
+      "currentEvidence": "Phase 13 adds a runtime JSON crash marker store, next-launch collector, embedded script service marker writes, native process service marker writes, and a host crash evidence collector. Fatal native chaos injection, packaged APK crash smoke, and signal-safe native marker proof remain open.",
       "requiredResolution": "Crash marker, next-launch collection, resource snapshot, timeline tail, symbolization, and chaos injection pass focused gates."
     },
     {

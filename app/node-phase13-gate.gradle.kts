@@ -91,6 +91,46 @@ tasks.register<Exec>("generateNodePhase13CapabilityTruth") {
     )
 }
 
+tasks.register<Exec>("collectNodePhase13CrashEvidence") {
+    group = "verification"
+    description = "Collects and verifies Phase 13 crash evidence automation readiness."
+
+    dependsOn("generateNodePhase13CapabilityTruth")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/collect-crash-evidence.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/collect-node-crash-bundle.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-node-crash-bundle.js"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/symbolize-node-crash.js"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeCrashEvidenceStore.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/App.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeAndroidRuntimePolicyInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/EmbeddedScriptMvpInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("phase13-crash-evidence-automation.json") },
+        nodePhase13ReportDir.map { it.file("phase13-crash-evidence-automation.md") },
+        nodePhase13ReportDir.map { it.file("phase13-crash-evidence-bundle/manifest.json") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeBuiltinDesktopParityMatrix") {
     group = "verification"
     description = "Generates the Phase 13 desktop Node builtin parity matrix."

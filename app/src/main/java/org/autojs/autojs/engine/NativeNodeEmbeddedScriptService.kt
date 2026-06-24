@@ -46,6 +46,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
     @Volatile
     private var activeLifecycle: NodeEmbeddedRuntimeLifecycle? = null
     @Volatile
+    private var activeCrashMarker: NodeCrashEvidenceStore.Marker? = null
+    @Volatile
     private var activeExecutionId: String? = null
     @Volatile
     private var activeExecutionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT
@@ -109,6 +111,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
         }
         val terminalNativeValues = activeHeartbeatMonitor?.nativeValuesSnapshot("destroyed")
             ?: activeLifecycle?.nativeValues().orEmpty()
+        NodeCrashEvidenceStore.markServiceDestroy(
+            context = this,
+            marker = activeCrashMarker,
+            reason = "embedded_script_service.onDestroy",
+            nativeValues = terminalNativeValues,
+        )
+        activeCrashMarker = null
         activeHeartbeatMonitor?.stop("service.onDestroy")
         activeHeartbeatMonitor = null
         interactiveExecutionId?.let { executionId ->
@@ -405,6 +414,19 @@ open class NativeNodeEmbeddedScriptService : Service() {
             processPoolSlot = preparedServiceRequest.processPoolSlot,
         )
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
+        val crashMarker = NodeCrashEvidenceStore.begin(
+            context = this,
+            executionId = executionId,
+            sourceName = sourceName,
+            workingDirectory = workingDirectory,
+            executionMode = executionMode,
+            launchSurface = launchSurface,
+            timeoutMs = timeoutMs,
+            runtimeAdapter = request.runtimeAdapter,
+            runtimeSlotId = processPoolPlan.selectedSlot.id,
+            scenario = "embedded_script_service",
+        )
+        activeCrashMarker = crashMarker
         val timeline = NodeEmbeddedRuntimeTimeline.create(
             env = env,
             executionId = executionId,
@@ -451,6 +473,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     "runtimeBudget=${runtimeBudget.toJsonObject()} " +
                     "runtimeFirst=${enrichedRuntimeModuleSources.keys.firstOrNull().orEmpty()}",
         )
+        var terminalCrashEvidenceMarked = false
         try {
             timeline?.mark("bridge_transport_start", mapOf("transport" to "file"))
             bridgeSession.start()
@@ -538,7 +561,14 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 )
             }
             timeline?.mark("destroy_complete", mapOf("state" to lifecycle.state.name))
-            receiver?.send(RESULT_SCRIPT, completed.withLifecycle(lifecycle).withQueueLease(slotLease).withPrewarmLease(prewarmLease).withTimeline(timeline).toBundle())
+            val evidenceResult = completed
+                .withLifecycle(lifecycle)
+                .withQueueLease(slotLease)
+                .withPrewarmLease(prewarmLease)
+                .withTimeline(timeline)
+            NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, evidenceResult)
+            terminalCrashEvidenceMarked = true
+            receiver?.send(RESULT_SCRIPT, evidenceResult.toBundle())
         } catch (e: Throwable) {
             timeline?.mark(
                 "stop_requested",
@@ -564,24 +594,29 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     nativeValues = lifecycle.nativeValues(),
                 )
             }
-            receiver?.send(
-                RESULT_SCRIPT,
-                NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
-                    succeeded = false,
-                    exitCode = 1,
-                    resultText = null,
-                    stdout = "",
-                    stderr = "",
-                    errorName = e.javaClass.simpleName,
-                    errorMessage = e.message ?: e.javaClass.name,
-                    errorStack = e.stackTraceToString(),
-                    elapsedMs = android.os.SystemClock.elapsedRealtime() - startedAt,
-                    processName = processName,
-                    pid = pid,
-                    sourceName = sourceName,
-                    nativeValues = emptyMap(),
-                ).withLifecycle(lifecycle).withQueueLease(slotLease).withPrewarmLease(prewarmLease).withRuntimeBudget(runtimeBudget).withTimeline(timeline).toBundle(),
+            val failureResult = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+                succeeded = false,
+                exitCode = 1,
+                resultText = null,
+                stdout = "",
+                stderr = "",
+                errorName = e.javaClass.simpleName,
+                errorMessage = e.message ?: e.javaClass.name,
+                errorStack = e.stackTraceToString(),
+                elapsedMs = android.os.SystemClock.elapsedRealtime() - startedAt,
+                processName = processName,
+                pid = pid,
+                sourceName = sourceName,
+                nativeValues = emptyMap(),
             )
+                .withLifecycle(lifecycle)
+                .withQueueLease(slotLease)
+                .withPrewarmLease(prewarmLease)
+                .withRuntimeBudget(runtimeBudget)
+                .withTimeline(timeline)
+            NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, failureResult)
+            terminalCrashEvidenceMarked = true
+            receiver?.send(RESULT_SCRIPT, failureResult.toBundle())
         } finally {
             File(File(cacheDir, REQUEST_SPOOL_DIR), safeRequestSpoolName(executionId)).deleteRecursively()
             activeHeartbeatMonitor?.stop("script.finally")
@@ -590,6 +625,15 @@ open class NativeNodeEmbeddedScriptService : Service() {
             bridgeSession.stop()
             val queueStatus = releaseExecutionSlot(executionId)
             val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
+            if (!terminalCrashEvidenceMarked) {
+                NodeCrashEvidenceStore.markServiceDestroy(
+                    context = this,
+                    marker = crashMarker,
+                    reason = "embedded_script_service.finally",
+                    nativeValues = lifecycle.nativeValues(),
+                )
+            }
+            activeCrashMarker = null
             Log.i(
                 TAG,
                 "script.exit executionId=$executionId processName=$processName pid=$pid " +
@@ -1554,6 +1598,12 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     stopRequested = true,
                     message = "$source foreground service timeout; stopSelf cleanup requested",
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("foreground_service_timeout", nativeValues),
+                    nativeValues = nativeValues,
+                )
+                NodeCrashEvidenceStore.markTimeout(
+                    context = this,
+                    marker = activeCrashMarker,
+                    reason = "foreground_service_timeout",
                     nativeValues = nativeValues,
                 )
             }

@@ -115,7 +115,15 @@
         "packaged long-running service",
         "Android package manager"
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/nodejs/reports/phase13/P13_05_CRASH_EVIDENCE_AUTOMATION.md",
+        "tools/nodejs/phase13/collect-crash-evidence.js",
+        ":app:collectNodePhase13CrashEvidence",
+        "app/src/main/java/org/autojs/autojs/engine/NodeCrashEvidenceStore.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-crash-evidence-automation.json",
+        "build/reports/nodejs/phase13-crash-evidence-automation.md"
+      ],
       "rollback": "Disable the promoted runtime path by profile flag and keep one-shot primary embedded execution as the fallback."
     },
     {

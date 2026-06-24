@@ -22,9 +22,11 @@ These must be resolved before Phase 11 can report `completed`.
 Current crash evidence progress:
 
 - `crash_evidence_automation`: Phase 11 crash bundle tooling can now import
-  runtime resource snapshots and timeline tails as first-class evidence, while
-  safe fatal markers, automatic next-launch collection, and chaos injection
-  remain open.
+  runtime resource snapshots and timeline tails as first-class evidence. Phase
+  13 adds a runtime JSON marker store, next-launch collector, embedded script
+  service marker writes, native process service marker writes, and a host
+  collector. Fatal native chaos injection, packaged APK crash smoke, and
+  signal-safe native marker proof remain open.
 
 Current multi-instance progress:
 

@@ -46,6 +46,10 @@ workstreams, target profiles, evidence, risk, and rollback policy.
 | `security.rollback_privacy` | `planned` | all runtime profiles | `P13-50` to `P13-52` | `critical` | Relaxed-capability security corpus, rollback, privacy, and disclosure. |
 | `docs.examples.final_gate` | `planned` | `safe_default`, `pro_compat_opt_in`, `desktop_compat_opt_in` | `P13-53` to `P13-57` | `medium` | Examples, types, migration docs, and final Phase 13 summary gate. |
 
+Current `runtime.graduation_blockers` evidence includes the P13-05 crash marker
+store and host collector, but the surface remains `planned` until P13-05 fully
+closes `crash_evidence_automation` and P13-06 through P13-09 land.
+
 ## Rules
 
 - Every P13 task must map to exactly one surface.

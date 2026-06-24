@@ -231,6 +231,16 @@ P13 task 本身使用以下执行状态：
       可诊断 bundle。
     - bundle 包含 execution id、runtime slot、ABI、profile、feature flags。
     - packaged APK 路径有同等证据或明确 skip reason。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Runtime marker store: `app/src/main/java/org/autojs/autojs/engine/NodeCrashEvidenceStore.kt`
+    - Next-launch collector: `App.onCreate()` -> `NodeCrashEvidenceStore.collectPending(...)`
+    - Embedded service marker writes: `app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt`
+    - Native process marker writes: `app/src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt`
+    - Bridge crash marker assertion: `app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt`
+    - Host collector: `tools/nodejs/phase13/collect-crash-evidence.js`
+    - Gradle gate: `:app:collectNodePhase13CrashEvidence`
+    - Report: `docs/nodejs/reports/phase13/P13_05_CRASH_EVIDENCE_AUTOMATION.md`
+    - Open before closure: fatal native chaos injection, packaged APK crash smoke, signal-safe native marker proof.
 
 - [ ] P13-06: 推进 second execution slot 到可调度状态。
   - 范围：从 Phase 12 的 explicit slot evidence 推进到默认 scheduler 可选择
