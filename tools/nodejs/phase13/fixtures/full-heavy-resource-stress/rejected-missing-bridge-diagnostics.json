@@ -1,0 +1,18 @@
+{
+  "schema": "autojs6-node-final-soak-run-v1",
+  "status": "passed",
+  "durationMs": 30600000,
+  "monotonicLeaks": false,
+  "orphanProcess": false,
+  "unrecoverableRuntime": false,
+  "samples": [
+    {
+      "rssKb": 123456,
+      "javaHeapKb": 12345,
+      "nativeHeapKb": 12345,
+      "threadCount": 42,
+      "fdCount": 128
+    }
+  ],
+  "failures": []
+}

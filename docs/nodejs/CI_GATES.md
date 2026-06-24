@@ -555,6 +555,11 @@ final 8 hour quick soak and 24 hour final soak. It consumes
 `build/reports/nodejs/final-soak/final-soak-24h.json`, checks comparable RSS,
 Java heap, native heap, thread count, fd count, and bridge diagnostics, and
 keeps the blocker open while either real device soak is missing or dirty.
+It also runs fixture-based contract checks from
+`tools/nodejs/phase13/fixtures/full-heavy-resource-stress/` to prove accepted
+report shapes and fail-closed under-duration, missing-metric, leak/orphan, and
+unrecoverable-runtime shapes. Those fixtures are CI contract tests only and do
+not satisfy the 8h/24h soak requirement.
 
 ## Release Gate
 

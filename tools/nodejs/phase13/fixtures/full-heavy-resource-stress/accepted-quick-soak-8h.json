@@ -1,0 +1,31 @@
+{
+  "schema": "autojs6-node-final-soak-run-v1",
+  "status": "passed",
+  "durationHours": 8.25,
+  "monotonicLeaks": false,
+  "orphanProcess": false,
+  "unrecoverableRuntime": false,
+  "samples": [
+    {
+      "rssKb": 123456,
+      "javaHeapKb": 12345,
+      "nativeHeapKb": 12345,
+      "threadCount": 42,
+      "fdCount": 128,
+      "bridgeDiagnostics": {
+        "embedded_script.bridge_resource.active_count": "0"
+      }
+    },
+    {
+      "rssKb": 124000,
+      "javaHeapKb": 12400,
+      "nativeHeapKb": 12380,
+      "threadCount": 42,
+      "fdCount": 128,
+      "bridgeDiagnostics": {
+        "embedded_script.bridge_resource.active_count": "0"
+      }
+    }
+  ],
+  "failures": []
+}

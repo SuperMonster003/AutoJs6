@@ -1328,6 +1328,13 @@ must not report monotonic leaks, orphan processes, or unrecoverable runtime
 failures. Until both real device soaks are present and clean, P13-08 remains
 partial and `full_heavy_resource_stress` remains open.
 
+The gate also runs contract fixtures from
+`tools/nodejs/phase13/fixtures/full-heavy-resource-stress/`. These fixtures
+exercise accepted `durationHours` and timestamp-duration shapes plus rejected
+under-duration, missing-metric, leak/orphan, and unrecoverable-runtime shapes.
+They validate the parser and fail-closed rules only; they are not soak evidence
+and do not set `quickSoakReady` or `finalSoakReady`.
+
 Current bridge concurrency and resource-limit focused instrumentation:
 
 ```powershell

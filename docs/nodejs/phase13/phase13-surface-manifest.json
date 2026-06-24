@@ -143,6 +143,7 @@
         "build/reports/nodejs/phase13-packaged-long-running-service.md",
         "docs/nodejs/reports/phase13/P13_08_FULL_HEAVY_RESOURCE_STRESS.md",
         "tools/nodejs/phase13/verify-full-heavy-resource-stress.js",
+        "tools/nodejs/phase13/fixtures/full-heavy-resource-stress/",
         ":app:verifyNodePhase13FullHeavyResourceStress",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedMemoryLeakStressInstrumentationTest.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodePhase7ResourceStressInstrumentationTest.kt",

@@ -1,0 +1,21 @@
+{
+  "schema": "autojs6-node-final-soak-run-v1",
+  "status": "completed",
+  "startedAt": "2026-06-24T00:00:00.000Z",
+  "completedAt": "2026-06-25T00:30:00.000Z",
+  "monotonicLeaks": false,
+  "orphanProcess": false,
+  "unrecoverableRuntime": false,
+  "diagnostics": {
+    "rssKb": 223456,
+    "javaHeapKb": 22345,
+    "nativeHeapKb": 22345,
+    "threadCount": 44,
+    "fdCount": 132,
+    "bridgeDiagnostics": {
+      "embedded_script.bridge_resource.active_count": "0",
+      "embedded_script.bridge_resource.close_errors": "0"
+    }
+  },
+  "failures": []
+}

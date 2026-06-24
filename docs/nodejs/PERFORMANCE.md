@@ -257,3 +257,10 @@ count, and bridge diagnostics. `verifyNodePhase13FullHeavyResourceStress`
 keeps the final blocker open when either report is missing, below duration,
 missing comparable metrics, or reporting failures, monotonic leaks, orphan
 processes, or unrecoverable runtime state.
+
+The verifier also contains contract fixtures under
+`tools/nodejs/phase13/fixtures/full-heavy-resource-stress/`. They prove that the
+parser accepts the intended 8h/24h report shapes and rejects under-duration,
+missing-metric, leak/orphan, or unrecoverable runtime samples. These fixtures
+are not performance evidence and must not be copied into
+`build/reports/nodejs/final-soak/`.

@@ -286,6 +286,10 @@ P13 task 本身使用以下执行状态：
     - 输出可比较的 stress report。
   - Progress Evidence (2026-06-24, partial; checkbox remains open):
     - Phase13 verifier: `tools/nodejs/phase13/verify-full-heavy-resource-stress.js`.
+    - Contract fixtures:
+      `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/` validate
+      accepted 8h/24h report shapes and fail-closed under-duration,
+      missing-metric, leak/orphan/runtime failure shapes.
     - Gradle gate: `:app:verifyNodePhase13FullHeavyResourceStress`.
     - Report: `docs/nodejs/reports/phase13/P13_08_FULL_HEAVY_RESOURCE_STRESS.md`.
     - Expected quick soak evidence: `build/reports/nodejs/final-soak/quick-soak-8h.json`.

@@ -48,13 +48,47 @@ const REQUIRED_METRICS = [
   "bridgeDiagnostics",
 ];
 
+const CONTRACT_FIXTURE_REPORTS = [
+  {
+    id: "fixture_accept_quick_soak",
+    relative: "tools/nodejs/phase13/fixtures/full-heavy-resource-stress/accepted-quick-soak-8h.json",
+    minDurationHours: 8,
+    expectedReady: true,
+  },
+  {
+    id: "fixture_accept_final_soak_timestamps",
+    relative: "tools/nodejs/phase13/fixtures/full-heavy-resource-stress/accepted-final-soak-24h-timestamps.json",
+    minDurationHours: 24,
+    expectedReady: true,
+  },
+  {
+    id: "fixture_reject_under_duration",
+    relative: "tools/nodejs/phase13/fixtures/full-heavy-resource-stress/rejected-under-duration.json",
+    minDurationHours: 8,
+    expectedReady: false,
+  },
+  {
+    id: "fixture_reject_missing_metric",
+    relative: "tools/nodejs/phase13/fixtures/full-heavy-resource-stress/rejected-missing-bridge-diagnostics.json",
+    minDurationHours: 8,
+    expectedReady: false,
+  },
+  {
+    id: "fixture_reject_dirty_runtime",
+    relative: "tools/nodejs/phase13/fixtures/full-heavy-resource-stress/rejected-leak-orphan-runtime.json",
+    minDurationHours: 24,
+    expectedReady: false,
+  },
+];
+
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const repoRoot = path.resolve(options.repoRoot || path.resolve(__dirname, "../../.."));
   const reportDir = path.resolve(options.reportDir || path.join(repoRoot, "build/reports/nodejs"));
   const files = loadFiles(repoRoot);
   const soakReports = REQUIRED_SOAK_REPORTS.map((entry) => readSoakReport(repoRoot, entry));
-  const report = buildReport(files, soakReports);
+  const contractFixtures = CONTRACT_FIXTURE_REPORTS.map((entry) => readContractFixture(repoRoot, entry));
+  const report = buildReport(files, soakReports, contractFixtures);
   fs.mkdirSync(reportDir, { recursive: true });
   fs.writeFileSync(path.join(reportDir, `${REPORT_BASENAME}.json`), JSON.stringify(report, null, 2) + "\n");
   fs.writeFileSync(path.join(reportDir, `${REPORT_BASENAME}.md`), renderMarkdown(report));
@@ -75,7 +109,7 @@ function loadFiles(repoRoot) {
   );
 }
 
-function buildReport(files, soakReports) {
+function buildReport(files, soakReports, contractFixtures) {
   const blockerEntry = blocker(files.blockerRegistry.text, "full_heavy_resource_stress");
   const anchorChecks = [
     token(files.phase13Tasks, "P13-08"),
@@ -100,6 +134,9 @@ function buildReport(files, soakReports) {
     .filter((entry) => !entry.present)
     .map((entry) => `missing stress anchor: ${entry.file} :: ${entry.token}`);
   const soakBlockers = soakReports.flatMap((entry) => entry.blockers.map((blockerText) => `${entry.id}: ${blockerText}`));
+  const contractFixtureViolations = contractFixtures
+    .filter((entry) => !entry.passed)
+    .map((entry) => `${entry.id}: expected ready=${entry.expectedReady}, actual ready=${entry.ready}`);
   const registryBlocker = blockerEntry && blockerEntry.status === "open"
     ? [`full_heavy_resource_stress: ${blockerEntry.currentEvidence}`]
     : blockerEntry && blockerEntry.status === "closed"
@@ -107,6 +144,7 @@ function buildReport(files, soakReports) {
       : ["full_heavy_resource_stress: blocker registry entry is missing"];
   const policyViolations = [
     ...missingAnchors,
+    ...contractFixtureViolations,
     ...(!blockerEntry || !["open", "closed"].includes(blockerEntry.status)
       ? ["full_heavy_resource_stress registry entry must exist with open or closed status."]
       : []),
@@ -133,11 +171,13 @@ function buildReport(files, soakReports) {
     files: Object.fromEntries(Object.entries(files).map(([key, file]) => [key, file.relative])),
     expectedSoakReports: REQUIRED_SOAK_REPORTS,
     requiredMetrics: REQUIRED_METRICS,
+    contractFixtureRequirements: CONTRACT_FIXTURE_REPORTS,
     anchors: {
       status: missingAnchors.length === 0 ? "ready" : "missing_evidence",
       checks: anchorChecks,
     },
     soakReports,
+    contractFixtures,
     blockerRegistry: blockerEntry || {
       id: "full_heavy_resource_stress",
       status: "missing",
@@ -152,6 +192,7 @@ function buildReport(files, soakReports) {
       quickSoakReady,
       finalSoakReady,
       comparableReportReady,
+      contractFixturesReady: contractFixtures.every((entry) => entry.passed),
       stressAnchorsReady: missingAnchors.length === 0,
       safeNodeProfilePreserved: true,
     },
@@ -201,6 +242,16 @@ function readSoakReport(repoRoot, requirement) {
     metricsClean,
     ready: Boolean(json) && durationReady && requiredMetricsReady && metricsClean,
     blockers,
+  };
+}
+
+function readContractFixture(repoRoot, fixture) {
+  const evaluated = readSoakReport(repoRoot, fixture);
+  const passed = evaluated.available && evaluated.ready === fixture.expectedReady;
+  return {
+    ...evaluated,
+    expectedReady: fixture.expectedReady,
+    passed,
   };
 }
 
@@ -346,6 +397,10 @@ function renderMarkdown(report) {
   lines.push("", "## Anchor Checks", "", "| File | Token | Present |", "| --- | --- | --- |");
   report.anchors.checks.forEach((entry) => {
     lines.push(`| \`${entry.file}\` | \`${escapeTable(entry.token)}\` | ${entry.present} |`);
+  });
+  lines.push("", "## Contract Fixtures", "", "| Fixture | Expected Ready | Actual Ready | Passed |", "| --- | --- | --- | --- |");
+  report.contractFixtures.forEach((entry) => {
+    lines.push(`| \`${entry.id}\` | ${entry.expectedReady} | ${entry.ready} | ${entry.passed} |`);
   });
   lines.push("", "## Blockers", "");
   if (report.blockers.length === 0) {

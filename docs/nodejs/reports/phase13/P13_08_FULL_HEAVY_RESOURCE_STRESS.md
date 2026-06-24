@@ -13,6 +13,8 @@ required 8 hour quick soak and 24 hour final soak.
 
 - Host verifier:
   `tools/nodejs/phase13/verify-full-heavy-resource-stress.js`
+- Contract fixtures:
+  `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/`
 - Gradle gate:
   `:app:verifyNodePhase13FullHeavyResourceStress`
 - Output:
@@ -27,6 +29,25 @@ required 8 hour quick soak and 24 hour final soak.
 The gate is intentionally non-closing while either long-duration report is
 missing, under-duration, missing comparable metrics, or reporting leaks,
 orphan processes, or unrecoverable runtime failures.
+
+## Contract Fixtures
+
+P13-08 now includes verifier-owned contract fixtures. They do not count as soak
+evidence and never make `quickSoakReady` or `finalSoakReady` true. They prove
+that the host gate accepts the intended report shape and rejects unsafe or
+incomplete shapes before real long-duration evidence is archived:
+
+- `accepted-quick-soak-8h.json`: accepted `durationHours` shape.
+- `accepted-final-soak-24h-timestamps.json`: accepted timestamp-duration shape.
+- `rejected-under-duration.json`: rejected below required duration.
+- `rejected-missing-bridge-diagnostics.json`: rejected missing comparable
+  bridge diagnostics.
+- `rejected-leak-orphan-runtime.json`: rejected dirty status, failure count,
+  leak, orphan, and unrecoverable runtime flags.
+
+The generated `phase13-full-heavy-resource-stress` report exposes these under
+`contractFixtures`; any mismatch is treated as a policy violation in the host
+gate.
 
 ## Comparable Report Contract
 
