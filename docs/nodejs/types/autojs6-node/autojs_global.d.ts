@@ -215,6 +215,36 @@ declare namespace AutoJs6Node {
     readonly downloadExec: boolean;
   }
 
+  export interface ChildProcessProfile {
+    readonly status: "disabled_by_default" | "desktop_opt_in" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly module: "denied" | "partial" | string;
+    readonly nodePrefix: "denied" | string;
+    readonly scopedRunner: "deferred" | "partial" | string;
+    readonly shellBridge: "separate_scoped_command_bridge" | string;
+    readonly androidShellProvider: "available_with_shell_capability" | string;
+    readonly appPrivateBinaries: "required_before_enablement" | string;
+    readonly allowlistedBinaries: "required_before_enablement" | string;
+    readonly arbitraryPaths: "denied" | string;
+    readonly cwd: "scoped_working_directory" | string;
+    readonly env: "string_map_scoped" | string;
+    readonly stdin: "deferred" | "bounded_required" | string;
+    readonly stdout: "bounded_required" | string;
+    readonly stderr: "bounded_required" | string;
+    readonly timeout: "required" | string;
+    readonly cancellation: "required_before_enablement" | string;
+    readonly kill: "required_before_enablement" | string;
+    readonly cleanup: "required_before_enablement" | string;
+    readonly processHandles: "denied" | string;
+    readonly fdStreams: "denied" | string;
+    readonly detached: "denied" | string;
+    readonly shellOperators: "denied" | string;
+    readonly packagedBehavior: "not_promoted" | string;
+    readonly rawProcessHandles: boolean;
+    readonly rawSignals: boolean;
+  }
+
   export interface AutoJsProfile {
     readonly name: string;
     readonly engineVersion: string;
@@ -234,6 +264,7 @@ declare namespace AutoJs6Node {
     readonly inspectorProfile: InspectorProfile;
     readonly wasiProfile: WasiProfile;
     readonly nativeAddonProfile: NativeAddonProfile;
+    readonly childProcessProfile: ChildProcessProfile;
     readonly directBuiltinAliases: Readonly<Record<string, string>>;
     readonly limitedBuiltins: readonly string[];
     readonly disabledBuiltins: readonly string[];

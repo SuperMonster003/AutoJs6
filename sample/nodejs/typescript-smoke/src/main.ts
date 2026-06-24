@@ -548,6 +548,12 @@ async function smoke(): Promise<void> {
   const nativeAddonProfileHashAllowlist: string = autojsProfile.nativeAddonProfile.hashAllowlist;
   const nativeAddonProfileCrashIsolation: string = autojsProfile.nativeAddonProfile.crashIsolation;
   const nativeAddonProfileDownloadExec: boolean = autojsProfile.nativeAddonProfile.downloadExec;
+  const childProcessProfileStatus: string = autojsProfile.childProcessProfile.status;
+  const childProcessProfileTargetProfiles: readonly string[] = autojsProfile.childProcessProfile.targetProfiles;
+  const childProcessProfileScopedRunner: string = autojsProfile.childProcessProfile.scopedRunner;
+  const childProcessProfileShellBridge: string = autojsProfile.childProcessProfile.shellBridge;
+  const childProcessProfileAllowlistedBinaries: string = autojsProfile.childProcessProfile.allowlistedBinaries;
+  const childProcessProfileRawHandles: boolean = autojsProfile.childProcessProfile.rawProcessHandles;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -771,6 +777,12 @@ async function smoke(): Promise<void> {
   void nativeAddonProfileHashAllowlist;
   void nativeAddonProfileCrashIsolation;
   void nativeAddonProfileDownloadExec;
+  void childProcessProfileStatus;
+  void childProcessProfileTargetProfiles;
+  void childProcessProfileScopedRunner;
+  void childProcessProfileShellBridge;
+  void childProcessProfileAllowlistedBinaries;
+  void childProcessProfileRawHandles;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;
