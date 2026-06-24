@@ -1116,6 +1116,21 @@ context APIs, `compileFunction`, VM module APIs, dynamic import hooks, timeout
 policy, memory/compiled-script budgets, escape-denial coverage, and packaged
 behavior open.
 
+Phase 13 inspector debug profile decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13InspectorDebugProfileDecision
+```
+
+This host gate records that P13-37 records inspector/devtools debug profile as
+partial. It requires `inspectorProfile` diagnostics, default
+`inspector`/`node:inspector` denial, `require.resolve()` denial, shadowing
+protection, existing inspector design/security gate evidence, TypeScript
+declarations, the desktop builtin matrix, and Phase13 docs. It keeps any
+callable inspector session, debugger endpoint, DevTools attach, loopback ADB
+forwarding, CPU/heap profiler artifact pipeline, redaction proof, and packaged
+debug behavior open.
+
 Current `os` privacy focused instrumentation:
 
 ```powershell

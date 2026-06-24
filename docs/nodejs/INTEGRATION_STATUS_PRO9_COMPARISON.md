@@ -1122,6 +1122,14 @@ yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout
 cancellation, memory budgets, context cleanup, bridge/process/global leakage
 denial, private binding denial, and packaged behavior remain open.
 
+P13-37 records inspector/devtools debug profile as partial: Safe Node now
+exposes `inspectorProfile` diagnostics while keeping `inspector` and
+`node:inspector` denied. This is not yet Pro/desktop parity for scripts that
+expect DevTools attach, CPU profiles, heap snapshots, or debugger URLs;
+explicit debug-session UI, loopback ADB forwarding, attach lifecycle, profiler
+artifact redaction, app-private export, and packaged release/debug behavior
+remain open.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

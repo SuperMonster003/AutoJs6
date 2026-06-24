@@ -1198,6 +1198,15 @@ denial, process/global leakage denial, scoped-fs preservation, memory limits,
 and packaged behavior. No callable `vm.Script`, context, `compileFunction`, VM
 module, dynamic import hook, or raw global access is promoted.
 
+P13-37 records inspector/devtools debug profile as partial. The runtime exposes
+`autojs6:profile.inspectorProfile` to document that `inspector` and
+`node:inspector` remain denied by default and in release builds while any future
+Debug profile must prove explicit user action, loopback-only port binding, ADB
+forward setup/cleanup, DevTools attach lifecycle, CPU/heap artifact redaction,
+and packaged behavior. No callable inspector session, debugger endpoint,
+profiler API, raw socket, bridge module, or script-visible inspector API is
+promoted.
+
 ## Process Profile
 
 Supported or limited:

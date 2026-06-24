@@ -720,6 +720,14 @@ Any future opt-in must prove timeout cancellation, memory budgets, context
 cleanup, private binding denial, bridge and host object denial, process/global
 leakage denial, scoped filesystem preservation, and packaged diagnostics.
 
+P13-37 records inspector/devtools debug profile as partial.
+`inspectorProfile` is diagnostic metadata only and does not open a debugger
+transport. `inspector` and `node:inspector` remain denied; release, project,
+and packaged metadata cannot enable them. Any future debug-only opt-in must
+prove explicit user action, visible/revocable session state, loopback-only
+binding, deterministic ADB forward cleanup, DevTools attach lifecycle,
+CPU/heap artifact redaction, app-private export, and packaged release denial.
+
 ## Release Security Gate
 
 Every Node release candidate must verify:

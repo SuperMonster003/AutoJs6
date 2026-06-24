@@ -740,6 +740,14 @@ require/resolve denial, local shadow-package protection, the existing VM design
 gate, TypeScript declarations, surface manifest evidence, and docs updates
 while keeping callable `vm.Script`, context APIs, timeout cancellation, memory
 budgets, escape-denial evidence, and packaged behavior unpromoted.
+`verifyNodePhase13InspectorDebugProfileDecision` records P13-37 as the
+inspector/devtools debug profile decision gate. It requires `inspectorProfile`
+diagnostics, stable `inspector`/`node:inspector` require/resolve denial, local
+shadow-package protection, the existing inspector design/security gates,
+TypeScript declarations, surface manifest evidence, and docs updates while
+keeping callable inspector sessions, DevTools attach, loopback ADB forwarding,
+CPU/heap profiler artifacts, redaction proof, and packaged debug behavior
+unpromoted. P13-37 records inspector/devtools debug profile as partial.
 `verifyNodeModernCoreGate` covers the S7-31 through S7-36 modern core surface:
 `AsyncLocalStorage` propagation, diagnostics channel runtime telemetry,
 `perf_hooks`, single-runtime `node:test`, promise-based timers/streams/readline,

@@ -336,6 +336,13 @@ P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 Node's VM APIs still need a future Desktop/Debug profile with timeout, memory,
 escape-denial, and packaged behavior evidence.
 
+P13-37 records inspector/devtools debug profile as partial. AutoJs6 Node
+exposes `inspectorProfile` diagnostics, but `inspector`, `node:inspector`,
+DevTools attach, debugger URLs, CPU profiles, heap snapshots, and inspector
+profiling exports remain unavailable. Scripts that depend on desktop debugging
+workflows still need a future debug-only profile with explicit user action,
+loopback ADB forwarding, artifact redaction, and packaged behavior evidence.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

@@ -1192,6 +1192,23 @@ P13 task 本身使用以下执行状态：
     - release build 稳定拒绝。
     - debug profile 有 explicit opt-in、端口绑定、ADB-only 策略。
     - CPU/heap profile 不泄漏敏感脚本路径或用户数据。
+  - 进展：
+    - P13-37 partial landing 已添加 `inspectorProfile` 诊断，保持
+      `inspector` / `node:inspector` 默认与 release 稳定拒绝。
+    - 新增 focused gate:
+      `NodeInspectorPhase13DecisionInstrumentationTest`。
+    - Existing design/security gates:
+      `NodeInspectorDesignGateInstrumentationTest` /
+      `NodeInspectorSecurityGateInstrumentationTest`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-inspector-debug-profile-decision.js`。
+    - Gradle gate: `:app:verifyNodePhase13InspectorDebugProfileDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_37_INSPECTOR_DEBUG_PROFILE.md`。
+    - Surface manifest evidence:
+      `phase13-inspector-debug-profile-decision`。
+  - Remaining: debug session UI/host command、loopback + ADB forward、
+    DevTools attach、CPU/heap artifact redaction、packaged behavior 仍未完成。
 
 - [ ] P13-38: 推进 controlled WASI。
   - 范围：从 pure WebAssembly 扩展到 `autojs:wasi` 或受控 `node:wasi` profile。

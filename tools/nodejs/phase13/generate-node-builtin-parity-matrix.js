@@ -221,7 +221,7 @@ function nextStepForDisabled(name) {
     case "dgram":
       return "P13-31 records UDP/dgram as stable-denied for v1.1; unicast client, server bind/listen, multicast, broadcast, packaged INTERNET policy, and fd leak proof remain future work.";
     case "inspector":
-      return "P13-37 must keep release denied and validate debug-only ADB-forward behavior.";
+      return "P13-37 records inspector debug-profile diagnostics as partial; Safe/default and release keep inspector denied while explicit debug-session UI, loopback ADB forwarding, DevTools attach, profiler artifact redaction, and packaged behavior evidence remain future work.";
     case "vm":
       return "P13-36 records vm module diagnostics as partial; Safe/default keeps vm denied while vm.Script/context/timeout, escape denial, memory budget, and packaged behavior evidence remain future work.";
     case "wasi":
