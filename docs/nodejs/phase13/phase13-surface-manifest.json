@@ -198,7 +198,14 @@
         "app/src/main/cpp/node_bridge_sources.cpp",
         "docs/nodejs/types/autojs6-node/autojs_global.d.ts",
         "build/reports/nodejs/phase13-autojs-global-v1.json",
-        "build/reports/nodejs/phase13-autojs-global-v1.md"
+        "build/reports/nodejs/phase13-autojs-global-v1.md",
+        "docs/nodejs/reports/phase13/P13_13_JAVA_INTEROP_ALLOWLIST.md",
+        "tools/nodejs/phase13/verify-java-interop-allowlist.js",
+        ":app:verifyNodePhase13JavaInteropAllowlist",
+        "app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeJavaInteropBridgeInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-java-interop-allowlist.json",
+        "build/reports/nodejs/phase13-java-interop-allowlist.md"
       ],
       "rollback": "Reject Pro Java/Rhino interop flags and keep require(\"rhino\") in the default disabled JSON-only path."
     },

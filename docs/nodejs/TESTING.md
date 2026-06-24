@@ -676,6 +676,21 @@ read-only global, that `$autojs.profile` matches `require("autojs6:profile")`,
 that `$autojs.androidContext` is diagnostic-only, and that default
 `$autojs.java` calls reject with `ERR_AUTOJS6_JAVA_INTEROP_DISABLED`.
 
+Phase 13 Java interop allowlist:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13JavaInteropAllowlist
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeJavaInteropBridgeInstrumentationTest"
+```
+
+`verifyNodePhase13JavaInteropAllowlist` records the P13-13 partial Java interop
+state: default-disabled Java interop, allowlisted `findClass` / constructor /
+static calls, Rect handle instance calls, Rect field reads, explicit
+release/dispose cleanup, TypeScript declarations, and fail-closed classloader /
+reflection / native-library / process boundaries. It remains partial until
+thread dispatch, a complete method budget model, and Pro profile promotion
+land.
+
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground
 long-running, runtime budget/heartbeat, queueing, scheduled runner,
@@ -1233,7 +1248,7 @@ Current Java interop allowlist focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeJavaInteropBridgeInstrumentationTest"
 ```
 
-This suite verifies `BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED=false`, disabled default `require("java")`, shadowing protection against `node_modules/java`, request-local experimental enablement, fake transport serialization, `java.lang.Math`, `java.util.UUID`, opaque `android.graphics.Rect` handles, provider destroy cleanup, and denial of Runtime, ProcessBuilder, System native-library loading, ClassLoader, and reflection classes.
+This suite verifies `BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED=false`, disabled default `require("java")`, shadowing protection against `node_modules/java`, request-local experimental enablement, fake transport serialization, `java.lang.Math`, `java.util.UUID`, opaque `android.graphics.Rect` handles, Rect instance method calls, Rect field reads, explicit release/dispose cleanup, provider destroy cleanup, and denial of Runtime, ProcessBuilder, System native-library loading, ClassLoader, and reflection classes.
 
 Task 124 GA evaluation report: [reports/JAVA_INTEROP_EVALUATION.md](reports/JAVA_INTEROP_EVALUATION.md).
 

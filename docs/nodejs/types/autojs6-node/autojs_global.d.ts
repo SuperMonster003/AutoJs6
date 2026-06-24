@@ -50,19 +50,26 @@ declare namespace AutoJs6Node {
     readonly deniedClassPrefixes: readonly string[];
   }
 
+  export interface AutoJsJavaObjectHandle<TValue extends Readonly<Record<string, JsonValue>> = Readonly<Record<string, JsonValue>>> {
+    readonly __autojs6JavaHandle: string;
+    readonly className: string;
+    readonly value?: TValue;
+    call(methodName: string, args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<unknown>;
+    callInstance(methodName: string, args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<unknown>;
+    getField(fieldName: string, options?: BridgeCallOptions): Promise<unknown>;
+    release(options?: BridgeCallOptions): Promise<boolean>;
+    dispose(options?: BridgeCallOptions): Promise<boolean>;
+  }
+
   export interface AutoJsJavaClassDescriptor {
     readonly className: string;
     readonly name: string;
     callStatic(methodName: string, args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<unknown>;
-    "new"(args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<unknown>;
+    "new"(args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<AutoJsJavaObjectHandle>;
+    create(args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<AutoJsJavaObjectHandle>;
   }
 
-  export interface AutoJsJavaFacade {
-    readonly schema: "autojs6-node-autojs-java-v1";
-    readonly enabled: boolean;
-    readonly experimental: boolean;
-    readonly mode: "disabled" | "allowlist" | string;
-    readonly reason: string;
+  export interface AutoJsJavaModule {
     readonly policy: AutoJsJavaPolicy;
     findClass(className: string): AutoJsJavaClassDescriptor;
     type(className: string): AutoJsJavaClassDescriptor;
@@ -72,13 +79,27 @@ declare namespace AutoJs6Node {
       args?: readonly JsonValue[],
       options?: BridgeCallOptions
     ): Promise<unknown>;
-    "new"(classOrName: string | AutoJsJavaClassDescriptor, args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<unknown>;
+    "new"(classOrName: string | AutoJsJavaClassDescriptor, args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<AutoJsJavaObjectHandle>;
+    create(classOrName: string | AutoJsJavaClassDescriptor, args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<AutoJsJavaObjectHandle>;
+    call(target: string | AutoJsJavaObjectHandle, methodName: string, args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<unknown>;
+    callInstance(target: string | AutoJsJavaObjectHandle, methodName: string, args?: readonly JsonValue[], options?: BridgeCallOptions): Promise<unknown>;
+    getField(target: string | AutoJsJavaObjectHandle, fieldName: string, options?: BridgeCallOptions): Promise<unknown>;
+    release(target: string | AutoJsJavaObjectHandle, options?: BridgeCallOptions): Promise<boolean>;
+    dispose(target: string | AutoJsJavaObjectHandle, options?: BridgeCallOptions): Promise<boolean>;
+  }
+
+  export interface AutoJsJavaFacade extends AutoJsJavaModule {
+    readonly schema: "autojs6-node-autojs-java-v1";
+    readonly enabled: boolean;
+    readonly experimental: boolean;
+    readonly mode: "disabled" | "allowlist" | string;
+    readonly reason: string;
     create(
       classOrName: string | AutoJsJavaClassDescriptor,
       args?: readonly JsonValue[],
       threadModeOrOptions?: "default" | BridgeCallOptions,
       options?: BridgeCallOptions
-    ): Promise<unknown>;
+    ): Promise<AutoJsJavaObjectHandle>;
     loadDex(dexFile: string): never;
     loadJar(jarFile: string): never;
     setThreadMode(obj: unknown, threadMode: string): never;
@@ -119,4 +140,9 @@ declare const $autojs: AutoJs6Node.AutoJsGlobal;
 declare module "autojs6:profile" {
   const profile: AutoJs6Node.AutoJsProfile;
   export = profile;
+}
+
+declare module "java" {
+  const java: AutoJs6Node.AutoJsJavaModule;
+  export = java;
 }

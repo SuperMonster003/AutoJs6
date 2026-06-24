@@ -39,6 +39,7 @@ import websocket = require("websocket");
 import workManager = require("work_manager");
 import plugins = require("plugins");
 import autojsProfile = require("autojs6:profile");
+import java = require("java");
 
 interface TypeSmokePlugin {
   readonly ready: boolean;
@@ -378,6 +379,13 @@ async function smoke(): Promise<void> {
   const autojsJavaPolicy: AutoJs6Node.AutoJsJavaPolicy = $autojs.java.policy;
   const autojsJavaClass: AutoJs6Node.AutoJsJavaClassDescriptor = $autojs.java.findClass("java.lang.Math");
   const autojsJavaCall: Promise<unknown> = $autojs.java.callStatic(autojsJavaClass, "max", [1, 2], { timeoutMs: 1000 });
+  const javaClass: AutoJs6Node.AutoJsJavaClassDescriptor = java.findClass("java.lang.Math");
+  const javaCall: Promise<unknown> = java.callStatic(javaClass, "max", [1, 2], { timeoutMs: 1000 });
+  const javaRect: Promise<AutoJs6Node.AutoJsJavaObjectHandle> = java.new("android.graphics.Rect", [0, 0, 4, 5], { timeoutMs: 1000 });
+  const autojsJavaRect: Promise<AutoJs6Node.AutoJsJavaObjectHandle> = $autojs.java.new("android.graphics.Rect", [0, 0, 4, 5], { timeoutMs: 1000 });
+  const autojsJavaWidth: Promise<unknown> = autojsJavaRect.then((rect) => rect.call("width", [], { timeoutMs: 1000 }));
+  const autojsJavaField: Promise<unknown> = autojsJavaRect.then((rect) => $autojs.java.getField(rect, "left", { timeoutMs: 1000 }));
+  const autojsJavaRelease: Promise<boolean> = autojsJavaRect.then((rect) => java.release(rect, { timeoutMs: 1000 }));
   const autojsLoadDex: (dexFile: string) => never = $autojs.java.loadDex;
 
   void launched;
@@ -504,6 +512,13 @@ async function smoke(): Promise<void> {
   void autojsJavaPolicy;
   void autojsJavaClass;
   void autojsJavaCall;
+  void javaClass;
+  void javaCall;
+  void javaRect;
+  void autojsJavaRect;
+  void autojsJavaWidth;
+  void autojsJavaField;
+  void autojsJavaRelease;
   void autojsLoadDex;
 }
 

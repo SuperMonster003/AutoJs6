@@ -383,6 +383,16 @@ P13 task 本身使用以下执行状态：
     - 类/包 allowlist、denylist、method budget、timeout、thread mode 明确。
     - 禁止 classloader、reflection escape、native library loading、process authority。
     - Java object lifetime 和 destroy cleanup 有 evidence。
+  - 2026-06-24 partial landing:
+    - `require("java")` / `$autojs.java` now expose allowlist-only
+      `call` / `callInstance` / `getField` / `release` / `dispose` helpers.
+    - `android.graphics.Rect` handles support selected instance methods,
+      field reads, explicit release, and provider destroy cleanup.
+    - Host verifier: `tools/nodejs/phase13/verify-java-interop-allowlist.js`.
+    - Gradle gate: `:app:verifyNodePhase13JavaInteropAllowlist`.
+    - Report: `docs/nodejs/reports/phase13/P13_13_JAVA_INTEROP_ALLOWLIST.md`.
+  - Remaining: thread dispatch / method budget / Pro profile promotion still
+    block full P13-13 closure.
 
 - [ ] P13-14: 推进 `require("rhino").install()` partial Pro compatibility。
   - 范围：在 Pro profile 中安装 `Packages`、`java`、`android` 等 Rhino 风格入口。

@@ -18121,6 +18121,9 @@ std::string buildEmbeddedScriptExecutionSource(
       },
       new: function(args, options) {
         return __autojs6_java_new(checkedClassName, args, options);
+      },
+      create: function(args, options) {
+        return __autojs6_java_new(checkedClassName, args, options);
       }
     });
   }
@@ -18169,8 +18172,160 @@ std::string buildEmbeddedScriptExecutionSource(
         permissions: ["java_interop"]
       }
     ).then(function(result) {
-      return result && typeof result === "object" ? Object.freeze(result) : result;
+      return __autojs6_java_handle_descriptor(result);
     });
+  }
+  function __autojs6_java_handle_id(value) {
+    if (typeof value === "string") {
+      return value.trim();
+    }
+    if (value && typeof value === "object") {
+      if (typeof value.__autojs6JavaHandle === "string") {
+        return value.__autojs6JavaHandle.trim();
+      }
+      if (typeof value.handle === "string") {
+        return value.handle.trim();
+      }
+    }
+    return "";
+  }
+  function __autojs6_java_handle_class_name(value) {
+    return value && typeof value === "object" && typeof value.className === "string"
+      ? value.className
+      : "";
+  }
+  function __autojs6_java_handle_descriptor(result) {
+    if (!result || typeof result !== "object") {
+      return result;
+    }
+    const handleId = __autojs6_java_handle_id(result);
+    if (!handleId) {
+      return Object.freeze(result);
+    }
+    const handle = Object.assign({}, result);
+    Object.defineProperties(handle, {
+      call: {
+        value: function(methodName, args, options) {
+          return __autojs6_java_call_instance(handle, methodName, args, options);
+        }
+      },
+      callInstance: {
+        value: function(methodName, args, options) {
+          return __autojs6_java_call_instance(handle, methodName, args, options);
+        }
+      },
+      getField: {
+        value: function(fieldName, options) {
+          return __autojs6_java_get_field(handle, fieldName, options);
+        }
+      },
+      release: {
+        value: function(options) {
+          return __autojs6_java_release(handle, options);
+        }
+      },
+      dispose: {
+        value: function(options) {
+          return __autojs6_java_release(handle, options);
+        }
+      }
+    });
+    return Object.freeze(handle);
+  }
+  function __autojs6_java_call_instance(target, methodName, args, options) {
+    let descriptor;
+    try {
+      __autojs6_java_check_enabled();
+      const handle = __autojs6_java_handle_id(target);
+      const className = __autojs6_java_handle_class_name(target);
+      const checkedMethodName = __autojs6_java_method_name(methodName, className);
+      if (!handle) {
+        throw __autojs6_java_interop_error(
+          "AutoJs6 Java interop requires a Java object handle.",
+          "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+          className,
+          checkedMethodName
+        );
+      }
+      descriptor = {
+        handle,
+        method: checkedMethodName,
+        args: __autojs6_java_argument_array(args, className || "java.handle", checkedMethodName)
+      };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_call_autojs(
+      "java",
+      "call",
+      [descriptor],
+      {
+        timeoutMs: __autojs6_java_timeout(options),
+        signal: __autojs6_bridge_signal_from_options(options),
+        permissions: ["java_interop"]
+      }
+    );
+  }
+  function __autojs6_java_get_field(target, fieldName, options) {
+    let descriptor;
+    try {
+      __autojs6_java_check_enabled();
+      const handle = __autojs6_java_handle_id(target);
+      const className = __autojs6_java_handle_class_name(target);
+      const checkedFieldName = __autojs6_java_method_name(fieldName, className);
+      if (!handle) {
+        throw __autojs6_java_interop_error(
+          "AutoJs6 Java interop requires a Java object handle.",
+          "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+          className,
+          checkedFieldName
+        );
+      }
+      descriptor = {
+        handle,
+        field: checkedFieldName
+      };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_call_autojs(
+      "java",
+      "getField",
+      [descriptor],
+      {
+        timeoutMs: __autojs6_java_timeout(options),
+        signal: __autojs6_bridge_signal_from_options(options),
+        permissions: ["java_interop"]
+      }
+    );
+  }
+  function __autojs6_java_release(target, options) {
+    let descriptor;
+    try {
+      __autojs6_java_check_enabled();
+      const handle = __autojs6_java_handle_id(target);
+      if (!handle) {
+        throw __autojs6_java_interop_error(
+          "AutoJs6 Java interop requires a Java object handle.",
+          "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+          __autojs6_java_handle_class_name(target),
+          "release"
+        );
+      }
+      descriptor = { handle };
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return __autojs6_call_autojs(
+      "java",
+      "release",
+      [descriptor],
+      {
+        timeoutMs: __autojs6_java_timeout(options),
+        signal: __autojs6_bridge_signal_from_options(options),
+        permissions: ["java_interop"]
+      }
+    );
   }
   function __autojs6_limited_java() {
     if (!__autojs6_java_interop_experimental_enabled) {
@@ -18180,9 +18335,16 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_limited_java_cache;
     }
     __autojs6_limited_java_cache = Object.freeze({
+      findClass: __autojs6_java_class_descriptor,
       type: __autojs6_java_class_descriptor,
       callStatic: __autojs6_java_call_static,
       new: __autojs6_java_new,
+      create: __autojs6_java_new,
+      call: __autojs6_java_call_instance,
+      callInstance: __autojs6_java_call_instance,
+      getField: __autojs6_java_get_field,
+      release: __autojs6_java_release,
+      dispose: __autojs6_java_release,
       policy: __autojs6_java_policy_snapshot()
     });
     return __autojs6_limited_java_cache;
@@ -18214,6 +18376,15 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_autojs_java_new(classOrName, args, options) {
     return __autojs6_limited_java().new(__autojs6_autojs_java_class_name(classOrName), args, options);
+  }
+  function __autojs6_autojs_java_call_instance(target, methodName, args, options) {
+    return __autojs6_limited_java().call(target, methodName, args, options);
+  }
+  function __autojs6_autojs_java_get_field(target, fieldName, options) {
+    return __autojs6_limited_java().getField(target, fieldName, options);
+  }
+  function __autojs6_autojs_java_release(target, options) {
+    return __autojs6_limited_java().release(target, options);
   }
   function __autojs6_autojs_java_create(classOrName, args, threadModeOrOptions, maybeOptions) {
     if (!__autojs6_java_interop_experimental_enabled) {
@@ -18265,6 +18436,11 @@ std::string buildEmbeddedScriptExecutionSource(
       callStatic: __autojs6_autojs_java_call_static,
       new: __autojs6_autojs_java_new,
       create: __autojs6_autojs_java_create,
+      call: __autojs6_autojs_java_call_instance,
+      callInstance: __autojs6_autojs_java_call_instance,
+      getField: __autojs6_autojs_java_get_field,
+      release: __autojs6_autojs_java_release,
+      dispose: __autojs6_autojs_java_release,
       loadDex: __autojs6_autojs_java_stable_rejection("loadDex", "dynamic dex loading remains blocked."),
       loadJar: __autojs6_autojs_java_stable_rejection("loadJar", "dynamic jar loading remains blocked."),
       setThreadMode: __autojs6_autojs_java_stable_rejection("setThreadMode", "Java object thread dispatch remains blocked."),

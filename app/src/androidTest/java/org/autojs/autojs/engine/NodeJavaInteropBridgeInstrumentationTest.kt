@@ -33,6 +33,11 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertTrue(NodeBridgeModules.supports("java", "type"))
         assertTrue(NodeBridgeModules.supports("java", "callStatic"))
         assertTrue(NodeBridgeModules.supports("java", "new"))
+        assertTrue(NodeBridgeModules.supports("java", "call"))
+        assertTrue(NodeBridgeModules.supports("java", "callInstance"))
+        assertTrue(NodeBridgeModules.supports("java", "getField"))
+        assertTrue(NodeBridgeModules.supports("java", "release"))
+        assertTrue(NodeBridgeModules.supports("java", "dispose"))
         assertFalse(NodeBridgeModules.supports("java", "reflect"))
         assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED)
 
@@ -116,10 +121,60 @@ class NodeJavaInteropBridgeInstrumentationTest {
         )
         assertTrue(rect.toString(), rect.ok)
         val rectJson = JSONObject(rect.resultJson.orEmpty())
-        assertTrue(rectJson.getString("__autojs6JavaHandle").startsWith("java-"))
+        val rectHandle = rectJson.getString("__autojs6JavaHandle")
+        assertTrue(rectHandle.startsWith("java-"))
         assertEquals("android.graphics.Rect", rectJson.getString("className"))
         assertEquals(1, rectJson.getJSONObject("value").getInt("left"))
         assertEquals("1", enabledProvider.nativeDiagnostics()["embedded_script.java_interop_handle_count"])
+
+        val width = dispatchJava(
+            enabledProvider,
+            "call",
+            """[{"handle":"$rectHandle","method":"width","args":[]}]""",
+        )
+        assertTrue(width.toString(), width.ok)
+        assertEquals(2.0, (JSONTokener(width.resultJson.orEmpty()).nextValue() as Number).toDouble(), 0.0)
+
+        val contains = dispatchJava(
+            enabledProvider,
+            "callInstance",
+            """[{"handle":"$rectHandle","method":"contains","args":[2,3]}]""",
+        )
+        assertTrue(contains.toString(), contains.ok)
+        assertEquals(true, JSONTokener(contains.resultJson.orEmpty()).nextValue())
+
+        val right = dispatchJava(
+            enabledProvider,
+            "getField",
+            """[{"handle":"$rectHandle","field":"right"}]""",
+        )
+        assertTrue(right.toString(), right.ok)
+        assertEquals(3.0, (JSONTokener(right.resultJson.orEmpty()).nextValue() as Number).toDouble(), 0.0)
+
+        val deniedMutation = dispatchJava(
+            enabledProvider,
+            "call",
+            """[{"handle":"$rectHandle","method":"offset","args":[1,1]}]""",
+        )
+        assertFalse(deniedMutation.ok)
+        assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, deniedMutation.error?.code)
+
+        val released = dispatchJava(
+            enabledProvider,
+            "release",
+            """[{"handle":"$rectHandle"}]""",
+        )
+        assertTrue(released.toString(), released.ok)
+        assertEquals(true, JSONTokener(released.resultJson.orEmpty()).nextValue())
+        assertEquals("0", enabledProvider.nativeDiagnostics()["embedded_script.java_interop_handle_count"])
+
+        val afterRelease = dispatchJava(
+            enabledProvider,
+            "call",
+            """[{"handle":"$rectHandle","method":"width","args":[]}]""",
+        )
+        assertFalse(afterRelease.ok)
+        assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, afterRelease.error?.code)
         enabledProvider.destroy()
         assertEquals("0", enabledProvider.nativeDiagnostics()["embedded_script.java_interop_handle_count"])
     }
@@ -191,6 +246,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
             (async function main() {
               const bridge = require("autojs6:bridge");
               const requests = [];
+              const releasedHandles = new Set();
               function codeOf(error) {
                 return String(error && (error.autojs6Code || error.code || error.name || ""));
               }
@@ -235,6 +291,44 @@ class NodeJavaInteropBridgeInstrumentationTest {
                     });
                     return;
                   }
+                  if (request.method === "call" && descriptor.handle === "java-fake-rect") {
+                    if (releasedHandles.has(descriptor.handle)) {
+                      respond(request, false, null, {
+                        code: "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+                        message: "released handle"
+                      });
+                      return;
+                    }
+                    if (descriptor.method === "width") {
+                      respond(request, true, 2);
+                      return;
+                    }
+                    if (descriptor.method === "height") {
+                      respond(request, true, 2);
+                      return;
+                    }
+                    if (descriptor.method === "centerX") {
+                      respond(request, true, 2);
+                      return;
+                    }
+                    if (descriptor.method === "contains") {
+                      respond(request, true, descriptor.args[0] >= 1 && descriptor.args[0] < 3 && descriptor.args[1] >= 2 && descriptor.args[1] < 4);
+                      return;
+                    }
+                  }
+                  if (request.method === "getField" && descriptor.handle === "java-fake-rect") {
+                    const value = { left: 1, top: 2, right: 3, bottom: 4 }[descriptor.field];
+                    if (value !== undefined) {
+                      respond(request, true, value);
+                      return;
+                    }
+                  }
+                  if (request.method === "release" && descriptor.handle === "java-fake-rect") {
+                    const firstRelease = !releasedHandles.has(descriptor.handle);
+                    releasedHandles.add(descriptor.handle);
+                    respond(request, true, firstRelease);
+                    return;
+                  }
                   respond(request, false, null, {
                     code: "ERR_AUTOJS6_JAVA_METHOD_DENIED",
                     message: "unexpected java call"
@@ -244,10 +338,19 @@ class NodeJavaInteropBridgeInstrumentationTest {
 
               const profile = require("autojs6:profile");
               const java = require("java");
+              const autojsJava = ${'$'}autojs.java;
               const math = java.type("java.lang.Math");
               const max = await java.callStatic("java.lang.Math", "max", [3, 9], { timeoutMs: 1234 });
               const uuid = await java.callStatic("java.util.UUID", "fromString", ["00000000-0000-0000-0000-000000000002"]);
               const rect = await java.new("android.graphics.Rect", [1, 2, 3, 4]);
+              const width = await java.call(rect, "width");
+              const height = await rect.call("height");
+              const contains = await rect.callInstance("contains", [2, 3]);
+              const left = await java.getField(rect, "left");
+              const right = await rect.getField("right");
+              const centerX = await autojsJava.call(rect, "centerX");
+              const autojsMax = await autojsJava.callStatic(autojsJava.findClass("java.lang.Math"), "max", [2, 8]);
+              const released = await rect.release();
 
               const beforeInvalid = requests.length;
               let runtimeCode = "";
@@ -278,14 +381,49 @@ class NodeJavaInteropBridgeInstrumentationTest {
               console.log("java.resolve=" + require.resolve("java"));
               console.log("java.shadow=" + (java.shadow === true));
               console.log("java.frozen=" + Object.isFrozen(java));
+              console.log("java.rect_frozen=" + Object.isFrozen(rect));
               console.log("java.profile=" + [
                 profile.featureFlags.java_interop.enabled,
                 profile.featureFlags.java_interop.status,
                 profile.experimentalFlags.javaInterop
               ].join("|"));
-              console.log("java.methods=" + [typeof java.type, typeof java.callStatic, typeof java.new, typeof math.callStatic, typeof math.new].join("|"));
-              console.log("java.results=" + [max, uuid, rect.__autojs6JavaHandle, rect.value.left, rect.value.bottom].join("|"));
-              console.log("java.requests=" + requests.map((request) => request.method + ":" + request.args[0].className).join("|"));
+              console.log("java.methods=" + [
+                typeof java.findClass,
+                typeof java.type,
+                typeof java.callStatic,
+                typeof java.new,
+                typeof java.call,
+                typeof java.getField,
+                typeof java.release,
+                typeof java.dispose,
+                typeof math.callStatic,
+                typeof math.new,
+                typeof math.create,
+                typeof rect.call,
+                typeof rect.callInstance,
+                typeof rect.getField,
+                typeof rect.release,
+                typeof rect.dispose
+              ].join("|"));
+              console.log("java.results=" + [
+                max,
+                uuid,
+                rect.__autojs6JavaHandle,
+                rect.value.left,
+                rect.value.bottom,
+                width,
+                height,
+                contains,
+                left,
+                right,
+                centerX,
+                autojsMax,
+                released
+              ].join("|"));
+              console.log("java.requests=" + requests.map((request) => {
+                const descriptor = request.args[0] || {};
+                return request.method + ":" + (descriptor.className || descriptor.handle || descriptor.field);
+              }).join("|"));
               console.log("java.permissions=" + requests.every((request) => request.permissions.indexOf("java_interop") >= 0));
               console.log("java.timeout=" + requests[0].timeoutMs);
               console.log("java.invalid_no_request=" + (requests.length === beforeInvalid));
@@ -308,10 +446,24 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("java.resolve=java"))
         assertTrue(result.stdout, result.stdout.contains("java.shadow=false"))
         assertTrue(result.stdout, result.stdout.contains("java.frozen=true"))
+        assertTrue(result.stdout, result.stdout.contains("java.rect_frozen=true"))
         assertTrue(result.stdout, result.stdout.contains("java.profile=true|experimental|true"))
-        assertTrue(result.stdout, result.stdout.contains("java.methods=function|function|function|function|function"))
-        assertTrue(result.stdout, result.stdout.contains("java.results=9|00000000-0000-0000-0000-000000000002|java-fake-rect|1|4"))
-        assertTrue(result.stdout, result.stdout.contains("callStatic:java.lang.Math|callStatic:java.util.UUID|new:android.graphics.Rect"))
+        assertTrue(
+            result.stdout,
+            result.stdout.contains(
+                "java.methods=function|function|function|function|function|function|function|function|function|function|function|function|function|function|function|function",
+            ),
+        )
+        assertTrue(
+            result.stdout,
+            result.stdout.contains("java.results=9|00000000-0000-0000-0000-000000000002|java-fake-rect|1|4|2|2|true|1|3|2|8|true"),
+        )
+        assertTrue(
+            result.stdout,
+            result.stdout.contains(
+                "callStatic:java.lang.Math|callStatic:java.util.UUID|new:android.graphics.Rect|call:java-fake-rect|call:java-fake-rect|call:java-fake-rect|getField:java-fake-rect|getField:java-fake-rect|call:java-fake-rect|callStatic:java.lang.Math|release:java-fake-rect",
+            ),
+        )
         assertTrue(result.stdout, result.stdout.contains("java.permissions=true"))
         assertTrue(result.stdout, result.stdout.contains("java.timeout=1234"))
         assertTrue(result.stdout, result.stdout.contains("java.invalid_no_request=true"))

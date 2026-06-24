@@ -306,6 +306,7 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase13AndroidPackageInstallManager
 .\gradlew.bat --console=plain :app:verifyNodePhase13ProEntryDirectives
 .\gradlew.bat --console=plain :app:verifyNodePhase13AutoJsGlobalV1
+.\gradlew.bat --console=plain :app:verifyNodePhase13JavaInteropAllowlist
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
@@ -352,6 +353,12 @@ global v1 state: frozen global installation, `$autojs.version`,
 `$autojs.profile`, diagnostic-only `$autojs.androidContext`, gated
 `$autojs.java`, TypeScript declarations, and focused instrumentation. It does
 not promote full Java/Rhino parity.
+`verifyNodePhase13JavaInteropAllowlist` records the P13-13 partial Java interop
+allowlist state: `require("java")` and `$autojs.java` expose explicit
+findClass/type, constructor, static call, Rect instance call, Rect field read,
+and release/dispose helpers only when the build-time experiment is enabled.
+Classloader, reflection, native-library, process authority, thread dispatch,
+and Pro profile promotion remain fail-closed.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through

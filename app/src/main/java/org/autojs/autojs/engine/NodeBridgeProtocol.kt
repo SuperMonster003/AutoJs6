@@ -632,7 +632,7 @@ object NodeBridgeModules {
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
-    val javaMethods = setOf("type", "callStatic", "new")
+    val javaMethods = setOf("type", "callStatic", "new", "call", "callInstance", "getField", "release", "dispose")
     val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
 
@@ -3164,6 +3164,9 @@ class AndroidNodeBridgeCapabilityProvider(
                 "type" -> describeJavaType(request)
                 "callStatic" -> callJavaStatic(request)
                 "new" -> newJavaObject(request)
+                "call", "callInstance" -> callJavaInstance(request)
+                "getField" -> getJavaField(request)
+                "release", "dispose" -> releaseJavaObject(request)
                 else -> unavailable(request)
             }
         }.getOrElse { error ->
@@ -3249,6 +3252,55 @@ class AndroidNodeBridgeCapabilityProvider(
             javaHandles.remove(handleId)
         }
         return NodeBridgeResponse.success(request.id, javaHandleJson(handleId, className, rect).toString())
+    }
+
+    private fun callJavaInstance(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.call requires an object handle descriptor.")
+        val method = payload.optNonBlankString("method")
+            ?: return javaPolicyFailure(request, "java.call requires a non-empty method.")
+        val rect = javaRectHandle(request, payload) ?: return javaPolicyFailure(request, "AutoJs6 Java interop handle is not available.")
+        val args = payload.optJSONArray("args") ?: JSONArray()
+        val result = ControlledJavaInteropPolicy.callRect(rect, method, args)
+        if (result.error != null) {
+            return NodeBridgeResponse.failure(request.id, result.error.toBridgeError(request))
+        }
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(result.value))
+    }
+
+    private fun getJavaField(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.getField requires an object handle descriptor.")
+        val field = payload.optNonBlankString("field")
+            ?: return javaPolicyFailure(request, "java.getField requires a non-empty field.")
+        val rect = javaRectHandle(request, payload) ?: return javaPolicyFailure(request, "AutoJs6 Java interop handle is not available.")
+        val result = ControlledJavaInteropPolicy.getRectField(rect, field)
+        if (result.error != null) {
+            return NodeBridgeResponse.failure(request.id, result.error.toBridgeError(request))
+        }
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(result.value))
+    }
+
+    private fun releaseJavaObject(request: NodeBridgeRequest): NodeBridgeResponse {
+        val payload = request.firstObjectArg()
+            ?: return javaPolicyFailure(request, "java.release requires an object handle descriptor.")
+        val handleId = javaHandleId(payload)
+            ?: return javaPolicyFailure(request, "java.release requires a non-empty Java handle.")
+        val closed = resourceRegistry.close(handleId, "java.${request.method}")
+        return NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(closed))
+    }
+
+    private fun javaRectHandle(request: NodeBridgeRequest, payload: JSONObject): Rect? {
+        val handleId = javaHandleId(payload) ?: return null
+        val target = javaHandles[handleId] ?: return null
+        return target as? Rect ?: throw IllegalStateException("Unsupported Java handle type for ${request.method}: ${target.javaClass.name}")
+    }
+
+    private fun javaHandleId(payload: JSONObject): String? {
+        return payload.optNonBlankString("handle")
+            ?: payload.optNonBlankString("__autojs6JavaHandle")
+            ?: payload.optJSONObject("target")?.optNonBlankString("__autojs6JavaHandle")
+            ?: payload.optJSONObject("target")?.optNonBlankString("handle")
     }
 
     private fun javaHandleJson(handleId: String, className: String, rect: Rect): JSONObject {
@@ -4469,6 +4521,24 @@ private object ControlledJavaInteropPolicy {
                     },
                 ),
             )
+            put(
+                "instanceMethods",
+                JSONArray(
+                    when (className) {
+                        "android.graphics.Rect" -> rectInstanceMethods
+                        else -> emptyList()
+                    },
+                ),
+            )
+            put(
+                "fields",
+                JSONArray(
+                    when (className) {
+                        "android.graphics.Rect" -> rectFields
+                        else -> emptyList()
+                    },
+                ),
+            )
         }
     }
 
@@ -4542,6 +4612,36 @@ private object ControlledJavaInteropPolicy {
         return Result.value(Rect(left, top, right, bottom))
     }
 
+    fun callRect(rect: Rect, method: String, args: JSONArray): Result {
+        return when (method) {
+            "width" -> noArgs(args, "android.graphics.Rect.width") { rect.width() }
+            "height" -> noArgs(args, "android.graphics.Rect.height") { rect.height() }
+            "centerX" -> noArgs(args, "android.graphics.Rect.centerX") { rect.centerX() }
+            "centerY" -> noArgs(args, "android.graphics.Rect.centerY") { rect.centerY() }
+            "exactCenterX" -> noArgs(args, "android.graphics.Rect.exactCenterX") { rect.exactCenterX().toDouble() }
+            "exactCenterY" -> noArgs(args, "android.graphics.Rect.exactCenterY") { rect.exactCenterY().toDouble() }
+            "isEmpty" -> noArgs(args, "android.graphics.Rect.isEmpty") { rect.isEmpty }
+            "contains" -> containsPoint(rect, args)
+            else -> Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "AutoJs6 Java interop does not allow android.graphics.Rect.$method.",
+            )
+        }
+    }
+
+    fun getRectField(rect: Rect, field: String): Result {
+        return when (field) {
+            "left" -> Result.value(rect.left)
+            "top" -> Result.value(rect.top)
+            "right" -> Result.value(rect.right)
+            "bottom" -> Result.value(rect.bottom)
+            else -> Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "AutoJs6 Java interop does not allow android.graphics.Rect.$field field access.",
+            )
+        }
+    }
+
     private fun invalidRectArg(): Result {
         return Result.denied(
             NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
@@ -4581,6 +4681,34 @@ private object ControlledJavaInteropPolicy {
         return Result.value(operation(first, second))
     }
 
+    private fun noArgs(args: JSONArray, method: String, operation: () -> Any): Result {
+        if (args.length() != 0) {
+            return Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "$method requires no arguments.",
+            )
+        }
+        return Result.value(operation())
+    }
+
+    private fun containsPoint(rect: Rect, args: JSONArray): Result {
+        if (args.length() != 2) {
+            return Result.denied(
+                NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+                "android.graphics.Rect.contains requires two integer arguments.",
+            )
+        }
+        val x = args.optIntOrNull(0) ?: return Result.denied(
+            NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+            "android.graphics.Rect.contains arguments must be finite integers.",
+        )
+        val y = args.optIntOrNull(1) ?: return Result.denied(
+            NodeRuntimeErrorCodes.JAVA_METHOD_DENIED,
+            "android.graphics.Rect.contains arguments must be finite integers.",
+        )
+        return Result.value(rect.contains(x, y))
+    }
+
     data class ErrorDescriptor(
         val code: String,
         val message: String,
@@ -4607,6 +4735,18 @@ private object ControlledJavaInteropPolicy {
             )
         }
     }
+
+    private val rectInstanceMethods = listOf(
+        "width",
+        "height",
+        "centerX",
+        "centerY",
+        "exactCenterX",
+        "exactCenterY",
+        "isEmpty",
+        "contains",
+    )
+    private val rectFields = listOf("left", "top", "right", "bottom")
 }
 
 private fun JSONArray.optDoubleOrNull(index: Int): Double? {
@@ -5083,6 +5223,7 @@ private data class ControlledDatabaseHandle(
             )
         }
     }
+
 }
 
 private object NodeDatabaseBridgePolicy {

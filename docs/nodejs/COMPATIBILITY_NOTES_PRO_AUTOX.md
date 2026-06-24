@@ -153,6 +153,9 @@ AutoJs6 behavior:
 - P13-12 provides `$autojs` global v1 as a read-only diagnostic and gated entry
   surface: `$autojs.androidContext` is not a raw `Context`, and `$autojs.java`
   rejects by default unless the Java interop experiment is enabled.
+- P13-13 extends the experiment with allowlist-only `java.lang.Math`,
+  `java.util.UUID`, and `android.graphics.Rect` handle construction, selected
+  instance calls, field reads, and explicit release/dispose cleanup.
 - AutoJs capabilities should be requested through bridge modules.
 - raw Android services, activities, accessibility nodes, media projection objects, and bitmap pointers are not exposed directly.
 

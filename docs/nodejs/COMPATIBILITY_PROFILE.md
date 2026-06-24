@@ -97,6 +97,13 @@ is a frozen unavailable descriptor, and `$autojs.java` is a gated facade over
 the existing Java interop experiment. Normal builds keep `$autojs.java.enabled`
 false and reject calls with `ERR_AUTOJS6_JAVA_INTEROP_DISABLED`.
 
+P13-13 extends that experiment without changing the default profile. When
+`autojs.nodejs.javaInterop.experimental=true` is enabled, `require("java")` and
+`$autojs.java` support the allowlisted `java.lang.Math`, `java.util.UUID`, and
+provider-owned `android.graphics.Rect` handle surface, including selected Rect
+instance calls, field reads, and explicit `release` / `dispose` cleanup. Thread
+dispatch and Pro profile promotion remain unpromoted.
+
 ## Supported Entry Points
 
 - `"nodejs";` directive
