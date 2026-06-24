@@ -445,6 +445,11 @@ scoped mediainfo reads, recorder status, and stable recorder start/stop
 fail-closed behavior are covered, while playback, real recorder sessions,
 MediaStore access, packaged media evidence, and raw Android media objects
 remain blocked.
+`verifyNodePhase13UtilityHeavyRhinoModules` records the P13-27 partial
+utility-heavy Rhino modules state: pure `jsox.mathx` helpers are covered
+through `jsox`, `jsox.mathx`, and `compat.jsox`, while `zip`, `canvas`,
+OpenCC/pinyin packaged resources, `sysprops`, `Arrayx`, `Numberx`, raw
+Canvas/Paint, and raw Android/OpenCV object parity remain blocked.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -629,6 +634,12 @@ metadata, recorder status, and stable recorder provider-missing denials are
 covered, while playback, real recording, MediaStore, packaged media behavior,
 foreground microphone disclosure, and raw Android media objects require
 separate evidence.
+P13-27 additionally uses `verifyNodePhase13UtilityHeavyRhinoModules` as the
+host promotion-status gate for utility-heavy Rhino module parity and keeps the
+surface partial: pure `jsox.mathx` helpers, explicit-target `jsox.extend()`,
+and `compat.jsox` are covered, while `zip`, `canvas`, OpenCC/pinyin packaged
+resources, Rhino `util` split batches, `sysprops`, `Arrayx`, `Numberx`, and raw
+Android/Canvas object parity require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

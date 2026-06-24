@@ -309,7 +309,7 @@
         "P13-26",
         "P13-27"
       ],
-      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked. P13-23 records partial app/intent/broadcast parity: JSON-safe app.intent descriptors and stricter app.startActivity descriptor parsing are available, while sendBroadcast, root/Shizuku app options, dual-user helpers, URI/email/settings helpers, installed-app lookup policy, and packaged smoke remain blocked. P13-24 records partial shell/root/Shizuku capability evidence: shell.root and shell.shizuku are explicit capability tokens, execRoot routes through the controlled shell bridge, and execShizuku is a stable rejection while real root/Shizuku device and packaged evidence remain blocked. P13-25 records partial notifications/settings/power manager evidence: notification permission/settings snapshots and battery-optimization status/settings dry-run helpers are available behind explicit notifications.settings and device.power capabilities while actions/listeners/wakelocks/direct power control and packaged evidence remain blocked. P13-26 records partial media/recorder/mediainfo provider evidence: read-only audio stream snapshots, scoped mediainfo metadata, recorder status, and compat aliases are available behind exact media.audio/media.metadata/media.recording capabilities while playback, real recording, MediaStore, packaged media evidence, and migration examples remain blocked.",
+      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked. P13-23 records partial app/intent/broadcast parity: JSON-safe app.intent descriptors and stricter app.startActivity descriptor parsing are available, while sendBroadcast, root/Shizuku app options, dual-user helpers, URI/email/settings helpers, installed-app lookup policy, and packaged smoke remain blocked. P13-24 records partial shell/root/Shizuku capability evidence: shell.root and shell.shizuku are explicit capability tokens, execRoot routes through the controlled shell bridge, and execShizuku is a stable rejection while real root/Shizuku device and packaged evidence remain blocked. P13-25 records partial notifications/settings/power manager evidence: notification permission/settings snapshots and battery-optimization status/settings dry-run helpers are available behind explicit notifications.settings and device.power capabilities while actions/listeners/wakelocks/direct power control and packaged evidence remain blocked. P13-26 records partial media/recorder/mediainfo provider evidence: read-only audio stream snapshots, scoped mediainfo metadata, recorder status, and compat aliases are available behind exact media.audio/media.metadata/media.recording capabilities while playback, real recording, MediaStore, packaged media evidence, and migration examples remain blocked. P13-27 records partial utility-heavy Rhino modules evidence: pure jsox.mathx helpers are available through jsox, jsox.mathx, and compat.jsox while zip, canvas, OpenCC/pinyin packaged resources, sysprops, Arrayx, Numberx, and raw Canvas/Paint or Android/OpenCV object parity remain blocked.",
       "risk": "high",
       "runtimeSurface": [
         "daily/weekly task provider",
@@ -320,6 +320,7 @@
         "media audio status provider",
         "mediainfo scoped metadata provider",
         "recorder status and fail-closed boundary",
+        "jsox mathx pure utility provider",
         "utility providers"
       ],
       "evidence": [
@@ -381,7 +382,14 @@
         "docs/nodejs/types/autojs6-node/recorder.d.ts",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeMediaBridgeInstrumentationTest.kt",
         "build/reports/nodejs/phase13-media-recorder-mediainfo-provider.json",
-        "build/reports/nodejs/phase13-media-recorder-mediainfo-provider.md"
+        "build/reports/nodejs/phase13-media-recorder-mediainfo-provider.md",
+        "docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md",
+        "tools/nodejs/phase13/verify-utility-heavy-rhino-modules.js",
+        ":app:verifyNodePhase13UtilityHeavyRhinoModules",
+        "docs/nodejs/types/autojs6-node/jsox.d.ts",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeUtilityBridgeInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-utility-heavy-rhino-modules.json",
+        "build/reports/nodejs/phase13-utility-heavy-rhino-modules.md"
       ],
       "rollback": "Keep P12 stable unsupported or blocked_by_design stubs and require explicit migration to supported Node bridge modules."
     },

@@ -1052,6 +1052,15 @@ Playback, real recorder sessions, foreground microphone disclosure, MediaStore
 access, packaged media assets, migration examples, and raw Android media
 objects remain blocked.
 
+P13-27 records utility-heavy Rhino modules promotion as partial:
+`require("jsox")`, `require("jsox.mathx")`, and
+`require("autojs6:compat").jsox` now expose the pure Rhino `Mathx` helper
+subset. Scripts can migrate random/statistics/distance/log/pow/min/max helper
+usage to Node, and can copy helpers with `jsox.extend(target, "Mathx")`.
+Default global `Math` or prototype mutation, `zip`, `canvas`, OpenCC/pinyin
+packaged resources, `sysprops`, `Arrayx`, `Numberx`, and raw Android/OpenCV
+object parity remain blocked.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

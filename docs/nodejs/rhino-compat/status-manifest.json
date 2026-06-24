@@ -9298,363 +9298,401 @@
     },
     {
       "id": "jsox.mathx",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "autojs6:compat",
+        "jsox",
+        "jsox.mathx"
+      ],
       "bridgeModules": [],
-      "decision": "p12_31_defer_jsox_mathx_batch",
+      "decision": "p13_27_pure_js_mathx_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module.",
-        "P12-31 decision: defer jsox.mathx as a pure JS batch after the smaller s13n pilot; it has too many helpers for a single P12-32 pilot."
+        "P12-31 decision: defer jsox.mathx as a pure JS batch after the smaller s13n pilot; P13-27 now promotes the pure Mathx subset.",
+        "P13-27 promotes the pure Mathx facade through require(\"jsox\"), require(\"jsox.mathx\"), and autojs6:compat.jsox.",
+        "Mathx keeps JSON-safe number and point inputs only; raw Android/OpenCV Point/Rect parity remains out of this profile gate.",
+        "zip, canvas, OpenCC packaged dictionaries, full pinyin dictionaries, sysprops, Arrayx, and Numberx remain deferred until separate resource/provider gates land."
       ],
       "apiEntries": [
         {
           "id": "jsox.mathx.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.avg",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "avg",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.ceilLog",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "ceilLog",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.ceilPow",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "ceilPow",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.cv",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "cv",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.dist",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "dist",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.floorLog",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "floorLog",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.floorPow",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "floorPow",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.logMn",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "logMn",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.max",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "max",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.maxi",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "maxi",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.mean",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "mean",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.median",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "median",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.min",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "min",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.mini",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "mini",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.mode",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "mode",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.randFloat",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "randFloat",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.randInt",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "randInt",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.random",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "random",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.randomFloat",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "randomFloat",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.randomInt",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "randomInt",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.roundLog",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "roundLog",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.roundPow",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "roundPow",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.std",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "std",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         },
         {
           "id": "jsox.mathx.sum",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox.mathx",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "sum",
+          "decision": "p13_27_pure_js_mathx_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 maps this pure Mathx helper to the Node jsox.mathx facade.",
+            "The implementation is synchronous and does not require an Android bridge provider."
           ]
         }
       ]
     },
     {
       "id": "jsox",
-      "status": "unsupported",
-      "asyncMode": "unknown",
-      "nodeModules": [],
+      "status": "partial",
+      "asyncMode": "sync",
+      "nodeModules": [
+        "autojs6:compat",
+        "jsox"
+      ],
       "bridgeModules": [],
-      "decision": "no_node_surface_evidence",
+      "decision": "p13_27_jsox_facade",
       "notes": [
-        "No matching Node bridge/types/runtime surface was found for this Rhino module."
+        "P13-27 exposes jsox as an explicit Node facade for the promoted Mathx subset.",
+        "jsox.extend() and extendAll() copy helpers only to an explicit target object; default global Math/prototype mutation remains blocked by design."
       ],
       "apiEntries": [
         {
           "id": "jsox.__module",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox",
           "bridgeModule": null,
           "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "decision": "p13_27_jsox_facade",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 exposes this helper through require(\"jsox\") and autojs6:compat.jsox.",
+            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy Mathx helpers."
           ]
         },
         {
           "id": "jsox.extend",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "extend",
+          "decision": "p13_27_explicit_target_copy",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 exposes this helper through require(\"jsox\") and autojs6:compat.jsox.",
+            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy Mathx helpers."
           ]
         },
         {
           "id": "jsox.extendAll",
-          "status": "unsupported",
-          "asyncMode": "unknown",
-          "nodeModule": null,
+          "status": "partial",
+          "asyncMode": "sync",
+          "nodeModule": "jsox",
           "bridgeModule": null,
-          "nodeName": null,
-          "decision": "no_node_api_mapping",
+          "nodeName": "extendAll",
+          "decision": "p13_27_explicit_target_copy",
           "notes": [
-            "No matching Node API mapping exists yet."
+            "P13-27 exposes this helper through require(\"jsox\") and autojs6:compat.jsox.",
+            "Default global Math/prototype mutation remains blocked; pass an explicit target object to copy Mathx helpers."
           ]
         }
       ]

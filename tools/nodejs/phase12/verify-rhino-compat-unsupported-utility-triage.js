@@ -131,7 +131,13 @@ function buildChecks(files, repoRoot) {
         ["unsupported", "supported"].includes(entryStatus(moduleById.get("s13n"), "s13n.bytes")) &&
         ["s13n.color", "s13n.point", "s13n.throwable", "s13n.time"].every((id) => entryStatus(moduleById.get("s13n"), id) === "unsupported") &&
         moduleById.get("util").status === "unsupported" &&
-        moduleById.get("jsox.mathx").status === "unsupported" &&
+        (
+          moduleById.get("jsox.mathx").status === "unsupported" ||
+          (
+            moduleById.get("jsox.mathx").status === "partial" &&
+            moduleById.get("jsox.mathx").decision === "p13_27_pure_js_mathx_facade"
+          )
+        ) &&
         moduleById.get("zip").status === "unsupported" &&
         moduleById.get("canvas").status === "unsupported" &&
         moduleById.get("recorder").status === "unsupported" &&
@@ -140,7 +146,7 @@ function buildChecks(files, repoRoot) {
         moduleById.get("media").status === "partial" &&
         moduleById.get("pinyin").status === "partial" &&
         entryStatus(moduleById.get("pinyin"), "pinyin.fromPhrase") === "unsupported",
-      "P12-31 must not promote triaged modules except the later P12-32 s13n.bytes pilot.",
+      "P12-31 must not promote triaged modules except later explicitly documented gates such as P12-32 s13n.bytes and P13-27 jsox.mathx.",
     ),
     check(
       "status-manifest-no-extra-p12-31-notes",

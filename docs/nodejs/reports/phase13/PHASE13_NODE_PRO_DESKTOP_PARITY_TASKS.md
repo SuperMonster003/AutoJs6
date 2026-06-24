@@ -113,6 +113,22 @@
   foreground notification disclosure, MediaStore permissions/policy, packaged
   media asset lookup, corpus evidence, and migration examples.
 
+## P13-27 Partial Landing Note
+
+- P13-27 partial utility-heavy Rhino modules gate records the pure
+  `jsox.mathx` facade subset through `require("jsox")`,
+  `require("jsox.mathx")`, and explicit `autojs6:compat.jsox`.
+- Host verifier:
+  `tools/nodejs/phase13/verify-utility-heavy-rhino-modules.js`.
+- Gradle gate: `:app:verifyNodePhase13UtilityHeavyRhinoModules`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
+- Surface manifest evidence: `phase13-utility-heavy-rhino-modules`.
+- Remaining P13-27 blockers: `zip`, `canvas`, OpenCC packaged resources,
+  pinyin full dictionaries, Rhino `util` split batches, `sysprops`, `Arrayx`,
+  `Numberx`, and raw Android Canvas/Paint or Android/OpenCV point/rect parity
+  profile gates.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -842,6 +858,25 @@ P13 task 本身使用以下执行状态：
     - 纯 JS 能力优先 promotion。
     - 资源型能力必须有 packaged resource lookup 和 missing-resource diagnostics。
     - raw Android Canvas/Paint parity 如需开放必须单独 profile gate。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Pure JS facade: `require("jsox")` and `require("jsox.mathx")`.
+    - Compat alias: `require("autojs6:compat").jsox`.
+    - Promoted subset: `Mathx` random/statistics/distance/log/pow/min/max helpers.
+    - Mutation policy: `jsox.extend(target, "Mathx")` and
+      `jsox.extendAll(target)` copy helpers only to explicit targets; default
+      global Math/prototype mutation returns
+      `ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN`.
+    - Types: `docs/nodejs/types/autojs6-node/jsox.d.ts`.
+    - Instrumentation:
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeUtilityBridgeInstrumentationTest.kt`.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-utility-heavy-rhino-modules.js`.
+    - Gradle gate: `:app:verifyNodePhase13UtilityHeavyRhinoModules`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
+    - Open before closure: `zip`, `canvas`, OpenCC/pinyin packaged resources,
+      Rhino `util` helper split, `sysprops`, `Arrayx`, `Numberx`, and raw
+      Canvas/Paint or Android/OpenCV object parity profile gates.
 
 ### Track C: Desktop Node.js parity
 

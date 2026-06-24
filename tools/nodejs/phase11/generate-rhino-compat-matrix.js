@@ -183,6 +183,18 @@ function nextStepFor(module, gapModule) {
   if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer util"))) {
     return "Defer whole-module util promotion; split Node util aliases, pure type helpers, and Android density helpers into smaller decisions.";
   }
+  if (
+    module.id === "jsox.mathx" &&
+    ((module.migration.notes || []).some((note) => note.includes("P13-27 promotes the pure Mathx facade")) || module.migration.status === "partial")
+  ) {
+    return "P13-27 promotes the pure Mathx facade subset; raw Android/OpenCV point/rect parity and sibling JSOX modules remain deferred.";
+  }
+  if (
+    module.id === "jsox" &&
+    ((module.migration.notes || []).some((note) => note.includes("P13-27 exposes jsox as an explicit Node facade")) || module.migration.status === "partial")
+  ) {
+    return "P13-27 exposes explicit-target jsox.extend() / extendAll() for Mathx; default global Math/prototype mutation remains blocked.";
+  }
   if ((module.migration.notes || []).some((note) => note.includes("P12-31 decision: defer jsox.mathx"))) {
     return "Defer jsox.mathx as a later pure utility batch after the smaller s13n pilot proves the promotion pattern.";
   }

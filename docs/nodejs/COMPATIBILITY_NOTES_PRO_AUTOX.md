@@ -274,6 +274,13 @@ playback, real recording sessions, MediaStore, packaged media assets,
 foreground microphone disclosure, or raw Android media objects on Rhino until a
 dedicated provider lands.
 
+P13-27 records utility-heavy Rhino modules promotion as partial. AutoJs6 Node
+now exposes pure `jsox.mathx` helpers through `require("jsox")`,
+`require("jsox.mathx")`, and `require("autojs6:compat").jsox`. Keep Rhino/Pro
+scripts that depend on default global `Math`/prototype mutation, `zip`,
+`canvas`, OpenCC/pinyin packaged dictionaries, `sysprops`, `Arrayx`, `Numberx`,
+or raw Android/OpenCV objects on Rhino until separate gates land.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

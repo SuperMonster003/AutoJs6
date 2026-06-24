@@ -1439,6 +1439,20 @@ permission-manifest, and cross-document evidence. It does not promote playback,
 real recording sessions, MediaStore access, packaged media assets, or raw
 Android media objects.
 
+Phase 13 utility-heavy Rhino modules status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13UtilityHeavyRhinoModules
+```
+
+This host gate records P13-27 as partial. It requires the pure `jsox.mathx`
+facade through `require("jsox")`, `require("jsox.mathx")`, and
+`autojs6:compat.jsox`, TypeScript coverage, conformance coverage, focused
+instrumentation, status-manifest/matrix updates, and cross-document evidence.
+It does not promote `zip`, `canvas`, OpenCC/pinyin packaged resources,
+`sysprops`, `Arrayx`, `Numberx`, raw Canvas/Paint, or raw Android/OpenCV
+objects.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell
