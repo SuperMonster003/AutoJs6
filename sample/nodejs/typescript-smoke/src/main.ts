@@ -54,7 +54,15 @@ async function smoke(): Promise<void> {
   const launched: boolean = await app.launchPackage(app.packageName, { timeoutMs: 1000 });
   const launchByName: boolean = await app.launchApp("AutoJs6", { timeoutMs: 1000 });
   await app.openAppSetting(app.packageName, { timeoutMs: 1000 });
-  await app.startActivity({ action: "android.intent.action.VIEW", data: "https://example.invalid" }, { timeoutMs: 1000 });
+  const viewIntent: app.IntentDescriptor = app.intent({
+    action: "android.intent.action.VIEW",
+    data: "https://example.invalid",
+    category: ["android.intent.category.BROWSABLE"],
+    flags: [0x10000000],
+    extras: { source: "typescript-smoke", retry: 1, active: true, tags: ["node", "app"] }
+  });
+  await app.startActivity(viewIntent, { timeoutMs: 1000 });
+  const broadcastDenied: Promise<never> = app.sendBroadcast({ action: "org.autojs6.TEST" }, { timeoutMs: 1000 });
 
   await dialogs.alert("Title", "Message", { timeoutMs: 1000 });
   const confirmed: boolean = await dialogs.confirm("Confirm", "Message", { timeoutMs: 1000 });
@@ -84,6 +92,12 @@ async function smoke(): Promise<void> {
     timeoutMs: 1000
   });
   const compatLaunch: boolean = await rhinoCompat.app.launchPackage(app.packageName, { timeoutMs: 1000 });
+  const compatIntent: app.IntentDescriptor = rhinoCompat.app.intent({
+    action: "android.intent.action.VIEW",
+    data: "https://example.invalid",
+    categories: "android.intent.category.BROWSABLE"
+  });
+  const compatBroadcastDenied: Promise<never> = rhinoCompat.app.sendBroadcast("inspect_layout_bounds", { timeoutMs: 1000 });
   const compatScreenOn: boolean = await rhinoCompat.device.isScreenOn({ timeoutMs: 1000 });
   const compatShellResult: shell.ShellResult = await rhinoCompat.shell("echo compat", { timeoutMs: 1000 });
   const compatRootShellResult: shell.ShellResult = await rhinoCompat.shell("id", true);
@@ -426,6 +440,10 @@ async function smoke(): Promise<void> {
 
   void launched;
   void launchByName;
+  void viewIntent;
+  void broadcastDenied;
+  void compatIntent;
+  void compatBroadcastDenied;
   void confirmed;
   void input;
   void prompted;

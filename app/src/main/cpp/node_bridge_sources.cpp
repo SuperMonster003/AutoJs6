@@ -18716,6 +18716,149 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_app_non_empty_string(value) {
     return value === undefined || value === null ? "" : String(value);
   }
+  function __autojs6_app_intent_plain_object(value) {
+    return value && typeof value === "object" && !Array.isArray(value);
+  }
+  function __autojs6_app_intent_error(methodName, message) {
+    throw __autojs6_app_invalid_argument_error(methodName, message);
+  }
+  function __autojs6_app_optional_intent_string(value, methodName, fieldName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    const text = String(value);
+    return text.length > 0 ? text : undefined;
+  }
+  function __autojs6_app_intent_categories(value, methodName, fieldName) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    const values = Array.isArray(value) ? value : [value];
+    return values.map(function(entry) {
+      if (entry === undefined || entry === null) {
+        return "";
+      }
+      return String(entry);
+    }).filter(function(entry) {
+      return entry.length > 0;
+    });
+  }
+  function __autojs6_app_intent_flag(value, methodName, fieldName) {
+    if (typeof value !== "number" || !Number.isFinite(value) || Math.floor(value) !== value) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " intent " + fieldName + " must be an integer flag value.");
+    }
+    return value | 0;
+  }
+  function __autojs6_app_intent_flags(value, methodName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (Array.isArray(value)) {
+      return value.reduce(function(flags, entry, index) {
+        return flags | __autojs6_app_intent_flag(entry, methodName, "flags[" + index + "]");
+      }, 0);
+    }
+    return __autojs6_app_intent_flag(value, methodName, "flags");
+  }
+  function __autojs6_app_intent_extra_value(value, methodName, key) {
+    if (value === undefined) {
+      return undefined;
+    }
+    if (value === null || typeof value === "string" || typeof value === "boolean") {
+      return value;
+    }
+    if (typeof value === "number") {
+      if (!Number.isFinite(value)) {
+        __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " must be a finite number.");
+      }
+      return value;
+    }
+    if (Array.isArray(value)) {
+      let elementType = "";
+      return Object.freeze(value.map(function(entry, index) {
+        const parsed = __autojs6_app_intent_extra_value(entry, methodName, key + "[" + index + "]");
+        const parsedType = parsed === null ? "null" : typeof parsed;
+        if (parsed === undefined || parsed === null || (parsed && typeof parsed === "object")) {
+          __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " arrays may only contain string, number, or boolean primitives.");
+        }
+        if (!elementType) {
+          elementType = parsedType;
+        } else if (elementType !== parsedType) {
+          __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " arrays must not mix primitive types.");
+        }
+        return parsed;
+      }));
+    }
+    __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " must be a JSON primitive or primitive array.");
+  }
+  function __autojs6_app_intent_extras(value, methodName) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    if (!__autojs6_app_intent_plain_object(value)) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " intent extras must be a JSON object.");
+    }
+    const extras = {};
+    Object.keys(value).forEach(function(key) {
+      const parsed = __autojs6_app_intent_extra_value(value[key], methodName, key);
+      if (parsed !== undefined) {
+        extras[key] = parsed;
+      }
+    });
+    return Object.freeze(extras);
+  }
+  function __autojs6_app_reject_privileged_intent_options(options, methodName) {
+    ["root", "shizuku", "dual", "user", "userId"].forEach(function(key) {
+      if (Object.prototype.hasOwnProperty.call(options, key)) {
+        __autojs6_app_intent_error(
+          methodName,
+          "app." + methodName + " does not accept privileged Rhino intent option: " + key + ". Use a dedicated shell/root/Shizuku capability instead."
+        );
+      }
+    });
+  }
+  function __autojs6_app_normalize_intent_descriptor(options, methodName) {
+    if (!__autojs6_app_intent_plain_object(options)) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " requires a JSON intent descriptor object.");
+    }
+    __autojs6_app_reject_privileged_intent_options(options, methodName);
+    const descriptor = {};
+    [
+      "action",
+      "data",
+      "type",
+      "packageName",
+      "package",
+      "className",
+      "component"
+    ].forEach(function(key) {
+      const value = __autojs6_app_optional_intent_string(options[key], methodName, key);
+      if (value !== undefined) {
+        descriptor[key === "package" ? "packageName" : key] = value;
+      }
+    });
+    const categories = []
+      .concat(__autojs6_app_intent_categories(options.category, methodName, "category"))
+      .concat(__autojs6_app_intent_categories(options.categories, methodName, "categories"));
+    if (categories.length > 0) {
+      descriptor.categories = Object.freeze(Array.from(new Set(categories)));
+    }
+    const flags = __autojs6_app_intent_flags(options.flags, methodName);
+    if (flags !== undefined) {
+      descriptor.flags = flags;
+    }
+    const extras = __autojs6_app_intent_extras(options.extras, methodName);
+    if (extras !== undefined) {
+      descriptor.extras = extras;
+    }
+    if (!__autojs6_app_has_start_activity_target(descriptor)) {
+      __autojs6_app_intent_error(
+        methodName,
+        "app." + methodName + " requires action, data, type, packageName, className, or component."
+      );
+    }
+    return Object.freeze(descriptor);
+  }
   function __autojs6_app_has_start_activity_target(options) {
     if (!options || typeof options !== "object" || Array.isArray(options)) {
       return false;
@@ -18730,11 +18873,22 @@ std::string buildEmbeddedScriptExecutionSource(
       options.component
     );
   }
+  function __autojs6_app_send_broadcast_unavailable_error() {
+    return __autojs6_bridge_error(
+      "app.sendBroadcast is not available in the Node.js engine yet; P13-23 keeps broadcast send APIs blocked until receiver authority, manifest policy, and root/Shizuku separation are complete.",
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "app",
+      "sendBroadcast"
+    );
+  }
   function __autojs6_limited_app() {
     if (__autojs6_limited_app_cache) {
       return __autojs6_limited_app_cache;
     }
     const info = __autojs6_host_app_info();
+    function intent(options) {
+      return __autojs6_app_normalize_intent_descriptor(options, "intent");
+    }
     function launchPackage(packageName, options) {
       const target = __autojs6_app_non_empty_string(packageName);
       if (!target) {
@@ -18787,11 +18941,13 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     function startActivity(options, callOptions) {
-      const descriptor = options && typeof options === "object" && !Array.isArray(options) ? options : null;
-      if (!__autojs6_app_has_start_activity_target(descriptor)) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_app_normalize_intent_descriptor(options, "startActivity");
+      } catch (error) {
         return Promise.reject(__autojs6_app_invalid_argument_error(
           "startActivity",
-          "app.startActivity requires a JSON intent descriptor with action, data, type, packageName, className, or component."
+          error && error.message ? error.message : "app.startActivity requires a JSON intent descriptor."
         ));
       }
       return __autojs6_call_autojs(
@@ -18801,14 +18957,19 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_app_bridge_options(callOptions, 10000)
       );
     }
+    function sendBroadcast(options, callOptions) {
+      return Promise.reject(__autojs6_app_send_broadcast_unavailable_error());
+    }
     __autojs6_limited_app_cache = Object.freeze({
       packageName: info.packageName,
       versionName: info.versionName,
       versionCode: info.versionCode,
+      intent,
       launchPackage,
       launchApp,
       openAppSetting,
-      startActivity
+      startActivity,
+      sendBroadcast
     });
     return __autojs6_limited_app_cache;
   }

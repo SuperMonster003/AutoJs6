@@ -309,7 +309,7 @@
         "P13-26",
         "P13-27"
       ],
-      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked.",
+      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked. P13-23 records partial app/intent/broadcast parity: JSON-safe app.intent descriptors and stricter app.startActivity descriptor parsing are available, while sendBroadcast, root/Shizuku app options, dual-user helpers, URI/email/settings helpers, installed-app lookup policy, and packaged smoke remain blocked.",
       "risk": "high",
       "runtimeSurface": [
         "daily/weekly task provider",
@@ -345,7 +345,15 @@
         "docs/nodejs/design/BROADCAST_TASKS.md",
         "docs/nodejs/design/TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md",
         "build/reports/nodejs/phase13-intent-broadcast-provider.json",
-        "build/reports/nodejs/phase13-intent-broadcast-provider.md"
+        "build/reports/nodejs/phase13-intent-broadcast-provider.md",
+        "docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md",
+        "tools/nodejs/phase13/verify-app-intent-broadcast-parity.js",
+        ":app:verifyNodePhase13AppIntentBroadcastParity",
+        "docs/nodejs/types/autojs6-node/app.d.ts",
+        "sample/nodejs/typescript-smoke/src/main.ts",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-app-intent-broadcast-parity.json",
+        "build/reports/nodejs/phase13-app-intent-broadcast-parity.md"
       ],
       "rollback": "Keep P12 stable unsupported or blocked_by_design stubs and require explicit migration to supported Node bridge modules."
     },

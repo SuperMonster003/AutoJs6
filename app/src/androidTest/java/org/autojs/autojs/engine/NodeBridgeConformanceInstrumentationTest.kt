@@ -285,7 +285,7 @@ class NodeBridgeConformanceInstrumentationTest {
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
               expectExports("toast", toast, ["showToast", "toast"]);
-              expectExports("app", app, ["launchPackage", "launchApp", "openAppSetting", "startActivity"]);
+              expectExports("app", app, ["intent", "launchPackage", "launchApp", "openAppSetting", "startActivity", "sendBroadcast"]);
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate"]);
@@ -342,7 +342,27 @@ class NodeBridgeConformanceInstrumentationTest {
               await expectPromise("app.launchPackage", app.launchPackage("org.autojs.autojs6", { timeoutMs: 1012 }));
               await expectPromise("app.launchApp", app.launchApp("AutoJs6", { timeoutMs: 1013 }));
               await expectPromise("app.openAppSetting", app.openAppSetting("org.autojs.autojs6", { timeoutMs: 1014 }));
-              await expectPromise("app.startActivity", app.startActivity({ action: "android.intent.action.VIEW", data: "https://example.com" }, { timeoutMs: 1015 }));
+              const viewIntent = app.intent({
+                action: "android.intent.action.VIEW",
+                data: "https://example.com",
+                category: "android.intent.category.BROWSABLE",
+                categories: ["android.intent.category.DEFAULT", "android.intent.category.BROWSABLE"],
+                flags: [0x10000000, 0x00000020],
+                extras: { source: "conformance", retry: 2, enabled: true, labels: ["node", "intent"] }
+              });
+              assert.strictEqual(Object.isFrozen(viewIntent), true, "app.intent descriptor must be frozen");
+              assert.deepStrictEqual(viewIntent.categories, ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]);
+              assert.strictEqual(viewIntent.flags, 0x10000020);
+              await expectPromise("app.startActivity", app.startActivity(viewIntent, { timeoutMs: 1015 }));
+              const appStartRequest = requests.filter((request) => request.module === "app" && request.method === "startActivity").pop();
+              assert(appStartRequest, "app.startActivity request must be dispatched");
+              assert.deepStrictEqual(appStartRequest.args[0].categories, ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]);
+              assert.strictEqual(appStartRequest.args[0].flags, 0x10000020);
+              assert.deepStrictEqual(appStartRequest.args[0].extras.labels, ["node", "intent"]);
+              const beforeAppRejects = requests.length;
+              await expectRejectCode("app.sendBroadcast", app.sendBroadcast({ action: "org.autojs6.TEST" }), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
+              await expectRejectCode("app.intent.root", Promise.resolve().then(() => app.intent({ action: "android.intent.action.VIEW", root: true })), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
+              assert.strictEqual(requests.length, beforeAppRejects, "app sendBroadcast/root rejected stubs must not dispatch bridge requests");
               await expectPromise("dialogs.alert", dialogs.alert("title", "message", { timeoutMs: 1016 }));
               assert.strictEqual(await expectPromise("dialogs.confirm", dialogs.confirm("title", "message", { timeoutMs: 1017 })), true);
               assert.strictEqual(await expectPromise("dialogs.input", dialogs.input("title", "prefill", { timeoutMs: 1018 })), "typed");

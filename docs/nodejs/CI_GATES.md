@@ -416,6 +416,13 @@ receiver substrate, `compat.tasks` IntentTask rejection stubs, and raw broadcast
 object denial are present, while receiver registration, manifest mutation,
 capability split, packaged install/trigger/remove behavior, and external
 broadcast wakeups remain blocked.
+`verifyNodePhase13AppIntentBroadcastParity` records the P13-23 partial
+app/intent/broadcast Pro parity state: JSON-safe `app.intent()` descriptors,
+`app.startActivity()` descriptor normalization, TypeScript/conformance evidence,
+and stable `app.sendBroadcast()` plus privileged app-option rejection are
+present, while broadcast send promotion, root/Shizuku app routing, URI/email/
+settings helpers, installed-app lookup policy, packaged smoke, and raw Android
+app/intent objects remain blocked.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -574,6 +581,12 @@ partial: Android/Rhino receiver substrate and stable rejection stubs are
 covered, while direct receiver registration, boot/package/custom triggers,
 manifest synthesis, packaged install/trigger/remove behavior, and raw broadcast
 objects require separate evidence.
+P13-23 additionally uses `verifyNodePhase13AppIntentBroadcastParity` as the
+host promotion-status gate for app/intent/broadcast parity and keeps the surface
+partial: JSON-safe `app.intent()` and normalized `app.startActivity()` are
+covered, while `sendBroadcast`, root/Shizuku app options, dual-user helpers,
+URI/email/settings helpers, installed-app lookup policy, packaged behavior, and
+raw Android objects require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

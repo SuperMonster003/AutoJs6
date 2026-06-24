@@ -4082,6 +4082,12 @@ class AndroidNodeBridgeCapabilityProvider(
         if (!hasTarget) {
             return null
         }
+        val categories = parseIntentCategories(options) ?: return null
+        val flags = parseIntentFlags(options) ?: return null
+        val extras = options.optJSONObject("extras")
+        if (options.has("extras") && !options.isNull("extras") && extras == null) {
+            return null
+        }
         return Intent().apply {
             action?.let { setAction(it) }
             when {
@@ -4094,18 +4100,65 @@ class AndroidNodeBridgeCapabilityProvider(
                 setClassName(packageName, className)
             }
             component?.let { setComponent(parseComponentName(it) ?: return null) }
-            options.optJSONArray("categories")?.let { categories ->
-                for (index in 0 until categories.length()) {
-                    categories.optString(index).takeIf { it.isNotBlank() }?.let(::addCategory)
-                }
-            }
-            if (options.has("flags")) {
-                addFlags(options.optInt("flags", 0))
-            }
+            categories.forEach(::addCategory)
+            addFlags(flags)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            options.optJSONObject("extras")?.let { extras ->
-                putJsonIntentExtras(this, extras)
+            extras?.let { putJsonIntentExtras(this, it) }
+        }
+    }
+
+    private fun parseIntentCategories(options: JSONObject): List<String>? {
+        val values = mutableListOf<String>()
+        fun append(value: Any?): Boolean {
+            return when (value) {
+                null, JSONObject.NULL -> true
+                is String -> {
+                    value.takeIf { it.isNotBlank() }?.let(values::add)
+                    true
+                }
+                is JSONArray -> {
+                    for (index in 0 until value.length()) {
+                        if (!append(value.opt(index))) {
+                            return false
+                        }
+                    }
+                    true
+                }
+                else -> false
             }
+        }
+        if (options.has("category") && !append(options.opt("category"))) {
+            return null
+        }
+        if (options.has("categories") && !append(options.opt("categories"))) {
+            return null
+        }
+        return values.distinct()
+    }
+
+    private fun parseIntentFlags(options: JSONObject): Int? {
+        if (!options.has("flags") || options.isNull("flags")) {
+            return 0
+        }
+        fun flagOf(value: Any?): Int? {
+            return when (value) {
+                is Int -> value
+                is Long -> value.toInt()
+                is Number -> value.toInt()
+                else -> null
+            }
+        }
+        val value = options.opt("flags")
+        return when (value) {
+            is JSONArray -> {
+                var flags = 0
+                for (index in 0 until value.length()) {
+                    val flag = flagOf(value.opt(index)) ?: return null
+                    flags = flags or flag
+                }
+                flags
+            }
+            else -> flagOf(value)
         }
     }
 
@@ -4131,9 +4184,25 @@ class AndroidNodeBridgeCapabilityProvider(
                 is Long -> intent.putExtra(key, value)
                 is Double -> intent.putExtra(key, value)
                 is String -> intent.putExtra(key, value)
+                is JSONArray -> putJsonIntentExtraArray(intent, key, value)
                 JSONObject.NULL, null -> Unit
                 else -> intent.putExtra(key, value.toString())
             }
+        }
+    }
+
+    private fun putJsonIntentExtraArray(intent: Intent, key: String, values: JSONArray) {
+        if (values.length() == 0) {
+            intent.putExtra(key, emptyArray<String>())
+            return
+        }
+        when (values.opt(0)) {
+            is Boolean -> intent.putExtra(key, BooleanArray(values.length()) { index -> values.optBoolean(index) })
+            is Int -> intent.putExtra(key, IntArray(values.length()) { index -> values.optInt(index) })
+            is Long -> intent.putExtra(key, LongArray(values.length()) { index -> values.optLong(index) })
+            is Number -> intent.putExtra(key, DoubleArray(values.length()) { index -> values.optDouble(index) })
+            is String -> intent.putExtra(key, Array(values.length()) { index -> values.optString(index) })
+            else -> intent.putExtra(key, values.toString())
         }
     }
 

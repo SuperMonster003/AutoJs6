@@ -45,6 +45,22 @@
   manifest synthesis, install/trigger/remove smoke, user disclosure, and raw
   Intent/BroadcastReceiver profile decisions.
 
+## P13-23 Partial Landing Note
+
+- P13-23 partial app/intent/broadcast Pro parity gate records JSON-safe
+  `app.intent()` descriptors, stricter `app.startActivity()` descriptor
+  parsing, and stable `app.sendBroadcast()` rejection.
+- Host verifier:
+  `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
+- Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
+- Surface manifest evidence: `phase13-app-intent-broadcast-parity`.
+- Remaining P13-23 blockers: Rhino app helper aliases, URI/email/settings
+  helpers, installed-app lookup privacy policy, broadcast send promotion,
+  root/Shizuku/dual-user routing through explicit capabilities, packaged smoke,
+  negative device corpus, and migration examples.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -654,6 +670,29 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - Intent JSON schema、flag/category/extras 类型、安全过滤明确。
     - root 选项和 Shizuku 路径不混入普通 app API。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - JSON-safe descriptor helper: `require("app").intent(request)`.
+    - `startActivity()` descriptor normalization: `category`/`categories`,
+      numeric flag arrays, package alias normalization, and primitive extras.
+    - Android parser coverage:
+      `NodeBridgeProtocol.parseIntentCategories`,
+      `NodeBridgeProtocol.parseIntentFlags`, and primitive array extras.
+    - Stable blocked boundary: `app.sendBroadcast()` rejects before bridge
+      dispatch, and `root`/`shizuku`/`dual`/`user` options are rejected by the
+      JS facade.
+    - Type declarations: `docs/nodejs/types/autojs6-node/app.d.ts`.
+    - Type smoke: `sample/nodejs/typescript-smoke/src/main.ts`.
+    - Focused conformance:
+      `NodeBridgeConformanceInstrumentationTest#jsStableBridgeModuleExportsAndPromiseContractsAreStable`.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
+    - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
+    - Open before closure: Rhino app helper aliases, URI/email/settings
+      helpers, broadcast send promotion, root/Shizuku/dual-user routing through
+      P13-24 capabilities, installed-app lookup privacy policy, packaged smoke,
+      negative device corpus, and migration examples.
 
 - [ ] P13-24: 扩展 shell/root/Shizuku 能力。
   - 范围：将 shell、root shell、Shizuku 拆成独立 capability。

@@ -1019,6 +1019,12 @@ evidence-backed, while receiver registration, manifest mutation, boot/package/
 startup/custom triggers, packaged install/trigger/remove behavior, and raw
 `Intent` / `BroadcastReceiver` objects remain blocked.
 
+P13-23 records app/intent/broadcast Pro parity as partial: JSON-safe
+`app.intent()` descriptors and normalized `app.startActivity()` options are
+evidence-backed, while `sendBroadcast`, root/Shizuku app options, dual-user
+helpers, URI/email/settings helpers, installed-app lookup policy, packaged
+behavior, and raw Android app/intent objects remain blocked.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

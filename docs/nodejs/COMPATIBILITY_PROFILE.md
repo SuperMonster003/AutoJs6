@@ -1375,10 +1375,17 @@ runtime.
   - `packageName: string`
   - `versionName: string`
   - `versionCode: number`
+  - `intent(intentOptions): IntentDescriptor`
   - `launchPackage(packageName, options?): Promise<boolean>`
   - `launchApp(name, options?): Promise<boolean>`
   - `openAppSetting(packageName?, options?): Promise<void>`
   - `startActivity(intentOptions, options?): Promise<void>`
+  - `sendBroadcast(intentOptionsOrName, options?): Promise<never>`
+  - P13-23 records app/intent/broadcast Pro parity as partial: `app.intent()`
+    and `app.startActivity()` use JSON-safe descriptors with
+    `category`/`categories`, numeric flag arrays, and primitive extras, while
+    broadcast sending, root/Shizuku/dual-user routes, raw Android objects,
+    installed-app lookup policy, and packaged app smoke remain blocked.
 - `engines`
   - `myEngine(): EngineInfo`
   - `all(options?): Promise<EngineInfo[]>`

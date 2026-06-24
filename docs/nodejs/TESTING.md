@@ -1376,6 +1376,21 @@ stable rejection coverage. It does not promote receiver registration,
 `tasks.broadcast`, `tasks.intent`, boot/package/custom broadcast triggers,
 packaged trigger/remove behavior, or raw Android broadcast objects.
 
+Phase 13 app/intent/broadcast Pro parity status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13AppIntentBroadcastParity
+```
+
+This host gate records P13-23 as partial. It requires the JSON-safe
+`app.intent()` helper, `app.startActivity()` descriptor normalization for
+`category`/`categories`, numeric flag arrays, and primitive extras, TypeScript
+coverage, conformance coverage, and stable pre-dispatch rejection for
+`app.sendBroadcast()` plus privileged `root`/`shizuku`/`dual` app options. It
+does not promote broadcast sending, root/Shizuku routing through ordinary app
+APIs, full Rhino app helper aliases, installed-app lookup policy, packaged
+behavior, or raw Android app/intent objects.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

@@ -244,6 +244,13 @@ Node still cannot register Android receivers, receive boot/package/custom
 broadcast triggers, mutate packaged manifests, inspect raw trigger payloads, or
 access raw `Intent` / `BroadcastReceiver` objects.
 
+P13-23 records app/intent/broadcast Pro parity as partial. AutoJs6 Node now has
+JSON-safe `app.intent()` descriptors and stricter `app.startActivity()`
+descriptor parsing for `category`/`categories`, numeric flag arrays, and
+primitive extras. It still keeps `app.sendBroadcast()`, root/Shizuku app
+options, dual-user helpers, URI/email/settings helpers, installed-app lookup
+policy, packaged behavior, and raw Android app/intent objects blocked.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

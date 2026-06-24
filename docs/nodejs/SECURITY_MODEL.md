@@ -546,6 +546,13 @@ P13-21 records daily/weekly/user task database promotion as partial. The existin
 
 P13-22 records IntentTask/broadcast task provider promotion as partial. The existing Android/Rhino receiver stack remains substrate evidence only; Node still cannot register static or dynamic receivers, mutate packaged manifests, accept external broadcast wakeups, inject boot/package receivers, observe raw trigger payloads, or access raw `BroadcastReceiver`, `Intent`, `IntentFilter`, `PendingIntent`, `Bundle`, `Uri`, `PackageManager`, signature, icon, package-list, or receiver-handle objects.
 
+P13-23 records app/intent/broadcast Pro parity as partial. Node `app.intent()`
+and `app.startActivity()` accept only JSON-safe descriptors, and privileged
+Rhino options such as `root`, `shizuku`, `dual`, `user`, and `userId` are
+rejected before bridge dispatch. `app.sendBroadcast()` is a stable rejection
+stub until broadcast authority, manifest policy, user disclosure, rate limits,
+packaged smoke, and the P13-24 shell/root/Shizuku capability split are complete.
+
 Future support must follow `docs/nodejs/design/WORK_MANAGER.md`:
 
 - timed task execution may be added only through a Promise bridge provider
