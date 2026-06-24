@@ -1203,6 +1203,15 @@ missing profile/capability/permission requirements. This improves migration
 debuggability for Pro/Desktop parity without promoting any profile beyond the
 current `safe_default` authority.
 
+P13-50 records relaxed-capability security corpus as partial: AutoJs6 Node now
+tracks raw network, filesystem relaxation, Java interop, `child_process`,
+native addon loading, inspector, and WASI in
+`RELAXED_CAPABILITY_SECURITY_CORPUS.json`, with positive tests, negative tests,
+abuse cases, CI evidence, and rollback posture. This creates the security
+evidence lane needed for Pro/Desktop parity, but raw sockets, expanded roots,
+raw process/native handles, raw WASI, inspector, native addons, and release
+Java interop remain unpromoted.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

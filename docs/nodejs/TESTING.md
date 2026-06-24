@@ -2075,6 +2075,33 @@ capability reporting, Android permission synthesis, runtime
 `profileSelection`, and actionable missing-capability error fields. P13-49
 records profile selection UX and diagnostics as partial.
 
+Phase 13 relaxed-capability security corpus gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13RelaxedCapabilitySecurityCorpus
+```
+
+This host gate records P13-50 as partial. It requires
+`RELAXED_CAPABILITY_SECURITY_CORPUS.json`, focused
+`NodeSecurityRegressionInstrumentationTest` additions, companion raw
+network/filesystem/Java/child_process/native addon/inspector/WASI evidence,
+surface manifest evidence, release matrix updates, and Phase 13 docs. It keeps
+raw sockets, expanded filesystem roots, raw process/native handles, raw WASI,
+inspector, native addons, and release Java interop unpromoted.
+
+Phase 13 relaxed-capability security corpus focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeSecurityRegressionInstrumentationTest#phase13JavaInteropRelaxedCapabilityCorpusKeepsAllowlistAndDenials"
+```
+
+These focused tests cover raw network denial, scoped fs positive and escape
+paths, shell-bridge replacement for `child_process`, native addon denial,
+inspector denial, pure WebAssembly with raw WASI denial, and Java interop
+allowlist/denylist behavior. P13-50 records relaxed-capability security corpus
+as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

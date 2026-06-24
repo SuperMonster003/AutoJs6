@@ -814,6 +814,14 @@ bounded stdio, explicit args, empty-by-default env, limited clock/random,
 network and process-exit denial, resource budgets, hostile corpus coverage,
 and packaged behavior.
 
+P13-50 records relaxed-capability security corpus as partial. The structured
+corpus covers raw network, filesystem relaxation, Java interop,
+`child_process`, native addon loading, inspector, and WASI with positive
+evidence, negative abuse probes, CI evidence, and rollback posture. The focused
+security regression keeps raw network modules, expanded filesystem roots,
+raw `child_process`, native addons, inspector, raw WASI, and release Java
+interop fail-closed while later rollback/privacy/disclosure gates are designed.
+
 ## Release Security Gate
 
 Every Node release candidate must verify:

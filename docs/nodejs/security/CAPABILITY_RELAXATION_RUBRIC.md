@@ -86,6 +86,13 @@ A task cannot move to `opt_in_promoted` unless it includes:
 - migration/user documentation;
 - rollback documentation.
 
+P13-50 adds `RELAXED_CAPABILITY_SECURITY_CORPUS.json` as the shared relaxed
+capability corpus index. Any future promotion of raw network, filesystem
+relaxation, Java interop, `child_process`, native addon loading, inspector, or
+WASI must keep that corpus updated with positive tests, negative tests, abuse
+cases, CI evidence, and rollback posture before moving beyond diagnostic or
+controlled fail-closed behavior.
+
 ## Release Rule
 
 `debug_unsafe_lab` and critical-risk surfaces cannot be accepted in release

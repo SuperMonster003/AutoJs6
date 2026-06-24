@@ -821,6 +821,15 @@ Selection JSON/text, TypeScript declarations, surface manifest evidence, and
 docs updates while keeping effective profile selection at `safe_default` and
 user-selectable Pro/Desktop/Debug promotion disabled. P13-49 records profile
 selection UX and diagnostics as partial.
+`verifyNodePhase13RelaxedCapabilitySecurityCorpus` records P13-50 as the
+relaxed-capability security corpus gate. It requires
+`RELAXED_CAPABILITY_SECURITY_CORPUS.json`, focused
+`NodeSecurityRegressionInstrumentationTest` coverage, companion raw
+network/filesystem/Java/child_process/native addon/inspector/WASI evidence,
+surface manifest evidence, and docs updates while keeping raw sockets,
+expanded filesystem roots, raw process/native handles, raw WASI, inspector,
+native addons, and release Java interop unpromoted. P13-50 records
+relaxed-capability security corpus as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

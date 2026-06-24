@@ -1573,6 +1573,26 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - 每个放开能力都有正向和负向测试。
     - 旧 Safe profile 不因新能力产生 regression。
+  - Progress:
+    - P13-50 partial landing 已添加
+      `docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json`,
+      覆盖 raw network、filesystem relaxation、Java interop、
+      `child_process`、native addon、inspector、WASI 七类 relaxed
+      capabilities 的 positive tests、negative tests、abuse cases、
+      CI evidence 与 rollback posture。
+    - `NodeSecurityRegressionInstrumentationTest` 已新增 focused corpus：
+      raw network deny、scoped fs positive/escape、shell bridge 替代
+      `child_process`、native addon deny、inspector deny、raw WASI deny、
+      Java interop allowlist/denylist。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-relaxed-capability-security-corpus.js`。
+    - Gradle gate:
+      `:app:verifyNodePhase13RelaxedCapabilitySecurityCorpus`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_50_RELAXED_CAPABILITY_SECURITY_CORPUS.md`。
+    - Remaining P13-50 blockers: real raw capability promotion、rollback UX、
+      privacy disclosure、user prompts、packaged behavior、final opt-in
+      promotion evidence 仍由 P13-51/P13-52 及后续 promotion gate 关闭。
 
 - [ ] P13-51: 增加 per-profile rollback playbook。
   - 范围：更新 rollback 文档和 Gradle/property 开关。

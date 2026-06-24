@@ -1301,6 +1301,16 @@ capability errors now include `requiredProfiles`, `requiredNodePermissions`,
 profile remains `safe_default`; requested Pro/Desktop/Debug metadata is
 diagnostic-only and does not grant authority.
 
+P13-50 records relaxed-capability security corpus as partial. The corpus at
+`docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json` covers raw
+network, filesystem relaxation, Java interop, `child_process`, native addon
+loading, inspector, and WASI with positive tests, negative tests, abuse cases,
+CI evidence, and rollback posture. The host gate
+`verifyNodePhase13RelaxedCapabilitySecurityCorpus` and focused
+`NodeSecurityRegressionInstrumentationTest` additions prove the current
+runtime remains fail-closed while future Pro/Desktop/Debug promotion evidence
+is collected.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context
