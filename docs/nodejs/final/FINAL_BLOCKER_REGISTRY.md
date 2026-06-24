@@ -58,6 +58,16 @@ Current full heavy resource stress progress:
   count, and bridge diagnostics. The blocker remains open until real 8 hour
   and 24 hour device reports are available and clean.
 
+Current Android package installation progress:
+
+- `android_side_package_installation`: Phase 13 adds
+  `NodeAndroidPackageInstallManager`, an app-private local package store with
+  transactional install/update/remove/list/verify/prune, cancellation, store
+  locking, SHA-512 integrity, lifecycle/bin/native/path-escape denial, and
+  focused instrumentation. The blocker remains open until a prepared-device
+  run, runtime/JS API exposure, registry/download policy, signed native-payload
+  decision, and plugin/package distribution integration land.
+
 Resolved in Phase 11:
 
 - `adapter_v1_real_execution_path`: `AutoJsNodeRuntimeApiV1` is now a

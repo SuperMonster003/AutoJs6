@@ -788,7 +788,10 @@ blockers：
 
 - crash marker、next-launch collection、symbolization、chaos injection 尚未形成
   完整自动化闭环。
-- Android 端 package install/update/remove/list/verify/prune 尚未完成。
+- P13-09 已补 Android 端 app-private local package store，支持
+  install/update/remove/list/verify/prune、transaction、cancel、lock 和
+  integrity；JS API、registry/download、signed native payload 和 distribution
+  integration 尚未完成。
 - packaged APK long-running Node service mode 尚未完成。
 - 第二执行 slot 已有显式 one-shot 路由和 focused instrumentation，但默认调度、
   packaged 行为、slot crash evidence 和 stress promotion 仍未完成。

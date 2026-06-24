@@ -303,6 +303,7 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase10FocusedGateMatrix
 .\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
+.\gradlew.bat --console=plain :app:verifyNodePhase13AndroidPackageInstallManager
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
@@ -334,7 +335,11 @@ smokes. `verifyNodePhase10Autojs6PmFixture` covers the S10-21 through S10-27
 host-managed `autojs6-pm` boundary with offline registry metadata, semver,
 tarball integrity, safe extraction, `autojs6-lock.json`, install/list/update/
 remove/verify/prune, and package compatibility analyzer negative tests. It does
-not enable Android runtime package installation or full npm CLI behavior.
+not enable full npm CLI behavior. `verifyNodePhase13AndroidPackageInstallManager`
+covers the partial Android local package store with transaction staging, store
+locking, cancellation, SHA-512 integrity, lifecycle/bin/native/path denial, and
+install/update/remove/list/verify/prune. It does not enable registry download or
+a JavaScript package-manager API.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through

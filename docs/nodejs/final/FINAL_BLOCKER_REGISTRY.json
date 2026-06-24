@@ -27,7 +27,7 @@
       "id": "android_side_package_installation",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Package manager is host-managed/offline fixture only.",
+      "currentEvidence": "Host-managed/offline fixture remains available; Phase 13 adds a partial Android-side local package store with transactional install/update/remove/list/verify/prune, cancellation, store locking, SHA-512 integrity, lifecycle/bin/native/path-escape denial, and focused instrumentation. JavaScript/runtime API exposure, registry/download policy, signed native-payload decision, prepared-device run evidence, and plugin/package distribution integration remain open.",
       "requiredResolution": "Android package install/update/remove/list/verify/prune is transactional, cancellable, locked, integrity checked, and lifecycle-script free."
     },
     {

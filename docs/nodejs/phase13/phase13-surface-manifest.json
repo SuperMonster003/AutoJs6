@@ -150,7 +150,14 @@
         "build/reports/nodejs/final-soak/quick-soak-8h.json",
         "build/reports/nodejs/final-soak/final-soak-24h.json",
         "build/reports/nodejs/phase13-full-heavy-resource-stress.json",
-        "build/reports/nodejs/phase13-full-heavy-resource-stress.md"
+        "build/reports/nodejs/phase13-full-heavy-resource-stress.md",
+        "docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md",
+        "tools/nodejs/phase13/verify-android-package-install-manager.js",
+        ":app:verifyNodePhase13AndroidPackageInstallManager",
+        "app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-android-package-install-manager.json",
+        "build/reports/nodejs/phase13-android-package-install-manager.md"
       ],
       "rollback": "Disable the promoted runtime path by profile flag and keep one-shot primary embedded execution as the fallback."
     },

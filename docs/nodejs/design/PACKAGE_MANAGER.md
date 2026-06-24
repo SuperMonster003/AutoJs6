@@ -2,7 +2,9 @@
 
 ## Status
 
-Decision gate. No runtime implementation is enabled by this document.
+Decision gate. Android runtime npm/registry installation is not enabled by this
+document. Phase 13 adds a partial Android local package store, but no
+user-facing package-manager JavaScript API is promoted yet.
 
 AutoJs6 Safe Node Profile supports checked-in pure JavaScript CommonJS dependencies under `node_modules`, but it does not run `npm install`, package lifecycle scripts, native addon builds, or package managers inside the Android runtime.
 
@@ -178,6 +180,10 @@ Supported:
 - package `main`, `exports`, `imports`, and self-reference under the current resolver
 - fixed offline compatibility fixtures
 - packaged APK inclusion of vetted JavaScript dependency files
+- partial Android local package store through `NodeAndroidPackageInstallManager`
+  for already-unpacked app-private packages with transaction staging, store
+  locking, cancellation checks, SHA-512 integrity, and
+  install/update/remove/list/verify/prune operations
 
 Unsupported:
 
@@ -187,6 +193,7 @@ Unsupported:
 - postinstall-generated sources
 - arbitrary `.bin` execution
 - mobile registry downloads
+- JavaScript/runtime package-manager API exposure for the Android local store
 
 ## Follow-Up Implementation
 
@@ -281,3 +288,44 @@ The fixture uses a local registry under
 This is the S10-21 through S10-27 evidence path. S10-28 remains deferred:
 project UI, live online registry integration, and APK builder dependency UI
 must be added separately before this becomes a user-facing mobile installer.
+
+## Phase 13 Android Local Store
+
+Phase 13 adds `NodeAndroidPackageInstallManager` as the first Android-side
+package installation substrate. It is app-private and local-only: callers pass
+an already-unpacked package directory, and the manager validates and stages it
+before moving it into the store.
+
+Focused gates:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13AndroidPackageInstallManager
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAndroidPackageInstallManagerInstrumentationTest"
+```
+
+Current operations:
+
+- `install`
+- `update`
+- `remove`
+- `list`
+- `verify`
+- `prune`
+
+Current safety properties:
+
+- store-wide file lock
+- transaction staging directory
+- atomic move with update restore path
+- cancellation checks
+- SHA-512 expected integrity and installed-record verification
+- lifecycle script denial for `preinstall`, `install`, `postinstall`, and
+  `prepare`
+- package `bin` denial
+- `.node`, `binding.gyp`, `build/Release`, and `build/Debug` native payload
+  denial
+- symlink and path-escape denial
+
+This is not a full Android npm installer. Registry download, npm CLI install,
+JS API exposure, signed native payload support, and plugin/package distribution
+integration remain deferred.

@@ -299,6 +299,17 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - transactional、cancellable、locked、integrity checked。
     - 能服务后续 npm/package manager 和 plugin distribution。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Android store: `NodeAndroidPackageInstallManager`.
+    - Operations: `install`, `update`, `remove`, `list`, `verify`, `prune`.
+    - Boundaries: lifecycle scripts, `bin`, native payloads, symlinks, and path escapes are rejected.
+    - Integrity: SHA-512 expected integrity and installed-record verification.
+    - Transaction model: store lock, transaction staging, atomic move/restore, cancellation token.
+    - Focused instrumentation: `NodeAndroidPackageInstallManagerInstrumentationTest`.
+    - Host verifier: `tools/nodejs/phase13/verify-android-package-install-manager.js`.
+    - Gradle gate: `:app:verifyNodePhase13AndroidPackageInstallManager`.
+    - Report: `docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md`.
+    - Open before closure: JS/runtime API exposure, registry/download policy, signed native-payload decision, prepared-device instrumentation run, and plugin/package distribution integration.
 
 - [x] P13-10: 发布 Phase 13 capability truth report。
   - 范围：生成 Safe/Pro/Desktop/Debug 四个 profile 的能力真值表。

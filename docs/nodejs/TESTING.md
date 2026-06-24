@@ -637,6 +637,19 @@ The gate is host-managed and experimental; Android runtime package installation,
 full npm CLI behavior, hoisting, package-manager hooks, and peer installation
 remain deferred.
 
+Phase 13 Android-side package install manager:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13AndroidPackageInstallManager
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAndroidPackageInstallManagerInstrumentationTest"
+```
+
+`NodeAndroidPackageInstallManagerInstrumentationTest` covers the app-private
+local package store: install/update/remove/list/verify/prune, transaction
+staging, store locking, cancellation, SHA-512 integrity mismatch rollback,
+and lifecycle/bin/native payload denial. This does not promote Android npm CLI,
+registry download, or a JavaScript package-manager API.
+
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground
 long-running, runtime budget/heartbeat, queueing, scheduled runner,
