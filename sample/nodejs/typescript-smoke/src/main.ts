@@ -41,6 +41,10 @@ import overlay = require("ui.overlay");
 import fetchModule = require("fetch");
 import http = require("http");
 import https = require("https");
+import net = require("net");
+import tls = require("tls");
+import dns = require("dns");
+import dnsPromises = require("dns/promises");
 import axios = require("axios");
 import websocket = require("websocket");
 import workManager = require("work_manager");
@@ -420,6 +424,29 @@ async function smoke(): Promise<void> {
   httpsRequest.end("secure");
   httpAgent.destroy();
   httpsAgent.destroy();
+  const socketAddress: net.SocketAddress = new net.SocketAddress({ address: "127.0.0.1", port: 9229 });
+  const parsedSocketAddress: net.SocketAddress | undefined = net.SocketAddress.parse("127.0.0.1:9229");
+  const blockList = new net.BlockList();
+  blockList.addAddress("127.0.0.2");
+  blockList.addSubnet("127.0.1.0", 24);
+  const socketBlocked: boolean = blockList.check("127.0.0.2");
+  const socket = new net.Socket({ allowHalfOpen: true });
+  const destroyedSocket: net.Socket = socket.destroy();
+  const netConnectDenied: (...args: readonly unknown[]) => never = net.connect;
+  const netServer: net.Server = net.createServer();
+  const netListenDenied: (...args: readonly unknown[]) => never = netServer.listen;
+  const dnsLookup: void = dns.lookup("localhost", { all: true }, (error: Error | null, addresses: readonly dns.LookupAddress[]) => {
+    void error;
+    void addresses;
+  });
+  const dnsLookupPromise: Promise<dnsPromises.LookupAddress> = dnsPromises.lookup("localhost");
+  const dnsResolveDenied: (hostname: string, callback: (error: Error | null, addresses?: readonly string[]) => void) => void = dns.resolve4;
+  const secureContext: tls.SecureContext = tls.createSecureContext({ minVersion: "TLSv1.2" });
+  const tlsSocket: tls.TLSSocket = new tls.TLSSocket(socket, { servername: "example.invalid" });
+  const tlsCipher: tls.CipherNameAndProtocol = tlsSocket.getCipher();
+  const tlsServer: tls.Server = tls.createServer({ requestCert: true });
+  const tlsConnectDenied: (...args: readonly unknown[]) => never = tls.connect;
+  const tlsListenDenied: (...args: readonly unknown[]) => never = tlsServer.listen;
   const axiosResponse: axios.Response<{ ok: boolean }> = await axios.get("https://example.invalid/axios", {
     baseURL: "https://example.invalid",
     params: { q: "types" },
@@ -657,6 +684,20 @@ async function smoke(): Promise<void> {
   void httpRequest;
   void httpsRequest;
   void httpListenDenied;
+  void socketAddress;
+  void parsedSocketAddress;
+  void socketBlocked;
+  void destroyedSocket;
+  void netConnectDenied;
+  void netListenDenied;
+  void dnsLookup;
+  void dnsLookupPromise;
+  void dnsResolveDenied;
+  void secureContext;
+  void tlsSocket;
+  void tlsCipher;
+  void tlsConnectDenied;
+  void tlsListenDenied;
   void axiosResponse;
   void axiosText;
   void axiosDiagnostics;
