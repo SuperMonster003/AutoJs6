@@ -35,6 +35,10 @@ class NodeRealNpmCompatInstrumentationTest {
             assertEquals(EXPECTED_FIXTURE_COUNT - PHASE8_FIXTURE_COUNT, fixtures.size - PHASE8_FIXTURE_COUNT)
             assertEquals(EXPECTED_FIXTURE_COUNT - PHASE9_FIXTURE_COUNT, fixtures.size - PHASE9_FIXTURE_COUNT)
             assertRequiredPatternsPresent(fixtures)
+            assertPhase13CompatibilityMetadata(
+                manifest = JSONObject(File(corpusRoot, "manifest.json").readText()),
+                fixtureNames = fixtures.map { it.name }.toSet(),
+            )
 
             fixtures.forEach { fixture ->
                 val fixtureDir = File(corpusRoot, fixture.name)
@@ -262,6 +266,43 @@ class NodeRealNpmCompatInstrumentationTest {
         }
     }
 
+    private fun assertPhase13CompatibilityMetadata(manifest: JSONObject, fixtureNames: Set<String>) {
+        val metadata = manifest.getJSONObject("phase13Compatibility")
+        assertEquals("autojs6-phase13-dependency-compatibility-corpus-v1", metadata.getString("schema"))
+        assertEquals(EXPECTED_FIXTURE_COUNT, metadata.getInt("fixtureCount"))
+
+        val required = metadata.getJSONArray("requiredReasonKinds")
+        val requiredReasons = (0 until required.length()).map { required.getString(it) }.toSet()
+        assertEquals(PHASE13_REQUIRED_REASON_KINDS, requiredReasons)
+
+        val categories = metadata.getJSONArray("categories")
+        val seenReasons = mutableSetOf<String>()
+        for (index in 0 until categories.length()) {
+            val category = categories.getJSONObject(index)
+            val reasonKind = category.getString("reasonKind")
+            seenReasons += reasonKind
+            assertTrue("unexpected P13 reason kind: $reasonKind", reasonKind in PHASE13_REQUIRED_REASON_KINDS)
+            assertTrue("missing category id", category.getString("id").isNotBlank())
+            assertTrue("missing category title", category.getString("title").isNotBlank())
+
+            val categoryFixtures = category.getJSONArray("fixtures")
+            assertTrue("category $reasonKind must reference fixtures", categoryFixtures.length() > 0)
+            for (fixtureIndex in 0 until categoryFixtures.length()) {
+                val fixtureName = categoryFixtures.getString(fixtureIndex)
+                assertTrue("category $reasonKind references unknown fixture: $fixtureName", fixtureName in fixtureNames)
+            }
+
+            val packages = category.getJSONArray("packages")
+            assertTrue("category $reasonKind must include package reason rows", packages.length() > 0)
+            for (packageIndex in 0 until packages.length()) {
+                val row = packages.getJSONObject(packageIndex)
+                assertTrue("category $reasonKind package name missing", row.getString("name").isNotBlank())
+                assertTrue("category $reasonKind package reason missing", row.getString("reason").isNotBlank())
+            }
+        }
+        assertEquals(PHASE13_REQUIRED_REASON_KINDS, seenReasons)
+    }
+
     private fun jsString(value: String): String {
         return buildString {
             append('"')
@@ -297,6 +338,7 @@ class NodeRealNpmCompatInstrumentationTest {
         private const val REAL_NPM_FIXTURE_BATCH_SIZE = 6
         private const val REAL_NPM_FIXTURE_BATCH_TIMEOUT_MS = 30_000L
         private val FORBIDDEN_PACKAGE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")
+        private val PHASE13_REQUIRED_REASON_KINDS = setOf("missing_builtin", "native_addon", "postinstall", "network", "fs")
         private val REQUIRED_REAL_NPM_PATTERNS = setOf(
             "ESM-only small package",
             "hybrid CJS/ESM package",

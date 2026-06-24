@@ -398,5 +398,124 @@
         "legacy path blocker metadata"
       ]
     }
-  ]
+  ],
+  "phase13Compatibility": {
+    "schema": "autojs6-phase13-dependency-compatibility-corpus-v1",
+    "fixtureCount": 50,
+    "requiredReasonKinds": [
+      "missing_builtin",
+      "native_addon",
+      "postinstall",
+      "network",
+      "fs"
+    ],
+    "categories": [
+      {
+        "id": "missing_builtin",
+        "title": "Packages that probe desktop builtins unavailable in the Safe profile",
+        "reasonKind": "missing_builtin",
+        "fixtures": [
+          "wasi-policy-package",
+          "test-runner-package",
+          "diagnostics-report-package",
+          "security-policy-checker"
+        ],
+        "packages": [
+          {
+            "name": "wasi-policy-package",
+            "reason": "Raw node:wasi remains disabled; package must use controlled WASI detection or graceful fallback."
+          },
+          {
+            "name": "test-runner-package",
+            "reason": "node:test/reporters and broad test-runner surfaces are not promoted in the Safe profile."
+          },
+          {
+            "name": "diagnostics-report-package",
+            "reason": "inspector/devtools diagnostics remain disabled; package must avoid debugger-only builtin paths."
+          }
+        ]
+      },
+      {
+        "id": "native_addon",
+        "title": "Packages that depend on native addons or native build artifacts",
+        "reasonKind": "native_addon",
+        "fixtures": [
+          "security-policy-checker",
+          "adapter-diagnostics-helper"
+        ],
+        "packages": [
+          {
+            "name": "native-sqlite-addon",
+            "reason": ".node native addon loading remains denied until signed packaged artifacts, ABI/hash allowlists, and crash isolation land."
+          },
+          {
+            "name": "image-native-addon",
+            "reason": "Native payloads and node-gyp output are blocked by dependency scanning and runtime native-addon policy."
+          }
+        ]
+      },
+      {
+        "id": "postinstall",
+        "title": "Packages that require lifecycle scripts or postinstall downloads",
+        "reasonKind": "postinstall",
+        "fixtures": [
+          "package-manager-installed",
+          "lockfile-reader",
+          "package-integrity-package"
+        ],
+        "packages": [
+          {
+            "name": "unsafe-postinstall-lite",
+            "reason": "preinstall/install/postinstall/prepare scripts stay denied for Android runtime and packaged dependency bundles."
+          },
+          {
+            "name": "binary-downloader-package",
+            "reason": "Postinstall download and executable extraction remain blocked until integrity, rollback, and disclosure policy land."
+          }
+        ]
+      },
+      {
+        "id": "network",
+        "title": "Packages that require raw network, sockets, or live outbound access",
+        "reasonKind": "network",
+        "fixtures": [
+          "http-client-package",
+          "formdata-fetch-package",
+          "fetch-adapter-v2",
+          "websocket-protocol-util"
+        ],
+        "packages": [
+          {
+            "name": "http-client-package",
+            "reason": "node:http client shape is partial and raw network remains capability-gated."
+          },
+          {
+            "name": "websocket-protocol-util",
+            "reason": "Protocol helpers pass offline, but live sockets remain behind controlled websocket/network capability evidence."
+          }
+        ]
+      },
+      {
+        "id": "fs",
+        "title": "Packages that require broader filesystem roots or advanced fs behavior",
+        "reasonKind": "fs",
+        "fixtures": [
+          "filehandle-package",
+          "fs-watch-package",
+          "lockfile-reader",
+          "module-graph-resolver"
+        ],
+        "packages": [
+          {
+            "name": "filehandle-package",
+            "reason": "FileHandle coverage is scoped to the working directory and does not grant arbitrary host paths."
+          },
+          {
+            "name": "fs-watch-package",
+            "reason": "fs.watch coverage is scoped and bounded; recursive watchers and broader packaged watcher parity remain blocked."
+          }
+        ]
+      }
+    ]
+  }
 }

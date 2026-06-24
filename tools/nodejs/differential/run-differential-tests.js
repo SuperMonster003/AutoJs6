@@ -47,6 +47,7 @@ function main() {
     autoJsSource: options.autojsJson || options.autojsLog || null,
     rows,
     summary: summarize(rows),
+    phase13Compatibility: summarizePhase13CompatibilityCategories(rows, manifest.phase13Compatibility),
   };
 
   fs.mkdirSync(reportDir, { recursive: true });
@@ -389,6 +390,7 @@ function renderV11CompatMarkdown(report) {
 
 function renderV11DifferentialMarkdown(report) {
   const categories = summarizeV11CapabilityCategories(report.rows);
+  const phase13Categories = report.phase13Compatibility && report.phase13Compatibility.categories || [];
   const lines = [];
   lines.push("# Node Profile v1.1 Differential Report");
   lines.push("");
@@ -409,6 +411,23 @@ function renderV11DifferentialMarkdown(report) {
   lines.push("| bug | `" + report.summary.bugs + "` |");
   lines.push("| desktop failures | `" + report.summary.desktopFailures + "` |");
   lines.push("");
+  if (phase13Categories.length > 0) {
+    lines.push("## Phase 13 Dependency Compatibility Categories");
+    lines.push("");
+    lines.push("| Category | Reason kind | Fixtures | Desktop pass-rate | AutoJs6 pass-rate | Package reasons |");
+    lines.push("| --- | --- | --- | ---: | ---: | --- |");
+    phase13Categories.forEach((category) => {
+      lines.push([
+        category.title || category.id,
+        category.reasonKind,
+        category.fixtures.join(", ") || "none",
+        renderPassRate(category.passRate.desktop),
+        renderPassRate(category.passRate.autojs),
+        category.packages.map((row) => row.name + ": " + row.reason).join("; "),
+      ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
+    });
+    lines.push("");
+  }
   lines.push("## Required v1.1 Coverage");
   lines.push("");
   lines.push("| Capability area | Fixtures | Classification counts |");
@@ -436,6 +455,63 @@ function renderV11DifferentialMarkdown(report) {
     ].map(markdownCell).join(" | ").replace(/^/, "| ").replace(/$/, " |"));
   });
   return lines.join("\n") + "\n";
+}
+
+function summarizePhase13CompatibilityCategories(rows, metadata) {
+  if (!metadata || !Array.isArray(metadata.categories)) {
+    return {
+      schema: "",
+      fixtureCount: rows.length,
+      requiredReasonKinds: [],
+      categories: [],
+    };
+  }
+  const rowByFixture = new Map(rows.map((row) => [row.fixture, row]));
+  return {
+    schema: String(metadata.schema || ""),
+    fixtureCount: Number(metadata.fixtureCount || rows.length),
+    requiredReasonKinds: Array.isArray(metadata.requiredReasonKinds) ? metadata.requiredReasonKinds.map(String) : [],
+    categories: metadata.categories.map((category) => {
+      const fixtures = Array.isArray(category.fixtures) ? category.fixtures.map(String) : [];
+      const matchedRows = fixtures.map((fixture) => rowByFixture.get(fixture)).filter(Boolean);
+      return {
+        id: String(category.id || ""),
+        title: String(category.title || category.id || ""),
+        reasonKind: String(category.reasonKind || ""),
+        fixtures,
+        packages: Array.isArray(category.packages)
+          ? category.packages.map((row) => ({
+            name: String(row && row.name || ""),
+            reason: String(row && row.reason || ""),
+          }))
+          : [],
+        counts: countClassifications(matchedRows),
+        passRate: {
+          desktop: passRate(matchedRows, (row) => row.desktop && row.desktop.expectedOutputFound && row.desktop.exitCode === 0),
+          autojs: passRate(
+            matchedRows.filter((row) => row.autojs),
+            (row) => row.autojs && row.autojs.exitCode === 0,
+          ),
+        },
+      };
+    }),
+  };
+}
+
+function passRate(rows, predicate) {
+  if (!rows.length) {
+    return {
+      passed: 0,
+      total: 0,
+      ratio: null,
+    };
+  }
+  const passed = rows.filter(predicate).length;
+  return {
+    passed,
+    total: rows.length,
+    ratio: passed / rows.length,
+  };
 }
 
 function summarizeV11CapabilityCategories(rows) {
@@ -491,6 +567,13 @@ function renderClassificationCounts(counts) {
   ].filter((classification) => counts[classification] > 0)
     .map((classification) => classification + "=" + counts[classification])
     .join(", ") || "none";
+}
+
+function renderPassRate(value) {
+  if (!value || !value.total) {
+    return "n/a";
+  }
+  return value.passed + "/" + value.total;
 }
 
 function markdownCell(value) {
