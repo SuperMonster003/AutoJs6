@@ -1664,6 +1664,7 @@ runtime.
   - provider-owned task registrations are tracked as bridge resources; explicit `cancel()` removes persisted records and cancels the unique WorkManager work
   - raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter objects remain unavailable to JavaScript
   - P13-21 records the current daily/weekly/user task database provider state as partial: `work_manager` and `compat.tasks` one-shot migration are live evidence, while direct `require("tasks")`, global `tasks`, daily/weekly add/query/update/remove, packaged task-database promotion, and raw `TimedTask` / `IntentTask` mutation remain blocked
+  - P13-22 records the current IntentTask/broadcast task provider state as partial: Android/Rhino receiver substrate and `compat.tasks` IntentTask rejection stubs are evidence, while receiver registration, boot/package/startup/custom broadcast triggers, manifest mutation, packaged trigger/remove behavior, and raw `Intent` / `BroadcastReceiver` objects remain blocked
 
 Example:
 
@@ -1784,6 +1785,7 @@ Current policy:
 - Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.
 - Existing Rhino task APIs remain unchanged.
 - P13-21 keeps daily/weekly/user task database parity in a partial Pro-profile evidence state: `compat.tasks.addDisposableTask()` can migrate Node-owned one-shot descriptors through `work_manager`, but wall-clock daily/weekly rows, user task database schema migration, packaged metadata, and raw task object compatibility remain separate gates.
+- P13-22 keeps IntentTask/broadcast parity in a partial Pro-profile evidence state: Rhino/Android receiver infrastructure is documented, but Node cannot create broadcast receiver rows, trigger boot/package/custom actions, mutate manifests, or inspect raw trigger payloads.
 - Future migration into the user-visible AutoJs6 task database, packaged receivers, boot/broadcast triggers, restart policies, and arbitrary long-running scheduled Node processes remain separate gates.
 - Future broadcast, startup, boot, and package-event task support is deferred behind `docs/nodejs/design/BROADCAST_TASKS.md` and a user-visible permission flow.
 

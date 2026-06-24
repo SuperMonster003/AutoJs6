@@ -309,7 +309,7 @@
         "P13-26",
         "P13-27"
       ],
-      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked.",
+      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked.",
       "risk": "high",
       "runtimeSurface": [
         "daily/weekly task provider",
@@ -334,7 +334,18 @@
         "docs/nodejs/types/autojs6-node/work_manager.d.ts",
         "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
         "build/reports/nodejs/phase13-task-database-provider.json",
-        "build/reports/nodejs/phase13-task-database-provider.md"
+        "build/reports/nodejs/phase13-task-database-provider.md",
+        "docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md",
+        "tools/nodejs/phase13/verify-intent-broadcast-provider.js",
+        ":app:verifyNodePhase13IntentBroadcastProvider",
+        "app/src/main/java/org/autojs/autojs/external/receiver/BaseBroadcastReceiver.java",
+        "app/src/main/java/org/autojs/autojs/external/receiver/StaticBroadcastReceiver.java",
+        "app/src/main/java/org/autojs/autojs/external/receiver/DynamicBroadcastReceivers.kt",
+        "app/src/main/java/org/autojs/autojs/timing/IntentTask.java",
+        "docs/nodejs/design/BROADCAST_TASKS.md",
+        "docs/nodejs/design/TASKS_INTENT_BROADCAST_COMPATIBILITY_DECISION.md",
+        "build/reports/nodejs/phase13-intent-broadcast-provider.json",
+        "build/reports/nodejs/phase13-intent-broadcast-provider.md"
       ],
       "rollback": "Keep P12 stable unsupported or blocked_by_design stubs and require explicit migration to supported Node bridge modules."
     },

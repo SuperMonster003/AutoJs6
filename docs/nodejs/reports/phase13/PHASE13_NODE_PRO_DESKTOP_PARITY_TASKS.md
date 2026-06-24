@@ -30,6 +30,21 @@
   scheduler semantics, packaged metadata/manifest behavior, and raw
   TimedTask/IntentTask profile decisions.
 
+## P13-22 Partial Landing Note
+
+- P13-22 partial IntentTask/broadcast provider gate records the current
+  Android/Rhino `IntentTask`, `IntentTaskDatabase`, `BaseBroadcastReceiver`,
+  `StaticBroadcastReceiver`, and `DynamicBroadcastReceivers` substrate plus the
+  existing `autojs6:compat.tasks` IntentTask rejection stubs.
+- Host verifier: `tools/nodejs/phase13/verify-intent-broadcast-provider.js`.
+- Gradle gate: `:app:verifyNodePhase13IntentBroadcastProvider`.
+- Report: `docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md`.
+- Surface manifest evidence: `phase13-intent-broadcast-provider`.
+- Remaining P13-22 blockers: capability split, receiver authority,
+  exported/non-exported policy, trigger payload serialization, packaged
+  manifest synthesis, install/trigger/remove smoke, user disclosure, and raw
+  Intent/BroadcastReceiver profile decisions.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -619,6 +634,20 @@ P13 task 本身使用以下执行状态：
     - manifest synthesis、receiver authority、exported policy、package signing 清晰。
     - 不允许任意外部广播静默唤起高权限脚本。
     - packaged APK smoke 覆盖 install/trigger/remove。
+  - P13-22 partial IntentTask/broadcast provider gate (2026-06-24):
+    - Evidence:
+      - Report: `docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md`
+      - Verifier: `tools/nodejs/phase13/verify-intent-broadcast-provider.js`
+      - Gradle gate: `:app:verifyNodePhase13IntentBroadcastProvider`
+      - Surface manifest evidence: `phase13-intent-broadcast-provider`
+    - Current ready slice:
+      - Android/Rhino `IntentTask`, `IntentTaskDatabase`, `TimedTaskManager`, `BaseBroadcastReceiver`, `StaticBroadcastReceiver`, and `DynamicBroadcastReceivers` exist as substrate.
+      - `compat.tasks.addIntentTask/queryIntentTasks/getIntentTask/removeIntentTask` still reject with `ERR_AUTOJS6_RHINO_COMPAT_UNSUPPORTED` before bridge dispatch.
+      - Node still cannot register Android receivers, mutate manifests, receive external broadcast wakeups, or access raw `Intent` / `BroadcastReceiver` / `IntentTask` objects.
+    - Remaining blockers:
+      - Capability split for app-local custom broadcasts, exported broadcasts, boot/user-unlocked, package events, startup, and exact-alarm triggers.
+      - Receiver ownership, exported policy, duplicate suppression, unregister/delete cleanup, and process-death recovery.
+      - Trigger payload JSON snapshots, packaged manifest synthesis, install/trigger/remove smokes, user disclosure, and rate-limit diagnostics.
 
 - [ ] P13-23: 扩展 app/intent/broadcast Pro parity。
   - 范围：补齐 `app` 模块启动应用、intent、URI、邮件、设置页、广播等能力。

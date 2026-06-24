@@ -544,6 +544,8 @@ Node scripts have only the Task 65/180/S7-15/S7-21 `work_manager` controlled sch
 
 P13-21 records daily/weekly/user task database promotion as partial. The existing Android/Rhino `TimedTask` and `IntentTask` database substrate is evidence only; Node still has no `tasks` capability, no direct task database provider, no packaged task database promotion, no wall-clock daily/weekly scheduler parity, and no raw `TimedTask`, `IntentTask`, WorkManager, PendingIntent, AlarmManager, JobScheduler, BroadcastReceiver, Intent, or cursor object access.
 
+P13-22 records IntentTask/broadcast task provider promotion as partial. The existing Android/Rhino receiver stack remains substrate evidence only; Node still cannot register static or dynamic receivers, mutate packaged manifests, accept external broadcast wakeups, inject boot/package receivers, observe raw trigger payloads, or access raw `BroadcastReceiver`, `Intent`, `IntentFilter`, `PendingIntent`, `Bundle`, `Uri`, `PackageManager`, signature, icon, package-list, or receiver-handle objects.
+
 Future support must follow `docs/nodejs/design/WORK_MANAGER.md`:
 
 - timed task execution may be added only through a Promise bridge provider

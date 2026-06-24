@@ -453,7 +453,12 @@ object NodeBridgeProviderRegistry {
             "compatTasksLiveMethods" to "addDisposableTask,queryTasks,queryTimedTasks,getTimedTask,removeTask,removeTimedTask",
             "blockedRhinoTaskMethods" to "addDailyTask,addWeeklyTask,updateTask,addIntentTask,queryIntentTasks,getIntentTask,removeIntentTask",
             "dailyWeeklyPromotion" to "blocked_until_user_task_database_schema_migration_packaged_policy_and_wall_clock_scheduler_evidence",
+            "phase13IntentBroadcastPromotion" to "P13-22 partial IntentTask/broadcast task provider evidence gate",
+            "blockedBroadcastTriggers" to "boot,user-unlocked,package-event,startup,exact-alarm,custom-broadcast,exported-receiver",
+            "broadcastTaskPromotion" to "blocked_until_capability_split_receiver_authority_packaged_manifest_trigger_payload_install_trigger_remove_evidence",
+            "broadcastReceiverPolicy" to "Node cannot register Android receivers, mutate manifests, or accept external broadcast wakeups until a dedicated user-visible provider lands",
             "rawTaskObjectPolicy" to "no raw TimedTask, IntentTask, WorkRequest, PendingIntent, AlarmManager, JobScheduler, WorkManager, BroadcastReceiver, Intent, or database cursor crosses the bridge",
+            "rawBroadcastObjectPolicy" to "no raw BroadcastReceiver, Intent, IntentFilter, PendingIntent, Bundle, Uri, PackageManager, signature, icon, or package-list object crosses the bridge",
             "requireTasksPolicy" to "require(\"tasks\"), global tasks, and raw Rhino task objects remain unavailable until a dedicated Pro profile provider lands",
             "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
         )

@@ -1362,6 +1362,20 @@ evidence, provider-registry raw object denial, surface-manifest evidence, and
 cross-document policy anchors. It does not promote `require("tasks")`, global
 `tasks`, packaged task database behavior, or raw task object mutation.
 
+Phase 13 IntentTask/broadcast provider status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13IntentBroadcastProvider
+```
+
+This host gate records P13-22 as partial. It requires the Android/Rhino
+`IntentTask` database and receiver substrate, `compat.tasks` IntentTask
+rejection stubs, provider-registry receiver/raw object denial, packaged
+manifest/receiver policy anchors, surface-manifest evidence, and TypeScript
+stable rejection coverage. It does not promote receiver registration,
+`tasks.broadcast`, `tasks.intent`, boot/package/custom broadcast triggers,
+packaged trigger/remove behavior, or raw Android broadcast objects.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

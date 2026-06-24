@@ -237,6 +237,13 @@ daily/weekly wall-clock task database operations, IntentTask/broadcast task
 provider access, packaged task database promotion, or raw Rhino task object
 mutation.
 
+P13-22 records IntentTask/broadcast provider promotion as partial. The
+Android/Rhino `IntentTask` database and receiver stack are present, and the
+Node `compat.tasks` IntentTask helpers keep stable unsupported errors. AutoJs6
+Node still cannot register Android receivers, receive boot/package/custom
+broadcast triggers, mutate packaged manifests, inspect raw trigger payloads, or
+access raw `Intent` / `BroadcastReceiver` objects.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

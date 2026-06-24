@@ -410,6 +410,12 @@ work, `compat.tasks` one-shot migration, rejection stubs, Android/Rhino task
 database substrate evidence, and raw task object denial are present, while
 direct `tasks`, daily/weekly JSON provider operations, packaged task database
 promotion, and raw Rhino task mutation remain blocked.
+`verifyNodePhase13IntentBroadcastProvider` records the P13-22 partial
+IntentTask/broadcast provider state: Android/Rhino `IntentTask` persistence,
+receiver substrate, `compat.tasks` IntentTask rejection stubs, and raw broadcast
+object denial are present, while receiver registration, manifest mutation,
+capability split, packaged install/trigger/remove behavior, and external
+broadcast wakeups remain blocked.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -562,6 +568,12 @@ provider partial: `work_manager` and `compat.tasks` one-shot scheduling are
 covered, while direct `require("tasks")`, daily/weekly database add/query/get/
 update/remove operations, packaged behavior, and raw task objects require
 separate evidence.
+P13-22 additionally uses `verifyNodePhase13IntentBroadcastProvider` as the host
+promotion-status gate for IntentTask/broadcast parity and keeps the provider
+partial: Android/Rhino receiver substrate and stable rejection stubs are
+covered, while direct receiver registration, boot/package/custom triggers,
+manifest synthesis, packaged install/trigger/remove behavior, and raw broadcast
+objects require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

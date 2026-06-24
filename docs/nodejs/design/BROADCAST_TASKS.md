@@ -6,6 +6,12 @@ through `require("autojs6:compat").tasks`. Embedded Node scripts cannot
 register boot, package-event, startup, exact-alarm, or custom
 broadcast-triggered tasks yet.
 
+P13-22 records this design gate as partial Phase 13 evidence only. Android/Rhino
+`IntentTask` persistence and receiver substrate exist, but Node still has no
+broadcast task provider, no receiver registration authority, no manifest
+mutation authority, no packaged install/trigger/remove smoke, and no raw
+`Intent` or `BroadcastReceiver` access.
+
 ## Goal
 
 Boot and broadcast-triggered Node tasks must reuse AutoJs6 task ownership instead of giving Node direct access to Android broadcast APIs.

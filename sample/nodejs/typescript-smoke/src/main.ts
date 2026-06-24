@@ -395,6 +395,10 @@ async function smoke(): Promise<void> {
   const compatDailyDenied: Promise<never> = rhinoCompat.tasks.addDailyTask({ path: "main.cjs", time: "08:30" });
   const compatWeeklyDenied: Promise<never> = rhinoCompat.tasks.addWeeklyTask({ path: "main.cjs", time: "08:30", daysOfWeek: [1] });
   const compatUpdateDenied: Promise<never> = rhinoCompat.tasks.updateTask({ id: compatDisposableId });
+  const compatIntentAddDenied: Promise<never> = rhinoCompat.tasks.addIntentTask({ path: "main.cjs", action: "org.autojs6.TEST" });
+  const compatIntentQueryDenied: Promise<never> = rhinoCompat.tasks.queryIntentTasks({ action: "org.autojs6.TEST" });
+  const compatIntentGetDenied: Promise<never> = rhinoCompat.tasks.getIntentTask("intent-1");
+  const compatIntentRemoveDenied: Promise<never> = rhinoCompat.tasks.removeIntentTask("intent-1");
 
   const pluginInfo: plugins.PluginManifest = plugins.manifest("org.example.types");
   const pluginEntry: string = plugins.resolve("org.example.types");
@@ -551,6 +555,10 @@ async function smoke(): Promise<void> {
   void compatDailyDenied;
   void compatWeeklyDenied;
   void compatUpdateDenied;
+  void compatIntentAddDenied;
+  void compatIntentQueryDenied;
+  void compatIntentGetDenied;
+  void compatIntentRemoveDenied;
   void autojsVersionCode;
   void autojsPackageName;
   void autojsContextAvailable;

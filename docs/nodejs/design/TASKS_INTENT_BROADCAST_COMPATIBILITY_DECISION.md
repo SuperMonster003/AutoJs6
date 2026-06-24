@@ -11,6 +11,12 @@ task provider, Android receiver registration, manifest mutation, or
 P12-18 keeps Rhino `IntentTask` database and broadcast trigger parity out of
 the Node provider surface.
 
+P13-22 reopens this area only as a partial Pro-profile evidence gate. It records
+the current Android/Rhino receiver substrate and the existing Node rejection
+stubs, but it still does not promote receiver registration, manifest mutation,
+packaged broadcast triggers, raw Android intent objects, or a direct
+`require("tasks")` provider.
+
 The following `compat.tasks` methods are explicit stable-error stubs:
 
 - `addIntentTask(options?)` rejects with

@@ -1013,6 +1013,12 @@ P13-21 records task database provider promotion as partial: `work_manager` and
 `tasks`, daily/weekly/user database operations, IntentTask/broadcast triggers,
 packaged promotion, and raw task object mutation remain blocked.
 
+P13-22 records IntentTask/broadcast provider promotion as partial: Android/Rhino
+receiver substrate and stable `compat.tasks` rejection stubs are
+evidence-backed, while receiver registration, manifest mutation, boot/package/
+startup/custom triggers, packaged install/trigger/remove behavior, and raw
+`Intent` / `BroadcastReceiver` objects remain blocked.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、
