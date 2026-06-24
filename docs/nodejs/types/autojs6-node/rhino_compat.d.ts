@@ -12,6 +12,9 @@ declare module "autojs6:compat" {
   import mediaProjection = require("media_projection");
   import ocr = require("ocr");
   import barcodeModule = require("barcode");
+  import mediaModule = require("media");
+  import mediainfoModule = require("mediainfo");
+  import recorderModule = require("recorder");
   import ui = require("ui");
   import files = require("files");
   import base64 = require("base64");
@@ -398,6 +401,9 @@ declare module "autojs6:compat" {
       readonly ocr: RhinoOcrCompatFunction;
       readonly barcode: RhinoBarcodeCompatFunction;
       readonly qrcode: RhinoBarcodeCompatFunction;
+      readonly media: mediaModule.MediaModule;
+      readonly mediainfo: mediainfoModule.MediainfoModule;
+      readonly recorder: recorderModule.RecorderModule;
       readonly ui: RhinoUiCompatModule;
       readonly tasks: RhinoTasksCompatModule;
       requestScreenCapture(options?: ScreenCaptureRequestOptions): Promise<boolean>;

@@ -92,7 +92,8 @@ function buildReport(files) {
       token(files.permissionManifest, 'const val DEVICE_POWER = "device.power"'),
       token(files.permissionManifest, '"power-manager" to DEVICE_POWER'),
       token(files.permissionManifest, '"isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings" -> listOf(DEVICE, DEVICE_POWER)'),
-      token(files.permissionManifest, "required == SHELL_ROOT || required == SHELL_SHIZUKU || required == NOTIFICATIONS_SETTINGS || required == DEVICE_POWER"),
+      token(files.permissionManifest, "required == NOTIFICATIONS_SETTINGS ||"),
+      token(files.permissionManifest, "required == DEVICE_POWER ||"),
       token(files.protocol, 'val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings")'),
       token(files.protocol, '"isIgnoringBatteryOptimizations" -> runCatching'),
       token(files.protocol, '"openBatteryOptimizationSettings" -> runCatching'),
@@ -115,7 +116,7 @@ function buildReport(files) {
       token(files.providerRegistry, '"phase13Promotion" to "P13-25 partial notifications/settings/power manager evidence gate"'),
       token(files.providerRegistry, '"rawObjectPolicy" to "no raw Notification'),
       token(files.providerRegistry, '"rawObjectPolicy" to "no raw PowerManager'),
-      token(files.providerRegistryTest, 'assertEquals(18, definitions.size)'),
+      token(files.providerRegistryTest, 'assertEquals(19, definitions.size)'),
       token(files.providerRegistryTest, 'id = "device"'),
       token(files.permissionManifestTest, "NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS"),
       token(files.permissionManifestTest, "NodeBridgePermissionManifest.DEVICE_POWER"),
@@ -167,7 +168,8 @@ function buildReport(files) {
     ),
     check(
       "settings-capability-exact",
-      files.permissionManifest.text.includes("required == SHELL_ROOT || required == SHELL_SHIZUKU || required == NOTIFICATIONS_SETTINGS || required == DEVICE_POWER"),
+      files.permissionManifest.text.includes("required == NOTIFICATIONS_SETTINGS ||") &&
+        files.permissionManifest.text.includes("required == DEVICE_POWER ||"),
       "notifications.settings and device.power must be exact capabilities, not implied by their parent tokens.",
     ),
     check(

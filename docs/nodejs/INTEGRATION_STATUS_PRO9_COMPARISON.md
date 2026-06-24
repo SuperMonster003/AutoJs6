@@ -1043,6 +1043,15 @@ Do-Not-Disturb/exact-alarm policy, direct wakelock/power-manager APIs, OEM
 power matrices, packaged disclosure, and raw Android notification/power objects
 remain blocked.
 
+P13-26 records media/recorder/mediainfo provider promotion as partial:
+`media.getAudioStreamVolume()`, `media.getAudioStreamMaxVolume()`,
+`media.getAudioStreamInfo()`, scoped `mediainfo.read()` / `mediainfo.get()`,
+and `recorder.getStatus()` are evidence-backed JSON-safe helpers requiring
+exact `media.audio`, `media.metadata`, or `media.recording` where appropriate.
+Playback, real recorder sessions, foreground microphone disclosure, MediaStore
+access, packaged media assets, migration examples, and raw Android media
+objects remain blocked.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

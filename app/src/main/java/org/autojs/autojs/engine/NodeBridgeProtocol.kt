@@ -21,6 +21,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -62,6 +63,7 @@ import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
+import org.mediainfo.android.MediaInfo
 import okio.ByteString.Companion.decodeBase64
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -562,6 +564,9 @@ object NodeBridgeModules {
     const val IMAGES = "images"
     const val OCR = "ocr"
     const val BARCODE = "barcode"
+    const val MEDIA = "media"
+    const val MEDIAINFO = "mediainfo"
+    const val RECORDER = "recorder"
     const val STORAGE = "storage"
     const val STORAGES = "storages"
     const val DATABASE = "database"
@@ -618,6 +623,9 @@ object NodeBridgeModules {
     )
     val ocrMethods = setOf("recognize", "recognizeText", "detectTextBounds")
     val barcodeMethods = setOf("detect", "detectAll", "recognizeText", "recognizeTexts")
+    val mediaMethods = setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo")
+    val mediainfoMethods = setOf("read", "get")
+    val recorderMethods = setOf("getStatus", "start", "stop")
     val storageModules = setOf(STORAGE, STORAGES)
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
     val databaseModules = setOf(DATABASE, SQLITE)
@@ -647,6 +655,9 @@ object NodeBridgeModules {
         IMAGES to imageMethods,
         OCR to ocrMethods,
         BARCODE to barcodeMethods,
+        MEDIA to mediaMethods,
+        MEDIAINFO to mediainfoMethods,
+        RECORDER to recorderMethods,
         STORAGE to storageMethods,
         STORAGES to storageMethods,
         DATABASE to databaseMethods,
@@ -777,6 +788,9 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module in NodeBridgeModules.imageModules && request.method in NodeBridgeModules.imageMethods -> dispatchImage(request, auditedCallback)
             request.module == NodeBridgeModules.OCR && request.method in NodeBridgeModules.ocrMethods -> dispatchOcr(request, auditedCallback)
             request.module == NodeBridgeModules.BARCODE && request.method in NodeBridgeModules.barcodeMethods -> dispatchBarcode(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIA && request.method in NodeBridgeModules.mediaMethods -> dispatchMedia(request, auditedCallback)
+            request.module == NodeBridgeModules.MEDIAINFO && request.method in NodeBridgeModules.mediainfoMethods -> dispatchMediainfo(request, auditedCallback)
+            request.module == NodeBridgeModules.RECORDER && request.method in NodeBridgeModules.recorderMethods -> dispatchRecorder(request, auditedCallback)
             request.module in NodeBridgeModules.storageModules && request.method in NodeBridgeModules.storageMethods -> dispatchStorage(request, auditedCallback)
             request.module in NodeBridgeModules.databaseModules && request.method in NodeBridgeModules.databaseMethods -> dispatchDatabase(request, auditedCallback)
             request.module == NodeBridgeModules.NOTIFICATIONS && request.method in NodeBridgeModules.notificationsMethods -> dispatchNotifications(request, auditedCallback)
@@ -1931,6 +1945,207 @@ class AndroidNodeBridgeCapabilityProvider(
                     )
                 }
             }
+    }
+
+    private fun dispatchMedia(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        dispatchOnMain(request, callback) {
+            runCatching {
+                val args = request.argsArray()
+                val stream = audioStreamFromArg(args.opt(0))
+                when (request.method) {
+                    "getAudioStreamVolume" -> NodeBridgeResponse.success(
+                        request.id,
+                        NodeBridgeJson.valueToJson(audioManager().getStreamVolume(stream.type)),
+                    )
+                    "getAudioStreamMaxVolume" -> NodeBridgeResponse.success(
+                        request.id,
+                        NodeBridgeJson.valueToJson(audioManager().getStreamMaxVolume(stream.type)),
+                    )
+                    "getAudioStreamInfo" -> NodeBridgeResponse.success(
+                        request.id,
+                        audioStreamInfo(stream).toString(),
+                    )
+                    else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
+                }
+            }.getOrElse { error ->
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 media request failed.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun dispatchMediainfo(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        runCatching {
+            val args = request.argsArray()
+            val rawPath = args.optString(0, "")
+            val file = resolveScopedProjectFile(rawPath)
+                ?: return callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.permissionDenied(
+                            message = "AutoJs6 mediainfo path must stay inside the scoped working directory.",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+            if (!file.isFile) {
+                return callback(
+                    NodeBridgeResponse.failure(
+                        request.id,
+                        NodeBridgeError.invalidRequest(
+                            message = "AutoJs6 mediainfo target does not exist: $rawPath",
+                            module = request.module,
+                            method = request.method,
+                        ),
+                    ),
+                )
+            }
+            when (request.method) {
+                "read" -> {
+                    val options = args.optJSONObject(1) ?: JSONObject()
+                    callback(NodeBridgeResponse.success(request.id, mediainfoSnapshot(rawPath, file, options).toString()))
+                }
+                "get" -> {
+                    val streamKind = mediaInfoStreamKind(args.optString(1, "general"))
+                    val parameter = args.optString(2, "")
+                    val value = MediaInfo().get(file.absolutePath, streamKind, 0, parameter)
+                    callback(NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(value)))
+                }
+                else -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method)))
+            }
+        }.getOrElse { error ->
+            callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.invalidRequest(
+                        message = error.message ?: "AutoJs6 mediainfo request failed.",
+                        module = request.module,
+                        method = request.method,
+                    ),
+                ),
+            )
+        }
+    }
+
+    private fun dispatchRecorder(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        when (request.method) {
+            "getStatus" -> callback(NodeBridgeResponse.success(request.id, recorderStatus().toString()))
+            "start", "stop" -> callback(
+                NodeBridgeResponse.failure(
+                    request.id,
+                    NodeBridgeError.capabilityProviderMissing(
+                        module = request.module,
+                        method = request.method,
+                        requirement = "a privacy-reviewed audio recorder provider with foreground disclosure and cleanup evidence",
+                    ),
+                ),
+            )
+            else -> callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method)))
+        }
+    }
+
+    private fun audioManager(): AudioManager {
+        return appContext.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            ?: throw IllegalStateException("Android AudioManager is unavailable.")
+    }
+
+    private fun audioStreamFromArg(raw: Any?): ControlledAudioStream {
+        val text = when (raw) {
+            null, JSONObject.NULL -> "music"
+            is JSONObject -> raw.optString("stream", raw.optString("type", "music"))
+            else -> raw.toString()
+        }.trim().lowercase(Locale.US).replace('-', '_')
+        return when (text) {
+            "", "music", "media", "stream_music" -> ControlledAudioStream("music", AudioManager.STREAM_MUSIC)
+            "notification", "notifications", "stream_notification" -> ControlledAudioStream("notification", AudioManager.STREAM_NOTIFICATION)
+            "alarm", "stream_alarm" -> ControlledAudioStream("alarm", AudioManager.STREAM_ALARM)
+            "ring", "ringtone", "stream_ring" -> ControlledAudioStream("ring", AudioManager.STREAM_RING)
+            "system", "stream_system" -> ControlledAudioStream("system", AudioManager.STREAM_SYSTEM)
+            "voice_call", "call", "stream_voice_call" -> ControlledAudioStream("voice_call", AudioManager.STREAM_VOICE_CALL)
+            "dtmf", "stream_dtmf" -> ControlledAudioStream("dtmf", AudioManager.STREAM_DTMF)
+            else -> throw IllegalArgumentException("Unsupported audio stream: $text")
+        }
+    }
+
+    private fun audioStreamInfo(stream: ControlledAudioStream): JSONObject {
+        val manager = audioManager()
+        return JSONObject()
+            .put("schema", "autojs6-node-media-audio-stream-v1")
+            .put("stream", stream.name)
+            .put("streamType", stream.type)
+            .put("volume", manager.getStreamVolume(stream.type))
+            .put("maxVolume", manager.getStreamMaxVolume(stream.type))
+            .put("minVolume", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) manager.getStreamMinVolume(stream.type) else 0)
+            .put("volumeFixed", manager.isVolumeFixed)
+    }
+
+    private fun mediainfoSnapshot(requestedPath: String, file: File, options: JSONObject): JSONObject {
+        val includeInform = options.optBoolean("includeInform", true)
+        val includeSections = options.optBoolean("includeSections", true)
+        val inform = MediaInfo().getMI(file.absolutePath).orEmpty()
+        return JSONObject()
+            .put("schema", "autojs6-node-mediainfo-snapshot-v1")
+            .put("path", requestedPath)
+            .put("fileName", file.name)
+            .put("sizeBytes", file.length())
+            .put("inform", if (includeInform) inform else "")
+            .put("sections", if (includeSections) mediaInfoSections(inform) else JSONObject())
+    }
+
+    private fun mediaInfoSections(inform: String): JSONObject {
+        val sections = JSONObject()
+        var current: JSONObject? = null
+        inform.lineSequence().forEach { raw ->
+            val line = raw.trimEnd()
+            if (line.isBlank()) return@forEach
+            if (!line.contains(':')) {
+                val sectionName = line.trim().lowercase(Locale.US)
+                val array = sections.optJSONArray(sectionName) ?: JSONArray().also { sections.put(sectionName, it) }
+                current = JSONObject().also { array.put(it) }
+            } else {
+                val target = current ?: return@forEach
+                val idx = line.indexOf(':')
+                val key = line.substring(0, idx).trim().toMediainfoCamel()
+                val value = line.substring(idx + 1).trim()
+                if (key.isNotBlank()) {
+                    target.put(key, value)
+                }
+            }
+        }
+        return sections
+    }
+
+    private fun String.toMediainfoCamel(): String = this
+        .replace(Regex("\\((s|es|ies)\\)"), "$1")
+        .split(Regex("[^A-Za-z0-9]+"))
+        .filter { it.isNotEmpty() }
+        .joinToString("") { part ->
+            part.lowercase(Locale.US).replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }.replaceFirstChar { it.lowercase() }
+
+    private fun mediaInfoStreamKind(raw: String): MediaInfo.StreamKind {
+        val normalized = raw.trim().uppercase(Locale.US)
+        return MediaInfo.StreamKind.entries.firstOrNull { it.name == normalized }
+            ?: throw IllegalArgumentException("Unsupported mediainfo stream kind: $raw")
+    }
+
+    private fun recorderStatus(): JSONObject {
+        val microphoneGranted = appContext.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        return JSONObject()
+            .put("schema", "autojs6-node-recorder-status-v1")
+            .put("recording", false)
+            .put("providerAvailable", false)
+            .put("microphonePermissionRequired", true)
+            .put("microphonePermissionGranted", microphoneGranted)
+            .put("foregroundDisclosureRequired", true)
+            .put("reason", "blocked_until_privacy_reviewed_recorder_provider")
     }
 
     private fun dispatchImageRead(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -4376,6 +4591,11 @@ private data class ShellExecResult(
         }.toString()
     }
 }
+
+private data class ControlledAudioStream(
+    val name: String,
+    val type: Int,
+)
 
 enum class ControlledWorkTaskKind(val wireName: String) {
     ONCE("once"),

@@ -125,6 +125,7 @@ object NodeBridgeProviderRegistry {
     private const val BARCODE_PROVIDER = "barcode"
     private const val STORAGE_PROVIDER = "storage"
     private const val DATABASE_PROVIDER = "database"
+    private const val MEDIA_PROVIDER = "media"
     private const val NOTIFICATIONS_PROVIDER = "notifications"
     private const val DEVICE_PROVIDER = "device"
     private const val SENSORS_PROVIDER = "sensors"
@@ -178,6 +179,18 @@ object NodeBridgeProviderRegistry {
             modules = listOf(NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE),
             capabilities = listOf(NodeBridgePermissionManifest.DATABASE),
             packagedSupport = packagedSupported("database files remain scoped to the packaged project working directory"),
+        ),
+        provider(
+            id = MEDIA_PROVIDER,
+            displayName = "media/mediainfo/recorder",
+            modules = listOf(NodeBridgeModules.MEDIA, NodeBridgeModules.MEDIAINFO, NodeBridgeModules.RECORDER),
+            capabilities = listOf(
+                NodeBridgePermissionManifest.MEDIA,
+                NodeBridgePermissionManifest.MEDIA_AUDIO,
+                NodeBridgePermissionManifest.MEDIA_METADATA,
+                NodeBridgePermissionManifest.MEDIA_RECORDING,
+            ),
+            packagedSupport = packagedProviderDependent("P13-26 partial media provider exposes scoped metadata and read-only audio status; recording, playback, MediaStore, and foreground disclosure require separate packaged evidence"),
         ),
         provider(
             id = NOTIFICATIONS_PROVIDER,
@@ -345,6 +358,7 @@ object NodeBridgeProviderRegistry {
         BARCODE_PROVIDER -> if (mlKitBarcodeAvailable()) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        MEDIA_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
         DEVICE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SENSORS_PROVIDER -> sensorsStatus(context)
@@ -363,6 +377,23 @@ object NodeBridgeProviderRegistry {
     private fun androidDetails(id: String, context: Context): Map<String, String> = when (id) {
         OCR_PROVIDER -> ocrDetails(context)
         BARCODE_PROVIDER -> barcodeDetails(context)
+        MEDIA_PROVIDER -> linkedMapOf(
+            "liveMethods" to "media.getAudioStreamVolume,media.getAudioStreamMaxVolume,media.getAudioStreamInfo,mediainfo.read,mediainfo.get,recorder.getStatus",
+            "blockedMethods" to "recorder.start,recorder.stop,media.play,media.pause,media.stop,media.scanFile,mediaStore.query,mediaStore.insert",
+            "capability" to NodeBridgePermissionManifest.MEDIA,
+            "audioCapability" to NodeBridgePermissionManifest.MEDIA_AUDIO,
+            "metadataCapability" to NodeBridgePermissionManifest.MEDIA_METADATA,
+            "recordingCapability" to NodeBridgePermissionManifest.MEDIA_RECORDING,
+            "recordingAndroidPermissions" to NodeBridgePermissionManifest.androidPermissionsForCapabilities(listOf(NodeBridgePermissionManifest.MEDIA_RECORDING)).joinToString(","),
+            "audioStatusSchema" to "autojs6-node-media-audio-stream-v1",
+            "mediainfoSchema" to "autojs6-node-mediainfo-snapshot-v1",
+            "recorderStatusSchema" to "autojs6-node-recorder-status-v1",
+            "phase13Promotion" to "P13-26 partial media/recorder/mediainfo provider evidence gate",
+            "pathPolicy" to "mediainfo accepts only relative paths inside the scoped Node working directory",
+            "recorderPolicy" to "recorder exposes getStatus only; start/stop fail closed until foreground disclosure, permission, lifecycle, cleanup, and packaged smoke are promoted",
+            "rawObjectPolicy" to "no raw MediaPlayer, AudioManager, MediaRecorder, MediaMetadataRetriever, MediaInfo, MediaStore cursor, Uri, file descriptor, or Context object crosses the bridge",
+            "statusReason" to "P13-26 partial gate promotes JSON-safe scoped metadata and read-only audio status while recording/playback/MediaStore remain blocked",
+        )
         NOTIFICATIONS_PROVIDER -> linkedMapOf(
             "liveMethods" to "notify,cancel,cancelAll,getPermissionStatus,openSettings",
             "capability" to NodeBridgePermissionManifest.NOTIFICATIONS,

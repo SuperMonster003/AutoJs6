@@ -266,6 +266,14 @@ that depend on notification actions/listeners, rich layouts, Do-Not-Disturb,
 exact alarms, wakelocks, direct power-manager control, OEM power behavior, or
 packaged disclosure flows on Rhino until a dedicated provider lands.
 
+P13-26 records media/recorder/mediainfo provider promotion as partial. AutoJs6
+Node now has read-only audio stream snapshots, scoped file metadata through
+`mediainfo`, and recorder status behind exact `media.audio`, `media.metadata`,
+and `media.recording` boundaries. Keep Rhino/Pro scripts that depend on audio
+playback, real recording sessions, MediaStore, packaged media assets,
+foreground microphone disclosure, or raw Android media objects on Rhino until a
+dedicated provider lands.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

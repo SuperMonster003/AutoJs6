@@ -179,6 +179,42 @@ class NodeBridgePermissionManifestInstrumentationTest {
         )
         assertEquals(NodeBridgePermissionManifest.DEVICE_POWER, NodeBridgePermissionManifest.normalizeCapability("device-power"))
         assertEquals(
+            listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_AUDIO),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("media", "getAudioStreamInfo"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.MEDIA_AUDIO),
+            NodeBridgePermissionManifest.missingCapabilities(
+                declaredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA),
+                requiredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_AUDIO),
+            ),
+        )
+        assertEquals(NodeBridgePermissionManifest.MEDIA_AUDIO, NodeBridgePermissionManifest.normalizeCapability("media-audio"))
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_METADATA),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("mediainfo", "read"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.MEDIA_METADATA),
+            NodeBridgePermissionManifest.missingCapabilities(
+                declaredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA),
+                requiredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_METADATA),
+            ),
+        )
+        assertEquals(NodeBridgePermissionManifest.MEDIA_METADATA, NodeBridgePermissionManifest.normalizeCapability("mediainfo"))
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_RECORDING),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("recorder", "start"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.MEDIA_RECORDING),
+            NodeBridgePermissionManifest.missingCapabilities(
+                declaredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA),
+                requiredCapabilities = listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_RECORDING),
+            ),
+        )
+        assertEquals(NodeBridgePermissionManifest.MEDIA_RECORDING, NodeBridgePermissionManifest.normalizeCapability("recorder"))
+        assertEquals(
             listOf(NodeBridgePermissionManifest.SENSORS),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("sensors", "getAvailableSensors"),
         )
@@ -295,16 +331,18 @@ class NodeBridgePermissionManifestInstrumentationTest {
     @Test
     fun androidPermissionMismatchIsDerivedFromCapabilityManifest() {
         val missing = NodeBridgePermissionManifest.missingAndroidPermissionsForCapabilities(
-            capabilities = listOf("network", "screen_capture", "notifications"),
+            capabilities = listOf("network", "screen_capture", "notifications", "media.recording"),
             declaredAndroidPermissions = listOf(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
         )
 
         assertEquals(
             listOf(
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_POST_NOTIFICATIONS,
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_RECORD_AUDIO,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE,
+                NodeBridgePermissionManifest.ANDROID_PERMISSION_FOREGROUND_SERVICE_MICROPHONE,
             ),
             missing,
         )

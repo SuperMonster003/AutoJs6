@@ -23,6 +23,10 @@ object NodeBridgePermissionManifest {
     const val IMAGE = "image"
     const val OCR = "ocr"
     const val BARCODE = "barcode"
+    const val MEDIA = "media"
+    const val MEDIA_AUDIO = "media.audio"
+    const val MEDIA_METADATA = "media.metadata"
+    const val MEDIA_RECORDING = "media.recording"
     const val STORAGE = "storage"
     const val DATABASE = "database"
     const val NOTIFICATIONS = "notifications"
@@ -56,7 +60,10 @@ object NodeBridgePermissionManifest {
         "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE =
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+    const val ANDROID_PERMISSION_FOREGROUND_SERVICE_MICROPHONE =
+        "android.permission.FOREGROUND_SERVICE_MICROPHONE"
     const val ANDROID_PERMISSION_POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS"
+    const val ANDROID_PERMISSION_RECORD_AUDIO = "android.permission.RECORD_AUDIO"
 
     val definedCapabilities: List<String> = listOf(
         TOAST,
@@ -72,6 +79,10 @@ object NodeBridgePermissionManifest {
         IMAGE,
         OCR,
         BARCODE,
+        MEDIA,
+        MEDIA_AUDIO,
+        MEDIA_METADATA,
+        MEDIA_RECORDING,
         STORAGE,
         DATABASE,
         NOTIFICATIONS,
@@ -118,6 +129,19 @@ object NodeBridgePermissionManifest {
         "qrcode.detectall" to BARCODE,
         "qrcode.recognizetext" to BARCODE,
         "qrcode.recognizetexts" to BARCODE,
+        "audio" to MEDIA_AUDIO,
+        "media:audio" to MEDIA_AUDIO,
+        "media-audio" to MEDIA_AUDIO,
+        "media.metadata" to MEDIA_METADATA,
+        "media:metadata" to MEDIA_METADATA,
+        "mediainfo" to MEDIA_METADATA,
+        "media-info" to MEDIA_METADATA,
+        "media_info" to MEDIA_METADATA,
+        "media.record" to MEDIA_RECORDING,
+        "media:recording" to MEDIA_RECORDING,
+        "media-recording" to MEDIA_RECORDING,
+        "recorder" to MEDIA_RECORDING,
+        "audio.recording" to MEDIA_RECORDING,
         "notification" to NOTIFICATIONS,
         "notification.settings" to NOTIFICATIONS_SETTINGS,
         "notifications:settings" to NOTIFICATIONS_SETTINGS,
@@ -159,6 +183,11 @@ object NodeBridgePermissionManifest {
 
     private val androidPermissionsByCapability = linkedMapOf(
         NOTIFICATIONS to listOf(ANDROID_PERMISSION_POST_NOTIFICATIONS),
+        MEDIA_RECORDING to listOf(
+            ANDROID_PERMISSION_RECORD_AUDIO,
+            ANDROID_PERMISSION_FOREGROUND_SERVICE,
+            ANDROID_PERMISSION_FOREGROUND_SERVICE_MICROPHONE,
+        ),
         NETWORK to listOf(ANDROID_PERMISSION_INTERNET),
         SCREEN_CAPTURE to listOf(
             ANDROID_PERMISSION_FOREGROUND_SERVICE,
@@ -169,10 +198,12 @@ object NodeBridgePermissionManifest {
 
     private val androidPermissionOrder = listOf(
         ANDROID_PERMISSION_POST_NOTIFICATIONS,
+        ANDROID_PERMISSION_RECORD_AUDIO,
         ANDROID_PERMISSION_INTERNET,
         ANDROID_PERMISSION_FOREGROUND_SERVICE,
         ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,
         ANDROID_PERMISSION_FOREGROUND_SERVICE_SPECIAL_USE,
+        ANDROID_PERMISSION_FOREGROUND_SERVICE_MICROPHONE,
     )
 
     fun normalizeCapability(value: String): String {
@@ -288,6 +319,9 @@ object NodeBridgePermissionManifest {
             }
             NodeBridgeModules.OCR -> listOf(OCR, IMAGE)
             NodeBridgeModules.BARCODE -> listOf(BARCODE, IMAGE)
+            NodeBridgeModules.MEDIA -> listOf(MEDIA, MEDIA_AUDIO)
+            NodeBridgeModules.MEDIAINFO -> listOf(MEDIA, MEDIA_METADATA)
+            NodeBridgeModules.RECORDER -> listOf(MEDIA, MEDIA_RECORDING)
             NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
             NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE -> listOf(DATABASE)
             NodeBridgeModules.NOTIFICATIONS -> when (method) {
@@ -367,7 +401,15 @@ object NodeBridgePermissionManifest {
     }
 
     private fun declaresCapability(declared: Set<String>, required: String): Boolean {
-        if (required == SHELL_ROOT || required == SHELL_SHIZUKU || required == NOTIFICATIONS_SETTINGS || required == DEVICE_POWER) {
+        if (
+            required == SHELL_ROOT ||
+            required == SHELL_SHIZUKU ||
+            required == NOTIFICATIONS_SETTINGS ||
+            required == DEVICE_POWER ||
+            required == MEDIA_AUDIO ||
+            required == MEDIA_METADATA ||
+            required == MEDIA_RECORDING
+        ) {
             return required in declared
         }
         if (required in declared) {

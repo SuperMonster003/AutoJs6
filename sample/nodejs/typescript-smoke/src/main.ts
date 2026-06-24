@@ -12,6 +12,9 @@ import mediaProjection = require("media_projection");
 import image = require("image");
 import images = require("images");
 import ocr = require("ocr");
+import media = require("media");
+import mediainfo = require("mediainfo");
+import recorder = require("recorder");
 import storage = require("storage");
 import storages = require("storages");
 import database = require("database");
@@ -107,6 +110,22 @@ async function smoke(): Promise<void> {
   const compatBroadcastDenied: Promise<never> = rhinoCompat.app.sendBroadcast("inspect_layout_bounds", { timeoutMs: 1000 });
   const compatScreenOn: boolean = await rhinoCompat.device.isScreenOn({ timeoutMs: 1000 });
   const compatBatteryIgnored: boolean = await rhinoCompat.device.isIgnoringBatteryOptimizations({ timeoutMs: 1000 });
+  const audioVolume: number = await media.getAudioStreamVolume("music", { timeoutMs: 1000 });
+  const audioMaxVolume: number = await media.getAudioStreamMaxVolume("music", { timeoutMs: 1000 });
+  const audioInfo: media.AudioStreamInfo = await media.getAudioStreamInfo("music", { timeoutMs: 1000 });
+  const compatAudioInfo: media.AudioStreamInfo = await rhinoCompat.media.getAudioStreamInfo("music", { timeoutMs: 1000 });
+  const mediaInfoSnapshot: mediainfo.Snapshot = await mediainfo.read("sample.mp3", {
+    includeInform: false,
+    includeSections: true,
+    timeoutMs: 1000
+  });
+  const mediaInfoCallableSnapshot: mediainfo.Snapshot = await mediainfo("sample.mp3", { timeoutMs: 1000 });
+  const mediaInfoFormat: string = await mediainfo.get("sample.mp3", "general", "Format", { timeoutMs: 1000 });
+  const compatMediaInfoSnapshot: mediainfo.Snapshot = await rhinoCompat.mediainfo.read("sample.mp3", { timeoutMs: 1000 });
+  const recorderStatus: recorder.RecorderStatus = await recorder.getStatus({ timeoutMs: 1000 });
+  const compatRecorderStatus: recorder.RecorderStatus = await rhinoCompat.recorder.getStatus({ timeoutMs: 1000 });
+  const recorderStart: (options?: recorder.RecorderStartOptions) => Promise<never> = recorder.start;
+  const recorderStop: (options?: AutoJs6Node.BridgeCallOptions) => Promise<never> = rhinoCompat.recorder.stop;
   const compatShellResult: shell.ShellResult = await rhinoCompat.shell("echo compat", { timeoutMs: 1000 });
   const compatRootShellResult: shell.ShellResult = await rhinoCompat.shell("id", true);
   const compatExecRootResult: shell.ShellResult = await rhinoCompat.shell.execRoot("id", { timeoutMs: 1000 });
@@ -483,6 +502,18 @@ async function smoke(): Promise<void> {
   void compatLaunch;
   void compatScreenOn;
   void compatBatteryIgnored;
+  void audioVolume;
+  void audioMaxVolume;
+  void audioInfo;
+  void compatAudioInfo;
+  void mediaInfoSnapshot;
+  void mediaInfoCallableSnapshot;
+  void mediaInfoFormat;
+  void compatMediaInfoSnapshot;
+  void recorderStatus;
+  void compatRecorderStatus;
+  void recorderStart;
+  void recorderStop;
   void compatShellResult;
   void compatRootShellResult;
   void compatExecRootResult;

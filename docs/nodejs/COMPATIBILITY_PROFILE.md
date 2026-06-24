@@ -1131,7 +1131,8 @@ Supported or limited:
 - controlled `process.chdir()` for project bootstrap use
 - `process.nextTick`; tests lock its ordering before Promise/`queueMicrotask` callbacks and before timer callbacks
 - read-only `process.permission.has(scope, reference?)` compatibility facade for `fs.read`, `fs.write`,
-  `network`, `worker`, `shell`, `accessibility`, `screen_capture`, `notifications`, `notifications.settings`, `device.power`, `sensors`, and `ocr`
+  `network`, `worker`, `shell`, `accessibility`, `screen_capture`, `notifications`, `notifications.settings`, `device.power`,
+  `media`, `media.audio`, `media.metadata`, `media.recording`, `sensors`, and `ocr`
 - warning and event-emitter style process APIs where covered by tests
 
 Disabled or controlled:
@@ -1335,6 +1336,7 @@ Declared capability names:
 - `storage`
 - `database` (`sqlite` is accepted as an alias)
 - `notifications`, `notifications.settings`
+- `media`, `media.audio`, `media.metadata`, `media.recording`
 - `sensors`
 - `ui`
 - `clipboard`
@@ -1605,6 +1607,18 @@ runtime.
   - privacy-sensitive identifiers are absent: IMEI, Android ID, serial, phone number, accounts, MAC/IP address, hardware fingerprint, brand, and manufacturer
   - no raw `Context`, `PowerManager`, `Vibrator`, display, or build objects are exposed to JavaScript
   - P13-25 records notifications/settings/power manager promotion as partial: wake locks, direct Doze mutation, request-ignore-battery-optimization flow, OEM power-manager matrices, packaged disclosure, and migration examples remain open
+- `media`, `mediainfo`, `recorder`
+  - `media.getAudioStreamVolume(stream?, options?): Promise<number>`
+  - `media.getAudioStreamMaxVolume(stream?, options?): Promise<number>`
+  - `media.getAudioStreamInfo(stream?, options?): Promise<MediaAudioStreamInfo>`
+  - `mediainfo.read(path, options?): Promise<MediainfoSnapshot>`
+  - `mediainfo.get(path, streamKind, parameter?, options?): Promise<string>`
+  - `recorder.getStatus(options?): Promise<RecorderStatus>`
+  - `recorder.start()` and `recorder.stop()` are present but fail closed until a privacy-reviewed recorder provider lands
+  - `media.audio`, `media.metadata`, and `media.recording` are exact capabilities and are not implied by `media`
+  - `mediainfo` accepts only relative paths inside the scoped Node working directory
+  - no raw `MediaPlayer`, `AudioManager`, `MediaRecorder`, `MediaMetadataRetriever`, `MediaInfo`, `MediaStore`, `Uri`, file descriptor, or Android `Context` object is exposed to JavaScript
+  - P13-26 records media/recorder/mediainfo provider promotion as partial: playback, real recorder sessions, foreground disclosure, MediaStore policy, packaged media asset lookup, corpus evidence, and migration examples remain open
 - `shell`
   - `exec(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
   - `execRoot(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`

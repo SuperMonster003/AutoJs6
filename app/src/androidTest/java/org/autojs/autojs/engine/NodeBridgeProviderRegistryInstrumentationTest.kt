@@ -14,7 +14,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(18, definitions.size)
+        assertEquals(19, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -39,6 +39,16 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             id = "database",
             modules = listOf(NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE),
             capabilities = listOf(NodeBridgePermissionManifest.DATABASE),
+        )
+        assertProvider(
+            id = "media",
+            modules = listOf(NodeBridgeModules.MEDIA, NodeBridgeModules.MEDIAINFO, NodeBridgeModules.RECORDER),
+            capabilities = listOf(
+                NodeBridgePermissionManifest.MEDIA,
+                NodeBridgePermissionManifest.MEDIA_AUDIO,
+                NodeBridgePermissionManifest.MEDIA_METADATA,
+                NodeBridgePermissionManifest.MEDIA_RECORDING,
+            ),
         )
         assertProvider(
             id = "notifications",
@@ -99,6 +109,9 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals("accessibility", healthById.getValue("input_observer").details.getValue("liveSource"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("storage").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("database").status)
+        assertEquals(NodeBridgeProviderStatus.DEGRADED, healthById.getValue("media").status)
+        assertTrue(healthById.getValue("media").details.getValue("liveMethods").contains("mediainfo.read"))
+        assertEquals(NodeBridgePermissionManifest.MEDIA_RECORDING, healthById.getValue("media").details.getValue("recordingCapability"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("device").status)
         assertTrue(healthById.getValue("notifications").details.getValue("liveMethods").contains("openSettings"))
         assertEquals(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS, healthById.getValue("notifications").details.getValue("settingsCapability"))

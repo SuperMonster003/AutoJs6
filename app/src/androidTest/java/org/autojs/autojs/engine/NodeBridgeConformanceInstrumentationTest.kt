@@ -179,6 +179,31 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "detectAll") result = [barcodeSnapshot];
                     else if (method === "recognizeText") result = "https://example.com";
                     else if (method === "recognizeTexts") result = ["https://example.com", "WIFI:T:WPA;S:AutoJs6;P:secret;;"];
+                  } else if (moduleName === "media") {
+                    if (method === "getAudioStreamVolume") result = 3;
+                    else if (method === "getAudioStreamMaxVolume") result = 15;
+                    else if (method === "getAudioStreamInfo") {
+                      result = { schema: "autojs6-node-media-audio-stream-v1", stream: "music", streamType: 3, volume: 3, maxVolume: 15, minVolume: 0, volumeFixed: false };
+                    }
+                  } else if (moduleName === "mediainfo") {
+                    if (method === "read") {
+                      result = { schema: "autojs6-node-mediainfo-snapshot-v1", path: request.args[0], fileName: "sample.mp3", sizeBytes: 4, inform: "", sections: {} };
+                    } else if (method === "get") {
+                      result = "MPEG Audio";
+                    }
+                  } else if (moduleName === "recorder") {
+                    if (method === "getStatus") {
+                      result = { schema: "autojs6-node-recorder-status-v1", recording: false, providerAvailable: false, microphonePermissionRequired: true, microphonePermissionGranted: false, foregroundDisclosureRequired: true, reason: "blocked_until_privacy_reviewed_recorder_provider" };
+                    } else if (method === "start" || method === "stop") {
+                      respond(request, false, null, {
+                        name: "Error",
+                        message: "recorder blocked",
+                        code: "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+                        module: "recorder",
+                        method
+                      });
+                      return;
+                    }
                   } else if (moduleName === "storage" || moduleName === "storages") {
                     if (method === "get") result = { found: true, value: { ok: true } };
                     else if (method === "keys") result = ["alpha"];
@@ -280,6 +305,9 @@ class NodeBridgeConformanceInstrumentationTest {
               const images = require("images");
               const ocr = require("ocr");
               const barcode = require("barcode");
+              const media = require("media");
+              const mediainfo = require("mediainfo");
+              const recorder = require("recorder");
               const storage = require("storage");
               const storages = require("storages");
               const database = require("database");
@@ -304,6 +332,9 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["images", images],
                 ["ocr", ocr],
                 ["barcode", barcode],
+                ["media", media],
+                ["mediainfo", mediainfo],
+                ["recorder", recorder],
                 ["storage", storage],
                 ["storages", storages],
                 ["database", database],
@@ -315,6 +346,9 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["autojs6:compat", compat],
                 ["autojs6:compat.barcode", compat.barcode],
                 ["autojs6:compat.qrcode", compat.qrcode],
+                ["autojs6:compat.media", compat.media],
+                ["autojs6:compat.mediainfo", compat.mediainfo],
+                ["autojs6:compat.recorder", compat.recorder],
                 ["autojs6:compat.ui", compat.ui],
                 ["autojs6:compat.tasks", compat.tasks]
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
@@ -332,6 +366,9 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("images", images, ["captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "getSize", "recycle"]);
               expectExports("ocr", ocr, ["recognize", "recognizeText", "detectTextBounds"]);
               expectExports("barcode", barcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
+              expectExports("media", media, ["getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"]);
+              expectExports("mediainfo", mediainfo, ["read", "get"]);
+              expectExports("recorder", recorder, ["getStatus", "start", "stop"]);
               expectExports("storage", storage, ["create", "open"]);
               expectExports("storages", storages, ["create", "open"]);
               expectExports("database", database, ["open"]);
@@ -342,6 +379,9 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
               expectExports("autojs6:compat.barcode", compat.barcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("autojs6:compat.qrcode", compat.qrcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
+              expectExports("autojs6:compat.media", compat.media, ["getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"]);
+              expectExports("autojs6:compat.mediainfo", compat.mediainfo, ["read", "get"]);
+              expectExports("autojs6:compat.recorder", compat.recorder, ["getStatus", "start", "stop"]);
               expectExports("autojs6:compat.ui", compat.ui, ["showLayout", "state", "bind"]);
               expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "addDailyTask", "addWeeklyTask", "addIntentTask", "removeTask", "queryTasks", "queryIntentTasks", "queryTimedTasks", "getIntentTask", "getTimedTask", "removeIntentTask", "removeTimedTask", "updateTask"]);
               assert.strictEqual(globalThis.barcode, undefined, "compat.barcode must not install a default global");
@@ -354,13 +394,20 @@ class NodeBridgeConformanceInstrumentationTest {
               const compatInstall = compat.install({ globals: true });
               assert(compatInstall.globals.indexOf("barcode") >= 0, "compat.install({ globals: true }) must install barcode global");
               assert(compatInstall.globals.indexOf("qrcode") >= 0, "compat.install({ globals: true }) must install qrcode global");
+              assert(compatInstall.globals.indexOf("media") >= 0, "compat.install({ globals: true }) must install media global");
+              assert(compatInstall.globals.indexOf("mediainfo") >= 0, "compat.install({ globals: true }) must install mediainfo global");
+              assert(compatInstall.globals.indexOf("recorder") >= 0, "compat.install({ globals: true }) must install recorder global");
               assert.strictEqual(globalThis.barcode, compat.barcode);
               assert.strictEqual(globalThis.qrcode, compat.qrcode);
+              assert.strictEqual(globalThis.media, compat.media);
+              assert.strictEqual(globalThis.mediainfo, compat.mediainfo);
+              assert.strictEqual(globalThis.recorder, compat.recorder);
               assert(compatInstall.globals.indexOf("ui") >= 0, "compat.install({ globals: true }) must install constrained ui global");
               assert.strictEqual(globalThis.ui, compat.ui);
               assert.strictEqual(globalThis.tasks, undefined, "compat.install({ globals: true }) must not install tasks global");
               assert.strictEqual(typeof globalThis.ui.layout, "undefined");
               assert(compat.status().implementedTasks.indexOf("P12-29") >= 0, "compat.status must include P12-29");
+              assert(compat.status().implementedTasks.indexOf("P13-26") >= 0, "compat.status must include P13-26");
 
               assert.strictEqual(typeof app.packageName, "string");
               assert.strictEqual(typeof app.versionName, "string");
@@ -478,6 +525,17 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("compat.barcode.recognizeText", compat.barcode.recognizeText(capture, { timeoutMs: 1056 })), "https://example.com");
               assert.strictEqual((await expectPromise("compat.qrcode.recognizeTexts", compat.qrcode.recognizeTexts(capture, { timeoutMs: 1056 }))).length, 2);
               assert.strictEqual((await expectPromise("compat.qrcode.detectAll", compat.qrcode.detectAll(capture, { timeoutMs: 1056 })))[0].formatName, "QR_CODE");
+              assert.strictEqual(await expectPromise("media.getAudioStreamVolume", media.getAudioStreamVolume("music", { timeoutMs: 1056 })), 3);
+              assert.strictEqual(await expectPromise("media.getAudioStreamMaxVolume", media.getAudioStreamMaxVolume("music", { timeoutMs: 1056 })), 15);
+              assert.strictEqual((await expectPromise("media.getAudioStreamInfo", media.getAudioStreamInfo("music", { timeoutMs: 1056 }))).schema, "autojs6-node-media-audio-stream-v1");
+              assert.strictEqual((await expectPromise("compat.media.getAudioStreamInfo", compat.media.getAudioStreamInfo("music", { timeoutMs: 1056 }))).schema, "autojs6-node-media-audio-stream-v1");
+              assert.strictEqual((await expectPromise("mediainfo.read", mediainfo.read("sample.mp3", { timeoutMs: 1056 }))).schema, "autojs6-node-mediainfo-snapshot-v1");
+              assert.strictEqual((await expectPromise("mediainfo.call", mediainfo("sample.mp3", { timeoutMs: 1056 }))).schema, "autojs6-node-mediainfo-snapshot-v1");
+              assert.strictEqual(await expectPromise("mediainfo.get", mediainfo.get("sample.mp3", "general", "Format", { timeoutMs: 1056 })), "MPEG Audio");
+              assert.strictEqual((await expectPromise("compat.mediainfo.read", compat.mediainfo.read("sample.mp3", { timeoutMs: 1056 }))).schema, "autojs6-node-mediainfo-snapshot-v1");
+              assert.strictEqual((await expectPromise("recorder.getStatus", recorder.getStatus({ timeoutMs: 1056 }))).schema, "autojs6-node-recorder-status-v1");
+              assert.strictEqual((await expectPromise("compat.recorder.getStatus", compat.recorder.getStatus({ timeoutMs: 1056 }))).schema, "autojs6-node-recorder-status-v1");
+              await expectRejectCode("recorder.start", recorder.start({ path: "record.m4a", timeoutMs: 1056 }), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               const store = storage.create("settings");
               expectFrozen("storage.store", store);
               expectExports("storage.store", store, ["get", "put", "remove", "clear", "keys", "contains"]);
@@ -610,6 +668,13 @@ class NodeBridgeConformanceInstrumentationTest {
                 "barcode.detectAll",
                 "barcode.recognizeText",
                 "barcode.recognizeTexts",
+                "media.getAudioStreamVolume",
+                "media.getAudioStreamMaxVolume",
+                "media.getAudioStreamInfo",
+                "mediainfo.read",
+                "mediainfo.get",
+                "recorder.getStatus",
+                "recorder.start",
                 "storage.put",
                 "storages.clear",
                 "database.open",
@@ -820,6 +885,9 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.IMAGES to setOf("captureScreen", "readImage", "saveImage", "clip", "resize", "grayscale", "threshold", "findImage", "matchTemplate", "findColor", "findMultiColors", "recycle"),
             NodeBridgeModules.OCR to setOf("recognize", "recognizeText", "detectTextBounds"),
             NodeBridgeModules.BARCODE to setOf("detect", "detectAll", "recognizeText", "recognizeTexts"),
+            NodeBridgeModules.MEDIA to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"),
+            NodeBridgeModules.MEDIAINFO to setOf("read", "get"),
+            NodeBridgeModules.RECORDER to setOf("getStatus", "start", "stop"),
             NodeBridgeModules.STORAGE to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.DATABASE to setOf("open", "exec", "run", "get", "all", "transaction", "close"),

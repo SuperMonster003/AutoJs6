@@ -309,7 +309,7 @@
         "P13-26",
         "P13-27"
       ],
-      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked. P13-23 records partial app/intent/broadcast parity: JSON-safe app.intent descriptors and stricter app.startActivity descriptor parsing are available, while sendBroadcast, root/Shizuku app options, dual-user helpers, URI/email/settings helpers, installed-app lookup policy, and packaged smoke remain blocked. P13-24 records partial shell/root/Shizuku capability evidence: shell.root and shell.shizuku are explicit capability tokens, execRoot routes through the controlled shell bridge, and execShizuku is a stable rejection while real root/Shizuku device and packaged evidence remain blocked. P13-25 records partial notifications/settings/power manager evidence: notification permission/settings snapshots and battery-optimization status/settings dry-run helpers are available behind explicit notifications.settings and device.power capabilities while actions/listeners/wakelocks/direct power control and packaged evidence remain blocked.",
+      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked. P13-23 records partial app/intent/broadcast parity: JSON-safe app.intent descriptors and stricter app.startActivity descriptor parsing are available, while sendBroadcast, root/Shizuku app options, dual-user helpers, URI/email/settings helpers, installed-app lookup policy, and packaged smoke remain blocked. P13-24 records partial shell/root/Shizuku capability evidence: shell.root and shell.shizuku are explicit capability tokens, execRoot routes through the controlled shell bridge, and execShizuku is a stable rejection while real root/Shizuku device and packaged evidence remain blocked. P13-25 records partial notifications/settings/power manager evidence: notification permission/settings snapshots and battery-optimization status/settings dry-run helpers are available behind explicit notifications.settings and device.power capabilities while actions/listeners/wakelocks/direct power control and packaged evidence remain blocked. P13-26 records partial media/recorder/mediainfo provider evidence: read-only audio stream snapshots, scoped mediainfo metadata, recorder status, and compat aliases are available behind exact media.audio/media.metadata/media.recording capabilities while playback, real recording, MediaStore, packaged media evidence, and migration examples remain blocked.",
       "risk": "high",
       "runtimeSurface": [
         "daily/weekly task provider",
@@ -317,7 +317,10 @@
         "app intent helpers",
         "root/Shizuku shell capability",
         "notifications settings and device power manager",
-        "media and utility providers"
+        "media audio status provider",
+        "mediainfo scoped metadata provider",
+        "recorder status and fail-closed boundary",
+        "utility providers"
       ],
       "evidence": [
         "docs/nodejs/reports/phase13/P13_21_TASK_DATABASE_PROVIDER.md",
@@ -369,7 +372,16 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeNotificationsBridgeInstrumentationTest.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeDeviceBridgeInstrumentationTest.kt",
         "build/reports/nodejs/phase13-notifications-settings-power-manager.json",
-        "build/reports/nodejs/phase13-notifications-settings-power-manager.md"
+        "build/reports/nodejs/phase13-notifications-settings-power-manager.md",
+        "docs/nodejs/reports/phase13/P13_26_MEDIA_RECORDER_MEDIAINFO_PROVIDER.md",
+        "tools/nodejs/phase13/verify-media-recorder-mediainfo-provider.js",
+        ":app:verifyNodePhase13MediaRecorderMediainfoProvider",
+        "docs/nodejs/types/autojs6-node/media.d.ts",
+        "docs/nodejs/types/autojs6-node/mediainfo.d.ts",
+        "docs/nodejs/types/autojs6-node/recorder.d.ts",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeMediaBridgeInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-media-recorder-mediainfo-provider.json",
+        "build/reports/nodejs/phase13-media-recorder-mediainfo-provider.md"
       ],
       "rollback": "Keep P12 stable unsupported or blocked_by_design stubs and require explicit migration to supported Node bridge modules."
     },

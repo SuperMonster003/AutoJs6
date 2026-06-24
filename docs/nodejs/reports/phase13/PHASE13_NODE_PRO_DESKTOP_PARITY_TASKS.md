@@ -96,6 +96,23 @@
   power behavior matrix, packaged disclosure/run evidence, and migration
   examples.
 
+## P13-26 Partial Landing Note
+
+- P13-26 partial media/recorder/mediainfo provider gate records `media`,
+  `media.audio`, `media.metadata`, and `media.recording` as explicit
+  capability tokens. Node now exposes read-only audio stream snapshots,
+  scoped `mediainfo` JSON-safe metadata, and recorder status while
+  `recorder.start()`/`stop()` remain fail-closed.
+- Host verifier:
+  `tools/nodejs/phase13/verify-media-recorder-mediainfo-provider.js`.
+- Gradle gate: `:app:verifyNodePhase13MediaRecorderMediainfoProvider`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_26_MEDIA_RECORDER_MEDIAINFO_PROVIDER.md`.
+- Surface manifest evidence: `phase13-media-recorder-mediainfo-provider`.
+- Remaining P13-26 blockers: audio playback, real recorder sessions,
+  foreground notification disclosure, MediaStore permissions/policy, packaged
+  media asset lookup, corpus evidence, and migration examples.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -791,6 +808,32 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - 录音/媒体读取权限、foreground disclosure、resource cleanup 完整。
     - 不泄漏 raw MediaPlayer/MediaRecorder/MediaMetadataRetriever。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Capability gate: `media`, `media.audio`, `media.metadata`, and
+      `media.recording` are explicit bridge capabilities; the three
+      specialized tokens are exact and are not implied by `media`.
+    - Runtime bridge: `media.getAudioStreamVolume()`,
+      `media.getAudioStreamMaxVolume()`, `media.getAudioStreamInfo()`,
+      `mediainfo.read()`, `mediainfo.get()`, and `recorder.getStatus()`.
+    - Fail-closed recorder boundary: `recorder.start()` and
+      `recorder.stop()` require `media.recording` and return a stable provider
+      missing error until foreground disclosure, permission flow, cleanup, and
+      packaged smoke exist.
+    - Compat aliases: `autojs6:compat.media`, `autojs6:compat.mediainfo`,
+      and `autojs6:compat.recorder`.
+    - Types: `docs/nodejs/types/autojs6-node/media.d.ts`,
+      `docs/nodejs/types/autojs6-node/mediainfo.d.ts`, and
+      `docs/nodejs/types/autojs6-node/recorder.d.ts`.
+    - Instrumentation:
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeMediaBridgeInstrumentationTest.kt`.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-media-recorder-mediainfo-provider.js`.
+    - Gradle gate: `:app:verifyNodePhase13MediaRecorderMediainfoProvider`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_26_MEDIA_RECORDER_MEDIAINFO_PROVIDER.md`.
+    - Open before closure: playback provider, real recorder sessions,
+      MediaStore policy, external media permission matrix, packaged media
+      asset lookup, privacy copy, corpus evidence, and migration examples.
 
 - [ ] P13-27: 扩展 utility-heavy Rhino modules。
   - 范围：`zip`、`canvas`、`opencc`、`pinyin` full dictionary、`jsox`、

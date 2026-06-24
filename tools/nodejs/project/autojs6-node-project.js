@@ -18,6 +18,10 @@ const KNOWN_CAPABILITIES = new Set([
   "image",
   "ocr",
   "barcode",
+  "media",
+  "media.audio",
+  "media.metadata",
+  "media.recording",
   "storage",
   "notifications",
   "notifications.settings",
@@ -55,7 +59,20 @@ const CAPABILITY_ALIASES = new Map([
   ["power_manager", "device.power"],
   ["java", "java_interop"],
   ["qrcode", "barcode"],
-  ["qr_code", "barcode"]
+  ["qr_code", "barcode"],
+  ["audio", "media.audio"],
+  ["media:audio", "media.audio"],
+  ["media-audio", "media.audio"],
+  ["mediainfo", "media.metadata"],
+  ["media.info", "media.metadata"],
+  ["media-info", "media.metadata"],
+  ["media_info", "media.metadata"],
+  ["media:metadata", "media.metadata"],
+  ["recorder", "media.recording"],
+  ["media.record", "media.recording"],
+  ["media:recording", "media.recording"],
+  ["media-recording", "media.recording"],
+  ["audio.recording", "media.recording"]
 ]);
 
 const SUPPORTED_ENTRY_EXTENSIONS = new Set([".js", ".cjs", ".mjs", ".ts", ".cts", ".mts"]);

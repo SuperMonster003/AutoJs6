@@ -438,6 +438,13 @@ snapshots and battery-optimization settings dry-run helpers are covered, while
 notification actions/listeners, Do-Not-Disturb/exact-alarm policy, direct
 wakelock/power-manager control, OEM matrices, packaged disclosure, and raw
 Android notification/power objects remain blocked.
+`verifyNodePhase13MediaRecorderMediainfoProvider` records the P13-26 partial
+media/recorder/mediainfo provider state: `media.audio`, `media.metadata`, and
+`media.recording` are exact capability tokens, read-only media audio snapshots,
+scoped mediainfo reads, recorder status, and stable recorder start/stop
+fail-closed behavior are covered, while playback, real recorder sessions,
+MediaStore access, packaged media evidence, and raw Android media objects
+remain blocked.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -615,6 +622,13 @@ battery-optimization status/settings dry-run helpers are covered, while
 notification actions/listeners, direct power-manager APIs, wakelocks,
 Do-Not-Disturb/exact-alarm policy, OEM matrices, packaged behavior, and raw
 Android notification/power objects require separate evidence.
+P13-26 additionally uses `verifyNodePhase13MediaRecorderMediainfoProvider` as
+the host promotion-status gate for media/recorder/mediainfo parity and keeps
+the surface partial: read-only audio stream snapshots, scoped mediainfo
+metadata, recorder status, and stable recorder provider-missing denials are
+covered, while playback, real recording, MediaStore, packaged media behavior,
+foreground microphone disclosure, and raw Android media objects require
+separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

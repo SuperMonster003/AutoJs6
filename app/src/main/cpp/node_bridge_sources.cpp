@@ -8176,6 +8176,9 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_images_cache = null;
   let __autojs6_limited_ocr_cache = null;
   let __autojs6_limited_barcode_cache = null;
+  let __autojs6_limited_media_cache = null;
+  let __autojs6_limited_mediainfo_cache = null;
+  let __autojs6_limited_recorder_cache = null;
   let __autojs6_limited_storage_cache = null;
   let __autojs6_limited_storages_cache = null;
   let __autojs6_limited_database_cache = null;
@@ -8914,6 +8917,15 @@ std::string buildEmbeddedScriptExecutionSource(
     if (text === "media_projection" || text === "media.projection" || text === "screen.capture" || text === "screencapture") {
       return "screen_capture";
     }
+    if (text === "audio" || text === "media:audio" || text === "media-audio") {
+      return "media.audio";
+    }
+    if (text === "mediainfo" || text === "media.info" || text === "media-info" || text === "media_info" || text === "media:metadata") {
+      return "media.metadata";
+    }
+    if (text === "recorder" || text === "media.record" || text === "media:recording" || text === "media-recording" || text === "audio.recording") {
+      return "media.recording";
+    }
     if (text === "engine.exec") {
       return "engines.exec";
     }
@@ -9124,6 +9136,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (moduleName === "ocr") return ["ocr", "image"];
     if (moduleName === "barcode") return ["barcode", "image"];
+    if (moduleName === "media") return ["media", "media.audio"];
+    if (moduleName === "mediainfo") return ["media", "media.metadata"];
+    if (moduleName === "recorder") return ["media", "media.recording"];
     if (moduleName === "storage" || moduleName === "storages") return ["storage"];
     if (moduleName === "database" || moduleName === "sqlite") return ["database"];
     if (moduleName === "notifications") {
@@ -9161,7 +9176,10 @@ std::string buildEmbeddedScriptExecutionSource(
       required === "shell.root" ||
       required === "shell.shizuku" ||
       required === "notifications.settings" ||
-      required === "device.power"
+      required === "device.power" ||
+      required === "media.audio" ||
+      required === "media.metadata" ||
+      required === "media.recording"
     ) {
       return declared.indexOf(required) >= 0;
     }
@@ -9201,6 +9219,10 @@ std::string buildEmbeddedScriptExecutionSource(
       text === "notifications_settings"
     ) return "notifications.settings";
     if (text === "device.power" || text === "device_power" || text === "power_manager") return "device.power";
+    if (text === "media") return "media";
+    if (text === "audio" || text === "media.audio" || text === "media_audio") return "media.audio";
+    if (text === "mediainfo" || text === "media.info" || text === "media_info" || text === "media.metadata" || text === "media_metadata") return "media.metadata";
+    if (text === "recorder" || text === "media.record" || text === "media.recording" || text === "media_recording" || text === "audio.recording") return "media.recording";
     if (text === "sensor" || text === "sensors") return "sensors";
     if (text === "ocr") return "ocr";
     if (text === "barcode" || text === "qrcode" || text === "qr_code") return "barcode";
@@ -9258,6 +9280,10 @@ std::string buildEmbeddedScriptExecutionSource(
       normalizedScope === "notifications" ||
       normalizedScope === "notifications.settings" ||
       normalizedScope === "device.power" ||
+      normalizedScope === "media" ||
+      normalizedScope === "media.audio" ||
+      normalizedScope === "media.metadata" ||
+      normalizedScope === "media.recording" ||
       normalizedScope === "sensors" ||
       normalizedScope === "ocr" ||
       normalizedScope === "barcode"
@@ -9278,6 +9304,10 @@ std::string buildEmbeddedScriptExecutionSource(
       "notifications",
       "notifications.settings",
       "device.power",
+      "media",
+      "media.audio",
+      "media.metadata",
+      "media.recording",
       "sensors",
       "ocr",
       "barcode"
@@ -16630,8 +16660,8 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_rhino_compat_events = Object.freeze({
     keys: __autojs6_rhino_compat_key_constants
   });
-  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "keys", "ui"]);
-  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "events.keys", "ui", "tasks"]);
+  const __autojs6_rhino_compat_basic_global_names = Object.freeze(["toast", "toastLog", "sleep", "setClip", "getClip", "files", "base64", "colors", "fmt", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storages", "sqlite", "console", "setTimeout", "clearTimeout", "setInterval", "clearInterval", "selector", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains", "click", "back", "home", "recentApps", "recents", "app", "device", "shell", "images", "requestScreenCapture", "requestScreenCaptureAsync", "captureScreen", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "keys", "ui"]);
+  const __autojs6_rhino_compat_basic_module_names = Object.freeze(["toast", "clipboard", "console", "timers", "files", "base64", "colors", "formatter", "fmt", "converter", "cvt", "s13n", "mime", "nanoid", "util", "opencc", "pinyin", "pinyin4j", "storage", "storages", "database", "sqlite", "selector", "app", "device", "shell", "images", "media_projection", "ocr", "barcode", "qrcode", "media", "mediainfo", "recorder", "events.keys", "ui", "tasks"]);
   const __autojs6_rhino_compat_installed_globals = [];
   function __autojs6_rhino_compat_error(message, code, apiName, category) {
     const error = __autojs6_error(message, code);
@@ -17856,6 +17886,9 @@ std::string buildEmbeddedScriptExecutionSource(
     const ocr = __autojs6_rhino_compat_ocr();
     const barcode = __autojs6_rhino_compat_barcode();
     const qrcode = __autojs6_rhino_compat_qrcode();
+    const media = __autojs6_limited_media();
+    const mediainfo = __autojs6_limited_mediainfo();
+    const recorder = __autojs6_limited_recorder();
     const ui = __autojs6_limited_ui();
     const tasks = __autojs6_rhino_compat_tasks();
     __autojs6_rhino_compat_facade_cache = Object.freeze({
@@ -17916,6 +17949,9 @@ std::string buildEmbeddedScriptExecutionSource(
       ocr: ocr,
       barcode: barcode,
       qrcode: qrcode,
+      media: media,
+      mediainfo: mediainfo,
+      recorder: recorder,
       ui: ui,
       tasks: tasks,
       requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
@@ -17939,7 +17975,7 @@ std::string buildEmbeddedScriptExecutionSource(
       mode: "explicit-opt-in",
       defaultGlobalInjection: false,
       installed: __autojs6_rhino_compat_installed_globals.length > 0,
-      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17", "P12-18", "P12-29", "P12-32"]),
+      implementedTasks: Object.freeze(["S11-08", "S11-09", "S11-10", "S11-11", "S11-12", "S11-13", "S11-14", "S11-16", "S11-17", "S11-18", "S11-19", "S11-20", "P12-03", "P12-09", "P12-16", "P12-17", "P12-18", "P12-29", "P12-32", "P13-26"]),
       pendingTasks: Object.freeze([]),
       globalNames: __autojs6_rhino_compat_installed_global_names(),
       availableGlobalNames: __autojs6_rhino_compat_basic_global_names,
@@ -18016,6 +18052,9 @@ std::string buildEmbeddedScriptExecutionSource(
     const ocr = __autojs6_rhino_compat_ocr();
     const barcode = __autojs6_rhino_compat_barcode();
     const qrcode = __autojs6_rhino_compat_qrcode();
+    const media = __autojs6_limited_media();
+    const mediainfo = __autojs6_limited_mediainfo();
+    const recorder = __autojs6_limited_recorder();
     const ui = __autojs6_limited_ui();
     const tasks = __autojs6_rhino_compat_tasks();
     __autojs6_limited_rhino_compat_cache = Object.freeze({
@@ -18084,6 +18123,9 @@ std::string buildEmbeddedScriptExecutionSource(
       ocr: ocr,
       barcode: barcode,
       qrcode: qrcode,
+      media: media,
+      mediainfo: mediainfo,
+      recorder: recorder,
       ui: ui,
       tasks: tasks,
       requestScreenCapture: __autojs6_rhino_compat_request_screen_capture,
@@ -21679,6 +21721,207 @@ std::string buildEmbeddedScriptExecutionSource(
       recognizeTexts
     });
     return __autojs6_limited_barcode_cache;
+  }
+  function __autojs6_media_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_media_invalid_argument_error(moduleName, methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      moduleName,
+      methodName
+    );
+  }
+  function __autojs6_media_bridge_options(moduleName, methodName, options, fallbackMs) {
+    const input = __autojs6_media_options(options);
+    let permissions = ["media"];
+    if (moduleName === "media") {
+      permissions = ["media", "media.audio"];
+    } else if (moduleName === "mediainfo") {
+      permissions = ["media", "media.metadata"];
+    } else if (moduleName === "recorder") {
+      permissions = ["media", "media.recording"];
+    }
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions
+    };
+  }
+  function __autojs6_media_stream_name(value, methodName) {
+    if (value === undefined || value === null || value === "") {
+      return "music";
+    }
+    if (typeof value === "object" && !Array.isArray(value)) {
+      return __autojs6_media_stream_name(value.stream !== undefined ? value.stream : value.type, methodName);
+    }
+    const text = String(value).trim();
+    if (!text) {
+      return "music";
+    }
+    if (!/^[A-Za-z0-9_.:-]+$/.test(text)) {
+      throw __autojs6_media_invalid_argument_error(
+        "media",
+        methodName,
+        "media." + methodName + " stream must be a known Android audio stream name."
+      );
+    }
+    return text;
+  }
+  function __autojs6_media_freeze_record(value) {
+    if (!value || typeof value !== "object") {
+      return value === undefined ? null : value;
+    }
+    if (Array.isArray(value)) {
+      return Object.freeze(value.map(__autojs6_media_freeze_record));
+    }
+    const output = {};
+    Object.keys(value).forEach(function(key) {
+      output[key] = __autojs6_media_freeze_record(value[key]);
+    });
+    return Object.freeze(output);
+  }
+  function __autojs6_limited_media() {
+    if (__autojs6_limited_media_cache) {
+      return __autojs6_limited_media_cache;
+    }
+    function call(methodName, stream, options) {
+      let streamName;
+      try {
+        streamName = __autojs6_media_stream_name(stream, methodName);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "media",
+        methodName,
+        [streamName],
+        __autojs6_media_bridge_options("media", methodName, options, 5000)
+      );
+    }
+    function getAudioStreamVolume(stream, options) {
+      return call("getAudioStreamVolume", stream, options).then(function(value) {
+        return Math.trunc(Number(value));
+      });
+    }
+    function getAudioStreamMaxVolume(stream, options) {
+      return call("getAudioStreamMaxVolume", stream, options).then(function(value) {
+        return Math.trunc(Number(value));
+      });
+    }
+    function getAudioStreamInfo(stream, options) {
+      return call("getAudioStreamInfo", stream, options).then(__autojs6_media_freeze_record);
+    }
+    __autojs6_limited_media_cache = Object.freeze({
+      getAudioStreamVolume,
+      getAudioStreamMaxVolume,
+      getAudioStreamInfo
+    });
+    return __autojs6_limited_media_cache;
+  }
+  function __autojs6_mediainfo_path(value, methodName) {
+    const text = value === undefined || value === null ? "" : String(value).trim();
+    if (!text || text.indexOf("\u0000") !== -1 || text.indexOf(":") !== -1 || text.charAt(0) === "/" || text.indexOf("..") !== -1) {
+      throw __autojs6_media_invalid_argument_error(
+        "mediainfo",
+        methodName,
+        "mediainfo." + methodName + " path must be a relative file path inside the scoped working directory."
+      );
+    }
+    return text;
+  }
+  function __autojs6_mediainfo_stream_kind(value, methodName) {
+    const text = value === undefined || value === null || value === "" ? "general" : String(value).trim();
+    if (!/^[A-Za-z]+$/.test(text)) {
+      throw __autojs6_media_invalid_argument_error(
+        "mediainfo",
+        methodName,
+        "mediainfo." + methodName + " stream kind must be a MediaInfo stream name."
+      );
+    }
+    return text.toLowerCase();
+  }
+  function __autojs6_limited_mediainfo() {
+    if (__autojs6_limited_mediainfo_cache) {
+      return __autojs6_limited_mediainfo_cache;
+    }
+    function read(path, options) {
+      let target;
+      try {
+        target = __autojs6_mediainfo_path(path, "read");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "mediainfo",
+        "read",
+        [target, __autojs6_media_options(options)],
+        __autojs6_media_bridge_options("mediainfo", "read", options, 10000)
+      ).then(__autojs6_media_freeze_record);
+    }
+    function get(path, streamKind, parameter, options) {
+      let target;
+      let kind;
+      try {
+        target = __autojs6_mediainfo_path(path, "get");
+        kind = __autojs6_mediainfo_stream_kind(streamKind, "get");
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return __autojs6_call_autojs(
+        "mediainfo",
+        "get",
+        [target, kind, parameter === undefined || parameter === null ? "" : String(parameter)],
+        __autojs6_media_bridge_options("mediainfo", "get", options, 10000)
+      ).then(function(value) {
+        return value === undefined || value === null ? "" : String(value);
+      });
+    }
+    const facade = function(path, options) {
+      return read(path, options);
+    };
+    Object.defineProperties(facade, {
+      read: { value: read, enumerable: true },
+      get: { value: get, enumerable: true }
+    });
+    __autojs6_limited_mediainfo_cache = Object.freeze(facade);
+    return __autojs6_limited_mediainfo_cache;
+  }
+  function __autojs6_limited_recorder() {
+    if (__autojs6_limited_recorder_cache) {
+      return __autojs6_limited_recorder_cache;
+    }
+    function getStatus(options) {
+      return __autojs6_call_autojs(
+        "recorder",
+        "getStatus",
+        [],
+        __autojs6_media_bridge_options("recorder", "getStatus", options, 5000)
+      ).then(__autojs6_media_freeze_record);
+    }
+    function start(options) {
+      return __autojs6_call_autojs(
+        "recorder",
+        "start",
+        [__autojs6_media_options(options)],
+        __autojs6_media_bridge_options("recorder", "start", options, 5000)
+      );
+    }
+    function stop(options) {
+      return __autojs6_call_autojs(
+        "recorder",
+        "stop",
+        [__autojs6_media_options(options)],
+        __autojs6_media_bridge_options("recorder", "stop", options, 5000)
+      );
+    }
+    __autojs6_limited_recorder_cache = Object.freeze({
+      getStatus,
+      start,
+      stop
+    });
+    return __autojs6_limited_recorder_cache;
   }
   function __autojs6_storage_options(value) {
     return value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -40219,6 +40462,15 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "barcode") {
       return "barcode";
     }
+    if (name === "media") {
+      return "media";
+    }
+    if (name === "mediainfo") {
+      return "mediainfo";
+    }
+    if (name === "recorder") {
+      return "recorder";
+    }
     if (name === "storage") {
       return "storage";
     }
@@ -40524,6 +40776,15 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "barcode") {
       return __autojs6_limited_barcode();
+    }
+    if (name === "media") {
+      return __autojs6_limited_media();
+    }
+    if (name === "mediainfo") {
+      return __autojs6_limited_mediainfo();
+    }
+    if (name === "recorder") {
+      return __autojs6_limited_recorder();
     }
     if (name === "storage") {
       return __autojs6_limited_storage("storage");

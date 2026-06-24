@@ -419,7 +419,7 @@ Required bridge properties:
 
 Bridge capability manifests are optional for legacy compatibility. When a Node project declares `node.permissions` in `project.json` or `autojs6.node.permissions` in `package.json`, the bridge becomes deny-by-default for that execution. Missing declarations reject in JavaScript before the request reaches the native or Android provider. The Android provider also audits every supported bridge request before dispatch: the request must carry the required capability names, and an enforced project manifest must declare them. Failures use `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`.
 
-Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activity`, `dialogs`, `engines`, `engines.exec`, `accessibility`, `screen_capture`, `image`, `ocr`, `storage`, `notifications`, `notifications.settings`, `sensors`, `ui`, `clipboard`, `device`, `device.power`, `shell`, `shell.root`, `shell.shizuku`, `network`, `work_manager`, and `java_interop`. Declaring a parent such as `app` or `engines` grants its non-root child methods; `notifications.settings`, `device.power`, `shell.root`, and `shell.shizuku` must be declared explicitly. `media_projection` is accepted as an alias for `screen_capture`, and `storages` is accepted as an alias for `storage`.
+Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activity`, `dialogs`, `engines`, `engines.exec`, `accessibility`, `screen_capture`, `image`, `ocr`, `storage`, `notifications`, `notifications.settings`, `media`, `media.audio`, `media.metadata`, `media.recording`, `sensors`, `ui`, `clipboard`, `device`, `device.power`, `shell`, `shell.root`, `shell.shizuku`, `network`, `work_manager`, and `java_interop`. Declaring a parent such as `app` or `engines` grants its non-root child methods; `notifications.settings`, `media.audio`, `media.metadata`, `media.recording`, `device.power`, `shell.root`, and `shell.shizuku` must be declared explicitly. `media_projection` is accepted as an alias for `screen_capture`, and `storages` is accepted as an alias for `storage`.
 
 Declaring `network` is required for controlled `fetch`, `axios`, and `websocket` bridge dispatch when a capability manifest is enforced. Packaged builds map that capability to `android.permission.INTERNET`; doctor reports expose the mapping and raw Node network modules remain disabled.
 
@@ -542,6 +542,22 @@ Notification actions/listeners/rich layouts, Do-Not-Disturb/exact-alarm
 policy, direct wakelock/power-manager control, request-ignore-battery-
 optimization flows, OEM power matrices, packaged disclosure, and migration
 examples remain blocked.
+
+The `media`, `mediainfo`, and `recorder` bridge modules expose only a partial
+P13-26 provider. `media` returns read-only Android audio-stream volume/status
+snapshots behind exact `media.audio`. `mediainfo` reads scoped relative files
+inside the Node execution working directory and returns frozen JSON metadata
+behind exact `media.metadata`. `recorder.getStatus()` returns provider status
+behind exact `media.recording`, while `recorder.start()` and `recorder.stop()`
+fail closed until a foreground recording provider and disclosure model exist.
+JavaScript must not receive raw `MediaPlayer`, `MediaRecorder`, `AudioManager`,
+`MediaInfo`, `MediaStore`, `Uri`, `Context`, native pointers, file descriptors,
+or Android media object handles.
+
+P13-26 records media/recorder/mediainfo provider promotion as partial.
+Playback, real recorder sessions, foreground-service microphone disclosure,
+MediaStore access, packaged media asset lookup, corpus/device evidence, and
+migration examples remain blocked.
 
 The `shell` bridge is the controlled AutoJs6 replacement for Node `child_process`, not an unrestricted process-spawning API. The migration path is intentionally narrow: `child_process.exec()` maps to `require("shell").exec()` when the project declares the `shell` bridge capability; S11-17 `require("autojs6:compat").shell(command, optionsOrRoot)` is only a callable compatibility wrapper over the same controlled facade. `spawn()`, `fork()`, streaming stdio, and interactive shells remain unsupported. It exposes `exec(command, options?)`, JS-layer `execFile(path, args?, options?)`, `checkAccess(options?)`, and `setDefaultTimeout(ms)`, and returns serialized `{ code, stdout, stderr }` results for command execution. `execFile()` validates a scoped relative path and string arguments, shell-quotes them, and then calls the same underlying `exec` bridge method. Commands run on a provider thread through a non-interactive shell; JavaScript never receives a `Process`, file descriptor, stream, signal handle, or raw Android shell object. Root mode is explicit through `options.root === true` or the migration shorthand `compat.shell(command, true)`, requires the separate `shell.root` capability when a manifest is enforced, and is never default. Shizuku execution remains unsupported in v1.1; `checkAccess({ shizuku: true })` reports it as unavailable instead of creating a fallback path. `cwd` is scoped to the execution working directory, `env` is JSON string-only, command output is bounded, and timeouts are enforced. The queued packaged fallback must not execute shell commands; `shell.exec()`, `shell.execFile()`, and `compat.shell()` require live bridge metadata so command results and denials are observable before the Promise settles.
 

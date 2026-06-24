@@ -1423,6 +1423,22 @@ evidence. It does not promote notification actions/listeners/rich layouts,
 direct wakelock/power-manager APIs, Do-Not-Disturb/exact-alarm policy, OEM
 power matrices, packaged disclosure, or raw Android notification/power objects.
 
+Phase 13 media/recorder/mediainfo provider status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13MediaRecorderMediainfoProvider
+```
+
+This host gate records P13-26 as partial. It requires exact `media.audio`,
+`media.metadata`, and `media.recording` capability tokens, read-only
+`media.getAudioStreamVolume()`, `media.getAudioStreamMaxVolume()`,
+`media.getAudioStreamInfo()`, scoped `mediainfo.read()` / `mediainfo.get()`,
+`recorder.getStatus()`, stable fail-closed `recorder.start()` /
+`recorder.stop()`, plus TypeScript, conformance, provider-registry,
+permission-manifest, and cross-document evidence. It does not promote playback,
+real recording sessions, MediaStore access, packaged media assets, or raw
+Android media objects.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell
