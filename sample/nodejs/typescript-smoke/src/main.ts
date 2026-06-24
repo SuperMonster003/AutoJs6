@@ -523,6 +523,12 @@ async function smoke(): Promise<void> {
   const esmLoaderProfilePackageExports: string = autojsProfile.esmLoaderProfile.packageExports;
   const esmLoaderProfileLoaderHooks: string = autojsProfile.esmLoaderProfile.loaderHooks;
   const esmLoaderProfileRawNodeLoader: boolean = autojsProfile.esmLoaderProfile.rawNodeLoader;
+  const packageManagerProfileStatus: string = autojsProfile.packageManagerProfile.status;
+  const packageManagerProfileDefaultEnabled: boolean = autojsProfile.packageManagerProfile.defaultEnabled;
+  const packageManagerProfileRuntimeInstall: string = autojsProfile.packageManagerProfile.androidRuntimeInstall;
+  const packageManagerProfileLifecycleScripts: string = autojsProfile.packageManagerProfile.lifecycleScripts;
+  const packageManagerProfileBinLinks: string = autojsProfile.packageManagerProfile.binLinks;
+  const packageManagerProfileRawRegistryAccess: boolean = autojsProfile.packageManagerProfile.rawRegistryAccess;
   const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
   const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
   const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
@@ -758,6 +764,12 @@ async function smoke(): Promise<void> {
   void esmLoaderProfilePackageExports;
   void esmLoaderProfileLoaderHooks;
   void esmLoaderProfileRawNodeLoader;
+  void packageManagerProfileStatus;
+  void packageManagerProfileDefaultEnabled;
+  void packageManagerProfileRuntimeInstall;
+  void packageManagerProfileLifecycleScripts;
+  void packageManagerProfileBinLinks;
+  void packageManagerProfileRawRegistryAccess;
   void filesystemProfileMode;
   void filesystemProfileRoots;
   void filesystemAdvancedWatch;

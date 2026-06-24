@@ -198,10 +198,18 @@ class NodeAndroidPackageInstallManager(
         "android_package_manager.transactional" to "true",
         "android_package_manager.cancellable" to "true",
         "android_package_manager.locked" to "true",
+        "android_package_manager.android_runtime_install" to "local_unpacked_only",
+        "android_package_manager.npm_cli" to "disabled",
+        "android_package_manager.registry_download" to "disabled",
+        "android_package_manager.lockfile" to "autojs6-lock-host-managed",
         "android_package_manager.integrity" to "sha512",
         "android_package_manager.lifecycle_scripts" to "disabled",
+        "android_package_manager.bin_links" to "disabled",
+        "android_package_manager.symlinks" to "disabled",
         "android_package_manager.native_payload_execution" to "disabled",
+        "android_package_manager.postinstall_download" to "disabled",
         "android_package_manager.network_install" to "disabled",
+        "android_package_manager.js_bridge" to "not_exposed",
     )
 
     private fun installOrUpdate(

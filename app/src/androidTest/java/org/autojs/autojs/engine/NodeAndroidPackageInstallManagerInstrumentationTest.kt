@@ -165,10 +165,18 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
         assertEquals("true", nativeValues["android_package_manager.transactional"])
         assertEquals("true", nativeValues["android_package_manager.cancellable"])
         assertEquals("true", nativeValues["android_package_manager.locked"])
+        assertEquals("local_unpacked_only", nativeValues["android_package_manager.android_runtime_install"])
+        assertEquals("disabled", nativeValues["android_package_manager.npm_cli"])
+        assertEquals("disabled", nativeValues["android_package_manager.registry_download"])
+        assertEquals("autojs6-lock-host-managed", nativeValues["android_package_manager.lockfile"])
         assertEquals("sha512", nativeValues["android_package_manager.integrity"])
         assertEquals("disabled", nativeValues["android_package_manager.lifecycle_scripts"])
+        assertEquals("disabled", nativeValues["android_package_manager.bin_links"])
+        assertEquals("disabled", nativeValues["android_package_manager.symlinks"])
         assertEquals("disabled", nativeValues["android_package_manager.native_payload_execution"])
+        assertEquals("disabled", nativeValues["android_package_manager.postinstall_download"])
         assertEquals("disabled", nativeValues["android_package_manager.network_install"])
+        assertEquals("not_exposed", nativeValues["android_package_manager.js_bridge"])
     }
 
     private fun request(name: String, version: String, sourceDir: File): NodeAndroidPackageInstallManager.PackageRequest {

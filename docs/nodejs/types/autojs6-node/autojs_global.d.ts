@@ -52,6 +52,38 @@ declare namespace AutoJs6Node {
     readonly customConditions: boolean;
   }
 
+  export interface PackageManagerProfile {
+    readonly status: "android_substrate_partial" | "disabled_by_default" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly hostPackageManager: "available" | string;
+    readonly androidStore: "local_app_private_partial" | string;
+    readonly androidRuntimeInstall: "local_unpacked_only" | string;
+    readonly npmCli: "denied" | "debug_only" | "partial" | string;
+    readonly npmInstallEquivalent: "host_managed_plus_android_store_substrate" | string;
+    readonly registryDownload: "deferred" | "denied" | "partial" | string;
+    readonly tarballInstall: "host_side_only" | "partial" | string;
+    readonly lockfile: "autojs6_lock_host_managed" | string;
+    readonly integrity: "sha512_required" | string;
+    readonly lifecycleScripts: "denied" | "debug_only" | string;
+    readonly debugLifecycleScripts: "not_promoted" | "debug_only" | string;
+    readonly binLinks: "denied" | "partial" | string;
+    readonly symlinks: "denied" | string;
+    readonly nativeBuild: "denied" | string;
+    readonly nativePayloads: "denied" | "signed_packaged_only" | string;
+    readonly postinstallDownload: "denied" | string;
+    readonly nodeModulesMutation: "transactional_store_only" | string;
+    readonly transaction: "locked_cancellable_atomic" | string;
+    readonly operations: readonly string[];
+    readonly packageKinds: readonly string[];
+    readonly jsBridge: "not_exposed" | "partial" | string;
+    readonly requirePackageManager: "denied" | "partial" | string;
+    readonly packagedBehavior: "not_promoted" | string;
+    readonly androidNetwork: "denied" | "partial" | string;
+    readonly rawExecutables: boolean;
+    readonly rawRegistryAccess: boolean;
+  }
+
   export interface FilesystemAdvancedApis {
     readonly streams: "partial" | "unsupported" | string;
     readonly fileHandle: "partial" | "unsupported" | string;
@@ -293,6 +325,7 @@ declare namespace AutoJs6Node {
     readonly nativeAddon: boolean;
     readonly scopedFs: boolean;
     readonly esmLoaderProfile: EsmLoaderProfile;
+    readonly packageManagerProfile: PackageManagerProfile;
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
