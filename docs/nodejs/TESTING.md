@@ -764,6 +764,22 @@ The gate remains partial because live `show`/`update`/`drainEvents`/per-handle
 `close`, foreground disclosure ownership, packaged install-run evidence, and
 real overlay leak/stress evidence are still missing.
 
+Phase 13 accessibility selector promotion:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13AccessibilitySelectorPromotion
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAccessibilitySelectorBridgeInstrumentationTest"
+```
+
+`verifyNodePhase13AccessibilitySelectorPromotion` records the P13-19 partial
+`accessibility` and explicit `autojs6:compat` selector state: selector v2 JSON
+descriptors, frozen node snapshots, direct selector find/action APIs, Rhino
+compat selector handles, unavailable-provider rejection, and raw node denial
+are checked. The gate remains partial because `swipe`, `gesture`,
+`powerDialog`, direct `waitFor`, broader Rhino selector aliases, packaged
+accessibility service/settings lifecycle, expanded real-device evidence, and
+root/Shizuku gesture tiers are still missing.
+
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground
 long-running, runtime budget/heartbeat, queueing, scheduled runner,

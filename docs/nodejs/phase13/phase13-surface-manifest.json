@@ -245,7 +245,7 @@
         "P13-19",
         "P13-20"
       ],
-      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence while live packaged UI remains blocked. P13-18 records partial overlay provider evidence over the P12-14 permission/settings/cleanup live gate while live overlay creation remains fail-closed.",
+      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence while live packaged UI remains blocked. P13-18 records partial overlay provider evidence over the P12-14 permission/settings/cleanup live gate while live overlay creation remains fail-closed. P13-19 records partial accessibility selector evidence while advanced gesture, packaged service, and root/Shizuku tiers remain blocked.",
       "risk": "high",
       "runtimeSurface": [
         "require(\"ui\") live provider",
@@ -271,7 +271,15 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeOverlayBridgeInstrumentationTest.kt",
         "docs/nodejs/types/autojs6-node/ui_overlay.d.ts",
         "build/reports/nodejs/phase13-overlay-provider-promotion.json",
-        "build/reports/nodejs/phase13-overlay-provider-promotion.md"
+        "build/reports/nodejs/phase13-overlay-provider-promotion.md",
+        "docs/nodejs/reports/phase13/P13_19_ACCESSIBILITY_SELECTOR_PROMOTION.md",
+        "tools/nodejs/phase13/verify-accessibility-selector-promotion.js",
+        ":app:verifyNodePhase13AccessibilitySelectorPromotion",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeAccessibilitySelectorBridgeInstrumentationTest.kt",
+        "docs/nodejs/types/autojs6-node/accessibility.d.ts",
+        "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
+        "build/reports/nodejs/phase13-accessibility-selector-promotion.json",
+        "build/reports/nodejs/phase13-accessibility-selector-promotion.md"
       ],
       "rollback": "Fail closed to existing provider POC or stable denial errors for UI, overlay, accessibility, and media projection."
     },

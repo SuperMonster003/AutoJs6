@@ -145,6 +145,33 @@ Current user-facing bridge modules include:
 
 Some modules are intentionally narrower than Pro/AutoX counterparts.
 
+## Accessibility And Selector
+
+Auto.js Pro and Rhino scripts commonly rely on global selector builders such as
+`text()`, `id()`, `desc()`, chained selector handles, global actions, and
+gesture helpers.
+
+AutoJs6 behavior:
+
+- P13-19 records selector/accessibility as partial.
+- `require("accessibility")` exposes JSON selector builders, `findOne`,
+  `findAll`, selector `click`, `longClick`, `setText`, `scrollForward`,
+  `scrollBackward`, `findByText`, `clickText`, `back`, `home`, and
+  `recentApps`.
+- `require("autojs6:compat")` exposes Promise-based Rhino-style selector
+  handles, including `findOne(1000)`, `find()`, `findAll()`, `exists()`,
+  selector actions, coordinate `click`, and Back/Home/Recents wrappers.
+- Returned nodes are frozen JSON snapshots, not raw `AccessibilityNodeInfo` or
+  Rhino/UiAutomator node objects.
+- `swipe`, `gesture`, `powerDialog`, direct `waitFor`, packaged
+  accessibility-service lifecycle, and root/Shizuku automation tiers remain
+  unpromoted.
+
+Porting note: use explicit `await` with direct `accessibility` or
+`autojs6:compat` selector calls. Keep scripts that require synchronous Rhino
+selector behavior, raw node objects, or gesture/root/Shizuku fallback on Rhino
+until a later provider gate lands.
+
 ## UI
 
 Auto.js Pro 9 public docs describe `"nodejs ui"` / `"ui-thread"` style entry

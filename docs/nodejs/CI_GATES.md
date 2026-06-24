@@ -390,6 +390,13 @@ records, and raw Window/View denial are present, while live overlay
 `show`/`update`/`drainEvents`/per-handle `close`, foreground disclosure,
 packaged install-run behavior, and real overlay leak/stress evidence still
 block opt-in promotion.
+`verifyNodePhase13AccessibilitySelectorPromotion` records the P13-19 partial
+`accessibility` selector state: selector v2 JSON descriptors, direct
+find/action APIs, explicit Rhino compat selector handles, unavailable-provider
+rejection, and raw node denial are present, while `swipe`, `gesture`,
+`powerDialog`, direct `waitFor`, broader Rhino selector aliases, packaged
+accessibility service/settings lifecycle, expanded real-device evidence, and
+root/Shizuku gesture tiers still block opt-in promotion.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -525,6 +532,11 @@ promotion-status gate for `ui.overlay` and keeps the Android provider degraded:
 permission/settings/closeAll are live-gate methods, but live overlay creation
 methods remain fail-closed until a reviewed provider and packaged/leak evidence
 land.
+P13-19 additionally uses `verifyNodePhase13AccessibilitySelectorPromotion` as
+the host promotion-status gate for `accessibility` selector parity and keeps
+advanced automation blocked: the existing live provider remains selector-only
+and service-dependent, while gesture APIs, packaged service lifecycle, and
+root/Shizuku tiers require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

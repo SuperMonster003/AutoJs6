@@ -399,7 +399,7 @@ capability 映射示例：
 | `app` | `launchPackage`, `launchApp`, `openAppSetting`, `startActivity` | 基础应用能力，范围小于 Rhino `app` |
 | `engines` | `myEngine`, `all`, `stopAll`, `stopSelf`, `execScript`, `execScriptFile` | 受控脚本调度，不暴露 raw engine 对象 |
 | `dialogs` | `alert`, `confirm`, `input`, `select` | Promise 化对话框能力，需关注 Activity/provider 生命周期 |
-| `accessibility` | `isEnabled`, `ensureEnabled`, `click`, `back`, `home`, `recentApps`, `findByText`, `clickText`, `findOne`, `findAll`, `longClick`, `setText`, `scrollForward`, `scrollBackward` | 自动化核心子集，不是完整 Rhino selector/raw node 等价 |
+| `accessibility` | `isEnabled`, `ensureEnabled`, `click`, `back`, `home`, `recentApps`, `findByText`, `clickText`, `findOne`, `findAll`, `longClick`, `setText`, `scrollForward`, `scrollBackward` | P13-19 records selector/accessibility as partial: selector v2 JSON descriptors and compat selector handles are covered, but gesture, direct `waitFor`, packaged service, raw node, root/Shizuku parity remain open |
 | `media_projection` | `requestScreenCapture`, `nextImage`, `stop` | 协议存在，真实授权和 packaged 行为仍需按 provider 状态判断 |
 | `image` / `images` | `captureScreen`, `readImage`, `saveImage`, `clip`, `resize`, `grayscale`, `threshold`, `findImage`, `matchTemplate`, `findColor`, `findMultiColors`, `recycle` | handle-based，不暴露 raw Bitmap/Mat |
 | `ocr` | `recognize`, `recognizeText`, `detectTextBounds` | 依赖 image handle 和 OCR provider/model |
@@ -599,7 +599,7 @@ await ok.click({ timeoutMs: 3000 });
 | `global` | `toastLog`, `sleep`, `setClip`, `getClip`, selector globals | `autojs6:compat` | 部分，已覆盖低风险和部分自动化全局 |
 | `app` | `app.launchPackage`, intent/broadcast/helpers | `app`, `autojs6:compat.app` | 部分，基础启动/设置/Activity 可用，广播等缺口仍在 |
 | `autojs` | `$autojs`, version/resource 等 | `autojs6:profile`, `engines` 等分散能力 | 部分 |
-| `automator` / `auto` / `selector` | `text("OK").findOne().click()` | `accessibility`, `autojs6:compat` selector handle | 部分，已是 Promise/handle 模型 |
+| `automator` / `auto` / `selector` | `text("OK").findOne().click()` | `accessibility`, `autojs6:compat` selector handle | 部分，P13-19 固定 selector v2/compat handle 证据；`waitFor`、手势、raw node、packaged service、root/Shizuku 仍未完成 |
 | `root_automator` | root input event 自动化 | 无稳定 Node bridge | `blocked_by_design` 或待单独 provider |
 | `files` | `files.read/write/createWithDirs` | scoped `files`, scoped `fs` | 部分，路径语义与 Rhino 不完全一致 |
 | `images` | 截图、读写、找图、找色、模板匹配 | `image/images`, `media_projection`, `autojs6:compat.images` | 部分，handle-based，需显式 recycle/stop |
@@ -843,7 +843,9 @@ blockers：
 高优先级缺口：
 
 - 默认全局兼容不是目标，但显式 `compat.install({ globals: true })` 仍需继续扩展。
-- selector DSL 需要更多 Rhino 选择器细节和常见链式写法。
+- selector DSL 需要更多 Rhino 选择器细节和常见链式写法；P13-19 已固定
+  JSON selector/compat handle 证据，但 `waitFor`、gesture、packaged
+  accessibility service、raw node 和 root/Shizuku tiers 仍未完成。
 - `images` 需要继续覆盖更多 Rhino overload、权限路径、packaged 行为和资源回收。
 - `app` 需要扩展广播、邮件、intent helpers、应用信息查询等。
 - `device` 需要扩展更多设备信息、电源、亮度、剪贴板兼容细节。
@@ -946,7 +948,7 @@ const accessibility = require("accessibility");
 
 await showToast("start");
 await app.launchPackage("com.example");
-await accessibility.click({ x: 100, y: 200 });
+await accessibility.click(accessibility.text("OK"), { timeoutMs: 3000 });
 ```
 
 迁移 Rhino 脚本时使用显式 compat：

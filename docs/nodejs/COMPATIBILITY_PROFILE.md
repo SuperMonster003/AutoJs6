@@ -1440,6 +1440,7 @@ runtime.
   - when an operational AutoJs6 accessibility service is visible in the current process, the Android provider can validate `isEnabled`, `ensureEnabled`, `findByText`, selector `findOne`/`findAll`, selector `click`/`longClick`/`setText`/`scrollForward`/`scrollBackward`, and Back/Home/Recents global actions through controlled JSON snapshots and booleans
   - the focused accessibility/image gate launches a controlled Activity and exercises real selector `findOne`/`click` only when the service is already enabled; it does not modify device accessibility settings
   - when an accessibility provider is unavailable in the current process, including isolated embedded service processes that cannot see the main-process service instance, `isEnabled`/`ensureEnabled` return `false` and action/query methods reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
+  - P13-19 records the current accessibility selector promotion state as partial: direct `accessibility` and explicit `autojs6:compat` selector handles are covered by host/device/type evidence, while `swipe`, `gesture`, `powerDialog`, direct `waitFor`, broader Rhino selector aliases, packaged service/settings lifecycle, expanded real-device evidence, and root/Shizuku gesture tiers remain blocked
 - `media_projection`
   - `requestScreenCapture(options?): Promise<ScreenCapturer>`
   - `ScreenCapturer.nextImage(options?): Promise<Image | null>`

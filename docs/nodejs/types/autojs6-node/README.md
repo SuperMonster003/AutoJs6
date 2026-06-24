@@ -86,6 +86,14 @@ permission, settings, closeAll, show, handle, and event types, while Android
 live `show`/`update`/`drainEvents`/per-handle `close` remains fail-closed until
 a promoted overlay provider lands.
 
+P13-19 records the partial accessibility selector promotion gate for the
+declared `accessibility` and explicit `autojs6:compat` selector types. Direct
+selector descriptors, frozen node snapshots, selector find/action calls, Rhino
+compat selector handles, and unavailable-provider rejection are covered by
+host/device/type evidence. `swipe`, `gesture`, `powerDialog`, direct
+`waitFor`, broader Rhino selector aliases, packaged accessibility service
+lifecycle, and root/Shizuku tiers remain unpromoted.
+
 P12-34 is a documentation synchronization gate rather than a new declaration
 surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9
 comparison, `RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`, `SECURITY_MODEL.md`, and

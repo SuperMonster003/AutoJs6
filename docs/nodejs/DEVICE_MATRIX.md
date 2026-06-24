@@ -96,6 +96,9 @@ Use `accessibility` only for manual physical-device validation after enabling th
 - primary device: Sony XQ-AT72 `QV710AF65F`
 - use: controlled real-device `accessibility` provider smoke for `isEnabled`, `ensureEnabled`, `findByText`, and `clickText`
 - optional extra: pass `-Pandroid.testInstrumentationRunnerArguments.autojs.nodejs.accessibilitySmoke.globalActions=true` only when it is safe for the test to trigger Back/Home
+- P13-19 keeps optional accessibility smoke manual: the promotion gate records
+  selector/provider evidence, but it still requires explicit user-side service
+  enablement and does not modify Android accessibility settings.
 
 Recommended command:
 

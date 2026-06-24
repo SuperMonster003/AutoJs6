@@ -1,5 +1,20 @@
 # Phase 13: Auto.js Pro And Desktop Node Parity Expansion Tasks
 
+## P13-19 Partial Landing Note
+
+- P13-19 partial accessibility selector promotion gate records the current
+  direct `accessibility` and explicit `autojs6:compat` selector surfaces.
+- Host verifier:
+  `tools/nodejs/phase13/verify-accessibility-selector-promotion.js`.
+- Gradle gate: `:app:verifyNodePhase13AccessibilitySelectorPromotion`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_19_ACCESSIBILITY_SELECTOR_PROMOTION.md`.
+- Surface manifest evidence: `phase13-accessibility-selector-promotion`.
+- Remaining P13-19 blockers: `swipe`/`gesture`/`powerDialog`, direct
+  `waitFor`, broader Rhino selector aliases, packaged accessibility
+  service/settings lifecycle, real-device matrix expansion, and root/Shizuku
+  gesture tiers.
+
 盘点日期：2026-06-24
 
 当前版本基线来自根目录 `version.properties`：
