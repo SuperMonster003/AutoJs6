@@ -1148,6 +1148,15 @@ shims, symlinks, native builds, signed native payloads, script-visible
 `package_manager`/`npm`, packaged dependency distribution, and real npm corpus
 growth remain open.
 
+P13-43 records Node stdlib conformance as partial: Safe Node now exposes
+`stdlibProfile` diagnostics for the representative stdlib subset covering
+`crypto`, streams, zlib, Buffer, URL, OS, readline, TTY, `perf_hooks`, and
+`async_hooks`. This narrows the gap for common desktop packages that depend on
+low-risk builtins, but it is not yet full Pro/Desktop stdlib parity. Broader
+module conformance, Android OS/terminal edge cases, `process.getBuiltinModule`,
+`zlib/promises`, raw native handles, unrestricted network behavior, and real
+npm corpus pass-rate growth remain open.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

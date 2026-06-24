@@ -760,6 +760,14 @@ registry download, lifecycle execution, bin shims, symlink materialization,
 native builds/native payloads, postinstall downloads, JS package-manager
 facades, raw executable authority, and raw registry access unpromoted. P13-42
 records Android package manager parity as partial.
+`verifyNodePhase13StdlibConformanceDecision` records P13-43 as the stdlib
+conformance decision gate. It requires `stdlibProfile` diagnostics,
+representative focused instrumentation, existing core builtin compatibility
+evidence, real npm corpus baseline evidence, modern-core differential
+evidence, TypeScript declarations, surface manifest evidence, and docs updates
+while keeping full desktop stdlib parity, raw native handles, unrestricted
+network behavior, broad terminal control, `process.getBuiltinModule`, and
+`zlib/promises` unpromoted. P13-43 records Node stdlib conformance as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

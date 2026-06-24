@@ -1899,6 +1899,32 @@ store install/verify behavior, SHA-512 integrity, native values, and
 lifecycle/bin/native package rejection. P13-42 records Android package manager
 parity as partial.
 
+Phase 13 stdlib conformance decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13StdlibConformanceDecision
+```
+
+This host gate records P13-43 as partial. It requires `stdlibProfile`
+diagnostics, the focused P13-43 instrumentation test, existing core builtin
+compatibility evidence, the real npm corpus baseline, modern-core
+differential evidence, TypeScript declarations, surface manifest evidence,
+release matrix updates, and Phase13 docs. It keeps full desktop stdlib parity,
+raw native handles, unrestricted network behavior, broad terminal control,
+`process.getBuiltinModule`, and `zlib/promises` open.
+
+Phase 13 stdlib conformance focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeStdlibPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies `stdlibProfile` diagnostics and representative Safe
+subset behavior for `crypto`, streams, zlib, Buffer, URL, OS, readline, TTY,
+`perf_hooks`, and `async_hooks`. It also verifies stable denial for
+`process.getBuiltinModule` and `zlib/promises`, plus native callback/stream
+cleanup counters. P13-43 records Node stdlib conformance as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

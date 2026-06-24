@@ -23,13 +23,13 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | --- | --- | --- | --- | --- |
 | `assert` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `assert/strict` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `async_hooks` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `buffer` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
+| `async_hooks` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
+| `buffer` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
 | `child_process` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-40 records child_process scoped-runner diagnostics as partial; Safe/default keeps child_process denied while app-private allowlisted binaries, bounded stdio, timeout/cancel/kill cleanup, packaged evidence, and hostile corpus coverage remain future work. |
 | `cluster` | `disabled` | `permanently_unsupported` | `commonjs-known`, `disabled` | Keep stable denial unless a future Phase 13 task assigns an opt-in profile. |
 | `console` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `constants` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `crypto` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
+| `crypto` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
 | `dgram` | `disabled` | `desktop_compat_opt_in` | `disabled` | P13-31 records UDP/dgram as stable-denied for v1.1; unicast client, server bind/listen, multicast, broadcast, packaged INTERNET policy, and fd leak proof remain future work. |
 | `diagnostics_channel` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `dns` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |
@@ -45,35 +45,35 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `net` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |
 | `node:test` | `missing_from_registry` | `desktop_compat_opt_in` | - | Add explicit registry entry or document android_not_applicable. |
 | `node:test/reporters` | `missing_from_registry` | `desktop_compat_opt_in` | - | Add explicit registry entry or document android_not_applicable. |
-| `os` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
+| `os` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
 | `path` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `path/posix` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `path/win32` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `perf_hooks` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
+| `perf_hooks` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
 | `process` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `punycode` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `querystring` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `readline` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `readline/promises` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
+| `readline` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
+| `readline/promises` | `partial` | `safe_default` | `limited` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
 | `repl` | `disabled` | `permanently_unsupported` | `commonjs-known`, `disabled` | Keep stable denial unless a future Phase 13 task assigns an opt-in profile. |
-| `stream` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `stream/consumers` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `stream/promises` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `stream/web` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
+| `stream` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
+| `stream/consumers` | `partial` | `safe_default` | `limited` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
+| `stream/promises` | `partial` | `safe_default` | `limited` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
+| `stream/web` | `partial` | `safe_default` | `limited` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
 | `string_decoder` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `timers` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `timers/promises` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `tls` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |
-| `tty` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `url` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
+| `tty` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
+| `url` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
 | `util` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `util/types` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `v8` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `vm` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-36 records vm module diagnostics as partial; Safe/default keeps vm denied while vm.Script/context/timeout, escape denial, memory budget, and packaged behavior evidence remain future work. |
 | `wasi` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-38 records controlled WASI diagnostics as partial; pure WebAssembly stays available while raw WASI remains denied and controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remain future work. |
 | `worker_threads` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, and native preflight are covered while native runnable evidence, crash/resource stress, packaged worker smoke, and final Desktop worker policy remain open. |
-| `zlib` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `zlib/promises` | `disabled` | `desktop_compat_opt_in` | `disabled` | Keep stable denial unless a future Phase 13 task assigns an opt-in profile. |
+| `zlib` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |
+| `zlib/promises` | `disabled` | `desktop_compat_opt_in` | `disabled` | P13-43 records zlib/promises as a stable disabled gap while callback, sync, and stream zlib subsets stay covered. |
 
 ## Checks
 

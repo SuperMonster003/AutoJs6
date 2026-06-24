@@ -358,6 +358,13 @@ store, but Android npm CLI, registry download, lifecycle scripts, bin shims,
 symlinks, native builds/native payloads, postinstall downloads, and
 script-visible `package_manager`/`npm` remain unavailable.
 
+P13-43 records Node stdlib conformance as partial. AutoJs6 Node exposes
+`stdlibProfile` diagnostics for representative Safe stdlib coverage across
+`crypto`, streams, zlib, Buffer, URL, OS, readline, TTY, `perf_hooks`, and
+`async_hooks`. Desktop packages that need broader OS/terminal behavior,
+`process.getBuiltinModule`, `zlib/promises`, unrestricted network/native
+handles, or full Node stdlib parity still need later Desktop-profile work.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

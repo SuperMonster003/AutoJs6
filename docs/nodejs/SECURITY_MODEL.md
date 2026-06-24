@@ -751,6 +751,14 @@ builds/native payloads, postinstall downloads, raw executable launch,
 script-visible `package_manager`/`npm`, and raw `node_modules` mutation remain
 denied until separate Desktop-profile evidence proves them safe.
 
+P13-43 records Node stdlib conformance as partial. `stdlibProfile` is
+diagnostic metadata only and does not grant raw desktop stdlib authority.
+Representative Safe subsets are available for `crypto`, streams, zlib, Buffer,
+URL, OS, readline, TTY, `perf_hooks`, and `async_hooks`, but
+`process.getBuiltinModule`, `zlib/promises`, raw native handles, unrestricted
+network/OS surfaces, raw terminal control, and full desktop parity remain
+denied until separate Desktop-profile evidence proves them safe.
+
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
 metadata only and does not make a second JavaScript context a security
 boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,

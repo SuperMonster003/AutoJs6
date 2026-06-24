@@ -201,6 +201,24 @@ function nextStepForLimited(name) {
   if (name === "fs" || name === "fs/promises") {
     return "P13-32 records scoped filesystem profile and P13-33 records advanced fs APIs as partial; Safe profile stays working-directory scoped while expanded roots, packaged watcher/fd/FileHandle close-on-destroy, Android unsupported behavior notes, and full desktop fs semantics remain future work.";
   }
+  if ([
+    "async_hooks",
+    "buffer",
+    "crypto",
+    "os",
+    "perf_hooks",
+    "readline",
+    "readline/promises",
+    "stream",
+    "stream/consumers",
+    "stream/promises",
+    "stream/web",
+    "tty",
+    "url",
+    "zlib",
+  ].includes(name)) {
+    return "P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work.";
+  }
   return "Keep current Safe subset unless P13-43 promotes broader desktop conformance.";
 }
 
@@ -228,6 +246,8 @@ function nextStepForDisabled(name) {
       return "P13-38 records controlled WASI diagnostics as partial; pure WebAssembly stays available while raw WASI remains denied and controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remain future work.";
     case "worker_threads":
       return "P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, and native preflight are covered while native runnable evidence, crash/resource stress, packaged worker smoke, and final Desktop worker policy remain open.";
+    case "zlib/promises":
+      return "P13-43 records zlib/promises as a stable disabled gap while callback, sync, and stream zlib subsets stay covered.";
     default:
       return "Keep stable denial unless a future Phase 13 task assigns an opt-in profile.";
   }

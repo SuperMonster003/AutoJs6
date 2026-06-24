@@ -1368,6 +1368,29 @@ P13 task 本身使用以下执行状态：
     - 每个模块有 conformance subset。
     - Android 不适用 API 有稳定差异说明。
     - npm corpus 中真实依赖通过率提升。
+  - Progress:
+    - P13-43 partial landing 已添加 `stdlibProfile` 诊断，记录当前 Safe
+      Node stdlib subset、代表性模块状态、Android 稳定差异、npm corpus
+      基线和 desktop differential 证据，同时保持 raw desktop parity、
+      raw native handles、unrestricted network、broad terminal、
+      `process.getBuiltinModule` 和 `zlib/promises` 未提升。
+    - 已新增 `NodeStdlibPhase13DecisionInstrumentationTest`，覆盖
+      `crypto`、`stream` / `stream/promises` / `stream/consumers` /
+      `stream/web`、`zlib`、`buffer`、`url`、`os`、`readline` /
+      `readline/promises`、`tty`、`perf_hooks`、`async_hooks` 的代表性
+      Safe subset，以及 `process.getBuiltinModule` 与 `zlib/promises`
+      的稳定 denial。
+    - 已新增 host verifier:
+      `tools/nodejs/phase13/verify-stdlib-conformance-decision.js`。
+    - Gradle gate:
+      `:app:verifyNodePhase13StdlibConformanceDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_43_STDLIB_CONFORMANCE.md`。
+    - Surface manifest evidence:
+      `phase13-stdlib-conformance-decision`。
+  - Remaining: full desktop stdlib parity、更多 hostile inputs/edge cases、
+    Android terminal/OS 差异矩阵、更多 stdlib-dependent real npm corpus
+    fixture 和通过率提升仍未完成。
 
 - [ ] P13-44: 推进 process/env/argv parity。
   - 范围：补齐 `process.argv`、`process.env`、cwd、exit、signals、versions、

@@ -1236,6 +1236,15 @@ native builds/native payloads, postinstall downloads, raw `node_modules`
 mutation, script-visible `package_manager`/`npm`, and raw registry/executable
 authority remain unpromoted.
 
+P13-43 records Node stdlib conformance as partial. The runtime exposes
+`autojs6:profile.stdlibProfile` to document the current Safe stdlib subset for
+`crypto`, `stream`, `stream/promises`, `stream/consumers`, `stream/web`,
+`zlib`, `buffer`, `url`, `os`, `readline`, `readline/promises`, `tty`,
+`perf_hooks`, and `async_hooks`. `zlib/promises`, `process.getBuiltinModule`,
+raw desktop parity, raw native handles, unrestricted network behavior, and
+broad terminal control remain unpromoted while broader Android difference
+coverage and real npm corpus growth stay future work.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context
