@@ -8903,6 +8903,27 @@ std::string buildEmbeddedScriptExecutionSource(
         nestedWorkers: false,
         rawProcessHandles: false
       }),
+      vmProfile: Object.freeze({
+        status: "disabled_by_default",
+        defaultEnabled: false,
+        targetProfiles: Object.freeze(["desktop_compat_opt_in", "debug_unsafe_lab"]),
+        module: "denied",
+        script: "deferred",
+        context: "deferred",
+        timeout: "required_before_enablement",
+        compileFunction: "denied",
+        syntheticModule: "denied",
+        sourceTextModule: "denied",
+        dynamicImportHooks: "denied",
+        bridgeModules: "denied",
+        processAccess: "denied_for_future_contexts",
+        scopedFs: "must_preserve",
+        privateBindings: "denied",
+        hostObjects: "denied",
+        memoryLimits: "not_defined",
+        packagedBehavior: "not_promoted",
+        rawGlobalAccess: false
+      }),
       processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
       limitedBuiltins: __autojs6_freeze_sorted_copy(

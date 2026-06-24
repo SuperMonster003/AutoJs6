@@ -530,6 +530,10 @@ async function smoke(): Promise<void> {
   const processWorkerPreferredPrimitive: string = autojsProfile.processWorkerReplacementProfile.preferredPrimitive;
   const processWorkerMessageSizeBytes: number = autojsProfile.processWorkerReplacementProfile.messageSizeBytes;
   const processWorkerRawProcessHandles: boolean = autojsProfile.processWorkerReplacementProfile.rawProcessHandles;
+  const vmProfileStatus: string = autojsProfile.vmProfile.status;
+  const vmProfileTargetProfiles: readonly string[] = autojsProfile.vmProfile.targetProfiles;
+  const vmProfileTimeout: string = autojsProfile.vmProfile.timeout;
+  const vmProfileRawGlobalAccess: boolean = autojsProfile.vmProfile.rawGlobalAccess;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -735,6 +739,10 @@ async function smoke(): Promise<void> {
   void processWorkerPreferredPrimitive;
   void processWorkerMessageSizeBytes;
   void processWorkerRawProcessHandles;
+  void vmProfileStatus;
+  void vmProfileTargetProfiles;
+  void vmProfileTimeout;
+  void vmProfileRawGlobalAccess;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;

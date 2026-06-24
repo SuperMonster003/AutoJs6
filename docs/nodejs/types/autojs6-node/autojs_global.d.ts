@@ -123,6 +123,28 @@ declare namespace AutoJs6Node {
     readonly rawProcessHandles: boolean;
   }
 
+  export interface VmProfile {
+    readonly status: "disabled_by_default" | "experimental_opt_in" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly module: "denied" | "partial" | string;
+    readonly script: "deferred" | "partial" | string;
+    readonly context: "deferred" | "partial" | string;
+    readonly timeout: "required_before_enablement" | string;
+    readonly compileFunction: "denied" | string;
+    readonly syntheticModule: "denied" | string;
+    readonly sourceTextModule: "denied" | string;
+    readonly dynamicImportHooks: "denied" | string;
+    readonly bridgeModules: "denied" | string;
+    readonly processAccess: "denied_for_future_contexts" | string;
+    readonly scopedFs: "must_preserve" | string;
+    readonly privateBindings: "denied" | string;
+    readonly hostObjects: "denied" | string;
+    readonly memoryLimits: "not_defined" | string;
+    readonly packagedBehavior: "not_promoted" | string;
+    readonly rawGlobalAccess: boolean;
+  }
+
   export interface AutoJsProfile {
     readonly name: string;
     readonly engineVersion: string;
@@ -138,6 +160,7 @@ declare namespace AutoJs6Node {
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
+    readonly vmProfile: VmProfile;
     readonly directBuiltinAliases: Readonly<Record<string, string>>;
     readonly limitedBuiltins: readonly string[];
     readonly disabledBuiltins: readonly string[];
