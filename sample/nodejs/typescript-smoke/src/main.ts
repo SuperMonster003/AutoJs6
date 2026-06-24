@@ -529,6 +529,12 @@ async function smoke(): Promise<void> {
   const packageManagerProfileLifecycleScripts: string = autojsProfile.packageManagerProfile.lifecycleScripts;
   const packageManagerProfileBinLinks: string = autojsProfile.packageManagerProfile.binLinks;
   const packageManagerProfileRawRegistryAccess: boolean = autojsProfile.packageManagerProfile.rawRegistryAccess;
+  const stdlibProfileStatus: string = autojsProfile.stdlibProfile.status;
+  const stdlibProfileModules: readonly string[] = autojsProfile.stdlibProfile.conformanceModules;
+  const stdlibProfileCrypto: string = autojsProfile.stdlibProfile.moduleStatus.crypto;
+  const stdlibProfileAndroidUnsupported: readonly string[] = autojsProfile.stdlibProfile.androidUnsupported;
+  const stdlibProfileProcessGetBuiltin: string = autojsProfile.stdlibProfile.processGetBuiltinModule;
+  const stdlibProfileRawDesktopParity: boolean = autojsProfile.stdlibProfile.rawDesktopParity;
   const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
   const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
   const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
@@ -770,6 +776,12 @@ async function smoke(): Promise<void> {
   void packageManagerProfileLifecycleScripts;
   void packageManagerProfileBinLinks;
   void packageManagerProfileRawRegistryAccess;
+  void stdlibProfileStatus;
+  void stdlibProfileModules;
+  void stdlibProfileCrypto;
+  void stdlibProfileAndroidUnsupported;
+  void stdlibProfileProcessGetBuiltin;
+  void stdlibProfileRawDesktopParity;
   void filesystemProfileMode;
   void filesystemProfileRoots;
   void filesystemAdvancedWatch;

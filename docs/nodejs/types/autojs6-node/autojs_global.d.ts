@@ -84,6 +84,29 @@ declare namespace AutoJs6Node {
     readonly rawRegistryAccess: boolean;
   }
 
+  export interface StdlibProfile {
+    readonly status: "safe_subset_partial" | "desktop_opt_in" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly conformanceSet: "node24_safe_stdlib_subset" | string;
+    readonly moduleStatus: Readonly<Record<string, "partial" | "limited_network_gated" | "disabled" | string>>;
+    readonly conformanceModules: readonly string[];
+    readonly cjsAliases: "bare_and_node_prefix" | string;
+    readonly esmImports: "partial" | string;
+    readonly shadowing: "builtin_precedence" | string;
+    readonly processGetBuiltinModule: "denied" | string;
+    readonly androidDifferences: "documented_stable" | string;
+    readonly androidUnsupported: readonly string[];
+    readonly resourceLimits: "bounded_callbacks_streams_crypto_zlib" | string;
+    readonly npmCorpus: "real_npm_phase9_30_fixture_baseline" | string;
+    readonly desktopDifferential: "modern_core_s7_36_partial" | string;
+    readonly packagedBehavior: "existing_v1_1_smokes_partial" | string;
+    readonly rawDesktopParity: boolean;
+    readonly rawNativeHandles: boolean;
+    readonly unrestrictedNetwork: boolean;
+    readonly broadTerminal: boolean;
+  }
+
   export interface FilesystemAdvancedApis {
     readonly streams: "partial" | "unsupported" | string;
     readonly fileHandle: "partial" | "unsupported" | string;
@@ -326,6 +349,7 @@ declare namespace AutoJs6Node {
     readonly scopedFs: boolean;
     readonly esmLoaderProfile: EsmLoaderProfile;
     readonly packageManagerProfile: PackageManagerProfile;
+    readonly stdlibProfile: StdlibProfile;
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
