@@ -148,8 +148,36 @@ class NodeBridgePermissionManifestInstrumentationTest {
         )
         assertEquals(
             listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "getPermissionStatus"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.NOTIFICATIONS, NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "openSettings"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "cancelAll"),
         )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS),
+            NodeBridgePermissionManifest.missingCapabilities(
+                declaredCapabilities = listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
+                requiredCapabilities = listOf(NodeBridgePermissionManifest.NOTIFICATIONS, NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS),
+            ),
+        )
+        assertEquals(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS, NodeBridgePermissionManifest.normalizeCapability("notification.settings"))
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("device", "openBatteryOptimizationSettings"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.DEVICE_POWER),
+            NodeBridgePermissionManifest.missingCapabilities(
+                declaredCapabilities = listOf(NodeBridgePermissionManifest.DEVICE),
+                requiredCapabilities = listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER),
+            ),
+        )
+        assertEquals(NodeBridgePermissionManifest.DEVICE_POWER, NodeBridgePermissionManifest.normalizeCapability("device-power"))
         assertEquals(
             listOf(NodeBridgePermissionManifest.SENSORS),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("sensors", "getAvailableSensors"),

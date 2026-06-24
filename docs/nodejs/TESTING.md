@@ -1406,6 +1406,23 @@ registry policy anchors, and cross-document evidence. It does not promote real
 Shizuku execution, root device matrix closure, packaged shell disclosure, or
 raw process/shizuku/root handles.
 
+Phase 13 notifications/settings/power manager status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13NotificationsSettingsPowerManager
+```
+
+This host gate records P13-25 as partial. It requires explicit
+`notifications.settings` and `device.power` capability tokens,
+`notifications.getPermissionStatus()`, `notifications.openSettings()`,
+`notifications.openNotificationSettings()`,
+`device.isIgnoringBatteryOptimizations()`, and
+`device.openBatteryOptimizationSettings({ dryRun: true })`, plus TypeScript,
+conformance, provider-registry, permission-manifest, and cross-document
+evidence. It does not promote notification actions/listeners/rich layouts,
+direct wakelock/power-manager APIs, Do-Not-Disturb/exact-alarm policy, OEM
+power matrices, packaged disclosure, or raw Android notification/power objects.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

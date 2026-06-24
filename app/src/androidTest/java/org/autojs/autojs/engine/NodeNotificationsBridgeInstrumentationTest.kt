@@ -32,13 +32,22 @@ class NodeNotificationsBridgeInstrumentationTest {
 
     @Test
     fun kotlinNotificationsBridgeRegistryAndManifestAreStable() {
-        listOf("notify", "cancel", "cancelAll").forEach { method ->
+        listOf("notify", "cancel", "cancelAll", "getPermissionStatus").forEach { method ->
             assertTrue(NodeBridgeModules.supports("notifications", method))
             assertEquals(
                 listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
                 NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", method),
             )
         }
+        assertTrue(NodeBridgeModules.supports("notifications", "openSettings"))
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.NOTIFICATIONS, NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "openSettings"),
+        )
+        assertEquals(
+            NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS,
+            NodeBridgePermissionManifest.normalizeCapability("notifications:settings"),
+        )
         assertFalse(NodeBridgeModules.supports("notifications", "listen"))
         assertEquals(
             listOf(NodeBridgePermissionManifest.ANDROID_PERMISSION_POST_NOTIFICATIONS),
@@ -68,7 +77,32 @@ class NodeNotificationsBridgeInstrumentationTest {
                 postMessage(message) {
                   const request = JSON.parse(message);
                   requests.push(request);
-                  const result = request.method === "notify" ? (request.args[0].id || 7001) : null;
+                  let result = null;
+                  if (request.method === "notify") {
+                    result = request.args[0].id || 7001;
+                  } else if (request.method === "getPermissionStatus") {
+                    result = {
+                      schema: "autojs6-node-notification-permission-status-v1",
+                      sdkInt: 35,
+                      notificationsEnabled: true,
+                      postNotificationsPermissionRequired: true,
+                      postNotificationsPermissionGranted: true,
+                      canOpenSettings: true
+                    };
+                  } else if (request.method === "openSettings") {
+                    result = {
+                      schema: "autojs6-node-notification-permission-status-v1",
+                      sdkInt: 35,
+                      notificationsEnabled: true,
+                      postNotificationsPermissionRequired: true,
+                      postNotificationsPermissionGranted: true,
+                      canOpenSettings: true,
+                      opened: false,
+                      dryRun: request.args[0].dryRun === true,
+                      action: "android.settings.APP_NOTIFICATION_SETTINGS",
+                      reason: "settings-intent-dry-run"
+                    };
+                  }
                   setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
                     id: request.id,
                     ok: true,
@@ -88,6 +122,9 @@ class NodeNotificationsBridgeInstrumentationTest {
               }, { timeoutMs: 1000 });
               await notifications.cancel(id, { timeoutMs: 1000 });
               await notifications.cancelAll({ timeoutMs: 1000 });
+              const status = await notifications.getPermissionStatus({ timeoutMs: 1000 });
+              const settings = await notifications.openSettings({ dryRun: true, timeoutMs: 1000 });
+              const aliasSettings = await notifications.openNotificationSettings({ dryRun: true, timeoutMs: 1000 });
 
               let invalid = "";
               try {
@@ -99,12 +136,15 @@ class NodeNotificationsBridgeInstrumentationTest {
               console.log("notifications.resolve=" + require.resolve("notifications"));
               console.log("notifications.shadow=" + (notifications.shadow === true));
               console.log("notifications.frozen=" + Object.isFrozen(notifications));
-              console.log("notifications.methods=" + [typeof notifications.notify, typeof notifications.cancel, typeof notifications.cancelAll].join("|"));
+              console.log("notifications.methods=" + [typeof notifications.notify, typeof notifications.cancel, typeof notifications.cancelAll, typeof notifications.getPermissionStatus, typeof notifications.openSettings, typeof notifications.openNotificationSettings].join("|"));
               console.log("notifications.id=" + id);
+              console.log("notifications.status=" + [status.schema, status.notificationsEnabled, status.postNotificationsPermissionGranted].join("|"));
+              console.log("notifications.settings=" + [settings.schema, settings.dryRun, aliasSettings.dryRun].join("|"));
               console.log("notifications.invalid=" + invalid);
               console.log("notifications.requests=" + requests.map((request) => request.module + "." + request.method).join("|"));
               console.log("notifications.payload=" + [requests[0].args[0].title, requests[0].args[0].text, requests[0].args[0].channel, requests[0].args[0].ongoing, requests[0].args[0].priority].join("|"));
               console.log("notifications.permissions=" + requests[0].permissions.join("|"));
+              console.log("notifications.settings_permissions=" + requests.filter((request) => request.method === "openSettings").every((request) => request.permissions.join("|") === "notifications|notifications.settings"));
               console.log("notifications.pending=" + bridge.__test.pendingCount());
             })();
             """.trimIndent(),
@@ -116,12 +156,15 @@ class NodeNotificationsBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("notifications.resolve=notifications"))
         assertTrue(result.stdout.contains("notifications.shadow=false"))
         assertTrue(result.stdout.contains("notifications.frozen=true"))
-        assertTrue(result.stdout.contains("notifications.methods=function|function|function"))
+        assertTrue(result.stdout.contains("notifications.methods=function|function|function|function|function|function"))
         assertTrue(result.stdout.contains("notifications.id=7001"))
+        assertTrue(result.stdout.contains("notifications.status=autojs6-node-notification-permission-status-v1|true|true"))
+        assertTrue(result.stdout.contains("notifications.settings=autojs6-node-notification-permission-status-v1|true|true"))
         assertTrue(result.stdout.contains("notifications.invalid=${NodeRuntimeErrorCodes.BRIDGE_INVALID_REQUEST}"))
-        assertTrue(result.stdout.contains("notifications.requests=notifications.notify|notifications.cancel|notifications.cancelAll"))
+        assertTrue(result.stdout.contains("notifications.requests=notifications.notify|notifications.cancel|notifications.cancelAll|notifications.getPermissionStatus|notifications.openSettings|notifications.openSettings"))
         assertTrue(result.stdout.contains("notifications.payload=Node task|Running|node-test|true|low"))
         assertTrue(result.stdout.contains("notifications.permissions=notifications"))
+        assertTrue(result.stdout.contains("notifications.settings_permissions=true"))
         assertTrue(result.stdout.contains("notifications.pending=0"))
     }
 
@@ -165,6 +208,45 @@ class NodeNotificationsBridgeInstrumentationTest {
     }
 
     @Test
+    fun jsNotificationsSettingsRequiresExplicitManifestCapabilityBeforeDispatch() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node notifications settings manifest capability regression")
+
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("notifications"))
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  requests.push(JSON.parse(message));
+                }
+              });
+              let code = "";
+              let missing = "";
+              try {
+                await require("notifications").openSettings({ dryRun: true, timeoutMs: 1000 });
+              } catch (error) {
+                code = String(error && (error.autojs6Code || error.code || ""));
+                missing = Array.isArray(error && error.missingCapabilities) ? error.missingCapabilities.join(",") : "";
+              }
+              console.log("notifications.settings.manifest.denied=" + [code, missing, requests.length, bridge.__test.pendingCount()].join("|"));
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-notifications-settings-manifest.js>",
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("notifications settings manifest capability denial", result)
+        assertTrue(
+            result.stdout.contains(
+                "notifications.settings.manifest.denied=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|notifications.settings|0|0",
+            ),
+        )
+    }
+
+    @Test
     fun androidProviderPostsOrReportsNotificationPermissionAndTracksOwnedResource() {
         val workDir = File(context.cacheDir, "node-bridge-notifications-provider").apply {
             deleteRecursively()
@@ -174,7 +256,7 @@ class NodeNotificationsBridgeInstrumentationTest {
                 {
                   "type": "node",
                   "node": {
-                    "permissions": ["notifications"]
+                    "permissions": ["notifications", "notifications.settings"]
                   }
                 }
                 """.trimIndent(),
@@ -189,6 +271,25 @@ class NodeNotificationsBridgeInstrumentationTest {
                 cwd = workDir.absolutePath,
             ),
         )
+
+        val status = dispatch(
+            provider,
+            method = "getPermissionStatus",
+            argsJson = "[]",
+        )
+        assertTrue(status.toString(), status.ok)
+        assertEquals("autojs6-node-notification-permission-status-v1", jsonObject(status.resultJson.orEmpty()).getString("schema"))
+
+        val settings = dispatch(
+            provider,
+            method = "openSettings",
+            argsJson = """[{"dryRun":true}]""",
+        )
+        assertTrue(settings.toString(), settings.ok)
+        val settingsJson = jsonObject(settings.resultJson.orEmpty())
+        assertEquals("autojs6-node-notification-permission-status-v1", settingsJson.getString("schema"))
+        assertTrue(settingsJson.getBoolean("dryRun"))
+        assertFalse(settingsJson.getBoolean("opened"))
 
         val notify = dispatch(
             provider,
@@ -246,7 +347,11 @@ class NodeNotificationsBridgeInstrumentationTest {
                 method = method,
                 argsJson = argsJson,
                 timeoutMs = 5_000L,
-                permissions = listOf("notifications"),
+                permissions = if (method == "openSettings") {
+                    listOf("notifications", "notifications.settings")
+                } else {
+                    listOf("notifications")
+                },
             ),
         ) { bridgeResponse ->
             response = bridgeResponse
@@ -272,5 +377,9 @@ class NodeNotificationsBridgeInstrumentationTest {
 
     private fun jsonInt(raw: String): Int {
         return (JSONTokener(raw).nextValue() as Number).toInt()
+    }
+
+    private fun jsonObject(raw: String): JSONObject {
+        return JSONTokener(raw).nextValue() as JSONObject
     }
 }

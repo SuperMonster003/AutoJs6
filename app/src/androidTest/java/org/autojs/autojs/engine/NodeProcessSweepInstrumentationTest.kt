@@ -135,7 +135,7 @@ class NodeProcessSweepInstrumentationTest {
         File(workDir, "nested").mkdirs()
 
         val declaredManifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(
-            listOf("shell", "accessibility", "screen_capture", "notifications", "sensors", "ocr", "network"),
+            listOf("shell", "accessibility", "screen_capture", "notifications", "notifications.settings", "device.power", "sensors", "ocr", "network"),
         )
         val declared = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
@@ -174,6 +174,8 @@ class NodeProcessSweepInstrumentationTest {
             assert.strictEqual(permission.has("accessibility"), true);
             assert.strictEqual(permission.has("screen.capture"), true);
             assert.strictEqual(permission.has("notifications"), true);
+            assert.strictEqual(permission.has("notification.settings"), true);
+            assert.strictEqual(permission.has("device-power"), true);
             assert.strictEqual(permission.has("sensors"), true);
             assert.strictEqual(permission.has("ocr"), true);
             assert.strictEqual(permission.has("network"), false);
@@ -211,8 +213,11 @@ class NodeProcessSweepInstrumentationTest {
               "accessibility",
               "screen_capture",
               "notifications",
+              "notifications.settings",
+              "device.power",
               "sensors",
-              "ocr"
+              "ocr",
+              "barcode"
             ]);
             assert.strictEqual(query.scopes["fs.read"], true);
             assert.strictEqual(query.scopes["fs.write"], true);
@@ -220,8 +225,11 @@ class NodeProcessSweepInstrumentationTest {
             assert.strictEqual(query.scopes.accessibility, true);
             assert.strictEqual(query.scopes.screen_capture, true);
             assert.strictEqual(query.scopes.notifications, true);
+            assert.strictEqual(query.scopes["notifications.settings"], true);
+            assert.strictEqual(query.scopes["device.power"], true);
             assert.strictEqual(query.scopes.sensors, true);
             assert.strictEqual(query.scopes.ocr, true);
+            assert.strictEqual(query.scopes.barcode, false);
             assert.strictEqual(query.scopes.network, false);
             assert.strictEqual(query.scopes.worker, expectedWorker);
             assert.strictEqual(query.manifest.enforced, true);
@@ -236,6 +244,8 @@ class NodeProcessSweepInstrumentationTest {
               permission.has("accessibility"),
               permission.has("screen_capture"),
               permission.has("notifications"),
+              permission.has("notifications.settings"),
+              permission.has("device.power"),
               permission.has("sensors"),
               permission.has("ocr"),
               permission.has("network"),
@@ -255,7 +265,7 @@ class NodeProcessSweepInstrumentationTest {
         assertTrue(
             NodeEmbeddedTestHarness.describeResult("process.permission declared manifest", declared),
             declared.stdout.contains(
-                "process.permission.declared=true|true|true|true|true|true|true|true|false|$expectedWorkerPermission|false|ERR_INVALID_ARG_TYPE|0",
+                "process.permission.declared=true|true|true|true|true|true|true|true|true|true|false|$expectedWorkerPermission|false|ERR_INVALID_ARG_TYPE|0",
             ),
         )
 
@@ -276,6 +286,8 @@ class NodeProcessSweepInstrumentationTest {
             assert.strictEqual(permission.has("accessibility"), false);
             assert.strictEqual(permission.has("media_projection"), false);
             assert.strictEqual(permission.has("notifications"), false);
+            assert.strictEqual(permission.has("notifications.settings"), false);
+            assert.strictEqual(permission.has("device.power"), false);
             assert.strictEqual(permission.has("sensors"), false);
             assert.strictEqual(permission.has("ocr"), false);
             assert.strictEqual(permission.has("network"), false);
@@ -287,8 +299,11 @@ class NodeProcessSweepInstrumentationTest {
               query.scopes.accessibility,
               query.scopes.screen_capture,
               query.scopes.notifications,
+              query.scopes["notifications.settings"],
+              query.scopes["device.power"],
               query.scopes.sensors,
               query.scopes.ocr,
+              query.scopes.barcode,
               query.scopes.network,
               query.manifest.normalizedPermissions.join(","),
               bridge.__test.pendingCount()
@@ -303,7 +318,7 @@ class NodeProcessSweepInstrumentationTest {
         assertTrue(
             NodeEmbeddedTestHarness.describeResult("process.permission restricted manifest", restricted),
             restricted.stdout.contains(
-                "process.permission.restricted=true|true|false|false|false|false|false|false|false|toast|0",
+                "process.permission.restricted=true|true|false|false|false|false|false|false|false|false|false|false|toast|0",
             ),
         )
     }

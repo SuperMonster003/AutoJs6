@@ -9126,7 +9126,10 @@ std::string buildEmbeddedScriptExecutionSource(
     if (moduleName === "barcode") return ["barcode", "image"];
     if (moduleName === "storage" || moduleName === "storages") return ["storage"];
     if (moduleName === "database" || moduleName === "sqlite") return ["database"];
-    if (moduleName === "notifications") return ["notifications"];
+    if (moduleName === "notifications") {
+      if (methodName === "openSettings") return ["notifications", "notifications.settings"];
+      return ["notifications"];
+    }
     if (moduleName === "sensors") return ["sensors"];
     if (moduleName === "ui") return ["ui"];
     if (moduleName === "ui.overlay") {
@@ -9138,7 +9141,10 @@ std::string buildEmbeddedScriptExecutionSource(
       return ["input_observer", "input_observer.keys"];
     }
     if (moduleName === "clipboard") return ["clipboard"];
-    if (moduleName === "device") return ["device"];
+    if (moduleName === "device") {
+      if (methodName === "isIgnoringBatteryOptimizations" || methodName === "openBatteryOptimizationSettings") return ["device", "device.power"];
+      return ["device"];
+    }
     if (moduleName === "shell") return ["shell"];
     if (moduleName === "fetch" || moduleName === "websocket") return ["network"];
     if (moduleName === "work_manager") return ["work_manager"];
@@ -9151,7 +9157,12 @@ std::string buildEmbeddedScriptExecutionSource(
     return explicit.length > 0 ? explicit : __autojs6_bridge_default_permissions(moduleName, methodName);
   }
   function __autojs6_bridge_declares_capability(declared, required) {
-    if (required === "shell.root" || required === "shell.shizuku") {
+    if (
+      required === "shell.root" ||
+      required === "shell.shizuku" ||
+      required === "notifications.settings" ||
+      required === "device.power"
+    ) {
       return declared.indexOf(required) >= 0;
     }
     if (declared.indexOf(required) >= 0) {
@@ -9184,6 +9195,12 @@ std::string buildEmbeddedScriptExecutionSource(
       text === "media.projection"
     ) return "screen_capture";
     if (text === "notification" || text === "notifications") return "notifications";
+    if (
+      text === "notification.settings" ||
+      text === "notifications.settings" ||
+      text === "notifications_settings"
+    ) return "notifications.settings";
+    if (text === "device.power" || text === "device_power" || text === "power_manager") return "device.power";
     if (text === "sensor" || text === "sensors") return "sensors";
     if (text === "ocr") return "ocr";
     if (text === "barcode" || text === "qrcode" || text === "qr_code") return "barcode";
@@ -9239,6 +9256,8 @@ std::string buildEmbeddedScriptExecutionSource(
       normalizedScope === "accessibility" ||
       normalizedScope === "screen_capture" ||
       normalizedScope === "notifications" ||
+      normalizedScope === "notifications.settings" ||
+      normalizedScope === "device.power" ||
       normalizedScope === "sensors" ||
       normalizedScope === "ocr" ||
       normalizedScope === "barcode"
@@ -9257,6 +9276,8 @@ std::string buildEmbeddedScriptExecutionSource(
       "accessibility",
       "screen_capture",
       "notifications",
+      "notifications.settings",
+      "device.power",
       "sensors",
       "ocr",
       "barcode"
@@ -13786,6 +13807,13 @@ std::string buildEmbeddedScriptExecutionSource(
       signal: __autojs6_bridge_signal_from_options(options)
     };
   }
+  function __autojs6_device_power_bridge_options(options, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_device_timeout_from_options(options, fallbackMs),
+      permissions: ["device", "device.power"],
+      signal: __autojs6_bridge_signal_from_options(options)
+    };
+  }
   function __autojs6_device_invalid_argument_error(methodName, message) {
     return __autojs6_bridge_error(
       message,
@@ -13878,6 +13906,28 @@ std::string buildEmbeddedScriptExecutionSource(
         return undefined;
       });
     }
+    function isIgnoringBatteryOptimizations(options) {
+      const bridgeOptions = __autojs6_device_options(options);
+      return __autojs6_call_autojs(
+        "device",
+        "isIgnoringBatteryOptimizations",
+        [],
+        __autojs6_device_power_bridge_options(bridgeOptions, 5000)
+      ).then(function(result) {
+        return result === true;
+      });
+    }
+    function openBatteryOptimizationSettings(options) {
+      const bridgeOptions = __autojs6_device_options(options);
+      return __autojs6_call_autojs(
+        "device",
+        "openBatteryOptimizationSettings",
+        [{ dryRun: bridgeOptions.dryRun === true }],
+        __autojs6_device_power_bridge_options(bridgeOptions, 5000)
+      ).then(function(result) {
+        return Object.freeze(Object.assign({}, result || {}));
+      });
+    }
     __autojs6_limited_device_cache = Object.freeze({
       sdkInt: info.sdkInt,
       width: info.width,
@@ -13885,7 +13935,9 @@ std::string buildEmbeddedScriptExecutionSource(
       density: info.density,
       isScreenOn,
       wakeUp,
-      vibrate
+      vibrate,
+      isIgnoringBatteryOptimizations,
+      openBatteryOptimizationSettings
     });
     return __autojs6_limited_device_cache;
   }
@@ -22024,6 +22076,20 @@ std::string buildEmbeddedScriptExecutionSource(
       permissions: ["notifications"]
     };
   }
+  function __autojs6_notifications_settings_call_options(options, fallbackMs) {
+    const input = __autojs6_notifications_options(options);
+    return {
+      timeoutMs: __autojs6_bridge_timeout_ms(input.timeoutMs === undefined ? fallbackMs : input.timeoutMs),
+      signal: __autojs6_bridge_signal_from_options(input),
+      permissions: ["notifications", "notifications.settings"]
+    };
+  }
+  function __autojs6_notifications_settings_payload(options) {
+    const input = __autojs6_notifications_options(options);
+    return {
+      dryRun: input.dryRun === true
+    };
+  }
   function __autojs6_notifications_payload(options) {
     if (!options || typeof options !== "object" || Array.isArray(options)) {
       throw __autojs6_notifications_invalid_argument_error(
@@ -22095,10 +22161,33 @@ std::string buildEmbeddedScriptExecutionSource(
         return undefined;
       });
     }
+    function getPermissionStatus(options) {
+      return __autojs6_call_autojs(
+        "notifications",
+        "getPermissionStatus",
+        [],
+        __autojs6_notifications_call_options(options, 5000)
+      ).then(function(result) {
+        return Object.freeze(Object.assign({}, result || {}));
+      });
+    }
+    function openSettings(options) {
+      return __autojs6_call_autojs(
+        "notifications",
+        "openSettings",
+        [__autojs6_notifications_settings_payload(options)],
+        __autojs6_notifications_settings_call_options(options, 5000)
+      ).then(function(result) {
+        return Object.freeze(Object.assign({}, result || {}));
+      });
+    }
     __autojs6_limited_notifications_cache = Object.freeze({
       notify,
       cancel,
-      cancelAll
+      cancelAll,
+      getPermissionStatus,
+      openSettings,
+      openNotificationSettings: openSettings
     });
     return __autojs6_limited_notifications_cache;
   }

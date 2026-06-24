@@ -622,12 +622,12 @@ object NodeBridgeModules {
     val storageMethods = setOf("get", "put", "remove", "clear", "keys", "contains")
     val databaseModules = setOf(DATABASE, SQLITE)
     val databaseMethods = setOf("open", "exec", "run", "get", "all", "transaction", "close")
-    val notificationsMethods = setOf("notify", "cancel", "cancelAll")
+    val notificationsMethods = setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings")
     val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
     val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents")
     val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")
     val clipboardMethods = setOf("getText", "setText", "hasText")
-    val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate")
+    val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings")
     val shellMethods = setOf("exec")
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
@@ -1065,6 +1065,10 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun overlayPermissionSettingsIntentAvailable(intent: Intent = overlayPermissionSettingsIntent()): Boolean {
+        return appContext.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
+    }
+
+    private fun intentAvailable(intent: Intent): Boolean {
         return appContext.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
     }
 
@@ -2453,6 +2457,16 @@ class AndroidNodeBridgeCapabilityProvider(
                         }
                         NodeBridgeResponse.success(request.id, "null")
                     }
+                    "getPermissionStatus" -> {
+                        NodeBridgeResponse.success(request.id, notificationPermissionStatus().toString())
+                    }
+                    "openSettings" -> {
+                        val options = args.optJSONObject(0) ?: JSONObject()
+                        NodeBridgeResponse.success(
+                            request.id,
+                            openNotificationSettings(dryRun = options.optBoolean("dryRun", false)).toString(),
+                        )
+                    }
                     else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
                 }
             }.getOrElse { error ->
@@ -2514,6 +2528,58 @@ class AndroidNodeBridgeCapabilityProvider(
             lockscreenVisibility = Notification.VISIBILITY_PRIVATE
         }
         manager.createNotificationChannel(channel)
+    }
+
+    private fun notificationPermissionStatus(): JSONObject {
+        val notificationsEnabled = NotificationManagerCompat.from(appContext).areNotificationsEnabled()
+        val runtimePermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        val runtimePermissionGranted = !runtimePermissionRequired ||
+                appContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        val intent = notificationSettingsIntent()
+        return JSONObject()
+            .put("schema", "autojs6-node-notification-permission-status-v1")
+            .put("sdkInt", Build.VERSION.SDK_INT)
+            .put("notificationsEnabled", notificationsEnabled)
+            .put("postNotificationsPermissionRequired", runtimePermissionRequired)
+            .put("postNotificationsPermissionGranted", runtimePermissionGranted)
+            .put("canOpenSettings", intentAvailable(intent))
+    }
+
+    private fun openNotificationSettings(dryRun: Boolean): JSONObject {
+        val intent = notificationSettingsIntent()
+        val canOpenSettings = intentAvailable(intent)
+        var opened = false
+        var reason = if (canOpenSettings) "settings-intent-ready" else "settings-intent-unavailable"
+        if (canOpenSettings && dryRun) {
+            reason = "settings-intent-dry-run"
+        } else if (canOpenSettings) {
+            runCatching {
+                appContext.startActivity(intent)
+                opened = true
+                reason = "settings-intent-opened"
+            }.getOrElse { error ->
+                reason = "settings-intent-failed:${error.javaClass.simpleName}"
+            }
+        }
+        return notificationPermissionStatus()
+            .put("opened", opened)
+            .put("dryRun", dryRun)
+            .put("action", intent.action.orEmpty())
+            .put("reason", reason)
+    }
+
+    private fun notificationSettingsIntent(): Intent {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, appContext.packageName)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:${appContext.packageName}")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        }
     }
 
     private fun dispatchSensors(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
@@ -2943,6 +3009,21 @@ class AndroidNodeBridgeCapabilityProvider(
                 "vibrate" -> runCatching {
                     vibrateDevice(request.firstLongArg())
                     NodeBridgeResponse.success(request.id, "null")
+                }.getOrElse { error ->
+                    deviceAccessFailure(request, error)
+                }
+                "isIgnoringBatteryOptimizations" -> runCatching {
+                    NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(isIgnoringBatteryOptimizations()))
+                }.getOrElse { error ->
+                    deviceAccessFailure(request, error)
+                }
+                "openBatteryOptimizationSettings" -> runCatching {
+                    val args = request.argsArray()
+                    val options = args.optJSONObject(0) ?: JSONObject()
+                    NodeBridgeResponse.success(
+                        request.id,
+                        openBatteryOptimizationSettings(dryRun = options.optBoolean("dryRun", false)).toString(),
+                    )
                 }.getOrElse { error ->
                     deviceAccessFailure(request, error)
                 }
@@ -3999,6 +4080,52 @@ class AndroidNodeBridgeCapabilityProvider(
         val powerManager = appContext.getSystemService(Context.POWER_SERVICE) as? PowerManager
             ?: return true
         return powerManager.isInteractive
+    }
+
+    private fun isIgnoringBatteryOptimizations(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true
+        }
+        val powerManager = appContext.getSystemService(Context.POWER_SERVICE) as? PowerManager
+            ?: return false
+        return powerManager.isIgnoringBatteryOptimizations(appContext.packageName)
+    }
+
+    private fun openBatteryOptimizationSettings(dryRun: Boolean): JSONObject {
+        val intent = batteryOptimizationSettingsIntent()
+        val canOpenSettings = intentAvailable(intent)
+        var opened = false
+        var reason = if (canOpenSettings) "settings-intent-ready" else "settings-intent-unavailable"
+        if (canOpenSettings && dryRun) {
+            reason = "settings-intent-dry-run"
+        } else if (canOpenSettings) {
+            runCatching {
+                appContext.startActivity(intent)
+                opened = true
+                reason = "settings-intent-opened"
+            }.getOrElse { error ->
+                reason = "settings-intent-failed:${error.javaClass.simpleName}"
+            }
+        }
+        return JSONObject()
+            .put("schema", "autojs6-node-battery-optimization-settings-v1")
+            .put("sdkInt", Build.VERSION.SDK_INT)
+            .put("ignoringBatteryOptimizations", isIgnoringBatteryOptimizations())
+            .put("canOpenSettings", canOpenSettings)
+            .put("opened", opened)
+            .put("dryRun", dryRun)
+            .put("action", intent.action.orEmpty())
+            .put("reason", reason)
+    }
+
+    private fun batteryOptimizationSettingsIntent(): Intent {
+        return Intent(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+            } else {
+                Settings.ACTION_SETTINGS
+            },
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
     @Suppress("DEPRECATION")

@@ -1032,6 +1032,17 @@ P13-24 records shell/root/Shizuku capability promotion as partial: ordinary
 Shizuku authorization, lifecycle, packaged disclosure, and device matrix
 evidence exist.
 
+P13-25 records notifications/settings/power manager promotion as partial:
+`notifications.getPermissionStatus()`, `notifications.openSettings()`,
+`notifications.openNotificationSettings()`,
+`device.isIgnoringBatteryOptimizations()`, and
+`device.openBatteryOptimizationSettings({ dryRun: true })` are evidence-backed
+JSON-safe helpers requiring exact `notifications.settings` or `device.power`
+where appropriate. Notification actions/listeners/rich layouts,
+Do-Not-Disturb/exact-alarm policy, direct wakelock/power-manager APIs, OEM
+power matrices, packaged disclosure, and raw Android notification/power objects
+remain blocked.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

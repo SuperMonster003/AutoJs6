@@ -78,6 +78,24 @@
   disclosure/failure diagnostics, expanded audit taxonomy, and migration
   examples.
 
+## P13-25 Partial Landing Note
+
+- P13-25 partial notifications/settings/power manager gate records
+  `notifications.settings` and `device.power` as explicit capability tokens.
+  Node now exposes notification permission/settings snapshots plus battery
+  optimization status/settings dry-run helpers without exposing raw Android
+  notification or power manager objects.
+- Host verifier:
+  `tools/nodejs/phase13/verify-notifications-settings-power-manager.js`.
+- Gradle gate: `:app:verifyNodePhase13NotificationsSettingsPowerManager`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_25_NOTIFICATIONS_SETTINGS_POWER_MANAGER.md`.
+- Surface manifest evidence: `phase13-notifications-settings-power-manager`.
+- Remaining P13-25 blockers: notification actions/listeners/rich layouts,
+  Do-Not-Disturb/exact-alarm policy, direct wakelock/power-manager APIs, OEM
+  power behavior matrix, packaged disclosure/run evidence, and migration
+  examples.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -748,6 +766,25 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - Android 版本差异和 runtime permission 有稳定错误。
     - channel lifecycle、cancel ownership、settings launch 有测试。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Notifications: `notify/cancel/cancelAll` remain owned-resource APIs, and
+      `getPermissionStatus()`, `openSettings()`, and
+      `openNotificationSettings()` now return JSON-safe permission/settings
+      snapshots.
+    - Power manager: `device.isIgnoringBatteryOptimizations()` and
+      `device.openBatteryOptimizationSettings({ dryRun: true })` are available
+      through explicit `device.power`.
+    - Capability gate: `notifications.settings` and `device.power` are exact
+      declarations, not implied by base `notifications` or `device`.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-notifications-settings-power-manager.js`.
+    - Gradle gate: `:app:verifyNodePhase13NotificationsSettingsPowerManager`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_25_NOTIFICATIONS_SETTINGS_POWER_MANAGER.md`.
+    - Open before closure: notification actions/listeners/rich layouts,
+      Do-Not-Disturb/exact-alarm policy, direct wakelock/power-manager APIs,
+      OEM/device matrix, packaged disclosure/run evidence, and migration
+      examples.
 
 - [ ] P13-26: 扩展 media/recorder/mediainfo provider。
   - 范围：音频播放、录音、媒体元数据、MediaStore 相关能力。

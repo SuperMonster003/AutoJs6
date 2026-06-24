@@ -80,6 +80,11 @@ async function smoke(): Promise<void> {
   const screenOn: boolean = await device.isScreenOn({ timeoutMs: 1000 });
   await device.wakeUp({ timeoutMs: 1000 });
   await device.vibrate(25, { timeoutMs: 1000 });
+  const batteryIgnored: boolean = await device.isIgnoringBatteryOptimizations({ timeoutMs: 1000 });
+  const batterySettings: device.DevicePowerSettingsResult = await device.openBatteryOptimizationSettings({
+    dryRun: true,
+    timeoutMs: 1000
+  });
 
   const shellResult: shell.ShellResult = await shell.exec("echo ok", {
     cwd: "sub",
@@ -101,6 +106,7 @@ async function smoke(): Promise<void> {
   });
   const compatBroadcastDenied: Promise<never> = rhinoCompat.app.sendBroadcast("inspect_layout_bounds", { timeoutMs: 1000 });
   const compatScreenOn: boolean = await rhinoCompat.device.isScreenOn({ timeoutMs: 1000 });
+  const compatBatteryIgnored: boolean = await rhinoCompat.device.isIgnoringBatteryOptimizations({ timeoutMs: 1000 });
   const compatShellResult: shell.ShellResult = await rhinoCompat.shell("echo compat", { timeoutMs: 1000 });
   const compatRootShellResult: shell.ShellResult = await rhinoCompat.shell("id", true);
   const compatExecRootResult: shell.ShellResult = await rhinoCompat.shell.execRoot("id", { timeoutMs: 1000 });
@@ -278,6 +284,15 @@ async function smoke(): Promise<void> {
   }, { timeoutMs: 1000 });
   await notifications.cancel(notificationId, { timeoutMs: 1000 });
   await notifications.cancelAll({ timeoutMs: 1000 });
+  const notificationStatus: notifications.NotificationPermissionStatus = await notifications.getPermissionStatus({ timeoutMs: 1000 });
+  const notificationSettings: notifications.NotificationSettingsResult = await notifications.openSettings({
+    dryRun: true,
+    timeoutMs: 1000
+  });
+  const notificationSettingsAlias: notifications.NotificationSettingsResult = await notifications.openNotificationSettings({
+    dryRun: true,
+    timeoutMs: 1000
+  });
   const availableSensors: readonly sensors.SensorInfo[] = await sensors.getAvailableSensors({ timeoutMs: 1000 });
   const sensorEvent: sensors.SensorEvent = await sensors.once("accelerometer", {
     samplingIntervalMs: sensors.policy.minSamplingIntervalMs,
@@ -457,6 +472,8 @@ async function smoke(): Promise<void> {
   void screenWidth;
   void density;
   void screenOn;
+  void batteryIgnored;
+  void batterySettings;
   void shellResult;
   void shellDefaultTimeout;
   void shellAccess;
@@ -465,6 +482,7 @@ async function smoke(): Promise<void> {
   void shizukuShellDenied;
   void compatLaunch;
   void compatScreenOn;
+  void compatBatteryIgnored;
   void compatShellResult;
   void compatRootShellResult;
   void compatExecRootResult;
@@ -549,6 +567,9 @@ async function smoke(): Promise<void> {
   void pinyinRows;
   void pinyin4jText;
   void notificationId;
+  void notificationStatus;
+  void notificationSettings;
+  void notificationSettingsAlias;
   void availableSensors;
   void sensorEvent;
   void sensorSub;

@@ -312,6 +312,7 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase13RhinoJavaAdapterDecision
 .\gradlew.bat --console=plain :app:verifyNodePhase13LiveUiProviderPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase13ShellRootShizukuCapability
+.\gradlew.bat --console=plain :app:verifyNodePhase13NotificationsSettingsPowerManager
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
@@ -430,6 +431,13 @@ shell/root/Shizuku capability state: `shell`, `shell.root`, and
 existing controlled shell provider, and Shizuku execution rejects before bridge
 dispatch while authorization, lifecycle, packaged disclosure, and device matrix
 evidence remain blocked.
+`verifyNodePhase13NotificationsSettingsPowerManager` records the P13-25 partial
+notifications/settings/power manager state: `notifications.settings` and
+`device.power` are exact capability tokens, notification permission/settings
+snapshots and battery-optimization settings dry-run helpers are covered, while
+notification actions/listeners, Do-Not-Disturb/exact-alarm policy, direct
+wakelock/power-manager control, OEM matrices, packaged disclosure, and raw
+Android notification/power objects remain blocked.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -600,6 +608,13 @@ the surface partial: ordinary shell and explicit root facades are covered by
 the controlled `shell.exec` provider, while real Shizuku authorization,
 root-device matrix closure, packaged disclosure, cancellation evidence, and raw
 process/root/Shizuku handles require separate evidence.
+P13-25 additionally uses `verifyNodePhase13NotificationsSettingsPowerManager`
+as the host promotion-status gate for notifications/settings/power manager
+parity and keeps the surface partial: permission/settings snapshots and
+battery-optimization status/settings dry-run helpers are covered, while
+notification actions/listeners, direct power-manager APIs, wakelocks,
+Do-Not-Disturb/exact-alarm policy, OEM matrices, packaged behavior, and raw
+Android notification/power objects require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

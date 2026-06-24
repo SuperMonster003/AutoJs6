@@ -120,7 +120,19 @@ class NodeBridgeConformanceInstrumentationTest {
                   } else if (moduleName === "clipboard") {
                     result = method === "getText" ? "clip" : (method === "hasText" ? true : null);
                   } else if (moduleName === "device") {
-                    result = method === "isScreenOn" ? true : null;
+                    if (method === "isScreenOn" || method === "isIgnoringBatteryOptimizations") result = true;
+                    else if (method === "openBatteryOptimizationSettings") {
+                      result = {
+                        schema: "autojs6-node-battery-optimization-settings-v1",
+                        sdkInt: 35,
+                        ignoringBatteryOptimizations: true,
+                        canOpenSettings: true,
+                        opened: false,
+                        dryRun: request.args[0].dryRun === true,
+                        action: "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS",
+                        reason: "settings-intent-dry-run"
+                      };
+                    }
                   } else if (moduleName === "shell") {
                     result = { code: 0, stdout: "ok\n", stderr: "" };
                   } else if (moduleName === "engines") {
@@ -181,7 +193,30 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "close") result = true;
                     else result = null;
                   } else if (moduleName === "notifications") {
-                    result = method === "notify" ? (request.args[0].id || 9001) : null;
+                    if (method === "notify") result = request.args[0].id || 9001;
+                    else if (method === "getPermissionStatus") {
+                      result = {
+                        schema: "autojs6-node-notification-permission-status-v1",
+                        sdkInt: 35,
+                        notificationsEnabled: true,
+                        postNotificationsPermissionRequired: true,
+                        postNotificationsPermissionGranted: true,
+                        canOpenSettings: true
+                      };
+                    } else if (method === "openSettings") {
+                      result = {
+                        schema: "autojs6-node-notification-permission-status-v1",
+                        sdkInt: 35,
+                        notificationsEnabled: true,
+                        postNotificationsPermissionRequired: true,
+                        postNotificationsPermissionGranted: true,
+                        canOpenSettings: true,
+                        opened: false,
+                        dryRun: request.args[0].dryRun === true,
+                        action: "android.settings.APP_NOTIFICATION_SETTINGS",
+                        reason: "settings-intent-dry-run"
+                      };
+                    }
                   } else if (moduleName === "sensors") {
                     if (method === "getAvailableSensors") {
                       result = [{ type: "accelerometer", name: "fake accelerometer", vendor: "AutoJs6", version: 1 }];
@@ -288,7 +323,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("app", app, ["intent", "launchPackage", "launchApp", "openAppSetting", "startActivity", "sendBroadcast"]);
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
-              expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate"]);
+              expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"]);
               expectExports("shell", shell, ["exec", "execRoot", "execShizuku", "execFile", "checkAccess", "setDefaultTimeout"]);
               expectExports("engines", engines, ["myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"]);
               expectExports("accessibility", accessibility, ["isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains"]);
@@ -301,7 +336,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("storages", storages, ["create", "open"]);
               expectExports("database", database, ["open"]);
               expectExports("sqlite", sqlite, ["open"]);
-              expectExports("notifications", notifications, ["notify", "cancel", "cancelAll"]);
+              expectExports("notifications", notifications, ["notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings", "openNotificationSettings"]);
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
@@ -374,6 +409,10 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("device.isScreenOn", device.isScreenOn({ timeoutMs: 1024 })), true);
               await expectPromise("device.wakeUp", device.wakeUp({ timeoutMs: 1025 }));
               await expectPromise("device.vibrate", device.vibrate(5, { timeoutMs: 1026 }));
+              assert.strictEqual(await expectPromise("device.isIgnoringBatteryOptimizations", device.isIgnoringBatteryOptimizations({ timeoutMs: 1026 })), true);
+              const batterySettings = await expectPromise("device.openBatteryOptimizationSettings", device.openBatteryOptimizationSettings({ dryRun: true, timeoutMs: 1026 }));
+              assert.strictEqual(batterySettings.schema, "autojs6-node-battery-optimization-settings-v1");
+              assert.strictEqual(batterySettings.dryRun, true);
               assert.strictEqual((await expectPromise("shell.exec", shell.exec("echo ok", { timeoutMs: 1027 }))).code, 0);
               assert.strictEqual(shell.setDefaultTimeout(2000), 2000);
               const shizukuAccess = shell.checkAccess({ shizuku: true });
@@ -464,6 +503,12 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(notificationId, 9001);
               await expectPromise("notifications.cancel", notifications.cancel(notificationId, { timeoutMs: 1064 }));
               await expectPromise("notifications.cancelAll", notifications.cancelAll({ timeoutMs: 1065 }));
+              const notificationStatus = await expectPromise("notifications.getPermissionStatus", notifications.getPermissionStatus({ timeoutMs: 1065 }));
+              assert.strictEqual(notificationStatus.schema, "autojs6-node-notification-permission-status-v1");
+              const notificationSettings = await expectPromise("notifications.openSettings", notifications.openSettings({ dryRun: true, timeoutMs: 1065 }));
+              assert.strictEqual(notificationSettings.dryRun, true);
+              const notificationAliasSettings = await expectPromise("notifications.openNotificationSettings", notifications.openNotificationSettings({ dryRun: true, timeoutMs: 1065 }));
+              assert.strictEqual(notificationAliasSettings.schema, "autojs6-node-notification-permission-status-v1");
               assert.strictEqual((await expectPromise("sensors.getAvailableSensors", sensors.getAvailableSensors({ timeoutMs: 1066 })))[0].type, "accelerometer");
               assert.strictEqual((await expectPromise("sensors.once", sensors.once("accelerometer", { timeoutMs: 1067 }))).values[2], 3);
               let sensorCallbackCount = 0;
@@ -547,6 +592,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "dialogs.input",
                 "clipboard.hasText",
                 "device.vibrate",
+                "device.isIgnoringBatteryOptimizations",
+                "device.openBatteryOptimizationSettings",
                 "shell.exec",
                 "engines.execScriptFile",
                 "accessibility.findAll",
@@ -570,6 +617,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "sqlite.open",
                 "notifications.notify",
                 "notifications.cancelAll",
+                "notifications.getPermissionStatus",
+                "notifications.openSettings",
                 "sensors.once",
                 "sensors.unsubscribe",
                 "ui.showLayout",
@@ -747,7 +796,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.APP to setOf("launchPackage", "launchApp", "openAppSetting", "startActivity"),
             NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select"),
             NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),
-            NodeBridgeModules.DEVICE to setOf("isScreenOn", "wakeUp", "vibrate"),
+            NodeBridgeModules.DEVICE to setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"),
             NodeBridgeModules.SHELL to setOf("exec"),
             NodeBridgeModules.ENGINES to setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"),
             NodeBridgeModules.ACCESSIBILITY to setOf(
@@ -775,7 +824,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.STORAGES to setOf("get", "put", "remove", "clear", "keys", "contains"),
             NodeBridgeModules.DATABASE to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
             NodeBridgeModules.SQLITE to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
-            NodeBridgeModules.NOTIFICATIONS to setOf("notify", "cancel", "cancelAll"),
+            NodeBridgeModules.NOTIFICATIONS to setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings"),
             NodeBridgeModules.SENSORS to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             NodeBridgeModules.UI to setOf("showLayout", "update", "batchUpdate", "close", "drainEvents"),
             NodeBridgeModules.INPUT_OBSERVER to setOf("observeKeys", "drainEvents", "close", "getAvailableSources"),

@@ -258,6 +258,14 @@ controlled root shell path, and stable pre-dispatch Shizuku rejection. Real
 Shizuku service binding, authorization prompts, lifecycle cleanup, packaged
 disclosure, and device matrix evidence remain blocked.
 
+P13-25 records notifications/settings/power manager promotion as partial.
+AutoJs6 Node now has JSON-safe notification permission/settings snapshots and
+battery-optimization status/settings dry-run helpers through exact
+`notifications.settings` and `device.power` boundaries. Keep Rhino/Pro scripts
+that depend on notification actions/listeners, rich layouts, Do-Not-Disturb,
+exact alarms, wakelocks, direct power-manager control, OEM power behavior, or
+packaged disclosure flows on Rhino until a dedicated provider lands.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

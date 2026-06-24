@@ -14,7 +14,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(15, definitions.size)
+        assertEquals(18, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -39,6 +39,16 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             id = "database",
             modules = listOf(NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE),
             capabilities = listOf(NodeBridgePermissionManifest.DATABASE),
+        )
+        assertProvider(
+            id = "notifications",
+            modules = listOf(NodeBridgeModules.NOTIFICATIONS),
+            capabilities = listOf(NodeBridgePermissionManifest.NOTIFICATIONS, NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS),
+        )
+        assertProvider(
+            id = "device",
+            modules = listOf(NodeBridgeModules.DEVICE),
+            capabilities = listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER),
         )
         assertProvider(
             id = "work_manager",
@@ -89,6 +99,11 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals("accessibility", healthById.getValue("input_observer").details.getValue("liveSource"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("storage").status)
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("database").status)
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("device").status)
+        assertTrue(healthById.getValue("notifications").details.getValue("liveMethods").contains("openSettings"))
+        assertEquals(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS, healthById.getValue("notifications").details.getValue("settingsCapability"))
+        assertTrue(healthById.getValue("device").details.getValue("liveMethods").contains("openBatteryOptimizationSettings"))
+        assertEquals(NodeBridgePermissionManifest.DEVICE_POWER, healthById.getValue("device").details.getValue("powerCapability"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("work_manager").status)
         assertEquals(NodeWorkManagerBridgeScheduler.SCHEDULER_NAME, healthById.getValue("work_manager").details.getValue("scheduler"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)

@@ -126,6 +126,7 @@ object NodeBridgeProviderRegistry {
     private const val STORAGE_PROVIDER = "storage"
     private const val DATABASE_PROVIDER = "database"
     private const val NOTIFICATIONS_PROVIDER = "notifications"
+    private const val DEVICE_PROVIDER = "device"
     private const val SENSORS_PROVIDER = "sensors"
     private const val ACCESSIBILITY_PROVIDER = "accessibility"
     private const val MEDIA_PROJECTION_PROVIDER = "media_projection"
@@ -181,8 +182,14 @@ object NodeBridgeProviderRegistry {
         provider(
             id = NOTIFICATIONS_PROVIDER,
             modules = listOf(NodeBridgeModules.NOTIFICATIONS),
-            capabilities = listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
-            packagedSupport = packagedProviderDependent("requires Android notification permission and channel policy"),
+            capabilities = listOf(NodeBridgePermissionManifest.NOTIFICATIONS, NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS),
+            packagedSupport = packagedProviderDependent("requires Android notification permission, channel policy, settings disclosure, and packaged dry-run evidence"),
+        ),
+        provider(
+            id = DEVICE_PROVIDER,
+            modules = listOf(NodeBridgeModules.DEVICE),
+            capabilities = listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER),
+            packagedSupport = packagedProviderDependent("basic device methods use live or queued provider metadata; power settings require live bridge metadata and user-visible settings disclosure"),
         ),
         provider(
             id = SENSORS_PROVIDER,
@@ -339,6 +346,7 @@ object NodeBridgeProviderRegistry {
         STORAGE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         DATABASE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         NOTIFICATIONS_PROVIDER -> notificationStatus(context)
+        DEVICE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SENSORS_PROVIDER -> sensorsStatus(context)
         ACCESSIBILITY_PROVIDER -> accessibilityStatus()
         MEDIA_PROJECTION_PROVIDER -> NodeBridgeProviderStatus.UNAVAILABLE
@@ -355,6 +363,33 @@ object NodeBridgeProviderRegistry {
     private fun androidDetails(id: String, context: Context): Map<String, String> = when (id) {
         OCR_PROVIDER -> ocrDetails(context)
         BARCODE_PROVIDER -> barcodeDetails(context)
+        NOTIFICATIONS_PROVIDER -> linkedMapOf(
+            "liveMethods" to "notify,cancel,cancelAll,getPermissionStatus,openSettings",
+            "capability" to NodeBridgePermissionManifest.NOTIFICATIONS,
+            "settingsCapability" to NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS,
+            "androidPermission" to NodeBridgePermissionManifest.ANDROID_PERMISSION_POST_NOTIFICATIONS,
+            "permissionStatusSchema" to "autojs6-node-notification-permission-status-v1",
+            "settingsResultSchema" to "autojs6-node-notification-permission-status-v1",
+            "phase13Promotion" to "P13-25 partial notifications/settings/power manager evidence gate",
+            "channelPolicy" to "notify creates stable app-owned channels; raw NotificationChannel objects never cross the bridge",
+            "settingsPolicy" to "openSettings supports dryRun and requires notifications.settings when the manifest is enforced",
+            "cleanupPolicy" to "owned notification ids are ResourceRegistry-owned; cancel/cancelAll/provider destroy remove active records",
+            "blockedMethods" to "actions,listener,groups,styles,inline-reply,remote-input,do-not-disturb,exact-alarm,wakelock",
+            "rawObjectPolicy" to "no raw Notification, NotificationCompat.Builder, PendingIntent, RemoteViews, Channel, Manager, Context, or Intent object crosses the bridge",
+            "statusReason" to "P13-25 partial gate exposes status/settings evidence while advanced notification parity remains blocked",
+        )
+        DEVICE_PROVIDER -> linkedMapOf(
+            "liveMethods" to "isScreenOn,wakeUp,vibrate,isIgnoringBatteryOptimizations,openBatteryOptimizationSettings",
+            "capability" to NodeBridgePermissionManifest.DEVICE,
+            "powerCapability" to NodeBridgePermissionManifest.DEVICE_POWER,
+            "settingsResultSchema" to "autojs6-node-battery-optimization-settings-v1",
+            "phase13Promotion" to "P13-25 partial notifications/settings/power manager evidence gate",
+            "powerPolicy" to "battery optimization status/settings are explicit device.power operations and support dryRun for tests",
+            "privacyPolicy" to "device keeps hardware identifiers and sensitive profile fields absent from the Node surface",
+            "blockedMethods" to "imei,androidId,serial,brand,manufacturer,accounts,macAddress,ipAddress,rawPowerManager,wakelock,ignoreBatteryOptimizationRequest",
+            "rawObjectPolicy" to "no raw PowerManager, WakeLock, Intent, Context, Vibrator, Build, Account, network, or device identifier object crosses the bridge",
+            "statusReason" to "P13-25 partial gate exposes battery optimization status/settings evidence while direct power manager control remains blocked",
+        )
         MEDIA_PROJECTION_PROVIDER -> linkedMapOf(
             "reservedMethods" to "requestScreenCapture,nextImage,stop",
             "blockedMethods" to "requestScreenCapture,nextImage,stop",

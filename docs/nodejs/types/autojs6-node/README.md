@@ -93,6 +93,15 @@ and `compat.shell.execRoot()` are typed over the existing controlled
 real Shizuku provider has authorization, lifecycle, cleanup, and packaged
 evidence.
 
+P13-25 records the partial notifications/settings/power manager gate.
+`notifications.getPermissionStatus()`, `notifications.openSettings()`,
+`notifications.openNotificationSettings()`,
+`device.isIgnoringBatteryOptimizations()`, and
+`device.openBatteryOptimizationSettings()` are typed with JSON-safe result
+schemas. Exact `notifications.settings` and `device.power` capabilities are
+required for settings/power helpers; notification actions/listeners, wakelocks,
+direct power-manager control, and packaged disclosure remain future work.
+
 P12-24 reserves `require("rhino")` as a disabled JSON-only shim facade. P12-25 adds an explicit `rhino.run({ experimental: true, source|path, timeoutMs, args })` JSON-only POC that returns frozen `RunResult` records and never installs Rhino globals. Calls without `experimental: true` still reject with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`; default `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, `require("node:rhino")` is not an alias, and no `compat.rhino` surface is declared. P13-14 adds typed `rhino.install({ experimental: true, globals?, target? })` support for the explicit Java proxy POC only: the returned `InstallResult` records `Packages`, `java`, and `android` proxy installation through the Java interop allowlist, while `JavaAdapter` remains unavailable. P13-15 declares `rhino.importClass()` and `rhino.importPackage()` as stable `never` helpers that throw `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; migration should use assignment from an explicit proxy target. P13-16 declares `rhino.JavaAdapter()` as a stable `never` helper that throws `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`, and reserves `java.defineClass()` / `$autojs.java.defineClass()` as stable-denied replacement names until a bounded proxy-interface provider exists.
 
 `input_observer` is a P12 provider POC. It exposes `observeKeys`, `drainEvents`, `close`, and `getAvailableSources` against fake-source JSON snapshots and the P12-06 `accessibility` live-source gate. Live key observation requires an operational AutoJs6 accessibility service and still remains subject to P12-07 cleanup/security/packaged policy evidence.

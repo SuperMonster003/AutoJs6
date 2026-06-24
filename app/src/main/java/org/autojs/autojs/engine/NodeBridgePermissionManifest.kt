@@ -26,6 +26,7 @@ object NodeBridgePermissionManifest {
     const val STORAGE = "storage"
     const val DATABASE = "database"
     const val NOTIFICATIONS = "notifications"
+    const val NOTIFICATIONS_SETTINGS = "notifications.settings"
     const val SENSORS = "sensors"
     const val UI = "ui"
     const val UI_OVERLAY = "ui.overlay"
@@ -34,6 +35,7 @@ object NodeBridgePermissionManifest {
     const val UI_OVERLAY_PACKAGED = "ui.overlay.packaged"
     const val CLIPBOARD = "clipboard"
     const val DEVICE = "device"
+    const val DEVICE_POWER = "device.power"
     const val SHELL = "shell"
     const val SHELL_ROOT = "shell.root"
     const val SHELL_SHIZUKU = "shell.shizuku"
@@ -73,6 +75,7 @@ object NodeBridgePermissionManifest {
         STORAGE,
         DATABASE,
         NOTIFICATIONS,
+        NOTIFICATIONS_SETTINGS,
         SENSORS,
         UI,
         UI_OVERLAY,
@@ -81,6 +84,7 @@ object NodeBridgePermissionManifest {
         UI_OVERLAY_PACKAGED,
         CLIPBOARD,
         DEVICE,
+        DEVICE_POWER,
         SHELL,
         SHELL_ROOT,
         SHELL_SHIZUKU,
@@ -114,6 +118,14 @@ object NodeBridgePermissionManifest {
         "qrcode.detectall" to BARCODE,
         "qrcode.recognizetext" to BARCODE,
         "qrcode.recognizetexts" to BARCODE,
+        "notification" to NOTIFICATIONS,
+        "notification.settings" to NOTIFICATIONS_SETTINGS,
+        "notifications:settings" to NOTIFICATIONS_SETTINGS,
+        "notifications-settings" to NOTIFICATIONS_SETTINGS,
+        "device:power" to DEVICE_POWER,
+        "device-power" to DEVICE_POWER,
+        "power-manager" to DEVICE_POWER,
+        "power_manager" to DEVICE_POWER,
         "engines:exec" to ENGINES_EXEC,
         "engine.exec" to ENGINES_EXEC,
         "shell:root" to SHELL_ROOT,
@@ -278,7 +290,10 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.BARCODE -> listOf(BARCODE, IMAGE)
             NodeBridgeModules.STORAGE, NodeBridgeModules.STORAGES -> listOf(STORAGE)
             NodeBridgeModules.DATABASE, NodeBridgeModules.SQLITE -> listOf(DATABASE)
-            NodeBridgeModules.NOTIFICATIONS -> listOf(NOTIFICATIONS)
+            NodeBridgeModules.NOTIFICATIONS -> when (method) {
+                "openSettings" -> listOf(NOTIFICATIONS, NOTIFICATIONS_SETTINGS)
+                else -> listOf(NOTIFICATIONS)
+            }
             NodeBridgeModules.SENSORS -> listOf(SENSORS)
             NodeBridgeModules.UI -> listOf(UI)
             NodeBridgeModules.UI_OVERLAY -> when (method) {
@@ -286,7 +301,10 @@ object NodeBridgePermissionManifest {
                 else -> listOf(UI_OVERLAY)
             }
             NodeBridgeModules.CLIPBOARD -> listOf(CLIPBOARD)
-            NodeBridgeModules.DEVICE -> listOf(DEVICE)
+            NodeBridgeModules.DEVICE -> when (method) {
+                "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings" -> listOf(DEVICE, DEVICE_POWER)
+                else -> listOf(DEVICE)
+            }
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)
             NodeBridgeModules.FETCH, NodeBridgeModules.WEBSOCKET -> listOf(NETWORK)
             NodeBridgeModules.WORK_MANAGER -> listOf(WORK_MANAGER)
@@ -349,7 +367,7 @@ object NodeBridgePermissionManifest {
     }
 
     private fun declaresCapability(declared: Set<String>, required: String): Boolean {
-        if (required == SHELL_ROOT || required == SHELL_SHIZUKU) {
+        if (required == SHELL_ROOT || required == SHELL_SHIZUKU || required == NOTIFICATIONS_SETTINGS || required == DEVICE_POWER) {
             return required in declared
         }
         if (required in declared) {

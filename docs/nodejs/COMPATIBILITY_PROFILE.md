@@ -1131,7 +1131,7 @@ Supported or limited:
 - controlled `process.chdir()` for project bootstrap use
 - `process.nextTick`; tests lock its ordering before Promise/`queueMicrotask` callbacks and before timer callbacks
 - read-only `process.permission.has(scope, reference?)` compatibility facade for `fs.read`, `fs.write`,
-  `network`, `worker`, `shell`, `accessibility`, `screen_capture`, `notifications`, `sensors`, and `ocr`
+  `network`, `worker`, `shell`, `accessibility`, `screen_capture`, `notifications`, `notifications.settings`, `device.power`, `sensors`, and `ocr`
 - warning and event-emitter style process APIs where covered by tests
 
 Disabled or controlled:
@@ -1334,11 +1334,11 @@ Declared capability names:
 - `ocr`
 - `storage`
 - `database` (`sqlite` is accepted as an alias)
-- `notifications`
+- `notifications`, `notifications.settings`
 - `sensors`
 - `ui`
 - `clipboard`
-- `device`
+- `device`, `device.power`
 - `shell`, `shell.root`, `shell.shizuku`
 - `network`
 - `work_manager`
@@ -1529,13 +1529,18 @@ runtime.
   - `notify(options, callOptions?): Promise<number>`
   - `cancel(id, options?): Promise<void>`
   - `cancelAll(options?): Promise<void>`
+  - `getPermissionStatus(options?): Promise<NotificationPermissionStatus>`
+  - `openSettings(options?): Promise<NotificationSettingsResult>`
+  - `openNotificationSettings(options?): Promise<NotificationSettingsResult>`
   - options: `{ id?: number, title?: string, text?: string, channel?: string, channelName?: string, ongoing?: boolean, priority?: "min" | "low" | "default" | "high" | "max" | number }`
-  - requests require the `notifications` capability
+  - requests require the `notifications` capability; settings launch helpers additionally require exact `notifications.settings`
   - packaged capability manifests map `notifications` to `android.permission.POST_NOTIFICATIONS`
   - Android provider checks notification runtime permission/app notification state before posting
+  - Android provider reports permission/settings state through schema `autojs6-node-notification-permission-status-v1` and supports `{ dryRun: true }` for settings-launch tests
   - Android provider creates stable channel ids and records channel/ongoing metadata for owned notification resources
   - the provider tracks notifications owned by the current Node execution and cancels remaining owned notifications on provider destroy
   - JavaScript receives only numeric ids; no raw `Notification`, `NotificationChannel`, `PendingIntent`, `RemoteViews`, or Android object crosses into Node
+  - P13-25 records notifications/settings/power manager promotion as partial: actions, listeners, richer layouts, Do-Not-Disturb, exact-alarm, packaged disclosure, and migration examples remain open
 - `sensors`
   - `getAvailableSensors(options?): Promise<readonly SensorInfo[]>`
   - `once(type, options?): Promise<SensorEvent>`
@@ -1592,10 +1597,14 @@ runtime.
   - `isScreenOn(options?): Promise<boolean>`
   - `wakeUp(options?): Promise<void>`
   - `vibrate(ms, options?): Promise<void>`
+  - `isIgnoringBatteryOptimizations(options?): Promise<boolean>`
+  - `openBatteryOptimizationSettings(options?): Promise<DevicePowerSettingsResult>`
   - current Android provider uses `PowerManager` and `Vibrator` through the live bridge provider
+  - battery optimization helpers require exact `device.power` and return schema `autojs6-node-battery-optimization-settings-v1`; settings launch supports `{ dryRun: true }`
   - `vibrate()` clamps duration to 10 seconds and packaged APKs that use it must declare `android.permission.VIBRATE`
   - privacy-sensitive identifiers are absent: IMEI, Android ID, serial, phone number, accounts, MAC/IP address, hardware fingerprint, brand, and manufacturer
   - no raw `Context`, `PowerManager`, `Vibrator`, display, or build objects are exposed to JavaScript
+  - P13-25 records notifications/settings/power manager promotion as partial: wake locks, direct Doze mutation, request-ignore-battery-optimization flow, OEM power-manager matrices, packaged disclosure, and migration examples remain open
 - `shell`
   - `exec(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
   - `execRoot(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
