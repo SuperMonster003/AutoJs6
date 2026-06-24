@@ -10,13 +10,20 @@ object NodeEmbeddedProcessPoolPolicy {
     const val VERSION = 1
     const val STATUS_DESIGN_GATED = "design_gated"
     const val STATUS_EXPLICIT_SLOT_ENABLED = "explicit_slot_enabled"
+    const val STATUS_DEFAULT_SCHEDULER_ENABLED = "default_scheduler_enabled"
     const val MODE_PRIMARY_ONLY = "primary_only"
     const val MODE_EXPLICIT_TWO_SLOT = "explicit_two_slot"
+    const val MODE_DEFAULT_TWO_SLOT = "default_two_slot"
     const val PRIMARY_SLOT_ID = "primary"
     const val LONG_RUNNING_SLOT_ID = "long_running"
     const val OVERFLOW_SLOT_ID = "overflow_1"
+    const val SLOT_SELECTION_LEGACY_DEFAULT = "legacy_default"
+    const val SLOT_SELECTION_EXPLICIT_REQUEST = "explicit_request"
+    const val SLOT_SELECTION_DEFAULT_SCHEDULER = "default_scheduler"
+    const val SLOT_SELECTION_CURRENT_SERVICE = "current_service"
     const val DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS = 1
     const val EXPLICIT_EFFECTIVE_MAX_ACTIVE_SLOTS = 2
+    const val DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS = 2
 
     private const val MB = 1024L * 1024L
     private const val STANDARD_DEVICE_MIN_TOTAL_MB = 3_072L
@@ -56,10 +63,14 @@ object NodeEmbeddedProcessPoolPolicy {
         val declaredSlots: List<ProcessSlot>,
         val requestedSlotId: String,
         val selectedSlot: ProcessSlot,
+        val slotSelectionSource: String,
         val effectiveMaxActiveSlots: Int,
         val recommendedMaxActiveSlots: Int,
         val longRunningDedicatedSlotId: String,
         val longRunningDedicatedSlotEnabled: Boolean,
+        val defaultSchedulerEnabled: Boolean,
+        val defaultSchedulerSlotIds: List<String>,
+        val defaultSchedulerFallbackEnabled: Boolean,
         val queueWhenPoolFullEnabled: Boolean,
         val queuePolicy: String,
         val oneActiveEnvironmentPerSlot: Boolean,
@@ -78,12 +89,16 @@ object NodeEmbeddedProcessPoolPolicy {
             "embedded_script.process_pool.declared_slot_ids" to declaredSlots.joinToString(",") { it.id },
             "embedded_script.process_pool.requested_slot_id" to requestedSlotId,
             "embedded_script.process_pool.selected_slot_id" to selectedSlot.id,
+            "embedded_script.process_pool.slot_selection_source" to slotSelectionSource,
             "embedded_script.process_pool.selected_service_class" to selectedSlot.serviceClassName,
             "embedded_script.process_pool.selected_process_suffix" to selectedSlot.processSuffix,
             "embedded_script.process_pool.effective_max_active_slots" to effectiveMaxActiveSlots.toString(),
             "embedded_script.process_pool.recommended_max_active_slots" to recommendedMaxActiveSlots.toString(),
             "embedded_script.process_pool.long_running_dedicated_slot_id" to longRunningDedicatedSlotId,
             "embedded_script.process_pool.long_running_dedicated_slot_enabled" to longRunningDedicatedSlotEnabled.toString(),
+            "embedded_script.process_pool.default_scheduler_enabled" to defaultSchedulerEnabled.toString(),
+            "embedded_script.process_pool.default_scheduler_slot_ids" to defaultSchedulerSlotIds.joinToString(","),
+            "embedded_script.process_pool.default_scheduler_fallback_enabled" to defaultSchedulerFallbackEnabled.toString(),
             "embedded_script.process_pool.queue_when_full_enabled" to queueWhenPoolFullEnabled.toString(),
             "embedded_script.process_pool.queue_policy" to queuePolicy,
             "embedded_script.process_pool.one_active_environment_per_slot" to oneActiveEnvironmentPerSlot.toString(),
@@ -146,18 +161,43 @@ object NodeEmbeddedProcessPoolPolicy {
         launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         currentServiceClassName: String? = null,
         requestedSlotId: String? = null,
+        slotSelectionSource: String? = null,
+        defaultSchedulerEnabled: Boolean = false,
     ): ProcessPoolPlan {
         val memoryProfile = deviceMemoryProfile(context)
         val normalizedMode = NodeExecutionModePolicy.normalize(executionMode)
         val currentSlot = slotForServiceClassName(currentServiceClassName)
         val normalizedRequestedSlotId = requestedSlotId?.trim().orEmpty()
+        val normalizedSlotSelectionSource = slotSelectionSource?.trim().orEmpty()
+        val defaultSchedulerSlot = explicitSelectableSlot(normalizedRequestedSlotId)
+            ?.takeIf { normalizedSlotSelectionSource == SLOT_SELECTION_DEFAULT_SCHEDULER }
         val requestedSlot = explicitSelectableSlot(normalizedRequestedSlotId)
-        val explicitSlotRequested = normalizedRequestedSlotId.isNotBlank()
+            ?.takeIf { defaultSchedulerSlot == null }
+        val explicitSlotRequested = normalizedRequestedSlotId.isNotBlank() && defaultSchedulerSlot == null
+        val selectedSlot = currentSlot ?: defaultSchedulerSlot ?: requestedSlot ?: primarySlot
+        val selectedByDefaultScheduler = defaultSchedulerEnabled ||
+                normalizedSlotSelectionSource == SLOT_SELECTION_DEFAULT_SCHEDULER ||
+                defaultSchedulerSlot != null
         val explicitSlotEnabled = requestedSlot != null || currentSlot?.id == OVERFLOW_SLOT_ID
-        val selectedSlot = currentSlot ?: requestedSlot ?: primarySlot
+        val multiProcessEnabled = explicitSlotEnabled || selectedByDefaultScheduler
+        val effectiveMaxActiveSlots = when {
+            selectedByDefaultScheduler -> DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS
+            explicitSlotEnabled -> EXPLICIT_EFFECTIVE_MAX_ACTIVE_SLOTS
+            else -> DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS
+        }
+        val resolvedSelectionSource = when {
+            selectedByDefaultScheduler -> SLOT_SELECTION_DEFAULT_SCHEDULER
+            currentSlot != null && currentSlot.id != PRIMARY_SLOT_ID -> SLOT_SELECTION_CURRENT_SERVICE
+            requestedSlot != null -> SLOT_SELECTION_EXPLICIT_REQUEST
+            else -> SLOT_SELECTION_LEGACY_DEFAULT
+        }
         val reason = when {
             currentSlot != null && requestedSlot != null && currentSlot.id != requestedSlot.id ->
                 "current_service_slot_overrides_requested:${currentSlot.id}"
+            selectedByDefaultScheduler && currentSlot != null ->
+                "default_scheduler_selected:${currentSlot.id}"
+            selectedByDefaultScheduler && defaultSchedulerSlot != null ->
+                "default_scheduler_selected:${defaultSchedulerSlot.id}"
             currentSlot != null && currentSlot.id != PRIMARY_SLOT_ID ->
                 "reserved_slot_direct_start_detected:current_service_slot:${currentSlot.id}"
             requestedSlot != null ->
@@ -172,20 +212,28 @@ object NodeEmbeddedProcessPoolPolicy {
         return ProcessPoolPlan(
             schema = SCHEMA,
             version = VERSION,
-            status = if (explicitSlotEnabled) STATUS_EXPLICIT_SLOT_ENABLED else STATUS_DESIGN_GATED,
-            mode = if (explicitSlotEnabled) MODE_EXPLICIT_TWO_SLOT else MODE_PRIMARY_ONLY,
-            multiProcessEnabled = explicitSlotEnabled,
+            status = when {
+                selectedByDefaultScheduler -> STATUS_DEFAULT_SCHEDULER_ENABLED
+                explicitSlotEnabled -> STATUS_EXPLICIT_SLOT_ENABLED
+                else -> STATUS_DESIGN_GATED
+            },
+            mode = when {
+                selectedByDefaultScheduler -> MODE_DEFAULT_TWO_SLOT
+                explicitSlotEnabled -> MODE_EXPLICIT_TWO_SLOT
+                else -> MODE_PRIMARY_ONLY
+            },
+            multiProcessEnabled = multiProcessEnabled,
             declaredSlots = declaredSlots,
             requestedSlotId = normalizedRequestedSlotId,
             selectedSlot = selectedSlot,
-            effectiveMaxActiveSlots = if (explicitSlotEnabled) {
-                EXPLICIT_EFFECTIVE_MAX_ACTIVE_SLOTS
-            } else {
-                DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS
-            },
+            slotSelectionSource = resolvedSelectionSource,
+            effectiveMaxActiveSlots = effectiveMaxActiveSlots,
             recommendedMaxActiveSlots = recommendedMaxActiveSlots(memoryProfile),
             longRunningDedicatedSlotId = longRunningSlot.id,
             longRunningDedicatedSlotEnabled = false,
+            defaultSchedulerEnabled = selectedByDefaultScheduler,
+            defaultSchedulerSlotIds = defaultSchedulerSlotIds(),
+            defaultSchedulerFallbackEnabled = false,
             queueWhenPoolFullEnabled = false,
             queuePolicy = "caller_side_queue_only_until_process_pool_enabled",
             oneActiveEnvironmentPerSlot = true,
@@ -194,6 +242,42 @@ object NodeEmbeddedProcessPoolPolicy {
             memoryProfile = memoryProfile,
             reason = reason,
         )
+    }
+
+    fun defaultSchedulerSlotIds(): List<String> = listOf(PRIMARY_SLOT_ID, OVERFLOW_SLOT_ID)
+
+    fun defaultSchedulerEligible(
+        context: Context,
+        executionMode: String? = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+    ): Boolean {
+        return defaultSchedulerEligible(
+            memoryProfile = deviceMemoryProfile(context),
+            executionMode = executionMode,
+            launchSurface = launchSurface,
+        )
+    }
+
+    fun defaultSchedulerEligible(
+        memoryProfile: DeviceMemoryProfile,
+        executionMode: String? = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+    ): Boolean {
+        return NodeExecutionModePolicy.normalize(executionMode) == NodeExecutionModePolicy.MODE_ONE_SHOT &&
+                launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT &&
+                recommendedMaxActiveSlots(memoryProfile) >= DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS
+    }
+
+    fun defaultSchedulerSelectableSlots(
+        context: Context,
+        executionMode: String? = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+    ): List<ProcessSlot> {
+        return if (defaultSchedulerEligible(context, executionMode, launchSurface)) {
+            listOf(primarySlot, overflowSlot)
+        } else {
+            listOf(primarySlot)
+        }
     }
 
     private fun explicitSelectableSlot(requestedSlotId: String): ProcessSlot? {

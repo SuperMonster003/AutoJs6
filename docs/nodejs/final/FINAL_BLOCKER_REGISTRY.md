@@ -33,8 +33,11 @@ Current multi-instance progress:
 - `second_execution_slot`: explicit one-shot routing can now select `primary`
   or `overflow_1`; focused instrumentation covers `overflow_1` diagnostics and
   concurrent primary/overflow execution in different Android service processes.
-  Default scheduling, packaged behavior, per-slot crash evidence, and stress
-  promotion remain open.
+  Phase 13 adds a client-side default one-shot scheduler that can lease
+  `primary` / `overflow_1` on eligible devices, preserves
+  `processPoolSlotSource` diagnostics, and reports pool-busy failures. Packaged
+  behavior, fatal slot-crash fallback/quarantine, and stress promotion remain
+  open.
 
 Resolved in Phase 11:
 

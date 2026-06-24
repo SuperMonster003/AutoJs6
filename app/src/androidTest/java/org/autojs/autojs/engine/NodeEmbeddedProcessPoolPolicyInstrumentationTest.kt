@@ -9,6 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
@@ -80,15 +81,47 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("embedded process pool policy", result)
         assertEquals(NodeEmbeddedProcessPoolPolicy.SCHEMA, result.nativeValues["embedded_script.process_pool.schema"])
-        assertEquals("false", result.nativeValues["embedded_script.process_pool.enabled"])
-        assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_PRIMARY_ONLY, result.nativeValues["embedded_script.process_pool.mode"])
         assertEquals(NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID, result.nativeValues["embedded_script.process_pool.selected_slot_id"])
         assertEquals(":nodejs_embedded", result.nativeValues["embedded_script.process_pool.selected_process_suffix"])
-        assertEquals("1", result.nativeValues["embedded_script.process_pool.effective_max_active_slots"])
         assertEquals("false", result.nativeValues["embedded_script.process_pool.long_running_dedicated_slot_enabled"])
         assertEquals("false", result.nativeValues["embedded_script.process_pool.queue_when_full_enabled"])
         assertEquals("true", result.nativeValues["embedded_script.process_pool.one_active_environment_per_slot"])
         assertEquals("false", result.nativeValues["embedded_script.process_pool.shared_v8_environment_allowed"])
+        if (NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(context)) {
+            assertEquals("true", result.nativeValues["embedded_script.process_pool.enabled"])
+            assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_DEFAULT_TWO_SLOT, result.nativeValues["embedded_script.process_pool.mode"])
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+                result.nativeValues["embedded_script.process_pool.slot_selection_source"],
+            )
+            assertEquals("2", result.nativeValues["embedded_script.process_pool.effective_max_active_slots"])
+            assertEquals("true", result.nativeValues["embedded_script.process_pool.default_scheduler_enabled"])
+        } else {
+            assertEquals("false", result.nativeValues["embedded_script.process_pool.enabled"])
+            assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_PRIMARY_ONLY, result.nativeValues["embedded_script.process_pool.mode"])
+            assertEquals("1", result.nativeValues["embedded_script.process_pool.effective_max_active_slots"])
+            assertEquals("false", result.nativeValues["embedded_script.process_pool.default_scheduler_enabled"])
+        }
+    }
+
+    @Test
+    fun defaultSchedulerPlanMarksTwoSlotMode() {
+        val plan = NodeEmbeddedProcessPoolPolicy.plan(
+            context = context,
+            requestedSlotId = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+            slotSelectionSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+            defaultSchedulerEnabled = true,
+        )
+
+        assertEquals(NodeEmbeddedProcessPoolPolicy.STATUS_DEFAULT_SCHEDULER_ENABLED, plan.status)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_DEFAULT_TWO_SLOT, plan.mode)
+        assertTrue(plan.multiProcessEnabled)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.overflowSlot, plan.selectedSlot)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS, plan.effectiveMaxActiveSlots)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER, plan.slotSelectionSource)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.defaultSchedulerSlotIds(), plan.defaultSchedulerSlotIds)
+        assertFalse(plan.defaultSchedulerFallbackEnabled)
+        assertTrue(plan.reason.contains("default_scheduler_selected"))
     }
 
     @Test
@@ -177,6 +210,65 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
     }
 
     @Test
+    fun defaultSchedulerRoutesConcurrentOneShotScriptsToDifferentProcesses() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("embedded process pool default scheduler")
+        assumeTrue(
+            "Default process-pool scheduler requires a device profile with at least two recommended slots.",
+            NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(context),
+        )
+
+        val startGate = CountDownLatch(1)
+        val first = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
+        val second = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
+        val firstError = AtomicReference<Throwable>()
+        val secondError = AtomicReference<Throwable>()
+        val firstThread = Thread {
+            runCatching {
+                startGate.await(5, TimeUnit.SECONDS)
+                first.set(runDefaultSchedulerScript("default-a"))
+            }.onFailure { firstError.set(it) }
+        }
+        val secondThread = Thread {
+            runCatching {
+                startGate.await(5, TimeUnit.SECONDS)
+                second.set(runDefaultSchedulerScript("default-b"))
+            }.onFailure { secondError.set(it) }
+        }
+
+        firstThread.start()
+        secondThread.start()
+        startGate.countDown()
+        firstThread.join(30_000L)
+        secondThread.join(30_000L)
+
+        firstError.get()?.let { throw AssertionError("first default scheduler thread failed", it) }
+        secondError.get()?.let { throw AssertionError("second default scheduler thread failed", it) }
+        val firstResult = requireNotNull(first.get()) { "first default scheduler result missing" }
+        val secondResult = requireNotNull(second.get()) { "second default scheduler result missing" }
+        NodeEmbeddedTestHarness.assertSucceeded("first default scheduler slot", firstResult)
+        NodeEmbeddedTestHarness.assertSucceeded("second default scheduler slot", secondResult)
+        val selectedSlots = setOf(
+            firstResult.nativeValues["embedded_script.process_pool.selected_slot_id"],
+            secondResult.nativeValues["embedded_script.process_pool.selected_slot_id"],
+        )
+        assertEquals(
+            setOf(NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID, NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID),
+            selectedSlots,
+        )
+        assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_DEFAULT_TWO_SLOT, firstResult.nativeValues["embedded_script.process_pool.mode"])
+        assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_DEFAULT_TWO_SLOT, secondResult.nativeValues["embedded_script.process_pool.mode"])
+        assertEquals(
+            NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+            firstResult.nativeValues["embedded_script.process_pool.slot_selection_source"],
+        )
+        assertEquals(
+            NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+            secondResult.nativeValues["embedded_script.process_pool.slot_selection_source"],
+        )
+        assertTrue("expected different default scheduler service processes", firstResult.pid != secondResult.pid)
+    }
+
+    @Test
     fun longRunningSlotIsReservedUntilPromotion() {
         val plan = NodeEmbeddedProcessPoolPolicy.plan(
             context = context,
@@ -208,6 +300,25 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
             sourceName = "<process-pool-$label.js>",
             timeoutMs = 15_000L,
             processPoolSlot = slotId,
+        )
+    }
+
+    private fun runDefaultSchedulerScript(
+        label: String,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                return new Promise((resolve) => {
+                  setTimeout(() => {
+                    console.log("slot.label=$label");
+                    console.log("slot.pid=" + process.pid);
+                    resolve("$label-ok");
+                  }, 500);
+                });
+            """.trimIndent(),
+            sourceName = "<process-pool-default-$label.js>",
+            timeoutMs = 15_000L,
         )
     }
 

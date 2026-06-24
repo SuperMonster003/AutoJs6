@@ -122,7 +122,16 @@
         "app/src/main/java/org/autojs/autojs/engine/NodeCrashEvidenceStore.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt",
         "build/reports/nodejs/phase13-crash-evidence-automation.json",
-        "build/reports/nodejs/phase13-crash-evidence-automation.md"
+        "build/reports/nodejs/phase13-crash-evidence-automation.md",
+        "docs/nodejs/reports/phase13/P13_06_SECOND_EXECUTION_SLOT_SCHEDULER.md",
+        "tools/nodejs/phase13/verify-second-execution-slot-scheduler.js",
+        ":app:verifyNodePhase13SecondExecutionSlotScheduler",
+        "app/src/main/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicy.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicyInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-second-execution-slot-scheduler.json",
+        "build/reports/nodejs/phase13-second-execution-slot-scheduler.md"
       ],
       "rollback": "Disable the promoted runtime path by profile flag and keep one-shot primary embedded execution as the fallback."
     },

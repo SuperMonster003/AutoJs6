@@ -41,7 +41,7 @@
       "id": "second_execution_slot",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Explicit primary/overflow_1 one-shot slot selection now routes to independent Android service processes with focused concurrent instrumentation coverage; default scheduler routing, packaged behavior, slot crash evidence, and stress promotion remain open.",
+      "currentEvidence": "Explicit primary/overflow_1 one-shot slot selection routes to independent Android service processes; Phase 13 adds a client-side default one-shot scheduler that can lease primary/overflow_1 on eligible devices, preserves processPoolSlotSource diagnostics, reports pool-busy failures, and has focused concurrent instrumentation coverage. Packaged behavior, fatal slot-crash fallback/quarantine, and stress promotion remain open.",
       "requiredResolution": "At least two independent Node execution slots are available with isolated ResourceRegistry and crash evidence."
     },
     {

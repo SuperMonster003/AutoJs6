@@ -25,7 +25,9 @@ internal object NodeEmbeddedTestHarness {
     }
 
     fun settleEmbeddedScriptServiceProcess() {
-        targetContext.stopService(Intent(targetContext, NativeNodeEmbeddedScriptService::class.java))
+        NodeEmbeddedProcessPoolPolicy.declaredSlots.forEach { slot ->
+            targetContext.stopService(Intent(targetContext, slot.serviceClass))
+        }
         SystemClock.sleep(600L)
     }
 

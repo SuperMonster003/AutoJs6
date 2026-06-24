@@ -17541,6 +17541,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val spawnDepth: Int = 0,
         val runtimeAdapter: String? = null,
         val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
     )
 
     data class EmbeddedScriptResult(

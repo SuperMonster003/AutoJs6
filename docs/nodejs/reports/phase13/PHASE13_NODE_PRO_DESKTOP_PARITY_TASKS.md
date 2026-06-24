@@ -249,6 +249,16 @@ P13 task 本身使用以下执行状态：
     - 至少两个 Node execution slot 可并发运行独立脚本。
     - ResourceRegistry、provider handles、stdout/stderr、crash evidence 相互隔离。
     - 默认调度、显式 slot、slot busy、slot crash fallback 均有测试。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Default one-shot scheduler policy: `NodeEmbeddedProcessPoolPolicy.STATUS_DEFAULT_SCHEDULER_ENABLED` / `MODE_DEFAULT_TWO_SLOT`.
+    - Client-side slot lease: `NativeNodeEmbeddedScriptService.acquireDefaultProcessPoolSlot(...)`.
+    - Slot source propagation: `NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.processPoolSlotSource`.
+    - Default busy rejection: `EmbeddedNodeProcessPoolBusyError` with `embedded_script.process_pool.busy=true`.
+    - Focused instrumentation: `defaultSchedulerRoutesConcurrentOneShotScriptsToDifferentProcesses`.
+    - Host verifier: `tools/nodejs/phase13/verify-second-execution-slot-scheduler.js`.
+    - Gradle gate: `:app:verifyNodePhase13SecondExecutionSlotScheduler`.
+    - Report: `docs/nodejs/reports/phase13/P13_06_SECOND_EXECUTION_SLOT_SCHEDULER.md`.
+    - Open before closure: packaged scheduler smoke, fatal slot-crash fallback/quarantine, full stress promotion.
 
 - [ ] P13-07: 推进 packaged long-running service mode。
   - 范围：打包 APK 中支持 foreground long-running Node runtime。

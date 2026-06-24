@@ -2,7 +2,9 @@
 
 Status: enforced single active execution per embedded service process. Phase 11
 adds an internal explicit `primary` / `overflow_1` process-slot selector for
-focused diagnostics; default project/package execution still uses `primary`.
+focused diagnostics. Phase 13 adds a default one-shot scheduler that can route
+eligible concurrent ordinary scripts to `overflow_1`; packaged execution still
+uses the conservative primary service path.
 
 ## Decision
 
@@ -23,8 +25,10 @@ The rejected request is not queued silently.
 Callers that deliberately want queueing must use the controlled caller-side enqueue API. Queueing is not the default startup behavior.
 
 Focused Phase 11 diagnostics may explicitly route a one-shot execution to
-`overflow_1`, which runs in `:nodejs_embedded_2`. This is not same-process
-concurrency and does not change the default startup path.
+`overflow_1`, which runs in `:nodejs_embedded_2`. Phase 13 default scheduling
+can also route ordinary one-shot scripts to `overflow_1` when `primary` is
+leased and the device profile recommends at least two active slots. This is not
+same-process concurrency.
 
 ## Rationale
 
@@ -122,6 +126,8 @@ Current S8-43 behavior:
 - default effective active slot count is `1`;
 - explicit `overflow_1` diagnostics use `explicit_slot_enabled` /
   `explicit_two_slot` with effective active slot count `2`;
+- Phase 13 default scheduler diagnostics use `default_scheduler_enabled` /
+  `default_two_slot` with effective active slot count `2`;
 - device-memory-aware recommended slot count is diagnostic only;
 - the long-running dedicated slot is reserved but disabled;
 - queue-when-full remains disabled until a real pool coordinator exists.
@@ -131,7 +137,7 @@ Future promotion still needs:
 - crash detection that removes only the failed slot;
 - foreground notification policy per execution;
 - packaged manifest synthesis for every service component;
-- default scheduler / pool coordinator routing;
+- packaged scheduler / full pool coordinator routing;
 - stress tests proving no cwd, env, module cache, bridge transport, provider,
   fd, watcher, timer, or handle crosses execution or slot boundaries.
 
@@ -152,5 +158,7 @@ Current focused coverage:
 - explicitly run `overflow_1` and assert `:nodejs_embedded_2` diagnostics
 - explicitly run `primary` and `overflow_1` concurrently and assert different
   service-process pids
+- run two default one-shot scripts concurrently on an eligible device and assert
+  the scheduler selects `primary` plus `overflow_1`
 
 Release candidates should also verify packaged smoke still uses one embedded service process and does not treat queue support as concurrent execution support.

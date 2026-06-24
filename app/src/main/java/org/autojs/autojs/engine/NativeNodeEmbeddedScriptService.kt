@@ -282,6 +282,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
             launchSurface = launchSurface,
             currentServiceClassName = javaClass.name,
             requestedSlotId = preparedServiceRequest.processPoolSlot,
+            slotSelectionSource = preparedServiceRequest.processPoolSlotSource,
+            defaultSchedulerEnabled = preparedServiceRequest.processPoolSlotSource ==
+                    NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
         )
         val interactiveSession = executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
             launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
@@ -412,6 +415,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(queueMode, queueTimeoutMs),
             runtimeAdapter = preparedServiceRequest.runtimeAdapter,
             processPoolSlot = preparedServiceRequest.processPoolSlot,
+            processPoolSlotSource = preparedServiceRequest.processPoolSlotSource,
         )
         val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, sourceName)
         val crashMarker = NodeCrashEvidenceStore.begin(
@@ -1455,6 +1459,15 @@ open class NativeNodeEmbeddedScriptService : Service() {
         data class Rejected(val failure: ExecutionSlotFailure) : ExecutionSlotDecision()
     }
 
+    private sealed class DefaultProcessPoolSlotDecision {
+
+        data class Acquired(val lease: DefaultProcessPoolSlotLease) : DefaultProcessPoolSlotDecision()
+
+        data class Rejected(val activeSlotIds: List<String>) : DefaultProcessPoolSlotDecision()
+
+        object NotEligible : DefaultProcessPoolSlotDecision()
+    }
+
     private data class ExecutionSlotLease(
         val executionId: String,
         val queueMode: String,
@@ -1462,6 +1475,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val queueWaitMs: Long,
         val queuePosition: Int,
         val maxQueuedExecutions: Int,
+    )
+
+    private data class DefaultProcessPoolSlotLease(
+        val executionId: String,
+        val slot: NodeEmbeddedProcessPoolPolicy.ProcessSlot,
+        val activeSlotIdsAtAcquire: List<String>,
+        val acquiredAtElapsedMs: Long,
     )
 
     private data class ExecutionSlotFailure(
@@ -1677,8 +1697,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private val ACTIVE_EXECUTION_ID = AtomicReference<String?>(null)
         @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
         private val EXECUTION_QUEUE_LOCK = Object()
+        @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+        private val DEFAULT_PROCESS_POOL_LOCK = Object()
         private val QUEUED_EXECUTION_IDS = ArrayDeque<String>()
         private val CANCELLED_QUEUED_EXECUTION_IDS = mutableSetOf<String>()
+        private val DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS = linkedSetOf<String>()
         private const val ACTION_PREWARM_RUNTIME = "org.autojs.autojs.engine.action.PREWARM_NATIVE_NODE_RUNTIME"
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
         private const val ACTION_STOP_INTERACTIVE = NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME
@@ -1698,6 +1721,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_RUNTIME_ADAPTER = "runtime_adapter"
         private const val EXTRA_PROCESS_POOL_SLOT = "process_pool_slot"
+        private const val EXTRA_PROCESS_POOL_SLOT_SOURCE = "process_pool_slot_source"
         private const val EXTRA_EXECUTION_ID = "execution_id"
         private const val EXTRA_FOREGROUND_SERVICE_TYPE = "foreground_service_type"
         private const val EXTRA_PREWARM_TTL_MS = "prewarm_ttl_ms"
@@ -1912,6 +1936,29 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
             val startedAt = android.os.SystemClock.elapsedRealtime()
             val appContext = context.applicationContext
+            val defaultSlotDecision = acquireDefaultProcessPoolSlot(
+                context = appContext,
+                executionId = executionId,
+                request = requestForService,
+                launchSurface = launchSurface,
+            )
+            if (defaultSlotDecision is DefaultProcessPoolSlotDecision.Rejected) {
+                return defaultProcessPoolBusyResult(
+                    context = appContext,
+                    request = requestForService,
+                    executionId = executionId,
+                    startedAt = startedAt,
+                    launchSurface = launchSurface,
+                    activeSlotIds = defaultSlotDecision.activeSlotIds,
+                )
+            }
+            val defaultSlotLease = (defaultSlotDecision as? DefaultProcessPoolSlotDecision.Acquired)?.lease
+            val scheduledRequestForService = defaultSlotLease?.let { lease ->
+                requestForService.copy(
+                    processPoolSlot = lease.slot.id,
+                    processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+                )
+            } ?: requestForService
             val completion = CountDownLatch(1)
             val result = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
             val receiver = object : ResultReceiver(null) {
@@ -1927,29 +1974,35 @@ open class NativeNodeEmbeddedScriptService : Service() {
             val intent = Intent(appContext, NativeNodeEmbeddedScriptService::class.java).apply {
                 action = ACTION_RUN_SCRIPT
                 putExtra(EXTRA_RESULT_RECEIVER, receiver)
-                putExtra(EXTRA_SOURCE_NAME, requestForService.sourceName)
-                putExtra(EXTRA_WORKING_DIRECTORY, requestForService.workingDirectory)
-                putExtra(EXTRA_EXECUTION_MODE, requestForService.executionMode)
+                putExtra(EXTRA_SOURCE_NAME, scheduledRequestForService.sourceName)
+                putExtra(EXTRA_WORKING_DIRECTORY, scheduledRequestForService.workingDirectory)
+                putExtra(EXTRA_EXECUTION_MODE, scheduledRequestForService.executionMode)
                 putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
-                putExtra(EXTRA_TIMEOUT_MS, requestForService.timeoutMs.coerceAtLeast(1L))
-                putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, requestForService.esmExperimentalEnabled)
-                putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, requestForService.dynamicImportExperimentalEnabled)
-                putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
-                putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
-                putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
-                putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
-                putExtra(EXTRA_PROCESS_POOL_SLOT, requestForService.processPoolSlot)
+                putExtra(EXTRA_TIMEOUT_MS, scheduledRequestForService.timeoutMs.coerceAtLeast(1L))
+                putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, scheduledRequestForService.esmExperimentalEnabled)
+                putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, scheduledRequestForService.dynamicImportExperimentalEnabled)
+                putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, scheduledRequestForService.workerThreadsExperimentalEnabled)
+                putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, scheduledRequestForService.javaInteropExperimentalEnabled)
+                putExtra(
+                    EXTRA_SPAWN_DEPTH,
+                    scheduledRequestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
+                )
+                putExtra(EXTRA_RUNTIME_ADAPTER, scheduledRequestForService.runtimeAdapter)
+                putExtra(EXTRA_PROCESS_POOL_SLOT, scheduledRequestForService.processPoolSlot)
+                putExtra(EXTRA_PROCESS_POOL_SLOT_SOURCE, scheduledRequestForService.processPoolSlotSource)
                 putExtra(EXTRA_EXECUTION_ID, executionId)
             }
             val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
                 context = appContext,
-                executionMode = requestForService.executionMode,
+                executionMode = scheduledRequestForService.executionMode,
                 launchSurface = launchSurface,
-                requestedSlotId = requestForService.processPoolSlot,
+                requestedSlotId = scheduledRequestForService.processPoolSlot,
+                slotSelectionSource = scheduledRequestForService.processPoolSlotSource,
+                defaultSchedulerEnabled = defaultSlotLease != null,
             )
             var component: android.content.ComponentName? = null
             try {
-                requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, requestForService)
+                requestSpoolFile = writeEmbeddedScriptRequestSpool(appContext, executionId, scheduledRequestForService)
                 intent.putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
                 val startOutcome = startEmbeddedScriptService(
                     appContext,
@@ -1966,9 +2019,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 val completed = completion.await(clientAwaitTimeoutMs(request.timeoutMs), TimeUnit.MILLISECONDS)
                 if (!completed) {
                     appContext.stopService(Intent().setComponent(component))
-                    val lifecycle = timeoutLifecycle(executionId, requestForService)
+                    val lifecycle = timeoutLifecycle(executionId, scheduledRequestForService)
                     return processCrashedOrTimedOut(
-                        request = requestForService,
+                        request = scheduledRequestForService,
                         message = "Embedded script process crashed or timed out.",
                         startedAt = startedAt,
                         timedOut = true,
@@ -1983,7 +2036,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             } catch (e: Throwable) {
                 component?.let { appContext.stopService(Intent().setComponent(it)) }
                 return processCrashedOrTimedOut(
-                    requestForService,
+                    scheduledRequestForService,
                     "Embedded script process crashed or timed out.\n${e.message ?: e.javaClass.name}",
                     e,
                     startedAt = startedAt,
@@ -1991,9 +2044,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 )
             } finally {
                 requestSpoolFile?.parentFile?.deleteRecursively()
+                releaseDefaultProcessPoolSlot(defaultSlotLease)
             }
             return result.get() ?: processCrashedOrTimedOut(
-                request = requestForService,
+                request = scheduledRequestForService,
                 message = "Embedded script process crashed or timed out.",
                 startedAt = startedAt,
                 executionId = executionId,
@@ -2094,6 +2148,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                     putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
                     putExtra(EXTRA_PROCESS_POOL_SLOT, requestForService.processPoolSlot)
+                    putExtra(EXTRA_PROCESS_POOL_SLOT_SOURCE, requestForService.processPoolSlotSource)
                     putExtra(EXTRA_EXECUTION_ID, executionId)
                     putExtra(EXTRA_REQUEST_SPOOL_FILE, requestSpoolFile.absolutePath)
                 }
@@ -2351,6 +2406,102 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     }
                 }
                 .toMap(linkedMapOf())
+        }
+
+        private fun acquireDefaultProcessPoolSlot(
+            context: Context,
+            executionId: String,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String,
+        ): DefaultProcessPoolSlotDecision {
+            if (!request.processPoolSlot.isNullOrBlank()) {
+                return DefaultProcessPoolSlotDecision.NotEligible
+            }
+            if (!NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(
+                    context = context,
+                    executionMode = request.executionMode,
+                    launchSurface = launchSurface,
+                )
+            ) {
+                return DefaultProcessPoolSlotDecision.NotEligible
+            }
+            synchronized(DEFAULT_PROCESS_POOL_LOCK) {
+                val activeSlotIds = DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.toList()
+                val slot = NodeEmbeddedProcessPoolPolicy.defaultSchedulerSelectableSlots(
+                    context = context,
+                    executionMode = request.executionMode,
+                    launchSurface = launchSurface,
+                ).firstOrNull { candidate -> candidate.id !in DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS }
+                    ?: return DefaultProcessPoolSlotDecision.Rejected(activeSlotIds)
+                DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.add(slot.id)
+                return DefaultProcessPoolSlotDecision.Acquired(
+                    DefaultProcessPoolSlotLease(
+                        executionId = executionId,
+                        slot = slot,
+                        activeSlotIdsAtAcquire = activeSlotIds,
+                        acquiredAtElapsedMs = android.os.SystemClock.elapsedRealtime(),
+                    ),
+                )
+            }
+        }
+
+        private fun releaseDefaultProcessPoolSlot(lease: DefaultProcessPoolSlotLease?) {
+            if (lease == null) {
+                return
+            }
+            synchronized(DEFAULT_PROCESS_POOL_LOCK) {
+                DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.remove(lease.slot.id)
+                DEFAULT_PROCESS_POOL_LOCK.notifyAll()
+            }
+        }
+
+        private fun defaultProcessPoolBusyResult(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            executionId: String,
+            startedAt: Long,
+            launchSurface: String,
+            activeSlotIds: List<String>,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            val processName = currentProcessNameCompat()
+            val pid = Process.myPid()
+            val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, request.sourceName)
+                .apply {
+                    transition(NodeEmbeddedRuntimeState.FAILED, "client.default_process_pool_busy")
+                }
+            val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
+                context = context,
+                executionMode = request.executionMode,
+                launchSurface = launchSurface,
+                slotSelectionSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+                defaultSchedulerEnabled = true,
+            )
+            val nativeValues = linkedMapOf<String, String>().apply {
+                putAll(processPoolPlan.nativeValues())
+                put("embedded_script.process_pool.scheduler_rejected", "true")
+                put("embedded_script.process_pool.busy", "true")
+                put("embedded_script.process_pool.active_slot_ids", activeSlotIds.joinToString(","))
+                put("embedded_script.concurrent_policy", "one-active-execution-per-process-slot")
+                put("embedded_script.rejected_execution_id", executionId)
+                put("embedded_script.error_code", NodeRuntimeErrorCodes.NODE_ENGINE_BUSY)
+            }
+            return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
+                succeeded = false,
+                exitCode = 1,
+                resultText = null,
+                stdout = "",
+                stderr = "",
+                errorName = "EmbeddedNodeProcessPoolBusyError",
+                errorMessage = "Embedded Node.js default process pool is busy; active slots=${activeSlotIds.joinToString(",")}.",
+                errorStack = null,
+                errorCode = NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+                elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
+                processName = processName,
+                pid = pid,
+                sourceName = request.sourceName,
+                nativeValues = nativeValues,
+                workingDirectory = request.workingDirectory,
+            ).withLifecycle(lifecycle)
         }
 
         private fun acquireExecutionSlot(
@@ -2965,6 +3116,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 spawnDepth = getIntExtra(EXTRA_SPAWN_DEPTH, 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
                 runtimeAdapter = getStringExtra(EXTRA_RUNTIME_ADAPTER)?.takeIf { it.isNotBlank() },
                 processPoolSlot = getStringExtra(EXTRA_PROCESS_POOL_SLOT)?.takeIf { it.isNotBlank() },
+                processPoolSlotSource = getStringExtra(EXTRA_PROCESS_POOL_SLOT_SOURCE)?.takeIf { it.isNotBlank() },
             )
         }
 
@@ -3007,6 +3159,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 put("spawnDepth", request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 request.runtimeAdapter?.takeIf { it.isNotBlank() }?.let { put("runtimeAdapter", it) }
                 request.processPoolSlot?.takeIf { it.isNotBlank() }?.let { put("processPoolSlot", it) }
+                request.processPoolSlotSource?.takeIf { it.isNotBlank() }?.let { put("processPoolSlotSource", it) }
             }
         }
 
@@ -3049,6 +3202,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 spawnDepth = json.optInt("spawnDepth", 0).coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH),
                 runtimeAdapter = json.optString("runtimeAdapter").takeIf { it.isNotBlank() },
                 processPoolSlot = json.optString("processPoolSlot").takeIf { it.isNotBlank() },
+                processPoolSlotSource = json.optString("processPoolSlotSource").takeIf { it.isNotBlank() },
             )
         }
 
