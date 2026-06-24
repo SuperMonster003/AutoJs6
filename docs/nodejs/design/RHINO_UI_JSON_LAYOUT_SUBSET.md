@@ -24,6 +24,10 @@ The facade does not install a default global `ui`; when
 `compat.install({ globals: true })` exposes `globalThis.ui`, that global is the
 constrained facade described here, not Rhino's raw UI module.
 
+P13-17 records live Activity-owned `require("ui")` provider evidence for this
+JSON subset and keeps packaged live UI unpromoted until Back/Recents,
+orientation, relaunch/crash, and disclosure evidence lands.
+
 ## Accepted Descriptor
 
 A layout descriptor is a plain JSON object with a required `type` field at the

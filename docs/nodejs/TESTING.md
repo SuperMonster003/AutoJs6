@@ -734,6 +734,21 @@ installed, and `java.defineClass()` / `$autojs.java.defineClass()` are reserved
 stable denials until a bounded proxy-interface provider, callback cleanup,
 thread dispatch, packaged policy, and leak diagnostics land.
 
+Phase 13 live UI provider promotion:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13LiveUiProviderPromotion
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeUiBridgeInstrumentationTest"
+```
+
+`verifyNodePhase13LiveUiProviderPromotion` records the P13-17 partial live UI
+state: direct `require("ui")` has live Activity provider evidence for JSON
+layouts, events, updates, close, and provider cleanup; `compat.ui` and type
+declarations stay aligned with the same JSON provider. The gate remains partial
+because live packaged UI, Back/Recents, orientation/configuration-change,
+relaunch/crash, and packaged capability/disclosure denial evidence are still
+missing.
+
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground
 long-running, runtime budget/heartbeat, queueing, scheduled runner,

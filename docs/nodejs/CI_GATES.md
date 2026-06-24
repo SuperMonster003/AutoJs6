@@ -310,6 +310,7 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase13RhinoInstallJavaProxy
 .\gradlew.bat --console=plain :app:verifyNodePhase13RhinoImportHelpersDecision
 .\gradlew.bat --console=plain :app:verifyNodePhase13RhinoJavaAdapterDecision
+.\gradlew.bat --console=plain :app:verifyNodePhase13LiveUiProviderPromotion
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
@@ -377,6 +378,11 @@ decision: `require("rhino").JavaAdapter()` is a stable
 installed, and `java.defineClass()` / `$autojs.java.defineClass()` stay
 `ERR_AUTOJS6_JAVA_METHOD_DENIED` until the bounded proxy-interface provider and
 callback cleanup evidence land.
+`verifyNodePhase13LiveUiProviderPromotion` records the P13-17 partial live UI
+provider state: direct `require("ui")` Activity evidence is present for JSON
+layout, event drain, updates, close, and provider cleanup, while live packaged
+UI, Back/Recents, orientation/configuration-change, relaunch/crash, and
+packaged capability/disclosure denial evidence still block opt-in promotion.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -503,6 +509,10 @@ and selector `click`; otherwise that single real-accessibility smoke is an
 explicit JUnit skip.
 `verifyNodeLiveUiGate` validates the Activity-owned UI provider, JavaScript
 event delivery, provider cleanup, descriptor denial, and foreign-handle denial.
+P13-17 additionally uses `verifyNodePhase13LiveUiProviderPromotion` as the host
+promotion-status gate for this same provider and keeps packaged live UI
+provider-dependent until Back/Recents, orientation, relaunch/crash, and
+disclosure evidence lands.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

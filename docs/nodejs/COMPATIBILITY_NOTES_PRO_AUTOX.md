@@ -138,10 +138,32 @@ Current user-facing bridge modules include:
 - `image` / `images`
 - `clipboard`
 - `device`
+- `ui`
 - `shell`
 - controlled `fetch` when the network experiment is explicitly enabled
 
 Some modules are intentionally narrower than Pro/AutoX counterparts.
+
+## UI
+
+Auto.js Pro 9 public docs describe `"nodejs ui"` / `"ui-thread"` style entry
+semantics.
+
+AutoJs6 behavior:
+
+- P13-11 records the entry directive metadata path, but it does not yet make
+  Pro-style UI-thread execution equivalent.
+- P13-17 records the live `require("ui")` provider promotion gate: JSON
+  layout, update, event drain, close, and provider cleanup have live Activity
+  evidence.
+- `require("autojs6:compat").ui` maps to the same JSON-only provider for Rhino
+  migration.
+- live packaged UI, Back/Recents, orientation/configuration-change,
+  relaunch/crash, and packaged disclosure evidence remain unpromoted.
+
+Porting note: migrate Rhino UI scripts to explicit `require("ui")` or
+`compat.ui` JSON descriptors instead of relying on raw `View`, `NativeView`,
+`ui.run()`, `ui.post()`, or implicit current-Activity behavior.
 
 ## Java And Android Interop
 

@@ -210,7 +210,9 @@ object NodeBridgeProviderRegistry {
             id = UI_PROVIDER,
             modules = listOf(NodeBridgeModules.UI),
             capabilities = listOf(NodeBridgePermissionManifest.UI),
-            packagedSupport = packagedSupported("Activity-owned declarative UI sessions are handle-based and project-owned"),
+            packagedSupport = packagedProviderDependent(
+                "P13-17 records live main-app Activity UI provider evidence; live packaged UI promotion still requires Back/Recents, orientation, relaunch, crash, and disclosure evidence",
+            ),
         ),
         provider(
             id = UI_OVERLAY_PROVIDER,
@@ -355,6 +357,9 @@ object NodeBridgeProviderRegistry {
             "components" to "Column,Row,Text,Button,Input,Image,ScrollView,List,Switch,Checkbox,Progress,Tabs",
             "eventDelivery" to "bounded drainEvents JSON snapshots",
             "maxActiveSessionsPerExecution" to "4",
+            "phase13Promotion" to "P13-17 partial live provider evidence gate",
+            "packagedPromotion" to "blocked_until_live_packaged_back_recents_orientation_relaunch_crash_evidence",
+            "rawObjectPolicy" to "no raw View, Activity, Context, NativeView, or Java object crosses the bridge",
             "statusReason" to "Activity-owned declarative UI MVP",
         )
         UI_OVERLAY_PROVIDER -> linkedMapOf(

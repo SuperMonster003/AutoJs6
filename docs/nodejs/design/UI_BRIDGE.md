@@ -13,6 +13,10 @@ JSON-only migration subset in
 `autojs6:compat.ui` as a constrained wrapper over this provider and keeps
 default global `ui` injection disabled. P12-10 adds a compat.ui packaged marker
 and UI_SESSION cleanup evidence without promoting live packaged background UI.
+P13-17 records the Phase 13 live UI provider promotion gate: direct
+`require("ui")` live Activity evidence is present, but packaged live UI,
+Back/Recents, orientation, relaunch, crash, and disclosure evidence still block
+`pro_compat_opt_in` promotion.
 
 ## Goal
 
@@ -159,6 +163,11 @@ configuration change, but that choice must be explicit and tested.
 ## Packaged APK Behavior
 
 Packaged APK behavior must be designed before shipping any UI module.
+
+P13-17 keeps live packaged UI in provider-dependent state. The provider registry
+may report the main-app Activity provider as available, but packaged support
+must not be treated as promoted until the Back/Recents, orientation,
+relaunch/crash, and disclosure evidence below is covered by device smoke.
 
 Open packaged requirements:
 
@@ -354,6 +363,8 @@ Task S7-14 and S7-44 tests now cover:
 - TypeScript declaration smoke
 - P12-10 `compat.ui` packaged marker, fake-transport event/update/batch/close
   smoke, and `UI_SESSION` cleanup evidence
+- P13-17 `verifyNodePhase13LiveUiProviderPromotion` host gate, which records
+  live Activity provider evidence and keeps live packaged UI blockers explicit
 
 Minimum tests before promoting packaged live UI or WebView:
 

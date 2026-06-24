@@ -108,7 +108,7 @@ Phase 13 中允许重新审视 Phase 12 的部分 `blocked_by_design` 决策，�
 推荐提交信息格式：
 
 ```text
-nodejs phase13 P13-17: promote live overlay provider
+nodejs phase13 P13-17: promote live UI provider
 ```
 
 每个 task 完成时需要：
@@ -467,6 +467,27 @@ P13 task 本身使用以下执行状态：
     - JSON layout subset、update、event drain、close、Activity lifecycle 可用。
     - Back/Recents、orientation、destroy cleanup、permission denial 有设备证据。
     - Rhino `ui` 兼容 wrapper 和 Pro 风格 `require("ui")` 文档同步。
+
+  - 2026-06-24 partial landing:
+    - Live `require("ui")` Activity-owned provider evidence is recorded for
+      `showLayout`, `update`, `batchUpdate`, `drainEvents`, and `close`.
+    - `NodeBridgeUiActivity` covers JSON descriptors for Column/Row/Text/Button/Input/Image/ScrollView/List/Switch/Checkbox/Progress/Tabs.
+    - `NodeUiBridgeInstrumentationTest` covers fake transport, live Android
+      Button/Input/List/Switch/Checkbox/Tabs events, state snapshots, update,
+      close, provider destroy cleanup, unsupported descriptor denial, WebView
+      gate denial, foreign-handle denial, and active UI session limits.
+    - `compat.ui` and direct `ui` type smoke remain aligned with the same
+      JSON provider.
+    - Provider registry now marks packaged UI support as provider-dependent
+      until live packaged Back/Recents/orientation/relaunch/crash evidence
+      lands.
+    - Host verifier: `tools/nodejs/phase13/verify-live-ui-provider-promotion.js`.
+    - Gradle gate: `:app:verifyNodePhase13LiveUiProviderPromotion`.
+    - Report: `docs/nodejs/reports/phase13/P13_17_LIVE_UI_PROVIDER_PROMOTION.md`.
+  - Remaining: Back/Recents lifecycle evidence, orientation/configuration
+    policy evidence, live packaged APK UI smoke, crash/relaunch evidence, and
+    packaged capability/disclosure denial evidence still block opt-in
+    promotion.
 
 - [ ] P13-18: 推进 live floaty/overlay provider 到 opt-in promoted。
   - 范围：基于 P12 overlay provider POC，开启 live show/update/drainEvents/close。

@@ -143,6 +143,12 @@ P13-11 records Pro-style UI entry directives through Node project launch
 metadata and diagnostics. Full Activity lifecycle launch, Back/Recents behavior,
 and concrete UI-thread dispatch parity remain unpromoted.
 
+P13-17 records the live `require("ui")` provider promotion gate. The direct
+Activity-owned JSON provider has live device evidence for layout, events,
+updates, close, and provider cleanup, while live packaged UI, Back/Recents,
+orientation/configuration-change policy, relaunch/crash evidence, and packaged
+capability/disclosure denial evidence remain unpromoted.
+
 ## Supported CommonJS Features
 
 - `require()`
@@ -1546,6 +1552,7 @@ runtime.
   - requests require the `ui` capability
   - current JavaScript API, fake-provider tests, type declarations, and bridge protocol are reserved
   - Android provider starts an internal Activity and supports `Column`, `Row`, `Text`, `Button`, `Input`, `Image`, `ScrollView`, `List`, `Switch`, `Checkbox`, `Progress`, and `Tabs` descriptors, `update`, `batchUpdate`, Button/Input/List/Switch/Checkbox/Tabs/lifecycle events, state snapshots, `close`, provider-destroy cleanup, and a bounded active UI session count
+  - P13-17 records this as a partial live-provider promotion gate; packaged support is provider-dependent until Back/Recents, orientation, relaunch/crash, and disclosure evidence lands
   - `WebView` descriptors reject with a stable invalid-request error until a separate WebView security gate is designed
   - JavaScript receives only an opaque handle; no raw `Context`, `Activity`, `View`, `Window`, `Fragment`, `Handler`, Rhino `NativeView`, overlay window, Binder, or Java object crosses into Node
 - `clipboard`

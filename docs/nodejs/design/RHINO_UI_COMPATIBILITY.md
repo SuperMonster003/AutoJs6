@@ -33,6 +33,11 @@ deterministic packaged fake bridge transport. The marker
 `packaged.rhino_compat.compat_ui=true` covers facade routing, permission
 metadata, event delivery, update, batch update, close, and zero pending bridge
 calls; it does not promote live packaged Activity UI as a background surface.
+P13-17 adds the Phase 13 live UI provider promotion gate for the direct
+`require("ui")` Activity provider and keeps `compat.ui` mapped to the same
+JSON-only surface. The gate remains partial until live packaged UI,
+Back/Recents, orientation, relaunch/crash, and packaged disclosure evidence
+lands.
 
 ## Rhino Surface
 
@@ -167,6 +172,8 @@ Future UI compatibility work must be split into small tasks:
 - provider schema coverage for status/navigation/background options
 - inset snapshots for status/navigation bar height queries
 - live packaged APK UI behavior and Back/Recents policy
+- P13-17 blocker closure for packaged live UI, orientation policy, relaunch,
+  crash evidence, and capability/disclosure denial evidence
 
 Floaty and overlay compatibility remains separate and is tracked by
 [FLOATY_NODE.md](FLOATY_NODE.md).

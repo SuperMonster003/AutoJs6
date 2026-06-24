@@ -446,7 +446,7 @@ TypeScript 声明还覆盖：
 | Java/Android | `$autojs.java`、`require("rhino").install()` | P13-12 已有只读 `$autojs` 和 gated `$autojs.java` facade；P13-13 增加实验 allowlist 下的 `java.lang.Math`、`java.util.UUID`、`android.graphics.Rect` handle 构造/实例调用/字段读取/释放；P13-14 增加显式 experimental `rhino.install` Java proxy，可安装 `Packages`、`java`、`android` 代理但仍只走 allowlist；P13-15 决定 `importClass`/`importPackage` 在 Node 中稳定拒绝并给出赋值式迁移；P13-16 决定 `JavaAdapter` 稳定拒绝并预留 `java.defineClass()` / `$autojs.java.defineClass()` replacement；默认仍拒绝 Java 调用，线程 dispatch、实际 proxy-interface provider 和完整 Java/Rhino parity 仍未完成 |
 | Rhino 全局兼容 | 第一代 API 保留在 Rhino；Node 需 require 新模块 | Rhino 保留；Node 有显式 `autojs6:compat`，但不默认安装 globals |
 | 线程 | Node event loop，`worker_threads` 方向受限 | `worker_threads` 默认关闭，Rhino `threads` 不作为 Node 兼容目标 |
-| UI 线程 | `"nodejs ui"` / `"ui-thread"` | P13-11 已补 `NodeEntryDirective` metadata、descriptor/project config 透传和 gate；Activity lifecycle、Back/Recents、实际 UI-thread dispatch 仍未等价 |
+| UI 线程 | `"nodejs ui"` / `"ui-thread"` | P13-11 已补 `NodeEntryDirective` metadata、descriptor/project config 透传和 gate；P13-17 记录 direct `require("ui")` live Activity provider evidence、JSON layout/update/event drain/close 和 provider cleanup；Activity lifecycle、Back/Recents、orientation、live packaged UI、实际 UI-thread dispatch 仍未等价 |
 | 网络 | 文档列出 `http/https` 等 Node 能力 | raw network 默认拒绝，推荐受控 `fetch`/`axios`/`websocket` |
 | 打包 | Pro v9 自有打包体系 | AutoJs6 已有 packaged smoke、runtime libs、release flavor、ABI 策略，但 packaged long-running 仍未完成 |
 
