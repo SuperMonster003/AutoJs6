@@ -2002,6 +2002,28 @@ This suite verifies `pluginSystemProfile` diagnostics and proves plugin
 manifest capabilities cannot exceed the host permission manifest. P13-46
 records plugin system parity as partial.
 
+Phase 13 dependency compatibility corpus gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13DependencyCompatibilityCorpus
+```
+
+This host gate records P13-47 as partial. It requires the 50-fixture real npm
+manifest, `phase13Compatibility` classification metadata, package/reason rows
+for `missing_builtin`, `native_addon`, `postinstall`, `network`, and `fs`,
+metadata instrumentation, desktop differential pass-rate reporting, surface
+manifest evidence, release matrix updates, and Phase13 docs.
+
+Phase 13 dependency compatibility corpus metadata instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest#fixtureMetadataIsCompleteAndSafe"
+```
+
+This focused metadata path verifies the manifest taxonomy without executing
+unsafe native addon or lifecycle-script packages. P13-47 records dependency
+compatibility corpus as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

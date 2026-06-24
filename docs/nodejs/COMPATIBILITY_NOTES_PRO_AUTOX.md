@@ -388,6 +388,13 @@ status, and debug-only reload. Android provider plugins, native plugins,
 signed archives, remote marketplace install/update, packaged plugin
 distribution, and plugin-granted host authority remain unavailable.
 
+P13-47 records dependency compatibility corpus as partial. AutoJs6 Node now
+classifies the fixed real npm corpus with `phase13Compatibility` package reason
+categories for `missing_builtin`, `native_addon`, `postinstall`, `network`,
+and `fs`; the differential report can show pass-rate rows by category when
+AutoJs6 results are supplied. Unsafe registry packages, native payloads,
+lifecycle scripts, and postinstall downloads remain blocked.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

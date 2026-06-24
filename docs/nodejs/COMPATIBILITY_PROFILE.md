@@ -1272,6 +1272,15 @@ paths. Plugin manifests may request `plugin.<id>` and bridge capabilities, but
 the host project/package permission manifest remains the authority ceiling and
 missing capabilities reject before plugin code runs.
 
+P13-47 records dependency compatibility corpus as partial. The fixed real npm
+corpus remains at 50 offline fixtures, and its manifest now records
+`phase13Compatibility` package reason categories for `missing_builtin`,
+`native_addon`, `postinstall`, `network`, and `fs`. The desktop differential
+report can show pass-rate rows by category when AutoJs6 results are supplied,
+but unsafe registry packages, native payloads, lifecycle scripts, and
+postinstall downloads are still represented as metadata blockers rather than
+runnable corpus content.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context

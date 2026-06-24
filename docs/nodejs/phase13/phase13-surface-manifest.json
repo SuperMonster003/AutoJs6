@@ -628,7 +628,7 @@
         "P13-47",
         "P13-48"
       ],
-      "summary": "Expand packaged APK capability metadata, plugin system, dependency compatibility corpus, and lock/integrity policy for Pro/Desktop distribution. P13-45 records packaged APK capability metadata as partial with packagedCapabilityProfile, packagedMetadata, node.permissions manifest enforcement, Android permission synthesis evidence, and stable denial for undeclared bridge capabilities while profile/builtin/native asset/filesystem-root metadata remains diagnostic-only. P13-46 records plugin system parity as partial with pluginSystemProfile, JS-only local manager evidence, host capability ceiling enforcement, and stable denials/deferred decisions for Android provider plugins, native plugins, remote marketplace, signed archives, and packaged distribution.",
+      "summary": "Expand packaged APK capability metadata, plugin system, dependency compatibility corpus, and lock/integrity policy for Pro/Desktop distribution. P13-45 records packaged APK capability metadata as partial with packagedCapabilityProfile, packagedMetadata, node.permissions manifest enforcement, Android permission synthesis evidence, and stable denial for undeclared bridge capabilities while profile/builtin/native asset/filesystem-root metadata remains diagnostic-only. P13-46 records plugin system parity as partial with pluginSystemProfile, JS-only local manager evidence, host capability ceiling enforcement, and stable denials/deferred decisions for Android provider plugins, native plugins, remote marketplace, signed archives, and packaged distribution. P13-47 records dependency compatibility corpus as partial with phase13Compatibility manifest taxonomy, missing_builtin/native_addon/postinstall/network/fs package reason categories, and differential pass-rate rows.",
       "risk": "high",
       "runtimeSurface": [
         "packaged profile metadata",
@@ -658,7 +658,15 @@
         "docs/nodejs/design/PLUGIN_SYSTEM.md",
         "docs/nodejs/reports/phase9/PLUGIN_POLICY.md",
         "build/reports/nodejs/phase13-plugin-system-parity-decision.json",
-        "build/reports/nodejs/phase13-plugin-system-parity-decision.md"
+        "build/reports/nodejs/phase13-plugin-system-parity-decision.md",
+        "tools/nodejs/phase13/verify-dependency-compatibility-corpus.js",
+        ":app:verifyNodePhase13DependencyCompatibilityCorpus",
+        "docs/nodejs/reports/phase13/P13_47_DEPENDENCY_COMPATIBILITY_CORPUS.md",
+        "app/src/androidTest/assets/npm_compat_real/manifest.json",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeRealNpmCompatInstrumentationTest.kt",
+        "tools/nodejs/differential/run-differential-tests.js",
+        "build/reports/nodejs/phase13-dependency-compatibility-corpus.json",
+        "build/reports/nodejs/phase13-dependency-compatibility-corpus.md"
       ],
       "rollback": "Reject packaged Pro/Desktop profile metadata and keep JS-only local plugins plus host-side dependency validation."
     },

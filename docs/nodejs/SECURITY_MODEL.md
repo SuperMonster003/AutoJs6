@@ -780,6 +780,13 @@ manifests remain constrained by the host project/package permission manifest:
 exact `plugin.<id>` and every plugin-requested bridge capability must be
 declared by the host, and missing capabilities reject before plugin code runs.
 
+P13-47 records dependency compatibility corpus as partial. The real npm corpus
+taxonomy records `missing_builtin`, `native_addon`, `postinstall`, `network`,
+and `fs` package blocker reasons without adding unsafe runnable payloads.
+Native addons, lifecycle scripts, postinstall downloads, registry drift, and
+executable extraction remain denied by dependency scanning and runtime policy;
+P13-47 only improves reporting and pass-rate visibility by reason kind.
+
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
 metadata only and does not make a second JavaScript context a security
 boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,

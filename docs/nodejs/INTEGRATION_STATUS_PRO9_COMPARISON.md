@@ -1180,6 +1180,13 @@ distribution, but Android provider plugins, native plugins, signed archives,
 remote marketplace install/update, packaged plugin distribution, and
 plugin-granted host authority remain unavailable.
 
+P13-47 records dependency compatibility corpus as partial: the fixed real npm
+corpus now carries `phase13Compatibility` package reason categories for
+`missing_builtin`, `native_addon`, `postinstall`, `network`, and `fs`, and the
+desktop differential report can show pass-rate rows by category. This improves
+Pro/Desktop dependency planning without executing unsafe registry packages,
+native payloads, lifecycle scripts, or postinstall downloads.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

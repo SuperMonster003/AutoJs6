@@ -1499,6 +1499,24 @@ P13 task 本身使用以下执行状态：
     - 报告给出 package、missing builtin、native addon、postinstall、network、fs
       等原因。
     - P13 每次放开桌面能力都能看到 corpus 通过率变化。
+  - Progress:
+    - P13-47 partial landing 已在 `npm_compat_real/manifest.json` 增加
+      `phase13Compatibility` 分类元数据，固定 50 个离线 fixture baseline。
+    - 分类覆盖 `missing_builtin`、`native_addon`、`postinstall`、`network`
+      和 `fs`，每类包含 package/reason rows 与 fixture 引用。
+    - `NodeRealNpmCompatInstrumentationTest.fixtureMetadataIsCompleteAndSafe`
+      现在验证 P13 分类 schema、fixture 引用和 reason rows。
+    - `tools/nodejs/differential/run-differential-tests.js` 现在输出
+      `phase13Compatibility` JSON，并在 v1.1 differential Markdown 中输出
+      "Phase 13 Dependency Compatibility Categories" pass-rate 表。
+    - Gate:
+      `tools/nodejs/phase13/verify-dependency-compatibility-corpus.js` 生成
+      `phase13-dependency-compatibility-corpus` 报告，并接入
+      `:app:verifyNodePhase13DependencyCompatibilityCorpus`。
+  - Remaining:
+    - CI 仍需自动导入 connected AutoJs6 real npm differential log/JSON。
+    - 真实 registry drift、unsafe native/postinstall 包执行仍保持拒绝，仅以
+      metadata blocker category 表达。
 
 - [ ] P13-48: 实现 package lock and integrity policy。
   - 范围：为 Android-side package manager、plugins、native addon 做统一完整性策略。
