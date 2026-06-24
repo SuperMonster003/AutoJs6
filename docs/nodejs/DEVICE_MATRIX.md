@@ -115,6 +115,10 @@ Use `screen_capture` only for manual physical-device validation after preparing 
 - primary device: Sony XQ-AT72 `QV710AF65F`
 - use: real-device MediaProjection and image-frame smoke for permission request, one captured frame, dimension checks, bitmap decode/recycle, and capturer shutdown
 - expected denial behavior: if the system prompt is denied or canceled, the optional test fails with a clear permission-denied message
+- P13-20 keeps screen_capture smoke manual: the promotion gate records the
+  optional Android capture lifecycle evidence, but the Node bridge
+  MediaProjection provider remains unavailable until permission prompt,
+  foreground disclosure, stop cleanup, and packaged behavior are promoted.
 
 Recommended command:
 

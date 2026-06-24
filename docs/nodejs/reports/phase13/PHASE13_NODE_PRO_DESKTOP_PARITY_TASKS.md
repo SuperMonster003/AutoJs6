@@ -1,5 +1,21 @@
 # Phase 13: Auto.js Pro And Desktop Node Parity Expansion Tasks
 
+## P13-20 Partial Landing Note
+
+- P13-20 partial screenshot/image/OCR promotion gate records direct
+  `media_projection`, `image`/`images`, `ocr`, and explicit
+  `autojs6:compat` screenshot/image/OCR surfaces.
+- Host verifier:
+  `tools/nodejs/phase13/verify-screenshot-image-ocr-promotion.js`.
+- Gradle gate: `:app:verifyNodePhase13ScreenshotImageOcrPromotion`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_20_SCREENSHOT_IMAGE_OCR_PROMOTION.md`.
+- Surface manifest evidence: `phase13-screenshot-image-ocr-promotion`.
+- Remaining P13-20 blockers: Activity-owned MediaProjection prompting,
+  foreground disclosure, capturer cleanup, advanced image processing,
+  packaged capture/OCR behavior, Paddle/Rapid fallback, and raw
+  Bitmap/OpenCV profile decisions.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -543,6 +559,22 @@ P13 task 本身使用以下执行状态：
     - permission prompt、foreground disclosure、capturer stop、image recycle 完整。
     - ML Kit/Paddle/Rapid provider 的可用性和 fallback 策略明确。
     - raw Bitmap/OpenCV object 是否开放另起 profile 决策。
+
+- P13-20 partial screenshot/image/OCR promotion gate (2026-06-24):
+  - Evidence:
+    - Report: `docs/nodejs/reports/phase13/P13_20_SCREENSHOT_IMAGE_OCR_PROMOTION.md`
+    - Verifier: `tools/nodejs/phase13/verify-screenshot-image-ocr-promotion.js`
+    - Gradle gate: `:app:verifyNodePhase13ScreenshotImageOcrPromotion`
+    - Surface manifest evidence: `phase13-screenshot-image-ocr-promotion`
+  - Current ready slice:
+    - `image`/`images` direct API shape and TypeScript declarations cover screenshot, read/write, transforms, matching, color search, size, and recycle.
+    - Android live provider supports scoped `readImage` and explicit `recycle` through provider-owned image handles.
+    - `ocr` direct API and live ML Kit provider consume provider-owned image handles and reject unknown/recycled handles without resource leaks.
+    - `autojs6:compat` exposes Rhino-style screenshot/image/OCR wrappers over the same controlled providers.
+  - Remaining blockers:
+    - MediaProjection bridge provider still needs Activity-owned prompt, denial, foreground disclosure, `nextImage`, `stop`, cleanup, and packaged evidence.
+    - Real image save/transform/match/color providers and packaged scoped path/quota evidence remain unpromoted.
+    - Paddle/Rapid/plugin fallback, packaged OCR model lookup, and raw Bitmap/OpenCV object profile decisions remain open.
 
 - [ ] P13-21: 实现 tasks daily/weekly/user database provider。
   - 范围：将 P12 中 rejected 的 daily/weekly/user task database 重新作为

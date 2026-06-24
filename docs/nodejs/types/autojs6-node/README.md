@@ -94,6 +94,15 @@ host/device/type evidence. `swipe`, `gesture`, `powerDialog`, direct
 `waitFor`, broader Rhino selector aliases, packaged accessibility service
 lifecycle, and root/Shizuku tiers remain unpromoted.
 
+P13-20 records the partial screenshot/image/OCR promotion gate for the declared
+`media_projection`, `image`/`images`, `ocr`, and explicit `autojs6:compat`
+image/OCR types. Direct API shape, scoped image read/recycle, ML Kit OCR over
+provider-owned image handles, Rhino-style screenshot/image/OCR wrappers, and
+raw object denials are covered by host/device/type evidence. MediaProjection
+bridge prompting, advanced image processing, packaged capture/OCR behavior,
+Paddle/Rapid fallback, and raw Bitmap/OpenCV profile decisions remain
+unpromoted.
+
 P12-34 is a documentation synchronization gate rather than a new declaration
 surface. It keeps this README aligned with `MIGRATION_FROM_RHINO.md`, the Pro 9
 comparison, `RHINO_AUGMENT_COMPATIBILITY_MATRIX.md`, `SECURITY_MODEL.md`, and

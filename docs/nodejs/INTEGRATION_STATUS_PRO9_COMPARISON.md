@@ -400,9 +400,9 @@ capability 映射示例：
 | `engines` | `myEngine`, `all`, `stopAll`, `stopSelf`, `execScript`, `execScriptFile` | 受控脚本调度，不暴露 raw engine 对象 |
 | `dialogs` | `alert`, `confirm`, `input`, `select` | Promise 化对话框能力，需关注 Activity/provider 生命周期 |
 | `accessibility` | `isEnabled`, `ensureEnabled`, `click`, `back`, `home`, `recentApps`, `findByText`, `clickText`, `findOne`, `findAll`, `longClick`, `setText`, `scrollForward`, `scrollBackward` | P13-19 records selector/accessibility as partial: selector v2 JSON descriptors and compat selector handles are covered, but gesture, direct `waitFor`, packaged service, raw node, root/Shizuku parity remain open |
-| `media_projection` | `requestScreenCapture`, `nextImage`, `stop` | 协议存在，真实授权和 packaged 行为仍需按 provider 状态判断 |
-| `image` / `images` | `captureScreen`, `readImage`, `saveImage`, `clip`, `resize`, `grayscale`, `threshold`, `findImage`, `matchTemplate`, `findColor`, `findMultiColors`, `recycle` | handle-based，不暴露 raw Bitmap/Mat |
-| `ocr` | `recognize`, `recognizeText`, `detectTextBounds` | 依赖 image handle 和 OCR provider/model |
+| `media_projection` | `requestScreenCapture`, `nextImage`, `stop` | P13-20 records screenshot/image/OCR as partial: API shape is reserved, optional real-device capture smoke exists, but bridge-owned prompt, foreground disclosure, stop cleanup, and packaged behavior remain blocked |
+| `image` / `images` | `captureScreen`, `readImage`, `saveImage`, `clip`, `resize`, `grayscale`, `threshold`, `findImage`, `matchTemplate`, `findColor`, `findMultiColors`, `recycle` | P13-20 records screenshot/image/OCR as partial: scoped `readImage`/`recycle` are live provider paths, while capture/save/transform/match/color operations remain fail-closed; no raw Bitmap/Mat/OpenCV object is exposed |
+| `ocr` | `recognize`, `recognizeText`, `detectTextBounds` | P13-20 records screenshot/image/OCR as partial: ML Kit OCR works over provider-owned image handles, while Paddle/Rapid fallback, packaged model lookup, and capture/path packaged evidence remain blocked |
 | `storage` / `storages` | `get`, `put`, `remove`, `clear`, `keys`, `contains` | JSON-only，按项目/包/工作目录隔离 |
 | `database` / `sqlite` | `open`, `exec`, `run`, `get`, `all`, `transaction`, `close` | 受控 SQLite handle，不是 raw SQLite/Android DB 对象 |
 | `notifications` | `notify`, `cancel`, `cancelAll` | 通知 post/cancel 子集 |
@@ -602,8 +602,8 @@ await ok.click({ timeoutMs: 3000 });
 | `automator` / `auto` / `selector` | `text("OK").findOne().click()` | `accessibility`, `autojs6:compat` selector handle | 部分，P13-19 固定 selector v2/compat handle 证据；`waitFor`、手势、raw node、packaged service、root/Shizuku 仍未完成 |
 | `root_automator` | root input event 自动化 | 无稳定 Node bridge | `blocked_by_design` 或待单独 provider |
 | `files` | `files.read/write/createWithDirs` | scoped `files`, scoped `fs` | 部分，路径语义与 Rhino 不完全一致 |
-| `images` | 截图、读写、找图、找色、模板匹配 | `image/images`, `media_projection`, `autojs6:compat.images` | 部分，handle-based，需显式 recycle/stop |
-| `ocr` | `ocr.recognize`, MLKit/Paddle/Rapid | `ocr`, `autojs6:compat.ocr` | 部分，当前偏 ML Kit/受控 provider |
+| `images` | 截图、读写、找图、找色、模板匹配 | `image/images`, `media_projection`, `autojs6:compat.images` | 部分，P13-20 固定 scoped read/recycle 和 compat wrapper 证据；MediaProjection、save/transform/match/color、packaged 行为仍未完成 |
+| `ocr` | `ocr.recognize`, MLKit/Paddle/Rapid | `ocr`, `autojs6:compat.ocr` | 部分，P13-20 固定 ML Kit/provider-owned handle 证据；Paddle/Rapid fallback、packaged model/path/capture 仍未完成 |
 | `barcode` / `qrcode` | 条码/二维码识别或生成 | `barcode`, `autojs6:compat.barcode`, QR-only `autojs6:compat.qrcode` | `supported_async`，已完成 P12-27 到 P12-30 provider/facade/examples |
 | `dialogs` | 同步/阻塞式 dialogs | `dialogs` Promise bridge | 部分，API 形态不同 |
 | `console` | `console.log`, 浮动控制台 | Node console 和 `autojs6:compat.console` | 部分，浮动控制台控制为 no-op 或 unsupported |
@@ -846,7 +846,7 @@ blockers：
 - selector DSL 需要更多 Rhino 选择器细节和常见链式写法；P13-19 已固定
   JSON selector/compat handle 证据，但 `waitFor`、gesture、packaged
   accessibility service、raw node 和 root/Shizuku tiers 仍未完成。
-- `images` 需要继续覆盖更多 Rhino overload、权限路径、packaged 行为和资源回收。
+- `images` 需要继续覆盖更多 Rhino overload、权限路径、packaged 行为和资源回收；P13-20 已固定 scoped `readImage`/`recycle`、ML Kit OCR、compat wrapper 和 raw object denial 证据。
 - `app` 需要扩展广播、邮件、intent helpers、应用信息查询等。
 - `device` 需要扩展更多设备信息、电源、亮度、剪贴板兼容细节。
 - `events.keys` 纯常量已支持；按键观察、拦截和 touch observer 仍是 provider

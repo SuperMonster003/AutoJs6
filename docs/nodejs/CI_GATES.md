@@ -397,6 +397,13 @@ rejection, and raw node denial are present, while `swipe`, `gesture`,
 `powerDialog`, direct `waitFor`, broader Rhino selector aliases, packaged
 accessibility service/settings lifecycle, expanded real-device evidence, and
 root/Shizuku gesture tiers still block opt-in promotion.
+`verifyNodePhase13ScreenshotImageOcrPromotion` records the P13-20 partial
+`media_projection`, `image`/`images`, and `ocr` promotion state: reserved
+screen-capture API shape, scoped image read/recycle, ML Kit OCR over
+provider-owned image handles, Rhino compat wrappers, cleanup, and raw object
+denial are present, while bridge-owned MediaProjection prompting, advanced
+image processing, packaged capture/OCR behavior, Paddle/Rapid fallback, and raw
+Bitmap/OpenCV profile decisions still block opt-in promotion.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -537,6 +544,12 @@ the host promotion-status gate for `accessibility` selector parity and keeps
 advanced automation blocked: the existing live provider remains selector-only
 and service-dependent, while gesture APIs, packaged service lifecycle, and
 root/Shizuku tiers require separate evidence.
+P13-20 additionally uses `verifyNodePhase13ScreenshotImageOcrPromotion` as the
+host promotion-status gate for screenshot/image/OCR parity and keeps the
+Android providers partial: `image.readImage()`/`recycle()` and ML Kit OCR over
+provider-owned handles are live, while MediaProjection prompting, capture,
+save/transform/match/color providers, packaged behavior, Paddle/Rapid fallback,
+and raw Bitmap/OpenCV exposure require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

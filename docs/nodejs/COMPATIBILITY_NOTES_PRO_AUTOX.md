@@ -145,6 +145,16 @@ Current user-facing bridge modules include:
 
 Some modules are intentionally narrower than Pro/AutoX counterparts.
 
+## Screenshot, Image, And OCR
+
+P13-20 records screenshot/image/OCR as partial. AutoJs6 has the direct
+`media_projection`, `image`/`images`, and `ocr` API shapes plus explicit
+`autojs6:compat` wrappers for Rhino-style screenshot, image, and OCR code.
+Scoped `image.readImage()`/`recycle()` and ML Kit OCR over provider-owned image
+handles are live. Bridge-owned MediaProjection prompting, advanced image save
+or transform operations, template/color search, packaged capture/OCR behavior,
+Paddle/Rapid fallback, and raw Bitmap/OpenCV object exposure are still blocked.
+
 ## Accessibility And Selector
 
 Auto.js Pro and Rhino scripts commonly rely on global selector builders such as

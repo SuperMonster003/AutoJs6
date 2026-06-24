@@ -245,7 +245,7 @@
         "P13-19",
         "P13-20"
       ],
-      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence while live packaged UI remains blocked. P13-18 records partial overlay provider evidence over the P12-14 permission/settings/cleanup live gate while live overlay creation remains fail-closed. P13-19 records partial accessibility selector evidence while advanced gesture, packaged service, and root/Shizuku tiers remain blocked.",
+      "summary": "Promote live UI, floaty/overlay, accessibility/selector, screenshot/image/OCR Pro compatibility surfaces. P13-17 records partial live Activity-owned UI provider evidence while live packaged UI remains blocked. P13-18 records partial overlay provider evidence over the P12-14 permission/settings/cleanup live gate while live overlay creation remains fail-closed. P13-19 records partial accessibility selector evidence while advanced gesture, packaged service, and root/Shizuku tiers remain blocked. P13-20 records partial screenshot/image/OCR promotion evidence: scoped image read/recycle and ML Kit OCR are live, while MediaProjection, advanced image processing, packaged capture/OCR, Paddle/Rapid fallback, and raw Bitmap/OpenCV profile decisions remain blocked.",
       "risk": "high",
       "runtimeSurface": [
         "require(\"ui\") live provider",
@@ -279,7 +279,18 @@
         "docs/nodejs/types/autojs6-node/accessibility.d.ts",
         "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
         "build/reports/nodejs/phase13-accessibility-selector-promotion.json",
-        "build/reports/nodejs/phase13-accessibility-selector-promotion.md"
+        "build/reports/nodejs/phase13-accessibility-selector-promotion.md",
+        "docs/nodejs/reports/phase13/P13_20_SCREENSHOT_IMAGE_OCR_PROMOTION.md",
+        "tools/nodejs/phase13/verify-screenshot-image-ocr-promotion.js",
+        ":app:verifyNodePhase13ScreenshotImageOcrPromotion",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeImageBridgeExpansionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeOcrBridgeInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeScreenCaptureRealDeviceSmokeInstrumentationTest.kt",
+        "docs/nodejs/types/autojs6-node/media_projection.d.ts",
+        "docs/nodejs/types/autojs6-node/image.d.ts",
+        "docs/nodejs/types/autojs6-node/ocr.d.ts",
+        "build/reports/nodejs/phase13-screenshot-image-ocr-promotion.json",
+        "build/reports/nodejs/phase13-screenshot-image-ocr-promotion.md"
       ],
       "rollback": "Fail closed to existing provider POC or stable denial errors for UI, overlay, accessibility, and media projection."
     },

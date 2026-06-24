@@ -780,6 +780,24 @@ are checked. The gate remains partial because `swipe`, `gesture`,
 accessibility service/settings lifecycle, expanded real-device evidence, and
 root/Shizuku gesture tiers are still missing.
 
+Phase 13 screenshot/image/OCR promotion:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ScreenshotImageOcrPromotion
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeImageBridgeExpansionInstrumentationTest"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeOcrBridgeInstrumentationTest"
+```
+
+`verifyNodePhase13ScreenshotImageOcrPromotion` records the P13-20 partial
+`media_projection`, `image`/`images`, `ocr`, and explicit `autojs6:compat`
+state: reserved screen-capture API shape, scoped `image.readImage()` and
+`recycle()`, ML Kit OCR over provider-owned image handles, Rhino image/OCR
+wrappers, resource cleanup, and raw object denial are checked. The gate remains
+partial because MediaProjection bridge prompting, advanced image processing,
+packaged capture/OCR behavior, Paddle/Rapid fallback, and raw Bitmap/OpenCV
+profile decisions are still missing. The optional `screen_capture` smoke stays
+manual because it requires approving the Android prompt on a prepared device.
+
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground
 long-running, runtime budget/heartbeat, queueing, scheduled runner,
