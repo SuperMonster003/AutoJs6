@@ -144,6 +144,22 @@
   parity, proxy support decision, richer redirect/TLS failure corpus, and
   desktop client package corpus expansion.
 
+## P13-30 Partial Landing Note
+
+- P13-30 partial net/tls/dns staged compatibility gate records the existing
+  limited `net`, `tls`, `dns`, and `dns/promises` builtins as Desktop-profile
+  shape and policy evidence, not as raw network promotion.
+- Host verifier:
+  `tools/nodejs/phase13/verify-net-tls-dns-staged-compatibility.js`.
+- Gradle gate: `:app:verifyNodePhase13NetTlsDnsStagedCompatibility`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_30_NET_TLS_DNS_STAGED_COMPATIBILITY.md`.
+- Surface manifest evidence: `phase13-net-tls-dns-staged-compatibility`.
+- Remaining P13-30 blockers: real client socket authority, server socket
+  decision, connection/byte/timeout/background policy, DNS privacy review,
+  TLS session/certificate policy, fd leak instrumentation, packaged INTERNET
+  proof, and live Android network evidence.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -943,6 +959,21 @@ P13 task 本身使用以下执行状态：
     - connection count、bytes、timeout、host allow/deny、background policy 明确。
     - DNS API 不泄漏 Android 私有网络状态。
     - socket close/destroy 后无 fd leak。
+  - Partial progress:
+    - `NodeNetTlsDnsStagedParityInstrumentationTest` 覆盖 reserved builtin
+      解析、shadow denial、`net`/`tls`/`dns` 当前有限 facade 形状、DNS
+      loopback/IP-literal-only 行为、server/listen/connect/TLS session
+      denial，以及 socket close/destroy 无公开 fd/bytes 逃逸的当前证据。
+    - Type declarations:
+      `docs/nodejs/types/autojs6-node/net.d.ts`,
+      `docs/nodejs/types/autojs6-node/tls.d.ts`,
+      `docs/nodejs/types/autojs6-node/dns.d.ts`.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-net-tls-dns-staged-compatibility.js`.
+    - Gradle gate: `:app:verifyNodePhase13NetTlsDnsStagedCompatibility`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_30_NET_TLS_DNS_STAGED_COMPATIBILITY.md`.
+    - Surface manifest evidence: `phase13-net-tls-dns-staged-compatibility`.
 
 - [ ] P13-31: 决策 `dgram` UDP capability。
   - 范围：评估 UDP client/server 是否进入 Desktop profile。

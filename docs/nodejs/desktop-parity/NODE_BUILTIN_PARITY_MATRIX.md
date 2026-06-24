@@ -32,8 +32,8 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `crypto` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `dgram` | `disabled` | `desktop_compat_opt_in` | `disabled` | P13-31 must decide UDP client/server, multicast, broadcast, and packaged network policy. |
 | `diagnostics_channel` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `dns` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy. |
-| `dns/promises` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `network` | P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy. |
+| `dns` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |
+| `dns/promises` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |
 | `domain` | `disabled` | `permanently_unsupported` | `commonjs-known`, `disabled` | Keep stable denial unless a future Phase 13 task assigns an opt-in profile. |
 | `events` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `fs` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
@@ -42,7 +42,7 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `https` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29 records the controlled client subset as partial; raw server/listen, proxy/tunnel, custom TLS/session control, and packaged live-network evidence remain open. |
 | `inspector` | `disabled` | `debug_unsafe_lab` | `commonjs-known`, `disabled` | P13-37 must keep release denied and validate debug-only ADB-forward behavior. |
 | `module` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `net` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy. |
+| `net` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |
 | `node:test` | `missing_from_registry` | `desktop_compat_opt_in` | - | Add explicit registry entry or document android_not_applicable. |
 | `node:test/reporters` | `missing_from_registry` | `desktop_compat_opt_in` | - | Add explicit registry entry or document android_not_applicable. |
 | `os` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
@@ -63,7 +63,7 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `string_decoder` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `timers` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `timers/promises` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `tls` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy. |
+| `tls` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |
 | `tty` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `url` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `util` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |

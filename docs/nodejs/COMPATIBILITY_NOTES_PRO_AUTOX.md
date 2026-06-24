@@ -287,6 +287,14 @@ timeout, redirect, and provider-owned TLS errors, but still rejects
 server/listen, raw sockets, proxy/tunnel options, `CONNECT`, custom TLS/session
 control, and per-request proxy configuration.
 
+P13-30 records net/tls/dns staged compatibility as partial. AutoJs6 Node now
+keeps `net`, `tls`, `dns`, and `dns/promises` reserved and typed for package
+probing, `SocketAddress`, `BlockList`, TLS metadata, and deterministic
+loopback/IP-literal DNS lookup. Keep Pro/AutoX scripts that depend on real TCP
+or TLS sockets, server listeners, Android resolver state, custom DNS servers,
+TLS sessions, fd handles, or live network DNS on Rhino/Android APIs until a
+future Desktop-profile gate explicitly promotes those capabilities.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

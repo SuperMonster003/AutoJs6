@@ -191,6 +191,9 @@ function networkNextStepFor(name) {
   if (name === "http" || name === "https") {
     return "P13-29 records the controlled client subset as partial; raw server/listen, proxy/tunnel, custom TLS/session control, and packaged live-network evidence remain open.";
   }
+  if (name === "net" || name === "tls" || name === "dns" || name === "dns/promises") {
+    return "P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open.";
+  }
   return "P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy.";
 }
 

@@ -1002,6 +1002,17 @@ proxy/tunnel/`CONNECT`/server-listen denials. This does not promote raw sockets,
 DNS/TLS session APIs, per-request proxy support, packaged INTERNET permission
 evidence, or live provider HTTP smoke.
 
+P13-30 records net/tls/dns staged compatibility as partial. `require("net")`,
+`require("node:net")`, `require("tls")`, `require("node:tls")`,
+`require("dns")`, `require("node:dns")`, `require("dns/promises")`, and
+`require("node:dns/promises")` resolve to reserved limited builtins that cannot
+be shadowed. AutoJs6 Node exposes deterministic socket/server shape metadata,
+`SocketAddress`, `BlockList`, TLS context/socket metadata, safe TLS constants,
+and DNS lookup for `localhost`, loopback aliases, and IP literals only. Real
+client sockets, server listeners, network DNS queries, Android resolver state,
+TLS sessions, fd/native handles, packaged INTERNET proof, and live Android
+network evidence remain unpromoted.
+
 The controlled request policy is bounded even when fake or experimental live providers are used:
 
 - max concurrent user fetches: `4`

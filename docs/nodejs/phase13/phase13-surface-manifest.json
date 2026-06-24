@@ -408,7 +408,7 @@
         "P13-32",
         "P13-33"
       ],
-      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as partial while raw sockets, net/tls/dns, dgram, broader roots, and advanced fs APIs remain staged.",
+      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as partial; P13-30 records limited net/tls/dns facades as partial while real sockets, network DNS, TLS sessions, dgram, broader roots, and advanced fs APIs remain staged.",
       "risk": "high",
       "runtimeSurface": [
         "controlled node:http/node:https client facade",
@@ -434,7 +434,16 @@
         "docs/nodejs/types/autojs6-node/http.d.ts",
         "docs/nodejs/types/autojs6-node/https.d.ts",
         "build/reports/nodejs/phase13-http-https-client-parity.json",
-        "build/reports/nodejs/phase13-http-https-client-parity.md"
+        "build/reports/nodejs/phase13-http-https-client-parity.md",
+        "tools/nodejs/phase13/verify-net-tls-dns-staged-compatibility.js",
+        ":app:verifyNodePhase13NetTlsDnsStagedCompatibility",
+        "docs/nodejs/reports/phase13/P13_30_NET_TLS_DNS_STAGED_COMPATIBILITY.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeNetTlsDnsStagedParityInstrumentationTest.kt",
+        "docs/nodejs/types/autojs6-node/net.d.ts",
+        "docs/nodejs/types/autojs6-node/tls.d.ts",
+        "docs/nodejs/types/autojs6-node/dns.d.ts",
+        "build/reports/nodejs/phase13-net-tls-dns-staged-compatibility.json",
+        "build/reports/nodejs/phase13-net-tls-dns-staged-compatibility.md"
       ],
       "rollback": "Revert Desktop profile allowlist entries and keep raw network and broad filesystem access denied."
     },

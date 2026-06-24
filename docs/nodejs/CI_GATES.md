@@ -654,6 +654,14 @@ redirect, TLS/provider error, proxy/tunnel denial, and fetch/axios boundary are
 covered, while packaged INTERNET evidence, live provider HTTP smoke, raw
 sockets, server/listen, DNS/TLS session control, and proxy support require
 separate evidence.
+P13-30 additionally uses `verifyNodePhase13NetTlsDnsStagedCompatibility` as
+the host promotion-status gate for staged `net`/`tls`/`dns` compatibility and
+keeps the desktop network/fs surface partial: reserved builtin identity,
+shadow denial, socket/server shape metadata, `SocketAddress`, `BlockList`,
+loopback/IP-literal DNS lookup, DNS privacy guardrails, TLS metadata, and
+fail-closed connect/listen/resolve/session APIs are covered, while real client
+sockets, server sockets, network DNS, TLS sessions, fd leak proof, packaged
+INTERNET evidence, and live Android network evidence require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

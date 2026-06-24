@@ -1482,6 +1482,19 @@ desktop builtin matrix updates, security/profile docs, and release matrix text.
 It keeps server/listen, raw sockets, DNS/TLS session control, proxy/tunnel
 configuration, packaged INTERNET proof, and live provider HTTP evidence open.
 
+Phase 13 net/tls/dns staged compatibility status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13NetTlsDnsStagedCompatibility
+```
+
+This host gate records P13-30 as partial. It requires the limited `net`,
+`tls`, `dns`, and `dns/promises` builtins, focused device evidence, TypeScript
+declarations, desktop builtin matrix updates, security/profile docs, and
+release matrix text. It keeps real client sockets, server sockets, network DNS,
+TLS sessions, fd leak proof, packaged INTERNET proof, and live Android network
+evidence open.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

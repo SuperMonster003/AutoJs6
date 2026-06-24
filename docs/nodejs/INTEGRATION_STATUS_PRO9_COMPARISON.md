@@ -1069,6 +1069,16 @@ is not unrestricted desktop networking; server/listen, raw sockets,
 proxy/tunnel options, `CONNECT`, DNS/TLS session APIs, packaged INTERNET proof,
 and live provider HTTP smoke remain blocked.
 
+P13-30 records net/tls/dns staged compatibility as partial: `require("net")`,
+`require("node:net")`, `require("tls")`, `require("node:tls")`,
+`require("dns")`, `require("node:dns")`, `require("dns/promises")`, and
+`require("node:dns/promises")` are reserved limited builtins with TypeScript
+coverage and focused tests. They support package-probing shapes such as
+`SocketAddress`, `BlockList`, socket/server counters, TLS metadata, and
+loopback/IP-literal DNS lookup, while real sockets, server listeners, network
+DNS, Android resolver state, TLS sessions, fd/native handles, packaged INTERNET
+proof, and live Android network evidence remain blocked.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、
