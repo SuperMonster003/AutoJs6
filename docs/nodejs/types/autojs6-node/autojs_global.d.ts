@@ -145,6 +145,27 @@ declare namespace AutoJs6Node {
     readonly rawGlobalAccess: boolean;
   }
 
+  export interface InspectorProfile {
+    readonly status: "disabled_by_default" | "debug_opt_in" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly module: "denied" | "partial" | string;
+    readonly devtools: "deferred" | "partial" | string;
+    readonly inspectorProtocol: "deferred" | "partial" | string;
+    readonly adbForwarding: "required_before_enablement" | string;
+    readonly explicitUserAction: "required_before_enablement" | string;
+    readonly releaseBuild: "denied" | string;
+    readonly packagedBehavior: "not_promoted" | string;
+    readonly portBinding: "denied" | "loopback_only" | string;
+    readonly remoteConnections: "denied" | string;
+    readonly bridgeModules: "denied" | string;
+    readonly processAccess: "denied" | string;
+    readonly heapSnapshot: "denied" | "partial" | string;
+    readonly cpuProfiler: "denied" | "partial" | string;
+    readonly sensitivePathRedaction: "not_proven" | "required" | string;
+    readonly rawSockets: boolean;
+  }
+
   export interface AutoJsProfile {
     readonly name: string;
     readonly engineVersion: string;
@@ -161,6 +182,7 @@ declare namespace AutoJs6Node {
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
     readonly vmProfile: VmProfile;
+    readonly inspectorProfile: InspectorProfile;
     readonly directBuiltinAliases: Readonly<Record<string, string>>;
     readonly limitedBuiltins: readonly string[];
     readonly disabledBuiltins: readonly string[];

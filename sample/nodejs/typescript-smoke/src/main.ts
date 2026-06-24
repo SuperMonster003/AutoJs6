@@ -534,6 +534,10 @@ async function smoke(): Promise<void> {
   const vmProfileTargetProfiles: readonly string[] = autojsProfile.vmProfile.targetProfiles;
   const vmProfileTimeout: string = autojsProfile.vmProfile.timeout;
   const vmProfileRawGlobalAccess: boolean = autojsProfile.vmProfile.rawGlobalAccess;
+  const inspectorProfileStatus: string = autojsProfile.inspectorProfile.status;
+  const inspectorProfileTargetProfiles: readonly string[] = autojsProfile.inspectorProfile.targetProfiles;
+  const inspectorProfileAdbForwarding: string = autojsProfile.inspectorProfile.adbForwarding;
+  const inspectorProfileRawSockets: boolean = autojsProfile.inspectorProfile.rawSockets;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -743,6 +747,10 @@ async function smoke(): Promise<void> {
   void vmProfileTargetProfiles;
   void vmProfileTimeout;
   void vmProfileRawGlobalAccess;
+  void inspectorProfileStatus;
+  void inspectorProfileTargetProfiles;
+  void inspectorProfileAdbForwarding;
+  void inspectorProfileRawSockets;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;

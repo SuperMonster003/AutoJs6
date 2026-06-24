@@ -8924,6 +8924,26 @@ std::string buildEmbeddedScriptExecutionSource(
         packagedBehavior: "not_promoted",
         rawGlobalAccess: false
       }),
+      inspectorProfile: Object.freeze({
+        status: "disabled_by_default",
+        defaultEnabled: false,
+        targetProfiles: Object.freeze(["debug_unsafe_lab"]),
+        module: "denied",
+        devtools: "deferred",
+        inspectorProtocol: "deferred",
+        adbForwarding: "required_before_enablement",
+        explicitUserAction: "required_before_enablement",
+        releaseBuild: "denied",
+        packagedBehavior: "not_promoted",
+        portBinding: "denied",
+        remoteConnections: "denied",
+        bridgeModules: "denied",
+        processAccess: "denied",
+        heapSnapshot: "denied",
+        cpuProfiler: "denied",
+        sensitivePathRedaction: "not_proven",
+        rawSockets: false
+      }),
       processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
       limitedBuiltins: __autojs6_freeze_sorted_copy(
