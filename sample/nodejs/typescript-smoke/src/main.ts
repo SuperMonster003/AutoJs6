@@ -517,6 +517,12 @@ async function smoke(): Promise<void> {
   const pluginResult: string = typedPlugin.run();
   const profileEngine: string = autojsProfile.engineVersion;
   const globalProfile: AutoJs6Node.AutoJsProfile = $autojs.profile;
+  const esmLoaderProfileStatus: string = autojsProfile.esmLoaderProfile.status;
+  const esmLoaderProfileRequestEnabled: boolean = autojsProfile.esmLoaderProfile.requestEnabled;
+  const esmLoaderProfileDynamicImport: string = autojsProfile.esmLoaderProfile.dynamicImport;
+  const esmLoaderProfilePackageExports: string = autojsProfile.esmLoaderProfile.packageExports;
+  const esmLoaderProfileLoaderHooks: string = autojsProfile.esmLoaderProfile.loaderHooks;
+  const esmLoaderProfileRawNodeLoader: boolean = autojsProfile.esmLoaderProfile.rawNodeLoader;
   const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
   const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
   const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
@@ -746,6 +752,12 @@ async function smoke(): Promise<void> {
   void pluginResult;
   void profileEngine;
   void globalProfile;
+  void esmLoaderProfileStatus;
+  void esmLoaderProfileRequestEnabled;
+  void esmLoaderProfileDynamicImport;
+  void esmLoaderProfilePackageExports;
+  void esmLoaderProfileLoaderHooks;
+  void esmLoaderProfileRawNodeLoader;
   void filesystemProfileMode;
   void filesystemProfileRoots;
   void filesystemAdvancedWatch;

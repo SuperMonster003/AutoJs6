@@ -17,6 +17,41 @@ declare namespace AutoJs6Node {
     readonly status: "partial" | "experimental" | "disabled" | "unsupported" | string;
   }
 
+  export interface EsmLoaderProfile {
+    readonly status: "partial_default" | "disabled_by_request" | string;
+    readonly defaultEnabled: boolean;
+    readonly requestEnabled: boolean;
+    readonly dynamicImportDefaultEnabled: boolean;
+    readonly dynamicImportEnabled: boolean;
+    readonly implementation: "autojs6_managed_transform" | string;
+    readonly mjsEntry: "partial" | "unsupported" | string;
+    readonly packageTypeModuleEntry: "partial" | "unsupported" | string;
+    readonly topLevelAwait: "partial" | "unsupported" | string;
+    readonly staticImport: "local_scoped_partial" | string;
+    readonly dynamicImport: "local_scoped_partial" | string;
+    readonly packageExports: "partial" | string;
+    readonly packageImports: "partial" | string;
+    readonly jsonImportAttributes: "partial" | string;
+    readonly importMeta: "scoped_partial" | string;
+    readonly cjsInterop: "sync_esm_only" | string;
+    readonly moduleSources: "partial" | string;
+    readonly packagedBehavior: "focused_smoke_partial" | string;
+    readonly sourceMaps: "sourceURL_stack_only" | string;
+    readonly loaderHooks: "denied" | string;
+    readonly rawNodeModuleLoader: "denied" | string;
+    readonly networkImports: "denied" | string;
+    readonly fileUrlImports: "denied" | string;
+    readonly dataUrlImports: "denied" | string;
+    readonly absolutePathImports: "denied" | string;
+    readonly workingDirectoryEscape: "denied" | string;
+    readonly disabledBuiltinImports: "denied" | string;
+    readonly encryptedGraphParity: "not_promoted" | string;
+    readonly pendingEvaluationCleanup: "not_proven" | string;
+    readonly realEsmCorpus: "partial_required" | string;
+    readonly rawNodeLoader: boolean;
+    readonly customConditions: boolean;
+  }
+
   export interface FilesystemAdvancedApis {
     readonly streams: "partial" | "unsupported" | string;
     readonly fileHandle: "partial" | "unsupported" | string;
@@ -257,6 +292,7 @@ declare namespace AutoJs6Node {
     readonly javaInterop: boolean;
     readonly nativeAddon: boolean;
     readonly scopedFs: boolean;
+    readonly esmLoaderProfile: EsmLoaderProfile;
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
