@@ -554,6 +554,10 @@ async function smoke(): Promise<void> {
   const pluginSystemProfilePermissions: string = autojsProfile.pluginSystemProfile.permissionModel;
   const pluginSystemProfilePackaged: string = autojsProfile.pluginSystemProfile.packagedDistribution;
   const pluginSystemProfileNative: boolean = autojsProfile.pluginSystemProfile.nativeAddonLoading;
+  const packageIntegrityProfileStatus: string = autojsProfile.packageIntegrityProfile.status;
+  const packageIntegrityProfileHash: string = autojsProfile.packageIntegrityProfile.hashAlgorithm;
+  const packageIntegrityProfileSubjects: readonly string[] = autojsProfile.packageIntegrityProfile.subjects;
+  const packageIntegrityProfileUnsignedNative: boolean = autojsProfile.packageIntegrityProfile.unsignedNativeAddonLoad;
   const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
   const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
   const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
@@ -820,6 +824,10 @@ async function smoke(): Promise<void> {
   void pluginSystemProfilePermissions;
   void pluginSystemProfilePackaged;
   void pluginSystemProfileNative;
+  void packageIntegrityProfileStatus;
+  void packageIntegrityProfileHash;
+  void packageIntegrityProfileSubjects;
+  void packageIntegrityProfileUnsignedNative;
   void filesystemProfileMode;
   void filesystemProfileRoots;
   void filesystemAdvancedWatch;

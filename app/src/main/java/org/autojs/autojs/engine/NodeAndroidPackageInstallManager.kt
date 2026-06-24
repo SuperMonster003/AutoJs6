@@ -210,6 +210,18 @@ class NodeAndroidPackageInstallManager(
         "android_package_manager.postinstall_download" to "disabled",
         "android_package_manager.network_install" to "disabled",
         "android_package_manager.js_bridge" to "not_exposed",
+        "package_integrity_policy.schema" to NodePackageIntegrityPolicy.SCHEMA,
+        "package_integrity_policy.status" to NodePackageIntegrityPolicy.STATUS,
+        "package_integrity_policy.lockfile" to NodePackageIntegrityPolicy.LOCKFILE,
+        "package_integrity_policy.hash" to NodePackageIntegrityPolicy.HASH_ALGORITHM,
+        "package_integrity_policy.signature" to "required_before_plugin_native_promotion",
+        "package_integrity_policy.rollback" to "staging_restore_previous_on_failure",
+        "package_integrity_policy.cache_cleanup" to "staging_prune_and_reinstall_required",
+        "package_integrity_policy.corruption_recovery" to "verify_mismatch_reinstall_required",
+        "package_integrity_policy.subjects" to NodePackageIntegrityPolicy.subjectIds().joinToString(","),
+        "package_integrity_policy.raw_registry_install" to "disabled",
+        "package_integrity_policy.unsigned_plugin_install" to "disabled",
+        "package_integrity_policy.unsigned_native_addon_load" to "disabled",
     )
 
     private fun installOrUpdate(

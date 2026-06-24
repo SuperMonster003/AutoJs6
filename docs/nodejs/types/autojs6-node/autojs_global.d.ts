@@ -213,6 +213,34 @@ declare namespace AutoJs6Node {
     readonly grantsHostCapabilities: boolean;
   }
 
+  export interface PackageIntegrityProfile {
+    readonly status: "lock_integrity_policy_partial" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly policySchema: "autojs6-node-package-lock-integrity-policy-v1" | string;
+    readonly lockfile: "autojs6-lock.json" | string;
+    readonly androidRecordSchema: "autojs6-node-android-package-record-v1" | string;
+    readonly hashAlgorithm: "sha512" | string;
+    readonly hashFormat: "ssri_sha512_base64" | string;
+    readonly androidPackageManager: "transactional_local_store" | string;
+    readonly pluginPackages: "local_checked_files_signed_archives_deferred" | string;
+    readonly nativeAddons: "denied_until_signed_packaged_artifacts" | string;
+    readonly signatureScheme: "autojs6-package-signature-v1" | string;
+    readonly signaturePolicy: "required_before_plugin_native_promotion" | string;
+    readonly rollback: "staging_restore_previous_on_failure" | string;
+    readonly cacheCleanup: "staging_prune_and_reinstall_required" | string;
+    readonly corruptionRecovery: "verify_mismatch_reinstall_required" | string;
+    readonly lockfileAuthority: "host_managed_required" | string;
+    readonly subjects: readonly string[];
+    readonly unsafePackageExecution: boolean;
+    readonly rawRegistryInstall: boolean;
+    readonly unsignedPluginInstall: boolean;
+    readonly unsignedNativeAddonLoad: boolean;
+    readonly lifecycleScripts: boolean;
+    readonly postinstallDownloads: boolean;
+    readonly unverifiedCacheReuse: boolean;
+  }
+
   export interface BridgePermissionsReport {
     readonly version: number;
     readonly enforced: boolean;
@@ -473,6 +501,7 @@ declare namespace AutoJs6Node {
     readonly processParityProfile: ProcessParityProfile;
     readonly packagedCapabilityProfile: PackagedCapabilityProfile;
     readonly pluginSystemProfile: PluginSystemProfile;
+    readonly packageIntegrityProfile: PackageIntegrityProfile;
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;

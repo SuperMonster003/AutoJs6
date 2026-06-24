@@ -9086,6 +9086,37 @@ std::string buildEmbeddedScriptExecutionSource(
         persistedGlobalState: false,
         grantsHostCapabilities: false
       }),
+      packageIntegrityProfile: Object.freeze({
+        status: "lock_integrity_policy_partial",
+        defaultEnabled: true,
+        targetProfiles: Object.freeze(["pro_compat_opt_in", "desktop_compat_opt_in"]),
+        policySchema: "autojs6-node-package-lock-integrity-policy-v1",
+        lockfile: "autojs6-lock.json",
+        androidRecordSchema: "autojs6-node-android-package-record-v1",
+        hashAlgorithm: "sha512",
+        hashFormat: "ssri_sha512_base64",
+        androidPackageManager: "transactional_local_store",
+        pluginPackages: "local_checked_files_signed_archives_deferred",
+        nativeAddons: "denied_until_signed_packaged_artifacts",
+        signatureScheme: "autojs6-package-signature-v1",
+        signaturePolicy: "required_before_plugin_native_promotion",
+        rollback: "staging_restore_previous_on_failure",
+        cacheCleanup: "staging_prune_and_reinstall_required",
+        corruptionRecovery: "verify_mismatch_reinstall_required",
+        lockfileAuthority: "host_managed_required",
+        subjects: Object.freeze([
+          "android_package_manager",
+          "plugin_packages",
+          "native_addons"
+        ]),
+        unsafePackageExecution: false,
+        rawRegistryInstall: false,
+        unsignedPluginInstall: false,
+        unsignedNativeAddonLoad: false,
+        lifecycleScripts: false,
+        postinstallDownloads: false,
+        unverifiedCacheReuse: false
+      }),
       filesystemProfile: Object.freeze({
         mode: "scoped_working_directory",
         safeProfileScoped: true,
