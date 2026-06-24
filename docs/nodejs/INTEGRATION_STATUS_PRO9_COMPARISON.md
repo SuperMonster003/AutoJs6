@@ -792,7 +792,8 @@ blockers：
 - packaged APK long-running Node service mode 尚未完成。
 - 第二执行 slot 已有显式 one-shot 路由和 focused instrumentation，但默认调度、
   packaged 行为、slot crash evidence 和 stress promotion 仍未完成。
-- 8 小时 quick soak 和 24 小时 final soak 仍未完成。
+- P13-08 已补 `verifyNodePhase13FullHeavyResourceStress` 状态 gate 和可比较
+  report contract；真实 8 小时 quick soak 和 24 小时 final soak 证据仍未完成。
 
 ### Conditional decisions
 

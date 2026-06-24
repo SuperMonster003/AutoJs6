@@ -514,6 +514,13 @@ resource stress when native workers are available. Live network entries still
 require `autojs.nodejs.network.experimental=true`; otherwise those tests skip
 with the same explicit opt-in reason as the live provider gates.
 
+`verifyNodePhase13FullHeavyResourceStress` is the Phase 13 status gate for the
+final 8 hour quick soak and 24 hour final soak. It consumes
+`build/reports/nodejs/final-soak/quick-soak-8h.json` and
+`build/reports/nodejs/final-soak/final-soak-24h.json`, checks comparable RSS,
+Java heap, native heap, thread count, fd count, and bridge diagnostics, and
+keeps the blocker open while either real device soak is missing or dirty.
+
 ## Release Gate
 
 Use `verifyNodeReleaseGate` for release candidates:
@@ -539,6 +546,8 @@ Some checks remain explicit because they need a prepared device, a recently expo
 - reduced/full `NodeEmbeddedMemoryLeakStressInstrumentationTest`
 - focused `verifyNodePhase7ResourceStressGate` with increased iteration
   arguments
+- `verifyNodePhase13FullHeavyResourceStress` after archiving 8h/24h soak
+  reports under `build/reports/nodejs/final-soak/`
 - worker resource stress
 - packaged APK output verifier with `-Pautojs.embeddedNode.packagedApk=<apk>`
 - `verifyRhinoOnlyBuild` rollback verification

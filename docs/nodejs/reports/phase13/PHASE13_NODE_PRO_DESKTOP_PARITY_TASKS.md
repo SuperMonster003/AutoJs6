@@ -284,6 +284,14 @@ P13 task 本身使用以下执行状态：
     - 无 monotonic RSS/native handle/image/socket/provider leak。
     - service restart、slot failover、provider destroy 后无 orphan process。
     - 输出可比较的 stress report。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Phase13 verifier: `tools/nodejs/phase13/verify-full-heavy-resource-stress.js`.
+    - Gradle gate: `:app:verifyNodePhase13FullHeavyResourceStress`.
+    - Report: `docs/nodejs/reports/phase13/P13_08_FULL_HEAVY_RESOURCE_STRESS.md`.
+    - Expected quick soak evidence: `build/reports/nodejs/final-soak/quick-soak-8h.json`.
+    - Expected final soak evidence: `build/reports/nodejs/final-soak/final-soak-24h.json`.
+    - Reused anchors: `NodeEmbeddedMemoryLeakStressInstrumentationTest`, `NodePhase7ResourceStressInstrumentationTest`, `NodeBridgeResourceLeakStressInstrumentationTest`, `NodeLongRunningStressInstrumentationTest`, `NodeWorkerThreadsResourceStressInstrumentationTest`, `NodeResourceStressSnapshot`, and `verifyNodeFinalSoakGate`.
+    - Open before closure: real 8h/24h device soak reports with comparable RSS/native heap/Java heap/thread/fd/bridge diagnostics and no leak/orphan/runtime failure flags.
 
 - [ ] P13-09: 实现 Android-side package installation manager。
   - 范围：Node 项目/插件/依赖包在 Android 侧的 install/update/remove/list/verify/prune。

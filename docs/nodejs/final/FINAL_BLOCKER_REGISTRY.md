@@ -49,6 +49,15 @@ Current packaged long-running progress:
   Android permission/background-start policy coverage, and quota/stress
   promotion remain open.
 
+Current full heavy resource stress progress:
+
+- `full_heavy_resource_stress`: core memory leak, resource stress,
+  long-running, and worker stress anchors already exist. Phase 13 adds a
+  dedicated verifier for `quick-soak-8h.json` and `final-soak-24h.json`, plus
+  comparable metric checks for RSS, Java heap, native heap, thread count, fd
+  count, and bridge diagnostics. The blocker remains open until real 8 hour
+  and 24 hour device reports are available and clean.
+
 Resolved in Phase 11:
 
 - `adapter_v1_real_execution_path`: `AutoJsNodeRuntimeApiV1` is now a

@@ -213,6 +213,51 @@ tasks.register<Exec>("verifyNodePhase13PackagedLongRunningService") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase13FullHeavyResourceStress") {
+    group = "verification"
+    description = "Verifies Phase 13 full heavy resource stress readiness."
+
+    dependsOn("verifyNodePhase13PackagedLongRunningService")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-full-heavy-resource-stress.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_08_FULL_HEAVY_RESOURCE_STRESS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase11/verify-final-soak-gate.js"))
+    inputs.file(project.layout.projectDirectory.file("node-phase11-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedMemoryLeakStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePhase7ResourceStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeBridgeResourceLeakStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeLongRunningStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeResourceStressSnapshot.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/PERFORMANCE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_INTEGRATION_DEFINITION.md"))
+    inputs.files(
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/quick-soak-8h.json"),
+        rootProject.layout.projectDirectory.file("build/reports/nodejs/final-soak/final-soak-24h.json"),
+    )
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("phase13-full-heavy-resource-stress.json") },
+        nodePhase13ReportDir.map { it.file("phase13-full-heavy-resource-stress.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeBuiltinDesktopParityMatrix") {
     group = "verification"
     description = "Generates the Phase 13 desktop Node builtin parity matrix."

@@ -1682,6 +1682,12 @@ cleanup, JS-only plugin lifecycle cleanup, and worker resource stress when nativ
 with zero active bridge resources, database handles, WorkManager registrations, shell commands, WebSocket connections,
 leaks, and close errors.
 
+P13-08 adds `verifyNodePhase13FullHeavyResourceStress`, a host status gate for
+the required `quick-soak-8h.json` and `final-soak-24h.json` reports. It keeps
+the final blocker open until both reports contain comparable RSS, Java heap,
+native heap, thread, fd, and bridge diagnostics and no leak/orphan/runtime
+failure flags.
+
 The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path.
 
 The v1.1 packaged bridge smoke declares `network`, `ocr`, `image`, `storage`, `ui`, and `work_manager` capabilities in packaged project metadata, then runs a JavaScript fake-transport fixture for controlled `fetch`, OCR over an opaque image handle, JSON `storage`/`storages` operations, UI layout/event/update/close calls, and `work_manager` metadata schedule/list/cancel serialization. It verifies the v1.1 bridge modules cannot be shadowed by project-local `node_modules` packages and that pending bridge calls drain to zero, proving these surfaces are not main-app-only without granting live Android provider authority in older templates. The `shell` module is intentionally not executed by queued fallback; packaged `shell.exec()` should remain a live-bridge-only capability. Packaged `work_manager` persistent registration also remains live-bridge-only; the fake-transport packaged smoke covers JavaScript serialization and routing only.

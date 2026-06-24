@@ -140,7 +140,17 @@
         "app/src/main/java/org/autojs/autojs/engine/NodeInteractiveLongRunningStatusStore.kt",
         "app/src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt",
         "build/reports/nodejs/phase13-packaged-long-running-service.json",
-        "build/reports/nodejs/phase13-packaged-long-running-service.md"
+        "build/reports/nodejs/phase13-packaged-long-running-service.md",
+        "docs/nodejs/reports/phase13/P13_08_FULL_HEAVY_RESOURCE_STRESS.md",
+        "tools/nodejs/phase13/verify-full-heavy-resource-stress.js",
+        ":app:verifyNodePhase13FullHeavyResourceStress",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedMemoryLeakStressInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodePhase7ResourceStressInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeResourceStressSnapshot.kt",
+        "build/reports/nodejs/final-soak/quick-soak-8h.json",
+        "build/reports/nodejs/final-soak/final-soak-24h.json",
+        "build/reports/nodejs/phase13-full-heavy-resource-stress.json",
+        "build/reports/nodejs/phase13-full-heavy-resource-stress.md"
       ],
       "rollback": "Disable the promoted runtime path by profile flag and keep one-shot primary embedded execution as the fallback."
     },

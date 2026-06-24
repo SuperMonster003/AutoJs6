@@ -48,7 +48,7 @@
       "id": "full_heavy_resource_stress",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Core long-running/resource stress exists; full heavy stress and 24-hour soak remain incomplete.",
+      "currentEvidence": "Core long-running/resource stress exists; Phase 13 adds a full heavy resource stress verifier, expected 8h/24h final-soak report paths, comparable metric checks, and host reporting. Actual 8-hour quick soak and 24-hour final soak evidence remain incomplete.",
       "requiredResolution": "8-hour quick soak and 24-hour final soak show no monotonic leaks, orphan process, or unrecoverable runtime."
     },
     {

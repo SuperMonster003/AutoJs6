@@ -245,3 +245,15 @@ Useful local overrides:
 ```
 
 Set `autojs.nodejs.leak.failOnRunaway=false` to collect a report without failing the test. Use that only for exploratory local profiling.
+
+Phase 13 full heavy resource stress consumes long-duration reports at:
+
+- `build/reports/nodejs/final-soak/quick-soak-8h.json`
+- `build/reports/nodejs/final-soak/final-soak-24h.json`
+
+Each report must provide a duration (`durationHours`, `durationMs`, or
+parseable start/end timestamps), RSS, Java heap, native heap, thread count, fd
+count, and bridge diagnostics. `verifyNodePhase13FullHeavyResourceStress`
+keeps the final blocker open when either report is missing, below duration,
+missing comparable metrics, or reporting failures, monotonic leaks, orphan
+processes, or unrecoverable runtime state.

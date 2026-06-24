@@ -1229,6 +1229,22 @@ loop for local triage or nightly gates. `verifyNodePhase7ResourceStressGate` als
 stress, live fetch/WebSocket destroy cleanup, live OCR/sensor/UI/WorkManager resource cleanup, and worker resource
 stress classes; live network cases still require `autojs.nodejs.network.experimental=true` to run instead of skip.
 
+Phase 13 full heavy resource stress status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13FullHeavyResourceStress
+```
+
+This host gate does not synthesize soak success. It reads the required final
+soak reports from `build/reports/nodejs/final-soak/quick-soak-8h.json` and
+`build/reports/nodejs/final-soak/final-soak-24h.json`, then writes
+`phase13-full-heavy-resource-stress.json` and `.md` under
+`build/reports/nodejs`. The reports must expose duration plus comparable RSS,
+Java heap, native heap, thread count, fd count, and bridge diagnostics, and
+must not report monotonic leaks, orphan processes, or unrecoverable runtime
+failures. Until both real device soaks are present and clean, P13-08 remains
+partial and `full_heavy_resource_stress` remains open.
+
 Current bridge concurrency and resource-limit focused instrumentation:
 
 ```powershell
