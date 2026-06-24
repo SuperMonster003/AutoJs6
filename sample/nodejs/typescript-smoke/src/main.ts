@@ -549,6 +549,11 @@ async function smoke(): Promise<void> {
   const packagedMetadataBuiltins: readonly string[] = autojsProfile.bridgePermissions.packagedMetadata.builtins;
   const packagedMetadataNetworkRequested: boolean = autojsProfile.bridgePermissions.packagedMetadata.network.requested;
   const packagedMetadataGrantsAuthority: boolean = autojsProfile.bridgePermissions.packagedMetadata.grantsAuthority;
+  const pluginSystemProfileStatus: string = autojsProfile.pluginSystemProfile.status;
+  const pluginSystemProfileOperations: readonly string[] = autojsProfile.pluginSystemProfile.operations;
+  const pluginSystemProfilePermissions: string = autojsProfile.pluginSystemProfile.permissionModel;
+  const pluginSystemProfilePackaged: string = autojsProfile.pluginSystemProfile.packagedDistribution;
+  const pluginSystemProfileNative: boolean = autojsProfile.pluginSystemProfile.nativeAddonLoading;
   const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
   const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
   const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
@@ -810,6 +815,11 @@ async function smoke(): Promise<void> {
   void packagedMetadataBuiltins;
   void packagedMetadataNetworkRequested;
   void packagedMetadataGrantsAuthority;
+  void pluginSystemProfileStatus;
+  void pluginSystemProfileOperations;
+  void pluginSystemProfilePermissions;
+  void pluginSystemProfilePackaged;
+  void pluginSystemProfileNative;
   void filesystemProfileMode;
   void filesystemProfileRoots;
   void filesystemAdvancedWatch;

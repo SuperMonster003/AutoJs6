@@ -186,6 +186,33 @@ declare namespace AutoJs6Node {
     readonly warnings: readonly string[];
   }
 
+  export interface PluginSystemProfile {
+    readonly status: "js_only_local_manager_partial" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly manager: "js_only_local_manager_v1" | string;
+    readonly pluginRoot: "project_local_plugins_directory" | string;
+    readonly installMode: "already_present_current_execution" | string;
+    readonly operations: readonly string[];
+    readonly permissionModel: "exact_plugin_id_plus_requested_permissions" | string;
+    readonly hostManifestEnforcement: "required_before_install_load_start" | string;
+    readonly overDeclaredPluginCapabilities: "rejected_before_code_execution" | string;
+    readonly androidProviderPlugins: "deferred" | "denied" | "partial" | string;
+    readonly nativePlugins: "denied" | "deferred" | "partial" | string;
+    readonly remoteMarketplace: "deferred" | "denied" | "partial" | string;
+    readonly signedArchives: "deferred" | "required" | string;
+    readonly updateChannel: "deferred" | "partial" | string;
+    readonly packagedDistribution: "local_checked_files_only" | "partial" | string;
+    readonly resourceOwnership: "plugin_lifecycle_context_partial" | string;
+    readonly debugReload: "debug_only" | string;
+    readonly downloadInstaller: boolean;
+    readonly nativeAddonLoading: boolean;
+    readonly androidPluginApkBridge: boolean;
+    readonly marketplaceInstall: boolean;
+    readonly persistedGlobalState: boolean;
+    readonly grantsHostCapabilities: boolean;
+  }
+
   export interface BridgePermissionsReport {
     readonly version: number;
     readonly enforced: boolean;
@@ -445,6 +472,7 @@ declare namespace AutoJs6Node {
     readonly stdlibProfile: StdlibProfile;
     readonly processParityProfile: ProcessParityProfile;
     readonly packagedCapabilityProfile: PackagedCapabilityProfile;
+    readonly pluginSystemProfile: PluginSystemProfile;
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
