@@ -45,6 +45,14 @@ class NodeExecutionModePolicyInstrumentationTest {
                 NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
             ),
         )
+        assertTrue(
+            NodeExecutionModePolicy.isSupported(
+                NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+            ),
+        )
+        assertTrue(NodeExecutionModePolicy.isInteractiveLongRunningLaunchSurface(NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION))
+        assertTrue(NodeExecutionModePolicy.isInteractiveLongRunningLaunchSurface(NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING))
         assertEquals("required", interactive.foregroundRequirement)
         assertEquals("persistent_stop_action_required", interactive.notificationRequirement)
         assertTrue(interactive.unsupportedReason.orEmpty().contains("explicit interactive session"))
@@ -116,7 +124,10 @@ class NodeExecutionModePolicyInstrumentationTest {
         assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT, interactive["embedded_script.execution_mode_launch_surface"])
         assertEquals("false", interactive["embedded_script.execution_mode_supported"])
         assertEquals(
-            NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+            listOf(
+                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+                NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+            ).joinToString(","),
             interactive["embedded_script.execution_mode_supported_launch_surfaces"],
         )
         assertEquals("true", interactive["embedded_script.long_running_requested"])
@@ -131,6 +142,12 @@ class NodeExecutionModePolicyInstrumentationTest {
         )
         assertEquals("true", interactiveSession["embedded_script.execution_mode_supported"])
         assertEquals("true", interactiveSession["embedded_script.long_running_supported"])
+        val packagedLongRunning = NodeExecutionModePolicy.nativeValues(
+            "longRunning",
+            NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+        )
+        assertEquals("true", packagedLongRunning["embedded_script.execution_mode_supported"])
+        assertEquals("true", packagedLongRunning["embedded_script.long_running_supported"])
 
         val scheduled = NodeExecutionModePolicy.nativeValues("scheduled")
         assertEquals("false", scheduled["embedded_script.execution_mode_supported"])

@@ -19,6 +19,7 @@ object NativeNodeEmbeddedProjectRunner {
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val entrySource: String? = null,
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
     )
 
     data class PackageBinRequest(
@@ -31,6 +32,7 @@ object NativeNodeEmbeddedProjectRunner {
         val timeoutMs: Long = 5000L,
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
     )
 
     data class PackageScriptRequest(
@@ -43,6 +45,7 @@ object NativeNodeEmbeddedProjectRunner {
         val timeoutMs: Long = 5000L,
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
     )
 
     data class ProjectRequest(
@@ -57,6 +60,7 @@ object NativeNodeEmbeddedProjectRunner {
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val entrySource: String? = null,
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
     )
 
     data class ProjectLaunchPlan(
@@ -70,6 +74,7 @@ object NativeNodeEmbeddedProjectRunner {
         val moduleSources: Map<String, String>,
         val runtimeModuleSources: Map<String, String>,
         val entrySource: String?,
+        val executionMode: String,
         val diagnosticArgv: List<String>? = null,
         val diagnosticEnvKeys: List<String>? = null,
         val packageDir: File? = null,
@@ -93,6 +98,7 @@ object NativeNodeEmbeddedProjectRunner {
         val runtimeModuleSourceCount: Int,
         val runtimeModuleSourceBytes: Int,
         val entrySourceBytes: Int,
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val packageDir: String? = null,
         val binName: String? = null,
         val scriptName: String? = null,
@@ -114,6 +120,7 @@ object NativeNodeEmbeddedProjectRunner {
                 appendLine("runtimeModuleSourceCount=$runtimeModuleSourceCount")
                 appendLine("runtimeModuleSourceBytes=$runtimeModuleSourceBytes")
                 appendLine("entrySourceBytes=$entrySourceBytes")
+                appendLine("executionMode=$executionMode")
                 appendLine("packageDir=${packageDir.orEmpty()}")
                 appendLine("binName=${binName.orEmpty()}")
                 appendLine("scriptName=${scriptName.orEmpty()}")
@@ -137,6 +144,7 @@ object NativeNodeEmbeddedProjectRunner {
                 "embedded_project_runner.runtime_module_source_count" to runtimeModuleSourceCount.toString(),
                 "embedded_project_runner.runtime_module_source_bytes" to runtimeModuleSourceBytes.toString(),
                 "embedded_project_runner.entry_source_bytes" to entrySourceBytes.toString(),
+                "embedded_project_runner.execution_mode" to executionMode,
                 "embedded_project_runner.package_dir" to packageDir.orEmpty(),
                 "embedded_project_runner.bin_name" to binName.orEmpty(),
                 "embedded_project_runner.script_name" to scriptName.orEmpty(),
@@ -158,6 +166,12 @@ object NativeNodeEmbeddedProjectRunner {
         plan: ProjectLaunchPlan,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return runNormalized(context, plan.toEntryRequest(), describe(plan))
+    }
+
+    fun buildResolvedProjectLaunchRequest(
+        plan: ProjectLaunchPlan,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+        return buildEmbeddedScriptRequest(plan.toEntryRequest(), describe(plan))
     }
 
     fun resolveProjectLaunchPlanWithDescriptor(request: ProjectRequest): ProjectLaunchPlan {
@@ -207,6 +221,7 @@ object NativeNodeEmbeddedProjectRunner {
             argv = launchSource.nodeProjectArgv.toList(),
             env = launchSource.nodeProjectEnv.toMap(),
             timeoutMs = launchSource.nodeProjectTimeoutMs ?: defaultRequest.timeoutMs,
+            executionMode = launchSource.nodeProjectExecutionMode ?: defaultRequest.executionMode,
         )
         val requestLaunchKind = NodeProjectLaunchKind.from(request.scriptName, request.binName)
         require(requestLaunchKind == sourceLaunchKind) {
@@ -243,6 +258,7 @@ object NativeNodeEmbeddedProjectRunner {
                     timeoutMs = request.timeoutMs,
                     moduleSources = request.moduleSources,
                     runtimeModuleSources = request.runtimeModuleSources,
+                    executionMode = request.executionMode,
                 ),
             )
         }
@@ -261,6 +277,7 @@ object NativeNodeEmbeddedProjectRunner {
                     timeoutMs = request.timeoutMs,
                     moduleSources = request.moduleSources,
                     runtimeModuleSources = request.runtimeModuleSources,
+                    executionMode = request.executionMode,
                 ),
             )
         }
@@ -275,6 +292,7 @@ object NativeNodeEmbeddedProjectRunner {
             moduleSources = request.moduleSources,
             runtimeModuleSources = request.runtimeModuleSources,
             entrySource = request.entrySource,
+            executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
         )
     }
 
@@ -291,6 +309,15 @@ object NativeNodeEmbeddedProjectRunner {
         request: Request,
         descriptor: Descriptor,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        val embeddedRequest = buildEmbeddedScriptRequest(request, descriptor)
+        val result = NativeNodeEmbeddedScriptService.runScript(context, embeddedRequest)
+        return withDescriptorNativeValues(result, descriptor)
+    }
+
+    private fun buildEmbeddedScriptRequest(
+        request: Request,
+        descriptor: Descriptor,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
         val projectRoot = request.projectRoot.canonicalFile
         val entryFile = request.entryFile.canonicalFile
         val workingDirectory = request.workingDirectory.canonicalFile
@@ -329,18 +356,15 @@ object NativeNodeEmbeddedProjectRunner {
                 append('\n')
             }
         }
-        val result = NativeNodeEmbeddedScriptService.runScript(
-            context,
-            NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
-                source = source,
-                sourceName = entryFile.canonicalPath,
-                workingDirectory = projectRoot.canonicalPath,
-                timeoutMs = request.timeoutMs,
-                moduleSources = request.moduleSources,
-                runtimeModuleSources = request.runtimeModuleSources,
-            ),
+        return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+            source = source,
+            sourceName = entryFile.canonicalPath,
+            workingDirectory = projectRoot.canonicalPath,
+            executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
+            timeoutMs = request.timeoutMs,
+            moduleSources = request.moduleSources,
+            runtimeModuleSources = request.runtimeModuleSources,
         )
-        return withDescriptorNativeValues(result, descriptor)
     }
 
     fun runPackageBin(
@@ -395,6 +419,7 @@ object NativeNodeEmbeddedProjectRunner {
             moduleSources = normalizedRequest.moduleSources,
             runtimeModuleSources = normalizedRequest.runtimeModuleSources,
             entrySource = null,
+            executionMode = NodeExecutionModePolicy.normalize(normalizedRequest.executionMode),
             packageDir = normalizedRequest.packageDir,
             binName = normalizedRequest.binName,
         )
@@ -427,6 +452,7 @@ object NativeNodeEmbeddedProjectRunner {
             moduleSources = normalizedRequest.moduleSources,
             runtimeModuleSources = normalizedRequest.runtimeModuleSources,
             entrySource = null,
+            executionMode = NodeExecutionModePolicy.normalize(normalizedRequest.executionMode),
             diagnosticArgv = normalizedRequest.argv,
             diagnosticEnvKeys = normalizedRequest.env.keys.sorted(),
             packageDir = normalizedRequest.packageDir,
@@ -632,6 +658,7 @@ object NativeNodeEmbeddedProjectRunner {
                 it.toByteArray(StandardCharsets.UTF_8).size
             },
             entrySourceBytes = request.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
+            executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             packageDir = request.packageDir?.absolutePath,
             binName = request.binName,
             scriptName = request.scriptName,
@@ -658,6 +685,7 @@ object NativeNodeEmbeddedProjectRunner {
                 it.toByteArray(StandardCharsets.UTF_8).size
             },
             entrySourceBytes = plan.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
+            executionMode = NodeExecutionModePolicy.normalize(plan.executionMode),
             packageDir = plan.packageDir?.absolutePath,
             binName = plan.binName,
             scriptName = plan.scriptName,
@@ -683,6 +711,7 @@ object NativeNodeEmbeddedProjectRunner {
                 it.toByteArray(StandardCharsets.UTF_8).size
             },
             entrySourceBytes = request.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
+            executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
         )
     }
 
@@ -706,6 +735,7 @@ object NativeNodeEmbeddedProjectRunner {
                 it.toByteArray(StandardCharsets.UTF_8).size
             },
             entrySourceBytes = -1,
+            executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             packageDir = request.packageDir.absolutePath,
             binName = request.binName,
         )
@@ -734,6 +764,7 @@ object NativeNodeEmbeddedProjectRunner {
                 it.toByteArray(StandardCharsets.UTF_8).size
             },
             entrySourceBytes = -1,
+            executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             packageDir = request.packageDir.absolutePath,
             binName = binName,
             scriptName = request.scriptName,
@@ -1126,6 +1157,7 @@ object NativeNodeEmbeddedProjectRunner {
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
                 entrySource = entrySource,
+                executionMode = executionMode,
             ),
         )
     }

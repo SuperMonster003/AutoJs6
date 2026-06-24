@@ -47,9 +47,11 @@ workstreams, target profiles, evidence, risk, and rollback policy.
 | `docs.examples.final_gate` | `planned` | `safe_default`, `pro_compat_opt_in`, `desktop_compat_opt_in` | `P13-53` to `P13-57` | `medium` | Examples, types, migration docs, and final Phase 13 summary gate. |
 
 Current `runtime.graduation_blockers` evidence includes the P13-05 crash marker
-store/host collector and P13-06 default one-shot scheduler gate. The surface
-remains `planned` until P13-05 fully closes `crash_evidence_automation`, P13-06
-adds packaged/fatal-crash/stress evidence, and P13-07 through P13-09 land.
+store/host collector, P13-06 default one-shot scheduler gate, and P13-07 partial
+packaged long-running dispatch gate. The surface remains `planned` until P13-05
+fully closes `crash_evidence_automation`, P13-06 adds
+packaged/fatal-crash/stress evidence, P13-07 adds packaged install/run
+restore/background-policy evidence, and P13-08 through P13-09 land.
 
 ## Rules
 

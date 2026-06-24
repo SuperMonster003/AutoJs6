@@ -168,26 +168,30 @@ multi-process promotion must keep one active Node/V8/libuv environment per
 process slot and prove crash isolation, queue-when-full behavior, and
 cross-slot resource cleanup before enabling reserved slots.
 
-Long-running Node service mode is limited to the explicit S7-18 interactive
-foreground runtime. It must not be inferred from pending timers, open
-network/WebSocket handles, `timeoutMs: 0`, or package metadata. Normal scripts
-remain one-shot and timeout-controlled; direct script
+Long-running Node service mode is limited to explicit foreground launch
+surfaces: the S7-18 interactive runtime and the P13-07 packaged long-running
+opt-in path. It must not be inferred from pending timers, open
+network/WebSocket handles, `timeoutMs: 0`, or undeclared package metadata.
+Normal scripts remain one-shot and timeout-controlled; direct script
 `interactiveLongRunning`/legacy `long_running` requests reject before user code.
 The request protocol recognizes `executionMode` through the Phase 7 state
 machine: `one_shot` is executable for normal launches,
 `interactive_long_running` is executable only through the explicit
-`interactive_session` launch surface with a persistent notification and Stop
-action, `scheduled` is executable only through the WorkManager-owned
+`interactive_session` launch surface or a packaged project that declares
+`node.executionMode=interactive_long_running`, with a persistent notification
+and Stop action, `scheduled` is executable only through the WorkManager-owned
 `scheduled_runner` launch surface, `worker_computation` remains reserved, and
 `node_sandboxed` is a Phase 8 manifest/design-gated POC that requires a Binder
 capability broker before execution. Direct script requests for non-`one_shot`
 modes still reject before user code.
 Interactive
 long-running status records restart policy `never`, `automaticRestart=false`,
-duration, active resources, and the Stop action; packaged service mode,
-automatic restart, service descriptors, broader quotas, and script-level
+duration, active resources, and the Stop action; packaged long-running remains
+partial until install/run, restore/cleanup, permission-denial, background-start,
+and stress evidence land. Automatic restart, broader quotas, and script-level
 cooperative stop beyond the interactive lifecycle module remain gated. S7-22
-adds `require("autojs6:lifecycle")` for interactive sessions only:
+adds `require("autojs6:lifecycle")` for interactive and packaged long-running
+sessions:
 checkpoints are JSON-only, limited to 64 KiB, app-private, project-scoped by
 package plus canonical working directory, atomically persisted, and restored
 only by an explicit script call. Status snapshots expose checkpoint metadata but

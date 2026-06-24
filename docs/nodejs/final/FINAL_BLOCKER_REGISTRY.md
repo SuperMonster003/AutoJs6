@@ -39,6 +39,16 @@ Current multi-instance progress:
   behavior, fatal slot-crash fallback/quarantine, and stress promotion remain
   open.
 
+Current packaged long-running progress:
+
+- `packaged_long_running`: interactive long-running works, and Phase 13 adds a
+  partial packaged dispatch path through
+  `node.executionMode=interactive_long_running`, the `packaged_long_running`
+  launch surface, inrt foreground-service routing, and a host verifier.
+  Packaged install/run smoke, `autojs6:lifecycle` restore/cleanup evidence,
+  Android permission/background-start policy coverage, and quota/stress
+  promotion remain open.
+
 Resolved in Phase 11:
 
 - `adapter_v1_real_execution_path`: `AutoJsNodeRuntimeApiV1` is now a

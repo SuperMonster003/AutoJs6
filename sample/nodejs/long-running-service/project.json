@@ -10,8 +10,8 @@
   },
   "example": {
     "capabilities": ["interactive_long_running", "lifecycle_checkpoint"],
-    "expectedProvider": "explicit interactive long-running launch surface",
-    "packagedSupport": "not supported; packaged entries remain one-shot",
+    "expectedProvider": "explicit interactive or packaged long-running launch surface",
+    "packagedSupport": "partial opt-in via node.executionMode=interactive_long_running; final restore/permission/background evidence remains P13-07",
     "securityLimitations": ["restart policy is never", "checkpoint data is JSON-only", "direct one-shot launch rejects service mode"]
   }
 }

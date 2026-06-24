@@ -1,8 +1,9 @@
 # Long-Running Node Service Mode
 
-Status: Phase 7 S7-18 controlled interactive foreground MVP. Normal script,
-project, package, and WorkManager launches remain one-shot; only the explicit
-interactive session launch surface can run `interactive_long_running`.
+Status: Phase 13 P13-07 partial foreground MVP. Normal script and generic
+project launches remain one-shot; the explicit interactive session launch
+surface and packaged long-running launch surface can run
+`interactive_long_running`.
 
 Task 179 adds the first runtime contract guard: embedded script requests now
 carry an `executionMode` field through the service request spool. `one_shot` is
@@ -15,9 +16,9 @@ Task S7-17 expands that guard into a versioned execution-mode state machine:
 
 - `one_shot`: implemented; requires a positive script timeout.
 - `interactive_long_running`: partial; supported only by the explicit
-  interactive session launch surface with a persistent foreground notification,
-  Stop action, status file, duration/resource summary, and restart policy
-  `never`.
+  interactive session or packaged long-running launch surface with a persistent
+  foreground notification, Stop action, status file, duration/resource summary,
+  and restart policy `never`.
 - `scheduled`: reserved; WorkManager currently launches bounded one-shot runs
   until the dedicated scheduled task runner gate exists.
 - `worker_computation`: reserved; blocked behind worker_threads capability
@@ -46,6 +47,14 @@ same interactive runtime. `require("autojs6:lifecycle")` exposes
 surface. Checkpoints are JSON-serializable data only, size-limited to 64 KiB,
 stored atomically under app-private project-scoped storage, and never trigger an
 automatic restart.
+
+Task P13-07 adds the first packaged long-running dispatch path. A packaged Node
+project may opt in with `node.executionMode=interactive_long_running`; the inrt
+launcher then prepares the encrypted project entry through the same Node project
+preprocessor used by one-shot packaged projects and starts the foreground
+service with `launchSurface=packaged_long_running`. The final blocker remains
+open until install/run smoke, packaged lifecycle restore/cleanup, Android
+permission denial, and background-start policy evidence land.
 
 ## Goal
 
@@ -79,7 +88,7 @@ Long-running service mode is not:
 | `one_shot` | Implemented | Required positive script timeout | Console/notification while running | directive, file route, project route, packaged route |
 | Execution queue | Implemented helper, not a mode | Queue timeout plus per-script timeout | Caller-owned diagnostics | `enqueueScript(...)` |
 | `scheduled` | Reserved; WorkManager still launches bounded one-shot executions | Required task timeout | Future task UI/notification | future scheduled runner |
-| `interactive_long_running` | Partial explicit foreground MVP | Startup timeout plus stop grace and watchdog policy | Persistent foreground notification with Stop | explicit interactive session API |
+| `interactive_long_running` | Partial explicit foreground MVP | Startup timeout plus stop grace and watchdog policy | Persistent foreground notification with Stop | explicit interactive session API or packaged long-running opt-in |
 | `worker_computation` | Reserved behind worker_threads gates | Startup/task timeout | None | future worker runtime |
 | `node_sandboxed` | Manifest and policy POC; not executable | Broker startup and script timeout | Host-owned visibility required | future isolated-process runtime |
 
@@ -123,9 +132,9 @@ launches. The aliases `"interactiveLongRunning"`, `"longRunning"`,
 direct script launches still reject before user JavaScript runs and do not
 convert `timeoutMs: 0` into an unbounded run. `interactive_long_running` is
 accepted only when the service request is created through the explicit
-interactive session launch surface. `scheduled` and `workerComputation` are
-also recognized as reserved modes and rejected before user code until their
-dedicated gates are implemented.
+interactive session launch surface or packaged long-running launch surface.
+`scheduled` and `workerComputation` are also recognized as reserved modes and
+rejected before user code until their dedicated gates are implemented.
 
 ## Foreground Notification
 

@@ -48,6 +48,7 @@ object NodeProjectLaunchDescriptor {
             argv = json.optStringArray("argv"),
             env = json.optStringMap("env"),
             timeoutMs = json.optPositiveLongOrNull("timeoutMs"),
+            executionMode = json.optStringOrNull("executionMode"),
         )
         return launchOptions.validateDescriptorLaunchKind(descriptorLaunchKind)
     }

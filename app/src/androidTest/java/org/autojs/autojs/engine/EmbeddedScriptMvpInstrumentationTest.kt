@@ -21633,6 +21633,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 expectedArgv: List<String>,
                 expectedEnv: Map<String, String>,
                 expectedTimeoutMs: Long?,
+                expectedExecutionMode: String? = null,
             ) {
                 val options = NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot)
                 assertEquals("$label descriptor launchKind", expectedLaunchKind, options.launchKind)
@@ -21647,6 +21648,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label descriptor argv", expectedArgv, options.argv)
                 assertEquals("$label descriptor env", expectedEnv, options.env)
                 assertEquals("$label descriptor timeoutMs", expectedTimeoutMs, options.timeoutMs)
+                assertEquals("$label descriptor executionMode", expectedExecutionMode, options.executionMode)
 
                 val source = NodeProjectScriptSourceFactory.create(entry)
                 assertTrue("$label source should be Node project launch source", source is NodeProjectLaunchSource)
@@ -21669,6 +21671,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label source argv", expectedArgv, launchSource.nodeProjectArgv)
                 assertEquals("$label source env", expectedEnv, launchSource.nodeProjectEnv)
                 assertEquals("$label source timeoutMs", expectedTimeoutMs, launchSource.nodeProjectTimeoutMs)
+                assertEquals("$label source executionMode", expectedExecutionMode, launchSource.nodeProjectExecutionMode)
 
                 val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource)
                 assertEquals("$label request projectRoot", projectRoot.canonicalFile, request.projectRoot)
@@ -21687,6 +21690,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label request argv", expectedArgv, request.argv)
                 assertEquals("$label request env", expectedEnv, request.env)
                 assertEquals("$label request timeoutMs", expectedTimeoutMs ?: 5000L, request.timeoutMs)
+                assertEquals(
+                    "$label request executionMode",
+                    expectedExecutionMode ?: NodeExecutionModePolicy.MODE_ONE_SHOT,
+                    request.executionMode,
+                )
                 assertEquals(
                     "$label request launchKind",
                     expectedLaunchKind,
@@ -21710,6 +21718,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label debug env keys", expectedEnv.keys.sorted(), debugDescriptor.envKeys)
                 assertEquals("$label debug argv", expectedArgv, debugDescriptor.argv)
                 assertEquals("$label debug timeoutMs", expectedTimeoutMs ?: 5000L, debugDescriptor.timeoutMs)
+                assertEquals(
+                    "$label debug executionMode",
+                    expectedExecutionMode ?: NodeExecutionModePolicy.MODE_ONE_SHOT,
+                    debugDescriptor.executionMode,
+                )
                 val debugText = debugDescriptor.toDebugString()
                 expectedEnv.values.forEach { secretValue ->
                     assertFalse("$label debug descriptor leaked env value", debugText.contains(secretValue))
@@ -22238,6 +22251,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     argv = argv,
                     env = env,
                     timeoutMs = 1234L,
+                    executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
                 ),
             )
 
@@ -22267,6 +22281,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(listOf("--before"), source.nodeProjectArgv)
             assertEquals(mapOf("SOURCE_ENV" to "before"), source.nodeProjectEnv)
             assertEquals(1234L, source.nodeProjectTimeoutMs)
+            assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, source.nodeProjectExecutionMode)
             val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(source)
             assertEquals(root.canonicalFile, request.projectRoot)
             assertEquals(packageDir.canonicalFile, request.packageDir)
@@ -22276,6 +22291,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(listOf("--before"), request.argv)
             assertEquals(mapOf("SOURCE_ENV" to "before"), request.env)
             assertEquals(1234L, request.timeoutMs)
+            assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, request.executionMode)
 
             val argvMutation = runCatching {
                 @Suppress("UNCHECKED_CAST")
@@ -32981,6 +32997,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         val argv: List<String> = emptyList(),
         val env: Map<String, String> = emptyMap(),
         val timeoutMs: Long = 5000L,
+        val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
     )
 
     private fun assertNodeProjectLaunchRequest(
@@ -33010,6 +33027,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertEquals("$label request argv", expected.argv, request.argv)
         assertEquals("$label request env", expected.env, request.env)
         assertEquals("$label request timeoutMs", expected.timeoutMs, request.timeoutMs)
+        assertEquals("$label request executionMode", expected.executionMode, request.executionMode)
         assertEquals("$label request launchKind", expected.launchKind, NodeProjectLaunchKind.from(request.scriptName, request.binName))
     }
 

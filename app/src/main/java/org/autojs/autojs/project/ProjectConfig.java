@@ -927,6 +927,10 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         private Long mTimeoutMs;
 
         @Nullable
+        @SerializedName("executionMode")
+        private String mExecutionMode;
+
+        @Nullable
         @SerializedName("permissions")
         private List<String> mPermissions;
 
@@ -947,6 +951,16 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
 
         public NodeConfig setTimeoutMs(@Nullable Long timeoutMs) {
             mTimeoutMs = timeoutMs;
+            return this;
+        }
+
+        @Nullable
+        public String getExecutionMode() {
+            return mExecutionMode;
+        }
+
+        public NodeConfig setExecutionMode(@Nullable String executionMode) {
+            mExecutionMode = executionMode;
             return this;
         }
 

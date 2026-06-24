@@ -9401,6 +9401,7 @@ class EmbeddedNodePackagedApkSmokeTest {
         val argv: List<String> = emptyList(),
         val env: Map<String, String> = emptyMap(),
         val timeoutMs: Long? = null,
+        val executionMode: String? = null,
     )
 
     private fun packagedRuntimeCompatibilityDescriptorMismatchFailureCase(): PackagedLaunchFailureCase {
@@ -14941,6 +14942,7 @@ $nodeConfigJson
         assertEquals("$label descriptor argv", expected.argv, actual.optStringList("argv"))
         assertEquals("$label descriptor env", expected.env, actual.optStringMap("env"))
         assertOptionalDescriptorLong(label, expected.timeoutMs, actual, "timeoutMs")
+        assertOptionalDescriptorString(label, expected.executionMode, actual, "executionMode")
     }
 
     private fun assertOptionalDescriptorString(
@@ -14979,6 +14981,7 @@ $nodeConfigJson
             argv = optStringList("argv"),
             env = optStringMap("env"),
             timeoutMs = optLongOrNull("timeoutMs"),
+            executionMode = optStringOrNull("executionMode"),
         )
     }
 

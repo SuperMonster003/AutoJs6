@@ -287,7 +287,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
         )
         val interactiveSession = executionMode == NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING &&
-            launchSurface == NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
+            NodeExecutionModePolicy.isInteractiveLongRunningLaunchSurface(launchSurface)
         if (interactiveSession) {
             activeExecutionId = executionId
             activeExecutionMode = executionMode
@@ -301,6 +301,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 sourceName = sourceName,
                 workingDirectory = workingDirectory,
                 startedAtEpochMs = activeStartedAtEpochMs,
+                launchSurface = launchSurface,
                 activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("starting"),
             )
             updateInteractiveForeground(executionId, sourceName)
@@ -323,6 +324,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     sourceName = sourceName,
                     workingDirectory = workingDirectory,
                     startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    launchSurface = launchSurface,
                     message = slotDecision.failure.errorMessage,
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("queue_rejected"),
                     nativeValues = processPoolPlan.nativeValues() + mapOf(
@@ -510,6 +512,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     sourceName = sourceName,
                     workingDirectory = workingDirectory,
                     startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    launchSurface = launchSurface,
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("running", runningNativeValues),
                     nativeValues = runningNativeValues,
                 )
@@ -559,6 +562,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     sourceName = sourceName,
                     workingDirectory = workingDirectory,
                     startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    launchSurface = launchSurface,
                     message = completed.errorMessage,
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary(state, completed.nativeValues),
                     nativeValues = lifecycle.nativeValues() + completed.nativeValues,
@@ -593,6 +597,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     sourceName = sourceName,
                     workingDirectory = workingDirectory,
                     startedAtEpochMs = activeStartedAtEpochMs.takeIf { it > 0L },
+                    launchSurface = launchSurface,
                     message = e.message ?: e.javaClass.name,
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("exception"),
                     nativeValues = lifecycle.nativeValues(),
@@ -2065,6 +2070,29 @@ open class NativeNodeEmbeddedScriptService : Service() {
             context: Context,
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
         ): InteractiveLongRunningSession {
+            return startLongRunning(
+                context = context,
+                request = request,
+                launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+            )
+        }
+
+        fun startPackagedLongRunning(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+        ): InteractiveLongRunningSession {
+            return startLongRunning(
+                context = context,
+                request = request,
+                launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+            )
+        }
+
+        private fun startLongRunning(
+            context: Context,
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String,
+        ): InteractiveLongRunningSession {
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
             val appContext = context.applicationContext
             val startedAt = android.os.SystemClock.elapsedRealtime()
@@ -2088,6 +2116,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
                     sourceName = requestWithExecutionId.sourceName,
                     workingDirectory = requestWithExecutionId.workingDirectory,
+                    launchSurface = launchSurface,
                     message = failure.errorMessage,
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("preflight_failed"),
                     nativeValues = failure.nativeValues,
@@ -2101,7 +2130,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
             NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(
                 requestForService,
-                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+                launchSurface,
             )?.let { failure ->
                 val status = NodeInteractiveLongRunningStatusStore.write(
                     context = appContext,
@@ -2109,6 +2138,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
                     sourceName = requestForService.sourceName,
                     workingDirectory = requestForService.workingDirectory,
+                    launchSurface = launchSurface,
                     message = failure.errorMessage,
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("preflight_failed"),
                     nativeValues = failure.nativeValues,
@@ -2126,6 +2156,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 state = NodeInteractiveLongRunningStatusStore.STATE_STARTING,
                 sourceName = requestForService.sourceName,
                 workingDirectory = requestForService.workingDirectory,
+                launchSurface = launchSurface,
                 activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("client_starting"),
             )
             var requestSpoolFile: File? = null
@@ -2136,7 +2167,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     putExtra(EXTRA_SOURCE_NAME, requestForService.sourceName)
                     putExtra(EXTRA_WORKING_DIRECTORY, requestForService.workingDirectory)
                     putExtra(EXTRA_EXECUTION_MODE, requestForService.executionMode)
-                    putExtra(EXTRA_LAUNCH_SURFACE, NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION)
+                    putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
                     putExtra(EXTRA_TIMEOUT_MS, requestForService.timeoutMs.coerceAtLeast(1L))
                     putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, requestForService.esmExperimentalEnabled)
                     putExtra(
@@ -2167,6 +2198,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                         state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
                         sourceName = requestForService.sourceName,
                         workingDirectory = requestForService.workingDirectory,
+                        launchSurface = launchSurface,
                         message = failure.errorMessage,
                         activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_failed"),
                         nativeValues = failure.nativeValues,
@@ -2194,6 +2226,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     state = NodeInteractiveLongRunningStatusStore.STATE_FAILED,
                     sourceName = requestForService.sourceName,
                     workingDirectory = requestForService.workingDirectory,
+                    launchSurface = launchSurface,
                     message = failure.errorMessage,
                     activeResources = NodeInteractiveLongRunningStatusStore.activeResourceSummary("service_start_exception"),
                     nativeValues = failure.nativeValues,

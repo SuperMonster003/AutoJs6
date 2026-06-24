@@ -38,6 +38,40 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         return finishEmbeddedScriptExecution(request, result)
     }
 
+    fun prepareNodeProjectLaunchRequest(
+        source: JavaScriptSource,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest? {
+        val launchSource = source as? NodeProjectLaunchSource ?: return null
+        val fileSource = source as? JavaScriptFileSource ?: return null
+        val projectRoot = launchSource.nodeProjectRootFile.normalizedCanonicalFile()
+        val sourceLaunchKind = launchSource.nodeProjectLaunchKind
+        val baseRequest = NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource, projectRoot)
+        val basePlan = NativeNodeEmbeddedProjectRunner.resolveProjectLaunchPlanWithDescriptor(baseRequest)
+        val preparation = prepareNodeProjectRun(fileSource, projectRoot, basePlan.entryFile)
+        val plan = basePlan.copy(
+            moduleSources = preparation.preload.moduleSources,
+            runtimeModuleSources = preparation.runtimeModuleSources,
+            entrySource = preparation.entrySource,
+        )
+        Log.i(
+            TAG,
+            "embedded node project launch request prepared for external service " +
+                    "projectRoot=${preparation.workingDirectory} " +
+                    "sourceName=${preparation.sourceName} " +
+                    "sourceLaunchKind=${sourceLaunchKind.descriptorValue} " +
+                    "launchKind=${plan.kind} " +
+                    "executionMode=${plan.executionMode} " +
+                    "moduleSources=${preparation.preload.moduleSources.size} " +
+                    "runtimeModuleSources=${preparation.runtimeModuleSources.size} " +
+                    "runtimeFirst=${preparation.runtimeModuleSources.keys.firstOrNull().orEmpty()}",
+        )
+        lastCommonJsPreloadDiagnostics = preparation.preload.diagnostics
+        lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(plan)
+        return NativeNodeEmbeddedProjectRunner
+            .buildResolvedProjectLaunchRequest(plan)
+            .copy(spawnDepth = currentSpawnDepth())
+    }
+
     private fun tryRunNodeProjectLaunch(source: JavaScriptSource): Any? {
         val launchSource = source as? NodeProjectLaunchSource ?: return null
         val fileSource = source as? JavaScriptFileSource ?: return null
@@ -65,7 +99,10 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         lastCommonJsPreloadDiagnostics = preparation.preload.diagnostics
         lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(plan)
         val result = NativeNodeEmbeddedProjectRunner.runResolvedProjectLaunchPlan(androidContext, plan)
-        return finishEmbeddedScriptExecution(preparation.toBridgeRequest(plan.timeoutMs, currentSpawnDepth()), result)
+        return finishEmbeddedScriptExecution(
+            preparation.toBridgeRequest(plan.timeoutMs, currentSpawnDepth(), plan.executionMode),
+            result,
+        )
     }
 
     private fun tryRunNodeProjectFile(source: JavaScriptSource): Any? {
@@ -1110,11 +1147,16 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val preload: CommonJsPreloadResult,
         val runtimeModuleSources: Map<String, String>,
     ) {
-        fun toBridgeRequest(timeoutMs: Long, spawnDepth: Int = 0): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
+        fun toBridgeRequest(
+            timeoutMs: Long,
+            spawnDepth: Int = 0,
+            executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest {
             return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
                 source = entrySource,
                 sourceName = sourceName,
                 workingDirectory = workingDirectory,
+                executionMode = NodeExecutionModePolicy.normalize(executionMode),
                 timeoutMs = timeoutMs,
                 moduleSources = preload.moduleSources,
                 runtimeModuleSources = runtimeModuleSources,

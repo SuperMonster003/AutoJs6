@@ -131,7 +131,16 @@
         "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeEmbeddedProcessPoolPolicyInstrumentationTest.kt",
         "build/reports/nodejs/phase13-second-execution-slot-scheduler.json",
-        "build/reports/nodejs/phase13-second-execution-slot-scheduler.md"
+        "build/reports/nodejs/phase13-second-execution-slot-scheduler.md",
+        "docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md",
+        "tools/nodejs/phase13/verify-packaged-long-running-service.js",
+        ":app:verifyNodePhase13PackagedLongRunningService",
+        "app/src/main/java/org/autojs/autojs/inrt/launch/AssetsProjectLauncher.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeExecutionModePolicy.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeInteractiveLongRunningStatusStore.kt",
+        "app/src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt",
+        "build/reports/nodejs/phase13-packaged-long-running-service.json",
+        "build/reports/nodejs/phase13-packaged-long-running-service.md"
       ],
       "rollback": "Disable the promoted runtime path by profile flag and keep one-shot primary embedded execution as the fallback."
     },

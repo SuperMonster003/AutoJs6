@@ -85,6 +85,10 @@ checks recovery after the isolated Node process exits. The status snapshot must
 include `executionMode=interactive_long_running`,
 `launchSurface=interactive_session`, runtime duration, active resource summary,
 restart policy `never`, `automaticRestart=false`, and the Stop action name.
+P13-07 adds a packaged long-running dispatch gate for projects that declare
+`node.executionMode=interactive_long_running`; packaged status snapshots should
+use `launchSurface=packaged_long_running`, while final install/run,
+restore/cleanup, permission-denial, and background-start evidence remains open.
 `NodeAndroidRuntimePolicyInstrumentationTest` verifies the embedded Node service
 manifest/type/permission diagnostics, background foreground-service start
 denial classification, missing or invalid foreground-service type diagnostics,
@@ -103,8 +107,9 @@ explicitly `onRestore()` that checkpoint, and `automaticRestart` remains false.
 `NodeLongRunningStressInstrumentationTest` extends the same gate with repeated
 interactive stop/checkpoint/recovery cycles and provider-destroy cleanup for
 owned notification, sensor, UI, shell, and WebSocket counters. Normal builds
-still keep WebSocket live I/O feature-gated or denied, and packaged service
-mode remains unavailable.
+still keep WebSocket live I/O feature-gated or denied. Packaged service mode is
+partial through P13-07 and must not be treated as final until the packaged APK
+smoke and Android policy matrix pass.
 
 Lifecycle tests must still verify that normal scripts are one-shot executions
 controlled by `timeoutMs`, including timeout recovery, uncleared interval

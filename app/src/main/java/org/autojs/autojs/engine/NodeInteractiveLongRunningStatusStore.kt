@@ -20,6 +20,7 @@ object NodeInteractiveLongRunningStatusStore {
         sourceName: String,
         workingDirectory: String? = null,
         startedAtEpochMs: Long? = null,
+        launchSurface: String? = null,
         stopRequested: Boolean = false,
         message: String? = null,
         activeResources: JSONObject? = null,
@@ -30,6 +31,10 @@ object NodeInteractiveLongRunningStatusStore {
         val resolvedStartedAt = startedAtEpochMs
             ?: previous?.optLong("startedAtEpochMs")?.takeIf { it > 0L }
             ?: now
+        val resolvedLaunchSurface = launchSurface
+            ?.takeIf { it.isNotBlank() }
+            ?: previous?.optString("launchSurface")?.takeIf { it.isNotBlank() }
+            ?: NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION
         val resolvedResources = activeResources
             ?: previous?.optJSONObject("activeResources")?.copy()
             ?: JSONObject()
@@ -38,7 +43,7 @@ object NodeInteractiveLongRunningStatusStore {
             put("schemaVersion", 1)
             put("executionId", executionId)
             put("executionMode", NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING)
-            put("launchSurface", NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION)
+            put("launchSurface", resolvedLaunchSurface)
             put("sourceName", sourceName.ifBlank { "<embedded-script>" })
             put("workingDirectory", workingDirectory)
             put("state", state)
@@ -53,7 +58,7 @@ object NodeInteractiveLongRunningStatusStore {
             put("checkpoint", NodeLifecycleCheckpointStore.statusSnapshot(context, workingDirectory))
             put("policy", JSONObject(NodeExecutionModePolicy.nativeValues(
                 NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
-                NodeExecutionModePolicy.LAUNCH_SURFACE_INTERACTIVE_SESSION,
+                resolvedLaunchSurface,
             )))
             put("nativeValues", JSONObject(nativeValues))
             message?.let { put("message", it) }

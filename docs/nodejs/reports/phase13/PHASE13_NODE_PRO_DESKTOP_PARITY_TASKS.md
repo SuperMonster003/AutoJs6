@@ -266,6 +266,17 @@ P13 task 本身使用以下执行状态：
     - foreground notification、Stop action、checkpoint、quota、destroy cleanup 可用。
     - `autojs6:lifecycle` 在 packaged 模式有恢复/清理证据。
     - Android 版本、权限、后台限制不满足时稳定拒绝。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Packaged launch surface: `NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING`.
+    - Project metadata parsing: `ProjectConfig.NodeConfig.executionMode` and `NodeProjectLaunchDescriptor.executionMode`.
+    - Request propagation: `NodeProjectLaunchSource.nodeProjectExecutionMode`, `NativeNodeEmbeddedProjectRunner.ProjectRequest.executionMode`, and `EmbeddedScriptRequest.executionMode`.
+    - Packaged inrt dispatch: `AssetsProjectLauncher.startPackagedLongRunningIfRequested(...)`.
+    - Foreground service entry: `NativeNodeEmbeddedScriptService.startPackagedLongRunning(...)`.
+    - Status evidence: `NodeInteractiveLongRunningStatusStore.launchSurface=packaged_long_running`.
+    - Host verifier: `tools/nodejs/phase13/verify-packaged-long-running-service.js`.
+    - Gradle gate: `:app:verifyNodePhase13PackagedLongRunningService`.
+    - Report: `docs/nodejs/reports/phase13/P13_07_PACKAGED_LONG_RUNNING_SERVICE.md`.
+    - Open before closure: install-and-run packaged APK smoke, packaged `autojs6:lifecycle` restore/cleanup evidence, Android permission/background-start matrix, quota/stress evidence.
 
 - [ ] P13-08: 完成 full heavy resource stress。
   - 范围：补齐 8 小时 quick soak 和 24 小时 final soak。

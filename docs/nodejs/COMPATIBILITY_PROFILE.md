@@ -279,7 +279,9 @@ Current behavior remains:
 - `one_shot` is the only supported executable value for normal script launches
 - `interactive_long_running` is supported only by the explicit
   `interactive_session` launch surface used by
-  `NativeNodeEmbeddedScriptService.startInteractiveLongRunning(...)`
+  `NativeNodeEmbeddedScriptService.startInteractiveLongRunning(...)` or the
+  packaged long-running opt-in surface used by packaged projects that declare
+  `node.executionMode=interactive_long_running`
 - `scheduled` is supported only by the WorkManager-owned
   `scheduled_runner` launch surface used for fired `work_manager` tasks
 - direct script `interactiveLongRunning`, legacy `long_running`/`service`,
@@ -291,7 +293,7 @@ Current behavior remains:
 - interactive status snapshots include runtime duration, Stop action, active
   resource summary, restart policy `never`, and `automaticRestart=false`
 - `require("autojs6:lifecycle")` is available only inside the explicit
-  interactive long-running runtime and supports JSON-only
+  interactive or packaged long-running runtime and supports JSON-only
   `checkpoint()`/`readCheckpoint()`/`clearCheckpoint()`, `onCheckpoint()`,
   explicit `onRestore()`, and cooperative `onStop()`
 - checkpoints are app-private, project-scoped by package plus canonical working
@@ -306,8 +308,10 @@ Current behavior remains:
   image/network/WebSocket counts, and budget breach counts in status
   `nativeValues`/`activeResources`
 - service process exit is expected after one-shot execution settles
-- packaged Node entries remain one-shot unless a future explicit service
-  descriptor is implemented
+- packaged Node entries remain one-shot unless they explicitly opt in with
+  `node.executionMode=interactive_long_running`; that packaged long-running
+  path is partial until P13-07 device restore/cleanup and Android policy
+  evidence land
 
 The future design gate is documented in [design/LONG_RUNNING_SERVICE.md](design/LONG_RUNNING_SERVICE.md).
 

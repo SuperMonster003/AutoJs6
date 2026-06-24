@@ -44,6 +44,8 @@ interface NodeProjectLaunchSource {
         get() = emptyMap()
     val nodeProjectTimeoutMs: Long?
         get() = null
+    val nodeProjectExecutionMode: String?
+        get() = null
 }
 
 data class NodeProjectLaunchOptions @JvmOverloads constructor(
@@ -54,6 +56,7 @@ data class NodeProjectLaunchOptions @JvmOverloads constructor(
     val argv: List<String> = emptyList(),
     val env: Map<String, String> = emptyMap(),
     val timeoutMs: Long? = null,
+    val executionMode: String? = null,
 ) {
     val launchKind: NodeProjectLaunchKind
         get() = NodeProjectLaunchKind.from(scriptName, binName)
@@ -92,6 +95,9 @@ class NodeProjectJavaScriptFileSource @JvmOverloads constructor(
     override val nodeProjectTimeoutMs: Long?
         get() = nodeProjectLaunchOptions.timeoutMs
 
+    override val nodeProjectExecutionMode: String?
+        get() = nodeProjectLaunchOptions.executionMode
+
     override val engineName: String
         get() = JavaScriptSource.ENGINE_NODEJS
 
@@ -103,6 +109,7 @@ class NodeProjectJavaScriptFileSource @JvmOverloads constructor(
             workingDirectory = workingDirectory?.normalizedCanonicalFile(),
             argv = Collections.unmodifiableList(argv.toList()),
             env = Collections.unmodifiableMap(env.toMap()),
+            executionMode = executionMode?.trim()?.takeIf { it.isNotBlank() },
         )
     }
 

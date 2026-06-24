@@ -10,6 +10,7 @@ object NodeExecutionModePolicy {
 
     const val LAUNCH_SURFACE_SCRIPT = "script"
     const val LAUNCH_SURFACE_INTERACTIVE_SESSION = "interactive_session"
+    const val LAUNCH_SURFACE_PACKAGED_LONG_RUNNING = "packaged_long_running"
     const val LAUNCH_SURFACE_SCHEDULED_RUNNER = "scheduled_runner"
 
     // Legacy request aliases retained for stable rejection diagnostics.
@@ -83,6 +84,11 @@ object NodeExecutionModePolicy {
 
     fun isLongRunningRequest(mode: String?): Boolean {
         return normalize(mode) == MODE_INTERACTIVE_LONG_RUNNING
+    }
+
+    fun isInteractiveLongRunningLaunchSurface(launchSurface: String?): Boolean {
+        return launchSurface == LAUNCH_SURFACE_INTERACTIVE_SESSION ||
+            launchSurface == LAUNCH_SURFACE_PACKAGED_LONG_RUNNING
     }
 
     fun unsupportedMessage(
@@ -177,7 +183,10 @@ object NodeExecutionModePolicy {
         Definition(
             mode = MODE_INTERACTIVE_LONG_RUNNING,
             status = "partial",
-            supportedLaunchSurfaces = setOf(LAUNCH_SURFACE_INTERACTIVE_SESSION),
+            supportedLaunchSurfaces = setOf(
+                LAUNCH_SURFACE_INTERACTIVE_SESSION,
+                LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+            ),
             timeoutPolicy = "startup_timeout_stop_grace_and_watchdog",
             foregroundRequirement = "required",
             notificationRequirement = "persistent_stop_action_required",
@@ -197,7 +206,7 @@ object NodeExecutionModePolicy {
             restartPolicy = "never",
             resourceQuotaProfile = "interactive_long_running_strict",
             stopSemantics = "foreground_or_user_stop_then_graceful_destroy",
-            unsupportedReason = "Interactive long-running mode is available only through the explicit interactive session launch surface; direct script launches remain one-shot.",
+            unsupportedReason = "Interactive long-running mode is available only through explicit interactive or packaged long-running launch surfaces; direct script launches remain one-shot.",
         ),
         Definition(
             mode = MODE_SCHEDULED,
