@@ -1086,6 +1086,13 @@ client sockets, server bind/listen, multicast, broadcast, Android multicast
 state, fd/native handles, packaged permission proof, and live Android UDP
 evidence are not part of the current v1.1 Desktop profile.
 
+P13-39 records native addon loading as partial: `nativeAddonProfile` exposes a
+diagnostic-only decision snapshot while arbitrary `.node` loading,
+`process.dlopen`, native builds, and runtime download-exec remain denied.
+Desktop-profile support is still blocked on signed packaged artifacts, ABI and
+hash allowlists, dependency scanning, crash isolation, and packaged
+positive/hostile corpus evidence.
+
 P13-32 records filesystem profile expansion as partial: Safe Node remains
 `workingDirectory` scoped, `autojs6:profile.filesystemProfile` reports
 `mode="scoped_working_directory"` with `additionalRoots=[]`, and `/sdcard`,

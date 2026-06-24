@@ -379,6 +379,13 @@ Unsupported or rejected module source forms:
 - package export/import targets that escape the package root
 - unsupported package export/import extensions
 
+P13-39 records native addon loading as partial. `nativeAddonProfile` is
+diagnostic metadata only: `.node` loading, addon resolution, `process.dlopen`,
+`process.binding`, native builds, and runtime download-exec remain denied by
+default. Any future Desktop-profile native addon support must be signed and
+packaged-only, tied to ABI and hash allowlists, covered by dependency scan and
+APK preflight, and isolated against native crashes before promotion.
+
 The reusable compatibility corpus lives under `app/src/androidTest/assets/node_compat_corpus/` and is executed by
 `NodeCompatCorpusInstrumentationTest`. It covers pure JavaScript CommonJS package patterns that should remain stable across
 future builtin and bridge work. The S8-19 module conformance v2 corpus lives under

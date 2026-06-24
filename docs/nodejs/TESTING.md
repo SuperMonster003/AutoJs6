@@ -892,6 +892,17 @@ Focused native addon policy instrumentation:
 
 This suite verifies that `.node` native addon targets reject with `ERR_AUTOJS6_NATIVE_ADDON_DISABLED` through direct relative `require()`, `module.createRequire()`, package `main`, package `exports`, package `imports`, and package subpath imports. It also verifies the profile reports `native_addon.enabled=false` and exposes the native-addon error code.
 
+Phase 13 native addon loading decision instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeNativeAddonPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies `nativeAddonProfile` diagnostics, default feature-flag
+denial, direct `.node` `require()`/`require.resolve()` denial, package `main`
+denial, `process.dlopen`/`process.binding`/`process._linkedBinding` denial,
+and require-cache non-loading. P13-39 records native addon loading as partial.
+
 The network portion also asserts that normal builds keep `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=false`; raw network operations must stay denied until `docs/nodejs/design/NETWORK.md` is implemented by a later task.
 
 Current resolver fuzzer extended instrumentation:
@@ -1145,6 +1156,20 @@ builtin matrix, and Phase13 docs. It keeps any callable `autojs6:wasi` facade,
 controlled `node:wasi` profile, scoped preopen broker, virtual fd/env/args
 policy, resource budgets, worker integration, and packaged `.wasm`/WASI
 behavior open.
+
+Phase 13 native addon loading decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13NativeAddonLoadingDecision
+```
+
+This host gate records that P13-39 records native addon loading as partial. It
+requires `nativeAddonProfile` diagnostics, stable `.node` require/resolve
+denial, private process native API denial, existing native-addon policy
+evidence, dependency/package native-payload rejection evidence, TypeScript
+declarations, surface manifest evidence, and docs updates. It keeps signed
+packaged artifacts, ABI/hash allowlists, dependency scanning, crash isolation,
+download-exec policy evidence, and packaged positive/hostile corpus open.
 
 Current `os` privacy focused instrumentation:
 

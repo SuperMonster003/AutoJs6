@@ -364,6 +364,13 @@ Reasons:
 Future support, if any, should be developer-mode only, separately gated, and based on an explicit plugin model with ABI,
 signature, packaging, and review policy. Runtime npm/native build tooling must not be used as the enablement path.
 
+P13-39 records native addon loading as partial. `nativeAddonProfile` reports
+default denial for `.node`, addon resolution, and `process.dlopen` while
+making signed packaged-only artifacts, ABI and hash allowlists, dependency
+scan, no download-exec, and crash isolation explicit promotion blockers. The
+current runtime still rejects arbitrary native addon files and private process
+native APIs before user code can turn them into embedded-process native code.
+
 ## Java Interop Policy
 
 Direct Java and Android interop is disabled in the default Safe Node Profile. Node scripts must use AutoJs bridge modules instead of raw `java.*`, `android.*`, Rhino `importClass`, `Packages`, reflection, class loaders, or Android object references. P13-12 exposes `$autojs.androidContext` only as a frozen unavailable descriptor and `$autojs.java` only as a gated facade; normal builds still reject Java calls with `ERR_AUTOJS6_JAVA_INTEROP_DISABLED`.

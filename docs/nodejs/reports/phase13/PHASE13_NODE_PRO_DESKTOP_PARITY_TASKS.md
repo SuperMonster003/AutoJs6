@@ -1241,6 +1241,24 @@ P13 task 本身使用以下执行状态：
     - 若开放，必须有 ABI allowlist、签名/哈希、packaged-only、no download-exec、
       dependency scan、crash isolation。
     - `process.dlopen` 和 addon resolve 不能绕过 policy。
+  - Progress:
+    - P13-39 partial landing 已添加 `nativeAddonProfile` 诊断，保持
+      `.node`、`process.dlopen`、`process.binding`、`process._linkedBinding`
+      默认拒绝。
+    - 新增 focused gate:
+      `NodeNativeAddonPhase13DecisionInstrumentationTest`。
+    - Existing native addon policy gate:
+      `NodeNativeAddonPolicyInstrumentationTest`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-native-addon-loading-decision.js`。
+    - Gradle gate: `:app:verifyNodePhase13NativeAddonLoadingDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_39_NATIVE_ADDON_LOADING.md`。
+    - Surface manifest evidence:
+      `phase13-native-addon-loading-decision`。
+  - Remaining: signed packaged manifest、ABI allowlist、hash/signature
+    verification、packaged-only/no download-exec、dependency scan、crash
+    isolation、packaged positive/hostile corpus 仍未完成。
 
 - [ ] P13-40: 推进 `child_process` scoped runner。
   - 范围：评估桌面 Node 生态需要的子进程能力在 Android 上的替代实现。

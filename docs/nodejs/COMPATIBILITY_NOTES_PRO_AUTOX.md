@@ -91,6 +91,12 @@ AutoJs6 behavior:
 - `worker_threads` remains disabled by default.
 - native `.node` addons remain disabled by default.
 
+P13-39 records native addon loading as partial. AutoJs6 now reports
+`nativeAddonProfile` diagnostics, but this does not enable `.node` imports,
+`process.dlopen`, native builds, or runtime download-exec. Future Desktop
+support still requires signed packaged artifacts, ABI/hash allowlists,
+dependency scan, and crash isolation.
+
 Porting note: vendor pure-JS dependencies into the project, avoid install-time scripts, and check `docs/nodejs/COMPATIBILITY_PROFILE.md` for supported builtins.
 
 ## Filesystem

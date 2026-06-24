@@ -756,6 +756,15 @@ TypeScript declarations, surface manifest evidence, and docs updates while
 keeping callable WASI facades, scoped preopen broker, virtual fd/env/args
 policy, resource budgets, worker integration, and packaged `.wasm`/WASI
 behavior unpromoted. P13-38 records controlled WASI profile as partial.
+`verifyNodePhase13NativeAddonLoadingDecision` records P13-39 as the native
+addon loading decision gate. It requires `nativeAddonProfile` diagnostics,
+stable `.node` require/resolve denial, private process native API denial,
+existing native-addon policy evidence, dependency/package native-payload
+rejection evidence, TypeScript declarations, surface manifest evidence, and
+docs updates while keeping signed packaged artifacts, ABI/hash allowlists,
+dependency scanning, crash isolation, download-exec policy evidence, and
+packaged positive/hostile corpus unpromoted. P13-39 records native addon
+loading as partial.
 `verifyNodeModernCoreGate` covers the S7-31 through S7-36 modern core surface:
 `AsyncLocalStorage` propagation, diagnostics channel runtime telemetry,
 `perf_hooks`, single-runtime `node:test`, promise-based timers/streams/readline,

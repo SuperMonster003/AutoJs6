@@ -1,7 +1,7 @@
 {
   "schema": "autojs6-node-phase13-surface-manifest-v1",
   "phase": "Phase 13: Auto.js Pro And Desktop Node Parity Expansion",
-  "updatedAt": "2026-06-24",
+  "updatedAt": "2026-06-25",
   "profileVocabulary": [
     "safe_default",
     "pro_compat_opt_in",
@@ -481,7 +481,7 @@
         "P13-39",
         "P13-40"
       ],
-      "summary": "Stage desktop execution capabilities: P13-34 records worker_threads opt-in diagnostics and native-preflight evidence as partial; P13-35 records process-worker replacement as WorkerPool-preferred with no new process_worker facade while child_process remains denied; P13-36 records vm diagnostics while keeping vm denied until context isolation, timeout, memory, escape-denial, and packaged behavior evidence exists; P13-37 records inspector debug-profile diagnostics while keeping inspector denied until explicit debug session UI, loopback ADB forwarding, DevTools attach, profiler redaction, and packaged behavior evidence exists; P13-38 records controlled WASI diagnostics while keeping raw WASI denied until scoped preopen, fd/env/args, resource, worker, and packaged behavior evidence exists; native addon loading and child_process scoped runner remain staged.",
+      "summary": "Stage desktop execution capabilities: P13-34 records worker_threads opt-in diagnostics and native-preflight evidence as partial; P13-35 records process-worker replacement as WorkerPool-preferred with no new process_worker facade while child_process remains denied; P13-36 records vm diagnostics while keeping vm denied until context isolation, timeout, memory, escape-denial, and packaged behavior evidence exists; P13-37 records inspector debug-profile diagnostics while keeping inspector denied until explicit debug session UI, loopback ADB forwarding, DevTools attach, profiler redaction, and packaged behavior evidence exists; P13-38 records controlled WASI diagnostics while keeping raw WASI denied until scoped preopen, fd/env/args, resource, worker, and packaged behavior evidence exists; P13-39 records native addon diagnostics while keeping .node, process.dlopen, native builds, and download-exec denied until signed packaged artifacts, ABI/hash allowlists, dependency scan, and crash isolation exist; child_process scoped runner remains staged.",
       "risk": "critical",
       "runtimeSurface": [
         "node:worker_threads",
@@ -530,7 +530,14 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeWasiPhase13DecisionInstrumentationTest.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeWasmWasiInstrumentationTest.kt",
         "build/reports/nodejs/phase13-controlled-wasi-profile-decision.json",
-        "build/reports/nodejs/phase13-controlled-wasi-profile-decision.md"
+        "build/reports/nodejs/phase13-controlled-wasi-profile-decision.md",
+        "tools/nodejs/phase13/verify-native-addon-loading-decision.js",
+        ":app:verifyNodePhase13NativeAddonLoadingDecision",
+        "docs/nodejs/reports/phase13/P13_39_NATIVE_ADDON_LOADING.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeNativeAddonPhase13DecisionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeNativeAddonPolicyInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-native-addon-loading-decision.json",
+        "build/reports/nodejs/phase13-native-addon-loading-decision.md"
       ],
       "rollback": "Disable desktop execution flags and keep high-risk builtins on stable denial paths."
     },
