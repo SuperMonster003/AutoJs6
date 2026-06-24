@@ -1205,6 +1205,15 @@ reserved, `second_execution_slot` is not closed by this decision, and raw
 process handles, spawn/fork, stdio streams, signals, bridge modules, nested
 workers, and packaged process-worker behavior remain unpromoted.
 
+P13-40 records child_process scoped runner as partial. The runtime exposes
+`autojs6:profile.childProcessProfile` to document that `child_process` and
+`node:child_process` remain denied while the existing `shell` bridge stays the
+only command-execution migration path. Any future Desktop scoped runner must
+use app-private allowlisted binaries, reject arbitrary paths/downloaded
+binaries/shell operators/detached handles, bound stdin/stdout/stderr, prove
+timeout/cancel/kill/cleanup behavior, and add packaged plus hostile-corpus
+evidence before promotion.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context

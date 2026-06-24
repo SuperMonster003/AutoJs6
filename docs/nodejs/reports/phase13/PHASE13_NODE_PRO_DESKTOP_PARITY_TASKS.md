@@ -1267,6 +1267,27 @@ P13 task 本身使用以下执行状态：
     - Desktop profile 只能执行 allowlisted app-private binaries 或 Android shell
       provider，不允许任意路径执行。
     - stdout/stderr/input/timeout/cancel/kill/process cleanup 完整。
+  - Progress:
+    - P13-40 partial landing 已添加 `childProcessProfile` 诊断，保持
+      `child_process` / `node:child_process` 默认拒绝。
+    - 当前替代路径仍是单独 capability 的 `shell` bridge，不暴露
+      `spawn` / `fork` / stdio stream / signal / process handle。
+    - 新增 focused gate:
+      `NodeChildProcessPhase13DecisionInstrumentationTest`。
+    - Existing shell/process gates:
+      `NodeShellBridgeInstrumentationTest` /
+      `NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-child-process-scoped-runner-decision.js`。
+    - Gradle gate:
+      `:app:verifyNodePhase13ChildProcessScopedRunnerDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_40_CHILD_PROCESS_SCOPED_RUNNER.md`。
+    - Surface manifest evidence:
+      `phase13-child-process-scoped-runner-decision`。
+  - Remaining: scoped API shape、app-private binary packaging、allowlist/hash
+    integrity、bounded stdin/stdout/stderr、timeout/cancel/kill/cleanup、
+    provider process accounting、packaged smoke、hostile corpus 仍未完成。
 
 - [ ] P13-41: 推进完整 ESM loader parity。
   - 范围：扩展 `.mjs`、`type=module`、TLA、dynamic import、package exports/imports、

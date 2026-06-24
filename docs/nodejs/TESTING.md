@@ -1820,6 +1820,31 @@ WorkerPool evidence, packaged process-worker behavior, slot accounting,
 cleanup stress, user-facing API/UX, and any future P13-40 scoped
 `child_process` runner open.
 
+Phase 13 child_process scoped runner decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ChildProcessScopedRunnerDecision
+```
+
+This host gate records P13-40 as partial. It requires `childProcessProfile`
+diagnostics, stable `child_process` / `node:child_process` require and resolve
+denial, local shadow-package protection, the separate `shell` bridge evidence,
+TypeScript declarations, the desktop builtin matrix, and Phase13 docs. It keeps
+any callable child_process module, scoped runner API, app-private binary
+allowlist, bounded stdio, cancel/kill/cleanup semantics, packaged behavior, and
+hostile corpus coverage open.
+
+Phase 13 child_process scoped runner decision instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeChildProcessPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies `childProcessProfile` diagnostics, default feature-flag
+denial, `child_process` / `node:child_process` require and resolve denial,
+shadow-package protection, and the separate `shell` bridge path through a fake
+transport. P13-40 records child_process scoped runner as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

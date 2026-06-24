@@ -336,6 +336,13 @@ process-worker behavior. Scripts that need old threading/process-worker
 semantics should remain on Rhino or explicit bridge-backed alternatives until a
 future profile promotes them.
 
+P13-40 records child_process scoped runner as partial. AutoJs6 Node exposes
+`childProcessProfile` diagnostics, but it does not enable `child_process`,
+`node:child_process`, `spawn`, `fork`, streaming stdio, or process handles.
+Continue using the controlled `shell` bridge for the supported migration path
+until a future Desktop profile promotes a scoped runner with app-private binary
+allowlists and cleanup evidence.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

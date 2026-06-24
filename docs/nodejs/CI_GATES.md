@@ -734,6 +734,15 @@ bridge, reserved `worker_computation`, open `second_execution_slot` relation,
 and docs updates while keeping native WorkerPool proof, packaged behavior, slot
 accounting, cleanup stress, user-facing API/UX, and any future P13-40
 `child_process` runner open.
+`verifyNodePhase13ChildProcessScopedRunnerDecision` records P13-40 as the
+child_process scoped runner decision gate. It requires `childProcessProfile`
+diagnostics, stable `child_process` / `node:child_process` require/resolve
+denial, local shadow-package protection, separate `shell` bridge evidence,
+TypeScript declarations, desktop builtin matrix evidence, surface manifest
+evidence, and docs updates while keeping any callable child_process module,
+scoped runner API, app-private binary allowlist, bounded stdio,
+cancel/kill/cleanup semantics, packaged behavior, and hostile corpus coverage
+unpromoted. P13-40 records child_process scoped runner as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

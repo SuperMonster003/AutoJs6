@@ -1123,6 +1123,13 @@ a `process_worker` or `compute_worker` facade. `child_process` remains denied,
 `second_execution_slot` stay unpromoted until future evidence closes those
 gates.
 
+P13-40 records child_process scoped runner as partial: Safe Node now exposes
+`childProcessProfile` diagnostics while `child_process` and
+`node:child_process` stay denied. The current migration path remains the
+separate `shell` bridge; a real Desktop scoped runner still needs app-private
+allowlisted binaries, bounded stdio, timeout/cancel/kill/cleanup behavior,
+packaged evidence, and hostile corpus coverage.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

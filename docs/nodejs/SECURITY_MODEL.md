@@ -719,6 +719,15 @@ command bridge, `worker_computation` stays reserved, and no raw process handle,
 spawn/fork, stdio stream, signal, bridge-module, nested-worker, or packaged
 process-worker authority is promoted.
 
+P13-40 records child_process scoped runner as partial. `childProcessProfile` is
+diagnostic metadata only: `child_process` and `node:child_process` remain
+disabled builtins, and the existing `shell` bridge remains the separate
+capability-scoped command path. A future scoped runner must prove app-private
+allowlisted binaries, integrity checks, arbitrary-path denial, bounded
+stdin/stdout/stderr, timeout, cancellation, kill, cleanup, packaged disclosure,
+hostile corpus coverage, and rollback controls before any child-process-like
+Desktop profile authority can be promoted.
+
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
 metadata only and does not make a second JavaScript context a security
 boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,
