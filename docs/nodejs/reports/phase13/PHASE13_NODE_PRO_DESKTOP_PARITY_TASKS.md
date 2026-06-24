@@ -290,6 +290,9 @@ P13 task 本身使用以下执行状态：
       `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/` validate
       accepted 8h/24h report shapes and fail-closed under-duration,
       missing-metric, leak/orphan/runtime failure shapes.
+    - Archive helper:
+      `tools/nodejs/phase13/archive-full-heavy-resource-soak.js` validates a
+      completed soak JSON before copying it into the canonical final-soak path.
     - Gradle gate: `:app:verifyNodePhase13FullHeavyResourceStress`.
     - Report: `docs/nodejs/reports/phase13/P13_08_FULL_HEAVY_RESOURCE_STRESS.md`.
     - Expected quick soak evidence: `build/reports/nodejs/final-soak/quick-soak-8h.json`.

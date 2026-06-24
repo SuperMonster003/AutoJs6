@@ -56,9 +56,10 @@ Current full heavy resource stress progress:
   dedicated verifier for `quick-soak-8h.json` and `final-soak-24h.json`, plus
   comparable metric checks for RSS, Java heap, native heap, thread count, fd
   count, and bridge diagnostics. P13-08 also adds contract fixtures for accepted
-  and rejected report shapes, proving the gate fails closed before real soak
-  reports are archived. The blocker remains open until real 8 hour and 24 hour
-  device reports are available and clean.
+  and rejected report shapes plus an archive helper that validates real soak
+  JSON before copying it into the canonical final-soak path. The blocker
+  remains open until real 8 hour and 24 hour device reports are available and
+  clean.
 
 Current Android package installation progress:
 

@@ -801,8 +801,9 @@ blockers：
 - 第二执行 slot 已有显式 one-shot 路由和 focused instrumentation，但默认调度、
   packaged 行为、slot crash evidence 和 stress promotion 仍未完成。
 - P13-08 已补 `verifyNodePhase13FullHeavyResourceStress` 状态 gate、可比较
-  report contract 和 accepted/rejected 形状 fixtures；fixtures 只验证 gate
-  fail-closed 规则，真实 8 小时 quick soak 和 24 小时 final soak 证据仍未完成。
+  report contract、accepted/rejected 形状 fixtures 和归档前校验 helper；
+  fixtures 只验证 gate fail-closed 规则，真实 8 小时 quick soak 和 24 小时
+  final soak 证据仍未完成。
 
 ### Conditional decisions
 

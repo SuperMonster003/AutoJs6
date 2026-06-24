@@ -264,3 +264,7 @@ parser accepts the intended 8h/24h report shapes and rejects under-duration,
 missing-metric, leak/orphan, or unrecoverable runtime samples. These fixtures
 are not performance evidence and must not be copied into
 `build/reports/nodejs/final-soak/`.
+
+Use `tools/nodejs/phase13/archive-full-heavy-resource-soak.js` to copy only
+validated real soak outputs into `build/reports/nodejs/final-soak/`. Run it with
+`--dry-run` first when checking a candidate report.

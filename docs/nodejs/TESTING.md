@@ -1335,6 +1335,17 @@ under-duration, missing-metric, leak/orphan, and unrecoverable-runtime shapes.
 They validate the parser and fail-closed rules only; they are not soak evidence
 and do not set `quickSoakReady` or `finalSoakReady`.
 
+After a real device soak completes, archive it through the validator before
+placing it under the final-soak path:
+
+```powershell
+node tools/nodejs/phase13/archive-full-heavy-resource-soak.js --kind quick --source D:\path\to\quick-soak-report.json
+node tools/nodejs/phase13/archive-full-heavy-resource-soak.js --kind final --source D:\path\to\final-soak-report.json
+```
+
+Use `--dry-run` first when validating a candidate report. The helper writes an
+archive audit report and refuses under-duration or dirty reports.
+
 Current bridge concurrency and resource-limit focused instrumentation:
 
 ```powershell

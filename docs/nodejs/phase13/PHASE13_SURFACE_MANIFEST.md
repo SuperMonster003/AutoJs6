@@ -49,7 +49,7 @@ workstreams, target profiles, evidence, risk, and rollback policy.
 Current `runtime.graduation_blockers` evidence includes the P13-05 crash marker
 store/host collector, P13-06 default one-shot scheduler gate, P13-07 partial
 packaged long-running dispatch gate, P13-08 full heavy stress report gate with
-contract fixtures, and P13-09 partial Android local package store. The surface
+contract fixtures/archive helper, and P13-09 partial Android local package store. The surface
 remains `planned` until
 P13-05 fully closes `crash_evidence_automation`, P13-06 adds
 packaged/fatal-crash/stress evidence, P13-07 adds packaged install/run

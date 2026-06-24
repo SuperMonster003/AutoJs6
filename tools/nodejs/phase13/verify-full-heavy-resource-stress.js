@@ -10,6 +10,7 @@ const FILES = {
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
   phase13Tasks: "docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md",
   p13Report: "docs/nodejs/reports/phase13/P13_08_FULL_HEAVY_RESOURCE_STRESS.md",
+  archiveScript: "tools/nodejs/phase13/archive-full-heavy-resource-soak.js",
   phase11SoakScript: "tools/nodejs/phase11/verify-final-soak-gate.js",
   phase11Gate: "app/node-phase11-gate.gradle.kts",
   phase13Gate: "app/node-phase13-gate.gradle.kts",
@@ -114,6 +115,7 @@ function buildReport(files, soakReports, contractFixtures) {
   const anchorChecks = [
     token(files.phase13Tasks, "P13-08"),
     token(files.p13Report, "Status: partial"),
+    token(files.archiveScript, "autojs6-node-phase13-full-heavy-resource-stress-archive-v1"),
     token(files.phase11SoakScript, "autojs6-node-final-soak-gate-v1"),
     token(files.phase11Gate, "generateNodeFinalSoakStatus"),
     token(files.phase11Gate, "verifyNodeFinalSoakGate"),
@@ -203,6 +205,10 @@ function buildReport(files, soakReports, contractFixtures) {
 function readSoakReport(repoRoot, requirement) {
   const file = path.join(repoRoot, requirement.relative);
   const json = readJsonIfExists(file);
+  return evaluateSoakReportJson(json, requirement);
+}
+
+function evaluateSoakReportJson(json, requirement) {
   const durationHours = durationHoursFrom(json);
   const requiredMetricPresence = Object.fromEntries(REQUIRED_METRICS.map((key) => [key, hasKeyDeep(json, key)]));
   const requiredMetricsReady = Object.values(requiredMetricPresence).every(Boolean);
@@ -475,4 +481,14 @@ function parseBoolean(value) {
   return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  REQUIRED_SOAK_REPORTS,
+  REQUIRED_METRICS,
+  evaluateSoakReportJson,
+  readJsonIfExists,
+  round,
+};

@@ -13,6 +13,8 @@ required 8 hour quick soak and 24 hour final soak.
 
 - Host verifier:
   `tools/nodejs/phase13/verify-full-heavy-resource-stress.js`
+- Archive helper:
+  `tools/nodejs/phase13/archive-full-heavy-resource-soak.js`
 - Contract fixtures:
   `tools/nodejs/phase13/fixtures/full-heavy-resource-stress/`
 - Gradle gate:
@@ -48,6 +50,27 @@ incomplete shapes before real long-duration evidence is archived:
 The generated `phase13-full-heavy-resource-stress` report exposes these under
 `contractFixtures`; any mismatch is treated as a policy violation in the host
 gate.
+
+## Archive Helper
+
+The archive helper validates a completed device soak report with the same
+P13-08 contract before copying it into the canonical final-soak path:
+
+```powershell
+node tools/nodejs/phase13/archive-full-heavy-resource-soak.js `
+  --kind quick `
+  --source D:\path\to\quick-soak-report.json
+
+node tools/nodejs/phase13/archive-full-heavy-resource-soak.js `
+  --kind final `
+  --source D:\path\to\final-soak-report.json
+```
+
+Use `--dry-run` to validate without copying, and `--force` only when replacing
+an already archived report intentionally. The helper writes
+`build/reports/nodejs/phase13-full-heavy-resource-stress-archive.{json,md}`.
+It does not create or synthesize soak evidence; invalid or under-duration
+reports are blocked before they can overwrite the expected final-soak files.
 
 ## Comparable Report Contract
 

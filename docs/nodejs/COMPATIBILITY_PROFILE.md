@@ -1724,7 +1724,8 @@ native heap, thread, fd, and bridge diagnostics and no leak/orphan/runtime
 failure flags. The verifier also has contract fixtures for accepted
 duration/timestamp report shapes and rejected under-duration, missing-metric,
 leak/orphan, and unrecoverable-runtime shapes; those fixtures validate the gate
-only and do not count as soak evidence.
+only and do not count as soak evidence. A companion archive helper validates
+real completed soak JSON before copying it into the canonical final-soak path.
 
 The packaged APK smoke requires `toast`, `app`, `clipboard`, and `device` successfully and verifies that project-local `node_modules/toast`, `node_modules/app`, `node_modules/clipboard`, and `node_modules/device` packages cannot shadow bridge modules. Packaged `app.packageName` is verified against the packaged application id. `versionName` and `versionCode` are type-checked in packaged smoke because older inrt templates do not inject host app metadata yet; refreshed templates should promote those to exact-value checks. Packaged `clipboard` and `device` smokes use the queued fallback when live bridge metadata is absent; this proves module routing, Promise behavior, packaged shadowing, and privacy-safe surface shape, while true system clipboard/device access is still provided by the live Android provider path.
 

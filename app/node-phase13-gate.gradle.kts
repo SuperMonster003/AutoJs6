@@ -221,6 +221,7 @@ tasks.register<Exec>("verifyNodePhase13FullHeavyResourceStress") {
 
     val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-full-heavy-resource-stress.js")
     inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase13/archive-full-heavy-resource-soak.js"))
     inputs.dir(rootProject.layout.projectDirectory.dir("tools/nodejs/phase13/fixtures/full-heavy-resource-stress"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
     inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
