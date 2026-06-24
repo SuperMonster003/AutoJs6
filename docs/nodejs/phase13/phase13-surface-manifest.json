@@ -408,9 +408,10 @@
         "P13-32",
         "P13-33"
       ],
-      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: http/https, net/tls/dns, dgram, broader roots, and advanced fs APIs.",
+      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as partial while raw sockets, net/tls/dns, dgram, broader roots, and advanced fs APIs remain staged.",
       "risk": "high",
       "runtimeSurface": [
+        "controlled node:http/node:https client facade",
         "node:http",
         "node:https",
         "node:net",
@@ -425,7 +426,15 @@
         ":app:generateNodeBuiltinDesktopParityMatrix",
         "docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md",
         "build/reports/nodejs/node-builtin-parity.json",
-        "build/reports/nodejs/node-builtin-parity.md"
+        "build/reports/nodejs/node-builtin-parity.md",
+        "tools/nodejs/phase13/verify-http-https-client-parity.js",
+        ":app:verifyNodePhase13HttpHttpsClientParity",
+        "docs/nodejs/reports/phase13/P13_29_HTTP_HTTPS_CLIENT_PARITY.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeHttpDesktopParityInstrumentationTest.kt",
+        "docs/nodejs/types/autojs6-node/http.d.ts",
+        "docs/nodejs/types/autojs6-node/https.d.ts",
+        "build/reports/nodejs/phase13-http-https-client-parity.json",
+        "build/reports/nodejs/phase13-http-https-client-parity.md"
       ],
       "rollback": "Revert Desktop profile allowlist entries and keep raw network and broad filesystem access denied."
     },

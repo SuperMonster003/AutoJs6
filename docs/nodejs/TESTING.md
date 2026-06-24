@@ -443,6 +443,23 @@ permission tagging, pending-call cleanup, and fail-closed TLS customization:
 request-level `createConnection`, and unsafe agent TLS options all reject with
 `ERR_AUTOJS6_NETWORK_POLICY_DENIED`.
 
+Phase 13 HTTP/HTTPS client parity gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13HttpHttpsClientParity
+```
+
+P13-29 records HTTP/HTTPS client parity as partial. The host gate requires the
+existing controlled `http` / `https` facade, `NodeHttpDesktopParityInstrumentationTest`,
+minimal TypeScript declarations, desktop builtin matrix evidence, and cross-doc
+policy text. The focused device test covers client request, stream-backed
+response consumption through the existing S8 tests, timeout, manual and explicit
+redirect follow, TLS/provider error propagation, proxy/tunnel/`CONNECT` denial,
+server/listen denial, `node_modules` shadow denial, and the controlled
+fetch/axios boundary. It does not promote raw sockets, DNS/TLS session APIs,
+server authority, per-request proxy support, packaged INTERNET permission
+evidence, or live provider HTTP smoke.
+
 Focused HTTP stream semantics instrumentation:
 
 ```powershell
@@ -1452,6 +1469,18 @@ instrumentation, status-manifest/matrix updates, and cross-document evidence.
 It does not promote `zip`, `canvas`, OpenCC/pinyin packaged resources,
 `sysprops`, `Arrayx`, `Numberx`, raw Canvas/Paint, or raw Android/OpenCV
 objects.
+
+Phase 13 HTTP/HTTPS client parity status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13HttpHttpsClientParity
+```
+
+This host gate records P13-29 as partial. It requires the controlled
+`http`/`https` client facade, focused device evidence, TypeScript declarations,
+desktop builtin matrix updates, security/profile docs, and release matrix text.
+It keeps server/listen, raw sockets, DNS/TLS session control, proxy/tunnel
+configuration, packaged INTERNET proof, and live provider HTTP evidence open.
 
 Current Java interop allowlist focused instrumentation:
 

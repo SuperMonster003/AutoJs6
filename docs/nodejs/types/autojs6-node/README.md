@@ -30,6 +30,8 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `ui.overlay`
 - `input_observer`
 - `fetch`
+- `http` / `node:http`
+- `https` / `node:https`
 - `axios`
 - `websocket`
 - `work_manager`
@@ -122,6 +124,13 @@ typed as a pure JavaScript `Mathx` facade through `require("jsox")`,
 `Math`/prototype mutation, `zip`, `canvas`, OpenCC/pinyin packaged resources,
 `sysprops`, `Arrayx`, `Numberx`, and raw Android/OpenCV object parity remain
 future work.
+
+P13-29 records the partial HTTP/HTTPS client parity gate. `http`/`node:http`
+and `https`/`node:https` are typed as controlled client facades over AutoJs6
+fetch: `request()`, `get()`, `ClientRequest`, `IncomingMessage`, and safe
+shape-only `Agent` fields are declared. Server/listen, raw sockets, proxy and
+tunnel options, custom TLS/session control, and packaged live-network behavior
+remain future work.
 
 P12-24 reserves `require("rhino")` as a disabled JSON-only shim facade. P12-25 adds an explicit `rhino.run({ experimental: true, source|path, timeoutMs, args })` JSON-only POC that returns frozen `RunResult` records and never installs Rhino globals. Calls without `experimental: true` still reject with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`; default `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, `require("node:rhino")` is not an alias, and no `compat.rhino` surface is declared. P13-14 adds typed `rhino.install({ experimental: true, globals?, target? })` support for the explicit Java proxy POC only: the returned `InstallResult` records `Packages`, `java`, and `android` proxy installation through the Java interop allowlist, while `JavaAdapter` remains unavailable. P13-15 declares `rhino.importClass()` and `rhino.importPackage()` as stable `never` helpers that throw `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; migration should use assignment from an explicit proxy target. P13-16 declares `rhino.JavaAdapter()` as a stable `never` helper that throws `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`, and reserves `java.defineClass()` / `$autojs.java.defineClass()` as stable-denied replacement names until a bounded proxy-interface provider exists.
 

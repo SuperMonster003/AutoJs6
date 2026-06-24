@@ -995,6 +995,13 @@ Current `require("autojs6:profile")` reports `network=false` and `experimentalFl
 
 Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, `maxRedirects`, text/arrayBuffer/json response helpers, and Web Stream reads through `response.body.stream()`. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. The axios-shaped adapter supports `axios(config)`, `axios.request`, `axios.get`, `axios.post`, `baseURL`, params, headers, `timeout`, and `responseType: "json" | "text" | "arraybuffer"` while rejecting custom adapters, agents, proxy configuration, custom transport, and raw socket assumptions. The S8-21 HTTP client facade supports `request()` / `get()`, a `ClientRequest` subset, an `IncomingMessage` subset, request and response headers, response status metadata, buffered request body chunks, response body `data` / `end` / `pipe()`, timeout, abort, and explicit redirect follow only when `redirect` or `maxRedirects` is configured. S8-23 adds focused stream semantics coverage for request-level `AbortSignal`, pre-aborted signal no-dispatch, `IncomingMessage` `close`, `pipe()` backpressure smoke, `maxResponseBytes`, service-destroy cancellation, and pending-call cleanup. S8-24 keeps `http.Agent` and `https.Agent` as limited shape-only facades with safe option fields while rejecting raw socket connector options. The S8-22 HTTPS layer keeps certificate validation provider-owned and rejects TLS customization such as `rejectUnauthorized=false`, custom secure contexts, client certificate fields, custom `createConnection`, and unsafe agent TLS options with `ERR_AUTOJS6_NETWORK_POLICY_DENIED`.
 
+P13-29 records HTTP/HTTPS client parity as partial. The controlled
+`http`/`https` facade now has a Phase 13 gate, TypeScript declarations, desktop
+builtin matrix evidence, TLS/provider-error propagation coverage, and explicit
+proxy/tunnel/`CONNECT`/server-listen denials. This does not promote raw sockets,
+DNS/TLS session APIs, per-request proxy support, packaged INTERNET permission
+evidence, or live provider HTTP smoke.
+
 The controlled request policy is bounded even when fake or experimental live providers are used:
 
 - max concurrent user fetches: `4`

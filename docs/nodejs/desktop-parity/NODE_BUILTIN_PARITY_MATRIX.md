@@ -38,8 +38,8 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `events` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `fs` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `fs/promises` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `http` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy. |
-| `https` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy. |
+| `http` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29 records the controlled client subset as partial; raw server/listen, proxy/tunnel, custom TLS/session control, and packaged live-network evidence remain open. |
+| `https` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29 records the controlled client subset as partial; raw server/listen, proxy/tunnel, custom TLS/session control, and packaged live-network evidence remain open. |
 | `inspector` | `disabled` | `debug_unsafe_lab` | `commonjs-known`, `disabled` | P13-37 must keep release denied and validate debug-only ADB-forward behavior. |
 | `module` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `net` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy. |

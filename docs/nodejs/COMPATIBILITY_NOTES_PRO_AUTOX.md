@@ -281,6 +281,12 @@ scripts that depend on default global `Math`/prototype mutation, `zip`,
 `canvas`, OpenCC/pinyin packaged dictionaries, `sysprops`, `Arrayx`, `Numberx`,
 or raw Android/OpenCV objects on Rhino until separate gates land.
 
+P13-29 records HTTP/HTTPS client parity as partial. AutoJs6 Node supports the
+controlled `http`/`https` client facade for request/get, stream response,
+timeout, redirect, and provider-owned TLS errors, but still rejects
+server/listen, raw sockets, proxy/tunnel options, `CONNECT`, custom TLS/session
+control, and per-request proxy configuration.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

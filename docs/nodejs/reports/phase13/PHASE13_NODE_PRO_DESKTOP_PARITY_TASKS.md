@@ -129,6 +129,21 @@
   `Numberx`, and raw Android Canvas/Paint or Android/OpenCV point/rect parity
   profile gates.
 
+## P13-29 Partial Landing Note
+
+- P13-29 partial HTTP/HTTPS client parity gate records the existing
+  controlled `http`/`https` client facade as a Desktop-profile compatibility
+  subset, backed only by AutoJs6 controlled fetch.
+- Host verifier: `tools/nodejs/phase13/verify-http-https-client-parity.js`.
+- Gradle gate: `:app:verifyNodePhase13HttpHttpsClientParity`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_29_HTTP_HTTPS_CLIENT_PARITY.md`.
+- Surface manifest evidence: `phase13-http-https-client-parity`.
+- Remaining P13-29 blockers: packaged INTERNET permission evidence, live
+  provider HTTP smoke, raw socket/server/listen policy, DNS/TLS session
+  parity, proxy support decision, richer redirect/TLS failure corpus, and
+  desktop client package corpus expansion.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -904,6 +919,23 @@ P13 task 本身使用以下执行状态：
       行为明确。
     - server/listen 能力不与 client 一起默认开放。
     - 与现有 `fetch`/`axios` bridge-backed provider 的边界清晰。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Runtime boundary: `app/src/main/cpp/node_bridge_sources.cpp`
+    - Focused instrumentation:
+      `app/src/androidTest/java/org/autojs/autojs/engine/NodeHttpDesktopParityInstrumentationTest.kt`
+    - Existing facade tests: `NodeHttpClientFacadeInstrumentationTest`,
+      `NodeHttpStreamSemanticsInstrumentationTest`,
+      `NodeHttpsClientFacadeInstrumentationTest`,
+      `NodeHttpAgentFacadeInstrumentationTest`,
+      `NodeRawNetworkPolicyInstrumentationTest`
+    - Types: `docs/nodejs/types/autojs6-node/http.d.ts`,
+      `docs/nodejs/types/autojs6-node/https.d.ts`
+    - Host verifier:
+      `tools/nodejs/phase13/verify-http-https-client-parity.js`
+    - Gradle gate: `:app:verifyNodePhase13HttpHttpsClientParity`
+    - Report:
+      `docs/nodejs/reports/phase13/P13_29_HTTP_HTTPS_CLIENT_PARITY.md`
+    - Surface manifest evidence: `phase13-http-https-client-parity`
 
 - [ ] P13-30: 推进 `net` / `tls` / `dns` staged compatibility。
   - 范围：先客户端 socket，再评估 server socket。

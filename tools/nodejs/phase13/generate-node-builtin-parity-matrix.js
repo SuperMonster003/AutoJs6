@@ -157,7 +157,7 @@ function classifyBuiltin(name, sets) {
       status: "limited_network_gated",
       targetProfile: "desktop_compat_opt_in",
       source: sourceTags({ disabled, network, limited, commonJs }),
-      nextStep: "P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy.",
+      nextStep: networkNextStepFor(bareName),
     };
   }
   if (limited) {
@@ -185,6 +185,13 @@ function classifyBuiltin(name, sets) {
     source: sourceTags({ disabled, network, limited, commonJs }),
     nextStep: "Add explicit registry entry or document android_not_applicable.",
   };
+}
+
+function networkNextStepFor(name) {
+  if (name === "http" || name === "https") {
+    return "P13-29 records the controlled client subset as partial; raw server/listen, proxy/tunnel, custom TLS/session control, and packaged live-network evidence remain open.";
+  }
+  return "P13-29/P13-30 must decide raw client/server behavior, limits, and Android permission policy.";
 }
 
 function highRiskProfileFor(name) {
