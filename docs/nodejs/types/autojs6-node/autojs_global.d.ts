@@ -17,6 +17,25 @@ declare namespace AutoJs6Node {
     readonly status: "partial" | "experimental" | "disabled" | "unsupported" | string;
   }
 
+  export interface FilesystemAdvancedApis {
+    readonly streams: "partial" | "unsupported" | string;
+    readonly fileHandle: "partial" | "unsupported" | string;
+    readonly fd: "partial" | "unsupported" | string;
+    readonly opendir: "partial" | "unsupported" | string;
+    readonly watch: "partial" | "unsupported" | string;
+    readonly realpath: "partial" | "unsupported" | string;
+    readonly recursiveWatch: "unsupported" | "partial" | string;
+    readonly closeOnDestroy: "execution_owned" | "unsupported" | string;
+    readonly packagedBehavior: "partial" | "unsupported" | string;
+    readonly rawFd: boolean;
+  }
+
+  export interface FilesystemProfileLimits {
+    readonly watcherLimit: number;
+    readonly watchEventLimit: number;
+    readonly watchEventWindowMs: number;
+  }
+
   export interface FilesystemProfile {
     readonly mode: "scoped_working_directory" | string;
     readonly safeProfileScoped: boolean;
@@ -25,6 +44,8 @@ declare namespace AutoJs6Node {
     readonly safRoots: boolean;
     readonly appPrivateRoots: boolean;
     readonly androidSharedStorage: boolean;
+    readonly advancedApis: FilesystemAdvancedApis;
+    readonly limits: FilesystemProfileLimits;
   }
 
   export interface AutoJsProfile {

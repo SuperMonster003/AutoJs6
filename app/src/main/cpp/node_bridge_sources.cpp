@@ -8851,7 +8851,24 @@ std::string buildEmbeddedScriptExecutionSource(
         userAuthorizedRoots: false,
         safRoots: false,
         appPrivateRoots: false,
-        androidSharedStorage: false
+        androidSharedStorage: false,
+        advancedApis: Object.freeze({
+          streams: "partial",
+          fileHandle: "partial",
+          fd: "partial",
+          opendir: "partial",
+          watch: "partial",
+          realpath: "partial",
+          recursiveWatch: "unsupported",
+          closeOnDestroy: "execution_owned",
+          packagedBehavior: "partial",
+          rawFd: false
+        }),
+        limits: Object.freeze({
+          watcherLimit: __autojs6_scoped_fs_watcher_limit,
+          watchEventLimit: __autojs6_scoped_fs_watch_event_limit,
+          watchEventWindowMs: __autojs6_scoped_fs_watch_event_window_ms
+        })
       }),
       processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),

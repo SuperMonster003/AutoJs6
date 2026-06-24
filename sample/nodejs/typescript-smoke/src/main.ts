@@ -519,6 +519,9 @@ async function smoke(): Promise<void> {
   const globalProfile: AutoJs6Node.AutoJsProfile = $autojs.profile;
   const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
   const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
+  const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
+  const filesystemRawFd: boolean = autojsProfile.filesystemProfile.advancedApis.rawFd;
+  const filesystemWatcherLimit: number = autojsProfile.filesystemProfile.limits.watcherLimit;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -713,6 +716,9 @@ async function smoke(): Promise<void> {
   void globalProfile;
   void filesystemProfileMode;
   void filesystemProfileRoots;
+  void filesystemAdvancedWatch;
+  void filesystemRawFd;
+  void filesystemWatcherLimit;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;
