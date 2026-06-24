@@ -9015,6 +9015,36 @@ std::string buildEmbeddedScriptExecutionSource(
         rawProcessHandles: false,
         nativeBindings: false
       }),
+      packagedCapabilityProfile: Object.freeze({
+        status: "packaged_metadata_partial",
+        defaultEnabled: true,
+        targetProfiles: Object.freeze(["pro_compat_opt_in", "desktop_compat_opt_in"]),
+        metadataSchema: "autojs6-packaged-capability-metadata-v1",
+        metadataSources: Object.freeze([
+          "project.json:node",
+          "package.json:autojs6",
+          "package.json:autojs6.node",
+          ".autojs6-node-runtime.json",
+          ".autojs6-node-launch.json"
+        ]),
+        permissionManifest: "node_permissions_enforced",
+        androidManifestSynthesis: "bridge_android_permissions_only",
+        profileMetadata: "diagnostic_only",
+        nodeBuiltins: "declared_metadata_only_no_authority",
+        nativeAssets: "declared_metadata_only_denied",
+        filesystemRoots: "declared_metadata_only_scoped_default",
+        network: "network_capability_maps_android_internet",
+        longRunning: "execution_mode_metadata_partial",
+        undeclaredCapabilities: "rejected_before_dispatch",
+        manifestConsistency: "project_package_metadata_verified",
+        packagedRuntimeDescriptor: "version_vector_required",
+        packagedLaunchDescriptor: "scoped_internal_metadata",
+        rawProfilePromotion: false,
+        rawBuiltinPromotion: false,
+        nativeAssetLoading: false,
+        expandedFilesystemRoots: false,
+        unreviewedAndroidPermissions: false
+      }),
       filesystemProfile: Object.freeze({
         mode: "scoped_working_directory",
         safeProfileScoped: true,
@@ -9302,6 +9332,54 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return Object.freeze(output);
   }
+  function __autojs6_bridge_packaged_metadata_fallback() {
+    return Object.freeze({
+      schema: "autojs6-packaged-capability-metadata-v1",
+      status: "absent",
+      profile: "safe_default",
+      requestedProfiles: Object.freeze([]),
+      builtins: Object.freeze([]),
+      nativeAssets: Object.freeze([]),
+      filesystemRoots: Object.freeze([]),
+      executionMode: "",
+      longRunning: false,
+      network: Object.freeze({
+        requested: false,
+        declaredCapability: false,
+        androidPermissions: Object.freeze([])
+      }),
+      metadataOnly: true,
+      grantsAuthority: false,
+      sources: Object.freeze(["none"]),
+      warnings: Object.freeze([])
+    });
+  }
+  function __autojs6_bridge_freeze_packaged_metadata(value) {
+    if (!value || typeof value !== "object") {
+      return __autojs6_bridge_packaged_metadata_fallback();
+    }
+    const network = value.network && typeof value.network === "object" ? value.network : {};
+    return Object.freeze({
+      schema: typeof value.schema === "string" && value.schema ? value.schema : "autojs6-packaged-capability-metadata-v1",
+      status: typeof value.status === "string" && value.status ? value.status : "absent",
+      profile: typeof value.profile === "string" && value.profile ? value.profile : "safe_default",
+      requestedProfiles: __autojs6_bridge_freeze_string_array(value.requestedProfiles),
+      builtins: __autojs6_bridge_freeze_string_array(value.builtins),
+      nativeAssets: __autojs6_bridge_freeze_string_array(value.nativeAssets),
+      filesystemRoots: __autojs6_bridge_freeze_string_array(value.filesystemRoots),
+      executionMode: typeof value.executionMode === "string" ? value.executionMode : "",
+      longRunning: value.longRunning === true,
+      network: Object.freeze({
+        requested: network.requested === true,
+        declaredCapability: network.declaredCapability === true,
+        androidPermissions: __autojs6_bridge_freeze_string_array(network.androidPermissions)
+      }),
+      metadataOnly: value.metadataOnly !== false,
+      grantsAuthority: value.grantsAuthority === true,
+      sources: __autojs6_bridge_freeze_string_array(value.sources),
+      warnings: __autojs6_bridge_freeze_string_array(value.warnings)
+    });
+  }
   function __autojs6_bridge_permission_manifest() {
     if (__autojs6_bridge_permission_manifest_cache !== undefined) {
       return __autojs6_bridge_permission_manifest_cache;
@@ -9316,6 +9394,7 @@ std::string buildEmbeddedScriptExecutionSource(
       unknownPermissions: Object.freeze([]),
       androidPermissions: Object.freeze([]),
       serviceRequired: false,
+      packagedMetadata: __autojs6_bridge_packaged_metadata_fallback(),
       warnings: Object.freeze([])
     });
     try {
@@ -9343,6 +9422,7 @@ std::string buildEmbeddedScriptExecutionSource(
         unknownPermissions: __autojs6_bridge_freeze_string_array(parsed.unknownPermissions),
         androidPermissions: __autojs6_bridge_freeze_string_array(parsed.androidPermissions),
         serviceRequired: parsed.serviceRequired === true,
+        packagedMetadata: __autojs6_bridge_freeze_packaged_metadata(parsed.packagedMetadata),
         warnings: __autojs6_bridge_freeze_string_array(parsed.warnings)
       });
       return __autojs6_bridge_permission_manifest_cache;
@@ -9368,6 +9448,7 @@ std::string buildEmbeddedScriptExecutionSource(
       unknownPermissions: Object.freeze(manifest.unknownPermissions.slice()),
       androidPermissions: Object.freeze(manifest.androidPermissions.slice()),
       serviceRequired: manifest.serviceRequired,
+      packagedMetadata: manifest.packagedMetadata,
       warnings: Object.freeze(manifest.warnings.slice())
     });
   }

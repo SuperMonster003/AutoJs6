@@ -248,16 +248,19 @@ object NodeBridgePermissionManifest {
     fun fromJsonSources(projectJsonText: String?, packageJsonText: String?): Manifest {
         val sources = mutableListOf<PermissionSource>()
         val warnings = mutableListOf<String>()
+        val packagedMetadata = PackagedMetadataBuilder()
         projectJsonText?.let { text ->
             val json = parseJsonObject(text, PROJECT_JSON, warnings)
             if (json != null) {
                 collectProjectJsonPermissions(json, sources, warnings)
+                collectProjectJsonPackagedMetadata(json, packagedMetadata, warnings)
             }
         }
         packageJsonText?.let { text ->
             val json = parseJsonObject(text, PACKAGE_JSON, warnings)
             if (json != null) {
                 collectPackageJsonPermissions(json, sources, warnings)
+                collectPackageJsonPackagedMetadata(json, packagedMetadata, warnings)
             }
         }
         val permissions = sources
@@ -271,6 +274,7 @@ object NodeBridgePermissionManifest {
             permissions = permissions,
             sources = sources.map { it.name }.distinct(),
             warnings = warnings,
+            packagedMetadata = packagedMetadata,
         )
     }
 
@@ -424,8 +428,10 @@ object NodeBridgePermissionManifest {
         permissions: List<String>,
         sources: List<String>,
         warnings: List<String>,
+        packagedMetadata: PackagedMetadataBuilder = PackagedMetadataBuilder(),
     ): Manifest {
         val unknown = permissions.filterNot { it in definedCapabilitySet }.sorted()
+        val normalizedPermissions = permissions.map(::normalizeCapability).filter { it.isNotEmpty() }.distinct()
         return Manifest(
             version = 1,
             enforced = enforced,
@@ -436,6 +442,7 @@ object NodeBridgePermissionManifest {
             androidPermissions = androidPermissionsForCapabilities(permissions),
             serviceRequired = permissions.isNotEmpty(),
             warnings = (warnings + unknown.map { "Unknown Node bridge capability: $it" }).distinct(),
+            packagedMetadata = packagedMetadata.build(normalizedPermissions),
         )
     }
 
@@ -449,6 +456,15 @@ object NodeBridgePermissionManifest {
         collectArray(node, "bridgePermissions", "project.json:node.bridgePermissions", sources, warnings)
     }
 
+    private fun collectProjectJsonPackagedMetadata(
+        json: JSONObject,
+        metadata: PackagedMetadataBuilder,
+        warnings: MutableList<String>,
+    ) {
+        val node = json.optJSONObject("node") ?: return
+        collectPackagedMetadata(node, "project.json:node", metadata, warnings)
+    }
+
     private fun collectPackageJsonPermissions(
         json: JSONObject,
         sources: MutableList<PermissionSource>,
@@ -460,6 +476,136 @@ object NodeBridgePermissionManifest {
         autojs6.optJSONObject("node")?.let { node ->
             collectArray(node, "permissions", "package.json:autojs6.node.permissions", sources, warnings)
             collectArray(node, "bridgePermissions", "package.json:autojs6.node.bridgePermissions", sources, warnings)
+        }
+    }
+
+    private fun collectPackageJsonPackagedMetadata(
+        json: JSONObject,
+        metadata: PackagedMetadataBuilder,
+        warnings: MutableList<String>,
+    ) {
+        val autojs6 = json.optJSONObject("autojs6") ?: return
+        collectPackagedMetadata(autojs6, "package.json:autojs6", metadata, warnings)
+        autojs6.optJSONObject("node")?.let { node ->
+            collectPackagedMetadata(node, "package.json:autojs6.node", metadata, warnings)
+        }
+    }
+
+    private fun collectPackagedMetadata(
+        json: JSONObject,
+        sourceName: String,
+        metadata: PackagedMetadataBuilder,
+        warnings: MutableList<String>,
+    ) {
+        collectOptionalString(json, "profile", "$sourceName.profile", warnings)?.let { profile ->
+            metadata.profiles += profile
+            metadata.sources += "$sourceName.profile"
+        }
+        collectOptionalStringArray(json, "profiles", "$sourceName.profiles", warnings).let { profiles ->
+            if (profiles.isNotEmpty()) {
+                metadata.profiles += profiles
+                metadata.sources += "$sourceName.profiles"
+            }
+        }
+        collectOptionalStringArray(json, "builtins", "$sourceName.builtins", warnings).let { builtins ->
+            if (builtins.isNotEmpty()) {
+                metadata.builtins += builtins
+                metadata.sources += "$sourceName.builtins"
+            }
+        }
+        collectOptionalStringArray(json, "nodeBuiltins", "$sourceName.nodeBuiltins", warnings).let { builtins ->
+            if (builtins.isNotEmpty()) {
+                metadata.builtins += builtins
+                metadata.sources += "$sourceName.nodeBuiltins"
+            }
+        }
+        collectOptionalStringArray(json, "nativeAssets", "$sourceName.nativeAssets", warnings).let { nativeAssets ->
+            if (nativeAssets.isNotEmpty()) {
+                metadata.nativeAssets += nativeAssets
+                metadata.sources += "$sourceName.nativeAssets"
+            }
+        }
+        collectOptionalStringArray(json, "filesystemRoots", "$sourceName.filesystemRoots", warnings).let { roots ->
+            if (roots.isNotEmpty()) {
+                metadata.filesystemRoots += roots
+                metadata.sources += "$sourceName.filesystemRoots"
+            }
+        }
+        json.optJSONObject("filesystem")?.let { filesystem ->
+            collectOptionalStringArray(filesystem, "roots", "$sourceName.filesystem.roots", warnings).let { roots ->
+                if (roots.isNotEmpty()) {
+                    metadata.filesystemRoots += roots
+                    metadata.sources += "$sourceName.filesystem.roots"
+                }
+            }
+        }
+        collectOptionalString(json, "executionMode", "$sourceName.executionMode", warnings)?.let { executionMode ->
+            if (metadata.executionMode == null) {
+                metadata.executionMode = executionMode
+            }
+            metadata.sources += "$sourceName.executionMode"
+        }
+        if (json.has("network") && !json.isNull("network")) {
+            val network = json.opt("network")
+            when (network) {
+                is Boolean -> {
+                    metadata.networkRequested = metadata.networkRequested || network
+                    metadata.sources += "$sourceName.network"
+                }
+                is JSONObject -> {
+                    val enabled = network.opt("enabled")
+                    if (enabled is Boolean) {
+                        metadata.networkRequested = metadata.networkRequested || enabled
+                        metadata.sources += "$sourceName.network.enabled"
+                    } else {
+                        warnings += "$sourceName.network.enabled must be a boolean when present."
+                    }
+                }
+                else -> warnings += "$sourceName.network must be a boolean or object."
+            }
+        }
+    }
+
+    private fun collectOptionalString(
+        json: JSONObject,
+        key: String,
+        sourceName: String,
+        warnings: MutableList<String>,
+    ): String? {
+        if (!json.has(key) || json.isNull(key)) {
+            return null
+        }
+        val value = json.opt(key)
+        if (value !is String || value.isBlank()) {
+            warnings += "$sourceName must be a non-empty string."
+            return null
+        }
+        return value.trim()
+    }
+
+    private fun collectOptionalStringArray(
+        json: JSONObject,
+        key: String,
+        sourceName: String,
+        warnings: MutableList<String>,
+    ): List<String> {
+        if (!json.has(key) || json.isNull(key)) {
+            return emptyList()
+        }
+        val array = json.opt(key) as? JSONArray
+        if (array == null) {
+            warnings += "$sourceName must be a JSON string array."
+            return emptyList()
+        }
+        return buildList {
+            for (index in 0 until array.length()) {
+                val value = array.opt(index)
+                if (value !is String || value.isBlank()) {
+                    warnings += "$sourceName[$index] must be a non-empty string."
+                } else {
+                    add(value.trim())
+                }
+            }
         }
     }
 
@@ -520,6 +666,7 @@ object NodeBridgePermissionManifest {
         val androidPermissions: List<String>,
         val serviceRequired: Boolean,
         val warnings: List<String>,
+        val packagedMetadata: PackagedMetadata,
     ) {
         fun toJsonObject(): JSONObject = JSONObject().apply {
             put("version", version)
@@ -531,6 +678,7 @@ object NodeBridgePermissionManifest {
             put("androidPermissions", JSONArray(androidPermissions))
             put("serviceRequired", serviceRequired)
             put("warnings", JSONArray(warnings))
+            put("packagedMetadata", packagedMetadata.toJsonObject())
         }
 
         fun toJson(): String = toJsonObject().toString()
@@ -550,6 +698,110 @@ object NodeBridgePermissionManifest {
         val permissions: List<String>,
     )
 
+    data class PackagedMetadata(
+        val schema: String,
+        val status: String,
+        val profile: String,
+        val requestedProfiles: List<String>,
+        val builtins: List<String>,
+        val nativeAssets: List<String>,
+        val filesystemRoots: List<String>,
+        val executionMode: String,
+        val longRunning: Boolean,
+        val network: NetworkMetadata,
+        val metadataOnly: Boolean,
+        val grantsAuthority: Boolean,
+        val sources: List<String>,
+        val warnings: List<String>,
+    ) {
+        fun toJsonObject(): JSONObject = JSONObject().apply {
+            put("schema", schema)
+            put("status", status)
+            put("profile", profile)
+            put("requestedProfiles", JSONArray(requestedProfiles))
+            put("builtins", JSONArray(builtins))
+            put("nativeAssets", JSONArray(nativeAssets))
+            put("filesystemRoots", JSONArray(filesystemRoots))
+            put("executionMode", executionMode)
+            put("longRunning", longRunning)
+            put("network", network.toJsonObject())
+            put("metadataOnly", metadataOnly)
+            put("grantsAuthority", grantsAuthority)
+            put("sources", JSONArray(sources))
+            put("warnings", JSONArray(warnings))
+        }
+    }
+
+    data class NetworkMetadata(
+        val requested: Boolean,
+        val declaredCapability: Boolean,
+        val androidPermissions: List<String>,
+    ) {
+        fun toJsonObject(): JSONObject = JSONObject().apply {
+            put("requested", requested)
+            put("declaredCapability", declaredCapability)
+            put("androidPermissions", JSONArray(androidPermissions))
+        }
+    }
+
+    private data class PackagedMetadataBuilder(
+        val profiles: MutableList<String> = mutableListOf(),
+        val builtins: MutableList<String> = mutableListOf(),
+        val nativeAssets: MutableList<String> = mutableListOf(),
+        val filesystemRoots: MutableList<String> = mutableListOf(),
+        val sources: MutableList<String> = mutableListOf(),
+        var executionMode: String? = null,
+        var networkRequested: Boolean = false,
+    ) {
+        fun build(normalizedPermissions: List<String>): PackagedMetadata {
+            val distinctProfiles = profiles.map(::normalizeMetadataToken).filter { it.isNotEmpty() }.distinct()
+            val profile = distinctProfiles.firstOrNull() ?: "safe_default"
+            val mode = executionMode?.let(::normalizeMetadataToken).orEmpty()
+            val networkCapabilityDeclared = NETWORK in normalizedPermissions
+            val androidPermissions = if (networkCapabilityDeclared || networkRequested) {
+                androidPermissionsForCapabilities(listOf(NETWORK))
+            } else {
+                emptyList()
+            }
+            val hasMetadata =
+                distinctProfiles.isNotEmpty() ||
+                        builtins.isNotEmpty() ||
+                        nativeAssets.isNotEmpty() ||
+                        filesystemRoots.isNotEmpty() ||
+                        mode.isNotEmpty() ||
+                        networkRequested
+            return PackagedMetadata(
+                schema = PACKAGED_METADATA_SCHEMA,
+                status = if (hasMetadata || normalizedPermissions.isNotEmpty()) "partial" else "absent",
+                profile = profile,
+                requestedProfiles = distinctProfiles.sorted(),
+                builtins = builtins.map(::normalizeBuiltin).filter { it.isNotEmpty() }.distinct().sorted(),
+                nativeAssets = nativeAssets.map(::normalizeMetadataToken).filter { it.isNotEmpty() }.distinct().sorted(),
+                filesystemRoots = filesystemRoots.map(::normalizeMetadataToken).filter { it.isNotEmpty() }.distinct().sorted(),
+                executionMode = mode,
+                longRunning = mode == "interactive_long_running" || mode == "long_running",
+                network = NetworkMetadata(
+                    requested = networkRequested || networkCapabilityDeclared,
+                    declaredCapability = networkCapabilityDeclared,
+                    androidPermissions = androidPermissions,
+                ),
+                metadataOnly = true,
+                grantsAuthority = false,
+                sources = sources.distinct().ifEmpty { listOf("none") },
+                warnings = emptyList(),
+            )
+        }
+
+        private fun normalizeBuiltin(value: String): String {
+            val normalized = normalizeMetadataToken(value)
+            return normalized.removePrefix("node.")
+        }
+
+        private fun normalizeMetadataToken(value: String): String =
+            value.trim().lowercase(Locale.US).replace(':', '.')
+    }
+
     private const val PROJECT_JSON = "project.json"
     private const val PACKAGE_JSON = "package.json"
+    private const val PACKAGED_METADATA_SCHEMA = "autojs6-packaged-capability-metadata-v1"
 }

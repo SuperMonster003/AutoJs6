@@ -138,6 +138,68 @@ declare namespace AutoJs6Node {
     readonly nativeBindings: boolean;
   }
 
+  export interface PackagedCapabilityProfile {
+    readonly status: "packaged_metadata_partial" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly metadataSchema: "autojs6-packaged-capability-metadata-v1" | string;
+    readonly metadataSources: readonly string[];
+    readonly permissionManifest: "node_permissions_enforced" | string;
+    readonly androidManifestSynthesis: "bridge_android_permissions_only" | string;
+    readonly profileMetadata: "diagnostic_only" | string;
+    readonly nodeBuiltins: "declared_metadata_only_no_authority" | string;
+    readonly nativeAssets: "declared_metadata_only_denied" | string;
+    readonly filesystemRoots: "declared_metadata_only_scoped_default" | string;
+    readonly network: "network_capability_maps_android_internet" | string;
+    readonly longRunning: "execution_mode_metadata_partial" | string;
+    readonly undeclaredCapabilities: "rejected_before_dispatch" | string;
+    readonly manifestConsistency: "project_package_metadata_verified" | string;
+    readonly packagedRuntimeDescriptor: "version_vector_required" | string;
+    readonly packagedLaunchDescriptor: "scoped_internal_metadata" | string;
+    readonly rawProfilePromotion: boolean;
+    readonly rawBuiltinPromotion: boolean;
+    readonly nativeAssetLoading: boolean;
+    readonly expandedFilesystemRoots: boolean;
+    readonly unreviewedAndroidPermissions: boolean;
+  }
+
+  export interface PackagedCapabilityMetadataNetwork {
+    readonly requested: boolean;
+    readonly declaredCapability: boolean;
+    readonly androidPermissions: readonly string[];
+  }
+
+  export interface PackagedCapabilityMetadata {
+    readonly schema: "autojs6-packaged-capability-metadata-v1" | string;
+    readonly status: "partial" | "absent" | string;
+    readonly profile: string;
+    readonly requestedProfiles: readonly string[];
+    readonly builtins: readonly string[];
+    readonly nativeAssets: readonly string[];
+    readonly filesystemRoots: readonly string[];
+    readonly executionMode: string;
+    readonly longRunning: boolean;
+    readonly network: PackagedCapabilityMetadataNetwork;
+    readonly metadataOnly: boolean;
+    readonly grantsAuthority: boolean;
+    readonly sources: readonly string[];
+    readonly warnings: readonly string[];
+  }
+
+  export interface BridgePermissionsReport {
+    readonly version: number;
+    readonly enforced: boolean;
+    readonly permissions: readonly string[];
+    readonly normalizedPermissions: readonly string[];
+    readonly sources: readonly string[];
+    readonly knownCapabilities: readonly string[];
+    readonly unknownPermissions: readonly string[];
+    readonly androidPermissions: readonly string[];
+    readonly serviceRequired: boolean;
+    readonly packagedMetadata: PackagedCapabilityMetadata;
+    readonly warnings: readonly string[];
+  }
+
   export interface FilesystemAdvancedApis {
     readonly streams: "partial" | "unsupported" | string;
     readonly fileHandle: "partial" | "unsupported" | string;
@@ -382,6 +444,7 @@ declare namespace AutoJs6Node {
     readonly packageManagerProfile: PackageManagerProfile;
     readonly stdlibProfile: StdlibProfile;
     readonly processParityProfile: ProcessParityProfile;
+    readonly packagedCapabilityProfile: PackagedCapabilityProfile;
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
@@ -401,7 +464,7 @@ declare namespace AutoJs6Node {
     readonly deniedFeatureFlags: readonly string[];
     readonly errorCodes: Readonly<Record<string, string | Readonly<Record<string, string>>>>;
     readonly compileCache: Readonly<Record<string, unknown>>;
-    readonly bridgePermissions: Readonly<Record<string, unknown>>;
+    readonly bridgePermissions: BridgePermissionsReport;
     readonly bridgeLimits: Readonly<Record<string, unknown>>;
   }
 
