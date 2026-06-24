@@ -304,6 +304,7 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase10Autojs6PmFixture
 .\gradlew.bat --console=plain :app:verifyNodePackageManagerGate
 .\gradlew.bat --console=plain :app:verifyNodePhase13AndroidPackageInstallManager
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProEntryDirectives
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
@@ -340,6 +341,11 @@ covers the partial Android local package store with transaction staging, store
 locking, cancellation, SHA-512 integrity, lifecycle/bin/native/path denial, and
 install/update/remove/list/verify/prune. It does not enable registry download or
 a JavaScript package-manager API.
+`verifyNodePhase13ProEntryDirectives` records the P13-11 Pro-style Node entry
+directive state for `"nodejs ui"` and `"nodejs ui-thread"`, including
+`NodeEntryDirective`, descriptor/project config metadata, debug/native values,
+and focused instrumentation. It remains partial until Activity lifecycle,
+Back/Recents, and concrete UI-thread dispatch evidence land.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through

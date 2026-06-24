@@ -331,6 +331,20 @@ P13 task 本身使用以下执行状态：
     - UI Activity 启动、非 UI 线程脚本、UI-thread dispatch 三者行为清晰。
     - 与当前 `require("ui")` provider 不冲突。
     - packaged APK 有 Activity lifecycle 和 Back/Recents evidence。
+  - 进度：
+    - 已落地 `NodeEntryDirective`，规范化 `"nodejs ui"` / `"nodejs ui-thread"`。
+    - 已将 `entryDirective` 接入 launch descriptor、project config、Node project
+      request、debug descriptor、native values 和 failure marker。
+    - 已增加 focused instrumentation 与 Phase13 host verifier。
+  - 证据：
+    - Runtime parser: `app/src/main/java/org/autojs/autojs/script/NodeEntryDirective.kt`.
+    - Focused test:
+      `EmbeddedScriptMvpInstrumentationTest#proStyleNodeEntryDirectivesParseToStableMetadata`.
+    - Host verifier: `tools/nodejs/phase13/verify-pro-entry-directives.js`.
+    - Gradle gate: `:app:verifyNodePhase13ProEntryDirectives`.
+    - Report: `docs/nodejs/reports/phase13/P13_11_PRO_ENTRY_DIRECTIVES.md`.
+  - 未关闭原因：Activity lifecycle、Back/Recents 和实际 UI-thread dispatch
+    evidence 尚未完成，因此保持 `partial`。
 
 - [ ] P13-12: 定义并实现 `$autojs` global v1。
   - 范围：提供 Pro 风格 `$autojs` 入口，但分层暴露能力。

@@ -23,6 +23,7 @@ import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.NodeEntryDirective
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor
 import org.autojs.autojs.script.NodeProjectLaunchKind
 import org.autojs.autojs.script.NodeProjectLaunchOptions
@@ -227,6 +228,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
                     "launchKind=${launchSource?.nodeProjectLaunchKind?.descriptorValue.orEmpty()} " +
                     "requestLaunchKind=$requestLaunchKind " +
                     "executionMode=${launchSource?.nodeProjectExecutionMode.orEmpty()} " +
+                    "entryDirective=${launchSource?.nodeProjectEntryDirective.orEmpty()} " +
                     "longRunning=${NodeExecutionModePolicy.isLongRunningRequest(launchSource?.nodeProjectExecutionMode)} " +
                     "packageDir=${request?.packageDir?.path.orEmpty()} " +
                     "packageDirProjectRoot=$packageDirProjectRoot " +
@@ -251,6 +253,9 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         }
         val source = launch.source as? JavaScriptSource
             ?: throw IllegalStateException("Packaged Node long-running launch requires a JavaScript source.")
+        if (NodeEntryDirective.requiresUiActivity(launchSource.nodeProjectEntryDirective)) {
+            throw IllegalStateException("Packaged Node long-running launch does not support UI entry directives yet.")
+        }
         val engine = NativeNodeEmbeddedJavaScriptEngine(mActivity.applicationContext)
         val request = engine.prepareNodeProjectLaunchRequest(source)
             ?: throw IllegalStateException("Packaged Node long-running launch requires a Node project source.")
@@ -286,6 +291,8 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         nodeConfig ?: return this
         val descriptorMode = executionMode?.takeIf { it.isNotBlank() }
         val projectMode = nodeConfig.executionMode?.takeIf { it.isNotBlank() }
+        val descriptorDirective = NodeEntryDirective.normalize(entryDirective)
+        val projectDirective = NodeEntryDirective.normalize(nodeConfig.entryDirective)
         if (
             descriptorMode != null &&
             projectMode != null &&
@@ -295,9 +302,15 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
                 "Packaged Node executionMode mismatch: descriptor=$descriptorMode project=${nodeConfig.executionMode}",
             )
         }
+        if (descriptorDirective != null && projectDirective != null && descriptorDirective != projectDirective) {
+            throw IllegalArgumentException(
+                "Packaged Node entryDirective mismatch: descriptor=$descriptorDirective project=${nodeConfig.entryDirective}",
+            )
+        }
         return copy(
             timeoutMs = timeoutMs ?: nodeConfig.timeoutMs?.takeIf { it > 0L },
             executionMode = descriptorMode ?: projectMode,
+            entryDirective = descriptorDirective ?: projectDirective,
         )
     }
 

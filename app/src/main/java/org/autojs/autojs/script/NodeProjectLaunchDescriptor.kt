@@ -49,6 +49,7 @@ object NodeProjectLaunchDescriptor {
             env = json.optStringMap("env"),
             timeoutMs = json.optPositiveLongOrNull("timeoutMs"),
             executionMode = json.optStringOrNull("executionMode"),
+            entryDirective = json.optNodeEntryDirectiveOrNull(),
         )
         return launchOptions.validateDescriptorLaunchKind(descriptorLaunchKind)
     }
@@ -111,6 +112,14 @@ object NodeProjectLaunchDescriptor {
     private fun JSONObject.optNodeProjectLaunchKindOrNull(key: String): NodeProjectLaunchKind? {
         val value = optStringOrNull(key) ?: return null
         return NodeProjectLaunchKind.fromDescriptorValue(value)
+    }
+
+    private fun JSONObject.optNodeEntryDirectiveOrNull(): String? {
+        val value = optStringOrNull("entryDirective")
+            ?: optStringOrNull("nodeEntryDirective")
+            ?: optStringOrNull("directive")
+            ?: return null
+        return NodeEntryDirective.normalize(value)
     }
 
     private fun JSONObject.optStringArray(key: String): List<String> {

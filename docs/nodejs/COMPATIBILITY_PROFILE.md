@@ -95,12 +95,18 @@ Runtime diagnostics expose the same state through `require("autojs6:profile").fe
 
 - `"nodejs";` directive
 - `"node";` directive
+- `"nodejs ui";` directive metadata via `NodeEntryDirective` (P13-11 partial)
+- `"nodejs ui-thread";` directive metadata via `NodeEntryDirective` (P13-11 partial)
 - `.node.js`
 - `.cjs`
 - `.mjs` as a Node ESM entry
 - `project.json` with `type: "node"` or `projectType: "node"`
 - package bin launch paths resolved from Node project metadata
 - encrypted script headers carrying the Node execution flag
+
+P13-11 records Pro-style UI entry directives through Node project launch
+metadata and diagnostics. Full Activity lifecycle launch, Back/Recents behavior,
+and concrete UI-thread dispatch parity remain unpromoted.
 
 ## Supported CommonJS Features
 

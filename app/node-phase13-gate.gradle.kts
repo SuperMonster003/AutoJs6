@@ -292,6 +292,49 @@ tasks.register<Exec>("verifyNodePhase13AndroidPackageInstallManager") {
     )
 }
 
+tasks.register<Exec>("verifyNodePhase13ProEntryDirectives") {
+    group = "verification"
+    description = "Verifies Phase 13 Pro-style Node entry directive readiness."
+
+    dependsOn("verifyNodePhase13AndroidPackageInstallManager")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-pro-entry-directives.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_11_PRO_ENTRY_DIRECTIVES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/JavaScriptSource.java"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeEntryDirective.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/script/NodeProjectJavaScriptFileSource.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedProjectRunner.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeProjectLaunchDiagnostics.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/inrt/launch/AssetsProjectLauncher.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/project/ProjectConfig.java"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/EmbeddedScriptMvpInstrumentationTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("phase13-pro-entry-directives.json") },
+        nodePhase13ReportDir.map { it.file("phase13-pro-entry-directives.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+    )
+}
+
 tasks.register<Exec>("generateNodeBuiltinDesktopParityMatrix") {
     group = "verification"
     description = "Generates the Phase 13 desktop Node builtin parity matrix."

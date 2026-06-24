@@ -650,6 +650,19 @@ staging, store locking, cancellation, SHA-512 integrity mismatch rollback,
 and lifecycle/bin/native payload denial. This does not promote Android npm CLI,
 registry download, or a JavaScript package-manager API.
 
+Phase 13 Pro-style Node entry directives:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProEntryDirectives
+```
+
+`EmbeddedScriptMvpInstrumentationTest#proStyleNodeEntryDirectivesParseToStableMetadata`
+and the existing Node project launch alignment coverage verify that
+`"nodejs ui"` and `"nodejs ui-thread"` parse into stable `NodeEntryDirective`
+metadata and flow through descriptor, source, project request, debug descriptor,
+native values, and failure markers. The gate stays partial until Activity
+lifecycle, Back/Recents behavior, and concrete UI-thread dispatch evidence land.
+
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36
 machine-readable report for execution mode, interactive foreground
 long-running, runtime budget/heartbeat, queueing, scheduled runner,

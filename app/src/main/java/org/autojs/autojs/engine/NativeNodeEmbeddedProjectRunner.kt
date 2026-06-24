@@ -1,6 +1,8 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.NodeEntryDirective
 import org.autojs.autojs.script.NodeProjectLaunchKind
 import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.json.JSONObject
@@ -20,6 +22,7 @@ object NativeNodeEmbeddedProjectRunner {
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val entrySource: String? = null,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        val entryDirective: String? = null,
     )
 
     data class PackageBinRequest(
@@ -33,6 +36,7 @@ object NativeNodeEmbeddedProjectRunner {
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        val entryDirective: String? = null,
     )
 
     data class PackageScriptRequest(
@@ -46,6 +50,7 @@ object NativeNodeEmbeddedProjectRunner {
         val moduleSources: Map<String, String> = emptyMap(),
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        val entryDirective: String? = null,
     )
 
     data class ProjectRequest(
@@ -61,6 +66,7 @@ object NativeNodeEmbeddedProjectRunner {
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val entrySource: String? = null,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        val entryDirective: String? = null,
     )
 
     data class ProjectLaunchPlan(
@@ -75,6 +81,7 @@ object NativeNodeEmbeddedProjectRunner {
         val runtimeModuleSources: Map<String, String>,
         val entrySource: String?,
         val executionMode: String,
+        val entryDirective: String? = null,
         val diagnosticArgv: List<String>? = null,
         val diagnosticEnvKeys: List<String>? = null,
         val packageDir: File? = null,
@@ -99,6 +106,7 @@ object NativeNodeEmbeddedProjectRunner {
         val runtimeModuleSourceBytes: Int,
         val entrySourceBytes: Int,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        val entryDirective: String? = null,
         val packageDir: String? = null,
         val binName: String? = null,
         val scriptName: String? = null,
@@ -121,6 +129,7 @@ object NativeNodeEmbeddedProjectRunner {
                 appendLine("runtimeModuleSourceBytes=$runtimeModuleSourceBytes")
                 appendLine("entrySourceBytes=$entrySourceBytes")
                 appendLine("executionMode=$executionMode")
+                appendLine("entryDirective=${entryDirective.orEmpty()}")
                 appendLine("packageDir=${packageDir.orEmpty()}")
                 appendLine("binName=${binName.orEmpty()}")
                 appendLine("scriptName=${scriptName.orEmpty()}")
@@ -145,6 +154,13 @@ object NativeNodeEmbeddedProjectRunner {
                 "embedded_project_runner.runtime_module_source_bytes" to runtimeModuleSourceBytes.toString(),
                 "embedded_project_runner.entry_source_bytes" to entrySourceBytes.toString(),
                 "embedded_project_runner.execution_mode" to executionMode,
+                "embedded_project_runner.entry_directive" to entryDirective.orEmpty(),
+                "embedded_project_runner.entry_directive_ui_activity" to NodeEntryDirective
+                    .requiresUiActivity(entryDirective)
+                    .toString(),
+                "embedded_project_runner.entry_directive_ui_thread" to NodeEntryDirective
+                    .requiresUiThread(entryDirective)
+                    .toString(),
                 "embedded_project_runner.package_dir" to packageDir.orEmpty(),
                 "embedded_project_runner.bin_name" to binName.orEmpty(),
                 "embedded_project_runner.script_name" to scriptName.orEmpty(),
@@ -222,6 +238,10 @@ object NativeNodeEmbeddedProjectRunner {
             env = launchSource.nodeProjectEnv.toMap(),
             timeoutMs = launchSource.nodeProjectTimeoutMs ?: defaultRequest.timeoutMs,
             executionMode = launchSource.nodeProjectExecutionMode ?: defaultRequest.executionMode,
+            entryDirective = NodeEntryDirective.normalize(launchSource.nodeProjectEntryDirective)
+                ?: (launchSource as? JavaScriptSource)
+                    ?.executionMode
+                    ?.let { mode -> NodeEntryDirective.fromExecutionMode(mode) },
         )
         val requestLaunchKind = NodeProjectLaunchKind.from(request.scriptName, request.binName)
         require(requestLaunchKind == sourceLaunchKind) {
@@ -259,6 +279,7 @@ object NativeNodeEmbeddedProjectRunner {
                     moduleSources = request.moduleSources,
                     runtimeModuleSources = request.runtimeModuleSources,
                     executionMode = request.executionMode,
+                    entryDirective = request.entryDirective,
                 ),
             )
         }
@@ -278,6 +299,7 @@ object NativeNodeEmbeddedProjectRunner {
                     moduleSources = request.moduleSources,
                     runtimeModuleSources = request.runtimeModuleSources,
                     executionMode = request.executionMode,
+                    entryDirective = request.entryDirective,
                 ),
             )
         }
@@ -293,6 +315,7 @@ object NativeNodeEmbeddedProjectRunner {
             runtimeModuleSources = request.runtimeModuleSources,
             entrySource = request.entrySource,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
+            entryDirective = NodeEntryDirective.normalize(request.entryDirective),
         )
     }
 
@@ -420,6 +443,7 @@ object NativeNodeEmbeddedProjectRunner {
             runtimeModuleSources = normalizedRequest.runtimeModuleSources,
             entrySource = null,
             executionMode = NodeExecutionModePolicy.normalize(normalizedRequest.executionMode),
+            entryDirective = NodeEntryDirective.normalize(normalizedRequest.entryDirective),
             packageDir = normalizedRequest.packageDir,
             binName = normalizedRequest.binName,
         )
@@ -453,6 +477,7 @@ object NativeNodeEmbeddedProjectRunner {
             runtimeModuleSources = normalizedRequest.runtimeModuleSources,
             entrySource = null,
             executionMode = NodeExecutionModePolicy.normalize(normalizedRequest.executionMode),
+            entryDirective = NodeEntryDirective.normalize(normalizedRequest.entryDirective),
             diagnosticArgv = normalizedRequest.argv,
             diagnosticEnvKeys = normalizedRequest.env.keys.sorted(),
             packageDir = normalizedRequest.packageDir,
@@ -659,6 +684,7 @@ object NativeNodeEmbeddedProjectRunner {
             },
             entrySourceBytes = request.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
+            entryDirective = NodeEntryDirective.normalize(request.entryDirective),
             packageDir = request.packageDir?.absolutePath,
             binName = request.binName,
             scriptName = request.scriptName,
@@ -686,6 +712,7 @@ object NativeNodeEmbeddedProjectRunner {
             },
             entrySourceBytes = plan.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
             executionMode = NodeExecutionModePolicy.normalize(plan.executionMode),
+            entryDirective = NodeEntryDirective.normalize(plan.entryDirective),
             packageDir = plan.packageDir?.absolutePath,
             binName = plan.binName,
             scriptName = plan.scriptName,
@@ -712,6 +739,7 @@ object NativeNodeEmbeddedProjectRunner {
             },
             entrySourceBytes = request.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
+            entryDirective = NodeEntryDirective.normalize(request.entryDirective),
         )
     }
 
@@ -736,6 +764,7 @@ object NativeNodeEmbeddedProjectRunner {
             },
             entrySourceBytes = -1,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
+            entryDirective = NodeEntryDirective.normalize(request.entryDirective),
             packageDir = request.packageDir.absolutePath,
             binName = request.binName,
         )
@@ -765,6 +794,7 @@ object NativeNodeEmbeddedProjectRunner {
             },
             entrySourceBytes = -1,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
+            entryDirective = NodeEntryDirective.normalize(request.entryDirective),
             packageDir = request.packageDir.absolutePath,
             binName = binName,
             scriptName = request.scriptName,
@@ -852,8 +882,11 @@ object NativeNodeEmbeddedProjectRunner {
         val argvLiteral = (listOf("autojs6-node", entryFile.canonicalPath) + request.argv)
             .joinToString(prefix = "[", postfix = "]") { value -> jsStringLiteral(value) }
         val relativeWorkingDirectory = relativePathInside(projectRoot, workingDirectory)
+        val entryDirective = NodeEntryDirective.normalize(request.entryDirective)
+            ?: NodeEntryDirective.DIRECTIVE_NODEJS
         return buildString {
-            append("\"nodejs\";\n")
+            append(jsStringLiteral(entryDirective))
+            append(";\n")
             append("process.argv.splice(0, process.argv.length, ...")
             append(argvLiteral)
             append(");\n")
@@ -1117,6 +1150,7 @@ object NativeNodeEmbeddedProjectRunner {
             projectRoot = request.projectRoot.canonicalFile,
             entryFile = request.entryFile.canonicalFile,
             workingDirectory = request.workingDirectory.canonicalFile,
+            entryDirective = NodeEntryDirective.normalize(request.entryDirective),
         )
     }
 
@@ -1125,6 +1159,7 @@ object NativeNodeEmbeddedProjectRunner {
             projectRoot = request.projectRoot.canonicalFile,
             packageDir = request.packageDir.canonicalFile,
             workingDirectory = request.workingDirectory.canonicalFile,
+            entryDirective = NodeEntryDirective.normalize(request.entryDirective),
         )
     }
 
@@ -1133,6 +1168,7 @@ object NativeNodeEmbeddedProjectRunner {
             projectRoot = request.projectRoot.canonicalFile,
             packageDir = request.packageDir.canonicalFile,
             workingDirectory = request.workingDirectory.canonicalFile,
+            entryDirective = NodeEntryDirective.normalize(request.entryDirective),
         )
     }
 
@@ -1158,6 +1194,7 @@ object NativeNodeEmbeddedProjectRunner {
                 runtimeModuleSources = runtimeModuleSources,
                 entrySource = entrySource,
                 executionMode = executionMode,
+                entryDirective = entryDirective,
             ),
         )
     }

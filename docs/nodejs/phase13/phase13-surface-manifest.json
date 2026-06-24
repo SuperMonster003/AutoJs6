@@ -163,7 +163,7 @@
     },
     {
       "id": "pro.entry_java_rhino",
-      "status": "planned",
+      "status": "debug_poc",
       "profiles": [
         "pro_compat_opt_in",
         "debug_unsafe_lab"
@@ -185,7 +185,14 @@
         "$autojs.java",
         "require(\"rhino\").install()"
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/nodejs/reports/phase13/P13_11_PRO_ENTRY_DIRECTIVES.md",
+        "tools/nodejs/phase13/verify-pro-entry-directives.js",
+        ":app:verifyNodePhase13ProEntryDirectives",
+        "app/src/main/java/org/autojs/autojs/script/NodeEntryDirective.kt",
+        "build/reports/nodejs/phase13-pro-entry-directives.json",
+        "build/reports/nodejs/phase13-pro-entry-directives.md"
+      ],
       "rollback": "Reject Pro Java/Rhino interop flags and keep require(\"rhino\") in the default disabled JSON-only path."
     },
     {

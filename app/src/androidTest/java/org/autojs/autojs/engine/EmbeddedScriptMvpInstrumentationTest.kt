@@ -13,6 +13,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.script.NodeEntryDirective
 import org.autojs.autojs.script.NodeProjectJavaScriptFileSource
 import org.autojs.autojs.script.NodeProjectLaunchDescriptor
 import org.autojs.autojs.script.NodeProjectLaunchKind
@@ -21515,6 +21516,33 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun proStyleNodeEntryDirectivesParseToStableMetadata() {
+        val nodeUi = JavaScriptSource.parseExecutionMode(""""nodejs ui"; console.log("ui");""").mode
+        assertTrue((nodeUi and JavaScriptSource.EXECUTION_MODE_NODEJS) != 0)
+        assertTrue((nodeUi and JavaScriptSource.EXECUTION_MODE_UI) != 0)
+        assertFalse((nodeUi and JavaScriptSource.EXECUTION_MODE_UI_THREAD) != 0)
+        assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI, NodeEntryDirective.fromExecutionMode(nodeUi))
+        assertTrue(NodeEntryDirective.requiresUiActivity(NodeEntryDirective.fromExecutionMode(nodeUi)))
+        assertFalse(NodeEntryDirective.requiresUiThread(NodeEntryDirective.fromExecutionMode(nodeUi)))
+
+        val nodeUiThread = JavaScriptSource.parseExecutionMode(""""nodejs ui-thread"; console.log("ui-thread");""").mode
+        assertTrue((nodeUiThread and JavaScriptSource.EXECUTION_MODE_NODEJS) != 0)
+        assertFalse((nodeUiThread and JavaScriptSource.EXECUTION_MODE_UI) != 0)
+        assertTrue((nodeUiThread and JavaScriptSource.EXECUTION_MODE_UI_THREAD) != 0)
+        assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, NodeEntryDirective.fromExecutionMode(nodeUiThread))
+        assertFalse(NodeEntryDirective.requiresUiActivity(NodeEntryDirective.fromExecutionMode(nodeUiThread)))
+        assertTrue(NodeEntryDirective.requiresUiThread(NodeEntryDirective.fromExecutionMode(nodeUiThread)))
+
+        assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, NodeEntryDirective.normalize("ui_thread"))
+        assertEquals(
+            NodeEntryDirective.DIRECTIVE_NODEJS_UI_AND_UI_THREAD,
+            NodeEntryDirective.normalize("node ui | ui-thread"),
+        )
+        val invalid = runCatching { NodeEntryDirective.normalize("nodejs native") }.exceptionOrNull()
+        assertTrue(invalid is IllegalArgumentException)
+    }
+
+    @Test
     fun nodeProjectLaunchDescriptorParsesAndValidatesInternalOptions() {
         val projectRoot = File(context.cacheDir, "embedded-node-project-launch-descriptor-${System.nanoTime()}").apply {
             check(mkdirs()) { "Failed to create node project launch descriptor dir: $absolutePath" }
@@ -21539,6 +21567,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("argv", JSONArray().put("--from-descriptor"))
                     .put("env", JSONObject().put("DESCRIPTOR_SECRET", "hidden-value"))
                     .put("timeoutMs", 1234)
+                    .put("entryDirective", "nodejs ui-thread")
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -21551,6 +21580,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(listOf("--from-descriptor"), scriptOptions.argv)
             assertEquals(mapOf("DESCRIPTOR_SECRET" to "hidden-value"), scriptOptions.env)
             assertEquals(1234L, scriptOptions.timeoutMs)
+            assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, scriptOptions.entryDirective)
 
             descriptor.writeText(
                 JSONObject()
@@ -21634,6 +21664,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 expectedEnv: Map<String, String>,
                 expectedTimeoutMs: Long?,
                 expectedExecutionMode: String? = null,
+                expectedOptionsEntryDirective: String? = null,
+                expectedEntryDirective: String? = NodeEntryDirective.DIRECTIVE_NODEJS,
             ) {
                 val options = NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot)
                 assertEquals("$label descriptor launchKind", expectedLaunchKind, options.launchKind)
@@ -21649,6 +21681,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label descriptor env", expectedEnv, options.env)
                 assertEquals("$label descriptor timeoutMs", expectedTimeoutMs, options.timeoutMs)
                 assertEquals("$label descriptor executionMode", expectedExecutionMode, options.executionMode)
+                assertEquals("$label descriptor entryDirective", expectedOptionsEntryDirective, options.entryDirective)
 
                 val source = NodeProjectScriptSourceFactory.create(entry)
                 assertTrue("$label source should be Node project launch source", source is NodeProjectLaunchSource)
@@ -21672,6 +21705,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label source env", expectedEnv, launchSource.nodeProjectEnv)
                 assertEquals("$label source timeoutMs", expectedTimeoutMs, launchSource.nodeProjectTimeoutMs)
                 assertEquals("$label source executionMode", expectedExecutionMode, launchSource.nodeProjectExecutionMode)
+                assertEquals("$label source entryDirective", expectedEntryDirective, launchSource.nodeProjectEntryDirective)
 
                 val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource)
                 assertEquals("$label request projectRoot", projectRoot.canonicalFile, request.projectRoot)
@@ -21695,6 +21729,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     expectedExecutionMode ?: NodeExecutionModePolicy.MODE_ONE_SHOT,
                     request.executionMode,
                 )
+                assertEquals("$label request entryDirective", expectedEntryDirective, request.entryDirective)
                 assertEquals(
                     "$label request launchKind",
                     expectedLaunchKind,
@@ -21722,6 +21757,23 @@ class EmbeddedScriptMvpInstrumentationTest {
                     "$label debug executionMode",
                     expectedExecutionMode ?: NodeExecutionModePolicy.MODE_ONE_SHOT,
                     debugDescriptor.executionMode,
+                )
+                assertEquals("$label debug entryDirective", expectedEntryDirective, debugDescriptor.entryDirective)
+                val nativeValues = debugDescriptor.toNativeValues()
+                assertEquals(
+                    "$label native entryDirective",
+                    expectedEntryDirective.orEmpty(),
+                    nativeValues["embedded_project_runner.entry_directive"],
+                )
+                assertEquals(
+                    "$label native ui activity",
+                    NodeEntryDirective.requiresUiActivity(expectedEntryDirective).toString(),
+                    nativeValues["embedded_project_runner.entry_directive_ui_activity"],
+                )
+                assertEquals(
+                    "$label native ui thread",
+                    NodeEntryDirective.requiresUiThread(expectedEntryDirective).toString(),
+                    nativeValues["embedded_project_runner.entry_directive_ui_thread"],
                 )
                 val debugText = debugDescriptor.toDebugString()
                 expectedEnv.values.forEach { secretValue ->
@@ -21774,6 +21826,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("argv", JSONArray().put("--from-bin-descriptor"))
                     .put("env", JSONObject().put("ALIGN_BIN_SECRET", "bin-secret-value"))
                     .put("timeoutMs", 3456L)
+                    .put("entryDirective", "nodejs ui")
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -21787,6 +21840,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 expectedArgv = listOf("--from-bin-descriptor"),
                 expectedEnv = mapOf("ALIGN_BIN_SECRET" to "bin-secret-value"),
                 expectedTimeoutMs = 3456L,
+                expectedOptionsEntryDirective = NodeEntryDirective.DIRECTIVE_NODEJS_UI,
+                expectedEntryDirective = NodeEntryDirective.DIRECTIVE_NODEJS_UI,
             )
         } finally {
             projectRoot.deleteRecursively()
@@ -21899,6 +21954,12 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("packageDir", "bad\u0000dir")
                     .put("env", JSONObject().put("SECRET", "secret-value")),
                 "contains NUL",
+            )
+            assertInvalid(
+                JSONObject()
+                    .put("entryDirective", "nodejs native")
+                    .put("env", JSONObject().put("SECRET", "secret-value")),
+                "Unsupported Node entry directive token",
             )
         } finally {
             projectRoot.deleteRecursively()
@@ -22252,6 +22313,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     env = env,
                     timeoutMs = 1234L,
                     executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+                    entryDirective = "node ui_thread",
                 ),
             )
 
@@ -22282,6 +22344,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(mapOf("SOURCE_ENV" to "before"), source.nodeProjectEnv)
             assertEquals(1234L, source.nodeProjectTimeoutMs)
             assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, source.nodeProjectExecutionMode)
+            assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, source.nodeProjectEntryDirective)
             val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(source)
             assertEquals(root.canonicalFile, request.projectRoot)
             assertEquals(packageDir.canonicalFile, request.packageDir)
@@ -22292,6 +22355,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(mapOf("SOURCE_ENV" to "before"), request.env)
             assertEquals(1234L, request.timeoutMs)
             assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, request.executionMode)
+            assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, request.entryDirective)
 
             val argvMutation = runCatching {
                 @Suppress("UNCHECKED_CAST")
