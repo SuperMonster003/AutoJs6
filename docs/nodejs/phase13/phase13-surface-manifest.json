@@ -75,12 +75,13 @@
         "P13-10",
         "P13-49"
       ],
-      "summary": "Shared profile vocabulary, capability relaxation rubric, truth reporting, and user-facing profile diagnostics for staged Safe/Pro/Desktop/Debug promotion.",
+      "summary": "Shared profile vocabulary, capability relaxation rubric, truth reporting, and diagnostic-only profile selection UX for staged Safe/Pro/Desktop/Debug promotion.",
       "risk": "medium",
       "runtimeSurface": [
-        "future profile selection metadata",
-        "future capability truth report",
-        "future profile diagnostics"
+        "autojs6:profile.profileSelection",
+        "Node Doctor Profile Selection report",
+        "capability-not-declared profileSelectionHint",
+        "future capability truth report"
       ],
       "evidence": [
         "docs/nodejs/INTEGRATION_PLAN.md",
@@ -90,7 +91,12 @@
         "tools/nodejs/phase13/generate-node-phase13-capability-truth.js",
         ":app:generateNodePhase13CapabilityTruth",
         "build/reports/nodejs/phase13-capability-truth.json",
-        "build/reports/nodejs/phase13-capability-truth.md"
+        "build/reports/nodejs/phase13-capability-truth.md",
+        "docs/nodejs/reports/phase13/P13_49_PROFILE_SELECTION_DIAGNOSTICS.md",
+        "tools/nodejs/phase13/verify-profile-selection-diagnostics.js",
+        ":app:verifyNodePhase13ProfileSelectionDiagnostics",
+        "build/reports/nodejs/phase13-profile-selection-diagnostics.json",
+        "build/reports/nodejs/phase13-profile-selection-diagnostics.md"
       ],
       "rollback": "Keep Safe Node Profile as the only accepted profile and reject Pro/Desktop profile metadata."
     },

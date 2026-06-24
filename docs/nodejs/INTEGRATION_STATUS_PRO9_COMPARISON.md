@@ -1195,6 +1195,14 @@ corruption detection, and reinstall/update recovery are covered, while signed
 plugin archives, signed native artifacts, marketplace install/update, raw
 registry install, and package-manager JavaScript facades remain future work.
 
+P13-49 records profile selection UX and diagnostics as partial: AutoJs6 Node
+now exposes `profileSelection` diagnostics through `autojs6:profile` and Node
+Doctor. Scripts can see requested Pro/Desktop/Debug metadata, declared
+high-risk capabilities, blocked promotions, and actionable failure hints for
+missing profile/capability/permission requirements. This improves migration
+debuggability for Pro/Desktop parity without promoting any profile beyond the
+current `safe_default` authority.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

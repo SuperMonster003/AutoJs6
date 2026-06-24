@@ -1291,6 +1291,16 @@ instrumentation. Unsigned plugin install, unsigned native addon load, raw
 registry install, lifecycle scripts, postinstall downloads, and unverified
 cache reuse remain fail-closed.
 
+P13-49 records profile selection UX and diagnostics as partial. The runtime
+exposes `autojs6:profile.profileSelection`, backed by
+`NodeProfileSelectionDiagnostics`, to report requested Safe/Pro/Desktop/Debug
+profiles, declared Node permissions, Android permission synthesis, high-risk
+capability rows, blocked profile promotions, and failure hints. Missing bridge
+capability errors now include `requiredProfiles`, `requiredNodePermissions`,
+`requiredAndroidPermissions`, and `profileSelectionHint`. The effective
+profile remains `safe_default`; requested Pro/Desktop/Debug metadata is
+diagnostic-only and does not grant authority.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context
@@ -2041,6 +2051,8 @@ Examples:
 - scoped fs absolute outside path: canonical `autojs6Code=ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED`
 - closed or non-owned scoped FileHandle descriptor: `code=EBADF`
 - undeclared bridge capability: `code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
+  with P13-49 `requiredProfiles`, `requiredNodePermissions`,
+  `requiredAndroidPermissions`, and `profileSelectionHint` diagnostics.
 - cancelled bridge call: `code=ERR_AUTOJS6_BRIDGE_CANCELLED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CANCELLED`
 - malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
 - bridge resource limit: `code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`

@@ -1550,6 +1550,22 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - 用户能清楚看到启用了哪些高风险能力。
     - 失败时错误消息能指出需要哪个 profile/capability/permission。
+  - 进展：
+    - P13-49 partial landing 已添加 `NodeProfileSelectionDiagnostics`,
+      `autojs6:profile.profileSelection`, Doctor Profile Selection 文本/JSON,
+      TypeScript declarations, and focused instrumentation.
+    - Missing bridge capability errors now expose `requiredProfiles`,
+      `requiredNodePermissions`, `requiredAndroidPermissions`, and
+      `profileSelectionHint`.
+    - Current effective profile remains `safe_default`; requested
+      `pro_compat_opt_in`, `desktop_compat_opt_in`, and `debug_unsafe_lab`
+      metadata is diagnostic-only and does not grant authority.
+    - Gradle gate: `:app:verifyNodePhase13ProfileSelectionDiagnostics`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_49_PROFILE_SELECTION_DIAGNOSTICS.md`。
+    - Remaining P13-49 blockers: user-facing project settings UI, packaged
+      builder profile UI, actual profile promotion, rollback/disclosure UX, and
+      security/privacy corpus approval for relaxed capabilities.
 
 - [ ] P13-50: 扩展 security corpus for relaxed capabilities。
   - 范围：为 raw network、fs 放宽、Java interop、child_process、native addon、

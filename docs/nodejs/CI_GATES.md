@@ -812,6 +812,15 @@ manifest evidence, and docs updates while keeping unsigned plugin install,
 unsigned native addon load, raw registry install, lifecycle scripts,
 postinstall downloads, and unverified cache reuse unpromoted. P13-48 records
 package lock and integrity policy as partial.
+`verifyNodePhase13ProfileSelectionDiagnostics` records P13-49 as the profile
+selection UX and diagnostics gate. It requires
+`NodeProfileSelectionDiagnostics`, `autojs6:profile.profileSelection`,
+capability-not-declared `requiredProfiles` / `requiredNodePermissions` /
+`requiredAndroidPermissions` / `profileSelectionHint`, Node Doctor Profile
+Selection JSON/text, TypeScript declarations, surface manifest evidence, and
+docs updates while keeping effective profile selection at `safe_default` and
+user-selectable Pro/Desktop/Debug promotion disabled. P13-49 records profile
+selection UX and diagnostics as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

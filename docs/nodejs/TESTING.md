@@ -2050,6 +2050,31 @@ Android store rollback after integrity mismatch, stale transaction pruning,
 corruption detection, and reinstall/update recovery. P13-48 records package
 lock and integrity policy as partial.
 
+Phase 13 profile selection diagnostics gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProfileSelectionDiagnostics
+```
+
+This host gate records P13-49 as partial. It requires
+`NodeProfileSelectionDiagnostics`, `autojs6:profile.profileSelection`,
+capability-not-declared profile/capability/permission hints, Node Doctor
+Profile Selection JSON/text, TypeScript declarations, focused instrumentation,
+surface manifest evidence, release matrix updates, and Phase 13 docs. It keeps
+effective profile selection at `safe_default` and keeps user-selectable
+Pro/Desktop/Debug promotion disabled.
+
+Phase 13 profile selection diagnostics focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeProfileSelectionDiagnosticsPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies requested Pro/Desktop/Debug metadata, declared high-risk
+capability reporting, Android permission synthesis, runtime
+`profileSelection`, and actionable missing-capability error fields. P13-49
+records profile selection UX and diagnostics as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

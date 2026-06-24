@@ -403,6 +403,13 @@ but signed plugin archives, signed native artifacts, raw registry install,
 package-manager JavaScript facades, and unverified cache reuse remain
 unavailable.
 
+P13-49 records profile selection UX and diagnostics as partial. AutoJs6 Node
+exposes `profileSelection` diagnostics through `autojs6:profile` and Node
+Doctor so Pro/AutoX migrations can see requested profiles, declared high-risk
+capabilities, Android permission synthesis, and blocked promotions. Missing
+bridge capability errors now report the required profile, Node capability, and
+Android permissions, but effective authority remains `safe_default`.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require
