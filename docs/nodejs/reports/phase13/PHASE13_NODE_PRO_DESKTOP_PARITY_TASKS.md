@@ -1474,6 +1474,24 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - Android provider plugin、native plugin、remote marketplace 分阶段决策。
     - 插件能力不能超出 host project/package 声明。
+  - Progress:
+    - P13-46 partial landing 已添加 `pluginSystemProfile` 诊断，记录
+      JS-only local manager v1 是当前唯一 callable plugin surface。
+    - Focused instrumentation:
+      `NodePluginSystemParityPhase13DecisionInstrumentationTest` 验证
+      Android provider plugin、native plugin、remote marketplace 仍为
+      staged/denied，并验证 plugin manifest 请求的 `network` 不能越过 host
+      `node.permissions`。
+    - Existing evidence: `NodePluginSystemInstrumentationTest` 继续覆盖
+      install/enable/configure/load/start/stop/unload/debug reload、native
+      addon 拒绝、path escape 拒绝、resource cleanup 和 capability subset。
+    - Gate:
+      `tools/nodejs/phase13/verify-plugin-system-parity-decision.js` 生成
+      `phase13-plugin-system-parity-decision` 报告，并接入
+      `:app:verifyNodePhase13PluginSystemParityDecision`。
+  - Remaining:
+    - signed archive、Android provider plugin adapter、native isolation、
+      marketplace install/update、packaged plugin distribution 仍需后续 gate。
 
 - [ ] P13-47: 增加 dependency compatibility corpus。
   - 范围：扩大真实 npm 包测试，按缺失能力分类。

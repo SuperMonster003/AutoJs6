@@ -787,6 +787,14 @@ evidence, and docs updates while keeping profile selection, builtin promotion,
 native asset loading, expanded filesystem roots, and unreviewed Android
 permission synthesis unpromoted. P13-45 records packaged APK capability
 metadata as partial.
+`verifyNodePhase13PluginSystemParityDecision` records P13-46 as the plugin
+system parity decision gate. It requires `pluginSystemProfile`, focused plugin
+system parity instrumentation, existing JS-only plugin manager evidence, plugin
+design/policy docs, TypeScript declarations, surface manifest evidence, and
+docs updates while keeping Android provider plugins, native plugins, remote
+marketplace install/update, signed archives, packaged plugin distribution, and
+plugin-granted host authority unpromoted. P13-46 records plugin system parity
+as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

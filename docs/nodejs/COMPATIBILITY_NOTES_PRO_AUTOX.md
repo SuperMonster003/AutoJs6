@@ -381,6 +381,13 @@ network intent. These fields do not yet grant Pro/Desktop authority; they
 prepare reviewed packaged synthesis while undeclared bridge capabilities still
 reject before dispatch.
 
+P13-46 records plugin system parity as partial. AutoJs6 Node exposes
+`pluginSystemProfile` diagnostics for the JS-only local plugin manager,
+install/load/lifecycle operations, host capability ceiling, packaged local-file
+status, and debug-only reload. Android provider plugins, native plugins,
+signed archives, remote marketplace install/update, packaged plugin
+distribution, and plugin-granted host authority remain unavailable.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

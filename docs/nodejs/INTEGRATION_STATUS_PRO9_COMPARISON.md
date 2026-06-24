@@ -1172,6 +1172,14 @@ This narrows the gap toward Pro/Desktop packaged declarations, but the metadata
 does not yet select a real profile, widen builtins, load native assets, expand
 filesystem roots, or grant undeclared Android/bridge authority.
 
+P13-46 records plugin system parity as partial: Safe Node now exposes
+`pluginSystemProfile` diagnostics for the JS-only local plugin manager,
+install/load/lifecycle operations, host capability ceiling, packaged local-file
+status, and debug-only reload. This narrows the gap toward Pro/Desktop plugin
+distribution, but Android provider plugins, native plugins, signed archives,
+remote marketplace install/update, packaged plugin distribution, and
+plugin-granted host authority remain unavailable.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

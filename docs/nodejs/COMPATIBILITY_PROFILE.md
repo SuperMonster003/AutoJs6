@@ -1263,6 +1263,15 @@ bridge authority source, Android manifest synthesis currently maps bridge
 capabilities to Android permissions, and profile/builtin/native/fs-root
 metadata does not widen runtime authority.
 
+P13-46 records plugin system parity as partial. The runtime exposes
+`autojs6:profile.pluginSystemProfile` to document the current JS-only local
+plugin manager, tracked manager operations, host capability ceiling, packaged
+local-file status, debug-only reload, and denied/deferred Android provider
+plugin, native plugin, remote marketplace, signed archive, and installer
+paths. Plugin manifests may request `plugin.<id>` and bridge capabilities, but
+the host project/package permission manifest remains the authority ceiling and
+missing capabilities reject before plugin code runs.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context

@@ -1979,6 +1979,29 @@ read-only JavaScript reports, diagnostic-only builtin/native/fs-root metadata,
 and stable pre-dispatch denial for undeclared bridge capabilities. P13-45
 records packaged APK capability metadata as partial.
 
+Phase 13 plugin system parity decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13PluginSystemParityDecision
+```
+
+This host gate records P13-46 as partial. It requires `pluginSystemProfile`,
+focused P13-46 instrumentation, existing JS-only plugin manager evidence,
+plugin design/policy docs, TypeScript declarations, surface manifest evidence,
+release matrix updates, and Phase13 docs. It keeps Android provider plugins,
+native plugins, remote marketplace install/update, signed archives, packaged
+plugin distribution, and plugin-granted host authority unpromoted.
+
+Phase 13 plugin system parity focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePluginSystemParityPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies `pluginSystemProfile` diagnostics and proves plugin
+manifest capabilities cannot exceed the host permission manifest. P13-46
+records plugin system parity as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell
