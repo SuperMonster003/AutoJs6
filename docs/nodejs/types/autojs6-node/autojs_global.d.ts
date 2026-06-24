@@ -103,6 +103,26 @@ declare namespace AutoJs6Node {
     readonly policy: WorkerThreadsPolicy;
   }
 
+  export interface ProcessWorkerReplacementProfile {
+    readonly status: "decision_partial" | "ready" | string;
+    readonly api: "not_introduced" | "autojs6_process_worker" | string;
+    readonly facade: "not_introduced" | string;
+    readonly preferredPrimitive: "worker_threads.WorkerPool" | string;
+    readonly workerThreads: "request_local_experimental_preflight" | string;
+    readonly childProcess: "denied" | string;
+    readonly shellBridge: "separate_scoped_command_bridge" | string;
+    readonly executionMode: "worker_computation_reserved" | string;
+    readonly secondExecutionSlot: "not_closed" | string;
+    readonly scopedScriptPath: "workingDirectory" | string;
+    readonly messageSizeBytes: number;
+    readonly maxQueuedMessages: number;
+    readonly cleanup: "worker_pool_close_or_execution_destroy" | string;
+    readonly packagedBehavior: "not_promoted" | string;
+    readonly bridgeModules: "denied" | string;
+    readonly nestedWorkers: boolean;
+    readonly rawProcessHandles: boolean;
+  }
+
   export interface AutoJsProfile {
     readonly name: string;
     readonly engineVersion: string;
@@ -117,6 +137,7 @@ declare namespace AutoJs6Node {
     readonly scopedFs: boolean;
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
+    readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
     readonly directBuiltinAliases: Readonly<Record<string, string>>;
     readonly limitedBuiltins: readonly string[];
     readonly disabledBuiltins: readonly string[];

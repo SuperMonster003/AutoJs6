@@ -526,6 +526,10 @@ async function smoke(): Promise<void> {
   const workerThreadsRequestLocalOptIn: boolean = autojsProfile.workerThreadsProfile.requestLocalOptIn;
   const workerThreadsMaxWorkers: number = autojsProfile.workerThreadsProfile.policy.maxWorkers;
   const workerThreadsBridgeModules: string = autojsProfile.workerThreadsProfile.bridgeModules;
+  const processWorkerReplacementStatus: string = autojsProfile.processWorkerReplacementProfile.status;
+  const processWorkerPreferredPrimitive: string = autojsProfile.processWorkerReplacementProfile.preferredPrimitive;
+  const processWorkerMessageSizeBytes: number = autojsProfile.processWorkerReplacementProfile.messageSizeBytes;
+  const processWorkerRawProcessHandles: boolean = autojsProfile.processWorkerReplacementProfile.rawProcessHandles;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -727,6 +731,10 @@ async function smoke(): Promise<void> {
   void workerThreadsRequestLocalOptIn;
   void workerThreadsMaxWorkers;
   void workerThreadsBridgeModules;
+  void processWorkerReplacementStatus;
+  void processWorkerPreferredPrimitive;
+  void processWorkerMessageSizeBytes;
+  void processWorkerRawProcessHandles;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;

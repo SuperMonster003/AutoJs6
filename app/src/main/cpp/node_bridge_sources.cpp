@@ -8884,6 +8884,25 @@ std::string buildEmbeddedScriptExecutionSource(
         packagedBehavior: "native_available_only",
         policy: __autojs6_worker_threads_policy_snapshot()
       }),
+      processWorkerReplacementProfile: Object.freeze({
+        status: "decision_partial",
+        api: "not_introduced",
+        facade: "not_introduced",
+        preferredPrimitive: "worker_threads.WorkerPool",
+        workerThreads: "request_local_experimental_preflight",
+        childProcess: "denied",
+        shellBridge: "separate_scoped_command_bridge",
+        executionMode: "worker_computation_reserved",
+        secondExecutionSlot: "not_closed",
+        scopedScriptPath: "workingDirectory",
+        messageSizeBytes: __autojs6_worker_threads_policy.maxMessageBytes,
+        maxQueuedMessages: __autojs6_worker_threads_policy.maxQueuedMessages,
+        cleanup: "worker_pool_close_or_execution_destroy",
+        packagedBehavior: "not_promoted",
+        bridgeModules: "denied",
+        nestedWorkers: false,
+        rawProcessHandles: false
+      }),
       processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
       limitedBuiltins: __autojs6_freeze_sorted_copy(
