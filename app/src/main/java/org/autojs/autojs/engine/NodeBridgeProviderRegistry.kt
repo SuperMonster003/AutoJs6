@@ -449,6 +449,12 @@ object NodeBridgeProviderRegistry {
             "minimumPeriodicIntervalMs" to ControlledWorkManagerPolicy.MIN_PERIODIC_INTERVAL_MS.toString(),
             "retryPolicy" to "no implicit retry; workers never return Result.retry",
             "android16JobQuotaPolicy" to NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics().optString("quotaState"),
+            "phase13TaskDatabasePromotion" to "P13-21 partial daily/weekly/user task database provider evidence gate",
+            "compatTasksLiveMethods" to "addDisposableTask,queryTasks,queryTimedTasks,getTimedTask,removeTask,removeTimedTask",
+            "blockedRhinoTaskMethods" to "addDailyTask,addWeeklyTask,updateTask,addIntentTask,queryIntentTasks,getIntentTask,removeIntentTask",
+            "dailyWeeklyPromotion" to "blocked_until_user_task_database_schema_migration_packaged_policy_and_wall_clock_scheduler_evidence",
+            "rawTaskObjectPolicy" to "no raw TimedTask, IntentTask, WorkRequest, PendingIntent, AlarmManager, JobScheduler, WorkManager, BroadcastReceiver, Intent, or database cursor crosses the bridge",
+            "requireTasksPolicy" to "require(\"tasks\"), global tasks, and raw Rhino task objects remain unavailable until a dedicated Pro profile provider lands",
             "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
         )
         RHINO_PROVIDER -> linkedMapOf(

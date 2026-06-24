@@ -296,7 +296,7 @@
     },
     {
       "id": "pro.tasks_app_shell_media_utils",
-      "status": "planned",
+      "status": "debug_poc",
       "profiles": [
         "pro_compat_opt_in"
       ],
@@ -309,7 +309,7 @@
         "P13-26",
         "P13-27"
       ],
-      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules.",
+      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked.",
       "risk": "high",
       "runtimeSurface": [
         "daily/weekly task provider",
@@ -318,7 +318,24 @@
         "root/Shizuku shell capability",
         "media and utility providers"
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/nodejs/reports/phase13/P13_21_TASK_DATABASE_PROVIDER.md",
+        "tools/nodejs/phase13/verify-task-database-provider.js",
+        ":app:verifyNodePhase13TaskDatabaseProvider",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkManagerBridgeInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeResourceRegistryInstrumentationTest.kt",
+        "app/src/main/java/org/autojs/autojs/runtime/api/augment/tasks/Tasks.kt",
+        "app/src/main/java/org/autojs/autojs/storage/database/TimedTaskDatabase.java",
+        "app/src/main/java/org/autojs/autojs/storage/database/IntentTaskDatabase.java",
+        "app/src/main/java/org/autojs/autojs/timing/TimedTaskManager.kt",
+        "docs/nodejs/design/TASKS_DAILY_WEEKLY_USER_DATABASE_DECISION.md",
+        "docs/nodejs/design/RHINO_TASKS_WORK_MANAGER_MIGRATION.md",
+        "docs/nodejs/types/autojs6-node/work_manager.d.ts",
+        "docs/nodejs/types/autojs6-node/rhino_compat.d.ts",
+        "build/reports/nodejs/phase13-task-database-provider.json",
+        "build/reports/nodejs/phase13-task-database-provider.md"
+      ],
       "rollback": "Keep P12 stable unsupported or blocked_by_design stubs and require explicit migration to supported Node bridge modules."
     },
     {

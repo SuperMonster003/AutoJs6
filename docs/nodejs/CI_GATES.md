@@ -404,6 +404,12 @@ provider-owned image handles, Rhino compat wrappers, cleanup, and raw object
 denial are present, while bridge-owned MediaProjection prompting, advanced
 image processing, packaged capture/OCR behavior, Paddle/Rapid fallback, and raw
 Bitmap/OpenCV profile decisions still block opt-in promotion.
+`verifyNodePhase13TaskDatabaseProvider` records the P13-21 partial
+daily/weekly/user task database provider state: live `work_manager` scheduled
+work, `compat.tasks` one-shot migration, rejection stubs, Android/Rhino task
+database substrate evidence, and raw task object denial are present, while
+direct `tasks`, daily/weekly JSON provider operations, packaged task database
+promotion, and raw Rhino task mutation remain blocked.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -550,6 +556,12 @@ Android providers partial: `image.readImage()`/`recycle()` and ML Kit OCR over
 provider-owned handles are live, while MediaProjection prompting, capture,
 save/transform/match/color providers, packaged behavior, Paddle/Rapid fallback,
 and raw Bitmap/OpenCV exposure require separate evidence.
+P13-21 additionally uses `verifyNodePhase13TaskDatabaseProvider` as the host
+promotion-status gate for daily/weekly/user task database parity and keeps the
+provider partial: `work_manager` and `compat.tasks` one-shot scheduling are
+covered, while direct `require("tasks")`, daily/weekly database add/query/get/
+update/remove operations, packaged behavior, and raw task objects require
+separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

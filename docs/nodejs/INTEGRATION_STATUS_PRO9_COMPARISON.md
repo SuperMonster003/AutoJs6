@@ -1008,6 +1008,11 @@ await setClip("ready");
 AutoJs6 的 Node.js 集成已经超过“实验入口”阶段，具备 runtime、模块系统、
 受控文件系统、桥接协议、权限模型、类型声明、示例、测试和打包验证等核心骨架。
 
+P13-21 records task database provider promotion as partial: `work_manager` and
+`autojs6:compat.tasks` one-shot scheduling are evidence-backed, while direct
+`tasks`, daily/weekly/user database operations, IntentTask/broadcast triggers,
+packaged promotion, and raw task object mutation remain blocked.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

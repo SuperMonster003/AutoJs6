@@ -542,6 +542,8 @@ The `work_manager` bridge is a controlled scheduled-task surface, not direct And
 
 Node scripts have only the Task 65/180/S7-15/S7-21 `work_manager` controlled scheduling MVP plus the P12-16/P12-17/P12-18 `compat.tasks` wrapper over that MVP. `require("tasks")`, global `tasks`, and raw Rhino task objects remain unavailable. P12-17 rejection stubs for daily/weekly tasks and `updateTask()` must fail before bridge dispatch; P12-18 rejection stubs for IntentTask/broadcast tasks must also fail before bridge dispatch. Node scripts do not have authority to register broadcast, boot, package-event, exact-alarm, raw Android scheduler, interactive background UI, or arbitrary long-running background tasks.
 
+P13-21 records daily/weekly/user task database promotion as partial. The existing Android/Rhino `TimedTask` and `IntentTask` database substrate is evidence only; Node still has no `tasks` capability, no direct task database provider, no packaged task database promotion, no wall-clock daily/weekly scheduler parity, and no raw `TimedTask`, `IntentTask`, WorkManager, PendingIntent, AlarmManager, JobScheduler, BroadcastReceiver, Intent, or cursor object access.
+
 Future support must follow `docs/nodejs/design/WORK_MANAGER.md`:
 
 - timed task execution may be added only through a Promise bridge provider

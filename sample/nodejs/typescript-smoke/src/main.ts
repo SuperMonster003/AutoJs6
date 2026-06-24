@@ -385,6 +385,16 @@ async function smoke(): Promise<void> {
   });
   const tasks: readonly workManager.WorkTask[] = await workManager.list({ timeoutMs: 1000 });
   await workManager.cancel(onceId, { timeoutMs: 1000 });
+  const compatDisposableId: string = await rhinoCompat.tasks.addDisposableTask({
+    path: "main.cjs",
+    delayMs: 1000,
+    timeoutMs: 1000
+  });
+  const compatTimedTasks: readonly workManager.WorkTask[] = await rhinoCompat.tasks.queryTimedTasks({ timeoutMs: 1000 });
+  const compatTimedTask: workManager.WorkTask | null = await rhinoCompat.tasks.getTimedTask(compatDisposableId, { timeoutMs: 1000 });
+  const compatDailyDenied: Promise<never> = rhinoCompat.tasks.addDailyTask({ path: "main.cjs", time: "08:30" });
+  const compatWeeklyDenied: Promise<never> = rhinoCompat.tasks.addWeeklyTask({ path: "main.cjs", time: "08:30", daysOfWeek: [1] });
+  const compatUpdateDenied: Promise<never> = rhinoCompat.tasks.updateTask({ id: compatDisposableId });
 
   const pluginInfo: plugins.PluginManifest = plugins.manifest("org.example.types");
   const pluginEntry: string = plugins.resolve("org.example.types");
@@ -536,6 +546,11 @@ async function smoke(): Promise<void> {
   void pluginResult;
   void profileEngine;
   void globalProfile;
+  void compatTimedTasks;
+  void compatTimedTask;
+  void compatDailyDenied;
+  void compatWeeklyDenied;
+  void compatUpdateDenied;
   void autojsVersionCode;
   void autojsPackageName;
   void autojsContextAvailable;

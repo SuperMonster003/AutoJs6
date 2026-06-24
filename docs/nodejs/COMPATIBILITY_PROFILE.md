@@ -1663,6 +1663,7 @@ runtime.
   - task records expose `lastRun` plus bounded `runHistory` with trigger, runner version, attempt, execution id, execution mode, launch surface, stdout/stderr snippets, exit/error metadata, timeout state, Android quota policy, and selected embedded native values
   - provider-owned task registrations are tracked as bridge resources; explicit `cancel()` removes persisted records and cancels the unique WorkManager work
   - raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, and IntentFilter objects remain unavailable to JavaScript
+  - P13-21 records the current daily/weekly/user task database provider state as partial: `work_manager` and `compat.tasks` one-shot migration are live evidence, while direct `require("tasks")`, global `tasks`, daily/weekly add/query/update/remove, packaged task-database promotion, and raw `TimedTask` / `IntentTask` mutation remain blocked
 
 Example:
 
@@ -1782,6 +1783,7 @@ Current policy:
 - `require("tasks")` is not exposed in the Embedded Node Safe Node Profile.
 - Node scripts must not access raw WorkManager, AlarmManager, JobScheduler, BroadcastReceiver, PendingIntent, or IntentFilter objects.
 - Existing Rhino task APIs remain unchanged.
+- P13-21 keeps daily/weekly/user task database parity in a partial Pro-profile evidence state: `compat.tasks.addDisposableTask()` can migrate Node-owned one-shot descriptors through `work_manager`, but wall-clock daily/weekly rows, user task database schema migration, packaged metadata, and raw task object compatibility remain separate gates.
 - Future migration into the user-visible AutoJs6 task database, packaged receivers, boot/broadcast triggers, restart policies, and arbitrary long-running scheduled Node processes remain separate gates.
 - Future broadcast, startup, boot, and package-event task support is deferred behind `docs/nodejs/design/BROADCAST_TASKS.md` and a user-visible permission flow.
 

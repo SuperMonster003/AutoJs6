@@ -10,6 +10,11 @@ database compatibility. The implemented Node surface stays under
 P12-17 keeps Rhino daily/weekly `TimedTask` database parity out of the Node
 provider surface.
 
+P13-21 reopens this area only as a partial Pro-profile provider gate. It records
+the existing Android/Rhino task database substrate, live `work_manager`
+scheduled-work provider, and `compat.tasks` one-shot migration, but it does not
+promote daily/weekly add/query/update/remove behavior yet.
+
 The promoted `compat.tasks` methods are still the WorkManager-backed,
 Node-owned subset:
 

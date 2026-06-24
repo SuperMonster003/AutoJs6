@@ -227,6 +227,21 @@ Porting note: use `ui.overlay` only for JSON-only overlay migration
 experiments. Production scripts should not depend on live overlay windows until
 the provider is promoted.
 
+## Tasks And User Task Database
+
+P13-21 records task database provider promotion as partial. AutoJs6 Node has
+live `work_manager` scheduling for Node-owned scoped entries and
+`require("autojs6:compat").tasks` one-shot disposable-task migration over that
+provider. It still does not expose direct `require("tasks")`, global `tasks`,
+daily/weekly wall-clock task database operations, IntentTask/broadcast task
+provider access, packaged task database promotion, or raw Rhino task object
+mutation.
+
+Porting note: migrate one-shot disposable task cases to `work_manager` or
+`compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
+IntentTask triggers, or raw task object mutation on Rhino until a dedicated
+Pro-profile task provider lands.
+
 ## Java And Android Interop
 
 Auto.js Pro 9 public docs describe `$autojs.java` and a `rhino` module for Java/Android interop.
@@ -313,6 +328,7 @@ Porting note: a Pro/AutoX Node script that runs in its original environment may 
 | Scoped fs | not described as AutoJs6 policy | not equivalent | enforced |
 | Raw `http`/`https` | documented as usable | not equivalent | disabled by default |
 | `worker_threads` | documented with Auto.js API restrictions | no old-style multithreading | disabled by default |
+| `tasks` / user task database | timed task database APIs | compatibility varies | P13-21 partial: `work_manager` and one-shot `compat.tasks` only |
 | Direct Java/Android access | `$autojs` / `rhino` docs | Java Promise direction | bridge modules only by default |
 | Packaged APK Node runtime | product-specific | product-specific | verified Safe Node Profile |
 

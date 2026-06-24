@@ -1349,6 +1349,19 @@ Focused live WorkManager gate:
 
 This suite verifies the `work_manager` bridge registry, fake-provider schedule-once and schedule-periodic descriptors, `require("work_manager")`, shadowing protection, ordinary `scriptPath` versus project `entry` serialization, packaged project-entry metadata serialization, scoped path and missing-file rejection, interval/backend policy rejection, explicit capability tagging, AndroidX WorkManager-backed task persistence, Android 16 JobScheduler quota diagnostics in task records, real scheduled-runner embedded Node execution with `executionMode=scheduled` and `launchSurface=scheduled_runner`, CommonJS and ESM scheduled entries, persisted `lastRun`/`runHistory` result and failure metadata, scheduled task environment variables, delayed-task cancellation before execution, `cancel()`, `list()`, and that `require("tasks")` remains unavailable. Packaged queued-fallback rejection remains a release/template gate because the normal instrumentation harness injects live bridge metadata.
 
+Phase 13 task database provider status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13TaskDatabaseProvider
+```
+
+This host gate records P13-21 as partial. It requires the live `work_manager`
+baseline, `compat.tasks` one-shot migration evidence, explicit daily/weekly /
+IntentTask rejection stubs, Android/Rhino `TimedTask` database substrate
+evidence, provider-registry raw object denial, surface-manifest evidence, and
+cross-document policy anchors. It does not promote `require("tasks")`, global
+`tasks`, packaged task database behavior, or raw task object mutation.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

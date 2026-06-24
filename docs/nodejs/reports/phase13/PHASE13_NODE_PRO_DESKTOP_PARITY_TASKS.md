@@ -16,6 +16,20 @@
   packaged capture/OCR behavior, Paddle/Rapid fallback, and raw
   Bitmap/OpenCV profile decisions.
 
+## P13-21 Partial Landing Note
+
+- P13-21 partial task database provider gate records the current
+  `work_manager`, explicit `autojs6:compat.tasks`, and Android/Rhino
+  `TimedTask` database substrate.
+- Host verifier: `tools/nodejs/phase13/verify-task-database-provider.js`.
+- Gradle gate: `:app:verifyNodePhase13TaskDatabaseProvider`.
+- Report: `docs/nodejs/reports/phase13/P13_21_TASK_DATABASE_PROVIDER.md`.
+- Surface manifest evidence: `phase13-task-database-provider`.
+- Remaining P13-21 blockers: JSON task database schema, main-app vs packaged
+  ownership, add/query/update/remove daily/weekly operations, wall-clock
+  scheduler semantics, packaged metadata/manifest behavior, and raw
+  TimedTask/IntentTask profile decisions.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -583,6 +597,21 @@ P13 task 本身使用以下执行状态：
     - add/query/update/remove daily/weekly task 可用。
     - 数据库 schema、迁移、权限、packaged 行为有 gate。
     - raw task object mutation 仍需单独决策。
+  - P13-21 partial task database provider gate (2026-06-24):
+    - Evidence:
+      - Report: `docs/nodejs/reports/phase13/P13_21_TASK_DATABASE_PROVIDER.md`
+      - Verifier: `tools/nodejs/phase13/verify-task-database-provider.js`
+      - Gradle gate: `:app:verifyNodePhase13TaskDatabaseProvider`
+      - Surface manifest evidence: `phase13-task-database-provider`
+    - Current ready slice:
+      - `work_manager.scheduleOnce/schedulePeriodic/cancel/list` remains the live Node-owned scheduled-work provider.
+      - `compat.tasks.addDisposableTask/queryTasks/queryTimedTasks/getTimedTask/removeTask/removeTimedTask` covers one-shot migration over WorkManager snapshots.
+      - `compat.tasks.addDailyTask/addWeeklyTask/updateTask` and IntentTask methods still reject before bridge dispatch.
+      - Android/Rhino `TimedTaskDatabase`, `TimedTaskManager`, and daily/weekly factory methods exist as substrate, but raw rows/objects do not cross into Node.
+    - Remaining blockers:
+      - JSON task database descriptor schema, migration/downgrade policy, and main-app vs packaged ownership.
+      - Daily/weekly add/query/get/update/remove provider operations over frozen JSON snapshots.
+      - Wall-clock scheduler semantics, exact-alarm/WorkManager/JobScheduler fallback policy, packaged manifest/disclosure, and raw task object profile decision.
 
 - [ ] P13-22: 实现 IntentTask/broadcast task provider。
   - 范围：提供受控广播/Intent 触发任务能力。
