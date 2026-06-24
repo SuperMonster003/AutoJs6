@@ -712,6 +712,14 @@ command bridge, `worker_computation` stays reserved, and no raw process handle,
 spawn/fork, stdio stream, signal, bridge-module, nested-worker, or packaged
 process-worker authority is promoted.
 
+P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
+metadata only and does not make a second JavaScript context a security
+boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,
+`compileFunction`, VM module APIs, and dynamic import hooks are not surfaced.
+Any future opt-in must prove timeout cancellation, memory budgets, context
+cleanup, private binding denial, bridge and host object denial, process/global
+leakage denial, scoped filesystem preservation, and packaged diagnostics.
+
 ## Release Security Gate
 
 Every Node release candidate must verify:

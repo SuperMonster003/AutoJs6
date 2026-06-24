@@ -1116,6 +1116,12 @@ a `process_worker` or `compute_worker` facade. `child_process` remains denied,
 `second_execution_slot` stay unpromoted until future evidence closes those
 gates.
 
+P13-36 records `vm` module promotion as partial: Safe Node now exposes
+`vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
+yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout
+cancellation, memory budgets, context cleanup, bridge/process/global leakage
+denial, private binding denial, and packaged behavior remain open.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

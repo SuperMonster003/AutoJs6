@@ -330,6 +330,12 @@ process-worker behavior. Scripts that need old threading/process-worker
 semantics should remain on Rhino or explicit bridge-backed alternatives until a
 future profile promotes them.
 
+P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
+`vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
+`compileFunction`, and VM module APIs remain unavailable. Packages that require
+Node's VM APIs still need a future Desktop/Debug profile with timeout, memory,
+escape-denial, and packaged behavior evidence.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

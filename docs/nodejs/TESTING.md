@@ -1102,6 +1102,20 @@ Current `vm` design gate focused instrumentation:
 
 This suite verifies the registry/profile disabled state for `vm`, denial for `require("vm")`, `require("node:vm")`, `require.resolve("vm")`, `require.resolve("node:vm")`, and shadowing protection against `node_modules/vm`.
 
+Phase 13 vm module decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13VmModuleDecision
+```
+
+This host gate records P13-36 as partial. It requires `vmProfile`
+diagnostics, default `vm`/`node:vm` denial, `require.resolve()` denial,
+shadowing protection, existing design-gate evidence, TypeScript declarations,
+the desktop builtin matrix, and Phase13 docs. It keeps callable `vm.Script`,
+context APIs, `compileFunction`, VM module APIs, dynamic import hooks, timeout
+policy, memory/compiled-script budgets, escape-denial coverage, and packaged
+behavior open.
+
 Current `os` privacy focused instrumentation:
 
 ```powershell

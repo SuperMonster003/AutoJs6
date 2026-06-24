@@ -734,6 +734,12 @@ bridge, reserved `worker_computation`, open `second_execution_slot` relation,
 and docs updates while keeping native WorkerPool proof, packaged behavior, slot
 accounting, cleanup stress, user-facing API/UX, and any future P13-40
 `child_process` runner open.
+`verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
+gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
+require/resolve denial, local shadow-package protection, the existing VM design
+gate, TypeScript declarations, surface manifest evidence, and docs updates
+while keeping callable `vm.Script`, context APIs, timeout cancellation, memory
+budgets, escape-denial evidence, and packaged behavior unpromoted.
 `verifyNodeModernCoreGate` covers the S7-31 through S7-36 modern core surface:
 `AsyncLocalStorage` propagation, diagnostics channel runtime telemetry,
 `perf_hooks`, single-runtime `node:test`, promise-based timers/streams/readline,

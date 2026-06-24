@@ -223,7 +223,7 @@ function nextStepForDisabled(name) {
     case "inspector":
       return "P13-37 must keep release denied and validate debug-only ADB-forward behavior.";
     case "vm":
-      return "P13-36 must design context isolation, timeout, and escape-denial tests.";
+      return "P13-36 records vm module diagnostics as partial; Safe/default keeps vm denied while vm.Script/context/timeout, escape denial, memory budget, and packaged behavior evidence remain future work.";
     case "wasi":
       return "P13-38 must define controlled preopens and raw WASI denial.";
     case "worker_threads":

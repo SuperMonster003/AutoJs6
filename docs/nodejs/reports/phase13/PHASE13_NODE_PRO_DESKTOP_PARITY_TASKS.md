@@ -237,6 +237,21 @@
   process-worker packaging behavior, slot accounting, cleanup stress,
   user-facing API/UX, and any future P13-40 scoped `child_process` runner.
 
+## P13-36 Partial Landing Note
+
+- P13-36 partial `vm` module gate records `vmProfile` diagnostics and keeps
+  `vm`/`node:vm` denied by default.
+- The gate documents the future enablement contract for `vm.Script`, context,
+  timeout, private binding denial, host object denial, bridge denial, scoped fs
+  preservation, memory limits, and packaged behavior.
+- Host verifier: `tools/nodejs/phase13/verify-vm-module-decision.js`.
+- Gradle gate: `:app:verifyNodePhase13VmModuleDecision`.
+- Report: `docs/nodejs/reports/phase13/P13_36_VM_MODULE_DECISION.md`.
+- Surface manifest evidence: `phase13-vm-module-decision`.
+- Remaining P13-36 blockers: limited VM API design, context isolation, timeout
+  cancellation, memory/compiled-script budgets, disabled-builtin escape tests,
+  bridge/process/global leakage tests, and packaged APK behavior.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -1156,6 +1171,20 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - 禁止逃逸到 private bindings、bridge globals 或 host objects。
     - context resource cleanup 和 memory budget 有测试。
+  - Partial landing:
+    - `autojs6:profile.vmProfile` 已暴露 P13-36 决策快照。
+    - `vm` / `node:vm` 保持默认拒绝，`node_modules/vm` 不能 shadow。
+    - `vm.Script`、context、`compileFunction`、ES module VM APIs、
+      dynamic import hooks 均未引入 runtime surface。
+    - future enablement gate 明确要求 timeout、context cleanup、memory
+      budget、private binding/bridge/host object/process/global leakage denial
+      和 packaged APK behavior 证据。
+    - Device test: `NodeVmPhase13DecisionInstrumentationTest`。
+    - Existing design gate: `NodeVmDesignGateInstrumentationTest`。
+    - Host verifier: `tools/nodejs/phase13/verify-vm-module-decision.js`。
+    - Gradle gate: `:app:verifyNodePhase13VmModuleDecision`。
+    - Report: `docs/nodejs/reports/phase13/P13_36_VM_MODULE_DECISION.md`。
+    - Surface manifest evidence: `phase13-vm-module-decision`。
 
 - [ ] P13-37: 推进 inspector/devtools debug profile。
   - 范围：允许 debug build 通过 adb forward 使用 inspector/profiling。

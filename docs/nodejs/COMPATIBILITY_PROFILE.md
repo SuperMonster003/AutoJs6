@@ -1190,6 +1190,14 @@ reserved, `second_execution_slot` is not closed by this decision, and raw
 process handles, spawn/fork, stdio streams, signals, bridge modules, nested
 workers, and packaged process-worker behavior remain unpromoted.
 
+P13-36 records `vm` module promotion as partial. The runtime exposes
+`autojs6:profile.vmProfile` to document that `vm` remains denied by default
+while any future Desktop/Debug opt-in must prove `vm.Script` or context
+isolation, timeout cancellation, private binding denial, bridge and host object
+denial, process/global leakage denial, scoped-fs preservation, memory limits,
+and packaged behavior. No callable `vm.Script`, context, `compileFunction`, VM
+module, dynamic import hook, or raw global access is promoted.
+
 ## Process Profile
 
 Supported or limited:

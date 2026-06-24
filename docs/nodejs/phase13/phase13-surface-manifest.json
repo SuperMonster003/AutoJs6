@@ -481,7 +481,7 @@
         "P13-39",
         "P13-40"
       ],
-      "summary": "Stage desktop execution capabilities: P13-34 records worker_threads opt-in diagnostics and native-preflight evidence as partial; P13-35 records process-worker replacement as WorkerPool-preferred with no new process_worker facade while child_process remains denied; vm, inspector, WASI, native addon loading, and child_process scoped runner remain staged.",
+      "summary": "Stage desktop execution capabilities: P13-34 records worker_threads opt-in diagnostics and native-preflight evidence as partial; P13-35 records process-worker replacement as WorkerPool-preferred with no new process_worker facade while child_process remains denied; P13-36 records vm diagnostics while keeping vm denied until context isolation, timeout, memory, escape-denial, and packaged behavior evidence exists; inspector, WASI, native addon loading, and child_process scoped runner remain staged.",
       "risk": "critical",
       "runtimeSurface": [
         "node:worker_threads",
@@ -508,7 +508,14 @@
         "docs/nodejs/reports/phase13/P13_35_PROCESS_WORKER_REPLACEMENT.md",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest.kt",
         "build/reports/nodejs/phase13-process-worker-replacement-decision.json",
-        "build/reports/nodejs/phase13-process-worker-replacement-decision.md"
+        "build/reports/nodejs/phase13-process-worker-replacement-decision.md",
+        "tools/nodejs/phase13/verify-vm-module-decision.js",
+        ":app:verifyNodePhase13VmModuleDecision",
+        "docs/nodejs/reports/phase13/P13_36_VM_MODULE_DECISION.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeVmPhase13DecisionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeVmDesignGateInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-vm-module-decision.json",
+        "build/reports/nodejs/phase13-vm-module-decision.md"
       ],
       "rollback": "Disable desktop execution flags and keep high-risk builtins on stable denial paths."
     },
