@@ -316,6 +316,12 @@ state. Scripts should still treat these as scoped compatibility APIs: raw native
 fd access, recursive watchers, expanded roots, and full packaged
 watcher/fd/FileHandle lifecycle parity are not yet Pro/Desktop-promoted.
 
+P13-34 records `worker_threads` opt-in promotion as partial. AutoJs6 Node keeps
+`worker_threads` disabled by default, and `workerThreadsProfile` is diagnostic
+only. Pro/AutoX scripts should not treat worker threads as a portable threading
+replacement until native worker availability, packaged worker smoke, crash
+evidence, and Android resource ceilings are promoted.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

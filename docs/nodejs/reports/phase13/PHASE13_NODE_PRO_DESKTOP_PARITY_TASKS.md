@@ -202,6 +202,22 @@
   smoke, pending watcher/watchFile Kotlin diagnostics, expanded-root reruns,
   Android unsupported behavior notes, and final full desktop fs semantics.
 
+## P13-34 Partial Landing Note
+
+- P13-34 partial worker_threads opt-in promotion gate records default denial,
+  `workerThreadsProfile` diagnostics, request-local experimental preflight, and
+  existing native-available worker/MessageChannel/WorkerPool/resource/packaged
+  evidence without promoting workers by default.
+- Host verifier:
+  `tools/nodejs/phase13/verify-worker-threads-opt-in-promotion.js`.
+- Gradle gate: `:app:verifyNodePhase13WorkerThreadsOptInPromotion`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_34_WORKER_THREADS_OPT_IN_PROMOTION.md`.
+- Surface manifest evidence: `phase13-worker-threads-opt-in-promotion`.
+- Remaining P13-34 blockers: native worker availability on target ABIs,
+  archived experimental worker gate evidence, packaged `.mjs` worker smoke,
+  worker crash evidence, nested-worker policy, and Android resource ceilings.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -1078,6 +1094,16 @@ P13 task 本身使用以下执行状态：
     - worker 可运行纯 JS、Node builtin、MessageChannel/TransferList 基础能力。
     - worker 默认不能访问 AutoJs bridge，除非后续单独 provider。
     - nested worker、resource stress、crash evidence、packaged behavior 完整。
+  - 进展：
+    - P13-34 partial landing 已添加 `workerThreadsProfile` 诊断，保持默认拒绝。
+    - 新增 focused gate:
+      `NodeWorkerThreadsPhase13DecisionInstrumentationTest`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-worker-threads-opt-in-promotion.js`。
+    - Gradle gate: `:app:verifyNodePhase13WorkerThreadsOptInPromotion`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_34_WORKER_THREADS_OPT_IN_PROMOTION.md`。
+    - Surface manifest evidence: `phase13-worker-threads-opt-in-promotion`。
 
 - [ ] P13-35: 决策 process-worker replacement。
   - 范围：如果 `worker_threads` 无法满足 Android 稳定性，提供 AutoJs6

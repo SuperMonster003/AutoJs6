@@ -1100,6 +1100,14 @@ Android-platform-limited. Pro scripts that expect broad filesystem roots, raw
 native fds, recursive watchers, or desktop-identical packaged watcher/fd
 lifecycle behavior still need future profile promotion work.
 
+P13-34 records `worker_threads` opt-in promotion as partial: Safe Node still
+rejects worker threads by default, while `workerThreadsProfile` describes the
+request-local experimental preflight, worker policy, bridge isolation,
+MessageChannel/transfer-list/WorkerPool targets, and packaged worker state.
+This is not yet Pro/desktop parity for worker scripts because native
+availability, current experimental gate evidence, crash evidence, packaged
+`.mjs` worker smoke, and Android resource ceilings remain open.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

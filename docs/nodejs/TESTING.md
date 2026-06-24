@@ -1719,6 +1719,22 @@ native-availability preflight reports
 `ERR_AUTOJS6_WORKER_DISABLED`, and it must pass on the Sony gate device before
 workers can be advertised as a runnable experiment.
 
+Phase 13 worker_threads opt-in promotion gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13WorkerThreadsOptInPromotion
+```
+
+This host gate records P13-34 as partial. It requires
+`workerThreadsProfile` diagnostics, default disabled/shadow-denial evidence,
+request-local experimental preflight evidence, existing native-available worker,
+MessageChannel, transfer-list, WorkerPool, resource-stress, and packaged worker
+smoke source markers, TypeScript declarations, the desktop builtin matrix, and
+Phase13 docs. It keeps native runnable evidence on target ABIs, archived
+experimental worker gate output, packaged `.mjs` worker smoke evidence, crash
+evidence, nested-worker policy, SharedArrayBuffer/Atomics policy, and Android
+resource ceilings open.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

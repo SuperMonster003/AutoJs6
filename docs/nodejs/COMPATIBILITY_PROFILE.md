@@ -1172,6 +1172,15 @@ parentPort, threadId, builtin import, source graph packaging, and exit cleanup.
 It is not a user-visible packaged worker guarantee while the default profile
 keeps `worker_threads` disabled.
 
+P13-34 records `worker_threads` opt-in promotion as partial. The runtime now
+exposes `autojs6:profile.workerThreadsProfile` as diagnostics for default
+denial, request-local experimental opt-in, native availability preflight,
+worker policy, bridge denial, nested-worker denial, WorkerPool, transfer-list,
+and packaged behavior state. It does not promote default, project, or packaged
+worker authority; native runnable evidence, archived experimental worker gate
+results, crash evidence, packaged `.mjs` worker smoke, and Android resource
+ceilings remain open.
+
 ## Process Profile
 
 Supported or limited:

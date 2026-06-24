@@ -71,7 +71,7 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `v8` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `vm` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-36 must design context isolation, timeout, and escape-denial tests. |
 | `wasi` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-38 must define controlled preopens and raw WASI denial. |
-| `worker_threads` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-34 must validate worker isolation, message budgets, crash evidence, and packaged behavior. |
+| `worker_threads` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, and native preflight are covered while native runnable evidence, crash/resource stress, packaged worker smoke, and final Desktop worker policy remain open. |
 | `zlib` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `zlib/promises` | `disabled` | `desktop_compat_opt_in` | `disabled` | Keep stable denial unless a future Phase 13 task assigns an opt-in profile. |
 

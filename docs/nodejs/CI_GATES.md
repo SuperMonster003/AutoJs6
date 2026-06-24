@@ -718,6 +718,13 @@ native Worker surface or stable `ERR_AUTOJS6_WORKER_DISABLED` diagnostics. When
 creation and resource stress classes remain promotion gates; they are skipped
 with an explicit native-availability reason on the current Embedded Node build
 instead of weakening the contract with a same-thread fallback.
+`verifyNodePhase13WorkerThreadsOptInPromotion` records P13-34 as the Phase 13
+worker decision gate. It requires `workerThreadsProfile` diagnostics, default
+denial/shadow protection, request-local experimental native preflight, existing
+worker/MessageChannel/WorkerPool/resource/packaged evidence anchors, and docs
+updates while keeping default worker authority, project/package opt-in, native
+runnable claims, packaged worker promotion, crash evidence, nested-worker
+policy, and Android resource ceilings unpromoted.
 `verifyNodeModernCoreGate` covers the S7-31 through S7-36 modern core surface:
 `AsyncLocalStorage` propagation, diagnostics channel runtime telemetry,
 `perf_hooks`, single-runtime `node:test`, promise-based timers/streams/readline,

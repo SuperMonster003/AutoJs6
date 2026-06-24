@@ -227,7 +227,7 @@ function nextStepForDisabled(name) {
     case "wasi":
       return "P13-38 must define controlled preopens and raw WASI denial.";
     case "worker_threads":
-      return "P13-34 must validate worker isolation, message budgets, crash evidence, and packaged behavior.";
+      return "P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, and native preflight are covered while native runnable evidence, crash/resource stress, packaged worker smoke, and final Desktop worker policy remain open.";
     default:
       return "Keep stable denial unless a future Phase 13 task assigns an opt-in profile.";
   }

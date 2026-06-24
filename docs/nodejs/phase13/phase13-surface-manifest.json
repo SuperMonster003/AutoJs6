@@ -481,7 +481,7 @@
         "P13-39",
         "P13-40"
       ],
-      "summary": "Stage desktop execution capabilities: worker_threads, process-worker replacement, vm, inspector, WASI, native addon loading, and child_process scoped runner.",
+      "summary": "Stage desktop execution capabilities: P13-34 records worker_threads opt-in diagnostics and native-preflight evidence as partial; process-worker replacement, vm, inspector, WASI, native addon loading, and child_process scoped runner remain staged.",
       "risk": "critical",
       "runtimeSurface": [
         "node:worker_threads",
@@ -492,7 +492,18 @@
         "native .node addon policy",
         "child_process scoped runner"
       ],
-      "evidence": [],
+      "evidence": [
+        "tools/nodejs/phase13/verify-worker-threads-opt-in-promotion.js",
+        ":app:verifyNodePhase13WorkerThreadsOptInPromotion",
+        "docs/nodejs/reports/phase13/P13_34_WORKER_THREADS_OPT_IN_PROMOTION.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsPhase13DecisionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsExperimentalInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-worker-threads-opt-in-promotion.json",
+        "build/reports/nodejs/phase13-worker-threads-opt-in-promotion.md"
+      ],
       "rollback": "Disable desktop execution flags and keep high-risk builtins on stable denial paths."
     },
     {

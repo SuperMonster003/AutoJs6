@@ -1394,3 +1394,57 @@ tasks.register<Exec>("verifyNodePhase13FilesystemAdvancedApis") {
         nodePhase13ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase13WorkerThreadsOptInPromotion") {
+    group = "verification"
+    description = "Verifies Phase 13 worker_threads opt-in promotion decision."
+
+    dependsOn("verifyNodePhase13FilesystemAdvancedApis")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-worker-threads-opt-in-promotion.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_34_WORKER_THREADS_OPT_IN_PROMOTION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/desktop-parity/NODE_BUILTIN_PARITY_MATRIX.md"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(rootProject.layout.projectDirectory.file("app/build.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsPhase13DecisionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsTestSupport.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsBootstrapInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsDesignGateInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsExperimentalInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWorkerThreadsResourceStressInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/design/WORKER_THREADS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/WORKER_EXPERIMENTAL_EVALUATION.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase8/WORKER_PARTIAL_PROMOTION_RECHECK.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/autojs_global.d.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/types/autojs6-node/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/typescript-smoke/src/main.ts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("tools/nodejs/phase13/generate-node-builtin-parity-matrix.js"))
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("phase13-worker-threads-opt-in-promotion.json") },
+        nodePhase13ReportDir.map { it.file("phase13-worker-threads-opt-in-promotion.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+    )
+}
