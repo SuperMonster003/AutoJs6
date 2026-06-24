@@ -725,6 +725,15 @@ worker/MessageChannel/WorkerPool/resource/packaged evidence anchors, and docs
 updates while keeping default worker authority, project/package opt-in, native
 runnable claims, packaged worker promotion, crash evidence, nested-worker
 policy, and Android resource ceilings unpromoted.
+`verifyNodePhase13ProcessWorkerReplacementDecision` records P13-35 as the
+process-worker replacement decision gate. It requires
+`processWorkerReplacementProfile` diagnostics, no callable
+`process_worker`/`compute_worker` facade, WorkerPool as the current replacement
+path, continued `child_process` denial, `shell` as a separate scoped command
+bridge, reserved `worker_computation`, open `second_execution_slot` relation,
+and docs updates while keeping native WorkerPool proof, packaged behavior, slot
+accounting, cleanup stress, user-facing API/UX, and any future P13-40
+`child_process` runner open.
 `verifyNodeModernCoreGate` covers the S7-31 through S7-36 modern core surface:
 `AsyncLocalStorage` propagation, diagnostics channel runtime telemetry,
 `perf_hooks`, single-runtime `node:test`, promise-based timers/streams/readline,

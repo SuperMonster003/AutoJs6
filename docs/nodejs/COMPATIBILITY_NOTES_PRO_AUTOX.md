@@ -322,6 +322,14 @@ only. Pro/AutoX scripts should not treat worker threads as a portable threading
 replacement until native worker availability, packaged worker smoke, crash
 evidence, and Android resource ceilings are promoted.
 
+P13-35 records process-worker replacement as partial. AutoJs6 Node exposes
+`processWorkerReplacementProfile` diagnostics to show that WorkerPool is the
+current replacement path, but it does not add `process_worker`,
+`compute_worker`, raw `child_process`, raw process handles, or packaged
+process-worker behavior. Scripts that need old threading/process-worker
+semantics should remain on Rhino or explicit bridge-backed alternatives until a
+future profile promotes them.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

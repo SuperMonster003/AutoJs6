@@ -25,7 +25,7 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `assert/strict` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `async_hooks` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `buffer` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `child_process` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-40 must design a scoped runner before any opt-in promotion. |
+| `child_process` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-35 records the process-worker replacement decision as WorkerPool-preferred with no process_worker facade and child_process still denied; P13-40 must design a scoped runner before any opt-in promotion. |
 | `cluster` | `disabled` | `permanently_unsupported` | `commonjs-known`, `disabled` | Keep stable denial unless a future Phase 13 task assigns an opt-in profile. |
 | `console` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `constants` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |

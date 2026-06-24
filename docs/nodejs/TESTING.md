@@ -1735,6 +1735,22 @@ experimental worker gate output, packaged `.mjs` worker smoke evidence, crash
 evidence, nested-worker policy, SharedArrayBuffer/Atomics policy, and Android
 resource ceilings open.
 
+Phase 13 process-worker replacement decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProcessWorkerReplacementDecision
+```
+
+This host gate records P13-35 as partial. It requires
+`processWorkerReplacementProfile` diagnostics, absence of a callable
+`process_worker`/`compute_worker` facade, default `child_process` denial,
+default worker denial, WorkerPool replacement-path evidence, reserved
+`worker_computation`, open `second_execution_slot` relation, TypeScript
+declarations, the desktop builtin matrix, and Phase13 docs. It keeps native
+WorkerPool evidence, packaged process-worker behavior, slot accounting,
+cleanup stress, user-facing API/UX, and any future P13-40 scoped
+`child_process` runner open.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

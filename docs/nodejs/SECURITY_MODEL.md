@@ -703,6 +703,15 @@ Use the most specific code available. Avoid generic `Error` messages for securit
 
 During the compatibility migration, `error.code` may remain a Node-style code such as `EPERM` or an existing legacy AutoJs6 code such as `ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED`. New consumers should prefer `error.autojs6Code` when present. If a legacy code is preserved, `error.legacyCode` is also set.
 
+P13-35 records process-worker replacement as partial. The only runtime change is
+diagnostic metadata in `autojs6:profile.processWorkerReplacementProfile`; it
+does not create a process-worker facade. The current replacement direction is
+request-local `worker_threads.WorkerPool` after native preflight succeeds.
+`child_process` remains denied, `shell` stays a separately permissioned scoped
+command bridge, `worker_computation` stays reserved, and no raw process handle,
+spawn/fork, stdio stream, signal, bridge-module, nested-worker, or packaged
+process-worker authority is promoted.
+
 ## Release Security Gate
 
 Every Node release candidate must verify:

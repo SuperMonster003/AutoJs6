@@ -218,6 +218,25 @@
   archived experimental worker gate evidence, packaged `.mjs` worker smoke,
   worker crash evidence, nested-worker policy, and Android resource ceilings.
 
+## P13-35 Partial Landing Note
+
+- P13-35 partial process-worker replacement gate records
+  `processWorkerReplacementProfile` diagnostics and decides the current
+  replacement path as request-local `worker_threads.WorkerPool`, not a new
+  `process_worker` or `compute_worker` facade.
+- The gate keeps `child_process` denied, keeps `shell` as a separate scoped
+  command bridge, and keeps `worker_computation` plus `second_execution_slot`
+  from being promoted by this decision.
+- Host verifier:
+  `tools/nodejs/phase13/verify-process-worker-replacement-decision.js`.
+- Gradle gate: `:app:verifyNodePhase13ProcessWorkerReplacementDecision`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_35_PROCESS_WORKER_REPLACEMENT.md`.
+- Surface manifest evidence: `phase13-process-worker-replacement-decision`.
+- Remaining P13-35 blockers: native WorkerPool evidence on target ABIs,
+  process-worker packaging behavior, slot accounting, cleanup stress,
+  user-facing API/UX, and any future P13-40 scoped `child_process` runner.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -1111,6 +1130,26 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - API 与 `worker_threads` 关系清晰。
     - scoped script path、message size、cleanup、slot accounting 完整。
+  - Partial landing:
+    - `autojs6:profile.processWorkerReplacementProfile` 已暴露 P13-35
+      决策快照。
+    - 当前替代路径明确为 request-local
+      `worker_threads.WorkerPool`，不新增 `process_worker` 或
+      `compute_worker` callable facade。
+    - `child_process` 保持默认拒绝；`shell` 继续作为独立 scoped command
+      bridge，不获得 raw process/spawn/fork/stdio/signal 权限。
+    - `worker_computation` 与 `second_execution_slot` 仅作为未来 gate
+      依赖，不由 P13-35 关闭。
+    - Device test:
+      `NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-process-worker-replacement-decision.js`。
+    - Gradle gate:
+      `:app:verifyNodePhase13ProcessWorkerReplacementDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_35_PROCESS_WORKER_REPLACEMENT.md`。
+    - Surface manifest evidence:
+      `phase13-process-worker-replacement-decision`。
 
 - [ ] P13-36: 推进 `vm` module。
   - 范围：在 Desktop/Debug profile 中支持受控 `vm.Script`、context 和 timeout。

@@ -1181,6 +1181,15 @@ worker authority; native runnable evidence, archived experimental worker gate
 results, crash evidence, packaged `.mjs` worker smoke, and Android resource
 ceilings remain open.
 
+P13-35 records process-worker replacement as partial. The runtime exposes
+`autojs6:profile.processWorkerReplacementProfile` to document that the current
+replacement path is request-local `worker_threads.WorkerPool`, not a new
+`process_worker` or `compute_worker` facade. `child_process` stays denied,
+`shell` remains a separate scoped command bridge, `worker_computation` remains
+reserved, `second_execution_slot` is not closed by this decision, and raw
+process handles, spawn/fork, stdio streams, signals, bridge modules, nested
+workers, and packaged process-worker behavior remain unpromoted.
+
 ## Process Profile
 
 Supported or limited:
