@@ -542,6 +542,12 @@ async function smoke(): Promise<void> {
   const wasiProfileTargetProfiles: readonly string[] = autojsProfile.wasiProfile.targetProfiles;
   const wasiProfilePreopens: string = autojsProfile.wasiProfile.preopens;
   const wasiProfileRawFdNumbers: boolean = autojsProfile.wasiProfile.rawFdNumbers;
+  const nativeAddonProfileStatus: string = autojsProfile.nativeAddonProfile.status;
+  const nativeAddonProfileTargetProfiles: readonly string[] = autojsProfile.nativeAddonProfile.targetProfiles;
+  const nativeAddonProfileAbiAllowlist: string = autojsProfile.nativeAddonProfile.abiAllowlist;
+  const nativeAddonProfileHashAllowlist: string = autojsProfile.nativeAddonProfile.hashAllowlist;
+  const nativeAddonProfileCrashIsolation: string = autojsProfile.nativeAddonProfile.crashIsolation;
+  const nativeAddonProfileDownloadExec: boolean = autojsProfile.nativeAddonProfile.downloadExec;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -759,6 +765,12 @@ async function smoke(): Promise<void> {
   void wasiProfileTargetProfiles;
   void wasiProfilePreopens;
   void wasiProfileRawFdNumbers;
+  void nativeAddonProfileStatus;
+  void nativeAddonProfileTargetProfiles;
+  void nativeAddonProfileAbiAllowlist;
+  void nativeAddonProfileHashAllowlist;
+  void nativeAddonProfileCrashIsolation;
+  void nativeAddonProfileDownloadExec;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;

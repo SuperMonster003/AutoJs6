@@ -192,6 +192,29 @@ declare namespace AutoJs6Node {
     readonly rawFdNumbers: boolean;
   }
 
+  export interface NativeAddonProfile {
+    readonly status: "disabled_by_default" | "desktop_opt_in" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly module: "denied" | "partial" | string;
+    readonly requireExtension: "denied" | "partial" | string;
+    readonly processDlopen: "denied" | string;
+    readonly processBinding: "denied" | string;
+    readonly nodeGyp: "denied" | string;
+    readonly downloadedArtifacts: "denied" | string;
+    readonly signedPackagedOnly: "required_before_enablement" | string;
+    readonly abiAllowlist: "required_before_enablement" | string;
+    readonly hashAllowlist: "required_before_enablement" | string;
+    readonly dependencyScan: "required_before_enablement" | string;
+    readonly crashIsolation: "required_before_enablement" | string;
+    readonly packagedBehavior: "not_promoted" | string;
+    readonly jniBridge: "denied" | string;
+    readonly rawDlopen: "denied" | string;
+    readonly nativeMemoryAccess: "denied" | string;
+    readonly rawNativeHandles: boolean;
+    readonly downloadExec: boolean;
+  }
+
   export interface AutoJsProfile {
     readonly name: string;
     readonly engineVersion: string;
@@ -210,6 +233,7 @@ declare namespace AutoJs6Node {
     readonly vmProfile: VmProfile;
     readonly inspectorProfile: InspectorProfile;
     readonly wasiProfile: WasiProfile;
+    readonly nativeAddonProfile: NativeAddonProfile;
     readonly directBuiltinAliases: Readonly<Record<string, string>>;
     readonly limitedBuiltins: readonly string[];
     readonly disabledBuiltins: readonly string[];

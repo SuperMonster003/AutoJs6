@@ -8969,6 +8969,28 @@ std::string buildEmbeddedScriptExecutionSource(
         rawHostPaths: false,
         rawFdNumbers: false
       }),
+      nativeAddonProfile: Object.freeze({
+        status: "disabled_by_default",
+        defaultEnabled: false,
+        targetProfiles: Object.freeze(["desktop_compat_opt_in"]),
+        module: "denied",
+        requireExtension: "denied",
+        processDlopen: "denied",
+        processBinding: "denied",
+        nodeGyp: "denied",
+        downloadedArtifacts: "denied",
+        signedPackagedOnly: "required_before_enablement",
+        abiAllowlist: "required_before_enablement",
+        hashAllowlist: "required_before_enablement",
+        dependencyScan: "required_before_enablement",
+        crashIsolation: "required_before_enablement",
+        packagedBehavior: "not_promoted",
+        jniBridge: "denied",
+        rawDlopen: "denied",
+        nativeMemoryAccess: "denied",
+        rawNativeHandles: false,
+        downloadExec: false
+      }),
       processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
       limitedBuiltins: __autojs6_freeze_sorted_copy(
