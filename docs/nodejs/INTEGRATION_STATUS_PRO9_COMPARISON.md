@@ -1187,6 +1187,14 @@ desktop differential report can show pass-rate rows by category. This improves
 Pro/Desktop dependency planning without executing unsafe registry packages,
 native payloads, lifecycle scripts, or postinstall downloads.
 
+P13-48 records package lock and integrity policy as partial: AutoJs6 Node now
+has a shared `NodePackageIntegrityPolicy` and runtime
+`packageIntegrityProfile` for Android package manager, plugin packages, and
+native addon artifacts. Android local-store rollback, stale transaction prune,
+corruption detection, and reinstall/update recovery are covered, while signed
+plugin archives, signed native artifacts, marketplace install/update, raw
+registry install, and package-manager JavaScript facades remain future work.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

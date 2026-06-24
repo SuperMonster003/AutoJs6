@@ -395,6 +395,14 @@ and `fs`; the differential report can show pass-rate rows by category when
 AutoJs6 results are supplied. Unsafe registry packages, native payloads,
 lifecycle scripts, and postinstall downloads remain blocked.
 
+P13-48 records package lock and integrity policy as partial. AutoJs6 Node
+exposes `packageIntegrityProfile` diagnostics for shared lockfile/hash/signature
+policy across Android package manager, plugin packages, and native addon
+artifacts. Android local-store rollback/prune/corruption recovery is covered,
+but signed plugin archives, signed native artifacts, raw registry install,
+package-manager JavaScript facades, and unverified cache reuse remain
+unavailable.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

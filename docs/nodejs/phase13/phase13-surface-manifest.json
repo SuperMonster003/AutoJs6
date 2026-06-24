@@ -628,7 +628,7 @@
         "P13-47",
         "P13-48"
       ],
-      "summary": "Expand packaged APK capability metadata, plugin system, dependency compatibility corpus, and lock/integrity policy for Pro/Desktop distribution. P13-45 records packaged APK capability metadata as partial with packagedCapabilityProfile, packagedMetadata, node.permissions manifest enforcement, Android permission synthesis evidence, and stable denial for undeclared bridge capabilities while profile/builtin/native asset/filesystem-root metadata remains diagnostic-only. P13-46 records plugin system parity as partial with pluginSystemProfile, JS-only local manager evidence, host capability ceiling enforcement, and stable denials/deferred decisions for Android provider plugins, native plugins, remote marketplace, signed archives, and packaged distribution. P13-47 records dependency compatibility corpus as partial with phase13Compatibility manifest taxonomy, missing_builtin/native_addon/postinstall/network/fs package reason categories, and differential pass-rate rows.",
+      "summary": "Expand packaged APK capability metadata, plugin system, dependency compatibility corpus, and lock/integrity policy for Pro/Desktop distribution. P13-45 records packaged APK capability metadata as partial with packagedCapabilityProfile, packagedMetadata, node.permissions manifest enforcement, Android permission synthesis evidence, and stable denial for undeclared bridge capabilities while profile/builtin/native asset/filesystem-root metadata remains diagnostic-only. P13-46 records plugin system parity as partial with pluginSystemProfile, JS-only local manager evidence, host capability ceiling enforcement, and stable denials/deferred decisions for Android provider plugins, native plugins, remote marketplace, signed archives, and packaged distribution. P13-47 records dependency compatibility corpus as partial with phase13Compatibility manifest taxonomy, missing_builtin/native_addon/postinstall/network/fs package reason categories, and differential pass-rate rows. P13-48 records package lock and integrity policy as partial with packageIntegrityProfile, NodePackageIntegrityPolicy, Android rollback/prune/corruption recovery evidence, and fail-closed unsigned plugin/native install decisions.",
       "risk": "high",
       "runtimeSurface": [
         "packaged profile metadata",
@@ -666,9 +666,18 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeRealNpmCompatInstrumentationTest.kt",
         "tools/nodejs/differential/run-differential-tests.js",
         "build/reports/nodejs/phase13-dependency-compatibility-corpus.json",
-        "build/reports/nodejs/phase13-dependency-compatibility-corpus.md"
+        "build/reports/nodejs/phase13-dependency-compatibility-corpus.md",
+        "tools/nodejs/phase13/verify-package-lock-integrity-policy.js",
+        ":app:verifyNodePhase13PackageLockIntegrityPolicy",
+        "docs/nodejs/reports/phase13/P13_48_PACKAGE_LOCK_INTEGRITY_POLICY.md",
+        "app/src/main/java/org/autojs/autojs/engine/NodePackageIntegrityPolicy.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest.kt",
+        "docs/nodejs/reports/phase13/P13_39_NATIVE_ADDON_LOADING.md",
+        "build/reports/nodejs/phase13-package-lock-integrity-policy.json",
+        "build/reports/nodejs/phase13-package-lock-integrity-policy.md"
       ],
-      "rollback": "Reject packaged Pro/Desktop profile metadata and keep JS-only local plugins plus host-side dependency validation."
+      "rollback": "Reject packaged Pro/Desktop profile metadata, keep JS-only local plugins plus host-side dependency validation, and keep unsigned plugin/native package installs fail-closed."
     },
     {
       "id": "security.rollback_privacy",

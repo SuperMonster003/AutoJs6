@@ -185,6 +185,15 @@ Supported:
   locking, cancellation checks, SHA-512 integrity, and
   install/update/remove/list/verify/prune operations
 
+P13-48 unifies the lock and integrity policy across the Android-side package
+manager, plugin packages, and native addon artifacts. The shared policy is
+recorded by `NodePackageIntegrityPolicy` and surfaced as
+`autojs6:profile.packageIntegrityProfile`: `autojs6-lock.json`, SHA-512
+integrity, signature requirements, rollback, stale transaction prune, mismatch
+recovery, and unverified-cache denial are explicit. Plugin archive signatures
+and signed native artifacts are policy requirements before promotion; they are
+not executable install/load paths yet.
+
 Unsupported:
 
 - runtime `npm install`

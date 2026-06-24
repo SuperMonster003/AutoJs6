@@ -803,6 +803,15 @@ instrumentation, differential pass-rate reporting, surface manifest evidence,
 and docs updates while keeping unsafe package execution, live registry drift,
 native payloads, lifecycle scripts, and postinstall downloads unpromoted.
 P13-47 records dependency compatibility corpus as partial.
+`verifyNodePhase13PackageLockIntegrityPolicy` records P13-48 as the package
+lock and integrity policy gate. It requires `NodePackageIntegrityPolicy`,
+`packageIntegrityProfile`, Android package manager `nativeValues()` policy
+diagnostics, focused rollback/prune/corruption recovery instrumentation,
+plugin and native addon fail-closed evidence, TypeScript declarations, surface
+manifest evidence, and docs updates while keeping unsigned plugin install,
+unsigned native addon load, raw registry install, lifecycle scripts,
+postinstall downloads, and unverified cache reuse unpromoted. P13-48 records
+package lock and integrity policy as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

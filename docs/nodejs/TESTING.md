@@ -2024,6 +2024,32 @@ This focused metadata path verifies the manifest taxonomy without executing
 unsafe native addon or lifecycle-script packages. P13-47 records dependency
 compatibility corpus as partial.
 
+Phase 13 package lock and integrity policy gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13PackageLockIntegrityPolicy
+```
+
+This host gate records P13-48 as partial. It requires
+`NodePackageIntegrityPolicy`, `packageIntegrityProfile`, Android store
+`nativeValues()` policy diagnostics, focused P13-48 instrumentation, existing
+package manager/plugin/native addon fail-closed evidence, TypeScript
+declarations, surface manifest evidence, release matrix updates, and Phase 13
+docs. It keeps unsigned plugin install, unsigned native addon load, raw
+registry install, lifecycle scripts, postinstall downloads, and unverified
+cache reuse unpromoted.
+
+Phase 13 package lock and integrity policy focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies the shared policy descriptor, read-only runtime profile,
+Android store rollback after integrity mismatch, stale transaction pruning,
+corruption detection, and reinstall/update recovery. P13-48 records package
+lock and integrity policy as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

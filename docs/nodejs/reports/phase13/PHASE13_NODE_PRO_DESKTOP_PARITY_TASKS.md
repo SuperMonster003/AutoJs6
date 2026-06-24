@@ -1522,6 +1522,26 @@ P13 task 本身使用以下执行状态：
   - 范围：为 Android-side package manager、plugins、native addon 做统一完整性策略。
   - 验收：
     - lockfile、hash、签名、回滚、缓存清理、损坏恢复完整。
+  - Progress:
+    - P13-48 partial landing 已添加 `NodePackageIntegrityPolicy` 与
+      `packageIntegrityProfile` 诊断，统一记录 Android package manager、
+      plugin packages、native addons 的 lock/hash/signature/rollback/cache
+      cleanup/corruption recovery 策略。
+    - Android local store 已将 policy 暴露到 `nativeValues()`，并通过 focused
+      instrumentation 覆盖 integrity mismatch rollback、stale transaction
+      prune、corruption detection 与 reinstall/update recovery。
+    - Plugin/native 侧当前仍 fail-closed：unsigned plugin install、unsigned
+      native addon load、raw registry install、lifecycle scripts、
+      postinstall downloads 和 unverified cache reuse 均未放开。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-package-lock-integrity-policy.js`。
+    - Gradle gate: `:app:verifyNodePhase13PackageLockIntegrityPolicy`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_48_PACKAGE_LOCK_INTEGRITY_POLICY.md`。
+    - Remaining P13-48 blockers: signed plugin archive extraction/update,
+      marketplace cache prune/rollback UI, signed native artifact ABI/hash
+      allowlists, crash isolation, Android registry install, JS facade, and
+      user-facing corruption recovery diagnostics.
 
 ### Track E: Security, UX, and rollback
 

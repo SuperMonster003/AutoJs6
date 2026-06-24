@@ -1281,6 +1281,16 @@ but unsafe registry packages, native payloads, lifecycle scripts, and
 postinstall downloads are still represented as metadata blockers rather than
 runnable corpus content.
 
+P13-48 records package lock and integrity policy as partial. The runtime
+exposes `autojs6:profile.packageIntegrityProfile`, backed by
+`NodePackageIntegrityPolicy`, to document the shared lockfile/hash/signature
+policy for Android package manager, plugin packages, and native addon
+artifacts. Android local store rollback, stale transaction prune, corruption
+detection, and reinstall/update recovery are covered by focused
+instrumentation. Unsigned plugin install, unsigned native addon load, raw
+registry install, lifecycle scripts, postinstall downloads, and unverified
+cache reuse remain fail-closed.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context
