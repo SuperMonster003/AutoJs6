@@ -1331,6 +1331,35 @@ P13 task 本身使用以下执行状态：
     - `npm i --no-bin-links` 或等价安装流程可用。
     - lifecycle scripts 默认拒绝或 debug-only。
     - bin shim、symlink、native build、postinstall 下载、integrity lock 有策略。
+  - Progress:
+    - P13-42 partial landing 已添加 `packageManagerProfile` 诊断，记录当前
+      host-managed package manager + Android app-private local store substrate
+      的边界。
+    - Android runtime install 当前限定为 `local_unpacked_only`：可对已解包包目录执行
+      install/update/remove/list/verify/prune。
+    - `NodeAndroidPackageInstallManager.nativeValues()` 现在输出 npm CLI、
+      registry download、lockfile、lifecycle、bin link、symlink、native payload、
+      postinstall download、network install、JS bridge 等策略。
+    - 新增 focused instrumentation:
+      `NodePackageManagerPhase13DecisionInstrumentationTest`。
+    - Existing Android store gate:
+      `NodeAndroidPackageInstallManagerInstrumentationTest` /
+      `:app:verifyNodePhase13AndroidPackageInstallManager`。
+    - Host package manager boundary:
+      `tools/nodejs/phase10/autojs6-pm.js` /
+      `docs/nodejs/reports/phase10/PACKAGE_MANAGER_BOUNDARY.md`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-package-manager-android-decision.js`。
+    - Gradle gate:
+      `:app:verifyNodePhase13PackageManagerAndroidDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md`。
+    - Surface manifest evidence:
+      `phase13-package-manager-android-decision`。
+  - Remaining: Android 侧 registry metadata/tarball 下载、npm CLI、script-visible
+    `package_manager`/`npm` facade、debug-only lifecycle runner、bin shim、signed
+    native payload policy、native build strategy、packaged dependency install/distribution
+    evidence、真实 npm corpus 通过率提升仍未完成。
 
 - [ ] P13-43: 扩展 Node stdlib conformance。
   - 范围：`crypto`、`stream`、`zlib`、`buffer`、`url`、`os`、`readline`、

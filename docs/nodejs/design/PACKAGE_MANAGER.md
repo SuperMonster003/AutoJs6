@@ -329,3 +329,12 @@ Current safety properties:
 This is not a full Android npm installer. Registry download, npm CLI install,
 JS API exposure, signed native payload support, and plugin/package distribution
 integration remain deferred.
+
+P13-42 adds `packageManagerProfile` and
+`verifyNodePhase13PackageManagerAndroidDecision` to record this boundary as an
+Android package-manager partial. The current equivalent to
+`npm i --no-bin-links` is host-managed validation plus the Android local store
+substrate for already-unpacked packages. Android-side npm CLI execution,
+registry/tarball download, lifecycle execution, bin shims, native builds,
+postinstall downloads, and a script-visible package-manager facade remain
+deferred.

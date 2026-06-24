@@ -1225,6 +1225,17 @@ imports, arbitrary absolute paths, working-directory escapes, custom condition
 sets, import maps, broad packaged encrypted graphs, and pending-evaluation
 cleanup remain unpromoted.
 
+P13-42 records Android package manager parity as partial. The runtime exposes
+`autojs6:profile.packageManagerProfile` to document that package installation
+is currently host-managed plus Android local-store substrate only. Already
+unpacked package directories can flow through the internal app-private
+`NodeAndroidPackageInstallManager` with transactions, locking, cancellation,
+SHA-512 integrity, and verify/prune support. Android npm CLI execution,
+registry download, lifecycle scripts, bin shims, symlink materialization,
+native builds/native payloads, postinstall downloads, raw `node_modules`
+mutation, script-visible `package_manager`/`npm`, and raw registry/executable
+authority remain unpromoted.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context

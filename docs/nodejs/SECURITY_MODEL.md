@@ -739,6 +739,18 @@ policy. Raw loader hooks, raw `node:module` loader authority, network imports,
 custom condition sets, import maps, and raw loader handles remain denied until
 separate Desktop-profile evidence proves them safe.
 
+P13-42 records Android package manager parity as partial.
+`packageManagerProfile` is diagnostic metadata for the existing host-managed
+package validation path and the Android app-private local store substrate; it
+does not grant npm or registry authority to scripts. Android runtime package
+operations are limited to already-unpacked package directories handled by
+`NodeAndroidPackageInstallManager`, with SHA-512 integrity, transactions,
+locking, cancellation, and verify/prune support. npm CLI execution, registry
+download, lifecycle scripts, bin shim creation, symlink materialization, native
+builds/native payloads, postinstall downloads, raw executable launch,
+script-visible `package_manager`/`npm`, and raw `node_modules` mutation remain
+denied until separate Desktop-profile evidence proves them safe.
+
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
 metadata only and does not make a second JavaScript context a security
 boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,

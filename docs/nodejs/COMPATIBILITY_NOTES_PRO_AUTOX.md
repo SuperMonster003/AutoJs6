@@ -350,6 +350,14 @@ P13-41 records ESM loader parity as partial. AutoJs6 Node exposes
 interop. It does not enable raw loader hooks, network/file/data URL imports,
 import maps, custom condition profiles, or broad packaged encrypted ESM graphs.
 
+P13-42 records Android package manager parity as partial. AutoJs6 Node exposes
+`packageManagerProfile` diagnostics for the current host-managed package
+manager plus Android local-store substrate. Pure JavaScript dependencies can be
+prepared by host tooling and stored through the internal app-private Android
+store, but Android npm CLI, registry download, lifecycle scripts, bin shims,
+symlinks, native builds/native payloads, postinstall downloads, and
+script-visible `package_manager`/`npm` remain unavailable.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

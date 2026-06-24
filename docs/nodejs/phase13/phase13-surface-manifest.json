@@ -560,7 +560,7 @@
         "P13-43",
         "P13-44"
       ],
-      "summary": "Improve desktop module and process parity: P13-41 records partial ESM loader diagnostics with full raw-loader parity still blocked; later tasks cover Android-side npm/package manager, broader stdlib conformance, and process/env/argv behavior.",
+      "summary": "Improve desktop module and process parity: P13-41 records partial ESM loader diagnostics with full raw-loader parity still blocked; P13-42 records Android package-manager substrate diagnostics with host-managed npm plus local app-private Android store partial while npm CLI, registry download, lifecycle scripts, bin/native execution, and JS facade remain blocked; later tasks cover broader stdlib conformance and process/env/argv behavior.",
       "risk": "high",
       "runtimeSurface": [
         "full ESM loader",
@@ -576,7 +576,18 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeEsmExperimentalInstrumentationTest.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeSourceMapStackTraceInstrumentationTest.kt",
         "build/reports/nodejs/phase13-esm-loader-parity-decision.json",
-        "build/reports/nodejs/phase13-esm-loader-parity-decision.md"
+        "build/reports/nodejs/phase13-esm-loader-parity-decision.md",
+        "tools/nodejs/phase13/verify-package-manager-android-decision.js",
+        ":app:verifyNodePhase13PackageManagerAndroidDecision",
+        "docs/nodejs/reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodePackageManagerPhase13DecisionInstrumentationTest.kt",
+        "app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt",
+        "docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md",
+        "tools/nodejs/phase10/autojs6-pm.js",
+        "docs/nodejs/reports/phase10/PACKAGE_MANAGER_BOUNDARY.md",
+        "build/reports/nodejs/phase13-package-manager-android-decision.json",
+        "build/reports/nodejs/phase13-package-manager-android-decision.md"
       ],
       "rollback": "Return to current CommonJS/partial ESM resolver and deny Android-side install or unsafe process features."
     },

@@ -751,6 +751,15 @@ keeping raw loader hooks, raw `node:module` loader authority,
 network/file/data URL imports, custom conditions/import maps, broad packaged
 encrypted graphs, pending-evaluation cleanup, and full desktop source-map
 parity unpromoted. P13-41 records ESM loader parity as partial.
+`verifyNodePhase13PackageManagerAndroidDecision` records P13-42 as the Android
+package manager decision gate. It requires `packageManagerProfile`
+diagnostics, the P13-09 Android local package store, the Phase 10 host-managed
+package manager boundary, focused instrumentation, TypeScript declarations,
+surface manifest evidence, and docs updates while keeping Android npm CLI,
+registry download, lifecycle execution, bin shims, symlink materialization,
+native builds/native payloads, postinstall downloads, JS package-manager
+facades, raw executable authority, and raw registry access unpromoted. P13-42
+records Android package manager parity as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

@@ -1138,6 +1138,16 @@ interop have focused evidence, but raw loader hooks, network/file/data URL
 imports, custom conditions/import maps, broad packaged encrypted graphs, and
 pending evaluation cleanup remain outside Desktop parity.
 
+P13-42 records Android package manager parity as partial: Safe Node now exposes
+`packageManagerProfile` diagnostics and keeps the practical install path as
+host-managed validation plus Android app-private local store substrate. This
+narrows the gap for pure JavaScript dependencies that have already been
+resolved and sanitized by host tooling, but it is not yet Pro/Desktop npm
+parity. Android npm CLI, registry download/cache, lifecycle scripts, bin
+shims, symlinks, native builds, signed native payloads, script-visible
+`package_manager`/`npm`, packaged dependency distribution, and real npm corpus
+growth remain open.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout
