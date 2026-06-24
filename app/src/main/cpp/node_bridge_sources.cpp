@@ -36829,12 +36829,24 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const denied = [
       "createConnection",
-      "socketPath"
+      "socketPath",
+      "proxy",
+      "proxyUrl",
+      "proxyTunnel",
+      "httpProxy",
+      "httpsProxy",
+      "socksProxy",
+      "tunnel",
+      "upgrade"
     ];
     for (const name of denied) {
       if (__autojs6_has_own(options, name) && options[name] !== undefined && options[name] !== null) {
         throw __autojs6_limited_http_raw_option_error(protocol, name);
       }
+    }
+    const method = String(options.method || "").toUpperCase();
+    if (method === "CONNECT") {
+      throw __autojs6_limited_http_raw_option_error(protocol, "method.CONNECT");
     }
     const agent = options.agent;
     if (agent && typeof agent === "object") {

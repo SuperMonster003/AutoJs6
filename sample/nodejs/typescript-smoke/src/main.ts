@@ -39,6 +39,8 @@ import sensors = require("sensors");
 import ui = require("ui");
 import overlay = require("ui.overlay");
 import fetchModule = require("fetch");
+import http = require("http");
+import https = require("https");
 import axios = require("axios");
 import websocket = require("websocket");
 import workManager = require("work_manager");
@@ -395,6 +397,29 @@ async function smoke(): Promise<void> {
   const responseText: string = await response.text();
   const responseJson: unknown = await fetchModule.default("https://example.invalid/json", { timeoutMs: 1000 }).then((item) => item.json());
   const fetchDiagnostics: fetchModule.Diagnostics = fetchModule.diagnostics();
+  const httpAgent = new http.Agent({ keepAlive: true, maxSockets: 2 });
+  const httpRequest: http.ClientRequest = http.request("http://example.invalid/client", {
+    agent: httpAgent,
+    headers: { "x-types": "yes" },
+    maxRedirects: 1,
+    timeout: 1000
+  }, (incoming: http.IncomingMessage) => {
+    incoming.setEncoding("utf8").on("data", (chunk) => void chunk);
+  });
+  httpRequest.setTimeout(1000).end("payload");
+  const httpsAgent = new https.Agent({ keepAlive: true, rejectUnauthorized: true });
+  const httpsRequest: http.ClientRequest = https.request({
+    hostname: "example.invalid",
+    path: "/secure",
+    method: "POST",
+    agent: httpsAgent,
+    timeoutMs: 1000
+  });
+  const httpServer: http.Server = http.createServer();
+  const httpListenDenied: (...args: readonly unknown[]) => never = httpServer.listen;
+  httpsRequest.end("secure");
+  httpAgent.destroy();
+  httpsAgent.destroy();
   const axiosResponse: axios.Response<{ ok: boolean }> = await axios.get("https://example.invalid/axios", {
     baseURL: "https://example.invalid",
     params: { q: "types" },
@@ -629,6 +654,9 @@ async function smoke(): Promise<void> {
   void responseText;
   void responseJson;
   void fetchDiagnostics;
+  void httpRequest;
+  void httpsRequest;
+  void httpListenDenied;
   void axiosResponse;
   void axiosText;
   void axiosDiagnostics;
