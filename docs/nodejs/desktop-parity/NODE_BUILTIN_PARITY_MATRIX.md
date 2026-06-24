@@ -30,7 +30,7 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `console` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `constants` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `crypto` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
-| `dgram` | `disabled` | `desktop_compat_opt_in` | `disabled` | P13-31 must decide UDP client/server, multicast, broadcast, and packaged network policy. |
+| `dgram` | `disabled` | `desktop_compat_opt_in` | `disabled` | P13-31 records UDP/dgram as stable-denied for v1.1; unicast client, server bind/listen, multicast, broadcast, packaged INTERNET policy, and fd leak proof remain future work. |
 | `diagnostics_channel` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless P13-43 promotes broader desktop conformance. |
 | `dns` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `commonjs-known`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |
 | `dns/promises` | `limited_network_gated` | `desktop_compat_opt_in` | `limited`, `network` | P13-30 records staged limited facades as partial; real client sockets, server sockets, network DNS, TLS sessions, fd leak proof, and packaged live-network evidence remain open. |

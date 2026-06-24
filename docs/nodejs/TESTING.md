@@ -1495,6 +1495,19 @@ release matrix text. It keeps real client sockets, server sockets, network DNS,
 TLS sessions, fd leak proof, packaged INTERNET proof, and live Android network
 evidence open.
 
+Phase 13 dgram UDP decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13DgramUdpDecision
+```
+
+This host gate records P13-31 as stable-denied/partial. It requires `dgram` and
+`node:dgram` to remain disabled in runtime capabilities, builtin policy,
+focused device evidence, desktop builtin matrix updates, security/profile docs,
+and release matrix text. It keeps UDP client sockets, UDP server bind/listen,
+multicast, broadcast, packaged INTERNET/multicast proof, fd leak proof, and
+live Android UDP evidence open.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

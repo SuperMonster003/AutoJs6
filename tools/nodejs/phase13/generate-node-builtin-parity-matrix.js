@@ -212,7 +212,7 @@ function nextStepForDisabled(name) {
     case "child_process":
       return "P13-40 must design a scoped runner before any opt-in promotion.";
     case "dgram":
-      return "P13-31 must decide UDP client/server, multicast, broadcast, and packaged network policy.";
+      return "P13-31 records UDP/dgram as stable-denied for v1.1; unicast client, server bind/listen, multicast, broadcast, packaged INTERNET policy, and fd leak proof remain future work.";
     case "inspector":
       return "P13-37 must keep release denied and validate debug-only ADB-forward behavior.";
     case "vm":

@@ -160,6 +160,19 @@
   TLS session/certificate policy, fd leak instrumentation, packaged INTERNET
   proof, and live Android network evidence.
 
+## P13-31 Stable-Denied Landing Note
+
+- P13-31 stable-denied landing records `dgram` / `node:dgram` as not entering
+  the current Node Profile v1.1 Desktop track.
+- Host verifier: `tools/nodejs/phase13/verify-dgram-udp-decision.js`.
+- Gradle gate: `:app:verifyNodePhase13DgramUdpDecision`.
+- Report: `docs/nodejs/reports/phase13/P13_31_DGRAM_UDP_DECISION.md`.
+- Surface manifest evidence: `phase13-dgram-udp-decision`.
+- Remaining P13-31 blockers: future UDP provider design, unicast client
+  policy, server bind/listen policy, multicast/broadcast capability split,
+  packaged INTERNET/multicast permission proof, fd leak instrumentation, and
+  live Android UDP evidence.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -980,6 +993,16 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - multicast/broadcast 默认拒绝或独立 capability。
     - packaged INTERNET permission、network policy 和 fd cleanup 完整。
+  - Decision progress:
+    - `dgram` / `node:dgram` 在当前 Node Profile v1.1 Desktop track 中保持
+      stable-denied，不提供 shape-only facade，也不开放 UDP client/server。
+    - `NodeDgramUdpDecisionInstrumentationTest` 覆盖 direct require、`node:`
+      alias、`require.resolve()`、transitive package require、local
+      `node_modules/dgram` shadow denial。
+    - Host verifier: `tools/nodejs/phase13/verify-dgram-udp-decision.js`.
+    - Gradle gate: `:app:verifyNodePhase13DgramUdpDecision`.
+    - Report: `docs/nodejs/reports/phase13/P13_31_DGRAM_UDP_DECISION.md`.
+    - Surface manifest evidence: `phase13-dgram-udp-decision`.
 
 - [ ] P13-32: 放宽 filesystem profile。
   - 范围：从 scoped project fs 扩展到用户显式授权目录、`/sdcard`、SAF 或 app

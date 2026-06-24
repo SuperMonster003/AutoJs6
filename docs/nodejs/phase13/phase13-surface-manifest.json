@@ -408,7 +408,7 @@
         "P13-32",
         "P13-33"
       ],
-      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as partial; P13-30 records limited net/tls/dns facades as partial while real sockets, network DNS, TLS sessions, dgram, broader roots, and advanced fs APIs remain staged.",
+      "summary": "Create Node builtin parity matrix and stage desktop network and filesystem expansion: P13-29 records controlled http/https client parity as partial; P13-30 records limited net/tls/dns facades as partial; P13-31 records dgram/UDP as stable-denied while real sockets, network DNS, TLS sessions, broader roots, and advanced fs APIs remain staged.",
       "risk": "high",
       "runtimeSurface": [
         "controlled node:http/node:https client facade",
@@ -443,7 +443,13 @@
         "docs/nodejs/types/autojs6-node/tls.d.ts",
         "docs/nodejs/types/autojs6-node/dns.d.ts",
         "build/reports/nodejs/phase13-net-tls-dns-staged-compatibility.json",
-        "build/reports/nodejs/phase13-net-tls-dns-staged-compatibility.md"
+        "build/reports/nodejs/phase13-net-tls-dns-staged-compatibility.md",
+        "tools/nodejs/phase13/verify-dgram-udp-decision.js",
+        ":app:verifyNodePhase13DgramUdpDecision",
+        "docs/nodejs/reports/phase13/P13_31_DGRAM_UDP_DECISION.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeDgramUdpDecisionInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-dgram-udp-decision.json",
+        "build/reports/nodejs/phase13-dgram-udp-decision.md"
       ],
       "rollback": "Revert Desktop profile allowlist entries and keep raw network and broad filesystem access denied."
     },

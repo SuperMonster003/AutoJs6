@@ -1079,6 +1079,13 @@ loopback/IP-literal DNS lookup, while real sockets, server listeners, network
 DNS, Android resolver state, TLS sessions, fd/native handles, packaged INTERNET
 proof, and live Android network evidence remain blocked.
 
+P13-31 records dgram UDP capability as stable-denied: `require("dgram")`,
+`require("node:dgram")`, `require.resolve("dgram")`, transitive package
+requires, and local `node_modules/dgram` shadow attempts remain denied. UDP
+client sockets, server bind/listen, multicast, broadcast, Android multicast
+state, fd/native handles, packaged permission proof, and live Android UDP
+evidence are not part of the current v1.1 Desktop profile.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

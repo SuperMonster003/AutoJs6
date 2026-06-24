@@ -295,6 +295,13 @@ or TLS sockets, server listeners, Android resolver state, custom DNS servers,
 TLS sessions, fd handles, or live network DNS on Rhino/Android APIs until a
 future Desktop-profile gate explicitly promotes those capabilities.
 
+P13-31 records dgram UDP capability as stable-denied. AutoJs6 Node does not
+provide `require("dgram")` or `require("node:dgram")` in the current v1.1
+Desktop track. Keep Pro/AutoX scripts that depend on UDP send/receive, UDP
+server bind/listen, multicast, broadcast, or raw datagram sockets on
+Rhino/Android APIs until a future UDP provider and packaged permission policy
+land.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated
