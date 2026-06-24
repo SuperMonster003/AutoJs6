@@ -147,6 +147,8 @@ declare module "autojs6:compat" {
     export interface ShellCompatFunction {
       (command: string, options?: ShellCompatOptions): Promise<shellModule.ShellResult>;
       exec(command: string, options?: shellModule.ShellExecOptions): Promise<shellModule.ShellResult>;
+      execRoot(command: string, options?: Omit<shellModule.ShellExecOptions, "root">): Promise<shellModule.ShellResult>;
+      execShizuku(command: string, options?: Omit<shellModule.ShellExecOptions, "root" | "shizuku">): Promise<never>;
       execFile(path: string, args?: readonly string[], options?: shellModule.ShellExecOptions): Promise<shellModule.ShellResult>;
       checkAccess(options?: shellModule.ShellAccessOptions): shellModule.ShellAccessReport;
       setDefaultTimeout(ms: number): number;

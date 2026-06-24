@@ -1025,6 +1025,13 @@ evidence-backed, while `sendBroadcast`, root/Shizuku app options, dual-user
 helpers, URI/email/settings helpers, installed-app lookup policy, packaged
 behavior, and raw Android app/intent objects remain blocked.
 
+P13-24 records shell/root/Shizuku capability promotion as partial: ordinary
+`shell.exec()` stays on the controlled provider, `shell.execRoot()` and
+`compat.shell.execRoot()` are explicit root facades requiring `shell.root`, and
+`shell.execShizuku()` / `shizuku: true` reject before bridge dispatch until
+Shizuku authorization, lifecycle, packaged disclosure, and device matrix
+evidence exist.
+
 但它仍是 Safe Node Profile，而不是 Pro v9 或桌面 Node.js 的无边界复刻。
 对脚本开发者最重要的 Rhino 能力迁移已经有 `autojs6:compat` 这条显式路径，
 并且 Phase 11A 已经完成 inventory、状态矩阵、低风险 facade、自动化核心 facade、

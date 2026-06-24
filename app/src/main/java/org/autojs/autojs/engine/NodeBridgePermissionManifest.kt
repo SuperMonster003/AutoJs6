@@ -36,6 +36,7 @@ object NodeBridgePermissionManifest {
     const val DEVICE = "device"
     const val SHELL = "shell"
     const val SHELL_ROOT = "shell.root"
+    const val SHELL_SHIZUKU = "shell.shizuku"
     const val NETWORK = "network"
     const val WORK_MANAGER = "work_manager"
     const val JAVA_INTEROP = "java_interop"
@@ -82,6 +83,7 @@ object NodeBridgePermissionManifest {
         DEVICE,
         SHELL,
         SHELL_ROOT,
+        SHELL_SHIZUKU,
         NETWORK,
         WORK_MANAGER,
         JAVA_INTEROP,
@@ -115,6 +117,9 @@ object NodeBridgePermissionManifest {
         "engines:exec" to ENGINES_EXEC,
         "engine.exec" to ENGINES_EXEC,
         "shell:root" to SHELL_ROOT,
+        "shell-root" to SHELL_ROOT,
+        "shell:shizuku" to SHELL_SHIZUKU,
+        "shell-shizuku" to SHELL_SHIZUKU,
         "storages" to STORAGE,
         "sqlite" to DATABASE,
         "java" to JAVA_INTEROP,
@@ -344,8 +349,8 @@ object NodeBridgePermissionManifest {
     }
 
     private fun declaresCapability(declared: Set<String>, required: String): Boolean {
-        if (required == SHELL_ROOT) {
-            return SHELL_ROOT in declared
+        if (required == SHELL_ROOT || required == SHELL_SHIZUKU) {
+            return required in declared
         }
         if (required in declared) {
             return true

@@ -61,6 +61,23 @@
   root/Shizuku/dual-user routing through explicit capabilities, packaged smoke,
   negative device corpus, and migration examples.
 
+## P13-24 Partial Landing Note
+
+- P13-24 partial shell/root/Shizuku capability gate records explicit
+  `shell.root` and `shell.shizuku` capability vocabulary, controlled
+  `shell.exec()` resource ownership, `shell.execRoot()` routing through root
+  capability, and stable `shell.execShizuku()` rejection.
+- Host verifier:
+  `tools/nodejs/phase13/verify-shell-root-shizuku-capability.js`.
+- Gradle gate: `:app:verifyNodePhase13ShellRootShizukuCapability`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md`.
+- Surface manifest evidence: `phase13-shell-root-shizuku-capability`.
+- Remaining P13-24 blockers: root device matrix, Shizuku authorization and
+  service lifecycle, AbortSignal cancellation instrumentation, packaged
+  disclosure/failure diagnostics, expanded audit taxonomy, and migration
+  examples.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current
@@ -700,6 +717,31 @@ P13 task 本身使用以下执行状态：
     - root 和 Shizuku 必须显式声明、显式授权、可审计。
     - stdout/stderr/exitCode/timeout/cancel/resource cleanup 完整。
     - packaged APK 权限提示和失败路径清晰。
+  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+    - Capability vocabulary: `shell`, `shell.root`, and `shell.shizuku`.
+    - Root facade: `shell.execRoot()` and `compat.shell.execRoot()` route
+      through the existing controlled `shell.exec()` bridge with `root: true`.
+    - Shizuku stable denial: `shell.execShizuku()` and
+      `shell.exec(..., { shizuku: true })` reject with
+      `ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED` before bridge dispatch.
+    - Controlled execution evidence: scoped `cwd`, string-only `env`, bounded
+      output, timeout code `124`, `ResourceRegistry` process cleanup, and
+      active shell command limits.
+    - Type declarations:
+      `docs/nodejs/types/autojs6-node/shell.d.ts` and
+      `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`.
+    - Type smoke: `sample/nodejs/typescript-smoke/src/main.ts`.
+    - Focused conformance:
+      `NodeBridgeConformanceInstrumentationTest#jsStableBridgeModuleExportsAndPromiseContractsAreStable`.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-shell-root-shizuku-capability.js`.
+    - Gradle gate: `:app:verifyNodePhase13ShellRootShizukuCapability`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md`.
+    - Open before closure: root available/unavailable device matrix, Shizuku
+      service authorization and lifecycle, AbortSignal cancellation
+      instrumentation, packaged disclosure/failure diagnostics, expanded audit
+      taxonomy, and migration examples.
 
 - [ ] P13-25: 扩展 notifications/settings/power manager。
   - 范围：补齐通知渠道、设置、电池优化、唤醒/亮屏等 Pro 能力。

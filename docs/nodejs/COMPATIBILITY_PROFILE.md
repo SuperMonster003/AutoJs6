@@ -1339,7 +1339,7 @@ Declared capability names:
 - `ui`
 - `clipboard`
 - `device`
-- `shell`, `shell.root`
+- `shell`, `shell.root`, `shell.shizuku`
 - `network`
 - `work_manager`
 - `java_interop`
@@ -1598,18 +1598,23 @@ runtime.
   - no raw `Context`, `PowerManager`, `Vibrator`, display, or build objects are exposed to JavaScript
 - `shell`
   - `exec(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
+  - `execRoot(command, options?): Promise<{ code: number, stdout: string, stderr: string }>`
+  - `execShizuku(command, options?): Promise<never>`
   - `execFile(path, args?, options?): Promise<{ code: number, stdout: string, stderr: string }>`
   - `checkAccess(options?): { shell: boolean, root: boolean, shizuku: boolean, missingCapabilities: string[] }`
   - `setDefaultTimeout(ms): number`
-  - options: `{ root?: boolean, timeoutMs?: number, cwd?: string, env?: Record<string, string> }`
+  - options: `{ root?: boolean, timeoutMs?: number, cwd?: string, env?: Record<string, string> }`; `shizuku: true` is reserved and rejected in v1.1
   - runs through the AutoJs6 bridge provider, not Node `child_process`
   - migration mapping: `child_process.exec()` -> `require("shell").exec()` with declared `shell` capability; `child_process.spawn()`, `fork()`, streaming stdio, and interactive shells are not supported by the Safe Node Profile
   - non-root mode uses a controlled non-interactive shell process on a provider thread; root mode is explicit and attempts `su -c`
+  - `execRoot()` is a JavaScript facade over `exec(..., { root: true })` and requires the explicit `shell.root` capability when a manifest is enforced
+  - `execShizuku()` and `exec(..., { shizuku: true })` reject before bridge dispatch with `ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED`
   - `execFile()` is a JS-layer convenience wrapper over `exec()` for scoped relative file paths and string arguments; it shell-quotes the target and args and does not add a second native dispatch method
   - `cwd` is relative to the scoped working directory and rejects absolute paths, NUL bytes, `..` escapes, and realpath escapes
   - `env` accepts string keys and values only
   - command timeout returns a result with `code: 124`; invalid policy inputs reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`; `setDefaultTimeout()` changes only the per-module JS fallback timeout
   - `checkAccess({ root: true })` reports missing `shell.root` when a manifest is enforced and the capability is absent; `checkAccess({ shizuku: true })` always reports `shizuku: false` in v1.1 because Shizuku execution remains unsupported
+  - P13-24 records shell/root/Shizuku capability promotion as partial: `shell.shizuku` is a vocabulary-only token, root remains explicit, and real Shizuku authorization/lifecycle evidence is still required
   - queued host fallback does not execute shell commands; packaged templates need live bridge metadata before `shell.exec()` can observe real command results
   - no interactive shell, streaming stdio, process object, signal control, `spawn`, `fork`, or `open` API is exposed
 - `fetch`

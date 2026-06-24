@@ -251,6 +251,13 @@ primitive extras. It still keeps `app.sendBroadcast()`, root/Shizuku app
 options, dual-user helpers, URI/email/settings helpers, installed-app lookup
 policy, packaged behavior, and raw Android app/intent objects blocked.
 
+P13-24 records shell/root/Shizuku capability promotion as partial. AutoJs6 Node
+now has explicit `shell`, `shell.root`, and `shell.shizuku` capability tokens,
+`shell.execRoot()` / `compat.shell.execRoot()` facades for the existing
+controlled root shell path, and stable pre-dispatch Shizuku rejection. Real
+Shizuku service binding, authorization prompts, lifecycle cleanup, packaged
+disclosure, and device matrix evidence remain blocked.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

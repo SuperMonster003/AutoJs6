@@ -462,6 +462,20 @@ object NodeBridgeProviderRegistry {
             "requireTasksPolicy" to "require(\"tasks\"), global tasks, and raw Rhino task objects remain unavailable until a dedicated Pro profile provider lands",
             "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
         )
+        SHELL_PROVIDER -> linkedMapOf(
+            "liveBridgeMethods" to "exec",
+            "jsFacadeMethods" to "exec,execRoot,execShizuku,execFile,checkAccess,setDefaultTimeout",
+            "capability" to NodeBridgePermissionManifest.SHELL,
+            "rootCapability" to NodeBridgePermissionManifest.SHELL_ROOT,
+            "shizukuCapability" to NodeBridgePermissionManifest.SHELL_SHIZUKU,
+            "rootPolicy" to "root shell is explicit through execRoot or options.root and requires shell.root when the manifest is enforced",
+            "shizukuPolicy" to "shell.shizuku is vocabulary-only in P13-24; execShizuku and options.shizuku reject before bridge dispatch",
+            "packagedPolicy" to "queued packaged fallback must not execute shell; packaged execution requires live bridge metadata and explicit project capabilities",
+            "cleanupPolicy" to "ProcessBuilder command is ResourceRegistry-owned, output is bounded, timeout closes the resource and destroys the process",
+            "rawObjectPolicy" to "no Process, file descriptor, stream, signal handle, Binder, Shizuku service, root shell handle, or Android shell object crosses the bridge",
+            "phase13Promotion" to "P13-24 partial shell/root/Shizuku capability evidence gate",
+            "statusReason" to "controlled non-interactive shell bridge with explicit root gating and Shizuku stable denial",
+        )
         RHINO_PROVIDER -> linkedMapOf(
             "liveMethods" to "run",
             "mode" to "json-only-poc",

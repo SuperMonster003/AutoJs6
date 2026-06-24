@@ -311,6 +311,7 @@ packaged APK evidence into focused first-wave gates:
 .\gradlew.bat --console=plain :app:verifyNodePhase13RhinoImportHelpersDecision
 .\gradlew.bat --console=plain :app:verifyNodePhase13RhinoJavaAdapterDecision
 .\gradlew.bat --console=plain :app:verifyNodePhase13LiveUiProviderPromotion
+.\gradlew.bat --console=plain :app:verifyNodePhase13ShellRootShizukuCapability
 .\gradlew.bat --console=plain :app:verifyNodePhase10LongRunningActivation
 .\gradlew.bat --console=plain :app:verifyNodeLongRunningGate "-Pautojs.nodejs.test.deviceProfile=sony"
 .\gradlew.bat --console=plain :app:verifyNodePhase10WorkerWasiBoundary
@@ -423,6 +424,12 @@ and stable `app.sendBroadcast()` plus privileged app-option rejection are
 present, while broadcast send promotion, root/Shizuku app routing, URI/email/
 settings helpers, installed-app lookup policy, packaged smoke, and raw Android
 app/intent objects remain blocked.
+`verifyNodePhase13ShellRootShizukuCapability` records the P13-24 partial
+shell/root/Shizuku capability state: `shell`, `shell.root`, and
+`shell.shizuku` are split capability tokens, `execRoot()` routes through the
+existing controlled shell provider, and Shizuku execution rejects before bridge
+dispatch while authorization, lifecycle, packaged disclosure, and device matrix
+evidence remain blocked.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -587,6 +594,12 @@ partial: JSON-safe `app.intent()` and normalized `app.startActivity()` are
 covered, while `sendBroadcast`, root/Shizuku app options, dual-user helpers,
 URI/email/settings helpers, installed-app lookup policy, packaged behavior, and
 raw Android objects require separate evidence.
+P13-24 additionally uses `verifyNodePhase13ShellRootShizukuCapability` as the
+host promotion-status gate for shell/root/Shizuku capability parity and keeps
+the surface partial: ordinary shell and explicit root facades are covered by
+the controlled `shell.exec` provider, while real Shizuku authorization,
+root-device matrix closure, packaged disclosure, cancellation evidence, and raw
+process/root/Shizuku handles require separate evidence.
 `verifyNodeLiveWorkManagerGate` validates AndroidX WorkManager-backed
 `work_manager` scheduling, real scheduled-runner embedded Node execution for
 CommonJS and ESM entries, delayed cancel prevention, path/capability

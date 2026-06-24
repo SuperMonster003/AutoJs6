@@ -9151,8 +9151,8 @@ std::string buildEmbeddedScriptExecutionSource(
     return explicit.length > 0 ? explicit : __autojs6_bridge_default_permissions(moduleName, methodName);
   }
   function __autojs6_bridge_declares_capability(declared, required) {
-    if (required === "shell.root") {
-      return declared.indexOf("shell.root") >= 0;
+    if (required === "shell.root" || required === "shell.shizuku") {
+      return declared.indexOf(required) >= 0;
     }
     if (declared.indexOf(required) >= 0) {
       return true;
@@ -13904,6 +13904,14 @@ std::string buildEmbeddedScriptExecutionSource(
       methodName
     );
   }
+  function __autojs6_shell_shizuku_unsupported_error(methodName) {
+    return __autojs6_bridge_error(
+      "shell." + methodName + " requires Shizuku shell support, which is not available in the Node.js engine yet; P13-24 keeps Shizuku execution blocked until explicit authorization, lifecycle, packaged disclosure, and cleanup evidence land.",
+      "ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED",
+      "shell",
+      methodName
+    );
+  }
   function __autojs6_shell_timeout_ms(value, fallbackMs) {
     return __autojs6_bridge_timeout_ms(value === undefined ? fallbackMs : value);
   }
@@ -14004,6 +14012,9 @@ std::string buildEmbeddedScriptExecutionSource(
       let inputOptions;
       try {
         inputOptions = __autojs6_shell_options(options);
+        if (inputOptions.shizuku === true) {
+          throw __autojs6_shell_shizuku_unsupported_error("exec");
+        }
         const timeoutMs = __autojs6_shell_timeout_ms(inputOptions.timeoutMs, defaultTimeoutMs);
         normalizedOptions = {
           root: inputOptions.root === true,
@@ -14014,7 +14025,7 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (error) {
         return Promise.reject(error);
       }
-      const permissions = normalizedOptions.root ? ["shell", "shell:root"] : ["shell"];
+      const permissions = normalizedOptions.root ? ["shell", "shell.root"] : ["shell"];
       return __autojs6_call_autojs(
         "shell",
         "exec",
@@ -14025,6 +14036,13 @@ std::string buildEmbeddedScriptExecutionSource(
           signal: __autojs6_bridge_signal_from_options(inputOptions)
         }
       ).then(__autojs6_shell_result);
+    }
+    function execRoot(command, options) {
+      const inputOptions = __autojs6_shell_options(options);
+      return exec(command, Object.freeze(Object.assign({}, inputOptions, { root: true })));
+    }
+    function execShizuku(command, options) {
+      return Promise.reject(__autojs6_shell_shizuku_unsupported_error("execShizuku"));
     }
     function execFile(path, args, options) {
       let command;
@@ -14041,12 +14059,12 @@ std::string buildEmbeddedScriptExecutionSource(
       const opts = __autojs6_shell_options(options);
       const requested = ["shell"];
       if (opts.root === true) {
-        requested.push("shell:root");
+        requested.push("shell.root");
       }
-      let missing = __autojs6_bridge_missing_capabilities(requested);
       if (opts.shizuku === true) {
-        missing = missing.concat(["shell.shizuku"]);
+        requested.push("shell.shizuku");
       }
+      const missing = __autojs6_bridge_missing_capabilities(requested);
       const frozenMissing = Object.freeze(missing.slice());
       return Object.freeze({
         shell: missing.indexOf("shell") < 0,
@@ -14065,6 +14083,8 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     __autojs6_limited_shell_cache = Object.freeze({
       exec,
+      execRoot,
+      execShizuku,
       execFile,
       checkAccess,
       setDefaultTimeout
@@ -16701,6 +16721,8 @@ std::string buildEmbeddedScriptExecutionSource(
     };
     Object.defineProperties(shell, {
       exec: { value: shellModule.exec, enumerable: true },
+      execRoot: { value: shellModule.execRoot, enumerable: true },
+      execShizuku: { value: shellModule.execShizuku, enumerable: true },
       execFile: { value: shellModule.execFile, enumerable: true },
       checkAccess: { value: shellModule.checkAccess, enumerable: true },
       setDefaultTimeout: { value: shellModule.setDefaultTimeout, enumerable: true }

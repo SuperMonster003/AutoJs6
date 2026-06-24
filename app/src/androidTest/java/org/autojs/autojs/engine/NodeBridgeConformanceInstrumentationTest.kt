@@ -289,7 +289,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate"]);
-              expectExports("shell", shell, ["exec", "execFile", "checkAccess", "setDefaultTimeout"]);
+              expectExports("shell", shell, ["exec", "execRoot", "execShizuku", "execFile", "checkAccess", "setDefaultTimeout"]);
               expectExports("engines", engines, ["myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile"]);
               expectExports("accessibility", accessibility, ["isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "text", "desc", "id", "className", "textContains", "descContains", "textMatches", "descMatches", "idMatches", "classNameMatches", "clickable", "enabled", "depth", "boundsInside", "boundsContains"]);
               expectExports("media_projection", mediaProjection, ["requestScreenCapture"]);
@@ -376,7 +376,13 @@ class NodeBridgeConformanceInstrumentationTest {
               await expectPromise("device.vibrate", device.vibrate(5, { timeoutMs: 1026 }));
               assert.strictEqual((await expectPromise("shell.exec", shell.exec("echo ok", { timeoutMs: 1027 }))).code, 0);
               assert.strictEqual(shell.setDefaultTimeout(2000), 2000);
-              assert.strictEqual(shell.checkAccess({ shizuku: true }).shizuku, false);
+              const shizukuAccess = shell.checkAccess({ shizuku: true });
+              assert.strictEqual(shizukuAccess.shizuku, false);
+              assert(Array.isArray(shizukuAccess.missingCapabilities), "Shizuku access diagnostics must expose missingCapabilities");
+              const beforeShellRejects = requests.length;
+              await expectRejectCode("shell.execShizuku", shell.execShizuku("id"), "ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED");
+              await expectRejectCode("shell.exec.shizuku", shell.exec("id", { shizuku: true }), "ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED");
+              assert.strictEqual(requests.length, beforeShellRejects, "shell Shizuku rejected stubs must not dispatch bridge requests");
               assert.strictEqual((await expectPromise("shell.execFile", shell.execFile("scripts/run.sh", ["--dry-run"], { timeoutMs: 1028 }))).code, 0);
               assert.strictEqual((await expectPromise("engines.all", engines.all({ timeoutMs: 1028 }))).length >= 1, true);
               assert.strictEqual(await expectPromise("engines.stopAll", engines.stopAll({ timeoutMs: 1029 })), 2);
@@ -705,6 +711,8 @@ class NodeBridgeConformanceInstrumentationTest {
               let deniedModule = "";
               let deniedMethod = "";
               let missing = "";
+              const shellAccess = require("shell").checkAccess({ shizuku: true });
+              const shizukuMissing = Array.isArray(shellAccess.missingCapabilities) ? shellAccess.missingCapabilities.join("|") : "";
               try {
                 await require("dialogs").alert("blocked", { timeoutMs: 1000 });
               } catch (error) {
@@ -714,6 +722,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 missing = Array.isArray(error && error.missingCapabilities) ? error.missingCapabilities.join("|") : "";
               }
               console.log("bridge.conformance.capability=" + [deniedCode, deniedModule, deniedMethod, missing, requests.length, bridge.__test.pendingCount()].join("|"));
+              console.log("bridge.conformance.shell_shizuku_missing=" + shizukuMissing);
             })();
             """.trimIndent(),
             "<embedded-autojs-bridge-conformance-capabilities.js>",
@@ -725,6 +734,10 @@ class NodeBridgeConformanceInstrumentationTest {
             capabilityResult.stdout.contains(
                 "bridge.conformance.capability=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|dialogs|alert|dialogs|0|0",
             ),
+        )
+        assertTrue(
+            capabilityResult.stdout,
+            capabilityResult.stdout.contains("bridge.conformance.shell_shizuku_missing=shell|shell.shizuku"),
         )
     }
 

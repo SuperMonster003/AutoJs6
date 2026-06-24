@@ -309,7 +309,7 @@
         "P13-26",
         "P13-27"
       ],
-      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked. P13-23 records partial app/intent/broadcast parity: JSON-safe app.intent descriptors and stricter app.startActivity descriptor parsing are available, while sendBroadcast, root/Shizuku app options, dual-user helpers, URI/email/settings helpers, installed-app lookup policy, and packaged smoke remain blocked.",
+      "summary": "Expand Pro-style tasks, Intent/broadcast triggers, app/intent helpers, shell/root/Shizuku, notifications/settings, media/recorder/mediainfo, and utility-heavy Rhino modules. P13-21 records partial daily/weekly/user task database provider evidence: live work_manager and compat.tasks one-shot migration are available, while daily/weekly task database add/query/update/remove, packaged task rows, scheduler semantics, and raw TimedTask/IntentTask profile decisions remain blocked. P13-22 records partial IntentTask/broadcast provider evidence: Android/Rhino receiver substrate and compat.tasks rejection stubs are available, while receiver capability split, manifest synthesis, trigger payloads, packaged install/trigger/remove, exported policy, and raw Intent/BroadcastReceiver profile decisions remain blocked. P13-23 records partial app/intent/broadcast parity: JSON-safe app.intent descriptors and stricter app.startActivity descriptor parsing are available, while sendBroadcast, root/Shizuku app options, dual-user helpers, URI/email/settings helpers, installed-app lookup policy, and packaged smoke remain blocked. P13-24 records partial shell/root/Shizuku capability evidence: shell.root and shell.shizuku are explicit capability tokens, execRoot routes through the controlled shell bridge, and execShizuku is a stable rejection while real root/Shizuku device and packaged evidence remain blocked.",
       "risk": "high",
       "runtimeSurface": [
         "daily/weekly task provider",
@@ -353,7 +353,13 @@
         "sample/nodejs/typescript-smoke/src/main.ts",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
         "build/reports/nodejs/phase13-app-intent-broadcast-parity.json",
-        "build/reports/nodejs/phase13-app-intent-broadcast-parity.md"
+        "build/reports/nodejs/phase13-app-intent-broadcast-parity.md",
+        "docs/nodejs/reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md",
+        "tools/nodejs/phase13/verify-shell-root-shizuku-capability.js",
+        ":app:verifyNodePhase13ShellRootShizukuCapability",
+        "docs/nodejs/types/autojs6-node/shell.d.ts",
+        "build/reports/nodejs/phase13-shell-root-shizuku-capability.json",
+        "build/reports/nodejs/phase13-shell-root-shizuku-capability.md"
       ],
       "rollback": "Keep P12 stable unsupported or blocked_by_design stubs and require explicit migration to supported Node bridge modules."
     },

@@ -1391,6 +1391,21 @@ does not promote broadcast sending, root/Shizuku routing through ordinary app
 APIs, full Rhino app helper aliases, installed-app lookup policy, packaged
 behavior, or raw Android app/intent objects.
 
+Phase 13 shell/root/Shizuku capability status gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ShellRootShizukuCapability
+```
+
+This host gate records P13-24 as partial. It requires the explicit `shell`,
+`shell.root`, and `shell.shizuku` capability split, `shell.execRoot()` and
+`compat.shell.execRoot()` facades over the controlled `shell.exec` provider,
+stable pre-dispatch rejection for `shell.execShizuku()` and `shell.exec(...,
+{ shizuku: true })`, TypeScript coverage, conformance coverage, provider
+registry policy anchors, and cross-document evidence. It does not promote real
+Shizuku execution, root device matrix closure, packaged shell disclosure, or
+raw process/shizuku/root handles.
+
 Current Java interop allowlist focused instrumentation:
 
 ```powershell

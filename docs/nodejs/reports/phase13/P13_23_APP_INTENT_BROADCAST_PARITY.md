@@ -59,7 +59,7 @@ No raw Android `Intent`, `Uri`, `Bundle`, `ComponentName`, `PackageManager`,
 - Activity short-form mapping and URI/email/settings helper descriptors.
 - Broadcast send promotion with receiver authority, exported/non-exported
   policy, manifest synthesis, user disclosure, rate limits, and packaged smoke.
-- Root/Shizuku/dual-user routes through explicit P13-24 capability surfaces.
+- root/Shizuku/dual-user routes through explicit P13-24 capability surfaces.
 - Installed app/package lookup privacy policy and packaged behavior.
 - Negative device tests for invalid component names, invalid flag values,
   non-object extras, and blocked privileged options.
