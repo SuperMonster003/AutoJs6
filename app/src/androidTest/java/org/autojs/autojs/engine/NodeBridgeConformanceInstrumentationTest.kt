@@ -317,6 +317,8 @@ class NodeBridgeConformanceInstrumentationTest {
               const ui = require("ui");
               const workManager = require("work_manager");
               const compat = require("autojs6:compat");
+              const jsox = require("jsox");
+              const jsoxMathx = require("jsox.mathx");
 
               [
                 ["toast", toast],
@@ -343,7 +345,12 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["sensors", sensors],
                 ["ui", ui],
                 ["work_manager", workManager],
+                ["jsox", jsox],
+                ["jsox.mathx", jsoxMathx],
+                ["jsox.mathx.alias", jsox.mathx],
                 ["autojs6:compat", compat],
+                ["autojs6:compat.jsox", compat.jsox],
+                ["autojs6:compat.jsox.mathx", compat.jsox.mathx],
                 ["autojs6:compat.barcode", compat.barcode],
                 ["autojs6:compat.qrcode", compat.qrcode],
                 ["autojs6:compat.media", compat.media],
@@ -377,6 +384,13 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
+              expectExports("jsox", jsox, ["extend", "extendAll", "status"]);
+              expectExports("jsox.mathx", jsoxMathx, ["randInt", "randomInt", "randFloat", "randomFloat", "random", "sum", "mean", "avg", "median", "var", "std", "cv", "mode", "dist", "logMn", "floorLog", "ceilLog", "roundLog", "floorPow", "ceilPow", "roundPow", "max", "maxi", "min", "mini"]);
+              expectExports("autojs6:compat.jsox", compat.jsox, ["extend", "extendAll", "status"]);
+              expectExports("autojs6:compat.jsox.mathx", compat.jsox.mathx, ["randInt", "randomInt", "randFloat", "randomFloat", "random", "sum", "mean", "avg", "median", "var", "std", "cv", "mode", "dist", "logMn", "floorLog", "ceilLog", "roundLog", "floorPow", "ceilPow", "roundPow", "max", "maxi", "min", "mini"]);
+              assert.strictEqual(jsox.mathx, jsox.Mathx);
+              assert.strictEqual(jsox.mathx, jsoxMathx);
+              assert.strictEqual(compat.jsox.mathx, jsox.mathx);
               expectExports("autojs6:compat.barcode", compat.barcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("autojs6:compat.qrcode", compat.qrcode, ["detect", "detectAll", "recognizeText", "recognizeTexts"]);
               expectExports("autojs6:compat.media", compat.media, ["getAudioStreamVolume", "getAudioStreamMaxVolume", "getAudioStreamInfo"]);
@@ -386,6 +400,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("autojs6:compat.tasks", compat.tasks, ["addDisposableTask", "addDailyTask", "addWeeklyTask", "addIntentTask", "removeTask", "queryTasks", "queryIntentTasks", "queryTimedTasks", "getIntentTask", "getTimedTask", "removeIntentTask", "removeTimedTask", "updateTask"]);
               assert.strictEqual(globalThis.barcode, undefined, "compat.barcode must not install a default global");
               assert.strictEqual(globalThis.qrcode, undefined, "compat.qrcode must not install a default global");
+              assert.strictEqual(globalThis.jsox, undefined, "compat.jsox must not install a default global");
               assert.strictEqual(globalThis.ui, undefined, "compat.ui must not install a default global");
               assert.strictEqual(globalThis.tasks, undefined, "compat.tasks must not install a default global");
               assert.strictEqual(typeof compat.ui.run, "undefined");
@@ -397,17 +412,21 @@ class NodeBridgeConformanceInstrumentationTest {
               assert(compatInstall.globals.indexOf("media") >= 0, "compat.install({ globals: true }) must install media global");
               assert(compatInstall.globals.indexOf("mediainfo") >= 0, "compat.install({ globals: true }) must install mediainfo global");
               assert(compatInstall.globals.indexOf("recorder") >= 0, "compat.install({ globals: true }) must install recorder global");
+              assert(compatInstall.globals.indexOf("jsox") >= 0, "compat.install({ globals: true }) must install jsox global");
               assert.strictEqual(globalThis.barcode, compat.barcode);
               assert.strictEqual(globalThis.qrcode, compat.qrcode);
               assert.strictEqual(globalThis.media, compat.media);
               assert.strictEqual(globalThis.mediainfo, compat.mediainfo);
               assert.strictEqual(globalThis.recorder, compat.recorder);
+              assert.strictEqual(globalThis.jsox, compat.jsox);
+              assert.strictEqual(globalThis.jsox.mathx.sum(1, 2, 3), 6);
               assert(compatInstall.globals.indexOf("ui") >= 0, "compat.install({ globals: true }) must install constrained ui global");
               assert.strictEqual(globalThis.ui, compat.ui);
               assert.strictEqual(globalThis.tasks, undefined, "compat.install({ globals: true }) must not install tasks global");
               assert.strictEqual(typeof globalThis.ui.layout, "undefined");
               assert(compat.status().implementedTasks.indexOf("P12-29") >= 0, "compat.status must include P12-29");
               assert(compat.status().implementedTasks.indexOf("P13-26") >= 0, "compat.status must include P13-26");
+              assert(compat.status().implementedTasks.indexOf("P13-27") >= 0, "compat.status must include P13-27");
 
               assert.strictEqual(typeof app.packageName, "string");
               assert.strictEqual(typeof app.versionName, "string");

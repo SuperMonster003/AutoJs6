@@ -33,6 +33,7 @@ import util = require("util");
 import opencc = require("opencc");
 import pinyin = require("pinyin");
 import pinyin4j = require("pinyin4j");
+import jsox = require("jsox");
 import notifications = require("notifications");
 import sensors = require("sensors");
 import ui = require("ui");
@@ -292,6 +293,12 @@ async function smoke(): Promise<void> {
   const pinyinText: string = pinyin.simple("\u4f60\u597d");
   const pinyinRows: pinyin.PinyinResult = pinyin.convert("\u4e2d\u56fd", { style: pinyin.STYLE_TONE2 });
   const pinyin4jText: string = pinyin4j.of("\u4e2d\u56fd", { separator: " ", tone: "WITH_TONE_NUMBER" });
+  const mathxMean: number = jsox.mathx.mean([1, 2, 3, 4]);
+  const mathxVariance: number = jsox.Mathx["var"]([1, 2, 3]);
+  const mathxDistance: number = jsox.mathx.dist([0, 0], { x: 3, y: 4 });
+  const mathxTarget = jsox.extend({} as { sum(...values: readonly unknown[]): number }, "Mathx");
+  const mathxTargetSum: number = mathxTarget.sum(1, 2, 3);
+  const compatMathxMedian: number = rhinoCompat.jsox.mathx.median([1, 4, 2, 3]);
 
   const notificationId: notifications.NotificationId = await notifications.notify({
     id: 710003,
@@ -597,6 +604,11 @@ async function smoke(): Promise<void> {
   void pinyinText;
   void pinyinRows;
   void pinyin4jText;
+  void mathxMean;
+  void mathxVariance;
+  void mathxDistance;
+  void mathxTargetSum;
+  void compatMathxMedian;
   void notificationId;
   void notificationStatus;
   void notificationSettings;

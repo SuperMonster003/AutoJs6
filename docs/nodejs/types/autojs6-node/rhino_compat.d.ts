@@ -28,6 +28,7 @@ declare module "autojs6:compat" {
   import opencc = require("opencc");
   import pinyin = require("pinyin");
   import pinyin4j = require("pinyin4j");
+  import jsox = require("jsox");
   import workManager = require("work_manager");
 
   namespace rhinoCompat {
@@ -359,6 +360,7 @@ declare module "autojs6:compat" {
       readonly opencc: opencc.OpenccModule;
       readonly pinyin: pinyin.PinyinModule;
       readonly pinyin4j: pinyin4j.Pinyin4jModule;
+      readonly jsox: jsox.JsoxModule;
       readonly keys: RhinoEventKeysCompatModule;
       readonly events: RhinoEventsCompatModule;
       readonly storage: storage.StorageModule;
