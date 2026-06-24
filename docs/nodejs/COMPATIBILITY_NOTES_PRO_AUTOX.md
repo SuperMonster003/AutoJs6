@@ -343,6 +343,13 @@ Continue using the controlled `shell` bridge for the supported migration path
 until a future Desktop profile promotes a scoped runner with app-private binary
 allowlists and cleanup evidence.
 
+P13-41 records ESM loader parity as partial. AutoJs6 Node exposes
+`esmLoaderProfile` diagnostics for the current AutoJs6-managed ESM subset:
+`.mjs`, `type=module`, TLA, local static/dynamic import, package
+`exports`/`imports`, JSON import attributes, scoped `import.meta`, and CJS
+interop. It does not enable raw loader hooks, network/file/data URL imports,
+import maps, custom condition profiles, or broad packaged encrypted ESM graphs.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

@@ -1130,6 +1130,14 @@ separate `shell` bridge; a real Desktop scoped runner still needs app-private
 allowlisted binaries, bounded stdio, timeout/cancel/kill/cleanup behavior,
 packaged evidence, and hostile corpus coverage.
 
+P13-41 records ESM loader parity as partial: Safe Node now exposes
+`esmLoaderProfile` diagnostics for the AutoJs6-managed partial ESM loader.
+`.mjs`, `type=module`, TLA, local static/dynamic import, package
+`exports`/`imports`, JSON import attributes, scoped `import.meta`, and CJS
+interop have focused evidence, but raw loader hooks, network/file/data URL
+imports, custom conditions/import maps, broad packaged encrypted graphs, and
+pending evaluation cleanup remain outside Desktop parity.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

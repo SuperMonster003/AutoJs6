@@ -728,6 +728,17 @@ stdin/stdout/stderr, timeout, cancellation, kill, cleanup, packaged disclosure,
 hostile corpus coverage, and rollback controls before any child-process-like
 Desktop profile authority can be promoted.
 
+P13-41 records ESM loader parity as partial. `esmLoaderProfile` is diagnostic
+metadata for the existing AutoJs6-managed partial ESM loader; it does not grant
+raw Node loader authority. `.mjs`, `type=module`, TLA, local static/dynamic
+import, package `exports` / `imports`, JSON import attributes, scoped
+`import.meta`, ESM/CJS interop, and sync `require(esm)` remain constrained by
+scoped filesystem, builtin allowlist, native-addon denial, and package target
+policy. Raw loader hooks, raw `node:module` loader authority, network imports,
+`file:` / `data:` URL imports, absolute paths, working-directory escapes,
+custom condition sets, import maps, and raw loader handles remain denied until
+separate Desktop-profile evidence proves them safe.
+
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
 metadata only and does not make a second JavaScript context a security
 boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,

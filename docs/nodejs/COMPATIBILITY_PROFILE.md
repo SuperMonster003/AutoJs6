@@ -1214,6 +1214,17 @@ binaries/shell operators/detached handles, bound stdin/stdout/stderr, prove
 timeout/cancel/kill/cleanup behavior, and add packaged plus hostile-corpus
 evidence before promotion.
 
+P13-41 records ESM loader parity as partial. The runtime exposes
+`autojs6:profile.esmLoaderProfile` to document that v1.1 supports the
+AutoJs6-managed partial ESM loader for `.mjs`, `type=module`, TLA, local
+static/dynamic import, package `exports` / `imports`, JSON import attributes,
+scoped `import.meta`, ESM/CJS interop, sync `require(esm)`, and focused
+packaged ESM smokes. This is not full desktop loader parity: raw loader hooks,
+raw `node:module` loader authority, network imports, `file:` / `data:` URL
+imports, arbitrary absolute paths, working-directory escapes, custom condition
+sets, import maps, broad packaged encrypted graphs, and pending-evaluation
+cleanup remain unpromoted.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context

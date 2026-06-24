@@ -560,7 +560,7 @@
         "P13-43",
         "P13-44"
       ],
-      "summary": "Improve desktop module and process parity: full ESM loader, Android-side npm/package manager, broader stdlib conformance, and process/env/argv behavior.",
+      "summary": "Improve desktop module and process parity: P13-41 records partial ESM loader diagnostics with full raw-loader parity still blocked; later tasks cover Android-side npm/package manager, broader stdlib conformance, and process/env/argv behavior.",
       "risk": "high",
       "runtimeSurface": [
         "full ESM loader",
@@ -568,7 +568,16 @@
         "expanded Node stdlib",
         "process/env/argv parity"
       ],
-      "evidence": [],
+      "evidence": [
+        "tools/nodejs/phase13/verify-esm-loader-parity-decision.js",
+        ":app:verifyNodePhase13EsmLoaderParityDecision",
+        "docs/nodejs/reports/phase13/P13_41_ESM_LOADER_PARITY.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeEsmLoaderPhase13DecisionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeEsmExperimentalInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeSourceMapStackTraceInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-esm-loader-parity-decision.json",
+        "build/reports/nodejs/phase13-esm-loader-parity-decision.md"
+      ],
       "rollback": "Return to current CommonJS/partial ESM resolver and deny Android-side install or unsafe process features."
     },
     {

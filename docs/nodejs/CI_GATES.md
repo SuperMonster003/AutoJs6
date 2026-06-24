@@ -743,6 +743,14 @@ evidence, and docs updates while keeping any callable child_process module,
 scoped runner API, app-private binary allowlist, bounded stdio,
 cancel/kill/cleanup semantics, packaged behavior, and hostile corpus coverage
 unpromoted. P13-40 records child_process scoped runner as partial.
+`verifyNodePhase13EsmLoaderParityDecision` records P13-41 as the ESM loader
+parity decision gate. It requires `esmLoaderProfile` diagnostics, focused
+local ESM loader evidence, existing ESM/package/source-map/security evidence,
+TypeScript declarations, surface manifest evidence, and docs updates while
+keeping raw loader hooks, raw `node:module` loader authority,
+network/file/data URL imports, custom conditions/import maps, broad packaged
+encrypted graphs, pending-evaluation cleanup, and full desktop source-map
+parity unpromoted. P13-41 records ESM loader parity as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

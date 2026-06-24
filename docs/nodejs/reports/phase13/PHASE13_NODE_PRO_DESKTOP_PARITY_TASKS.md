@@ -1296,6 +1296,34 @@ P13 task 本身使用以下执行状态：
     - local/package ESM 与桌面 Node 行为差距有 matrix。
     - loader hooks、network import 是否支持有明确决策。
     - source map 和 stack trace 与 CJS 一致。
+  - Progress:
+    - P13-41 partial landing 已添加 `esmLoaderProfile` 诊断，记录当前
+      AutoJs6-managed partial ESM loader，而不是提升为 raw Node loader。
+    - 已覆盖 `.mjs`、`type=module`、TLA、local static import、local
+      dynamic import、package `exports` / `imports`、JSON import attributes、
+      scoped `import.meta`、ESM/CJS interop 和 sync `require(esm)`。
+    - loader hooks、raw `node:module` loader authority、network import、
+      `file:` / `data:` URL import、absolute path import、workingDirectory
+      escape、disabled builtin import 继续拒绝。
+    - 新增 focused gate:
+      `NodeEsmLoaderPhase13DecisionInstrumentationTest`。
+    - Existing ESM gates:
+      `NodeEsmExperimentalInstrumentationTest` /
+      `NodeSourceMapStackTraceInstrumentationTest` /
+      `:app:verifyNodePackagedEsmGate`。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-esm-loader-parity-decision.js`。
+    - Gradle gate:
+      `:app:verifyNodePhase13EsmLoaderParityDecision`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_41_ESM_LOADER_PARITY.md`。
+    - Surface manifest evidence:
+      `phase13-esm-loader-parity-decision`。
+  - Remaining: native loader hooks、raw `node:module` loader authority、
+    network/file/data URL import、custom condition sets/import maps、packaged
+    encrypted package exports/imports graph、broader dynamic-import package
+    graph、pending TLA/linking cancellation cleanup、full desktop source-map
+    parity 仍未完成。
 
 - [ ] P13-42: 推进 npm/package manager on Android。
   - 范围：从 host-side bundler/validator 推进到 Android 侧 npm 包安装/管理能力。

@@ -1845,6 +1845,33 @@ denial, `child_process` / `node:child_process` require and resolve denial,
 shadow-package protection, and the separate `shell` bridge path through a fake
 transport. P13-40 records child_process scoped runner as partial.
 
+Phase 13 ESM loader parity decision gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13EsmLoaderParityDecision
+```
+
+This host gate records P13-41 as partial. It requires `esmLoaderProfile`
+diagnostics, the default partial ESM/local dynamic-import feature flags,
+focused local ESM loader evidence, packaged ESM gate references, source-map
+stack evidence, TypeScript declarations, surface manifest evidence, release
+matrix updates, and Phase13 docs. It keeps raw Node loader hooks, raw
+`node:module` loader authority, network/file/data URL imports, custom
+condition sets, import maps, broad packaged encrypted graphs, pending
+evaluation cleanup, and full desktop source-map parity open.
+
+Phase 13 ESM loader parity focused instrumentation:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEsmLoaderPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies `esmLoaderProfile` diagnostics, local dynamic import URL
+and network denial, `.mjs` import, `type=module` entry routing, top-level
+await, package `exports` / `imports`, JSON import attributes, CJS interop,
+scoped `import.meta.resolve()`, and native diagnostic fields. P13-41 records
+ESM loader parity as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell
