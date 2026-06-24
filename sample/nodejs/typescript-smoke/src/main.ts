@@ -517,6 +517,8 @@ async function smoke(): Promise<void> {
   const pluginResult: string = typedPlugin.run();
   const profileEngine: string = autojsProfile.engineVersion;
   const globalProfile: AutoJs6Node.AutoJsProfile = $autojs.profile;
+  const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
+  const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
   const autojsVersionCode: number = $autojs.version.code;
   const autojsPackageName: string = $autojs.androidContext.packageName;
   const autojsContextAvailable: false = $autojs.androidContext.available;
@@ -709,6 +711,8 @@ async function smoke(): Promise<void> {
   void pluginResult;
   void profileEngine;
   void globalProfile;
+  void filesystemProfileMode;
+  void filesystemProfileRoots;
   void compatTimedTasks;
   void compatTimedTask;
   void compatDailyDenied;

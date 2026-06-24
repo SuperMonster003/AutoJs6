@@ -17,6 +17,16 @@ declare namespace AutoJs6Node {
     readonly status: "partial" | "experimental" | "disabled" | "unsupported" | string;
   }
 
+  export interface FilesystemProfile {
+    readonly mode: "scoped_working_directory" | string;
+    readonly safeProfileScoped: boolean;
+    readonly additionalRoots: readonly string[];
+    readonly userAuthorizedRoots: boolean;
+    readonly safRoots: boolean;
+    readonly appPrivateRoots: boolean;
+    readonly androidSharedStorage: boolean;
+  }
+
   export interface AutoJsProfile {
     readonly name: string;
     readonly engineVersion: string;
@@ -29,6 +39,7 @@ declare namespace AutoJs6Node {
     readonly javaInterop: boolean;
     readonly nativeAddon: boolean;
     readonly scopedFs: boolean;
+    readonly filesystemProfile: FilesystemProfile;
     readonly directBuiltinAliases: Readonly<Record<string, string>>;
     readonly limitedBuiltins: readonly string[];
     readonly disabledBuiltins: readonly string[];

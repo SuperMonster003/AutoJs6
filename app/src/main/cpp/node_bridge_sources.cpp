@@ -8844,6 +8844,15 @@ std::string buildEmbeddedScriptExecutionSource(
       javaInterop: __autojs6_java_interop_experimental_enabled,
       nativeAddon: false,
       scopedFs: true,
+      filesystemProfile: Object.freeze({
+        mode: "scoped_working_directory",
+        safeProfileScoped: true,
+        additionalRoots: Object.freeze([]),
+        userAuthorizedRoots: false,
+        safRoots: false,
+        appPrivateRoots: false,
+        androidSharedStorage: false
+      }),
       processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
       limitedBuiltins: __autojs6_freeze_sorted_copy(
