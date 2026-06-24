@@ -699,14 +699,34 @@
         "P13-51",
         "P13-52"
       ],
-      "summary": "Security corpus, rollback playbooks, privacy, foreground disclosure, and user prompts for relaxed capabilities.",
+      "summary": "P13-50 records relaxed-capability security corpus as partial with structured positive/negative/abuse cases, focused security regression, and fail-closed raw capability policy; rollback playbooks, privacy, disclosure, and user prompts remain future work.",
       "risk": "critical",
       "runtimeSurface": [
         "per-profile security corpus",
+        "raw network relaxed-capability corpus",
+        "filesystem relaxation corpus",
+        "Java interop allowlist and denial corpus",
+        "child_process and shell bridge replacement corpus",
+        "native addon denial corpus",
+        "inspector debug denial corpus",
+        "WASI pure WebAssembly and raw WASI denial corpus",
         "per-profile rollback controls",
         "privacy and disclosure policy"
       ],
-      "evidence": [],
+      "evidence": [
+        "docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json",
+        "tools/nodejs/phase13/verify-relaxed-capability-security-corpus.js",
+        ":app:verifyNodePhase13RelaxedCapabilitySecurityCorpus",
+        "docs/nodejs/reports/phase13/P13_50_RELAXED_CAPABILITY_SECURITY_CORPUS.md",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeSecurityRegressionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeJavaInteropBridgeInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeChildProcessPhase13DecisionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeNativeAddonPhase13DecisionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeInspectorPhase13DecisionInstrumentationTest.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeWasiPhase13DecisionInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-relaxed-capability-security-corpus.json",
+        "build/reports/nodejs/phase13-relaxed-capability-security-corpus.md"
+      ],
       "rollback": "Disable relaxed capability groups and keep existing Safe Node Profile security corpus as the release gate."
     },
     {

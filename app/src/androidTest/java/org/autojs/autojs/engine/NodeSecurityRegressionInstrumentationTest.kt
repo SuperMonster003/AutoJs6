@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import org.autojs.autojs6.BuildConfig
+import org.json.JSONTokener
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -10,6 +11,8 @@ import org.junit.Test
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class NodeSecurityRegressionInstrumentationTest {
 
@@ -962,11 +965,381 @@ class NodeSecurityRegressionInstrumentationTest {
         }
     }
 
+    @Test
+    fun phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Phase 13 relaxed capability security corpus")
+        assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
+
+        val workDir = freshWorkDir("node-security-p13-50-relaxed-corpus")
+        val outsideDir = freshWorkDir("node-security-p13-50-outside")
+        try {
+            File(workDir, "safe.txt").writeText("safe", StandardCharsets.UTF_8)
+            File(outsideDir, "secret.txt").writeText("secret", StandardCharsets.UTF_8)
+            Files.createSymbolicLink(File(workDir, "outside-link").toPath(), outsideDir.toPath())
+            File(workDir, "native.node").writeText("native-addon-placeholder\n", StandardCharsets.UTF_8)
+            listOf("child_process", "inspector", "wasi").forEach { name ->
+                File(workDir, "node_modules/$name").apply {
+                    mkdirs()
+                    File(this, "index.js").writeText(
+                        """module.exports = { shadowed: "$name" };""" + "\n",
+                        StandardCharsets.UTF_8,
+                    )
+                }
+            }
+
+            val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("network", "shell"))
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async () => {
+                      const bridge = require("autojs6:bridge");
+                      const fs = require("fs");
+                      const fsp = require("fs/promises");
+                      const profile = require("autojs6:profile");
+                      const requests = [];
+
+                      bridge.__test.setTransport({
+                        postMessage(message) {
+                          const request = JSON.parse(message);
+                          requests.push(request);
+                          if (request.module === "fetch") {
+                            const payload = request.args[0];
+                            setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                              id: request.id,
+                              ok: true,
+                              result: {
+                                url: payload.url,
+                                status: 200,
+                                statusText: "OK",
+                                headers: [["content-type", "text/plain"]],
+                                bodyBase64: Buffer.from("fetch-ok").toString("base64")
+                              }
+                            })));
+                            return;
+                          }
+                          setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                            id: request.id,
+                            ok: true,
+                            result: { code: 0, stdout: "shell-ok\n", stderr: "" }
+                          })));
+                        }
+                      });
+
+                      function detailOf(error) {
+                        return [
+                          error && error.code,
+                          error && error.autojs6Code,
+                          error && error.legacyCode
+                        ].filter(Boolean).join("/");
+                      }
+                      function expectDenied(label, action, expectedCode) {
+                        try {
+                          action();
+                        } catch (error) {
+                          const detail = detailOf(error);
+                          if (expectedCode && detail.indexOf(expectedCode) < 0) {
+                            throw new Error(label + " expected " + expectedCode + " but got " + detail + ": " + (error && error.message));
+                          }
+                          console.log("security.p13_50." + label + "=" + detail);
+                          return;
+                        }
+                        throw new Error(label + " was unexpectedly allowed");
+                      }
+                      async function expectDeniedAsync(label, action, expectedCode) {
+                        try {
+                          await action();
+                        } catch (error) {
+                          const detail = detailOf(error);
+                          if (expectedCode && detail.indexOf(expectedCode) < 0) {
+                            throw new Error(label + " expected " + expectedCode + " but got " + detail + ": " + (error && error.message));
+                          }
+                          console.log("security.p13_50." + label + "=" + detail);
+                          return;
+                        }
+                        throw new Error(label + " was unexpectedly allowed");
+                      }
+                      function shadowLoaded(name) {
+                        return Object.keys(require.cache).some((filename) => {
+                          return filename.replace(/\\/g, "/").includes("/node_modules/" + name + "/");
+                        });
+                      }
+
+                      const selection = profile.profileSelection || {};
+                      const networkRisk = ((selection.highRiskCapabilities || []).find((item) => item.id === "network")) || {};
+                      console.log("security.p13_50.raw_network_positive=" + [
+                        networkRisk.requiredProfile,
+                        (selection.declaredAndroidPermissions || []).includes("android.permission.INTERNET"),
+                        profile.highRiskCapabilities.network,
+                        profile.featureFlags.network.enabled,
+                        profile.featureFlags.network.defaultEnabled
+                      ].join("|"));
+                      const fetchResponse = await fetch("https://example.invalid/p13-50");
+                      const fetchBody = await fetchResponse.text();
+                      const fetchRequests = requests.filter((request) => request.module === "fetch");
+                      console.log("security.p13_50.raw_network_controlled_fetch=" + [
+                        fetchResponse.status,
+                        fetchBody,
+                        fetchRequests.length,
+                        fetchRequests[0].permissions.join(",")
+                      ].join("|"));
+                      expectDenied("raw_network.net_connect", () => require("net").connect(80, "127.0.0.1"), "ERR_AUTOJS6_NETWORK_DISABLED");
+                      expectDenied("raw_network.net_listen", () => require("net").createServer().listen(0), "ERR_AUTOJS6_NETWORK_DISABLED");
+                      await expectDeniedAsync("raw_network.dns_resolve", () => require("dns/promises").resolve4("example.invalid"), "ERR_AUTOJS6_NETWORK_DISABLED");
+
+                      await fsp.writeFile("safe-copy.txt", "safe-copy", "utf8");
+                      console.log("security.p13_50.fs_positive=" + [
+                        fs.readFileSync("safe.txt", "utf8"),
+                        fs.readFileSync("safe-copy.txt", "utf8"),
+                        profile.filesystemProfile.mode,
+                        profile.filesystemProfile.safeProfileScoped,
+                        profile.filesystemProfile.additionalRoots.length,
+                        profile.filesystemProfile.userAuthorizedRoots,
+                        profile.filesystemProfile.advancedApis.rawFd
+                      ].join("|"));
+                      expectDenied("fs_escape", () => fs.readFileSync("../secret.txt", "utf8"), "ERR_AUTOJS6_FS_PATH_ESCAPE");
+                      expectDenied("fs_proc", () => fs.readFileSync("/proc/version", "utf8"), "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
+                      expectDenied("fs_symlink", () => fs.readFileSync("./outside-link/secret.txt", "utf8"), "ERR_AUTOJS6_FS_REALPATH_ESCAPE");
+
+                      const shell = require("shell");
+                      const shellResult = await shell.exec("echo p13-50", { timeoutMs: 778, cwd: "." });
+                      const shellRequests = requests.filter((request) => request.module === "shell");
+                      console.log("security.p13_50.child_positive=" + [
+                        shellResult.code,
+                        shellResult.stdout.trim(),
+                        shellRequests.length,
+                        shellRequests[0].module,
+                        shellRequests[0].permissions.join(","),
+                        typeof shell.exec,
+                        typeof shell.spawn,
+                        typeof shell.fork
+                      ].join("|"));
+                      expectDenied("child.require", () => require("child_process"), "ERR_AUTOJS6_BUILTIN_DISABLED");
+                      expectDenied("child.resolve", () => require.resolve("child_process"), "ERR_AUTOJS6_BUILTIN_DISABLED");
+                      console.log("security.p13_50.child_shadow=" + shadowLoaded("child_process"));
+
+                      console.log("security.p13_50.native_positive=" + [
+                        profile.nativeAddonProfile.signedPackagedOnly,
+                        profile.nativeAddonProfile.hashAllowlist,
+                        profile.nativeAddonProfile.crashIsolation,
+                        profile.featureFlags.native_addon.releaseForbidden
+                      ].join("|"));
+                      expectDenied("native.require", () => require("./native.node"), "ERR_AUTOJS6_NATIVE_ADDON_DISABLED");
+                      expectDenied("native.dlopen", () => process.dlopen({}, "./native.node"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
+
+                      console.log("security.p13_50.inspector_positive=" + [
+                        profile.inspectorProfile.adbForwarding,
+                        profile.inspectorProfile.explicitUserAction,
+                        profile.inspectorProfile.releaseBuild,
+                        process.features.inspector,
+                        process.features.debug
+                      ].join("|"));
+                      expectDenied("inspector.require", () => require("inspector"), "ERR_AUTOJS6_BUILTIN_DISABLED");
+                      expectDenied("inspector.resolve", () => require.resolve("inspector"), "ERR_AUTOJS6_BUILTIN_DISABLED");
+                      console.log("security.p13_50.inspector_shadow=" + shadowLoaded("inspector"));
+
+                      const wasmHeader = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]);
+                      console.log("security.p13_50.wasi_positive=" + [
+                        WebAssembly.validate(wasmHeader),
+                        profile.wasiProfile.pureWebAssembly,
+                        profile.wasiProfile.preopens,
+                        profile.wasiProfile.rawHostPaths,
+                        profile.wasiProfile.rawFdNumbers
+                      ].join("|"));
+                      expectDenied("wasi.require", () => require("wasi"), "ERR_AUTOJS6_BUILTIN_DISABLED");
+                      expectDenied("wasi.resolve", () => require.resolve("wasi"), "ERR_AUTOJS6_BUILTIN_DISABLED");
+                      console.log("security.p13_50.wasi_shadow=" + shadowLoaded("wasi"));
+
+                      console.log("security.p13_50.ready=true");
+                    })().catch((error) => {
+                      console.error("security.p13_50.error=" + (error && (error.stack || error.message) || error));
+                      process.exitCode = 1;
+                    });
+                """.trimIndent(),
+                sourceName = File(workDir, "phase13-relaxed-capability-security-corpus.js").absolutePath,
+                workingDirectory = workDir,
+                timeoutMs = 10_000L,
+                runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("Node Phase 13 relaxed capability security corpus", result)
+            listOf(
+                "security.p13_50.raw_network_positive=desktop_compat_opt_in|true|false|false|false",
+                "security.p13_50.raw_network_controlled_fetch=200|fetch-ok|1|network",
+                "security.p13_50.raw_network.net_connect=",
+                "security.p13_50.raw_network.net_listen=",
+                "security.p13_50.raw_network.dns_resolve=",
+                "security.p13_50.fs_positive=safe|safe-copy|scoped_working_directory|true|0|false|false",
+                "security.p13_50.fs_escape=",
+                "security.p13_50.fs_proc=",
+                "security.p13_50.fs_symlink=",
+                "security.p13_50.child_positive=0|shell-ok|1|shell|shell|function|undefined|undefined",
+                "security.p13_50.child.require=",
+                "security.p13_50.child.resolve=",
+                "security.p13_50.child_shadow=false",
+                "security.p13_50.native_positive=required_before_enablement|required_before_enablement|required_before_enablement|true",
+                "security.p13_50.native.require=",
+                "security.p13_50.native.dlopen=",
+                "security.p13_50.inspector_positive=required_before_enablement|required_before_enablement|denied|false|false",
+                "security.p13_50.inspector.require=",
+                "security.p13_50.inspector.resolve=",
+                "security.p13_50.inspector_shadow=false",
+                "security.p13_50.wasi_positive=true|available|scoped_or_authorized_roots_required|false|false",
+                "security.p13_50.wasi.require=",
+                "security.p13_50.wasi.resolve=",
+                "security.p13_50.wasi_shadow=false",
+                "security.p13_50.ready=true",
+            ).forEach { token ->
+                assertTrue(
+                    NodeEmbeddedTestHarness.describeResult("missing P13-50 relaxed capability corpus token $token", result),
+                    result.stdout.contains(token),
+                )
+            }
+            listOf(
+                NodeRuntimeErrorCodes.NETWORK_DISABLED,
+                NodeRuntimeErrorCodes.FS_PATH_ESCAPE,
+                NodeRuntimeErrorCodes.FS_ABSOLUTE_PATH_DENIED,
+                NodeRuntimeErrorCodes.FS_REALPATH_ESCAPE,
+                NodeRuntimeErrorCodes.BUILTIN_DISABLED,
+                NodeRuntimeErrorCodes.NATIVE_ADDON_DISABLED,
+                NodeRuntimeErrorCodes.PROCESS_API_DISABLED,
+            ).forEach { code ->
+                assertTrue(
+                    NodeEmbeddedTestHarness.describeResult("missing P13-50 relaxed capability denial $code", result),
+                    result.stdout.contains(code),
+                )
+            }
+            assertEquals(false, result.pendingScopedFsStreams)
+            assertEquals(0, result.pendingScopedFsStreamCount ?: -1)
+        } finally {
+            workDir.deleteRecursively()
+            outsideDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun phase13JavaInteropRelaxedCapabilityCorpusKeepsAllowlistAndDenials() {
+        assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED)
+
+        val disabledProvider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            javaInteropExperimentalEnabled = false,
+        )
+        try {
+            val disabled = dispatchJava(
+                disabledProvider,
+                "callStatic",
+                """[{"className":"java.lang.Math","method":"max","args":[3,7]}]""",
+            )
+            assertFalse(disabled.ok)
+            assertEquals(NodeRuntimeErrorCodes.JAVA_INTEROP_DISABLED, disabled.error?.code)
+        } finally {
+            disabledProvider.destroy()
+        }
+
+        val enabledProvider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            javaInteropExperimentalEnabled = true,
+        )
+        try {
+            val math = dispatchJava(
+                enabledProvider,
+                "callStatic",
+                """[{"className":"java.lang.Math","method":"max","args":[3,7]}]""",
+            )
+            assertTrue(math.toString(), math.ok)
+            assertEquals(7.0, (JSONTokener(math.resultJson.orEmpty()).nextValue() as Number).toDouble(), 0.0)
+
+            val rect = dispatchJava(
+                enabledProvider,
+                "new",
+                """[{"className":"android.graphics.Rect","args":[1,2,3,4]}]""",
+            )
+            assertTrue(rect.toString(), rect.ok)
+            val rectHandle = JSONTokener(rect.resultJson.orEmpty())
+                .nextValue()
+                .let { it as org.json.JSONObject }
+                .getString("__autojs6JavaHandle")
+            assertTrue(rectHandle.startsWith("java-"))
+            assertEquals("1", enabledProvider.nativeDiagnostics()["embedded_script.java_interop_handle_count"])
+
+            val width = dispatchJava(
+                enabledProvider,
+                "call",
+                """[{"handle":"$rectHandle","method":"width","args":[]}]""",
+            )
+            assertTrue(width.toString(), width.ok)
+            assertEquals(2.0, (JSONTokener(width.resultJson.orEmpty()).nextValue() as Number).toDouble(), 0.0)
+
+            val runtimeDenied = dispatchJava(
+                enabledProvider,
+                "callStatic",
+                """[{"className":"java.lang.Runtime","method":"exec","args":["id"]}]""",
+            )
+            assertFalse(runtimeDenied.ok)
+            assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, runtimeDenied.error?.code)
+
+            val reflectionDenied = dispatchJava(
+                enabledProvider,
+                "type",
+                """[{"className":"java.lang.reflect.Method"}]""",
+            )
+            assertFalse(reflectionDenied.ok)
+            assertEquals(NodeRuntimeErrorCodes.JAVA_REFLECTION_DENIED, reflectionDenied.error?.code)
+
+            val systemLoadLibraryDenied = dispatchJava(
+                enabledProvider,
+                "callStatic",
+                """[{"className":"java.lang.System","method":"loadLibrary","args":["autojs6-node"]}]""",
+            )
+            assertFalse(systemLoadLibraryDenied.ok)
+            assertEquals(NodeRuntimeErrorCodes.JAVA_CLASS_DENIED, systemLoadLibraryDenied.error?.code)
+
+            val released = dispatchJava(
+                enabledProvider,
+                "release",
+                """[{"handle":"$rectHandle"}]""",
+            )
+            assertTrue(released.toString(), released.ok)
+            assertEquals(true, JSONTokener(released.resultJson.orEmpty()).nextValue())
+            assertEquals("0", enabledProvider.nativeDiagnostics()["embedded_script.java_interop_handle_count"])
+
+            val afterRelease = dispatchJava(
+                enabledProvider,
+                "call",
+                """[{"handle":"$rectHandle","method":"width","args":[]}]""",
+            )
+            assertFalse(afterRelease.ok)
+            assertEquals(NodeRuntimeErrorCodes.JAVA_METHOD_DENIED, afterRelease.error?.code)
+        } finally {
+            enabledProvider.destroy()
+        }
+    }
+
     private fun freshWorkDir(name: String): File =
         File(context.cacheDir, "$name-${System.nanoTime()}").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create work dir: $absolutePath" }
         }
+
+    private fun dispatchJava(provider: NodeBridgeCapabilityProvider, method: String, argsJson: String): NodeBridgeResponse {
+        val latch = CountDownLatch(1)
+        var response: NodeBridgeResponse? = null
+        provider.dispatch(
+            NodeBridgeRequest(
+                id = "p13-50-java-provider-${System.nanoTime()}",
+                module = "java",
+                method = method,
+                argsJson = argsJson,
+                timeoutMs = 5_000L,
+                permissions = listOf("java_interop"),
+            ),
+        ) { bridgeResponse ->
+            response = bridgeResponse
+            latch.countDown()
+        }
+        assertTrue("Timed out waiting for P13-50 java provider response", latch.await(5, TimeUnit.SECONDS))
+        return checkNotNull(response) { "Missing P13-50 java provider response" }
+    }
 
     private fun writePhase5Plugin(
         workDir: File,

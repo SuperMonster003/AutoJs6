@@ -1,0 +1,203 @@
+{
+  "schema": "autojs6-node-relaxed-capability-security-corpus-v1",
+  "task": "P13-50",
+  "status": "partial",
+  "updatedAt": "2026-06-25",
+  "policy": {
+    "defaultProfile": "safe_default",
+    "profilePromotion": false,
+    "rawCapabilitiesPromoted": false,
+    "minimumEvidence": [
+      "positiveTests",
+      "negativeTests",
+      "abuseCases",
+      "ciEvidence",
+      "rollback"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "raw_network",
+      "profile": "desktop_compat_opt_in",
+      "risk": "high",
+      "positiveTests": [
+        "profileSelection reports network as a Desktop-profile high-risk capability with android.permission.INTERNET",
+        "controlled fetch/http/net/tls/dns facades keep documented diagnostics under existing P13-29/P13-30 tests"
+      ],
+      "negativeTests": [
+        "Safe profile keeps raw network disabled by default",
+        "server/listen, DNS resolution, raw socket connect, unsupported schemes, and credential-bearing URLs reject without leaking secrets"
+      ],
+      "abuseCases": [
+        "loopback server bind",
+        "raw socket outbound connect",
+        "DNS resolution without network opt-in",
+        "credential redaction in denied URL diagnostics"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeHttpDesktopParityInstrumentationTest",
+        "NodeNetTlsDnsStagedParityInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "rollback": "Keep NODEJS_NETWORK_EXPERIMENTAL_ENABLED false and keep raw network modules denied."
+    },
+    {
+      "id": "filesystem_relaxation",
+      "profile": "desktop_compat_opt_in",
+      "risk": "high",
+      "positiveTests": [
+        "scoped working-directory reads/writes and advanced fs APIs work inside the project root",
+        "filesystemProfile reports additionalRoots as empty and rawFd as false"
+      ],
+      "negativeTests": [
+        "absolute paths, parent traversal, NUL paths, /proc, /sys, /dev, symlink, and realpath escapes reject",
+        "watchers and streams must close without pending scoped resources"
+      ],
+      "abuseCases": [
+        "symlink escape to app cache sibling",
+        "realpath escape",
+        "absolute device/proc/sys reads",
+        "stream escape cleanup"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#scopedFilesystemAndPackageEscapesStayDenied",
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeFilesystemAdvancedDecisionInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "rollback": "Keep filesystemProfile.additionalRoots empty and require explicit future root authorization."
+    },
+    {
+      "id": "java_interop",
+      "profile": "pro_compat_opt_in",
+      "risk": "critical",
+      "positiveTests": [
+        "debug experimental provider can call allowlisted java.lang.Math and manage JSON-safe Android handles",
+        "profileSelection and featureFlags report Java interop as high-risk disabled by default"
+      ],
+      "negativeTests": [
+        "default Java module require/resolve is denied and cannot be shadowed",
+        "Runtime.exec, ProcessBuilder, ClassLoader, reflection, System.loadLibrary, denied mutation, and released handles reject"
+      ],
+      "abuseCases": [
+        "process execution through java.lang.Runtime",
+        "classloader access",
+        "reflection access",
+        "native library loading",
+        "stale Java handle reuse"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13JavaInteropRelaxedCapabilityCorpusKeepsAllowlistAndDenials",
+        "NodeJavaInteropBridgeInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "rollback": "Keep NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED false in release and reject project/package overrides."
+    },
+    {
+      "id": "child_process",
+      "profile": "desktop_compat_opt_in",
+      "risk": "high",
+      "positiveTests": [
+        "separate shell bridge remains available only with shell capability",
+        "childProcessProfile documents scoped-runner requirements"
+      ],
+      "negativeTests": [
+        "child_process and node:child_process require/resolve are denied and cannot be shadowed",
+        "raw process handles, spawn/fork, detached mode, signals, and fd streams remain unavailable"
+      ],
+      "abuseCases": [
+        "child_process shadow package",
+        "raw spawn/fork access",
+        "shell operator confusion",
+        "process handle leakage"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeChildProcessPhase13DecisionInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "rollback": "Keep child_process builtin disabled and route command execution through the scoped shell bridge only."
+    },
+    {
+      "id": "native_addon",
+      "profile": "desktop_compat_opt_in",
+      "risk": "critical",
+      "positiveTests": [
+        "nativeAddonProfile documents signed packaged-only artifact requirements",
+        "package integrity policy covers native addon artifacts before any promotion"
+      ],
+      "negativeTests": [
+        ".node require/resolve, process.dlopen, process.binding, _linkedBinding, node-gyp artifacts, and downloaded native payloads reject"
+      ],
+      "abuseCases": [
+        "relative .node load",
+        "package main .node load",
+        "process.dlopen",
+        "private binding access",
+        "unsigned native payload"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeNativeAddonPhase13DecisionInstrumentationTest",
+        "NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "rollback": "Keep native addon loading denied until signed packaged artifacts, ABI/hash allowlists, dependency scan, and crash isolation land."
+    },
+    {
+      "id": "inspector",
+      "profile": "debug_unsafe_lab",
+      "risk": "critical",
+      "positiveTests": [
+        "inspectorProfile documents debug-only ADB forwarding, user action, and redaction requirements",
+        "process.features reports inspector/debug as false"
+      ],
+      "negativeTests": [
+        "inspector and node:inspector require/resolve are denied and cannot be shadowed",
+        "DevTools attach, protocol sessions, CPU/heap artifacts, remote sockets, and release builds remain unavailable"
+      ],
+      "abuseCases": [
+        "shadow inspector package",
+        "remote inspector port exposure",
+        "heap snapshot export",
+        "CPU profile export",
+        "release build debug attach"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeInspectorPhase13DecisionInstrumentationTest",
+        "NodeInspectorSecurityGateInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "rollback": "Keep inspector disabled outside future debug-only sessions with explicit user action."
+    },
+    {
+      "id": "wasi",
+      "profile": "desktop_compat_opt_in",
+      "risk": "high",
+      "positiveTests": [
+        "pure WebAssembly remains available without raw WASI authority",
+        "wasiProfile documents scoped/authorized preopen and fd/env/args requirements"
+      ],
+      "negativeTests": [
+        "wasi and node:wasi require/resolve are denied and cannot be shadowed",
+        "raw preopens, host path access, inherited fd numbers, unrestricted env/args, network, and process exit remain denied"
+      ],
+      "abuseCases": [
+        "preopen escape",
+        "raw fd number inheritance",
+        "env leakage",
+        "process exit from WASI",
+        "worker-integrated WASI escape"
+      ],
+      "ciEvidence": [
+        "NodeSecurityRegressionInstrumentationTest#phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi",
+        "NodeWasiPhase13DecisionInstrumentationTest",
+        "NodeWasmWasiInstrumentationTest",
+        "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
+      ],
+      "rollback": "Keep raw WASI denied until a controlled facade proves scoped preopens, virtual fds, env/args, resources, worker, and packaged behavior."
+    }
+  ]
+}

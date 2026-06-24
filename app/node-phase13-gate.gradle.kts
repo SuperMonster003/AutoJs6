@@ -2173,3 +2173,55 @@ tasks.register<Exec>("verifyNodePhase13ProfileSelectionDiagnostics") {
         nodePhase13ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase13RelaxedCapabilitySecurityCorpus") {
+    group = "verification"
+    description = "Verifies Phase 13 relaxed-capability security corpus."
+
+    dependsOn("verifyNodePhase13ProfileSelectionDiagnostics")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-relaxed-capability-security-corpus.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_50_RELAXED_CAPABILITY_SECURITY_CORPUS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
+    inputs.file(project.layout.projectDirectory.file("src/main/cpp/node_bridge_sources.cpp"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeSecurityRegressionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeHttpDesktopParityInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeNetTlsDnsStagedParityInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeFilesystemAdvancedDecisionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeJavaInteropBridgeInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeChildProcessPhase13DecisionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeNativeAddonPhase13DecisionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeInspectorPhase13DecisionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasiPhase13DecisionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodeWasmWasiInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("src/androidTest/java/org/autojs/autojs/engine/NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest.kt"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_PROFILE.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/SECURITY_MODEL.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/security/CAPABILITY_RELAXATION_RUBRIC.md"))
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("phase13-relaxed-capability-security-corpus.json") },
+        nodePhase13ReportDir.map { it.file("phase13-relaxed-capability-security-corpus.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+    )
+}
