@@ -535,6 +535,12 @@ async function smoke(): Promise<void> {
   const stdlibProfileAndroidUnsupported: readonly string[] = autojsProfile.stdlibProfile.androidUnsupported;
   const stdlibProfileProcessGetBuiltin: string = autojsProfile.stdlibProfile.processGetBuiltinModule;
   const stdlibProfileRawDesktopParity: boolean = autojsProfile.stdlibProfile.rawDesktopParity;
+  const processParityProfileStatus: string = autojsProfile.processParityProfile.status;
+  const processParityProfileArgv: string = autojsProfile.processParityProfile.argv;
+  const processParityProfileEnvKeys: readonly string[] = autojsProfile.processParityProfile.envDefaultKeys;
+  const processParityProfileExit: string = autojsProfile.processParityProfile.exit;
+  const processParityProfileSignals: string = autojsProfile.processParityProfile.signals;
+  const processParityProfileRawSignals: boolean = autojsProfile.processParityProfile.rawSignals;
   const filesystemProfileMode: string = autojsProfile.filesystemProfile.mode;
   const filesystemProfileRoots: readonly string[] = autojsProfile.filesystemProfile.additionalRoots;
   const filesystemAdvancedWatch: string = autojsProfile.filesystemProfile.advancedApis.watch;
@@ -782,6 +788,12 @@ async function smoke(): Promise<void> {
   void stdlibProfileAndroidUnsupported;
   void stdlibProfileProcessGetBuiltin;
   void stdlibProfileRawDesktopParity;
+  void processParityProfileStatus;
+  void processParityProfileArgv;
+  void processParityProfileEnvKeys;
+  void processParityProfileExit;
+  void processParityProfileSignals;
+  void processParityProfileRawSignals;
   void filesystemProfileMode;
   void filesystemProfileRoots;
   void filesystemAdvancedWatch;

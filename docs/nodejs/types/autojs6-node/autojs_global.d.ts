@@ -107,6 +107,37 @@ declare namespace AutoJs6Node {
     readonly broadTerminal: boolean;
   }
 
+  export interface ProcessParityProfile {
+    readonly status: "safe_process_subset_partial" | "desktop_opt_in" | string;
+    readonly defaultEnabled: boolean;
+    readonly targetProfiles: readonly string[];
+    readonly argv: "entry_and_project_runner_partial" | string;
+    readonly env: "controlled_string_map" | string;
+    readonly envMutation: "script_local_mutable" | string;
+    readonly envSources: "request_map_plus_safe_defaults" | string;
+    readonly envDefaultKeys: readonly string[];
+    readonly envFilteredKeys: readonly string[];
+    readonly cwd: "scoped_working_directory" | string;
+    readonly chdir: "scoped_relative_directory_only" | string;
+    readonly exit: "exitCode_only_process_exit_denied" | string;
+    readonly signals: "denied_no_android_signal_delivery" | string;
+    readonly versions: "partial_node_v8_available" | string;
+    readonly resourceUsage: "partial_runtime_snapshot" | string;
+    readonly timing: "partial_uptime_hrtime_cpu_memory" | string;
+    readonly permission: "autojs6_readonly_capability_query" | string;
+    readonly report: "getReport_only_write_denied" | string;
+    readonly stdio: "bounded_non_tty" | string;
+    readonly moduleAliases: readonly string[];
+    readonly androidDifferences: "documented_stable" | string;
+    readonly androidUnsupported: readonly string[];
+    readonly packagedBehavior: "existing_project_runner_smokes_partial" | string;
+    readonly rawDesktopParity: boolean;
+    readonly rawEnvInheritance: boolean;
+    readonly rawSignals: boolean;
+    readonly rawProcessHandles: boolean;
+    readonly nativeBindings: boolean;
+  }
+
   export interface FilesystemAdvancedApis {
     readonly streams: "partial" | "unsupported" | string;
     readonly fileHandle: "partial" | "unsupported" | string;
@@ -350,6 +381,7 @@ declare namespace AutoJs6Node {
     readonly esmLoaderProfile: EsmLoaderProfile;
     readonly packageManagerProfile: PackageManagerProfile;
     readonly stdlibProfile: StdlibProfile;
+    readonly processParityProfile: ProcessParityProfile;
     readonly filesystemProfile: FilesystemProfile;
     readonly workerThreadsProfile: WorkerThreadsProfile;
     readonly processWorkerReplacementProfile: ProcessWorkerReplacementProfile;
