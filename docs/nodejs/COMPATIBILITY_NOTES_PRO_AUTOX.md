@@ -164,11 +164,17 @@ AutoJs6 behavior:
   Node. Explicit `require("rhino").importClass()` / `.importPackage()` calls
   throw `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; assign local names from a
   P13-14 proxy target instead.
+- P13-16 keeps Rhino `JavaAdapter` unsupported in Node. Explicit
+  `require("rhino").JavaAdapter()` calls throw
+  `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`; `java.defineClass()` and
+  `$autojs.java.defineClass()` are reserved replacement names but still throw
+  `ERR_AUTOJS6_JAVA_METHOD_DENIED` until a bounded proxy-interface provider is
+  implemented.
 - AutoJs capabilities should be requested through bridge modules.
 - raw Android services, activities, accessibility nodes, media projection objects, and bitmap pointers are not exposed directly.
 
 Porting note: treat `$autojs global v1`, `java.*`, `android.*`,
-`importClass`, and Rhino-style Java access as gated migration work. Prefer
+`importClass`, `JavaAdapter`, `defineClass`, and Rhino-style Java access as gated migration work. Prefer
 explicit bridge APIs where available.
 
 ## Threads

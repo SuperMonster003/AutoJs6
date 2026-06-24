@@ -4,6 +4,7 @@ declare module "rhino" {
       | "ERR_AUTOJS6_RHINO_SHIM_DISABLED"
       | "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED"
       | "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED"
+      | "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED"
       | "ERR_AUTOJS6_RHINO_INVALID_REQUEST"
       | "ERR_AUTOJS6_RHINO_EXECUTION_ERROR"
       | "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT"
@@ -13,6 +14,7 @@ declare module "rhino" {
       readonly shimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED";
       readonly installUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED";
       readonly importUnsupported: "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED";
+      readonly javaAdapterUnsupported: "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED";
       readonly invalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST";
       readonly executionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR";
       readonly executionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT";
@@ -152,6 +154,7 @@ declare module "rhino" {
       install(options?: unknown): never;
       importClass(value?: unknown, options?: unknown): never;
       importPackage(value?: unknown, options?: unknown): never;
+      JavaAdapter(...args: readonly unknown[]): never;
     }
   }
 

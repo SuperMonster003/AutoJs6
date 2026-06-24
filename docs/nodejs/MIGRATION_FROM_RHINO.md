@@ -100,7 +100,7 @@ If a script needs Android or AutoJs functionality, use an AutoJs bridge module.
 
 ## Rhino Compatibility Shim
 
-P12-24 reserves `require("rhino")` in the default Safe Node Profile as a disabled JSON-only shim facade. P12-25 implements an explicit `experimental: true` JSON-only execution adapter POC for small Rhino snippets or scoped files. Calls without `experimental: true` still reject, Node still does not support `rhino.install()`, and Node does not automatically install old AutoJs globals. The explicit migration helper for implemented Rhino-style APIs remains `require("autojs6:compat")`; it does not install globals unless the script calls `compat.install({ globals: true })`.
+P12-24 reserves `require("rhino")` in the default Safe Node Profile as a disabled JSON-only shim facade. P12-25 implements an explicit `experimental: true` JSON-only execution adapter POC for small Rhino snippets or scoped files. Calls without `experimental: true` still reject, default `rhino.install()` still rejects, and Node does not automatically install old AutoJs globals. P13-14 adds only an explicit experimental Java proxy install for `Packages` / `java` / `android`; P13-15 and P13-16 keep `importClass`, `importPackage`, and `JavaAdapter` as stable unsupported helpers. The explicit migration helper for implemented Rhino-style APIs remains `require("autojs6:compat")`; it does not install globals unless the script calls `compat.install({ globals: true })`.
 
 Do not migrate scripts by expecting these Rhino-era surfaces to appear inside Node:
 
@@ -949,7 +949,7 @@ For release flavors and ABI policy, see `docs/nodejs/design/RELEASE_FLAVORS.md`.
 - Replace `files` helpers with scoped `fs` or `fs/promises`.
 - Keep file paths relative to the project working directory.
 - Remove direct Java object access.
-- Do not rely on default `require("rhino")` execution; P12-25 requires an explicit `experimental: true` JSON-only POC request. `rhino.install()`, `importClass`, `importPackage`, `Packages`, and `JavaAdapter` remain unsupported inside Node.
+- Do not rely on default `require("rhino")` execution; P12-25 requires an explicit `experimental: true` JSON-only POC request. Default `rhino.install()` remains rejected, while P13-14 permits only explicit experimental Java proxy install through the allowlist. `importClass` / `importPackage` return stable unsupported errors; P13-16 also keeps `JavaAdapter` unsupported with `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED` and reserves `java.defineClass()` / `$autojs.java.defineClass()` as stable-denied replacement names.
 - Confirm unsupported builtins still fail with `ERR_AUTOJS6_*`.
 - Review `docs/nodejs/examples/rhino-compat` for checked
   toast/files/storage/selector/image/ocr/app/device/shell/tasks/barcode

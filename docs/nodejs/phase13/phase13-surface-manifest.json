@@ -178,7 +178,7 @@
         "P13-15",
         "P13-16"
       ],
-      "summary": "Auto.js Pro-style Node entry directives, $autojs global, Java interop, rhino.install(), importClass/importPackage, and JavaAdapter replacement decisions.",
+      "summary": "Auto.js Pro-style Node entry directives, $autojs global, Java interop, rhino.install(), importClass/importPackage, JavaAdapter, and defineClass replacement decisions.",
       "risk": "critical",
       "runtimeSurface": [
         "\"nodejs ui\" directive",
@@ -187,7 +187,10 @@
         "$autojs.java",
         "require(\"rhino\").install()",
         "require(\"rhino\").importClass()",
-        "require(\"rhino\").importPackage()"
+        "require(\"rhino\").importPackage()",
+        "require(\"rhino\").JavaAdapter()",
+        "java.defineClass()",
+        "$autojs.java.defineClass()"
       ],
       "evidence": [
         "docs/nodejs/reports/phase13/P13_11_PRO_ENTRY_DIRECTIVES.md",
@@ -221,7 +224,12 @@
         "tools/nodejs/phase13/verify-rhino-import-helpers-decision.js",
         ":app:verifyNodePhase13RhinoImportHelpersDecision",
         "build/reports/nodejs/phase13-rhino-import-helpers-decision.json",
-        "build/reports/nodejs/phase13-rhino-import-helpers-decision.md"
+        "build/reports/nodejs/phase13-rhino-import-helpers-decision.md",
+        "docs/nodejs/reports/phase13/P13_16_JAVA_ADAPTER_DECISION.md",
+        "tools/nodejs/phase13/verify-rhino-java-adapter-decision.js",
+        ":app:verifyNodePhase13RhinoJavaAdapterDecision",
+        "build/reports/nodejs/phase13-rhino-java-adapter-decision.json",
+        "build/reports/nodejs/phase13-rhino-java-adapter-decision.md"
       ],
       "rollback": "Reject Pro Java/Rhino interop flags and keep require(\"rhino\") in the default disabled JSON-only path."
     },

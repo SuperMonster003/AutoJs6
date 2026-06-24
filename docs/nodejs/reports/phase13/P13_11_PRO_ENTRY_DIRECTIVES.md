@@ -58,7 +58,9 @@ lifecycle path with the foreground-service long-running path.
 - This does not promote `require("ui")`; the existing provider remains a
   separate declarative bridge surface.
 - `$autojs`, Java interop, Rhino compatibility helpers, and
-  `importClass`/`importPackage` remain later P13-12 through P13-16 work.
+  `importClass`/`importPackage` and `JavaAdapter` now have P13-15/P13-16
+  stable-denial decisions, while actual Java listener/provider parity remains
+  later work.
 
 ## Verification Notes
 

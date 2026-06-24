@@ -106,7 +106,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, "phase13-rhino-install-java-proxy"),
     ], [
       "A real Pro profile runtime selector remains unimplemented.",
-      "JavaAdapter remains a P13-16 replacement decision.",
+      "JavaAdapter replacement remains P13-16 implementation work.",
       "Packaged APK policy remains fail-closed.",
     ]),
   ];

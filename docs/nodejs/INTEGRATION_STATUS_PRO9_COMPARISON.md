@@ -443,7 +443,7 @@ TypeScript 声明还覆盖：
 | npm | Android 终端内 `npm i --no-bin-links` | Android 运行时 npm install 尚未完成，当前偏 host/vendor |
 | Node builtins | 文档示例更接近普通 Node 使用 | 受 Safe Profile 约束，很多 builtin 是 wrapper 或 denial |
 | 文件系统 | 示例可读 Android 绝对路径 | scoped fs，默认拒绝越权路径 |
-| Java/Android | `$autojs.java`、`require("rhino").install()` | P13-12 已有只读 `$autojs` 和 gated `$autojs.java` facade；P13-13 增加实验 allowlist 下的 `java.lang.Math`、`java.util.UUID`、`android.graphics.Rect` handle 构造/实例调用/字段读取/释放；P13-14 增加显式 experimental `rhino.install` Java proxy，可安装 `Packages`、`java`、`android` 代理但仍只走 allowlist；P13-15 决定 `importClass`/`importPackage` 在 Node 中稳定拒绝并给出赋值式迁移；默认仍拒绝 Java 调用，线程 dispatch、`JavaAdapter` 和完整 Java/Rhino parity 仍未完成 |
+| Java/Android | `$autojs.java`、`require("rhino").install()` | P13-12 已有只读 `$autojs` 和 gated `$autojs.java` facade；P13-13 增加实验 allowlist 下的 `java.lang.Math`、`java.util.UUID`、`android.graphics.Rect` handle 构造/实例调用/字段读取/释放；P13-14 增加显式 experimental `rhino.install` Java proxy，可安装 `Packages`、`java`、`android` 代理但仍只走 allowlist；P13-15 决定 `importClass`/`importPackage` 在 Node 中稳定拒绝并给出赋值式迁移；P13-16 决定 `JavaAdapter` 稳定拒绝并预留 `java.defineClass()` / `$autojs.java.defineClass()` replacement；默认仍拒绝 Java 调用，线程 dispatch、实际 proxy-interface provider 和完整 Java/Rhino parity 仍未完成 |
 | Rhino 全局兼容 | 第一代 API 保留在 Rhino；Node 需 require 新模块 | Rhino 保留；Node 有显式 `autojs6:compat`，但不默认安装 globals |
 | 线程 | Node event loop，`worker_threads` 方向受限 | `worker_threads` 默认关闭，Rhino `threads` 不作为 Node 兼容目标 |
 | UI 线程 | `"nodejs ui"` / `"ui-thread"` | P13-11 已补 `NodeEntryDirective` metadata、descriptor/project config 透传和 gate；Activity lifecycle、Back/Recents、实际 UI-thread dispatch 仍未等价 |
@@ -525,6 +525,10 @@ const compat = require("autojs6:compat");
 - P13-15 已决策 `importClass` / `importPackage`：Node 中不模拟 Rhino 动态
   import 语义，显式 helper 返回 `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`，
   迁移时应从 P13-14 proxy target 赋值到本地变量。
+- P13-16 已决策 `JavaAdapter`：Node 中不模拟 Rhino adapter，显式
+  `rhino.JavaAdapter()` 返回 `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`；
+  `java.defineClass()` / `$autojs.java.defineClass()` 已预留但当前仍返回
+  `ERR_AUTOJS6_JAVA_METHOD_DENIED`。
 
 当前 `autojs6:compat` 已覆盖或部分覆盖：
 
@@ -824,6 +828,9 @@ blockers：
   `rhino.install({ experimental: true })` Java proxy POC。
 - P13-15 已决定 `importClass` / `importPackage` 不作为 Node 能力；显式
   helper 稳定返回 `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`。
+- P13-16 已决定 `JavaAdapter` 不作为 Node 能力；显式 helper 稳定返回
+  `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`，`defineClass` replacement
+  仍是稳定拒绝。
 - `java.*`、`android.*`、`Packages`、`JavaAdapter` 不是默认 Node 能力。
 - `"nodejs ui"` / `"ui-thread"` 已有 P13-11 metadata partial，但 Pro v9
   等价的 Activity lifecycle、Back/Recents 和实际 UI-thread dispatch 尚未完成。

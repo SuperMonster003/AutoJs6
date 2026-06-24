@@ -377,6 +377,18 @@ class NodeJavaInteropBridgeInstrumentationTest {
               } catch (error) {
                 systemLoadLibraryCode = codeOf(error);
               }
+              let defineClassCode = "";
+              try {
+                java.defineClass({ name: "org.autojs6.node.GeneratedListener", interfaces: ["java.lang.Runnable"] });
+              } catch (error) {
+                defineClassCode = codeOf(error);
+              }
+              let autojsDefineClassCode = "";
+              try {
+                autojsJava.defineClass({ name: "org.autojs6.node.GeneratedListener", interfaces: ["java.lang.Runnable"] });
+              } catch (error) {
+                autojsDefineClassCode = codeOf(error);
+              }
 
               console.log("java.resolve=" + require.resolve("java"));
               console.log("java.shadow=" + (java.shadow === true));
@@ -396,6 +408,8 @@ class NodeJavaInteropBridgeInstrumentationTest {
                 typeof java.getField,
                 typeof java.release,
                 typeof java.dispose,
+                typeof java.defineClass,
+                typeof autojsJava.defineClass,
                 typeof math.callStatic,
                 typeof math.new,
                 typeof math.create,
@@ -431,7 +445,9 @@ class NodeJavaInteropBridgeInstrumentationTest {
                 runtimeCode,
                 reflectionCode,
                 processBuilderCode,
-                systemLoadLibraryCode
+                systemLoadLibraryCode,
+                defineClassCode,
+                autojsDefineClassCode
               ].join("|"));
               console.log("java.pending=" + bridge.__test.pendingCount());
             })();
@@ -451,7 +467,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertTrue(
             result.stdout,
             result.stdout.contains(
-                "java.methods=function|function|function|function|function|function|function|function|function|function|function|function|function|function|function|function",
+                "java.methods=function|function|function|function|function|function|function|function|function|function|function|function|function|function|function|function|function|function",
             ),
         )
         assertTrue(
@@ -470,7 +486,7 @@ class NodeJavaInteropBridgeInstrumentationTest {
         assertTrue(
             result.stdout,
             result.stdout.contains(
-                "java.codes=ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_REFLECTION_DENIED|ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_CLASS_DENIED",
+                "java.codes=ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_REFLECTION_DENIED|ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_CLASS_DENIED|ERR_AUTOJS6_JAVA_METHOD_DENIED|ERR_AUTOJS6_JAVA_METHOD_DENIED",
             ),
         )
         assertTrue(result.stdout, result.stdout.contains("java.pending=0"))

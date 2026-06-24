@@ -139,6 +139,7 @@ async function smoke(): Promise<void> {
   const rhinoInstallResult: rhino.InstallResult = rhino.install({ experimental: true, target: {} });
   const rhinoImportClassDenied: () => never = rhino.importClass;
   const rhinoImportPackageDenied: () => never = rhino.importPackage;
+  const rhinoJavaAdapterDenied: (...args: readonly unknown[]) => never = rhino.JavaAdapter;
   await rhinoCompat.back({ timeoutMs: 1000 });
   await rhinoCompat.home({ timeoutMs: 1000 });
 
@@ -389,6 +390,8 @@ async function smoke(): Promise<void> {
   const autojsJavaWidth: Promise<unknown> = autojsJavaRect.then((rect) => rect.call("width", [], { timeoutMs: 1000 }));
   const autojsJavaField: Promise<unknown> = autojsJavaRect.then((rect) => $autojs.java.getField(rect, "left", { timeoutMs: 1000 }));
   const autojsJavaRelease: Promise<boolean> = autojsJavaRect.then((rect) => java.release(rect, { timeoutMs: 1000 }));
+  const javaDefineClassDenied: (descriptor?: unknown) => never = java.defineClass;
+  const autojsJavaDefineClassDenied: (descriptor?: unknown) => never = $autojs.java.defineClass;
   const autojsLoadDex: (dexFile: string) => never = $autojs.java.loadDex;
 
   void launched;
@@ -438,6 +441,7 @@ async function smoke(): Promise<void> {
   void rhinoInstallResult;
   void rhinoImportClassDenied;
   void rhinoImportPackageDenied;
+  void rhinoJavaAdapterDenied;
   void clickedText;
   void point;
   void matches;
@@ -525,6 +529,8 @@ async function smoke(): Promise<void> {
   void autojsJavaWidth;
   void autojsJavaField;
   void autojsJavaRelease;
+  void javaDefineClassDenied;
+  void autojsJavaDefineClassDenied;
   void autojsLoadDex;
 }
 

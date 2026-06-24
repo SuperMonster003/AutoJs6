@@ -103,6 +103,14 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 - How to fix: use the current Node bridge module directly, or wait for the matching Phase 11 compat facade task.
 - Related docs: [design/RHINO_COMPAT_LOADER.md](design/RHINO_COMPAT_LOADER.md), [RHINO_AUGMENT_COMPATIBILITY_MATRIX.md](RHINO_AUGMENT_COMPATIBILITY_MATRIX.md).
 
+## ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED
+
+- Meaning: Rhino `JavaAdapter` is not available inside the Node runtime.
+- Common cause: a migrated script expects `new JavaAdapter(...)` to create Java listener or interface implementations from V8.
+- Example: `require("rhino").JavaAdapter(android.view.View.OnClickListener, handlers)`.
+- How to fix: keep the script on the Rhino engine for now, or wait for the P13-16 bounded `java.defineClass()` / proxy-interface provider.
+- Related docs: [design/RHINO_SHIM.md](design/RHINO_SHIM.md), [design/JAVA_INTEROP.md](design/JAVA_INTEROP.md).
+
 ## ERR_AUTOJS6_BUILTIN_DISABLED
 
 - Meaning: A Node builtin is disabled by the Safe Node Profile.

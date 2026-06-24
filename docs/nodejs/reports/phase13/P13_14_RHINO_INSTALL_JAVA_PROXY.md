@@ -75,7 +75,8 @@ debug configuration.
 
 - Add a real Pro profile runtime selector instead of build/test-only
   experimental wiring.
-- Decide P13-16 `JavaAdapter` replacement behavior.
+- Implement the actual P13-16 `JavaAdapter` / `defineClass` replacement
+  provider.
 - Add packaged APK metadata, rollback, and security evidence before any
   profile promotion.
 

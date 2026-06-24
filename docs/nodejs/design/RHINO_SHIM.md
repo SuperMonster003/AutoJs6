@@ -16,6 +16,10 @@ default-disabled Phase 12 POC gate in
 `docs/nodejs/reports/phase12/RHINO_JSON_ONLY_SHIM_POC_GATE.md`, P12-24 reserves
 the default denial path, P12-25 implements the explicit adapter POC, and P12-26
 records the packaged metadata gate as fail-closed.
+P13-16 adds an explicit `rhino.JavaAdapter()` denial with
+`ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED` and reserves
+`java.defineClass()` / `$autojs.java.defineClass()` as the future replacement
+name, but does not implement proxy-interface callbacks yet.
 
 ## Goal
 
@@ -101,7 +105,7 @@ The detailed request/response shape, JSON-safe value definition, timeout and can
 | Old global AutoJs APIs | Unsupported by default | Node code should use explicit bridge modules such as `toast`, `app`, `image`, and `accessibility`. |
 | `importClass` / `importPackage` | Stable unsupported helpers in Node | P13-15 keeps global helpers absent and exposes only `rhino.importClass()` / `rhino.importPackage()` denials with `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; assignment from the P13-14 proxy target is the migration path. |
 | `Packages`, `java.*`, `android.*` | Explicit Java proxy POC only | P13-14 may install JavaScript proxies for allowlisted Java bridge calls; raw object graphs and class-loader surfaces remain denied. |
-| `JavaAdapter` | Unsupported | It creates cross-runtime proxy objects with complex lifetime and threading semantics. |
+| `JavaAdapter` | Stable unsupported helper in Node | P13-16 exposes `rhino.JavaAdapter()` only as `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`; the future replacement must be a bounded `defineClass` or proxy-interface provider, not raw Rhino adapter parity. |
 | Running a legacy Rhino script from Node | Future candidate | Must be explicit, serialized, timeout-bounded, and owned by the script manager. |
 | `rhino.run({ experimental: true, source, timeoutMs, args })` | P12-25 provider POC | JSON-only request/response adapter; no V8 global installation; default runtime rejects calls without `experimental: true` with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`. |
 
@@ -173,6 +177,21 @@ const MathClass = scope.Packages.java.lang.Math;
 
 This keeps the imported names local to the current module and preserves the
 P13-13 Java allowlist checks for every constructor or method call.
+
+## `JavaAdapter` / `defineClass` Policy
+
+P13-16 decides not to emulate Rhino `JavaAdapter` inside V8. `rhino.JavaAdapter()`
+is present only so migrated scripts receive
+`ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED` instead of an accidental missing
+property or npm shadow. It is never installed on `globalThis`, even after
+`rhino.install({ experimental: true })`.
+
+The reserved migration direction is `java.defineClass()` /
+`$autojs.java.defineClass()` or a proxy-interface API owned by the Java bridge
+provider. In the current phase those methods throw `ERR_AUTOJS6_JAVA_METHOD_DENIED`
+and do not dispatch to the bridge. A future implementation must prove bounded
+callback lifecycle, UI/main-thread dispatch where needed, no raw Java callback
+handle leakage, no unbounded inheritance, and no class-loader or dex/jar loading.
 
 ## Legacy Global Policy
 

@@ -96,9 +96,11 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                   assert.strictEqual(rhino.errorCodes.shimDisabled, "ERR_AUTOJS6_RHINO_SHIM_DISABLED");
                   assert.strictEqual(rhino.errorCodes.installUnsupported, "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED");
                   assert.strictEqual(rhino.errorCodes.importUnsupported, "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED");
+                  assert.strictEqual(rhino.errorCodes.javaAdapterUnsupported, "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED");
                   assert.strictEqual(profile.errorCodes.rhinoShimDisabled, "ERR_AUTOJS6_RHINO_SHIM_DISABLED");
                   assert.strictEqual(profile.errorCodes.rhinoInstallUnsupported, "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED");
                   assert.strictEqual(profile.errorCodes.rhinoImportUnsupported, "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED");
+                  assert.strictEqual(profile.errorCodes.rhinoJavaAdapterUnsupported, "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED");
                   assert.strictEqual(globalThis.rhino, undefined);
                   assert.strictEqual(globalThis.importClass, undefined);
                   assert.strictEqual(globalThis.importPackage, undefined);
@@ -127,6 +129,11 @@ class NodeRhinoShimDesignGateInstrumentationTest {
                     "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED"
                   );
                   expectSyncDenied(
+                    "JavaAdapter",
+                    function() { rhino.JavaAdapter(function() {}, {}); },
+                    "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED"
+                  );
+                  expectSyncDenied(
                     "nodePrefix",
                     function() { require("node:rhino"); },
                     "ERR_AUTOJS6_BUILTIN_DISABLED"
@@ -148,6 +155,7 @@ class NodeRhinoShimDesignGateInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("rhino.install=ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED/ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED/rhino/install/unsupported"))
             assertTrue(result.stdout, result.stdout.contains("rhino.importClass=ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED/ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED/rhino/importClass/unsupported"))
             assertTrue(result.stdout, result.stdout.contains("rhino.importPackage=ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED/ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED/rhino/importPackage/unsupported"))
+            assertTrue(result.stdout, result.stdout.contains("rhino.JavaAdapter=ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED/ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED/rhino/JavaAdapter/unsupported"))
             assertTrue(result.stdout, result.stdout.contains("rhino.nodePrefix=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
             assertTrue(result.stdout, result.stdout.contains("rhino.ready=true"))
         } finally {

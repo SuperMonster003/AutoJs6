@@ -8869,6 +8869,7 @@ std::string buildEmbeddedScriptExecutionSource(
         rhinoShimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
         rhinoInstallUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
         rhinoImportUnsupported: "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED",
+        rhinoJavaAdapterUnsupported: "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED",
         rhinoInvalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST",
         rhinoExecutionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR",
         rhinoExecutionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT",
@@ -16121,6 +16122,7 @@ std::string buildEmbeddedScriptExecutionSource(
     shimDisabled: "ERR_AUTOJS6_RHINO_SHIM_DISABLED",
     installUnsupported: "ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED",
     importUnsupported: "ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED",
+    javaAdapterUnsupported: "ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED",
     invalidRequest: "ERR_AUTOJS6_RHINO_INVALID_REQUEST",
     executionError: "ERR_AUTOJS6_RHINO_EXECUTION_ERROR",
     executionTimeout: "ERR_AUTOJS6_RHINO_EXECUTION_TIMEOUT",
@@ -16163,6 +16165,14 @@ std::string buildEmbeddedScriptExecutionSource(
       "AutoJs6 Node does not support Rhino " + api + "; use explicit assignment from rhino.install({ experimental: true, target }) Java proxies instead.",
       __autojs6_rhino_shim_error_codes.importUnsupported,
       api,
+      "unsupported"
+    );
+  }
+  function __autojs6_rhino_java_adapter_unsupported_error() {
+    return __autojs6_rhino_shim_error(
+      "AutoJs6 Node does not support Rhino JavaAdapter; P13-16 reserves a future $java.defineClass or proxy-interface replacement with bounded lifecycle and callback cleanup.",
+      __autojs6_rhino_shim_error_codes.javaAdapterUnsupported,
+      "JavaAdapter",
       "unsupported"
     );
   }
@@ -16492,6 +16502,9 @@ std::string buildEmbeddedScriptExecutionSource(
     function importPackage() {
       throw __autojs6_rhino_import_unsupported_error("importPackage");
     }
+    function JavaAdapter() {
+      throw __autojs6_rhino_java_adapter_unsupported_error();
+    }
     __autojs6_limited_rhino_cache = Object.freeze({
       name: "rhino",
       version: 1,
@@ -16506,7 +16519,8 @@ std::string buildEmbeddedScriptExecutionSource(
       run,
       install,
       importClass,
-      importPackage
+      importPackage,
+      JavaAdapter
     });
     return __autojs6_limited_rhino_cache;
   }
@@ -18452,6 +18466,15 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     );
   }
+  function __autojs6_java_define_class_unsupported() {
+    __autojs6_java_check_enabled();
+    throw __autojs6_java_interop_error(
+      "AutoJs6 Java defineClass/proxy-interface replacement is design-gated in P13-16; dynamic bytecode, class loaders, unbounded inheritance, and raw callback handles remain denied.",
+      "ERR_AUTOJS6_JAVA_METHOD_DENIED",
+      "",
+      "defineClass"
+    );
+  }
   function __autojs6_limited_java() {
     if (!__autojs6_java_interop_experimental_enabled) {
       throw __autojs6_java_interop_disabled_error();
@@ -18470,6 +18493,7 @@ std::string buildEmbeddedScriptExecutionSource(
       getField: __autojs6_java_get_field,
       release: __autojs6_java_release,
       dispose: __autojs6_java_release,
+      defineClass: __autojs6_java_define_class_unsupported,
       policy: __autojs6_java_policy_snapshot()
     });
     return __autojs6_limited_java_cache;
@@ -18566,6 +18590,7 @@ std::string buildEmbeddedScriptExecutionSource(
       getField: __autojs6_autojs_java_get_field,
       release: __autojs6_autojs_java_release,
       dispose: __autojs6_autojs_java_release,
+      defineClass: __autojs6_java_define_class_unsupported,
       loadDex: __autojs6_autojs_java_stable_rejection("loadDex", "dynamic dex loading remains blocked."),
       loadJar: __autojs6_autojs_java_stable_rejection("loadJar", "dynamic jar loading remains blocked."),
       setThreadMode: __autojs6_autojs_java_stable_rejection("setThreadMode", "Java object thread dispatch remains blocked."),

@@ -419,10 +419,10 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-rhino-install-java-proxy.js`.
     - Gradle gate: `:app:verifyNodePhase13RhinoInstallJavaProxy`.
     - Report: `docs/nodejs/reports/phase13/P13_14_RHINO_INSTALL_JAVA_PROXY.md`.
-  - Remaining: real Pro profile selector, packaged policy, and P13-16
-    `JavaAdapter` replacement still block full P13-14 closure.
+  - Remaining: real Pro profile selector, packaged policy, and actual P13-16
+    `JavaAdapter` replacement implementation still block full P13-14 closure.
 
-- [ ] P13-15: 决策并实现 `importClass` / `importPackage` compatibility。
+- [x] P13-15: 决策并实现 `importClass` / `importPackage` compatibility。
   - 范围：评估是否在 Pro profile 中提供 Rhino 迁移 helper。
   - 验收：
     - 如果实现，必须只绑定到显式 scope，不默认污染所有模块。
@@ -446,6 +446,20 @@ P13 task 本身使用以下执行状态：
     - 优先设计 `$java.defineClass` 或 proxy-interface API。
     - 禁止无界动态继承、跨线程泄漏和 raw callback handle 泄漏。
     - 至少覆盖常见 listener/interface 用例。
+  - 2026-06-24 decision landing:
+    - `require("rhino").JavaAdapter()` is an explicit stable denial with
+      `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`; no global `JavaAdapter` is
+      installed.
+    - `java.defineClass()` and `$autojs.java.defineClass()` are reserved as the
+      migration names but currently throw `ERR_AUTOJS6_JAVA_METHOD_DENIED`
+      without bridge dispatch.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-rhino-java-adapter-decision.js`.
+    - Gradle gate: `:app:verifyNodePhase13RhinoJavaAdapterDecision`.
+    - Report: `docs/nodejs/reports/phase13/P13_16_JAVA_ADAPTER_DECISION.md`.
+  - Remaining: actual proxy-interface / `defineClass` provider, listener
+    examples, callback cleanup, thread dispatch, packaged metadata, and leak
+    diagnostics still block full P13-16 closure.
 
 - [ ] P13-17: 推进 live UI provider 到 opt-in promoted。
   - 范围：基于 P12 `ui.compat` provider POC，补齐 live packaged UI。

@@ -118,6 +118,14 @@ and `.importPackage()` are explicit module helpers that throw
 local names from a `rhino.install({ experimental: true, target })` Java proxy
 scope.
 
+P13-16 records the `JavaAdapter` / `$java.defineClass` replacement decision.
+`require("rhino").JavaAdapter()` is an explicit stable denial with
+`ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`; no global `JavaAdapter` is
+installed. `java.defineClass()` and `$autojs.java.defineClass()` are reserved
+replacement names but currently throw `ERR_AUTOJS6_JAVA_METHOD_DENIED` without
+bridge dispatch until a bounded proxy-interface provider, callback lifecycle,
+thread dispatch, and packaged policy are proven.
+
 ## Supported Entry Points
 
 - `"nodejs";` directive

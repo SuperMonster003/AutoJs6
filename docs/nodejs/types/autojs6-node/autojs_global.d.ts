@@ -86,6 +86,7 @@ declare namespace AutoJs6Node {
     getField(target: string | AutoJsJavaObjectHandle, fieldName: string, options?: BridgeCallOptions): Promise<unknown>;
     release(target: string | AutoJsJavaObjectHandle, options?: BridgeCallOptions): Promise<boolean>;
     dispose(target: string | AutoJsJavaObjectHandle, options?: BridgeCallOptions): Promise<boolean>;
+    defineClass(descriptor?: unknown, options?: BridgeCallOptions): never;
   }
 
   export interface AutoJsJavaFacade extends AutoJsJavaModule {

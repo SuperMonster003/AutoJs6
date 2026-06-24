@@ -47,7 +47,8 @@ This task does not promote full Auto.js Pro Java parity. `findClass`,
 constructors, static calls, instance calls, fields, object lifetime, thread
 dispatch, reflection denial corpus, and Java callback wrapping continue under
 P13-13. `require("rhino").install()`, `importClass`, `importPackage`, and
-`JavaAdapter` remain P13-14 through P13-16 work.
+`JavaAdapter` now has the P13-16 stable denial / `defineClass` reservation, but
+the actual proxy-interface provider remains later work.
 
 The `pro.entry_java_rhino` surface therefore remains `debug_poc`: `$autojs`
 exists as a safe diagnostic and gated entry point, while raw Java/Android and
