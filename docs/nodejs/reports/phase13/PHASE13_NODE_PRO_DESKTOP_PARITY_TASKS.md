@@ -1453,6 +1453,9 @@ P13 task 本身使用以下执行状态：
       基线和 desktop differential 证据，同时保持 raw desktop parity、
       raw native handles、unrestricted network、broad terminal、
       `process.getBuiltinModule` 和 `zlib/promises` 未提升。
+    - `TextDecoder` 在 no-ICU runtime 下补充 `utf-8` / `utf-16le` /
+      `utf-16be` 的 `fatal: true` Unicode fallback，用于 pure-JS npm
+      兼容；不声明 full ICU encoding coverage。
     - 已新增 `NodeStdlibPhase13DecisionInstrumentationTest`，覆盖
       `crypto`、`stream` / `stream/promises` / `stream/consumers` /
       `stream/web`、`zlib`、`buffer`、`url`、`os`、`readline` /

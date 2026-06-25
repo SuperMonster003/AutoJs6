@@ -19,6 +19,9 @@ that keep broader Desktop behavior future work.
 - CJS aliases use bare and `node:` prefixes; ESM imports remain partial.
 - Builtin precedence is preserved, while `process.getBuiltinModule` remains
   denied.
+- `globalThis.TextDecoder` and `require("util").TextDecoder` include a no-ICU
+  Unicode fallback for `fatal: true` with `utf-8`, `utf-16le`, and `utf-16be`;
+  this is npm compatibility support, not full ICU coverage.
 - Android differences are documented as stable for `os.setPriority`, real
   network interfaces, raw TTY mode, `process.getBuiltinModule`,
   `zlib/promises`, and `node:test/reporters`.

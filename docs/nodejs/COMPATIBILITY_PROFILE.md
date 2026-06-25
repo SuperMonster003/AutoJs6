@@ -565,6 +565,10 @@ are ignored, and `process.getBuiltinModule()` remains disabled so scripts cannot
 `events` wrapper exposes `EventEmitter` and helper functions such as `once()`/`on()`, but does not expose
 `EventEmitterAsyncResource` or `EventTarget`; Web-style `EventTarget` remains a global. `diagnostics_channel` exposes a
 bounded publish/subscribe/tracing surface without raw subscriber internals.
+On no-ICU embedded Node builds, `globalThis.TextDecoder` and `require("util").TextDecoder`
+include an AutoJs6 Unicode fallback for `fatal: true` with `utf-8`,
+`utf-16le`, and `utf-16be`. This keeps pure-JS npm packages from failing at
+constructor time while still not claiming full ICU encoding coverage.
 S7-32 adds execution-scoped runtime telemetry channels for bridge RPC and
 controlled fetch:
 

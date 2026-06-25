@@ -5781,6 +5781,236 @@ std::string buildEmbeddedScriptExecutionSource(
       } catch (_) {}
     }
   }
+  function __autojs6_text_decoder_no_icu_fatal_error(error) {
+    return !!error && (
+      error.code === "ERR_NO_ICU" ||
+      String(error.message || "").indexOf("without ICU") >= 0
+    );
+  }
+  function __autojs6_text_decoder_encoding(label) {
+    const value = label === undefined || label === null ? "utf-8" : String(label).trim().toLowerCase();
+    if (value === "utf8" || value === "utf-8" || value === "unicode-1-1-utf-8") return "utf-8";
+    if (value === "utf-16le" || value === "utf-16") return "utf-16le";
+    if (value === "utf-16be") return "utf-16be";
+    return "";
+  }
+  function __autojs6_text_decoder_input(value) {
+    if (value === undefined) return new Uint8Array();
+    if (value instanceof Uint8Array) return value;
+    if (typeof ArrayBuffer === "function" && value instanceof ArrayBuffer) {
+      return new Uint8Array(value);
+    }
+    if (typeof ArrayBuffer === "function" && ArrayBuffer.isView && ArrayBuffer.isView(value)) {
+      return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+    }
+    throw new TypeError("TextDecoder.decode input must be an ArrayBuffer or ArrayBufferView.");
+  }
+  function __autojs6_text_decoder_type_error(message) {
+    const error = new TypeError(message);
+    try {
+      Object.defineProperty(error, "code", {
+        value: "ERR_ENCODING_INVALID_ENCODED_DATA",
+        configurable: true,
+        enumerable: false
+      });
+    } catch (_) {}
+    return error;
+  }
+  function __autojs6_text_decoder_from_code_units(units, fatal) {
+    const chars = [];
+    for (let index = 0; index < units.length; index += 1) {
+      const code = units[index];
+      if (code >= 0xD800 && code <= 0xDBFF) {
+        const next = units[index + 1];
+        if (next >= 0xDC00 && next <= 0xDFFF) {
+          chars.push(String.fromCharCode(code, next));
+          index += 1;
+        } else if (fatal) {
+          throw __autojs6_text_decoder_type_error("The encoded data was not valid for encoding utf-16.");
+        } else {
+          chars.push("\uFFFD");
+        }
+      } else if (code >= 0xDC00 && code <= 0xDFFF) {
+        if (fatal) {
+          throw __autojs6_text_decoder_type_error("The encoded data was not valid for encoding utf-16.");
+        }
+        chars.push("\uFFFD");
+      } else {
+        chars.push(String.fromCharCode(code));
+      }
+    }
+    return chars.join("");
+  }
+  function __autojs6_text_decoder_decode_utf16(bytes, littleEndian, fatal, ignoreBOM) {
+    const units = [];
+    let length = bytes.byteLength;
+    if (length % 2 !== 0) {
+      if (fatal) {
+        throw __autojs6_text_decoder_type_error("The encoded data was not valid for encoding utf-16.");
+      }
+      length -= 1;
+    }
+    for (let index = 0; index < length; index += 2) {
+      const code = littleEndian
+        ? bytes[index] | (bytes[index + 1] << 8)
+        : (bytes[index] << 8) | bytes[index + 1];
+      units.push(code);
+    }
+    let text = __autojs6_text_decoder_from_code_units(units, fatal);
+    if (bytes.byteLength % 2 !== 0 && !fatal) {
+      text += "\uFFFD";
+    }
+    return !ignoreBOM && text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+  }
+  function __autojs6_text_decoder_decode_utf8(bytes, fatal, ignoreBOM) {
+    const chars = [];
+    let index = 0;
+    function fail() {
+      if (fatal) {
+        throw __autojs6_text_decoder_type_error("The encoded data was not valid for encoding utf-8.");
+      }
+      chars.push("\uFFFD");
+      index += 1;
+      return true;
+    }
+    while (index < bytes.length) {
+      const first = bytes[index];
+      if (first < 0x80) {
+        chars.push(String.fromCharCode(first));
+        index += 1;
+      } else if (first >= 0xC2 && first <= 0xDF) {
+        if (index + 1 >= bytes.length) {
+          fail();
+          continue;
+        }
+        const second = bytes[index + 1];
+        if ((second & 0xC0) !== 0x80) {
+          fail();
+          continue;
+        }
+        chars.push(String.fromCharCode(((first & 0x1F) << 6) | (second & 0x3F)));
+        index += 2;
+      } else if (first >= 0xE0 && first <= 0xEF) {
+        if (index + 2 >= bytes.length) {
+          fail();
+          continue;
+        }
+        const second = bytes[index + 1];
+        const third = bytes[index + 2];
+        const validSecond = first === 0xE0
+          ? second >= 0xA0 && second <= 0xBF
+          : (first === 0xED ? second >= 0x80 && second <= 0x9F : (second & 0xC0) === 0x80);
+        if (!validSecond || (third & 0xC0) !== 0x80) {
+          fail();
+          continue;
+        }
+        chars.push(String.fromCharCode(((first & 0x0F) << 12) | ((second & 0x3F) << 6) | (third & 0x3F)));
+        index += 3;
+      } else if (first >= 0xF0 && first <= 0xF4) {
+        if (index + 3 >= bytes.length) {
+          fail();
+          continue;
+        }
+        const second = bytes[index + 1];
+        const third = bytes[index + 2];
+        const fourth = bytes[index + 3];
+        const validSecond = first === 0xF0
+          ? second >= 0x90 && second <= 0xBF
+          : (first === 0xF4 ? second >= 0x80 && second <= 0x8F : (second & 0xC0) === 0x80);
+        if (!validSecond || (third & 0xC0) !== 0x80 || (fourth & 0xC0) !== 0x80) {
+          fail();
+          continue;
+        }
+        let codePoint = ((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((third & 0x3F) << 6) | (fourth & 0x3F);
+        codePoint -= 0x10000;
+        chars.push(String.fromCharCode(0xD800 + (codePoint >> 10), 0xDC00 + (codePoint & 0x3FF)));
+        index += 4;
+      } else {
+        fail();
+      }
+    }
+    let text = chars.join("");
+    return !ignoreBOM && text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+  }
+  function __autojs6_text_decoder_compat_constructor(BaseTextDecoder) {
+    if (typeof BaseTextDecoder !== "function") return BaseTextDecoder;
+    if (BaseTextDecoder.__autojs6NoIcuFatalCompat) return BaseTextDecoder;
+    if (BaseTextDecoder.__autojs6NoIcuFatalCompatCtor) return BaseTextDecoder.__autojs6NoIcuFatalCompatCtor;
+    let needsCompat = false;
+    try {
+      new BaseTextDecoder("utf-8", { fatal: true });
+      new BaseTextDecoder("utf-16le", { fatal: true });
+    } catch (error) {
+      if (__autojs6_text_decoder_no_icu_fatal_error(error)) {
+        needsCompat = true;
+      } else {
+        throw error;
+      }
+    }
+    if (!needsCompat) return BaseTextDecoder;
+    function AutoJs6TextDecoder(label, options) {
+      const opts = options === undefined || options === null ? {} : Object(options);
+      const fatal = !!opts.fatal;
+      const ignoreBOM = !!opts.ignoreBOM;
+      const encoding = __autojs6_text_decoder_encoding(label);
+      this.__autojs6Encoding = encoding;
+      this.__autojs6Fatal = fatal;
+      this.__autojs6IgnoreBOM = ignoreBOM;
+      this.__autojs6Native = null;
+      if (encoding && (fatal || encoding === "utf-16le" || encoding === "utf-16be")) {
+        return;
+      }
+      try {
+        this.__autojs6Native = new BaseTextDecoder(label, opts);
+        this.__autojs6Encoding = this.__autojs6Native.encoding || encoding || "utf-8";
+      } catch (error) {
+        if (!fatal || !__autojs6_text_decoder_no_icu_fatal_error(error)) {
+          throw error;
+        }
+        this.__autojs6Native = new BaseTextDecoder(label, { ignoreBOM });
+        this.__autojs6Encoding = this.__autojs6Native.encoding || encoding || "utf-8";
+      }
+    }
+    Object.defineProperties(AutoJs6TextDecoder.prototype, {
+      encoding: {
+        get: function() {
+          return this.__autojs6Native ? this.__autojs6Native.encoding : this.__autojs6Encoding;
+        }
+      },
+      fatal: {
+        get: function() {
+          return this.__autojs6Native ? this.__autojs6Native.fatal : this.__autojs6Fatal;
+        }
+      },
+      ignoreBOM: {
+        get: function() {
+          return this.__autojs6Native ? this.__autojs6Native.ignoreBOM : this.__autojs6IgnoreBOM;
+        }
+      }
+    });
+    AutoJs6TextDecoder.prototype.decode = function(input) {
+      if (this.__autojs6Native) {
+        return this.__autojs6Native.decode.apply(this.__autojs6Native, arguments);
+      }
+      const bytes = __autojs6_text_decoder_input(input);
+      if (this.__autojs6Encoding === "utf-16le") {
+        return __autojs6_text_decoder_decode_utf16(bytes, true, this.__autojs6Fatal, this.__autojs6IgnoreBOM);
+      }
+      if (this.__autojs6Encoding === "utf-16be") {
+        return __autojs6_text_decoder_decode_utf16(bytes, false, this.__autojs6Fatal, this.__autojs6IgnoreBOM);
+      }
+      if (this.__autojs6Encoding === "utf-8") {
+        return __autojs6_text_decoder_decode_utf8(bytes, this.__autojs6Fatal, this.__autojs6IgnoreBOM);
+      }
+      throw new RangeError("The encoding label provided is unsupported.");
+    };
+    try {
+      Object.defineProperty(AutoJs6TextDecoder, "name", { value: "TextDecoder" });
+      Object.defineProperty(AutoJs6TextDecoder, "__autojs6NoIcuFatalCompat", { value: true });
+      Object.defineProperty(BaseTextDecoder, "__autojs6NoIcuFatalCompatCtor", { value: AutoJs6TextDecoder });
+    } catch (_) {}
+    return AutoJs6TextDecoder;
+  }
   function __autojs6_define_process_property(name, value, writable) {
     if (typeof process !== "object" || !process) return false;
     try {
@@ -7828,8 +8058,12 @@ std::string buildEmbeddedScriptExecutionSource(
     if (typeof TextEncoder !== "function" && utilModule && typeof utilModule.TextEncoder === "function") {
       __autojs6_define_global("TextEncoder", utilModule.TextEncoder);
     }
-    if (typeof TextDecoder !== "function" && utilModule && typeof utilModule.TextDecoder === "function") {
-      __autojs6_define_global("TextDecoder", utilModule.TextDecoder);
+    const TextDecoderBase = typeof TextDecoder === "function"
+      ? TextDecoder
+      : (utilModule && typeof utilModule.TextDecoder === "function" ? utilModule.TextDecoder : null);
+    const TextDecoderCompat = __autojs6_text_decoder_compat_constructor(TextDecoderBase);
+    if (typeof TextDecoderCompat === "function" && TextDecoder !== TextDecoderCompat) {
+      __autojs6_define_global("TextDecoder", TextDecoderCompat);
     }
     const webBufferModule = __autojs6_builtin_module("buffer");
     if (
@@ -35753,7 +35987,7 @@ std::string buildEmbeddedScriptExecutionSource(
       ? nodeUtil.TextEncoder
       : (typeof TextEncoder === "function" ? TextEncoder : null);
     const TextDecoderCtor = nodeUtil && typeof nodeUtil.TextDecoder === "function"
-      ? nodeUtil.TextDecoder
+      ? __autojs6_text_decoder_compat_constructor(nodeUtil.TextDecoder)
       : (typeof TextDecoder === "function" ? TextDecoder : null);
     const getSystemErrorName = nodeUtil && typeof nodeUtil.getSystemErrorName === "function"
       ? nodeUtil.getSystemErrorName.bind(nodeUtil)

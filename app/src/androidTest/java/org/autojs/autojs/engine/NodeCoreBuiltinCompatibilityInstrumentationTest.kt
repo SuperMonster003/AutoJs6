@@ -222,6 +222,46 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
     }
 
     @Test
+    fun textDecoderFatalOptionWorksOnNoIcuRuntimeForUnicodeCodecs() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("TextDecoder no-ICU fatal compatibility")
+        val workDir = freshWorkDir("node-text-decoder-no-icu")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                const util = require("util");
+                function throwsFatal(action) {
+                  try {
+                    action();
+                    return false;
+                  } catch (error) {
+                    return error instanceof TypeError &&
+                      (error.code === "ERR_ENCODING_INVALID_ENCODED_DATA" || error.code === "ERR_NO_ICU" || /encoded data|utf/i.test(String(error.message)));
+                  }
+                }
+
+                const le = new TextDecoder("utf-16le", { fatal: true, ignoreBOM: true });
+                const be = new util.TextDecoder("utf-16be", { fatal: true, ignoreBOM: true });
+                const utf8 = new TextDecoder("utf-8", { fatal: true });
+                const textOk =
+                  le.decode(Uint8Array.of(0x41, 0x00, 0x42, 0x00)) === "AB" &&
+                  be.decode(Uint8Array.of(0x00, 0x41, 0x00, 0x42)) === "AB" &&
+                  utf8.decode(Uint8Array.of(0xE2, 0x82, 0xAC)) === "\u20AC" &&
+                  new TextDecoder().decode(new TextEncoder().encode("roundtrip")) === "roundtrip";
+                const fatalOk =
+                  throwsFatal(() => le.decode(Uint8Array.of(0x00, 0xD8))) &&
+                  throwsFatal(() => utf8.decode(Uint8Array.of(0xC0, 0xAF)));
+                console.log("textdecoder.noicu.fatal=" + textOk + "/" + fatalOk + "/" + le.encoding + "/" + be.encoding + "/" + utf8.fatal);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.js").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("TextDecoder no-ICU fatal compatibility", result)
+        assertTrue(result.stdout.contains("textdecoder.noicu.fatal=true/true/utf-16le/utf-16be/true"))
+    }
+
+    @Test
     fun asyncLocalStoragePropagatesAcrossSafeAsyncBoundariesAndCleansUp() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("async_hooks context propagation")
         val workDir = freshWorkDir("node-async-context")
