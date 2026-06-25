@@ -189,6 +189,15 @@ function scenarioStatus(files) {
   const crashEvidenceStoreTest = files.crashEvidenceStoreTest.text;
   const androidRuntimePolicyTest = files.androidRuntimePolicyTest.text;
   const embeddedMvpTest = files.embeddedMvpTest.text;
+  const nativeFatalRunningMarkerReady = crashEvidenceStoreTest.includes("collectsRunningMarkerAfterSimulatedNativeFatalProcessDeath") &&
+    crashEvidenceStoreTest.includes("native_fatal_running_marker") &&
+    crashEvidenceStoreTest.includes("STATE_COLLECTED_AFTER_RESTART");
+  const packagedMarkerContractReady = crashEvidenceStoreTest.includes("markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke") &&
+    crashEvidenceStoreTest.includes("LAUNCH_SURFACE_PACKAGED_LONG_RUNNING") &&
+    crashEvidenceStoreTest.includes("packaged_apk_crash_smoke_contract");
+  const signalSafeBoundaryReady = files.crashStore.text.includes("safeSignalMarker") &&
+    crashEvidenceStoreTest.includes("markerRecordsSignalSafeNativeMarkerBoundary") &&
+    crashEvidenceStoreTest.includes("native signal-safe writer remains separate");
   const bridgeProviderCrashReady = embeddedBridge.includes("PROBE_LEVEL_PLUGIN_CRASH") &&
     embeddedBridge.includes("plugin_crash.has_crash_event") &&
     crashEvidenceStoreTest.includes("markerRecordsBridgeProviderCrashBundleFields") &&
@@ -198,13 +207,15 @@ function scenarioStatus(files) {
     scenario(
       "native_crash",
       nativeProcessService.includes("NodeCrashEvidenceStore.begin(") &&
-        embeddedService.includes("NodeCrashEvidenceStore.begin("),
+        embeddedService.includes("NodeCrashEvidenceStore.begin(") &&
+        nativeFatalRunningMarkerReady,
       [
         files.nativeProcessService.relative,
         files.embeddedService.relative,
         files.crashStore.relative,
+        files.crashEvidenceStoreTest.relative,
       ],
-      ["focused injected native fatal crash instrumentation evidence is still required"],
+      ["real fatal native chaos injection evidence is still required"],
     ),
     scenario(
       "bridge_provider_crash",
@@ -231,13 +242,18 @@ function scenarioStatus(files) {
       [files.embeddedService.relative, files.nativeProcessService.relative],
       [],
     ),
-    {
-      id: "packaged_apk",
-      status: "skipped",
-      evidence: [],
-      skipReason: "Packaged APK crash evidence smoke is not implemented yet; P13-07/P13-45 must route packaged runtime markers into the same store.",
-      remaining: [],
-    },
+    scenario(
+      "packaged_apk",
+      packagedMarkerContractReady,
+      [files.crashEvidenceStoreTest.relative],
+      ["real packaged APK crash evidence smoke is still required"],
+    ),
+    scenario(
+      "signal_safe_marker",
+      signalSafeBoundaryReady,
+      [files.crashStore.relative, files.crashEvidenceStoreTest.relative, files.phase11Collect.relative],
+      ["native signal-safe fixed-size marker writer proof is still required"],
+    ),
   ];
 }
 
@@ -284,9 +300,14 @@ function buildChecks(markerAutomation, scenarios, nativeLibraryHashes, symboliza
       "Phase 11 crash bundle collection, verification, and symbolization tooling must remain available.",
     ),
     check(
-      "packaged-skip-visible",
-      scenarios.some((item) => item.id === "packaged_apk" && item.skipReason),
-      "Packaged APK path must have equivalent crash evidence or an explicit skip reason.",
+      "packaged-path-visible",
+      scenarios.some((item) => item.id === "packaged_apk" && (item.status !== "missing" || item.skipReason)),
+      "Packaged APK path must have equivalent crash evidence, a marker contract, or an explicit skip reason.",
+    ),
+    check(
+      "signal-safe-boundary-visible",
+      scenarios.some((item) => item.id === "signal_safe_marker" && item.status !== "missing"),
+      "P13-05 must record the current signal-safe marker boundary until a native fixed-size writer lands.",
     ),
     check(
       "task-checklist-visible",

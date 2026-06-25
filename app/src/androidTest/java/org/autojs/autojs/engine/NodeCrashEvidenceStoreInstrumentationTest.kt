@@ -14,6 +14,110 @@ class NodeCrashEvidenceStoreInstrumentationTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
+    fun collectsRunningMarkerAfterSimulatedNativeFatalProcessDeath() {
+        val executionId = "p13-native-fatal-marker-${System.nanoTime()}"
+        val marker = NodeCrashEvidenceStore.begin(
+            context = context,
+            executionId = executionId,
+            sourceName = "native-fatal-chaos.js",
+            workingDirectory = context.cacheDir.absolutePath,
+            executionMode = "native_process",
+            launchSurface = "native_process_service",
+            timeoutMs = null,
+            runtimeAdapter = "desktop_node_main",
+            runtimeSlotId = "fatal-chaos-simulated",
+            scenario = "native_fatal_running_marker",
+        )
+        assertNotNull(marker)
+        marker ?: return
+        val nextLaunchBundle = File(
+            File(context.filesDir, "nodejs/crash-evidence/next-launch"),
+            "${marker.id}.json",
+        )
+        try {
+            val running = JSONObject(marker.file.readText(Charsets.UTF_8))
+            assertEquals(NodeCrashEvidenceStore.STATE_RUNNING, running.getString("state"))
+            assertEquals("native_fatal_running_marker", running.getString("scenario"))
+            assertEquals("fatal-chaos-simulated", running.getString("runtimeSlotId"))
+
+            val collected = NodeCrashEvidenceStore.collectPending(context, "instrumentation.native_fatal_simulated")
+            assertTrue(
+                "next-launch collection should include running marker ${marker.id}: $collected",
+                (0 until collected.length()).any { index ->
+                    collected.getJSONObject(index).getString("markerId") == marker.id
+                },
+            )
+
+            val collectedMarker = JSONObject(marker.file.readText(Charsets.UTF_8))
+            assertEquals(NodeCrashEvidenceStore.STATE_COLLECTED_AFTER_RESTART, collectedMarker.getString("state"))
+            assertEquals("instrumentation.native_fatal_simulated", collectedMarker.getString("collectionReason"))
+            assertTrue(collectedMarker.getBoolean("nextLaunchCollection"))
+            assertTrue(nextLaunchBundle.isFile)
+            val bundle = JSONObject(nextLaunchBundle.readText(Charsets.UTF_8))
+            assertEquals(NodeCrashEvidenceStore.NEXT_LAUNCH_BUNDLE_SCHEMA, bundle.getString("schema"))
+            assertEquals(NodeCrashEvidenceStore.STATE_COLLECTED_AFTER_RESTART, bundle.getJSONObject("marker").getString("state"))
+        } finally {
+            marker.file.delete()
+            nextLaunchBundle.delete()
+        }
+    }
+
+    @Test
+    fun markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke() {
+        val executionId = "p13-packaged-crash-marker-${System.nanoTime()}"
+        val marker = NodeCrashEvidenceStore.begin(
+            context = context,
+            executionId = executionId,
+            sourceName = "packaged-long-running.js",
+            workingDirectory = context.cacheDir.absolutePath,
+            executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+            launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING,
+            timeoutMs = 30_000L,
+            runtimeAdapter = "adapter_v1",
+            runtimeSlotId = "packaged-smoke-contract",
+            scenario = "packaged_apk_crash_smoke_contract",
+        )
+        assertNotNull(marker)
+        marker ?: return
+        try {
+            val json = JSONObject(marker.file.readText(Charsets.UTF_8))
+            assertEquals(NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING, json.getString("executionMode"))
+            assertEquals(NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING, json.getString("launchSurface"))
+            assertEquals("packaged_apk_crash_smoke_contract", json.getString("scenario"))
+            assertEquals("packaged-smoke-contract", json.getString("runtimeSlotId"))
+        } finally {
+            marker.file.delete()
+        }
+    }
+
+    @Test
+    fun markerRecordsSignalSafeNativeMarkerBoundary() {
+        val executionId = "p13-signal-marker-boundary-${System.nanoTime()}"
+        val marker = NodeCrashEvidenceStore.begin(
+            context = context,
+            executionId = executionId,
+            sourceName = "signal-safe-marker-boundary.js",
+            workingDirectory = context.cacheDir.absolutePath,
+            executionMode = NodeExecutionModePolicy.MODE_ONE_SHOT,
+            launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+            timeoutMs = 5_000L,
+            runtimeAdapter = "adapter_v1",
+            runtimeSlotId = "signal-safe-boundary",
+            scenario = "signal_safe_marker_boundary",
+        )
+        assertNotNull(marker)
+        marker ?: return
+        try {
+            val json = JSONObject(marker.file.readText(Charsets.UTF_8))
+            val signalMarker = json.getJSONObject("safeSignalMarker")
+            assertEquals(false, signalMarker.getBoolean("implemented"))
+            assertTrue(signalMarker.getString("reason").contains("native signal-safe writer remains separate"))
+        } finally {
+            marker.file.delete()
+        }
+    }
+
+    @Test
     fun markerRecordsBridgeProviderCrashBundleFields() {
         val executionId = "p13-crash-evidence-${System.nanoTime()}"
         val marker = NodeCrashEvidenceStore.begin(
