@@ -1203,6 +1203,28 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun embeddedScriptRequestDefaultTimeoutAllowsLargeNodeModuleStartup() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val request = NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest(
+            source = """
+                "nodejs";
+                console.log("default.timeout.probe");
+            """.trimIndent(),
+            sourceName = "<embedded-default-timeout-source.js>",
+            workingDirectory = context.cacheDir.absolutePath,
+        )
+        val result = NativeNodeEmbeddedScriptService.runScript(
+            context,
+            request,
+        )
+
+        assertEquals(NativeNodeEmbeddedRuntimeBridge.DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS, request.timeoutMs)
+        assertTrue(result.errorMessage.orEmpty(), result.succeeded)
+        assertTrue(result.stdout.contains("default.timeout.probe"))
+    }
+
+    @Test
     fun setIntervalRunsUntilCleared() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -6088,6 +6110,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                   transcodeTypedArrayHex === "610062006300" &&
                   transcodeLimit === "ERR_OUT_OF_RANGE" &&
                   transcodeInvalid === "U_ILLEGAL_ARGUMENT_ERROR";
+                const hasOwnOk =
+                  buffer.hasOwnProperty("Buffer") === true &&
+                  buffer.Buffer.hasOwnProperty("from") === true;
                 const objectUrlOk =
                   typeof buffer.resolveObjectURL === "function" &&
                   typeof URL.createObjectURL === "function" &&
@@ -6131,6 +6156,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("buffer.builtin.roundtrip=" + decoded);
                 console.log("buffer.builtin.slow=" + slowOk);
                 console.log("buffer.builtin.surface=" + surfaceOk);
+                console.log("buffer.builtin.has_own=" + hasOwnOk);
                 console.log("buffer.builtin.object_url=" + objectUrlOk);
                 console.log("buffer.builtin.transcode=" + [
                   transcodeRoundtrip,
@@ -6170,6 +6196,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("buffer.builtin.roundtrip=builtin"))
             assertTrue(result.stdout.contains("buffer.builtin.slow=true"))
             assertTrue(result.stdout.contains("buffer.builtin.surface=true"))
+            assertTrue(result.stdout.contains("buffer.builtin.has_own=true"))
             assertTrue(result.stdout.contains("buffer.builtin.object_url=true"))
             assertTrue(result.stdout.contains("buffer.builtin.transcode=builtin|636166c3a9|610062006300|ERR_OUT_OF_RANGE|U_ILLEGAL_ARGUMENT_ERROR"))
             assertTrue(result.stdout.contains("buffer.builtin.constants=true"))

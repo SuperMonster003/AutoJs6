@@ -1463,6 +1463,12 @@ P13 task 本身使用以下执行状态：
       npm package-root trailing slash 请求进入 `node_modules/punycode`，
       保持 `require("punycode")` / `require("node:punycode")` 仍命中受控
       builtin wrapper，用于兼容 `tr46` / `jsdom` 这类真实 npm 依赖。
+    - `buffer` wrapper 现在使用冻结的普通对象导出，保留
+      `hasOwnProperty()`，用于兼容 `cheerio` / `iconv-lite` /
+      `safer-buffer` 这类真实 npm 依赖。
+    - 普通 one-shot Embedded Node 脚本默认 timeout 从 probe 用的 3000ms
+      调整为 30000ms；显式 `timeoutMs` 仍保持原语义，用于降低大 npm
+      module graph 启动时的误超时。
     - 已新增 `NodeStdlibPhase13DecisionInstrumentationTest`，覆盖
       `crypto`、`stream` / `stream/promises` / `stream/consumers` /
       `stream/web`、`zlib`、`buffer`、`url`、`os`、`readline` /

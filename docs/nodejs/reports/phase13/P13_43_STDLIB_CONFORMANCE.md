@@ -19,9 +19,15 @@ that keep broader Desktop behavior future work.
 - CJS aliases use bare and `node:` prefixes; ESM imports remain partial.
 - Builtin precedence is preserved, while `process.getBuiltinModule` remains
   denied.
+- The `buffer` wrapper is a frozen ordinary object, so legacy npm packages can
+  use `require("buffer").hasOwnProperty(...)` and `Buffer.hasOwnProperty(...)`
+  probes without loading `node_modules/buffer` shadows.
 - `globalThis.TextDecoder` and `require("util").TextDecoder` include a no-ICU
   Unicode fallback for `fatal: true` with `utf-8`, `utf-16le`, and `utf-16be`;
   this is npm compatibility support, not full ICU coverage.
+- Normal one-shot Embedded Node scripts default to a `30000` ms timeout rather
+  than the `3000` ms probe timeout, reducing false timeouts while large pure-JS
+  npm module graphs initialize.
 - Android differences are documented as stable for `os.setPriority`, real
   network interfaces, raw TTY mode, `process.getBuiltinModule`,
   `zlib/promises`, and `node:test/reporters`.

@@ -1782,7 +1782,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val TIMEOUT_EXIT_CODE = 124
         private const val TIMEOUT_ERROR_CODE = NodeRuntimeErrorCodes.LEGACY_SCRIPT_TIMEOUT
         private const val DEFAULT_SOURCE_NAME = "<embedded-script>"
-        private const val DEFAULT_TIMEOUT_MS = 3000L
+        private const val DEFAULT_TIMEOUT_MS = NativeNodeEmbeddedRuntimeBridge.DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS
         private const val EXTRA_PREWARM_STARTED = "prewarm_started"
         private const val EXTRA_PREWARM_STATUS = "prewarm_status"
         private const val EXTRA_PREWARM_REASON = "prewarm_reason"

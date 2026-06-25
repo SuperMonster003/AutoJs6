@@ -319,7 +319,8 @@ service.
 
 Current behavior remains:
 
-- normal embedded scripts require `timeoutMs`
+- normal embedded scripts default to a `30000` ms timeout and still accept an
+  explicit `timeoutMs` override
 - timeout produces the existing timeout diagnostic shape
 - `EmbeddedScriptRequest.executionMode` is serialized through the service
   request spool and normalized through the Phase 7 mode state machine
@@ -661,7 +662,10 @@ bare ESM `import "buffer"`, and ESM `import "node:buffer"`. It exposes the
 safe Node-managed surface already used by the runtime: `Buffer`, `Blob`, `File`,
 `atob`, `btoa`, `constants` when present, and encoding helpers. `globalThis.Buffer`
 and `require("buffer").Buffer` must stay identical, and builtin routing must
-win over `node_modules/buffer` shadow packages.
+win over `node_modules/buffer` shadow packages. The module export uses a frozen
+ordinary object so legacy npm packages such as `safer-buffer` can call
+`require("buffer").hasOwnProperty("Buffer")` without treating the wrapper as a
+mutable authority boundary.
 
 The `fs` wrapper exposes a scoped stream MVP through `createReadStream()` and
 `createWriteStream()`. These streams use the same scoped path policy as the rest

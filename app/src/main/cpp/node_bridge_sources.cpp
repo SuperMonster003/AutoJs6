@@ -40833,7 +40833,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (typeof BufferCtor !== "function") {
       throw new Error("require is restricted in Embedded Node.js MVP; allowlisted module 'buffer' is unavailable.");
     }
-    const limitedBuffer = Object.create(null);
+    const limitedBuffer = {};
     const descriptors = {
       Buffer: { value: BufferCtor, enumerable: true }
     };

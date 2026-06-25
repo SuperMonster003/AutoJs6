@@ -16,6 +16,7 @@ import java.util.Locale
 object NativeNodeEmbeddedRuntimeBridge {
 
     private const val TAG = "NativeNodeEmbeddedRuntime"
+    const val DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS = 30_000L
     private val NODE_HEADER_VERSION = NodeRuntimeCapabilities.NODE_HEADER_VERSION
     private const val RUNTIME_ADAPTER_PROPERTY = "autojs.nodejs.runtime.adapter"
     private const val RUNTIME_ADAPTER_AUTO = "auto"
@@ -17650,7 +17651,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val workingDirectory: String? = null,
         val executionId: String? = null,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
-        val timeoutMs: Long = BuildConfig.NODEJS_EMBEDDED_PROBE_TIMEOUT_MS.coerceAtLeast(1L),
+        val timeoutMs: Long = DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS,
         val queueMode: String = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
         val queueTimeoutMs: Long = 0L,
         val captureStdout: Boolean = true,
