@@ -2197,6 +2197,22 @@ documents Pro/Desktop profile requirements and Safe-profile denial behavior
 without declaring denied desktop modules as callable modules or granting
 runtime authority.
 
+Phase 13 migration and Pro9 comparison docs gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13MigrationPro9Comparison
+```
+
+This host gate records P13-56 as partial. It requires
+`MIGRATION_FROM_RHINO.md`, `INTEGRATION_STATUS_PRO9_COMPARISON.md`,
+`COMPATIBILITY_NOTES_PRO_AUTOX.md`, surface manifest evidence, release matrix
+updates, and Phase 13 docs to classify migration surfaces as Pro-compatible,
+Desktop-compatible, or gated/diagnostic-only. The gate also checks that
+debug-only/provider POC is not formal availability and that
+`sample/nodejs/pro-parity-suite`, `sample/nodejs/desktop-parity-suite`, and
+`profile_capabilities.d.ts` remain evidence or metadata rather than runtime
+authority.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

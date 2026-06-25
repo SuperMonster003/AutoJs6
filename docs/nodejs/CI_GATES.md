@@ -873,6 +873,14 @@ manifest evidence, release matrix updates, and docs updates while keeping the
 matrix metadata-only. P13-55 records TypeScript profile declarations as
 partial; runtime profile promotion and denied desktop module declarations
 remain unpromoted.
+`verifyNodePhase13MigrationPro9Comparison` records P13-56 as the migration and
+Pro9 comparison docs gate. It requires `MIGRATION_FROM_RHINO.md`,
+`INTEGRATION_STATUS_PRO9_COMPARISON.md`,
+`COMPATIBILITY_NOTES_PRO_AUTOX.md`, surface manifest evidence, release matrix
+updates, and docs updates while classifying surfaces as Pro-compatible,
+Desktop-compatible, or gated/diagnostic-only. P13-56 records migration and Pro9
+comparison docs as partial; debug-only/provider POC is not formal availability,
+and examples or profile declarations remain evidence only.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

@@ -1727,6 +1727,23 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - 明确哪些能力已经 Pro-compatible，哪些是 Desktop-compatible，哪些仍 gated。
     - 不把 debug-only 或 provider POC 写成正式可用。
+  - Progress:
+    - P13-56 partial landing synchronizes `MIGRATION_FROM_RHINO.md`,
+      `INTEGRATION_STATUS_PRO9_COMPARISON.md`, and
+      `COMPATIBILITY_NOTES_PRO_AUTOX.md` with shared `Pro-compatible`,
+      `Desktop-compatible`, and `gated/diagnostic-only` labels.
+    - The docs explicitly state that debug-only/provider POC is not formal
+      availability and keep `sample/nodejs/pro-parity-suite`,
+      `sample/nodejs/desktop-parity-suite`, and `profile_capabilities.d.ts` as
+      evidence or metadata rather than runtime authority.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-migration-pro9-comparison.js`.
+    - Gradle gate: `:app:verifyNodePhase13MigrationPro9Comparison`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_56_MIGRATION_PRO9_COMPARISON.md`.
+    - Remaining P13-56 blockers: runtime profile promotion, packaged
+      Pro/Desktop migration cookbook, prompt/disclosure UX, device permission
+      matrix, and P13-57 summary/final gate remain gated.
 
 - [ ] P13-57: 发布 Phase 13 summary generator and final gate。
   - 范围：新增 summary generator，汇总 task checklist、surface manifest、
