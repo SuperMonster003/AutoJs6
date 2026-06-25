@@ -32,6 +32,7 @@ import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.util.IntentUtils.startSafely
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 
 /**
@@ -140,8 +141,29 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
         PFiles.deleteRecursively(File(mProjectDir))
         try {
             PFiles.copyAssetDir(mActivity.assets, mAssetsProjectDir, mProjectDir, null)
+            copyKnownNodeDescriptorAssets()
         } catch (e: IOException) {
             throw UncheckedIOException(e)
+        }
+    }
+
+    private fun copyKnownNodeDescriptorAssets() {
+        val descriptorNames = (
+                NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAMES +
+                        NodeProjectRuntimeCompatibilityDescriptor.DESCRIPTOR_FILE_NAMES
+        ).distinct()
+        descriptorNames.forEach { descriptorName ->
+            val assetPath = PFiles.join(mAssetsProjectDir, descriptorName)
+            try {
+                mActivity.assets.open(assetPath).use { input ->
+                    File(mProjectDir, descriptorName).outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                Log.d(TAG, "Copied packaged Node descriptor asset: $descriptorName")
+            } catch (_: FileNotFoundException) {
+                // Optional descriptor assets are only copied when bundled.
+            }
         }
     }
 

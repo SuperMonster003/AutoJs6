@@ -7,17 +7,22 @@ import java.io.File
 object NodeProjectLaunchDescriptor {
 
     const val DESCRIPTOR_FILE_NAME = ".autojs6-node-launch.json"
+    const val INTERNAL_DESCRIPTOR_FILE_NAME = "autojs6-node-launch.json"
     const val INVALID_JSON_SANITIZED_MARKER =
         "autojs6.node_project_launch_descriptor.invalid_json_sanitized.v1"
+
+    val DESCRIPTOR_FILE_NAMES = listOf(DESCRIPTOR_FILE_NAME, INTERNAL_DESCRIPTOR_FILE_NAME)
 
     @JvmStatic
     fun descriptorFile(projectRoot: File): File = File(projectRoot, DESCRIPTOR_FILE_NAME)
 
     @JvmStatic
+    fun descriptorFiles(projectRoot: File): List<File> = DESCRIPTOR_FILE_NAMES.map { name -> File(projectRoot, name) }
+
+    @JvmStatic
     fun readOptionsOrDefault(projectRoot: File): NodeProjectLaunchOptions {
         NodeProjectRuntimeCompatibilityDescriptor.requireCompatibleOrDefault(projectRoot)
-        val descriptor = descriptorFile(projectRoot)
-        return if (descriptor.isFile) {
+        return if (descriptorFiles(projectRoot).any { descriptor -> descriptor.isFile }) {
             readOptions(projectRoot)
         } else {
             NodeProjectLaunchOptions()
@@ -27,9 +32,9 @@ object NodeProjectLaunchDescriptor {
     @JvmStatic
     fun readOptions(projectRoot: File): NodeProjectLaunchOptions {
         NodeProjectRuntimeCompatibilityDescriptor.requireCompatibleOrDefault(projectRoot)
-        val descriptor = descriptorFile(projectRoot)
-        require(descriptor.isFile) {
-            "Missing internal Node project launch descriptor: ${descriptor.absolutePath}"
+        val descriptor = descriptorFiles(projectRoot).firstOrNull { descriptor -> descriptor.isFile }
+        require(descriptor != null) {
+            "Missing internal Node project launch descriptor: ${descriptorFile(projectRoot).absolutePath}"
         }
         val json = runCatching {
             JSONObject(descriptor.readText(Charsets.UTF_8))

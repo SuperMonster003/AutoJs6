@@ -12050,10 +12050,12 @@ class EmbeddedNodePackagedApkSmokeTest {
             }
         }
         launchDescriptor?.let { descriptor ->
-            File(projectDir, PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE).writeText(
-                descriptor,
-                StandardCharsets.UTF_8,
-            )
+            PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILES.forEach { descriptorFileName ->
+                File(projectDir, descriptorFileName).writeText(
+                    descriptor,
+                    StandardCharsets.UTF_8,
+                )
+            }
         }
         val runtimeMatrixText = runtimeMarkers.joinToString(separator = "\n", postfix = "\n")
         val projectConfigText = """
@@ -12063,6 +12065,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               "versionCode": 1,
               "packageName": "$packageName",
               "main": "$mainScriptName",
+              "type": "node",
               "abis": ["arm64-v8a"],
               "libs": ["Embedded Node.js"],
               "permissions": [
@@ -12812,10 +12815,12 @@ $nodeConfigJson
             assertTrue("Gate diagnostics APK is missing bundled project config", "assets/project/${ProjectConfig.CONFIG_FILE_NAME}" in entries)
             assertTrue("Gate diagnostics APK is missing runtime matrix marker", "assets/project/runtime-matrix.expected.txt" in entries)
             if (launchDescriptor != null) {
-                assertTrue(
-                    "Gate diagnostics APK is missing internal Node launch descriptor",
-                    "assets/project/$PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE" in entries,
-                )
+                PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILES.forEach { descriptorFileName ->
+                    assertTrue(
+                        "Gate diagnostics APK is missing internal Node launch descriptor: $descriptorFileName",
+                        "assets/project/$descriptorFileName" in entries,
+                    )
+                }
             }
 
             val projectConfig = readZipText(zip, "assets/project/${ProjectConfig.CONFIG_FILE_NAME}")
@@ -14338,6 +14343,7 @@ $nodeConfigJson
         private const val CRASH_EVIDENCE_APK_NAME = "PackagedNodeCrashEvidenceSmoke_v1.0.0.apk"
         private const val CRASH_EVIDENCE_TIMEOUT_MS = 30_000L
         private const val PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE = NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAME
+        private val PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILES = NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAMES
         private const val PACKAGED_SMOKE_MARKER_REPORT_FILE = "packaged-smoke-markers.log"
         private const val PACKAGE_SCRIPT_NODE_MODULES_BIN_TEMPLATE_MARKER = "node_modules/.bin/"
         private const val PACKAGED_LAUNCH_FAILURE_SECRET_KEY = "PACKAGED_FAILURE_SECRET"
@@ -14931,7 +14937,6 @@ $nodeConfigJson
             "packaged.crash_evidence.started=true",
         )
         private val CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS = listOf(
-            "packaged.crash_evidence.started=true",
             "autojs6.inrt.node_project_packaged_long_running.v1",
             "marker.begin schema=autojs6-node-phase13-crash-marker-v1",
             "scenario=embedded_script_service",

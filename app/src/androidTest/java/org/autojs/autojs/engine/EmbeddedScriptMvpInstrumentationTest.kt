@@ -21653,6 +21653,20 @@ class EmbeddedScriptMvpInstrumentationTest {
 
             assertEquals(NodeProjectLaunchKind.PROJECT_ENTRY, NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot).launchKind)
 
+            File(projectRoot, NodeProjectLaunchDescriptor.INTERNAL_DESCRIPTOR_FILE_NAME).writeText(
+                JSONObject()
+                    .put("launchKind", "project-entry")
+                    .put("timeoutMs", 4321)
+                    .put("executionMode", "interactive_long_running")
+                    .toString(),
+                StandardCharsets.UTF_8,
+            )
+            val internalOptions = NodeProjectLaunchDescriptor.readOptions(projectRoot)
+            assertEquals(NodeProjectLaunchKind.PROJECT_ENTRY, internalOptions.launchKind)
+            assertEquals(4321L, internalOptions.timeoutMs)
+            assertEquals("interactive_long_running", internalOptions.executionMode)
+            File(projectRoot, NodeProjectLaunchDescriptor.INTERNAL_DESCRIPTOR_FILE_NAME).delete()
+
             descriptor.writeText(
                 JSONObject()
                     .put("launchKind", "package-script")

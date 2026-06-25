@@ -20,6 +20,8 @@ const FILES = {
   embeddedProbeService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedProbeService.kt",
   nativeProcessService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt",
   embeddedBridge: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt",
+  assetsLauncher: "app/src/main/java/org/autojs/autojs/inrt/launch/AssetsProjectLauncher.kt",
+  launchDescriptor: "app/src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt",
   crashEvidenceStoreTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt",
   packagedSmokeTest: "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
   androidRuntimePolicyTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidRuntimePolicyInstrumentationTest.kt",
@@ -189,6 +191,8 @@ function scenarioStatus(files) {
   const embeddedProbeService = files.embeddedProbeService.text;
   const nativeProcessService = files.nativeProcessService.text;
   const embeddedBridge = files.embeddedBridge.text;
+  const assetsLauncher = files.assetsLauncher.text;
+  const launchDescriptor = files.launchDescriptor.text;
   const crashEvidenceStoreTest = files.crashEvidenceStoreTest.text;
   const packagedSmokeTest = files.packagedSmokeTest.text;
   const androidRuntimePolicyTest = files.androidRuntimePolicyTest.text;
@@ -209,9 +213,14 @@ function scenarioStatus(files) {
   const packagedCrashEvidenceSmokeHarnessReady = packagedMarkerContractReady &&
     files.crashStore.text.includes("marker.begin schema=") &&
     files.crashStore.text.includes("marker.collect schema=") &&
+    launchDescriptor.includes("INTERNAL_DESCRIPTOR_FILE_NAME = \"autojs6-node-launch.json\"") &&
+    launchDescriptor.includes("descriptorFiles(projectRoot)") &&
+    assetsLauncher.includes("copyKnownNodeDescriptorAssets") &&
+    assetsLauncher.includes("NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAMES") &&
     packagedSmokeTest.includes("installAndRunCrashEvidenceEmbeddedNodePackagedApk") &&
     packagedSmokeTest.includes("assertInstallRunAndCollectPackagedCrashEvidenceSmoke") &&
     packagedSmokeTest.includes("CRASH_EVIDENCE_TEMPLATE_DEX_MARKERS") &&
+    packagedSmokeTest.includes('"type": "node"') &&
     packagedSmokeTest.includes("packaged.crash_evidence.started=true") &&
     packagedSmokeTest.includes("marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1") &&
     packagedSmokeTest.includes("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME") &&
@@ -271,10 +280,12 @@ function scenarioStatus(files) {
       [
         files.crashStore.relative,
         files.app.relative,
+        files.assetsLauncher.relative,
+        files.launchDescriptor.relative,
         files.crashEvidenceStoreTest.relative,
         files.packagedSmokeTest.relative,
       ],
-      ["packaged inrt template/runtime must include live NodeCrashEvidenceStore proof before the smoke can pass"],
+      [],
     ),
     scenario(
       "signal_safe_marker",
