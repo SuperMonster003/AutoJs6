@@ -1627,6 +1627,27 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - Android 权限、前台服务、通知和 UI 提示一致。
     - packaged APK 不因缺少披露进入隐式高权限状态。
+  - Progress:
+    - P13-52 partial landing 已添加
+      `NodePrivacyDisclosurePolicy` 和
+      `autojs6:profile.privacyDisclosurePolicy`，覆盖截图、录音、
+      悬浮窗、无障碍、网络、filesystem relaxation、Java interop、
+      root/Shizuku shell、`child_process`、native addon、inspector、
+      WASI 的 prompt/disclosure/Android permission/packaged denial 元数据。
+    - Node Doctor JSON/text 已新增 Privacy Disclosure Policy section；
+      TypeScript declarations 和 smoke 已覆盖 `PrivacyDisclosurePolicy`、
+      `PrivacyDisclosureSurface`、channel、packaged policy 和 Doctor privacy
+      字段。
+    - Host verifier:
+      `tools/nodejs/phase13/verify-privacy-disclosure-policy.js`。
+    - Gradle gate:
+      `:app:verifyNodePhase13PrivacyDisclosurePolicy`。
+    - Report:
+      `docs/nodejs/reports/phase13/P13_52_PRIVACY_DISCLOSURE_POLICY.md`。
+    - Remaining P13-52 blockers: settings UI prompt/localization、foreground
+      service notification ownership、packaged disclosure manifest review UI、
+      installer/runtime enforcement、device matrix 仍未完成；策略仍为
+      metadata-only 且不授予 Pro/Desktop/Debug authority。
 
 ### Track F: Docs, examples, and final gate
 

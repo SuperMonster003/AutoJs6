@@ -2127,6 +2127,32 @@ This suite verifies Kotlin rollback policy, runtime frozen
 switch names, and packaged downgrade metadata. P13-51 records per-profile
 rollback playbook as partial.
 
+Phase 13 privacy disclosure policy gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13PrivacyDisclosurePolicy
+```
+
+This host gate records P13-52 as partial. It requires
+`NodePrivacyDisclosurePolicy`, `autojs6:profile.privacyDisclosurePolicy`, Node
+Doctor Privacy Disclosure Policy diagnostics, focused instrumentation,
+TypeScript declarations, surface manifest evidence, release matrix updates,
+and Phase 13 docs. It keeps `implicitHighPrivilegeDenied` and
+`packagedImplicitHighPrivilegeDenied` true while settings UI prompts,
+foreground notification ownership, packaged disclosure review, and runtime
+promotion enforcement remain unpromoted.
+
+Focused P13-52 device coverage:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies Kotlin privacy/disclosure policy, runtime frozen
+`privacyDisclosurePolicy`, prompt/foreground disclosure requirements,
+Android permission metadata, packaged denial policy, and Doctor privacy
+redaction metadata. P13-52 records privacy and disclosure policy as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

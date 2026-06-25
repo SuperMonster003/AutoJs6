@@ -832,6 +832,15 @@ stress, security-corpus, and packaged regressions fall back to `safe_default`;
 published packaged APK downgrade is documented as a Safe-profile patch or
 metadata removal, not as a silent authority change.
 
+P13-52 records privacy and disclosure policy as partial. The policy requires
+user prompts before sensitive screenshot, recording, overlay, accessibility,
+network, filesystem relaxation, Java interop, shell/root/Shizuku,
+`child_process`, native addon, inspector, or WASI promotion; screenshot,
+recording, overlay, root shell, and inspector also require foreground
+disclosure/notification ownership. Packaged APKs keep
+`packagedImplicitHighPrivilegeDenied=true` and must not synthesize reviewed
+high-privilege authority without a future disclosure manifest review path.
+
 ## Release Security Gate
 
 Every Node release candidate must verify:

@@ -425,6 +425,15 @@ rollback actions, Safe crash/stress fallback, and packaged APK Safe-profile
 downgrade guidance. The playbook helps staged Pro/AutoX compatibility work
 remain reversible; it does not enable profile authority by itself.
 
+P13-52 records privacy and disclosure policy as partial. AutoJs6 Node now
+exposes `privacyDisclosurePolicy` diagnostics and Node Doctor privacy
+disclosure output for prompt channels, foreground disclosure requirements,
+Android permission/settings metadata, and packaged denial behavior across
+screenshot, recording, overlay, accessibility, network, filesystem
+relaxation, Java interop, root/Shizuku shell, `child_process`, native addon,
+inspector, and WASI. This blocks implicit high privilege while prompt UI,
+notification ownership, and packaged disclosure review remain future work.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

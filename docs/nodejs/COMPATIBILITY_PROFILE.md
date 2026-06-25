@@ -1322,6 +1322,17 @@ properties default to false for `autojs.nodejs.profile.pro.enabled`,
 `autojs.nodejs.relaxedCapabilities.enabled`. This is rollback metadata only:
 effective authority remains `safe_default` until promotion gates close.
 
+P13-52 records privacy and disclosure policy as partial. The runtime exposes
+`autojs6:profile.privacyDisclosurePolicy`, backed by
+`NodePrivacyDisclosurePolicy`, to report prompt channels, foreground
+disclosure requirements, Android permissions/settings, packaged denial
+behavior, and promotion blockers for screenshot, recording, overlay,
+accessibility, network, filesystem relaxation, Java interop, root/Shizuku
+shell, `child_process`, native addon, inspector, and WASI. The policy keeps
+`implicitHighPrivilegeDenied` and `packagedImplicitHighPrivilegeDenied` true
+and does not grant authority; actual prompt UI, notification ownership, and
+packaged disclosure review remain future work.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context

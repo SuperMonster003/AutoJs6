@@ -699,7 +699,7 @@
         "P13-51",
         "P13-52"
       ],
-      "summary": "P13-50 records relaxed-capability security corpus as partial with structured positive/negative/abuse cases, focused security regression, and fail-closed raw capability policy. P13-51 records per-profile rollback playbook as partial with default-off Gradle switches, NodeProfileRollbackPolicy, profileRollbackPolicy runtime diagnostics, Node Doctor output, TypeScript coverage, and packaged Safe-profile downgrade guidance; privacy, disclosure, user prompts, automatic crash circuit breaker, and remote packaged kill switch remain future work.",
+      "summary": "P13-50 records relaxed-capability security corpus as partial with structured positive/negative/abuse cases, focused security regression, and fail-closed raw capability policy. P13-51 records per-profile rollback playbook as partial with default-off Gradle switches, NodeProfileRollbackPolicy, profileRollbackPolicy runtime diagnostics, Node Doctor output, TypeScript coverage, and packaged Safe-profile downgrade guidance. P13-52 records privacy and disclosure policy as partial with NodePrivacyDisclosurePolicy, autojs6:profile.privacyDisclosurePolicy, Node Doctor privacy disclosure diagnostics, TypeScript coverage, and packaged implicit-high-privilege denial; prompt UI, notification ownership, packaged review UI, automatic crash circuit breaker, and remote packaged kill switch remain future work.",
       "risk": "critical",
       "runtimeSurface": [
         "per-profile security corpus",
@@ -711,7 +711,8 @@
         "inspector debug denial corpus",
         "WASI pure WebAssembly and raw WASI denial corpus",
         "per-profile rollback controls",
-        "privacy and disclosure policy"
+        "autojs6:profile.privacyDisclosurePolicy",
+        "Node Doctor Privacy Disclosure Policy"
       ],
       "evidence": [
         "docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json",
@@ -737,9 +738,17 @@
         "docs/nodejs/types/autojs6-node/autojs_global.d.ts",
         "sample/nodejs/typescript-smoke/src/main.ts",
         "build/reports/nodejs/phase13-profile-rollback-playbook.json",
-        "build/reports/nodejs/phase13-profile-rollback-playbook.md"
+        "build/reports/nodejs/phase13-profile-rollback-playbook.md",
+        "docs/nodejs/security/PRIVACY_DISCLOSURE_POLICY.md",
+        "tools/nodejs/phase13/verify-privacy-disclosure-policy.js",
+        ":app:verifyNodePhase13PrivacyDisclosurePolicy",
+        "docs/nodejs/reports/phase13/P13_52_PRIVACY_DISCLOSURE_POLICY.md",
+        "app/src/main/java/org/autojs/autojs/engine/NodePrivacyDisclosurePolicy.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest.kt",
+        "build/reports/nodejs/phase13-privacy-disclosure-policy.json",
+        "build/reports/nodejs/phase13-privacy-disclosure-policy.md"
       ],
-      "rollback": "Disable individual relaxed capability switches, disable Pro/Desktop/Debug profile switches, remove packaged profile metadata, and fall back to the Safe Node Profile security corpus as the release gate."
+      "rollback": "Disable individual relaxed capability switches, disable Pro/Desktop/Debug profile switches, remove packaged profile/disclosure metadata, deny implicit high privilege without reviewed disclosure, and fall back to the Safe Node Profile security corpus as the release gate."
     },
     {
       "id": "docs.examples.final_gate",

@@ -839,6 +839,14 @@ and docs updates while keeping effective authority at `safe_default` and
 automatic crash circuit breaker, remote packaged kill switch, settings UI,
 packaged builder UI, and privacy prompts unpromoted. P13-51 records
 per-profile rollback playbook as partial.
+`verifyNodePhase13PrivacyDisclosurePolicy` records P13-52 as the privacy and
+disclosure policy gate. It requires `NodePrivacyDisclosurePolicy`,
+`autojs6:profile.privacyDisclosurePolicy`, Node Doctor Privacy Disclosure
+Policy diagnostics, focused instrumentation, TypeScript declarations, surface
+manifest evidence, and docs updates while keeping implicit high privilege and
+packaged implicit high privilege denied. P13-52 records privacy and disclosure
+policy as partial; prompt UI, foreground notification ownership, packaged
+review UI, and runtime enforcement remain unpromoted.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

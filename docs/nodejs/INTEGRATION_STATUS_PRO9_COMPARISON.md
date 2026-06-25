@@ -1221,6 +1221,16 @@ long-term Auto.js Pro plus desktop Node target without silently granting
 authority; settings UI, packaged builder UI, automatic crash circuit breaker,
 remote packaged kill switch, and privacy prompts remain future work.
 
+P13-52 records privacy and disclosure policy as partial: AutoJs6 Node now
+documents prompt channels, foreground disclosure requirements, Android
+permission/settings metadata, and packaged denial behavior through
+`NodePrivacyDisclosurePolicy`, `autojs6:profile.privacyDisclosurePolicy`, and
+Node Doctor. This closes the diagnostic lane for screenshot, recording,
+overlay, accessibility, network, filesystem relaxation, Java interop,
+root/Shizuku shell, `child_process`, native addon, inspector, and WASI without
+granting implicit high privilege; prompt UI, notification ownership, and
+packaged disclosure review remain future work.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout
