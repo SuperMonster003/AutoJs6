@@ -21677,6 +21677,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("env", JSONObject().put("DESCRIPTOR_SECRET", "hidden-value"))
                     .put("timeoutMs", 1234)
                     .put("entryDirective", "nodejs ui-thread")
+                    .put("processPoolSlot", NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID)
+                    .put("processPoolSlotSource", NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST)
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -21690,6 +21692,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(mapOf("DESCRIPTOR_SECRET" to "hidden-value"), scriptOptions.env)
             assertEquals(1234L, scriptOptions.timeoutMs)
             assertEquals(NodeEntryDirective.DIRECTIVE_NODEJS_UI_THREAD, scriptOptions.entryDirective)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, scriptOptions.processPoolSlot)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST, scriptOptions.processPoolSlotSource)
 
             descriptor.writeText(
                 JSONObject()
@@ -21775,6 +21779,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 expectedExecutionMode: String? = null,
                 expectedOptionsEntryDirective: String? = null,
                 expectedEntryDirective: String? = NodeEntryDirective.DIRECTIVE_NODEJS,
+                expectedProcessPoolSlot: String? = null,
+                expectedProcessPoolSlotSource: String? = null,
             ) {
                 val options = NodeProjectLaunchDescriptor.readOptionsOrDefault(projectRoot)
                 assertEquals("$label descriptor launchKind", expectedLaunchKind, options.launchKind)
@@ -21791,6 +21797,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label descriptor timeoutMs", expectedTimeoutMs, options.timeoutMs)
                 assertEquals("$label descriptor executionMode", expectedExecutionMode, options.executionMode)
                 assertEquals("$label descriptor entryDirective", expectedOptionsEntryDirective, options.entryDirective)
+                assertEquals("$label descriptor processPoolSlot", expectedProcessPoolSlot, options.processPoolSlot)
+                assertEquals("$label descriptor processPoolSlotSource", expectedProcessPoolSlotSource, options.processPoolSlotSource)
 
                 val source = NodeProjectScriptSourceFactory.create(entry)
                 assertTrue("$label source should be Node project launch source", source is NodeProjectLaunchSource)
@@ -21815,6 +21823,12 @@ class EmbeddedScriptMvpInstrumentationTest {
                 assertEquals("$label source timeoutMs", expectedTimeoutMs, launchSource.nodeProjectTimeoutMs)
                 assertEquals("$label source executionMode", expectedExecutionMode, launchSource.nodeProjectExecutionMode)
                 assertEquals("$label source entryDirective", expectedEntryDirective, launchSource.nodeProjectEntryDirective)
+                assertEquals("$label source processPoolSlot", expectedProcessPoolSlot, launchSource.nodeProjectProcessPoolSlot)
+                assertEquals(
+                    "$label source processPoolSlotSource",
+                    expectedProcessPoolSlotSource,
+                    launchSource.nodeProjectProcessPoolSlotSource,
+                )
 
                 val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource)
                 assertEquals("$label request projectRoot", projectRoot.canonicalFile, request.projectRoot)
@@ -21839,6 +21853,12 @@ class EmbeddedScriptMvpInstrumentationTest {
                     request.executionMode,
                 )
                 assertEquals("$label request entryDirective", expectedEntryDirective, request.entryDirective)
+                assertEquals("$label request processPoolSlot", expectedProcessPoolSlot, request.processPoolSlot)
+                assertEquals(
+                    "$label request processPoolSlotSource",
+                    expectedProcessPoolSlotSource,
+                    request.processPoolSlotSource,
+                )
                 assertEquals(
                     "$label request launchKind",
                     expectedLaunchKind,
@@ -21868,6 +21888,12 @@ class EmbeddedScriptMvpInstrumentationTest {
                     debugDescriptor.executionMode,
                 )
                 assertEquals("$label debug entryDirective", expectedEntryDirective, debugDescriptor.entryDirective)
+                assertEquals("$label debug processPoolSlot", expectedProcessPoolSlot, debugDescriptor.processPoolSlot)
+                assertEquals(
+                    "$label debug processPoolSlotSource",
+                    expectedProcessPoolSlotSource,
+                    debugDescriptor.processPoolSlotSource,
+                )
                 val nativeValues = debugDescriptor.toNativeValues()
                 assertEquals(
                     "$label native entryDirective",
@@ -21883,6 +21909,16 @@ class EmbeddedScriptMvpInstrumentationTest {
                     "$label native ui thread",
                     NodeEntryDirective.requiresUiThread(expectedEntryDirective).toString(),
                     nativeValues["embedded_project_runner.entry_directive_ui_thread"],
+                )
+                assertEquals(
+                    "$label native processPoolSlot",
+                    expectedProcessPoolSlot.orEmpty(),
+                    nativeValues["embedded_project_runner.process_pool_slot"],
+                )
+                assertEquals(
+                    "$label native processPoolSlotSource",
+                    expectedProcessPoolSlotSource.orEmpty(),
+                    nativeValues["embedded_project_runner.process_pool_slot_source"],
                 )
                 val debugText = debugDescriptor.toDebugString()
                 expectedEnv.values.forEach { secretValue ->
@@ -21911,6 +21947,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("argv", JSONArray().put("--from-script-descriptor"))
                     .put("env", JSONObject().put("ALIGN_SCRIPT_SECRET", "script-secret-value"))
                     .put("timeoutMs", 2345L)
+                    .put("processPoolSlot", NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID)
+                    .put("processPoolSlotSource", NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST)
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -21924,6 +21962,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                 expectedArgv = listOf("--from-script-descriptor"),
                 expectedEnv = mapOf("ALIGN_SCRIPT_SECRET" to "script-secret-value"),
                 expectedTimeoutMs = 2345L,
+                expectedProcessPoolSlot = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                expectedProcessPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
             )
 
             descriptor.writeText(
@@ -22147,6 +22187,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                     .put("workingDirectory", "script-file-workspace")
                     .put("argv", JSONArray().put("--from-script-file-descriptor"))
                     .put("env", JSONObject().put("SCRIPT_FILE_SOURCE_ENV", "source-secret"))
+                    .put("processPoolSlot", NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID)
+                    .put("processPoolSlotSource", NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST)
                     .toString(),
                 StandardCharsets.UTF_8,
             )
@@ -22164,6 +22206,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(projectRoot.canonicalFile, pathRequest.packageDir)
             assertEquals(workspace.canonicalFile, pathRequest.workingDirectory)
             assertEquals("verify", pathRequest.scriptName)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, pathRequest.processPoolSlot)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST, pathRequest.processPoolSlotSource)
             val request = NativeNodeEmbeddedProjectRunner.buildProjectRequest(launchSource)
             assertEquals(projectRoot.canonicalFile, request.projectRoot)
             assertEquals(projectRoot.canonicalFile, request.packageDir)
@@ -22172,6 +22216,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(null, request.binName)
             assertEquals(listOf("--from-script-file-descriptor"), request.argv)
             assertEquals(mapOf("SCRIPT_FILE_SOURCE_ENV" to "source-secret"), request.env)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, request.processPoolSlot)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST, request.processPoolSlotSource)
 
             val engine = NativeNodeEmbeddedJavaScriptEngine(context)
             assertEquals(0, engine.doExecution(source as JavaScriptSource))
@@ -22183,6 +22229,25 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(workspace.canonicalPath, descriptor?.workingDirectory)
             assertEquals(listOf("--from-script-file-descriptor"), descriptor?.argv)
             assertEquals(listOf("SCRIPT_FILE_SOURCE_ENV"), descriptor?.envKeys)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, descriptor?.processPoolSlot)
+            assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST, descriptor?.processPoolSlotSource)
+            val nativeValues = engine.lastEmbeddedScriptResultNativeValues
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                nativeValues["embedded_script.process_pool.selected_slot_id"],
+            )
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.MODE_EXPLICIT_TWO_SLOT,
+                nativeValues["embedded_script.process_pool.mode"],
+            )
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+                nativeValues["embedded_script.process_pool.slot_selection_source"],
+            )
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                nativeValues["embedded_project_runner.process_pool_slot"],
+            )
         } finally {
             projectRoot.deleteRecursively()
         }

@@ -21,6 +21,9 @@ object NodeEmbeddedProcessPoolPolicy {
     const val SLOT_SELECTION_EXPLICIT_REQUEST = "explicit_request"
     const val SLOT_SELECTION_DEFAULT_SCHEDULER = "default_scheduler"
     const val SLOT_SELECTION_CURRENT_SERVICE = "current_service"
+    const val SLOT_CRASH_FALLBACK_MODE_NO_RESTART = "no_restart_collect_marker"
+    const val SLOT_CRASH_QUARANTINE_POLICY_NONE = "no_quarantine_until_pool_coordinator"
+    const val SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS = "allow_other_slots_after_marker_collection"
     const val DEFAULT_EFFECTIVE_MAX_ACTIVE_SLOTS = 1
     const val EXPLICIT_EFFECTIVE_MAX_ACTIVE_SLOTS = 2
     const val DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS = 2
@@ -71,6 +74,10 @@ object NodeEmbeddedProcessPoolPolicy {
         val defaultSchedulerEnabled: Boolean,
         val defaultSchedulerSlotIds: List<String>,
         val defaultSchedulerFallbackEnabled: Boolean,
+        val slotCrashFallbackMode: String,
+        val failedSlotReplacementEnabled: Boolean,
+        val failedSlotQuarantinePolicy: String,
+        val survivingSlotExecutionPolicy: String,
         val queueWhenPoolFullEnabled: Boolean,
         val queuePolicy: String,
         val oneActiveEnvironmentPerSlot: Boolean,
@@ -99,6 +106,10 @@ object NodeEmbeddedProcessPoolPolicy {
             "embedded_script.process_pool.default_scheduler_enabled" to defaultSchedulerEnabled.toString(),
             "embedded_script.process_pool.default_scheduler_slot_ids" to defaultSchedulerSlotIds.joinToString(","),
             "embedded_script.process_pool.default_scheduler_fallback_enabled" to defaultSchedulerFallbackEnabled.toString(),
+            "embedded_script.process_pool.slot_crash_fallback_mode" to slotCrashFallbackMode,
+            "embedded_script.process_pool.failed_slot_replacement_enabled" to failedSlotReplacementEnabled.toString(),
+            "embedded_script.process_pool.failed_slot_quarantine_policy" to failedSlotQuarantinePolicy,
+            "embedded_script.process_pool.surviving_slot_execution_policy" to survivingSlotExecutionPolicy,
             "embedded_script.process_pool.queue_when_full_enabled" to queueWhenPoolFullEnabled.toString(),
             "embedded_script.process_pool.queue_policy" to queuePolicy,
             "embedded_script.process_pool.one_active_environment_per_slot" to oneActiveEnvironmentPerSlot.toString(),
@@ -187,8 +198,8 @@ object NodeEmbeddedProcessPoolPolicy {
         }
         val resolvedSelectionSource = when {
             selectedByDefaultScheduler -> SLOT_SELECTION_DEFAULT_SCHEDULER
-            currentSlot != null && currentSlot.id != PRIMARY_SLOT_ID -> SLOT_SELECTION_CURRENT_SERVICE
             requestedSlot != null -> SLOT_SELECTION_EXPLICIT_REQUEST
+            currentSlot != null && currentSlot.id != PRIMARY_SLOT_ID -> SLOT_SELECTION_CURRENT_SERVICE
             else -> SLOT_SELECTION_LEGACY_DEFAULT
         }
         val reason = when {
@@ -198,6 +209,8 @@ object NodeEmbeddedProcessPoolPolicy {
                 "default_scheduler_selected:${currentSlot.id}"
             selectedByDefaultScheduler && defaultSchedulerSlot != null ->
                 "default_scheduler_selected:${defaultSchedulerSlot.id}"
+            currentSlot != null && requestedSlot != null ->
+                "explicit_process_slot_selected:${requestedSlot.id}"
             currentSlot != null && currentSlot.id != PRIMARY_SLOT_ID ->
                 "reserved_slot_direct_start_detected:current_service_slot:${currentSlot.id}"
             requestedSlot != null ->
@@ -234,6 +247,10 @@ object NodeEmbeddedProcessPoolPolicy {
             defaultSchedulerEnabled = selectedByDefaultScheduler,
             defaultSchedulerSlotIds = defaultSchedulerSlotIds(),
             defaultSchedulerFallbackEnabled = false,
+            slotCrashFallbackMode = SLOT_CRASH_FALLBACK_MODE_NO_RESTART,
+            failedSlotReplacementEnabled = false,
+            failedSlotQuarantinePolicy = SLOT_CRASH_QUARANTINE_POLICY_NONE,
+            survivingSlotExecutionPolicy = SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS,
             queueWhenPoolFullEnabled = false,
             queuePolicy = "caller_side_queue_only_until_process_pool_enabled",
             oneActiveEnvironmentPerSlot = true,

@@ -48,6 +48,10 @@ interface NodeProjectLaunchSource {
         get() = null
     val nodeProjectEntryDirective: String?
         get() = null
+    val nodeProjectProcessPoolSlot: String?
+        get() = null
+    val nodeProjectProcessPoolSlotSource: String?
+        get() = null
 }
 
 data class NodeProjectLaunchOptions @JvmOverloads constructor(
@@ -60,6 +64,8 @@ data class NodeProjectLaunchOptions @JvmOverloads constructor(
     val timeoutMs: Long? = null,
     val executionMode: String? = null,
     val entryDirective: String? = null,
+    val processPoolSlot: String? = null,
+    val processPoolSlotSource: String? = null,
 ) {
     val launchKind: NodeProjectLaunchKind
         get() = NodeProjectLaunchKind.from(scriptName, binName)
@@ -105,6 +111,12 @@ class NodeProjectJavaScriptFileSource @JvmOverloads constructor(
         get() = nodeProjectLaunchOptions.entryDirective
             ?: NodeEntryDirective.fromExecutionMode(executionMode)
 
+    override val nodeProjectProcessPoolSlot: String?
+        get() = nodeProjectLaunchOptions.processPoolSlot
+
+    override val nodeProjectProcessPoolSlotSource: String?
+        get() = nodeProjectLaunchOptions.processPoolSlotSource
+
     override val engineName: String
         get() = JavaScriptSource.ENGINE_NODEJS
 
@@ -118,6 +130,8 @@ class NodeProjectJavaScriptFileSource @JvmOverloads constructor(
             env = Collections.unmodifiableMap(env.toMap()),
             executionMode = executionMode?.trim()?.takeIf { it.isNotBlank() },
             entryDirective = NodeEntryDirective.normalize(entryDirective),
+            processPoolSlot = processPoolSlot?.trim()?.takeIf { it.isNotBlank() },
+            processPoolSlotSource = processPoolSlotSource?.trim()?.takeIf { it.isNotBlank() },
         )
     }
 

@@ -252,6 +252,8 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
                     "executionMode=${launchSource?.nodeProjectExecutionMode.orEmpty()} " +
                     "entryDirective=${launchSource?.nodeProjectEntryDirective.orEmpty()} " +
                     "longRunning=${NodeExecutionModePolicy.isLongRunningRequest(launchSource?.nodeProjectExecutionMode)} " +
+                    "processPoolSlot=${launchSource?.nodeProjectProcessPoolSlot.orEmpty()} " +
+                    "processPoolSlotSource=${launchSource?.nodeProjectProcessPoolSlotSource.orEmpty()} " +
                     "packageDir=${request?.packageDir?.path.orEmpty()} " +
                     "packageDirProjectRoot=$packageDirProjectRoot " +
                     "workingDirectory=${request?.workingDirectory?.path.orEmpty()} " +

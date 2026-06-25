@@ -23,6 +23,8 @@ object NativeNodeEmbeddedProjectRunner {
         val entrySource: String? = null,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val entryDirective: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
     )
 
     data class PackageBinRequest(
@@ -37,6 +39,8 @@ object NativeNodeEmbeddedProjectRunner {
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val entryDirective: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
     )
 
     data class PackageScriptRequest(
@@ -51,6 +55,8 @@ object NativeNodeEmbeddedProjectRunner {
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val entryDirective: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
     )
 
     data class ProjectRequest(
@@ -67,6 +73,8 @@ object NativeNodeEmbeddedProjectRunner {
         val entrySource: String? = null,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val entryDirective: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
     )
 
     data class ProjectLaunchPlan(
@@ -82,6 +90,8 @@ object NativeNodeEmbeddedProjectRunner {
         val entrySource: String?,
         val executionMode: String,
         val entryDirective: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
         val diagnosticArgv: List<String>? = null,
         val diagnosticEnvKeys: List<String>? = null,
         val packageDir: File? = null,
@@ -107,6 +117,8 @@ object NativeNodeEmbeddedProjectRunner {
         val entrySourceBytes: Int,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val entryDirective: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
         val packageDir: String? = null,
         val binName: String? = null,
         val scriptName: String? = null,
@@ -130,6 +142,8 @@ object NativeNodeEmbeddedProjectRunner {
                 appendLine("entrySourceBytes=$entrySourceBytes")
                 appendLine("executionMode=$executionMode")
                 appendLine("entryDirective=${entryDirective.orEmpty()}")
+                appendLine("processPoolSlot=${processPoolSlot.orEmpty()}")
+                appendLine("processPoolSlotSource=${processPoolSlotSource.orEmpty()}")
                 appendLine("packageDir=${packageDir.orEmpty()}")
                 appendLine("binName=${binName.orEmpty()}")
                 appendLine("scriptName=${scriptName.orEmpty()}")
@@ -155,6 +169,8 @@ object NativeNodeEmbeddedProjectRunner {
                 "embedded_project_runner.entry_source_bytes" to entrySourceBytes.toString(),
                 "embedded_project_runner.execution_mode" to executionMode,
                 "embedded_project_runner.entry_directive" to entryDirective.orEmpty(),
+                "embedded_project_runner.process_pool_slot" to processPoolSlot.orEmpty(),
+                "embedded_project_runner.process_pool_slot_source" to processPoolSlotSource.orEmpty(),
                 "embedded_project_runner.entry_directive_ui_activity" to NodeEntryDirective
                     .requiresUiActivity(entryDirective)
                     .toString(),
@@ -229,6 +245,7 @@ object NativeNodeEmbeddedProjectRunner {
         val normalizedProjectRoot = projectRoot.canonicalFile
         val sourceLaunchKind = launchSource.nodeProjectLaunchKind
         val defaultRequest = ProjectRequest(projectRoot = normalizedProjectRoot)
+        val processPoolSlot = normalizeDescriptorProcessPoolSlot(launchSource.nodeProjectProcessPoolSlot)
         val request = defaultRequest.copy(
             packageDir = launchSource.nodeProjectPackageDirFile?.canonicalFile ?: normalizedProjectRoot,
             workingDirectory = launchSource.nodeProjectWorkingDirectoryFile?.canonicalFile ?: normalizedProjectRoot,
@@ -242,6 +259,11 @@ object NativeNodeEmbeddedProjectRunner {
                 ?: (launchSource as? JavaScriptSource)
                     ?.executionMode
                     ?.let { mode -> NodeEntryDirective.fromExecutionMode(mode) },
+            processPoolSlot = processPoolSlot,
+            processPoolSlotSource = normalizeDescriptorProcessPoolSlotSource(
+                launchSource.nodeProjectProcessPoolSlotSource,
+                processPoolSlot,
+            ),
         )
         val requestLaunchKind = NodeProjectLaunchKind.from(request.scriptName, request.binName)
         require(requestLaunchKind == sourceLaunchKind) {
@@ -255,6 +277,8 @@ object NativeNodeEmbeddedProjectRunner {
         val normalizedProjectRoot = request.projectRoot.canonicalFile
         val normalizedWorkingDirectory = request.workingDirectory.canonicalFile
         val normalizedPackageDir = (request.packageDir ?: normalizedProjectRoot).canonicalFile
+        val processPoolSlot = normalizeDescriptorProcessPoolSlot(request.processPoolSlot)
+        val processPoolSlotSource = normalizeDescriptorProcessPoolSlotSource(request.processPoolSlotSource, processPoolSlot)
         readNodeProjectConfig(normalizedProjectRoot)
             ?: throw IllegalArgumentException(
                 "Node project config type must be node: ${File(normalizedProjectRoot, PROJECT_CONFIG_NAME).absolutePath}",
@@ -280,6 +304,8 @@ object NativeNodeEmbeddedProjectRunner {
                     runtimeModuleSources = request.runtimeModuleSources,
                     executionMode = request.executionMode,
                     entryDirective = request.entryDirective,
+                    processPoolSlot = processPoolSlot,
+                    processPoolSlotSource = processPoolSlotSource,
                 ),
             )
         }
@@ -300,6 +326,8 @@ object NativeNodeEmbeddedProjectRunner {
                     runtimeModuleSources = request.runtimeModuleSources,
                     executionMode = request.executionMode,
                     entryDirective = request.entryDirective,
+                    processPoolSlot = processPoolSlot,
+                    processPoolSlotSource = processPoolSlotSource,
                 ),
             )
         }
@@ -316,6 +344,8 @@ object NativeNodeEmbeddedProjectRunner {
             entrySource = request.entrySource,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             entryDirective = NodeEntryDirective.normalize(request.entryDirective),
+            processPoolSlot = processPoolSlot,
+            processPoolSlotSource = processPoolSlotSource,
         )
     }
 
@@ -387,6 +417,8 @@ object NativeNodeEmbeddedProjectRunner {
             timeoutMs = request.timeoutMs,
             moduleSources = request.moduleSources,
             runtimeModuleSources = request.runtimeModuleSources,
+            processPoolSlot = request.processPoolSlot,
+            processPoolSlotSource = request.processPoolSlotSource,
         )
     }
 
@@ -444,6 +476,8 @@ object NativeNodeEmbeddedProjectRunner {
             entrySource = null,
             executionMode = NodeExecutionModePolicy.normalize(normalizedRequest.executionMode),
             entryDirective = NodeEntryDirective.normalize(normalizedRequest.entryDirective),
+            processPoolSlot = normalizedRequest.processPoolSlot,
+            processPoolSlotSource = normalizedRequest.processPoolSlotSource,
             packageDir = normalizedRequest.packageDir,
             binName = normalizedRequest.binName,
         )
@@ -478,6 +512,8 @@ object NativeNodeEmbeddedProjectRunner {
             entrySource = null,
             executionMode = NodeExecutionModePolicy.normalize(normalizedRequest.executionMode),
             entryDirective = NodeEntryDirective.normalize(normalizedRequest.entryDirective),
+            processPoolSlot = normalizedRequest.processPoolSlot,
+            processPoolSlotSource = normalizedRequest.processPoolSlotSource,
             diagnosticArgv = normalizedRequest.argv,
             diagnosticEnvKeys = normalizedRequest.env.keys.sorted(),
             packageDir = normalizedRequest.packageDir,
@@ -685,6 +721,8 @@ object NativeNodeEmbeddedProjectRunner {
             entrySourceBytes = request.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             entryDirective = NodeEntryDirective.normalize(request.entryDirective),
+            processPoolSlot = request.processPoolSlot,
+            processPoolSlotSource = request.processPoolSlotSource,
             packageDir = request.packageDir?.absolutePath,
             binName = request.binName,
             scriptName = request.scriptName,
@@ -713,6 +751,8 @@ object NativeNodeEmbeddedProjectRunner {
             entrySourceBytes = plan.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
             executionMode = NodeExecutionModePolicy.normalize(plan.executionMode),
             entryDirective = NodeEntryDirective.normalize(plan.entryDirective),
+            processPoolSlot = plan.processPoolSlot,
+            processPoolSlotSource = plan.processPoolSlotSource,
             packageDir = plan.packageDir?.absolutePath,
             binName = plan.binName,
             scriptName = plan.scriptName,
@@ -740,6 +780,8 @@ object NativeNodeEmbeddedProjectRunner {
             entrySourceBytes = request.entrySource?.toByteArray(StandardCharsets.UTF_8)?.size ?: -1,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             entryDirective = NodeEntryDirective.normalize(request.entryDirective),
+            processPoolSlot = request.processPoolSlot,
+            processPoolSlotSource = request.processPoolSlotSource,
         )
     }
 
@@ -765,6 +807,8 @@ object NativeNodeEmbeddedProjectRunner {
             entrySourceBytes = -1,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             entryDirective = NodeEntryDirective.normalize(request.entryDirective),
+            processPoolSlot = request.processPoolSlot,
+            processPoolSlotSource = request.processPoolSlotSource,
             packageDir = request.packageDir.absolutePath,
             binName = request.binName,
         )
@@ -795,6 +839,8 @@ object NativeNodeEmbeddedProjectRunner {
             entrySourceBytes = -1,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             entryDirective = NodeEntryDirective.normalize(request.entryDirective),
+            processPoolSlot = request.processPoolSlot,
+            processPoolSlotSource = request.processPoolSlotSource,
             packageDir = request.packageDir.absolutePath,
             binName = binName,
             scriptName = request.scriptName,
@@ -1146,30 +1192,83 @@ object NativeNodeEmbeddedProjectRunner {
     }
 
     private fun normalizeRequest(request: Request): Request {
+        val processPoolSlot = normalizeDescriptorProcessPoolSlot(request.processPoolSlot)
         return request.copy(
             projectRoot = request.projectRoot.canonicalFile,
             entryFile = request.entryFile.canonicalFile,
             workingDirectory = request.workingDirectory.canonicalFile,
             entryDirective = NodeEntryDirective.normalize(request.entryDirective),
+            processPoolSlot = processPoolSlot,
+            processPoolSlotSource = normalizeDescriptorProcessPoolSlotSource(
+                request.processPoolSlotSource,
+                processPoolSlot,
+            ),
         )
     }
 
     private fun normalizePackageScriptRequest(request: PackageScriptRequest): PackageScriptRequest {
+        val processPoolSlot = normalizeDescriptorProcessPoolSlot(request.processPoolSlot)
         return request.copy(
             projectRoot = request.projectRoot.canonicalFile,
             packageDir = request.packageDir.canonicalFile,
             workingDirectory = request.workingDirectory.canonicalFile,
             entryDirective = NodeEntryDirective.normalize(request.entryDirective),
+            processPoolSlot = processPoolSlot,
+            processPoolSlotSource = normalizeDescriptorProcessPoolSlotSource(
+                request.processPoolSlotSource,
+                processPoolSlot,
+            ),
         )
     }
 
     private fun normalizePackageBinRequest(request: PackageBinRequest): PackageBinRequest {
+        val processPoolSlot = normalizeDescriptorProcessPoolSlot(request.processPoolSlot)
         return request.copy(
             projectRoot = request.projectRoot.canonicalFile,
             packageDir = request.packageDir.canonicalFile,
             workingDirectory = request.workingDirectory.canonicalFile,
             entryDirective = NodeEntryDirective.normalize(request.entryDirective),
+            processPoolSlot = processPoolSlot,
+            processPoolSlotSource = normalizeDescriptorProcessPoolSlotSource(
+                request.processPoolSlotSource,
+                processPoolSlot,
+            ),
         )
+    }
+
+    private fun normalizeDescriptorProcessPoolSlot(value: String?): String? {
+        val normalized = value?.trim()?.takeIf { it.isNotBlank() } ?: return null
+        require(
+            normalized == NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID ||
+                    normalized == NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+        ) {
+            "Node project processPoolSlot must be ${NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID} " +
+                    "or ${NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID}: $normalized"
+        }
+        return normalized
+    }
+
+    private fun normalizeDescriptorProcessPoolSlotSource(
+        value: String?,
+        processPoolSlot: String?,
+    ): String? {
+        val normalized = value?.trim()?.takeIf { it.isNotBlank() }
+        if (processPoolSlot == null) {
+            require(normalized == null) {
+                "Node project processPoolSlotSource requires processPoolSlot: $normalized"
+            }
+            return null
+        }
+        require(
+            normalized == null ||
+                    normalized == NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST ||
+                    normalized == NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+        ) {
+            "Node project processPoolSlotSource must be " +
+                    "${NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST} or " +
+                    "${NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER}: $normalized"
+        }
+        return normalized ?: NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST
     }
 
     private fun projectRequestLaunchKind(request: ProjectRequest): String {
@@ -1195,6 +1294,8 @@ object NativeNodeEmbeddedProjectRunner {
                 entrySource = entrySource,
                 executionMode = executionMode,
                 entryDirective = entryDirective,
+                processPoolSlot = processPoolSlot,
+                processPoolSlotSource = processPoolSlotSource,
             ),
         )
     }

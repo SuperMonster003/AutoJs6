@@ -582,13 +582,15 @@ object NativeNodeEmbeddedRuntimeBridge {
         val startedAt = SystemClock.elapsedRealtime()
         val processName = currentProcessName()
         val pid = Process.myPid()
-        if (!isEmbeddedProbeProcess(processName)) {
+        if (!isEmbeddedScriptProcess(processName)) {
             return failureEmbeddedScriptResult(
                 request = request,
                 processName = processName,
                 pid = pid,
                 startedAt = startedAt,
-                message = "Embedded script execution must run in isolated process $EMBEDDED_PROBE_PROCESS_SUFFIX; currentProcess=$processName, pid=$pid.",
+                message = "Embedded script execution must run in isolated process " +
+                        embeddedScriptProcessSuffixes().joinToString(prefix = "[", postfix = "]") +
+                        "; currentProcess=$processName, pid=$pid.",
             )
         }
         if (!BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED) {
@@ -15791,6 +15793,12 @@ object NativeNodeEmbeddedRuntimeBridge {
 
     fun isEmbeddedProbeProcess(processName: String): Boolean =
         processName.endsWith(EMBEDDED_PROBE_PROCESS_SUFFIX)
+
+    fun isEmbeddedScriptProcess(processName: String): Boolean =
+        embeddedScriptProcessSuffixes().any { suffix -> processName.endsWith(suffix) }
+
+    private fun embeddedScriptProcessSuffixes(): List<String> =
+        NodeEmbeddedProcessPoolPolicy.declaredSlots.map { slot -> slot.processSuffix }
 
     private fun logStage(
         stageEvents: MutableList<String>,

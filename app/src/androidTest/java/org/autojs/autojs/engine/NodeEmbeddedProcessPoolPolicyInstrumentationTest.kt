@@ -12,6 +12,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -48,6 +49,10 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
         assertFalse(plan.queueWhenPoolFullEnabled)
         assertTrue(plan.oneActiveEnvironmentPerSlot)
         assertFalse(plan.sharedV8EnvironmentAllowed)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_FALLBACK_MODE_NO_RESTART, plan.slotCrashFallbackMode)
+        assertFalse(plan.failedSlotReplacementEnabled)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_QUARANTINE_POLICY_NONE, plan.failedSlotQuarantinePolicy)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS, plan.survivingSlotExecutionPolicy)
     }
 
     @Test
@@ -125,6 +130,77 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
     }
 
     @Test
+    fun slotCrashNoRestartFallbackCollectsOverflowMarkerAndPrimarySurvives() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("embedded process pool slot crash fallback")
+
+        val plan = NodeEmbeddedProcessPoolPolicy.plan(
+            context = context,
+            requestedSlotId = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+        )
+        assertEquals(NodeEmbeddedProcessPoolPolicy.overflowSlot, plan.selectedSlot)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_FALLBACK_MODE_NO_RESTART, plan.slotCrashFallbackMode)
+        assertFalse(plan.defaultSchedulerFallbackEnabled)
+        assertFalse(plan.failedSlotReplacementEnabled)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_QUARANTINE_POLICY_NONE, plan.failedSlotQuarantinePolicy)
+        assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS, plan.survivingSlotExecutionPolicy)
+
+        val executionId = "p13-slot-crash-fallback-${System.nanoTime()}"
+        val marker = NodeCrashEvidenceStore.begin(
+            context = context,
+            executionId = executionId,
+            sourceName = "second-execution-slot-fallback.js",
+            workingDirectory = context.cacheDir.absolutePath,
+            executionMode = NodeExecutionModePolicy.MODE_ONE_SHOT,
+            launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
+            timeoutMs = 5_000L,
+            runtimeAdapter = "adapter_v1",
+            runtimeSlotId = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+            scenario = "second_execution_slot_no_restart_fallback",
+        )
+        assertNotNull(marker)
+        marker ?: return
+        val nextLaunchBundle = File(
+            File(context.filesDir, "nodejs/crash-evidence/next-launch"),
+            "${marker.id}.json",
+        )
+        try {
+            val collected = NodeCrashEvidenceStore.collectPending(context, "instrumentation.second_slot_no_restart_fallback")
+            assertTrue(
+                "next-launch collection should include overflow slot marker ${marker.id}: $collected",
+                (0 until collected.length()).any { index ->
+                    collected.getJSONObject(index).getString("markerId") == marker.id
+                },
+            )
+            assertTrue(nextLaunchBundle.isFile)
+            val bundle = org.json.JSONObject(nextLaunchBundle.readText(Charsets.UTF_8))
+            assertEquals(NodeCrashEvidenceStore.NEXT_LAUNCH_BUNDLE_SCHEMA, bundle.getString("schema"))
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                bundle.getJSONObject("marker").getString("runtimeSlotId"),
+            )
+
+            val survivor = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    return "primary-survivor-ok";
+                """.trimIndent(),
+                sourceName = "<process-pool-primary-survivor.js>",
+                timeoutMs = 10_000L,
+                processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+            )
+            NodeEmbeddedTestHarness.assertSucceeded("primary survivor after overflow marker", survivor)
+            assertEquals("primary-survivor-ok", survivor.resultText)
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                survivor.nativeValues["embedded_script.process_pool.selected_slot_id"],
+            )
+        } finally {
+            marker.file.delete()
+            nextLaunchBundle.delete()
+        }
+    }
+
+    @Test
     fun explicitOverflowSlotPlanEnablesTwoSlotMode() {
         val plan = NodeEmbeddedProcessPoolPolicy.plan(
             context = context,
@@ -163,6 +239,10 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
         assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_EXPLICIT_TWO_SLOT, result.nativeValues["embedded_script.process_pool.mode"])
         assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, result.nativeValues["embedded_script.process_pool.requested_slot_id"])
         assertEquals(NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID, result.nativeValues["embedded_script.process_pool.selected_slot_id"])
+        assertEquals(
+            NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+            result.nativeValues["embedded_script.process_pool.slot_selection_source"],
+        )
         assertEquals(":nodejs_embedded_2", result.nativeValues["embedded_script.process_pool.selected_process_suffix"])
         assertEquals("2", result.nativeValues["embedded_script.process_pool.effective_max_active_slots"])
         assertTrue(result.processName.endsWith(":nodejs_embedded_2"))

@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.engine.EmbeddedNodeFixtureCorpus
 import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
 import org.autojs.autojs.engine.NodeExecutionModePolicy
+import org.autojs.autojs.engine.NodeEmbeddedProcessPoolPolicy
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.engine.NodeWorkerThreadsTestSupport
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
@@ -9283,6 +9284,59 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun installAndRunProcessPoolSlotEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged process-pool slot install-and-run smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged process-pool slot install-and-run smoke")
+
+        val launchDescriptor = """
+            {
+              "launchKind": "project-entry",
+              "workingDirectory": ".",
+              "argv": ["--from-packaged-process-pool-slot"],
+              "env": {
+                "PACKAGED_PROCESS_POOL_SLOT_ENV": "slot-secret"
+              },
+              "timeoutMs": 10000,
+              "processPoolSlot": "${NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID}",
+              "processPoolSlotSource": "${NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST}"
+            }
+            """.trimIndent() + "\n"
+        val outputApk = buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-process-pool-slot-smoke",
+            outputApkName = PROCESS_POOL_SLOT_APK_NAME,
+            projectName = PROCESS_POOL_SLOT_PROJECT_NAME,
+            packageName = PROCESS_POOL_SLOT_PACKAGE_NAME,
+            mainScriptName = "process-pool-slot.js",
+            mainScript = """
+                "nodejs";
+                const ready =
+                  process.argv.includes("--from-packaged-process-pool-slot") &&
+                  process.env.PACKAGED_PROCESS_POOL_SLOT_ENV === "slot-secret";
+                console.log("packaged.process_pool_slot.ready=" + ready);
+                console.log("packaged.process_pool_slot.argv=" + process.argv.includes("--from-packaged-process-pool-slot"));
+                console.log("packaged.process_pool_slot.env=" + (process.env.PACKAGED_PROCESS_POOL_SLOT_ENV === "slot-secret"));
+            """.trimIndent() + "\n",
+            runtimeMarkers = PROCESS_POOL_SLOT_RUNTIME_MARKERS,
+            launchDescriptor = launchDescriptor,
+            launchDescriptorExpectation = PackagedNodeLaunchDescriptorExpectation(
+                launchKind = NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue,
+                workingDirectory = ".",
+                argv = listOf("--from-packaged-process-pool-slot"),
+                env = mapOf("PACKAGED_PROCESS_POOL_SLOT_ENV" to "slot-secret"),
+                timeoutMs = 10_000L,
+                processPoolSlot = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+            ),
+            requiredTemplateDexMarkers = PROCESS_POOL_SLOT_TEMPLATE_DEX_MARKERS,
+        )
+        assertInstallAndRunPackagedProcessPoolSlotSmoke(outputApk)
+    }
+
+    @Test
     fun installAndRunCrashEvidenceEmbeddedNodePackagedApk() {
         assumeTrue(
             "Embedded Node.js packaged crash evidence smoke requires embedded script execution build support.",
@@ -9445,6 +9499,8 @@ class EmbeddedNodePackagedApkSmokeTest {
         val env: Map<String, String> = emptyMap(),
         val timeoutMs: Long? = null,
         val executionMode: String? = null,
+        val processPoolSlot: String? = null,
+        val processPoolSlotSource: String? = null,
     )
 
     private fun packagedRuntimeCompatibilityDescriptorMismatchFailureCase(): PackagedLaunchFailureCase {
@@ -13481,6 +13537,16 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallAndRunPackagedProcessPoolSlotSmoke(outputApk: File) {
+        assertInstallAndRunPackagedApk(
+            outputApk = outputApk,
+            packageName = PROCESS_POOL_SLOT_PACKAGE_NAME,
+            shellApkPath = "/data/local/tmp/autojs6-packaged-node-process-pool-slot-smoke.apk",
+            label = "packaged process-pool slot smoke",
+            requiredMarkers = PROCESS_POOL_SLOT_INSTALL_REQUIRED_MARKERS,
+        )
+    }
+
     private fun assertInstallRunAndCollectPackagedCrashEvidenceSmoke(outputApk: File) {
         val publicApkPath = "$PACKAGED_SMOKE_PUBLIC_EXPORT_DIR/${outputApk.name}"
         val shellApkPath = "/data/local/tmp/autojs6-packaged-node-crash-evidence-smoke.apk"
@@ -14338,6 +14404,9 @@ $nodeConfigJson
         private const val TIMEOUT_DIAGNOSTICS_PROJECT_NAME = "PackagedNodeTimeoutDiagnosticsSmoke"
         private const val TIMEOUT_DIAGNOSTICS_PACKAGE_NAME = "org.autojs6.packaged.node.timeout.diagnostics.smoke"
         private const val TIMEOUT_DIAGNOSTICS_APK_NAME = "PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk"
+        private const val PROCESS_POOL_SLOT_PROJECT_NAME = "PackagedNodeProcessPoolSlotSmoke"
+        private const val PROCESS_POOL_SLOT_PACKAGE_NAME = "org.autojs6.packaged.node.processpoolslot.smoke"
+        private const val PROCESS_POOL_SLOT_APK_NAME = "PackagedNodeProcessPoolSlotSmoke_v1.0.0.apk"
         private const val CRASH_EVIDENCE_PROJECT_NAME = "PackagedNodeCrashEvidenceSmoke"
         private const val CRASH_EVIDENCE_PACKAGE_NAME = "org.autojs6.packaged.node.crashevidence.smoke"
         private const val CRASH_EVIDENCE_APK_NAME = "PackagedNodeCrashEvidenceSmoke_v1.0.0.apk"
@@ -14933,6 +15002,20 @@ $nodeConfigJson
             "timedOut=true",
             "pendingTimers=true",
         )
+        private val PROCESS_POOL_SLOT_RUNTIME_MARKERS = listOf(
+            "packaged.process_pool_slot.ready=true",
+            "packaged.process_pool_slot.argv=true",
+            "packaged.process_pool_slot.env=true",
+            "processPoolSlot=${NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID}",
+            "processPoolSlotSource=${NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST}",
+            "processPool=${NodeEmbeddedProcessPoolPolicy.MODE_EXPLICIT_TWO_SLOT}/${NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID}",
+        )
+        private val PROCESS_POOL_SLOT_INSTALL_REQUIRED_MARKERS = PROCESS_POOL_SLOT_RUNTIME_MARKERS
+        private val PROCESS_POOL_SLOT_TEMPLATE_DEX_MARKERS = listOf(
+            "processPoolSlot=",
+            "processPoolSlotSource=",
+            "process_pool_slot",
+        )
         private val CRASH_EVIDENCE_RUNTIME_MARKERS = listOf(
             "packaged.crash_evidence.started=true",
         )
@@ -15142,6 +15225,8 @@ $nodeConfigJson
         assertEquals("$label descriptor env", expected.env, actual.optStringMap("env"))
         assertOptionalDescriptorLong(label, expected.timeoutMs, actual, "timeoutMs")
         assertOptionalDescriptorString(label, expected.executionMode, actual, "executionMode")
+        assertOptionalDescriptorString(label, expected.processPoolSlot, actual, "processPoolSlot")
+        assertOptionalDescriptorString(label, expected.processPoolSlotSource, actual, "processPoolSlotSource")
     }
 
     private fun assertOptionalDescriptorString(
@@ -15181,6 +15266,8 @@ $nodeConfigJson
             env = optStringMap("env"),
             timeoutMs = optLongOrNull("timeoutMs"),
             executionMode = optStringOrNull("executionMode"),
+            processPoolSlot = optStringOrNull("processPoolSlot"),
+            processPoolSlotSource = optStringOrNull("processPoolSlotSource"),
         )
     }
 

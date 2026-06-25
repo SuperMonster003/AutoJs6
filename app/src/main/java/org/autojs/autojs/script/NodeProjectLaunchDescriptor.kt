@@ -55,6 +55,8 @@ object NodeProjectLaunchDescriptor {
             timeoutMs = json.optPositiveLongOrNull("timeoutMs"),
             executionMode = json.optStringOrNull("executionMode"),
             entryDirective = json.optNodeEntryDirectiveOrNull(),
+            processPoolSlot = json.optStringOrNull("processPoolSlot"),
+            processPoolSlotSource = json.optStringOrNull("processPoolSlotSource"),
         )
         return launchOptions.validateDescriptorLaunchKind(descriptorLaunchKind)
     }
