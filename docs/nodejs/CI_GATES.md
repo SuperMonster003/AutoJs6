@@ -767,7 +767,9 @@ authority, raw executable authority, and raw registry access unpromoted. The
 status/policy/sourcePolicy, dry-run planInstall/planUpdate/planRemove,
 policy-only planRegistryInstall/planTarballInstall, guarded install/update/
 remove requiring `package_manager.mutate` plus `allowMutation: true`, and
-list/verify/prune. The `npm` facade is allowed only as a guarded
+list/verify/prune. Registry plan diagnostics may parse caller-provided npm
+`metadata`/`packument`, but the gate must still keep Android registry download
+and install authority denied. The `npm` facade is allowed only as a guarded
 package-manager alias and must keep CLI/registry/lifecycle entry points denied.
 P13-42 records Android package manager parity as partial.
 `verifyNodePhase13StdlibConformanceDecision` records P13-43 as the stdlib

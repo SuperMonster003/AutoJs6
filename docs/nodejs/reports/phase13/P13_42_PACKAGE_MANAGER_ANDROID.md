@@ -52,6 +52,16 @@ unrestricted JavaScript package-manager mutation on Android. A script-visible
     install authority. They do not dispatch to the Android bridge, download
     registry metadata, fetch tarballs, extract archives, or mutate the local
     store.
+  - `planRegistryInstall(...)` can parse caller-provided npm
+    `metadata`/`packument` objects for dist-tags, versions, tarball URL,
+    integrity, and shasum, exposing a frozen
+    `autojs6-node-package-manager-registry-resolution-v1` diagnostic under
+    `resolution`. This is metadata-only planning; Android registry download,
+    cache reuse, extraction, install, and authority promotion remain blocked.
+  - `planTarballInstall(...)` exposes a frozen
+    `autojs6-node-package-manager-tarball-resolution-v1` diagnostic under
+    `resolution`, including the requested tarball URL and whether expected
+    integrity was supplied.
   - `install(...)` and `update(...)` require `package_manager.mutate`,
     `allowMutation: true`, a relative project-scoped local unpacked source, and
     `expectedIntegrity` from a dry-run plan before mutating the app-private
@@ -79,7 +89,8 @@ unrestricted JavaScript package-manager mutation on Android. A script-visible
   local Android store substrate.
 - Type declarations and TypeScript smoke now include
   `PackageManagerProfile`, source policy fields, and the guarded
-  `package_manager` / `npm` modules.
+  `package_manager` / `npm` modules, including packument input and remote
+  plan resolution diagnostics.
 - Host verifier and Gradle gate:
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
   - `:app:verifyNodePhase13PackageManagerAndroidDecision`
@@ -116,8 +127,8 @@ constrained to the local store substrate.
 - Running `npm install` or `npm i --no-bin-links` directly on Android.
 - Android registry metadata/tarball download and cache management.
 - `planRegistryInstall()` / `planTarballInstall()` beyond policy-only dry-run
-  diagnostics; they do not download, cache, extract, install, or grant
-  authority.
+  diagnostics; registry resolution uses caller-provided metadata only, and the
+  APIs do not download, cache, extract, install, or grant authority.
 - npm CLI/registry/lifecycle behavior behind the script-visible `npm` facade.
 - Unrestricted or registry-backed `package_manager.install/update/remove`
   operations.

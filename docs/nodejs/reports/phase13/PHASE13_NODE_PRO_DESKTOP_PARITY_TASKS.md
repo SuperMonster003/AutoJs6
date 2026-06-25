@@ -1391,7 +1391,10 @@ P13 task 本身使用以下执行状态：
       boundary API 暴露，返回 frozen
       `autojs6-node-package-manager-remote-plan-v1`，状态为
       `blocked_by_policy`，不触发 Android bridge、network/cache、下载、解包或
-      store mutation，也不授予 install authority。
+      store mutation，也不授予 install authority；其中 `planRegistryInstall()`
+      现在可解析调用方提供的 npm `metadata`/`packument`，输出 frozen
+      `autojs6-node-package-manager-registry-resolution-v1`，覆盖 dist-tag、
+      version、tarball URL、integrity、shasum 诊断。
     - `require("npm")` 已作为 guarded package-manager alias facade 暴露：
       `status()`/`policy()`/`sourcePolicy()` 可读，本地和 remote policy
       plan/mutation/list/verify/prune 代理到 `package_manager`，但
