@@ -135,6 +135,7 @@ object NodeBridgeProviderRegistry {
     private const val UI_PROVIDER = "ui"
     private const val UI_OVERLAY_PROVIDER = "ui.overlay"
     private const val WORK_MANAGER_PROVIDER = "work_manager"
+    private const val PACKAGE_MANAGER_PROVIDER = "package_manager"
     private const val SHELL_PROVIDER = "shell"
     private const val RHINO_PROVIDER = "rhino"
     private const val INPUT_OBSERVER_PROVIDER = "input_observer"
@@ -261,6 +262,12 @@ object NodeBridgeProviderRegistry {
             packagedSupport = packagedSupported("packaged project entries are validated and executed through WorkManager metadata"),
         ),
         provider(
+            id = PACKAGE_MANAGER_PROVIDER,
+            modules = listOf(NodeBridgeModules.PACKAGE_MANAGER),
+            capabilities = listOf(NodeBridgePermissionManifest.PACKAGE_MANAGER),
+            packagedSupport = packagedDegraded("read/verify/prune access to the app-private Android package store is live; registry, npm CLI, install/update/remove, lifecycle scripts, bin shims, and native payload execution remain unpromoted"),
+        ),
+        provider(
             id = SHELL_PROVIDER,
             modules = listOf(NodeBridgeModules.SHELL),
             capabilities = listOf(NodeBridgePermissionManifest.SHELL),
@@ -369,6 +376,7 @@ object NodeBridgeProviderRegistry {
         UI_OVERLAY_PROVIDER -> NodeBridgeProviderStatus.DEGRADED
         INPUT_OBSERVER_PROVIDER -> inputObserverStatus()
         WORK_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        PACKAGE_MANAGER_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         SHELL_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         RHINO_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
@@ -527,6 +535,20 @@ object NodeBridgeProviderRegistry {
             "rawBroadcastObjectPolicy" to "no raw BroadcastReceiver, Intent, IntentFilter, PendingIntent, Bundle, Uri, PackageManager, signature, icon, or package-list object crosses the bridge",
             "requireTasksPolicy" to "require(\"tasks\"), global tasks, and raw Rhino task objects remain unavailable until a dedicated Pro profile provider lands",
             "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
+        )
+        PACKAGE_MANAGER_PROVIDER -> linkedMapOf(
+            "liveMethods" to "list,verify,prune",
+            "blockedMethods" to "install,update,remove,npmCli,registryDownload,tarballDownload,lifecycleScripts,binLinks,nativeBuild,nativePayloadExecution",
+            "capability" to NodeBridgePermissionManifest.PACKAGE_MANAGER,
+            "store" to "app_private",
+            "androidRuntimeInstall" to "local_unpacked_only",
+            "jsBridge" to "read_maintenance_partial",
+            "integrity" to "sha512_required",
+            "transaction" to "locked_cancellable_atomic",
+            "rawRegistryAccess" to "false",
+            "rawExecutables" to "false",
+            "rawObjectPolicy" to "no raw npm CLI, registry client, package tarball stream, executable, native addon, or filesystem escape handle crosses the bridge",
+            "statusReason" to "P13-42 exposes package_manager list/verify/prune over the Android app-private local store while mutating install authority remains fail-closed",
         )
         SHELL_PROVIDER -> linkedMapOf(
             "liveBridgeMethods" to "exec",

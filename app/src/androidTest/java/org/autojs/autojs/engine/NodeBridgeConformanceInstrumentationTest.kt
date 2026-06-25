@@ -102,6 +102,19 @@ class NodeBridgeConformanceInstrumentationTest {
                   createdAtEpochMs: 1
                 };
               }
+              function packageRecord(name, version) {
+                return {
+                  schema: "autojs6-node-android-package-record-v1",
+                  name,
+                  version,
+                  kind: "dependency",
+                  integrity: "sha512-conformance",
+                  installedAtEpochMs: 1,
+                  fileCount: 1,
+                  totalBytes: 42,
+                  packageDir: "/data/user/0/org.autojs.autojs6/files/nodejs/package-manager-store"
+                };
+              }
 
               bridge.__test.setTransport({
                 postMessage(message) {
@@ -268,6 +281,25 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "schedulePeriodic") result = "work-periodic";
                     else if (method === "cancel") result = null;
                     else if (method === "list") result = [workTask("work-periodic", "periodic")];
+                  } else if (moduleName === "package_manager") {
+                    if (method === "list") result = [packageRecord("@autojs6/conformance", "1.0.0")];
+                    else if (method === "verify") {
+                      result = {
+                        operation: "verify",
+                        status: "verified",
+                        transactionId: "",
+                        message: "Package integrity verified.",
+                        record: packageRecord(request.args[0].name, request.args[0].version)
+                      };
+                    } else if (method === "prune") {
+                      result = {
+                        operation: "prune",
+                        status: "pruned",
+                        transactionId: "",
+                        message: "Removed 0 stale transaction(s).",
+                        record: null
+                      };
+                    }
                   }
                   respond(request, true, result);
                 }
@@ -452,9 +484,9 @@ class NodeBridgeConformanceInstrumentationTest {
               const packageManagerPolicy = packageManager.policy();
               assert.strictEqual(Object.isFrozen(packageManagerStatus), true, "package_manager.status result must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerPolicy), true, "package_manager.policy result must be frozen");
-              assert.strictEqual(packageManagerStatus.status, "diagnostic_only");
-              assert.strictEqual(packageManagerStatus.jsBridge, "diagnostic_only");
-              assert.strictEqual(packageManagerStatus.requirePackageManager, "diagnostic_only");
+              assert.strictEqual(packageManagerStatus.status, "read_maintenance_partial");
+              assert.strictEqual(packageManagerStatus.jsBridge, "read_maintenance_partial");
+              assert.strictEqual(packageManagerStatus.requirePackageManager, "read_maintenance_partial");
               assert.strictEqual(packageManagerStatus.grantsInstallAuthority, false);
               assert.strictEqual(packageManagerPolicy.npmCli, "denied");
               assert.strictEqual(packageManagerPolicy.registryDownload, "deferred");
@@ -667,11 +699,21 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
               assert.strictEqual((await expectPromise("work_manager.list", workManager.list({ timeoutMs: 1058 }))).length, 1);
-              ["install", "update", "remove", "list", "verify", "prune"].forEach((methodName) => {
+              ["install", "update", "remove"].forEach((methodName) => {
                 expectThrowCode("package_manager." + methodName, function() {
                   packageManager[methodName]({ name: "@autojs6/conformance", version: "1.0.0" });
                 }, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED");
               });
+              const packageList = await expectPromise("package_manager.list", packageManager.list({ timeoutMs: 1059 }));
+              assert.strictEqual(Object.isFrozen(packageList), true);
+              assert.strictEqual(packageList[0].name, "@autojs6/conformance");
+              assert.strictEqual(Object.isFrozen(packageList[0]), true);
+              const verifyResult = await expectPromise("package_manager.verify", packageManager.verify({ name: "@autojs6/conformance", version: "1.0.0", timeoutMs: 1060 }));
+              assert.strictEqual(verifyResult.status, "verified");
+              assert.strictEqual(verifyResult.record.name, "@autojs6/conformance");
+              assert.strictEqual(Object.isFrozen(verifyResult), true);
+              const pruneResult = await expectPromise("package_manager.prune", packageManager.prune({ maxTransactionAgeMs: 0, timeoutMs: 1061 }));
+              assert.strictEqual(pruneResult.status, "pruned");
               const compatTaskId = await expectPromise("compat.tasks.addDisposableTask", compat.tasks.addDisposableTask({ path: "main.cjs", delayMs: 0, timeoutMs: 1059 }));
               assert.strictEqual(compatTaskId, "work-once");
               assert.strictEqual((await expectPromise("compat.tasks.queryTasks", compat.tasks.queryTasks({ timeoutMs: 1060 }))).length, 0);
@@ -740,7 +782,10 @@ class NodeBridgeConformanceInstrumentationTest {
                 "ui.close",
                 "work_manager.scheduleOnce",
                 "work_manager.cancel",
-                "work_manager.list"
+                "work_manager.list",
+                "package_manager.list",
+                "package_manager.verify",
+                "package_manager.prune"
               ].forEach((entry) => assert(trace.indexOf(entry) >= 0, "missing request " + entry));
               console.log("bridge.conformance.request_count=" + requests.length);
               console.log("bridge.conformance.pending=" + bridge.__test.pendingCount());
@@ -944,6 +989,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.UI to setOf("showLayout", "update", "batchUpdate", "close", "drainEvents"),
             NodeBridgeModules.INPUT_OBSERVER to setOf("observeKeys", "drainEvents", "close", "getAvailableSources"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
+            NodeBridgeModules.PACKAGE_MANAGER to setOf("list", "verify", "prune"),
         )
     }
 }

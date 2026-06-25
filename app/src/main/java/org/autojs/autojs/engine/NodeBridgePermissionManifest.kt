@@ -45,6 +45,7 @@ object NodeBridgePermissionManifest {
     const val SHELL_SHIZUKU = "shell.shizuku"
     const val NETWORK = "network"
     const val WORK_MANAGER = "work_manager"
+    const val PACKAGE_MANAGER = "package_manager"
     const val JAVA_INTEROP = "java_interop"
     const val RHINO = "rhino"
     const val INPUT_OBSERVER = "input_observer"
@@ -101,6 +102,7 @@ object NodeBridgePermissionManifest {
         SHELL_SHIZUKU,
         NETWORK,
         WORK_MANAGER,
+        PACKAGE_MANAGER,
         JAVA_INTEROP,
         RHINO,
         INPUT_OBSERVER,
@@ -158,6 +160,10 @@ object NodeBridgePermissionManifest {
         "shell-shizuku" to SHELL_SHIZUKU,
         "storages" to STORAGE,
         "sqlite" to DATABASE,
+        "package-manager" to PACKAGE_MANAGER,
+        "package.manager" to PACKAGE_MANAGER,
+        "android_package_manager" to PACKAGE_MANAGER,
+        "android-package-manager" to PACKAGE_MANAGER,
         "java" to JAVA_INTEROP,
         "rhino.run" to RHINO,
         "input-observer" to INPUT_OBSERVER,
@@ -346,6 +352,7 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)
             NodeBridgeModules.FETCH, NodeBridgeModules.WEBSOCKET -> listOf(NETWORK)
             NodeBridgeModules.WORK_MANAGER -> listOf(WORK_MANAGER)
+            NodeBridgeModules.PACKAGE_MANAGER -> listOf(PACKAGE_MANAGER)
             NodeBridgeModules.JAVA -> listOf(JAVA_INTEROP)
             NodeBridgeModules.RHINO -> listOf(RHINO)
             NodeBridgeModules.INPUT_OBSERVER -> when (method) {

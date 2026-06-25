@@ -14,7 +14,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(19, definitions.size)
+        assertEquals(20, definitions.size)
         assertProvider(
             id = "fetch",
             modules = listOf(NodeBridgeModules.FETCH),
@@ -64,6 +64,11 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             id = "work_manager",
             modules = listOf(NodeBridgeModules.WORK_MANAGER),
             capabilities = listOf(NodeBridgePermissionManifest.WORK_MANAGER),
+        )
+        assertProvider(
+            id = "package_manager",
+            modules = listOf(NodeBridgeModules.PACKAGE_MANAGER),
+            capabilities = listOf(NodeBridgePermissionManifest.PACKAGE_MANAGER),
         )
         assertProvider(
             id = "input_observer",
@@ -119,6 +124,9 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals(NodeBridgePermissionManifest.DEVICE_POWER, healthById.getValue("device").details.getValue("powerCapability"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("work_manager").status)
         assertEquals(NodeWorkManagerBridgeScheduler.SCHEDULER_NAME, healthById.getValue("work_manager").details.getValue("scheduler"))
+        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("package_manager").status)
+        assertEquals("read_maintenance_partial", healthById.getValue("package_manager").details.getValue("jsBridge"))
+        assertTrue(healthById.getValue("package_manager").details.getValue("liveMethods").contains("verify"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)
         assertTrue(
             healthById.getValue("accessibility").status in setOf(
@@ -142,6 +150,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         }
         assertEquals("supported", healthById.getValue("storage").definition.packagedSupport.status.wireName)
         assertEquals("supported", healthById.getValue("work_manager").definition.packagedSupport.status.wireName)
+        assertEquals("degraded", healthById.getValue("package_manager").definition.packagedSupport.status.wireName)
         assertEquals("unsupported", healthById.getValue("media_projection").definition.packagedSupport.status.wireName)
     }
 

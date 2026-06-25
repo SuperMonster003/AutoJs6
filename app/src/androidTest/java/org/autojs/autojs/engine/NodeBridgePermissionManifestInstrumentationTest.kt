@@ -142,6 +142,12 @@ class NodeBridgePermissionManifestInstrumentationTest {
             )
         }
         assertEquals(NodeBridgePermissionManifest.DATABASE, NodeBridgePermissionManifest.normalizeCapability("sqlite"))
+        assertEquals(NodeBridgePermissionManifest.PACKAGE_MANAGER, NodeBridgePermissionManifest.normalizeCapability("package-manager"))
+        assertEquals(NodeBridgePermissionManifest.PACKAGE_MANAGER, NodeBridgePermissionManifest.normalizeCapability("android_package_manager"))
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.PACKAGE_MANAGER),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("package_manager", "verify"),
+        )
         assertEquals(
             listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("notifications", "notify"),

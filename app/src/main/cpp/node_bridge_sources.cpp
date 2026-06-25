@@ -8907,8 +8907,8 @@ std::string buildEmbeddedScriptExecutionSource(
         transaction: "locked_cancellable_atomic",
         operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
         packageKinds: Object.freeze(["dependency", "plugin", "project"]),
-        jsBridge: "diagnostic_only",
-        requirePackageManager: "diagnostic_only",
+        jsBridge: "read_maintenance_partial",
+        requirePackageManager: "read_maintenance_partial",
         diagnosticFacade: "available",
         packagedBehavior: "not_promoted",
         androidNetwork: "denied",
@@ -9905,6 +9905,14 @@ std::string buildEmbeddedScriptExecutionSource(
     if (text === "sqlite") {
       return "database";
     }
+    if (
+      text === "package-manager" ||
+      text === "package.manager" ||
+      text === "android_package_manager" ||
+      text === "android-package-manager"
+    ) {
+      return "package_manager";
+    }
     return text;
   }
   function __autojs6_bridge_freeze_string_array(value) {
@@ -10424,6 +10432,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (moduleName === "shell") return ["shell"];
     if (moduleName === "fetch" || moduleName === "websocket") return ["network"];
     if (moduleName === "work_manager") return ["work_manager"];
+    if (moduleName === "package_manager") return ["package_manager"];
     if (moduleName === "java") return ["java_interop"];
     if (moduleName === "rhino") return ["rhino"];
     return [];
@@ -10465,6 +10474,14 @@ std::string buildEmbeddedScriptExecutionSource(
     if (text === "worker" || text === "workers" || text === "worker_threads" || text === "workerthreads") return "worker";
     if (text === "network" || text === "net" || text === "http" || text === "https") return "network";
     if (text === "shell") return "shell";
+    if (
+      text === "package_manager" ||
+      text === "package.manager" ||
+      text === "package-manager" ||
+      text === "android_package_manager" ||
+      text === "android.package.manager" ||
+      text === "android-package-manager"
+    ) return "package_manager";
     if (text === "accessibility") return "accessibility";
     if (
       text === "screen_capture" ||
@@ -25859,7 +25876,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   const __autojs6_package_manager_policy = Object.freeze({
     schema: "autojs6-node-package-manager-policy-v1",
-    status: "diagnostic_only",
+    status: "read_maintenance_partial",
     androidStore: "local_app_private_partial",
     androidRuntimeInstall: "local_unpacked_only",
     npmCli: "denied",
@@ -25886,7 +25903,7 @@ std::string buildEmbeddedScriptExecutionSource(
   });
   function __autojs6_package_manager_not_promoted(methodName) {
     return __autojs6_error(
-      "package_manager." + methodName + " is diagnostic-only in the current AutoJs6 Node profile; Android runtime package installation is not promoted.",
+      "package_manager." + methodName + " is not promoted in the current AutoJs6 Node profile; Android runtime package installation remains fail-closed.",
       "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"
     );
   }
@@ -25894,6 +25911,84 @@ std::string buildEmbeddedScriptExecutionSource(
     return function() {
       throw __autojs6_package_manager_not_promoted(methodName);
     };
+  }
+  function __autojs6_package_manager_options(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+  function __autojs6_package_manager_timeout_from_options(options, fallbackMs) {
+    return options && typeof options === "object" && options.timeoutMs !== undefined
+      ? options.timeoutMs
+      : fallbackMs;
+  }
+  function __autojs6_package_manager_invalid_request(methodName, message) {
+    return __autojs6_bridge_error(
+      message,
+      "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST",
+      "package_manager",
+      methodName
+    );
+  }
+  function __autojs6_package_manager_string(value) {
+    return value === undefined || value === null ? "" : String(value);
+  }
+  function __autojs6_package_manager_record(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      schema: __autojs6_package_manager_string(source.schema || "autojs6-node-android-package-record-v1"),
+      name: __autojs6_package_manager_string(source.name),
+      version: __autojs6_package_manager_string(source.version),
+      kind: __autojs6_package_manager_string(source.kind || "dependency"),
+      integrity: __autojs6_package_manager_string(source.integrity),
+      installedAtEpochMs: Number(source.installedAtEpochMs) || 0,
+      fileCount: Number(source.fileCount) || 0,
+      totalBytes: Number(source.totalBytes) || 0,
+      packageDir: __autojs6_package_manager_string(source.packageDir)
+    });
+  }
+  function __autojs6_package_manager_operation_result(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      operation: __autojs6_package_manager_string(source.operation),
+      status: __autojs6_package_manager_string(source.status),
+      transactionId: __autojs6_package_manager_string(source.transactionId),
+      message: __autojs6_package_manager_string(source.message),
+      record: source.record && typeof source.record === "object"
+        ? __autojs6_package_manager_record(source.record)
+        : null
+    });
+  }
+  function __autojs6_package_manager_bridge_options(input, fallbackMs) {
+    return {
+      timeoutMs: __autojs6_package_manager_timeout_from_options(input, fallbackMs),
+      permissions: ["package_manager"],
+      signal: __autojs6_bridge_signal_from_options(input)
+    };
+  }
+  function __autojs6_package_manager_verify_request(value) {
+    const input = __autojs6_package_manager_options(value);
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    if (!name || !version) {
+      throw __autojs6_package_manager_invalid_request(
+        "verify",
+        "package_manager.verify requires non-empty name and version."
+      );
+    }
+    return { name, version };
+  }
+  function __autojs6_package_manager_prune_request(value) {
+    const input = __autojs6_package_manager_options(value);
+    if (input.maxTransactionAgeMs === undefined || input.maxTransactionAgeMs === null || input.maxTransactionAgeMs === "") {
+      return {};
+    }
+    const ageMs = Number(input.maxTransactionAgeMs);
+    if (!Number.isFinite(ageMs) || ageMs < 0) {
+      throw __autojs6_package_manager_invalid_request(
+        "prune",
+        "package_manager.prune maxTransactionAgeMs must be a finite non-negative number."
+      );
+    }
+    return { maxTransactionAgeMs: Math.trunc(ageMs) };
   }
   function __autojs6_limited_package_manager() {
     if (__autojs6_limited_package_manager_cache) {
@@ -25903,7 +25998,7 @@ std::string buildEmbeddedScriptExecutionSource(
       const profile = __autojs6_profile().packageManagerProfile;
       return Object.freeze({
         schema: "autojs6-node-package-manager-status-v1",
-        status: "diagnostic_only",
+        status: "read_maintenance_partial",
         profileStatus: profile.status,
         hostPackageManager: profile.hostPackageManager,
         androidStore: profile.androidStore,
@@ -25927,15 +26022,56 @@ std::string buildEmbeddedScriptExecutionSource(
     function policy() {
       return __autojs6_package_manager_policy;
     }
+    function list(options) {
+      const input = __autojs6_package_manager_options(options);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "list",
+        [],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(function(result) {
+        return Object.freeze((Array.isArray(result) ? result : []).map(__autojs6_package_manager_record));
+      });
+    }
+    function verify(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_verify_request(request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "verify",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_operation_result);
+    }
+    function prune(options) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_prune_request(options);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(options);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "prune",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_operation_result);
+    }
     __autojs6_limited_package_manager_cache = Object.freeze({
       status,
       policy,
       install: __autojs6_package_manager_denied("install"),
       update: __autojs6_package_manager_denied("update"),
       remove: __autojs6_package_manager_denied("remove"),
-      list: __autojs6_package_manager_denied("list"),
-      verify: __autojs6_package_manager_denied("verify"),
-      prune: __autojs6_package_manager_denied("prune")
+      list,
+      verify,
+      prune
     });
     return __autojs6_limited_package_manager_cache;
   }

@@ -581,6 +581,7 @@ object NodeBridgeModules {
     const val FETCH = "fetch"
     const val WEBSOCKET = "websocket"
     const val WORK_MANAGER = "work_manager"
+    const val PACKAGE_MANAGER = "package_manager"
     const val JAVA = "java"
     const val RHINO = "rhino"
     const val INPUT_OBSERVER = "input_observer"
@@ -640,6 +641,7 @@ object NodeBridgeModules {
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
+    val packageManagerMethods = setOf("list", "verify", "prune")
     val javaMethods = setOf("type", "callStatic", "new", "call", "callInstance", "getField", "release", "dispose")
     val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
@@ -672,6 +674,7 @@ object NodeBridgeModules {
         FETCH to fetchMethods,
         WEBSOCKET to websocketMethods,
         WORK_MANAGER to workManagerMethods,
+        PACKAGE_MANAGER to packageManagerMethods,
         JAVA to javaMethods,
         RHINO to rhinoMethods,
         INPUT_OBSERVER to inputObserverMethods,
@@ -744,6 +747,9 @@ class AndroidNodeBridgeCapabilityProvider(
         Thread(runnable, "AutoJs6NodeDatabase").apply { isDaemon = true }
     }
     private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
+    private val packageInstallManager by lazy {
+        NodeAndroidPackageInstallManager(File(appContext.filesDir, "nodejs/package-manager-store"))
+    }
     private val javaHandles = ConcurrentHashMap<String, Any>()
     private val notificationHandles = ConcurrentHashMap<Int, NodeBridgeResourceHandle>()
     private val notificationIdCounter = AtomicInteger(1_000_000)
@@ -803,6 +809,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.FETCH && request.method in NodeBridgeModules.fetchMethods -> dispatchFetch(request, auditedCallback)
             request.module == NodeBridgeModules.WEBSOCKET && request.method in NodeBridgeModules.websocketMethods -> dispatchWebSocket(request, auditedCallback)
             request.module == NodeBridgeModules.WORK_MANAGER && request.method in NodeBridgeModules.workManagerMethods -> dispatchWorkManager(request, auditedCallback)
+            request.module == NodeBridgeModules.PACKAGE_MANAGER && request.method in NodeBridgeModules.packageManagerMethods -> dispatchPackageManager(request, auditedCallback)
             request.module == NodeLifecycleCheckpointStore.BRIDGE_MODULE_NAME -> dispatchLifecycle(request, auditedCallback)
             request.module == NodeBridgeModules.JAVA && request.method in NodeBridgeModules.javaMethods -> dispatchJava(request, auditedCallback)
             request.module == NodeBridgeModules.RHINO && request.method in NodeBridgeModules.rhinoMethods -> dispatchRhino(request, auditedCallback)
@@ -831,6 +838,8 @@ class AndroidNodeBridgeCapabilityProvider(
         put("embedded_script.input_observer_live_listener_count", inputObserverSubscriptions.values.sumOf { it.liveListenerCount() }.toString())
         putAll(NodeLifecycleCheckpointStore.nativeDiagnostics(appContext, engineInfo))
         put("embedded_script.java_interop_handle_count", javaHandles.size.toString())
+        put("embedded_script.package_manager_record_count", runCatching { packageInstallManager.list().size }.getOrDefault(0).toString())
+        putAll(packageInstallManager.nativeValues())
         putAll(capabilityBrokerAudit.nativeDiagnostics())
         putAll(resourceRegistry.nativeDiagnostics())
         putAll(bridgeLimits.nativeDiagnostics())
@@ -857,6 +866,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 "ui.overlay" to overlaySessionIds.size,
                 "input_observer" to inputObserverSubscriptions.size,
                 "work_manager" to workManagerTasks.size,
+                "package_manager" to runCatching { packageInstallManager.list().size }.getOrDefault(0),
                 "shell" to activeShellCommands.get(),
             ),
         )
@@ -3398,6 +3408,94 @@ class AndroidNodeBridgeCapabilityProvider(
                 method = request.method,
             ),
         )
+    }
+
+    private fun dispatchPackageManager(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val response = runCatching {
+            when (request.method) {
+                "list" -> NodeBridgeResponse.success(
+                    request.id,
+                    NodeAndroidPackageInstallManager.recordsToJson(packageInstallManager.list()).toString(),
+                )
+                "verify" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.verify requires a JSON request with name and version.",
+                        )
+                    val name = payload.optString("name").trim()
+                    val version = payload.optString("version").trim()
+                    if (name.isBlank() || version.isBlank()) {
+                        return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.verify requires non-empty name and version.",
+                        )
+                    }
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.verify(name, version).toJson().toString(),
+                    )
+                }
+                "prune" -> {
+                    val payload = request.firstObjectArg()
+                    val maxTransactionAgeMs = packageManagerMaxTransactionAgeMs(payload)
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.prune(maxTransactionAgeMs).toJson().toString(),
+                    )
+                }
+                else -> unavailable(request)
+            }
+        }.getOrElse { error ->
+            NodeBridgeResponse.failure(request.id, packageManagerError(request, error))
+        }
+        callback(response)
+    }
+
+    private fun packageManagerMaxTransactionAgeMs(payload: JSONObject?): Long {
+        if (payload == null || !payload.has("maxTransactionAgeMs") || payload.isNull("maxTransactionAgeMs")) {
+            return 0L
+        }
+        val value = payload.opt("maxTransactionAgeMs")
+        return when (value) {
+            is Int -> value.toLong()
+            is Long -> value
+            is Number -> value.toLong()
+            is String -> value.toLongOrNull()
+            else -> null
+        }?.coerceAtLeast(0L) ?: throw IllegalArgumentException("package_manager.prune maxTransactionAgeMs must be a finite non-negative integer.")
+    }
+
+    private fun packageManagerInvalidRequest(request: NodeBridgeRequest, message: String): NodeBridgeResponse {
+        return NodeBridgeResponse.failure(
+            request.id,
+            NodeBridgeError.invalidRequest(
+                message = message,
+                module = request.module,
+                method = request.method,
+            ),
+        )
+    }
+
+    private fun packageManagerError(request: NodeBridgeRequest, error: Throwable): NodeBridgeError {
+        return when (error) {
+            is NodeAndroidPackageInstallManager.PackageInstallException -> NodeBridgeError.providerFailed(
+                message = error.message,
+                module = request.module,
+                method = request.method,
+                code = error.code,
+            )
+            is IllegalArgumentException -> NodeBridgeError.invalidRequest(
+                message = error.message ?: "package_manager request is malformed.",
+                module = request.module,
+                method = request.method,
+            )
+            else -> NodeBridgeError.providerFailed(
+                message = error.message ?: "Android package manager operation failed.",
+                module = request.module,
+                method = request.method,
+            )
+        }
     }
 
     private fun dispatchLifecycle(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
