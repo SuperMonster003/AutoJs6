@@ -60,6 +60,8 @@ declare namespace AutoJs6Node {
     readonly androidStore: "local_app_private_partial" | string;
     readonly androidRuntimeInstall: "local_unpacked_only" | string;
     readonly npmCli: "denied" | "debug_only" | "partial" | string;
+    readonly npmFacade: "guarded_package_manager_alias" | string;
+    readonly requireNpm: "guarded_package_manager_alias" | string;
     readonly npmInstallEquivalent: "host_managed_plus_android_store_substrate" | string;
     readonly registryDownload: "deferred" | "denied" | "partial" | string;
     readonly tarballInstall: "host_side_only" | "partial" | string;
@@ -81,6 +83,7 @@ declare namespace AutoJs6Node {
     readonly deniedSources: readonly string[];
     readonly planOperations: readonly string[];
     readonly mutationOperations: readonly string[];
+    readonly npmFacadeOperations: readonly string[];
     readonly mutationCapability: "package_manager.mutate" | string;
     readonly mutationConfirmation: "allowMutation_required" | string;
     readonly operations: readonly string[];

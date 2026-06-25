@@ -406,6 +406,7 @@ class NodeBridgeConformanceInstrumentationTest {
               const ui = require("ui");
               const workManager = require("work_manager");
               const packageManager = require("package_manager");
+              const npm = require("npm");
               const compat = require("autojs6:compat");
               const jsox = require("jsox");
               const jsoxMathx = require("jsox.mathx");
@@ -436,6 +437,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["ui", ui],
                 ["work_manager", workManager],
                 ["package_manager", packageManager],
+                ["npm", npm],
                 ["jsox", jsox],
                 ["jsox.mathx", jsoxMathx],
                 ["jsox.mathx.alias", jsox.mathx],
@@ -476,6 +478,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
               expectExports("package_manager", packageManager, ["status", "policy", "sourcePolicy", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune"]);
+              expectExports("npm", npm, ["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript", "installFromRegistry", "publish", "pack"]);
               expectExports("jsox", jsox, ["extend", "extendAll", "status"]);
               expectExports("jsox.mathx", jsoxMathx, ["randInt", "randomInt", "randFloat", "randomFloat", "random", "sum", "mean", "avg", "median", "var", "std", "cv", "mode", "dist", "logMn", "floorLog", "ceilLog", "roundLog", "floorPow", "ceilPow", "roundPow", "max", "maxi", "min", "mini"]);
               expectExports("autojs6:compat.jsox", compat.jsox, ["extend", "extendAll", "status"]);
@@ -531,9 +534,13 @@ class NodeBridgeConformanceInstrumentationTest {
               const packageManagerStatus = packageManager.status();
               const packageManagerPolicy = packageManager.policy();
               const packageManagerSourcePolicy = packageManager.sourcePolicy();
+              const npmStatus = npm.status();
+              const npmPolicy = npm.policy();
               assert.strictEqual(Object.isFrozen(packageManagerStatus), true, "package_manager.status result must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerPolicy), true, "package_manager.policy result must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy), true, "package_manager.sourcePolicy result must be frozen");
+              assert.strictEqual(Object.isFrozen(npmStatus), true, "npm.status result must be frozen");
+              assert.strictEqual(Object.isFrozen(npmPolicy), true, "npm.policy result must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.allowedSources), true, "package_manager.sourcePolicy allowedSources must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.deniedSources), true, "package_manager.sourcePolicy deniedSources must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.localUnpacked), true, "package_manager.sourcePolicy localUnpacked must be frozen");
@@ -553,6 +560,15 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(packageManagerSourcePolicy.status, "guarded_local_unpacked_mutation");
               assert.strictEqual(packageManagerSourcePolicy.grantsInstallAuthority, true);
               assert.strictEqual(packageManagerSourcePolicy.registry.rawRegistryAccess, false);
+              assert.strictEqual(packageManagerPolicy.npmFacade, "guarded_package_manager_alias");
+              assert.strictEqual(packageManagerPolicy.requireNpm, "guarded_package_manager_alias");
+              assert.strictEqual(npmStatus.status, "guarded_package_manager_alias");
+              assert.strictEqual(npmStatus.aliasFor, "package_manager");
+              assert.strictEqual(npmStatus.npmCli, "denied");
+              assert.strictEqual(npmPolicy.cli, "denied");
+              assert.strictEqual(npmPolicy.registryDownload, "deferred");
+              assert.strictEqual(npmPolicy.rawRegistryAccess, false);
+              assert.strictEqual(npm.packageManager(), packageManager);
               assert.strictEqual(engines.myEngine().engineName, "nodejs");
 
               await expectPromise("toast.showToast", toast.showToast("hello", { timeoutMs: 1010 }));
@@ -766,6 +782,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 packageManager.install({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", expectedIntegrity: "sha512-conformance" }),
                 "ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED"
               );
+              await expectRejectCode("npm.cli", Promise.resolve().then(() => npm.cli(["install"])), "ERR_AUTOJS6_NPM_CLI_DENIED");
+              await expectRejectCode("npm.installFromRegistry", Promise.resolve().then(() => npm.installFromRegistry("@autojs6/conformance")), "ERR_AUTOJS6_NPM_REGISTRY_DENIED");
               const planInstallResult = await expectPromise("package_manager.planInstall", packageManager.planInstall({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", timeoutMs: 1059 }));
               assert.strictEqual(planInstallResult.status, "ready");
               assert.strictEqual(planInstallResult.dryRun, true);
@@ -786,6 +804,8 @@ class NodeBridgeConformanceInstrumentationTest {
               const removeResult = await expectPromise("package_manager.remove", packageManager.remove({ name: "@autojs6/conformance", version: "1.0.0", expectedIntegrity: planRemoveResult.existingRecord.integrity, allowMutation: true, timeoutMs: 1059 }));
               assert.strictEqual(removeResult.status, "removed");
               const packageList = await expectPromise("package_manager.list", packageManager.list({ timeoutMs: 1059 }));
+              const npmPackageList = await expectPromise("npm.list", npm.list({ timeoutMs: 1059 }));
+              assert.strictEqual(Object.isFrozen(npmPackageList), true);
               assert.strictEqual(Object.isFrozen(packageList), true);
               assert.strictEqual(packageList[0].name, "@autojs6/conformance");
               assert.strictEqual(Object.isFrozen(packageList[0]), true);

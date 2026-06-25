@@ -134,6 +134,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertTrue(healthById.getValue("package_manager").details.getValue("liveMethods").contains("install"))
         assertEquals("planInstall,planUpdate,planRemove", healthById.getValue("package_manager").details.getValue("planOperations"))
         assertEquals("install,update,remove", healthById.getValue("package_manager").details.getValue("mutationOperations"))
+        assertEquals("guarded_package_manager_alias_no_cli", healthById.getValue("package_manager").details.getValue("npmFacade"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)
         assertTrue(
             healthById.getValue("accessibility").status in setOf(

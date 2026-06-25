@@ -265,7 +265,7 @@ object NodeBridgeProviderRegistry {
             id = PACKAGE_MANAGER_PROVIDER,
             modules = listOf(NodeBridgeModules.PACKAGE_MANAGER),
             capabilities = listOf(NodeBridgePermissionManifest.PACKAGE_MANAGER),
-            packagedSupport = packagedDegraded("read/verify/prune access to the app-private Android package store is live; registry, npm CLI, install/update/remove, lifecycle scripts, bin shims, and native payload execution remain unpromoted"),
+            packagedSupport = packagedDegraded("guarded install/update/remove/list/verify/prune access to the app-private Android package store is live; registry, npm CLI, lifecycle scripts, bin shims, and native payload execution remain unpromoted"),
         ),
         provider(
             id = SHELL_PROVIDER,
@@ -551,6 +551,7 @@ object NodeBridgeProviderRegistry {
             "allowedSources" to "local_unpacked_host_managed",
             "planOperations" to "planInstall,planUpdate,planRemove",
             "mutationOperations" to "install,update,remove",
+            "npmFacade" to "guarded_package_manager_alias_no_cli",
             "mutationConfirmation" to "allowMutation_required",
             "installAuthority" to NodeAndroidPackageInstallManager.INSTALL_AUTHORITY,
             "remoteTarballInstall" to "disabled",

@@ -61,6 +61,8 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   packageManagerProfile.androidStore,
                   packageManagerProfile.androidRuntimeInstall,
                   packageManagerProfile.npmCli,
+                  packageManagerProfile.npmFacade,
+                  packageManagerProfile.requireNpm,
                   packageManagerProfile.npmInstallEquivalent,
                   packageManagerProfile.registryDownload,
                   packageManagerProfile.tarballInstall,
@@ -82,6 +84,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   Array.isArray(packageManagerProfile.deniedSources) && packageManagerProfile.deniedSources.join(","),
                   Array.isArray(packageManagerProfile.planOperations) && packageManagerProfile.planOperations.join(","),
                   Array.isArray(packageManagerProfile.mutationOperations) && packageManagerProfile.mutationOperations.join(","),
+                  Array.isArray(packageManagerProfile.npmFacadeOperations) && packageManagerProfile.npmFacadeOperations.join(","),
                   packageManagerProfile.mutationCapability,
                   packageManagerProfile.mutationConfirmation,
                   Array.isArray(packageManagerProfile.operations) && packageManagerProfile.operations.join(","),
@@ -98,6 +101,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   Object.isFrozen(packageManagerProfile.deniedSources),
                   Object.isFrozen(packageManagerProfile.planOperations),
                   Object.isFrozen(packageManagerProfile.mutationOperations),
+                  Object.isFrozen(packageManagerProfile.npmFacadeOperations),
                   Object.isFrozen(packageManagerProfile.operations),
                   Object.isFrozen(packageManagerProfile.packageKinds)
                 ].join("|"));
@@ -123,8 +127,9 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
         assertTrue(
             result.stdout,
             result.stdout.contains(
-                "p13pm.profile=android_substrate_partial|false|desktop_compat_opt_in|" +
+                    "p13pm.profile=android_substrate_partial|false|desktop_compat_opt_in|" +
                     "available|local_app_private_partial|local_unpacked_only|denied|" +
+                    "guarded_package_manager_alias|guarded_package_manager_alias|" +
                     "host_managed_plus_android_store_substrate|deferred|host_side_only|" +
                     "autojs6_lock_host_managed|sha512_required|denied|not_promoted|denied|" +
                     "denied|denied|denied|denied|transactional_store_only|" +
@@ -132,15 +137,17 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "local_unpacked_host_managed_only|package_manager_mutate_explicit_local_unpacked|" +
                     "local_unpacked_host_managed|" +
                     "raw_registry,remote_tarball,git,http_url,file_url,workspace_symlink,unverified_cache|" +
-                    "planInstall,planUpdate,planRemove|install,update,remove|package_manager.mutate|allowMutation_required|" +
+                    "planInstall,planUpdate,planRemove|install,update,remove|" +
+                    "status,policy,sourcePolicy,packageManager,planInstall,planUpdate,planRemove,install,update,remove,list,verify,prune,cli,exec,runScript|" +
+                    "package_manager.mutate|allowMutation_required|" +
                     "install,update,remove,list,verify,prune|" +
                     "dependency,plugin,project|guarded_mutation_partial|guarded_mutation_partial|not_promoted|denied|" +
-                    "false|false|true|true|true|true|true|true|true|true",
+                    "false|false|true|true|true|true|true|true|true|true|true",
             ),
         )
         assertTrue(
             result.stdout,
-            result.stdout.contains("p13pm.boundary=undefined|undefined|undefined|true|false|false|false|false|false|true"),
+            result.stdout.contains("p13pm.boundary=undefined|undefined|undefined|true|true|false|false|false|false|true"),
         )
     }
 
@@ -156,15 +163,28 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   const fs = require("fs");
                   const path = require("path");
                   const packageManager = require("package_manager");
+                  const npm = require("npm");
                   const status = packageManager.status();
                   const policy = packageManager.policy();
                   const sourcePolicy = packageManager.sourcePolicy();
+                  const npmStatus = npm.status();
+                  const npmPolicy = npm.policy();
+                  const npmSourcePolicy = npm.sourcePolicy();
 
                   assert.strictEqual(Object.isFrozen(packageManager), true);
+                  assert.strictEqual(Object.isFrozen(npm), true);
                   assert.strictEqual(Object.isFrozen(status), true);
                   assert.strictEqual(Object.isFrozen(policy), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy), true);
+                  assert.strictEqual(Object.isFrozen(npmStatus), true);
+                  assert.strictEqual(Object.isFrozen(npmPolicy), true);
+                  assert.strictEqual(Object.isFrozen(npmSourcePolicy), true);
                   assert.strictEqual(Object.isFrozen(status.operations), true);
+                  assert.strictEqual(Object.isFrozen(status.npmFacadeOperations), true);
+                  assert.strictEqual(Object.isFrozen(npmStatus.operations), true);
+                  assert.strictEqual(Object.isFrozen(npmStatus.delegatedOperations), true);
+                  assert.strictEqual(Object.isFrozen(npmPolicy.operations), true);
+                  assert.strictEqual(Object.isFrozen(npmPolicy.delegatedOperations), true);
                   assert.strictEqual(Object.isFrozen(policy.operations), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.allowedSources), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.deniedSources), true);
@@ -194,6 +214,10 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(policy.mutationCapability, "package_manager.mutate");
                   assert.strictEqual(policy.mutationConfirmation, "allowMutation_required");
                   assert.strictEqual(policy.requiresExpectedIntegrity, true);
+                  assert.strictEqual(policy.npmFacade, "guarded_package_manager_alias");
+                  assert.strictEqual(policy.requireNpm, "guarded_package_manager_alias");
+                  assert.strictEqual(Object.isFrozen(policy.npmFacadeOperations), true);
+                  assert.deepStrictEqual(policy.npmFacadeOperations, ["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"]);
                   assert.strictEqual(sourcePolicy.schema, "autojs6-node-package-manager-source-policy-v1");
                   assert.strictEqual(sourcePolicy.status, "guarded_local_unpacked_mutation");
                   assert.strictEqual(sourcePolicy.grantsInstallAuthority, true);
@@ -212,6 +236,25 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(sourcePolicy.npmCli.status, "denied");
                   assert.deepStrictEqual(status.operations, ["install", "update", "remove", "list", "verify", "prune"]);
                   assert.deepStrictEqual(policy.packageKinds, ["dependency", "plugin", "project"]);
+                  assert.strictEqual(npmStatus.schema, "autojs6-node-npm-facade-status-v1");
+                  assert.strictEqual(npmStatus.status, "guarded_package_manager_alias");
+                  assert.strictEqual(npmStatus.aliasFor, "package_manager");
+                  assert.strictEqual(npmStatus.npmCli, "denied");
+                  assert.strictEqual(npmStatus.registryDownload, "deferred");
+                  assert.strictEqual(npmStatus.rawRegistryAccess, false);
+                  assert.strictEqual(npmStatus.packageManagerStatus, "guarded_mutation_partial");
+                  assert.strictEqual(npmStatus.mutationCapability, "package_manager.mutate");
+                  assert.strictEqual(npmPolicy.schema, "autojs6-node-npm-facade-policy-v1");
+                  assert.strictEqual(npmPolicy.status, "guarded_package_manager_alias");
+                  assert.strictEqual(npmPolicy.cli, "denied");
+                  assert.strictEqual(npmPolicy.registryDownload, "deferred");
+                  assert.strictEqual(npmPolicy.lifecycleScripts, "denied");
+                  assert.strictEqual(npmPolicy.rawRegistryAccess, false);
+                  assert.strictEqual(npmPolicy.packageManager.status, "guarded_mutation_partial");
+                  assert.strictEqual(npmSourcePolicy.status, "guarded_local_unpacked_mutation");
+                  assert.strictEqual(npm.packageManager(), packageManager);
+                  assert.strictEqual(npm.planInstall, packageManager.planInstall);
+                  assert.strictEqual(npm.install, packageManager.install);
 
                   async function rejectionCode(methodName, request) {
                     try {
@@ -245,6 +288,18 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     allowMutation: true
                   });
                   assert.strictEqual(mutationMissingIntegrity, "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST");
+                  function syncRejectionCode(fn) {
+                    try {
+                      fn();
+                    } catch (error) {
+                      return String(error && (error.autojs6Code || error.code || ""));
+                    }
+                    throw new Error("npm denied API must reject");
+                  }
+                  const npmCliDenied = syncRejectionCode(() => npm.cli(["install"]));
+                  assert.strictEqual(npmCliDenied, "ERR_AUTOJS6_NPM_CLI_DENIED");
+                  const npmRegistryDenied = syncRejectionCode(() => npm.installFromRegistry("@autojs6/not-promoted"));
+                  assert.strictEqual(npmRegistryDenied, "ERR_AUTOJS6_NPM_REGISTRY_DENIED");
                   const planInstallResult = await packageManager.planInstall({
                     name: planName,
                     version: "1.0.0",
@@ -320,6 +375,9 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(removedResult.status, "removed");
 
                   const listResult = await packageManager.list({ timeoutMs: 5000 });
+                  const npmListResult = await npm.list({ timeoutMs: 5000 });
+                  assert.strictEqual(Array.isArray(npmListResult), true);
+                  assert.strictEqual(Object.isFrozen(npmListResult), true);
                   assert.strictEqual(Array.isArray(listResult), true);
                   assert.strictEqual(Object.isFrozen(listResult), true);
                   listResult.forEach((record) => {
@@ -347,10 +405,16 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     policy.npmCli,
                     policy.registryDownload,
                     policy.rawRegistryAccess,
+                    policy.npmFacade,
+                    policy.requireNpm,
                     Object.isFrozen(packageManager),
+                    Object.isFrozen(npm),
                     Object.isFrozen(status),
                     Object.isFrozen(policy),
                     Object.isFrozen(sourcePolicy),
+                    npmStatus.status,
+                    npmPolicy.cli,
+                    npmStatus.operations.join(","),
                     sourcePolicy.status,
                     sourcePolicy.sourceAuthority,
                     sourcePolicy.allowedSources.join(","),
@@ -368,10 +432,14 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     removedResult.status,
                     mutationNotConfirmed,
                     mutationMissingIntegrity,
+                    npmCliDenied,
+                    npmRegistryDenied,
                     listResult.length >= 0,
+                    npmListResult.length >= 0,
                     verifyResult.status,
                     pruneResult.status,
                     require.resolve("package_manager"),
+                    require.resolve("npm"),
                     typeof globalThis.package_manager
                   ].join("|"));
                 })().catch((error) => {
@@ -389,12 +457,15 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
             result.stdout,
             result.stdout.contains(
                 "p13pm.facade=guarded_mutation_partial|guarded_mutation_partial|guarded_mutation_partial|denied|deferred|false|" +
-                    "true|true|true|true|guarded_local_unpacked_mutation|local_unpacked_host_managed_only|" +
+                    "guarded_package_manager_alias|guarded_package_manager_alias|" +
+                    "true|true|true|true|true|guarded_package_manager_alias|denied|" +
+                    "status,policy,sourcePolicy,packageManager,planInstall,planUpdate,planRemove,install,update,remove,list,verify,prune,cli,exec,runScript|" +
+                    "guarded_local_unpacked_mutation|local_unpacked_host_managed_only|" +
                     "local_unpacked_host_managed|true|true|" +
                     "planInstall,planUpdate,planRemove|install,update,remove|ready|false|installed|already_installed|" +
                     "ready|updated|ready|removed|ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED|" +
-                    "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|true|missing|pruned|" +
-                    "package_manager|undefined",
+                    "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_NPM_CLI_DENIED|ERR_AUTOJS6_NPM_REGISTRY_DENIED|" +
+                    "true|true|missing|pruned|package_manager|npm|undefined",
             ),
         )
     }

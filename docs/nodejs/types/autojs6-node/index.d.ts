@@ -37,6 +37,7 @@
 /// <reference path="./websocket.d.ts" />
 /// <reference path="./work_manager.d.ts" />
 /// <reference path="./package_manager.d.ts" />
+/// <reference path="./npm.d.ts" />
 /// <reference path="./lifecycle.d.ts" />
 /// <reference path="./files.d.ts" />
 /// <reference path="./base64.d.ts" />

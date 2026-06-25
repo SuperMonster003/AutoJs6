@@ -181,6 +181,9 @@ declare module "package_manager" {
       readonly operations: readonly Operation[];
       readonly packageKinds: readonly PackageKind[];
       readonly npmCli: "denied" | string;
+      readonly npmFacade: "guarded_package_manager_alias" | string;
+      readonly requireNpm: "guarded_package_manager_alias" | string;
+      readonly npmFacadeOperations: readonly string[];
       readonly registryDownload: "deferred" | string;
       readonly lifecycleScripts: "denied" | string;
       readonly binLinks: "denied" | string;
@@ -197,6 +200,8 @@ declare module "package_manager" {
       readonly androidStore: "local_app_private_partial" | string;
       readonly androidRuntimeInstall: "local_unpacked_only" | string;
       readonly npmCli: "denied" | string;
+      readonly npmFacade: "guarded_package_manager_alias" | string;
+      readonly requireNpm: "guarded_package_manager_alias" | string;
       readonly npmInstallEquivalent: "host_managed_plus_android_store_substrate" | string;
       readonly registryDownload: "deferred" | string;
       readonly tarballInstall: "host_side_only" | string;
@@ -218,6 +223,7 @@ declare module "package_manager" {
       readonly deniedSources: readonly DeniedSource[];
       readonly planOperations: readonly PlanOperation[];
       readonly mutationOperations: readonly MutationOperation[];
+      readonly npmFacadeOperations: readonly string[];
       readonly mutationCapability: "package_manager.mutate" | string;
       readonly mutationConfirmation: "allowMutation_required" | string;
       readonly requiresExpectedIntegrity: boolean;
