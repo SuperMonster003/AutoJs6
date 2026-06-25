@@ -1925,7 +1925,8 @@ visibility, denied npm CLI/registry surfaces, the guarded `package_manager`
 facade, source-authority diagnostics, Android app-private local store
 install/list/verify/prune behavior, dry-run planInstall/planUpdate/planRemove
 behavior, policy-only planRegistryInstall/planTarballInstall behavior,
-caller-provided packument semver/integrity resolution diagnostics, guarded
+caller-provided packument semver/integrity resolution diagnostics, local
+tarball URL/name/version/sha512 preflight diagnostics, guarded
 install/update/remove behavior, SHA-512 integrity, native values, and
 lifecycle/bin/native package rejection. P13-42 records Android package manager
 parity as partial.

@@ -193,7 +193,8 @@ Supported:
   `blocked_by_policy`, no Android bridge dispatch, no network/cache access,
   and no install authority; registry plans can parse caller-provided npm
   `metadata`/`packument` into a frozen dist-tag/semver/integrity resolution
-  diagnostic, but Android registry download remains deferred
+  diagnostic, and tarball plans can parse URL/name/version/sha512 integrity
+  shape locally, but Android registry/tarball download remains deferred
 
 P13-48 unifies the lock and integrity policy across the Android-side package
 manager, plugin packages, and native addon artifacts. The shared policy is

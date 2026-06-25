@@ -61,8 +61,10 @@ unrestricted JavaScript package-manager mutation on Android. A script-visible
     cache reuse, extraction, install, and authority promotion remain blocked.
   - `planTarballInstall(...)` exposes a frozen
     `autojs6-node-package-manager-tarball-resolution-v1` diagnostic under
-    `resolution`, including the requested tarball URL and whether expected
-    integrity was supplied.
+    `resolution`, including the requested tarball URL, URL protocol/host/path
+    shape, `.tgz` archive verdict, inferred npm package name/version,
+    request-vs-inferred name/version match flags, expected-integrity
+    algorithm, and SHA-512 allowlist verdict.
   - `install(...)` and `update(...)` require `package_manager.mutate`,
     `allowMutation: true`, a relative project-scoped local unpacked source, and
     `expectedIntegrity` from a dry-run plan before mutating the app-private
@@ -91,7 +93,7 @@ unrestricted JavaScript package-manager mutation on Android. A script-visible
 - Type declarations and TypeScript smoke now include
   `PackageManagerProfile`, source policy fields, and the guarded
   `package_manager` / `npm` modules, including packument input and remote
-  plan semver/integrity resolution diagnostics.
+  plan semver/tarball/integrity resolution diagnostics.
 - Host verifier and Gradle gate:
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
   - `:app:verifyNodePhase13PackageManagerAndroidDecision`
@@ -129,8 +131,8 @@ constrained to the local store substrate.
 - Android registry metadata/tarball download and cache management.
 - `planRegistryInstall()` / `planTarballInstall()` beyond policy-only dry-run
   diagnostics; registry semver/integrity resolution uses caller-provided
-  metadata only, and the APIs do not download, cache, extract, install, or
-  grant authority.
+  metadata only, tarball URL parsing is local-only, and the APIs do not
+  download, cache, extract, install, or grant authority.
 - npm CLI/registry/lifecycle behavior behind the script-visible `npm` facade.
 - Unrestricted or registry-backed `package_manager.install/update/remove`
   operations.

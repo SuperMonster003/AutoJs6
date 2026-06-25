@@ -768,10 +768,11 @@ status/policy/sourcePolicy, dry-run planInstall/planUpdate/planRemove,
 policy-only planRegistryInstall/planTarballInstall, guarded install/update/
 remove requiring `package_manager.mutate` plus `allowMutation: true`, and
 list/verify/prune. Registry plan diagnostics may parse caller-provided npm
-`metadata`/`packument` for dist-tag/semver/integrity verdicts, but the gate
-must still keep Android registry download and install authority denied. The
-`npm` facade is allowed only as a guarded package-manager alias and must keep
-CLI/registry/lifecycle entry points denied.
+`metadata`/`packument` for dist-tag/semver/integrity verdicts, and tarball
+plan diagnostics may parse URL/name/version/sha512 shape locally, but the gate
+must still keep Android registry/tarball download and install authority denied.
+The `npm` facade is allowed only as a guarded package-manager alias and must
+keep CLI/registry/lifecycle entry points denied.
 P13-42 records Android package manager parity as partial.
 `verifyNodePhase13StdlibConformanceDecision` records P13-43 as the stdlib
 conformance decision gate. It requires `stdlibProfile` diagnostics,

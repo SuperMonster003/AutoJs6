@@ -1241,10 +1241,11 @@ status, policy, source policy, dry-run `planInstall`, `planUpdate`,
 calls return frozen `blocked_by_policy` diagnostics without bridge dispatch,
 network/cache access, extraction, store mutation, or install authority;
 registry plans can resolve caller-provided npm `metadata`/`packument` into
-frozen dist-tag/semver/integrity diagnostics. `npm` is script-visible as a
-guarded package-manager alias facade; it does not run the npm CLI or fetch from
-registries. Mutating calls are capability-gated by `package_manager.mutate`,
-require
+frozen dist-tag/semver/integrity diagnostics, and tarball plans can parse URL,
+inferred package identity, and sha512 integrity shape locally. `npm` is
+script-visible as a guarded package-manager alias facade; it does not run the
+npm CLI or fetch from registries. Mutating calls are capability-gated by
+`package_manager.mutate`, require
 `allowMutation: true`, and use dry-run SHA-512 integrity.
 
 P13-43 records Node stdlib conformance as partial. The runtime exposes

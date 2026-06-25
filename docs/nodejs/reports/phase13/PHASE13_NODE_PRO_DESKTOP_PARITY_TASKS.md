@@ -1396,6 +1396,11 @@ P13 task 本身使用以下执行状态：
       `autojs6-node-package-manager-registry-resolution-v1`，覆盖 dist-tag、
       exact version、常见 semver range、tarball URL、integrity、
       expected-integrity verdict、shasum 诊断。
+      `planTarballInstall()` 也输出 frozen
+      `autojs6-node-package-manager-tarball-resolution-v1`，覆盖 tarball URL
+      protocol/host/path、`.tgz` archive、推断 npm name/version、
+      request-vs-inferred match、expected-integrity algorithm 和 sha512 allowlist
+      verdict。
     - `require("npm")` 已作为 guarded package-manager alias facade 暴露：
       `status()`/`policy()`/`sourcePolicy()` 可读，本地和 remote policy
       plan/mutation/list/verify/prune 代理到 `package_manager`，但
