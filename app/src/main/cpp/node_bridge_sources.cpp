@@ -5518,9 +5518,9 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_java_interop_experimental_enabled = )JS";
     script += javaInteropExperimentalEnabled ? "true" : "false";
     script += R"JS(;
-  const __autojs6_runtime_module_count_limit = 64;
-  const __autojs6_runtime_module_single_source_bytes_limit = 262144;
-  const __autojs6_runtime_module_total_source_bytes_limit = 524288;
+  const __autojs6_runtime_module_count_limit = 2048;
+  const __autojs6_runtime_module_single_source_bytes_limit = 2097152;
+  const __autojs6_runtime_module_total_source_bytes_limit = 33554432;
   const __autojs6_runtime_module_diagnostics = {
     loadedCount: 0,
     sourceBytes: 0,

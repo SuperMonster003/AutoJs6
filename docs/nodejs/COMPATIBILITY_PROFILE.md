@@ -984,9 +984,9 @@ See `docs/nodejs/design/ESM.md` for package `type`, CJS/ESM interop, top-level a
 
 Injected `moduleSources` are bounded before native runtime startup. The v1 limits are:
 
-- module count: `64`
-- per-module UTF-8 source bytes: `262144`
-- total UTF-8 source bytes: `524288`
+- module count: `2048`
+- per-module UTF-8 source bytes: `2097152`
+- total UTF-8 source bytes: `33554432`
 
 The limits apply to CommonJS preload records and encrypted packaged/runtime module source records, including partial ESM `.mjs` records. Over-budget requests fail with `ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED` before the embedded service starts native Node.
 
@@ -1487,7 +1487,7 @@ Packaged Node APKs require:
 - `android.permission.FOREGROUND_SERVICE`
 - `android.permission.FOREGROUND_SERVICE_SPECIAL_USE`
 - `android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE`
-- Node project metadata and module source entries within the `64` module, `262144` byte per-module, and `524288` byte total budgets
+- Node project metadata and module source entries within the `2048` module, `2097152` byte per-module, and `33554432` byte total budgets
 - packaged smoke coverage for the current user-facing `toast`, `app`, `clipboard`, and `device` bridge modules, plus v1.1 fake-provider packaged coverage for controlled `fetch`, `ocr`, `storage`/`storages`, `notifications`, `ui`, `work_manager`, and project-local JS-only plugins using isolated capabilities and resources
 
 Release packaging profile:

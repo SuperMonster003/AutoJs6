@@ -546,10 +546,13 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         stats: CommonJsPreloadStats,
         depth: Int,
     ) {
-        val requireMatches = COMMON_JS_REQUIRE_PATTERN.findAll(source).toList()
-        stats.recordRequireScan(source, requireMatches.size)
-        requireMatches
-            .map { match -> match.groupValues[1].ifEmpty { match.groupValues[2] } }
+        val requireReferences = commonJsRequireReferences(source)
+        stats.recordRequireScan(
+            staticCount = requireReferences.count { it.moduleName != null },
+            requireCallCount = requireReferences.size,
+        )
+        requireReferences
+            .mapNotNull { it.moduleName }
             .forEach { moduleName ->
                 val moduleFiles = resolveCommonJsModuleFiles(parentDirectory, rootDirectory, moduleName)
                 if (moduleFiles.isEmpty()) {
@@ -1120,15 +1123,250 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val RUNTIME_MODULE_SOURCE_EXTENSIONS = COMMON_JS_MODULE_EXTENSIONS + MJS_EXTENSION + MTS_EXTENSION
         val COMMON_JS_RECURSIVE_SOURCE_EXTENSIONS = NodeRuntimeCapabilities.commonJsRecursiveSourceExtensions
         val PACKAGE_JSON_EXPORT_CONDITIONS = NodeRuntimeCapabilities.packageJsonExportConditions
-        const val COMMON_JS_REQUIRE_SEPARATOR = """(?:\s|/\*[\s\S]*?\*/|//[^\r\n]*(?:\r?\n|$))*"""
-        val COMMON_JS_REQUIRE_CALL_PATTERN = Regex(
-            """(?<![\w$.])(?:require|module\s*\.\s*require)$COMMON_JS_REQUIRE_SEPARATOR\(""",
-        )
-        val COMMON_JS_REQUIRE_PATTERN = Regex(
-            """(?<![\w$.])(?:require|module\s*\.\s*require)$COMMON_JS_REQUIRE_SEPARATOR\($COMMON_JS_REQUIRE_SEPARATOR(?:"([^"]+)"|'([^']+)')$COMMON_JS_REQUIRE_SEPARATOR\)""",
-        )
         val COMMON_JS_PROTOCOL_SPECIFIER_PATTERN = Regex("""^[A-Za-z][A-Za-z0-9+.-]*:""")
         val COMMON_JS_BUILTIN_MODULE_NAMES = NodeRuntimeCapabilities.commonJsBuiltinModuleNames
+
+        private fun commonJsRequireReferences(source: String): List<CommonJsRequireReference> {
+            if (source.isEmpty()) {
+                return emptyList()
+            }
+            val references = mutableListOf<CommonJsRequireReference>()
+            var index = 0
+            while (index < source.length) {
+                val ch = source[index]
+                index = when {
+                    ch == '"' || ch == '\'' -> skipQuotedJavaScriptString(source, index)
+                    ch == '`' -> skipJavaScriptTemplateLiteral(source, index)
+                    ch == '/' && index + 1 < source.length && source[index + 1] == '/' -> skipJavaScriptLineComment(source, index)
+                    ch == '/' && index + 1 < source.length && source[index + 1] == '*' -> skipJavaScriptBlockComment(source, index)
+                    ch == '/' && looksLikeJavaScriptRegexLiteral(source, index) -> skipJavaScriptRegexLiteral(source, index)
+                    ch.isJavaScriptIdentifierStart() -> {
+                        val identifier = readJavaScriptIdentifier(source, index)
+                        val parsed = when {
+                            !isJavaScriptRequireBoundaryBefore(source, index) -> null
+                            identifier.name == "require" -> parseCommonJsRequireCall(source, identifier.endIndex)
+                            identifier.name == "module" -> parseCommonJsModuleRequireCall(source, identifier.endIndex)
+                            else -> null
+                        }
+                        if (parsed != null) {
+                            references += CommonJsRequireReference(parsed.moduleName)
+                            parsed.endIndex.coerceAtLeast(identifier.endIndex)
+                        } else {
+                            identifier.endIndex
+                        }
+                    }
+                    else -> index + 1
+                }
+            }
+            return references
+        }
+
+        private fun parseCommonJsModuleRequireCall(source: String, moduleIdentifierEnd: Int): CommonJsRequireParseResult? {
+            var index = skipJavaScriptWhitespaceAndComments(source, moduleIdentifierEnd)
+            if (index >= source.length || source[index] != '.') {
+                return null
+            }
+            index = skipJavaScriptWhitespaceAndComments(source, index + 1)
+            if (index >= source.length || !source[index].isJavaScriptIdentifierStart()) {
+                return null
+            }
+            val requireIdentifier = readJavaScriptIdentifier(source, index)
+            if (requireIdentifier.name != "require") {
+                return null
+            }
+            return parseCommonJsRequireCall(source, requireIdentifier.endIndex)
+        }
+
+        private fun parseCommonJsRequireCall(source: String, requireIdentifierEnd: Int): CommonJsRequireParseResult? {
+            var index = skipJavaScriptWhitespaceAndComments(source, requireIdentifierEnd)
+            if (index >= source.length || source[index] != '(') {
+                return null
+            }
+            index = skipJavaScriptWhitespaceAndComments(source, index + 1)
+            val literal = parseJavaScriptStringLiteral(source, index) ?: return CommonJsRequireParseResult(null, index)
+            index = skipJavaScriptWhitespaceAndComments(source, literal.endIndex)
+            if (index >= source.length || source[index] != ')') {
+                return CommonJsRequireParseResult(null, literal.endIndex)
+            }
+            return CommonJsRequireParseResult(literal.value, index + 1)
+        }
+
+        private fun skipJavaScriptWhitespaceAndComments(source: String, startIndex: Int): Int {
+            var index = startIndex
+            while (index < source.length) {
+                val ch = source[index]
+                index = when {
+                    ch.isWhitespace() -> index + 1
+                    ch == '/' && index + 1 < source.length && source[index + 1] == '/' -> skipJavaScriptLineComment(source, index)
+                    ch == '/' && index + 1 < source.length && source[index + 1] == '*' -> skipJavaScriptBlockComment(source, index)
+                    else -> return index
+                }
+            }
+            return index
+        }
+
+        private fun skipQuotedJavaScriptString(source: String, startIndex: Int): Int {
+            val quote = source[startIndex]
+            var index = startIndex + 1
+            while (index < source.length) {
+                val ch = source[index]
+                when {
+                    ch == '\\' -> index = (index + 2).coerceAtMost(source.length)
+                    ch == quote -> return index + 1
+                    else -> index += 1
+                }
+            }
+            return source.length
+        }
+
+        private fun parseJavaScriptStringLiteral(source: String, startIndex: Int): JavaScriptStringLiteral? {
+            if (startIndex >= source.length) {
+                return null
+            }
+            val quote = source[startIndex]
+            if (quote != '"' && quote != '\'') {
+                return null
+            }
+            val value = StringBuilder()
+            var index = startIndex + 1
+            while (index < source.length) {
+                val ch = source[index]
+                when {
+                    ch == '\\' -> {
+                        if (index + 1 >= source.length) {
+                            return null
+                        }
+                        value.append(source[index + 1])
+                        index += 2
+                    }
+                    ch == quote -> return JavaScriptStringLiteral(value.toString(), index + 1)
+                    else -> {
+                        value.append(ch)
+                        index += 1
+                    }
+                }
+            }
+            return null
+        }
+
+        private fun skipJavaScriptTemplateLiteral(source: String, startIndex: Int): Int {
+            var index = startIndex + 1
+            while (index < source.length) {
+                val ch = source[index]
+                index = when {
+                    ch == '\\' -> (index + 2).coerceAtMost(source.length)
+                    ch == '`' -> return index + 1
+                    else -> index + 1
+                }
+            }
+            return source.length
+        }
+
+        private fun skipJavaScriptLineComment(source: String, startIndex: Int): Int {
+            var index = startIndex + 2
+            while (index < source.length && source[index] != '\n' && source[index] != '\r') {
+                index += 1
+            }
+            return index
+        }
+
+        private fun skipJavaScriptBlockComment(source: String, startIndex: Int): Int {
+            var index = startIndex + 2
+            while (index + 1 < source.length) {
+                if (source[index] == '*' && source[index + 1] == '/') {
+                    return index + 2
+                }
+                index += 1
+            }
+            return source.length
+        }
+
+        private fun skipJavaScriptRegexLiteral(source: String, startIndex: Int): Int {
+            var index = startIndex + 1
+            var inCharacterClass = false
+            while (index < source.length) {
+                val ch = source[index]
+                when {
+                    ch == '\\' -> index = (index + 2).coerceAtMost(source.length)
+                    ch == '[' -> {
+                        inCharacterClass = true
+                        index += 1
+                    }
+                    ch == ']' -> {
+                        inCharacterClass = false
+                        index += 1
+                    }
+                    ch == '/' && !inCharacterClass -> {
+                        index += 1
+                        while (index < source.length && source[index].isJavaScriptIdentifierPart()) {
+                            index += 1
+                        }
+                        return index
+                    }
+                    ch == '\n' || ch == '\r' -> return index
+                    else -> index += 1
+                }
+            }
+            return source.length
+        }
+
+        private fun looksLikeJavaScriptRegexLiteral(source: String, slashIndex: Int): Boolean {
+            val previous = previousJavaScriptSignificantToken(source, slashIndex) ?: return true
+            if (previous.text in JAVASCRIPT_REGEX_PREFIX_KEYWORDS) {
+                return true
+            }
+            return previous.text.length == 1 && previous.text[0] in JAVASCRIPT_REGEX_PREFIX_CHARS
+        }
+
+        private fun previousJavaScriptSignificantToken(source: String, beforeIndex: Int): JavaScriptToken? {
+            var index = beforeIndex - 1
+            while (index >= 0 && source[index].isWhitespace()) {
+                index -= 1
+            }
+            if (index < 0) {
+                return null
+            }
+            val ch = source[index]
+            if (ch.isJavaScriptIdentifierPart()) {
+                val end = index + 1
+                while (index >= 0 && source[index].isJavaScriptIdentifierPart()) {
+                    index -= 1
+                }
+                return JavaScriptToken(source.substring(index + 1, end))
+            }
+            return JavaScriptToken(ch.toString())
+        }
+
+        private fun readJavaScriptIdentifier(source: String, startIndex: Int): JavaScriptIdentifier {
+            var index = startIndex + 1
+            while (index < source.length && source[index].isJavaScriptIdentifierPart()) {
+                index += 1
+            }
+            return JavaScriptIdentifier(source.substring(startIndex, index), index)
+        }
+
+        private fun isJavaScriptRequireBoundaryBefore(source: String, index: Int): Boolean {
+            if (index <= 0) {
+                return true
+            }
+            val previous = source[index - 1]
+            return !previous.isJavaScriptIdentifierPart() && previous != '.'
+        }
+
+        private fun Char.isJavaScriptIdentifierStart(): Boolean {
+            return this == '_' || this == '$' || isLetter()
+        }
+
+        private fun Char.isJavaScriptIdentifierPart(): Boolean {
+            return isJavaScriptIdentifierStart() || isDigit()
+        }
+
+        private val JAVASCRIPT_REGEX_PREFIX_CHARS = setOf(
+            '(', '{', '[', '=', ':', ',', ';', '!', '?', '&', '|', '+', '-', '*', '~', '^', '<', '>',
+        )
+        private val JAVASCRIPT_REGEX_PREFIX_KEYWORDS = setOf(
+            "return", "throw", "case", "delete", "void", "typeof", "yield", "await", "else", "do", "in", "of",
+        )
     }
 
     data class CommonJsPreloadDiagnostics(
@@ -1167,6 +1405,29 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             )
         }
     }
+
+    private data class CommonJsRequireReference(
+        val moduleName: String?,
+    )
+
+    private data class CommonJsRequireParseResult(
+        val moduleName: String?,
+        val endIndex: Int,
+    )
+
+    private data class JavaScriptIdentifier(
+        val name: String,
+        val endIndex: Int,
+    )
+
+    private data class JavaScriptStringLiteral(
+        val value: String,
+        val endIndex: Int,
+    )
+
+    private data class JavaScriptToken(
+        val text: String,
+    )
 
     private data class CommonJsPreloadResult(
         val moduleSources: Map<String, String>,
@@ -1209,9 +1470,8 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         var dynamicRequireIgnoredCount = 0
         var unresolvedStaticRequireCount = 0
 
-        fun recordRequireScan(source: String, staticCount: Int) {
+        fun recordRequireScan(staticCount: Int, requireCallCount: Int) {
             staticRequireCount += staticCount
-            val requireCallCount = COMMON_JS_REQUIRE_CALL_PATTERN.findAll(source).count()
             dynamicRequireIgnoredCount += (requireCallCount - staticCount).coerceAtLeast(0)
         }
 
