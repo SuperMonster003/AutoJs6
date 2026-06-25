@@ -980,6 +980,7 @@ Node Profile v1.1 partial ESM supports:
 - scoped `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)`
 - simple named exports
 - simple re-export syntax: `export { name as alias } from`, `export * from`, and `export * as namespace from`
+- block and line comments inside named import/export/re-export specifier lists
 - simple top-level await
 
 CommonJS package condition matching uses active conditions `autojs6`, `require`, `node`, `default` while preserving package key order. `development` and `production` are recognized for diagnostics but are not active by default.

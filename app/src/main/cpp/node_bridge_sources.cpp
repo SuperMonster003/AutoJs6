@@ -42487,9 +42487,14 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return value;
   }
+  function __autojs6_esm_strip_named_list_comments(text) {
+    return String(text || "")
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/\/\/[^\r\n]*/g, " ");
+  }
   function __autojs6_esm_split_named_list(sourceName, text) {
     const values = [];
-    const entries = String(text || "").split(",");
+    const entries = __autojs6_esm_strip_named_list_comments(text).split(",");
     for (const entry of entries) {
       const trimmed = entry.trim();
       if (!trimmed) continue;
@@ -42502,7 +42507,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_esm_split_export_named_list(sourceName, text) {
     const values = [];
-    const entries = String(text || "").split(",");
+    const entries = __autojs6_esm_strip_named_list_comments(text).split(",");
     for (const entry of entries) {
       const trimmed = entry.trim();
       if (!trimmed) continue;

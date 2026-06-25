@@ -1354,6 +1354,9 @@ P13 task 本身使用以下执行状态：
       multiline/compact import declarations）、local dynamic import、package
       `exports` / `imports`、JSON import attributes、simple re-export、scoped
       `import.meta`、ESM/CJS interop 和 sync `require(esm)`。
+    - named import/export/re-export specifier list 现在允许普通 block/line
+      comments，用于兼容 `parse5` / `jsdom` 等真实 npm package 输出中的
+      `export { /** @internal */ Parser } from ...` 形态。
     - loader hooks、raw `node:module` loader authority、network import、
       `file:` / `data:` URL import、absolute path import、workingDirectory
       escape、disabled builtin import 继续拒绝。

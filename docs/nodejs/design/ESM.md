@@ -89,6 +89,8 @@ flag to false preserves the previous fail-closed path for diagnostics.
   `export { name as alias } from "./dep.mjs"`,
   `export * from "./dep.mjs"`, and
   `export * as namespace from "./dep.mjs"`.
+- named import/export/re-export specifier lists may contain ordinary block or
+  line comments, matching common generated package output such as parse5.
 - top-level await is supported because the partial ESM graph is evaluated through an async runner.
 - diagnostics are emitted in the result envelope:
   - `esmEnabled`

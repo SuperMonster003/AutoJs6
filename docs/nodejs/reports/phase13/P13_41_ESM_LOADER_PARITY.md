@@ -17,6 +17,9 @@ current split:
   dynamic import, JSON import attributes,
   `import.meta`, simple ESM re-exports, package `exports` / `imports`, and
   synchronous CJS `require(esm)` are partial.
+- Named import/export/re-export specifier lists accept ordinary block and line
+  comments, covering generated package output such as parse5's
+  `export { /** @internal */ Parser } from ...`.
 - `moduleSources` and focused packaged ESM/dynamic import smokes are partial.
 - loader hooks, raw `node:module` loader authority, network imports, `file:`
   / `data:` URL imports, absolute path imports, working-directory escapes,

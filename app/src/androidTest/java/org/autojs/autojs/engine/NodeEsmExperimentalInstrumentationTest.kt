@@ -340,10 +340,18 @@ class NodeEsmExperimentalInstrumentationTest {
             export const hidden = "hidden";
             export default { label: "default" };
             const local = "local";
-            export { local as publicName };
+            export { /* local public */ local as publicName };
             """.trimIndent(),
         )
-        File(workDir, "named.mjs").writeText("""export{alpha as alias,default as defaultName}from"./dep.mjs";""")
+        File(workDir, "named.mjs").writeText(
+            """
+            export {
+              /** @internal */ alpha as alias,
+              // default export alias
+              default as defaultName
+            } from "./dep.mjs";
+            """.trimIndent(),
+        )
         File(workDir, "star.mjs").writeText(
             """
             export const alpha = "local-alpha";
@@ -381,7 +389,11 @@ class NodeEsmExperimentalInstrumentationTest {
 
         val esm = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
-                import { alias, defaultName } from "./named.mjs";
+                import {
+                  /** parse5-style specifier comment */ alias,
+                  // line comments are also accepted in named lists
+                  defaultName
+                } from "./named.mjs";
                 import * as star from "./star.mjs";
                 import { bundle } from "./namespace.mjs";
                 console.log("esm.reexport.static=" + [
