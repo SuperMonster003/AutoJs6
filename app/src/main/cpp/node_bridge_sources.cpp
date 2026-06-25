@@ -8058,11 +8058,11 @@ std::string buildEmbeddedScriptExecutionSource(
     if (typeof TextEncoder !== "function" && utilModule && typeof utilModule.TextEncoder === "function") {
       __autojs6_define_global("TextEncoder", utilModule.TextEncoder);
     }
-    const TextDecoderBase = typeof TextDecoder === "function"
-      ? TextDecoder
+    const TextDecoderBase = typeof globalThis.TextDecoder === "function"
+      ? globalThis.TextDecoder
       : (utilModule && typeof utilModule.TextDecoder === "function" ? utilModule.TextDecoder : null);
     const TextDecoderCompat = __autojs6_text_decoder_compat_constructor(TextDecoderBase);
-    if (typeof TextDecoderCompat === "function" && TextDecoder !== TextDecoderCompat) {
+    if (typeof TextDecoderCompat === "function" && globalThis.TextDecoder !== TextDecoderCompat) {
       __autojs6_define_global("TextDecoder", TextDecoderCompat);
     }
     const webBufferModule = __autojs6_builtin_module("buffer");
