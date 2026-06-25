@@ -760,9 +760,10 @@ read-maintenance and policy-only source planning: `status`/`policy`/
 `list`/`verify`/`prune`. Remote source plan calls return `blocked_by_policy`
 without bridge dispatch, network/cache access, extraction, store mutation, or
 install authority; registry plans can parse caller-provided npm
-`metadata`/`packument` only as frozen diagnostics. `npm` is script-visible only
-as a guarded package-manager alias facade; its CLI, lifecycle, registry
-install, publish, and pack entry points reject with stable policy errors.
+`metadata`/`packument` only as frozen dist-tag/semver/integrity diagnostics.
+`npm` is script-visible only as a guarded package-manager alias facade; its
+CLI, lifecycle, registry install, publish, and pack entry points reject with
+stable policy errors.
 Mutating calls require
 `package_manager.mutate`, `allowMutation: true`, a project-scoped local
 unpacked source where relevant, and expected SHA-512 integrity from a dry-run

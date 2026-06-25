@@ -1152,9 +1152,9 @@ planRegistryInstall/planTarballInstall, guarded install/update/remove, and
 list/verify/prune over the app-private store. Remote source plan calls return
 `blocked_by_policy` without network/cache access or install authority; registry
 plans can parse caller-provided npm `metadata`/`packument` as frozen
-diagnostics. `npm` is script-visible only as a guarded alias over that facade;
-CLI, registry install, lifecycle, publish, and pack entry points remain
-stable-denied.
+dist-tag/semver/integrity diagnostics. `npm` is script-visible only as a
+guarded alias over that facade; CLI, registry install, lifecycle, publish, and
+pack entry points remain stable-denied.
 
 P13-43 records Node stdlib conformance as partial: Safe Node now exposes
 `stdlibProfile` diagnostics for the representative stdlib subset covering

@@ -53,8 +53,9 @@ unrestricted JavaScript package-manager mutation on Android. A script-visible
     registry metadata, fetch tarballs, extract archives, or mutate the local
     store.
   - `planRegistryInstall(...)` can parse caller-provided npm
-    `metadata`/`packument` objects for dist-tags, versions, tarball URL,
-    integrity, and shasum, exposing a frozen
+    `metadata`/`packument` objects for dist-tags, exact versions, common
+    semver ranges (`^`, `~`, comparators, and `*`), tarball URL, integrity,
+    expected-integrity verdict, and shasum, exposing a frozen
     `autojs6-node-package-manager-registry-resolution-v1` diagnostic under
     `resolution`. This is metadata-only planning; Android registry download,
     cache reuse, extraction, install, and authority promotion remain blocked.
@@ -90,7 +91,7 @@ unrestricted JavaScript package-manager mutation on Android. A script-visible
 - Type declarations and TypeScript smoke now include
   `PackageManagerProfile`, source policy fields, and the guarded
   `package_manager` / `npm` modules, including packument input and remote
-  plan resolution diagnostics.
+  plan semver/integrity resolution diagnostics.
 - Host verifier and Gradle gate:
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
   - `:app:verifyNodePhase13PackageManagerAndroidDecision`
@@ -127,8 +128,9 @@ constrained to the local store substrate.
 - Running `npm install` or `npm i --no-bin-links` directly on Android.
 - Android registry metadata/tarball download and cache management.
 - `planRegistryInstall()` / `planTarballInstall()` beyond policy-only dry-run
-  diagnostics; registry resolution uses caller-provided metadata only, and the
-  APIs do not download, cache, extract, install, or grant authority.
+  diagnostics; registry semver/integrity resolution uses caller-provided
+  metadata only, and the APIs do not download, cache, extract, install, or
+  grant authority.
 - npm CLI/registry/lifecycle behavior behind the script-visible `npm` facade.
 - Unrestricted or registry-backed `package_manager.install/update/remove`
   operations.

@@ -378,9 +378,10 @@ status/policy/sourcePolicy/planInstall/planUpdate/planRemove/planRegistryInstall
 mutating calls require `package_manager.mutate`, `allowMutation: true`, and
 dry-run SHA-512 integrity. Remote source plan calls return `blocked_by_policy`
 without network/cache access or install authority; registry plans can parse
-caller-provided npm `metadata`/`packument` as frozen diagnostics. `npm` is
-script-visible only as a guarded alias over that facade; CLI, registry install,
-lifecycle, publish, and pack entry points remain stable-denied.
+caller-provided npm `metadata`/`packument` as frozen dist-tag/semver/integrity
+diagnostics. `npm` is script-visible only as a guarded alias over that facade;
+CLI, registry install, lifecycle, publish, and pack entry points remain
+stable-denied.
 
 P13-43 records Node stdlib conformance as partial. AutoJs6 Node exposes
 `stdlibProfile` diagnostics for representative Safe stdlib coverage across

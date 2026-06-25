@@ -158,7 +158,7 @@ runtime has a local app-private store substrate for already-unpacked packages,
 and the `package_manager` module exposes status/policy/sourcePolicy,
 dry-run `planInstall`/`planUpdate`/`planRemove`, policy-only
 `planRegistryInstall`/`planTarballInstall` returning `RemotePackagePlan` with
-frozen remote plan resolution diagnostics,
+frozen remote plan dist-tag/semver/integrity resolution diagnostics,
 guarded `install`/`update`/`remove`, plus `list`, `verify`, and `prune` for
 the app-private store. The `npm` module is also declared as a guarded
 package-manager alias facade; it exposes the same local-store plan/mutation,
