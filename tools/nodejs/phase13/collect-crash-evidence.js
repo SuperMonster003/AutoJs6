@@ -17,6 +17,7 @@ const FILES = {
   crashStore: "app/src/main/java/org/autojs/autojs/engine/NodeCrashEvidenceStore.kt",
   app: "app/src/main/java/org/autojs/autojs/App.kt",
   embeddedService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt",
+  embeddedProbeService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedProbeService.kt",
   nativeProcessService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt",
   embeddedBridge: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt",
   crashEvidenceStoreTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt",
@@ -184,6 +185,7 @@ function markerAutomationStatus(files) {
 
 function scenarioStatus(files) {
   const embeddedService = files.embeddedService.text;
+  const embeddedProbeService = files.embeddedProbeService.text;
   const nativeProcessService = files.nativeProcessService.text;
   const embeddedBridge = files.embeddedBridge.text;
   const crashEvidenceStoreTest = files.crashEvidenceStoreTest.text;
@@ -192,6 +194,13 @@ function scenarioStatus(files) {
   const nativeFatalRunningMarkerReady = crashEvidenceStoreTest.includes("collectsRunningMarkerAfterSimulatedNativeFatalProcessDeath") &&
     crashEvidenceStoreTest.includes("native_fatal_running_marker") &&
     crashEvidenceStoreTest.includes("STATE_COLLECTED_AFTER_RESTART");
+  const realFatalNativeChaosReady = embeddedProbeService.includes("runFatalCrashEvidenceProbe") &&
+    embeddedProbeService.includes("EXTRA_FATAL_CRASH_EVIDENCE_PROBE") &&
+    embeddedProbeService.includes("native_fatal_chaos_injection") &&
+    embeddedProbeService.includes("SIGKILL") &&
+    crashEvidenceStoreTest.includes("collectsRunningMarkerAfterRealFatalNativeChaosProbeDeath") &&
+    crashEvidenceStoreTest.includes("instrumentation.native_fatal_chaos_probe") &&
+    crashEvidenceStoreTest.includes("native_fatal_chaos_injection");
   const packagedMarkerContractReady = crashEvidenceStoreTest.includes("markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke") &&
     crashEvidenceStoreTest.includes("LAUNCH_SURFACE_PACKAGED_LONG_RUNNING") &&
     crashEvidenceStoreTest.includes("packaged_apk_crash_smoke_contract");
@@ -208,14 +217,16 @@ function scenarioStatus(files) {
       "native_crash",
       nativeProcessService.includes("NodeCrashEvidenceStore.begin(") &&
         embeddedService.includes("NodeCrashEvidenceStore.begin(") &&
-        nativeFatalRunningMarkerReady,
+        nativeFatalRunningMarkerReady &&
+        realFatalNativeChaosReady,
       [
         files.nativeProcessService.relative,
         files.embeddedService.relative,
+        files.embeddedProbeService.relative,
         files.crashStore.relative,
         files.crashEvidenceStoreTest.relative,
       ],
-      ["real fatal native chaos injection evidence is still required"],
+      [],
     ),
     scenario(
       "bridge_provider_crash",

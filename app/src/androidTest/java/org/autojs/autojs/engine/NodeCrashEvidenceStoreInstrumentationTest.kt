@@ -63,6 +63,61 @@ class NodeCrashEvidenceStoreInstrumentationTest {
     }
 
     @Test
+    fun collectsRunningMarkerAfterRealFatalNativeChaosProbeDeath() {
+        val executionId = "p13-native-fatal-chaos-${System.nanoTime()}"
+        val result = NativeNodeEmbeddedProbeService.runFatalCrashEvidenceProbe(
+            context = context,
+            executionId = executionId,
+            timeoutMs = 3_000L,
+        )
+        assertTrue(
+            "fatal crash probe should report process death: ${result.formattedLog}",
+            !result.succeeded,
+        )
+        assertTrue(result.errorMessage.orEmpty().contains("crashed or timed out"))
+
+        val collected = NodeCrashEvidenceStore.collectPending(context, "instrumentation.native_fatal_chaos_probe")
+        val collectedMarker = (0 until collected.length())
+            .asSequence()
+            .map { index -> collected.getJSONObject(index) }
+            .firstOrNull { item -> item.optString("executionId") == executionId }
+        assertNotNull(
+            "next-launch collection should include fatal chaos execution $executionId: $collected",
+            collectedMarker,
+        )
+        collectedMarker ?: return
+
+        val markerId = collectedMarker.getString("markerId")
+        val markerFile = File(
+            File(context.filesDir, "nodejs/crash-evidence/markers"),
+            "$markerId.json",
+        )
+        val nextLaunchBundle = File(
+            File(context.filesDir, "nodejs/crash-evidence/next-launch"),
+            "$markerId.json",
+        )
+        try {
+            assertTrue(markerFile.isFile)
+            assertTrue(nextLaunchBundle.isFile)
+            val marker = JSONObject(markerFile.readText(Charsets.UTF_8))
+            assertEquals(NodeCrashEvidenceStore.STATE_COLLECTED_AFTER_RESTART, marker.getString("state"))
+            assertEquals("instrumentation.native_fatal_chaos_probe", marker.getString("collectionReason"))
+            assertEquals(executionId, marker.getString("executionId"))
+            assertEquals("native_fatal_chaos_injection", marker.getString("scenario"))
+            assertEquals("native_process", marker.getString("executionMode"))
+            assertEquals("embedded_probe_service", marker.getString("launchSurface"))
+            assertEquals(":nodejs_embedded", marker.getString("runtimeSlotId"))
+            assertTrue(marker.getString("sourceName").contains("sigkill"))
+            val bundle = JSONObject(nextLaunchBundle.readText(Charsets.UTF_8))
+            assertEquals(NodeCrashEvidenceStore.NEXT_LAUNCH_BUNDLE_SCHEMA, bundle.getString("schema"))
+            assertEquals(markerId, bundle.getString("markerId"))
+        } finally {
+            markerFile.delete()
+            nextLaunchBundle.delete()
+        }
+    }
+
+    @Test
     fun markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke() {
         val executionId = "p13-packaged-crash-marker-${System.nanoTime()}"
         val marker = NodeCrashEvidenceStore.begin(
