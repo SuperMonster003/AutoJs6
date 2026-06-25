@@ -12,8 +12,9 @@ hooks, network imports, unrestricted URL imports, or custom loader authority.
 The new `autojs6:profile.esmLoaderProfile` diagnostic snapshot records the
 current split:
 
-- `.mjs` entries, `package.json` `type=module` entries, local static imports,
-  top-level await, local dynamic import, JSON import attributes,
+- `.mjs` entries, `package.json` `type=module` entries, local static imports
+  including common multiline/compact declarations, top-level await, local
+  dynamic import, JSON import attributes,
   `import.meta`, simple ESM re-exports, package `exports` / `imports`, and
   synchronous CJS `require(esm)` are partial.
 - `moduleSources` and focused packaged ESM/dynamic import smokes are partial.

@@ -276,6 +276,61 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun experimentalEsmMultilineStaticImportsWorkForRequireAndStaticImport() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM multiline static imports")
+        val workDir = freshWorkDir("esm-multiline-imports")
+        File(workDir, "side-effect.mjs").writeText("""globalThis.__autojs6MultilineImportSideEffect = "side";""")
+        File(workDir, "dep.mjs").writeText(
+            """
+            export default { label: "dep" };
+            export const first = "one";
+            export const second = "two";
+            """.trimIndent(),
+        )
+        File(workDir, "multi.mjs").writeText(
+            """
+            import"./side-effect.mjs"
+            import dep, {
+              first,
+              second as renamed,
+            } from "./dep.mjs"
+            export const summary = [globalThis.__autojs6MultilineImportSideEffect, dep.label, first, renamed].join("/");
+            """.trimIndent(),
+        )
+        File(workDir, "compact.mjs").writeText("""import{first as compactFirst}from"./dep.mjs";import{second as compactSecond}from"./dep.mjs"; export const compact = compactFirst + "/" + compactSecond;""")
+
+        val cjs = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const mod = require("./multi.mjs");
+                const compact = require("./compact.mjs");
+                console.log("cjs.require.esm.multiline=" + mod.summary + "/" + compact.compact);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.cjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("cjs require ESM multiline static import", cjs)
+        assertTrue(cjs.stdout.contains("cjs.require.esm.multiline=side/dep/one/two/one/two"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val esm = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import { summary } from "./multi.mjs";
+                import{compact}from"./compact.mjs";
+                console.log("esm.multiline=" + summary + "/" + compact);
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("ESM multiline static import", esm)
+        assertTrue(esm.stdout.contains("esm.multiline=side/dep/one/two/one/two"))
+    }
+
+    @Test
     fun experimentalEsmReExportsWorkForRequireAndStaticImport() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM re-export support")
         val workDir = freshWorkDir("esm-reexports")

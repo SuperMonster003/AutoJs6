@@ -1350,10 +1350,10 @@ P13 task 本身使用以下执行状态：
   - Progress:
     - P13-41 partial landing 已添加 `esmLoaderProfile` 诊断，记录当前
       AutoJs6-managed partial ESM loader，而不是提升为 raw Node loader。
-    - 已覆盖 `.mjs`、`type=module`、TLA、local static import、local
-      dynamic import、package `exports` / `imports`、JSON import attributes、
-      simple re-export、scoped `import.meta`、ESM/CJS interop 和 sync
-      `require(esm)`。
+    - 已覆盖 `.mjs`、`type=module`、TLA、local static import（含常见
+      multiline/compact import declarations）、local dynamic import、package
+      `exports` / `imports`、JSON import attributes、simple re-export、scoped
+      `import.meta`、ESM/CJS interop 和 sync `require(esm)`。
     - loader hooks、raw `node:module` loader authority、network import、
       `file:` / `data:` URL import、absolute path import、workingDirectory
       escape、disabled builtin import 继续拒绝。

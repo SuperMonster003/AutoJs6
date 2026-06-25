@@ -13992,7 +13992,7 @@ std::string buildEmbeddedScriptExecutionSource(
         __esmUnsupported("import.meta is disabled for AutoJs6 worker partial ESM module '" + filename + "'.");
       }
     }
-    const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3\s*;?/g;
+    const importPattern = /(^|[\r\n;])\s*import\b\s*(?![.(])(?:(["'])([^"'\r\n]+)\2|([\s\S]*?)\s*from\s*(["'])([^"'\r\n]+)\5)[ \t]*(?=;|[\r\n]|$|\/\/|\/\*)/g;
     const bindingLines = [];
     let body = "";
     let cursor = 0;
@@ -14004,12 +14004,12 @@ std::string buildEmbeddedScriptExecutionSource(
       body += sourceText.slice(cursor, statementStart);
       cursor = statementEnd;
       const importVar = "__autojs6_esm_import_" + importIndex++;
-      const specifier = match[4];
+      const specifier = match[3] || match[6];
       bindingLines.push(
         "const " + importVar + " = await __autojs6_load_esm_module(" +
           JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ");"
       );
-      const specifierText = match[2] === undefined ? "" : match[2];
+      const specifierText = match[4] === undefined ? "" : match[4];
       Array.prototype.push.apply(bindingLines, __parseImportBindings(specifierText, importVar, filename));
     }
     body += sourceText.slice(cursor);
@@ -42768,7 +42768,7 @@ std::string buildEmbeddedScriptExecutionSource(
         continue;
       }
     }
-    const importPattern = /(^|[\r\n;])\s*import\s+(?:(.*?)\s+from\s+)?(["'])([^"'\r\n]+)\3(?:\s+(with|assert)\s*\{([^}]*)\})?\s*;?/g;
+    const importPattern = /(^|[\r\n;])\s*import\b\s*(?![.(])(?:(["'])([^"'\r\n]+)\2|([\s\S]*?)\s*from\s*(["'])([^"'\r\n]+)\5)(?:\s+(with|assert)\s*\{([^}]*)\})?[ \t]*(?=;|[\r\n]|$|\/\/|\/\*)/g;
     const bindingLines = [];
     let body = "";
     let cursor = 0;
@@ -42780,13 +42780,13 @@ std::string buildEmbeddedScriptExecutionSource(
       body += sourceText.slice(cursor, statementStart);
       cursor = statementEnd;
       const importVar = "__autojs6_esm_import_" + importIndex++;
-      const specifier = match[4];
-      const attributes = __autojs6_esm_parse_static_import_attributes(match[5], match[6], filename, specifier);
+      const specifier = match[3] || match[6];
+      const attributes = __autojs6_esm_parse_static_import_attributes(match[7], match[8], filename, specifier);
       bindingLines.push(
         "const " + importVar + " = " + (syncMode ? "__autojs6_load_esm_module_sync" : "await __autojs6_load_esm_module") + "(" +
           JSON.stringify(specifier) + ", " + JSON.stringify(filename) + ", " + JSON.stringify(attributes) + ");"
       );
-      const specifierText = match[2] === undefined ? "" : match[2];
+      const specifierText = match[4] === undefined ? "" : match[4];
       Array.prototype.push.apply(
         bindingLines,
         __autojs6_esm_parse_import_bindings(specifierText, importVar, filename)

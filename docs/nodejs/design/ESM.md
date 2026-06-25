@@ -73,7 +73,8 @@ flag to false preserves the previous fail-closed path for diagnostics.
 
 - `.mjs` entry scripts can run.
 - `.js` entry scripts can run as ESM only when the nearest scoped `package.json` contains `"type": "module"`.
-- local static imports of `.mjs` files inside `workingDirectory` are supported.
+- local static imports of `.mjs` files inside `workingDirectory` are supported,
+  including common multiline and compact default/named import declarations.
 - ESM may default-import scoped CommonJS modules (`.cjs`, `.js`, or `.json`) through the existing CommonJS loader cache.
 - ESM may import supported builtin modules through the existing Safe Node builtin allowlist and limited builtin wrappers.
 - ESM bare package imports may select package `exports` using the active ESM condition set `autojs6`, `import`, `node`, `default` while preserving package key order, then load a CommonJS target through the CommonJS loader.
@@ -140,7 +141,10 @@ Still unsupported in v1:
 
 CommonJS entries use a conservative preflight scan to reject obvious ESM forms before CommonJS execution.
 
-Partial v1.1 uses a deliberately small AutoJs6-managed transform for local static `.mjs` imports, simple exports, and simple re-exports. It is not a full Node ESM parser and is documented as a safe compatibility subset.
+Partial v1.1 uses a deliberately small AutoJs6-managed transform for local
+static `.mjs` imports, including common multiline and compact import
+declarations, simple exports, and simple re-exports. It is not a full Node ESM
+parser and is documented as a safe compatibility subset.
 
 For packaged APKs, partial v1.1 verifies a small encrypted graph: a `.mjs`
 entry can import a local `.mjs` dependency and a local CommonJS dependency

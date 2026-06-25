@@ -957,7 +957,8 @@ Node Profile v1.1 partial ESM supports:
 
 - `.mjs` entry execution
 - package `type=module` entry execution for `.js`
-- local static imports of `.mjs` files inside `workingDirectory`
+- local static imports of `.mjs` files inside `workingDirectory`, including
+  common multiline and compact default/named import declarations
 - default import from scoped CommonJS modules through the existing CommonJS loader
 - supported builtin imports such as `node:path` and `node:events`
 - bare package imports that resolve package `exports` with the ESM active condition set `autojs6`, `import`, `node`, `default`, preserving package key order, and then load a CommonJS target
