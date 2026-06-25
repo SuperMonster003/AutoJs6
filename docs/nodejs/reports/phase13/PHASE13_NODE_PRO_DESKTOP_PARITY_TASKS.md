@@ -485,7 +485,7 @@ P13 task 本身使用以下执行状态：
 
 ### Track A: Required internal blockers and runtime graduation
 
-- [ ] P13-05: 关闭 crash evidence automation blocker。
+- [x] P13-05: 关闭 crash evidence automation blocker。
   - 范围：自动收集 fatal marker、next-launch crash bundle、resource snapshot、
     timeline tail、symbolization 和 chaos injection evidence。
   - 建议产物：
@@ -498,7 +498,7 @@ P13 task 本身使用以下执行状态：
       可诊断 bundle。
     - bundle 包含 execution id、runtime slot、ABI、profile、feature flags。
     - packaged APK 路径有同等证据或明确 skip reason。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Progress Evidence (2026-06-25, completed):
     - Runtime marker store: `app/src/main/java/org/autojs/autojs/engine/NodeCrashEvidenceStore.kt`
     - Next-launch collector: `App.onCreate()` -> `NodeCrashEvidenceStore.collectPending(...)`
     - Embedded service marker writes: `app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedScriptService.kt`
@@ -508,11 +508,11 @@ P13 task 本身使用以下执行状态：
     - Real fatal native chaos assertion: `collectsRunningMarkerAfterRealFatalNativeChaosProbeDeath` writes a marker in `:nodejs_embedded`, injects `SIGKILL`, and verifies next-launch collection.
     - Packaged launch-surface marker contract: `markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke`.
     - Packaged APK crash evidence smoke: `installAndRunCrashEvidenceEmbeddedNodePackagedApk` installs a packaged `interactive_long_running` APK with a fresh inrt template override, force-stops it, relaunches it, and verifies marker collection logs.
-    - Signal-safe marker boundary assertion: `markerRecordsSignalSafeNativeMarkerBoundary`.
+    - Signal-safe fixed-size native marker assertion: `markerWritesSignalSafeFixedSizeNativeRecord` writes a 256-byte append-only sidecar record through the native `open|write|close` core and records `safeSignalMarker` proof.
     - Host collector: `tools/nodejs/phase13/collect-crash-evidence.js`
     - Gradle gate: `:app:collectNodePhase13CrashEvidence`
     - Report: `docs/nodejs/reports/phase13/P13_05_CRASH_EVIDENCE_AUTOMATION.md`
-    - Open before closure: signal-safe fixed-size native marker proof.
+    - Closure: `collectNodePhase13CrashEvidence` reports `ready` with zero blockers and zero policy violations.
 
 - [ ] P13-06: 推进 second execution slot 到可调度状态。
   - 范围：从 Phase 12 的 explicit slot evidence 推进到默认 scheduler 可选择
