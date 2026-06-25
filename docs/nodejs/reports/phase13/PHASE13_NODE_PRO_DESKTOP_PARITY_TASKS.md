@@ -537,10 +537,18 @@ P13 task 本身使用以下执行状态：
       `failed_slot_replacement_enabled=false`, and
       `slotCrashNoRestartFallbackCollectsOverflowMarkerAndPrimarySurvives`.
     - Focused instrumentation: `defaultSchedulerRoutesConcurrentOneShotScriptsToDifferentProcesses`.
+    - Focused two-slot resource stress:
+      `concurrentSlotsStressSharedResourcesRemainIsolated` covers concurrent
+      primary/overflow execution with stdout/stderr capture, cwd/env isolation,
+      CommonJS module cache isolation, globals, timers, file handles,
+      `fs.watch` lifecycle cleanup, storage bridge pending drain, bridge
+      resource cleanup, and crash marker `runtimeSlotId` evidence.
     - Host verifier: `tools/nodejs/phase13/verify-second-execution-slot-scheduler.js`.
     - Gradle gate: `:app:verifyNodePhase13SecondExecutionSlotScheduler`.
     - Report: `docs/nodejs/reports/phase13/P13_06_SECOND_EXECUTION_SLOT_SCHEDULER.md`.
-    - Open before closure: full stress promotion across both active slots.
+    - Open before closure: P13-08 long-duration quick/final soak evidence
+      across both active slots, plus future automatic slot replacement/quarantine
+      before enabling scheduler fallback.
 
 - [ ] P13-07: 推进 packaged long-running service mode。
   - 范围：打包 APK 中支持 foreground long-running Node runtime。
@@ -548,7 +556,7 @@ P13 task 本身使用以下执行状态：
     - foreground notification、Stop action、checkpoint、quota、destroy cleanup 可用。
     - `autojs6:lifecycle` 在 packaged 模式有恢复/清理证据。
     - Android 版本、权限、后台限制不满足时稳定拒绝。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Progress Evidence (2026-06-25, partial; checkbox remains open):
     - Packaged launch surface: `NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING`.
     - Project metadata parsing: `ProjectConfig.NodeConfig.executionMode` and `NodeProjectLaunchDescriptor.executionMode`.
     - Request propagation: `NodeProjectLaunchSource.nodeProjectExecutionMode`, `NativeNodeEmbeddedProjectRunner.ProjectRequest.executionMode`, and `EmbeddedScriptRequest.executionMode`.
@@ -580,6 +588,12 @@ P13 task 本身使用以下执行状态：
     - Expected quick soak evidence: `build/reports/nodejs/final-soak/quick-soak-8h.json`.
     - Expected final soak evidence: `build/reports/nodejs/final-soak/final-soak-24h.json`.
     - Reused anchors: `NodeEmbeddedMemoryLeakStressInstrumentationTest`, `NodePhase7ResourceStressInstrumentationTest`, `NodeBridgeResourceLeakStressInstrumentationTest`, `NodeLongRunningStressInstrumentationTest`, `NodeWorkerThreadsResourceStressInstrumentationTest`, `NodeResourceStressSnapshot`, and `verifyNodeFinalSoakGate`.
+    - Focused two-slot resource stress anchor:
+      `NodeEmbeddedProcessPoolPolicyInstrumentationTest.concurrentSlotsStressSharedResourcesRemainIsolated`
+      verifies stdout/stderr, cwd/env/module/global isolation, timers,
+      file-handle and watcher cleanup, storage bridge pending drain, bridge
+      resource cleanup, and crash marker slot metadata across `primary` and
+      `overflow_1`.
     - Open before closure: real 8h/24h device soak reports with comparable RSS/native heap/Java heap/thread/fd/bridge diagnostics and no leak/orphan/runtime failure flags.
 
 - [ ] P13-09: 实现 Android-side package installation manager。

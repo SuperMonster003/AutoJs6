@@ -27,10 +27,25 @@ required 8 hour quick soak and 24 hour final soak.
   `build/reports/nodejs/final-soak/quick-soak-8h.json`
 - Required input reports:
   `build/reports/nodejs/final-soak/final-soak-24h.json`
+- Focused two-slot resource stress:
+  `NodeEmbeddedProcessPoolPolicyInstrumentationTest.concurrentSlotsStressSharedResourcesRemainIsolated`
 
 The gate is intentionally non-closing while either long-duration report is
 missing, under-duration, missing comparable metrics, or reporting leaks,
 orphan processes, or unrecoverable runtime failures.
+
+## Focused Two-Slot Resource Stress
+
+P13-08 now has a focused resource-stress anchor that runs the `primary` and
+`overflow_1` embedded script slots concurrently. The test stresses
+stdout/stderr capture, cwd/env isolation, CommonJS module cache isolation,
+global isolation, timers, file handles, `fs.watch` lifecycle cleanup, storage
+bridge dispatch drain, bridge resource cleanup, and crash marker slot metadata.
+
+This is not a substitute for the 8 hour quick soak or 24 hour final soak. It is
+only a deterministic pre-soak anchor proving that both active slots can carry a
+shared-resource workload without cross-slot state bleed or pending resource
+leaks at script completion.
 
 ## Contract Fixtures
 
@@ -123,6 +138,8 @@ Minimal accepted shape:
 - Verify no monotonic RSS/native-handle/image/socket/provider leak.
 - Verify service restart, slot failover, provider destroy, worker cleanup, and
   packaged long-running cleanup leave no orphan process or owned resource.
+- Keep the focused two-slot resource stress passing while collecting the
+  long-duration reports.
 - Close `full_heavy_resource_stress` in
   `docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json` only after both reports are
   available and ready.

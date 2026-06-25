@@ -119,8 +119,17 @@ function buildReport(files) {
       token(files.fullHeavyStressReport, "P13-08"),
       token(files.fullHeavyStressReport, "service restart"),
       token(files.fullHeavyStressReport, "slot failover"),
+      token(files.policyTest, "concurrentSlotsStressSharedResourcesRemainIsolated"),
+      token(files.policyTest, "p13.pool.resource.raw_stdout"),
+      token(files.policyTest, "p13.pool.resource.raw_stderr"),
+      token(files.policyTest, "p13.pool.resource.summary"),
+      token(files.policyTest, "slot-state.cjs"),
+      token(files.policyTest, "fs.watch"),
+      token(files.policyTest, "bridge.__test.pendingCount()"),
+      token(files.policyTest, "embedded_script.crash_evidence.marker_path"),
+      token(files.policyTest, "runtimeSlotId"),
     ], [
-      "Full stress promotion remains open for bridge provider isolation, stdout/stderr capture, cwd/env/module cache, timers, file handles, watchers, and crash evidence across both active slots.",
+      "Focused two-slot resource stress has landed; long-duration P13-08 quick/final soak remains open before P13-06 closure.",
     ]),
   ];
   const checks = [
@@ -158,6 +167,7 @@ function buildReport(files) {
       resourceIsolationReady: scenarioById(scenarios, "resource_isolation").status === "ready",
       slotCrashFallbackReady: scenarioById(scenarios, "slot_crash_fallback").status === "ready",
       packagedSchedulerReady: scenarioById(scenarios, "packaged_scheduler").status === "ready",
+      twoSlotResourceStressReady: scenarioById(scenarios, "stress_promotion").checks.every((entry) => entry.present),
       safeNodeProfilePreserved: true,
     },
   };

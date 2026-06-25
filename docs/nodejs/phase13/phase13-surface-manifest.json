@@ -113,7 +113,7 @@
         "P13-08",
         "P13-09"
       ],
-      "summary": "Close required internal blockers: crash evidence automation, second execution slot scheduling, packaged long-running service mode, full heavy resource stress, and Android-side package installation. P13-05 now includes simulated native fatal running-marker collection, real fatal native SIGKILL chaos collection, packaged launch-surface marker contract, passing packaged APK crash smoke, and native signal-safe fixed-size marker proof. P13-06 now includes default two-slot scheduling, descriptor/package processPoolSlot metadata, explicit packaged overflow-slot smoke coverage, pool-busy diagnostics, and no-restart crash marker fallback evidence while full stress promotion remains open.",
+      "summary": "Close required internal blockers: crash evidence automation, second execution slot scheduling, packaged long-running service mode, full heavy resource stress, and Android-side package installation. P13-05 now includes simulated native fatal running-marker collection, real fatal native SIGKILL chaos collection, packaged launch-surface marker contract, passing packaged APK crash smoke, and native signal-safe fixed-size marker proof. P13-06 now includes default two-slot scheduling, descriptor/package processPoolSlot metadata, explicit packaged overflow-slot smoke coverage, pool-busy diagnostics, no-restart crash marker fallback evidence, and focused primary/overflow shared-resource stress while long-duration P13-08 soak remains open.",
       "risk": "high",
       "runtimeSurface": [
         "crash evidence bundle",
