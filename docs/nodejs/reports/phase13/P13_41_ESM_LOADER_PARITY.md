@@ -14,8 +14,8 @@ current split:
 
 - `.mjs` entries, `package.json` `type=module` entries, local static imports,
   top-level await, local dynamic import, JSON import attributes,
-  `import.meta`, package `exports` / `imports`, and synchronous CJS
-  `require(esm)` are partial.
+  `import.meta`, simple ESM re-exports, package `exports` / `imports`, and
+  synchronous CJS `require(esm)` are partial.
 - `moduleSources` and focused packaged ESM/dynamic import smokes are partial.
 - loader hooks, raw `node:module` loader authority, network imports, `file:`
   / `data:` URL imports, absolute path imports, working-directory escapes,

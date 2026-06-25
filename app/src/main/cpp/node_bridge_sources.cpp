@@ -42263,6 +42263,19 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return values;
   }
+  function __autojs6_esm_split_export_named_list(sourceName, text) {
+    const values = [];
+    const entries = String(text || "").split(",");
+    for (const entry of entries) {
+      const trimmed = entry.trim();
+      if (!trimmed) continue;
+      const parts = trimmed.split(/\s+as\s+/);
+      const local = __autojs6_esm_validate_identifier(parts[0], sourceName);
+      const exported = __autojs6_esm_validate_identifier(parts.length > 1 ? parts[1] : parts[0], sourceName);
+      values.push({ exported, local });
+    }
+    return values;
+  }
   function __autojs6_esm_parse_import_bindings(specifierText, importVar, sourceName) {
     const lines = [];
     let text = String(specifierText || "").trim();
@@ -42423,14 +42436,50 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     throw __autojs6_module_not_found("Cannot find Embedded Node partial ESM module '" + name + "' from '" + parentFilename + "'.");
   }
-  function __autojs6_esm_transform_exports(source, sourceName) {
+  function __autojs6_esm_copy_star_exports(source, target) {
+    if (source === null || source === undefined) return;
+    const type = typeof source;
+    if (type !== "object" && type !== "function") return;
+    for (const key of Object.keys(source)) {
+      if (key === "default") continue;
+      if (!__autojs6_has_own(target, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+  function __autojs6_esm_transform_exports(source, sourceName, syncMode, importState) {
     let body = String(source || "");
     const namedExports = [];
+    const reExportTail = [];
     let hasDefault = false;
-    const masked = __autojs6_mask_non_code(body);
-    if (/(^|[\r\n;{}])\s*export\s+(?:\*|\{[^}]*\}\s+from\b)/.test(masked)) {
-      throw __autojs6_esm_error("Embedded Node partial ESM v1 does not support re-export syntax in " + sourceName + ".");
-    }
+    const state = importState || { nextIndex: 0, bindingLines: [] };
+    if (!Array.isArray(state.bindingLines)) state.bindingLines = [];
+    if (typeof state.nextIndex !== "number") state.nextIndex = 0;
+    const reExportPattern = /(^|[\r\n;{}])\s*export\s*(?:(\*)\s*(?:as\s+([A-Za-z_$][0-9A-Za-z_$]*))?|(\{[^}]*\}))\s*from\s*(["'])([^"'\r\n]+)\5(?:\s+(with|assert)\s*\{([^}]*)\})?\s*;?/g;
+    body = body.replace(reExportPattern, function(match, prefix, star, namespaceName, namedList, quote, specifier, attributeKind, attributeBody) {
+      const importVar = "__autojs6_esm_import_" + state.nextIndex++;
+      const attributes = __autojs6_esm_parse_static_import_attributes(attributeKind, attributeBody, sourceName, specifier);
+      state.bindingLines.push(
+        "const " + importVar + " = " + (syncMode ? "__autojs6_load_esm_module_sync" : "await __autojs6_load_esm_module") + "(" +
+          JSON.stringify(specifier) + ", " + JSON.stringify(sourceName) + ", " + JSON.stringify(attributes) + ");"
+      );
+      if (star) {
+        if (namespaceName) {
+          const exportedName = __autojs6_esm_validate_identifier(namespaceName, sourceName);
+          reExportTail.push("__autojs6_esm_namespace[" + JSON.stringify(exportedName) + "] = " + importVar + ";");
+        } else {
+          reExportTail.push("__autojs6_esm_copy_star_exports(" + importVar + ", __autojs6_esm_namespace);");
+        }
+      } else {
+        for (const item of __autojs6_esm_split_export_named_list(sourceName, String(namedList || "").slice(1, -1))) {
+          reExportTail.push(
+            "__autojs6_esm_namespace[" + JSON.stringify(item.exported) + "] = " +
+              importVar + "[" + JSON.stringify(item.local) + "];"
+          );
+        }
+      }
+      return prefix || "";
+    });
     body = body.replace(/\bexport\s+default\s+/g, function() {
       if (hasDefault) {
         throw __autojs6_esm_error("Embedded Node partial ESM module has more than one default export: " + sourceName);
@@ -42451,7 +42500,7 @@ std::string buildEmbeddedScriptExecutionSource(
       return "class " + name;
     });
     body = body.replace(/(^|[\r\n;{}])\s*export\s*\{([^}]*)\}\s*;?/g, function(match, prefix, list) {
-      for (const item of __autojs6_esm_split_named_list(sourceName, list)) {
+      for (const item of __autojs6_esm_split_export_named_list(sourceName, list)) {
         namedExports.push(item);
       }
       return prefix || "";
@@ -42463,6 +42512,7 @@ std::string buildEmbeddedScriptExecutionSource(
     for (const item of namedExports) {
       tail.push("__autojs6_esm_namespace[" + JSON.stringify(item.exported) + "] = " + item.local + ";");
     }
+    Array.prototype.push.apply(tail, reExportTail);
     return {
       body,
       tail: tail.join("\n")
@@ -42743,7 +42793,10 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     }
     body += sourceText.slice(cursor);
-    const exportTransform = __autojs6_esm_transform_exports(body, filename);
+    const exportTransform = __autojs6_esm_transform_exports(body, filename, syncMode, {
+      bindingLines,
+      nextIndex: importIndex
+    });
     const importMetaBody = __autojs6_transform_import_meta(exportTransform.body, filename);
     const transformedBody = __autojs6_transform_dynamic_import_calls(importMetaBody, filename, "__filename");
     const remaining = __autojs6_mask_non_code(transformedBody);

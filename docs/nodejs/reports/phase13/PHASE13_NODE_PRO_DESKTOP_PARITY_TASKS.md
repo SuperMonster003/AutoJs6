@@ -1352,7 +1352,8 @@ P13 task 本身使用以下执行状态：
       AutoJs6-managed partial ESM loader，而不是提升为 raw Node loader。
     - 已覆盖 `.mjs`、`type=module`、TLA、local static import、local
       dynamic import、package `exports` / `imports`、JSON import attributes、
-      scoped `import.meta`、ESM/CJS interop 和 sync `require(esm)`。
+      simple re-export、scoped `import.meta`、ESM/CJS interop 和 sync
+      `require(esm)`。
     - loader hooks、raw `node:module` loader authority、network import、
       `file:` / `data:` URL import、absolute path import、workingDirectory
       escape、disabled builtin import 继续拒绝。

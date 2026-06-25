@@ -276,6 +276,79 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun experimentalEsmReExportsWorkForRequireAndStaticImport() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM re-export support")
+        val workDir = freshWorkDir("esm-reexports")
+        File(workDir, "dep.mjs").writeText(
+            """
+            export const alpha = "alpha";
+            export const hidden = "hidden";
+            export default { label: "default" };
+            const local = "local";
+            export { local as publicName };
+            """.trimIndent(),
+        )
+        File(workDir, "named.mjs").writeText("""export{alpha as alias,default as defaultName}from"./dep.mjs";""")
+        File(workDir, "star.mjs").writeText(
+            """
+            export const alpha = "local-alpha";
+            export*from"./dep.mjs";
+            """.trimIndent(),
+        )
+        File(workDir, "namespace.mjs").writeText("""export*as bundle from"./dep.mjs";""")
+
+        val cjs = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const named = require("./named.mjs");
+                const star = require("./star.mjs");
+                const namespace = require("./namespace.mjs");
+                const dep = require("./dep.mjs");
+                console.log("cjs.require.esm.reexport=" + [
+                  named.alias,
+                  named.defaultName.label,
+                  star.alpha,
+                  star.publicName,
+                  Object.prototype.hasOwnProperty.call(star, "default"),
+                  namespace.bundle.alpha,
+                  namespace.bundle.default.label,
+                  dep.publicName
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = File(workDir, "main.cjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("cjs require ESM re-exports", cjs)
+        assertTrue(cjs.stdout.contains("cjs.require.esm.reexport=alpha|default|local-alpha|local|false|alpha|default|local"))
+
+        NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+
+        val esm = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import { alias, defaultName } from "./named.mjs";
+                import * as star from "./star.mjs";
+                import { bundle } from "./namespace.mjs";
+                console.log("esm.reexport.static=" + [
+                  alias,
+                  defaultName.label,
+                  star.alpha,
+                  star.publicName,
+                  Object.prototype.hasOwnProperty.call(star, "default"),
+                  bundle.alpha,
+                  bundle.default.label
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+            esmExperimentalEnabled = true,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("ESM static re-exports", esm)
+        assertTrue(esm.stdout.contains("esm.reexport.static=alpha|default|local-alpha|local|false|alpha|default"))
+    }
+
+    @Test
     fun experimentalEsmJsonImportAttributesUseCommonJsJsonCache() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM JSON import attributes")
         val workDir = freshWorkDir("esm-json-attributes")

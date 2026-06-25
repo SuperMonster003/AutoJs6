@@ -84,6 +84,10 @@ flag to false preserves the previous fail-closed path for diagnostics.
 - ESM may import scoped JSON modules only with `with { type: "json" }`; the resulting default export shares the existing CommonJS JSON cache object.
 - ESM exposes `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)` for AutoJs6-managed modules. `resolve()` reuses the scoped ESM resolver, returns `file:` URLs for local/package targets, returns `node:` URLs for allowed builtins, and keeps disabled builtins denied.
 - simple named exports are supported for local `.mjs` modules.
+- simple re-exports are supported for local/package ESM graphs:
+  `export { name as alias } from "./dep.mjs"`,
+  `export * from "./dep.mjs"`, and
+  `export * as namespace from "./dep.mjs"`.
 - top-level await is supported because the partial ESM graph is evaluated through an async runner.
 - diagnostics are emitted in the result envelope:
   - `esmEnabled`
@@ -136,7 +140,7 @@ Still unsupported in v1:
 
 CommonJS entries use a conservative preflight scan to reject obvious ESM forms before CommonJS execution.
 
-Partial v1.1 uses a deliberately small AutoJs6-managed transform for local static `.mjs` imports and simple exports. It is not a full Node ESM parser and is documented as a safe compatibility subset.
+Partial v1.1 uses a deliberately small AutoJs6-managed transform for local static `.mjs` imports, simple exports, and simple re-exports. It is not a full Node ESM parser and is documented as a safe compatibility subset.
 
 For packaged APKs, partial v1.1 verifies a small encrypted graph: a `.mjs`
 entry can import a local `.mjs` dependency and a local CommonJS dependency
