@@ -129,6 +129,8 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals("local_unpacked_host_managed_only", healthById.getValue("package_manager").details.getValue("sourceAuthority"))
         assertEquals("internal_substrate_only", healthById.getValue("package_manager").details.getValue("installAuthority"))
         assertTrue(healthById.getValue("package_manager").details.getValue("liveMethods").contains("verify"))
+        assertTrue(healthById.getValue("package_manager").details.getValue("liveMethods").contains("planInstall"))
+        assertEquals("planInstall,planUpdate,planRemove", healthById.getValue("package_manager").details.getValue("planOperations"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)
         assertTrue(
             healthById.getValue("accessibility").status in setOf(

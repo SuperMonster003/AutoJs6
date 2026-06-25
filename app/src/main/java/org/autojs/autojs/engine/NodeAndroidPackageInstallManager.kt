@@ -64,6 +64,26 @@ class NodeAndroidPackageInstallManager(
             .put("record", record?.toJson() ?: JSONObject.NULL)
     }
 
+    data class PackagePlan(
+        val operation: String,
+        val status: String,
+        val record: PackageRecord? = null,
+        val existingRecord: PackageRecord? = null,
+        val message: String = "",
+    ) {
+        fun toJson(): JSONObject = JSONObject()
+            .put("schema", PLAN_SCHEMA)
+            .put("operation", operation)
+            .put("status", status)
+            .put("dryRun", true)
+            .put("sourceAuthority", "local_unpacked_host_managed_only")
+            .put("installAuthority", "internal_substrate_only")
+            .put("grantsInstallAuthority", false)
+            .put("message", message)
+            .put("record", record?.toJson() ?: JSONObject.NULL)
+            .put("existingRecord", existingRecord?.toJson() ?: JSONObject.NULL)
+    }
+
     class CancellationToken {
         private val cancelled = AtomicBoolean(false)
 
@@ -120,6 +140,32 @@ class NodeAndroidPackageInstallManager(
                 transactionDir.deleteRecursively()
             }
         }
+    }
+
+    fun planInstall(request: PackageRequest): PackagePlan {
+        return planInstallOrUpdate(OP_INSTALL, request, replace = false)
+    }
+
+    fun planUpdate(request: PackageRequest): PackagePlan {
+        return planInstallOrUpdate(OP_UPDATE, request, replace = true)
+    }
+
+    fun planRemove(name: String, version: String): PackagePlan = withStoreLock {
+        if (name.isBlank() || version.isBlank()) {
+            throw PackageInstallException(ERROR_INVALID_PACKAGE, "Package name and version must not be blank.")
+        }
+        val existingRecord = readRecord(packageDir(name, version))
+            ?: return@withStoreLock PackagePlan(
+                operation = OP_REMOVE,
+                status = STATUS_MISSING,
+                message = "Package is not installed.",
+            )
+        PackagePlan(
+            operation = OP_REMOVE,
+            status = STATUS_READY,
+            existingRecord = existingRecord,
+            message = "Package is ready for remove dry-run.",
+        )
     }
 
     fun list(): List<PackageRecord> = withStoreLock {
@@ -297,6 +343,56 @@ class NodeAndroidPackageInstallManager(
         }
     }
 
+    private fun planInstallOrUpdate(
+        operation: String,
+        request: PackageRequest,
+        replace: Boolean,
+    ): PackagePlan = withStoreLock {
+        validateRequest(request)
+        validatePackageSource(request)
+        val target = packageDir(request.name, request.version)
+        val existingRecord = readRecord(target)
+        if (!replace && existingRecord != null) {
+            return@withStoreLock PackagePlan(
+                operation = operation,
+                status = STATUS_ALREADY_INSTALLED,
+                existingRecord = existingRecord,
+                message = "Package is already installed.",
+            )
+        }
+        if (replace && existingRecord == null) {
+            return@withStoreLock PackagePlan(
+                operation = operation,
+                status = STATUS_MISSING,
+                message = "Package is not installed.",
+            )
+        }
+        val integrity = calculateSourceIntegrity(request.sourceDir)
+        request.expectedIntegrity?.let { expected ->
+            if (expected != integrity) {
+                throw PackageInstallException(ERROR_INTEGRITY_MISMATCH, "Package integrity mismatch for ${request.name}@${request.version}.")
+            }
+        }
+        val files = collectPackageFiles(request.sourceDir, CancellationToken())
+        val record = PackageRecord(
+            name = request.name,
+            version = request.version,
+            kind = request.kind,
+            integrity = integrity,
+            installedAtEpochMs = 0L,
+            fileCount = files.size,
+            totalBytes = files.sumOf { it.length() },
+            packageDir = target,
+        )
+        PackagePlan(
+            operation = operation,
+            status = STATUS_READY,
+            record = record,
+            existingRecord = existingRecord,
+            message = "Package source is ready for $operation dry-run.",
+        )
+    }
+
     private fun validateRequest(request: PackageRequest) {
         if (request.name.isBlank()) {
             throw PackageInstallException(ERROR_INVALID_PACKAGE, "Package name must not be blank.")
@@ -447,6 +543,8 @@ class NodeAndroidPackageInstallManager(
         const val STATUS_MISSING = "missing"
         const val STATUS_VERIFIED = "verified"
         const val STATUS_PRUNED = "pruned"
+        const val STATUS_READY = "ready"
+        const val STATUS_ALREADY_INSTALLED = "already_installed"
 
         const val ERROR_INVALID_PACKAGE = "ERR_AUTOJS6_ANDROID_PACKAGE_INVALID"
         const val ERROR_ALREADY_INSTALLED = "ERR_AUTOJS6_ANDROID_PACKAGE_ALREADY_INSTALLED"
@@ -464,6 +562,7 @@ class NodeAndroidPackageInstallManager(
         private const val LOCK_FILE = ".autojs6-package-manager.lock"
         private const val RECORD_FILE = ".autojs6-package.json"
         private const val RECORD_SCHEMA = "autojs6-node-android-package-record-v1"
+        private const val PLAN_SCHEMA = "autojs6-node-android-package-plan-v1"
 
         private val processLock = ReentrantLock()
 

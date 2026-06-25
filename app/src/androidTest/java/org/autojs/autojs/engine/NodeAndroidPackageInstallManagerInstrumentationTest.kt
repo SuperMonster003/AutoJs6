@@ -41,6 +41,18 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
             files = mapOf("index.cjs" to "module.exports = 'v1';\n"),
         )
         val integrityV1 = manager.calculateSourceIntegrity(sourceV1)
+        val installPlan = manager.planInstall(
+            NodeAndroidPackageInstallManager.PackageRequest(
+                name = "@autojs6/test-package",
+                version = "1.0.0",
+                sourceDir = sourceV1,
+                expectedIntegrity = integrityV1,
+            ),
+        )
+        assertEquals(NodeAndroidPackageInstallManager.STATUS_READY, installPlan.status)
+        assertTrue(installPlan.toJson().getBoolean("dryRun"))
+        assertEquals("internal_substrate_only", installPlan.toJson().getString("installAuthority"))
+        assertTrue(manager.list().isEmpty())
 
         val installed = manager.install(
             NodeAndroidPackageInstallManager.PackageRequest(
@@ -54,6 +66,10 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
         assertEquals(integrityV1, installed.record?.integrity)
         assertEquals(1, manager.list().size)
         assertEquals(NodeAndroidPackageInstallManager.STATUS_VERIFIED, manager.verify("@autojs6/test-package", "1.0.0").status)
+        assertEquals(
+            NodeAndroidPackageInstallManager.STATUS_ALREADY_INSTALLED,
+            manager.planInstall(request("@autojs6/test-package", "1.0.0", sourceV1)).status,
+        )
 
         val duplicate = expectPackageError(NodeAndroidPackageInstallManager.ERROR_ALREADY_INSTALLED) {
             manager.install(
@@ -87,6 +103,16 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
         assertEquals("module.exports = 'v1';\n", File(manager.list().single().packageDir, "index.cjs").readText())
 
         val integrityV2 = manager.calculateSourceIntegrity(sourceV2)
+        val updatePlan = manager.planUpdate(
+            NodeAndroidPackageInstallManager.PackageRequest(
+                name = "@autojs6/test-package",
+                version = "1.0.0",
+                sourceDir = sourceV2,
+                expectedIntegrity = integrityV2,
+            ),
+        )
+        assertEquals(NodeAndroidPackageInstallManager.STATUS_READY, updatePlan.status)
+        assertEquals("module.exports = 'v1';\n", File(manager.list().single().packageDir, "index.cjs").readText())
         val updated = manager.update(
             NodeAndroidPackageInstallManager.PackageRequest(
                 name = "@autojs6/test-package",
@@ -98,12 +124,20 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
         assertEquals(NodeAndroidPackageInstallManager.STATUS_UPDATED, updated.status)
         assertEquals("module.exports = 'v2';\n", File(manager.list().single().packageDir, "index.cjs").readText())
         assertEquals(NodeAndroidPackageInstallManager.STATUS_VERIFIED, manager.verify("@autojs6/test-package", "1.0.0").status)
+        assertEquals(
+            NodeAndroidPackageInstallManager.STATUS_READY,
+            manager.planRemove("@autojs6/test-package", "1.0.0").status,
+        )
 
         assertEquals(
             NodeAndroidPackageInstallManager.STATUS_REMOVED,
             manager.remove("@autojs6/test-package", "1.0.0").status,
         )
         assertTrue(manager.list().isEmpty())
+        assertEquals(
+            NodeAndroidPackageInstallManager.STATUS_MISSING,
+            manager.planRemove("@autojs6/test-package", "1.0.0").status,
+        )
         assertEquals(
             NodeAndroidPackageInstallManager.STATUS_MISSING,
             manager.verify("@autojs6/test-package", "1.0.0").status,

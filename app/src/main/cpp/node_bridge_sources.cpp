@@ -8910,6 +8910,7 @@ std::string buildEmbeddedScriptExecutionSource(
         installAuthority: "internal_substrate_only",
         allowedSources: Object.freeze(["local_unpacked_host_managed"]),
         deniedSources: Object.freeze(["raw_registry", "remote_tarball", "git", "http_url", "file_url", "workspace_symlink", "unverified_cache"]),
+        planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove"]),
         operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
         packageKinds: Object.freeze(["dependency", "plugin", "project"]),
         jsBridge: "read_maintenance_partial",
@@ -25897,6 +25898,7 @@ std::string buildEmbeddedScriptExecutionSource(
     "packaged_distribution_evidence",
     "user_visible_install_authority"
   ]);
+  const __autojs6_package_manager_plan_operations = Object.freeze(["planInstall", "planUpdate", "planRemove"]);
   const __autojs6_package_manager_source_policy = Object.freeze({
     schema: "autojs6-node-package-manager-source-policy-v1",
     status: "decision_only_no_install_authority",
@@ -25905,6 +25907,7 @@ std::string buildEmbeddedScriptExecutionSource(
     grantsInstallAuthority: false,
     allowedSources: __autojs6_package_manager_allowed_sources,
     deniedSources: __autojs6_package_manager_denied_sources,
+    planOperations: __autojs6_package_manager_plan_operations,
     localUnpacked: Object.freeze({
       status: "allowed_substrate",
       source: "host_managed_unpacked_directory",
@@ -25963,6 +25966,7 @@ std::string buildEmbeddedScriptExecutionSource(
     installAuthority: "internal_substrate_only",
     allowedSources: __autojs6_package_manager_allowed_sources,
     deniedSources: __autojs6_package_manager_denied_sources,
+    planOperations: __autojs6_package_manager_plan_operations,
     operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
     packageKinds: Object.freeze(["dependency", "plugin", "project"]),
     androidNetwork: "denied",
@@ -26026,6 +26030,25 @@ std::string buildEmbeddedScriptExecutionSource(
         : null
     });
   }
+  function __autojs6_package_manager_plan_result(value) {
+    const source = value && typeof value === "object" ? value : {};
+    return Object.freeze({
+      schema: __autojs6_package_manager_string(source.schema || "autojs6-node-android-package-plan-v1"),
+      operation: __autojs6_package_manager_string(source.operation),
+      status: __autojs6_package_manager_string(source.status),
+      dryRun: source.dryRun !== false,
+      sourceAuthority: __autojs6_package_manager_string(source.sourceAuthority || "local_unpacked_host_managed_only"),
+      installAuthority: __autojs6_package_manager_string(source.installAuthority || "internal_substrate_only"),
+      grantsInstallAuthority: false,
+      message: __autojs6_package_manager_string(source.message),
+      record: source.record && typeof source.record === "object"
+        ? __autojs6_package_manager_record(source.record)
+        : null,
+      existingRecord: source.existingRecord && typeof source.existingRecord === "object"
+        ? __autojs6_package_manager_record(source.existingRecord)
+        : null
+    });
+  }
   function __autojs6_package_manager_bridge_options(input, fallbackMs) {
     return {
       timeoutMs: __autojs6_package_manager_timeout_from_options(input, fallbackMs),
@@ -26041,6 +26064,41 @@ std::string buildEmbeddedScriptExecutionSource(
       throw __autojs6_package_manager_invalid_request(
         "verify",
         "package_manager.verify requires non-empty name and version."
+      );
+    }
+    return { name, version };
+  }
+  function __autojs6_package_manager_source_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    const sourceDir = __autojs6_package_manager_string(input.sourceDir).trim();
+    if (!name || !version || !sourceDir) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires non-empty name, version, and sourceDir."
+      );
+    }
+    const payload = {
+      name,
+      version,
+      sourceDir,
+      kind: __autojs6_package_manager_string(input.kind || "dependency").trim() || "dependency"
+    };
+    const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity).trim();
+    if (expectedIntegrity) {
+      payload.expectedIntegrity = expectedIntegrity;
+    }
+    return payload;
+  }
+  function __autojs6_package_manager_name_version_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    if (!name || !version) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires non-empty name and version."
       );
     }
     return { name, version };
@@ -26080,6 +26138,7 @@ std::string buildEmbeddedScriptExecutionSource(
         installAuthority: profile.installAuthority,
         allowedSources: __autojs6_package_manager_allowed_sources,
         deniedSources: __autojs6_package_manager_denied_sources,
+        planOperations: __autojs6_package_manager_plan_operations,
         operations: __autojs6_package_manager_policy.operations,
         packageKinds: __autojs6_package_manager_policy.packageKinds,
         npmCli: profile.npmCli,
@@ -26098,6 +26157,51 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     function sourcePolicy() {
       return __autojs6_package_manager_source_policy;
+    }
+    function planInstall(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_source_request("planInstall", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "planInstall",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_plan_result);
+    }
+    function planUpdate(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_source_request("planUpdate", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "planUpdate",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_plan_result);
+    }
+    function planRemove(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_name_version_request("planRemove", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      const input = __autojs6_package_manager_options(request);
+      return __autojs6_call_autojs(
+        "package_manager",
+        "planRemove",
+        [payload],
+        __autojs6_package_manager_bridge_options(input, 5000)
+      ).then(__autojs6_package_manager_plan_result);
     }
     function list(options) {
       const input = __autojs6_package_manager_options(options);
@@ -26144,6 +26248,9 @@ std::string buildEmbeddedScriptExecutionSource(
       status,
       policy,
       sourcePolicy,
+      planInstall,
+      planUpdate,
+      planRemove,
       install: __autojs6_package_manager_denied("install"),
       update: __autojs6_package_manager_denied("update"),
       remove: __autojs6_package_manager_denied("remove"),

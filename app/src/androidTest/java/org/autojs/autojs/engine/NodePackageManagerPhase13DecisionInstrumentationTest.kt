@@ -80,6 +80,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   packageManagerProfile.installAuthority,
                   Array.isArray(packageManagerProfile.allowedSources) && packageManagerProfile.allowedSources.join(","),
                   Array.isArray(packageManagerProfile.deniedSources) && packageManagerProfile.deniedSources.join(","),
+                  Array.isArray(packageManagerProfile.planOperations) && packageManagerProfile.planOperations.join(","),
                   Array.isArray(packageManagerProfile.operations) && packageManagerProfile.operations.join(","),
                   Array.isArray(packageManagerProfile.packageKinds) && packageManagerProfile.packageKinds.join(","),
                   packageManagerProfile.jsBridge,
@@ -92,6 +93,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   Object.isFrozen(packageManagerProfile.targetProfiles),
                   Object.isFrozen(packageManagerProfile.allowedSources),
                   Object.isFrozen(packageManagerProfile.deniedSources),
+                  Object.isFrozen(packageManagerProfile.planOperations),
                   Object.isFrozen(packageManagerProfile.operations),
                   Object.isFrozen(packageManagerProfile.packageKinds)
                 ].join("|"));
@@ -126,9 +128,10 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "local_unpacked_host_managed_only|internal_substrate_only|" +
                     "local_unpacked_host_managed|" +
                     "raw_registry,remote_tarball,git,http_url,file_url,workspace_symlink,unverified_cache|" +
+                    "planInstall,planUpdate,planRemove|" +
                     "install,update,remove,list,verify,prune|" +
                     "dependency,plugin,project|read_maintenance_partial|read_maintenance_partial|not_promoted|denied|" +
-                    "false|false|true|true|true|true|true|true",
+                    "false|false|true|true|true|true|true|true|true",
             ),
         )
         assertTrue(
@@ -146,6 +149,8 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                 "nodejs";
                 (async function main() {
                   const assert = require("assert");
+                  const fs = require("fs");
+                  const path = require("path");
                   const packageManager = require("package_manager");
                   const status = packageManager.status();
                   const policy = packageManager.policy();
@@ -159,6 +164,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(Object.isFrozen(policy.operations), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.allowedSources), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.deniedSources), true);
+                  assert.strictEqual(Object.isFrozen(sourcePolicy.planOperations), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.localUnpacked), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.registry), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.tarball), true);
@@ -179,12 +185,14 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.deepStrictEqual(policy.allowedSources, ["local_unpacked_host_managed"]);
                   assert(policy.deniedSources.includes("raw_registry"));
                   assert(policy.deniedSources.includes("remote_tarball"));
+                  assert.deepStrictEqual(policy.planOperations, ["planInstall", "planUpdate", "planRemove"]);
                   assert.strictEqual(sourcePolicy.schema, "autojs6-node-package-manager-source-policy-v1");
                   assert.strictEqual(sourcePolicy.status, "decision_only_no_install_authority");
                   assert.strictEqual(sourcePolicy.grantsInstallAuthority, false);
                   assert.deepStrictEqual(sourcePolicy.allowedSources, ["local_unpacked_host_managed"]);
                   assert(sourcePolicy.deniedSources.includes("raw_registry"));
                   assert(sourcePolicy.deniedSources.includes("remote_tarball"));
+                  assert.deepStrictEqual(sourcePolicy.planOperations, ["planInstall", "planUpdate", "planRemove"]);
                   assert.strictEqual(sourcePolicy.localUnpacked.status, "allowed_substrate");
                   assert.strictEqual(sourcePolicy.localUnpacked.requiresSha512, true);
                   assert.strictEqual(sourcePolicy.registry.rawRegistryAccess, false);
@@ -203,6 +211,47 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   }
                   const deniedCodes = ["install", "update", "remove"].map(deniedCode);
                   deniedCodes.forEach((code) => assert.strictEqual(code, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"));
+
+                  const planSuffix = Date.now().toString(36);
+                  const planName = "@autojs6/p13-plan-" + planSuffix;
+                  const planSourceDir = "p13-plan-package-" + planSuffix;
+                  fs.mkdirSync(planSourceDir, { recursive: true });
+                  fs.writeFileSync(path.join(planSourceDir, "package.json"), JSON.stringify({
+                    name: planName,
+                    version: "1.0.0"
+                  }));
+                  fs.writeFileSync(path.join(planSourceDir, "index.cjs"), "module.exports = 13;\n");
+                  const planInstallResult = await packageManager.planInstall({
+                    name: planName,
+                    version: "1.0.0",
+                    sourceDir: planSourceDir,
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(planInstallResult.schema, "autojs6-node-android-package-plan-v1");
+                  assert.strictEqual(planInstallResult.operation, "install");
+                  assert.strictEqual(planInstallResult.status, "ready");
+                  assert.strictEqual(planInstallResult.dryRun, true);
+                  assert.strictEqual(planInstallResult.grantsInstallAuthority, false);
+                  assert.strictEqual(planInstallResult.record.name, planName);
+                  assert.strictEqual(Object.isFrozen(planInstallResult), true);
+                  assert.strictEqual(Object.isFrozen(planInstallResult.record), true);
+                  const planUpdateResult = await packageManager.planUpdate({
+                    name: planName,
+                    version: "1.0.0",
+                    sourceDir: planSourceDir,
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(planUpdateResult.operation, "update");
+                  assert.strictEqual(planUpdateResult.status, "missing");
+                  assert.strictEqual(planUpdateResult.grantsInstallAuthority, false);
+                  const planRemoveResult = await packageManager.planRemove({
+                    name: planName,
+                    version: "1.0.0",
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(planRemoveResult.operation, "remove");
+                  assert.strictEqual(planRemoveResult.status, "missing");
+                  assert.strictEqual(planRemoveResult.grantsInstallAuthority, false);
 
                   const listResult = await packageManager.list({ timeoutMs: 5000 });
                   assert.strictEqual(Array.isArray(listResult), true);
@@ -241,6 +290,11 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     sourcePolicy.allowedSources.join(","),
                     sourcePolicy.deniedSources.includes("raw_registry"),
                     sourcePolicy.grantsInstallAuthority,
+                    sourcePolicy.planOperations.join(","),
+                    planInstallResult.status,
+                    planInstallResult.grantsInstallAuthority,
+                    planUpdateResult.status,
+                    planRemoveResult.status,
                     deniedCodes.join(","),
                     listResult.length >= 0,
                     verifyResult.status,
@@ -265,6 +319,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                 "p13pm.facade=read_maintenance_partial|read_maintenance_partial|read_maintenance_partial|denied|deferred|false|" +
                     "true|true|true|true|decision_only_no_install_authority|local_unpacked_host_managed_only|" +
                     "local_unpacked_host_managed|true|false|" +
+                    "planInstall,planUpdate,planRemove|ready|false|missing|missing|" +
                     "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED,ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED," +
                     "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED|true|missing|pruned|" +
                     "package_manager|undefined",

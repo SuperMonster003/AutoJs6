@@ -641,7 +641,7 @@ object NodeBridgeModules {
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
-    val packageManagerMethods = setOf("list", "verify", "prune")
+    val packageManagerMethods = setOf("list", "verify", "prune", "planInstall", "planUpdate", "planRemove")
     val javaMethods = setOf("type", "callStatic", "new", "call", "callInstance", "getField", "release", "dispose")
     val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
@@ -3444,12 +3444,80 @@ class AndroidNodeBridgeCapabilityProvider(
                         packageInstallManager.prune(maxTransactionAgeMs).toJson().toString(),
                     )
                 }
+                "planInstall" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.planInstall requires a JSON request with name, version, and sourceDir.",
+                        )
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.planInstall(packageManagerPackageRequest(payload, "planInstall")).toJson().toString(),
+                    )
+                }
+                "planUpdate" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.planUpdate requires a JSON request with name, version, and sourceDir.",
+                        )
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.planUpdate(packageManagerPackageRequest(payload, "planUpdate")).toJson().toString(),
+                    )
+                }
+                "planRemove" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.planRemove requires a JSON request with name and version.",
+                        )
+                    val nameVersion = packageManagerNameVersion(payload, "planRemove")
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.planRemove(nameVersion.first, nameVersion.second).toJson().toString(),
+                    )
+                }
                 else -> unavailable(request)
             }
         }.getOrElse { error ->
             NodeBridgeResponse.failure(request.id, packageManagerError(request, error))
         }
         callback(response)
+    }
+
+    private fun packageManagerPackageRequest(
+        payload: JSONObject,
+        methodName: String,
+    ): NodeAndroidPackageInstallManager.PackageRequest {
+        val (name, version) = packageManagerNameVersion(payload, methodName)
+        val sourceDirText = payload.optString("sourceDir").trim()
+        if (sourceDirText.isBlank()) {
+            throw IllegalArgumentException("package_manager.$methodName requires a non-empty relative sourceDir.")
+        }
+        val sourceDir = resolveScopedProjectFile(sourceDirText)
+            ?: throw IllegalArgumentException("package_manager.$methodName sourceDir must be a relative path inside the current workingDirectory.")
+        val expectedIntegrity = payload.optString("expectedIntegrity").trim().takeIf { it.isNotBlank() }
+        val kind = payload.optString("kind", NodeAndroidPackageInstallManager.KIND_DEPENDENCY)
+            .trim()
+            .takeIf { it.isNotBlank() }
+            ?: NodeAndroidPackageInstallManager.KIND_DEPENDENCY
+        return NodeAndroidPackageInstallManager.PackageRequest(
+            name = name,
+            version = version,
+            sourceDir = sourceDir,
+            expectedIntegrity = expectedIntegrity,
+            kind = kind,
+        )
+    }
+
+    private fun packageManagerNameVersion(payload: JSONObject, methodName: String): Pair<String, String> {
+        val name = payload.optString("name").trim()
+        val version = payload.optString("version").trim()
+        if (name.isBlank() || version.isBlank()) {
+            throw IllegalArgumentException("package_manager.$methodName requires non-empty name and version.")
+        }
+        return name to version
     }
 
     private fun packageManagerMaxTransactionAgeMs(payload: JSONObject?): Long {
