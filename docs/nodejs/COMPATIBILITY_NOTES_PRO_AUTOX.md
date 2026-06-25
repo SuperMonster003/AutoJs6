@@ -22,6 +22,22 @@ Embedded Node/V8/libuv runtime
 
 The goal is not unrestricted desktop Node.js compatibility. Scripts written for Auto.js Pro 9 or AutoX.js v7 may need adaptation.
 
+P13-56 records migration and Pro9 comparison docs as partial. This document uses
+three labels consistently:
+
+- Pro-compatible: a Safe-profile bridge or documented Pro-profile migration path
+  exists for Auto.js Pro/Rhino-style scripts.
+- Desktop-compatible: a local desktop Node.js pattern has an AutoJs6-safe path,
+  usually scoped by project files, explicit capabilities, or static examples.
+- gated/diagnostic-only: a debug-only diagnostic, provider POC, static catalog,
+  TypeScript metadata row, or stable denial exists, but normal scripts cannot
+  rely on that authority.
+
+debug-only/provider POC is not formal availability. Treat
+`sample/nodejs/pro-parity-suite`, `sample/nodejs/desktop-parity-suite`, and
+`profile_capabilities.d.ts` as migration evidence until a runtime promotion gate
+marks the related surface as callable.
+
 ## Entry Points
 
 Auto.js Pro 9 public docs describe:
@@ -478,6 +494,17 @@ surfaces. Scripts can type-check profile requirements and Safe-profile denial
 behavior with `ProfileModuleModeFor` and related helpers, but denied desktop
 modules are not declared as callable modules and no Pro/Desktop authority is
 granted by the declaration package.
+
+P13-56 records migration and Pro9 comparison docs as partial. Existing
+AutoJs/Rhino bridge modules and covered `autojs6:compat` wrappers are the main
+Pro-compatible migration lane. Local CJS/partial ESM, scoped filesystem,
+controlled HTTP/HTTPS, and host-managed pure-JS dependencies are the main
+Desktop-compatible migration lane. `$autojs.java`, `rhino.install`, raw Java or
+Android globals, raw floaty, unrestricted UI-thread execution, daily/weekly task
+rows, raw network sockets, expanded filesystem roots, `worker_threads`, `vm`,
+`inspector`, raw WASI, native addons, `child_process`, Android npm CLI,
+registry install, lifecycle scripts, and native payloads remain
+gated/diagnostic-only or unsupported until a later profile promotion gate lands.
 
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,

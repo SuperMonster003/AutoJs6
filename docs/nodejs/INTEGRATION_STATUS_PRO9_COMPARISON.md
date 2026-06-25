@@ -1256,6 +1256,29 @@ use `ProfileModuleModeFor`, `ProfileRequiredFor`, `SafeDefaultModeFor`, and
 behavior. The matrix is metadata-only and does not declare denied desktop
 modules as callable modules or grant Pro/Desktop authority.
 
+P13-56 records migration and Pro9 comparison docs as partial: this document now
+uses the same profile vocabulary as the Phase 13 surface manifest. The labels
+are:
+
+- Pro-compatible: Safe-profile or documented Pro-profile migration paths that
+  help Auto.js Pro/Rhino authors rewrite scripts to explicit Node bridge modules
+  or guarded Pro examples.
+- Desktop-compatible: scoped desktop Node.js patterns such as local module
+  loading, partial local ESM, scoped filesystem behavior, controlled HTTP/HTTPS,
+  host-managed pure-JS dependencies, and the desktop example catalog.
+- gated/diagnostic-only: debug profile rows, provider POCs, static examples,
+  declaration-only profile metadata, or stable denials that are not promoted as
+  normal script APIs.
+
+debug-only/provider POC is not formal availability. `sample/nodejs/pro-parity-suite`
+and `sample/nodejs/desktop-parity-suite` are migration evidence, while
+`profile_capabilities.d.ts` is metadata-only. `$autojs.java`, Java/Rhino proxy
+globals, raw floaty, unrestricted UI-thread execution, daily/weekly task rows,
+raw network sockets, expanded filesystem roots, `worker_threads`, `vm`,
+`inspector`, WASI, native addons, `child_process`, Android npm CLI, registry
+install, lifecycle scripts, and native payloads remain gated unless a later
+runtime promotion gate explicitly changes their status.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout
