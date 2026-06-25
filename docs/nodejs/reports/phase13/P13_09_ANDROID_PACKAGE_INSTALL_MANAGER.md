@@ -3,10 +3,12 @@
 Status: partial
 
 P13-09 starts the Android-side package installation manager without promoting a
-user-facing npm or registry installer. The first landed piece is a local,
+user-facing npm or registry installer. The landed pieces are a local,
 app-private package store that can install already-unpacked package directories
-after policy validation. It is intended as the Android runtime substrate for
-future dependency, plugin, and package distribution work.
+after policy validation, plus a diagnostic-only `require("package_manager")`
+facade that reports policy and rejects all mutating operations. It is intended
+as the Android runtime substrate for future dependency, plugin, and package
+distribution work.
 
 ## Landed
 
@@ -14,6 +16,10 @@ future dependency, plugin, and package distribution work.
   `app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt`
 - Focused instrumentation:
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt`
+- Diagnostic facade instrumentation:
+  `app/src/androidTest/java/org/autojs/autojs/engine/NodePackageManagerPhase13DecisionInstrumentationTest.kt`
+- Type declaration:
+  `docs/nodejs/types/autojs6-node/package_manager.d.ts`
 - Host verifier:
   `tools/nodejs/phase13/verify-android-package-install-manager.js`
 - Gradle gate:
@@ -46,11 +52,19 @@ operation checks, and SHA-512 integrity. It rejects:
 Records include dependency/plugin/project package kinds so future plugin
 distribution and package-manager work can build on the same store.
 
+`require("package_manager")` is now script-visible in diagnostic-only mode:
+
+- `status()` returns a frozen runtime policy snapshot.
+- `policy()` returns a frozen fail-closed package-manager policy.
+- `install`, `update`, `remove`, `list`, `verify`, and `prune` throw
+  `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` before dispatching any Android
+  package-store operation.
+
 ## Not Promoted Yet
 
-- No JavaScript bridge or `require("package_manager")` surface is enabled.
 - No Android registry downloader is enabled.
 - No npm CLI install is enabled on Android.
+- No script-visible mutating package-manager operation is promoted.
 - No lifecycle scripts are executed.
 - No signed native payload verification exists yet; native payload execution
   remains disabled.

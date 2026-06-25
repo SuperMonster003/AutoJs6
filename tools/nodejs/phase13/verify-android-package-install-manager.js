@@ -10,8 +10,12 @@ const FILES = {
   blockerRegistry: "docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json",
   phase13Tasks: "docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md",
   p13Report: "docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md",
+  nodeBridgeSources: "app/src/main/cpp/node_bridge_sources.cpp",
   manager: "app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt",
   managerTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt",
+  p13PackageManagerTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodePackageManagerPhase13DecisionInstrumentationTest.kt",
+  typesPackageManager: "docs/nodejs/types/autojs6-node/package_manager.d.ts",
+  typesIndex: "docs/nodejs/types/autojs6-node/index.d.ts",
   packageManagerDoc: "docs/nodejs/design/PACKAGE_MANAGER.md",
   testingDoc: "docs/nodejs/TESTING.md",
   securityModel: "docs/nodejs/SECURITY_MODEL.md",
@@ -79,13 +83,20 @@ function buildReport(files) {
       token(files.manager, "ERROR_PATH_ESCAPE"),
       token(files.managerTest, "rejectsLifecycleScriptsNativePayloadsBinEntriesAndCancellation"),
     ]),
-    scenario("future_distribution", "Manager records dependency/plugin/project package kinds for later distribution", [
+    scenario("future_distribution", "Manager records dependency/plugin/project package kinds and a diagnostic script facade for later distribution", [
       token(files.manager, "KIND_DEPENDENCY"),
       token(files.manager, "KIND_PLUGIN"),
       token(files.manager, "KIND_PROJECT"),
       token(files.manager, "nativeValues"),
+      token(files.manager, '"android_package_manager.js_bridge" to "diagnostic_only"'),
+      token(files.nodeBridgeSources, "function __autojs6_limited_package_manager()"),
+      token(files.nodeBridgeSources, 'jsBridge: "diagnostic_only"'),
+      token(files.nodeBridgeSources, 'requirePackageManager: "diagnostic_only"'),
+      token(files.nodeBridgeSources, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"),
+      token(files.p13PackageManagerTest, "packageManagerDiagnosticFacadeIsVisibleButInstallOperationsRemainDenied"),
+      token(files.typesPackageManager, 'declare module "package_manager"'),
+      token(files.typesIndex, './package_manager.d.ts'),
     ], [
-      "No JavaScript bridge or user-facing package-manager module is promoted yet.",
       "Registry download and npm CLI install remain disabled.",
       "Signed native payload verification is not implemented; native payload execution remains disabled.",
     ]),
@@ -136,6 +147,7 @@ function buildReport(files) {
         scenarioById(scenarios, "integrity_policy").status === "ready" &&
         scenarioById(scenarios, "safe_boundaries").status === "ready",
       runtimeExposureReady: scenarioById(scenarios, "future_distribution").status === "ready",
+      diagnosticFacadeReady: scenarioById(scenarios, "future_distribution").missingEvidence === 0,
       safeNodeProfilePreserved: true,
     },
   };
@@ -148,6 +160,7 @@ function scenario(id, title, checks, plannedRemaining = []) {
     id,
     title,
     status: remaining.length === 0 ? "ready" : missing.length > 0 ? "missing_evidence" : "partial",
+    missingEvidence: missing.length,
     checks,
     remaining,
   };

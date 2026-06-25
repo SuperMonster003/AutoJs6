@@ -1233,8 +1233,9 @@ unpacked package directories can flow through the internal app-private
 SHA-512 integrity, and verify/prune support. Android npm CLI execution,
 registry download, lifecycle scripts, bin shims, symlink materialization,
 native builds/native payloads, postinstall downloads, raw `node_modules`
-mutation, script-visible `package_manager`/`npm`, and raw registry/executable
-authority remain unpromoted.
+mutation, script-visible `npm`, mutating `package_manager` operations, and raw
+registry/executable authority remain unpromoted. `package_manager` is
+diagnostic-only for status and policy inspection.
 
 P13-43 records Node stdlib conformance as partial. The runtime exposes
 `autojs6:profile.stdlibProfile` to document the current Safe stdlib subset for

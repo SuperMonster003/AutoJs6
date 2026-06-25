@@ -1900,8 +1900,9 @@ the Phase 10 host-managed package manager boundary, focused instrumentation,
 TypeScript declarations, surface manifest evidence, release matrix updates,
 and Phase13 docs. It keeps Android npm CLI, registry download, lifecycle
 execution, bin shims, symlink materialization, native builds/native payloads,
-postinstall downloads, JS package-manager facades, raw executable authority,
-and raw registry access open.
+postinstall downloads, mutating package-manager operations, raw executable
+authority, and raw registry access open. The `package_manager` module is
+diagnostic-only.
 
 Phase 13 Android package manager focused instrumentation:
 
@@ -1909,9 +1910,9 @@ Phase 13 Android package manager focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePackageManagerPhase13DecisionInstrumentationTest"
 ```
 
-This suite verifies `packageManagerProfile` diagnostics, denied
-script-visible `package_manager`/`npm` surfaces, Android app-private local
-store install/verify behavior, SHA-512 integrity, native values, and
+This suite verifies `packageManagerProfile` diagnostics, denied npm surfaces,
+the diagnostic-only `package_manager` facade, Android app-private local store
+install/verify behavior, SHA-512 integrity, native values, and
 lifecycle/bin/native package rejection. P13-42 records Android package manager
 parity as partial.
 

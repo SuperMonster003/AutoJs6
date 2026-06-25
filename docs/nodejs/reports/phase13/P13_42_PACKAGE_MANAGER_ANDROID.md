@@ -6,8 +6,8 @@ The current target is "Auto.js Pro capability + desktop Node.js capability",
 but package installation is still split between a host-managed npm-compatible
 validator and an Android app-private local package store substrate. This phase
 does not promote the npm CLI, registry download, lifecycle script execution, bin
-shim creation, native build execution, or a JavaScript package-manager facade on
-Android.
+shim creation, native build execution, or mutating JavaScript package-manager
+operations on Android.
 
 ## Landed
 
@@ -25,15 +25,21 @@ Android.
   - integrity: `sha512_required`
   - lifecycle scripts, bin links, symlinks, native build/native payloads, and
     postinstall downloads: `denied`
-  - JS bridge: `not_exposed`
+  - JS bridge: `diagnostic_only`
+  - `require("package_manager")`: `diagnostic_only`
   - raw executable and raw registry authority: `false`
+- `require("package_manager")` exposes a frozen diagnostic facade:
+  - `status()` and `policy()` return frozen policy snapshots.
+  - `install`, `update`, `remove`, `list`, `verify`, and `prune` throw
+    `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` without dispatching Android
+    package-store work.
 - `NodeAndroidPackageInstallManager.nativeValues()` now exposes the same
   Android-side policy details for native test reports.
 - `NodePackageManagerPhase13DecisionInstrumentationTest` verifies the runtime
-  profile, denied script-visible npm/package-manager globals, and the local
-  Android store substrate.
+  profile, denied npm globals, diagnostic package-manager facade, and the
+  local Android store substrate.
 - Type declarations and TypeScript smoke now include
-  `PackageManagerProfile`.
+  `PackageManagerProfile` and the diagnostic `package_manager` module.
 - Host verifier and Gradle gate:
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
   - `:app:verifyNodePhase13PackageManagerAndroidDecision`
@@ -64,7 +70,8 @@ constrained to the local store substrate.
 
 - Running `npm install` or `npm i --no-bin-links` directly on Android.
 - Android registry metadata/tarball download and cache management.
-- A script-visible `package_manager` or `npm` module.
+- A script-visible `npm` module.
+- Mutating `package_manager` operations.
 - Lifecycle script execution, including `preinstall`, `install`,
   `postinstall`, and `prepare`.
 - Debug-only lifecycle execution.

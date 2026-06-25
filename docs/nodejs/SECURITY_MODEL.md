@@ -751,8 +751,9 @@ operations are limited to already-unpacked package directories handled by
 locking, cancellation, and verify/prune support. npm CLI execution, registry
 download, lifecycle scripts, bin shim creation, symlink materialization, native
 builds/native payloads, postinstall downloads, raw executable launch,
-script-visible `package_manager`/`npm`, and raw `node_modules` mutation remain
-denied until separate Desktop-profile evidence proves them safe.
+script-visible `npm`, mutating `package_manager` operations, and raw
+`node_modules` mutation remain denied until separate Desktop-profile evidence
+proves them safe. `package_manager` itself is diagnostic-only.
 
 P13-43 records Node stdlib conformance as partial. `stdlibProfile` is
 diagnostic metadata only and does not grant raw desktop stdlib authority.

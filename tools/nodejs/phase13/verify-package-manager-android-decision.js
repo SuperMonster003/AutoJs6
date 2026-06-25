@@ -22,6 +22,8 @@ const FILES = {
   phase10PackageManagerReport: "docs/nodejs/reports/phase10/PACKAGE_MANAGER_BOUNDARY.md",
   designPackageManager: "docs/nodejs/design/PACKAGE_MANAGER.md",
   typesAutojsGlobal: "docs/nodejs/types/autojs6-node/autojs_global.d.ts",
+  typesPackageManager: "docs/nodejs/types/autojs6-node/package_manager.d.ts",
+  typesIndex: "docs/nodejs/types/autojs6-node/index.d.ts",
   typesReadme: "docs/nodejs/types/autojs6-node/README.md",
   typescriptSmoke: "sample/nodejs/typescript-smoke/src/main.ts",
   compatibilityProfile: "docs/nodejs/COMPATIBILITY_PROFILE.md",
@@ -79,6 +81,9 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'symlinks: "denied"'),
       token(files.nodeBridgeSources, 'nativeBuild: "denied"'),
       token(files.nodeBridgeSources, 'postinstallDownload: "denied"'),
+      token(files.nodeBridgeSources, 'jsBridge: "diagnostic_only"'),
+      token(files.nodeBridgeSources, 'requirePackageManager: "diagnostic_only"'),
+      token(files.nodeBridgeSources, 'diagnosticFacade: "available"'),
       token(files.nodeBridgeSources, 'rawRegistryAccess: false'),
       token(files.p13PackageManagerTest, "packageManagerProfileRecordsAndroidSubstrateAndDeniedBoundaries"),
       token(files.p13PackageManagerTest, "p13pm.profile=android_substrate_partial|false|desktop_compat_opt_in"),
@@ -101,17 +106,23 @@ function buildReport(files) {
       token(files.manager, '"android_package_manager.bin_links" to "disabled"'),
       token(files.manager, '"android_package_manager.symlinks" to "disabled"'),
       token(files.manager, '"android_package_manager.postinstall_download" to "disabled"'),
-      token(files.manager, '"android_package_manager.js_bridge" to "not_exposed"'),
+      token(files.manager, '"android_package_manager.js_bridge" to "diagnostic_only"'),
       token(files.manager, "DISABLED_LIFECYCLE_SCRIPTS"),
       token(files.manager, "ERROR_BIN_DISABLED"),
       token(files.manager, "ERROR_NATIVE_PAYLOAD_DISABLED"),
       token(files.manager, "Files.isSymbolicLink"),
       token(files.managerTest, "nativeValuesAdvertiseSafeAndroidPackageManagerBoundary"),
       token(files.p13PackageManagerTest, "androidStoreSubstrateInstallsLocalUnpackedPackageAndDeniesUnsafePolicies"),
+      token(files.p13PackageManagerTest, "packageManagerDiagnosticFacadeIsVisibleButInstallOperationsRemainDenied"),
+      token(files.nodeBridgeSources, "function __autojs6_limited_package_manager()"),
+      token(files.nodeBridgeSources, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"),
+      token(files.typesPackageManager, 'declare module "package_manager"'),
+      token(files.typesPackageManager, "install(request?: PackageRequest): never"),
+      token(files.typesIndex, './package_manager.d.ts'),
       token(files.p13AndroidManagerReport, "`NodeAndroidPackageInstallManager` supports"),
       token(files.p13AndroidManagerVerifier, "verifyNodePhase13AndroidPackageInstallManager"),
     ], [
-      "No Android registry downloader, npm CLI, package-manager JS facade, or node_modules mutation API is promoted yet.",
+      "No Android registry downloader, npm CLI, mutating package-manager operation, or node_modules mutation API is promoted yet.",
       "Signed packaged native payloads, native build execution, lifecycle debug mode, and bin shim strategy remain future work.",
     ]),
     scenario("host_managed_install_equivalent", "Host-side package manager remains the equivalent npm install path while Android runtime install stays constrained", [
@@ -144,7 +155,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-42 Android package manager"),
     ], [
-      "P13-42 remains partial until Android-side registry install, JS facade, lifecycle policy, signed native payloads, and packaged distribution evidence close.",
+      "P13-42 remains partial until Android-side registry install, mutating package-manager operations, lifecycle policy, signed native payloads, and packaged distribution evidence close.",
     ]),
   ];
 
@@ -166,10 +177,13 @@ function buildReport(files) {
         packageManagerProfile.includes('nativeBuild: "denied"') &&
         packageManagerProfile.includes('nativePayloads: "denied"') &&
         packageManagerProfile.includes('postinstallDownload: "denied"') &&
-        packageManagerProfile.includes('jsBridge: "not_exposed"') &&
+        packageManagerProfile.includes('jsBridge: "diagnostic_only"') &&
+        packageManagerProfile.includes('requirePackageManager: "diagnostic_only"') &&
+        !packageManagerProfile.includes('jsBridge: "partial"') &&
+        !packageManagerProfile.includes('requirePackageManager: "partial"') &&
         packageManagerProfile.includes("rawExecutables: false") &&
         packageManagerProfile.includes("rawRegistryAccess: false"),
-      "packageManagerProfile must keep npm CLI, lifecycle, bin/native/symlink, postinstall download, JS bridge, and raw registry access fail-closed.",
+      "packageManagerProfile must keep npm CLI, lifecycle, bin/native/symlink, postinstall download, mutating JS bridge operations, and raw registry access fail-closed.",
     ),
     check(
       "android-store-fail-closed-boundaries",
@@ -179,18 +193,22 @@ function buildReport(files) {
         files.manager.text.includes("ERROR_PATH_ESCAPE") &&
         files.manager.text.includes("Files.isSymbolicLink") &&
         files.manager.text.includes('"android_package_manager.network_install" to "disabled"') &&
-        files.manager.text.includes('"android_package_manager.js_bridge" to "not_exposed"'),
+        files.manager.text.includes('"android_package_manager.js_bridge" to "diagnostic_only"'),
       "NodeAndroidPackageInstallManager must keep unsafe npm install behavior denied.",
     ),
     check(
-      "no-js-facade-promotion",
-      !files.typesAutojsGlobal.text.includes('declare module "package_manager"') &&
+      "diagnostic-js-facade-fail-closed",
+      files.nodeBridgeSources.text.includes("function __autojs6_limited_package_manager()") &&
+        files.nodeBridgeSources.text.includes("ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED") &&
+        files.nodeBridgeSources.text.includes('npmCli: "denied"') &&
+        files.nodeBridgeSources.text.includes('registryDownload: "deferred"') &&
+        files.typesPackageManager.text.includes('declare module "package_manager"') &&
+        files.typesPackageManager.text.includes("install(request?: PackageRequest): never") &&
         !files.typesAutojsGlobal.text.includes('declare module "npm"') &&
-        !files.nodeBridgeSources.text.includes("__autojs6_package_manager") &&
         !packageManagerProfile.includes('jsBridge: "partial"') &&
         !packageManagerProfile.includes('requirePackageManager: "partial"') &&
         !packageManagerProfile.includes("rawRegistryAccess: true"),
-      "P13-42 must not introduce a package_manager/npm JS facade or raw registry authority.",
+      "P13-42 may expose only a diagnostic package_manager facade; npm facade, mutating package operations, partial promotion, and raw registry authority must remain absent.",
     ),
   ];
 
@@ -222,6 +240,7 @@ function buildReport(files) {
       npmCliPromoted: false,
       registryInstallPromoted: false,
       lifecycleScriptsPromoted: false,
+      jsPackageManagerDiagnosticFacadeReady: scenarioById(scenarios, "android_local_store_substrate").missingEvidence === 0,
       jsPackageManagerFacadePromoted: false,
       nativeBuildPromoted: false,
       binShimPromoted: false,
@@ -236,6 +255,7 @@ function scenario(id, title, checks, plannedRemaining = []) {
     id,
     title,
     status: remaining.length === 0 ? "ready" : missing.length > 0 ? "missing_evidence" : "partial",
+    missingEvidence: missing.length,
     checks,
     remaining,
   };

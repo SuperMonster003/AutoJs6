@@ -608,11 +608,18 @@ P13 task 本身使用以下执行状态：
     - Boundaries: lifecycle scripts, `bin`, native payloads, symlinks, and path escapes are rejected.
     - Integrity: SHA-512 expected integrity and installed-record verification.
     - Transaction model: store lock, transaction staging, atomic move/restore, cancellation token.
+    - Diagnostic JS facade: `require("package_manager").status()/policy()`
+      reports the current fail-closed policy, while
+      `install/update/remove/list/verify/prune` throw
+      `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED`.
     - Focused instrumentation: `NodeAndroidPackageInstallManagerInstrumentationTest`.
     - Host verifier: `tools/nodejs/phase13/verify-android-package-install-manager.js`.
     - Gradle gate: `:app:verifyNodePhase13AndroidPackageInstallManager`.
     - Report: `docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md`.
-    - Open before closure: JS/runtime API exposure, registry/download policy, signed native-payload decision, prepared-device instrumentation run, and plugin/package distribution integration.
+    - Open before closure: mutating JS/runtime package-manager operations,
+      registry/download policy, npm CLI decision, signed native-payload
+      decision, prepared-device instrumentation run, and plugin/package
+      distribution integration.
 
 - [x] P13-10: 发布 Phase 13 capability truth report。
   - 范围：生成 Safe/Pro/Desktop/Debug 四个 profile 的能力真值表。
@@ -1368,7 +1375,10 @@ P13 task 本身使用以下执行状态：
       install/update/remove/list/verify/prune。
     - `NodeAndroidPackageInstallManager.nativeValues()` 现在输出 npm CLI、
       registry download、lockfile、lifecycle、bin link、symlink、native payload、
-      postinstall download、network install、JS bridge 等策略。
+      postinstall download、network install、diagnostic JS bridge 等策略。
+    - `require("package_manager")` 已作为 diagnostic-only facade 暴露：
+      `status()`/`policy()` 可读，`install/update/remove/list/verify/prune`
+      仍以 `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` 同步拒绝。
     - 新增 focused instrumentation:
       `NodePackageManagerPhase13DecisionInstrumentationTest`。
     - Existing Android store gate:
@@ -1386,7 +1396,7 @@ P13 task 本身使用以下执行状态：
     - Surface manifest evidence:
       `phase13-package-manager-android-decision`。
   - Remaining: Android 侧 registry metadata/tarball 下载、npm CLI、script-visible
-    `package_manager`/`npm` facade、debug-only lifecycle runner、bin shim、signed
+    `npm` facade、mutating `package_manager` operations、debug-only lifecycle runner、bin shim、signed
     native payload policy、native build strategy、packaged dependency install/distribution
     evidence、真实 npm corpus 通过率提升仍未完成。
 
