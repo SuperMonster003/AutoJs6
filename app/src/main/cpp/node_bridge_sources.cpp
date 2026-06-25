@@ -29403,7 +29403,14 @@ std::string buildEmbeddedScriptExecutionSource(
         "NUL path"
       );
     }
-    if (path.isAbsolute(pathText) && !input.allowAbsolute) {
+    const scope = __autojs6_fs_root(path, fs);
+    const absoluteInput = path.isAbsolute(pathText);
+    const resolved = path.resolve(scope.cwd, pathText || ".");
+    if (
+      absoluteInput &&
+      !input.allowAbsolute &&
+      (!__autojs6_path_within_root(resolved, scope.root) || __autojs6_sensitive_path(resolved))
+    ) {
       throw __autojs6_scoped_fs_policy_error(
         "Embedded Node scoped fs rejects absolute path for " + operation + ": " + display,
         pathValue,
@@ -29412,8 +29419,6 @@ std::string buildEmbeddedScriptExecutionSource(
         "absolute path"
       );
     }
-    const scope = __autojs6_fs_root(path, fs);
-    const resolved = path.resolve(scope.cwd, pathText || ".");
     if (!__autojs6_path_within_root(resolved, scope.root) || __autojs6_sensitive_path(resolved)) {
       throw __autojs6_scoped_fs_policy_error(
         "Embedded Node scoped fs " + inputKind + "path escapes working directory for " + operation + ": " + display + " (sandboxRoot=" + scope.root + ")",

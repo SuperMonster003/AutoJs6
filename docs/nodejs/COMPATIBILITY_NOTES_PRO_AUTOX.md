@@ -122,7 +122,7 @@ Auto.js Pro 9 public docs show Node `fs` examples that read Android absolute pat
 AutoJs6 behavior:
 
 - `fs` and `fs/promises` are scoped to the working directory/project root.
-- absolute paths are denied.
+- absolute paths are allowed only when they resolve inside the scoped root.
 - `..` escape, NUL paths, `/proc`, `/sys`, `/dev`, symlink escape, and realpath escape are denied.
 - file URL behavior is constrained by the scoped file URL policy.
 

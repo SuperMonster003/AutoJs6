@@ -7188,11 +7188,12 @@ class EmbeddedScriptMvpInstrumentationTest {
                 ));
                 console.log("path.hidden=" + pathHidden);
                 console.log("path.toNamespacedPath=" + path.toNamespacedPath("a/b"));
+                console.log("path.absolute.fs.read=" + fs.readFileSync(absolute, "utf8"));
                 try {
-                  fs.readFileSync(absolute, "utf8");
-                  console.log("path.absolute.fs.denied=false");
+                  fs.readFileSync("/tmp/autojs6-outside.txt", "utf8");
+                  console.log("path.absolute.fs.outside.denied=false");
                 } catch (error) {
-                  console.log("path.absolute.fs.denied=" + String(error.message).includes("rejects absolute path"));
+                  console.log("path.absolute.fs.outside.denied=" + String(error.message).includes("rejects absolute path"));
                 }
                 console.log("url.global=" + target.protocol + "/" + target.pathname + "/" + target.searchParams.get("y"));
                 console.log("url.params=" + params.toString());
@@ -7282,7 +7283,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("path.matchesGlob=true"))
             assertTrue(result.stdout.contains("path.hidden=undefined,function"))
             assertTrue(result.stdout.contains("path.toNamespacedPath=a/b"))
-            assertTrue(result.stdout.contains("path.absolute.fs.denied=true"))
+            assertTrue(result.stdout.contains("path.absolute.fs.read=x"))
+            assertTrue(result.stdout.contains("path.absolute.fs.outside.denied=true"))
             assertTrue(result.stdout.contains("url.global=https:/"))
             assertTrue(result.stdout.contains("url.params=a=1&b=2"))
             assertTrue(result.stdout.contains("url.wrapper.same=true"))
@@ -30130,12 +30132,17 @@ class EmbeddedScriptMvpInstrumentationTest {
                 parentFile?.mkdirs()
                 writeText("""module.exports = require.resolve("is-number");""", StandardCharsets.UTF_8)
             }
+            val readLocalFixture = File(scriptDir, "node_modules/read-local/fixture.txt").apply {
+                parentFile?.mkdirs()
+                writeText("fixture\n", StandardCharsets.UTF_8)
+            }
             val readLocal = File(scriptDir, "node_modules/read-local/index.js").apply {
                 parentFile?.mkdirs()
                 writeText(
                     """
                     const fs = require("fs");
-                    module.exports = fs.readFileSync("./fixture.txt", "utf8").trim();
+                    const path = require("path");
+                    module.exports = fs.readFileSync(path.join(__dirname, "fixture.txt"), "utf8").trim();
                     """.trimIndent(),
                     StandardCharsets.UTF_8,
                 )
@@ -30173,6 +30180,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     outer,
                     inner,
                     resolveUser,
+                    readLocalFixture,
                     readLocal,
                     metadataCheck,
                 ),

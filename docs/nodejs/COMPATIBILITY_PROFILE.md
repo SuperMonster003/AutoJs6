@@ -483,7 +483,8 @@ Supported:
 
 Policy:
 
-- no absolute path access from user scripts
+- absolute paths are accepted only when they resolve inside the scoped
+  `workingDirectory`/`sandboxRoot`; outside absolute paths remain denied
 - no NUL byte paths
 - no `..` escape
 - no `/proc`, `/sys`, or `/dev` access
@@ -669,10 +670,11 @@ mutable authority boundary.
 
 The `fs` wrapper exposes a scoped stream MVP through `createReadStream()` and
 `createWriteStream()`. These streams use the same scoped path policy as the rest
-of `fs`: absolute paths, path escape, symlink escape, and Android/device roots
-such as `/proc`, `/sys`, and `/dev` remain denied. Active scoped fs streams are
-tracked in runtime diagnostics and are destroyed during runtime cleanup so a
-timed-out or stopped service does not poison the next execution.
+of `fs`: absolute paths are allowed only inside the scoped working directory,
+while path escape, symlink escape, and Android/device roots such as `/proc`,
+`/sys`, and `/dev` remain denied. Active scoped fs streams are tracked in
+runtime diagnostics and are destroyed during runtime cleanup so a timed-out or
+stopped service does not poison the next execution.
 
 The scoped `fs.promises.open()` surface returns AutoJs6-managed `FileHandle`
 objects. The v1.1 S8-27 gate covers `read()`, `write()`, `readFile()`,
@@ -721,8 +723,11 @@ permission failures.
 P13-32 records filesystem profile expansion as partial. The current Safe
 profile remains `workingDirectory` scoped and exposes
 `autojs6:profile.filesystemProfile` only as frozen diagnostics:
-`mode="scoped_working_directory"` and `additionalRoots=[]`. User-authorized
-roots, `/sdcard`, SAF/document roots, app-private roots, grant persistence,
+`mode="scoped_working_directory"` and `additionalRoots=[]`. Scoped absolute
+paths that resolve under the current sandbox are accepted so npm packages can
+read package resources via `__dirname`, while absolute paths outside the
+sandbox still reject with the absolute-path policy. User-authorized roots,
+`/sdcard`, SAF/document roots, app-private roots, grant persistence,
 revocation, and packaged expanded-root evidence remain unpromoted.
 
 P13-33 records desktop fs advanced APIs as partial. The same diagnostic object
@@ -1070,10 +1075,11 @@ INTERNET proof, multicast permission proof, and live Android UDP evidence are
 not part of the current v1.1 Desktop profile.
 
 P13-32 records filesystem profile expansion as partial for the Desktop track.
-It does not change the default scoped `fs` authority: broader roots require a
-future explicit provider, user/manifest authorization model, per-root
-symlink/realpath/sensitive-path audit, and packaged evidence before scripts can
-read or write outside their working directory.
+It does not change the default scoped `fs` authority: scoped absolute paths are
+accepted only while they remain under `workingDirectory`, and broader roots
+require a future explicit provider, user/manifest authorization model,
+per-root symlink/realpath/sensitive-path audit, and packaged evidence before
+scripts can read or write outside their working directory.
 
 P13-33 records desktop fs advanced APIs as partial for the Desktop track.
 Existing S8 and P13 gates cover scoped `fs.watch`, `fs.promises.watch`,

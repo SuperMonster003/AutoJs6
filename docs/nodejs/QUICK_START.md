@@ -120,8 +120,10 @@ TypeScript declarations for AutoJs6 bridge modules live under [types/autojs6-nod
 
 ## Scoped Filesystem
 
-Filesystem access is scoped to the script working directory. Absolute paths, NUL bytes, `..` escapes, symlink escapes,
-realpath escapes, and `/proc`, `/sys`, or `/dev` access are rejected.
+Filesystem access is scoped to the script working directory. Absolute paths are
+allowed only when they still resolve inside that scoped root. NUL bytes, `..`
+escapes, symlink escapes, realpath escapes, absolute paths outside the scoped
+root, and `/proc`, `/sys`, or `/dev` access are rejected.
 
 ## What To Read Next
 

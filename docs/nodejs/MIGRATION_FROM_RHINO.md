@@ -437,7 +437,7 @@ After:
 
 ## Filesystem Migration
 
-Rhino scripts often use AutoJs `files` helpers and absolute Android paths. Node scripts use scoped `fs` or `fs/promises`. Paths are relative to the working directory or project root. Absolute paths, `..` escapes, NUL bytes, `/proc`, `/sys`, `/dev`, symlink escapes, and realpath escapes are denied.
+Rhino scripts often use AutoJs `files` helpers and absolute Android paths. Node scripts use scoped `fs` or `fs/promises`. Paths are scoped to the working directory or project root. Absolute paths are accepted only when they still resolve inside that scoped root; `/sdcard`-style roots outside the working directory, `..` escapes, NUL bytes, `/proc`, `/sys`, `/dev`, symlink escapes, and realpath escapes are denied.
 
 Before:
 

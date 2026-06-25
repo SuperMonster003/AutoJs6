@@ -193,10 +193,11 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 
 ## ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED
 
-- Meaning: scoped fs denied an absolute path.
-- Common cause: a script passed `/sdcard/...`, `/proc/...`, `/sys/...`, `/dev/...`, or another absolute path to `fs`.
+- Meaning: scoped fs denied an absolute path outside the current sandbox root.
+- Common cause: a script passed `/sdcard/...`, `/proc/...`, `/sys/...`, `/dev/...`, or another outside-root absolute path to `fs`.
 - Example: `fs.readFileSync("/proc/version")`.
-- How to fix: use a relative path inside the working directory.
+- How to fix: keep the file inside the working directory and use either a
+  relative path or an absolute path that resolves under that scoped root.
 - Related docs: [SECURITY_MODEL.md](SECURITY_MODEL.md), [design/FS_PROMISES.md](design/FS_PROMISES.md).
 
 ## ERR_AUTOJS6_FS_NUL_BYTE
