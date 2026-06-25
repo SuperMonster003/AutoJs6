@@ -2182,6 +2182,21 @@ docs. The examples cover ESM, `worker_threads`, HTTP/HTTPS, advanced fs, WASI,
 inspector, and sanitized pure JavaScript npm dependency usage, but remain
 outside default runtime smoke and do not grant Desktop authority.
 
+Phase 13 profile-aware TypeScript declarations gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13TypeDeclarationProfiles
+```
+
+This host gate records P13-55 as partial. It requires
+`profile_capabilities.d.ts`, `index.d.ts` wiring, declaration README updates,
+`typescript-smoke` Safe/Pro/Desktop/Debug conditional type coverage,
+`verifyAutoJs6NodeTypeDeclarations`, `typeCheckNodeTypescriptSmoke`, surface
+manifest evidence, release matrix updates, and Phase 13 docs. The matrix
+documents Pro/Desktop profile requirements and Safe-profile denial behavior
+without declaring denied desktop modules as callable modules or granting
+runtime authority.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

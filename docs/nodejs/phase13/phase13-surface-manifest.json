@@ -765,7 +765,7 @@
         "P13-56",
         "P13-57"
       ],
-      "summary": "Publish Pro/Desktop examples, type declarations, migration docs, Pro9 comparison updates, summary generator, and final Phase 13 gate. P13-53 records Pro parity examples as partial with phase13-pro-parity-examples evidence. P13-54 records desktop Node parity examples as partial with phase13-desktop-parity-examples evidence.",
+      "summary": "Publish Pro/Desktop examples, type declarations, migration docs, Pro9 comparison updates, summary generator, and final Phase 13 gate. P13-53 records Pro parity examples as partial with phase13-pro-parity-examples evidence. P13-54 records desktop Node parity examples as partial with phase13-desktop-parity-examples evidence. P13-55 records profile-aware TypeScript declarations as partial with phase13-type-declaration-profiles evidence.",
       "risk": "medium",
       "runtimeSurface": [
         "sample/nodejs Pro parity examples",
@@ -787,7 +787,14 @@
         ":app:verifyNodePhase13DesktopParityExamples",
         "docs/nodejs/reports/phase13/P13_54_DESKTOP_PARITY_EXAMPLES.md",
         "build/reports/nodejs/phase13-desktop-parity-examples.json",
-        "build/reports/nodejs/phase13-desktop-parity-examples.md"
+        "build/reports/nodejs/phase13-desktop-parity-examples.md",
+        "docs/nodejs/types/autojs6-node/profile_capabilities.d.ts",
+        "sample/nodejs/typescript-smoke/src/main.ts",
+        "tools/nodejs/phase13/verify-type-declaration-profiles.js",
+        ":app:verifyNodePhase13TypeDeclarationProfiles",
+        "docs/nodejs/reports/phase13/P13_55_TYPE_DECLARATION_PROFILES.md",
+        "build/reports/nodejs/phase13-type-declaration-profiles.json",
+        "build/reports/nodejs/phase13-type-declaration-profiles.md"
       ],
       "rollback": "Keep Phase 13 examples and docs marked as gated until runtime promotion evidence lands."
     }

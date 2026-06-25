@@ -1248,6 +1248,14 @@ behavior, skip reason, and a Safe-profile denial marker. The catalog improves
 desktop Node porting evidence without adding the snippets to default runtime
 smoke or granting Desktop authority.
 
+P13-55 records TypeScript profile declarations as partial: AutoJs6 Node now
+ships `profile_capabilities.d.ts`, a declaration-only Safe/Pro/Desktop/Debug
+matrix for the P13-53 and P13-54 migration surfaces. TypeScript scripts can
+use `ProfileModuleModeFor`, `ProfileRequiredFor`, `SafeDefaultModeFor`, and
+`PackagedBehaviorFor` to document profile requirements and Safe-profile denial
+behavior. The matrix is metadata-only and does not declare denied desktop
+modules as callable modules or grant Pro/Desktop authority.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

@@ -471,6 +471,14 @@ behavior, and skip reasons. It is documentation and static-verification
 evidence only; the snippets are not part of default runtime smoke and do not
 grant Desktop profile authority.
 
+P13-55 records TypeScript profile declarations as partial. AutoJs6 Node now
+ships `profile_capabilities.d.ts`, a declaration-only matrix for
+Safe/Pro/Desktop/Debug profile differences across the P13-53 and P13-54
+surfaces. Scripts can type-check profile requirements and Safe-profile denial
+behavior with `ProfileModuleModeFor` and related helpers, but denied desktop
+modules are not declared as callable modules and no Pro/Desktop authority is
+granted by the declaration package.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

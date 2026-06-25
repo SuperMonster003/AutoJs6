@@ -1700,6 +1700,26 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - `docs/nodejs/types/autojs6-node` 覆盖新增模块。
     - type smoke 覆盖 Safe/Pro/Desktop 差异。
+  - Progress:
+    - P13-55 partial landing adds
+      `docs/nodejs/types/autojs6-node/profile_capabilities.d.ts` with
+      `RuntimeProfileId`, `ProfileModuleCatalog`, `ProfileModuleModeFor`,
+      `ProfileRequiredFor`, `SafeDefaultModeFor`, `PackagedBehaviorFor`, and
+      `ProfileDeclarationMatrix`.
+    - The declaration matrix covers P13-53 and P13-54 surfaces including
+      `$autojs.java`, `java`, `rhino.install`, UI, overlay, tasks,
+      screenshot/OCR, accessibility, ESM, `worker_threads`, HTTP/HTTPS,
+      advanced fs, WASI, inspector, package manager, and pure-JS npm usage.
+    - `sample/nodejs/typescript-smoke/src/main.ts` now type-checks
+      Safe/Pro/Desktop/Debug conditional profile differences without declaring
+      denied desktop modules as callable modules.
+    - Host verifier:
+      `tools/nodejs/phase13/verify-type-declaration-profiles.js`.
+    - Gradle gate: `:app:verifyNodePhase13TypeDeclarationProfiles`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_55_TYPE_DECLARATION_PROFILES.md`.
+    - Remaining P13-55 blockers: runtime profile promotion, callable denied
+      desktop modules, and packaged profile authority remain gated.
 
 - [ ] P13-56: 更新 migration and Pro9 comparison docs。
   - 范围：同步 `MIGRATION_FROM_RHINO.md`、`INTEGRATION_STATUS_PRO9_COMPARISON.md`、

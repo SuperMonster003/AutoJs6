@@ -864,6 +864,15 @@ release matrix updates, and docs updates while keeping the desktop snippets out
 of default runtime smoke. P13-54 records desktop Node parity examples as
 partial; packaged desktop parity, raw worker/network/fs/WASI/inspector
 authority, and Android package-manager parity remain unpromoted.
+`verifyNodePhase13TypeDeclarationProfiles` records P13-55 as the
+profile-aware TypeScript declaration gate. It requires
+`profile_capabilities.d.ts`, `index.d.ts` wiring, declaration README updates,
+`typescript-smoke` Safe/Pro/Desktop/Debug conditional type coverage,
+`verifyAutoJs6NodeTypeDeclarations`, `typeCheckNodeTypescriptSmoke`, surface
+manifest evidence, release matrix updates, and docs updates while keeping the
+matrix metadata-only. P13-55 records TypeScript profile declarations as
+partial; runtime profile promotion and denied desktop module declarations
+remain unpromoted.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design
