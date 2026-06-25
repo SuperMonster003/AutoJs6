@@ -9855,6 +9855,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                 const nodeAssert = require("node:assert");
                 const punycode = require("punycode");
                 const nodePunycode = require("node:punycode");
+                const packagePunycode = require("punycode/");
+                const packagePunycodeAgain = require("punycode/");
+                const packagePunycodeResolved = require.resolve("punycode/");
 
                 const encoded = querystring.stringify({ a: "1", b: "你好" });
                 const parsed = querystring.parse("a=1&b=%E4%BD%A0%E5%A5%BD");
@@ -9888,6 +9891,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("legacy.assert.error=" + (assertion instanceof Error));
                 console.log("legacy.punycode.same=" + (punycode === nodePunycode));
                 console.log("legacy.punycode.shadow=" + (punycode.shadow === true));
+                console.log("legacy.punycode.package_root=" + (packagePunycode.shadow === true));
+                console.log("legacy.punycode.package_cache=" + (packagePunycode === packagePunycodeAgain));
+                console.log("legacy.punycode.package_resolve=" + packagePunycodeResolved.endsWith("/node_modules/punycode/index.js"));
                 console.log("legacy.punycode.ascii=" + ascii.includes("xn--"));
                 console.log("legacy.punycode.unicode=" + (unicode === "mañana.com"));
                 console.log("legacy.punycode.ucs2=" + (typeof punycode.ucs2.decode));
@@ -9930,6 +9936,9 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("legacy.assert.error=true"))
             assertTrue(result.stdout.contains("legacy.punycode.same=true"))
             assertTrue(result.stdout.contains("legacy.punycode.shadow=false"))
+            assertTrue(result.stdout.contains("legacy.punycode.package_root=true"))
+            assertTrue(result.stdout.contains("legacy.punycode.package_cache=true"))
+            assertTrue(result.stdout.contains("legacy.punycode.package_resolve=true"))
             assertTrue(result.stdout.contains("legacy.punycode.ascii=true"))
             assertTrue(result.stdout.contains("legacy.punycode.unicode=true"))
             assertTrue(result.stdout.contains("legacy.punycode.ucs2=function"))

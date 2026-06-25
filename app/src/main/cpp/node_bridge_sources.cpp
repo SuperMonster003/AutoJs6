@@ -28041,7 +28041,10 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_protocol_specifier(name)) {
       throw new Error("Embedded Node node_modules require rejects protocol specifier: " + name);
     }
-    const parts = name.split("/");
+    const normalizedName = name.charAt(name.length - 1) === "/"
+      ? name.slice(0, -1)
+      : name;
+    const parts = normalizedName.split("/");
     if (!parts.length) return null;
     for (const part of parts) {
       if (part === "") {

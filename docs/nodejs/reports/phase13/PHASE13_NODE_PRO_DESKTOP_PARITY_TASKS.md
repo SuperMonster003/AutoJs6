@@ -1456,6 +1456,10 @@ P13 task 本身使用以下执行状态：
     - `TextDecoder` 在 no-ICU runtime 下补充 `utf-8` / `utf-16le` /
       `utf-16be` 的 `fatal: true` Unicode fallback，用于 pure-JS npm
       兼容；不声明 full ICU encoding coverage。
+    - `require("punycode/")` 和 `require.resolve("punycode/")` 现在作为
+      npm package-root trailing slash 请求进入 `node_modules/punycode`，
+      保持 `require("punycode")` / `require("node:punycode")` 仍命中受控
+      builtin wrapper，用于兼容 `tr46` / `jsdom` 这类真实 npm 依赖。
     - 已新增 `NodeStdlibPhase13DecisionInstrumentationTest`，覆盖
       `crypto`、`stream` / `stream/promises` / `stream/consumers` /
       `stream/web`、`zlib`、`buffer`、`url`、`os`、`readline` /

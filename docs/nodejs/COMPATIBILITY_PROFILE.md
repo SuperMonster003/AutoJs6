@@ -565,6 +565,12 @@ are ignored, and `process.getBuiltinModule()` remains disabled so scripts cannot
 `events` wrapper exposes `EventEmitter` and helper functions such as `once()`/`on()`, but does not expose
 `EventEmitterAsyncResource` or `EventTarget`; Web-style `EventTarget` remains a global. `diagnostics_channel` exposes a
 bounded publish/subscribe/tracing surface without raw subscriber internals.
+Package-root requests with a trailing slash, such as `require("punycode/")`,
+are treated as npm package requests and resolve through `node_modules`
+instead of the exact builtin-name path. This matches common desktop Node/npm
+compatibility patterns while keeping exact bare names such as
+`require("punycode")` and `require("node:punycode")` on the controlled builtin
+wrapper path.
 On no-ICU embedded Node builds, `globalThis.TextDecoder` and `require("util").TextDecoder`
 include an AutoJs6 Unicode fallback for `fatal: true` with `utf-8`,
 `utf-16le`, and `utf-16be`. This keeps pure-JS npm packages from failing at
