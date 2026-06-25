@@ -7,7 +7,8 @@ but package installation is still split between a host-managed npm-compatible
 validator and an Android app-private local package store substrate. This phase
 does not promote the npm CLI, registry download, lifecycle script execution, bin
 shim creation, native build execution, or unrestricted JavaScript
-package-manager mutation on Android.
+package-manager mutation on Android. A script-visible `npm` facade is present,
+but it is only a guarded alias over the local `package_manager` facade.
 
 ## Landed
 
@@ -18,6 +19,8 @@ package-manager mutation on Android.
   - Android store: `local_app_private_partial`
   - Android runtime install: `local_unpacked_only`
   - npm CLI: `denied`
+  - npm facade: `guarded_package_manager_alias`
+  - `require("npm")`: `guarded_package_manager_alias`
   - equivalent install path: `host_managed_plus_android_store_substrate`
   - registry download: `deferred`
   - tarball install: `host_side_only`
@@ -52,14 +55,22 @@ package-manager mutation on Android.
   - `verify({ name, version })` verifies installed package integrity or returns
     `missing` for absent packages.
   - `prune({ maxTransactionAgeMs })` removes stale transaction directories.
+- `require("npm")` exposes a frozen guarded facade:
+  - `status()`, `policy()`, and `sourcePolicy()` report the same local-store
+    boundaries as `package_manager`.
+  - `planInstall`/`planUpdate`/`planRemove`/`install`/`update`/`remove`/
+    `list`/`verify`/`prune` delegate to the guarded `package_manager` facade.
+  - `cli()`, `exec()`, `runScript()`, registry install, publish, and pack
+    entry points reject with stable npm policy errors.
 - `NodeAndroidPackageInstallManager.nativeValues()` now exposes the same
   Android-side policy details for native test reports.
 - `NodePackageManagerPhase13DecisionInstrumentationTest` verifies the runtime
-  profile, denied npm globals, guarded package-manager facade, and the
+  profile, guarded npm facade, denied npm CLI/registry calls,
+  guarded package-manager facade, and the
   local Android store substrate.
 - Type declarations and TypeScript smoke now include
   `PackageManagerProfile`, source policy fields, and the guarded
-  `package_manager` module.
+  `package_manager` / `npm` modules.
 - Host verifier and Gradle gate:
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
   - `:app:verifyNodePhase13PackageManagerAndroidDecision`
@@ -93,7 +104,7 @@ constrained to the local store substrate.
 
 - Running `npm install` or `npm i --no-bin-links` directly on Android.
 - Android registry metadata/tarball download and cache management.
-- A script-visible `npm` module.
+- npm CLI/registry/lifecycle behavior behind the script-visible `npm` facade.
 - Unrestricted or registry-backed `package_manager.install/update/remove`
   operations.
 - Lifecycle script execution, including `preinstall`, `install`,

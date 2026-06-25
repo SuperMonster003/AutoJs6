@@ -1907,7 +1907,9 @@ postinstall downloads, unrestricted package-manager operations, raw executable
 authority, and raw registry access open. The `package_manager` module exposes
 read-maintenance `status`/`policy`/`sourcePolicy`, dry-run
 `planInstall`/`planUpdate`/`planRemove`, guarded
-`install`/`update`/`remove`, and `list`/`verify`/`prune`.
+`install`/`update`/`remove`, and `list`/`verify`/`prune`. The `npm` module is
+covered as a guarded package-manager alias facade whose CLI/registry/lifecycle
+entry points remain denied.
 
 Phase 13 Android package manager focused instrumentation:
 
@@ -1915,12 +1917,13 @@ Phase 13 Android package manager focused instrumentation:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodePackageManagerPhase13DecisionInstrumentationTest"
 ```
 
-This suite verifies `packageManagerProfile` diagnostics, denied npm surfaces,
-the read-maintenance `package_manager` facade, source-authority diagnostics,
-Android app-private local store install/list/verify/prune behavior, dry-run
-planInstall/planUpdate/planRemove behavior, guarded install/update/remove
-behavior, SHA-512 integrity, native values, and lifecycle/bin/native package
-rejection. P13-42 records Android package manager parity as partial.
+This suite verifies `packageManagerProfile` diagnostics, guarded npm facade
+visibility, denied npm CLI/registry surfaces, the guarded `package_manager`
+facade, source-authority diagnostics, Android app-private local store
+install/list/verify/prune behavior, dry-run planInstall/planUpdate/planRemove
+behavior, guarded install/update/remove behavior, SHA-512 integrity, native
+values, and lifecycle/bin/native package rejection. P13-42 records Android
+package manager parity as partial.
 
 Phase 13 stdlib conformance decision gate:
 

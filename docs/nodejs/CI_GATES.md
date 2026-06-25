@@ -760,12 +760,14 @@ diagnostics, the P13-09 Android local package store, the Phase 10 host-managed
 package manager boundary, focused instrumentation, TypeScript declarations,
 surface manifest evidence, and docs updates while keeping Android npm CLI,
 registry download, lifecycle execution, bin shims, symlink materialization,
-native builds/native payloads, postinstall downloads, JS package-manager
-install/update/remove operations, script-visible `npm`, raw executable
-authority, and raw registry access unpromoted. The `package_manager` guarded
-mutation facade is limited to status/policy/sourcePolicy, dry-run
-planInstall/planUpdate/planRemove, guarded install/update/remove requiring
-`package_manager.mutate` plus `allowMutation: true`, and list/verify/prune.
+native builds/native payloads, postinstall downloads, unrestricted install
+authority, raw executable authority, and raw registry access unpromoted. The
+`package_manager` guarded mutation facade is limited to
+status/policy/sourcePolicy, dry-run planInstall/planUpdate/planRemove, guarded
+install/update/remove requiring `package_manager.mutate` plus
+`allowMutation: true`, and list/verify/prune. The `npm` facade is allowed only
+as a guarded package-manager alias and must keep CLI/registry/lifecycle entry
+points denied.
 P13-42 records Android package manager parity as partial.
 `verifyNodePhase13StdlibConformanceDecision` records P13-43 as the stdlib
 conformance decision gate. It requires `stdlibProfile` diagnostics,

@@ -371,12 +371,14 @@ P13-42 records Android package manager parity as partial. AutoJs6 Node exposes
 manager plus Android local-store substrate. Pure JavaScript dependencies can be
 prepared by host tooling and stored through the internal app-private Android
 store, but Android npm CLI, registry download, remote tarball install, lifecycle scripts, bin shims,
-symlinks, native builds/native payloads, postinstall downloads, and
-script-visible `npm` remain unavailable. `package_manager` is available as a
-guarded local mutation plus read-maintenance facade for
+symlinks, native builds/native payloads, and postinstall downloads remain
+unavailable. `package_manager` is available as a guarded local mutation plus
+read-maintenance facade for
 status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune;
 mutating calls require `package_manager.mutate`, `allowMutation: true`, and
-dry-run SHA-512 integrity.
+dry-run SHA-512 integrity. `npm` is script-visible only as a guarded alias over
+that facade; CLI, registry, lifecycle, publish, and pack entry points remain
+stable-denied.
 
 P13-43 records Node stdlib conformance as partial. AutoJs6 Node exposes
 `stdlibProfile` diagnostics for representative Safe stdlib coverage across

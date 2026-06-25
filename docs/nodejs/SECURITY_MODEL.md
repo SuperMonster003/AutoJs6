@@ -751,14 +751,17 @@ operations are limited to already-unpacked package directories handled by
 locking, cancellation, and verify/prune support. npm CLI execution, registry
 download, lifecycle scripts, bin shim creation, symlink materialization, native
 builds/native payloads, postinstall downloads, raw executable launch,
-script-visible `npm`, unrestricted `package_manager` operations, and raw
-`node_modules` mutation remain denied until separate Desktop-profile evidence
-proves them safe. `package_manager` itself is limited to guarded local mutation
-plus read-maintenance: `status`/`policy`/`sourcePolicy`,
+unrestricted `package_manager` operations, and raw `node_modules` mutation
+remain denied until separate Desktop-profile evidence proves them safe.
+`package_manager` itself is limited to guarded local mutation plus
+read-maintenance: `status`/`policy`/`sourcePolicy`,
 `planInstall`/`planUpdate`/`planRemove`, `install`/`update`/`remove`, and
-`list`/`verify`/`prune`. Mutating calls require `package_manager.mutate`,
-`allowMutation: true`, a project-scoped local unpacked source where relevant,
-and expected SHA-512 integrity from a dry-run plan.
+`list`/`verify`/`prune`. `npm` is script-visible only as a guarded
+package-manager alias facade; its CLI, lifecycle, registry, publish, and pack
+entry points reject with stable policy errors. Mutating calls require
+`package_manager.mutate`, `allowMutation: true`, a project-scoped local
+unpacked source where relevant, and expected SHA-512 integrity from a dry-run
+plan.
 
 P13-43 records Node stdlib conformance as partial. `stdlibProfile` is
 diagnostic metadata only and does not grant raw desktop stdlib authority.

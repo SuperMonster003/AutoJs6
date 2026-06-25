@@ -359,4 +359,8 @@ remove/list/verify/prune. Its source policy records
 `local_unpacked_host_managed` as the only allowed source substrate and keeps
 raw registry, remote tarball, URL/git, workspace symlink, and unverified-cache
 sources denied. Mutating calls require `package_manager.mutate`,
-`allowMutation: true`, and SHA-512 integrity from a dry-run plan.
+`allowMutation: true`, and SHA-512 integrity from a dry-run plan. The
+script-visible `npm` facade is a guarded alias over `package_manager`; it
+reports the same local-store policy and delegates local plan/mutation/
+maintenance calls while keeping CLI, registry, lifecycle, publish, and pack
+entry points denied.

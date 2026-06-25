@@ -72,10 +72,11 @@ Current Android package installation progress:
   focused instrumentation. It also exposes source-authority diagnostics and
   `package_manager` guarded local mutation plus read-maintenance
   status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune
-  while npm, registry, lifecycle, bin, native payload, and unrestricted
-  install authority remain denied. The blocker remains open until
-  registry/download implementation, npm CLI decision, signed native-payload
-  decision, and plugin/package distribution integration land.
+  plus guarded `npm` alias facade while npm CLI, registry, lifecycle, bin,
+  native payload, and unrestricted install authority remain denied. The
+  blocker remains open until registry/download implementation, npm CLI
+  decision, signed native-payload decision, and plugin/package distribution
+  integration land.
 
 Resolved in Phase 11:
 

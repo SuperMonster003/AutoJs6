@@ -620,10 +620,9 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-android-package-install-manager.js`.
     - Gradle gate: `:app:verifyNodePhase13AndroidPackageInstallManager`.
     - Report: `docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md`.
-    - Open before closure: mutating JS/runtime package-manager operations,
-      registry/download policy, npm CLI decision, signed native-payload
-      decision, broader device/distribution evidence, and plugin/package
-      distribution integration.
+    - Open before closure: registry/download policy, npm CLI decision,
+      signed native-payload decision, broader device/distribution evidence,
+      and plugin/package distribution integration.
 
 - [x] P13-10: 发布 Phase 13 capability truth report。
   - 范围：生成 Safe/Pro/Desktop/Debug 四个 profile 的能力真值表。
@@ -1388,6 +1387,10 @@ P13 task 本身使用以下执行状态：
       返回 frozen dry-run `PackagePlan`，`install/update/remove` 已提升为受控
       local unpacked mutation，需要 `package_manager.mutate`、`allowMutation: true`
       和对应 dry-run plan 的 `expectedIntegrity`。
+    - `require("npm")` 已作为 guarded package-manager alias facade 暴露：
+      `status()`/`policy()`/`sourcePolicy()` 可读，本地 plan/mutation/list/verify/prune
+      代理到 `package_manager`，但 `cli()`/`exec()`/`runScript()` 和 registry
+      install/publish/pack 仍以稳定 npm policy error 拒绝。
     - 新增 focused instrumentation:
       `NodePackageManagerPhase13DecisionInstrumentationTest`。
     - Existing Android store gate:
@@ -1404,8 +1407,8 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md`。
     - Surface manifest evidence:
       `phase13-package-manager-android-decision`。
-  - Remaining: Android 侧 registry metadata/tarball 下载、npm CLI、script-visible
-    `npm` facade、unrestricted package-manager install authority、debug-only lifecycle runner、bin shim、signed
+  - Remaining: Android 侧 registry metadata/tarball 下载、npm CLI、
+    unrestricted package-manager install authority、debug-only lifecycle runner、bin shim、signed
     native payload policy、native build strategy、packaged dependency install/distribution
     evidence、真实 npm corpus 通过率提升仍未完成。
 

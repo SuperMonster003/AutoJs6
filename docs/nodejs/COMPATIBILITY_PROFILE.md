@@ -1233,11 +1233,12 @@ unpacked package directories can flow through the internal app-private
 SHA-512 integrity, and verify/prune support. Android npm CLI execution,
 registry download, lifecycle scripts, bin shims, symlink materialization,
 native builds/native payloads, postinstall downloads, raw `node_modules`
-mutation, script-visible `npm`, unrestricted `package_manager` operations, and raw
+mutation, unrestricted `package_manager` operations, and raw
 registry/executable authority remain unpromoted. `package_manager` now exposes
-read-maintenance access for status, policy, source policy,
-dry-run `planInstall`, `planUpdate`, `planRemove`, guarded
-`install`/`update`/`remove`, `list`, `verify`, and `prune`. Mutating calls are
+status, policy, source policy, dry-run `planInstall`, `planUpdate`,
+`planRemove`, guarded `install`/`update`/`remove`, `list`, `verify`, and
+`prune`. `npm` is script-visible as a guarded package-manager alias facade; it
+does not run the npm CLI or fetch from registries. Mutating calls are
 capability-gated by `package_manager.mutate`, require `allowMutation: true`,
 and use dry-run SHA-512 integrity.
 

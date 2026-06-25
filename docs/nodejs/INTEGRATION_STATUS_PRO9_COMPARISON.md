@@ -1143,12 +1143,14 @@ P13-42 records Android package manager parity as partial: Safe Node now exposes
 host-managed validation plus Android app-private local store substrate. This
 narrows the gap for pure JavaScript dependencies that have already been
 resolved and sanitized by host tooling, but it is not yet Pro/Desktop npm
-parity. Android npm CLI, registry download/cache, remote tarball install, lifecycle scripts, bin
-shims, symlinks, native builds, signed native payloads, script-visible `npm`,
+parity. Android npm CLI, registry download/cache, remote tarball install,
+lifecycle scripts, bin shims, symlinks, native builds, signed native payloads,
 packaged dependency distribution, and real npm corpus growth remain open. The
 script-visible `package_manager` facade is limited to
 status/policy/sourcePolicy, dry-run planInstall/planUpdate/planRemove, guarded
 install/update/remove, and list/verify/prune over the app-private store.
+`npm` is script-visible only as a guarded alias over that facade; CLI,
+registry, lifecycle, publish, and pack entry points remain stable-denied.
 
 P13-43 records Node stdlib conformance as partial: Safe Node now exposes
 `stdlibProfile` diagnostics for the representative stdlib subset covering
