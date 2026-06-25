@@ -1467,8 +1467,13 @@ P13 task 本身使用以下执行状态：
       `hasOwnProperty()`，用于兼容 `cheerio` / `iconv-lite` /
       `safer-buffer` 这类真实 npm 依赖。
     - 普通 one-shot Embedded Node 脚本默认 timeout 从 probe 用的 3000ms
-      调整为 30000ms；显式 `timeoutMs` 仍保持原语义，用于降低大 npm
+      调整为 300000ms；显式 `timeoutMs` 仍保持原语义，用于降低大 npm
       module graph 启动时的误超时。
+    - Embedded Node 结果回传现在会从 `result_native_payload` 移除
+      `result_json`、`error_stack`、`stdout/stderr` 和 fd 捕获全文等
+      已有专用字段的大块重复内容，并对剩余 native payload 应用
+      512 项 / 65536 字符预算，避免 `cheerio` / `jsdom` 这类真实
+      npm 依赖的大失败 envelope 触发 Android Binder 事务过大。
     - 已新增 `NodeStdlibPhase13DecisionInstrumentationTest`，覆盖
       `crypto`、`stream` / `stream/promises` / `stream/consumers` /
       `stream/web`、`zlib`、`buffer`、`url`、`os`、`readline` /

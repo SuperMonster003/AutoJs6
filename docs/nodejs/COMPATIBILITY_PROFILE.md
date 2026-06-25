@@ -319,7 +319,7 @@ service.
 
 Current behavior remains:
 
-- normal embedded scripts default to a `30000` ms timeout and still accept an
+- normal embedded scripts default to a `300000` ms timeout and still accept an
   explicit `timeoutMs` override
 - timeout produces the existing timeout diagnostic shape
 - `EmbeddedScriptRequest.executionMode` is serialized through the service
@@ -1276,6 +1276,15 @@ P13-43 records Node stdlib conformance as partial. The runtime exposes
 raw desktop parity, raw native handles, unrestricted network behavior, and
 broad terminal control remain unpromoted while broader Android difference
 coverage and real npm corpus growth stay future work.
+
+Large embedded result envelopes are bounded before Android Binder transport.
+Dedicated result fields carry `resultText`, `stdout`, `stderr`, `errorMessage`,
+and `errorStack`; duplicate large native payload fields such as
+`embedded_script.result_json`, `embedded_script.error_stack`, `embedded_script.stdout`,
+`embedded_script.stderr`, and fd capture text are omitted from
+`result_native_payload`. Remaining native values are capped at 512 entries and
+65536 characters with `embedded_script.result_transport.*` truncation
+diagnostics.
 
 P13-44 records process/env/argv parity as partial. The runtime exposes
 `autojs6:profile.processParityProfile` to document the current Safe process

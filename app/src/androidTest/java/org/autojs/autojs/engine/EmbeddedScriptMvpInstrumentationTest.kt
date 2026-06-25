@@ -1002,6 +1002,39 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun largeFailureEnvelopeIsBoundedForResultTransport() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            const filler = "x".repeat(160 * 1024);
+            throw new Error("large-transport-error:" + filler);
+            """.trimIndent(),
+            "<embedded-large-result-transport-source.js>",
+            timeoutMs = 30_000L,
+        )
+
+        assertFalse(result.succeeded)
+        assertEquals("Error", result.errorName)
+        assertTrue(result.errorMessage.orEmpty().startsWith("large-transport-error:"))
+        assertTrue(result.errorMessage.orEmpty().contains("truncated by AutoJs6 Embedded Node result transport"))
+        assertTrue(result.errorStack.orEmpty().contains("truncated by AutoJs6 Embedded Node result transport"))
+        assertEquals("true", result.nativeValues["embedded_script.result_transport.truncated"])
+        assertTrue(
+            result.nativeValues["embedded_script.result_transport.truncated_fields"].orEmpty()
+                .contains("result_error_message"),
+        )
+        assertEquals("true", result.nativeValues["embedded_script.result_transport.native_payload_limited"])
+        assertTrue(
+            result.nativeValues["embedded_script.result_transport.native_payload_omitted_entries"].orEmpty()
+                .toIntOrNull()
+                ?.let { it > 0 } == true,
+        )
+        assertFalse(result.nativeValues.containsKey("embedded_script.result_json"))
+    }
+
+    @Test
     fun embeddedScriptUsesLightweightUvDiagnosticsByDefaultWithFullOptIn() {
         assumeEmbeddedScriptExecutionEnabled()
 

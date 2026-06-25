@@ -1778,11 +1778,27 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val BRIDGE_LIVE_DRAIN_ITERATIONS = 25
         private const val HEARTBEAT_STOP_JOIN_MS = 250L
         private const val RESULT_TRANSPORT_STRING_MAX_CHARS = 32_768
+        private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS = 65_536
+        private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES = 512
+        private const val RESULT_TRANSPORT_OMITTED_KEYS_MAX_CHARS = 4_096
         private const val CLIENT_SERVICE_START_GRACE_MS = 10_000L
         private const val TIMEOUT_EXIT_CODE = 124
         private const val TIMEOUT_ERROR_CODE = NodeRuntimeErrorCodes.LEGACY_SCRIPT_TIMEOUT
         private const val DEFAULT_SOURCE_NAME = "<embedded-script>"
         private const val DEFAULT_TIMEOUT_MS = NativeNodeEmbeddedRuntimeBridge.DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS
+        private val RESULT_TRANSPORT_NATIVE_PAYLOAD_DEDICATED_KEYS = setOf(
+            "embedded_script.result_json",
+            "embedded_script.result_text",
+            "embedded_script.error_message",
+            "embedded_script.error_stack",
+            "embedded_script.stdout",
+            "embedded_script.stderr",
+            "embedded_script.bridge_requests_json",
+            "stdout_capture.text",
+            "stdout_capture.text.hex",
+            "stderr_capture.text",
+            "stderr_capture.text.hex",
+        )
         private const val EXTRA_PREWARM_STARTED = "prewarm_started"
         private const val EXTRA_PREWARM_STATUS = "prewarm_status"
         private const val EXTRA_PREWARM_REASON = "prewarm_reason"
@@ -3356,9 +3372,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             pendingZlibStreamCount?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT, it) }
             pendingAsyncCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS, it) }
             pendingCallbacks?.let { putBoolean(EXTRA_RESULT_PENDING_CALLBACKS, it) }
-            val transportNativeValues = nativeValues
-                .mapValues { (key, value) -> value.limitResultTransportString("native:$key", truncations) }
-                .toMutableMap()
+            val transportNativeValues = nativeValues.toTransportNativeValues(truncations)
             if (truncations.isNotEmpty()) {
                 transportNativeValues["embedded_script.result_transport.truncated"] = "true"
                 transportNativeValues["embedded_script.result_transport.truncated_fields"] = truncations.keys.joinToString(",")
@@ -3367,6 +3381,62 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 }
             }
             putStringArray(EXTRA_RESULT_NATIVE_PAYLOAD, transportNativeValues.map { (key, value) -> "$key=$value" }.toTypedArray())
+        }
+
+        private fun Map<String, String>.toTransportNativeValues(
+            truncations: MutableMap<String, Int>,
+        ): MutableMap<String, String> {
+            val transport = linkedMapOf<String, String>()
+            val omittedKeys = mutableListOf<String>()
+            var originalChars = 0
+            var sentChars = 0
+            var omittedChars = 0
+            for ((key, value) in this) {
+                val originalEntryChars = key.length + 1 + value.length
+                originalChars += originalEntryChars
+                if (key in RESULT_TRANSPORT_NATIVE_PAYLOAD_DEDICATED_KEYS) {
+                    omittedKeys += key
+                    omittedChars += originalEntryChars
+                    continue
+                }
+                val limitedValue = value.limitResultTransportString("native:$key", truncations)
+                val transportEntryChars = key.length + 1 + limitedValue.length
+                if (
+                    transport.size >= RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES ||
+                    sentChars + transportEntryChars > RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS
+                ) {
+                    omittedKeys += key
+                    omittedChars += originalEntryChars
+                    continue
+                }
+                transport[key] = limitedValue
+                sentChars += transportEntryChars
+            }
+            val omittedCount = omittedKeys.size
+            if (omittedCount > 0) {
+                transport["embedded_script.result_transport.native_payload_limited"] = "true"
+                transport["embedded_script.result_transport.native_payload_original_entries"] = size.toString()
+                transport["embedded_script.result_transport.native_payload_sent_entries"] = transport.size.toString()
+                transport["embedded_script.result_transport.native_payload_omitted_entries"] = omittedCount.toString()
+                transport["embedded_script.result_transport.native_payload_original_chars"] = originalChars.toString()
+                transport["embedded_script.result_transport.native_payload_sent_chars"] = sentChars.toString()
+                transport["embedded_script.result_transport.native_payload_omitted_chars"] = omittedChars.toString()
+                transport["embedded_script.result_transport.native_payload_max_entries"] =
+                    RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES.toString()
+                transport["embedded_script.result_transport.native_payload_max_chars"] =
+                    RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS.toString()
+                transport["embedded_script.result_transport.native_payload_omitted_keys"] =
+                    omittedKeys.joinToString(",").limitOmittedKeysList()
+            }
+            return transport
+        }
+
+        private fun String.limitOmittedKeysList(): String {
+            return if (length <= RESULT_TRANSPORT_OMITTED_KEYS_MAX_CHARS) {
+                this
+            } else {
+                take(RESULT_TRANSPORT_OMITTED_KEYS_MAX_CHARS) + "..."
+            }
         }
 
         private fun String.limitResultTransportString(

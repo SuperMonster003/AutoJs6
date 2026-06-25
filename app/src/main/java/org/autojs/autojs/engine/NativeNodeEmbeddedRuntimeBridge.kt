@@ -16,7 +16,7 @@ import java.util.Locale
 object NativeNodeEmbeddedRuntimeBridge {
 
     private const val TAG = "NativeNodeEmbeddedRuntime"
-    const val DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS = 30_000L
+    const val DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS = 300_000L
     private val NODE_HEADER_VERSION = NodeRuntimeCapabilities.NODE_HEADER_VERSION
     private const val RUNTIME_ADAPTER_PROPERTY = "autojs.nodejs.runtime.adapter"
     private const val RUNTIME_ADAPTER_AUTO = "auto"
