@@ -35,8 +35,11 @@ internal request field that can explicitly route one-shot diagnostics to
 `primary` or `overflow_1`, allowing focused tests to prove two independent
 Android service processes. Phase 13 adds client-side default scheduling for
 eligible ordinary one-shot scripts: when `primary` is leased, the scheduler may
-lease `overflow_1`. Project metadata and package metadata still cannot select
-additional slots, and `long_running` remains reserved.
+lease `overflow_1`. Project and packaged launch metadata may also request an
+explicit diagnostic slot with `processPoolSlot=primary|overflow_1` and
+`processPoolSlotSource=explicit_request`; `long_running` remains reserved.
+The embedded script bridge accepts every declared script slot process suffix for
+script execution, while native probes stay bound to the primary probe process.
 
 ## Policy Gate
 
@@ -68,6 +71,14 @@ When the default scheduler selects a slot, diagnostics switch to:
 - effective active slots: `2`;
 - default scheduler fallback: `false`.
 
+If a slot crash is detected through marker collection, Phase 13 uses explicit
+no-restart fallback diagnostics:
+
+- slot crash fallback mode: `no_restart_collect_marker`;
+- failed slot replacement: disabled;
+- failed slot quarantine policy: `no_quarantine_until_pool_coordinator`;
+- surviving slot execution policy: `allow_other_slots_after_marker_collection`.
+
 Script result native values expose `embedded_script.process_pool.*` diagnostics
 for the selected slot, declared slot count, effective limit, recommended limit,
 memory profile, and reason.
@@ -82,15 +93,16 @@ It preserves the existing invariants:
 - no shared stdout/stderr capture, bridge transport directory, capability
   provider, cwd, env, module cache, timer, watcher, fd, image handle, or
   execution id across scripts;
-- non-primary slots are non-exported foreground services and remain unreachable
-  from project/package metadata;
+- non-primary slots are non-exported foreground services and are reachable only
+  through internal explicit/default scheduler metadata;
 - explicit caller-side queueing remains separate from the process-pool policy.
 
 Future promotion must add a real pool coordinator, queue-when-full behavior,
-crash removal/replacement, foreground notification policy per execution,
-packaged manifest synthesis, and long-running routing before any non-primary
-slot becomes part of packaged or long-running behavior. Phase 13's default
-one-shot scheduler is intentionally narrower than that future full coordinator.
+crash removal/replacement or stronger quarantine, foreground notification policy
+per execution, packaged manifest synthesis, and long-running routing before any
+non-primary slot becomes a general packaged or long-running behavior. Phase 13's
+default one-shot scheduler is intentionally narrower than that future full
+coordinator.
 
 ## Tests
 
@@ -105,5 +117,7 @@ The gate verifies policy defaults, device-memory-aware recommendations,
 manifest declarations for all three slots, default-disabled reserved slots,
 primary/default-scheduler script result diagnostics, explicit `overflow_1`
 diagnostics, focused primary/overflow concurrent execution with different
-service-process pids, and Phase 13 default-scheduler concurrent execution on
+service-process pids, descriptor-driven `overflow_1` execution through the
+script bridge process guard, no-restart slot crash marker fallback with primary
+survivor execution, and Phase 13 default-scheduler concurrent execution on
 eligible devices.

@@ -1,6 +1,6 @@
 # P13-06 Second Execution Slot Scheduler
 
-Status: partial runtime scheduler landed; final blocker remains open.
+Status: partial runtime scheduler landed; final stress promotion remains open.
 
 ## Landed In Phase 13
 
@@ -13,6 +13,9 @@ Status: partial runtime scheduler landed; final blocker remains open.
 - The default scheduler first selects `primary`; while that slot is occupied,
   it can select `overflow_1`, starting
   `NativeNodeEmbeddedScriptServiceSlot2` in `:nodejs_embedded_2`.
+- `NativeNodeEmbeddedRuntimeBridge.runEmbeddedScriptInCurrentProcess(...)` now
+  accepts all declared process-pool script slot suffixes, so `overflow_1`
+  execution is not rejected by the old primary-only `:nodejs_embedded` guard.
 - Explicit `primary` / `overflow_1` routing remains supported and distinct from
   default scheduler routing through `processPoolSlotSource`.
 - When both default scheduler slots are occupied, the client path returns
@@ -22,6 +25,20 @@ Status: partial runtime scheduler landed; final blocker remains open.
   target service process can publish default-scheduler diagnostics.
 - Crash evidence markers use `processPoolPlan.selectedSlot.id`, so normal
   marker evidence is slot-labelled for `primary` and `overflow_1`.
+- Internal project/package launch descriptors now accept
+  `processPoolSlot=primary|overflow_1` plus
+  `processPoolSlotSource=explicit_request|default_scheduler`, and
+  `NativeNodeEmbeddedProjectRunner` propagates that metadata into request,
+  debug descriptor, native values, and packaged launch diagnostics.
+- Packaged APK launch-source markers now include `processPoolSlot` and
+  `processPoolSlotSource`, allowing focused packaged smokes to prove explicit
+  `overflow_1` routing without relying on host-only launch paths.
+- Slot crash fallback semantics are explicit and fail-closed:
+  `slot_crash_fallback_mode=no_restart_collect_marker`,
+  `failed_slot_replacement_enabled=false`, and
+  `failed_slot_quarantine_policy=no_quarantine_until_pool_coordinator`.
+  This records crash markers and allows surviving slots to continue, but does
+  not yet promise automatic slot replacement.
 
 ## Test Evidence
 
@@ -33,7 +50,14 @@ Instrumentation coverage in
   branch for devices that recommend only one slot;
 - explicit primary/overflow concurrent execution in separate service processes;
 - default scheduler concurrent one-shot execution in separate service processes
-  on eligible devices.
+  on eligible devices;
+- overflow-slot no-restart crash marker collection with a subsequent explicit
+  primary-slot survivor execution;
+- launch descriptor, file source, project request, debug descriptor, and native
+  value alignment for explicit process-pool slot metadata.
+
+`EmbeddedNodePackagedApkSmokeTest` also adds a focused packaged process-pool
+slot smoke for descriptor-driven `overflow_1` routing.
 
 `NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()` now stops every
 declared embedded service slot, not just the primary service.
@@ -59,17 +83,17 @@ build/reports/nodejs/phase13-second-execution-slot-scheduler.json
 build/reports/nodejs/phase13-second-execution-slot-scheduler.md
 ```
 
-The gate is expected to report `partial` until packaged scheduler behavior,
-fatal slot-crash fallback/quarantine, and full stress promotion evidence land.
+The gate is expected to report `partial` with one remaining blocker until full
+stress promotion evidence lands.
 
 ## Remaining Work
 
-- Prove fatal native crash handling for one slot while the other slot survives.
-- Define and test slot quarantine/replacement or explicit no-restart fallback
-  semantics. `defaultSchedulerFallbackEnabled` intentionally remains `false`.
-- Add packaged APK smoke coverage for default scheduler routing and metadata.
 - Promote stress evidence for bridge provider isolation, stdout/stderr capture,
   cwd/env/module cache, timers, file handles, watchers, and crash evidence across
   both active slots.
+- Keep `defaultSchedulerFallbackEnabled=false` until a future pool coordinator
+  implements and tests automatic slot replacement/quarantine.
+- Reuse P13-08 long-duration soak evidence as the closing signal before marking
+  `second_execution_slot` complete.
 
 P13-06 remains unchecked until these final acceptance items pass.

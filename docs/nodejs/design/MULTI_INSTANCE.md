@@ -4,7 +4,7 @@ Status: enforced single active execution per embedded service process. Phase 11
 adds an internal explicit `primary` / `overflow_1` process-slot selector for
 focused diagnostics. Phase 13 adds a default one-shot scheduler that can route
 eligible concurrent ordinary scripts to `overflow_1`; packaged execution still
-uses the conservative primary service path.
+uses the same explicit slot metadata path for focused process-pool smoke.
 
 ## Decision
 
@@ -28,7 +28,9 @@ Focused Phase 11 diagnostics may explicitly route a one-shot execution to
 `overflow_1`, which runs in `:nodejs_embedded_2`. Phase 13 default scheduling
 can also route ordinary one-shot scripts to `overflow_1` when `primary` is
 leased and the device profile recommends at least two active slots. This is not
-same-process concurrency.
+same-process concurrency. Embedded script execution accepts all declared script
+slot process suffixes; native probes remain restricted to the primary probe
+process.
 
 ## Rationale
 
@@ -97,6 +99,8 @@ Packaged behavior is:
 - first active execution owns the process
 - concurrent starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`
 - after the first execution exits and the service settles, a later execution may run normally
+- packaged Node launch descriptors may include `processPoolSlot=primary|overflow_1`
+  and `processPoolSlotSource=explicit_request` for internal process-pool smoke
 - explicit queue metadata is caller-local and must remain visible through diagnostics when packaged callers opt in
 
 ## Queue Boundary
@@ -128,6 +132,10 @@ Current S8-43 behavior:
   `explicit_two_slot` with effective active slot count `2`;
 - Phase 13 default scheduler diagnostics use `default_scheduler_enabled` /
   `default_two_slot` with effective active slot count `2`;
+- packaged launch descriptor diagnostics can preserve `processPoolSlot` and
+  route focused one-shot smokes to `overflow_1`;
+- slot crash fallback is explicitly `no_restart_collect_marker` with no failed
+  slot replacement until a real coordinator lands;
 - device-memory-aware recommended slot count is diagnostic only;
 - the long-running dedicated slot is reserved but disabled;
 - queue-when-full remains disabled until a real pool coordinator exists.
@@ -137,7 +145,8 @@ Future promotion still needs:
 - crash detection that removes only the failed slot;
 - foreground notification policy per execution;
 - packaged manifest synthesis for every service component;
-- packaged scheduler / full pool coordinator routing;
+- packaged scheduler / full pool coordinator routing beyond explicit smoke
+  metadata;
 - stress tests proving no cwd, env, module cache, bridge transport, provider,
   fd, watcher, timer, or handle crosses execution or slot boundaries.
 
@@ -160,5 +169,12 @@ Current focused coverage:
   service-process pids
 - run two default one-shot scripts concurrently on an eligible device and assert
   the scheduler selects `primary` plus `overflow_1`
+- read and run packaged/project launch descriptor `processPoolSlot` metadata and
+  assert explicit `overflow_1` diagnostics
+- assert descriptor-driven `overflow_1` execution is accepted by the embedded
+  script process guard
+- collect an `overflow_1` running marker under the explicit no-restart fallback
+  policy, then assert `primary` can still run
 
-Release candidates should also verify packaged smoke still uses one embedded service process and does not treat queue support as concurrent execution support.
+Release candidates should also verify packaged smoke does not treat queue support
+as same-process concurrent execution support.
