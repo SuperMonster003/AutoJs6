@@ -581,6 +581,17 @@ async function smoke(): Promise<void> {
     autojsProfile.profileRollbackPolicy.packagedDowngrade;
   const rollbackReleasePolicy: AutoJs6Node.ProfileRollbackReleasePolicy =
     autojsProfile.profileRollbackPolicy.releasePolicy;
+  const privacyDisclosureStatus: string = autojsProfile.privacyDisclosurePolicy.status;
+  const privacyDisclosureSurfaces: readonly AutoJs6Node.PrivacyDisclosureSurface[] =
+    autojsProfile.privacyDisclosurePolicy.surfaces;
+  const privacyDisclosureChannel: AutoJs6Node.PrivacyDisclosureChannel =
+    autojsProfile.privacyDisclosurePolicy.channels[0];
+  const privacyDisclosurePackaged: AutoJs6Node.PrivacyDisclosurePackagedPolicy =
+    autojsProfile.privacyDisclosurePolicy.packagedPolicy;
+  const privacyDisclosureImplicitDenied: boolean =
+    autojsProfile.privacyDisclosurePolicy.implicitHighPrivilegeDenied;
+  const privacyDisclosureDoctorPrivacy: AutoJs6Node.PrivacyDisclosureDoctorPrivacy =
+    autojsProfile.privacyDisclosurePolicy.doctorPrivacy;
   const typedCapabilityError = {} as AutoJs6Node.AutoJsBridgeCapabilityNotDeclaredError;
   const capabilityErrorProfiles: readonly string[] = typedCapabilityError.requiredProfiles;
   const capabilityErrorNodePermissions: readonly string[] = typedCapabilityError.requiredNodePermissions;
@@ -869,6 +880,12 @@ async function smoke(): Promise<void> {
   void rollbackTrigger;
   void packagedDowngrade;
   void rollbackReleasePolicy;
+  void privacyDisclosureStatus;
+  void privacyDisclosureSurfaces;
+  void privacyDisclosureChannel;
+  void privacyDisclosurePackaged;
+  void privacyDisclosureImplicitDenied;
+  void privacyDisclosureDoctorPrivacy;
   void capabilityErrorProfiles;
   void capabilityErrorNodePermissions;
   void capabilityErrorAndroidPermissions;

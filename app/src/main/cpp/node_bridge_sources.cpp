@@ -8831,6 +8831,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const bridgePermissionsReport = __autojs6_bridge_permission_report();
     const profileSelection = __autojs6_profile_selection_report(featureFlags, bridgePermissionsReport);
     const profileRollbackPolicy = __autojs6_profile_rollback_policy_report(featureFlags);
+    const privacyDisclosurePolicy = __autojs6_privacy_disclosure_policy_report();
     const legacyAliases = Object.create(null);
     for (const name of Object.keys(__autojs6_error_code_aliases)) {
       legacyAliases[name] = __autojs6_error_code_aliases[name];
@@ -9360,6 +9361,7 @@ std::string buildEmbeddedScriptExecutionSource(
       compileCache: __autojs6_compile_cache_profile_snapshot(),
       profileSelection,
       profileRollbackPolicy,
+      privacyDisclosurePolicy,
       bridgePermissions: bridgePermissionsReport,
       bridgeLimits: __autojs6_bridge_limits_report()
     });
@@ -9570,6 +9572,305 @@ std::string buildEmbeddedScriptExecutionSource(
         "automatic crash circuit breaker",
         "remote packaged kill switch",
         "privacy disclosure prompts"
+      ])
+    });
+  }
+  function __autojs6_privacy_disclosure_surface(
+    id,
+    capability,
+    profile,
+    androidPermissions,
+    requiresUserPrompt,
+    requiresForegroundDisclosure,
+    requiresNotification,
+    requiresSettingsIntent,
+    promptChannel,
+    disclosureChannel,
+    settingsIntent
+  ) {
+    return Object.freeze({
+      id,
+      capability,
+      profile,
+      androidPermissions: Object.freeze(androidPermissions.slice()),
+      requiresUserPrompt,
+      requiresForegroundDisclosure,
+      requiresNotification,
+      requiresSettingsIntent,
+      promptChannel,
+      disclosureChannel,
+      settingsIntent: settingsIntent || null,
+      packagedBehavior: "deny_without_reviewed_disclosure_manifest",
+      runtimeStatus: "fail_closed_until_disclosure",
+      promotionBlockedUntil: "user_prompt_and_foreground_disclosure_implemented",
+      implicitGrantAllowed: false,
+      authority: "metadata_only_no_authority"
+    });
+  }
+  function __autojs6_privacy_disclosure_channel(id, status, requiredFor) {
+    return Object.freeze({
+      id,
+      status,
+      requiredFor: Object.freeze(requiredFor.slice()),
+      grantsAuthority: false
+    });
+  }
+  function __autojs6_privacy_disclosure_policy_report() {
+    return Object.freeze({
+      schema: "autojs6-node-privacy-disclosure-policy-v1",
+      status: "policy_partial",
+      defaultProfile: "safe_default",
+      effectiveProfile: "safe_default",
+      metadataOnly: true,
+      grantsAuthority: false,
+      implicitHighPrivilegeDenied: true,
+      packagedImplicitHighPrivilegeDenied: true,
+      disclosureBlocksPromotion: true,
+      foregroundDisclosureRequiredForPromotedSensitiveSurfaces: true,
+      userPromptRequiredForPromotedSensitiveSurfaces: true,
+      surfaces: Object.freeze([
+        __autojs6_privacy_disclosure_surface(
+          "screen_capture",
+          "screen_capture",
+          "pro_compat_opt_in",
+          Object.freeze([
+            "android.permission.FOREGROUND_SERVICE",
+            "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+            "android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+          ]),
+          true,
+          true,
+          true,
+          false,
+          "media_projection_prompt",
+          "foreground_service_notification",
+          "android.media.projection.MediaProjectionManager#createScreenCaptureIntent"
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "media_recording",
+          "media.recording",
+          "pro_compat_opt_in",
+          Object.freeze([
+            "android.permission.RECORD_AUDIO",
+            "android.permission.FOREGROUND_SERVICE",
+            "android.permission.FOREGROUND_SERVICE_MICROPHONE"
+          ]),
+          true,
+          true,
+          true,
+          false,
+          "android_permission_dialog",
+          "foreground_service_notification",
+          "android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS"
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "ui_overlay",
+          "ui.overlay",
+          "pro_compat_opt_in",
+          Object.freeze([
+            "android.permission.SYSTEM_ALERT_WINDOW",
+            "android.permission.FOREGROUND_SERVICE",
+            "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+            "android.permission.POST_NOTIFICATIONS"
+          ]),
+          true,
+          true,
+          true,
+          true,
+          "in_app_disclosure",
+          "foreground_service_notification",
+          "android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION"
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "accessibility",
+          "accessibility",
+          "pro_compat_opt_in",
+          Object.freeze(["android.permission.BIND_ACCESSIBILITY_SERVICE"]),
+          true,
+          true,
+          false,
+          true,
+          "in_app_disclosure",
+          "accessibility_service_description",
+          "android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS"
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "network",
+          "network",
+          "desktop_compat_opt_in",
+          Object.freeze(["android.permission.INTERNET"]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "packaged_metadata_review",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "filesystem_relaxation",
+          "filesystem_relaxation",
+          "desktop_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "in_app_disclosure",
+          "storage_access_framework",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "java_interop",
+          "java_interop",
+          "pro_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "doctor_report",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "shell_root",
+          "shell.root",
+          "pro_compat_opt_in",
+          Object.freeze([]),
+          true,
+          true,
+          false,
+          false,
+          "in_app_disclosure",
+          "foreground_service_notification",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "shell_shizuku",
+          "shell.shizuku",
+          "pro_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "in_app_disclosure",
+          "shizuku_permission_dialog",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "child_process",
+          "child_process",
+          "desktop_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "doctor_report",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "native_addon",
+          "native_addon",
+          "desktop_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "packaged_metadata_review",
+          "signed_native_artifact_review",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "inspector",
+          "inspector",
+          "debug_unsafe_lab",
+          Object.freeze([]),
+          true,
+          true,
+          true,
+          false,
+          "debug_session_confirmation",
+          "foreground_service_notification",
+          null
+        ),
+        __autojs6_privacy_disclosure_surface(
+          "wasi",
+          "wasi",
+          "desktop_compat_opt_in",
+          Object.freeze([]),
+          true,
+          false,
+          false,
+          false,
+          "project_capability_review",
+          "packaged_metadata_review",
+          null
+        )
+      ]),
+      channels: Object.freeze([
+        __autojs6_privacy_disclosure_channel("android_permission_dialog", "platform_controlled", ["media_recording"]),
+        __autojs6_privacy_disclosure_channel("media_projection_prompt", "platform_controlled", ["screen_capture"]),
+        __autojs6_privacy_disclosure_channel("foreground_service_notification", "required_before_promotion", [
+          "screen_capture",
+          "media_recording",
+          "ui_overlay",
+          "shell_root",
+          "inspector"
+        ]),
+        __autojs6_privacy_disclosure_channel("in_app_disclosure", "required_before_promotion", [
+          "ui_overlay",
+          "accessibility",
+          "filesystem_relaxation",
+          "shell_root",
+          "shell_shizuku"
+        ]),
+        __autojs6_privacy_disclosure_channel("project_capability_review", "required_before_promotion", [
+          "network",
+          "java_interop",
+          "child_process",
+          "wasi"
+        ]),
+        __autojs6_privacy_disclosure_channel("packaged_metadata_review", "required_before_packaged_promotion", [
+          "network",
+          "native_addon",
+          "wasi"
+        ]),
+        __autojs6_privacy_disclosure_channel("doctor_report", "diagnostic_only", ["java_interop", "child_process"])
+      ]),
+      packagedPolicy: Object.freeze({
+        schema: "autojs6-node-packaged-disclosure-manifest-v1",
+        status: "policy_partial",
+        metadataOnly: true,
+        grantsAuthority: false,
+        implicitHighPrivilegeDenied: true,
+        requiresDisclosureManifest: true,
+        reviewedManifestRequiredForPromotion: true,
+        denyUndeclaredHighRiskSurfaces: true,
+        permissionSynthesisRequiresReviewedDisclosure: true,
+        defaultAction: "deny_without_reviewed_disclosure_manifest",
+        manifestKeys: Object.freeze([
+          "project.json:node.disclosures",
+          "package.json:autojs6.node.disclosures"
+        ])
+      }),
+      doctorPrivacy: Object.freeze({
+        scriptContentsIncluded: false,
+        environmentValuesIncluded: false,
+        pathsRedacted: true,
+        surfaceMetadataOnly: true
+      }),
+      pending: Object.freeze([
+        "settings UI disclosure review",
+        "localized prompt copy",
+        "foreground service notification ownership",
+        "packaged disclosure manifest review",
+        "device matrix for screenshot recording overlay accessibility",
+        "automatic runtime enforcement before profile promotion"
       ])
     });
   }

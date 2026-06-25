@@ -387,6 +387,72 @@ declare namespace AutoJs6Node {
     readonly pending: readonly string[];
   }
 
+  export interface PrivacyDisclosureSurface {
+    readonly id: string;
+    readonly capability: string;
+    readonly profile: "safe_default" | "pro_compat_opt_in" | "desktop_compat_opt_in" | "debug_unsafe_lab" | string;
+    readonly androidPermissions: readonly string[];
+    readonly requiresUserPrompt: boolean;
+    readonly requiresForegroundDisclosure: boolean;
+    readonly requiresNotification: boolean;
+    readonly requiresSettingsIntent: boolean;
+    readonly promptChannel: string;
+    readonly disclosureChannel: string;
+    readonly settingsIntent: string | null;
+    readonly packagedBehavior: "deny_without_reviewed_disclosure_manifest" | string;
+    readonly runtimeStatus: "fail_closed_until_disclosure" | string;
+    readonly promotionBlockedUntil: "user_prompt_and_foreground_disclosure_implemented" | string;
+    readonly implicitGrantAllowed: boolean;
+    readonly authority: "metadata_only_no_authority" | string;
+  }
+
+  export interface PrivacyDisclosureChannel {
+    readonly id: string;
+    readonly status: "platform_controlled" | "required_before_promotion" | "required_before_packaged_promotion" | "diagnostic_only" | string;
+    readonly requiredFor: readonly string[];
+    readonly grantsAuthority: boolean;
+  }
+
+  export interface PrivacyDisclosurePackagedPolicy {
+    readonly schema: "autojs6-node-packaged-disclosure-manifest-v1" | string;
+    readonly status: "policy_partial" | string;
+    readonly metadataOnly: boolean;
+    readonly grantsAuthority: boolean;
+    readonly implicitHighPrivilegeDenied: boolean;
+    readonly requiresDisclosureManifest: boolean;
+    readonly reviewedManifestRequiredForPromotion: boolean;
+    readonly denyUndeclaredHighRiskSurfaces: boolean;
+    readonly permissionSynthesisRequiresReviewedDisclosure: boolean;
+    readonly defaultAction: "deny_without_reviewed_disclosure_manifest" | string;
+    readonly manifestKeys: readonly string[];
+  }
+
+  export interface PrivacyDisclosureDoctorPrivacy {
+    readonly scriptContentsIncluded: boolean;
+    readonly environmentValuesIncluded: boolean;
+    readonly pathsRedacted: boolean;
+    readonly surfaceMetadataOnly: boolean;
+  }
+
+  export interface PrivacyDisclosurePolicy {
+    readonly schema: "autojs6-node-privacy-disclosure-policy-v1" | string;
+    readonly status: "policy_partial" | string;
+    readonly defaultProfile: "safe_default" | string;
+    readonly effectiveProfile: "safe_default" | string;
+    readonly metadataOnly: boolean;
+    readonly grantsAuthority: boolean;
+    readonly implicitHighPrivilegeDenied: boolean;
+    readonly packagedImplicitHighPrivilegeDenied: boolean;
+    readonly disclosureBlocksPromotion: boolean;
+    readonly foregroundDisclosureRequiredForPromotedSensitiveSurfaces: boolean;
+    readonly userPromptRequiredForPromotedSensitiveSurfaces: boolean;
+    readonly surfaces: readonly PrivacyDisclosureSurface[];
+    readonly channels: readonly PrivacyDisclosureChannel[];
+    readonly packagedPolicy: PrivacyDisclosurePackagedPolicy;
+    readonly doctorPrivacy: PrivacyDisclosureDoctorPrivacy;
+    readonly pending: readonly string[];
+  }
+
   export interface AutoJsBridgeCapabilityNotDeclaredError extends Error {
     readonly code: "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED";
     readonly module?: string;
@@ -666,6 +732,7 @@ declare namespace AutoJs6Node {
     readonly compileCache: Readonly<Record<string, unknown>>;
     readonly profileSelection: ProfileSelectionDiagnostics;
     readonly profileRollbackPolicy: ProfileRollbackPolicy;
+    readonly privacyDisclosurePolicy: PrivacyDisclosurePolicy;
     readonly bridgePermissions: BridgePermissionsReport;
     readonly bridgeLimits: Readonly<Record<string, unknown>>;
   }

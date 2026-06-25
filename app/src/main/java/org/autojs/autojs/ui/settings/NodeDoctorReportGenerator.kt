@@ -5,6 +5,7 @@ import android.os.Build
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
+import org.autojs.autojs.engine.NodePrivacyDisclosurePolicy
 import org.autojs.autojs.engine.NodeProfileRollbackPolicy
 import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
@@ -62,6 +63,7 @@ object NodeDoctorReportGenerator {
             put("featureFlags", featureFlagsJson())
             put("profileSelection", profileSelectionJson(projectRoot))
             put("profileRollbackPolicy", NodeProfileRollbackPolicy.toJsonObject())
+            put("privacyDisclosurePolicy", NodePrivacyDisclosurePolicy.toJsonObject())
             put("nativeLibraries", nativeLibrariesJson(context, probeResult))
             put("capabilityProfile", capabilityProfileJson())
             put("bridgeCapabilities", bridgeCapabilitiesJson())
@@ -258,10 +260,18 @@ object NodeDoctorReportGenerator {
         val compileCache = json.getJSONObject("compileCache")
         val profileSelection = json.getJSONObject("profileSelection")
         val profileRollbackPolicy = json.getJSONObject("profileRollbackPolicy")
+        val privacyDisclosurePolicy = json.getJSONObject("privacyDisclosurePolicy")
         val nativeLibraries = json.getJSONObject("nativeLibraries")
         val packagedTemplate = json.getJSONObject("packagedTemplate")
         val lastNodeError = json.getJSONObject("lastNodeError")
         val nativeProbe = json.getJSONObject("nativeProbe")
+        val disclosureSurfaces = privacyDisclosurePolicy.getJSONArray("surfaces")
+        val promptRequiredSurfaces = (0 until disclosureSurfaces.length()).count { index ->
+            disclosureSurfaces.getJSONObject(index).getBoolean("requiresUserPrompt")
+        }
+        val foregroundDisclosureSurfaces = (0 until disclosureSurfaces.length()).count { index ->
+            disclosureSurfaces.getJSONObject(index).getBoolean("requiresForegroundDisclosure")
+        }
         return buildString {
             appendLine("AutoJs6 Node Doctor Report")
             appendLine("Generated at: $generatedAt")
@@ -316,6 +326,18 @@ object NodeDoctorReportGenerator {
             appendLine("  profile switches: ${profileRollbackPolicy.getJSONObject("profileKillSwitches").keys().asSequence().joinToString(", ")}")
             appendLine("  capability switches: ${profileRollbackPolicy.getJSONObject("capabilityKillSwitches").keys().asSequence().joinToString(", ")}")
             appendLine("  packaged downgrade: ${profileRollbackPolicy.getJSONObject("packagedDowngrade").getString("strategy")}")
+            appendLine()
+            appendLine("Privacy Disclosure Policy:")
+            appendLine("  status: ${privacyDisclosurePolicy.getString("status")}")
+            appendLine("  effective profile: ${privacyDisclosurePolicy.getString("effectiveProfile")}")
+            appendLine("  metadata only: ${privacyDisclosurePolicy.getBoolean("metadataOnly")}")
+            appendLine("  grants authority: ${privacyDisclosurePolicy.getBoolean("grantsAuthority")}")
+            appendLine("  implicit high privilege denied: ${privacyDisclosurePolicy.getBoolean("implicitHighPrivilegeDenied")}")
+            appendLine("  packaged implicit high privilege denied: ${privacyDisclosurePolicy.getBoolean("packagedImplicitHighPrivilegeDenied")}")
+            appendLine("  surfaces: ${disclosureSurfaces.length()}")
+            appendLine("  prompt-required surfaces: $promptRequiredSurfaces")
+            appendLine("  foreground-disclosure surfaces: $foregroundDisclosureSurfaces")
+            appendLine("  packaged default action: ${privacyDisclosurePolicy.getJSONObject("packagedPolicy").getString("defaultAction")}")
             appendLine()
             appendLine("Compile Cache:")
             appendLine("  status: ${compileCache.getString("status")}")

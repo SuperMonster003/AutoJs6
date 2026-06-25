@@ -5,6 +5,7 @@ import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NodeBridgeProviderStatus
 import org.autojs.autojs.engine.NodeEmbeddedTestHarness
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
+import org.autojs.autojs.engine.NodePrivacyDisclosurePolicy
 import org.autojs.autojs.engine.NodeProfileRollbackPolicy
 import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
@@ -85,6 +86,27 @@ class NodeDoctorReportGeneratorInstrumentationTest {
             "publish_safe_profile_patch_or_remove_promoted_metadata",
             rollbackPolicy.getJSONObject("packagedDowngrade").getString("strategy"),
         )
+        val privacyDisclosurePolicy = json.getJSONObject("privacyDisclosurePolicy")
+        assertEquals(NodePrivacyDisclosurePolicy.SCHEMA, privacyDisclosurePolicy.getString("schema"))
+        assertEquals(NodePrivacyDisclosurePolicy.STATUS, privacyDisclosurePolicy.getString("status"))
+        assertEquals(NodePrivacyDisclosurePolicy.SAFE_DEFAULT, privacyDisclosurePolicy.getString("effectiveProfile"))
+        assertTrue(privacyDisclosurePolicy.getBoolean("metadataOnly"))
+        assertFalse(privacyDisclosurePolicy.getBoolean("grantsAuthority"))
+        assertTrue(privacyDisclosurePolicy.getBoolean("implicitHighPrivilegeDenied"))
+        assertTrue(privacyDisclosurePolicy.getBoolean("packagedImplicitHighPrivilegeDenied"))
+        val disclosureSurfaces = privacyDisclosurePolicy.getJSONArray("surfaces").byId()
+        assertTrue(disclosureSurfaces.containsKey("screen_capture"))
+        assertTrue(disclosureSurfaces.containsKey("network"))
+        assertTrue(disclosureSurfaces.containsKey("java_interop"))
+        assertTrue(disclosureSurfaces.getValue("screen_capture").getBoolean("requiresForegroundDisclosure"))
+        assertTrue(
+            disclosureSurfaces
+                .getValue("network")
+                .getJSONArray("androidPermissions")
+                .toString()
+                .contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
+        )
+        assertTrue(privacyDisclosurePolicy.getJSONObject("packagedPolicy").getBoolean("requiresDisclosureManifest"))
         val compileCache = json.getJSONObject("compileCache")
         assertEquals(NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_SCHEMA_VERSION, compileCache.getString("schema"))
         assertTrue(compileCache.getBoolean("appPrivateOnly"))
@@ -141,8 +163,11 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertTrue(text.contains("Bridge Providers:"))
         assertTrue(text.contains("Profile Selection:"))
         assertTrue(text.contains("Profile Rollback Policy:"))
+        assertTrue(text.contains("Privacy Disclosure Policy:"))
         assertTrue(text.contains("effective profile: safe_default"))
         assertTrue(text.contains("rollback target: safe_default"))
+        assertTrue(text.contains("implicit high privilege denied: true"))
+        assertTrue(text.contains("packaged default action: deny_without_reviewed_disclosure_manifest"))
         assertTrue(text.contains("profile switches:"))
         assertTrue(text.contains("capability switches:"))
         assertTrue(text.contains("fetch/axios: status="))
@@ -185,6 +210,7 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         val json = JSONObject(reports.jsonFile.readText())
         val profileSelection = json.getJSONObject("profileSelection")
         val rollbackPolicy = json.getJSONObject("profileRollbackPolicy")
+        val privacyDisclosurePolicy = json.getJSONObject("privacyDisclosurePolicy")
 
         assertEquals("working_directory", profileSelection.getString("source"))
         assertEquals(NodeProfileSelectionDiagnostics.SAFE_DEFAULT, profileSelection.getString("effectiveProfile"))
@@ -201,8 +227,11 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertEquals(NodeProfileRollbackPolicy.SAFE_DEFAULT, rollbackPolicy.getString("rollbackTargetProfile"))
         assertTrue(rollbackPolicy.getJSONArray("profileStates").toString().contains("desktop_compat_opt_in"))
         assertTrue(rollbackPolicy.getJSONArray("capabilityStates").toString().contains("network"))
+        assertFalse(privacyDisclosurePolicy.getBoolean("grantsAuthority"))
+        assertTrue(privacyDisclosurePolicy.getJSONArray("surfaces").toString().contains("screen_capture"))
         assertTrue(text.contains("Profile Selection:"))
         assertTrue(text.contains("Profile Rollback Policy:"))
+        assertTrue(text.contains("Privacy Disclosure Policy:"))
         assertTrue(text.contains("requested profiles:"))
         assertTrue(text.contains("blocked profile promotions:"))
     }
