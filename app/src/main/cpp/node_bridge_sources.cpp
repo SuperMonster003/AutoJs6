@@ -42523,6 +42523,156 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return values;
   }
+  function __autojs6_esm_split_top_level(text, separator) {
+    const source = String(text || "");
+    const masked = __autojs6_mask_non_code(source);
+    const values = [];
+    let cursor = 0;
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      const ch = masked.charAt(index);
+      if (ch === "{") braceDepth += 1;
+      else if (ch === "}") braceDepth = Math.max(0, braceDepth - 1);
+      else if (ch === "[") bracketDepth += 1;
+      else if (ch === "]") bracketDepth = Math.max(0, bracketDepth - 1);
+      else if (ch === "(") parenDepth += 1;
+      else if (ch === ")") parenDepth = Math.max(0, parenDepth - 1);
+      else if (ch === separator && braceDepth === 0 && bracketDepth === 0 && parenDepth === 0) {
+        values.push(source.slice(cursor, index));
+        cursor = index + 1;
+      }
+    }
+    values.push(source.slice(cursor));
+    return values;
+  }
+  function __autojs6_esm_find_top_level_char(text, target) {
+    const source = String(text || "");
+    const masked = __autojs6_mask_non_code(source);
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      const ch = masked.charAt(index);
+      if (ch === "{") braceDepth += 1;
+      else if (ch === "}") braceDepth = Math.max(0, braceDepth - 1);
+      else if (ch === "[") bracketDepth += 1;
+      else if (ch === "]") bracketDepth = Math.max(0, bracketDepth - 1);
+      else if (ch === "(") parenDepth += 1;
+      else if (ch === ")") parenDepth = Math.max(0, parenDepth - 1);
+      else if (ch === target && braceDepth === 0 && bracketDepth === 0 && parenDepth === 0) {
+        return index;
+      }
+    }
+    return -1;
+  }
+  function __autojs6_esm_collect_binding_identifiers(pattern, sourceName) {
+    const names = [];
+    function add(name) {
+      const value = String(name || "").trim();
+      if (!value) return;
+      names.push(__autojs6_esm_validate_identifier(value, sourceName));
+    }
+    function collect(value) {
+      let text = String(value || "").trim();
+      if (!text) return;
+      if (text.slice(0, 3) === "...") {
+        text = text.slice(3).trim();
+      }
+      const equalIndex = __autojs6_esm_find_top_level_char(text, "=");
+      if (equalIndex >= 0) {
+        text = text.slice(0, equalIndex).trim();
+      }
+      if (!text) return;
+      const first = text.charAt(0);
+      if (first === "{" && text.charAt(text.length - 1) === "}") {
+        collectObject(text.slice(1, -1));
+        return;
+      }
+      if (first === "[" && text.charAt(text.length - 1) === "]") {
+        collectArray(text.slice(1, -1));
+        return;
+      }
+      const match = /^([A-Za-z_$][0-9A-Za-z_$]*)$/.exec(text);
+      if (match) {
+        add(match[1]);
+      }
+    }
+    function collectObject(body) {
+      const entries = __autojs6_esm_split_top_level(body, ",");
+      for (const entry of entries) {
+        let text = String(entry || "").trim();
+        if (!text) continue;
+        if (text.slice(0, 3) === "...") {
+          collect(text);
+          continue;
+        }
+        const colonIndex = __autojs6_esm_find_top_level_char(text, ":");
+        if (colonIndex >= 0) {
+          collect(text.slice(colonIndex + 1));
+        } else {
+          collect(text);
+        }
+      }
+    }
+    function collectArray(body) {
+      const entries = __autojs6_esm_split_top_level(body, ",");
+      for (const entry of entries) {
+        collect(entry);
+      }
+    }
+    collect(pattern);
+    return names;
+  }
+  function __autojs6_esm_find_matching_delimiter(text, openIndex) {
+    const source = String(text || "");
+    const open = source.charAt(openIndex);
+    const close = open === "{" ? "}" : open === "[" ? "]" : open === "(" ? ")" : "";
+    if (!close) return -1;
+    let depth = 0;
+    for (let index = openIndex; index < source.length; index += 1) {
+      const ch = source.charAt(index);
+      if (ch === open) depth += 1;
+      else if (ch === close) {
+        depth -= 1;
+        if (depth === 0) return index;
+      }
+    }
+    return -1;
+  }
+  function __autojs6_esm_transform_destructured_declaration_exports(body, sourceName, namedExports) {
+    const source = String(body || "");
+    const masked = __autojs6_mask_non_code(source);
+    let output = "";
+    let cursor = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(masked, index, "export")) continue;
+      const exportEnd = index + "export".length;
+      const kindStart = __autojs6_skip_whitespace(masked, exportEnd);
+      const kindMatch = /^(const|let|var)\b/.exec(masked.slice(kindStart));
+      if (!kindMatch) continue;
+      const afterKind = kindStart + kindMatch[1].length;
+      const patternStart = __autojs6_skip_whitespace(masked, afterKind);
+      const opener = masked.charAt(patternStart);
+      if (opener !== "{" && opener !== "[") continue;
+      const patternEnd = __autojs6_esm_find_matching_delimiter(masked, patternStart);
+      if (patternEnd < 0) continue;
+      const afterPattern = __autojs6_skip_whitespace(masked, patternEnd + 1);
+      if (masked.charAt(afterPattern) !== "=") continue;
+      const names = __autojs6_esm_collect_binding_identifiers(
+        source.slice(patternStart, patternEnd + 1),
+        sourceName
+      );
+      for (const name of names) {
+        namedExports.push({ exported: name, local: name });
+      }
+      output += source.slice(cursor, index);
+      cursor = kindStart;
+      index = kindStart;
+    }
+    return output + source.slice(cursor);
+  }
   function __autojs6_esm_parse_import_bindings(specifierText, importVar, sourceName) {
     const lines = [];
     let text = String(specifierText || "").trim();
@@ -42734,6 +42884,7 @@ std::string buildEmbeddedScriptExecutionSource(
       hasDefault = true;
       return "const __autojs6_esm_default = ";
     });
+    body = __autojs6_esm_transform_destructured_declaration_exports(body, sourceName, namedExports);
     body = body.replace(/\bexport\s+(const|let|var)\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, kind, name) {
       namedExports.push({ exported: name, local: name });
       return kind + " " + name;

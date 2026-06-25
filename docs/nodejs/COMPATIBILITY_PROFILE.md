@@ -987,7 +987,8 @@ Node Profile v1.1 partial ESM supports:
 - CommonJS `require()` of synchronous partial ESM targets, returning the ESM namespace object while preserving CommonJS package condition matching
 - ESM JSON imports with `with { type: "json" }`, sharing the CommonJS JSON cache object
 - scoped `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)`
-- simple named exports
+- simple named exports, including identifier declarations and object/array
+  destructuring declaration exports used by package entrypoints such as `css-tree`
 - simple re-export syntax: `export { name as alias } from`, `export * from`, and `export * as namespace from`
 - block and line comments inside named import/export/re-export specifier lists
 - simple top-level await

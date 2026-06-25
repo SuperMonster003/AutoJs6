@@ -362,8 +362,9 @@ allowlists and cleanup evidence.
 P13-41 records ESM loader parity as partial. AutoJs6 Node exposes
 `esmLoaderProfile` diagnostics for the current AutoJs6-managed ESM subset:
 `.mjs`, `type=module`, TLA, local static/dynamic import, package
-`exports`/`imports`, simple re-export syntax, JSON import attributes, scoped
-`import.meta`, and CJS interop. It does not enable raw loader hooks,
+`exports`/`imports`, simple re-export syntax, object/array destructuring
+declaration exports used by package entrypoints such as `css-tree`, JSON import
+attributes, scoped `import.meta`, and CJS interop. It does not enable raw loader hooks,
 network/file/data URL imports, import maps, custom condition profiles, or broad
 packaged encrypted ESM graphs.
 

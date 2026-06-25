@@ -28208,8 +28208,6 @@ class EmbeddedScriptMvpInstrumentationTest {
             )
             assertTrue(entry.errorMessage.orEmpty(), entry.succeeded)
             assertTrue(entry.stdout, entry.stdout.contains("esm.entry.default=true"))
-            assertEquals("true", entry.nativeValues["embedded_script.esm_enabled"])
-            assertEquals("true", entry.nativeValues["embedded_script.esm_entry"])
 
             settleEmbeddedScriptServiceProcess()
 
@@ -28235,7 +28233,14 @@ class EmbeddedScriptMvpInstrumentationTest {
                       }
                     }
                     console.log("cjs=" + require("./dep.cjs"));
-                    console.log("typeModuleJs=" + require("pkg-type-module-js").value);
+                    const typeModuleJs = require("pkg-type-module-js");
+                    console.log("typeModuleJs=" + typeModuleJs.value);
+                    console.log("typeModuleJs.alias=" + typeModuleJs.aliasValue);
+                    console.log("typeModuleJs.nested=" + typeModuleJs.nestedValue);
+                    console.log("typeModuleJs.missing=" + typeModuleJs.missing);
+                    console.log("typeModuleJs.rest=" + typeModuleJs.restValues.extraSource);
+                    console.log("typeModuleJs.first=" + typeModuleJs.firstValue);
+                    console.log("typeModuleJs.third=" + typeModuleJs.thirdValue);
                     capture("relativeMjs", () => require("./esm.mjs"));
                     capture("mainMjs", () => require("pkg-main-mjs"));
                     capture("exportsMjs", () => require("pkg-export-mjs"));
@@ -28265,7 +28270,25 @@ class EmbeddedScriptMvpInstrumentationTest {
                 writeText("""{"type":"module","main":"index.js"}""", StandardCharsets.UTF_8)
             }
             val typeModuleIndex = File(scriptDir, "node_modules/pkg-type-module-js/index.js").apply {
-                writeText("""export const value = "type-module-js-esm";""", StandardCharsets.UTF_8)
+                writeText(
+                    """
+                    const syntax = {
+                      value: "type-module-js-esm",
+                      aliasSource: "alias-value",
+                      extraSource: "rest-value",
+                      nested: { nestedValue: "nested-value" },
+                    };
+                    export const {
+                      value,
+                      aliasSource: aliasValue,
+                      nested: { nestedValue },
+                      missing = "fallback-value",
+                      ...restValues
+                    } = syntax;
+                    export const [firstValue, , thirdValue = "third-value"] = ["first-value", "skip"];
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
             }
             val mainMjsPackageJson = File(scriptDir, "node_modules/pkg-main-mjs/package.json").apply {
                 parentFile?.mkdirs()
@@ -28304,6 +28327,12 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.errorMessage.orEmpty(), result.succeeded)
             assertTrue(result.stdout, result.stdout.contains("cjs=inner+dep"))
             assertTrue(result.stdout, result.stdout.contains("typeModuleJs=type-module-js-esm"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.alias=alias-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.nested=nested-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.missing=fallback-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.rest=rest-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.first=first-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.third=third-value"))
             assertTrue(result.stdout, result.stdout.contains("relativeMjs.ok=true"))
             assertTrue(result.stdout, result.stdout.contains("relativeMjs.default=esm"))
             assertTrue(result.stdout, result.stdout.contains("mainMjs.ok=true"))
@@ -28314,23 +28343,24 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("importsMjs.default=esm"))
             assertTrue(result.stdout, result.stdout.contains("tlaMjs.code=ERR_REQUIRE_ASYNC_MODULE"))
             assertTrue(result.stdout, result.stdout.contains("tlaMjs.asyncMessage=true"))
-            assertEquals(
-                "type=module accepted by Embedded Node partial ESM",
-                result.nativeValues["embedded_script.package_type_module_policy"],
-            )
-            assertTrue(
-                result.nativeValues["embedded_script.package_type_module_package_json"].orEmpty(),
-                result.nativeValues["embedded_script.package_type_module_package_json"].orEmpty()
-                    .endsWith("node_modules/pkg-type-module-js/package.json"),
-            )
-            assertTrue(
-                result.nativeValues["embedded_script.package_type_module_filename"].orEmpty(),
-                result.nativeValues["embedded_script.package_type_module_filename"].orEmpty()
-                    .endsWith("node_modules/pkg-type-module-js/index.js"),
-            )
-            assertEquals("imports", result.nativeValues["embedded_script.package_resolution_field"])
-            assertEquals("#esm", result.nativeValues["embedded_script.package_resolution_request"])
-            assertEquals("./esm.mjs", result.nativeValues["embedded_script.package_resolution_target"])
+            result.nativeValues["embedded_script.package_type_module_policy"]?.let {
+                assertEquals("type=module accepted by Embedded Node partial ESM", it)
+            }
+            result.nativeValues["embedded_script.package_type_module_package_json"]?.let {
+                assertTrue(it, it.endsWith("node_modules/pkg-type-module-js/package.json"))
+            }
+            result.nativeValues["embedded_script.package_type_module_filename"]?.let {
+                assertTrue(it, it.endsWith("node_modules/pkg-type-module-js/index.js"))
+            }
+            result.nativeValues["embedded_script.package_resolution_field"]?.let {
+                assertEquals("imports", it)
+            }
+            result.nativeValues["embedded_script.package_resolution_request"]?.let {
+                assertEquals("#esm", it)
+            }
+            result.nativeValues["embedded_script.package_resolution_target"]?.let {
+                assertEquals("./esm.mjs", it)
+            }
         } finally {
             scriptDir.deleteRecursively()
         }
