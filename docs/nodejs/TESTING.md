@@ -2213,6 +2213,21 @@ debug-only/provider POC is not formal availability and that
 `profile_capabilities.d.ts` remain evidence or metadata rather than runtime
 authority.
 
+Phase 13 summary and partial final gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:generateNodePhase13Summary
+```
+
+This host gate records P13-57 as partial. It generates
+`docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`,
+`build/reports/nodejs/phase13-summary.json`, and
+`build/reports/nodejs/phase13-summary.md` from the Phase 13 task checklist,
+surface manifest, final blocker registry, profile truth report, and generated
+Phase 13 conformance reports. The summary must list completed/open/deferred/
+rejected categories, require evidence for every promoted surface, and keep open
+or decision-required blockers out of the completed bucket.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

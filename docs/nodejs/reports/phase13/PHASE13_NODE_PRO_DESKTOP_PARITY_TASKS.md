@@ -1756,6 +1756,23 @@ P13 task 本身使用以下执行状态：
     - summary 能列出 completed/open/deferred/rejected。
     - 每个 promoted surface 都有 evidence。
     - open blocker 不会被误报为完成。
+  - Progress:
+    - P13-57 partial landing adds
+      `tools/nodejs/phase13/generate-phase13-summary.js`.
+    - Gradle gate: `:app:generateNodePhase13Summary`.
+    - Canonical docs output:
+      `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`.
+    - Build reports: `build/reports/nodejs/phase13-summary.json` and
+      `build/reports/nodejs/phase13-summary.md`.
+    - The summary aggregates task checklist status, Phase 13 surface manifest
+      status, `FINAL_BLOCKER_REGISTRY.json`, `phase13-capability-truth`, and
+      generated conformance reports.
+    - It lists completed/open/deferred/rejected categories, verifies promoted
+      surfaces have evidence, and keeps open or decision-required blockers out
+      of the completed bucket.
+    - Remaining P13-57 blockers: runtime Pro/Desktop promotion, required
+      internal blocker closure, final soak evidence, packaged Pro/Desktop
+      evidence, and strict release completion remain open.
 
 ## 推荐执行顺序
 

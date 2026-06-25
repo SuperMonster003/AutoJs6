@@ -2472,3 +2472,42 @@ tasks.register<Exec>("verifyNodePhase13MigrationPro9Comparison") {
         nodePhase13ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("generateNodePhase13Summary") {
+    group = "verification"
+    description = "Generates the Phase 13 summary and partial final gate report."
+
+    dependsOn("verifyNodePhase13MigrationPro9Comparison")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/generate-phase13-summary.js")
+    inputs.file(scriptFile)
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/final/FINAL_BLOCKER_REGISTRY.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/README.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    inputs.file(nodePhase13ReportDir.map { it.file("phase13-capability-truth.json") })
+    inputs.file(nodePhase13ReportDir.map { it.file("phase13-stdlib-conformance-decision.json") })
+    inputs.file(nodePhase13ReportDir.map { it.file("phase13-migration-pro9-comparison.json") })
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("phase13-summary.json") },
+        nodePhase13ReportDir.map { it.file("phase13-summary.md") },
+        rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_SUMMARY.md"),
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+        "--docs-output",
+        rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_SUMMARY.md").asFile.absolutePath,
+    )
+}

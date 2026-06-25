@@ -881,6 +881,13 @@ updates, and docs updates while classifying surfaces as Pro-compatible,
 Desktop-compatible, or gated/diagnostic-only. P13-56 records migration and Pro9
 comparison docs as partial; debug-only/provider POC is not formal availability,
 and examples or profile declarations remain evidence only.
+`generateNodePhase13Summary` records P13-57 as the Phase 13 summary and partial
+final gate. It requires the task checklist, surface manifest, final blocker
+registry, `phase13-capability-truth`, generated conformance reports, Testing/CI
+docs, release matrix updates, and `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`.
+The gate lists completed/open/deferred/rejected categories, requires evidence
+for every promoted surface, and keeps open or decision-required blockers out of
+the completed bucket.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design
