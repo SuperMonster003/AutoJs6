@@ -69,6 +69,8 @@ private val nodeExampleKnownTags = setOf(
     "adapter",
     "debug",
     "queue",
+    "phase13",
+    "pro-parity",
 )
 
 private val nodeExampleSupportedEntryExtensions = setOf("js", "cjs", "mjs", "ts", "cts", "mts")

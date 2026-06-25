@@ -385,6 +385,13 @@
       "tags": ["phase10", "main-app", "security"],
       "mainAppSmoke": false,
       "packagedCompatible": false
+    },
+    {
+      "name": "pro-parity-suite",
+      "status": "partial",
+      "tags": ["phase13", "main-app", "bridge", "pro-parity", "ui", "requires-accessibility", "requires-screen-capture", "requires-image", "ocr", "design-gated"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
     }
   ]
 }
