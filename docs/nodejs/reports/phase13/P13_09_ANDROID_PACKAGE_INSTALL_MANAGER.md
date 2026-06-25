@@ -57,6 +57,10 @@ distribution and package-manager work can build on the same store.
 
 - `status()` returns a frozen runtime policy snapshot.
 - `policy()` returns a frozen fail-closed package-manager policy.
+- `sourcePolicy()` returns a frozen source-authority snapshot. The only
+  allowed substrate is a host-managed local unpacked directory; raw registry,
+  remote tarball, URL/git, workspace symlink, and unverified-cache sources
+  remain denied.
 - `list()` returns frozen Android package records from the app-private store.
 - `verify({ name, version })` verifies an installed record or returns
   `missing` for absent packages.
@@ -67,6 +71,7 @@ distribution and package-manager work can build on the same store.
 ## Not Promoted Yet
 
 - No Android registry downloader is enabled.
+- No Android remote tarball installer or unverified cache reuse is enabled.
 - No npm CLI install is enabled on Android.
 - No script-visible mutating package-manager operation is promoted.
 - No lifecycle scripts are executed.

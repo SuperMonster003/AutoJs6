@@ -347,4 +347,7 @@ substrate for already-unpacked packages. Android-side npm CLI execution,
 registry/tarball download, lifecycle execution, bin shims, native builds,
 postinstall downloads, and mutating package-manager operations remain deferred.
 The script-visible `package_manager` facade is limited to read-maintenance
-status/policy/list/verify/prune.
+status/policy/sourcePolicy/list/verify/prune. Its source policy records
+`local_unpacked_host_managed` as the only allowed source substrate and keeps raw
+registry, remote tarball, URL/git, workspace symlink, and unverified-cache
+sources denied without granting script-visible install authority.

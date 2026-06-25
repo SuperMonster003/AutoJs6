@@ -514,6 +514,7 @@ async function smoke(): Promise<void> {
 
   const packageManagerStatus: packageManager.DiagnosticStatus = packageManager.status();
   const packageManagerPolicy: packageManager.DiagnosticPolicy = packageManager.policy();
+  const packageManagerSourcePolicy: packageManager.SourcePolicy = packageManager.sourcePolicy();
   const packageManagerInstall: (request?: packageManager.PackageRequest) => never = packageManager.install;
   const packageManagerList: (options?: packageManager.ListOptions) => Promise<readonly packageManager.PackageRecord[]> = packageManager.list;
   const packageManagerVerify: (request: packageManager.VerifyRequest) => Promise<packageManager.OperationResult> = packageManager.verify;
@@ -533,6 +534,8 @@ async function smoke(): Promise<void> {
   const packageManagerProfileStatus: string = autojsProfile.packageManagerProfile.status;
   const packageManagerProfileDefaultEnabled: boolean = autojsProfile.packageManagerProfile.defaultEnabled;
   const packageManagerProfileRuntimeInstall: string = autojsProfile.packageManagerProfile.androidRuntimeInstall;
+  const packageManagerProfileSourceAuthority: string = autojsProfile.packageManagerProfile.sourceAuthority;
+  const packageManagerProfileAllowedSources: readonly string[] = autojsProfile.packageManagerProfile.allowedSources;
   const packageManagerProfileLifecycleScripts: string = autojsProfile.packageManagerProfile.lifecycleScripts;
   const packageManagerProfileBinLinks: string = autojsProfile.packageManagerProfile.binLinks;
   const packageManagerProfileRawRegistryAccess: boolean = autojsProfile.packageManagerProfile.rawRegistryAccess;
@@ -875,6 +878,8 @@ async function smoke(): Promise<void> {
   void packageManagerProfileStatus;
   void packageManagerProfileDefaultEnabled;
   void packageManagerProfileRuntimeInstall;
+  void packageManagerProfileSourceAuthority;
+  void packageManagerProfileAllowedSources;
   void packageManagerProfileLifecycleScripts;
   void packageManagerProfileBinLinks;
   void packageManagerProfileRawRegistryAccess;
@@ -1003,6 +1008,7 @@ async function smoke(): Promise<void> {
   void compatIntentRemoveDenied;
   void packageManagerStatus;
   void packageManagerPolicy;
+  void packageManagerSourcePolicy;
   void packageManagerInstall;
   void packageManagerList;
   void packageManagerVerify;

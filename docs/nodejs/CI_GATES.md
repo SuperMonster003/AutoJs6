@@ -347,9 +347,10 @@ remove/verify/prune, and package compatibility analyzer negative tests. It does
 not enable full npm CLI behavior. `verifyNodePhase13AndroidPackageInstallManager`
 covers the partial Android local package store with transaction staging, store
 locking, cancellation, SHA-512 integrity, lifecycle/bin/native/path denial, and
-install/update/remove/list/verify/prune. It does not enable registry download or
-mutating JavaScript package-manager install/update/remove APIs; the
-script-visible facade is limited to read-maintenance status/policy/list/verify/prune.
+install/update/remove/list/verify/prune. It does not enable registry download,
+remote tarball install, unverified cache reuse, or mutating JavaScript
+package-manager install/update/remove APIs; the script-visible facade is
+limited to read-maintenance status/policy/sourcePolicy/list/verify/prune.
 `verifyNodePhase13ProEntryDirectives` records the P13-11 Pro-style Node entry
 directive state for `"nodejs ui"` and `"nodejs ui-thread"`, including
 `NodeEntryDirective`, descriptor/project config metadata, debug/native values,
@@ -761,7 +762,8 @@ registry download, lifecycle execution, bin shims, symlink materialization,
 native builds/native payloads, postinstall downloads, JS package-manager
 install/update/remove operations, script-visible `npm`, raw executable
 authority, and raw registry access unpromoted. The `package_manager`
-read-maintenance facade is limited to status/policy/list/verify/prune. P13-42
+read-maintenance facade is limited to
+status/policy/sourcePolicy/list/verify/prune. P13-42
 records Android package manager parity as partial.
 `verifyNodePhase13StdlibConformanceDecision` records P13-43 as the stdlib
 conformance decision gate. It requires `stdlibProfile` diagnostics,

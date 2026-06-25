@@ -74,6 +74,11 @@ declare namespace AutoJs6Node {
     readonly postinstallDownload: "denied" | string;
     readonly nodeModulesMutation: "transactional_store_only" | string;
     readonly transaction: "locked_cancellable_atomic" | string;
+    readonly sourcePolicy: "decision_only_no_install_authority" | string;
+    readonly sourceAuthority: "local_unpacked_host_managed_only" | string;
+    readonly installAuthority: "internal_substrate_only" | string;
+    readonly allowedSources: readonly string[];
+    readonly deniedSources: readonly string[];
     readonly operations: readonly string[];
     readonly packageKinds: readonly string[];
     readonly jsBridge: "read_maintenance_partial" | "diagnostic_only" | "not_exposed" | "partial" | string;

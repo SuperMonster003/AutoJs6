@@ -49,6 +49,70 @@ declare module "package_manager" {
       readonly record: PackageRecord | null;
     }
 
+    export type SourceAuthority = "local_unpacked_host_managed_only" | string;
+    export type InstallAuthority = "internal_substrate_only" | string;
+    export type SourcePolicyStatus = "decision_only_no_install_authority" | string;
+    export type AllowedSource = "local_unpacked_host_managed" | string;
+    export type DeniedSource =
+      | "raw_registry"
+      | "remote_tarball"
+      | "git"
+      | "http_url"
+      | "file_url"
+      | "workspace_symlink"
+      | "unverified_cache"
+      | string;
+
+    export interface LocalUnpackedSourcePolicy {
+      readonly status: "allowed_substrate" | string;
+      readonly source: "host_managed_unpacked_directory" | string;
+      readonly requiresPackageJson: boolean;
+      readonly requiresNameVersionMatch: boolean;
+      readonly requiresSha512: boolean;
+      readonly requiresHostManagedLockfile: boolean;
+      readonly lifecycleScripts: "denied" | string;
+      readonly binLinks: "denied" | string;
+      readonly symlinks: "denied" | string;
+      readonly nativePayloads: "denied" | string;
+      readonly pathEscapes: "denied" | string;
+    }
+
+    export interface RegistrySourcePolicy {
+      readonly status: "deferred" | string;
+      readonly rawRegistryAccess: boolean;
+      readonly networkInstall: "denied" | string;
+      readonly metadataDownload: "deferred" | string;
+      readonly cacheReuse: "unverified_cache_denied" | string;
+    }
+
+    export interface TarballSourcePolicy {
+      readonly status: "host_side_only" | string;
+      readonly androidDownload: "denied" | string;
+      readonly androidExtraction: "deferred" | string;
+      readonly integrity: "sha512_required" | string;
+    }
+
+    export interface NpmCliSourcePolicy {
+      readonly status: "denied" | string;
+      readonly lifecycleScripts: "denied" | string;
+      readonly nativeBuild: "denied" | string;
+    }
+
+    export interface SourcePolicy {
+      readonly schema: "autojs6-node-package-manager-source-policy-v1";
+      readonly status: SourcePolicyStatus;
+      readonly sourceAuthority: SourceAuthority;
+      readonly installAuthority: InstallAuthority;
+      readonly grantsInstallAuthority: false;
+      readonly allowedSources: readonly AllowedSource[];
+      readonly deniedSources: readonly DeniedSource[];
+      readonly localUnpacked: LocalUnpackedSourcePolicy;
+      readonly registry: RegistrySourcePolicy;
+      readonly tarball: TarballSourcePolicy;
+      readonly npmCli: NpmCliSourcePolicy;
+      readonly futurePromotionRequires: readonly string[];
+    }
+
     export interface DiagnosticStatus {
       readonly schema: "autojs6-node-package-manager-status-v1";
       readonly status: "read_maintenance_partial" | "diagnostic_only" | string;
@@ -59,6 +123,11 @@ declare module "package_manager" {
       readonly jsBridge: "read_maintenance_partial" | "diagnostic_only" | string;
       readonly requirePackageManager: "read_maintenance_partial" | "diagnostic_only" | string;
       readonly diagnosticFacade: "available" | string;
+      readonly sourcePolicy: SourcePolicyStatus;
+      readonly sourceAuthority: SourceAuthority;
+      readonly installAuthority: InstallAuthority;
+      readonly allowedSources: readonly AllowedSource[];
+      readonly deniedSources: readonly DeniedSource[];
       readonly operations: readonly Operation[];
       readonly packageKinds: readonly PackageKind[];
       readonly npmCli: "denied" | string;
@@ -92,6 +161,11 @@ declare module "package_manager" {
       readonly postinstallDownload: "denied" | string;
       readonly nodeModulesMutation: "transactional_store_only" | string;
       readonly transaction: "locked_cancellable_atomic" | string;
+      readonly sourcePolicy: SourcePolicyStatus;
+      readonly sourceAuthority: SourceAuthority;
+      readonly installAuthority: InstallAuthority;
+      readonly allowedSources: readonly AllowedSource[];
+      readonly deniedSources: readonly DeniedSource[];
       readonly operations: readonly Operation[];
       readonly packageKinds: readonly PackageKind[];
       readonly androidNetwork: "denied" | string;
@@ -103,6 +177,7 @@ declare module "package_manager" {
     export interface PackageManagerModule {
       status(): DiagnosticStatus;
       policy(): DiagnosticPolicy;
+      sourcePolicy(): SourcePolicy;
       install(request?: PackageRequest): never;
       update(request?: PackageRequest): never;
       remove(request?: PackageRequest): never;

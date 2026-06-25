@@ -156,10 +156,12 @@ P13-42 extends the `autojs6:profile` declaration with
 manager boundary: host-managed package validation is available, the Android
 runtime has a local app-private store substrate for already-unpacked packages,
 and the `package_manager` module exposes status/policy plus `list`,
-`verify`, and `prune` for the app-private store. npm CLI, registry download,
-lifecycle scripts, bin links, symlinks, native builds, native payloads,
-postinstall downloads, `install`/`update`/`remove`, raw executables, and raw
-registry access remain denied.
+`sourcePolicy`, `verify`, and `prune` for the app-private store. The source
+policy records `local_unpacked_host_managed` as the only allowed substrate.
+npm CLI, registry download, remote tarball install, lifecycle scripts, bin
+links, symlinks, native builds, native payloads, postinstall downloads,
+`install`/`update`/`remove`, raw executables, and raw registry access remain
+denied.
 
 P13-43 extends the `autojs6:profile` declaration with `stdlibProfile`. The
 field reports the current partial Safe Node stdlib conformance subset for

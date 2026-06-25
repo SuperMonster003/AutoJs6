@@ -69,11 +69,12 @@ Current Android package installation progress:
   `NodeAndroidPackageInstallManager`, an app-private local package store with
   transactional install/update/remove/list/verify/prune, cancellation, store
   locking, SHA-512 integrity, lifecycle/bin/native/path-escape denial, and
-  focused instrumentation. It also exposes `package_manager` read-maintenance
-  status/policy/list/verify/prune while install/update/remove remain denied.
-  The blocker remains open until a prepared-device run, mutating runtime/JS API
-  exposure, registry/download policy, signed native-payload decision, and
-  plugin/package distribution integration land.
+  focused instrumentation. It also exposes source-authority diagnostics and
+  `package_manager` read-maintenance status/policy/sourcePolicy/list/verify/prune
+  while install/update/remove remain denied. The blocker remains open until a
+  prepared-device run, mutating runtime/JS API exposure, registry/download
+  implementation, signed native-payload decision, and plugin/package
+  distribution integration land.
 
 Resolved in Phase 11:
 

@@ -30,6 +30,10 @@ package-manager operations on Android.
   - raw executable and raw registry authority: `false`
 - `require("package_manager")` exposes a frozen read-maintenance facade:
   - `status()` and `policy()` return frozen policy snapshots.
+  - `sourcePolicy()` returns a frozen source-authority snapshot. The only
+    allowed substrate is `local_unpacked_host_managed`; raw registry, remote
+    tarball, URL/git, workspace symlink, and unverified-cache sources remain
+    denied and `grantsInstallAuthority` is `false`.
   - `list()` dispatches to the Android app-private store and returns frozen
     installed package records.
   - `verify({ name, version })` verifies installed package integrity or returns
@@ -43,7 +47,8 @@ package-manager operations on Android.
   profile, denied npm globals, read-maintenance package-manager facade, and the
   local Android store substrate.
 - Type declarations and TypeScript smoke now include
-  `PackageManagerProfile` and the read-maintenance `package_manager` module.
+  `PackageManagerProfile`, source policy fields, and the read-maintenance
+  `package_manager` module.
 - Host verifier and Gradle gate:
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
   - `:app:verifyNodePhase13PackageManagerAndroidDecision`

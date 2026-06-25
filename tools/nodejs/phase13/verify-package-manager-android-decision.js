@@ -81,6 +81,12 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'symlinks: "denied"'),
       token(files.nodeBridgeSources, 'nativeBuild: "denied"'),
       token(files.nodeBridgeSources, 'postinstallDownload: "denied"'),
+      token(files.nodeBridgeSources, 'sourcePolicy: "decision_only_no_install_authority"'),
+      token(files.nodeBridgeSources, 'sourceAuthority: "local_unpacked_host_managed_only"'),
+      token(files.nodeBridgeSources, 'installAuthority: "internal_substrate_only"'),
+      token(files.nodeBridgeSources, 'allowedSources: Object.freeze(["local_unpacked_host_managed"])'),
+      token(files.nodeBridgeSources, '"raw_registry",'),
+      token(files.nodeBridgeSources, '"remote_tarball",'),
       token(files.nodeBridgeSources, 'jsBridge: "read_maintenance_partial"'),
       token(files.nodeBridgeSources, 'requirePackageManager: "read_maintenance_partial"'),
       token(files.nodeBridgeSources, 'diagnosticFacade: "available"'),
@@ -106,6 +112,12 @@ function buildReport(files) {
       token(files.manager, '"android_package_manager.bin_links" to "disabled"'),
       token(files.manager, '"android_package_manager.symlinks" to "disabled"'),
       token(files.manager, '"android_package_manager.postinstall_download" to "disabled"'),
+      token(files.manager, '"android_package_manager.source_policy" to "decision_only_no_install_authority"'),
+      token(files.manager, '"android_package_manager.source_authority" to "local_unpacked_host_managed_only"'),
+      token(files.manager, '"android_package_manager.allowed_sources" to "local_unpacked_host_managed"'),
+      token(files.manager, '"android_package_manager.raw_registry_authority" to "disabled"'),
+      token(files.manager, '"android_package_manager.remote_tarball_install" to "disabled"'),
+      token(files.manager, '"android_package_manager.install_authority" to "internal_substrate_only"'),
       token(files.manager, '"android_package_manager.js_bridge" to "read_maintenance_partial"'),
       token(files.manager, "DISABLED_LIFECYCLE_SCRIPTS"),
       token(files.manager, "ERROR_BIN_DISABLED"),
@@ -115,8 +127,14 @@ function buildReport(files) {
       token(files.p13PackageManagerTest, "androidStoreSubstrateInstallsLocalUnpackedPackageAndDeniesUnsafePolicies"),
       token(files.p13PackageManagerTest, "packageManagerReadMaintenanceFacadeListsVerifiesAndPrunesLocalStore"),
       token(files.nodeBridgeSources, "function __autojs6_limited_package_manager()"),
+      token(files.nodeBridgeSources, "function sourcePolicy()"),
+      token(files.nodeBridgeSources, "autojs6-node-package-manager-source-policy-v1"),
+      token(files.nodeBridgeSources, "local_unpacked_host_managed"),
+      token(files.nodeBridgeSources, "unverified_cache_denied"),
       token(files.nodeBridgeSources, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"),
       token(files.typesPackageManager, 'declare module "package_manager"'),
+      token(files.typesPackageManager, "export interface SourcePolicy"),
+      token(files.typesPackageManager, "sourcePolicy(): SourcePolicy"),
       token(files.typesPackageManager, "list(options?: ListOptions): Promise<readonly PackageRecord[]>"),
       token(files.typesPackageManager, "verify(request: VerifyRequest): Promise<OperationResult>"),
       token(files.typesPackageManager, "install(request?: PackageRequest): never"),
@@ -179,6 +197,10 @@ function buildReport(files) {
         packageManagerProfile.includes('nativeBuild: "denied"') &&
         packageManagerProfile.includes('nativePayloads: "denied"') &&
         packageManagerProfile.includes('postinstallDownload: "denied"') &&
+        packageManagerProfile.includes('sourcePolicy: "decision_only_no_install_authority"') &&
+        packageManagerProfile.includes('sourceAuthority: "local_unpacked_host_managed_only"') &&
+        packageManagerProfile.includes('installAuthority: "internal_substrate_only"') &&
+        packageManagerProfile.includes('allowedSources: Object.freeze(["local_unpacked_host_managed"])') &&
         packageManagerProfile.includes('jsBridge: "read_maintenance_partial"') &&
         packageManagerProfile.includes('requirePackageManager: "read_maintenance_partial"') &&
         !packageManagerProfile.includes('jsBridge: "partial"') &&
@@ -195,6 +217,9 @@ function buildReport(files) {
         files.manager.text.includes("ERROR_PATH_ESCAPE") &&
         files.manager.text.includes("Files.isSymbolicLink") &&
         files.manager.text.includes('"android_package_manager.network_install" to "disabled"') &&
+        files.manager.text.includes('"android_package_manager.source_authority" to "local_unpacked_host_managed_only"') &&
+        files.manager.text.includes('"android_package_manager.raw_registry_authority" to "disabled"') &&
+        files.manager.text.includes('"android_package_manager.remote_tarball_install" to "disabled"') &&
         files.manager.text.includes('"android_package_manager.js_bridge" to "read_maintenance_partial"'),
       "NodeAndroidPackageInstallManager must keep unsafe npm install behavior denied.",
     ),
@@ -202,10 +227,13 @@ function buildReport(files) {
       "read-maintenance-js-facade-fail-closed",
       files.nodeBridgeSources.text.includes("function __autojs6_limited_package_manager()") &&
         files.nodeBridgeSources.text.includes("ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED") &&
+        files.nodeBridgeSources.text.includes("function sourcePolicy()") &&
+        files.nodeBridgeSources.text.includes("autojs6-node-package-manager-source-policy-v1") &&
         files.nodeBridgeSources.text.includes('npmCli: "denied"') &&
         files.nodeBridgeSources.text.includes('registryDownload: "deferred"') &&
         files.nodeBridgeSources.text.includes('permissions: ["package_manager"]') &&
         files.typesPackageManager.text.includes('declare module "package_manager"') &&
+        files.typesPackageManager.text.includes("sourcePolicy(): SourcePolicy") &&
         files.typesPackageManager.text.includes("list(options?: ListOptions): Promise<readonly PackageRecord[]>") &&
         files.typesPackageManager.text.includes("verify(request: VerifyRequest): Promise<OperationResult>") &&
         files.typesPackageManager.text.includes("install(request?: PackageRequest): never") &&
@@ -247,6 +275,9 @@ function buildReport(files) {
       lifecycleScriptsPromoted: false,
       jsPackageManagerDiagnosticFacadeReady: scenarioById(scenarios, "android_local_store_substrate").missingEvidence === 0,
       jsPackageManagerReadMaintenanceReady: scenarioById(scenarios, "android_local_store_substrate").missingEvidence === 0,
+      sourceAuthorityPolicyReady: files.nodeBridgeSources.text.includes("autojs6-node-package-manager-source-policy-v1") &&
+        files.nodeBridgeSources.text.includes("local_unpacked_host_managed_only") &&
+        files.manager.text.includes('"android_package_manager.source_authority" to "local_unpacked_host_managed_only"'),
       jsPackageManagerFacadePromoted: false,
       nativeBuildPromoted: false,
       binShimPromoted: false,

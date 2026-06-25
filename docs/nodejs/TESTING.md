@@ -665,8 +665,9 @@ Phase 13 Android-side package install manager:
 local package store: install/update/remove/list/verify/prune, transaction
 staging, store locking, cancellation, SHA-512 integrity mismatch rollback,
 and lifecycle/bin/native payload denial. This does not promote Android npm CLI,
-registry download, or JavaScript install/update/remove authority; the
-`package_manager` facade is limited to read-maintenance status/policy/list/verify/prune.
+registry download, remote tarball install, unverified cache reuse, or JavaScript
+install/update/remove authority; the `package_manager` facade is limited to
+read-maintenance status/policy/sourcePolicy/list/verify/prune.
 
 Phase 13 Pro-style Node entry directives:
 
@@ -1903,7 +1904,7 @@ and Phase13 docs. It keeps Android npm CLI, registry download, lifecycle
 execution, bin shims, symlink materialization, native builds/native payloads,
 postinstall downloads, mutating package-manager operations, raw executable
 authority, and raw registry access open. The `package_manager` module exposes
-read-maintenance `status`/`policy`/`list`/`verify`/`prune`; install/update/remove
+read-maintenance `status`/`policy`/`sourcePolicy`/`list`/`verify`/`prune`; install/update/remove
 remain unpromoted.
 
 Phase 13 Android package manager focused instrumentation:
@@ -1913,10 +1914,10 @@ Phase 13 Android package manager focused instrumentation:
 ```
 
 This suite verifies `packageManagerProfile` diagnostics, denied npm surfaces,
-the read-maintenance `package_manager` facade, Android app-private local store
-install/list/verify/prune behavior, SHA-512 integrity, native values, and
-lifecycle/bin/native package rejection. P13-42 records Android package manager
-parity as partial.
+the read-maintenance `package_manager` facade, source-authority diagnostics,
+Android app-private local store install/list/verify/prune behavior, SHA-512
+integrity, native values, and lifecycle/bin/native package rejection. P13-42
+records Android package manager parity as partial.
 
 Phase 13 stdlib conformance decision gate:
 
