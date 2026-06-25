@@ -952,6 +952,15 @@ Use `tools/nodejs/phase13/archive-full-heavy-resource-soak.js` to validate and
 copy completed soak JSON into the canonical final-soak paths; the helper writes
 an archive audit report and refuses dirty or under-duration inputs.
 
+`collectNodePhase13CrashEvidence` is the Phase 13 status gate for P13-05 crash
+evidence automation. It verifies the runtime marker store, next-launch
+collector, embedded/native process marker writers, required crash marker
+metadata, libnode hashes, Phase 11 symbolization tooling, simulated native fatal
+running-marker collection, packaged launch-surface marker contract, and
+signal-safe marker boundary. It intentionally keeps `crash_evidence_automation`
+open until real fatal native chaos injection, real packaged APK crash smoke, and
+signal-safe fixed-size native marker proof are available.
+
 ## Release Gate
 
 Use `verifyNodeReleaseGate` for release candidates:

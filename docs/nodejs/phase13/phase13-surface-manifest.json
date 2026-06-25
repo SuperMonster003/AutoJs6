@@ -113,7 +113,7 @@
         "P13-08",
         "P13-09"
       ],
-      "summary": "Close required internal blockers: crash evidence automation, second execution slot scheduling, packaged long-running service mode, full heavy resource stress, and Android-side package installation.",
+      "summary": "Close required internal blockers: crash evidence automation, second execution slot scheduling, packaged long-running service mode, full heavy resource stress, and Android-side package installation. P13-05 now includes simulated native fatal running-marker collection, packaged launch-surface marker contract, and signal-safe marker boundary evidence while real fatal native chaos injection, real packaged APK crash smoke, and signal-safe fixed-size native marker proof remain open.",
       "risk": "high",
       "runtimeSurface": [
         "crash evidence bundle",

@@ -20,7 +20,7 @@
       "id": "crash_evidence_automation",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Phase 13 adds a runtime JSON crash marker store, next-launch collector, embedded script service marker writes, native process service marker writes, and a host crash evidence collector. Fatal native chaos injection, packaged APK crash smoke, and signal-safe native marker proof remain open.",
+      "currentEvidence": "Phase 13 adds a runtime JSON crash marker store, next-launch collector, embedded script service marker writes, native process service marker writes, a host crash evidence collector, simulated native fatal running-marker collection, packaged launch-surface marker contract, and signal-safe marker boundary evidence. Real fatal native chaos injection, real packaged APK crash smoke, and signal-safe fixed-size native marker proof remain open.",
       "requiredResolution": "Crash marker, next-launch collection, resource snapshot, timeline tail, symbolization, and chaos injection pass focused gates."
     },
     {

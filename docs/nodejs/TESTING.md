@@ -1683,6 +1683,21 @@ node tools/nodejs/phase13/archive-full-heavy-resource-soak.js --kind final --sou
 Use `--dry-run` first when validating a candidate report. The helper writes an
 archive audit report and refuses under-duration or dirty reports.
 
+Phase 13 crash evidence automation gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:collectNodePhase13CrashEvidence
+```
+
+This host gate records P13-05 as partial. It verifies the runtime marker store,
+next-launch collector, embedded/native process writers, required metadata
+fields, libnode hashes, Phase 11 symbolization tooling, simulated native fatal
+running-marker collection, packaged launch-surface marker contract, and
+signal-safe marker boundary. The focused instrumentation class is
+`NodeCrashEvidenceStoreInstrumentationTest`; real fatal native chaos injection,
+real packaged APK crash smoke, and signal-safe fixed-size native marker proof
+remain required before `crash_evidence_automation` can close.
+
 Current bridge concurrency and resource-limit focused instrumentation:
 
 ```powershell

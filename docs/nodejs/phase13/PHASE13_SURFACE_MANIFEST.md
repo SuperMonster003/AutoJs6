@@ -47,14 +47,17 @@ workstreams, target profiles, evidence, risk, and rollback policy.
 | `docs.examples.final_gate` | `planned` | `safe_default`, `pro_compat_opt_in`, `desktop_compat_opt_in` | `P13-53` to `P13-57` | `medium` | Examples, types, migration docs, and final Phase 13 summary gate. P13-53 records partial Pro parity examples with `sample/nodejs/pro-parity-suite` and `phase13-pro-parity-examples` evidence. P13-54 records partial desktop Node parity examples with `sample/nodejs/desktop-parity-suite` and `phase13-desktop-parity-examples` evidence. P13-55 records partial profile-aware TypeScript declarations with `profile_capabilities.d.ts` and `phase13-type-declaration-profiles` evidence. P13-56 records partial migration and Pro9 comparison docs with `MIGRATION_FROM_RHINO.md`, Pro/AutoX comparison docs, and `phase13-migration-pro9-comparison` evidence. P13-57 records partial Phase 13 summary generation with `PHASE13_SUMMARY.md` and `phase13-summary` evidence. |
 
 Current `runtime.graduation_blockers` evidence includes the P13-05 crash marker
-store/host collector, P13-06 default one-shot scheduler gate, P13-07 partial
-packaged long-running dispatch gate, P13-08 full heavy stress report gate with
-contract fixtures/archive helper, and P13-09 partial Android local package store. The surface
-remains `planned` until
-P13-05 fully closes `crash_evidence_automation`, P13-06 adds
-packaged/fatal-crash/stress evidence, P13-07 adds packaged install/run
-restore/background-policy evidence, P13-08 has real 8h/24h clean soak reports,
-and P13-09 exposes a complete package installation/distribution path.
+store/host collector plus simulated native fatal running-marker collection,
+packaged launch-surface marker contract, and signal-safe marker boundary
+evidence, P13-06 default one-shot scheduler gate, P13-07 partial packaged
+long-running dispatch gate, P13-08 full heavy stress report gate with contract
+fixtures/archive helper, and P13-09 partial Android local package store. The
+surface remains `planned` until P13-05 fully closes real fatal native chaos
+injection, real packaged APK crash smoke, and signal-safe fixed-size native
+marker proof, P13-06 adds packaged/fatal-crash/stress evidence, P13-07 adds
+packaged install/run restore/background-policy evidence, P13-08 has real 8h/24h
+clean soak reports, and P13-09 exposes a complete package
+installation/distribution path.
 
 ## Rules
 
