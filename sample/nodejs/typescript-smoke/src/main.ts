@@ -48,6 +48,7 @@ import dnsPromises = require("dns/promises");
 import axios = require("axios");
 import websocket = require("websocket");
 import workManager = require("work_manager");
+import packageManager = require("package_manager");
 import plugins = require("plugins");
 import autojsProfile = require("autojs6:profile");
 import java = require("java");
@@ -511,6 +512,10 @@ async function smoke(): Promise<void> {
   const compatIntentGetDenied: Promise<never> = rhinoCompat.tasks.getIntentTask("intent-1");
   const compatIntentRemoveDenied: Promise<never> = rhinoCompat.tasks.removeIntentTask("intent-1");
 
+  const packageManagerStatus: packageManager.DiagnosticStatus = packageManager.status();
+  const packageManagerPolicy: packageManager.DiagnosticPolicy = packageManager.policy();
+  const packageManagerInstall: (request?: packageManager.PackageRequest) => never = packageManager.install;
+  const packageManagerList: (request?: packageManager.PackageRequest) => never = packageManager.list;
   const pluginInfo: plugins.PluginManifest = plugins.manifest("org.example.types");
   const pluginEntry: string = plugins.resolve("org.example.types");
   const typedPlugin: TypeSmokePlugin = plugins.load<TypeSmokePlugin>("org.example.types");
@@ -607,6 +612,9 @@ async function smoke(): Promise<void> {
   const debugInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "debug_unsafe_lab"> = "profile_gated";
   const safeInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "safe_default"> = "denied";
   const packageManagerRequiredProfile: AutoJs6Node.ProfileRequiredFor<"package_manager"> = "desktop_compat_opt_in";
+  const packageManagerSafeMode: AutoJs6Node.SafeDefaultModeFor<"package_manager"> = "diagnostic_only";
+  const packageManagerTargetMode: AutoJs6Node.TargetProfileModeFor<"package_manager"> = "diagnostic_only";
+  const packageManagerPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"package_manager"> = "metadata_only";
   const autojsJavaPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"$autojs.java"> = "metadata_only";
   const npmPureJsSafeMode: AutoJs6Node.SafeDefaultModeFor<"npm.pure_js"> = "partial";
   const workerRequiresDeclaration: AutoJs6Node.ProfileModuleRequiresDeclaration<"worker_threads"> = true;
@@ -932,6 +940,9 @@ async function smoke(): Promise<void> {
   void debugInspectorMode;
   void safeInspectorMode;
   void packageManagerRequiredProfile;
+  void packageManagerSafeMode;
+  void packageManagerTargetMode;
+  void packageManagerPackagedBehavior;
   void autojsJavaPackagedBehavior;
   void npmPureJsSafeMode;
   void workerRequiresDeclaration;
@@ -988,6 +999,10 @@ async function smoke(): Promise<void> {
   void compatIntentQueryDenied;
   void compatIntentGetDenied;
   void compatIntentRemoveDenied;
+  void packageManagerStatus;
+  void packageManagerPolicy;
+  void packageManagerInstall;
+  void packageManagerList;
   void autojsVersionCode;
   void autojsPackageName;
   void autojsContextAvailable;

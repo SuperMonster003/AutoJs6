@@ -116,13 +116,85 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "autojs6_lock_host_managed|sha512_required|denied|not_promoted|denied|" +
                     "denied|denied|denied|denied|transactional_store_only|" +
                     "locked_cancellable_atomic|install,update,remove,list,verify,prune|" +
-                    "dependency,plugin,project|not_exposed|denied|not_promoted|denied|" +
+                    "dependency,plugin,project|diagnostic_only|diagnostic_only|not_promoted|denied|" +
                     "false|false|true|true|true|true",
             ),
         )
         assertTrue(
             result.stdout,
-            result.stdout.contains("p13pm.boundary=undefined|undefined|undefined|false|false|false|false|false|false|true"),
+            result.stdout.contains("p13pm.boundary=undefined|undefined|undefined|true|false|false|false|false|false|true"),
+        )
+    }
+
+    @Test
+    fun packageManagerDiagnosticFacadeIsVisibleButInstallOperationsRemainDenied() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-42 package_manager diagnostic facade")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                const assert = require("assert");
+                const packageManager = require("package_manager");
+                const status = packageManager.status();
+                const policy = packageManager.policy();
+
+                assert.strictEqual(Object.isFrozen(packageManager), true);
+                assert.strictEqual(Object.isFrozen(status), true);
+                assert.strictEqual(Object.isFrozen(policy), true);
+                assert.strictEqual(Object.isFrozen(status.operations), true);
+                assert.strictEqual(Object.isFrozen(policy.operations), true);
+                assert.strictEqual(status.status, "diagnostic_only");
+                assert.strictEqual(status.jsBridge, "diagnostic_only");
+                assert.strictEqual(status.requirePackageManager, "diagnostic_only");
+                assert.strictEqual(status.grantsInstallAuthority, false);
+                assert.strictEqual(policy.npmCli, "denied");
+                assert.strictEqual(policy.registryDownload, "deferred");
+                assert.strictEqual(policy.lifecycleScripts, "denied");
+                assert.strictEqual(policy.rawRegistryAccess, false);
+                assert.deepStrictEqual(status.operations, ["install", "update", "remove", "list", "verify", "prune"]);
+                assert.deepStrictEqual(policy.packageKinds, ["dependency", "plugin", "project"]);
+
+                function deniedCode(methodName) {
+                  try {
+                    packageManager[methodName]({ name: "@autojs6/p13", version: "1.0.0" });
+                  } catch (error) {
+                    return String(error && (error.autojs6Code || error.code || ""));
+                  }
+                  throw new Error("package_manager." + methodName + " must remain unpromoted");
+                }
+                const deniedCodes = ["install", "update", "remove", "list", "verify", "prune"].map(deniedCode);
+                deniedCodes.forEach((code) => assert.strictEqual(code, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"));
+
+                console.log("p13pm.facade=" + [
+                  status.status,
+                  status.jsBridge,
+                  status.requirePackageManager,
+                  policy.npmCli,
+                  policy.registryDownload,
+                  policy.rawRegistryAccess,
+                  Object.isFrozen(packageManager),
+                  Object.isFrozen(status),
+                  Object.isFrozen(policy),
+                  deniedCodes.join(","),
+                  require.resolve("package_manager"),
+                  typeof globalThis.package_manager
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = "<node-package-manager-phase13-facade.js>",
+            workingDirectory = root,
+            timeoutMs = 10_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("P13-42 package_manager diagnostic facade", result)
+        assertTrue(
+            result.stdout,
+            result.stdout.contains(
+                "p13pm.facade=diagnostic_only|diagnostic_only|diagnostic_only|denied|deferred|false|" +
+                    "true|true|true|ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED,ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED," +
+                    "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED,ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED," +
+                    "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED,ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED|" +
+                    "package_manager|undefined",
+            ),
         )
     }
 
@@ -164,7 +236,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
         assertEquals("disabled", nativeValues["android_package_manager.native_payload_execution"])
         assertEquals("disabled", nativeValues["android_package_manager.postinstall_download"])
         assertEquals("disabled", nativeValues["android_package_manager.network_install"])
-        assertEquals("not_exposed", nativeValues["android_package_manager.js_bridge"])
+        assertEquals("diagnostic_only", nativeValues["android_package_manager.js_bridge"])
 
         val postinstall = packageSource(
             dirName = "pkg-postinstall",

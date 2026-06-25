@@ -209,7 +209,7 @@ class NodeAndroidPackageInstallManager(
         "android_package_manager.native_payload_execution" to "disabled",
         "android_package_manager.postinstall_download" to "disabled",
         "android_package_manager.network_install" to "disabled",
-        "android_package_manager.js_bridge" to "not_exposed",
+        "android_package_manager.js_bridge" to "diagnostic_only",
         "package_integrity_policy.schema" to NodePackageIntegrityPolicy.SCHEMA,
         "package_integrity_policy.status" to NodePackageIntegrityPolicy.STATUS,
         "package_integrity_policy.lockfile" to NodePackageIntegrityPolicy.LOCKFILE,

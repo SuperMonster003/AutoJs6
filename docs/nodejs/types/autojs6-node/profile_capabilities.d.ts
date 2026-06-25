@@ -65,7 +65,7 @@ declare namespace AutoJs6Node {
     readonly "fs.advanced": ProfileModuleSpec<"fs.advanced", "desktop_compat_opt_in", "partial", "partial", "gated">;
     readonly "wasi": ProfileModuleSpec<"wasi", "desktop_compat_opt_in", "denied", "profile_gated", "gated">;
     readonly "inspector": ProfileModuleSpec<"inspector", "debug_unsafe_lab", "denied", "profile_gated", "denied">;
-    readonly "package_manager": ProfileModuleSpec<"package_manager", "desktop_compat_opt_in", "denied", "profile_gated", "gated">;
+    readonly "package_manager": ProfileModuleSpec<"package_manager", "desktop_compat_opt_in", "diagnostic_only", "diagnostic_only", "metadata_only">;
     readonly "npm.pure_js": ProfileModuleSpec<"npm.pure_js", "desktop_compat_opt_in", "partial", "partial", "partial">;
   }
 

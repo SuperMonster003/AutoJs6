@@ -176,7 +176,7 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
         assertEquals("disabled", nativeValues["android_package_manager.native_payload_execution"])
         assertEquals("disabled", nativeValues["android_package_manager.postinstall_download"])
         assertEquals("disabled", nativeValues["android_package_manager.network_install"])
-        assertEquals("not_exposed", nativeValues["android_package_manager.js_bridge"])
+        assertEquals("diagnostic_only", nativeValues["android_package_manager.js_bridge"])
     }
 
     private fun request(name: String, version: String, sourceDir: File): NodeAndroidPackageInstallManager.PackageRequest {

@@ -292,6 +292,15 @@ class NodeBridgeConformanceInstrumentationTest {
                 }
                 throw new Error(name + " must reject");
               }
+              function expectThrowCode(name, fn, code) {
+                try {
+                  fn();
+                } catch (error) {
+                  assert.strictEqual(String(error && (error.autojs6Code || error.code || "")), code, name);
+                  return;
+                }
+                throw new Error(name + " must throw");
+              }
               const toast = require("toast");
               const app = require("app");
               const dialogs = require("dialogs");
@@ -316,6 +325,7 @@ class NodeBridgeConformanceInstrumentationTest {
               const sensors = require("sensors");
               const ui = require("ui");
               const workManager = require("work_manager");
+              const packageManager = require("package_manager");
               const compat = require("autojs6:compat");
               const jsox = require("jsox");
               const jsoxMathx = require("jsox.mathx");
@@ -345,6 +355,7 @@ class NodeBridgeConformanceInstrumentationTest {
                 ["sensors", sensors],
                 ["ui", ui],
                 ["work_manager", workManager],
+                ["package_manager", packageManager],
                 ["jsox", jsox],
                 ["jsox.mathx", jsoxMathx],
                 ["jsox.mathx.alias", jsox.mathx],
@@ -384,6 +395,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
+              expectExports("package_manager", packageManager, ["status", "policy", "install", "update", "remove", "list", "verify", "prune"]);
               expectExports("jsox", jsox, ["extend", "extendAll", "status"]);
               expectExports("jsox.mathx", jsoxMathx, ["randInt", "randomInt", "randFloat", "randomFloat", "random", "sum", "mean", "avg", "median", "var", "std", "cv", "mode", "dist", "logMn", "floorLog", "ceilLog", "roundLog", "floorPow", "ceilPow", "roundPow", "max", "maxi", "min", "mini"]);
               expectExports("autojs6:compat.jsox", compat.jsox, ["extend", "extendAll", "status"]);
@@ -436,6 +448,17 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(typeof device.height, "number");
               assert.strictEqual(typeof device.density, "number");
               assert.strictEqual(typeof workManager.policy.maxTasksPerProvider, "number");
+              const packageManagerStatus = packageManager.status();
+              const packageManagerPolicy = packageManager.policy();
+              assert.strictEqual(Object.isFrozen(packageManagerStatus), true, "package_manager.status result must be frozen");
+              assert.strictEqual(Object.isFrozen(packageManagerPolicy), true, "package_manager.policy result must be frozen");
+              assert.strictEqual(packageManagerStatus.status, "diagnostic_only");
+              assert.strictEqual(packageManagerStatus.jsBridge, "diagnostic_only");
+              assert.strictEqual(packageManagerStatus.requirePackageManager, "diagnostic_only");
+              assert.strictEqual(packageManagerStatus.grantsInstallAuthority, false);
+              assert.strictEqual(packageManagerPolicy.npmCli, "denied");
+              assert.strictEqual(packageManagerPolicy.registryDownload, "deferred");
+              assert.strictEqual(packageManagerPolicy.rawRegistryAccess, false);
               assert.strictEqual(engines.myEngine().engineName, "nodejs");
 
               await expectPromise("toast.showToast", toast.showToast("hello", { timeoutMs: 1010 }));
@@ -644,6 +667,11 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
               assert.strictEqual((await expectPromise("work_manager.list", workManager.list({ timeoutMs: 1058 }))).length, 1);
+              ["install", "update", "remove", "list", "verify", "prune"].forEach((methodName) => {
+                expectThrowCode("package_manager." + methodName, function() {
+                  packageManager[methodName]({ name: "@autojs6/conformance", version: "1.0.0" });
+                }, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED");
+              });
               const compatTaskId = await expectPromise("compat.tasks.addDisposableTask", compat.tasks.addDisposableTask({ path: "main.cjs", delayMs: 0, timeoutMs: 1059 }));
               assert.strictEqual(compatTaskId, "work-once");
               assert.strictEqual((await expectPromise("compat.tasks.queryTasks", compat.tasks.queryTasks({ timeoutMs: 1060 }))).length, 0);

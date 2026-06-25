@@ -8196,6 +8196,7 @@ std::string buildEmbeddedScriptExecutionSource(
   let __autojs6_limited_axios_cache = null;
   let __autojs6_limited_websocket_cache = null;
   let __autojs6_limited_work_manager_cache = null;
+  let __autojs6_limited_package_manager_cache = null;
   let __autojs6_limited_lifecycle_cache = null;
   let __autojs6_limited_rhino_cache = null;
   let __autojs6_rhino_install_state = null;
@@ -8906,8 +8907,9 @@ std::string buildEmbeddedScriptExecutionSource(
         transaction: "locked_cancellable_atomic",
         operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
         packageKinds: Object.freeze(["dependency", "plugin", "project"]),
-        jsBridge: "not_exposed",
-        requirePackageManager: "denied",
+        jsBridge: "diagnostic_only",
+        requirePackageManager: "diagnostic_only",
+        diagnosticFacade: "available",
         packagedBehavior: "not_promoted",
         androidNetwork: "denied",
         rawExecutables: false,
@@ -25855,6 +25857,88 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     return __autojs6_limited_plugins_cache;
   }
+  const __autojs6_package_manager_policy = Object.freeze({
+    schema: "autojs6-node-package-manager-policy-v1",
+    status: "diagnostic_only",
+    androidStore: "local_app_private_partial",
+    androidRuntimeInstall: "local_unpacked_only",
+    npmCli: "denied",
+    npmInstallEquivalent: "host_managed_plus_android_store_substrate",
+    registryDownload: "deferred",
+    tarballInstall: "host_side_only",
+    lockfile: "autojs6_lock_host_managed",
+    integrity: "sha512_required",
+    lifecycleScripts: "denied",
+    debugLifecycleScripts: "not_promoted",
+    binLinks: "denied",
+    symlinks: "denied",
+    nativeBuild: "denied",
+    nativePayloads: "denied",
+    postinstallDownload: "denied",
+    nodeModulesMutation: "transactional_store_only",
+    transaction: "locked_cancellable_atomic",
+    operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
+    packageKinds: Object.freeze(["dependency", "plugin", "project"]),
+    androidNetwork: "denied",
+    rawExecutables: false,
+    rawRegistryAccess: false,
+    grantsInstallAuthority: false
+  });
+  function __autojs6_package_manager_not_promoted(methodName) {
+    return __autojs6_error(
+      "package_manager." + methodName + " is diagnostic-only in the current AutoJs6 Node profile; Android runtime package installation is not promoted.",
+      "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"
+    );
+  }
+  function __autojs6_package_manager_denied(methodName) {
+    return function() {
+      throw __autojs6_package_manager_not_promoted(methodName);
+    };
+  }
+  function __autojs6_limited_package_manager() {
+    if (__autojs6_limited_package_manager_cache) {
+      return __autojs6_limited_package_manager_cache;
+    }
+    function status() {
+      const profile = __autojs6_profile().packageManagerProfile;
+      return Object.freeze({
+        schema: "autojs6-node-package-manager-status-v1",
+        status: "diagnostic_only",
+        profileStatus: profile.status,
+        hostPackageManager: profile.hostPackageManager,
+        androidStore: profile.androidStore,
+        androidRuntimeInstall: profile.androidRuntimeInstall,
+        jsBridge: profile.jsBridge,
+        requirePackageManager: profile.requirePackageManager,
+        diagnosticFacade: profile.diagnosticFacade,
+        operations: __autojs6_package_manager_policy.operations,
+        packageKinds: __autojs6_package_manager_policy.packageKinds,
+        npmCli: profile.npmCli,
+        registryDownload: profile.registryDownload,
+        lifecycleScripts: profile.lifecycleScripts,
+        binLinks: profile.binLinks,
+        nativePayloads: profile.nativePayloads,
+        androidNetwork: profile.androidNetwork,
+        rawExecutables: profile.rawExecutables,
+        rawRegistryAccess: profile.rawRegistryAccess,
+        grantsInstallAuthority: false
+      });
+    }
+    function policy() {
+      return __autojs6_package_manager_policy;
+    }
+    __autojs6_limited_package_manager_cache = Object.freeze({
+      status,
+      policy,
+      install: __autojs6_package_manager_denied("install"),
+      update: __autojs6_package_manager_denied("update"),
+      remove: __autojs6_package_manager_denied("remove"),
+      list: __autojs6_package_manager_denied("list"),
+      verify: __autojs6_package_manager_denied("verify"),
+      prune: __autojs6_package_manager_denied("prune")
+    });
+    return __autojs6_limited_package_manager_cache;
+  }
   function __autojs6_invalid_package_target(message) {
     return __autojs6_error(message, "ERR_INVALID_PACKAGE_TARGET");
   }
@@ -42163,6 +42247,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "work_manager") {
       return "work_manager";
     }
+    if (name === "package_manager") {
+      return "package_manager";
+    }
     if (name === "plugins") {
       return "plugins";
     }
@@ -42486,6 +42573,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "work_manager") {
       return __autojs6_limited_work_manager();
+    }
+    if (name === "package_manager") {
+      return __autojs6_limited_package_manager();
     }
     if (name === "plugins") {
       return __autojs6_limited_plugins();
