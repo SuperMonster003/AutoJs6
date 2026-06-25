@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.engine.EmbeddedNodeFixtureCorpus
 import org.autojs.autojs.engine.NativeNodeEmbeddedJavaScriptEngine
+import org.autojs.autojs.engine.NodeExecutionModePolicy
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.engine.NodeWorkerThreadsTestSupport
 import org.autojs.autojs.engine.NodeProjectLaunchDiagnostics
@@ -9282,6 +9283,48 @@ class EmbeddedNodePackagedApkSmokeTest {
     }
 
     @Test
+    fun installAndRunCrashEvidenceEmbeddedNodePackagedApk() {
+        assumeTrue(
+            "Embedded Node.js packaged crash evidence smoke requires embedded script execution build support.",
+            BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED,
+        )
+
+        assumePackagedSmokeTemplateAvailable("Packaged crash evidence install-and-run smoke")
+
+        val launchDescriptor = """
+            {
+              "launchKind": "project-entry",
+              "workingDirectory": ".",
+              "timeoutMs": $CRASH_EVIDENCE_TIMEOUT_MS,
+              "executionMode": "${NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING}"
+            }
+            """.trimIndent() + "\n"
+        val outputApk = buildPackagedGateDiagnosticsApk(
+            rootName = "embedded-node-packaged-crash-evidence-smoke",
+            outputApkName = CRASH_EVIDENCE_APK_NAME,
+            projectName = CRASH_EVIDENCE_PROJECT_NAME,
+            packageName = CRASH_EVIDENCE_PACKAGE_NAME,
+            mainScriptName = "crash-evidence.js",
+            mainScript = """
+                "nodejs";
+                console.log("packaged.crash_evidence.started=true");
+                console.log("packaged.crash_evidence.pid=" + process.pid);
+                setInterval(() => {}, 250);
+            """.trimIndent() + "\n",
+            runtimeMarkers = CRASH_EVIDENCE_RUNTIME_MARKERS,
+            launchDescriptor = launchDescriptor,
+            launchDescriptorExpectation = PackagedNodeLaunchDescriptorExpectation(
+                launchKind = NodeProjectLaunchKind.PROJECT_ENTRY.descriptorValue,
+                workingDirectory = ".",
+                timeoutMs = CRASH_EVIDENCE_TIMEOUT_MS,
+                executionMode = NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING,
+            ),
+            requiredTemplateDexMarkers = CRASH_EVIDENCE_TEMPLATE_DEX_MARKERS,
+        )
+        assertInstallRunAndCollectPackagedCrashEvidenceSmoke(outputApk)
+    }
+
+    @Test
     fun installAndRunLaunchFailureEmbeddedNodePackagedApks() {
         assumeTrue(
             "Embedded Node.js packaged launch failure smoke requires embedded script execution build support.",
@@ -11954,6 +11997,8 @@ class EmbeddedNodePackagedApkSmokeTest {
         nodePermissions: List<String> = emptyList(),
         runtimeMarkers: List<String>,
         requiredTemplateDexMarkers: List<String> = emptyList(),
+        launchDescriptor: String? = null,
+        launchDescriptorExpectation: PackagedNodeLaunchDescriptorExpectation? = null,
     ): File {
         val root = File(context.cacheDir, rootName).apply {
             deleteRecursively()
@@ -12003,6 +12048,12 @@ class EmbeddedNodePackagedApkSmokeTest {
                 parentFile?.mkdirs()
                 writeText(content, StandardCharsets.UTF_8)
             }
+        }
+        launchDescriptor?.let { descriptor ->
+            File(projectDir, PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE).writeText(
+                descriptor,
+                StandardCharsets.UTF_8,
+            )
         }
         val runtimeMatrixText = runtimeMarkers.joinToString(separator = "\n", postfix = "\n")
         val projectConfigText = """
@@ -12069,6 +12120,7 @@ $nodeConfigJson
                 "mainScript" to mainScript,
                 "permissions" to permissions.sorted().joinToString("\n"),
                 "nodePermissions" to nodePermissions.sorted().joinToString("\n"),
+                "launchDescriptor" to launchDescriptor.orEmpty(),
                 "projectConfig" to projectConfigText,
                 "runtimeMatrix" to runtimeMatrixText,
             ) + extraFiles.toSortedMap().map { (relativePath, content) ->
@@ -12090,6 +12142,8 @@ $nodeConfigJson
                 extraFiles = extraFiles,
                 nodePermissions = nodePermissions,
                 runtimeMarkers = runtimeMarkers,
+                launchDescriptor = launchDescriptor,
+                launchDescriptorExpectation = launchDescriptorExpectation,
             )
             exportPackagedSmokeApkForHost(cachedApk)
             return cachedApk
@@ -12118,6 +12172,8 @@ $nodeConfigJson
             extraFiles = extraFiles,
             nodePermissions = nodePermissions,
             runtimeMarkers = runtimeMarkers,
+            launchDescriptor = launchDescriptor,
+            launchDescriptorExpectation = launchDescriptorExpectation,
         )
         storePackagedSmokeFixtureCache(
             outputApk = outputApk,
@@ -12745,6 +12801,8 @@ $nodeConfigJson
         extraFiles: Map<String, String>,
         nodePermissions: List<String>,
         runtimeMarkers: List<String>,
+        launchDescriptor: String? = null,
+        launchDescriptorExpectation: PackagedNodeLaunchDescriptorExpectation? = null,
     ) {
         ZipFile(outputApk).use { zip ->
             val entries = zip.entries().asSequence().map { it.name }.toSet()
@@ -12753,6 +12811,12 @@ $nodeConfigJson
             assertTrue("Gate diagnostics APK is missing encrypted main script: $mainEntry", mainEntry in entries)
             assertTrue("Gate diagnostics APK is missing bundled project config", "assets/project/${ProjectConfig.CONFIG_FILE_NAME}" in entries)
             assertTrue("Gate diagnostics APK is missing runtime matrix marker", "assets/project/runtime-matrix.expected.txt" in entries)
+            if (launchDescriptor != null) {
+                assertTrue(
+                    "Gate diagnostics APK is missing internal Node launch descriptor",
+                    "assets/project/$PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE" in entries,
+                )
+            }
 
             val projectConfig = readZipText(zip, "assets/project/${ProjectConfig.CONFIG_FILE_NAME}")
             val bundledConfig = checkNotNull(ProjectConfig.fromJson(projectConfig)) {
@@ -12771,6 +12835,19 @@ $nodeConfigJson
                     "Bundled gate diagnostics project config should keep Node bridge permissions",
                     nodePermissions.sorted(),
                     bundledConfig.nodeConfig?.permissions.orEmpty().sorted(),
+                )
+            }
+            launchDescriptorExpectation?.let { expectation ->
+                assertPackagedNodeLaunchDescriptor(
+                    zip = zip,
+                    label = "Gate diagnostics",
+                    expected = expectation,
+                )
+            } ?: launchDescriptor?.let { descriptor ->
+                assertEquals(
+                    "Gate diagnostics raw launch descriptor",
+                    descriptor.trimEnd('\r', '\n'),
+                    readZipText(zip, "assets/project/$PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE").trimEnd('\r', '\n'),
                 )
             }
 
@@ -13399,6 +13476,90 @@ $nodeConfigJson
         )
     }
 
+    private fun assertInstallRunAndCollectPackagedCrashEvidenceSmoke(outputApk: File) {
+        val publicApkPath = "$PACKAGED_SMOKE_PUBLIC_EXPORT_DIR/${outputApk.name}"
+        val shellApkPath = "/data/local/tmp/autojs6-packaged-node-crash-evidence-smoke.apk"
+        val copyOutput = copyPublicApkToShellPath(publicApkPath, shellApkPath)
+        assumeTrue(
+            "Could not copy packaged crash evidence APK to a shell-readable install path.\n$copyOutput",
+            copyOutput.contains("READY"),
+        )
+        try {
+            shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
+            shellWithTimeout("pm uninstall $CRASH_EVIDENCE_PACKAGE_NAME")
+            shellWithTimeout("logcat -c", PACKAGED_SMOKE_LOGCAT_DUMP_TIMEOUT_SECONDS)
+
+            val installOutput = shellWithTimeout("pm install -r -t $shellApkPath")
+            assumeTrue(
+                "Package manager could not install packaged crash evidence APK.\n$installOutput",
+                installOutput.contains("Success", ignoreCase = true),
+            )
+
+            val packagePath = shellWithTimeout("pm path $CRASH_EVIDENCE_PACKAGE_NAME")
+            assumeTrue(
+                "Package manager did not expose installed packaged crash evidence APK path.\n$packagePath",
+                packagePath.contains("package:", ignoreCase = true),
+            )
+
+            val launchOutput = shellWithTimeout(
+                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
+            )
+            assumeTrue(
+                "Could not launch packaged crash evidence SplashActivity.\n$launchOutput",
+                launchOutput.contains("Starting", ignoreCase = true) ||
+                        launchOutput.contains("Warning: Activity not started", ignoreCase = true),
+            )
+
+            val firstLogcat = waitForLogcatMarkers(CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS)
+            val firstRelevantLog = relevantPackagedLogcat(firstLogcat, CRASH_EVIDENCE_PACKAGE_NAME)
+            assumeTrue(
+                "Logcat channel did not show the launched packaged crash evidence package.\n$firstRelevantLog",
+                firstLogcat.contains(CRASH_EVIDENCE_PACKAGE_NAME),
+            )
+            assertFalse(
+                "Packaged crash evidence first launch crashed natively before force-stop.\n$firstRelevantLog",
+                firstLogcat.contains(">>> $CRASH_EVIDENCE_PACKAGE_NAME:nodejs_embedded <<<") ||
+                        firstLogcat.contains("data_app_native_crash") ||
+                        firstLogcat.contains("NativeCrashHandler"),
+            )
+            val missingFirstMarkers = CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS.filterNot { firstLogcat.contains(it) }
+            assertTrue(
+                "Packaged crash evidence first launch did not contain expected markers: $missingFirstMarkers\n$firstRelevantLog",
+                missingFirstMarkers.isEmpty(),
+            )
+
+            shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
+            Thread.sleep(1_000L)
+
+            val relaunchOutput = shellWithTimeout(
+                "am start -n $CRASH_EVIDENCE_PACKAGE_NAME/org.autojs.autojs.inrt.SplashActivity",
+            )
+            assumeTrue(
+                "Could not relaunch packaged crash evidence SplashActivity.\n$relaunchOutput",
+                relaunchOutput.contains("Starting", ignoreCase = true) ||
+                        relaunchOutput.contains("Warning: Activity not started", ignoreCase = true),
+            )
+
+            val logcat = waitForLogcatMarkers(CRASH_EVIDENCE_COLLECTION_MARKERS)
+            val relevantLog = relevantPackagedLogcat(logcat, CRASH_EVIDENCE_PACKAGE_NAME)
+            assertFalse(
+                "Packaged crash evidence relaunch crashed natively.\n$relevantLog",
+                logcat.contains(">>> $CRASH_EVIDENCE_PACKAGE_NAME:nodejs_embedded <<<") ||
+                        logcat.contains("data_app_native_crash") ||
+                        logcat.contains("NativeCrashHandler"),
+            )
+            val missingCollectionMarkers = CRASH_EVIDENCE_COLLECTION_MARKERS.filterNot { logcat.contains(it) }
+            assertTrue(
+                "Packaged crash evidence relaunch did not collect next-launch markers: $missingCollectionMarkers\n$relevantLog",
+                missingCollectionMarkers.isEmpty(),
+            )
+        } finally {
+            shellWithTimeout("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME")
+            shellWithTimeout("pm uninstall $CRASH_EVIDENCE_PACKAGE_NAME")
+            shellWithTimeout("rm -f $shellApkPath", PACKAGED_SMOKE_FILE_SHELL_TIMEOUT_SECONDS)
+        }
+    }
+
     private fun assertInstallAndRunPackagedLaunchFailureSmoke(
         outputApk: File,
         failureCase: PackagedLaunchFailureCase,
@@ -13582,6 +13743,10 @@ $nodeConfigJson
                         it.contains("ESM/import") ||
                         it.contains("dynamic import") ||
                         it.contains("NativeNode") ||
+                        it.contains("NodeCrashEvidenceStore") ||
+                        it.contains("marker.begin") ||
+                        it.contains("marker.collect") ||
+                        it.contains("autojs6-node-phase13") ||
                         it.contains(NodeProjectLaunchDiagnostics.LAUNCH_FAILURE_MARKER) ||
                         it.contains(NodeProjectLaunchDiagnostics.RUNNER_REQUEST_FAILURE_MARKER) ||
                         it.contains(NodeProjectLaunchDiagnostics.INRT_PROJECT_ENTRY_RESOLUTION_FAILURE_MARKER) ||
@@ -14168,6 +14333,10 @@ $nodeConfigJson
         private const val TIMEOUT_DIAGNOSTICS_PROJECT_NAME = "PackagedNodeTimeoutDiagnosticsSmoke"
         private const val TIMEOUT_DIAGNOSTICS_PACKAGE_NAME = "org.autojs6.packaged.node.timeout.diagnostics.smoke"
         private const val TIMEOUT_DIAGNOSTICS_APK_NAME = "PackagedNodeTimeoutDiagnosticsSmoke_v1.0.0.apk"
+        private const val CRASH_EVIDENCE_PROJECT_NAME = "PackagedNodeCrashEvidenceSmoke"
+        private const val CRASH_EVIDENCE_PACKAGE_NAME = "org.autojs6.packaged.node.crashevidence.smoke"
+        private const val CRASH_EVIDENCE_APK_NAME = "PackagedNodeCrashEvidenceSmoke_v1.0.0.apk"
+        private const val CRASH_EVIDENCE_TIMEOUT_MS = 30_000L
         private const val PACKAGED_NODE_LAUNCH_DESCRIPTOR_FILE = NodeProjectLaunchDescriptor.DESCRIPTOR_FILE_NAME
         private const val PACKAGED_SMOKE_MARKER_REPORT_FILE = "packaged-smoke-markers.log"
         private const val PACKAGE_SCRIPT_NODE_MODULES_BIN_TEMPLATE_MARKER = "node_modules/.bin/"
@@ -14757,6 +14926,31 @@ $nodeConfigJson
             "ERR_AUTOJS6_EMBEDDED_NODE_SCRIPT_TIMEOUT",
             "timedOut=true",
             "pendingTimers=true",
+        )
+        private val CRASH_EVIDENCE_RUNTIME_MARKERS = listOf(
+            "packaged.crash_evidence.started=true",
+        )
+        private val CRASH_EVIDENCE_FIRST_LAUNCH_MARKERS = listOf(
+            "packaged.crash_evidence.started=true",
+            "autojs6.inrt.node_project_packaged_long_running.v1",
+            "marker.begin schema=autojs6-node-phase13-crash-marker-v1",
+            "scenario=embedded_script_service",
+            "launchSurface=${NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING}",
+            "executionMode=${NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING}",
+            "packageName=$CRASH_EVIDENCE_PACKAGE_NAME",
+        )
+        private val CRASH_EVIDENCE_COLLECTION_MARKERS = listOf(
+            "marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1",
+            "state=collected_after_restart",
+            "reason=app.onCreate",
+            "launchSurface=${NodeExecutionModePolicy.LAUNCH_SURFACE_PACKAGED_LONG_RUNNING}",
+            "executionMode=${NodeExecutionModePolicy.MODE_INTERACTIVE_LONG_RUNNING}",
+            "packageName=$CRASH_EVIDENCE_PACKAGE_NAME",
+        )
+        private val CRASH_EVIDENCE_TEMPLATE_DEX_MARKERS = listOf(
+            "marker.begin schema=",
+            "marker.collect schema=",
+            "autojs6-node-phase13-next-launch-crash-bundle-v1",
         )
         private const val PACKAGED_SMOKE_PUBLIC_EXPORT_DIR =
             "/sdcard/Download/AutoJs6/embedded-node-packaged-smoke"

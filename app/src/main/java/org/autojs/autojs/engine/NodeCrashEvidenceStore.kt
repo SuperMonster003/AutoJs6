@@ -63,6 +63,15 @@ object NodeCrashEvidenceStore {
                 val bundleFile = File(nextLaunchRoot(context), "$markerId.json")
                 writeJsonAtomic(bundleFile, bundle)
                 writeJsonAtomic(markerFile, marker)
+                Log.i(
+                    TAG,
+                    "marker.collect schema=$NEXT_LAUNCH_BUNDLE_SCHEMA markerId=$markerId " +
+                            "state=$STATE_COLLECTED_AFTER_RESTART previousState=$state reason=$reason " +
+                            "scenario=${marker.optString("scenario")} " +
+                            "launchSurface=${marker.optString("launchSurface")} " +
+                            "executionMode=${marker.optString("executionMode")} " +
+                            "bundle=${bundleFile.name} packageName=${context.packageName}",
+                )
                 collected.put(JSONObject().apply {
                     put("markerId", markerId)
                     put("bundlePath", bundleFile.absolutePath)
@@ -90,6 +99,8 @@ object NodeCrashEvidenceStore {
             val now = System.currentTimeMillis()
             val markerId = safeFileName("${executionId.ifBlank { "unknown" }}-$now")
             val markerFile = File(markerRoot(context), "$markerId.json")
+            val processName = currentProcessName()
+            val adapter = runtimeAdapter?.takeIf { it.isNotBlank() } ?: "auto"
             val marker = JSONObject().apply {
                 put("schema", MARKER_SCHEMA)
                 put("markerId", markerId)
@@ -98,7 +109,7 @@ object NodeCrashEvidenceStore {
                 put("runtimeSlot", BuildConfig.NODEJS_RUNTIME_SLOT.ifBlank { "node24_5" })
                 put("runtimeSlotId", runtimeSlotId ?: JSONObject.NULL)
                 put("runtimeSlotTargetVersion", BuildConfig.NODEJS_RUNTIME_SLOT_TARGET_VERSION)
-                put("runtimeAdapter", runtimeAdapter?.takeIf { it.isNotBlank() } ?: "auto")
+                put("runtimeAdapter", adapter)
                 put("runtimeBackend", BuildConfig.NODEJS_RUNTIME_BACKEND)
                 put("profile", NodeRuntimeCapabilities.PROFILE_NAME)
                 put("engineVersion", NodeRuntimeCapabilities.ENGINE_VERSION)
@@ -106,7 +117,7 @@ object NodeCrashEvidenceStore {
                 put("abi", Build.SUPPORTED_ABIS.firstOrNull().orEmpty())
                 put("supportedAbis", JSONArray(Build.SUPPORTED_ABIS.toList()))
                 put("scenario", scenario)
-                put("processName", currentProcessName())
+                put("processName", processName)
                 put("pid", Process.myPid())
                 put("sourceName", sourceName.ifBlank { "<embedded-script>" })
                 put("workingDirectory", workingDirectory ?: JSONObject.NULL)
@@ -132,6 +143,13 @@ object NodeCrashEvidenceStore {
                 })
             }
             writeJsonAtomic(markerFile, marker)
+            Log.i(
+                TAG,
+                "marker.begin schema=$MARKER_SCHEMA markerId=$markerId state=$STATE_RUNNING " +
+                        "scenario=$scenario launchSurface=$launchSurface executionMode=$executionMode " +
+                        "runtimeAdapter=$adapter runtimeSlotId=${runtimeSlotId ?: "null"} " +
+                        "processName=$processName packageName=${context.packageName}",
+            )
             Marker(markerId, markerFile, now)
         }.onFailure {
             Log.w(TAG, "Failed to begin Node crash evidence marker.", it)
@@ -301,6 +319,15 @@ object NodeCrashEvidenceStore {
             json.put("timelineTail", timelineTail(nativeValues))
             json.put("nativeValuesSha256", sha256(JSONObject(nativeValues).toString()))
             writeJsonAtomic(marker.file, json)
+            Log.i(
+                TAG,
+                "marker.terminal schema=$MARKER_SCHEMA markerId=${marker.id} state=$state " +
+                        "reason=$reason timedOut=$timedOut exitCode=${exitCode ?: "null"} " +
+                        "scenario=${json.optString("scenario")} " +
+                        "launchSurface=${json.optString("launchSurface")} " +
+                        "executionMode=${json.optString("executionMode")} " +
+                        "packageName=${context.packageName}",
+            )
         }.onFailure {
             Log.w(TAG, "Failed to update Node crash evidence marker ${marker.id}.", it)
         }

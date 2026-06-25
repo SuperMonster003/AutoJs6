@@ -21,6 +21,7 @@ const FILES = {
   nativeProcessService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt",
   embeddedBridge: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt",
   crashEvidenceStoreTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt",
+  packagedSmokeTest: "app/src/androidTest/java/org/autojs/autojs/apkbuilder/EmbeddedNodePackagedApkSmokeTest.kt",
   androidRuntimePolicyTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidRuntimePolicyInstrumentationTest.kt",
   embeddedMvpTest: "app/src/androidTest/java/org/autojs/autojs/engine/EmbeddedScriptMvpInstrumentationTest.kt",
   capabilities: "app/src/main/java/org/autojs/autojs/engine/NodeRuntimeCapabilities.kt",
@@ -189,6 +190,7 @@ function scenarioStatus(files) {
   const nativeProcessService = files.nativeProcessService.text;
   const embeddedBridge = files.embeddedBridge.text;
   const crashEvidenceStoreTest = files.crashEvidenceStoreTest.text;
+  const packagedSmokeTest = files.packagedSmokeTest.text;
   const androidRuntimePolicyTest = files.androidRuntimePolicyTest.text;
   const embeddedMvpTest = files.embeddedMvpTest.text;
   const nativeFatalRunningMarkerReady = crashEvidenceStoreTest.includes("collectsRunningMarkerAfterSimulatedNativeFatalProcessDeath") &&
@@ -204,6 +206,16 @@ function scenarioStatus(files) {
   const packagedMarkerContractReady = crashEvidenceStoreTest.includes("markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke") &&
     crashEvidenceStoreTest.includes("LAUNCH_SURFACE_PACKAGED_LONG_RUNNING") &&
     crashEvidenceStoreTest.includes("packaged_apk_crash_smoke_contract");
+  const packagedCrashEvidenceSmokeHarnessReady = packagedMarkerContractReady &&
+    files.crashStore.text.includes("marker.begin schema=") &&
+    files.crashStore.text.includes("marker.collect schema=") &&
+    packagedSmokeTest.includes("installAndRunCrashEvidenceEmbeddedNodePackagedApk") &&
+    packagedSmokeTest.includes("assertInstallRunAndCollectPackagedCrashEvidenceSmoke") &&
+    packagedSmokeTest.includes("CRASH_EVIDENCE_TEMPLATE_DEX_MARKERS") &&
+    packagedSmokeTest.includes("packaged.crash_evidence.started=true") &&
+    packagedSmokeTest.includes("marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1") &&
+    packagedSmokeTest.includes("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME") &&
+    packagedSmokeTest.includes("LAUNCH_SURFACE_PACKAGED_LONG_RUNNING");
   const signalSafeBoundaryReady = files.crashStore.text.includes("safeSignalMarker") &&
     crashEvidenceStoreTest.includes("markerRecordsSignalSafeNativeMarkerBoundary") &&
     crashEvidenceStoreTest.includes("native signal-safe writer remains separate");
@@ -255,9 +267,14 @@ function scenarioStatus(files) {
     ),
     scenario(
       "packaged_apk",
-      packagedMarkerContractReady,
-      [files.crashEvidenceStoreTest.relative],
-      ["real packaged APK crash evidence smoke is still required"],
+      packagedCrashEvidenceSmokeHarnessReady,
+      [
+        files.crashStore.relative,
+        files.app.relative,
+        files.crashEvidenceStoreTest.relative,
+        files.packagedSmokeTest.relative,
+      ],
+      ["packaged inrt template/runtime must include live NodeCrashEvidenceStore proof before the smoke can pass"],
     ),
     scenario(
       "signal_safe_marker",
