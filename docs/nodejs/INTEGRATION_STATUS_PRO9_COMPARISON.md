@@ -1239,6 +1239,15 @@ packaged behavior, and a skip reason. The catalog improves script developer
 porting evidence without adding the high-risk snippets to default runtime
 smoke or granting Pro authority.
 
+P13-54 records desktop Node parity examples as partial: AutoJs6 Node now
+includes `sample/nodejs/desktop-parity-suite`, a static example catalog for
+ESM, `worker_threads`, HTTP/HTTPS, advanced fs, WASI, inspector, and sanitized
+pure JavaScript npm dependency migration. Each snippet records
+`desktop_compat_opt_in`, required capabilities, expected output, packaged
+behavior, skip reason, and a Safe-profile denial marker. The catalog improves
+desktop Node porting evidence without adding the snippets to default runtime
+smoke or granting Desktop authority.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

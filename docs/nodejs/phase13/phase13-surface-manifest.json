@@ -765,7 +765,7 @@
         "P13-56",
         "P13-57"
       ],
-      "summary": "Publish Pro/Desktop examples, type declarations, migration docs, Pro9 comparison updates, summary generator, and final Phase 13 gate. P13-53 records Pro parity examples as partial with phase13-pro-parity-examples evidence.",
+      "summary": "Publish Pro/Desktop examples, type declarations, migration docs, Pro9 comparison updates, summary generator, and final Phase 13 gate. P13-53 records Pro parity examples as partial with phase13-pro-parity-examples evidence. P13-54 records desktop Node parity examples as partial with phase13-desktop-parity-examples evidence.",
       "risk": "medium",
       "runtimeSurface": [
         "sample/nodejs Pro parity examples",
@@ -780,7 +780,14 @@
         ":app:verifyNodePhase13ProParityExamples",
         "docs/nodejs/reports/phase13/P13_53_PRO_PARITY_EXAMPLES.md",
         "build/reports/nodejs/phase13-pro-parity-examples.json",
-        "build/reports/nodejs/phase13-pro-parity-examples.md"
+        "build/reports/nodejs/phase13-pro-parity-examples.md",
+        "sample/nodejs/desktop-parity-suite",
+        "sample/nodejs/desktop-parity-suite/examples.json",
+        "tools/nodejs/phase13/verify-desktop-parity-examples.js",
+        ":app:verifyNodePhase13DesktopParityExamples",
+        "docs/nodejs/reports/phase13/P13_54_DESKTOP_PARITY_EXAMPLES.md",
+        "build/reports/nodejs/phase13-desktop-parity-examples.json",
+        "build/reports/nodejs/phase13-desktop-parity-examples.md"
       ],
       "rollback": "Keep Phase 13 examples and docs marked as gated until runtime promotion evidence lands."
     }

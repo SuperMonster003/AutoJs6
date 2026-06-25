@@ -1678,6 +1678,22 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - 每个示例标注所需 profile。
     - Safe profile 下的拒绝路径也有示例或测试。
+  - Progress:
+    - P13-54 partial landing adds `sample/nodejs/desktop-parity-suite` with
+      guarded snippets for ESM, `worker_threads`, HTTP/HTTPS, advanced fs,
+      WASI, inspector, and sanitized pure JavaScript npm dependency usage.
+    - Each catalog entry in `sample/nodejs/desktop-parity-suite/examples.json`
+      records `desktop_compat_opt_in`, required capabilities, expected output,
+      packaged behavior, skip reason, and Safe-profile denial output.
+    - Safe-profile denial examples are centralized in
+      `sample/nodejs/desktop-parity-suite/snippets/safe-denials.cjs`.
+    - Host verifier: `tools/nodejs/phase13/verify-desktop-parity-examples.js`.
+    - Gradle gate: `:app:verifyNodePhase13DesktopParityExamples`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_54_DESKTOP_PARITY_EXAMPLES.md`.
+    - Remaining P13-54 blockers: packaged desktop parity, provider promotion,
+      integrity policy, Android package-manager parity, and default-runtime
+      smoke inclusion remain gated.
 
 - [ ] P13-55: 更新 TypeScript declaration package。
   - 范围：为 Pro/Desktop profile 增加条件类型或文档注释。

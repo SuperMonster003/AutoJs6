@@ -92,6 +92,7 @@ node tools/nodejs/project/autojs6-node-project.js validate D:\work\my-node-app
 - `wasm-worker`: design-gated WASM worker integration placeholder.
 - `wasm-plugin`: JS plus WASM plugin package policy placeholder.
 - `pro-parity-suite`: Phase 13 Pro parity examples for Java interop, Rhino proxy install, UI, overlay, tasks, screenshot/OCR, and accessibility migration.
+- `desktop-parity-suite`: Phase 13 desktop Node parity examples for ESM, worker_threads, HTTP/HTTPS, advanced fs, WASI, inspector, and npm dependency migration.
 - `typescript-smoke`: compile-time smoke for the checked-in AutoJs6 Node bridge declarations.
 
 ## Phase 13 Pro Parity Examples
@@ -113,6 +114,26 @@ P13-53 keeps these examples out of the default runtime smoke list. The catalog
 is static evidence for migration shape and docs parity; packaged Pro execution
 remains gated by provider promotion, disclosure review, and device permission
 evidence.
+
+## Phase 13 Desktop Node Parity Examples
+
+`sample/nodejs/desktop-parity-suite` is a migration catalog for desktop-style
+Node APIs. It includes guarded snippets for ESM, `worker_threads`,
+HTTP/HTTPS, advanced filesystem APIs, WASI, inspector, and sanitized pure
+JavaScript npm dependencies. Each catalog entry declares the required
+`desktop_compat_opt_in` profile, required capabilities, expected output,
+Safe-profile denial output, packaged behavior, and skip reason.
+
+Verify the catalog with:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13DesktopParityExamples
+```
+
+P13-54 keeps these examples out of the default runtime smoke list. The catalog
+is static evidence for desktop parity planning; packaged desktop execution,
+raw worker/network/fs/WASI/inspector authority, and Android package-manager
+parity remain gated by future promotion evidence.
 
 ## Smoke Coverage
 

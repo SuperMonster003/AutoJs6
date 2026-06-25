@@ -462,6 +462,15 @@ packaged behavior, and skip reasons for unavailable providers or permissions.
 It is documentation and static-verification evidence only; the snippets are
 not part of default runtime smoke and do not grant Pro profile authority.
 
+P13-54 records desktop Node parity examples as partial. AutoJs6 Node now ships
+`sample/nodejs/desktop-parity-suite`, a guarded catalog for ESM,
+`worker_threads`, HTTP/HTTPS, advanced fs, WASI, inspector, and sanitized pure
+JavaScript npm dependency migration. The catalog records `desktop_compat_opt_in`,
+required capabilities, expected output, Safe-profile denial output, packaged
+behavior, and skip reasons. It is documentation and static-verification
+evidence only; the snippets are not part of default runtime smoke and do not
+grant Desktop profile authority.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

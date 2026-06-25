@@ -2355,3 +2355,41 @@ tasks.register<Exec>("verifyNodePhase13ProParityExamples") {
         nodePhase13ReportDir.get().asFile.absolutePath,
     )
 }
+
+tasks.register<Exec>("verifyNodePhase13DesktopParityExamples") {
+    group = "verification"
+    description = "Verifies Phase 13 desktop Node parity example catalog."
+
+    dependsOn("verifyNodePhase13ProParityExamples", "verifyNodeExamples")
+
+    val scriptFile = rootProject.layout.projectDirectory.file("tools/nodejs/phase13/verify-desktop-parity-examples.js")
+    inputs.file(scriptFile)
+    inputs.dir(rootProject.layout.projectDirectory.dir("sample/nodejs/desktop-parity-suite"))
+    inputs.file(rootProject.layout.projectDirectory.file("sample/nodejs/examples.json"))
+    inputs.file(project.layout.projectDirectory.file("node-examples.gradle.kts"))
+    inputs.file(project.layout.projectDirectory.file("node-phase13-gate.gradle.kts"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/reports/phase13/P13_54_DESKTOP_PARITY_EXAMPLES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/EXAMPLES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/TESTING.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/CI_GATES.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/phase13-surface-manifest.json"))
+    inputs.file(rootProject.layout.projectDirectory.file("docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md"))
+    outputs.files(
+        nodePhase13ReportDir.map { it.file("phase13-desktop-parity-examples.json") },
+        nodePhase13ReportDir.map { it.file("phase13-desktop-parity-examples.md") },
+    )
+    outputs.upToDateWhen { false }
+    workingDir = rootProject.projectDir
+    commandLine(
+        "node",
+        scriptFile.asFile.absolutePath,
+        "--repo-root",
+        rootProject.projectDir.absolutePath,
+        "--report-dir",
+        nodePhase13ReportDir.get().asFile.absolutePath,
+    )
+}

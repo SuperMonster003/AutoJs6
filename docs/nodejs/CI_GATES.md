@@ -855,6 +855,15 @@ updates, and docs updates while keeping the high-risk snippets out of default
 runtime smoke. P13-53 records Pro parity examples as partial; live packaged Pro
 execution, prompt/disclosure UI, provider promotion, and device permission
 matrices remain unpromoted.
+`verifyNodePhase13DesktopParityExamples` records P13-54 as the desktop Node
+parity examples gate. It requires the `sample/nodejs/desktop-parity-suite`
+catalog, per-snippet `desktop_compat_opt_in` profile metadata, required
+capabilities, expected outputs, Safe-profile denial markers, packaged behavior,
+skip reasons, `verifyNodeExamples` registration, surface manifest evidence,
+release matrix updates, and docs updates while keeping the desktop snippets out
+of default runtime smoke. P13-54 records desktop Node parity examples as
+partial; packaged desktop parity, raw worker/network/fs/WASI/inspector
+authority, and Android package-manager parity remain unpromoted.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

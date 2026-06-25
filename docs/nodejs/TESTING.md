@@ -2167,6 +2167,21 @@ release matrix updates, and Phase 13 docs. The examples cover `$autojs.java`,
 `rhino.install`, UI, floaty/overlay, tasks, screenshot/OCR, and accessibility,
 but remain outside default runtime smoke and do not grant Pro authority.
 
+Phase 13 desktop Node parity examples gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13DesktopParityExamples
+```
+
+This host gate records P13-54 as partial. It requires the
+`sample/nodejs/desktop-parity-suite` catalog, desktop-profile snippet
+metadata, expected output markers, Safe-profile denial markers, README
+profile/packaged-behavior/skip-reason coverage, root example manifest
+registration, surface manifest evidence, release matrix updates, and Phase 13
+docs. The examples cover ESM, `worker_threads`, HTTP/HTTPS, advanced fs, WASI,
+inspector, and sanitized pure JavaScript npm dependency usage, but remain
+outside default runtime smoke and do not grant Desktop authority.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell
