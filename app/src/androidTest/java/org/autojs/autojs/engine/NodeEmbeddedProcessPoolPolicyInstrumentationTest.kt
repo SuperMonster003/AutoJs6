@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -349,6 +350,76 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
     }
 
     @Test
+    fun concurrentSlotsStressSharedResourcesRemainIsolated() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("embedded process pool shared resource stress")
+
+        val root = File(context.cacheDir, "node-process-pool-resource-stress-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create process-pool resource stress directory: $absolutePath" }
+        }
+        val primaryDir = prepareSlotStressDirectory(root, "primary")
+        val overflowDir = prepareSlotStressDirectory(root, "overflow")
+        try {
+            val startGate = CountDownLatch(1)
+            val primary = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
+            val overflow = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
+            val primaryError = AtomicReference<Throwable>()
+            val overflowError = AtomicReference<Throwable>()
+            val primaryThread = Thread {
+                runCatching {
+                    startGate.await(5, TimeUnit.SECONDS)
+                    primary.set(
+                        runSharedResourceStressScript(
+                            label = "primary",
+                            slotId = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                            workDir = primaryDir,
+                        ),
+                    )
+                }.onFailure { primaryError.set(it) }
+            }
+            val overflowThread = Thread {
+                runCatching {
+                    startGate.await(5, TimeUnit.SECONDS)
+                    overflow.set(
+                        runSharedResourceStressScript(
+                            label = "overflow",
+                            slotId = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                            workDir = overflowDir,
+                        ),
+                    )
+                }.onFailure { overflowError.set(it) }
+            }
+
+            primaryThread.start()
+            overflowThread.start()
+            startGate.countDown()
+            primaryThread.join(45_000L)
+            overflowThread.join(45_000L)
+
+            primaryError.get()?.let { throw AssertionError("primary resource stress thread failed", it) }
+            overflowError.get()?.let { throw AssertionError("overflow resource stress thread failed", it) }
+            val primaryResult = requireNotNull(primary.get()) { "primary resource stress result missing" }
+            val overflowResult = requireNotNull(overflow.get()) { "overflow resource stress result missing" }
+
+            assertSharedResourceStressResult(
+                label = "primary",
+                slotId = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                workDir = primaryDir,
+                result = primaryResult,
+            )
+            assertSharedResourceStressResult(
+                label = "overflow",
+                slotId = NodeEmbeddedProcessPoolPolicy.OVERFLOW_SLOT_ID,
+                workDir = overflowDir,
+                result = overflowResult,
+            )
+            assertTrue("expected isolated stress service processes", primaryResult.pid != overflowResult.pid)
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    @Test
     fun longRunningSlotIsReservedUntilPromotion() {
         val plan = NodeEmbeddedProcessPoolPolicy.plan(
             context = context,
@@ -360,6 +431,204 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
         assertEquals(NodeEmbeddedProcessPoolPolicy.longRunningSlot.id, plan.longRunningDedicatedSlotId)
         assertFalse(plan.longRunningDedicatedSlotEnabled)
         assertTrue(plan.reason.contains("dedicated_long_running_slot_reserved"))
+    }
+
+    private fun prepareSlotStressDirectory(root: File, label: String): File {
+        return File(root, label).apply {
+            check(mkdirs()) { "Failed to create $label stress directory: $absolutePath" }
+            File(this, "slot-state.cjs").writeText(
+                """module.exports = { label: "$label", count: 0 };""",
+                Charsets.UTF_8,
+            )
+        }
+    }
+
+    private fun runSharedResourceStressScript(
+        label: String,
+        slotId: String,
+        workDir: File,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                return (async () => {
+                  const fs = require("fs");
+                  const bridge = require("autojs6:bridge");
+                  const storage = require("storage");
+                  const label = process.env.P13_POOL_SLOT_LABEL;
+                  const secret = process.env.P13_POOL_SLOT_SECRET;
+                  const resolved = require.resolve("./slot-state.cjs");
+                  const cacheBefore = Boolean(require.cache[resolved]);
+                  const state = require("./slot-state.cjs");
+                  state.count += 1;
+                  const cacheAfter = Boolean(require.cache[resolved]);
+                  const cacheCount = Object.keys(require.cache)
+                    .filter((filename) => filename.endsWith("slot-state.cjs"))
+                    .length;
+                  const globalBefore = typeof globalThis.__p13PoolResourceStress;
+                  globalThis.__p13PoolResourceStress = label;
+
+                  const buckets = Object.create(null);
+                  const requests = [];
+                  bridge.__test.setTransport({
+                    postMessage(message) {
+                      const request = JSON.parse(message);
+                      requests.push(request);
+                      let result = null;
+                      if (request.module === "storage") {
+                        const storeName = request.args[0];
+                        const key = request.args[1];
+                        const bucket = buckets[storeName] || (buckets[storeName] = Object.create(null));
+                        if (request.method === "put") {
+                          bucket[key] = request.args[2];
+                        } else if (request.method === "get") {
+                          result = Object.prototype.hasOwnProperty.call(bucket, key)
+                            ? { found: true, value: bucket[key] }
+                            : { found: false };
+                        } else if (request.method === "clear") {
+                          Object.keys(bucket).forEach((entry) => delete bucket[entry]);
+                        }
+                      }
+                      setImmediate(() => {
+                        bridge.__test.receiveMessage(JSON.stringify({
+                          id: request.id,
+                          ok: true,
+                          result
+                        }));
+                      });
+                    }
+                  });
+
+                  const store = storage.create("pool-" + label);
+                  await store.put("slot", label, { timeoutMs: 1000 });
+                  const stored = await store.get("slot", null, { timeoutMs: 1000 });
+                  await store.clear({ timeoutMs: 1000 });
+
+                  fs.writeFileSync("./watch-target.txt", "before-" + label, "utf8");
+                  let watchEventType = null;
+                  let watchClosed = false;
+                  const watcher = fs.watch("./watch-target.txt", { persistent: false }, (eventType) => {
+                    watchEventType = eventType;
+                  });
+                  fs.writeFileSync("./watch-target.txt", "after-" + label, "utf8");
+                  await new Promise((resolve) => setTimeout(resolve, 100));
+                  watcher.close();
+                  watchClosed = true;
+                  await new Promise((resolve) => setImmediate(resolve));
+
+                  const fd = fs.openSync("./file-handle.txt", "w+");
+                  try {
+                    fs.writeSync(fd, "handle-" + label);
+                  } finally {
+                    fs.closeSync(fd);
+                  }
+                  const fileText = fs.readFileSync("./file-handle.txt", "utf8");
+
+                  const timerOrder = [];
+                  await new Promise((resolve) => {
+                    setImmediate(() => timerOrder.push("immediate"));
+                    setTimeout(() => {
+                      timerOrder.push("timeout");
+                      resolve();
+                    }, 25);
+                  });
+
+                  process.stdout.write("p13.pool.resource.raw_stdout." + label + "=" + process.pid + "\n");
+                  process.stderr.write("p13.pool.resource.raw_stderr." + label + "=" + process.pid + "\n");
+                  console.log("p13.pool.resource.stdout." + label + "=" + state.label + "|" + process.cwd());
+
+                  const summary = {
+                    label,
+                    pid: process.pid,
+                    cwdOk: process.cwd().replace(/\\/g, "/").endsWith("/" + label),
+                    envOk: secret === label + "-secret" && process.env.P13_POOL_SLOT_OTHER_SECRET === undefined,
+                    moduleOk: !cacheBefore && cacheAfter && cacheCount === 1 && state.label === label && state.count === 1,
+                    globalOk: globalBefore === "undefined",
+                    timerOk: timerOrder.join("|") === "immediate|timeout",
+                    watchOk: watchClosed && (watchEventType === null || watchEventType === "change" || watchEventType === "rename"),
+                    fileHandleOk: fileText === "handle-" + label,
+                    bridgeOk: stored === label && bridge.__test.pendingCount() === 0,
+                    bridgeRequestCount: requests.length
+                  };
+                  summary.allOk = summary.cwdOk &&
+                    summary.envOk &&
+                    summary.moduleOk &&
+                    summary.globalOk &&
+                    summary.timerOk &&
+                    summary.watchOk &&
+                    summary.fileHandleOk &&
+                    summary.bridgeOk;
+                  console.log("p13.pool.resource.summary." + label + "=" + JSON.stringify(summary));
+                  return JSON.stringify(summary);
+                })().catch((error) => {
+                  console.error("p13.pool.resource.error." + process.env.P13_POOL_SLOT_LABEL + "=" + (error && (error.stack || error.message) || error));
+                  throw error;
+                });
+            """.trimIndent(),
+            sourceName = "<process-pool-resource-stress-$label.js>",
+            workingDirectory = workDir,
+            timeoutMs = 20_000L,
+            env = mapOf(
+                "P13_POOL_SLOT_LABEL" to label,
+                "P13_POOL_SLOT_SECRET" to "$label-secret",
+            ),
+            processPoolSlot = slotId,
+        )
+    }
+
+    private fun assertSharedResourceStressResult(
+        label: String,
+        slotId: String,
+        workDir: File,
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+    ) {
+        NodeEmbeddedTestHarness.assertSucceeded("$label shared resource stress", result)
+        assertEquals(slotId, result.nativeValues["embedded_script.process_pool.selected_slot_id"])
+        assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_EXPLICIT_TWO_SLOT, result.nativeValues["embedded_script.process_pool.mode"])
+        assertEquals(
+            NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+            result.nativeValues["embedded_script.process_pool.slot_selection_source"],
+        )
+        assertTrue(
+            "workingDirectory should point at $label slot work dir: ${result.workingDirectory}",
+            result.workingDirectory.orEmpty().replace("\\", "/").endsWith("/$label"),
+        )
+        assertTrue(result.stdout, result.stdout.contains("p13.pool.resource.raw_stdout.$label="))
+        assertTrue(result.stdout, result.stdout.contains("p13.pool.resource.stdout.$label="))
+        assertTrue(result.stdout, result.stdout.contains("p13.pool.resource.summary.$label="))
+        assertTrue(result.stderr, result.stderr.contains("p13.pool.resource.raw_stderr.$label="))
+        assertEquals(false, result.pendingTimers)
+        assertEquals(0, result.pendingTimerCount ?: -1)
+        assertEquals(0, result.pendingScopedFsCallbacks ?: -1)
+        assertEquals(false, result.pendingScopedFsStreams)
+        assertEquals(0, result.pendingScopedFsStreamCount ?: -1)
+        assertEquals(0, result.pendingAsyncCallbacks ?: -1)
+        assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_pending_count"])
+        assertEquals("0", result.nativeValues["embedded_script.bridge_resource.active_count"])
+
+        val summary = JSONObject(result.resultText.orEmpty())
+        val summaryText = summary.toString()
+        assertEquals(label, summary.getString("label"))
+        assertTrue("cwdOk summary=$summaryText", summary.getBoolean("cwdOk"))
+        assertTrue("envOk summary=$summaryText", summary.getBoolean("envOk"))
+        assertTrue("moduleOk summary=$summaryText", summary.getBoolean("moduleOk"))
+        assertTrue("globalOk summary=$summaryText", summary.getBoolean("globalOk"))
+        assertTrue("timerOk summary=$summaryText", summary.getBoolean("timerOk"))
+        assertTrue("watchOk summary=$summaryText", summary.getBoolean("watchOk"))
+        assertTrue("fileHandleOk summary=$summaryText", summary.getBoolean("fileHandleOk"))
+        assertTrue("bridgeOk summary=$summaryText", summary.getBoolean("bridgeOk"))
+        assertTrue("allOk summary=$summaryText", summary.getBoolean("allOk"))
+        assertEquals(3, summary.getInt("bridgeRequestCount"))
+
+        val markerFile = File(result.nativeValues["embedded_script.crash_evidence.marker_path"].orEmpty())
+        assertTrue("missing crash marker for $label: ${markerFile.absolutePath}", markerFile.isFile)
+        val marker = JSONObject(markerFile.readText(Charsets.UTF_8))
+        assertEquals(NodeCrashEvidenceStore.STATE_CLEAN_EXIT, marker.getString("state"))
+        assertEquals(slotId, marker.getString("runtimeSlotId"))
+        assertEquals(result.nativeValues["embedded_script.execution_id"], marker.getString("executionId"))
+        assertEquals("embedded_script_service", marker.getString("scenario"))
+        assertEquals(true, marker.getJSONObject("resourceSnapshot").getBoolean("implemented"))
+        markerFile.delete()
     }
 
     private fun runSlotScript(

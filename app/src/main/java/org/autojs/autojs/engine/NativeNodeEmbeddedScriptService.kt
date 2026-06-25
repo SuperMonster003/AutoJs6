@@ -573,6 +573,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 .withLifecycle(lifecycle)
                 .withQueueLease(slotLease)
                 .withPrewarmLease(prewarmLease)
+                .withCrashEvidence(crashMarker)
                 .withTimeline(timeline)
             NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, evidenceResult)
             terminalCrashEvidenceMarked = true
@@ -622,6 +623,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 .withQueueLease(slotLease)
                 .withPrewarmLease(prewarmLease)
                 .withRuntimeBudget(runtimeBudget)
+                .withCrashEvidence(crashMarker)
                 .withTimeline(timeline)
             NodeCrashEvidenceStore.markEmbeddedResult(this, crashMarker, failureResult)
             terminalCrashEvidenceMarked = true
@@ -1110,6 +1112,17 @@ open class NativeNodeEmbeddedScriptService : Service() {
             nativeValues = linkedMapOf<String, String>().apply {
                 putAll(nativeValues)
                 putAll(budgetValues)
+            },
+        )
+    }
+
+    private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withCrashEvidence(
+        marker: NodeCrashEvidenceStore.Marker?,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return copy(
+            nativeValues = linkedMapOf<String, String>().apply {
+                putAll(nativeValues)
+                putAll(NodeCrashEvidenceStore.nativeValues(marker))
             },
         )
     }
