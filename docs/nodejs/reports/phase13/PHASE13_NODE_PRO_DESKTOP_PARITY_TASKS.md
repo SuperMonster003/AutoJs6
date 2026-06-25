@@ -507,12 +507,12 @@ P13 task 本身使用以下执行状态：
     - Simulated native fatal running-marker assertion: `collectsRunningMarkerAfterSimulatedNativeFatalProcessDeath`.
     - Real fatal native chaos assertion: `collectsRunningMarkerAfterRealFatalNativeChaosProbeDeath` writes a marker in `:nodejs_embedded`, injects `SIGKILL`, and verifies next-launch collection.
     - Packaged launch-surface marker contract: `markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke`.
-    - Packaged APK crash evidence smoke harness: `installAndRunCrashEvidenceEmbeddedNodePackagedApk` installs a packaged `interactive_long_running` APK, force-stops it, relaunches it, and verifies marker collection logs. Focused device run currently stops at template freshness because the inrt template/runtime lacks `NodeCrashEvidenceStore` marker strings.
+    - Packaged APK crash evidence smoke: `installAndRunCrashEvidenceEmbeddedNodePackagedApk` installs a packaged `interactive_long_running` APK with a fresh inrt template override, force-stops it, relaunches it, and verifies marker collection logs.
     - Signal-safe marker boundary assertion: `markerRecordsSignalSafeNativeMarkerBoundary`.
     - Host collector: `tools/nodejs/phase13/collect-crash-evidence.js`
     - Gradle gate: `:app:collectNodePhase13CrashEvidence`
     - Report: `docs/nodejs/reports/phase13/P13_05_CRASH_EVIDENCE_AUTOMATION.md`
-    - Open before closure: packaged inrt template/runtime crash-store proof, signal-safe fixed-size native marker proof.
+    - Open before closure: signal-safe fixed-size native marker proof.
 
 - [ ] P13-06: 推进 second execution slot 到可调度状态。
   - 范围：从 Phase 12 的 explicit slot evidence 推进到默认 scheduler 可选择

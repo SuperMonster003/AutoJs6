@@ -18,6 +18,10 @@ Status: partial packaged dispatch landed; final blocker remains open.
   `node.executionMode=interactive_long_running` route through
   `NativeNodeEmbeddedScriptService.startPackagedLongRunning(...)` instead of the
   one-shot script engine path.
+- Focused packaged crash evidence smoke now installs a packaged
+  `interactive_long_running` APK with a fresh inrt template override, verifies
+  `launchSurface=packaged_long_running`, force-stops the package, and verifies
+  next-launch crash marker collection.
 - The packaged foreground path reuses the existing embedded Node project
   preprocessor, so encrypted project entries, CommonJS static preload,
   `moduleSources`, runtime module sources, `argv`, `env`, package script/bin
@@ -50,15 +54,14 @@ build/reports/nodejs/phase13-packaged-long-running-service.json
 build/reports/nodejs/phase13-packaged-long-running-service.md
 ```
 
-The gate is expected to report `partial` until packaged install/run evidence,
-lifecycle restore/cleanup evidence, and Android permission/background policy
-coverage land.
+The gate is expected to report `partial` until full packaged foreground
+lifecycle evidence, restore/cleanup evidence, and Android permission/background
+policy coverage land.
 
 ## Open Before Closure
 
-- Add an install-and-run packaged APK smoke that builds a project with
-  `node.executionMode=interactive_long_running`, starts it from the packaged
-  app, observes the foreground notification, then stops it through the Stop
+- Add a full lifecycle packaged APK smoke that observes the foreground
+  notification and stops the packaged long-running service through the Stop
   action.
 - Prove `autojs6:lifecycle` checkpoint, explicit restore, and cleanup from
   packaged mode, not only from the main app interactive helper.

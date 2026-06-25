@@ -12,7 +12,7 @@ P13-05 now has a runtime crash marker store and a Phase 13 host gate:
 - Simulated native fatal running-marker assertion: `collectsRunningMarkerAfterSimulatedNativeFatalProcessDeath` verifies a `running` native marker is promoted to a next-launch bundle.
 - Real fatal native chaos assertion: `collectsRunningMarkerAfterRealFatalNativeChaosProbeDeath` starts `NativeNodeEmbeddedProbeService` in `:nodejs_embedded`, writes a marker, injects `SIGKILL`, and verifies next-launch collection.
 - Packaged launch-surface marker contract: `markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke` verifies packaged long-running crash metadata can enter the marker schema.
-- Packaged APK crash evidence smoke harness: `installAndRunCrashEvidenceEmbeddedNodePackagedApk` builds and installs a packaged `interactive_long_running` APK, verifies marker begin logs, force-stops the package, relaunches it, and verifies `App.onCreate` promotes the leftover marker into the next-launch bundle path. The focused live run currently fails at template freshness because the available inrt template/runtime does not yet include `NodeCrashEvidenceStore` marker strings.
+- Packaged APK crash evidence smoke: `installAndRunCrashEvidenceEmbeddedNodePackagedApk` builds and installs a packaged `interactive_long_running` APK, verifies marker begin logs with `launchSurface=packaged_long_running`, force-stops the package, relaunches it, and verifies `App.onCreate` promotes the leftover marker into the next-launch bundle path. The focused device run passes with a fresh inrt template override.
 - Signal-safe marker boundary assertion: `markerRecordsSignalSafeNativeMarkerBoundary` records the current boundary before a native fixed-size writer lands.
 - Host collector: `tools/nodejs/phase13/collect-crash-evidence.js`
 - Gradle task: `:app:collectNodePhase13CrashEvidence`
@@ -24,7 +24,6 @@ promotes that marker into a next-launch crash bundle.
 
 Current remaining blocker items:
 
-- Wire `NodeCrashEvidenceStore` into the packaged inrt template/runtime and rerun the packaged APK crash evidence smoke against a fresh template override.
 - Add native signal-safe fixed-size marker writer proof; the current gate only records the boundary and keeps the writer separate from JSON/JNI work.
 
 Until those items pass, `crash_evidence_automation` remains open in

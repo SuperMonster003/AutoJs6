@@ -20,7 +20,7 @@
       "id": "crash_evidence_automation",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Phase 13 adds a runtime JSON crash marker store, next-launch collector, embedded script service marker writes, native process service marker writes, a host crash evidence collector, simulated native fatal running-marker collection, real fatal native SIGKILL chaos collection, packaged launch-surface marker contract, a packaged APK crash smoke harness, and signal-safe marker boundary evidence. Packaged inrt template/runtime crash-store proof and signal-safe fixed-size native marker proof remain open.",
+      "currentEvidence": "Phase 13 adds a runtime JSON crash marker store, next-launch collector, embedded script service marker writes, native process service marker writes, a host crash evidence collector, simulated native fatal running-marker collection, real fatal native SIGKILL chaos collection, packaged launch-surface marker contract, a passing packaged APK crash smoke with fresh inrt template override, and signal-safe marker boundary evidence. Signal-safe fixed-size native marker proof remains open.",
       "requiredResolution": "Crash marker, next-launch collection, resource snapshot, timeline tail, symbolization, and chaos injection pass focused gates."
     },
     {
@@ -34,7 +34,7 @@
       "id": "packaged_long_running",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Interactive long-running works; Phase 13 adds partial packaged dispatch through node.executionMode=interactive_long_running, a packaged_long_running launch surface, inrt foreground-service routing, and host verification. Packaged install/run smoke, lifecycle restore/cleanup, Android permission/background-start matrix, and quota/stress evidence remain open.",
+      "currentEvidence": "Interactive long-running works; Phase 13 adds partial packaged dispatch through node.executionMode=interactive_long_running, a packaged_long_running launch surface, inrt foreground-service routing, host verification, and a focused packaged crash evidence smoke that installs and starts packaged long-running mode with fresh inrt template override. Full foreground Stop action, lifecycle restore/cleanup, Android permission/background-start matrix, and quota/stress evidence remain open.",
       "requiredResolution": "Packaged APK long-running mode has foreground notification, stop action, lifecycle handling, checkpoint, quota, and cleanup evidence."
     },
     {
