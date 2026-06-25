@@ -44,12 +44,35 @@ declare module "package_manager" {
       readonly version: string;
     }
 
+    export interface RegistryPackumentDist {
+      readonly tarball?: string;
+      readonly integrity?: string;
+      readonly shasum?: string;
+      readonly [key: string]: unknown;
+    }
+
+    export interface RegistryPackumentVersion {
+      readonly name?: string;
+      readonly version?: string;
+      readonly dist?: RegistryPackumentDist;
+      readonly [key: string]: unknown;
+    }
+
+    export interface RegistryPackument {
+      readonly name?: string;
+      readonly "dist-tags"?: Readonly<Record<string, string>>;
+      readonly versions?: Readonly<Record<string, RegistryPackumentVersion>>;
+      readonly [key: string]: unknown;
+    }
+
     export interface PlanRegistryInstallRequest extends BridgeOptions {
       readonly name: string;
       readonly version?: string;
       readonly tag?: string;
       readonly registry?: string;
       readonly expectedIntegrity?: string;
+      readonly metadata?: RegistryPackument;
+      readonly packument?: RegistryPackument;
     }
 
     export interface PlanTarballInstallRequest extends BridgeOptions {
@@ -106,6 +129,37 @@ declare module "package_manager" {
       readonly existingRecord: PackageRecord | null;
     }
 
+    export type RemotePlanResolutionStatus =
+      | "metadata_not_provided"
+      | "version_requested_no_metadata"
+      | "resolved_from_dist_tag"
+      | "resolved_from_version"
+      | "tag_not_found"
+      | "version_not_found"
+      | "name_mismatch"
+      | "integrity_supplied"
+      | "integrity_required"
+      | string;
+
+    export interface RemotePlanResolution {
+      readonly schema:
+        | "autojs6-node-package-manager-registry-resolution-v1"
+        | "autojs6-node-package-manager-tarball-resolution-v1"
+        | string;
+      readonly status: RemotePlanResolutionStatus;
+      readonly name: string;
+      readonly metadataName: string;
+      readonly nameMatches: boolean;
+      readonly requestedVersion: string;
+      readonly requestedTag: string;
+      readonly resolvedVersion: string;
+      readonly registry: string;
+      readonly tarballUrl: string;
+      readonly integrity: string;
+      readonly shasum: string;
+      readonly hasMetadata: boolean;
+    }
+
     export interface RemotePackagePlan {
       readonly schema: "autojs6-node-package-manager-remote-plan-v1";
       readonly operation: "planRegistryInstall" | "planTarballInstall" | string;
@@ -123,6 +177,7 @@ declare module "package_manager" {
       readonly requiresExpectedIntegrity: boolean;
       readonly message: string;
       readonly request: Readonly<Record<string, unknown>>;
+      readonly resolution: RemotePlanResolution;
       readonly policy: RegistrySourcePolicy | TarballSourcePolicy;
       readonly futurePromotionRequires: readonly string[];
     }

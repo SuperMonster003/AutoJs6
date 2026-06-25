@@ -26059,6 +26059,91 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_package_manager_string(value) {
     return value === undefined || value === null ? "" : String(value);
   }
+  function __autojs6_package_manager_plain_object(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : null;
+  }
+  function __autojs6_package_manager_registry_packument(input) {
+    const metadata = __autojs6_package_manager_plain_object(input && input.metadata);
+    if (metadata) {
+      return metadata;
+    }
+    return __autojs6_package_manager_plain_object(input && input.packument);
+  }
+  function __autojs6_package_manager_registry_resolution(request, input) {
+    const metadata = __autojs6_package_manager_registry_packument(input);
+    const requestedVersion = __autojs6_package_manager_string(request.version).trim();
+    const requestedTag = __autojs6_package_manager_string(request.tag).trim();
+    const expectedIntegrity = __autojs6_package_manager_string(request.expectedIntegrity).trim();
+    const base = {
+      schema: "autojs6-node-package-manager-registry-resolution-v1",
+      status: "",
+      name: request.name,
+      metadataName: "",
+      nameMatches: true,
+      requestedVersion,
+      requestedTag,
+      resolvedVersion: requestedVersion,
+      registry: request.registry,
+      tarballUrl: "",
+      integrity: expectedIntegrity,
+      shasum: "",
+      hasMetadata: !!metadata
+    };
+    if (!metadata) {
+      base.status = requestedVersion ? "version_requested_no_metadata" : "metadata_not_provided";
+      return Object.freeze(base);
+    }
+    const metadataName = __autojs6_package_manager_string(metadata.name).trim();
+    const distTags = __autojs6_package_manager_plain_object(metadata["dist-tags"]);
+    const versions = __autojs6_package_manager_plain_object(metadata.versions);
+    base.metadataName = metadataName;
+    base.nameMatches = !metadataName || metadataName === request.name;
+    let resolvedVersion = requestedVersion;
+    let status = requestedVersion ? "resolved_from_version" : "resolved_from_dist_tag";
+    if (!resolvedVersion) {
+      resolvedVersion = distTags && Object.prototype.hasOwnProperty.call(distTags, requestedTag)
+        ? __autojs6_package_manager_string(distTags[requestedTag]).trim()
+        : "";
+      if (!resolvedVersion) {
+        status = "tag_not_found";
+      }
+    }
+    base.resolvedVersion = resolvedVersion;
+    const versionEntry = resolvedVersion && versions
+      ? __autojs6_package_manager_plain_object(versions[resolvedVersion])
+      : null;
+    if (!base.nameMatches) {
+      status = "name_mismatch";
+    } else if (resolvedVersion && !versionEntry) {
+      status = "version_not_found";
+    }
+    const dist = versionEntry ? __autojs6_package_manager_plain_object(versionEntry.dist) : null;
+    if (dist) {
+      base.tarballUrl = __autojs6_package_manager_string(dist.tarball).trim();
+      base.integrity = __autojs6_package_manager_string(dist.integrity).trim() || expectedIntegrity;
+      base.shasum = __autojs6_package_manager_string(dist.shasum).trim();
+    }
+    base.status = status;
+    return Object.freeze(base);
+  }
+  function __autojs6_package_manager_tarball_resolution(request) {
+    const expectedIntegrity = __autojs6_package_manager_string(request.expectedIntegrity).trim();
+    return Object.freeze({
+      schema: "autojs6-node-package-manager-tarball-resolution-v1",
+      status: expectedIntegrity ? "integrity_supplied" : "integrity_required",
+      name: request.name,
+      metadataName: "",
+      nameMatches: true,
+      requestedVersion: request.version,
+      requestedTag: "",
+      resolvedVersion: request.version,
+      registry: "",
+      tarballUrl: request.tarballUrl,
+      integrity: expectedIntegrity,
+      shasum: "",
+      hasMetadata: false
+    });
+  }
   function __autojs6_package_manager_record(value) {
     const source = value && typeof value === "object" ? value : {};
     return Object.freeze({
@@ -26104,7 +26189,7 @@ std::string buildEmbeddedScriptExecutionSource(
         : null
     });
   }
-  function __autojs6_package_manager_remote_plan_result(operation, sourceKind, normalizedRequest, sourcePolicy, message) {
+  function __autojs6_package_manager_remote_plan_result(operation, sourceKind, normalizedRequest, sourcePolicy, resolution, message) {
     return Object.freeze({
       schema: "autojs6-node-package-manager-remote-plan-v1",
       operation,
@@ -26122,6 +26207,7 @@ std::string buildEmbeddedScriptExecutionSource(
       requiresExpectedIntegrity: true,
       message,
       request: Object.freeze(normalizedRequest),
+      resolution: Object.freeze(resolution || {}),
       policy: sourcePolicy,
       futurePromotionRequires: __autojs6_package_manager_future_promotion_requirements
     });
@@ -26394,31 +26480,37 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     function planRegistryInstall(request) {
       let payload;
+      const input = __autojs6_package_manager_options(request);
       try {
-        payload = __autojs6_package_manager_registry_plan_request("planRegistryInstall", request);
+        payload = __autojs6_package_manager_registry_plan_request("planRegistryInstall", input);
       } catch (error) {
         return Promise.reject(error);
       }
+      const resolution = __autojs6_package_manager_registry_resolution(payload, input);
       return Promise.resolve(__autojs6_package_manager_remote_plan_result(
         "planRegistryInstall",
         "raw_registry",
         payload,
         __autojs6_package_manager_source_policy.registry,
+        resolution,
         "Android registry metadata download and install remain blocked by package_manager source policy."
       ));
     }
     function planTarballInstall(request) {
       let payload;
+      const input = __autojs6_package_manager_options(request);
       try {
-        payload = __autojs6_package_manager_tarball_plan_request("planTarballInstall", request);
+        payload = __autojs6_package_manager_tarball_plan_request("planTarballInstall", input);
       } catch (error) {
         return Promise.reject(error);
       }
+      const resolution = __autojs6_package_manager_tarball_resolution(payload);
       return Promise.resolve(__autojs6_package_manager_remote_plan_result(
         "planTarballInstall",
         "remote_tarball",
         payload,
         __autojs6_package_manager_source_policy.tarball,
+        resolution,
         "Android remote tarball download and extraction remain blocked by package_manager source policy."
       ));
     }

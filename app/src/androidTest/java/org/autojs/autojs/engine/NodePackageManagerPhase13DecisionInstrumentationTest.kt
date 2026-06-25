@@ -320,8 +320,44 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(registryPlan.request.name, "@autojs6/registry-plan");
                   assert.strictEqual(Object.isFrozen(registryPlan), true);
                   assert.strictEqual(Object.isFrozen(registryPlan.request), true);
+                  assert.strictEqual(Object.isFrozen(registryPlan.resolution), true);
                   assert.strictEqual(Object.isFrozen(registryPlan.policy), true);
                   assert.strictEqual(Object.isFrozen(registryPlan.futurePromotionRequires), true);
+                  const metadataRegistryPlan = await packageManager.planRegistryInstall({
+                    name: "@autojs6/registry-plan",
+                    tag: "latest",
+                    registry: "https://registry.npmjs.org/",
+                    metadata: {
+                      name: "@autojs6/registry-plan",
+                      "dist-tags": {
+                        latest: "1.2.3"
+                      },
+                      versions: {
+                        "1.2.3": {
+                          name: "@autojs6/registry-plan",
+                          version: "1.2.3",
+                          dist: {
+                            tarball: "https://registry.npmjs.org/@autojs6/registry-plan/-/registry-plan-1.2.3.tgz",
+                            integrity: "sha512-packument",
+                            shasum: "abc123"
+                          }
+                        }
+                      }
+                    }
+                  });
+                  assert.strictEqual(metadataRegistryPlan.status, "blocked_by_policy");
+                  assert.strictEqual(metadataRegistryPlan.resolution.schema, "autojs6-node-package-manager-registry-resolution-v1");
+                  assert.strictEqual(metadataRegistryPlan.resolution.status, "resolved_from_dist_tag");
+                  assert.strictEqual(metadataRegistryPlan.resolution.name, "@autojs6/registry-plan");
+                  assert.strictEqual(metadataRegistryPlan.resolution.metadataName, "@autojs6/registry-plan");
+                  assert.strictEqual(metadataRegistryPlan.resolution.nameMatches, true);
+                  assert.strictEqual(metadataRegistryPlan.resolution.requestedTag, "latest");
+                  assert.strictEqual(metadataRegistryPlan.resolution.resolvedVersion, "1.2.3");
+                  assert.strictEqual(metadataRegistryPlan.resolution.tarballUrl, "https://registry.npmjs.org/@autojs6/registry-plan/-/registry-plan-1.2.3.tgz");
+                  assert.strictEqual(metadataRegistryPlan.resolution.integrity, "sha512-packument");
+                  assert.strictEqual(metadataRegistryPlan.resolution.shasum, "abc123");
+                  assert.strictEqual(metadataRegistryPlan.resolution.hasMetadata, true);
+                  assert.strictEqual(Object.isFrozen(metadataRegistryPlan.resolution), true);
                   const npmRegistryPlan = await npm.planRegistryInstall({ name: "@autojs6/npm-registry-plan" });
                   assert.strictEqual(npmRegistryPlan.status, "blocked_by_policy");
                   assert.strictEqual(npmRegistryPlan.request.tag, "latest");
@@ -339,8 +375,13 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(tarballPlan.networkAccess, false);
                   assert.strictEqual(tarballPlan.policy.androidDownload, "denied");
                   assert.strictEqual(tarballPlan.request.expectedIntegrity, "sha512-test");
+                  assert.strictEqual(tarballPlan.resolution.schema, "autojs6-node-package-manager-tarball-resolution-v1");
+                  assert.strictEqual(tarballPlan.resolution.status, "integrity_supplied");
+                  assert.strictEqual(tarballPlan.resolution.tarballUrl, "https://registry.npmjs.org/@autojs6/test/-/test-1.0.0.tgz");
+                  assert.strictEqual(tarballPlan.resolution.integrity, "sha512-test");
                   assert.strictEqual(Object.isFrozen(tarballPlan), true);
                   assert.strictEqual(Object.isFrozen(tarballPlan.request), true);
+                  assert.strictEqual(Object.isFrozen(tarballPlan.resolution), true);
                   assert.strictEqual(Object.isFrozen(tarballPlan.policy), true);
                   const planInstallResult = await packageManager.planInstall({
                     name: planName,
@@ -466,9 +507,12 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     sourcePolicy.mutationOperations.join(","),
                     registryPlan.status,
                     registryPlan.sourceAuthority,
+                    metadataRegistryPlan.resolution.status,
+                    metadataRegistryPlan.resolution.resolvedVersion,
                     npmRegistryPlan.status,
                     tarballPlan.status,
                     tarballPlan.sourceAuthority,
+                    tarballPlan.resolution.status,
                     planInstallResult.status,
                     planInstallResult.grantsInstallAuthority,
                     installedResult.status,
@@ -510,7 +554,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "guarded_local_unpacked_mutation|local_unpacked_host_managed_only|" +
                     "local_unpacked_host_managed|true|true|" +
                     "planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall|install,update,remove|" +
-                    "blocked_by_policy|raw_registry_denied|blocked_by_policy|blocked_by_policy|remote_tarball_denied|" +
+                    "blocked_by_policy|raw_registry_denied|resolved_from_dist_tag|1.2.3|blocked_by_policy|blocked_by_policy|remote_tarball_denied|integrity_supplied|" +
                     "ready|false|installed|already_installed|" +
                     "ready|updated|ready|removed|ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED|" +
                     "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_NPM_CLI_DENIED|ERR_AUTOJS6_NPM_REGISTRY_DENIED|" +

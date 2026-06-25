@@ -521,6 +521,28 @@ async function smoke(): Promise<void> {
   const packageManagerPlanRemove: (request: packageManager.PlanRemoveRequest) => Promise<packageManager.PackagePlan> = packageManager.planRemove;
   const packageManagerPlanRegistryInstall: (request: packageManager.PlanRegistryInstallRequest) => Promise<packageManager.RemotePackagePlan> = packageManager.planRegistryInstall;
   const packageManagerPlanTarballInstall: (request: packageManager.PlanTarballInstallRequest) => Promise<packageManager.RemotePackagePlan> = packageManager.planTarballInstall;
+  const packageManagerPackument: packageManager.RegistryPackument = {
+    name: "@autojs6/types-smoke",
+    "dist-tags": {
+      latest: "1.0.0"
+    },
+    versions: {
+      "1.0.0": {
+        name: "@autojs6/types-smoke",
+        version: "1.0.0",
+        dist: {
+          tarball: "https://registry.npmjs.org/@autojs6/types-smoke/-/types-smoke-1.0.0.tgz",
+          integrity: "sha512-types-smoke"
+        }
+      }
+    }
+  };
+  const packageManagerRegistryRequest: packageManager.PlanRegistryInstallRequest = {
+    name: "@autojs6/types-smoke",
+    tag: "latest",
+    metadata: packageManagerPackument
+  };
+  const packageManagerRemoteResolution: packageManager.RemotePlanResolution = {} as packageManager.RemotePlanResolution;
   const packageManagerInstall: (request: packageManager.MutationSourceRequest) => Promise<packageManager.OperationResult> = packageManager.install;
   const packageManagerUpdate: (request: packageManager.MutationSourceRequest) => Promise<packageManager.OperationResult> = packageManager.update;
   const packageManagerRemove: (request: packageManager.MutationRemoveRequest) => Promise<packageManager.OperationResult> = packageManager.remove;
@@ -531,6 +553,8 @@ async function smoke(): Promise<void> {
   const npmPolicy: npm.NpmFacadePolicy = npm.policy();
   const npmSourcePolicy: npm.SourcePolicy = npm.sourcePolicy();
   const npmPackageManager: packageManager.PackageManagerModule = npm.packageManager();
+  const npmPackument: npm.RegistryPackument = packageManagerPackument;
+  const npmRemoteResolution: npm.RemotePlanResolution = packageManagerRemoteResolution;
   const npmPlanRegistryInstall: (request: npm.PlanRegistryInstallRequest) => Promise<npm.RemotePackagePlan> = npm.planRegistryInstall;
   const npmPlanTarballInstall: (request: npm.PlanTarballInstallRequest) => Promise<npm.RemotePackagePlan> = npm.planTarballInstall;
   const npmInstall: (request: npm.MutationSourceRequest) => Promise<npm.OperationResult> = npm.install;
@@ -1041,6 +1065,9 @@ async function smoke(): Promise<void> {
   void packageManagerPlanRemove;
   void packageManagerPlanRegistryInstall;
   void packageManagerPlanTarballInstall;
+  void packageManagerPackument;
+  void packageManagerRegistryRequest;
+  void packageManagerRemoteResolution;
   void packageManagerInstall;
   void packageManagerUpdate;
   void packageManagerRemove;
@@ -1051,6 +1078,8 @@ async function smoke(): Promise<void> {
   void npmPolicy;
   void npmSourcePolicy;
   void npmPackageManager;
+  void npmPackument;
+  void npmRemoteResolution;
   void npmPlanRegistryInstall;
   void npmPlanTarballInstall;
   void npmInstall;

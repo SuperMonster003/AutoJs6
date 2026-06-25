@@ -6,6 +6,10 @@ declare module "npm" {
     export type OperationResult = packageManager.OperationResult;
     export type PackagePlan = packageManager.PackagePlan;
     export type RemotePackagePlan = packageManager.RemotePackagePlan;
+    export type RegistryPackument = packageManager.RegistryPackument;
+    export type RegistryPackumentVersion = packageManager.RegistryPackumentVersion;
+    export type RegistryPackumentDist = packageManager.RegistryPackumentDist;
+    export type RemotePlanResolution = packageManager.RemotePlanResolution;
     export type SourcePolicy = packageManager.SourcePolicy;
     export type PlanSourceRequest = packageManager.PlanSourceRequest;
     export type PlanRemoveRequest = packageManager.PlanRemoveRequest;

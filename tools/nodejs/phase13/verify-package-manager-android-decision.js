@@ -15,6 +15,7 @@ const FILES = {
   manager: "app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt",
   managerTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt",
   p13PackageManagerTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodePackageManagerPhase13DecisionInstrumentationTest.kt",
+  conformanceTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt",
   phase13GradleGate: "app/node-phase13-gate.gradle.kts",
   p13AndroidManagerReport: "docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md",
   p13AndroidManagerVerifier: "tools/nodejs/phase13/verify-android-package-install-manager.js",
@@ -149,6 +150,10 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "function planRemove(request)"),
       token(files.nodeBridgeSources, "function planRegistryInstall(request)"),
       token(files.nodeBridgeSources, "function planTarballInstall(request)"),
+      token(files.nodeBridgeSources, "function __autojs6_package_manager_registry_resolution"),
+      token(files.nodeBridgeSources, "autojs6-node-package-manager-registry-resolution-v1"),
+      token(files.nodeBridgeSources, "autojs6-node-package-manager-tarball-resolution-v1"),
+      token(files.nodeBridgeSources, "resolved_from_dist_tag"),
       token(files.nodeBridgeSources, "function install(request)"),
       token(files.nodeBridgeSources, "function update(request)"),
       token(files.nodeBridgeSources, "function remove(request)"),
@@ -167,6 +172,8 @@ function buildReport(files) {
       token(files.typesNpm, "export interface NpmFacadeModule"),
       token(files.typesPackageManager, "export interface SourcePolicy"),
       token(files.typesPackageManager, "export interface RemotePackagePlan"),
+      token(files.typesPackageManager, "export interface RegistryPackument"),
+      token(files.typesPackageManager, "export interface RemotePlanResolution"),
       token(files.typesPackageManager, "sourcePolicy(): SourcePolicy"),
       token(files.typesPackageManager, "planInstall(request: PlanSourceRequest): Promise<PackagePlan>"),
       token(files.typesPackageManager, "planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>"),
@@ -177,6 +184,9 @@ function buildReport(files) {
       token(files.typesPackageManager, "verify(request: VerifyRequest): Promise<OperationResult>"),
       token(files.typesIndex, './package_manager.d.ts'),
       token(files.typesIndex, './npm.d.ts'),
+      token(files.typescriptSmoke, "packageManager.RegistryPackument"),
+      token(files.p13PackageManagerTest, "metadataRegistryPlan.resolution.status"),
+      token(files.conformanceTest, "metadataRegistryPlanResult.resolution.status"),
       token(files.p13AndroidManagerReport, "`NodeAndroidPackageInstallManager` supports"),
       token(files.p13AndroidManagerVerifier, "verifyNodePhase13AndroidPackageInstallManager"),
     ], [
@@ -281,6 +291,10 @@ function buildReport(files) {
         files.nodeBridgeSources.text.includes("function planRemove(request)") &&
         files.nodeBridgeSources.text.includes("function planRegistryInstall(request)") &&
         files.nodeBridgeSources.text.includes("function planTarballInstall(request)") &&
+        files.nodeBridgeSources.text.includes("function __autojs6_package_manager_registry_resolution") &&
+        files.nodeBridgeSources.text.includes("autojs6-node-package-manager-registry-resolution-v1") &&
+        files.nodeBridgeSources.text.includes("autojs6-node-package-manager-tarball-resolution-v1") &&
+        files.nodeBridgeSources.text.includes("resolved_from_dist_tag") &&
         files.nodeBridgeSources.text.includes("function install(request)") &&
         files.nodeBridgeSources.text.includes('permissions: ["package_manager", "package_manager.mutate"]') &&
         files.nodeBridgeSources.text.includes("autojs6-node-package-manager-source-policy-v1") &&
@@ -291,6 +305,8 @@ function buildReport(files) {
         files.nodeBridgeSources.text.includes('registryDownload: "deferred"') &&
         files.nodeBridgeSources.text.includes('permissions: ["package_manager"]') &&
         files.typesPackageManager.text.includes('declare module "package_manager"') &&
+        files.typesPackageManager.text.includes("export interface RegistryPackument") &&
+        files.typesPackageManager.text.includes("export interface RemotePlanResolution") &&
         files.typesPackageManager.text.includes("sourcePolicy(): SourcePolicy") &&
         files.typesPackageManager.text.includes("planInstall(request: PlanSourceRequest): Promise<PackagePlan>") &&
         files.typesPackageManager.text.includes("planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>") &&
@@ -300,8 +316,12 @@ function buildReport(files) {
         files.typesPackageManager.text.includes("verify(request: VerifyRequest): Promise<OperationResult>") &&
         files.typesNpm.text.includes('declare module "npm"') &&
         files.typesNpm.text.includes("status(): NpmFacadeStatus") &&
+        files.typesNpm.text.includes("export type RegistryPackument = packageManager.RegistryPackument") &&
         files.typesNpm.text.includes("planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>") &&
         files.typesNpm.text.includes("cli(...args: readonly unknown[]): never") &&
+        files.typescriptSmoke.text.includes("packageManager.RegistryPackument") &&
+        files.p13PackageManagerTest.text.includes("metadataRegistryPlan.resolution.status") &&
+        files.conformanceTest.text.includes("metadataRegistryPlanResult.resolution.status") &&
         files.typesIndex.text.includes('./npm.d.ts') &&
         !packageManagerProfile.includes('jsBridge: "partial"') &&
         !packageManagerProfile.includes('requirePackageManager: "partial"') &&
@@ -340,6 +360,8 @@ function buildReport(files) {
         files.typesNpm.text.includes('declare module "npm"'),
       registryInstallPromoted: false,
       registryTarballPlanReady: files.nodeBridgeSources.text.includes("autojs6-node-package-manager-remote-plan-v1") &&
+        files.nodeBridgeSources.text.includes("autojs6-node-package-manager-registry-resolution-v1") &&
+        files.nodeBridgeSources.text.includes("autojs6-node-package-manager-tarball-resolution-v1") &&
         files.nodeBridgeSources.text.includes("function planRegistryInstall(request)") &&
         files.nodeBridgeSources.text.includes("function planTarballInstall(request)"),
       lifecycleScriptsPromoted: false,

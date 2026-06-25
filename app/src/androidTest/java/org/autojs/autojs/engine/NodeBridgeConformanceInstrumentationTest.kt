@@ -795,10 +795,39 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(registryPlanResult.networkAccess, false);
               assert.strictEqual(Object.isFrozen(registryPlanResult), true);
               assert.strictEqual(Object.isFrozen(registryPlanResult.request), true);
+              assert.strictEqual(Object.isFrozen(registryPlanResult.resolution), true);
+              const metadataRegistryPlanResult = await expectPromise("package_manager.planRegistryInstall.metadata", packageManager.planRegistryInstall({
+                name: "@autojs6/conformance",
+                tag: "latest",
+                metadata: {
+                  name: "@autojs6/conformance",
+                  "dist-tags": {
+                    latest: "1.0.0"
+                  },
+                  versions: {
+                    "1.0.0": {
+                      name: "@autojs6/conformance",
+                      version: "1.0.0",
+                      dist: {
+                        tarball: "https://registry.npmjs.org/@autojs6/conformance/-/conformance-1.0.0.tgz",
+                        integrity: "sha512-conformance",
+                        shasum: "def456"
+                      }
+                    }
+                  }
+                }
+              }));
+              assert.strictEqual(metadataRegistryPlanResult.status, "blocked_by_policy");
+              assert.strictEqual(metadataRegistryPlanResult.resolution.status, "resolved_from_dist_tag");
+              assert.strictEqual(metadataRegistryPlanResult.resolution.resolvedVersion, "1.0.0");
+              assert.strictEqual(metadataRegistryPlanResult.resolution.tarballUrl, "https://registry.npmjs.org/@autojs6/conformance/-/conformance-1.0.0.tgz");
+              assert.strictEqual(metadataRegistryPlanResult.resolution.integrity, "sha512-conformance");
+              assert.strictEqual(Object.isFrozen(metadataRegistryPlanResult.resolution), true);
               const npmTarballPlanResult = await expectPromise("npm.planTarballInstall", npm.planTarballInstall({ tarballUrl: "https://registry.npmjs.org/@autojs6/conformance/-/conformance-1.0.0.tgz", expectedIntegrity: "sha512-conformance" }));
               assert.strictEqual(npmTarballPlanResult.status, "blocked_by_policy");
               assert.strictEqual(npmTarballPlanResult.sourceAuthority, "remote_tarball_denied");
               assert.strictEqual(npmTarballPlanResult.networkAccess, false);
+              assert.strictEqual(npmTarballPlanResult.resolution.status, "integrity_supplied");
               assert.strictEqual(requests.length, beforeRemotePackagePlans, "remote package plan APIs must not dispatch bridge requests");
               const planInstallResult = await expectPromise("package_manager.planInstall", packageManager.planInstall({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", timeoutMs: 1059 }));
               assert.strictEqual(planInstallResult.status, "ready");
