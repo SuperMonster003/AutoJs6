@@ -5,10 +5,11 @@ P13-42 records Android package manager parity as partial.
 The current target is "Auto.js Pro capability + desktop Node.js capability",
 but package installation is still split between a host-managed npm-compatible
 validator and an Android app-private local package store substrate. This phase
-does not promote the npm CLI, registry download, lifecycle script execution, bin
-shim creation, native build execution, or unrestricted JavaScript
-package-manager mutation on Android. A script-visible `npm` facade is present,
-but it is only a guarded alias over the local `package_manager` facade.
+does not promote the npm CLI, registry download, remote tarball download,
+lifecycle script execution, bin shim creation, native build execution, or
+unrestricted JavaScript package-manager mutation on Android. A script-visible
+`npm` facade is present, but it is only a guarded alias over the local
+`package_manager` facade.
 
 ## Landed
 
@@ -44,6 +45,13 @@ but it is only a guarded alias over the local `package_manager` facade.
     local unpacked source/remove targets, return frozen
     `autojs6-node-android-package-plan-v1` results, and never grant install
     authority.
+  - `planRegistryInstall(...)` and `planTarballInstall(...)` are plan-only
+    source-boundary APIs. They return frozen
+    `autojs6-node-package-manager-remote-plan-v1` results with
+    `blocked_by_policy`, `networkAccess: false`, `cacheAccess: false`, and no
+    install authority. They do not dispatch to the Android bridge, download
+    registry metadata, fetch tarballs, extract archives, or mutate the local
+    store.
   - `install(...)` and `update(...)` require `package_manager.mutate`,
     `allowMutation: true`, a relative project-scoped local unpacked source, and
     `expectedIntegrity` from a dry-run plan before mutating the app-private
@@ -58,15 +66,16 @@ but it is only a guarded alias over the local `package_manager` facade.
 - `require("npm")` exposes a frozen guarded facade:
   - `status()`, `policy()`, and `sourcePolicy()` report the same local-store
     boundaries as `package_manager`.
-  - `planInstall`/`planUpdate`/`planRemove`/`install`/`update`/`remove`/
-    `list`/`verify`/`prune` delegate to the guarded `package_manager` facade.
+  - `planInstall`/`planUpdate`/`planRemove`/`planRegistryInstall`/
+    `planTarballInstall`/`install`/`update`/`remove`/`list`/`verify`/`prune`
+    delegate to the guarded `package_manager` facade.
   - `cli()`, `exec()`, `runScript()`, registry install, publish, and pack
     entry points reject with stable npm policy errors.
 - `NodeAndroidPackageInstallManager.nativeValues()` now exposes the same
   Android-side policy details for native test reports.
 - `NodePackageManagerPhase13DecisionInstrumentationTest` verifies the runtime
-  profile, guarded npm facade, denied npm CLI/registry calls,
-  guarded package-manager facade, and the
+  profile, guarded npm facade, denied npm CLI/registry calls, plan-only
+  registry/tarball boundaries, guarded package-manager facade, and the
   local Android store substrate.
 - Type declarations and TypeScript smoke now include
   `PackageManagerProfile`, source policy fields, and the guarded
@@ -86,6 +95,8 @@ already-unpacked package directory operations inside an app-private store:
 - planInstall (dry-run)
 - planUpdate (dry-run)
 - planRemove (dry-run)
+- planRegistryInstall (blocked policy dry-run)
+- planTarballInstall (blocked policy dry-run)
 - list
 - verify
 - prune
@@ -104,6 +115,9 @@ constrained to the local store substrate.
 
 - Running `npm install` or `npm i --no-bin-links` directly on Android.
 - Android registry metadata/tarball download and cache management.
+- `planRegistryInstall()` / `planTarballInstall()` beyond policy-only dry-run
+  diagnostics; they do not download, cache, extract, install, or grant
+  authority.
 - npm CLI/registry/lifecycle behavior behind the script-visible `npm` facade.
 - Unrestricted or registry-backed `package_manager.install/update/remove`
   operations.

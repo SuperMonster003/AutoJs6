@@ -665,10 +665,12 @@ Phase 13 Android-side package install manager:
 local package store: install/update/remove/list/verify/prune, transaction
 staging, store locking, cancellation, SHA-512 integrity mismatch rollback,
 and lifecycle/bin/native payload denial. This does not promote Android npm CLI,
-registry download, remote tarball install, unverified cache reuse, or JavaScript
-install/update/remove authority; the `package_manager` facade is limited to
-guarded local mutation plus read-maintenance:
-status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune.
+registry download, remote tarball install, unverified cache reuse, or
+unrestricted JavaScript install/update/remove authority; the `package_manager`
+facade is limited to guarded local mutation plus read-maintenance and
+policy-only source planning:
+status/policy/sourcePolicy/planInstall/planUpdate/planRemove/
+planRegistryInstall/planTarballInstall/install/update/remove/list/verify/prune.
 
 Phase 13 Pro-style Node entry directives:
 
@@ -1906,10 +1908,11 @@ execution, bin shims, symlink materialization, native builds/native payloads,
 postinstall downloads, unrestricted package-manager operations, raw executable
 authority, and raw registry access open. The `package_manager` module exposes
 read-maintenance `status`/`policy`/`sourcePolicy`, dry-run
-`planInstall`/`planUpdate`/`planRemove`, guarded
-`install`/`update`/`remove`, and `list`/`verify`/`prune`. The `npm` module is
-covered as a guarded package-manager alias facade whose CLI/registry/lifecycle
-entry points remain denied.
+`planInstall`/`planUpdate`/`planRemove`, policy-only
+`planRegistryInstall`/`planTarballInstall`, guarded `install`/`update`/
+`remove`, and `list`/`verify`/`prune`. The `npm` module is covered as a
+guarded package-manager alias facade whose CLI/registry/lifecycle entry points
+remain denied.
 
 Phase 13 Android package manager focused instrumentation:
 
@@ -1921,9 +1924,10 @@ This suite verifies `packageManagerProfile` diagnostics, guarded npm facade
 visibility, denied npm CLI/registry surfaces, the guarded `package_manager`
 facade, source-authority diagnostics, Android app-private local store
 install/list/verify/prune behavior, dry-run planInstall/planUpdate/planRemove
-behavior, guarded install/update/remove behavior, SHA-512 integrity, native
-values, and lifecycle/bin/native package rejection. P13-42 records Android
-package manager parity as partial.
+behavior, policy-only planRegistryInstall/planTarballInstall behavior, guarded
+install/update/remove behavior, SHA-512 integrity, native values, and
+lifecycle/bin/native package rejection. P13-42 records Android package manager
+parity as partial.
 
 Phase 13 stdlib conformance decision gate:
 

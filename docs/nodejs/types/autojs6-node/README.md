@@ -156,12 +156,13 @@ P13-42 extends the `autojs6:profile` declaration with
 manager boundary: host-managed package validation is available, the Android
 runtime has a local app-private store substrate for already-unpacked packages,
 and the `package_manager` module exposes status/policy/sourcePolicy,
-dry-run `planInstall`/`planUpdate`/`planRemove`, guarded
-`install`/`update`/`remove`, plus `list`, `verify`, and `prune` for the
-app-private store. The `npm` module is also declared as a guarded
-package-manager alias facade; it exposes the same local-store plan/mutation and
-maintenance calls while keeping CLI/registry/lifecycle APIs denied. The source
-policy records
+dry-run `planInstall`/`planUpdate`/`planRemove`, policy-only
+`planRegistryInstall`/`planTarballInstall` returning `RemotePackagePlan`,
+guarded `install`/`update`/`remove`, plus `list`, `verify`, and `prune` for
+the app-private store. The `npm` module is also declared as a guarded
+package-manager alias facade; it exposes the same local-store plan/mutation,
+remote source-boundary plan, and maintenance calls while keeping
+CLI/registry/lifecycle APIs denied. The source policy records
 `local_unpacked_host_managed` as the only allowed substrate.
 npm CLI, registry download, remote tarball install, lifecycle scripts, bin
 links, symlinks, native builds, native payloads, postinstall downloads,

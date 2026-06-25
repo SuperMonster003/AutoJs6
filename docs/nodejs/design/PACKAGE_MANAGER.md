@@ -3,8 +3,9 @@
 ## Status
 
 Decision gate. Android runtime npm/registry installation is not enabled by this
-document. Phase 13 adds a partial Android local package store, but no
-user-facing package-manager JavaScript API is promoted yet.
+document. Phase 13 adds a partial Android local package store plus guarded
+script-visible `package_manager` and `npm` facades for policy diagnostics,
+local-store operations, and plan-only source-boundary checks.
 
 AutoJs6 Safe Node Profile supports checked-in pure JavaScript CommonJS dependencies under `node_modules`, but it does not run `npm install`, package lifecycle scripts, native addon builds, or package managers inside the Android runtime.
 
@@ -186,6 +187,11 @@ Supported:
   install/update/remove/list/verify/prune operations plus dry-run
   planInstall/planUpdate/planRemove diagnostics through the script-visible
   facade
+- plan-only registry/tarball boundary diagnostics through
+  `planRegistryInstall()` and `planTarballInstall()`, returning frozen
+  `autojs6-node-package-manager-remote-plan-v1` results with
+  `blocked_by_policy`, no Android bridge dispatch, no network/cache access,
+  and no install authority
 
 P13-48 unifies the lock and integrity policy across the Android-side package
 manager, plugin packages, and native addon artifacts. The shared policy is
@@ -204,7 +210,7 @@ Unsupported:
 - postinstall-generated sources
 - arbitrary `.bin` execution
 - mobile registry downloads
-- mutating JavaScript/runtime package-manager API exposure for the Android
+- unrestricted JavaScript/runtime package-manager API exposure for the Android
   local store
 
 ## Follow-Up Implementation
@@ -353,14 +359,16 @@ substrate for already-unpacked packages. Android-side npm CLI execution,
 registry/tarball download, lifecycle execution, bin shims, native builds,
 postinstall downloads, and unrestricted package-manager operations remain
 deferred. The script-visible `package_manager` facade is limited to guarded
-local mutation plus read-maintenance:
-status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/
-remove/list/verify/prune. Its source policy records
-`local_unpacked_host_managed` as the only allowed source substrate and keeps
-raw registry, remote tarball, URL/git, workspace symlink, and unverified-cache
-sources denied. Mutating calls require `package_manager.mutate`,
-`allowMutation: true`, and SHA-512 integrity from a dry-run plan. The
-script-visible `npm` facade is a guarded alias over `package_manager`; it
-reports the same local-store policy and delegates local plan/mutation/
-maintenance calls while keeping CLI, registry, lifecycle, publish, and pack
-entry points denied.
+local mutation plus read-maintenance and policy-only source planning:
+status/policy/sourcePolicy/planInstall/planUpdate/planRemove/
+planRegistryInstall/planTarballInstall/install/update/remove/list/verify/prune.
+Its source policy records `local_unpacked_host_managed` as the only allowed
+source substrate and keeps raw registry, remote tarball, URL/git, workspace
+symlink, and unverified-cache sources denied. Remote source plan calls return
+`blocked_by_policy` without bridge dispatch, network/cache access, extraction,
+store mutation, or install authority. Mutating calls require
+`package_manager.mutate`, `allowMutation: true`, and SHA-512 integrity from a
+dry-run plan. The script-visible `npm` facade is a guarded alias over
+`package_manager`; it reports the same local-store policy and delegates local
+plan/mutation/maintenance plus remote source-boundary plan calls while keeping
+CLI, registry install, lifecycle, publish, and pack entry points denied.

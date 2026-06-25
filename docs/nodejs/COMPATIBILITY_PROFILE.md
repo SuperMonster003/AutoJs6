@@ -1236,11 +1236,14 @@ native builds/native payloads, postinstall downloads, raw `node_modules`
 mutation, unrestricted `package_manager` operations, and raw
 registry/executable authority remain unpromoted. `package_manager` now exposes
 status, policy, source policy, dry-run `planInstall`, `planUpdate`,
-`planRemove`, guarded `install`/`update`/`remove`, `list`, `verify`, and
-`prune`. `npm` is script-visible as a guarded package-manager alias facade; it
-does not run the npm CLI or fetch from registries. Mutating calls are
-capability-gated by `package_manager.mutate`, require `allowMutation: true`,
-and use dry-run SHA-512 integrity.
+`planRemove`, policy-only `planRegistryInstall`/`planTarballInstall`, guarded
+`install`/`update`/`remove`, `list`, `verify`, and `prune`. Remote source plan
+calls return frozen `blocked_by_policy` diagnostics without bridge dispatch,
+network/cache access, extraction, store mutation, or install authority. `npm`
+is script-visible as a guarded package-manager alias facade; it does not run
+the npm CLI or fetch from registries. Mutating calls are capability-gated by
+`package_manager.mutate`, require `allowMutation: true`, and use dry-run
+SHA-512 integrity.
 
 P13-43 records Node stdlib conformance as partial. The runtime exposes
 `autojs6:profile.stdlibProfile` to document the current Safe stdlib subset for

@@ -348,10 +348,11 @@ not enable full npm CLI behavior. `verifyNodePhase13AndroidPackageInstallManager
 covers the partial Android local package store with transaction staging, store
 locking, cancellation, SHA-512 integrity, lifecycle/bin/native/path denial, and
 install/update/remove/list/verify/prune. It does not enable registry download,
-remote tarball install, unverified cache reuse, or mutating JavaScript
+remote tarball install, unverified cache reuse, or unrestricted JavaScript
 package-manager APIs; the script-visible facade is guarded local mutation plus
-read-maintenance:
-status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune.
+read-maintenance and policy-only source planning:
+status/policy/sourcePolicy/planInstall/planUpdate/planRemove/
+planRegistryInstall/planTarballInstall/install/update/remove/list/verify/prune.
 `verifyNodePhase13ProEntryDirectives` records the P13-11 Pro-style Node entry
 directive state for `"nodejs ui"` and `"nodejs ui-thread"`, including
 `NodeEntryDirective`, descriptor/project config metadata, debug/native values,
@@ -763,11 +764,11 @@ registry download, lifecycle execution, bin shims, symlink materialization,
 native builds/native payloads, postinstall downloads, unrestricted install
 authority, raw executable authority, and raw registry access unpromoted. The
 `package_manager` guarded mutation facade is limited to
-status/policy/sourcePolicy, dry-run planInstall/planUpdate/planRemove, guarded
-install/update/remove requiring `package_manager.mutate` plus
-`allowMutation: true`, and list/verify/prune. The `npm` facade is allowed only
-as a guarded package-manager alias and must keep CLI/registry/lifecycle entry
-points denied.
+status/policy/sourcePolicy, dry-run planInstall/planUpdate/planRemove,
+policy-only planRegistryInstall/planTarballInstall, guarded install/update/
+remove requiring `package_manager.mutate` plus `allowMutation: true`, and
+list/verify/prune. The `npm` facade is allowed only as a guarded
+package-manager alias and must keep CLI/registry/lifecycle entry points denied.
 P13-42 records Android package manager parity as partial.
 `verifyNodePhase13StdlibConformanceDecision` records P13-43 as the stdlib
 conformance decision gate. It requires `stdlibProfile` diagnostics,

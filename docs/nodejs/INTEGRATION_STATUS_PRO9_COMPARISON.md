@@ -1146,11 +1146,13 @@ resolved and sanitized by host tooling, but it is not yet Pro/Desktop npm
 parity. Android npm CLI, registry download/cache, remote tarball install,
 lifecycle scripts, bin shims, symlinks, native builds, signed native payloads,
 packaged dependency distribution, and real npm corpus growth remain open. The
-script-visible `package_manager` facade is limited to
-status/policy/sourcePolicy, dry-run planInstall/planUpdate/planRemove, guarded
-install/update/remove, and list/verify/prune over the app-private store.
-`npm` is script-visible only as a guarded alias over that facade; CLI,
-registry, lifecycle, publish, and pack entry points remain stable-denied.
+script-visible `package_manager` facade is limited to status/policy/
+sourcePolicy, dry-run planInstall/planUpdate/planRemove, policy-only
+planRegistryInstall/planTarballInstall, guarded install/update/remove, and
+list/verify/prune over the app-private store. Remote source plan calls return
+`blocked_by_policy` without network/cache access or install authority. `npm` is
+script-visible only as a guarded alias over that facade; CLI, registry install,
+lifecycle, publish, and pack entry points remain stable-denied.
 
 P13-43 records Node stdlib conformance as partial: Safe Node now exposes
 `stdlibProfile` diagnostics for the representative stdlib subset covering

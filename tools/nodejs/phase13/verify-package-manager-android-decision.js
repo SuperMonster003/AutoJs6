@@ -88,9 +88,9 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'sourceAuthority: "local_unpacked_host_managed_only"'),
       token(files.nodeBridgeSources, 'installAuthority: "package_manager_mutate_explicit_local_unpacked"'),
       token(files.nodeBridgeSources, 'allowedSources: Object.freeze(["local_unpacked_host_managed"])'),
-      token(files.nodeBridgeSources, 'planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove"])'),
+      token(files.nodeBridgeSources, 'planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"])'),
       token(files.nodeBridgeSources, 'mutationOperations: Object.freeze(["install", "update", "remove"])'),
-      token(files.nodeBridgeSources, 'npmFacadeOperations: Object.freeze(["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"])'),
+      token(files.nodeBridgeSources, 'npmFacadeOperations: Object.freeze(["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"])'),
       token(files.nodeBridgeSources, 'mutationCapability: "package_manager.mutate"'),
       token(files.nodeBridgeSources, '"raw_registry",'),
       token(files.nodeBridgeSources, '"remote_tarball",'),
@@ -105,6 +105,8 @@ function buildReport(files) {
       token(files.typesAutojsGlobal, 'readonly npmFacade: "guarded_package_manager_alias" | string'),
       token(files.typescriptSmoke, "autojsProfile.packageManagerProfile.androidRuntimeInstall"),
       token(files.typescriptSmoke, "autojsProfile.packageManagerProfile.npmFacade"),
+      token(files.typescriptSmoke, "packageManager.planRegistryInstall"),
+      token(files.typescriptSmoke, "npm.planTarballInstall"),
     ], []),
     scenario("android_local_store_substrate", "Android can transact on already-unpacked package directories with integrity and unsafe npm behavior denial", [
       token(files.manager, "class NodeAndroidPackageInstallManager"),
@@ -145,11 +147,16 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "function planInstall(request)"),
       token(files.nodeBridgeSources, "function planUpdate(request)"),
       token(files.nodeBridgeSources, "function planRemove(request)"),
+      token(files.nodeBridgeSources, "function planRegistryInstall(request)"),
+      token(files.nodeBridgeSources, "function planTarballInstall(request)"),
       token(files.nodeBridgeSources, "function install(request)"),
       token(files.nodeBridgeSources, "function update(request)"),
       token(files.nodeBridgeSources, "function remove(request)"),
       token(files.nodeBridgeSources, "autojs6-node-package-manager-source-policy-v1"),
       token(files.nodeBridgeSources, "autojs6-node-android-package-plan-v1"),
+      token(files.nodeBridgeSources, "autojs6-node-package-manager-remote-plan-v1"),
+      token(files.nodeBridgeSources, 'status: "blocked_by_policy"'),
+      token(files.nodeBridgeSources, 'sourceAuthority: sourceKind === "raw_registry" ? "raw_registry_denied" : "remote_tarball_denied"'),
       token(files.nodeBridgeSources, "local_unpacked_host_managed"),
       token(files.nodeBridgeSources, "unverified_cache_denied"),
       token(files.nodeBridgeSources, "ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED"),
@@ -159,9 +166,13 @@ function buildReport(files) {
       token(files.typesNpm, 'declare module "npm"'),
       token(files.typesNpm, "export interface NpmFacadeModule"),
       token(files.typesPackageManager, "export interface SourcePolicy"),
+      token(files.typesPackageManager, "export interface RemotePackagePlan"),
       token(files.typesPackageManager, "sourcePolicy(): SourcePolicy"),
       token(files.typesPackageManager, "planInstall(request: PlanSourceRequest): Promise<PackagePlan>"),
+      token(files.typesPackageManager, "planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>"),
+      token(files.typesPackageManager, "planTarballInstall(request: PlanTarballInstallRequest): Promise<RemotePackagePlan>"),
       token(files.typesPackageManager, "install(request: MutationSourceRequest): Promise<OperationResult>"),
+      token(files.typesNpm, "planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>"),
       token(files.typesPackageManager, "list(options?: ListOptions): Promise<readonly PackageRecord[]>"),
       token(files.typesPackageManager, "verify(request: VerifyRequest): Promise<OperationResult>"),
       token(files.typesIndex, './package_manager.d.ts'),
@@ -230,9 +241,9 @@ function buildReport(files) {
         packageManagerProfile.includes('sourceAuthority: "local_unpacked_host_managed_only"') &&
         packageManagerProfile.includes('installAuthority: "package_manager_mutate_explicit_local_unpacked"') &&
         packageManagerProfile.includes('allowedSources: Object.freeze(["local_unpacked_host_managed"])') &&
-        packageManagerProfile.includes('planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove"])') &&
+        packageManagerProfile.includes('planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"])') &&
         packageManagerProfile.includes('mutationOperations: Object.freeze(["install", "update", "remove"])') &&
-        packageManagerProfile.includes('npmFacadeOperations: Object.freeze(["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"])') &&
+        packageManagerProfile.includes('npmFacadeOperations: Object.freeze(["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"])') &&
         packageManagerProfile.includes('mutationCapability: "package_manager.mutate"') &&
         packageManagerProfile.includes('jsBridge: "guarded_mutation_partial"') &&
         packageManagerProfile.includes('requirePackageManager: "guarded_mutation_partial"') &&
@@ -268,21 +279,28 @@ function buildReport(files) {
         files.nodeBridgeSources.text.includes("function planInstall(request)") &&
         files.nodeBridgeSources.text.includes("function planUpdate(request)") &&
         files.nodeBridgeSources.text.includes("function planRemove(request)") &&
+        files.nodeBridgeSources.text.includes("function planRegistryInstall(request)") &&
+        files.nodeBridgeSources.text.includes("function planTarballInstall(request)") &&
         files.nodeBridgeSources.text.includes("function install(request)") &&
         files.nodeBridgeSources.text.includes('permissions: ["package_manager", "package_manager.mutate"]') &&
         files.nodeBridgeSources.text.includes("autojs6-node-package-manager-source-policy-v1") &&
         files.nodeBridgeSources.text.includes("autojs6-node-android-package-plan-v1") &&
+        files.nodeBridgeSources.text.includes("autojs6-node-package-manager-remote-plan-v1") &&
+        files.nodeBridgeSources.text.includes('status: "blocked_by_policy"') &&
         files.nodeBridgeSources.text.includes('npmCli: "denied"') &&
         files.nodeBridgeSources.text.includes('registryDownload: "deferred"') &&
         files.nodeBridgeSources.text.includes('permissions: ["package_manager"]') &&
         files.typesPackageManager.text.includes('declare module "package_manager"') &&
         files.typesPackageManager.text.includes("sourcePolicy(): SourcePolicy") &&
         files.typesPackageManager.text.includes("planInstall(request: PlanSourceRequest): Promise<PackagePlan>") &&
+        files.typesPackageManager.text.includes("planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>") &&
+        files.typesPackageManager.text.includes("planTarballInstall(request: PlanTarballInstallRequest): Promise<RemotePackagePlan>") &&
         files.typesPackageManager.text.includes("install(request: MutationSourceRequest): Promise<OperationResult>") &&
         files.typesPackageManager.text.includes("list(options?: ListOptions): Promise<readonly PackageRecord[]>") &&
         files.typesPackageManager.text.includes("verify(request: VerifyRequest): Promise<OperationResult>") &&
         files.typesNpm.text.includes('declare module "npm"') &&
         files.typesNpm.text.includes("status(): NpmFacadeStatus") &&
+        files.typesNpm.text.includes("planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>") &&
         files.typesNpm.text.includes("cli(...args: readonly unknown[]): never") &&
         files.typesIndex.text.includes('./npm.d.ts') &&
         !packageManagerProfile.includes('jsBridge: "partial"') &&
@@ -321,6 +339,9 @@ function buildReport(files) {
       npmFacadeReady: files.nodeBridgeSources.text.includes("function __autojs6_limited_npm()") &&
         files.typesNpm.text.includes('declare module "npm"'),
       registryInstallPromoted: false,
+      registryTarballPlanReady: files.nodeBridgeSources.text.includes("autojs6-node-package-manager-remote-plan-v1") &&
+        files.nodeBridgeSources.text.includes("function planRegistryInstall(request)") &&
+        files.nodeBridgeSources.text.includes("function planTarballInstall(request)"),
       lifecycleScriptsPromoted: false,
       jsPackageManagerDiagnosticFacadeReady: scenarioById(scenarios, "android_local_store_substrate").missingEvidence === 0,
       jsPackageManagerReadMaintenanceReady: scenarioById(scenarios, "android_local_store_substrate").missingEvidence === 0,

@@ -754,11 +754,14 @@ builds/native payloads, postinstall downloads, raw executable launch,
 unrestricted `package_manager` operations, and raw `node_modules` mutation
 remain denied until separate Desktop-profile evidence proves them safe.
 `package_manager` itself is limited to guarded local mutation plus
-read-maintenance: `status`/`policy`/`sourcePolicy`,
-`planInstall`/`planUpdate`/`planRemove`, `install`/`update`/`remove`, and
-`list`/`verify`/`prune`. `npm` is script-visible only as a guarded
-package-manager alias facade; its CLI, lifecycle, registry, publish, and pack
-entry points reject with stable policy errors. Mutating calls require
+read-maintenance and policy-only source planning: `status`/`policy`/
+`sourcePolicy`, `planInstall`/`planUpdate`/`planRemove`,
+`planRegistryInstall`/`planTarballInstall`, `install`/`update`/`remove`, and
+`list`/`verify`/`prune`. Remote source plan calls return `blocked_by_policy`
+without bridge dispatch, network/cache access, extraction, store mutation, or
+install authority. `npm` is script-visible only as a guarded package-manager
+alias facade; its CLI, lifecycle, registry install, publish, and pack entry
+points reject with stable policy errors. Mutating calls require
 `package_manager.mutate`, `allowMutation: true`, a project-scoped local
 unpacked source where relevant, and expected SHA-512 integrity from a dry-run
 plan.
