@@ -46,6 +46,7 @@ object NodeBridgePermissionManifest {
     const val NETWORK = "network"
     const val WORK_MANAGER = "work_manager"
     const val PACKAGE_MANAGER = "package_manager"
+    const val PACKAGE_MANAGER_MUTATE = "package_manager.mutate"
     const val JAVA_INTEROP = "java_interop"
     const val RHINO = "rhino"
     const val INPUT_OBSERVER = "input_observer"
@@ -103,6 +104,7 @@ object NodeBridgePermissionManifest {
         NETWORK,
         WORK_MANAGER,
         PACKAGE_MANAGER,
+        PACKAGE_MANAGER_MUTATE,
         JAVA_INTEROP,
         RHINO,
         INPUT_OBSERVER,
@@ -164,6 +166,10 @@ object NodeBridgePermissionManifest {
         "package.manager" to PACKAGE_MANAGER,
         "android_package_manager" to PACKAGE_MANAGER,
         "android-package-manager" to PACKAGE_MANAGER,
+        "package-manager.mutate" to PACKAGE_MANAGER_MUTATE,
+        "package.manager.mutate" to PACKAGE_MANAGER_MUTATE,
+        "android_package_manager.mutate" to PACKAGE_MANAGER_MUTATE,
+        "android-package-manager.mutate" to PACKAGE_MANAGER_MUTATE,
         "java" to JAVA_INTEROP,
         "rhino.run" to RHINO,
         "input-observer" to INPUT_OBSERVER,
@@ -352,7 +358,10 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)
             NodeBridgeModules.FETCH, NodeBridgeModules.WEBSOCKET -> listOf(NETWORK)
             NodeBridgeModules.WORK_MANAGER -> listOf(WORK_MANAGER)
-            NodeBridgeModules.PACKAGE_MANAGER -> listOf(PACKAGE_MANAGER)
+            NodeBridgeModules.PACKAGE_MANAGER -> when (method) {
+                "install", "update", "remove" -> listOf(PACKAGE_MANAGER, PACKAGE_MANAGER_MUTATE)
+                else -> listOf(PACKAGE_MANAGER)
+            }
             NodeBridgeModules.JAVA -> listOf(JAVA_INTEROP)
             NodeBridgeModules.RHINO -> listOf(RHINO)
             NodeBridgeModules.INPUT_OBSERVER -> when (method) {
@@ -419,7 +428,8 @@ object NodeBridgePermissionManifest {
             required == DEVICE_POWER ||
             required == MEDIA_AUDIO ||
             required == MEDIA_METADATA ||
-            required == MEDIA_RECORDING
+            required == MEDIA_RECORDING ||
+            required == PACKAGE_MANAGER_MUTATE
         ) {
             return required in declared
         }

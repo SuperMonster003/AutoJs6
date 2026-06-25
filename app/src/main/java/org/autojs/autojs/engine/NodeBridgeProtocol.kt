@@ -641,7 +641,17 @@ object NodeBridgeModules {
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
     val workManagerMethods = setOf("scheduleOnce", "schedulePeriodic", "cancel", "list")
-    val packageManagerMethods = setOf("list", "verify", "prune", "planInstall", "planUpdate", "planRemove")
+    val packageManagerMethods = setOf(
+        "list",
+        "verify",
+        "prune",
+        "planInstall",
+        "planUpdate",
+        "planRemove",
+        "install",
+        "update",
+        "remove",
+    )
     val javaMethods = setOf("type", "callStatic", "new", "call", "callInstance", "getField", "release", "dispose")
     val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
@@ -3478,6 +3488,52 @@ class AndroidNodeBridgeCapabilityProvider(
                         packageInstallManager.planRemove(nameVersion.first, nameVersion.second).toJson().toString(),
                     )
                 }
+                "install" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.install requires a JSON request with name, version, sourceDir, expectedIntegrity, and allowMutation.",
+                        )
+                    packageManagerRequireMutationConfirmation(payload, "install")
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.install(
+                            packageManagerPackageRequest(payload, "install", requireExpectedIntegrity = true),
+                        ).toJson().toString(),
+                    )
+                }
+                "update" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.update requires a JSON request with name, version, sourceDir, expectedIntegrity, and allowMutation.",
+                        )
+                    packageManagerRequireMutationConfirmation(payload, "update")
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.update(
+                            packageManagerPackageRequest(payload, "update", requireExpectedIntegrity = true),
+                        ).toJson().toString(),
+                    )
+                }
+                "remove" -> {
+                    val payload = request.firstObjectArg()
+                        ?: return@runCatching packageManagerInvalidRequest(
+                            request,
+                            "package_manager.remove requires a JSON request with name, version, expectedIntegrity, and allowMutation.",
+                        )
+                    packageManagerRequireMutationConfirmation(payload, "remove")
+                    val nameVersion = packageManagerNameVersion(payload, "remove")
+                    val expectedIntegrity = packageManagerExpectedIntegrity(payload, "remove", requireExpectedIntegrity = true)
+                    NodeBridgeResponse.success(
+                        request.id,
+                        packageInstallManager.remove(
+                            nameVersion.first,
+                            nameVersion.second,
+                            expectedIntegrity = expectedIntegrity,
+                        ).toJson().toString(),
+                    )
+                }
                 else -> unavailable(request)
             }
         }.getOrElse { error ->
@@ -3489,6 +3545,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun packageManagerPackageRequest(
         payload: JSONObject,
         methodName: String,
+        requireExpectedIntegrity: Boolean = false,
     ): NodeAndroidPackageInstallManager.PackageRequest {
         val (name, version) = packageManagerNameVersion(payload, methodName)
         val sourceDirText = payload.optString("sourceDir").trim()
@@ -3497,7 +3554,7 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         val sourceDir = resolveScopedProjectFile(sourceDirText)
             ?: throw IllegalArgumentException("package_manager.$methodName sourceDir must be a relative path inside the current workingDirectory.")
-        val expectedIntegrity = payload.optString("expectedIntegrity").trim().takeIf { it.isNotBlank() }
+        val expectedIntegrity = packageManagerExpectedIntegrity(payload, methodName, requireExpectedIntegrity)
         val kind = payload.optString("kind", NodeAndroidPackageInstallManager.KIND_DEPENDENCY)
             .trim()
             .takeIf { it.isNotBlank() }
@@ -3509,6 +3566,27 @@ class AndroidNodeBridgeCapabilityProvider(
             expectedIntegrity = expectedIntegrity,
             kind = kind,
         )
+    }
+
+    private fun packageManagerRequireMutationConfirmation(payload: JSONObject, methodName: String) {
+        if (payload.opt("allowMutation") != true) {
+            throw NodeAndroidPackageInstallManager.PackageInstallException(
+                NodeAndroidPackageInstallManager.ERROR_MUTATION_NOT_CONFIRMED,
+                "package_manager.$methodName requires allowMutation: true.",
+            )
+        }
+    }
+
+    private fun packageManagerExpectedIntegrity(
+        payload: JSONObject,
+        methodName: String,
+        requireExpectedIntegrity: Boolean,
+    ): String? {
+        val expectedIntegrity = payload.optString("expectedIntegrity").trim().takeIf { it.isNotBlank() }
+        if (requireExpectedIntegrity && expectedIntegrity == null) {
+            throw IllegalArgumentException("package_manager.$methodName requires expectedIntegrity from a dry-run plan.")
+        }
+        return expectedIntegrity
     }
 
     private fun packageManagerNameVersion(payload: JSONObject, methodName: String): Pair<String, String> {

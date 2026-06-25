@@ -77,7 +77,7 @@ class NodeAndroidPackageInstallManager(
             .put("status", status)
             .put("dryRun", true)
             .put("sourceAuthority", "local_unpacked_host_managed_only")
-            .put("installAuthority", "internal_substrate_only")
+            .put("installAuthority", INSTALL_AUTHORITY)
             .put("grantsInstallAuthority", false)
             .put("message", message)
             .put("record", record?.toJson() ?: JSONObject.NULL)
@@ -112,7 +112,12 @@ class NodeAndroidPackageInstallManager(
         return installOrUpdate(OP_UPDATE, request, replace = true, token = token)
     }
 
-    fun remove(name: String, version: String, token: CancellationToken = CancellationToken()): OperationResult {
+    fun remove(
+        name: String,
+        version: String,
+        expectedIntegrity: String? = null,
+        token: CancellationToken = CancellationToken(),
+    ): OperationResult {
         return withStoreLock {
             token.throwIfCancellationRequested()
             val target = packageDir(name, version)
@@ -122,6 +127,17 @@ class NodeAndroidPackageInstallManager(
                     status = STATUS_MISSING,
                     message = "Package is not installed.",
                 )
+            }
+            expectedIntegrity?.let { expected ->
+                val record = readRecord(target)
+                    ?: throw PackageInstallException(ERROR_INVALID_PACKAGE, "Package record is missing for $name@$version.")
+                if (record.integrity != expected) {
+                    throw PackageInstallException(ERROR_INTEGRITY_MISMATCH, "Package integrity mismatch for $name@$version.")
+                }
+                val actualIntegrity = calculateSourceIntegrity(target, includeRecord = false)
+                if (actualIntegrity != record.integrity) {
+                    throw PackageInstallException(ERROR_INTEGRITY_MISMATCH, "Package integrity mismatch for $name@$version.")
+                }
             }
             val transactionId = newTransactionId()
             val transactionDir = transactionDir(transactionId)
@@ -255,14 +271,16 @@ class NodeAndroidPackageInstallManager(
         "android_package_manager.native_payload_execution" to "disabled",
         "android_package_manager.postinstall_download" to "disabled",
         "android_package_manager.network_install" to "disabled",
-        "android_package_manager.source_policy" to "decision_only_no_install_authority",
+        "android_package_manager.source_policy" to "guarded_local_unpacked_mutation",
         "android_package_manager.source_authority" to "local_unpacked_host_managed_only",
         "android_package_manager.allowed_sources" to "local_unpacked_host_managed",
         "android_package_manager.raw_registry_authority" to "disabled",
         "android_package_manager.remote_tarball_install" to "disabled",
         "android_package_manager.unverified_cache_reuse" to "disabled",
-        "android_package_manager.install_authority" to "internal_substrate_only",
-        "android_package_manager.js_bridge" to "read_maintenance_partial",
+        "android_package_manager.install_authority" to INSTALL_AUTHORITY,
+        "android_package_manager.mutation_capability" to "package_manager.mutate",
+        "android_package_manager.mutation_confirmation" to "allowMutation_required",
+        "android_package_manager.js_bridge" to "guarded_mutation_partial",
         "package_integrity_policy.schema" to NodePackageIntegrityPolicy.SCHEMA,
         "package_integrity_policy.status" to NodePackageIntegrityPolicy.STATUS,
         "package_integrity_policy.lockfile" to NodePackageIntegrityPolicy.LOCKFILE,
@@ -555,8 +573,10 @@ class NodeAndroidPackageInstallManager(
         const val ERROR_NATIVE_PAYLOAD_DISABLED = "ERR_AUTOJS6_ANDROID_PACKAGE_NATIVE_DISABLED"
         const val ERROR_BIN_DISABLED = "ERR_AUTOJS6_ANDROID_PACKAGE_BIN_DISABLED"
         const val ERROR_PATH_ESCAPE = "ERR_AUTOJS6_ANDROID_PACKAGE_PATH_ESCAPE"
+        const val ERROR_MUTATION_NOT_CONFIRMED = "ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED"
 
         val DISABLED_LIFECYCLE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")
+        const val INSTALL_AUTHORITY = "package_manager_mutate_explicit_local_unpacked"
 
         private const val DEFAULT_BUFFER_SIZE = 8192
         private const val LOCK_FILE = ".autojs6-package-manager.lock"

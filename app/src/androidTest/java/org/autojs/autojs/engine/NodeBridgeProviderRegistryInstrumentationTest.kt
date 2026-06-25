@@ -125,12 +125,15 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("work_manager").status)
         assertEquals(NodeWorkManagerBridgeScheduler.SCHEDULER_NAME, healthById.getValue("work_manager").details.getValue("scheduler"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("package_manager").status)
-        assertEquals("read_maintenance_partial", healthById.getValue("package_manager").details.getValue("jsBridge"))
+        assertEquals("guarded_mutation_partial", healthById.getValue("package_manager").details.getValue("jsBridge"))
         assertEquals("local_unpacked_host_managed_only", healthById.getValue("package_manager").details.getValue("sourceAuthority"))
-        assertEquals("internal_substrate_only", healthById.getValue("package_manager").details.getValue("installAuthority"))
+        assertEquals(NodeAndroidPackageInstallManager.INSTALL_AUTHORITY, healthById.getValue("package_manager").details.getValue("installAuthority"))
+        assertEquals(NodeBridgePermissionManifest.PACKAGE_MANAGER_MUTATE, healthById.getValue("package_manager").details.getValue("mutationCapability"))
         assertTrue(healthById.getValue("package_manager").details.getValue("liveMethods").contains("verify"))
         assertTrue(healthById.getValue("package_manager").details.getValue("liveMethods").contains("planInstall"))
+        assertTrue(healthById.getValue("package_manager").details.getValue("liveMethods").contains("install"))
         assertEquals("planInstall,planUpdate,planRemove", healthById.getValue("package_manager").details.getValue("planOperations"))
+        assertEquals("install,update,remove", healthById.getValue("package_manager").details.getValue("mutationOperations"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)
         assertTrue(
             healthById.getValue("accessibility").status in setOf(

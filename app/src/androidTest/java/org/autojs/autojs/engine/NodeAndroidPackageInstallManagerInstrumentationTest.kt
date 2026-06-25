@@ -51,7 +51,7 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
         )
         assertEquals(NodeAndroidPackageInstallManager.STATUS_READY, installPlan.status)
         assertTrue(installPlan.toJson().getBoolean("dryRun"))
-        assertEquals("internal_substrate_only", installPlan.toJson().getString("installAuthority"))
+        assertEquals(NodeAndroidPackageInstallManager.INSTALL_AUTHORITY, installPlan.toJson().getString("installAuthority"))
         assertTrue(manager.list().isEmpty())
 
         val installed = manager.install(
@@ -128,10 +128,14 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
             NodeAndroidPackageInstallManager.STATUS_READY,
             manager.planRemove("@autojs6/test-package", "1.0.0").status,
         )
+        expectPackageError(NodeAndroidPackageInstallManager.ERROR_INTEGRITY_MISMATCH) {
+            manager.remove("@autojs6/test-package", "1.0.0", expectedIntegrity = integrityV1)
+        }
+        assertEquals(1, manager.list().size)
 
         assertEquals(
             NodeAndroidPackageInstallManager.STATUS_REMOVED,
-            manager.remove("@autojs6/test-package", "1.0.0").status,
+            manager.remove("@autojs6/test-package", "1.0.0", expectedIntegrity = integrityV2).status,
         )
         assertTrue(manager.list().isEmpty())
         assertEquals(
@@ -210,14 +214,16 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
         assertEquals("disabled", nativeValues["android_package_manager.native_payload_execution"])
         assertEquals("disabled", nativeValues["android_package_manager.postinstall_download"])
         assertEquals("disabled", nativeValues["android_package_manager.network_install"])
-        assertEquals("decision_only_no_install_authority", nativeValues["android_package_manager.source_policy"])
+        assertEquals("guarded_local_unpacked_mutation", nativeValues["android_package_manager.source_policy"])
         assertEquals("local_unpacked_host_managed_only", nativeValues["android_package_manager.source_authority"])
         assertEquals("local_unpacked_host_managed", nativeValues["android_package_manager.allowed_sources"])
         assertEquals("disabled", nativeValues["android_package_manager.raw_registry_authority"])
         assertEquals("disabled", nativeValues["android_package_manager.remote_tarball_install"])
         assertEquals("disabled", nativeValues["android_package_manager.unverified_cache_reuse"])
-        assertEquals("internal_substrate_only", nativeValues["android_package_manager.install_authority"])
-        assertEquals("read_maintenance_partial", nativeValues["android_package_manager.js_bridge"])
+        assertEquals(NodeAndroidPackageInstallManager.INSTALL_AUTHORITY, nativeValues["android_package_manager.install_authority"])
+        assertEquals("package_manager.mutate", nativeValues["android_package_manager.mutation_capability"])
+        assertEquals("allowMutation_required", nativeValues["android_package_manager.mutation_confirmation"])
+        assertEquals("guarded_mutation_partial", nativeValues["android_package_manager.js_bridge"])
     }
 
     private fun request(name: String, version: String, sourceDir: File): NodeAndroidPackageInstallManager.PackageRequest {

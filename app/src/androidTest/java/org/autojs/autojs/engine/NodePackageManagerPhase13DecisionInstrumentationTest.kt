@@ -81,6 +81,9 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   Array.isArray(packageManagerProfile.allowedSources) && packageManagerProfile.allowedSources.join(","),
                   Array.isArray(packageManagerProfile.deniedSources) && packageManagerProfile.deniedSources.join(","),
                   Array.isArray(packageManagerProfile.planOperations) && packageManagerProfile.planOperations.join(","),
+                  Array.isArray(packageManagerProfile.mutationOperations) && packageManagerProfile.mutationOperations.join(","),
+                  packageManagerProfile.mutationCapability,
+                  packageManagerProfile.mutationConfirmation,
                   Array.isArray(packageManagerProfile.operations) && packageManagerProfile.operations.join(","),
                   Array.isArray(packageManagerProfile.packageKinds) && packageManagerProfile.packageKinds.join(","),
                   packageManagerProfile.jsBridge,
@@ -94,6 +97,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   Object.isFrozen(packageManagerProfile.allowedSources),
                   Object.isFrozen(packageManagerProfile.deniedSources),
                   Object.isFrozen(packageManagerProfile.planOperations),
+                  Object.isFrozen(packageManagerProfile.mutationOperations),
                   Object.isFrozen(packageManagerProfile.operations),
                   Object.isFrozen(packageManagerProfile.packageKinds)
                 ].join("|"));
@@ -124,14 +128,14 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "host_managed_plus_android_store_substrate|deferred|host_side_only|" +
                     "autojs6_lock_host_managed|sha512_required|denied|not_promoted|denied|" +
                     "denied|denied|denied|denied|transactional_store_only|" +
-                    "locked_cancellable_atomic|decision_only_no_install_authority|" +
-                    "local_unpacked_host_managed_only|internal_substrate_only|" +
+                    "locked_cancellable_atomic|guarded_local_unpacked_mutation|" +
+                    "local_unpacked_host_managed_only|package_manager_mutate_explicit_local_unpacked|" +
                     "local_unpacked_host_managed|" +
                     "raw_registry,remote_tarball,git,http_url,file_url,workspace_symlink,unverified_cache|" +
-                    "planInstall,planUpdate,planRemove|" +
+                    "planInstall,planUpdate,planRemove|install,update,remove|package_manager.mutate|allowMutation_required|" +
                     "install,update,remove,list,verify,prune|" +
-                    "dependency,plugin,project|read_maintenance_partial|read_maintenance_partial|not_promoted|denied|" +
-                    "false|false|true|true|true|true|true|true|true",
+                    "dependency,plugin,project|guarded_mutation_partial|guarded_mutation_partial|not_promoted|denied|" +
+                    "false|false|true|true|true|true|true|true|true|true",
             ),
         )
         assertTrue(
@@ -141,8 +145,8 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
     }
 
     @Test
-    fun packageManagerReadMaintenanceFacadeListsVerifiesAndPrunesLocalStore() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-42 package_manager read maintenance facade")
+    fun packageManagerGuardedMutationFacadeInstallsUpdatesRemovesAndMaintainsLocalStore() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-42 package_manager guarded mutation facade")
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
@@ -169,30 +173,38 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(Object.isFrozen(sourcePolicy.registry), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.tarball), true);
                   assert.strictEqual(Object.isFrozen(sourcePolicy.futurePromotionRequires), true);
-                  assert.strictEqual(status.status, "read_maintenance_partial");
-                  assert.strictEqual(status.jsBridge, "read_maintenance_partial");
-                  assert.strictEqual(status.requirePackageManager, "read_maintenance_partial");
-                  assert.strictEqual(status.grantsInstallAuthority, false);
-                  assert.strictEqual(status.sourcePolicy, "decision_only_no_install_authority");
+                  assert.strictEqual(status.status, "guarded_mutation_partial");
+                  assert.strictEqual(status.jsBridge, "guarded_mutation_partial");
+                  assert.strictEqual(status.requirePackageManager, "guarded_mutation_partial");
+                  assert.strictEqual(status.grantsInstallAuthority, true);
+                  assert.strictEqual(status.sourcePolicy, "guarded_local_unpacked_mutation");
                   assert.strictEqual(status.sourceAuthority, "local_unpacked_host_managed_only");
-                  assert.strictEqual(status.installAuthority, "internal_substrate_only");
+                  assert.strictEqual(status.installAuthority, "package_manager_mutate_explicit_local_unpacked");
                   assert.strictEqual(policy.npmCli, "denied");
                   assert.strictEqual(policy.registryDownload, "deferred");
                   assert.strictEqual(policy.lifecycleScripts, "denied");
                   assert.strictEqual(policy.rawRegistryAccess, false);
                   assert.strictEqual(policy.sourceAuthority, "local_unpacked_host_managed_only");
-                  assert.strictEqual(policy.installAuthority, "internal_substrate_only");
+                  assert.strictEqual(policy.installAuthority, "package_manager_mutate_explicit_local_unpacked");
                   assert.deepStrictEqual(policy.allowedSources, ["local_unpacked_host_managed"]);
                   assert(policy.deniedSources.includes("raw_registry"));
                   assert(policy.deniedSources.includes("remote_tarball"));
                   assert.deepStrictEqual(policy.planOperations, ["planInstall", "planUpdate", "planRemove"]);
+                  assert.deepStrictEqual(policy.mutationOperations, ["install", "update", "remove"]);
+                  assert.strictEqual(policy.mutationCapability, "package_manager.mutate");
+                  assert.strictEqual(policy.mutationConfirmation, "allowMutation_required");
+                  assert.strictEqual(policy.requiresExpectedIntegrity, true);
                   assert.strictEqual(sourcePolicy.schema, "autojs6-node-package-manager-source-policy-v1");
-                  assert.strictEqual(sourcePolicy.status, "decision_only_no_install_authority");
-                  assert.strictEqual(sourcePolicy.grantsInstallAuthority, false);
+                  assert.strictEqual(sourcePolicy.status, "guarded_local_unpacked_mutation");
+                  assert.strictEqual(sourcePolicy.grantsInstallAuthority, true);
                   assert.deepStrictEqual(sourcePolicy.allowedSources, ["local_unpacked_host_managed"]);
                   assert(sourcePolicy.deniedSources.includes("raw_registry"));
                   assert(sourcePolicy.deniedSources.includes("remote_tarball"));
                   assert.deepStrictEqual(sourcePolicy.planOperations, ["planInstall", "planUpdate", "planRemove"]);
+                  assert.deepStrictEqual(sourcePolicy.mutationOperations, ["install", "update", "remove"]);
+                  assert.strictEqual(sourcePolicy.mutationCapability, "package_manager.mutate");
+                  assert.strictEqual(sourcePolicy.mutationConfirmation, "allowMutation_required");
+                  assert.strictEqual(sourcePolicy.requiresExpectedIntegrity, true);
                   assert.strictEqual(sourcePolicy.localUnpacked.status, "allowed_substrate");
                   assert.strictEqual(sourcePolicy.localUnpacked.requiresSha512, true);
                   assert.strictEqual(sourcePolicy.registry.rawRegistryAccess, false);
@@ -201,16 +213,14 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.deepStrictEqual(status.operations, ["install", "update", "remove", "list", "verify", "prune"]);
                   assert.deepStrictEqual(policy.packageKinds, ["dependency", "plugin", "project"]);
 
-                  function deniedCode(methodName) {
+                  async function rejectionCode(methodName, request) {
                     try {
-                      packageManager[methodName]({ name: "@autojs6/p13", version: "1.0.0" });
+                      await packageManager[methodName](request);
                     } catch (error) {
                       return String(error && (error.autojs6Code || error.code || ""));
                     }
-                    throw new Error("package_manager." + methodName + " must remain unpromoted");
+                    throw new Error("package_manager." + methodName + " must reject");
                   }
-                  const deniedCodes = ["install", "update", "remove"].map(deniedCode);
-                  deniedCodes.forEach((code) => assert.strictEqual(code, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"));
 
                   const planSuffix = Date.now().toString(36);
                   const planName = "@autojs6/p13-plan-" + planSuffix;
@@ -221,6 +231,20 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     version: "1.0.0"
                   }));
                   fs.writeFileSync(path.join(planSourceDir, "index.cjs"), "module.exports = 13;\n");
+                  const mutationNotConfirmed = await rejectionCode("install", {
+                    name: planName,
+                    version: "1.0.0",
+                    sourceDir: planSourceDir,
+                    expectedIntegrity: "sha512-placeholder"
+                  });
+                  assert.strictEqual(mutationNotConfirmed, "ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED");
+                  const mutationMissingIntegrity = await rejectionCode("install", {
+                    name: planName,
+                    version: "1.0.0",
+                    sourceDir: planSourceDir,
+                    allowMutation: true
+                  });
+                  assert.strictEqual(mutationMissingIntegrity, "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST");
                   const planInstallResult = await packageManager.planInstall({
                     name: planName,
                     version: "1.0.0",
@@ -235,6 +259,27 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(planInstallResult.record.name, planName);
                   assert.strictEqual(Object.isFrozen(planInstallResult), true);
                   assert.strictEqual(Object.isFrozen(planInstallResult.record), true);
+                  const installedResult = await packageManager.install({
+                    name: planName,
+                    version: "1.0.0",
+                    sourceDir: planSourceDir,
+                    expectedIntegrity: planInstallResult.record.integrity,
+                    allowMutation: true,
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(installedResult.operation, "install");
+                  assert.strictEqual(installedResult.status, "installed");
+                  assert.strictEqual(installedResult.record.integrity, planInstallResult.record.integrity);
+                  assert.strictEqual(Object.isFrozen(installedResult), true);
+                  assert.strictEqual(Object.isFrozen(installedResult.record), true);
+                  const duplicatePlan = await packageManager.planInstall({
+                    name: planName,
+                    version: "1.0.0",
+                    sourceDir: planSourceDir,
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(duplicatePlan.status, "already_installed");
+                  fs.writeFileSync(path.join(planSourceDir, "index.cjs"), "module.exports = 14;\n");
                   const planUpdateResult = await packageManager.planUpdate({
                     name: planName,
                     version: "1.0.0",
@@ -242,16 +287,37 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     timeoutMs: 5000
                   });
                   assert.strictEqual(planUpdateResult.operation, "update");
-                  assert.strictEqual(planUpdateResult.status, "missing");
+                  assert.strictEqual(planUpdateResult.status, "ready");
                   assert.strictEqual(planUpdateResult.grantsInstallAuthority, false);
+                  const updatedResult = await packageManager.update({
+                    name: planName,
+                    version: "1.0.0",
+                    sourceDir: planSourceDir,
+                    expectedIntegrity: planUpdateResult.record.integrity,
+                    allowMutation: true,
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(updatedResult.operation, "update");
+                  assert.strictEqual(updatedResult.status, "updated");
+                  assert.strictEqual(updatedResult.record.integrity, planUpdateResult.record.integrity);
                   const planRemoveResult = await packageManager.planRemove({
                     name: planName,
                     version: "1.0.0",
                     timeoutMs: 5000
                   });
                   assert.strictEqual(planRemoveResult.operation, "remove");
-                  assert.strictEqual(planRemoveResult.status, "missing");
+                  assert.strictEqual(planRemoveResult.status, "ready");
                   assert.strictEqual(planRemoveResult.grantsInstallAuthority, false);
+                  assert.strictEqual(planRemoveResult.existingRecord.integrity, updatedResult.record.integrity);
+                  const removedResult = await packageManager.remove({
+                    name: planName,
+                    version: "1.0.0",
+                    expectedIntegrity: planRemoveResult.existingRecord.integrity,
+                    allowMutation: true,
+                    timeoutMs: 5000
+                  });
+                  assert.strictEqual(removedResult.operation, "remove");
+                  assert.strictEqual(removedResult.status, "removed");
 
                   const listResult = await packageManager.list({ timeoutMs: 5000 });
                   assert.strictEqual(Array.isArray(listResult), true);
@@ -291,11 +357,17 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     sourcePolicy.deniedSources.includes("raw_registry"),
                     sourcePolicy.grantsInstallAuthority,
                     sourcePolicy.planOperations.join(","),
+                    sourcePolicy.mutationOperations.join(","),
                     planInstallResult.status,
                     planInstallResult.grantsInstallAuthority,
+                    installedResult.status,
+                    duplicatePlan.status,
                     planUpdateResult.status,
+                    updatedResult.status,
                     planRemoveResult.status,
-                    deniedCodes.join(","),
+                    removedResult.status,
+                    mutationNotConfirmed,
+                    mutationMissingIntegrity,
                     listResult.length >= 0,
                     verifyResult.status,
                     pruneResult.status,
@@ -312,16 +384,16 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
             timeoutMs = 10_000L,
         )
 
-        NodeEmbeddedTestHarness.assertSucceeded("P13-42 package_manager read maintenance facade", result)
+        NodeEmbeddedTestHarness.assertSucceeded("P13-42 package_manager guarded mutation facade", result)
         assertTrue(
             result.stdout,
             result.stdout.contains(
-                "p13pm.facade=read_maintenance_partial|read_maintenance_partial|read_maintenance_partial|denied|deferred|false|" +
-                    "true|true|true|true|decision_only_no_install_authority|local_unpacked_host_managed_only|" +
-                    "local_unpacked_host_managed|true|false|" +
-                    "planInstall,planUpdate,planRemove|ready|false|missing|missing|" +
-                    "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED,ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED," +
-                    "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED|true|missing|pruned|" +
+                "p13pm.facade=guarded_mutation_partial|guarded_mutation_partial|guarded_mutation_partial|denied|deferred|false|" +
+                    "true|true|true|true|guarded_local_unpacked_mutation|local_unpacked_host_managed_only|" +
+                    "local_unpacked_host_managed|true|true|" +
+                    "planInstall,planUpdate,planRemove|install,update,remove|ready|false|installed|already_installed|" +
+                    "ready|updated|ready|removed|ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED|" +
+                    "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|true|missing|pruned|" +
                     "package_manager|undefined",
             ),
         )
@@ -365,14 +437,16 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
         assertEquals("disabled", nativeValues["android_package_manager.native_payload_execution"])
         assertEquals("disabled", nativeValues["android_package_manager.postinstall_download"])
         assertEquals("disabled", nativeValues["android_package_manager.network_install"])
-        assertEquals("decision_only_no_install_authority", nativeValues["android_package_manager.source_policy"])
+        assertEquals("guarded_local_unpacked_mutation", nativeValues["android_package_manager.source_policy"])
         assertEquals("local_unpacked_host_managed_only", nativeValues["android_package_manager.source_authority"])
         assertEquals("local_unpacked_host_managed", nativeValues["android_package_manager.allowed_sources"])
         assertEquals("disabled", nativeValues["android_package_manager.raw_registry_authority"])
         assertEquals("disabled", nativeValues["android_package_manager.remote_tarball_install"])
         assertEquals("disabled", nativeValues["android_package_manager.unverified_cache_reuse"])
-        assertEquals("internal_substrate_only", nativeValues["android_package_manager.install_authority"])
-        assertEquals("read_maintenance_partial", nativeValues["android_package_manager.js_bridge"])
+        assertEquals(NodeAndroidPackageInstallManager.INSTALL_AUTHORITY, nativeValues["android_package_manager.install_authority"])
+        assertEquals("package_manager.mutate", nativeValues["android_package_manager.mutation_capability"])
+        assertEquals("allowMutation_required", nativeValues["android_package_manager.mutation_confirmation"])
+        assertEquals("guarded_mutation_partial", nativeValues["android_package_manager.js_bridge"])
 
         val postinstall = packageSource(
             dirName = "pkg-postinstall",

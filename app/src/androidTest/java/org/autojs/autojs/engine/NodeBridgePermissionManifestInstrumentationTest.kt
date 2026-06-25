@@ -144,9 +144,14 @@ class NodeBridgePermissionManifestInstrumentationTest {
         assertEquals(NodeBridgePermissionManifest.DATABASE, NodeBridgePermissionManifest.normalizeCapability("sqlite"))
         assertEquals(NodeBridgePermissionManifest.PACKAGE_MANAGER, NodeBridgePermissionManifest.normalizeCapability("package-manager"))
         assertEquals(NodeBridgePermissionManifest.PACKAGE_MANAGER, NodeBridgePermissionManifest.normalizeCapability("android_package_manager"))
+        assertEquals(NodeBridgePermissionManifest.PACKAGE_MANAGER_MUTATE, NodeBridgePermissionManifest.normalizeCapability("package-manager.mutate"))
         assertEquals(
             listOf(NodeBridgePermissionManifest.PACKAGE_MANAGER),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("package_manager", "verify"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.PACKAGE_MANAGER, NodeBridgePermissionManifest.PACKAGE_MANAGER_MUTATE),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("package_manager", "install"),
         )
         assertEquals(
             listOf(NodeBridgePermissionManifest.NOTIFICATIONS),
@@ -332,6 +337,37 @@ class NodeBridgePermissionManifestInstrumentationTest {
         assertEquals(NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED, response.error?.code)
         assertEquals(listOf("shell.root"), response.error?.missingCapabilities)
         assertEquals("0", provider.nativeDiagnostics()["embedded_script.bridge_resource.created_count"])
+    }
+
+    @Test
+    fun androidProviderRejectsPackageMutationWithoutMutationCapabilityBeforeExecution() {
+        val workDir = File(context.cacheDir, "node-bridge-permission-package-mutate").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create bridge permission package mutate directory: $absolutePath" }
+        }
+        val provider = AndroidNodeBridgeCapabilityProvider(
+            context,
+            NodeBridgeEngineInfo.fromContext(
+                context,
+                id = "provider-package-mutate",
+                cwd = workDir.absolutePath,
+            ),
+        )
+        val response = dispatch(
+            provider,
+            NodeBridgeRequest(
+                id = "provider-package-mutate-denied",
+                module = "package_manager",
+                method = "install",
+                argsJson = """[{"name":"@autojs6/mutate","version":"1.0.0","sourceDir":"pkg","expectedIntegrity":"sha512-test","allowMutation":true}]""",
+                timeoutMs = 2000L,
+                permissions = listOf("package_manager"),
+            ),
+        )
+
+        assertFalse(response.toString(), response.ok)
+        assertEquals(NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED, response.error?.code)
+        assertEquals(listOf(NodeBridgePermissionManifest.PACKAGE_MANAGER_MUTATE), response.error?.missingCapabilities)
     }
 
     @Test

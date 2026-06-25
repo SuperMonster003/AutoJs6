@@ -290,7 +290,7 @@ class NodeBridgeConformanceInstrumentationTest {
                         status: "ready",
                         dryRun: true,
                         sourceAuthority: "local_unpacked_host_managed_only",
-                        installAuthority: "internal_substrate_only",
+                        installAuthority: "package_manager_mutate_explicit_local_unpacked",
                         grantsInstallAuthority: false,
                         message: "Package source is ready for install dry-run.",
                         record: packageRecord(request.args[0].name, request.args[0].version),
@@ -303,7 +303,7 @@ class NodeBridgeConformanceInstrumentationTest {
                         status: "ready",
                         dryRun: true,
                         sourceAuthority: "local_unpacked_host_managed_only",
-                        installAuthority: "internal_substrate_only",
+                        installAuthority: "package_manager_mutate_explicit_local_unpacked",
                         grantsInstallAuthority: false,
                         message: "Package source is ready for update dry-run.",
                         record: packageRecord(request.args[0].name, request.args[0].version),
@@ -316,11 +316,19 @@ class NodeBridgeConformanceInstrumentationTest {
                         status: "ready",
                         dryRun: true,
                         sourceAuthority: "local_unpacked_host_managed_only",
-                        installAuthority: "internal_substrate_only",
+                        installAuthority: "package_manager_mutate_explicit_local_unpacked",
                         grantsInstallAuthority: false,
                         message: "Package is ready for remove dry-run.",
                         record: null,
                         existingRecord: packageRecord(request.args[0].name, request.args[0].version)
+                      };
+                    } else if (method === "install" || method === "update" || method === "remove") {
+                      result = {
+                        operation: method,
+                        status: method === "install" ? "installed" : (method === "update" ? "updated" : "removed"),
+                        transactionId: method + "-tx",
+                        message: method + " ok",
+                        record: method === "remove" ? null : packageRecord(request.args[0].name, request.args[0].version)
                       };
                     }
                     else if (method === "verify") {
@@ -529,19 +537,21 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.allowedSources), true, "package_manager.sourcePolicy allowedSources must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.deniedSources), true, "package_manager.sourcePolicy deniedSources must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.localUnpacked), true, "package_manager.sourcePolicy localUnpacked must be frozen");
-              assert.strictEqual(packageManagerStatus.status, "read_maintenance_partial");
-              assert.strictEqual(packageManagerStatus.jsBridge, "read_maintenance_partial");
-              assert.strictEqual(packageManagerStatus.requirePackageManager, "read_maintenance_partial");
-              assert.strictEqual(packageManagerStatus.grantsInstallAuthority, false);
+              assert.strictEqual(packageManagerStatus.status, "guarded_mutation_partial");
+              assert.strictEqual(packageManagerStatus.jsBridge, "guarded_mutation_partial");
+              assert.strictEqual(packageManagerStatus.requirePackageManager, "guarded_mutation_partial");
+              assert.strictEqual(packageManagerStatus.grantsInstallAuthority, true);
               assert.strictEqual(packageManagerStatus.sourceAuthority, "local_unpacked_host_managed_only");
               assert.strictEqual(packageManagerPolicy.npmCli, "denied");
               assert.strictEqual(packageManagerPolicy.registryDownload, "deferred");
               assert.strictEqual(packageManagerPolicy.rawRegistryAccess, false);
-              assert.strictEqual(packageManagerPolicy.installAuthority, "internal_substrate_only");
+              assert.strictEqual(packageManagerPolicy.installAuthority, "package_manager_mutate_explicit_local_unpacked");
               assert.deepStrictEqual(packageManagerSourcePolicy.allowedSources, ["local_unpacked_host_managed"]);
               assert.deepStrictEqual(packageManagerSourcePolicy.planOperations, ["planInstall", "planUpdate", "planRemove"]);
-              assert.strictEqual(packageManagerSourcePolicy.status, "decision_only_no_install_authority");
-              assert.strictEqual(packageManagerSourcePolicy.grantsInstallAuthority, false);
+              assert.deepStrictEqual(packageManagerSourcePolicy.mutationOperations, ["install", "update", "remove"]);
+              assert.strictEqual(packageManagerSourcePolicy.mutationCapability, "package_manager.mutate");
+              assert.strictEqual(packageManagerSourcePolicy.status, "guarded_local_unpacked_mutation");
+              assert.strictEqual(packageManagerSourcePolicy.grantsInstallAuthority, true);
               assert.strictEqual(packageManagerSourcePolicy.registry.rawRegistryAccess, false);
               assert.strictEqual(engines.myEngine().engineName, "nodejs");
 
@@ -751,11 +761,11 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("work_manager.schedulePeriodic", workManager.schedulePeriodic({ scriptPath: "main.cjs", intervalMs: workManager.policy.minPeriodicIntervalMs, timeoutMs: 1056 })), "work-periodic");
               await expectPromise("work_manager.cancel", workManager.cancel("work-once", { timeoutMs: 1057 }));
               assert.strictEqual((await expectPromise("work_manager.list", workManager.list({ timeoutMs: 1058 }))).length, 1);
-              ["install", "update", "remove"].forEach((methodName) => {
-                expectThrowCode("package_manager." + methodName, function() {
-                  packageManager[methodName]({ name: "@autojs6/conformance", version: "1.0.0" });
-                }, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED");
-              });
+              await expectRejectCode(
+                "package_manager.install.confirmation",
+                packageManager.install({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", expectedIntegrity: "sha512-conformance" }),
+                "ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED"
+              );
               const planInstallResult = await expectPromise("package_manager.planInstall", packageManager.planInstall({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", timeoutMs: 1059 }));
               assert.strictEqual(planInstallResult.status, "ready");
               assert.strictEqual(planInstallResult.dryRun, true);
@@ -768,6 +778,13 @@ class NodeBridgeConformanceInstrumentationTest {
               const planRemoveResult = await expectPromise("package_manager.planRemove", packageManager.planRemove({ name: "@autojs6/conformance", version: "1.0.0", timeoutMs: 1059 }));
               assert.strictEqual(planRemoveResult.operation, "remove");
               assert.strictEqual(planRemoveResult.existingRecord.name, "@autojs6/conformance");
+              const installResult = await expectPromise("package_manager.install", packageManager.install({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", expectedIntegrity: planInstallResult.record.integrity, allowMutation: true, timeoutMs: 1059 }));
+              assert.strictEqual(installResult.status, "installed");
+              assert.strictEqual(Object.isFrozen(installResult.record), true);
+              const updateResult = await expectPromise("package_manager.update", packageManager.update({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", expectedIntegrity: planUpdateResult.record.integrity, allowMutation: true, timeoutMs: 1059 }));
+              assert.strictEqual(updateResult.status, "updated");
+              const removeResult = await expectPromise("package_manager.remove", packageManager.remove({ name: "@autojs6/conformance", version: "1.0.0", expectedIntegrity: planRemoveResult.existingRecord.integrity, allowMutation: true, timeoutMs: 1059 }));
+              assert.strictEqual(removeResult.status, "removed");
               const packageList = await expectPromise("package_manager.list", packageManager.list({ timeoutMs: 1059 }));
               assert.strictEqual(Object.isFrozen(packageList), true);
               assert.strictEqual(packageList[0].name, "@autojs6/conformance");
@@ -850,6 +867,9 @@ class NodeBridgeConformanceInstrumentationTest {
                 "package_manager.planInstall",
                 "package_manager.planUpdate",
                 "package_manager.planRemove",
+                "package_manager.install",
+                "package_manager.update",
+                "package_manager.remove",
                 "package_manager.list",
                 "package_manager.verify",
                 "package_manager.prune"
@@ -1056,7 +1076,7 @@ class NodeBridgeConformanceInstrumentationTest {
             NodeBridgeModules.UI to setOf("showLayout", "update", "batchUpdate", "close", "drainEvents"),
             NodeBridgeModules.INPUT_OBSERVER to setOf("observeKeys", "drainEvents", "close", "getAvailableSources"),
             NodeBridgeModules.WORK_MANAGER to setOf("scheduleOnce", "schedulePeriodic", "cancel", "list"),
-            NodeBridgeModules.PACKAGE_MANAGER to setOf("list", "verify", "prune", "planInstall", "planUpdate", "planRemove"),
+            NodeBridgeModules.PACKAGE_MANAGER to setOf("list", "verify", "prune", "planInstall", "planUpdate", "planRemove", "install", "update", "remove"),
         )
     }
 }
