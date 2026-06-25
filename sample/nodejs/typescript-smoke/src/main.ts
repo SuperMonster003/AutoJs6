@@ -519,6 +519,8 @@ async function smoke(): Promise<void> {
   const packageManagerPlanInstall: (request: packageManager.PlanSourceRequest) => Promise<packageManager.PackagePlan> = packageManager.planInstall;
   const packageManagerPlanUpdate: (request: packageManager.PlanSourceRequest) => Promise<packageManager.PackagePlan> = packageManager.planUpdate;
   const packageManagerPlanRemove: (request: packageManager.PlanRemoveRequest) => Promise<packageManager.PackagePlan> = packageManager.planRemove;
+  const packageManagerPlanRegistryInstall: (request: packageManager.PlanRegistryInstallRequest) => Promise<packageManager.RemotePackagePlan> = packageManager.planRegistryInstall;
+  const packageManagerPlanTarballInstall: (request: packageManager.PlanTarballInstallRequest) => Promise<packageManager.RemotePackagePlan> = packageManager.planTarballInstall;
   const packageManagerInstall: (request: packageManager.MutationSourceRequest) => Promise<packageManager.OperationResult> = packageManager.install;
   const packageManagerUpdate: (request: packageManager.MutationSourceRequest) => Promise<packageManager.OperationResult> = packageManager.update;
   const packageManagerRemove: (request: packageManager.MutationRemoveRequest) => Promise<packageManager.OperationResult> = packageManager.remove;
@@ -529,6 +531,8 @@ async function smoke(): Promise<void> {
   const npmPolicy: npm.NpmFacadePolicy = npm.policy();
   const npmSourcePolicy: npm.SourcePolicy = npm.sourcePolicy();
   const npmPackageManager: packageManager.PackageManagerModule = npm.packageManager();
+  const npmPlanRegistryInstall: (request: npm.PlanRegistryInstallRequest) => Promise<npm.RemotePackagePlan> = npm.planRegistryInstall;
+  const npmPlanTarballInstall: (request: npm.PlanTarballInstallRequest) => Promise<npm.RemotePackagePlan> = npm.planTarballInstall;
   const npmInstall: (request: npm.MutationSourceRequest) => Promise<npm.OperationResult> = npm.install;
   const npmList: (options?: npm.ListOptions) => Promise<readonly npm.PackageRecord[]> = npm.list;
   const npmCliDenied: (...args: readonly unknown[]) => never = npm.cli;
@@ -1035,6 +1039,8 @@ async function smoke(): Promise<void> {
   void packageManagerPlanInstall;
   void packageManagerPlanUpdate;
   void packageManagerPlanRemove;
+  void packageManagerPlanRegistryInstall;
+  void packageManagerPlanTarballInstall;
   void packageManagerInstall;
   void packageManagerUpdate;
   void packageManagerRemove;
@@ -1045,6 +1051,8 @@ async function smoke(): Promise<void> {
   void npmPolicy;
   void npmSourcePolicy;
   void npmPackageManager;
+  void npmPlanRegistryInstall;
+  void npmPlanTarballInstall;
   void npmInstall;
   void npmList;
   void npmCliDenied;

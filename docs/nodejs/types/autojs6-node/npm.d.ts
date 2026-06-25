@@ -5,9 +5,12 @@ declare module "npm" {
     export type PackageRecord = packageManager.PackageRecord;
     export type OperationResult = packageManager.OperationResult;
     export type PackagePlan = packageManager.PackagePlan;
+    export type RemotePackagePlan = packageManager.RemotePackagePlan;
     export type SourcePolicy = packageManager.SourcePolicy;
     export type PlanSourceRequest = packageManager.PlanSourceRequest;
     export type PlanRemoveRequest = packageManager.PlanRemoveRequest;
+    export type PlanRegistryInstallRequest = packageManager.PlanRegistryInstallRequest;
+    export type PlanTarballInstallRequest = packageManager.PlanTarballInstallRequest;
     export type MutationSourceRequest = packageManager.MutationSourceRequest;
     export type MutationRemoveRequest = packageManager.MutationRemoveRequest;
     export type ListOptions = packageManager.ListOptions;
@@ -80,6 +83,8 @@ declare module "npm" {
       planInstall(request: PlanSourceRequest): Promise<PackagePlan>;
       planUpdate(request: PlanSourceRequest): Promise<PackagePlan>;
       planRemove(request: PlanRemoveRequest): Promise<PackagePlan>;
+      planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>;
+      planTarballInstall(request: PlanTarballInstallRequest): Promise<RemotePackagePlan>;
       install(request: MutationSourceRequest): Promise<OperationResult>;
       update(request: MutationSourceRequest): Promise<OperationResult>;
       remove(request: MutationRemoveRequest): Promise<OperationResult>;

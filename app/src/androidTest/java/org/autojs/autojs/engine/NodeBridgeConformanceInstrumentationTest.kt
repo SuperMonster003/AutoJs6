@@ -477,8 +477,8 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
-              expectExports("package_manager", packageManager, ["status", "policy", "sourcePolicy", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune"]);
-              expectExports("npm", npm, ["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript", "installFromRegistry", "publish", "pack"]);
+              expectExports("package_manager", packageManager, ["status", "policy", "sourcePolicy", "planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall", "install", "update", "remove", "list", "verify", "prune"]);
+              expectExports("npm", npm, ["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript", "installFromRegistry", "publish", "pack"]);
               expectExports("jsox", jsox, ["extend", "extendAll", "status"]);
               expectExports("jsox.mathx", jsoxMathx, ["randInt", "randomInt", "randFloat", "randomFloat", "random", "sum", "mean", "avg", "median", "var", "std", "cv", "mode", "dist", "logMn", "floorLog", "ceilLog", "roundLog", "floorPow", "ceilPow", "roundPow", "max", "maxi", "min", "mini"]);
               expectExports("autojs6:compat.jsox", compat.jsox, ["extend", "extendAll", "status"]);
@@ -554,7 +554,7 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(packageManagerPolicy.rawRegistryAccess, false);
               assert.strictEqual(packageManagerPolicy.installAuthority, "package_manager_mutate_explicit_local_unpacked");
               assert.deepStrictEqual(packageManagerSourcePolicy.allowedSources, ["local_unpacked_host_managed"]);
-              assert.deepStrictEqual(packageManagerSourcePolicy.planOperations, ["planInstall", "planUpdate", "planRemove"]);
+              assert.deepStrictEqual(packageManagerSourcePolicy.planOperations, ["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"]);
               assert.deepStrictEqual(packageManagerSourcePolicy.mutationOperations, ["install", "update", "remove"]);
               assert.strictEqual(packageManagerSourcePolicy.mutationCapability, "package_manager.mutate");
               assert.strictEqual(packageManagerSourcePolicy.status, "guarded_local_unpacked_mutation");
@@ -569,6 +569,8 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(npmPolicy.registryDownload, "deferred");
               assert.strictEqual(npmPolicy.rawRegistryAccess, false);
               assert.strictEqual(npm.packageManager(), packageManager);
+              assert.strictEqual(npm.planRegistryInstall, packageManager.planRegistryInstall);
+              assert.strictEqual(npm.planTarballInstall, packageManager.planTarballInstall);
               assert.strictEqual(engines.myEngine().engineName, "nodejs");
 
               await expectPromise("toast.showToast", toast.showToast("hello", { timeoutMs: 1010 }));
@@ -784,6 +786,20 @@ class NodeBridgeConformanceInstrumentationTest {
               );
               await expectRejectCode("npm.cli", Promise.resolve().then(() => npm.cli(["install"])), "ERR_AUTOJS6_NPM_CLI_DENIED");
               await expectRejectCode("npm.installFromRegistry", Promise.resolve().then(() => npm.installFromRegistry("@autojs6/conformance")), "ERR_AUTOJS6_NPM_REGISTRY_DENIED");
+              const beforeRemotePackagePlans = requests.length;
+              const registryPlanResult = await expectPromise("package_manager.planRegistryInstall", packageManager.planRegistryInstall({ name: "@autojs6/conformance", tag: "latest" }));
+              assert.strictEqual(registryPlanResult.schema, "autojs6-node-package-manager-remote-plan-v1");
+              assert.strictEqual(registryPlanResult.status, "blocked_by_policy");
+              assert.strictEqual(registryPlanResult.sourceAuthority, "raw_registry_denied");
+              assert.strictEqual(registryPlanResult.grantsInstallAuthority, false);
+              assert.strictEqual(registryPlanResult.networkAccess, false);
+              assert.strictEqual(Object.isFrozen(registryPlanResult), true);
+              assert.strictEqual(Object.isFrozen(registryPlanResult.request), true);
+              const npmTarballPlanResult = await expectPromise("npm.planTarballInstall", npm.planTarballInstall({ tarballUrl: "https://registry.npmjs.org/@autojs6/conformance/-/conformance-1.0.0.tgz", expectedIntegrity: "sha512-conformance" }));
+              assert.strictEqual(npmTarballPlanResult.status, "blocked_by_policy");
+              assert.strictEqual(npmTarballPlanResult.sourceAuthority, "remote_tarball_denied");
+              assert.strictEqual(npmTarballPlanResult.networkAccess, false);
+              assert.strictEqual(requests.length, beforeRemotePackagePlans, "remote package plan APIs must not dispatch bridge requests");
               const planInstallResult = await expectPromise("package_manager.planInstall", packageManager.planInstall({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", timeoutMs: 1059 }));
               assert.strictEqual(planInstallResult.status, "ready");
               assert.strictEqual(planInstallResult.dryRun, true);

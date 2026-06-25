@@ -137,8 +137,8 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "local_unpacked_host_managed_only|package_manager_mutate_explicit_local_unpacked|" +
                     "local_unpacked_host_managed|" +
                     "raw_registry,remote_tarball,git,http_url,file_url,workspace_symlink,unverified_cache|" +
-                    "planInstall,planUpdate,planRemove|install,update,remove|" +
-                    "status,policy,sourcePolicy,packageManager,planInstall,planUpdate,planRemove,install,update,remove,list,verify,prune,cli,exec,runScript|" +
+                    "planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall|install,update,remove|" +
+                    "status,policy,sourcePolicy,packageManager,planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall,install,update,remove,list,verify,prune,cli,exec,runScript|" +
                     "package_manager.mutate|allowMutation_required|" +
                     "install,update,remove,list,verify,prune|" +
                     "dependency,plugin,project|guarded_mutation_partial|guarded_mutation_partial|not_promoted|denied|" +
@@ -209,7 +209,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.deepStrictEqual(policy.allowedSources, ["local_unpacked_host_managed"]);
                   assert(policy.deniedSources.includes("raw_registry"));
                   assert(policy.deniedSources.includes("remote_tarball"));
-                  assert.deepStrictEqual(policy.planOperations, ["planInstall", "planUpdate", "planRemove"]);
+                  assert.deepStrictEqual(policy.planOperations, ["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"]);
                   assert.deepStrictEqual(policy.mutationOperations, ["install", "update", "remove"]);
                   assert.strictEqual(policy.mutationCapability, "package_manager.mutate");
                   assert.strictEqual(policy.mutationConfirmation, "allowMutation_required");
@@ -217,14 +217,14 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(policy.npmFacade, "guarded_package_manager_alias");
                   assert.strictEqual(policy.requireNpm, "guarded_package_manager_alias");
                   assert.strictEqual(Object.isFrozen(policy.npmFacadeOperations), true);
-                  assert.deepStrictEqual(policy.npmFacadeOperations, ["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"]);
+                  assert.deepStrictEqual(policy.npmFacadeOperations, ["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"]);
                   assert.strictEqual(sourcePolicy.schema, "autojs6-node-package-manager-source-policy-v1");
                   assert.strictEqual(sourcePolicy.status, "guarded_local_unpacked_mutation");
                   assert.strictEqual(sourcePolicy.grantsInstallAuthority, true);
                   assert.deepStrictEqual(sourcePolicy.allowedSources, ["local_unpacked_host_managed"]);
                   assert(sourcePolicy.deniedSources.includes("raw_registry"));
                   assert(sourcePolicy.deniedSources.includes("remote_tarball"));
-                  assert.deepStrictEqual(sourcePolicy.planOperations, ["planInstall", "planUpdate", "planRemove"]);
+                  assert.deepStrictEqual(sourcePolicy.planOperations, ["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"]);
                   assert.deepStrictEqual(sourcePolicy.mutationOperations, ["install", "update", "remove"]);
                   assert.strictEqual(sourcePolicy.mutationCapability, "package_manager.mutate");
                   assert.strictEqual(sourcePolicy.mutationConfirmation, "allowMutation_required");
@@ -254,6 +254,8 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(npmSourcePolicy.status, "guarded_local_unpacked_mutation");
                   assert.strictEqual(npm.packageManager(), packageManager);
                   assert.strictEqual(npm.planInstall, packageManager.planInstall);
+                  assert.strictEqual(npm.planRegistryInstall, packageManager.planRegistryInstall);
+                  assert.strictEqual(npm.planTarballInstall, packageManager.planTarballInstall);
                   assert.strictEqual(npm.install, packageManager.install);
 
                   async function rejectionCode(methodName, request) {
@@ -300,6 +302,46 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(npmCliDenied, "ERR_AUTOJS6_NPM_CLI_DENIED");
                   const npmRegistryDenied = syncRejectionCode(() => npm.installFromRegistry("@autojs6/not-promoted"));
                   assert.strictEqual(npmRegistryDenied, "ERR_AUTOJS6_NPM_REGISTRY_DENIED");
+                  const registryPlan = await packageManager.planRegistryInstall({
+                    name: "@autojs6/registry-plan",
+                    tag: "latest",
+                    registry: "https://registry.npmjs.org/"
+                  });
+                  assert.strictEqual(registryPlan.schema, "autojs6-node-package-manager-remote-plan-v1");
+                  assert.strictEqual(registryPlan.operation, "planRegistryInstall");
+                  assert.strictEqual(registryPlan.status, "blocked_by_policy");
+                  assert.strictEqual(registryPlan.source, "raw_registry");
+                  assert.strictEqual(registryPlan.sourceAuthority, "raw_registry_denied");
+                  assert.strictEqual(registryPlan.installAuthority, "none");
+                  assert.strictEqual(registryPlan.grantsInstallAuthority, false);
+                  assert.strictEqual(registryPlan.networkAccess, false);
+                  assert.strictEqual(registryPlan.cacheAccess, false);
+                  assert.strictEqual(registryPlan.policy.rawRegistryAccess, false);
+                  assert.strictEqual(registryPlan.request.name, "@autojs6/registry-plan");
+                  assert.strictEqual(Object.isFrozen(registryPlan), true);
+                  assert.strictEqual(Object.isFrozen(registryPlan.request), true);
+                  assert.strictEqual(Object.isFrozen(registryPlan.policy), true);
+                  assert.strictEqual(Object.isFrozen(registryPlan.futurePromotionRequires), true);
+                  const npmRegistryPlan = await npm.planRegistryInstall({ name: "@autojs6/npm-registry-plan" });
+                  assert.strictEqual(npmRegistryPlan.status, "blocked_by_policy");
+                  assert.strictEqual(npmRegistryPlan.request.tag, "latest");
+                  const tarballPlan = await packageManager.planTarballInstall({
+                    tarballUrl: "https://registry.npmjs.org/@autojs6/test/-/test-1.0.0.tgz",
+                    expectedIntegrity: "sha512-test"
+                  });
+                  assert.strictEqual(tarballPlan.schema, "autojs6-node-package-manager-remote-plan-v1");
+                  assert.strictEqual(tarballPlan.operation, "planTarballInstall");
+                  assert.strictEqual(tarballPlan.status, "blocked_by_policy");
+                  assert.strictEqual(tarballPlan.source, "remote_tarball");
+                  assert.strictEqual(tarballPlan.sourceAuthority, "remote_tarball_denied");
+                  assert.strictEqual(tarballPlan.installAuthority, "none");
+                  assert.strictEqual(tarballPlan.grantsInstallAuthority, false);
+                  assert.strictEqual(tarballPlan.networkAccess, false);
+                  assert.strictEqual(tarballPlan.policy.androidDownload, "denied");
+                  assert.strictEqual(tarballPlan.request.expectedIntegrity, "sha512-test");
+                  assert.strictEqual(Object.isFrozen(tarballPlan), true);
+                  assert.strictEqual(Object.isFrozen(tarballPlan.request), true);
+                  assert.strictEqual(Object.isFrozen(tarballPlan.policy), true);
                   const planInstallResult = await packageManager.planInstall({
                     name: planName,
                     version: "1.0.0",
@@ -422,6 +464,11 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     sourcePolicy.grantsInstallAuthority,
                     sourcePolicy.planOperations.join(","),
                     sourcePolicy.mutationOperations.join(","),
+                    registryPlan.status,
+                    registryPlan.sourceAuthority,
+                    npmRegistryPlan.status,
+                    tarballPlan.status,
+                    tarballPlan.sourceAuthority,
                     planInstallResult.status,
                     planInstallResult.grantsInstallAuthority,
                     installedResult.status,
@@ -459,10 +506,12 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                 "p13pm.facade=guarded_mutation_partial|guarded_mutation_partial|guarded_mutation_partial|denied|deferred|false|" +
                     "guarded_package_manager_alias|guarded_package_manager_alias|" +
                     "true|true|true|true|true|guarded_package_manager_alias|denied|" +
-                    "status,policy,sourcePolicy,packageManager,planInstall,planUpdate,planRemove,install,update,remove,list,verify,prune,cli,exec,runScript|" +
+                    "status,policy,sourcePolicy,packageManager,planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall,install,update,remove,list,verify,prune,cli,exec,runScript|" +
                     "guarded_local_unpacked_mutation|local_unpacked_host_managed_only|" +
                     "local_unpacked_host_managed|true|true|" +
-                    "planInstall,planUpdate,planRemove|install,update,remove|ready|false|installed|already_installed|" +
+                    "planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall|install,update,remove|" +
+                    "blocked_by_policy|raw_registry_denied|blocked_by_policy|blocked_by_policy|remote_tarball_denied|" +
+                    "ready|false|installed|already_installed|" +
                     "ready|updated|ready|removed|ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED|" +
                     "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_NPM_CLI_DENIED|ERR_AUTOJS6_NPM_REGISTRY_DENIED|" +
                     "true|true|missing|pruned|package_manager|npm|undefined",

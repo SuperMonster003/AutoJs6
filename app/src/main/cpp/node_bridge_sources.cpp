@@ -8913,9 +8913,9 @@ std::string buildEmbeddedScriptExecutionSource(
         installAuthority: "package_manager_mutate_explicit_local_unpacked",
         allowedSources: Object.freeze(["local_unpacked_host_managed"]),
         deniedSources: Object.freeze(["raw_registry", "remote_tarball", "git", "http_url", "file_url", "workspace_symlink", "unverified_cache"]),
-        planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove"]),
+        planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"]),
         mutationOperations: Object.freeze(["install", "update", "remove"]),
-        npmFacadeOperations: Object.freeze(["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"]),
+        npmFacadeOperations: Object.freeze(["status", "policy", "sourcePolicy", "packageManager", "planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall", "install", "update", "remove", "list", "verify", "prune", "cli", "exec", "runScript"]),
         mutationCapability: "package_manager.mutate",
         mutationConfirmation: "allowMutation_required",
         operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
@@ -25931,7 +25931,7 @@ std::string buildEmbeddedScriptExecutionSource(
     "packaged_distribution_evidence",
     "user_visible_install_authority"
   ]);
-  const __autojs6_package_manager_plan_operations = Object.freeze(["planInstall", "planUpdate", "planRemove"]);
+  const __autojs6_package_manager_plan_operations = Object.freeze(["planInstall", "planUpdate", "planRemove", "planRegistryInstall", "planTarballInstall"]);
   const __autojs6_package_manager_mutation_operations = Object.freeze(["install", "update", "remove"]);
   const __autojs6_npm_facade_operations = Object.freeze([
     "status",
@@ -25941,6 +25941,8 @@ std::string buildEmbeddedScriptExecutionSource(
     "planInstall",
     "planUpdate",
     "planRemove",
+    "planRegistryInstall",
+    "planTarballInstall",
     "install",
     "update",
     "remove",
@@ -26102,6 +26104,28 @@ std::string buildEmbeddedScriptExecutionSource(
         : null
     });
   }
+  function __autojs6_package_manager_remote_plan_result(operation, sourceKind, normalizedRequest, sourcePolicy, message) {
+    return Object.freeze({
+      schema: "autojs6-node-package-manager-remote-plan-v1",
+      operation,
+      status: "blocked_by_policy",
+      dryRun: true,
+      source: sourceKind,
+      sourceAuthority: sourceKind === "raw_registry" ? "raw_registry_denied" : "remote_tarball_denied",
+      installAuthority: "none",
+      grantsInstallAuthority: false,
+      networkAccess: false,
+      cacheAccess: false,
+      lifecycleScripts: "denied",
+      binLinks: "denied",
+      nativePayloads: "denied",
+      requiresExpectedIntegrity: true,
+      message,
+      request: Object.freeze(normalizedRequest),
+      policy: sourcePolicy,
+      futurePromotionRequires: __autojs6_package_manager_future_promotion_requirements
+    });
+  }
   function __autojs6_package_manager_bridge_options(input, fallbackMs) {
     return {
       timeoutMs: __autojs6_package_manager_timeout_from_options(input, fallbackMs),
@@ -26162,6 +26186,58 @@ std::string buildEmbeddedScriptExecutionSource(
       kind: __autojs6_package_manager_string(input.kind || "dependency").trim() || "dependency"
     };
     const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity).trim();
+    if (expectedIntegrity) {
+      payload.expectedIntegrity = expectedIntegrity;
+    }
+    return payload;
+  }
+  function __autojs6_package_manager_registry_plan_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    const tag = __autojs6_package_manager_string(input.tag || (version ? "" : "latest")).trim();
+    const registry = __autojs6_package_manager_string(input.registry || "default").trim() || "default";
+    const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity).trim();
+    if (!name) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires a non-empty package name."
+      );
+    }
+    if (!version && !tag) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires a version or tag."
+      );
+    }
+    const payload = {
+      name,
+      version,
+      tag,
+      registry
+    };
+    if (expectedIntegrity) {
+      payload.expectedIntegrity = expectedIntegrity;
+    }
+    return payload;
+  }
+  function __autojs6_package_manager_tarball_plan_request(methodName, value) {
+    const input = __autojs6_package_manager_options(value);
+    const tarballUrl = __autojs6_package_manager_string(input.tarballUrl || input.url).trim();
+    const name = __autojs6_package_manager_string(input.name).trim();
+    const version = __autojs6_package_manager_string(input.version).trim();
+    const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity || input.integrity).trim();
+    if (!tarballUrl) {
+      throw __autojs6_package_manager_invalid_request(
+        methodName,
+        "package_manager." + methodName + " requires a non-empty tarballUrl."
+      );
+    }
+    const payload = {
+      tarballUrl,
+      name,
+      version
+    };
     if (expectedIntegrity) {
       payload.expectedIntegrity = expectedIntegrity;
     }
@@ -26316,6 +26392,36 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_package_manager_bridge_options(input, 5000)
       ).then(__autojs6_package_manager_plan_result);
     }
+    function planRegistryInstall(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_registry_plan_request("planRegistryInstall", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return Promise.resolve(__autojs6_package_manager_remote_plan_result(
+        "planRegistryInstall",
+        "raw_registry",
+        payload,
+        __autojs6_package_manager_source_policy.registry,
+        "Android registry metadata download and install remain blocked by package_manager source policy."
+      ));
+    }
+    function planTarballInstall(request) {
+      let payload;
+      try {
+        payload = __autojs6_package_manager_tarball_plan_request("planTarballInstall", request);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+      return Promise.resolve(__autojs6_package_manager_remote_plan_result(
+        "planTarballInstall",
+        "remote_tarball",
+        payload,
+        __autojs6_package_manager_source_policy.tarball,
+        "Android remote tarball download and extraction remain blocked by package_manager source policy."
+      ));
+    }
     function install(request) {
       let payload;
       try {
@@ -26409,6 +26515,8 @@ std::string buildEmbeddedScriptExecutionSource(
       planInstall,
       planUpdate,
       planRemove,
+      planRegistryInstall,
+      planTarballInstall,
       install,
       update,
       remove,
@@ -26509,6 +26617,8 @@ std::string buildEmbeddedScriptExecutionSource(
       planInstall: packageManager.planInstall,
       planUpdate: packageManager.planUpdate,
       planRemove: packageManager.planRemove,
+      planRegistryInstall: packageManager.planRegistryInstall,
+      planTarballInstall: packageManager.planTarballInstall,
       install: packageManager.install,
       update: packageManager.update,
       remove: packageManager.remove,

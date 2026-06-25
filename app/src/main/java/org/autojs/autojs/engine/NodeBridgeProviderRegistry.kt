@@ -537,7 +537,7 @@ object NodeBridgeProviderRegistry {
             "statusReason" to "WorkManager-backed embedded Node task scheduling MVP",
         )
         PACKAGE_MANAGER_PROVIDER -> linkedMapOf(
-            "liveMethods" to "list,verify,prune,planInstall,planUpdate,planRemove,install,update,remove",
+            "liveMethods" to "list,verify,prune,planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall,install,update,remove",
             "blockedMethods" to "npmCli,registryDownload,tarballDownload,lifecycleScripts,binLinks,nativeBuild,nativePayloadExecution",
             "capability" to NodeBridgePermissionManifest.PACKAGE_MANAGER,
             "mutationCapability" to NodeBridgePermissionManifest.PACKAGE_MANAGER_MUTATE,
@@ -549,7 +549,7 @@ object NodeBridgeProviderRegistry {
             "sourcePolicy" to "guarded_local_unpacked_mutation",
             "sourceAuthority" to "local_unpacked_host_managed_only",
             "allowedSources" to "local_unpacked_host_managed",
-            "planOperations" to "planInstall,planUpdate,planRemove",
+            "planOperations" to "planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall",
             "mutationOperations" to "install,update,remove",
             "npmFacade" to "guarded_package_manager_alias_no_cli",
             "mutationConfirmation" to "allowMutation_required",

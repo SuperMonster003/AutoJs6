@@ -1,7 +1,7 @@
 declare module "package_manager" {
   namespace packageManager {
     export type Operation = "install" | "update" | "remove" | "list" | "verify" | "prune";
-    export type PlanOperation = "planInstall" | "planUpdate" | "planRemove";
+    export type PlanOperation = "planInstall" | "planUpdate" | "planRemove" | "planRegistryInstall" | "planTarballInstall";
     export type MutationOperation = "install" | "update" | "remove";
     export type PackageKind = "dependency" | "plugin" | "project";
 
@@ -42,6 +42,23 @@ declare module "package_manager" {
     export interface PlanRemoveRequest extends BridgeOptions {
       readonly name: string;
       readonly version: string;
+    }
+
+    export interface PlanRegistryInstallRequest extends BridgeOptions {
+      readonly name: string;
+      readonly version?: string;
+      readonly tag?: string;
+      readonly registry?: string;
+      readonly expectedIntegrity?: string;
+    }
+
+    export interface PlanTarballInstallRequest extends BridgeOptions {
+      readonly tarballUrl?: string;
+      readonly url?: string;
+      readonly name?: string;
+      readonly version?: string;
+      readonly expectedIntegrity?: string;
+      readonly integrity?: string;
     }
 
     export interface MutationSourceRequest extends PlanSourceRequest {
@@ -87,6 +104,27 @@ declare module "package_manager" {
       readonly message: string;
       readonly record: PackageRecord | null;
       readonly existingRecord: PackageRecord | null;
+    }
+
+    export interface RemotePackagePlan {
+      readonly schema: "autojs6-node-package-manager-remote-plan-v1";
+      readonly operation: "planRegistryInstall" | "planTarballInstall" | string;
+      readonly status: "blocked_by_policy" | string;
+      readonly dryRun: true;
+      readonly source: "raw_registry" | "remote_tarball" | string;
+      readonly sourceAuthority: "raw_registry_denied" | "remote_tarball_denied" | string;
+      readonly installAuthority: "none" | string;
+      readonly grantsInstallAuthority: false;
+      readonly networkAccess: false;
+      readonly cacheAccess: false;
+      readonly lifecycleScripts: "denied" | string;
+      readonly binLinks: "denied" | string;
+      readonly nativePayloads: "denied" | string;
+      readonly requiresExpectedIntegrity: boolean;
+      readonly message: string;
+      readonly request: Readonly<Record<string, unknown>>;
+      readonly policy: RegistrySourcePolicy | TarballSourcePolicy;
+      readonly futurePromotionRequires: readonly string[];
     }
 
     export type SourceAuthority = "local_unpacked_host_managed_only" | string;
@@ -242,6 +280,8 @@ declare module "package_manager" {
       planInstall(request: PlanSourceRequest): Promise<PackagePlan>;
       planUpdate(request: PlanSourceRequest): Promise<PackagePlan>;
       planRemove(request: PlanRemoveRequest): Promise<PackagePlan>;
+      planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>;
+      planTarballInstall(request: PlanTarballInstallRequest): Promise<RemotePackagePlan>;
       install(request: MutationSourceRequest): Promise<OperationResult>;
       update(request: MutationSourceRequest): Promise<OperationResult>;
       remove(request: MutationRemoveRequest): Promise<OperationResult>;
