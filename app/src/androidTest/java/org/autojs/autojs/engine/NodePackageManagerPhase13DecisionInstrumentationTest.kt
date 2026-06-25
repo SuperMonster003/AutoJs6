@@ -327,6 +327,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     name: "@autojs6/registry-plan",
                     tag: "latest",
                     registry: "https://registry.npmjs.org/",
+                    expectedIntegrity: "sha512-packument",
                     metadata: {
                       name: "@autojs6/registry-plan",
                       "dist-tags": {
@@ -355,9 +356,65 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(metadataRegistryPlan.resolution.resolvedVersion, "1.2.3");
                   assert.strictEqual(metadataRegistryPlan.resolution.tarballUrl, "https://registry.npmjs.org/@autojs6/registry-plan/-/registry-plan-1.2.3.tgz");
                   assert.strictEqual(metadataRegistryPlan.resolution.integrity, "sha512-packument");
+                  assert.strictEqual(metadataRegistryPlan.resolution.expectedIntegrity, "sha512-packument");
+                  assert.strictEqual(metadataRegistryPlan.resolution.integrityStatus, "expected_integrity_matched");
                   assert.strictEqual(metadataRegistryPlan.resolution.shasum, "abc123");
                   assert.strictEqual(metadataRegistryPlan.resolution.hasMetadata, true);
                   assert.strictEqual(Object.isFrozen(metadataRegistryPlan.resolution), true);
+                  const rangeMetadata = {
+                    name: "@autojs6/range-plan",
+                    "dist-tags": {
+                      latest: "2.0.0"
+                    },
+                    versions: {
+                      "1.0.0": {
+                        name: "@autojs6/range-plan",
+                        version: "1.0.0",
+                        dist: {
+                          tarball: "https://registry.npmjs.org/@autojs6/range-plan/-/range-plan-1.0.0.tgz",
+                          integrity: "sha512-range-100"
+                        }
+                      },
+                      "1.2.3": {
+                        name: "@autojs6/range-plan",
+                        version: "1.2.3",
+                        dist: {
+                          tarball: "https://registry.npmjs.org/@autojs6/range-plan/-/range-plan-1.2.3.tgz",
+                          integrity: "sha512-range-123"
+                        }
+                      },
+                      "2.0.0": {
+                        name: "@autojs6/range-plan",
+                        version: "2.0.0",
+                        dist: {
+                          tarball: "https://registry.npmjs.org/@autojs6/range-plan/-/range-plan-2.0.0.tgz",
+                          integrity: "sha512-range-200"
+                        }
+                      }
+                    }
+                  };
+                  const rangeRegistryPlan = await packageManager.planRegistryInstall({
+                    name: "@autojs6/range-plan",
+                    range: "^1.0.0",
+                    expectedIntegrity: "sha512-range-123",
+                    metadata: rangeMetadata
+                  });
+                  assert.strictEqual(rangeRegistryPlan.status, "blocked_by_policy");
+                  assert.strictEqual(rangeRegistryPlan.resolution.status, "resolved_from_range");
+                  assert.strictEqual(rangeRegistryPlan.resolution.selectorKind, "range");
+                  assert.strictEqual(rangeRegistryPlan.resolution.requestedRange, "^1.0.0");
+                  assert.strictEqual(rangeRegistryPlan.resolution.resolvedVersion, "1.2.3");
+                  assert.strictEqual(rangeRegistryPlan.resolution.tarballUrl, "https://registry.npmjs.org/@autojs6/range-plan/-/range-plan-1.2.3.tgz");
+                  assert.strictEqual(rangeRegistryPlan.resolution.integrityStatus, "expected_integrity_matched");
+                  assert.strictEqual(rangeRegistryPlan.resolution.rangeSupported, true);
+                  const mismatchRegistryPlan = await packageManager.planRegistryInstall({
+                    name: "@autojs6/range-plan",
+                    version: "1.2.3",
+                    expectedIntegrity: "sha512-other",
+                    metadata: rangeMetadata
+                  });
+                  assert.strictEqual(mismatchRegistryPlan.resolution.status, "resolved_from_version");
+                  assert.strictEqual(mismatchRegistryPlan.resolution.integrityStatus, "expected_integrity_mismatch");
                   const npmRegistryPlan = await npm.planRegistryInstall({ name: "@autojs6/npm-registry-plan" });
                   assert.strictEqual(npmRegistryPlan.status, "blocked_by_policy");
                   assert.strictEqual(npmRegistryPlan.request.tag, "latest");
@@ -509,6 +566,10 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     registryPlan.sourceAuthority,
                     metadataRegistryPlan.resolution.status,
                     metadataRegistryPlan.resolution.resolvedVersion,
+                    rangeRegistryPlan.resolution.status,
+                    rangeRegistryPlan.resolution.resolvedVersion,
+                    rangeRegistryPlan.resolution.integrityStatus,
+                    mismatchRegistryPlan.resolution.integrityStatus,
                     npmRegistryPlan.status,
                     tarballPlan.status,
                     tarballPlan.sourceAuthority,
@@ -554,7 +615,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "guarded_local_unpacked_mutation|local_unpacked_host_managed_only|" +
                     "local_unpacked_host_managed|true|true|" +
                     "planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall|install,update,remove|" +
-                    "blocked_by_policy|raw_registry_denied|resolved_from_dist_tag|1.2.3|blocked_by_policy|blocked_by_policy|remote_tarball_denied|integrity_supplied|" +
+                    "blocked_by_policy|raw_registry_denied|resolved_from_dist_tag|1.2.3|resolved_from_range|1.2.3|expected_integrity_matched|expected_integrity_mismatch|blocked_by_policy|blocked_by_policy|remote_tarball_denied|integrity_supplied|" +
                     "ready|false|installed|already_installed|" +
                     "ready|updated|ready|removed|ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED|" +
                     "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_NPM_CLI_DENIED|ERR_AUTOJS6_NPM_REGISTRY_DENIED|" +

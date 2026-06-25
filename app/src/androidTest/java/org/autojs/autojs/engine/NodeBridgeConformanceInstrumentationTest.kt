@@ -823,6 +823,39 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(metadataRegistryPlanResult.resolution.tarballUrl, "https://registry.npmjs.org/@autojs6/conformance/-/conformance-1.0.0.tgz");
               assert.strictEqual(metadataRegistryPlanResult.resolution.integrity, "sha512-conformance");
               assert.strictEqual(Object.isFrozen(metadataRegistryPlanResult.resolution), true);
+              const rangeRegistryPlanResult = await expectPromise("package_manager.planRegistryInstall.range", packageManager.planRegistryInstall({
+                name: "@autojs6/conformance-range",
+                range: ">=1.0.0 <2.0.0",
+                expectedIntegrity: "sha512-conformance-range",
+                metadata: {
+                  name: "@autojs6/conformance-range",
+                  versions: {
+                    "1.0.0": {
+                      dist: {
+                        tarball: "https://registry.npmjs.org/@autojs6/conformance-range/-/conformance-range-1.0.0.tgz",
+                        integrity: "sha512-conformance-range-100"
+                      }
+                    },
+                    "1.4.0": {
+                      dist: {
+                        tarball: "https://registry.npmjs.org/@autojs6/conformance-range/-/conformance-range-1.4.0.tgz",
+                        integrity: "sha512-conformance-range"
+                      }
+                    },
+                    "2.0.0": {
+                      dist: {
+                        tarball: "https://registry.npmjs.org/@autojs6/conformance-range/-/conformance-range-2.0.0.tgz",
+                        integrity: "sha512-conformance-range-200"
+                      }
+                    }
+                  }
+                }
+              }));
+              assert.strictEqual(rangeRegistryPlanResult.status, "blocked_by_policy");
+              assert.strictEqual(rangeRegistryPlanResult.resolution.status, "resolved_from_range");
+              assert.strictEqual(rangeRegistryPlanResult.resolution.resolvedVersion, "1.4.0");
+              assert.strictEqual(rangeRegistryPlanResult.resolution.integrityStatus, "expected_integrity_matched");
+              assert.strictEqual(Object.isFrozen(rangeRegistryPlanResult.resolution), true);
               const npmTarballPlanResult = await expectPromise("npm.planTarballInstall", npm.planTarballInstall({ tarballUrl: "https://registry.npmjs.org/@autojs6/conformance/-/conformance-1.0.0.tgz", expectedIntegrity: "sha512-conformance" }));
               assert.strictEqual(npmTarballPlanResult.status, "blocked_by_policy");
               assert.strictEqual(npmTarballPlanResult.sourceAuthority, "remote_tarball_denied");

@@ -26069,9 +26069,126 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return __autojs6_package_manager_plain_object(input && input.packument);
   }
+  function __autojs6_package_manager_semver_parse(value) {
+    const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(__autojs6_package_manager_string(value).trim());
+    return match ? {
+      major: Number(match[1]),
+      minor: Number(match[2]),
+      patch: Number(match[3])
+    } : null;
+  }
+  function __autojs6_package_manager_semver_compare_parsed(left, right) {
+    if (left.major !== right.major) return left.major - right.major;
+    if (left.minor !== right.minor) return left.minor - right.minor;
+    return left.patch - right.patch;
+  }
+  function __autojs6_package_manager_semver_compare(left, right) {
+    const parsedLeft = __autojs6_package_manager_semver_parse(left);
+    const parsedRight = __autojs6_package_manager_semver_parse(right);
+    if (!parsedLeft && !parsedRight) return left < right ? -1 : left > right ? 1 : 0;
+    if (!parsedLeft) return -1;
+    if (!parsedRight) return 1;
+    return __autojs6_package_manager_semver_compare_parsed(parsedLeft, parsedRight);
+  }
+  function __autojs6_package_manager_semver_compare_with_comparator(version, comparator) {
+    const match = /^(>=|>|<=|<|=)?(\d+\.\d+\.\d+)$/.exec(__autojs6_package_manager_string(comparator).trim());
+    if (!match) {
+      return null;
+    }
+    const comparison = __autojs6_package_manager_semver_compare(version, match[2]);
+    const op = match[1] || "=";
+    if (op === "=") return comparison === 0;
+    if (op === ">=") return comparison >= 0;
+    if (op === ">") return comparison > 0;
+    if (op === "<=") return comparison <= 0;
+    if (op === "<") return comparison < 0;
+    return null;
+  }
+  function __autojs6_package_manager_semver_satisfies(version, range) {
+    const trimmed = __autojs6_package_manager_string(range).trim();
+    if (trimmed === "" || trimmed === "*") {
+      return true;
+    }
+    if (/^\d+\.\d+\.\d+$/.test(trimmed)) {
+      return version === trimmed;
+    }
+    if (trimmed.charAt(0) === "^") {
+      const min = __autojs6_package_manager_semver_parse(trimmed.slice(1));
+      const current = __autojs6_package_manager_semver_parse(version);
+      if (!min || !current) {
+        return null;
+      }
+      const upper = min.major === 0
+        ? { major: 0, minor: min.minor + 1, patch: 0 }
+        : { major: min.major + 1, minor: 0, patch: 0 };
+      return __autojs6_package_manager_semver_compare_parsed(current, min) >= 0 &&
+        __autojs6_package_manager_semver_compare_parsed(current, upper) < 0;
+    }
+    if (trimmed.charAt(0) === "~") {
+      const min = __autojs6_package_manager_semver_parse(trimmed.slice(1));
+      const current = __autojs6_package_manager_semver_parse(version);
+      if (!min || !current) {
+        return null;
+      }
+      const upper = { major: min.major, minor: min.minor + 1, patch: 0 };
+      return __autojs6_package_manager_semver_compare_parsed(current, min) >= 0 &&
+        __autojs6_package_manager_semver_compare_parsed(current, upper) < 0;
+    }
+    const comparators = trimmed.split(/\s+/).filter(Boolean);
+    if (comparators.length > 1 || /^[<>]=?/.test(comparators[0] || "")) {
+      for (let i = 0; i < comparators.length; i += 1) {
+        const result = __autojs6_package_manager_semver_compare_with_comparator(version, comparators[i]);
+        if (result === null) {
+          return null;
+        }
+        if (!result) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return null;
+  }
+  function __autojs6_package_manager_registry_versions_desc(versions) {
+    return Object.keys(versions || {})
+      .filter((version) => !!__autojs6_package_manager_semver_parse(version))
+      .sort(__autojs6_package_manager_semver_compare)
+      .reverse();
+  }
+  function __autojs6_package_manager_registry_resolve_range(versions, range) {
+    const sortedVersions = __autojs6_package_manager_registry_versions_desc(versions);
+    let supported = true;
+    for (let i = 0; i < sortedVersions.length; i += 1) {
+      const version = sortedVersions[i];
+      const satisfied = __autojs6_package_manager_semver_satisfies(version, range);
+      if (satisfied === null) {
+        supported = false;
+        continue;
+      }
+      if (satisfied) {
+        return Object.freeze({ version, supported: true });
+      }
+    }
+    return Object.freeze({ version: "", supported });
+  }
+  function __autojs6_package_manager_integrity_status(expectedIntegrity, resolvedIntegrity, metadataPresent) {
+    if (!metadataPresent) {
+      return "metadata_not_provided";
+    }
+    if (!expectedIntegrity) {
+      return "expected_integrity_missing";
+    }
+    if (!resolvedIntegrity) {
+      return "metadata_integrity_missing";
+    }
+    return expectedIntegrity === resolvedIntegrity
+      ? "expected_integrity_matched"
+      : "expected_integrity_mismatch";
+  }
   function __autojs6_package_manager_registry_resolution(request, input) {
     const metadata = __autojs6_package_manager_registry_packument(input);
     const requestedVersion = __autojs6_package_manager_string(request.version).trim();
+    const requestedRange = __autojs6_package_manager_string(request.range).trim();
     const requestedTag = __autojs6_package_manager_string(request.tag).trim();
     const expectedIntegrity = __autojs6_package_manager_string(request.expectedIntegrity).trim();
     const base = {
@@ -26081,16 +26198,26 @@ std::string buildEmbeddedScriptExecutionSource(
       metadataName: "",
       nameMatches: true,
       requestedVersion,
+      requestedRange,
       requestedTag,
+      selector: requestedVersion || requestedRange || requestedTag,
+      selectorKind: requestedVersion ? "version" : requestedRange ? "range" : "tag",
       resolvedVersion: requestedVersion,
       registry: request.registry,
       tarballUrl: "",
       integrity: expectedIntegrity,
+      expectedIntegrity,
+      integrityStatus: __autojs6_package_manager_integrity_status(expectedIntegrity, "", !!metadata),
       shasum: "",
-      hasMetadata: !!metadata
+      hasMetadata: !!metadata,
+      rangeSupported: true
     };
     if (!metadata) {
-      base.status = requestedVersion ? "version_requested_no_metadata" : "metadata_not_provided";
+      base.status = requestedVersion
+        ? "version_requested_no_metadata"
+        : requestedRange
+          ? "range_requested_no_metadata"
+          : "metadata_not_provided";
       return Object.freeze(base);
     }
     const metadataName = __autojs6_package_manager_string(metadata.name).trim();
@@ -26099,8 +26226,22 @@ std::string buildEmbeddedScriptExecutionSource(
     base.metadataName = metadataName;
     base.nameMatches = !metadataName || metadataName === request.name;
     let resolvedVersion = requestedVersion;
-    let status = requestedVersion ? "resolved_from_version" : "resolved_from_dist_tag";
-    if (!resolvedVersion) {
+    let status = requestedVersion ? "resolved_from_version" : requestedRange ? "resolved_from_range" : "resolved_from_dist_tag";
+    if (!resolvedVersion && requestedRange) {
+      if (distTags && Object.prototype.hasOwnProperty.call(distTags, requestedRange)) {
+        resolvedVersion = __autojs6_package_manager_string(distTags[requestedRange]).trim();
+        status = "resolved_from_dist_tag";
+      } else {
+        const rangeResolution = versions
+          ? __autojs6_package_manager_registry_resolve_range(versions, requestedRange)
+          : Object.freeze({ version: "", supported: true });
+        resolvedVersion = rangeResolution.version;
+        base.rangeSupported = rangeResolution.supported;
+        if (!resolvedVersion) {
+          status = rangeResolution.supported ? "range_not_satisfied" : "unsupported_range";
+        }
+      }
+    } else if (!resolvedVersion) {
       resolvedVersion = distTags && Object.prototype.hasOwnProperty.call(distTags, requestedTag)
         ? __autojs6_package_manager_string(distTags[requestedTag]).trim()
         : "";
@@ -26123,6 +26264,7 @@ std::string buildEmbeddedScriptExecutionSource(
       base.integrity = __autojs6_package_manager_string(dist.integrity).trim() || expectedIntegrity;
       base.shasum = __autojs6_package_manager_string(dist.shasum).trim();
     }
+    base.integrityStatus = __autojs6_package_manager_integrity_status(expectedIntegrity, base.integrity, true);
     base.status = status;
     return Object.freeze(base);
   }
@@ -26135,13 +26277,19 @@ std::string buildEmbeddedScriptExecutionSource(
       metadataName: "",
       nameMatches: true,
       requestedVersion: request.version,
+      requestedRange: "",
       requestedTag: "",
+      selector: request.tarballUrl,
+      selectorKind: "tarball_url",
       resolvedVersion: request.version,
       registry: "",
       tarballUrl: request.tarballUrl,
       integrity: expectedIntegrity,
+      expectedIntegrity,
+      integrityStatus: expectedIntegrity ? "expected_integrity_provided" : "expected_integrity_missing",
       shasum: "",
-      hasMetadata: false
+      hasMetadata: false,
+      rangeSupported: true
     });
   }
   function __autojs6_package_manager_record(value) {
@@ -26281,7 +26429,8 @@ std::string buildEmbeddedScriptExecutionSource(
     const input = __autojs6_package_manager_options(value);
     const name = __autojs6_package_manager_string(input.name).trim();
     const version = __autojs6_package_manager_string(input.version).trim();
-    const tag = __autojs6_package_manager_string(input.tag || (version ? "" : "latest")).trim();
+    const range = __autojs6_package_manager_string(input.range || input.versionRange).trim();
+    const tag = __autojs6_package_manager_string(input.tag || (version || range ? "" : "latest")).trim();
     const registry = __autojs6_package_manager_string(input.registry || "default").trim() || "default";
     const expectedIntegrity = __autojs6_package_manager_string(input.expectedIntegrity).trim();
     if (!name) {
@@ -26290,15 +26439,16 @@ std::string buildEmbeddedScriptExecutionSource(
         "package_manager." + methodName + " requires a non-empty package name."
       );
     }
-    if (!version && !tag) {
+    if (!version && !range && !tag) {
       throw __autojs6_package_manager_invalid_request(
         methodName,
-        "package_manager." + methodName + " requires a version or tag."
+        "package_manager." + methodName + " requires a version, range, or tag."
       );
     }
     const payload = {
       name,
       version,
+      range,
       tag,
       registry
     };

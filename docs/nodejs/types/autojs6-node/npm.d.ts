@@ -10,6 +10,8 @@ declare module "npm" {
     export type RegistryPackumentVersion = packageManager.RegistryPackumentVersion;
     export type RegistryPackumentDist = packageManager.RegistryPackumentDist;
     export type RemotePlanResolution = packageManager.RemotePlanResolution;
+    export type RemotePlanSelectorKind = packageManager.RemotePlanSelectorKind;
+    export type RemotePlanIntegrityStatus = packageManager.RemotePlanIntegrityStatus;
     export type SourcePolicy = packageManager.SourcePolicy;
     export type PlanSourceRequest = packageManager.PlanSourceRequest;
     export type PlanRemoveRequest = packageManager.PlanRemoveRequest;

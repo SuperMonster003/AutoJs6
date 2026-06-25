@@ -68,6 +68,8 @@ declare module "package_manager" {
     export interface PlanRegistryInstallRequest extends BridgeOptions {
       readonly name: string;
       readonly version?: string;
+      readonly range?: string;
+      readonly versionRange?: string;
       readonly tag?: string;
       readonly registry?: string;
       readonly expectedIntegrity?: string;
@@ -132,13 +134,28 @@ declare module "package_manager" {
     export type RemotePlanResolutionStatus =
       | "metadata_not_provided"
       | "version_requested_no_metadata"
+      | "range_requested_no_metadata"
       | "resolved_from_dist_tag"
       | "resolved_from_version"
+      | "resolved_from_range"
       | "tag_not_found"
       | "version_not_found"
+      | "range_not_satisfied"
+      | "unsupported_range"
       | "name_mismatch"
       | "integrity_supplied"
       | "integrity_required"
+      | string;
+
+    export type RemotePlanSelectorKind = "version" | "range" | "tag" | string;
+
+    export type RemotePlanIntegrityStatus =
+      | "metadata_not_provided"
+      | "expected_integrity_missing"
+      | "expected_integrity_matched"
+      | "expected_integrity_mismatch"
+      | "metadata_integrity_missing"
+      | "expected_integrity_provided"
       | string;
 
     export interface RemotePlanResolution {
@@ -151,13 +168,19 @@ declare module "package_manager" {
       readonly metadataName: string;
       readonly nameMatches: boolean;
       readonly requestedVersion: string;
+      readonly requestedRange: string;
       readonly requestedTag: string;
+      readonly selector: string;
+      readonly selectorKind: RemotePlanSelectorKind;
       readonly resolvedVersion: string;
       readonly registry: string;
       readonly tarballUrl: string;
       readonly integrity: string;
+      readonly expectedIntegrity: string;
+      readonly integrityStatus: RemotePlanIntegrityStatus;
       readonly shasum: string;
       readonly hasMetadata: boolean;
+      readonly rangeSupported: boolean;
     }
 
     export interface RemotePackagePlan {
