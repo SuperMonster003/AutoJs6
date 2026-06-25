@@ -132,6 +132,7 @@ low-memory signals.
 Runtime package installation is not a Safe Node Profile user capability. Projects may vendor pure JavaScript CommonJS dependencies, and host tooling may sanitize them at build time. Phase 13 adds `NodeAndroidPackageInstallManager` as an internal app-private local store for already-unpacked packages; it still rejects lifecycle scripts, package `bin`, native payloads, symlinks, path escapes, and registry/npm execution. AutoJs6 must not run package lifecycle scripts, native addon builds, arbitrary `.bin` commands, or registry downloads inside the Android runtime. See `docs/nodejs/design/PACKAGE_MANAGER.md`.
 P13-48 records package lock and integrity policy as partial. `NodePackageIntegrityPolicy` and `autojs6:profile.packageIntegrityProfile` define the shared lockfile, SHA-512 integrity, signature, rollback, cache cleanup, and corruption recovery requirements for Android package manager, plugin packages, and native addon artifacts. The policy does not promote unsigned plugin installs, unsigned native addon loads, lifecycle scripts, postinstall downloads, raw registry installs, or unverified cache reuse.
 P13-49 records profile selection UX and diagnostics as partial. `NodeProfileSelectionDiagnostics` and `autojs6:profile.profileSelection` expose requested Safe/Pro/Desktop/Debug metadata, declared high-risk capabilities, synthesized Android permissions, blocked profile promotions, and failure hints without changing authority. Missing bridge capability errors identify the required profile, Node capability declaration, and Android permission set, while the effective profile remains `safe_default` and user-selectable profile promotion stays disabled.
+P13-51 records per-profile rollback playbook as partial. `NodeProfileRollbackPolicy` and `autojs6:profile.profileRollbackPolicy` expose default-off Pro/Desktop/Debug profile switches, default-off relaxed-capability aggregation, individual capability rollback actions, Safe-profile crash/stress fallback, and packaged Safe-profile downgrade guidance. The playbook is metadata-only and does not grant authority; automatic crash circuit breaker, remote packaged kill switch, settings UI, and privacy prompts remain future work.
 The host dependency bundler rejects unsafe dependency trees before packaging. `.node` files are reported as `NATIVE_ADDON_DISABLED`; `binding.gyp` and `build/{Release,Debug}` artifacts are reported as `NODE_GYP_ARTIFACT_UNSUPPORTED`. It also rejects every blocked lifecycle script variant (`preinstall`, `install`, `postinstall`, `prepare`), unchecked `.bin` entries, npm cache/log artifacts, symlink/path escapes, suspicious executable/native binaries, unsupported package-manager layouts, oversized files/packages/trees, and package metadata path references that are absolute, protocol-based, NUL-containing, or escape through `..`. A sanitized bundle is copied only after the scan reports zero issues, and the dependency report includes an SBOM-lite file, dependency compatibility analyzer status, deterministic bundle hash, and content-addressed cache key for packaged APK review. APK-builder preflight gates reject analyzer `unsafe` and `unsupported` statuses.
 
 The `require("plugins")` surface is a JS-only local manager, not a package
@@ -821,6 +822,15 @@ evidence, negative abuse probes, CI evidence, and rollback posture. The focused
 security regression keeps raw network modules, expanded filesystem roots,
 raw `child_process`, native addons, inspector, raw WASI, and release Java
 interop fail-closed while later rollback/privacy/disclosure gates are designed.
+
+P13-51 records per-profile rollback playbook as partial. Profile switches
+(`autojs.nodejs.profile.pro.enabled`,
+`autojs.nodejs.profile.desktop.enabled`,
+`autojs.nodejs.profile.debugUnsafeLab.enabled`) and the aggregate
+`autojs.nodejs.relaxedCapabilities.enabled` switch default to false. Crash,
+stress, security-corpus, and packaged regressions fall back to `safe_default`;
+published packaged APK downgrade is documented as a Safe-profile patch or
+metadata removal, not as a silent authority change.
 
 ## Release Security Gate
 

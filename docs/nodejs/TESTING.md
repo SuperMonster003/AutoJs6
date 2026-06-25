@@ -2102,6 +2102,31 @@ inspector denial, pure WebAssembly with raw WASI denial, and Java interop
 allowlist/denylist behavior. P13-50 records relaxed-capability security corpus
 as partial.
 
+Phase 13 profile rollback playbook gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProfileRollbackPlaybook
+```
+
+This host gate records P13-51 as partial. It requires default-off profile and
+relaxed-capability Gradle switches, `NodeProfileRollbackPolicy`,
+`autojs6:profile.profileRollbackPolicy`, Node Doctor rollback diagnostics,
+focused instrumentation, TypeScript declarations, surface manifest evidence,
+release matrix updates, and Phase 13 docs. It keeps effective authority at
+`safe_default` and keeps automatic crash circuit breaker, remote packaged kill
+switch, settings UI, packaged builder UI, and privacy prompts unpromoted.
+
+Focused P13-51 device coverage:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest"
+```
+
+This suite verifies Kotlin rollback policy, runtime frozen
+`profileRollbackPolicy`, Safe crash/stress fallback, profile/capability
+switch names, and packaged downgrade metadata. P13-51 records per-profile
+rollback playbook as partial.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

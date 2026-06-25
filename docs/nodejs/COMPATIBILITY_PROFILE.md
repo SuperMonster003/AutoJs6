@@ -1311,6 +1311,17 @@ CI evidence, and rollback posture. The host gate
 runtime remains fail-closed while future Pro/Desktop/Debug promotion evidence
 is collected.
 
+P13-51 records per-profile rollback playbook as partial. The runtime exposes
+`autojs6:profile.profileRollbackPolicy`, backed by
+`NodeProfileRollbackPolicy`, to report default-off Pro/Desktop/Debug profile
+switches, relaxed-capability rollback switches, crash/stress/security/package
+rollback triggers, and packaged Safe-profile downgrade guidance. Gradle
+properties default to false for `autojs.nodejs.profile.pro.enabled`,
+`autojs.nodejs.profile.desktop.enabled`,
+`autojs.nodejs.profile.debugUnsafeLab.enabled`, and
+`autojs.nodejs.relaxedCapabilities.enabled`. This is rollback metadata only:
+effective authority remains `safe_default` until promotion gates close.
+
 P13-36 records `vm` module promotion as partial. The runtime exposes
 `autojs6:profile.vmProfile` to document that `vm` remains denied by default
 while any future Desktop/Debug opt-in must prove `vm.Script` or context

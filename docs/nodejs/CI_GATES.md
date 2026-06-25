@@ -830,6 +830,15 @@ surface manifest evidence, and docs updates while keeping raw sockets,
 expanded filesystem roots, raw process/native handles, raw WASI, inspector,
 native addons, and release Java interop unpromoted. P13-50 records
 relaxed-capability security corpus as partial.
+`verifyNodePhase13ProfileRollbackPlaybook` records P13-51 as the per-profile
+rollback playbook gate. It requires default-off Pro/Desktop/Debug profile and
+relaxed-capability Gradle switches, `NodeProfileRollbackPolicy`,
+`autojs6:profile.profileRollbackPolicy`, Node Doctor rollback diagnostics,
+focused instrumentation, TypeScript declarations, surface manifest evidence,
+and docs updates while keeping effective authority at `safe_default` and
+automatic crash circuit breaker, remote packaged kill switch, settings UI,
+packaged builder UI, and privacy prompts unpromoted. P13-51 records
+per-profile rollback playbook as partial.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

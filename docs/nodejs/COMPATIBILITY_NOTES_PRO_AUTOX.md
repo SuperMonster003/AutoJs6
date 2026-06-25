@@ -418,6 +418,13 @@ abuse cases, CI evidence, and rollback posture. This helps Pro/AutoX migration
 planning without enabling raw sockets, expanded roots, raw process/native
 handles, raw WASI, inspector, native addons, or release Java interop.
 
+P13-51 records per-profile rollback playbook as partial. AutoJs6 Node now
+exposes `profileRollbackPolicy` diagnostics and Node Doctor rollback output
+for default-off Pro/Desktop/Debug profile switches, relaxed-capability
+rollback actions, Safe crash/stress fallback, and packaged APK Safe-profile
+downgrade guidance. The playbook helps staged Pro/AutoX compatibility work
+remain reversible; it does not enable profile authority by itself.
+
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
 `compileFunction`, and VM module APIs remain unavailable. Packages that require

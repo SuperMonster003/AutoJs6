@@ -1212,6 +1212,15 @@ evidence lane needed for Pro/Desktop parity, but raw sockets, expanded roots,
 raw process/native handles, raw WASI, inspector, native addons, and release
 Java interop remain unpromoted.
 
+P13-51 records per-profile rollback playbook as partial: AutoJs6 Node now
+documents default-off Pro/Desktop/Debug profile switches, relaxed-capability
+rollback switches, Safe-profile crash/stress fallback, and packaged APK
+downgrade actions through `NodeProfileRollbackPolicy`,
+`autojs6:profile.profileRollbackPolicy`, and Node Doctor. This supports the
+long-term Auto.js Pro plus desktop Node target without silently granting
+authority; settings UI, packaged builder UI, automatic crash circuit breaker,
+remote packaged kill switch, and privacy prompts remain future work.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

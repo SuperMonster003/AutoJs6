@@ -699,7 +699,7 @@
         "P13-51",
         "P13-52"
       ],
-      "summary": "P13-50 records relaxed-capability security corpus as partial with structured positive/negative/abuse cases, focused security regression, and fail-closed raw capability policy; rollback playbooks, privacy, disclosure, and user prompts remain future work.",
+      "summary": "P13-50 records relaxed-capability security corpus as partial with structured positive/negative/abuse cases, focused security regression, and fail-closed raw capability policy. P13-51 records per-profile rollback playbook as partial with default-off Gradle switches, NodeProfileRollbackPolicy, profileRollbackPolicy runtime diagnostics, Node Doctor output, TypeScript coverage, and packaged Safe-profile downgrade guidance; privacy, disclosure, user prompts, automatic crash circuit breaker, and remote packaged kill switch remain future work.",
       "risk": "critical",
       "runtimeSurface": [
         "per-profile security corpus",
@@ -725,9 +725,21 @@
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeInspectorPhase13DecisionInstrumentationTest.kt",
         "app/src/androidTest/java/org/autojs/autojs/engine/NodeWasiPhase13DecisionInstrumentationTest.kt",
         "build/reports/nodejs/phase13-relaxed-capability-security-corpus.json",
-        "build/reports/nodejs/phase13-relaxed-capability-security-corpus.md"
+        "build/reports/nodejs/phase13-relaxed-capability-security-corpus.md",
+        "docs/nodejs/security/PROFILE_ROLLBACK_PLAYBOOK.md",
+        "tools/nodejs/phase13/verify-profile-rollback-playbook.js",
+        ":app:verifyNodePhase13ProfileRollbackPlaybook",
+        "docs/nodejs/reports/phase13/P13_51_PROFILE_ROLLBACK_PLAYBOOK.md",
+        "app/src/main/java/org/autojs/autojs/engine/NodeProfileRollbackPolicy.kt",
+        "app/src/main/cpp/node_bridge_sources.cpp",
+        "app/src/main/java/org/autojs/autojs/ui/settings/NodeDoctorReportGenerator.kt",
+        "app/src/androidTest/java/org/autojs/autojs/engine/NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest.kt",
+        "docs/nodejs/types/autojs6-node/autojs_global.d.ts",
+        "sample/nodejs/typescript-smoke/src/main.ts",
+        "build/reports/nodejs/phase13-profile-rollback-playbook.json",
+        "build/reports/nodejs/phase13-profile-rollback-playbook.md"
       ],
-      "rollback": "Disable relaxed capability groups and keep existing Safe Node Profile security corpus as the release gate."
+      "rollback": "Disable individual relaxed capability switches, disable Pro/Desktop/Debug profile switches, remove packaged profile metadata, and fall back to the Safe Node Profile security corpus as the release gate."
     },
     {
       "id": "docs.examples.final_gate",
