@@ -1145,11 +1145,10 @@ narrows the gap for pure JavaScript dependencies that have already been
 resolved and sanitized by host tooling, but it is not yet Pro/Desktop npm
 parity. Android npm CLI, registry download/cache, remote tarball install, lifecycle scripts, bin
 shims, symlinks, native builds, signed native payloads, script-visible `npm`,
-`package_manager.install/update/remove`, packaged dependency distribution, and
-real npm corpus growth remain open. The script-visible `package_manager`
-facade is limited to status/policy/sourcePolicy, dry-run
-planInstall/planUpdate/planRemove, and list/verify/prune over the app-private
-store.
+packaged dependency distribution, and real npm corpus growth remain open. The
+script-visible `package_manager` facade is limited to
+status/policy/sourcePolicy, dry-run planInstall/planUpdate/planRemove, guarded
+install/update/remove, and list/verify/prune over the app-private store.
 
 P13-43 records Node stdlib conformance as partial: Safe Node now exposes
 `stdlibProfile` diagnostics for the representative stdlib subset covering

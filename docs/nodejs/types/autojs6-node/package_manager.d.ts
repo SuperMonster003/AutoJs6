@@ -2,6 +2,7 @@ declare module "package_manager" {
   namespace packageManager {
     export type Operation = "install" | "update" | "remove" | "list" | "verify" | "prune";
     export type PlanOperation = "planInstall" | "planUpdate" | "planRemove";
+    export type MutationOperation = "install" | "update" | "remove";
     export type PackageKind = "dependency" | "plugin" | "project";
 
     export interface BridgeOptions {
@@ -43,6 +44,18 @@ declare module "package_manager" {
       readonly version: string;
     }
 
+    export interface MutationSourceRequest extends PlanSourceRequest {
+      readonly expectedIntegrity: string;
+      readonly allowMutation: true;
+    }
+
+    export interface MutationRemoveRequest extends BridgeOptions {
+      readonly name: string;
+      readonly version: string;
+      readonly expectedIntegrity: string;
+      readonly allowMutation: true;
+    }
+
     export interface PackageRecord {
       readonly schema: "autojs6-node-android-package-record-v1" | string;
       readonly name: string;
@@ -77,8 +90,8 @@ declare module "package_manager" {
     }
 
     export type SourceAuthority = "local_unpacked_host_managed_only" | string;
-    export type InstallAuthority = "internal_substrate_only" | string;
-    export type SourcePolicyStatus = "decision_only_no_install_authority" | string;
+    export type InstallAuthority = "package_manager_mutate_explicit_local_unpacked" | "internal_substrate_only" | string;
+    export type SourcePolicyStatus = "guarded_local_unpacked_mutation" | "decision_only_no_install_authority" | string;
     export type AllowedSource = "local_unpacked_host_managed" | string;
     export type DeniedSource =
       | "raw_registry"
@@ -130,10 +143,14 @@ declare module "package_manager" {
       readonly status: SourcePolicyStatus;
       readonly sourceAuthority: SourceAuthority;
       readonly installAuthority: InstallAuthority;
-      readonly grantsInstallAuthority: false;
+      readonly grantsInstallAuthority: boolean;
       readonly allowedSources: readonly AllowedSource[];
       readonly deniedSources: readonly DeniedSource[];
       readonly planOperations: readonly PlanOperation[];
+      readonly mutationOperations: readonly MutationOperation[];
+      readonly mutationCapability: "package_manager.mutate" | string;
+      readonly mutationConfirmation: "allowMutation_required" | string;
+      readonly requiresExpectedIntegrity: boolean;
       readonly localUnpacked: LocalUnpackedSourcePolicy;
       readonly registry: RegistrySourcePolicy;
       readonly tarball: TarballSourcePolicy;
@@ -143,13 +160,13 @@ declare module "package_manager" {
 
     export interface DiagnosticStatus {
       readonly schema: "autojs6-node-package-manager-status-v1";
-      readonly status: "read_maintenance_partial" | "diagnostic_only" | string;
+      readonly status: "guarded_mutation_partial" | "read_maintenance_partial" | "diagnostic_only" | string;
       readonly profileStatus: "android_substrate_partial" | string;
       readonly hostPackageManager: "available" | string;
       readonly androidStore: "local_app_private_partial" | string;
       readonly androidRuntimeInstall: "local_unpacked_only" | string;
-      readonly jsBridge: "read_maintenance_partial" | "diagnostic_only" | string;
-      readonly requirePackageManager: "read_maintenance_partial" | "diagnostic_only" | string;
+      readonly jsBridge: "guarded_mutation_partial" | "read_maintenance_partial" | "diagnostic_only" | string;
+      readonly requirePackageManager: "guarded_mutation_partial" | "read_maintenance_partial" | "diagnostic_only" | string;
       readonly diagnosticFacade: "available" | string;
       readonly sourcePolicy: SourcePolicyStatus;
       readonly sourceAuthority: SourceAuthority;
@@ -157,6 +174,10 @@ declare module "package_manager" {
       readonly allowedSources: readonly AllowedSource[];
       readonly deniedSources: readonly DeniedSource[];
       readonly planOperations: readonly PlanOperation[];
+      readonly mutationOperations: readonly MutationOperation[];
+      readonly mutationCapability: "package_manager.mutate" | string;
+      readonly mutationConfirmation: "allowMutation_required" | string;
+      readonly requiresExpectedIntegrity: boolean;
       readonly operations: readonly Operation[];
       readonly packageKinds: readonly PackageKind[];
       readonly npmCli: "denied" | string;
@@ -167,12 +188,12 @@ declare module "package_manager" {
       readonly androidNetwork: "denied" | string;
       readonly rawExecutables: boolean;
       readonly rawRegistryAccess: boolean;
-      readonly grantsInstallAuthority: false;
+      readonly grantsInstallAuthority: boolean;
     }
 
     export interface DiagnosticPolicy {
       readonly schema: "autojs6-node-package-manager-policy-v1";
-      readonly status: "read_maintenance_partial" | "diagnostic_only" | string;
+      readonly status: "guarded_mutation_partial" | "read_maintenance_partial" | "diagnostic_only" | string;
       readonly androidStore: "local_app_private_partial" | string;
       readonly androidRuntimeInstall: "local_unpacked_only" | string;
       readonly npmCli: "denied" | string;
@@ -196,12 +217,16 @@ declare module "package_manager" {
       readonly allowedSources: readonly AllowedSource[];
       readonly deniedSources: readonly DeniedSource[];
       readonly planOperations: readonly PlanOperation[];
+      readonly mutationOperations: readonly MutationOperation[];
+      readonly mutationCapability: "package_manager.mutate" | string;
+      readonly mutationConfirmation: "allowMutation_required" | string;
+      readonly requiresExpectedIntegrity: boolean;
       readonly operations: readonly Operation[];
       readonly packageKinds: readonly PackageKind[];
       readonly androidNetwork: "denied" | string;
       readonly rawExecutables: boolean;
       readonly rawRegistryAccess: boolean;
-      readonly grantsInstallAuthority: false;
+      readonly grantsInstallAuthority: boolean;
     }
 
     export interface PackageManagerModule {
@@ -211,9 +236,9 @@ declare module "package_manager" {
       planInstall(request: PlanSourceRequest): Promise<PackagePlan>;
       planUpdate(request: PlanSourceRequest): Promise<PackagePlan>;
       planRemove(request: PlanRemoveRequest): Promise<PackagePlan>;
-      install(request?: PackageRequest): never;
-      update(request?: PackageRequest): never;
-      remove(request?: PackageRequest): never;
+      install(request: MutationSourceRequest): Promise<OperationResult>;
+      update(request: MutationSourceRequest): Promise<OperationResult>;
+      remove(request: MutationRemoveRequest): Promise<OperationResult>;
       list(options?: ListOptions): Promise<readonly PackageRecord[]>;
       verify(request: VerifyRequest): Promise<OperationResult>;
       prune(options?: PruneOptions): Promise<OperationResult>;

@@ -70,12 +70,12 @@ Current Android package installation progress:
   transactional install/update/remove/list/verify/prune, cancellation, store
   locking, SHA-512 integrity, lifecycle/bin/native/path-escape denial, and
   focused instrumentation. It also exposes source-authority diagnostics and
-  `package_manager` read-maintenance plus dry-run planning
-  status/policy/sourcePolicy/planInstall/planUpdate/planRemove/list/verify/prune
-  while mutating install/update/remove remain denied. The blocker remains open
-  until mutating runtime/JS API exposure, registry/download implementation,
-  signed native-payload decision, and plugin/package distribution integration
-  land.
+  `package_manager` guarded local mutation plus read-maintenance
+  status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune
+  while npm, registry, lifecycle, bin, native payload, and unrestricted
+  install authority remain denied. The blocker remains open until
+  registry/download implementation, npm CLI decision, signed native-payload
+  decision, and plugin/package distribution integration land.
 
 Resolved in Phase 11:
 

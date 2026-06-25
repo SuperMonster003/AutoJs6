@@ -518,7 +518,9 @@ async function smoke(): Promise<void> {
   const packageManagerPlanInstall: (request: packageManager.PlanSourceRequest) => Promise<packageManager.PackagePlan> = packageManager.planInstall;
   const packageManagerPlanUpdate: (request: packageManager.PlanSourceRequest) => Promise<packageManager.PackagePlan> = packageManager.planUpdate;
   const packageManagerPlanRemove: (request: packageManager.PlanRemoveRequest) => Promise<packageManager.PackagePlan> = packageManager.planRemove;
-  const packageManagerInstall: (request?: packageManager.PackageRequest) => never = packageManager.install;
+  const packageManagerInstall: (request: packageManager.MutationSourceRequest) => Promise<packageManager.OperationResult> = packageManager.install;
+  const packageManagerUpdate: (request: packageManager.MutationSourceRequest) => Promise<packageManager.OperationResult> = packageManager.update;
+  const packageManagerRemove: (request: packageManager.MutationRemoveRequest) => Promise<packageManager.OperationResult> = packageManager.remove;
   const packageManagerList: (options?: packageManager.ListOptions) => Promise<readonly packageManager.PackageRecord[]> = packageManager.list;
   const packageManagerVerify: (request: packageManager.VerifyRequest) => Promise<packageManager.OperationResult> = packageManager.verify;
   const packageManagerPrune: (options?: packageManager.PruneOptions) => Promise<packageManager.OperationResult> = packageManager.prune;
@@ -540,6 +542,7 @@ async function smoke(): Promise<void> {
   const packageManagerProfileSourceAuthority: string = autojsProfile.packageManagerProfile.sourceAuthority;
   const packageManagerProfileAllowedSources: readonly string[] = autojsProfile.packageManagerProfile.allowedSources;
   const packageManagerProfilePlanOperations: readonly string[] = autojsProfile.packageManagerProfile.planOperations;
+  const packageManagerProfileMutationOperations: readonly string[] = autojsProfile.packageManagerProfile.mutationOperations;
   const packageManagerProfileLifecycleScripts: string = autojsProfile.packageManagerProfile.lifecycleScripts;
   const packageManagerProfileBinLinks: string = autojsProfile.packageManagerProfile.binLinks;
   const packageManagerProfileRawRegistryAccess: boolean = autojsProfile.packageManagerProfile.rawRegistryAccess;
@@ -885,6 +888,7 @@ async function smoke(): Promise<void> {
   void packageManagerProfileSourceAuthority;
   void packageManagerProfileAllowedSources;
   void packageManagerProfilePlanOperations;
+  void packageManagerProfileMutationOperations;
   void packageManagerProfileLifecycleScripts;
   void packageManagerProfileBinLinks;
   void packageManagerProfileRawRegistryAccess;
@@ -1018,6 +1022,8 @@ async function smoke(): Promise<void> {
   void packageManagerPlanUpdate;
   void packageManagerPlanRemove;
   void packageManagerInstall;
+  void packageManagerUpdate;
+  void packageManagerRemove;
   void packageManagerList;
   void packageManagerVerify;
   void packageManagerPrune;

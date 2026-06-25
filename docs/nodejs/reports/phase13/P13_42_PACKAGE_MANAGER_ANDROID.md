@@ -6,8 +6,8 @@ The current target is "Auto.js Pro capability + desktop Node.js capability",
 but package installation is still split between a host-managed npm-compatible
 validator and an Android app-private local package store substrate. This phase
 does not promote the npm CLI, registry download, lifecycle script execution, bin
-shim creation, native build execution, or mutating install/update/remove
-JavaScript package-manager operations on Android.
+shim creation, native build execution, or unrestricted JavaScript
+package-manager mutation on Android.
 
 ## Landed
 
@@ -25,35 +25,40 @@ JavaScript package-manager operations on Android.
   - integrity: `sha512_required`
   - lifecycle scripts, bin links, symlinks, native build/native payloads, and
     postinstall downloads: `denied`
-  - JS bridge: `read_maintenance_partial`
-  - `require("package_manager")`: `read_maintenance_partial`
+  - JS bridge: `guarded_mutation_partial`
+  - `require("package_manager")`: `guarded_mutation_partial`
+  - mutation capability: `package_manager.mutate`
+  - mutation confirmation: `allowMutation_required`
   - raw executable and raw registry authority: `false`
-- `require("package_manager")` exposes a frozen read-maintenance plus dry-run
-  planning facade:
+- `require("package_manager")` exposes a frozen guarded mutation facade:
   - `status()` and `policy()` return frozen policy snapshots.
   - `sourcePolicy()` returns a frozen source-authority snapshot. The only
     allowed substrate is `local_unpacked_host_managed`; raw registry, remote
     tarball, URL/git, workspace symlink, and unverified-cache sources remain
-    denied and `grantsInstallAuthority` is `false`.
+    denied.
   - `planInstall(...)`, `planUpdate(...)`, and `planRemove(...)` dispatch to
     the Android store as dry-run planning operations. They validate the same
     local unpacked source/remove targets, return frozen
     `autojs6-node-android-package-plan-v1` results, and never grant install
     authority.
+  - `install(...)` and `update(...)` require `package_manager.mutate`,
+    `allowMutation: true`, a relative project-scoped local unpacked source, and
+    `expectedIntegrity` from a dry-run plan before mutating the app-private
+    store.
+  - `remove(...)` requires `package_manager.mutate`, `allowMutation: true`, and
+    expected integrity from `planRemove()` before deleting an installed record.
   - `list()` dispatches to the Android app-private store and returns frozen
     installed package records.
   - `verify({ name, version })` verifies installed package integrity or returns
     `missing` for absent packages.
   - `prune({ maxTransactionAgeMs })` removes stale transaction directories.
-  - `install`, `update`, and `remove` throw
-    `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` without mutating package content.
 - `NodeAndroidPackageInstallManager.nativeValues()` now exposes the same
   Android-side policy details for native test reports.
 - `NodePackageManagerPhase13DecisionInstrumentationTest` verifies the runtime
-  profile, denied npm globals, read-maintenance package-manager facade, and the
+  profile, denied npm globals, guarded package-manager facade, and the
   local Android store substrate.
 - Type declarations and TypeScript smoke now include
-  `PackageManagerProfile`, source policy fields, and the read-maintenance
+  `PackageManagerProfile`, source policy fields, and the guarded
   `package_manager` module.
 - Host verifier and Gradle gate:
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
@@ -89,7 +94,8 @@ constrained to the local store substrate.
 - Running `npm install` or `npm i --no-bin-links` directly on Android.
 - Android registry metadata/tarball download and cache management.
 - A script-visible `npm` module.
-- Mutating `package_manager.install/update/remove` operations.
+- Unrestricted or registry-backed `package_manager.install/update/remove`
+  operations.
 - Lifecycle script execution, including `preinstall`, `install`,
   `postinstall`, and `prepare`.
 - Debug-only lifecycle execution.

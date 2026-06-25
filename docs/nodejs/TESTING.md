@@ -667,8 +667,8 @@ staging, store locking, cancellation, SHA-512 integrity mismatch rollback,
 and lifecycle/bin/native payload denial. This does not promote Android npm CLI,
 registry download, remote tarball install, unverified cache reuse, or JavaScript
 install/update/remove authority; the `package_manager` facade is limited to
-read-maintenance plus dry-run planning:
-status/policy/sourcePolicy/planInstall/planUpdate/planRemove/list/verify/prune.
+guarded local mutation plus read-maintenance:
+status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune.
 
 Phase 13 Pro-style Node entry directives:
 
@@ -1903,11 +1903,11 @@ the Phase 10 host-managed package manager boundary, focused instrumentation,
 TypeScript declarations, surface manifest evidence, release matrix updates,
 and Phase13 docs. It keeps Android npm CLI, registry download, lifecycle
 execution, bin shims, symlink materialization, native builds/native payloads,
-postinstall downloads, mutating package-manager operations, raw executable
+postinstall downloads, unrestricted package-manager operations, raw executable
 authority, and raw registry access open. The `package_manager` module exposes
 read-maintenance `status`/`policy`/`sourcePolicy`, dry-run
-`planInstall`/`planUpdate`/`planRemove`, and `list`/`verify`/`prune`;
-install/update/remove remain unpromoted.
+`planInstall`/`planUpdate`/`planRemove`, guarded
+`install`/`update`/`remove`, and `list`/`verify`/`prune`.
 
 Phase 13 Android package manager focused instrumentation:
 
@@ -1918,9 +1918,9 @@ Phase 13 Android package manager focused instrumentation:
 This suite verifies `packageManagerProfile` diagnostics, denied npm surfaces,
 the read-maintenance `package_manager` facade, source-authority diagnostics,
 Android app-private local store install/list/verify/prune behavior, dry-run
-planInstall/planUpdate/planRemove behavior, SHA-512 integrity, native values,
-and lifecycle/bin/native package rejection. P13-42 records Android package
-manager parity as partial.
+planInstall/planUpdate/planRemove behavior, guarded install/update/remove
+behavior, SHA-512 integrity, native values, and lifecycle/bin/native package
+rejection. P13-42 records Android package manager parity as partial.
 
 Phase 13 stdlib conformance decision gate:
 

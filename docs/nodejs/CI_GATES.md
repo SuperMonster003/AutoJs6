@@ -349,9 +349,9 @@ covers the partial Android local package store with transaction staging, store
 locking, cancellation, SHA-512 integrity, lifecycle/bin/native/path denial, and
 install/update/remove/list/verify/prune. It does not enable registry download,
 remote tarball install, unverified cache reuse, or mutating JavaScript
-package-manager install/update/remove APIs; the script-visible facade is
-limited to read-maintenance plus dry-run planning:
-status/policy/sourcePolicy/planInstall/planUpdate/planRemove/list/verify/prune.
+package-manager APIs; the script-visible facade is guarded local mutation plus
+read-maintenance:
+status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune.
 `verifyNodePhase13ProEntryDirectives` records the P13-11 Pro-style Node entry
 directive state for `"nodejs ui"` and `"nodejs ui-thread"`, including
 `NodeEntryDirective`, descriptor/project config metadata, debug/native values,
@@ -762,10 +762,11 @@ surface manifest evidence, and docs updates while keeping Android npm CLI,
 registry download, lifecycle execution, bin shims, symlink materialization,
 native builds/native payloads, postinstall downloads, JS package-manager
 install/update/remove operations, script-visible `npm`, raw executable
-authority, and raw registry access unpromoted. The `package_manager`
-read-maintenance plus dry-run planning facade is limited to status/policy/sourcePolicy plus dry-run
-planInstall/planUpdate/planRemove and list/verify/prune. P13-42 records
-Android package manager parity as partial.
+authority, and raw registry access unpromoted. The `package_manager` guarded
+mutation facade is limited to status/policy/sourcePolicy, dry-run
+planInstall/planUpdate/planRemove, guarded install/update/remove requiring
+`package_manager.mutate` plus `allowMutation: true`, and list/verify/prune.
+P13-42 records Android package manager parity as partial.
 `verifyNodePhase13StdlibConformanceDecision` records P13-43 as the stdlib
 conformance decision gate. It requires `stdlibProfile` diagnostics,
 representative focused instrumentation, existing core builtin compatibility

@@ -373,9 +373,10 @@ prepared by host tooling and stored through the internal app-private Android
 store, but Android npm CLI, registry download, remote tarball install, lifecycle scripts, bin shims,
 symlinks, native builds/native payloads, postinstall downloads, and
 script-visible `npm` remain unavailable. `package_manager` is available as a
-read-maintenance plus dry-run planning facade for
-status/policy/sourcePolicy/planInstall/planUpdate/planRemove/list/verify/prune;
-install/update/remove still reject.
+guarded local mutation plus read-maintenance facade for
+status/policy/sourcePolicy/planInstall/planUpdate/planRemove/install/update/remove/list/verify/prune;
+mutating calls require `package_manager.mutate`, `allowMutation: true`, and
+dry-run SHA-512 integrity.
 
 P13-43 records Node stdlib conformance as partial. AutoJs6 Node exposes
 `stdlibProfile` diagnostics for representative Safe stdlib coverage across

@@ -609,13 +609,13 @@ P13 task 本身使用以下执行状态：
     - Boundaries: lifecycle scripts, `bin`, native payloads, symlinks, and path escapes are rejected.
     - Integrity: SHA-512 expected integrity and installed-record verification.
     - Transaction model: store lock, transaction staging, atomic move/restore, cancellation token.
-    - Read-maintenance + dry-run plan JS facade:
+    - Guarded local mutation JS facade:
       `require("package_manager").status()/policy()/sourcePolicy()` reports
-      the current fail-closed policy and source authority, while
-      `planInstall/planUpdate/planRemove/list/verify/prune` dispatch to the
-      Android app-private store without granting install authority and
-      `install/update/remove` throw
-      `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED`.
+      the guarded source authority, `planInstall/planUpdate/planRemove`
+      returns dry-run integrity, and `install/update/remove/list/verify/prune`
+      dispatch to the Android app-private store; mutation calls require
+      `package_manager.mutate`, `allowMutation: true`, and matching
+      `expectedIntegrity`.
     - Focused instrumentation: `NodeAndroidPackageInstallManagerInstrumentationTest`.
     - Host verifier: `tools/nodejs/phase13/verify-android-package-install-manager.js`.
     - Gradle gate: `:app:verifyNodePhase13AndroidPackageInstallManager`.
@@ -1382,12 +1382,12 @@ P13 task 本身使用以下执行状态：
       registry download、lockfile、lifecycle、bin link、symlink、native payload、
       postinstall download、network install、source authority、read-maintenance
       JS bridge 等策略。
-    - `require("package_manager")` 已作为 read-maintenance + dry-run plan
-      facade 暴露：
+    - `require("package_manager")` 已作为 guarded local mutation facade 暴露：
       `status()`/`policy()`/`sourcePolicy()` 可读，`list/verify/prune` 经
       Android app-private store bridge 执行，`planInstall/planUpdate/planRemove`
-      返回 frozen dry-run `PackagePlan`，`install/update/remove` 仍以
-      `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` 同步拒绝。
+      返回 frozen dry-run `PackagePlan`，`install/update/remove` 已提升为受控
+      local unpacked mutation，需要 `package_manager.mutate`、`allowMutation: true`
+      和对应 dry-run plan 的 `expectedIntegrity`。
     - 新增 focused instrumentation:
       `NodePackageManagerPhase13DecisionInstrumentationTest`。
     - Existing Android store gate:
@@ -1405,7 +1405,7 @@ P13 task 本身使用以下执行状态：
     - Surface manifest evidence:
       `phase13-package-manager-android-decision`。
   - Remaining: Android 侧 registry metadata/tarball 下载、npm CLI、script-visible
-    `npm` facade、mutating `package_manager.install/update/remove` operations、debug-only lifecycle runner、bin shim、signed
+    `npm` facade、unrestricted package-manager install authority、debug-only lifecycle runner、bin shim、signed
     native payload policy、native build strategy、packaged dependency install/distribution
     evidence、真实 npm corpus 通过率提升仍未完成。
 
