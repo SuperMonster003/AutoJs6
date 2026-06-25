@@ -22,7 +22,8 @@
       "risk": "high",
       "positiveTests": [
         "profileSelection reports network as a Desktop-profile high-risk capability with android.permission.INTERNET",
-        "controlled fetch/http/net/tls/dns facades keep documented diagnostics under existing P13-29/P13-30 tests"
+        "controlled fetch/http/net/tls/dns facades keep documented diagnostics under existing P13-29/P13-30 tests",
+        "raw Node dns/dns-promises/http/https/net/tls native builtins are available only when autojs.nodejs.rawNetworkModules.experimental=true"
       ],
       "negativeTests": [
         "Safe profile keeps raw network disabled by default",
@@ -40,7 +41,7 @@
         "NodeNetTlsDnsStagedParityInstrumentationTest",
         "verifyNodePhase13RelaxedCapabilitySecurityCorpus"
       ],
-      "rollback": "Keep NODEJS_NETWORK_EXPERIMENTAL_ENABLED false and keep raw network modules denied."
+      "rollback": "Keep NODEJS_NETWORK_EXPERIMENTAL_ENABLED false and NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED false."
     },
     {
       "id": "filesystem_relaxation",

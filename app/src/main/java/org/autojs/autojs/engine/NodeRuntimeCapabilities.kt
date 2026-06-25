@@ -84,6 +84,8 @@ object NodeRuntimeCapabilities {
     const val DYNAMIC_IMPORT_EXPERIMENTAL_DEFAULT = false
     const val NETWORK_EXPERIMENTAL_PROPERTY = "autojs.nodejs.network.experimental"
     const val NETWORK_EXPERIMENTAL_DEFAULT = false
+    const val RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY = "autojs.nodejs.rawNetworkModules.experimental"
+    const val RAW_NETWORK_MODULES_EXPERIMENTAL_DEFAULT = false
     const val WORKER_THREADS_EXPERIMENTAL_PROPERTY = "autojs.nodejs.worker_threads.experimental"
     const val WORKER_THREADS_EXPERIMENTAL_DEFAULT = false
     const val JAVA_INTEROP_EXPERIMENTAL_PROPERTY = "autojs.nodejs.javaInterop.experimental"
@@ -131,13 +133,13 @@ object NodeRuntimeCapabilities {
         NodeRuntimeFeatureFlag(
             id = "raw_node_network_modules",
             diagnosticName = "rawNodeNetworkModules",
-            gradleProperty = null,
-            defaultEnabled = false,
-            buildTimeOverrideAllowed = false,
+            gradleProperty = RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
+            defaultEnabled = RAW_NETWORK_MODULES_EXPERIMENTAL_DEFAULT,
+            buildTimeOverrideAllowed = true,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "disabled",
+            status = "experimental",
         ),
         NodeRuntimeFeatureFlag(
             id = "websocket",
@@ -247,6 +249,7 @@ object NodeRuntimeCapabilities {
             flag.gradleProperty?.let { put(it.lowercase(Locale.US), flag.id) }
         }
         put(DYNAMIC_IMPORT_EXPERIMENTAL_PROPERTY.lowercase(Locale.US), "dynamic_import")
+        put(RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY.lowercase(Locale.US), "raw_node_network_modules")
         put("dynamicimport", "dynamic_import")
         put("rawnodenetworkmodules", "raw_node_network_modules")
         put("workerthreads", "worker_threads")

@@ -107,6 +107,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
         const std::vector<std::pair<std::string, std::string>>& envPairs,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
         bool javaInteropExperimentalEnabled
 ) {
@@ -119,6 +120,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     request.env = envPairs;
     request.esmExperimentalEnabled = esmExperimentalEnabled;
     request.dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled;
+    request.rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled;
     request.workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled;
     request.javaInteropExperimentalEnabled = javaInteropExperimentalEnabled;
     std::vector<std::string> payload = runEmbeddedScriptExecution(request);
@@ -352,6 +354,7 @@ static std::string adapterModuleSourcesJson(
 static uint32_t adapterExecutionFlags(
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
         bool javaInteropExperimentalEnabled
 ) {
@@ -361,6 +364,9 @@ static uint32_t adapterExecutionFlags(
     }
     if (dynamicImportExperimentalEnabled) {
         flags |= AUTOJS_NODE_EXECUTION_FLAG_DYNAMIC_IMPORT_EXPERIMENTAL;
+    }
+    if (rawNodeNetworkModulesExperimentalEnabled) {
+        flags |= AUTOJS_NODE_EXECUTION_FLAG_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL;
     }
     if (workerThreadsExperimentalEnabled) {
         flags |= AUTOJS_NODE_EXECUTION_FLAG_WORKER_THREADS_EXPERIMENTAL;
@@ -478,6 +484,7 @@ static jobjectArray runEmbeddedScriptAdapterV1ExecuteNative(
         const std::vector<std::pair<std::string, std::string>>& envPairs,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
         bool javaInteropExperimentalEnabled
 ) {
@@ -558,6 +565,7 @@ static jobjectArray runEmbeddedScriptAdapterV1ExecuteNative(
     executionRequest.flags = adapterExecutionFlags(
             esmExperimentalEnabled,
             dynamicImportExperimentalEnabled,
+            rawNodeNetworkModulesExperimentalEnabled,
             workerThreadsExperimentalEnabled,
             javaInteropExperimentalEnabled
     );
@@ -625,6 +633,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             false,
             false,
             false,
+            false,
             false
     );
 }
@@ -666,6 +675,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
+        jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
@@ -730,6 +740,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
+            rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
@@ -746,6 +757,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
+        jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
@@ -776,6 +788,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
+            rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
@@ -821,6 +834,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             false,
             false,
             false,
+            false,
             false
     );
 }
@@ -838,6 +852,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
+        jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
@@ -885,6 +900,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
+            rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
@@ -949,6 +965,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             false,
             false,
             false,
+            false,
             false
     );
 }
@@ -968,6 +985,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
         jboolean dynamicImportExperimentalEnabled,
+        jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
@@ -1032,6 +1050,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             envPairs,
             esmExperimentalEnabled == JNI_TRUE,
             dynamicImportExperimentalEnabled == JNI_TRUE,
+            rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );

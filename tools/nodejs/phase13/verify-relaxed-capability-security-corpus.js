@@ -151,7 +151,7 @@ function buildReport(files) {
       token(files.runtimeCapabilities, "nativeAddon"),
       token(files.bridgeManifest, "JAVA_INTEROP"),
     ], [
-      "Raw network modules, expanded filesystem roots, child_process, native addons, inspector, raw WASI, and release Java interop remain unpromoted.",
+      "Safe-default raw network modules, expanded filesystem roots, child_process, native addons, inspector, raw WASI, and release Java interop remain unpromoted.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-50", [
       token(files.phase13Tasks, "P13-50 partial landing"),

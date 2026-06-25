@@ -259,7 +259,7 @@ Network is not a default live I/O capability of the Safe Node Profile. The contr
 autojs.nodejs.network.experimental=false
 ```
 
-Do not treat a present `http`, `https`, `net`, `tls`, `dns`, or fetch-shaped API as permission to perform I/O. The current `fetch` and `require("fetch")` APIs route through the AutoJs6 bridge and reject with `ERR_AUTOJS6_NETWORK_DISABLED` when the live provider is gated off. Raw network modules remain denied. The denial applies to bare imports, `node:` aliases, and `node_modules` shadow attempts.
+Do not treat a present `http`, `https`, `net`, `tls`, `dns`, or fetch-shaped API as permission to perform I/O. The current `fetch` and `require("fetch")` APIs route through the AutoJs6 bridge and reject with `ERR_AUTOJS6_NETWORK_DISABLED` when the live provider is gated off. Raw network modules remain denied in the Safe profile. The denial applies to bare imports, `node:` aliases, and `node_modules` shadow attempts. Debug/build-time experiments may explicitly enable native Node `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` with `autojs.nodejs.rawNetworkModules.experimental=true`.
 
 Network enablement requires:
 
@@ -271,7 +271,7 @@ Network enablement requires:
 - privacy review
 - tests for denied and allowed paths
 
-The AutoJs6-controlled `fetch` wrapper is the preferred network path over unrestricted socket modules. Userland HTTP clients must use this controlled path or another explicit AutoJs6 bridge adapter; desktop Node adapters based on `http`, `https`, `net`, `tls`, `dns`, or `dgram` are outside the Safe Node Profile. The wrapper supports request timeout, abort, response-size budgeting, redirect budgeting, concurrent-request limits, unsupported-scheme rejection, and provider-side cancellation. The Android provider tracks live OkHttp calls and cancels them on provider destroy. Raw network authority must remain denied unless a later design gate explicitly changes that boundary.
+The AutoJs6-controlled `fetch` wrapper is the preferred Safe-profile network path over unrestricted socket modules. Userland HTTP clients must use this controlled path or another explicit AutoJs6 bridge adapter unless a debug/build-time raw network experiment is intentionally enabled. The wrapper supports request timeout, abort, response-size budgeting, redirect budgeting, concurrent-request limits, unsupported-scheme rejection, and provider-side cancellation. The Android provider tracks live OkHttp calls and cancels them on provider destroy. Raw network authority must stay default-off and release-forbidden until policy, privacy, and rollback gates are complete.
 
 See `docs/nodejs/design/NETWORK.md` for the current network design gate.
 
@@ -439,7 +439,7 @@ Bridge capability manifests are optional for legacy compatibility. When a Node p
 
 Canonical capability names are `toast`, `app.launch`, `app.settings`, `app.activity`, `dialogs`, `engines`, `engines.exec`, `accessibility`, `screen_capture`, `image`, `ocr`, `storage`, `notifications`, `notifications.settings`, `media`, `media.audio`, `media.metadata`, `media.recording`, `sensors`, `ui`, `clipboard`, `device`, `device.power`, `shell`, `shell.root`, `shell.shizuku`, `network`, `work_manager`, and `java_interop`. Declaring a parent such as `app` or `engines` grants its non-root child methods; `notifications.settings`, `media.audio`, `media.metadata`, `media.recording`, `device.power`, `shell.root`, and `shell.shizuku` must be declared explicitly. `media_projection` is accepted as an alias for `screen_capture`, and `storages` is accepted as an alias for `storage`.
 
-Declaring `network` is required for controlled `fetch`, `axios`, and `websocket` bridge dispatch when a capability manifest is enforced. Packaged builds map that capability to `android.permission.INTERNET`; doctor reports expose the mapping and raw Node network modules remain disabled.
+Declaring `network` is required for controlled `fetch`, `axios`, and `websocket` bridge dispatch when a capability manifest is enforced. Packaged builds map that capability to `android.permission.INTERNET`; doctor reports expose the mapping and the raw Node network module opt-in state.
 
 Bridge limit policy is optional and safe by default. Projects may lower or safely raise limits through `node.bridgeLimits` in `project.json` or `autojs6.node.bridgeLimits` in `package.json`; values above the hard maximum are ignored and reported through `profile.bridgeLimits.warnings`. The current policy bounds pending bridge calls, JS image handles, live shell commands, controlled fetch calls, controlled WebSocket sessions, and accessibility requests per second. Resource exhaustion uses `ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`; request-rate exhaustion uses `ERR_AUTOJS6_BRIDGE_RATE_LIMITED`.
 
@@ -597,15 +597,16 @@ controlled shell bridge, while `shell.execShizuku()` and
 execution, Shizuku service handles, Binder access, root shell handles, packaged
 disclosure, and raw process/file-descriptor/stream/signal objects remain denied.
 
-The `fetch` bridge is the controlled AutoJs6 replacement for Node raw network modules. JavaScript receives only a fetch-compatible Promise wrapper and buffered response helpers. Request descriptors are JSON-serialized, method-limited to `GET` and `POST`, bounded by `timeoutMs`, `maxResponseBytes`, `maxRedirects`, and max active request count, and may be cancelled through `AbortController.signal`. Only `http:` and `https:` URLs are accepted. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy cancels tracked OkHttp calls and must not call back into a destroyed Node environment.
+The `fetch` bridge is the controlled AutoJs6 Safe-profile replacement for Node raw network modules. JavaScript receives only a fetch-compatible Promise wrapper and buffered response helpers. Request descriptors are JSON-serialized, method-limited to `GET` and `POST`, bounded by `timeoutMs`, `maxResponseBytes`, `maxRedirects`, and max active request count, and may be cancelled through `AbortController.signal`. Only `http:` and `https:` URLs are accepted. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy cancels tracked OkHttp calls and must not call back into a destroyed Node environment.
 
 P13-29 records HTTP/HTTPS client parity as partial. The `http`/`https` modules
-remain controlled-fetch facades and raw Node network modules remain disabled:
+remain controlled-fetch facades in the Safe profile and raw Node network modules
+remain disabled by default:
 server/listen, raw sockets, DNS/TLS session control, proxy/tunnel options,
 `CONNECT`, upgrade, and custom connector hooks reject before raw transport
 authority can be acquired.
 
-P13-30 records net/tls/dns staged compatibility as partial. The `net`, `tls`,
+P13-30 records net/tls/dns staged compatibility as partial. By default, the `net`, `tls`,
 `dns`, and `dns/promises` modules are reserved limited builtins for compatibility
 probing and deterministic local behavior only. `net.connect()`,
 `net.createConnection()`, `net.Server.listen()`, `tls.connect()`,
@@ -614,6 +615,9 @@ TLS renegotiation, and keying-material export reject with the canonical AutoJs6
 network-disabled code. DNS lookup remains loopback/IP-literal-only and
 `dns.getServers()` returns an empty list so Android resolver servers, VPN/private
 network state, search domains, and local topology are not exposed.
+The release-forbidden `autojs.nodejs.rawNetworkModules.experimental=true`
+build/debug opt-in routes CommonJS `dns`, `dns/promises`, `http`, `https`,
+`net`, and `tls` to Node native builtins for Desktop parity experiments.
 
 P13-31 records dgram UDP capability as stable-denied. `dgram` / `node:dgram`
 is not a shape facade and cannot be loaded through local package shadowing or
@@ -835,7 +839,7 @@ P13-50 records relaxed-capability security corpus as partial. The structured
 corpus covers raw network, filesystem relaxation, Java interop,
 `child_process`, native addon loading, inspector, and WASI with positive
 evidence, negative abuse probes, CI evidence, and rollback posture. The focused
-security regression keeps raw network modules, expanded filesystem roots,
+security regression keeps Safe-profile raw network modules, expanded filesystem roots,
 raw `child_process`, native addons, inspector, raw WASI, and release Java
 interop fail-closed while later rollback/privacy/disclosure gates are designed.
 

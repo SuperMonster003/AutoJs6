@@ -154,6 +154,7 @@ object NodeDoctorReportGenerator {
         "esm" -> BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED
         "dynamic_import" -> BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED
         "network" -> BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED
+        "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED
         "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED
         "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED
         else -> NodeRuntimeCapabilities.featureFlagsById[id]?.defaultEnabled ?: false
@@ -233,7 +234,7 @@ object NodeDoctorReportGenerator {
                 NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET in requiredAndroidPermissions,
             )
             put("controlledModules", JSONArray(listOf("fetch", "axios", "websocket")))
-            put("rawNodeNetworkModulesEnabled", false)
+            put("rawNodeNetworkModulesEnabled", BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
         }
     }
 

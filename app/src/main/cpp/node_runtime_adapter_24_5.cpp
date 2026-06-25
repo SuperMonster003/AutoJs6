@@ -546,6 +546,8 @@ int32_t executeRequest(
     const uint32_t flags = requestFlags(request);
     execution.esmExperimentalEnabled = (flags & AUTOJS_NODE_EXECUTION_FLAG_ESM_EXPERIMENTAL) != 0;
     execution.dynamicImportExperimentalEnabled = (flags & AUTOJS_NODE_EXECUTION_FLAG_DYNAMIC_IMPORT_EXPERIMENTAL) != 0;
+    execution.rawNodeNetworkModulesExperimentalEnabled =
+            (flags & AUTOJS_NODE_EXECUTION_FLAG_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL) != 0;
     execution.workerThreadsExperimentalEnabled = (flags & AUTOJS_NODE_EXECUTION_FLAG_WORKER_THREADS_EXPERIMENTAL) != 0;
     execution.javaInteropExperimentalEnabled = (flags & AUTOJS_NODE_EXECUTION_FLAG_JAVA_INTEROP_EXPERIMENTAL) != 0;
 

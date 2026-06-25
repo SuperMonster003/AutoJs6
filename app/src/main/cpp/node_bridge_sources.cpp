@@ -5458,6 +5458,7 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
         bool javaInteropExperimentalEnabled) {
     const std::string sourceLiteral = jsonStringLiteral(source);
@@ -5507,6 +5508,9 @@ std::string buildEmbeddedScriptExecutionSource(
     script += R"JS(;
   const __autojs6_dynamic_import_experimental_enabled = )JS";
     script += dynamicImportExperimentalEnabled ? "true" : "false";
+    script += R"JS(;
+  const __autojs6_raw_node_network_modules_experimental_enabled = )JS";
+    script += rawNodeNetworkModulesExperimentalEnabled ? "true" : "false";
     script += R"JS(;
   const __autojs6_worker_threads_experimental_enabled = )JS";
     script += workerThreadsExperimentalEnabled ? "true" : "false";
@@ -7636,6 +7640,40 @@ std::string buildEmbeddedScriptExecutionSource(
     } catch (_) {}
     return null;
   }
+  function __autojs6_raw_node_network_builtin(name) {
+    if (!__autojs6_raw_node_network_modules_experimental_enabled) {
+      return null;
+    }
+    const request = name === undefined ? "" : String(name);
+    const normalized = request.indexOf("node:") === 0 ? request.slice(5) : request;
+    if (
+      normalized !== "dns" &&
+      normalized !== "dns/promises" &&
+      normalized !== "http" &&
+      normalized !== "https" &&
+      normalized !== "net" &&
+      normalized !== "tls"
+    ) {
+      return null;
+    }
+    let moduleValue = null;
+    if (normalized === "dns/promises") {
+      const dnsValue = __autojs6_builtin_module("dns");
+      if (dnsValue && dnsValue.promises) {
+        moduleValue = dnsValue.promises;
+      }
+    }
+    if (!moduleValue) {
+      moduleValue = __autojs6_builtin_module(normalized);
+    }
+    if (!moduleValue) {
+      throw __autojs6_error(
+        "Embedded Node raw network module '" + normalized + "' is unavailable.",
+        "ERR_AUTOJS6_BUILTIN_DISABLED"
+      );
+    }
+    return moduleValue;
+  }
   function __autojs6_internal_request_env_value(key) {
     try {
       const record = __autojs6_request_env_sources && __autojs6_request_env_sources[key];
@@ -8587,6 +8625,7 @@ std::string buildEmbeddedScriptExecutionSource(
       esm: __autojs6_esm_experimental_enabled,
       nativeAddon: false,
       network: false,
+      rawNodeNetworkModules: __autojs6_raw_node_network_modules_experimental_enabled,
       npmInstall: false,
       webSocket: false,
       workerThreads: __autojs6_worker_threads_experimental_enabled,
@@ -8596,6 +8635,7 @@ std::string buildEmbeddedScriptExecutionSource(
       esm: __autojs6_esm_experimental_enabled,
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
+      rawNodeNetworkModules: __autojs6_raw_node_network_modules_experimental_enabled,
       workerThreads: __autojs6_worker_threads_experimental_enabled,
       javaInterop: __autojs6_java_interop_experimental_enabled
     });
@@ -8654,19 +8694,19 @@ std::string buildEmbeddedScriptExecutionSource(
       raw_node_network_modules: Object.freeze({
         id: "raw_node_network_modules",
         diagnosticName: "rawNodeNetworkModules",
-        gradleProperty: null,
+        gradleProperty: "autojs.nodejs.rawNetworkModules.experimental",
         defaultEnabled: false,
-        enabled: false,
-        buildTimeOverrideAllowed: false,
+        enabled: __autojs6_raw_node_network_modules_experimental_enabled,
+        buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
-        buildOnly: false,
-        debugOnly: false,
+        buildOnly: true,
+        debugOnly: true,
         projectAllowed: false,
         packagedAllowed: false,
         releaseForbidden: true,
         securityLevel: "high",
-        status: "disabled"
+        status: "experimental"
       }),
       websocket: Object.freeze({
         id: "websocket",
@@ -9393,7 +9433,7 @@ std::string buildEmbeddedScriptExecutionSource(
       worker_threads: "autojs.nodejs.worker_threads.experimental",
       java_interop: "autojs.nodejs.javaInterop.experimental",
       all_relaxed_capabilities: "autojs.nodejs.relaxedCapabilities.enabled",
-      raw_node_network_modules: "stable_denial_no_runtime_switch",
+      raw_node_network_modules: "autojs.nodejs.rawNetworkModules.experimental",
       filesystem_relaxation: "safe_profile_scoped_fs",
       child_process: "stable_denial_no_runtime_switch",
       native_addon: "stable_denial_no_runtime_switch",
@@ -9461,6 +9501,14 @@ std::string buildEmbeddedScriptExecutionSource(
           property: capabilityKillSwitches.network,
           enabled: flagEnabled("network"),
           rollbackAction: "set_autojs_nodejs_network_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "raw_node_network_modules",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.raw_node_network_modules,
+          enabled: flagEnabled("raw_node_network_modules"),
+          rollbackAction: "set_autojs_nodejs_rawNetworkModules_experimental_false",
           fallbackProfile: "safe_default"
         }),
         Object.freeze({
@@ -10178,7 +10226,7 @@ std::string buildEmbeddedScriptExecutionSource(
         add("android.permission.RECORD_AUDIO");
         add("android.permission.FOREGROUND_SERVICE");
         add("android.permission.FOREGROUND_SERVICE_MICROPHONE");
-      } else if (capability === "network") {
+      } else if (capability === "network" || capability === "raw_node_network_modules") {
         add("android.permission.INTERNET");
       } else if (capability === "screen_capture") {
         add("android.permission.FOREGROUND_SERVICE");
@@ -38486,6 +38534,7 @@ std::string buildEmbeddedScriptExecutionSource(
       resolvePtr: __autojs6_limited_dns_disabled_callback("resolvePtr"),
       resolveSoa: __autojs6_limited_dns_disabled_callback("resolveSoa"),
       resolveSrv: __autojs6_limited_dns_disabled_callback("resolveSrv"),
+      resolveTlsa: __autojs6_limited_dns_disabled_callback("resolveTlsa"),
       resolveTxt: __autojs6_limited_dns_disabled_callback("resolveTxt"),
       reverse: __autojs6_limited_dns_disabled_callback("reverse")
     };
@@ -38502,6 +38551,7 @@ std::string buildEmbeddedScriptExecutionSource(
       resolvePtr: __autojs6_limited_dns_disabled_promise("resolvePtr"),
       resolveSoa: __autojs6_limited_dns_disabled_promise("resolveSoa"),
       resolveSrv: __autojs6_limited_dns_disabled_promise("resolveSrv"),
+      resolveTlsa: __autojs6_limited_dns_disabled_promise("resolveTlsa"),
       resolveTxt: __autojs6_limited_dns_disabled_promise("resolveTxt"),
       reverse: __autojs6_limited_dns_disabled_promise("reverse")
     };
@@ -43699,18 +43749,28 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_limited_crypto();
     }
     if (name === "dns" || name === "node:dns") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_dns();
     }
     if (name === "dns/promises" || name === "node:dns/promises") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_dns_promises();
     }
     if (name === "http" || name === "node:http") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_http("http");
     }
     if (name === "https" || name === "node:https") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_http("https");
     }
     if (name === "net" || name === "node:net") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_net();
     }
     if (name === "os" || name === "node:os") {
@@ -43750,6 +43810,8 @@ std::string buildEmbeddedScriptExecutionSource(
       return __autojs6_limited_timers_promises();
     }
     if (name === "tls" || name === "node:tls") {
+      const nativeNetwork = __autojs6_raw_node_network_builtin(name);
+      if (nativeNetwork) return nativeNetwork;
       return __autojs6_limited_tls();
     }
     if (name === "stream" || name === "node:stream") {

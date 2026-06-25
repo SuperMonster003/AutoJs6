@@ -78,7 +78,7 @@ with surface ownership in
 | `esm` | `autojs.nodejs.esm.experimental` | true | true | false | false | false | medium | partial |
 | `dynamic_import` | `autojs.nodejs.dynamicImport.local` | true | true | false | false | false | medium | partial |
 | `network` | `autojs.nodejs.network.experimental` | false | true | false | false | true | high | experimental |
-| `raw_node_network_modules` | none | false | false | false | false | true | high | disabled |
+| `raw_node_network_modules` | `autojs.nodejs.rawNetworkModules.experimental` | false | true | false | false | true | high | experimental |
 | `websocket` | none | false | false | false | false | true | high | experimental |
 | `worker_threads` | `autojs.nodejs.worker_threads.experimental` | false | true | false | false | true | high | experimental |
 | `fs_streams` | none | true | false | false | false | false | medium | partial |
@@ -736,7 +736,7 @@ cleanup, and keep the next execution clean after timeout or service stop.
 
 `createRequire(filename)` creates a CommonJS require function scoped to a file path inside the current working directory. The base path must be a file path, must not be absolute outside the scope, must not contain NUL bytes, must not be a `file:` URL, must not resolve through a symlink escape, and must not point to a directory. The created require function uses the existing AutoJs6 resolver, builtin allowlist/limited map, module cache, package `exports`/`imports` policy, and scoped filesystem checks.
 
-`builtinModules` is a frozen list of AutoJs6 known safe or limited builtins, not a promise of unrestricted desktop Node behavior. Network-shaped limited modules can appear for feature detection and stable denial wrappers, while raw network I/O remains disabled unless a future design-gated task changes that boundary.
+`builtinModules` is a frozen list of AutoJs6 known safe or limited builtins, not a promise of unrestricted desktop Node behavior. Network-shaped limited modules can appear for feature detection and stable denial wrappers. Raw network I/O remains disabled in the Safe profile; debug/build-time runs may explicitly enable selected native Node network builtins with `autojs.nodejs.rawNetworkModules.experimental=true`.
 
 The following Node loader internals are not exposed:
 
@@ -898,7 +898,7 @@ Registry-disabled builtin module names:
 - `worker_threads`
 - `zlib/promises`
 
-Network-related limited builtins may exist for feature detection and stable denial errors. That is not permission to perform network I/O.
+Network-related limited builtins may exist for feature detection and stable denial errors. That is not permission to perform network I/O unless the debug/build-time raw Node network module opt-in is explicitly enabled.
 
 WebAssembly is available as a pure JavaScript/V8 capability. The Phase 9
 `NodeWasmWasiInstrumentationTest` verifies `WebAssembly.compile`,
@@ -1017,9 +1017,9 @@ With the flag off:
 - `dgram` remains a disabled builtin
 - raw sockets, servers, DNS queries, TLS sessions, datagrams, `CONNECT` tunneling, socket upgrades, and unrestricted HTTP requests remain unavailable
 
-Use global `fetch()` or `require("fetch")` for controlled request experiments, use `require("axios")` for the AutoJs6-owned axios-shaped compatibility adapter, use `require("http")` / `require("https")` only for the controlled client facade, and use `require("websocket")` for the controlled WebSocket bridge. Userland HTTP clients cannot assume desktop Node socket adapters. Raw Node networking is not part of the Safe Node Profile: bare names and `node:` aliases are intercepted, and local `node_modules/http`, `node_modules/https`, `node_modules/net`, `node_modules/tls`, `node_modules/dns`, `node_modules/dns/promises`, `node_modules/dgram`, or `node_modules/axios` fixtures cannot bypass the policy.
+Use global `fetch()` or `require("fetch")` for controlled request experiments, use `require("axios")` for the AutoJs6-owned axios-shaped compatibility adapter, use `require("http")` / `require("https")` only for the controlled client facade, and use `require("websocket")` for the controlled WebSocket bridge. Userland HTTP clients cannot assume desktop Node socket adapters in the Safe profile. Raw Node networking is not part of the Safe Node Profile: bare names and `node:` aliases are intercepted, and local `node_modules/http`, `node_modules/https`, `node_modules/net`, `node_modules/tls`, `node_modules/dns`, `node_modules/dns/promises`, `node_modules/dgram`, or `node_modules/axios` fixtures cannot bypass the policy. Debug/build-time runs can explicitly enable native Node `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` with `autojs.nodejs.rawNetworkModules.experimental=true`.
 
-Current `require("autojs6:profile")` reports `network=false` and `experimentalFlags.network=false`.
+Current Safe-profile `require("autojs6:profile")` reports `network=false`, `rawNodeNetworkModules=false`, `experimentalFlags.network=false`, and `experimentalFlags.rawNodeNetworkModules=false`.
 
 Current controlled fetch support includes `GET`/`POST`, headers, string or binary bodies, `timeoutMs`, `AbortController.signal`, `maxResponseBytes`, `maxRedirects`, text/arrayBuffer/json response helpers, and Web Stream reads through `response.body.stream()`. The live provider is backed by Android/OkHttp behind `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal release builds keep that flag false. The axios-shaped adapter supports `axios(config)`, `axios.request`, `axios.get`, `axios.post`, `baseURL`, params, headers, `timeout`, and `responseType: "json" | "text" | "arraybuffer"` while rejecting custom adapters, agents, proxy configuration, custom transport, and raw socket assumptions. The S8-21 HTTP client facade supports `request()` / `get()`, a `ClientRequest` subset, an `IncomingMessage` subset, request and response headers, response status metadata, buffered request body chunks, response body `data` / `end` / `pipe()`, timeout, abort, and explicit redirect follow only when `redirect` or `maxRedirects` is configured. S8-23 adds focused stream semantics coverage for request-level `AbortSignal`, pre-aborted signal no-dispatch, `IncomingMessage` `close`, `pipe()` backpressure smoke, `maxResponseBytes`, service-destroy cancellation, and pending-call cleanup. S8-24 keeps `http.Agent` and `https.Agent` as limited shape-only facades with safe option fields while rejecting raw socket connector options. The S8-22 HTTPS layer keeps certificate validation provider-owned and rejects TLS customization such as `rejectUnauthorized=false`, custom secure contexts, client certificate fields, custom `createConnection`, and unsafe agent TLS options with `ERR_AUTOJS6_NETWORK_POLICY_DENIED`.
 
@@ -1030,7 +1030,7 @@ proxy/tunnel/`CONNECT`/server-listen denials. This does not promote raw sockets,
 DNS/TLS session APIs, per-request proxy support, packaged INTERNET permission
 evidence, or live provider HTTP smoke.
 
-P13-30 records net/tls/dns staged compatibility as partial. `require("net")`,
+P13-30 records net/tls/dns staged compatibility as partial. By default, `require("net")`,
 `require("node:net")`, `require("tls")`, `require("node:tls")`,
 `require("dns")`, `require("node:dns")`, `require("dns/promises")`, and
 `require("node:dns/promises")` resolve to reserved limited builtins that cannot
@@ -1039,7 +1039,10 @@ be shadowed. AutoJs6 Node exposes deterministic socket/server shape metadata,
 and DNS lookup for `localhost`, loopback aliases, and IP literals only. Real
 client sockets, server listeners, network DNS queries, Android resolver state,
 TLS sessions, fd/native handles, packaged INTERNET proof, and live Android
-network evidence remain unpromoted.
+network evidence remain unpromoted in Safe profile. The
+`autojs.nodejs.rawNetworkModules.experimental=true` debug/build-time opt-in
+routes CommonJS `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` to
+Node native builtins for Desktop parity experiments.
 
 P13-31 records dgram UDP capability as stable-denied. `require("dgram")`,
 `require("node:dgram")`, `require.resolve("dgram")`, transitive package
@@ -1523,7 +1526,7 @@ Current foundation:
 - when a bridge capability manifest is present, missing capabilities reject before dispatch with `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
 - `require("autojs6:bridge").permissions()` and `require("autojs6:profile").bridgePermissions` expose the read-only capability report
 - declaring `network` covers controlled `fetch`, `axios`, and `websocket`; packaged builds derive `android.permission.INTERNET` from that capability rather than from module presence
-- Node doctor text/JSON reports expose the bridge capability manifest schema, `network` capability status, required Android permission mapping, and raw network denial state
+- Node doctor text/JSON reports expose the bridge capability manifest schema, `network` capability status, required Android permission mapping, and raw network opt-in state
 - Node projects may declare bridge limits in `project.json` under `node.bridgeLimits`, or in `package.json` under `autojs6.node.bridgeLimits`
 - `require("autojs6:profile").bridgeLimits` exposes the effective read-only limit report, including warnings for ignored overrides
 - malformed live bridge requests reject with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST` when a response id can be recovered

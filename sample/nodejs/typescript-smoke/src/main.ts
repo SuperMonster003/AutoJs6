@@ -443,6 +443,37 @@ async function smoke(): Promise<void> {
   });
   const dnsLookupPromise: Promise<dnsPromises.LookupAddress> = dnsPromises.lookup("localhost");
   const dnsResolveDenied: (hostname: string, callback: (error: Error | null, addresses?: readonly string[]) => void) => void = dns.resolve4;
+  const dnsResolver = new dns.Resolver({ timeout: 100, tries: 1, maxTimeout: 250 });
+  const dnsPromiseResolver = new dnsPromises.Resolver({ timeout: 100, tries: 1, maxTimeout: 250 });
+  dns.resolve("example.invalid", "MX", (error: Error | null, records?: readonly dns.MxRecord[]) => {
+    void error;
+    const firstExchange: string | undefined = records?.[0]?.exchange;
+    void firstExchange;
+  });
+  dns.resolve4("example.invalid", { ttl: true }, (error: Error | null, records?: readonly dns.ResolveAddressWithTtl[]) => {
+    void error;
+    const firstTtl: number | undefined = records?.[0]?.ttl;
+    void firstTtl;
+  });
+  dnsResolver.resolveTlsa("example.invalid", (error: Error | null, records?: readonly dns.TlsaRecord[]) => {
+    void error;
+    const firstData: ArrayBuffer | undefined = records?.[0]?.data;
+    void firstData;
+  });
+  const dnsMappedMx: dns.ResolveRecordFor<"MX"> = [{ exchange: "mx.example.invalid", priority: 10 }];
+  const dnsAnyRecord: dns.AnyRecord = { type: "TLSA", certUsage: 3, selector: 1, match: 1, data: new ArrayBuffer(0) };
+  const dnsCancelled: "ECANCELLED" = dns.CANCELLED;
+  const dnsBadStr: "EBADSTR" = dns.BADSTR;
+  const dnsPromiseMx: Promise<readonly dnsPromises.MxRecord[]> = dnsPromises.resolve("example.invalid", "MX");
+  const dnsPromiseTlsa: Promise<readonly dnsPromises.TlsaRecord[]> = dnsPromiseResolver.resolveTlsa("example.invalid");
+  const dnsPromiseTtl: Promise<readonly dnsPromises.ResolveAddressWithTtl[]> = dnsPromises.resolve4("example.invalid", { ttl: true });
+  void dnsMappedMx;
+  void dnsAnyRecord;
+  void dnsCancelled;
+  void dnsBadStr;
+  void dnsPromiseMx;
+  void dnsPromiseTlsa;
+  void dnsPromiseTtl;
   const secureContext: tls.SecureContext = tls.createSecureContext({ minVersion: "TLSv1.2" });
   const tlsSocket: tls.TLSSocket = new tls.TLSSocket(socket, { servername: "example.invalid" });
   const tlsCipher: tls.CipherNameAndProtocol = tlsSocket.getCipher();

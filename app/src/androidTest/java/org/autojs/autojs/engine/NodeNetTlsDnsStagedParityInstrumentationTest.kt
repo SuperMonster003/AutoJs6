@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -149,8 +150,18 @@ class NodeNetTlsDnsStagedParityInstrumentationTest {
                       const hostnameDenied = await dnsLookupCode("example.invalid");
                       const resolveDenied = await dnsResolveCode(dns.resolve4, "localhost");
                       const promiseResolveDenied = await asyncCode(() => dnsPromises.resolve4("localhost"));
-                      const resolverDenied = await dnsResolveCode(new dns.Resolver().resolve4, "localhost");
-                      const promiseResolverDenied = await asyncCode(() => new dnsPromises.Resolver().resolve4("localhost"));
+                      const resolver = new dns.Resolver({ timeout: 1, tries: 1, maxTimeout: 1 });
+                      const promiseResolver = new dnsPromises.Resolver({ timeout: 1, tries: 1, maxTimeout: 1 });
+                      const resolverDenied = await dnsResolveCode(resolver.resolve4, "localhost");
+                      const promiseResolverDenied = await asyncCode(() => promiseResolver.resolve4("localhost"));
+                      const resolveRrtypeDenied = await dnsResolveCode((hostname, callback) => dns.resolve(hostname, "MX", callback), "localhost");
+                      const promiseResolveRrtypeDenied = await asyncCode(() => dnsPromises.resolve("localhost", "MX"));
+                      const resolve4TtlDenied = await dnsResolveCode((hostname, callback) => dns.resolve4(hostname, { ttl: true }, callback), "localhost");
+                      const promiseResolve4TtlDenied = await asyncCode(() => dnsPromises.resolve4("localhost", { ttl: true }));
+                      const tlsaDenied = await dnsResolveCode(dns.resolveTlsa, "localhost");
+                      const promiseTlsaDenied = await asyncCode(() => dnsPromises.resolveTlsa("localhost"));
+                      const resolverTlsaDenied = await dnsResolveCode(resolver.resolveTlsa, "localhost");
+                      const promiseResolverTlsaDenied = await asyncCode(() => promiseResolver.resolveTlsa("localhost"));
                       const serverList = dns.getServers();
                       const defaultOrderBefore = dns.getDefaultResultOrder();
                       dns.setDefaultResultOrder("ipv6first");
@@ -246,7 +257,26 @@ class NodeNetTlsDnsStagedParityInstrumentationTest {
                         resolveDenied,
                         promiseResolveDenied,
                         resolverDenied,
-                        promiseResolverDenied
+                        promiseResolverDenied,
+                        resolveRrtypeDenied,
+                        promiseResolveRrtypeDenied,
+                        resolve4TtlDenied,
+                        promiseResolve4TtlDenied,
+                        tlsaDenied,
+                        promiseTlsaDenied,
+                        resolverTlsaDenied,
+                        promiseResolverTlsaDenied
+                      ].join("|"));
+                      console.log("p13ntd.dns.shape=" + [
+                        typeof dns.resolveTlsa,
+                        typeof dnsPromises.resolveTlsa,
+                        typeof resolver.resolveTlsa,
+                        typeof promiseResolver.resolveTlsa,
+                        dns.CANCELLED,
+                        dns.BADSTR,
+                        dns.NOMEM,
+                        dns.DESTRUCTION,
+                        dns.ADDRGETNETWORKPARAMS
                       ].join("|"));
                       console.log("p13ntd.tls.shape=" + [
                         secureContext.secureProtocol,
@@ -305,7 +335,13 @@ class NodeNetTlsDnsStagedParityInstrumentationTest {
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "p13ntd.dns.denials=ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
+                    "p13ntd.dns.denials=ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
+                ),
+            )
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "p13ntd.dns.shape=function|function|function|function|ECANCELLED|EBADSTR|ENOMEM|EDESTRUCTION|EADDRGETNETWORKPARAMS",
                 ),
             )
             assertTrue(
@@ -320,6 +356,108 @@ class NodeNetTlsDnsStagedParityInstrumentationTest {
                     "p13ntd.tls.denials=false:ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
                 ),
             )
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun rawNodeNetworkModulesOptInExposesNativeBuiltins() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("raw Node network modules opt-in")
+
+        val workDir = File(context.cacheDir, "node-raw-network-opt-in-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create raw network opt-in work dir: $absolutePath" }
+        }
+
+        try {
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    return (async () => {
+                      const profile = require("autojs6:profile");
+                      const dns = require("dns");
+                      const nodeDns = require("node:dns");
+                      const dnsPromises = require("dns/promises");
+                      const http = require("http");
+                      const net = require("net");
+                      const tls = require("tls");
+
+                      function codeOf(error) {
+                        return String(error && (error.autojs6Code || error.code || error.legacyCode || error.name || ""));
+                      }
+
+                      function syncNativeNetwork(action) {
+                        try {
+                          const value = action();
+                          if (value && typeof value.on === "function") {
+                            value.on("error", () => {});
+                          }
+                          if (value && typeof value.destroy === "function") {
+                            value.destroy();
+                          } else if (value && typeof value.abort === "function") {
+                            value.abort();
+                          }
+                          return "allowed";
+                        } catch (error) {
+                          return codeOf(error);
+                        }
+                      }
+
+                      dns.setDefaultResultOrder("ipv4first");
+                      const dnsResolveStatus = await new Promise((resolve) => {
+                        dns.resolve("www.github.com", (error, addresses) => {
+                          if (error) {
+                            resolve("native_error:" + codeOf(error));
+                            return;
+                          }
+                          resolve("resolved:" + (Array.isArray(addresses) && addresses.length > 0) + ":" + typeof addresses[0]);
+                        });
+                      });
+                      const syncStatuses = [
+                        syncNativeNetwork(() => http.request({ host: "127.0.0.1", port: 9, path: "/", method: "GET" })),
+                        syncNativeNetwork(() => net.connect({ host: "127.0.0.1", port: 9 })),
+                        syncNativeNetwork(() => tls.connect({ host: "127.0.0.1", port: 443, rejectUnauthorized: false }))
+                      ];
+
+                      console.log("p13ntd.raw.profile=" + [
+                        profile.featureFlags.raw_node_network_modules.enabled,
+                        profile.experimentalFlags.rawNodeNetworkModules,
+                        profile.highRiskCapabilities.rawNodeNetworkModules
+                      ].join("|"));
+                      console.log("p13ntd.raw.same=" + [
+                        dns === nodeDns,
+                        dns.promises === dnsPromises
+                      ].join("|"));
+                      console.log("p13ntd.raw.shape=" + [
+                        typeof dns.resolve,
+                        typeof dnsPromises.resolve,
+                        typeof http.Agent,
+                        typeof http.ClientRequest,
+                        typeof net.Server,
+                        typeof tls.TLSSocket
+                      ].join("|"));
+                      console.log("p13ntd.raw.sync=" + syncStatuses.join("|"));
+                      console.log("p13ntd.raw.dns=" + dnsResolveStatus);
+                    })();
+                """.trimIndent(),
+                sourceName = "<node-raw-network-opt-in-p13-30.js>",
+                workingDirectory = workDir,
+                timeoutMs = 20_000L,
+                rawNodeNetworkModulesExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("raw Node network modules opt-in", result)
+            assertTrue(result.stdout, result.stdout.contains("p13ntd.raw.profile=true|true|true"))
+            assertTrue(result.stdout, result.stdout.contains("p13ntd.raw.same=true|true"))
+            assertTrue(
+                result.stdout,
+                result.stdout.contains("p13ntd.raw.shape=function|function|function|function|function|function"),
+            )
+            assertTrue(result.stdout, result.stdout.contains("p13ntd.raw.sync=allowed|allowed|allowed"))
+            assertTrue(result.stdout, result.stdout.contains("p13ntd.raw.dns="))
+            assertFalse(result.stdout, result.stdout.contains("ERR_AUTOJS6_NETWORK_DISABLED"))
+            assertFalse(result.stdout, result.stdout.contains("ERR_AUTOJS6_EMBEDDED_NODE_NETWORK_DISABLED"))
         } finally {
             workDir.deleteRecursively()
         }

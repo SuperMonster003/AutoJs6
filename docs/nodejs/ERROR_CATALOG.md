@@ -322,7 +322,7 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 ## ERR_AUTOJS6_NETWORK_DISABLED
 
 - Meaning: controlled network access is disabled in the current build or provider.
-- Common cause: normal builds keep live network providers disabled; raw network modules also reject before I/O.
+- Common cause: normal builds keep live network providers disabled; default raw network modules also reject before I/O unless the explicit raw Node network module opt-in is enabled.
 - Example: `await fetch("https://example.com")` in a normal build.
 - How to fix: use fake providers in tests or an explicitly approved experimental network build.
 - Related docs: [design/NETWORK.md](design/NETWORK.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).

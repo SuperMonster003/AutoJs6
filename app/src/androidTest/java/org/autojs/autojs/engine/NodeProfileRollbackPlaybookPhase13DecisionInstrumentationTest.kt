@@ -53,6 +53,10 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
 
         val capabilitySwitches = policy.getJSONObject("capabilityKillSwitches")
         assertEquals(NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("network"))
+        assertEquals(
+            NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
+            capabilitySwitches.getString("raw_node_network_modules"),
+        )
         assertEquals(NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("worker_threads"))
         assertEquals(NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("java_interop"))
         assertEquals(NodeProfileRollbackPolicy.RELAXED_CAPABILITIES_PROPERTY, capabilitySwitches.getString("all_relaxed_capabilities"))
@@ -67,6 +71,7 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
 
         val capabilityStates = policy.getJSONArray("capabilityStates").toString()
         assertTrue(capabilityStates.contains("network"))
+        assertTrue(capabilityStates.contains("raw_node_network_modules"))
         assertTrue(capabilityStates.contains("java_interop"))
         assertTrue(capabilityStates.contains("filesystem_relaxation"))
         assertTrue(capabilityStates.contains("keep_raw_wasi_denied"))
@@ -109,9 +114,11 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
                 assert.strictEqual(rollback.profileKillSwitches.pro_compat_opt_in, "${NodeProfileRollbackPolicy.PRO_PROFILE_PROPERTY}");
                 assert.strictEqual(rollback.profileKillSwitches.desktop_compat_opt_in, "${NodeProfileRollbackPolicy.DESKTOP_PROFILE_PROPERTY}");
                 assert.strictEqual(rollback.capabilityKillSwitches.network, "${NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY}");
+                assert.strictEqual(rollback.capabilityKillSwitches.raw_node_network_modules, "${NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY}");
                 assert.strictEqual(rollback.capabilityKillSwitches.all_relaxed_capabilities, "${NodeProfileRollbackPolicy.RELAXED_CAPABILITIES_PROPERTY}");
                 assert.ok(rollback.profileStates.some((item) => item.id === "safe_default" && item.enabled === true));
                 assert.ok(rollback.profileStates.some((item) => item.id === "desktop_compat_opt_in" && item.fallbackProfile === "safe_default"));
+                assert.ok(rollback.capabilityStates.some((item) => item.id === "raw_node_network_modules" && item.enabled === false));
                 assert.ok(rollback.capabilityStates.some((item) => item.id === "child_process" && item.enabled === false));
                 assert.ok(rollback.rollbackTriggers.some((item) => item.id === "stress_regression" && item.fallbackProfile === "safe_default"));
                 assert.strictEqual(rollback.packagedDowngrade.strategy, "publish_safe_profile_patch_or_remove_promoted_metadata");

@@ -1,6 +1,6 @@
 # Network Controlled Fetch MVP v1
 
-Status: controlled fetch MVP implemented, live network provider gated. `autojs.nodejs.network.experimental=false` is the default, so normal builds keep real network I/O disabled while the JavaScript API, bridge protocol, diagnostics, and fake-provider tests are in place.
+Status: controlled fetch MVP implemented, live network provider gated. `autojs.nodejs.network.experimental=false` is the default, so normal builds keep controlled provider I/O disabled while the JavaScript API, bridge protocol, diagnostics, and fake-provider tests are in place. P13-30 separately adds a release-forbidden `autojs.nodejs.rawNetworkModules.experimental=false` default for raw Node network module experiments.
 
 ## Goal
 
@@ -31,13 +31,24 @@ Current wiring:
 
 The flag gates the live Android/OkHttp provider. With the flag off, the JavaScript wrapper and bridge module exist, but the Android provider rejects requests with `ERR_AUTOJS6_NETWORK_DISABLED` before network I/O.
 
+Raw Node network modules use a separate debug/build-time flag:
+
+```properties
+autojs.nodejs.rawNetworkModules.experimental=false
+```
+
+With this flag off, `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`
+remain AutoJs6 limited or controlled facades. With it on, CommonJS `require()`
+routes those selected modules to Node native builtins for Desktop parity
+experiments. This does not change the controlled fetch provider policy.
+
 ## Current Default Behavior
 
 Default behavior with the flag off:
 
 - global `fetch()` is an AutoJs6 controlled wrapper and rejects with the current network-disabled policy code shape when routed to the default Android provider
 - `require("fetch")` returns the same controlled wrapper shape for CommonJS scripts
-- `http`, `https`, `net`, `tls`, `dns`, and `dns/promises` remain limited compatibility modules whose I/O operations reject with `ERR_AUTOJS6_NETWORK_DISABLED`
+- `http`, `https`, `net`, `tls`, `dns`, and `dns/promises` remain limited compatibility modules whose I/O operations reject with `ERR_AUTOJS6_NETWORK_DISABLED` while `autojs.nodejs.rawNetworkModules.experimental=false`
 - `dgram` remains a disabled builtin
 - no raw socket, server, DNS query, TLS session, datagram, or unrestricted HTTP request is permitted
 - packaged APK smoke must keep the same denial behavior
@@ -183,7 +194,7 @@ The diagnostics snapshot includes active request count, max active request count
 
 ## Raw Module Policy
 
-These raw modules remain disabled for I/O:
+These raw modules remain disabled for I/O in the Safe/default profile:
 
 - `http`
 - `https`
@@ -192,6 +203,11 @@ These raw modules remain disabled for I/O:
 - `dns`
 - `dns/promises`
 - `dgram`
+
+The P13-30 raw Node network opt-in can enable native `http`, `https`, `net`,
+`tls`, `dns`, and `dns/promises` in debug/build-time runs. It does not enable
+`dgram` and does not replace the controlled fetch policy for packaged/default
+behavior.
 
 Controlled fetch support must not imply support for:
 
@@ -213,7 +229,7 @@ The main app may already declare `android.permission.INTERNET` for other product
 Packaged APKs include `android.permission.INTERNET` for Node only when project metadata explicitly opts into controlled network with the bridge capability manifest:
 
 - no network opt-in: Node network disabled and no Node-driven INTERNET requirement
-- network opt-in: `network` capability declared, `android.permission.INTERNET` merged into the packaged manifest, controlled client enabled only when the experimental provider flag is on, raw modules still denied
+- network opt-in: `network` capability declared, `android.permission.INTERNET` merged into the packaged manifest, controlled client enabled only when the experimental provider flag is on, raw modules still denied unless the separate debug/build-time raw module flag is enabled
 
 Project-level opt-in:
 
@@ -371,10 +387,12 @@ Bridge transport failures should continue to use bridge-level errors such as `ER
 
 Before live network capability is enabled in release builds, tests must cover:
 
-- flag off keeps global fetch and raw modules denied
+- flag off keeps global fetch and default raw modules denied
 - `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED` is false in normal builds
+- `BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED` is false in normal builds
 - `require("autojs6:profile").experimentalFlags.network` is false
-- raw modules remain denied even if live controlled fetch is enabled
+- `require("autojs6:profile").experimentalFlags.rawNodeNetworkModules` is false by default
+- raw modules remain denied in the Safe profile even if live controlled fetch is enabled
 - fake provider success for GET and POST: covered by `NodeFetchBridgeInstrumentationTest`
 - object/array headers, string/Buffer/Uint8Array request bodies, and `Response.text()`/`json()`/`arrayBuffer()`: covered by `NodeFetchBridgeInstrumentationTest`
 - timeout cancellation: covered by `NodeFetchBridgeInstrumentationTest`
@@ -397,14 +415,16 @@ Before live network capability is enabled in release builds, tests must cover:
   `NodeHttpNpmCorpusInstrumentationTest`
 - explicit live Android fetch/axios smoke: covered by `verifyNodeLiveFetchGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback server and the Android OkHttp provider
 - explicit live Android WebSocket smoke: covered by `verifyNodeLiveWebSocketGate` with `autojs.nodejs.network.experimental=true`, using an on-device loopback WebSocket server and the Android OkHttp provider
-- raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests
+- default raw modules still denied: covered by `NodeFetchBridgeInstrumentationTest` and security regression tests
+- raw Node network module opt-in: covered by `NodeNetTlsDnsStagedParityInstrumentationTest`
 - default Android provider disabled with the flag off: covered by `NodeFetchBridgeInstrumentationTest`
 - service destroy cancellation: covered by `verifyNodeLiveFetchGate`; provider destroy cancels tracked OkHttp calls and returns a stable abort result
 - packaged APK manifest behavior with and without opt-in: capability metadata drives `INTERNET` merging, and verifier/doctor reports expose the mapping and manifest result
 
 ## Non-Goals
 
-Task 41 does not enable:
+Task 41 does not enable these in the controlled fetch path; P13-30 raw module
+experiments are tracked separately:
 
 - global network access
 - `node:http`

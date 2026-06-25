@@ -674,6 +674,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.env.values.toTypedArray(),
                     preparedRequest.esmExperimentalEnabled,
                     preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
                     preparedRequest.workerThreadsExperimentalEnabled,
                     preparedRequest.javaInteropExperimentalEnabled,
                 )
@@ -688,6 +689,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.env.values.toTypedArray(),
                     preparedRequest.esmExperimentalEnabled,
                     preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
                     preparedRequest.workerThreadsExperimentalEnabled,
                     preparedRequest.javaInteropExperimentalEnabled,
                 )
@@ -704,6 +706,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.env.values.toTypedArray(),
                     preparedRequest.esmExperimentalEnabled,
                     preparedRequest.dynamicImportExperimentalEnabled,
+                    preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
                     preparedRequest.workerThreadsExperimentalEnabled,
                     preparedRequest.javaInteropExperimentalEnabled,
                 )
@@ -1047,6 +1050,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         updatePart(compileCacheLoaderVersion())
         updatePart(request.esmExperimentalEnabled.toString())
         updatePart(request.dynamicImportExperimentalEnabled.toString())
+        updatePart(request.rawNodeNetworkModulesExperimentalEnabled.toString())
         updatePart(request.workerThreadsExperimentalEnabled.toString())
         updatePart(request.javaInteropExperimentalEnabled.toString())
     }.take(32)
@@ -15320,6 +15324,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
@@ -15334,6 +15339,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
@@ -15350,6 +15356,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
@@ -15375,6 +15382,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
         dynamicImportExperimentalEnabled: Boolean,
+        rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
@@ -17652,6 +17660,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val runtimeModuleSources: Map<String, String> = emptyMap(),
         val esmExperimentalEnabled: Boolean = BuildConfig.NODEJS_ESM_EXPERIMENTAL_ENABLED,
         val dynamicImportExperimentalEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+        val rawNodeNetworkModulesExperimentalEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
         val workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
         val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
         val spawnDepth: Int = 0,

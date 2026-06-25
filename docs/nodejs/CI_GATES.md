@@ -662,10 +662,12 @@ P13-30 additionally uses `verifyNodePhase13NetTlsDnsStagedCompatibility` as
 the host promotion-status gate for staged `net`/`tls`/`dns` compatibility and
 keeps the desktop network/fs surface partial: reserved builtin identity,
 shadow denial, socket/server shape metadata, `SocketAddress`, `BlockList`,
-loopback/IP-literal DNS lookup, DNS privacy guardrails, TLS metadata, and
-fail-closed connect/listen/resolve/session APIs are covered, while real client
-sockets, server sockets, network DNS, TLS sessions, fd leak proof, packaged
-INTERNET evidence, and live Android network evidence require separate evidence.
+loopback/IP-literal DNS lookup, DNS privacy guardrails, TLS metadata,
+fail-closed default connect/listen/resolve/session APIs, and the
+release-forbidden `autojs.nodejs.rawNetworkModules.experimental=true` native
+module opt-in path are covered, while release/default client sockets, server
+sockets, network DNS policy, TLS sessions, fd leak proof, packaged INTERNET
+evidence, and live Android network evidence require separate evidence.
 P13-31 additionally uses `verifyNodePhase13DgramUdpDecision` as the host
 decision gate for UDP and keeps the desktop network/fs surface partial:
 `dgram`/`node:dgram`, `require.resolve()`, transitive package require, and

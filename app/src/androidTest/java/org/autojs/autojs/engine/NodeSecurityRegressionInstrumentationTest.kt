@@ -969,6 +969,7 @@ class NodeSecurityRegressionInstrumentationTest {
     fun phase13RelaxedCapabilityCorpusCoversNetworkFsChildNativeInspectorAndWasi() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Phase 13 relaxed capability security corpus")
         assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
 
         val workDir = freshWorkDir("node-security-p13-50-relaxed-corpus")
         val outsideDir = freshWorkDir("node-security-p13-50-outside")

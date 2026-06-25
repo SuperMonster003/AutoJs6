@@ -103,7 +103,7 @@ AutoJs6 behavior:
 - pure JavaScript CommonJS packages are the primary compatibility target.
 - checked-in `node_modules` package trees are supported.
 - `npm install`, postinstall scripts, and native addon installation are not supported by the Safe Node Profile.
-- raw Node network modules remain disabled by default.
+- raw Node network modules remain disabled by default, with a debug/build-time `autojs.nodejs.rawNetworkModules.experimental=true` opt-in for native `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`.
 - `worker_threads` remains disabled by default.
 - native `.node` addons remain disabled by default.
 
@@ -574,11 +574,11 @@ Auto.js Pro 9 public docs list `http` and `https` as usable Node builtins.
 
 AutoJs6 behavior:
 
-- raw Node `http`, `https`, `net`, `tls`, `dns`, and `dgram` remain denied by default.
+- raw Node `http`, `https`, `net`, `tls`, `dns`, and `dgram` remain denied by default; `http`, `https`, `net`, `tls`, `dns`, and `dns/promises` can be enabled only through the debug/build-time raw network modules opt-in.
 - the controlled `fetch` direction is documented separately and remains feature-gated.
 - packaged APK INTERNET permission is only expected when controlled network is explicitly enabled.
 
-Porting note: do not assume Node socket or HTTP builtins are available in AutoJs6. Use the controlled network design when enabled.
+Porting note: do not assume Node socket or HTTP builtins are available in the Safe profile. Use the controlled network design for packaged/default behavior, or the raw network modules opt-in for Desktop parity experiments.
 
 ## Packaged APKs
 

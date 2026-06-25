@@ -217,6 +217,9 @@ val nodeJsDynamicImportEnabled = nodeJsDynamicImportLocalEnabled || nodeJsDynami
 val nodeJsNetworkExperimentalEnabled = providers.gradleProperty("autojs.nodejs.network.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsRawNetworkModulesExperimentalEnabled = providers.gradleProperty("autojs.nodejs.rawNetworkModules.experimental").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val nodeJsWorkerThreadsExperimentalEnabled = providers.gradleProperty("autojs.nodejs.worker_threads.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
@@ -253,6 +256,7 @@ val nodeJsReleaseTaskRequested = taskNames.any { rawTaskName ->
 val nodeJsReleaseForbiddenExperimentalFlags = linkedMapOf(
     "autojs.nodejs.dynamicImport.experimental" to nodeJsDynamicImportExperimentalEnabled,
     "autojs.nodejs.network.experimental" to nodeJsNetworkExperimentalEnabled,
+    "autojs.nodejs.rawNetworkModules.experimental" to nodeJsRawNetworkModulesExperimentalEnabled,
     "autojs.nodejs.worker_threads.experimental" to nodeJsWorkerThreadsExperimentalEnabled,
     "autojs.nodejs.javaInterop.experimental" to nodeJsJavaInteropExperimentalEnabled,
     "autojs.nodejs.profile.pro.enabled" to nodeJsProfileProEnabled,
@@ -2144,6 +2148,7 @@ android {
         buildConfigField("boolean", "NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED", "$nodeJsDynamicImportLocalEnabled")
         buildConfigField("boolean", "NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED", "$nodeJsDynamicImportEnabled")
         buildConfigField("boolean", "NODEJS_NETWORK_EXPERIMENTAL_ENABLED", "$nodeJsNetworkExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED", "$nodeJsRawNetworkModulesExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED", "$nodeJsWorkerThreadsExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED", "$nodeJsJavaInteropExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_PROFILE_PRO_ENABLED", "$nodeJsProfileProEnabled")

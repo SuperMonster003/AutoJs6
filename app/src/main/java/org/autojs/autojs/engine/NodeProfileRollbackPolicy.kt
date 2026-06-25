@@ -27,6 +27,7 @@ object NodeProfileRollbackPolicy {
 
     fun capabilityKillSwitchProperties(): List<String> = listOf(
         NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY,
+        NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
         NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY,
         NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY,
         RELAXED_CAPABILITIES_PROPERTY,
@@ -80,7 +81,7 @@ object NodeProfileRollbackPolicy {
         .put("worker_threads", NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY)
         .put("java_interop", NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY)
         .put("all_relaxed_capabilities", RELAXED_CAPABILITIES_PROPERTY)
-        .put("raw_node_network_modules", "stable_denial_no_runtime_switch")
+        .put("raw_node_network_modules", NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY)
         .put("filesystem_relaxation", "safe_profile_scoped_fs")
         .put("child_process", "stable_denial_no_runtime_switch")
         .put("native_addon", "stable_denial_no_runtime_switch")
@@ -129,6 +130,13 @@ object NodeProfileRollbackPolicy {
             property = NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY,
             enabled = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
             rollbackAction = "set_autojs_nodejs_network_experimental_false",
+        ),
+        CapabilityState(
+            id = "raw_node_network_modules",
+            profile = DESKTOP_COMPAT_OPT_IN,
+            property = NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
+            enabled = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+            rollbackAction = "set_autojs_nodejs_rawNetworkModules_experimental_false",
         ),
         CapabilityState(
             id = "worker_threads",

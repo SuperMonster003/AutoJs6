@@ -167,7 +167,7 @@ console.log(response.status, response.data);
 
 Limits:
 
-- raw Node network modules remain disabled
+- raw Node network modules remain disabled by default; debug/build-time experiments can enable `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` with `autojs.nodejs.rawNetworkModules.experimental=true`
 - desktop axios adapters, agents, proxy tunneling, and custom adapters are
   denied
 - response size, redirect count, timeout, and concurrency are bounded

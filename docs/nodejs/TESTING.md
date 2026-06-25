@@ -908,7 +908,7 @@ denial, direct `.node` `require()`/`require.resolve()` denial, package `main`
 denial, `process.dlopen`/`process.binding`/`process._linkedBinding` denial,
 and require-cache non-loading. P13-39 records native addon loading as partial.
 
-The network portion also asserts that normal builds keep `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=false`; raw network operations must stay denied until `docs/nodejs/design/NETWORK.md` is implemented by a later task.
+The network portion also asserts that normal builds keep `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED=false` and `BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED=false`; Safe-profile raw network operations stay denied unless the explicit raw Node network module opt-in is enabled for a focused experiment.
 
 Current resolver fuzzer extended instrumentation:
 
@@ -1562,11 +1562,13 @@ Phase 13 net/tls/dns staged compatibility status gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13NetTlsDnsStagedCompatibility
 ```
 
-This host gate records P13-30 as partial. It requires the limited `net`,
-`tls`, `dns`, and `dns/promises` builtins, focused device evidence, TypeScript
-declarations, desktop builtin matrix updates, security/profile docs, and
-release matrix text. It keeps real client sockets, server sockets, network DNS,
-TLS sessions, fd leak proof, packaged INTERNET proof, and live Android network
+This host gate records P13-30 as partial. It requires the default limited `net`,
+`tls`, `dns`, and `dns/promises` builtins, focused device evidence, the
+debug/build-time `autojs.nodejs.rawNetworkModules.experimental=true` native
+module opt-in path, TypeScript declarations, desktop builtin matrix updates,
+security/profile docs, and release matrix text. It keeps release/default client
+sockets, server sockets, network DNS policy, TLS sessions, fd leak proof,
+packaged INTERNET proof, and live Android network
 evidence open.
 
 Phase 13 dgram UDP decision gate:
@@ -2503,7 +2505,7 @@ If `autojs.embeddedNode.expectedAbis` is omitted, the verifier derives the ABI p
 
 See `docs/nodejs/design/RELEASE_FLAVORS.md`.
 
-The packaged diagnostic report also prints whether the inspected manifest declares `android.permission.INTERNET`. Controlled fetch and controlled WebSocket remain disabled in normal builds unless a packaged project opts into network explicitly; raw Node network modules must stay denied in either state.
+The packaged diagnostic report also prints whether the inspected manifest declares `android.permission.INTERNET`. Controlled fetch and controlled WebSocket remain disabled in normal builds unless a packaged project opts into network explicitly; raw Node network modules remain denied in the Safe profile and are available only for debug/build-time runs that explicitly enable `autojs.nodejs.rawNetworkModules.experimental=true`.
 
 Template refresh and smoke artifact collection:
 

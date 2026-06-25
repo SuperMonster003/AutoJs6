@@ -286,14 +286,17 @@ shape-only `Agent` fields are declared. Server/listen, raw sockets, proxy and
 tunnel options, custom TLS/session control, and packaged live-network behavior
 remain future work.
 
-P13-30 records the partial net/tls/dns staged compatibility gate. `net`,
-`node:net`, `tls`, `node:tls`, `dns`, `node:dns`, `dns/promises`, and
+P13-30 records the partial net/tls/dns staged compatibility gate. By default,
+`net`, `node:net`, `tls`, `node:tls`, `dns`, `node:dns`, `dns/promises`, and
 `node:dns/promises` are typed as limited builtins for package probing and
 deterministic local behavior: socket/server shapes, `SocketAddress`,
-`BlockList`, TLS context/socket metadata, DNS loopback/IP-literal lookup, and
-DNS constants are declared. Real TCP/TLS sockets, server listeners, network DNS
-queries, Android resolver state, TLS sessions, and fd/native handles remain
-future work.
+`BlockList`, TLS context/socket metadata, DNS loopback/IP-literal lookup,
+`resolve(hostname, rrtype)`, TTL resolve options, TLSA and other record result
+shapes, and DNS constants are declared. Debug/build-time runs can explicitly
+enable native Node `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`
+with `autojs.nodejs.rawNetworkModules.experimental=true`; broader release
+promotion, server listeners, Android resolver policy, fd/native-handle proof,
+and packaged live-network behavior remain future work.
 
 P12-24 reserves `require("rhino")` as a disabled JSON-only shim facade. P12-25 adds an explicit `rhino.run({ experimental: true, source|path, timeoutMs, args })` JSON-only POC that returns frozen `RunResult` records and never installs Rhino globals. Calls without `experimental: true` still reject with `ERR_AUTOJS6_RHINO_SHIM_DISABLED`; default `rhino.install()` throws `ERR_AUTOJS6_RHINO_INSTALL_UNSUPPORTED`, `require("node:rhino")` is not an alias, and no `compat.rhino` surface is declared. P13-14 adds typed `rhino.install({ experimental: true, globals?, target? })` support for the explicit Java proxy POC only: the returned `InstallResult` records `Packages`, `java`, and `android` proxy installation through the Java interop allowlist, while `JavaAdapter` remains unavailable. P13-15 declares `rhino.importClass()` and `rhino.importPackage()` as stable `never` helpers that throw `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED`; migration should use assignment from an explicit proxy target. P13-16 declares `rhino.JavaAdapter()` as a stable `never` helper that throws `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`, and reserves `java.defineClass()` / `$autojs.java.defineClass()` as stable-denied replacement names until a bounded proxy-interface provider exists.
 

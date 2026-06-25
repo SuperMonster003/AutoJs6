@@ -257,6 +257,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val esmExperimentalEnabled = preparedServiceRequest.esmExperimentalEnabled
         val dynamicImportLocalEnabled = BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED
         val dynamicImportExperimentalEnabled = preparedServiceRequest.dynamicImportExperimentalEnabled
+        val rawNodeNetworkModulesExperimentalEnabled = preparedServiceRequest.rawNodeNetworkModulesExperimentalEnabled
         val workerThreadsExperimentalEnabled = preparedServiceRequest.workerThreadsExperimentalEnabled
         val javaInteropExperimentalEnabled = preparedServiceRequest.javaInteropExperimentalEnabled
         val spawnDepth = preparedServiceRequest.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
@@ -410,6 +411,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             runtimeModuleSources = enrichedRuntimeModuleSources,
             esmExperimentalEnabled = esmExperimentalEnabled,
             dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
+            rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled,
             workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
             javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
             executionId = executionId,
@@ -470,6 +472,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     "esmExperimentalEnabled=$esmExperimentalEnabled " +
                     "dynamicImportLocalEnabled=$dynamicImportLocalEnabled " +
                     "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
+                    "rawNodeNetworkModulesExperimentalEnabled=$rawNodeNetworkModulesExperimentalEnabled " +
                     "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
                     "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +
                     "queueMode=$queueMode queued=${slotLease.queued} queueWaitMs=${slotLease.queueWaitMs} " +
@@ -1734,6 +1737,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_TIMEOUT_MS = "timeout_ms"
         private const val EXTRA_ESM_EXPERIMENTAL_ENABLED = "esm_experimental_enabled"
         private const val EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED = "dynamic_import_experimental_enabled"
+        private const val EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED =
+            "raw_node_network_modules_experimental_enabled"
         private const val EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED = "worker_threads_experimental_enabled"
         private const val EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED = "java_interop_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
@@ -1999,6 +2004,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_TIMEOUT_MS, scheduledRequestForService.timeoutMs.coerceAtLeast(1L))
                 putExtra(EXTRA_ESM_EXPERIMENTAL_ENABLED, scheduledRequestForService.esmExperimentalEnabled)
                 putExtra(EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED, scheduledRequestForService.dynamicImportExperimentalEnabled)
+                putExtra(
+                    EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                    scheduledRequestForService.rawNodeNetworkModulesExperimentalEnabled,
+                )
                 putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, scheduledRequestForService.workerThreadsExperimentalEnabled)
                 putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, scheduledRequestForService.javaInteropExperimentalEnabled)
                 putExtra(
@@ -2186,6 +2195,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     putExtra(
                         EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
                         requestForService.dynamicImportExperimentalEnabled,
+                    )
+                    putExtra(
+                        EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                        requestForService.rawNodeNetworkModulesExperimentalEnabled,
                     )
                     putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
                     putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
@@ -3151,6 +3164,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     EXTRA_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
                     BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
                 ),
+                rawNodeNetworkModulesExperimentalEnabled = getBooleanExtra(
+                    EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+                ),
                 workerThreadsExperimentalEnabled = getBooleanExtra(
                     EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED,
                     BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
@@ -3200,6 +3217,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 put("runtimeModuleSources", orderedStringMapJson(request.runtimeModuleSources))
                 put("esmExperimentalEnabled", request.esmExperimentalEnabled)
                 put("dynamicImportExperimentalEnabled", request.dynamicImportExperimentalEnabled)
+                put("rawNodeNetworkModulesExperimentalEnabled", request.rawNodeNetworkModulesExperimentalEnabled)
                 put("workerThreadsExperimentalEnabled", request.workerThreadsExperimentalEnabled)
                 put("javaInteropExperimentalEnabled", request.javaInteropExperimentalEnabled)
                 put("spawnDepth", request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
@@ -3236,6 +3254,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 dynamicImportExperimentalEnabled = json.optBoolean(
                     "dynamicImportExperimentalEnabled",
                     BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
+                ),
+                rawNodeNetworkModulesExperimentalEnabled = json.optBoolean(
+                    "rawNodeNetworkModulesExperimentalEnabled",
+                    BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
                 ),
                 workerThreadsExperimentalEnabled = json.optBoolean(
                     "workerThreadsExperimentalEnabled",

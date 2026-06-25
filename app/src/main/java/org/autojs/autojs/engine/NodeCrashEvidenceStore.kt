@@ -437,6 +437,7 @@ object NodeCrashEvidenceStore {
             "dynamic_import" -> BuildConfig.NODEJS_DYNAMIC_IMPORT_LOCAL_ENABLED ||
                     BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED
             "network" -> BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED
+            "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED
             "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED
             "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED
             else -> flag.defaultEnabled

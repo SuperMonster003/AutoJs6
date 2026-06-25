@@ -149,6 +149,13 @@
 - P13-30 partial net/tls/dns staged compatibility gate records the existing
   limited `net`, `tls`, `dns`, and `dns/promises` builtins as Desktop-profile
   shape and policy evidence, not as raw network promotion.
+- Follow-up DNS parity adds Node v24 `resolveTlsa`, `resolve(hostname,
+  rrtype)`, TTL resolve options, typed DNS record declarations, and exposed DNS
+  error constants while keeping all network DNS requests fail-closed.
+- Raw native Node network modules now have a debug/build-time opt-in:
+  `autojs.nodejs.rawNetworkModules.experimental=true`. With this flag, CommonJS
+  `dns`, `dns/promises`, `http`, `https`, `net`, and `tls` route to Node's
+  native builtins; Safe default remains limited and fail-closed.
 - Host verifier:
   `tools/nodejs/phase13/verify-net-tls-dns-staged-compatibility.js`.
 - Gradle gate: `:app:verifyNodePhase13NetTlsDnsStagedCompatibility`.
@@ -1095,6 +1102,10 @@ P13 task 本身使用以下执行状态：
       解析、shadow denial、`net`/`tls`/`dns` 当前有限 facade 形状、DNS
       loopback/IP-literal-only 行为、server/listen/connect/TLS session
       denial，以及 socket close/destroy 无公开 fd/bytes 逃逸的当前证据。
+    - 新增 `autojs.nodejs.rawNetworkModules.experimental=true` debug/build-time
+      opt-in 通路；CommonJS `dns`、`dns/promises`、`http`、`https`、`net`、
+      `tls` 会路由到 Node 原生 builtin，并包含用户侧
+      `dns.resolve("www.github.com")` 样例路径的 focused instrumentation。
     - Type declarations:
       `docs/nodejs/types/autojs6-node/net.d.ts`,
       `docs/nodejs/types/autojs6-node/tls.d.ts`,

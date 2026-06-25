@@ -87,7 +87,7 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "Certificate customization requires a separate design gate."),
       token(files.p13HttpTest, "ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_POLICY_DENIED"),
       token(files.rawNetworkTest, "rawNetworkModulesStayDeniedAndCannotBeShadowed"),
-      token(files.securityModel, "raw Node network modules remain disabled"),
+      token(files.securityModel, "Raw network modules remain denied in the Safe profile"),
       token(files.compatibilityProfile, "P13-29 records HTTP/HTTPS client parity as partial"),
     ], [
       "P13-30 must decide whether any net/tls/dns opt-in authority exists beyond these denials.",

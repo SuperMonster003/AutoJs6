@@ -24,6 +24,7 @@ promotion, privacy, and packaged gates are closed.
 | Capability | Profile lane | Switch or current rollback | Rollback action |
 | --- | --- | --- | --- |
 | `network` | `desktop_compat_opt_in` | `autojs.nodejs.network.experimental=false` | disable controlled network provider experiments |
+| `raw_node_network_modules` | `desktop_compat_opt_in` | `autojs.nodejs.rawNetworkModules.experimental=false` | disable native Node network builtin experiments |
 | `worker_threads` | `desktop_compat_opt_in` | `autojs.nodejs.worker_threads.experimental=false` | disable worker runtime experiments |
 | `java_interop` | `pro_compat_opt_in` | `autojs.nodejs.javaInterop.experimental=false` | disable allowlist Java interop experiments |
 | all relaxed capabilities | Pro/Desktop | `autojs.nodejs.relaxedCapabilities.enabled=false` | keep the relaxed-capability bundle disabled |

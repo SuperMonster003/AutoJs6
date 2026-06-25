@@ -946,6 +946,7 @@ struct EmbeddedScriptExecutionRequest {
     std::vector<std::pair<std::string, std::string>> env;
     bool esmExperimentalEnabled = false;
     bool dynamicImportExperimentalEnabled = false;
+    bool rawNodeNetworkModulesExperimentalEnabled = false;
     bool workerThreadsExperimentalEnabled = false;
     bool javaInteropExperimentalEnabled = false;
 };
@@ -1017,6 +1018,7 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::vector<std::pair<std::string, std::string>>& env,
         bool esmExperimentalEnabled,
         bool dynamicImportExperimentalEnabled,
+        bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
         bool javaInteropExperimentalEnabled);
 void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const std::string& text);
