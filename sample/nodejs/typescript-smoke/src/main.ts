@@ -592,6 +592,37 @@ async function smoke(): Promise<void> {
     autojsProfile.privacyDisclosurePolicy.implicitHighPrivilegeDenied;
   const privacyDisclosureDoctorPrivacy: AutoJs6Node.PrivacyDisclosureDoctorPrivacy =
     autojsProfile.privacyDisclosurePolicy.doctorPrivacy;
+  const runtimeProfileId: AutoJs6Node.RuntimeProfileId = "safe_default";
+  const proRuntimeProfileId: AutoJs6Node.RuntimeProfileId = "pro_compat_opt_in";
+  const desktopRuntimeProfileId: AutoJs6Node.RuntimeProfileId = "desktop_compat_opt_in";
+  const debugRuntimeProfileId: AutoJs6Node.RuntimeProfileId = "debug_unsafe_lab";
+  const safeToastMode: AutoJs6Node.ProfileModuleModeFor<"toast", "safe_default"> = "available";
+  const safeJavaMode: AutoJs6Node.ProfileModuleModeFor<"java", "safe_default"> = "denied";
+  const proJavaMode: AutoJs6Node.ProfileModuleModeFor<"java", "pro_compat_opt_in"> = "profile_gated";
+  const proOverlayMode: AutoJs6Node.ProfileModuleModeFor<"ui.overlay", "pro_compat_opt_in"> = "profile_gated";
+  const safeWorkerMode: AutoJs6Node.ProfileModuleModeFor<"worker_threads", "safe_default"> = "denied";
+  const desktopWorkerMode: AutoJs6Node.ProfileModuleModeFor<"worker_threads", "desktop_compat_opt_in"> = "profile_gated";
+  const desktopHttpMode: AutoJs6Node.ProfileModuleModeFor<"http", "desktop_compat_opt_in"> = "partial";
+  const desktopWasiMode: AutoJs6Node.ProfileModuleModeFor<"wasi", "desktop_compat_opt_in"> = "profile_gated";
+  const debugInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "debug_unsafe_lab"> = "profile_gated";
+  const safeInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "safe_default"> = "denied";
+  const packageManagerRequiredProfile: AutoJs6Node.ProfileRequiredFor<"package_manager"> = "desktop_compat_opt_in";
+  const autojsJavaPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"$autojs.java"> = "metadata_only";
+  const npmPureJsSafeMode: AutoJs6Node.SafeDefaultModeFor<"npm.pure_js"> = "partial";
+  const workerRequiresDeclaration: AutoJs6Node.ProfileModuleRequiresDeclaration<"worker_threads"> = true;
+  const toastRequiresDeclaration: AutoJs6Node.ProfileModuleRequiresDeclaration<"toast"> = false;
+  const profileDeclarationMatrix: AutoJs6Node.ProfileDeclarationMatrix = {
+    schema: "autojs6-node-profile-declaration-matrix-v1",
+    status: "declaration_partial",
+    profiles: [runtimeProfileId, proRuntimeProfileId, desktopRuntimeProfileId, debugRuntimeProfileId],
+    modules: {} as AutoJs6Node.ProfileModuleCatalog,
+    metadataOnly: true,
+    grantsAuthority: false
+  };
+  const profileCatalogJava: AutoJs6Node.ProfileModuleFor<"java"> =
+    profileDeclarationMatrix.modules.java;
+  const profileCatalogWorker: AutoJs6Node.ProfileModuleFor<"worker_threads"> =
+    profileDeclarationMatrix.modules.worker_threads;
   const typedCapabilityError = {} as AutoJs6Node.AutoJsBridgeCapabilityNotDeclaredError;
   const capabilityErrorProfiles: readonly string[] = typedCapabilityError.requiredProfiles;
   const capabilityErrorNodePermissions: readonly string[] = typedCapabilityError.requiredNodePermissions;
@@ -886,6 +917,28 @@ async function smoke(): Promise<void> {
   void privacyDisclosurePackaged;
   void privacyDisclosureImplicitDenied;
   void privacyDisclosureDoctorPrivacy;
+  void runtimeProfileId;
+  void proRuntimeProfileId;
+  void desktopRuntimeProfileId;
+  void debugRuntimeProfileId;
+  void safeToastMode;
+  void safeJavaMode;
+  void proJavaMode;
+  void proOverlayMode;
+  void safeWorkerMode;
+  void desktopWorkerMode;
+  void desktopHttpMode;
+  void desktopWasiMode;
+  void debugInspectorMode;
+  void safeInspectorMode;
+  void packageManagerRequiredProfile;
+  void autojsJavaPackagedBehavior;
+  void npmPureJsSafeMode;
+  void workerRequiresDeclaration;
+  void toastRequiresDeclaration;
+  void profileDeclarationMatrix;
+  void profileCatalogJava;
+  void profileCatalogWorker;
   void capabilityErrorProfiles;
   void capabilityErrorNodePermissions;
   void capabilityErrorAndroidPermissions;

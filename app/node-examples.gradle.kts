@@ -329,10 +329,11 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
         val sampleRoot = rootProject.projectDir.resolve("sample/nodejs/typescript-smoke")
         val indexFile = typesRoot.resolve("index.d.ts")
         val commonFile = typesRoot.resolve("common.d.ts")
+        val profileCapabilitiesFile = typesRoot.resolve("profile_capabilities.d.ts")
         val sampleTsConfig = sampleRoot.resolve("tsconfig.json")
         val sampleSource = sampleRoot.resolve("src/main.ts")
 
-        val missingRequired = listOf(indexFile, commonFile, sampleTsConfig, sampleSource)
+        val missingRequired = listOf(indexFile, commonFile, profileCapabilitiesFile, sampleTsConfig, sampleSource)
             .filterNot(File::isFile)
             .map { it.relativeTo(rootProject.projectDir).invariantSeparatorsPath }
         if (missingRequired.isNotEmpty()) {
@@ -340,6 +341,7 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
         }
 
         val indexText = indexFile.readText()
+        val profileCapabilitiesText = profileCapabilitiesFile.readText()
         val sampleText = sampleSource.readText()
         val tsConfigText = sampleTsConfig.readText()
         val rows = nodeTypeDeclarationModules.map { moduleName ->
@@ -366,6 +368,21 @@ val verifyAutoJs6NodeTypeDeclarations = tasks.register("verifyAutoJs6NodeTypeDec
 
         if (!tsConfigText.contains("../../../docs/nodejs/types/autojs6-node/**/*.d.ts")) {
             throw GradleException("typescript-smoke tsconfig.json must include the checked-in AutoJs6 Node declarations.")
+        }
+        if (!indexText.contains("profile_capabilities.d.ts")) {
+            throw GradleException("index.d.ts must reference profile_capabilities.d.ts.")
+        }
+        if (!profileCapabilitiesText.contains("ProfileModuleCatalog") ||
+            !profileCapabilitiesText.contains("ProfileModuleModeFor") ||
+            !profileCapabilitiesText.contains("desktop_compat_opt_in")
+        ) {
+            throw GradleException("profile_capabilities.d.ts must declare the profile-aware module catalog and conditional helpers.")
+        }
+        if (!sampleText.contains("""ProfileModuleModeFor<"java", "safe_default">""") ||
+            !sampleText.contains("""ProfileModuleModeFor<"worker_threads", "desktop_compat_opt_in">""") ||
+            !sampleText.contains("ProfileDeclarationMatrix")
+        ) {
+            throw GradleException("typescript-smoke sample must cover Safe/Pro/Desktop profile declaration differences.")
         }
 
         val examplesManifest = nodeExampleReadJsonObject(rootProject.projectDir.resolve("sample/nodejs/examples.json"))

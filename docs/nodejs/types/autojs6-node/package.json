@@ -2,6 +2,6 @@
   "name": "@autojs6/node-types",
   "version": "1.0.0",
   "private": true,
-  "description": "TypeScript declarations for AutoJs6 Safe Node Profile bridge modules.",
+  "description": "TypeScript declarations for AutoJs6 Safe/Pro/Desktop Node Profile bridge modules.",
   "types": "index.d.ts"
 }
