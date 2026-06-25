@@ -5,7 +5,9 @@ import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NodeBridgeProviderStatus
 import org.autojs.autojs.engine.NodeEmbeddedTestHarness
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
+import org.autojs.autojs.engine.NodeProfileRollbackPolicy
 import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
+import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.engine.NodeWorkManagerBridgeScheduler
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
 import org.json.JSONArray
@@ -61,6 +63,28 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertFalse(profileSelection.getBoolean("userSelectable"))
         assertTrue(profileSelection.getBoolean("projectSettingsSupported"))
         assertTrue(profileSelection.getBoolean("packagedSettingsSupported"))
+        val rollbackPolicy = json.getJSONObject("profileRollbackPolicy")
+        assertEquals(NodeProfileRollbackPolicy.SCHEMA, rollbackPolicy.getString("schema"))
+        assertEquals(NodeProfileRollbackPolicy.STATUS, rollbackPolicy.getString("status"))
+        assertEquals(NodeProfileRollbackPolicy.SAFE_DEFAULT, rollbackPolicy.getString("rollbackTargetProfile"))
+        assertEquals(NodeProfileRollbackPolicy.SAFE_DEFAULT, rollbackPolicy.getString("crashFallbackProfile"))
+        assertEquals(NodeProfileRollbackPolicy.SAFE_DEFAULT, rollbackPolicy.getString("stressFallbackProfile"))
+        assertFalse(rollbackPolicy.getBoolean("profilePromotion"))
+        assertFalse(rollbackPolicy.getBoolean("grantsAuthority"))
+        assertTrue(rollbackPolicy.getBoolean("safeDefaultAlwaysAvailable"))
+        assertTrue(rollbackPolicy.getBoolean("independentProfileDisable"))
+        assertEquals(
+            NodeProfileRollbackPolicy.PRO_PROFILE_PROPERTY,
+            rollbackPolicy.getJSONObject("profileKillSwitches").getString(NodeProfileRollbackPolicy.PRO_COMPAT_OPT_IN),
+        )
+        assertEquals(
+            NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY,
+            rollbackPolicy.getJSONObject("capabilityKillSwitches").getString("network"),
+        )
+        assertEquals(
+            "publish_safe_profile_patch_or_remove_promoted_metadata",
+            rollbackPolicy.getJSONObject("packagedDowngrade").getString("strategy"),
+        )
         val compileCache = json.getJSONObject("compileCache")
         assertEquals(NativeNodeEmbeddedRuntimeBridge.COMPILE_CACHE_SCHEMA_VERSION, compileCache.getString("schema"))
         assertTrue(compileCache.getBoolean("appPrivateOnly"))
@@ -116,7 +140,11 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertTrue(text.contains("Bridge Capabilities:"))
         assertTrue(text.contains("Bridge Providers:"))
         assertTrue(text.contains("Profile Selection:"))
+        assertTrue(text.contains("Profile Rollback Policy:"))
         assertTrue(text.contains("effective profile: safe_default"))
+        assertTrue(text.contains("rollback target: safe_default"))
+        assertTrue(text.contains("profile switches:"))
+        assertTrue(text.contains("capability switches:"))
         assertTrue(text.contains("fetch/axios: status="))
         assertTrue(text.contains("Runtime Compatibility:"))
         assertTrue(text.contains("Compile Cache:"))
@@ -156,6 +184,7 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         val text = reports.textFile.readText()
         val json = JSONObject(reports.jsonFile.readText())
         val profileSelection = json.getJSONObject("profileSelection")
+        val rollbackPolicy = json.getJSONObject("profileRollbackPolicy")
 
         assertEquals("working_directory", profileSelection.getString("source"))
         assertEquals(NodeProfileSelectionDiagnostics.SAFE_DEFAULT, profileSelection.getString("effectiveProfile"))
@@ -169,7 +198,11 @@ class NodeDoctorReportGeneratorInstrumentationTest {
         assertTrue(profileSelection.getJSONArray("highRiskCapabilities").toString().contains("network"))
         assertTrue(profileSelection.getJSONArray("highRiskCapabilities").toString().contains("shell.root"))
         assertTrue(profileSelection.getJSONArray("blockedProfilePromotions").length() >= 3)
+        assertEquals(NodeProfileRollbackPolicy.SAFE_DEFAULT, rollbackPolicy.getString("rollbackTargetProfile"))
+        assertTrue(rollbackPolicy.getJSONArray("profileStates").toString().contains("desktop_compat_opt_in"))
+        assertTrue(rollbackPolicy.getJSONArray("capabilityStates").toString().contains("network"))
         assertTrue(text.contains("Profile Selection:"))
+        assertTrue(text.contains("Profile Rollback Policy:"))
         assertTrue(text.contains("requested profiles:"))
         assertTrue(text.contains("blocked profile promotions:"))
     }

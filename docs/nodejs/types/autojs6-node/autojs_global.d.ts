@@ -322,6 +322,71 @@ declare namespace AutoJs6Node {
     readonly warnings: readonly string[];
   }
 
+  export interface ProfileRollbackState {
+    readonly id: "safe_default" | "pro_compat_opt_in" | "desktop_compat_opt_in" | "debug_unsafe_lab" | string;
+    readonly property: string;
+    readonly enabled: boolean;
+    readonly rollbackAction: string;
+    readonly fallbackProfile: "safe_default" | string;
+    readonly packagedAction: string;
+  }
+
+  export interface CapabilityRollbackState {
+    readonly id: string;
+    readonly profile: "safe_default" | "pro_compat_opt_in" | "desktop_compat_opt_in" | "debug_unsafe_lab" | "pro_or_desktop" | string;
+    readonly property: string;
+    readonly enabled: boolean;
+    readonly rollbackAction: string;
+    readonly fallbackProfile: "safe_default" | string;
+  }
+
+  export interface ProfileRollbackTrigger {
+    readonly id: "native_crash" | "bridge_provider_crash" | "stress_regression" | "security_corpus_regression" | "packaged_apk_regression" | string;
+    readonly evidence: string;
+    readonly fallbackProfile: "safe_default" | string;
+    readonly action: string;
+  }
+
+  export interface ProfileRollbackPackagedDowngrade {
+    readonly strategy: "publish_safe_profile_patch_or_remove_promoted_metadata" | string;
+    readonly authority: "metadata_only_no_authority" | string;
+    readonly publishSafeProfilePatch: boolean;
+    readonly remoteKillSwitchAvailable: boolean;
+    readonly requiresUserDisclosure: boolean;
+    readonly actions: readonly string[];
+  }
+
+  export interface ProfileRollbackReleasePolicy {
+    readonly releaseBuildForbidsDebugUnsafeLab: boolean;
+    readonly releaseBuildForbidsExperimentalProfiles: boolean;
+    readonly safeProfileReleaseFallback: boolean;
+    readonly rollbackPropertiesDefaultFalse: boolean;
+  }
+
+  export interface ProfileRollbackPolicy {
+    readonly schema: "autojs6-node-profile-rollback-policy-v1" | string;
+    readonly status: "playbook_partial" | string;
+    readonly defaultProfile: "safe_default" | string;
+    readonly effectiveProfile: "safe_default" | string;
+    readonly rollbackTargetProfile: "safe_default" | string;
+    readonly crashFallbackProfile: "safe_default" | string;
+    readonly stressFallbackProfile: "safe_default" | string;
+    readonly profilePromotion: boolean;
+    readonly userSelectable: boolean;
+    readonly metadataOnly: boolean;
+    readonly grantsAuthority: boolean;
+    readonly safeDefaultAlwaysAvailable: boolean;
+    readonly independentProfileDisable: boolean;
+    readonly profileKillSwitches: Readonly<Record<string, string>>;
+    readonly capabilityKillSwitches: Readonly<Record<string, string>>;
+    readonly profileStates: readonly ProfileRollbackState[];
+    readonly capabilityStates: readonly CapabilityRollbackState[];
+    readonly rollbackTriggers: readonly ProfileRollbackTrigger[];
+    readonly packagedDowngrade: ProfileRollbackPackagedDowngrade;
+    readonly releasePolicy: ProfileRollbackReleasePolicy;
+    readonly pending: readonly string[];
+  }
+
   export interface AutoJsBridgeCapabilityNotDeclaredError extends Error {
     readonly code: "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED";
     readonly module?: string;
@@ -600,6 +665,7 @@ declare namespace AutoJs6Node {
     readonly errorCodes: Readonly<Record<string, string | Readonly<Record<string, string>>>>;
     readonly compileCache: Readonly<Record<string, unknown>>;
     readonly profileSelection: ProfileSelectionDiagnostics;
+    readonly profileRollbackPolicy: ProfileRollbackPolicy;
     readonly bridgePermissions: BridgePermissionsReport;
     readonly bridgeLimits: Readonly<Record<string, unknown>>;
   }

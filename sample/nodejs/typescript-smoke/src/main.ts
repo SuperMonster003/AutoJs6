@@ -565,6 +565,22 @@ async function smoke(): Promise<void> {
     autojsProfile.profileSelection.highRiskCapabilities;
   const profileSelectionFailureHint: AutoJs6Node.ProfileSelectionFailureHint =
     autojsProfile.profileSelection.failureHints.capabilityNotDeclared;
+  const profileRollbackStatus: string = autojsProfile.profileRollbackPolicy.status;
+  const profileRollbackTarget: string = autojsProfile.profileRollbackPolicy.rollbackTargetProfile;
+  const profileRollbackProfileSwitches: Readonly<Record<string, string>> =
+    autojsProfile.profileRollbackPolicy.profileKillSwitches;
+  const profileRollbackCapabilitySwitches: Readonly<Record<string, string>> =
+    autojsProfile.profileRollbackPolicy.capabilityKillSwitches;
+  const profileRollbackStates: readonly AutoJs6Node.ProfileRollbackState[] =
+    autojsProfile.profileRollbackPolicy.profileStates;
+  const capabilityRollbackStates: readonly AutoJs6Node.CapabilityRollbackState[] =
+    autojsProfile.profileRollbackPolicy.capabilityStates;
+  const rollbackTrigger: AutoJs6Node.ProfileRollbackTrigger =
+    autojsProfile.profileRollbackPolicy.rollbackTriggers[0];
+  const packagedDowngrade: AutoJs6Node.ProfileRollbackPackagedDowngrade =
+    autojsProfile.profileRollbackPolicy.packagedDowngrade;
+  const rollbackReleasePolicy: AutoJs6Node.ProfileRollbackReleasePolicy =
+    autojsProfile.profileRollbackPolicy.releasePolicy;
   const typedCapabilityError = {} as AutoJs6Node.AutoJsBridgeCapabilityNotDeclaredError;
   const capabilityErrorProfiles: readonly string[] = typedCapabilityError.requiredProfiles;
   const capabilityErrorNodePermissions: readonly string[] = typedCapabilityError.requiredNodePermissions;
@@ -844,6 +860,15 @@ async function smoke(): Promise<void> {
   void profileSelectionRequested;
   void profileSelectionHighRisk;
   void profileSelectionFailureHint;
+  void profileRollbackStatus;
+  void profileRollbackTarget;
+  void profileRollbackProfileSwitches;
+  void profileRollbackCapabilitySwitches;
+  void profileRollbackStates;
+  void capabilityRollbackStates;
+  void rollbackTrigger;
+  void packagedDowngrade;
+  void rollbackReleasePolicy;
   void capabilityErrorProfiles;
   void capabilityErrorNodePermissions;
   void capabilityErrorAndroidPermissions;

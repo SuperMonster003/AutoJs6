@@ -5,6 +5,7 @@ import android.os.Build
 import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.autojs.autojs.engine.NodeBridgeProviderRegistry
 import org.autojs.autojs.engine.NativeNodeEmbeddedRuntimeBridge
+import org.autojs.autojs.engine.NodeProfileRollbackPolicy
 import org.autojs.autojs.engine.NodeProfileSelectionDiagnostics
 import org.autojs.autojs.engine.NodeRuntimeCapabilities
 import org.autojs.autojs.script.NodeProjectRuntimeCompatibilityDescriptor
@@ -60,6 +61,7 @@ object NodeDoctorReportGenerator {
             put("compileCache", compileCacheJson(context))
             put("featureFlags", featureFlagsJson())
             put("profileSelection", profileSelectionJson(projectRoot))
+            put("profileRollbackPolicy", NodeProfileRollbackPolicy.toJsonObject())
             put("nativeLibraries", nativeLibrariesJson(context, probeResult))
             put("capabilityProfile", capabilityProfileJson())
             put("bridgeCapabilities", bridgeCapabilitiesJson())
@@ -255,6 +257,7 @@ object NodeDoctorReportGenerator {
         val runtime = json.getJSONObject("runtime")
         val compileCache = json.getJSONObject("compileCache")
         val profileSelection = json.getJSONObject("profileSelection")
+        val profileRollbackPolicy = json.getJSONObject("profileRollbackPolicy")
         val nativeLibraries = json.getJSONObject("nativeLibraries")
         val packagedTemplate = json.getJSONObject("packagedTemplate")
         val lastNodeError = json.getJSONObject("lastNodeError")
@@ -302,6 +305,17 @@ object NodeDoctorReportGenerator {
             appendLine("  declared node permissions: ${profileSelection.getJSONArray("declaredNodePermissions").join(", ")}")
             appendLine("  high-risk capabilities: ${profileSelection.getJSONArray("highRiskCapabilities").length()}")
             appendLine("  blocked profile promotions: ${profileSelection.getJSONArray("blockedProfilePromotions").join(", ")}")
+            appendLine()
+            appendLine("Profile Rollback Policy:")
+            appendLine("  status: ${profileRollbackPolicy.getString("status")}")
+            appendLine("  rollback target: ${profileRollbackPolicy.getString("rollbackTargetProfile")}")
+            appendLine("  crash fallback: ${profileRollbackPolicy.getString("crashFallbackProfile")}")
+            appendLine("  stress fallback: ${profileRollbackPolicy.getString("stressFallbackProfile")}")
+            appendLine("  profile promotion: ${profileRollbackPolicy.getBoolean("profilePromotion")}")
+            appendLine("  independent profile disable: ${profileRollbackPolicy.getBoolean("independentProfileDisable")}")
+            appendLine("  profile switches: ${profileRollbackPolicy.getJSONObject("profileKillSwitches").keys().asSequence().joinToString(", ")}")
+            appendLine("  capability switches: ${profileRollbackPolicy.getJSONObject("capabilityKillSwitches").keys().asSequence().joinToString(", ")}")
+            appendLine("  packaged downgrade: ${profileRollbackPolicy.getJSONObject("packagedDowngrade").getString("strategy")}")
             appendLine()
             appendLine("Compile Cache:")
             appendLine("  status: ${compileCache.getString("status")}")

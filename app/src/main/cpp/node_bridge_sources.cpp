@@ -8830,6 +8830,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }));
     const bridgePermissionsReport = __autojs6_bridge_permission_report();
     const profileSelection = __autojs6_profile_selection_report(featureFlags, bridgePermissionsReport);
+    const profileRollbackPolicy = __autojs6_profile_rollback_policy_report(featureFlags);
     const legacyAliases = Object.create(null);
     for (const name of Object.keys(__autojs6_error_code_aliases)) {
       legacyAliases[name] = __autojs6_error_code_aliases[name];
@@ -9358,10 +9359,219 @@ std::string buildEmbeddedScriptExecutionSource(
       }),
       compileCache: __autojs6_compile_cache_profile_snapshot(),
       profileSelection,
+      profileRollbackPolicy,
       bridgePermissions: bridgePermissionsReport,
       bridgeLimits: __autojs6_bridge_limits_report()
     });
     return __autojs6_profile_cache;
+  }
+  function __autojs6_profile_rollback_policy_report(featureFlags) {
+    const profileKillSwitches = Object.freeze({
+      pro_compat_opt_in: "autojs.nodejs.profile.pro.enabled",
+      desktop_compat_opt_in: "autojs.nodejs.profile.desktop.enabled",
+      debug_unsafe_lab: "autojs.nodejs.profile.debugUnsafeLab.enabled"
+    });
+    const capabilityKillSwitches = Object.freeze({
+      network: "autojs.nodejs.network.experimental",
+      worker_threads: "autojs.nodejs.worker_threads.experimental",
+      java_interop: "autojs.nodejs.javaInterop.experimental",
+      all_relaxed_capabilities: "autojs.nodejs.relaxedCapabilities.enabled",
+      raw_node_network_modules: "stable_denial_no_runtime_switch",
+      filesystem_relaxation: "safe_profile_scoped_fs",
+      child_process: "stable_denial_no_runtime_switch",
+      native_addon: "stable_denial_no_runtime_switch",
+      inspector: "debug_profile_only_no_runtime_switch",
+      wasi: "stable_denial_no_runtime_switch"
+    });
+    const flagEnabled = function(name) {
+      const flag = featureFlags && featureFlags[name];
+      return !!(flag && flag.enabled === true);
+    };
+    return Object.freeze({
+      schema: "autojs6-node-profile-rollback-policy-v1",
+      status: "playbook_partial",
+      defaultProfile: "safe_default",
+      effectiveProfile: "safe_default",
+      rollbackTargetProfile: "safe_default",
+      crashFallbackProfile: "safe_default",
+      stressFallbackProfile: "safe_default",
+      profilePromotion: false,
+      userSelectable: false,
+      metadataOnly: true,
+      grantsAuthority: false,
+      safeDefaultAlwaysAvailable: true,
+      independentProfileDisable: true,
+      profileKillSwitches,
+      capabilityKillSwitches,
+      profileStates: Object.freeze([
+        Object.freeze({
+          id: "safe_default",
+          property: "always_on",
+          enabled: true,
+          rollbackAction: "keep_default_safe_profile",
+          fallbackProfile: "safe_default",
+          packagedAction: "no_downgrade_required"
+        }),
+        Object.freeze({
+          id: "pro_compat_opt_in",
+          property: profileKillSwitches.pro_compat_opt_in,
+          enabled: false,
+          rollbackAction: "disable_pro_profile_and_rebuild",
+          fallbackProfile: "safe_default",
+          packagedAction: "publish_safe_profile_patch_or_remove_pro_metadata"
+        }),
+        Object.freeze({
+          id: "desktop_compat_opt_in",
+          property: profileKillSwitches.desktop_compat_opt_in,
+          enabled: false,
+          rollbackAction: "disable_desktop_profile_and_rebuild",
+          fallbackProfile: "safe_default",
+          packagedAction: "publish_safe_profile_patch_or_remove_desktop_metadata"
+        }),
+        Object.freeze({
+          id: "debug_unsafe_lab",
+          property: profileKillSwitches.debug_unsafe_lab,
+          enabled: false,
+          rollbackAction: "disable_debug_unsafe_lab_and_rebuild",
+          fallbackProfile: "safe_default",
+          packagedAction: "release_build_forbids_debug_unsafe_lab"
+        })
+      ]),
+      capabilityStates: Object.freeze([
+        Object.freeze({
+          id: "network",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.network,
+          enabled: flagEnabled("network"),
+          rollbackAction: "set_autojs_nodejs_network_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "worker_threads",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.worker_threads,
+          enabled: flagEnabled("worker_threads"),
+          rollbackAction: "set_autojs_nodejs_worker_threads_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "java_interop",
+          profile: "pro_compat_opt_in",
+          property: capabilityKillSwitches.java_interop,
+          enabled: flagEnabled("java_interop"),
+          rollbackAction: "set_autojs_nodejs_javaInterop_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "all_relaxed_capabilities",
+          profile: "pro_or_desktop",
+          property: capabilityKillSwitches.all_relaxed_capabilities,
+          enabled: false,
+          rollbackAction: "set_autojs_nodejs_relaxedCapabilities_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "filesystem_relaxation",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.filesystem_relaxation,
+          enabled: false,
+          rollbackAction: "keep_scoped_working_directory_only",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "child_process",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.child_process,
+          enabled: false,
+          rollbackAction: "keep_child_process_builtin_denied",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "native_addon",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.native_addon,
+          enabled: false,
+          rollbackAction: "keep_node_extension_and_dlopen_denied",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "inspector",
+          profile: "debug_unsafe_lab",
+          property: capabilityKillSwitches.inspector,
+          enabled: false,
+          rollbackAction: "keep_inspector_builtin_denied",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "wasi",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.wasi,
+          enabled: false,
+          rollbackAction: "keep_raw_wasi_denied",
+          fallbackProfile: "safe_default"
+        })
+      ]),
+      rollbackTriggers: Object.freeze([
+        Object.freeze({
+          id: "native_crash",
+          evidence: "NodeCrashEvidenceStore",
+          fallbackProfile: "safe_default",
+          action: "disable_requested_profile_and_relaunch_safe_default"
+        }),
+        Object.freeze({
+          id: "bridge_provider_crash",
+          evidence: "NodeCrashEvidenceStore",
+          fallbackProfile: "safe_default",
+          action: "disable_provider_capability_then_relaunch_safe_default"
+        }),
+        Object.freeze({
+          id: "stress_regression",
+          evidence: "verifyNodePhase13FullHeavyResourceStress",
+          fallbackProfile: "safe_default",
+          action: "disable_profile_or_capability_until_stress_gate_recovers"
+        }),
+        Object.freeze({
+          id: "security_corpus_regression",
+          evidence: "RELAXED_CAPABILITY_SECURITY_CORPUS.json",
+          fallbackProfile: "safe_default",
+          action: "fail_closed_and_keep_relaxed_capability_unpromoted"
+        }),
+        Object.freeze({
+          id: "packaged_apk_regression",
+          evidence: "packaged capability metadata and crash bundle",
+          fallbackProfile: "safe_default",
+          action: "ship_safe_profile_patch_or_remove_promoted_metadata"
+        })
+      ]),
+      packagedDowngrade: Object.freeze({
+        strategy: "publish_safe_profile_patch_or_remove_promoted_metadata",
+        authority: "metadata_only_no_authority",
+        publishSafeProfilePatch: true,
+        remoteKillSwitchAvailable: false,
+        requiresUserDisclosure: true,
+        actions: Object.freeze([
+          "remove pro_compat_opt_in or desktop_compat_opt_in metadata",
+          "remove relaxed node.permissions",
+          "rebuild packaged APK with Safe profile defaults",
+          "keep stable denial errors for undeclared capabilities",
+          "record crash/stress evidence before re-enabling"
+        ])
+      }),
+      releasePolicy: Object.freeze({
+        releaseBuildForbidsDebugUnsafeLab: true,
+        releaseBuildForbidsExperimentalProfiles: true,
+        safeProfileReleaseFallback: true,
+        rollbackPropertiesDefaultFalse: true
+      }),
+      pending: Object.freeze([
+        "runtime profile promotion",
+        "settings UI profile switch",
+        "packaged builder profile switch",
+        "automatic crash circuit breaker",
+        "remote packaged kill switch",
+        "privacy disclosure prompts"
+      ])
+    });
   }
   function __autojs6_bridge_normalize_capability(value) {
     const text = String(value === undefined || value === null ? "" : value)

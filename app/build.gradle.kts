@@ -223,6 +223,18 @@ val nodeJsWorkerThreadsExperimentalEnabled = providers.gradleProperty("autojs.no
 val nodeJsJavaInteropExperimentalEnabled = providers.gradleProperty("autojs.nodejs.javaInterop.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsProfileProEnabled = providers.gradleProperty("autojs.nodejs.profile.pro.enabled").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsProfileDesktopEnabled = providers.gradleProperty("autojs.nodejs.profile.desktop.enabled").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsProfileDebugUnsafeLabEnabled = providers.gradleProperty("autojs.nodejs.profile.debugUnsafeLab.enabled").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsRelaxedCapabilitiesEnabled = providers.gradleProperty("autojs.nodejs.relaxedCapabilities.enabled").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val nodeJsTimelineTraceEnabled = providers.gradleProperty("autojs.nodejs.timelineTrace").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
@@ -243,6 +255,10 @@ val nodeJsReleaseForbiddenExperimentalFlags = linkedMapOf(
     "autojs.nodejs.network.experimental" to nodeJsNetworkExperimentalEnabled,
     "autojs.nodejs.worker_threads.experimental" to nodeJsWorkerThreadsExperimentalEnabled,
     "autojs.nodejs.javaInterop.experimental" to nodeJsJavaInteropExperimentalEnabled,
+    "autojs.nodejs.profile.pro.enabled" to nodeJsProfileProEnabled,
+    "autojs.nodejs.profile.desktop.enabled" to nodeJsProfileDesktopEnabled,
+    "autojs.nodejs.profile.debugUnsafeLab.enabled" to nodeJsProfileDebugUnsafeLabEnabled,
+    "autojs.nodejs.relaxedCapabilities.enabled" to nodeJsRelaxedCapabilitiesEnabled,
 )
 if (nodeJsReleaseTaskRequested) {
     val enabledForbiddenFlags = nodeJsReleaseForbiddenExperimentalFlags.filterValues { it }.keys
@@ -2130,6 +2146,10 @@ android {
         buildConfigField("boolean", "NODEJS_NETWORK_EXPERIMENTAL_ENABLED", "$nodeJsNetworkExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED", "$nodeJsWorkerThreadsExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED", "$nodeJsJavaInteropExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_PROFILE_PRO_ENABLED", "$nodeJsProfileProEnabled")
+        buildConfigField("boolean", "NODEJS_PROFILE_DESKTOP_ENABLED", "$nodeJsProfileDesktopEnabled")
+        buildConfigField("boolean", "NODEJS_PROFILE_DEBUG_UNSAFE_LAB_ENABLED", "$nodeJsProfileDebugUnsafeLabEnabled")
+        buildConfigField("boolean", "NODEJS_RELAXED_CAPABILITIES_ENABLED", "$nodeJsRelaxedCapabilitiesEnabled")
         buildConfigField("boolean", "NODEJS_TIMELINE_TRACE_ENABLED", "$nodeJsTimelineTraceEnabled")
         buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
         resValue("string", "node_identity_application_id", nodeJsEffectiveApplicationId)
