@@ -283,10 +283,10 @@ function buildChecks(files, generatedReports, summary, markdown) {
     check(
       "open-blockers-not-completed",
       openBlockersMarkedCompleted.length === 0 &&
-        summary.blockers.some((blocker) => blocker.id === "crash_evidence_automation" && blocker.summaryStatus === "open") &&
+        summary.blockers.some((blocker) => blocker.id === "crash_evidence_automation" && blocker.summaryStatus === "completed") &&
         summary.blockers.some((blocker) => blocker.id === "full_heavy_resource_stress" && blocker.summaryStatus === "open") &&
         summary.blockers.some((blocker) => blocker.id === "worker_threads" && blocker.summaryStatus === "open"),
-      "Open and decision-required blockers must remain open in the summary.",
+      "Open and decision-required blockers must remain open while closed required blockers are counted completed.",
     ),
     check(
       "profile-truth-report",

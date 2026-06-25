@@ -20,6 +20,7 @@ const FILES = {
   embeddedProbeService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedProbeService.kt",
   nativeProcessService: "app/src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt",
   embeddedBridge: "app/src/main/java/org/autojs/autojs/engine/NativeNodeEmbeddedRuntimeBridge.kt",
+  nativeBridgeJni: "app/src/main/cpp/node_bridge_jni.cpp",
   assetsLauncher: "app/src/main/java/org/autojs/autojs/inrt/launch/AssetsProjectLauncher.kt",
   launchDescriptor: "app/src/main/java/org/autojs/autojs/script/NodeProjectLaunchDescriptor.kt",
   crashEvidenceStoreTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt",
@@ -149,6 +150,7 @@ function markerAutomationStatus(files) {
   const app = files.app.text;
   const embeddedService = files.embeddedService.text;
   const nativeProcessService = files.nativeProcessService.text;
+  const nativeBridgeJni = files.nativeBridgeJni.text;
   const markerFieldsPresent = REQUIRED_MARKER_FIELDS.every((field) => store.includes(`"${field}"`));
   const beginCount = countOccurrences(embeddedService + nativeProcessService, "NodeCrashEvidenceStore.begin(");
   const serviceDestroyCount = countOccurrences(embeddedService + nativeProcessService, "NodeCrashEvidenceStore.markServiceDestroy(");
@@ -166,7 +168,10 @@ function markerAutomationStatus(files) {
       implemented: files.crashStore.exists && markerFieldsPresent,
       schema: "autojs6-node-phase13-crash-marker-v1",
       runtimeJsonMarker: true,
-      signalSafeNativeMarker: store.includes("safeSignalMarker") && store.includes("native signal-safe writer remains separate") ? false : null,
+      signalSafeNativeMarker: store.includes("SAFE_SIGNAL_MARKER_SCHEMA") &&
+        store.includes("writeSignalSafeNativeMarker") &&
+        nativeBridgeJni.includes("writeSignalSafeCrashMarkerRecord") &&
+        nativeBridgeJni.includes("kSignalSafeMarkerRecordBytes = 256"),
       source: files.crashStore.relative,
       requiredFieldsPresent: markerFieldsPresent,
       beginCallSites: beginCount,
@@ -191,6 +196,7 @@ function scenarioStatus(files) {
   const embeddedProbeService = files.embeddedProbeService.text;
   const nativeProcessService = files.nativeProcessService.text;
   const embeddedBridge = files.embeddedBridge.text;
+  const nativeBridgeJni = files.nativeBridgeJni.text;
   const assetsLauncher = files.assetsLauncher.text;
   const launchDescriptor = files.launchDescriptor.text;
   const crashEvidenceStoreTest = files.crashEvidenceStoreTest.text;
@@ -225,9 +231,20 @@ function scenarioStatus(files) {
     packagedSmokeTest.includes("marker.collect schema=autojs6-node-phase13-next-launch-crash-bundle-v1") &&
     packagedSmokeTest.includes("am force-stop $CRASH_EVIDENCE_PACKAGE_NAME") &&
     packagedSmokeTest.includes("LAUNCH_SURFACE_PACKAGED_LONG_RUNNING");
-  const signalSafeBoundaryReady = files.crashStore.text.includes("safeSignalMarker") &&
-    crashEvidenceStoreTest.includes("markerRecordsSignalSafeNativeMarkerBoundary") &&
-    crashEvidenceStoreTest.includes("native signal-safe writer remains separate");
+  const signalSafeNativeMarkerReady = files.crashStore.text.includes("SAFE_SIGNAL_MARKER_SCHEMA") &&
+    files.crashStore.text.includes("SAFE_SIGNAL_MARKER_RECORD_BYTES = 256") &&
+    files.crashStore.text.includes("writeSignalSafeNativeMarker") &&
+    embeddedBridge.includes("writeSignalSafeCrashMarker") &&
+    embeddedBridge.includes("nativeWriteSignalSafeCrashMarker") &&
+    nativeBridgeJni.includes("kSignalSafeMarkerRecordBytes = 256") &&
+    nativeBridgeJni.includes("writeSignalSafeCrashMarkerRecord") &&
+    nativeBridgeJni.includes("open(path, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC") &&
+    nativeBridgeJni.includes("write(fd, record + total") &&
+    nativeBridgeJni.includes("close(fd)") &&
+    nativeBridgeJni.includes("open|write|close") &&
+    crashEvidenceStoreTest.includes("markerWritesSignalSafeFixedSizeNativeRecord") &&
+    crashEvidenceStoreTest.includes("SAFE_SIGNAL_MARKER_RECORD_BYTES") &&
+    crashEvidenceStoreTest.includes("open_write_close_fixed_buffer");
   const bridgeProviderCrashReady = embeddedBridge.includes("PROBE_LEVEL_PLUGIN_CRASH") &&
     embeddedBridge.includes("plugin_crash.has_crash_event") &&
     crashEvidenceStoreTest.includes("markerRecordsBridgeProviderCrashBundleFields") &&
@@ -289,9 +306,9 @@ function scenarioStatus(files) {
     ),
     scenario(
       "signal_safe_marker",
-      signalSafeBoundaryReady,
-      [files.crashStore.relative, files.crashEvidenceStoreTest.relative, files.phase11Collect.relative],
-      ["native signal-safe fixed-size marker writer proof is still required"],
+      signalSafeNativeMarkerReady,
+      [files.crashStore.relative, files.embeddedBridge.relative, files.nativeBridgeJni.relative, files.crashEvidenceStoreTest.relative, files.phase11Collect.relative],
+      [],
     ),
   ];
 }
@@ -344,9 +361,9 @@ function buildChecks(markerAutomation, scenarios, nativeLibraryHashes, symboliza
       "Packaged APK path must have equivalent crash evidence, a marker contract, or an explicit skip reason.",
     ),
     check(
-      "signal-safe-boundary-visible",
-      scenarios.some((item) => item.id === "signal_safe_marker" && item.status !== "missing"),
-      "P13-05 must record the current signal-safe marker boundary until a native fixed-size writer lands.",
+      "signal-safe-fixed-size-writer",
+      scenarios.some((item) => item.id === "signal_safe_marker" && item.status === "ready"),
+      "P13-05 requires a native signal-safe fixed-size marker writer proof.",
     ),
     check(
       "task-checklist-visible",

@@ -475,6 +475,91 @@ object NativeNodeEmbeddedRuntimeBridge {
 
     private fun nativeLibrarySoFileName(libraryName: String): String = "lib$libraryName.so"
 
+    fun writeSignalSafeCrashMarker(
+        markerPath: String,
+        markerId: String,
+        executionId: String,
+        scenario: String,
+        reason: String,
+        pid: Int = Process.myPid(),
+        epochMs: Long = System.currentTimeMillis(),
+    ): SignalSafeCrashMarkerWriteResult {
+        val loadStartedAt = SystemClock.elapsedRealtime()
+        val libcxxLoad = loadLibrary("c++_shared")
+        val bridgeLoad = if (libcxxLoad.loaded) {
+            loadLibrary(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)
+        } else {
+            LibraryLoad.skipped(NativeNodeRuntimeBridge.BRIDGE_LIBRARY_NAME)
+        }
+        val loadDurationMs = SystemClock.elapsedRealtime() - loadStartedAt
+        val loadError = when {
+            libcxxLoad.attempted && !libcxxLoad.loaded -> "libc++_shared.so failed to load: ${libcxxLoad.error.toLoadErrorMessage().orEmpty()}"
+            bridgeLoad.attempted && !bridgeLoad.loaded -> "libautojs6-node.so failed to load: ${bridgeLoad.error.toLoadErrorMessage().orEmpty()}"
+            else -> null
+        }
+        if (loadError != null) {
+            return SignalSafeCrashMarkerWriteResult(
+                succeeded = false,
+                markerPath = markerPath,
+                markerId = markerId,
+                schema = NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_SCHEMA,
+                writer = "native_fixed_size_signal_safe_writer",
+                recordBytes = NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES,
+                bytesWritten = 0,
+                status = "failed",
+                errorMessage = loadError,
+                nativeValues = mapOf(
+                    "signal_safe_marker.status" to "failed",
+                    "signal_safe_marker.error" to loadError,
+                    "signal_safe_marker.path" to markerPath,
+                    "signal_safe_marker.marker_id" to markerId,
+                    "signal_safe_marker.record_bytes" to NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES.toString(),
+                    "load.duration.ms" to loadDurationMs.toString(),
+                ),
+            )
+        }
+
+        val nativeCall = runCatching {
+            nativeWriteSignalSafeCrashMarker(
+                markerPath,
+                markerId,
+                executionId,
+                scenario,
+                reason,
+                pid,
+                epochMs,
+            ) ?: emptyArray()
+        }
+        val nativeValues = nativeCall
+            .map(::parseNativePayload)
+            .getOrElse { throwable ->
+                mapOf(
+                    "signal_safe_marker.status" to "failed",
+                    "signal_safe_marker.error" to (throwable.message ?: throwable.javaClass.name),
+                    "signal_safe_marker.path" to markerPath,
+                    "signal_safe_marker.marker_id" to markerId,
+                    "signal_safe_marker.record_bytes" to NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES.toString(),
+                )
+            }
+            .toMutableMap()
+        nativeValues["load.duration.ms"] = loadDurationMs.toString()
+        val status = nativeValues["signal_safe_marker.status"].orEmpty()
+        return SignalSafeCrashMarkerWriteResult(
+            succeeded = status == "written" &&
+                    nativeValues["signal_safe_marker.bytes_written"]?.toIntOrNull() == NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES,
+            markerPath = nativeValues["signal_safe_marker.path"].orEmpty().ifBlank { markerPath },
+            markerId = nativeValues["signal_safe_marker.marker_id"].orEmpty().ifBlank { markerId },
+            schema = nativeValues["signal_safe_marker.schema"].orEmpty().ifBlank { NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_SCHEMA },
+            writer = nativeValues["signal_safe_marker.writer"].orEmpty().ifBlank { "native_fixed_size_signal_safe_writer" },
+            recordBytes = nativeValues["signal_safe_marker.record_bytes"]?.toIntOrNull()
+                ?: NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES,
+            bytesWritten = nativeValues["signal_safe_marker.bytes_written"]?.toIntOrNull() ?: 0,
+            status = status.ifBlank { "failed" },
+            errorMessage = nativeValues["signal_safe_marker.error"].takeUnless { it.isNullOrBlank() },
+            nativeValues = nativeValues,
+        )
+    }
+
     private fun File.sha256Hex(): String {
         val digest = MessageDigest.getInstance("SHA-256")
         inputStream().use { input ->
@@ -15215,6 +15300,16 @@ object NativeNodeEmbeddedRuntimeBridge {
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpTimeoutIsolationReadinessLifecycle(): Array<String>?
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpSecurityPolicyReadinessLifecycle(): Array<String>?
     private external fun nativeEmbeddedProbeV8UvEmbeddedMvpGoNoGoReadinessLifecycle(): Array<String>?
+    private external fun nativeWriteSignalSafeCrashMarker(
+        markerPath: String,
+        markerId: String,
+        executionId: String,
+        scenario: String,
+        reason: String,
+        pid: Int,
+        epochMs: Long,
+    ): Array<String>?
+
     private external fun nativeRunEmbeddedScriptLifecycleV2(
         source: String,
         sourceName: String,
@@ -17518,6 +17613,19 @@ object NativeNodeEmbeddedRuntimeBridge {
     private data class NativeProbeCall(
         val payload: Array<String>,
         val error: Throwable?,
+    )
+
+    data class SignalSafeCrashMarkerWriteResult(
+        val succeeded: Boolean,
+        val markerPath: String,
+        val markerId: String,
+        val schema: String,
+        val writer: String,
+        val recordBytes: Int,
+        val bytesWritten: Int,
+        val status: String,
+        val errorMessage: String?,
+        val nativeValues: Map<String, String>,
     )
 
     data class EmbeddedScriptRequest(

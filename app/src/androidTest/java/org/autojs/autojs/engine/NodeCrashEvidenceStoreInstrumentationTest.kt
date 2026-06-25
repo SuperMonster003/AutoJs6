@@ -146,29 +146,56 @@ class NodeCrashEvidenceStoreInstrumentationTest {
     }
 
     @Test
-    fun markerRecordsSignalSafeNativeMarkerBoundary() {
-        val executionId = "p13-signal-marker-boundary-${System.nanoTime()}"
+    fun markerWritesSignalSafeFixedSizeNativeRecord() {
+        val executionId = "p13-signal-marker-native-${System.nanoTime()}"
         val marker = NodeCrashEvidenceStore.begin(
             context = context,
             executionId = executionId,
-            sourceName = "signal-safe-marker-boundary.js",
+            sourceName = "signal-safe-marker-native.js",
             workingDirectory = context.cacheDir.absolutePath,
             executionMode = NodeExecutionModePolicy.MODE_ONE_SHOT,
             launchSurface = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
             timeoutMs = 5_000L,
             runtimeAdapter = "adapter_v1",
-            runtimeSlotId = "signal-safe-boundary",
-            scenario = "signal_safe_marker_boundary",
+            runtimeSlotId = "signal-safe-native",
+            scenario = "signal_safe_fixed_size_marker",
         )
         assertNotNull(marker)
         marker ?: return
+        var proof: NodeCrashEvidenceStore.SignalSafeMarkerProof? = null
         try {
+            proof = NodeCrashEvidenceStore.writeSignalSafeNativeMarker(
+                context = context,
+                marker = marker,
+                reason = "instrumentation.signal_safe_fixed_size_marker",
+            )
+            assertNotNull(proof)
+            proof ?: return
+            assertTrue("native writer should succeed: ${proof.result}", proof.result.succeeded)
+            assertEquals(NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES, proof.result.recordBytes)
+            assertEquals(NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES, proof.result.bytesWritten)
+            assertTrue(proof.file.isFile)
+            val recordBytes = proof.file.readBytes()
+            assertEquals(NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES, recordBytes.size)
+            val record = recordBytes.toString(Charsets.UTF_8)
+            assertTrue(record.contains("AJ6SIG13"))
+            assertTrue(record.contains(NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_SCHEMA))
+            assertTrue(record.contains("native_fixed_size_signal_safe_writer"))
+            assertTrue(record.contains("signal_safe_fixed_size_marker"))
+
             val json = JSONObject(marker.file.readText(Charsets.UTF_8))
             val signalMarker = json.getJSONObject("safeSignalMarker")
-            assertEquals(false, signalMarker.getBoolean("implemented"))
-            assertTrue(signalMarker.getString("reason").contains("native signal-safe writer remains separate"))
+            assertEquals(true, signalMarker.getBoolean("implemented"))
+            assertEquals(NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_SCHEMA, signalMarker.getString("schema"))
+            assertEquals(NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES, signalMarker.getInt("recordBytes"))
+            assertEquals(NodeCrashEvidenceStore.SAFE_SIGNAL_MARKER_RECORD_BYTES, signalMarker.getInt("bytesWritten"))
+            assertEquals("native_fixed_size_signal_safe_writer", signalMarker.getString("writer"))
+            assertEquals("written", signalMarker.getString("status"))
+            assertEquals("open_write_close_fixed_buffer", signalMarker.getString("nativeCore"))
+            assertEquals("open|write|close", signalMarker.getString("signalSafeSyscalls"))
         } finally {
             marker.file.delete()
+            proof?.file?.delete()
         }
     }
 

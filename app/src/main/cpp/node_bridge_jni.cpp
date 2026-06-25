@@ -1,8 +1,18 @@
 #include "node_bridge_internal.h"
 #include "node_runtime_api_v1.h"
 
+#include <cerrno>
+#include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 using namespace autojs6::node_bridge;
 using namespace autojs6::node_bridge::internal;
+
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
 
 extern "C" JNIEXPORT jint JNICALL
 Java_org_autojs_autojs_engine_NativeNodeRuntimeBridge_nativeRunMain(
@@ -130,6 +140,189 @@ static const char* adapterResultCodeName(int32_t code) {
         default:
             return "unknown";
     }
+}
+
+namespace {
+
+constexpr size_t kSignalSafeMarkerRecordBytes = 256;
+constexpr const char* kSignalSafeMarkerSchema = "autojs6-node-phase13-signal-safe-crash-marker-v1";
+constexpr const char* kSignalSafeMarkerWriter = "native_fixed_size_signal_safe_writer";
+
+struct SignalSafeMarkerWriteResult {
+    bool succeeded = false;
+    ssize_t bytesWritten = 0;
+    int errorNumber = 0;
+};
+
+void appendSignalSafeLiteral(char* buffer, size_t* offset, const char* value) {
+    if (value == nullptr) {
+        return;
+    }
+    while (*value != '\0' && *offset < kSignalSafeMarkerRecordBytes - 1) {
+        buffer[*offset] = *value;
+        ++(*offset);
+        ++value;
+    }
+}
+
+void appendSignalSafeTruncated(char* buffer, size_t* offset, const char* value, size_t maxBytes) {
+    if (value == nullptr) {
+        return;
+    }
+    size_t copied = 0;
+    while (*value != '\0' && copied < maxBytes && *offset < kSignalSafeMarkerRecordBytes - 1) {
+        const char next = *value;
+        buffer[*offset] = next == '\n' || next == '\r' ? '_' : next;
+        ++(*offset);
+        ++value;
+        ++copied;
+    }
+}
+
+void appendSignalSafeUnsigned(char* buffer, size_t* offset, unsigned long long value) {
+    char digits[32];
+    size_t count = 0;
+    do {
+        digits[count++] = static_cast<char>('0' + (value % 10));
+        value /= 10;
+    } while (value > 0 && count < sizeof(digits));
+    while (count > 0 && *offset < kSignalSafeMarkerRecordBytes - 1) {
+        buffer[*offset] = digits[--count];
+        ++(*offset);
+    }
+}
+
+void appendSignalSafeSigned(char* buffer, size_t* offset, long long value) {
+    if (value < 0) {
+        appendSignalSafeLiteral(buffer, offset, "-");
+        appendSignalSafeUnsigned(buffer, offset, static_cast<unsigned long long>(-(value + 1)) + 1ULL);
+    } else {
+        appendSignalSafeUnsigned(buffer, offset, static_cast<unsigned long long>(value));
+    }
+}
+
+SignalSafeMarkerWriteResult writeSignalSafeCrashMarkerRecord(
+        const char* path,
+        const char* markerId,
+        const char* executionId,
+        const char* scenario,
+        const char* reason,
+        int pid,
+        long long epochMs
+) {
+    char record[kSignalSafeMarkerRecordBytes];
+    for (size_t index = 0; index < sizeof(record); ++index) {
+        record[index] = ' ';
+    }
+    size_t offset = 0;
+    appendSignalSafeLiteral(record, &offset, "AJ6SIG13 ");
+    appendSignalSafeLiteral(record, &offset, "schema=");
+    appendSignalSafeLiteral(record, &offset, kSignalSafeMarkerSchema);
+    appendSignalSafeLiteral(record, &offset, " writer=");
+    appendSignalSafeLiteral(record, &offset, kSignalSafeMarkerWriter);
+    appendSignalSafeLiteral(record, &offset, " marker=");
+    appendSignalSafeTruncated(record, &offset, markerId, 40);
+    appendSignalSafeLiteral(record, &offset, " exec=");
+    appendSignalSafeTruncated(record, &offset, executionId, 40);
+    appendSignalSafeLiteral(record, &offset, " scenario=");
+    appendSignalSafeTruncated(record, &offset, scenario, 36);
+    appendSignalSafeLiteral(record, &offset, " reason=");
+    appendSignalSafeTruncated(record, &offset, reason, 28);
+    appendSignalSafeLiteral(record, &offset, " pid=");
+    appendSignalSafeSigned(record, &offset, static_cast<long long>(pid));
+    appendSignalSafeLiteral(record, &offset, " epochMs=");
+    appendSignalSafeSigned(record, &offset, epochMs);
+    record[kSignalSafeMarkerRecordBytes - 1] = '\n';
+
+    const int fd = open(path, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, S_IRUSR | S_IWUSR);
+    if (fd < 0) {
+        return {false, 0, errno};
+    }
+
+    size_t total = 0;
+    while (total < sizeof(record)) {
+        const ssize_t written = write(fd, record + total, sizeof(record) - total);
+        if (written < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            const int errorNumber = errno;
+            close(fd);
+            return {false, static_cast<ssize_t>(total), errorNumber};
+        }
+        if (written == 0) {
+            close(fd);
+            return {false, static_cast<ssize_t>(total), EIO};
+        }
+        total += static_cast<size_t>(written);
+    }
+
+    if (close(fd) != 0) {
+        return {false, static_cast<ssize_t>(total), errno};
+    }
+    return {true, static_cast<ssize_t>(total), 0};
+}
+
+} // namespace
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeWriteSignalSafeCrashMarker(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jstring markerPath,
+        jstring markerId,
+        jstring executionId,
+        jstring scenario,
+        jstring reason,
+        jint pid,
+        jlong epochMs
+) {
+    const auto startedAt = Clock::now();
+    const std::string path = toStdString(env, markerPath);
+    const std::string markerIdText = toStdString(env, markerId);
+    const std::string executionIdText = toStdString(env, executionId);
+    const std::string scenarioText = toStdString(env, scenario);
+    const std::string reasonText = toStdString(env, reason);
+    std::vector<std::string> payload;
+    putPayload(payload, "signal_safe_marker.schema", kSignalSafeMarkerSchema);
+    putPayload(payload, "signal_safe_marker.writer", kSignalSafeMarkerWriter);
+    putPayload(payload, "signal_safe_marker.record_bytes", static_cast<long long>(kSignalSafeMarkerRecordBytes));
+    putPayload(payload, "signal_safe_marker.path", path);
+    putPayload(payload, "signal_safe_marker.marker_id", markerIdText);
+    putPayload(payload, "signal_safe_marker.execution_id", executionIdText);
+    putPayload(payload, "signal_safe_marker.scenario", scenarioText);
+    putPayload(payload, "signal_safe_marker.reason", reasonText);
+    putPayload(payload, "signal_safe_marker.pid", static_cast<long long>(pid));
+    putPayload(payload, "signal_safe_marker.epoch_ms", static_cast<long long>(epochMs));
+    putPayload(payload, "signal_safe_marker.append_only", true);
+    putPayload(payload, "signal_safe_marker.native_core", "open_write_close_fixed_buffer");
+    putPayload(payload, "signal_safe_marker.signal_safe_syscalls", "open|write|close");
+
+    if (path.empty()) {
+        putPayload(payload, "signal_safe_marker.status", "failed");
+        putPayload(payload, "signal_safe_marker.error", "marker path is empty");
+        putPayload(payload, "signal_safe_marker.bytes_written", static_cast<long long>(0));
+        putCommonEmbeddedProbePayload(payload, 0, startedAt);
+        return toJavaStringArray(env, payload);
+    }
+
+    const SignalSafeMarkerWriteResult result = writeSignalSafeCrashMarkerRecord(
+            path.c_str(),
+            markerIdText.c_str(),
+            executionIdText.c_str(),
+            scenarioText.c_str(),
+            reasonText.c_str(),
+            static_cast<int>(pid),
+            static_cast<long long>(epochMs)
+    );
+    putPayload(payload, "signal_safe_marker.status", result.succeeded ? "written" : "failed");
+    putPayload(payload, "signal_safe_marker.bytes_written", static_cast<long long>(result.bytesWritten));
+    putPayload(payload, "signal_safe_marker.errno", static_cast<long long>(result.errorNumber));
+    if (!result.succeeded) {
+        putPayload(payload, "signal_safe_marker.error", std::strerror(result.errorNumber));
+    }
+    putCommonEmbeddedProbePayload(payload, 0, startedAt);
+    return toJavaStringArray(env, payload);
 }
 
 static std::string orderedStringPairsJson(const std::vector<std::pair<std::string, std::string>>& pairs) {

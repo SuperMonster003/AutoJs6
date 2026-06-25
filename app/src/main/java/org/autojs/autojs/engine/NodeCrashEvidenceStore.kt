@@ -16,6 +16,8 @@ object NodeCrashEvidenceStore {
 
     const val MARKER_SCHEMA = "autojs6-node-phase13-crash-marker-v1"
     const val NEXT_LAUNCH_BUNDLE_SCHEMA = "autojs6-node-phase13-next-launch-crash-bundle-v1"
+    const val SAFE_SIGNAL_MARKER_SCHEMA = "autojs6-node-phase13-signal-safe-crash-marker-v1"
+    const val SAFE_SIGNAL_MARKER_RECORD_BYTES = 256
     const val STATE_RUNNING = "running"
     const val STATE_CLEAN_EXIT = "clean_exit"
     const val STATE_FAILED = "failed"
@@ -32,6 +34,11 @@ object NodeCrashEvidenceStore {
         val id: String,
         val file: File,
         val startedAtEpochMs: Long,
+    )
+
+    data class SignalSafeMarkerProof(
+        val file: File,
+        val result: NativeNodeEmbeddedRuntimeBridge.SignalSafeCrashMarkerWriteResult,
     )
 
     fun collectPending(context: Context, reason: String): JSONArray {
@@ -133,7 +140,10 @@ object NodeCrashEvidenceStore {
                 put("featureFlags", featureFlagsJson())
                 put("safeSignalMarker", JSONObject().apply {
                     put("implemented", false)
-                    put("reason", "phase13_runtime_json_marker; native signal-safe writer remains separate")
+                    put("schema", SAFE_SIGNAL_MARKER_SCHEMA)
+                    put("recordBytes", SAFE_SIGNAL_MARKER_RECORD_BYTES)
+                    put("writer", "native_fixed_size_signal_safe_writer")
+                    put("reason", "phase13_runtime_json_marker; native fixed-size signal marker not written for this marker yet")
                 })
                 put("automaticCollection", true)
                 put("resourceSnapshot", resourceSnapshot(STATE_RUNNING, emptyMap()))
@@ -282,6 +292,52 @@ object NodeCrashEvidenceStore {
             "embedded_script.crash_evidence.marker_path" to marker.file.absolutePath,
             "embedded_script.crash_evidence.automatic_collection" to "true",
         )
+    }
+
+    fun writeSignalSafeNativeMarker(
+        context: Context,
+        marker: Marker?,
+        reason: String,
+    ): SignalSafeMarkerProof? {
+        if (marker == null) {
+            return null
+        }
+        val markerJson = readJson(marker.file) ?: JSONObject()
+        val signalMarkerFile = File(markerRoot(context), "${marker.id}.signal")
+        signalMarkerFile.delete()
+        val result = NativeNodeEmbeddedRuntimeBridge.writeSignalSafeCrashMarker(
+            markerPath = signalMarkerFile.absolutePath,
+            markerId = marker.id,
+            executionId = markerJson.optString("executionId").ifBlank { marker.id },
+            scenario = markerJson.optString("scenario").ifBlank { "unknown" },
+            reason = reason,
+            pid = Process.myPid(),
+            epochMs = System.currentTimeMillis(),
+        )
+        runCatching {
+            val now = System.currentTimeMillis()
+            val json = readJson(marker.file) ?: markerJson
+            json.put("updatedAtEpochMs", now)
+            json.put("safeSignalMarker", JSONObject().apply {
+                put("implemented", result.succeeded)
+                put("schema", result.schema)
+                put("recordBytes", result.recordBytes)
+                put("bytesWritten", result.bytesWritten)
+                put("writer", result.writer)
+                put("status", result.status)
+                put("path", signalMarkerFile.absolutePath)
+                put("appendOnly", result.nativeValues["signal_safe_marker.append_only"].toBooleanValue())
+                put("nativeCore", result.nativeValues["signal_safe_marker.native_core"].orEmpty())
+                put("signalSafeSyscalls", result.nativeValues["signal_safe_marker.signal_safe_syscalls"].orEmpty())
+                put("reason", reason)
+                put("updatedAtEpochMs", now)
+                put("error", result.errorMessage ?: JSONObject.NULL)
+            })
+            writeJsonAtomic(marker.file, json)
+        }.onFailure {
+            Log.w(TAG, "Failed to update signal-safe Node crash marker proof ${marker.id}.", it)
+        }
+        return SignalSafeMarkerProof(signalMarkerFile, result)
     }
 
     private fun markTerminal(
@@ -460,4 +516,6 @@ object NodeCrashEvidenceStore {
         val digest = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
         return digest.joinToString("") { "%02x".format(Locale.US, it.toInt() and 0xff) }
     }
+
+    private fun String?.toBooleanValue(): Boolean = equals("true", ignoreCase = true)
 }

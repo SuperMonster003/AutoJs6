@@ -20,11 +20,14 @@ const EXPECTED_PHASE12_TASKS = Object.freeze([
 ]);
 const EXPECTED_P13_TASKS = Object.freeze(Array.from({ length: 58 }, (_, index) => `P13-${String(index).padStart(2, "0")}`));
 const EXPECTED_OPEN_REQUIRED_BLOCKERS = Object.freeze([
-  "crash_evidence_automation",
   "android_side_package_installation",
   "packaged_long_running",
   "second_execution_slot",
   "full_heavy_resource_stress",
+]);
+const EXPECTED_CLOSED_REQUIRED_BLOCKERS = Object.freeze([
+  "adapter_v1_real_execution_path",
+  "crash_evidence_automation",
 ]);
 
 const FILES = {
@@ -55,6 +58,7 @@ function main() {
       phase12Tasks: EXPECTED_PHASE12_TASKS,
       phase13Tasks: EXPECTED_P13_TASKS,
       openRequiredBlockers: EXPECTED_OPEN_REQUIRED_BLOCKERS,
+      closedRequiredBlockers: EXPECTED_CLOSED_REQUIRED_BLOCKERS,
     },
     files: Object.fromEntries(Object.entries(files).map(([key, file]) => [key, file.relative])),
     checks,
@@ -94,6 +98,10 @@ function buildChecks(files) {
   const p13Tasks = parseTaskIds(files.p13Tasks.text, "P13");
   const openRequiredBlockers = (finalBlockers.blockers || [])
     .filter((blocker) => blocker.classification === "required_internal" && blocker.status === "open")
+    .map((blocker) => blocker.id)
+    .sort();
+  const closedRequiredBlockers = (finalBlockers.blockers || [])
+    .filter((blocker) => blocker.classification === "required_internal" && blocker.status === "closed")
     .map((blocker) => blocker.id)
     .sort();
   const phase12StatusCounts = countBy(phase12Manifest.surfaces || [], (surface) => surface.status);
@@ -136,8 +144,9 @@ function buildChecks(files) {
     check(
       "required-blockers-imported",
       sameSet(openRequiredBlockers, EXPECTED_OPEN_REQUIRED_BLOCKERS) &&
-        EXPECTED_OPEN_REQUIRED_BLOCKERS.every((id) => files.p13Tasks.text.includes(id)),
-      "Phase 13 checklist must import the five open required_internal blockers from the final registry.",
+        EXPECTED_OPEN_REQUIRED_BLOCKERS.every((id) => files.p13Tasks.text.includes(id)) &&
+        EXPECTED_CLOSED_REQUIRED_BLOCKERS.every((id) => closedRequiredBlockers.includes(id)),
+      "Phase 13 checklist must import remaining open required_internal blockers and keep closed required blockers recorded.",
     ),
     check(
       "phase13-task-plan-ready",
