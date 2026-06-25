@@ -5168,11 +5168,13 @@ bool appendUvRunCleanupPayload(
         UvWalk uvWalk,
         UvHandleGetType uvHandleGetType,
         UvIsActive uvIsActive,
-        UvIsClosing uvIsClosing
+        UvIsClosing uvIsClosing,
+        bool collectDiagnostics
 ) {
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "uv.run.start mode=UV_RUN_NOWAIT max_iterations=%d", kUvRunCleanupMaxIterations);
     const auto startedAt = Clock::now();
     putPayload(payload, "uv.run.mode", "UV_RUN_NOWAIT");
+    putPayload(payload, "uv.run.diagnostics", collectDiagnostics ? "full" : "lightweight");
     putPayload(payload, "uv.run.max_iterations", static_cast<long long>(kUvRunCleanupMaxIterations));
     putPayload(payload, "uv.run.completed_iterations", static_cast<long long>(0));
     if (eventLoop == nullptr) {
@@ -5195,20 +5197,30 @@ bool appendUvRunCleanupPayload(
             const std::string iterationPrefix = "uv.run.iteration." + std::to_string(iteration);
             putPayload(payload, iterationPrefix + ".rc", static_cast<long long>(result));
             putPayload(payload, "timing.uv_run_iteration_" + std::to_string(iteration) + ".ms", elapsedMs(iterationStartedAt));
-            const UvDiagnosticsSummary summary = appendUvDiagnosticsPayload(
-                    payload,
-                    "after_run_" + std::to_string(iteration),
-                    eventLoop,
-                    uvWalk,
-                    uvHandleGetType,
-                    uvIsActive,
-                    uvIsClosing
-            );
-            if (summary.valid) {
-                putPayload(payload, iterationPrefix + ".handle.count", static_cast<long long>(summary.count));
-                putPayload(payload, iterationPrefix + ".handle.active", static_cast<long long>(summary.active));
-                putPayload(payload, iterationPrefix + ".handle.closing", static_cast<long long>(summary.closing));
-                handleCountZero = summary.count == 0;
+            int handleCount = -1;
+            int activeCount = -1;
+            int closingCount = -1;
+            if (collectDiagnostics) {
+                const UvDiagnosticsSummary summary = appendUvDiagnosticsPayload(
+                        payload,
+                        "after_run_" + std::to_string(iteration),
+                        eventLoop,
+                        uvWalk,
+                        uvHandleGetType,
+                        uvIsActive,
+                        uvIsClosing
+                );
+                if (summary.valid) {
+                    handleCount = summary.count;
+                    activeCount = summary.active;
+                    closingCount = summary.closing;
+                    putPayload(payload, iterationPrefix + ".handle.count", static_cast<long long>(summary.count));
+                    putPayload(payload, iterationPrefix + ".handle.active", static_cast<long long>(summary.active));
+                    putPayload(payload, iterationPrefix + ".handle.closing", static_cast<long long>(summary.closing));
+                    handleCountZero = summary.count == 0;
+                }
+            } else {
+                handleCountZero = result == 0;
             }
             putPayload(payload, "uv.run.completed_iterations", static_cast<long long>(completedIterations));
             __android_log_print(
@@ -5217,9 +5229,9 @@ bool appendUvRunCleanupPayload(
                     "uv.run.iteration.%d.done rc=%d handle_count=%d active=%d closing=%d elapsed=%lldms",
                     iteration,
                     result,
-                    summary.valid ? summary.count : -1,
-                    summary.valid ? summary.active : -1,
-                    summary.valid ? summary.closing : -1,
+                    handleCount,
+                    activeCount,
+                    closingCount,
                     elapsedMs(iterationStartedAt)
             );
             if (handleCountZero) {

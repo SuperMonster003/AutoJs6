@@ -959,6 +959,25 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun embeddedConsoleReplayLinesDropOnlyTransportTrailingLineTerminator() {
+        assertEquals(emptyList<String>(), nodeEmbeddedConsoleOutputLines("").toList())
+        assertEquals(
+            listOf("Node.js version: v24.5.0"),
+            nodeEmbeddedConsoleOutputLines("Node.js version: v24.5.0\n").toList(),
+        )
+        assertEquals(
+            listOf("first", "second"),
+            nodeEmbeddedConsoleOutputLines("first\nsecond\n").toList(),
+        )
+        assertEquals(
+            listOf("first", ""),
+            nodeEmbeddedConsoleOutputLines("first\n\n").toList(),
+        )
+        assertEquals(listOf(""), nodeEmbeddedConsoleOutputLines("\n").toList())
+        assertEquals(listOf("first", "second"), nodeEmbeddedConsoleOutputLines("first\r\nsecond\r\n").toList())
+    }
+
+    @Test
     fun emptyAndDirectiveOnlyScriptsSucceedWithZeroExitCode() {
         assumeEmbeddedScriptExecutionEnabled()
 
@@ -975,6 +994,27 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertEquals(0, directiveOnly.exitCode ?: -1)
         assertTrue(directiveOnly.stdout.isEmpty())
         assertTrue(directiveOnly.stderr.isEmpty())
+    }
+
+    @Test
+    fun embeddedScriptUsesLightweightUvDiagnosticsByDefaultWithFullOptIn() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val lightweight = runEmbeddedScript(""""nodejs";""", "<embedded-lightweight-uv-diagnostics.js>")
+        assertTrue(lightweight.errorMessage.orEmpty(), lightweight.succeeded)
+        assertEquals("lightweight", lightweight.nativeValues["embedded_script.uv_diagnostics.mode"])
+        assertEquals("lightweight_cleanup", lightweight.nativeValues["uv.diagnostics.collection"])
+
+        settleEmbeddedScriptServiceProcess()
+
+        val full = runEmbeddedScript(
+            """"nodejs";""",
+            "<embedded-full-uv-diagnostics.js>",
+            env = mapOf("AUTOJS6_NODE_FULL_UV_DIAGNOSTICS" to "1"),
+        )
+        assertTrue(full.errorMessage.orEmpty(), full.succeeded)
+        assertEquals("full", full.nativeValues["embedded_script.uv_diagnostics.mode"])
+        assertEquals("full", full.nativeValues["uv.diagnostics.collection"])
     }
 
     @Test

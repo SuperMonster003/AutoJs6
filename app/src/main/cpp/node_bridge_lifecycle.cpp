@@ -21,6 +21,26 @@ const char* embeddedNodeInitializationFlagsName(bool enableStdioInitialization) 
            : "kLegacyInitializeNodeWithArgsBehavior|kDisableNodeOptionsEnv|kNoParseGlobalDebugVariables";
 }
 
+bool isTruthyEnvValue(const std::string& value) {
+    std::string normalized;
+    normalized.reserve(value.size());
+    for (char ch : value) {
+        if (!std::isspace(static_cast<unsigned char>(ch))) {
+            normalized.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(ch))));
+        }
+    }
+    return normalized == "1" || normalized == "true" || normalized == "yes" || normalized == "on";
+}
+
+bool embeddedScriptFullUvDiagnosticsRequested(const EmbeddedScriptExecutionRequest& request) {
+    for (const auto& entry : request.env) {
+        if (entry.first == "AUTOJS6_NODE_FULL_UV_DIAGNOSTICS") {
+            return isTruthyEnvValue(entry.second);
+        }
+    }
+    return false;
+}
+
 void appendEmbeddedLifecycleProbePayload(std::vector<std::string>& payload, void* handle) {
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "lifecycle.start");
     const auto lifecycleStartedAt = Clock::now();
@@ -554,6 +574,9 @@ std::vector<std::string> runEmbeddedScriptExecution(
     );
     void* handle = probeLoadedLibnodeHandle(payload);
     const char* workingDirectoryPtr = request.workingDirectory.empty() ? nullptr : request.workingDirectory.c_str();
+    const bool fullUvDiagnostics = embeddedScriptFullUvDiagnosticsRequested(request);
+    putPayload(payload, "embedded_script.uv_diagnostics.mode", fullUvDiagnostics ? "full" : "lightweight");
+    putPayload(payload, "embedded_script.uv_diagnostics.full_requested", fullUvDiagnostics);
     appendEmbeddedV8UvIsolateLifecycleProbePayload(
             payload,
             handle,
@@ -583,7 +606,8 @@ std::vector<std::string> runEmbeddedScriptExecution(
             &wrappedSource,
             "embedded_script",
             workingDirectoryPtr,
-            true
+            true,
+            fullUvDiagnostics
     );
     putCommonEmbeddedProbePayload(payload, 0, startedAt);
     __android_log_print(ANDROID_LOG_INFO, kLogTag, "embedded_script.exit elapsed=%lldms", elapsedMs(startedAt));
@@ -619,7 +643,8 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         const std::string* sourceOverride,
         const char* sourceLabelOverride,
         const char* workingDirectoryOverride,
-        bool scriptExecution
+        bool scriptExecution,
+        bool fullUvDiagnostics
 ) {
     const auto jsProbeKind = resolveEmbeddedLifecycleJsProbeKind(
             jsResult,
@@ -2871,9 +2896,23 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
     );
     putUvLoopSkippedPayload(payload, lifecycleDetail);
     putV8SkippedPayload(payload, lifecycleDetail);
+    const bool collectUvDiagnostics = diagnoseUvHandles && (!scriptExecution || fullUvDiagnostics);
+    putPayload(
+            payload,
+            "uv.diagnostics.collection",
+            collectUvDiagnostics
+                    ? "full"
+                    : diagnoseUvHandles
+                    ? "lightweight_cleanup"
+                    : "not_requested"
+    );
     putUvDiagnosticsSkippedPayload(
             payload,
-            diagnoseUvHandles ? lifecycleDetail : "uv diagnostics not requested"
+            collectUvDiagnostics
+                    ? lifecycleDetail
+                    : diagnoseUvHandles
+                    ? "full UV diagnostics disabled for embedded script fast path"
+                    : "uv diagnostics not requested"
     );
     putUvCloseSkippedPayload(
             payload,
@@ -19467,7 +19506,7 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         putPayload(payload, "timing.isolate_dispose.ms", elapsedMs(disposeStartedAt));
     }
 
-    if (diagnoseUvHandles && uvLoopInitialized) {
+    if (collectUvDiagnostics && uvLoopInitialized) {
         putPayload(payload, "uv.diagnostics.status", "running");
         putPayload(payload, "uv.diagnostics.detail", "uv_walk diagnostics started");
         appendUvDiagnosticsPayload(
@@ -19493,15 +19532,17 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
                 uvIsActive,
                 uvIsClosing
         );
-        appendUvDiagnosticsPayload(
-                payload,
-                "after_uv_close",
-                eventLoop.get(),
-                uvWalk,
-                uvHandleGetType,
-                uvIsActive,
-                uvIsClosing
-        );
+        if (collectUvDiagnostics) {
+            appendUvDiagnosticsPayload(
+                    payload,
+                    "after_uv_close",
+                    eventLoop.get(),
+                    uvWalk,
+                    uvHandleGetType,
+                    uvIsActive,
+                    uvIsClosing
+            );
+        }
     }
 
     if (runUvLoopCleanup && uvLoopInitialized) {
@@ -19514,7 +19555,8 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
                 uvWalk,
                 uvHandleGetType,
                 uvIsActive,
-                uvIsClosing
+                uvIsClosing,
+                collectUvDiagnostics
         );
         if (!uvRunCleanupCompleted) {
             lifecycleFailed = true;
@@ -19559,7 +19601,7 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         putPayload(payload, "timing.uv_loop_close.ms", elapsedMs(uvLoopCloseStartedAt));
     }
 
-    if (diagnoseUvHandles && uvLoopInitialized) {
+    if (collectUvDiagnostics && uvLoopInitialized) {
         if (closeUvHandles && uvLoopCloseAttempted && !uvLoopClosed) {
             appendUvDiagnosticsPayload(
                     payload,

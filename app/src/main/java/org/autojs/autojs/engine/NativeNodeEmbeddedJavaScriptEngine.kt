@@ -13,6 +13,39 @@ import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs6.BuildConfig
 import java.io.File
 
+internal fun nodeEmbeddedConsoleOutputLines(text: String): Sequence<String> {
+    if (text.isEmpty()) {
+        return emptySequence()
+    }
+    val output = text.stripSingleTrailingLineTerminator()
+    if (output.isEmpty()) {
+        return sequenceOf("")
+    }
+    return sequence {
+        var start = 0
+        var index = 0
+        while (index < output.length) {
+            val ch = output[index]
+            if (ch == '\n' || ch == '\r') {
+                yield(output.substring(start, index))
+                index += if (ch == '\r' && index + 1 < output.length && output[index + 1] == '\n') 2 else 1
+                start = index
+                continue
+            }
+            index += 1
+        }
+        yield(output.substring(start))
+    }
+}
+
+private fun String.stripSingleTrailingLineTerminator(): String {
+    return when {
+        endsWith("\r\n") -> dropLast(2)
+        endsWith('\n') || endsWith('\r') -> dropLast(1)
+        else -> this
+    }
+}
+
 class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : RhinoJavaScriptEngine(androidContext) {
 
     @Volatile
@@ -180,7 +213,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     "succeeded=${result.succeeded} elapsed=${result.elapsedMs}ms",
         )
         lastEmbeddedScriptResultNativeValues = result.nativeValues
-        printScriptOutput(Log.INFO, result.stdout)
+        printScriptOutput(Log.DEBUG, result.stdout)
         printScriptOutput(Log.ERROR, result.stderr)
         if (!result.succeeded) {
             result.errorStack?.takeIf { it.isNotBlank() }?.let { printScriptOutput(Log.ERROR, it) }
@@ -249,7 +282,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             return
         }
         val console = runCatching { runtime.console }.getOrNull()
-        text.lineSequence().forEach { line ->
+        nodeEmbeddedConsoleOutputLines(text).forEach { line ->
             if (line.isEmpty()) {
                 printScriptOutputChunk(level, line, console)
                 return@forEach

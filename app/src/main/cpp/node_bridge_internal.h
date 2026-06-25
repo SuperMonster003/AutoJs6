@@ -1260,7 +1260,8 @@ bool appendUvRunCleanupPayload(
         UvWalk uvWalk,
         UvHandleGetType uvHandleGetType,
         UvIsActive uvIsActive,
-        UvIsClosing uvIsClosing
+        UvIsClosing uvIsClosing,
+        bool collectDiagnostics = true
 );
 int v8BuildConfiguration();
 std::string uvLoopResultDetail(const char* operation, int result);
@@ -1295,7 +1296,8 @@ void appendEmbeddedV8UvIsolateLifecycleProbePayload(
         const std::string* sourceOverride = nullptr,
         const char* sourceLabelOverride = nullptr,
         const char* workingDirectoryOverride = nullptr,
-        bool scriptExecution = false
+        bool scriptExecution = false,
+        bool fullUvDiagnostics = true
 );
 void appendEmbeddedIsolateLifecycleProbePayload(
         std::vector<std::string>& payload,
