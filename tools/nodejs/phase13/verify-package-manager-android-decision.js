@@ -85,6 +85,7 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'sourceAuthority: "local_unpacked_host_managed_only"'),
       token(files.nodeBridgeSources, 'installAuthority: "internal_substrate_only"'),
       token(files.nodeBridgeSources, 'allowedSources: Object.freeze(["local_unpacked_host_managed"])'),
+      token(files.nodeBridgeSources, 'planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove"])'),
       token(files.nodeBridgeSources, '"raw_registry",'),
       token(files.nodeBridgeSources, '"remote_tarball",'),
       token(files.nodeBridgeSources, 'jsBridge: "read_maintenance_partial"'),
@@ -102,6 +103,9 @@ function buildReport(files) {
       token(files.manager, "fun install(request: PackageRequest"),
       token(files.manager, "fun update(request: PackageRequest"),
       token(files.manager, "fun remove(name: String, version: String"),
+      token(files.manager, "fun planInstall(request: PackageRequest"),
+      token(files.manager, "fun planUpdate(request: PackageRequest"),
+      token(files.manager, "fun planRemove(name: String, version: String"),
       token(files.manager, "fun list(): List<PackageRecord>"),
       token(files.manager, "fun verify(name: String, version: String)"),
       token(files.manager, "fun prune(maxTransactionAgeMs: Long = 0L)"),
@@ -128,16 +132,21 @@ function buildReport(files) {
       token(files.p13PackageManagerTest, "packageManagerReadMaintenanceFacadeListsVerifiesAndPrunesLocalStore"),
       token(files.nodeBridgeSources, "function __autojs6_limited_package_manager()"),
       token(files.nodeBridgeSources, "function sourcePolicy()"),
+      token(files.nodeBridgeSources, "function planInstall(request)"),
+      token(files.nodeBridgeSources, "function planUpdate(request)"),
+      token(files.nodeBridgeSources, "function planRemove(request)"),
       token(files.nodeBridgeSources, "autojs6-node-package-manager-source-policy-v1"),
+      token(files.nodeBridgeSources, "autojs6-node-android-package-plan-v1"),
       token(files.nodeBridgeSources, "local_unpacked_host_managed"),
       token(files.nodeBridgeSources, "unverified_cache_denied"),
       token(files.nodeBridgeSources, "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED"),
       token(files.typesPackageManager, 'declare module "package_manager"'),
       token(files.typesPackageManager, "export interface SourcePolicy"),
       token(files.typesPackageManager, "sourcePolicy(): SourcePolicy"),
+      token(files.typesPackageManager, "planInstall(request: PlanSourceRequest): Promise<PackagePlan>"),
+      token(files.typesPackageManager, "install(request?: PackageRequest): never"),
       token(files.typesPackageManager, "list(options?: ListOptions): Promise<readonly PackageRecord[]>"),
       token(files.typesPackageManager, "verify(request: VerifyRequest): Promise<OperationResult>"),
-      token(files.typesPackageManager, "install(request?: PackageRequest): never"),
       token(files.typesIndex, './package_manager.d.ts'),
       token(files.p13AndroidManagerReport, "`NodeAndroidPackageInstallManager` supports"),
       token(files.p13AndroidManagerVerifier, "verifyNodePhase13AndroidPackageInstallManager"),
@@ -201,6 +210,7 @@ function buildReport(files) {
         packageManagerProfile.includes('sourceAuthority: "local_unpacked_host_managed_only"') &&
         packageManagerProfile.includes('installAuthority: "internal_substrate_only"') &&
         packageManagerProfile.includes('allowedSources: Object.freeze(["local_unpacked_host_managed"])') &&
+        packageManagerProfile.includes('planOperations: Object.freeze(["planInstall", "planUpdate", "planRemove"])') &&
         packageManagerProfile.includes('jsBridge: "read_maintenance_partial"') &&
         packageManagerProfile.includes('requirePackageManager: "read_maintenance_partial"') &&
         !packageManagerProfile.includes('jsBridge: "partial"') &&
@@ -228,12 +238,17 @@ function buildReport(files) {
       files.nodeBridgeSources.text.includes("function __autojs6_limited_package_manager()") &&
         files.nodeBridgeSources.text.includes("ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED") &&
         files.nodeBridgeSources.text.includes("function sourcePolicy()") &&
+        files.nodeBridgeSources.text.includes("function planInstall(request)") &&
+        files.nodeBridgeSources.text.includes("function planUpdate(request)") &&
+        files.nodeBridgeSources.text.includes("function planRemove(request)") &&
         files.nodeBridgeSources.text.includes("autojs6-node-package-manager-source-policy-v1") &&
+        files.nodeBridgeSources.text.includes("autojs6-node-android-package-plan-v1") &&
         files.nodeBridgeSources.text.includes('npmCli: "denied"') &&
         files.nodeBridgeSources.text.includes('registryDownload: "deferred"') &&
         files.nodeBridgeSources.text.includes('permissions: ["package_manager"]') &&
         files.typesPackageManager.text.includes('declare module "package_manager"') &&
         files.typesPackageManager.text.includes("sourcePolicy(): SourcePolicy") &&
+        files.typesPackageManager.text.includes("planInstall(request: PlanSourceRequest): Promise<PackagePlan>") &&
         files.typesPackageManager.text.includes("list(options?: ListOptions): Promise<readonly PackageRecord[]>") &&
         files.typesPackageManager.text.includes("verify(request: VerifyRequest): Promise<OperationResult>") &&
         files.typesPackageManager.text.includes("install(request?: PackageRequest): never") &&
@@ -241,7 +256,7 @@ function buildReport(files) {
         !packageManagerProfile.includes('jsBridge: "partial"') &&
         !packageManagerProfile.includes('requirePackageManager: "partial"') &&
         !packageManagerProfile.includes("rawRegistryAccess: true"),
-      "P13-42 may expose only package_manager read-maintenance operations; npm facade, install/update/remove, full partial promotion, and raw registry authority must remain absent.",
+      "P13-42 may expose only package_manager read-maintenance and dry-run plan operations; npm facade, install/update/remove, full partial promotion, and raw registry authority must remain absent.",
     ),
   ];
 

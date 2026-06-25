@@ -33,8 +33,8 @@ cleanup, and corruption recovery behavior.
 - Native addon promotion still requires signed packaged artifacts, ABI/hash
   allowlists, dependency scanning, crash isolation, and packaged positive plus
   hostile corpus evidence.
-- Android runtime registry install and package-manager JavaScript facades remain
-  unpromoted.
+- Android runtime registry install and mutating package-manager JavaScript
+  facades remain unpromoted.
 - User-facing corruption recovery diagnostics and per-profile rollback UX remain
   future P13 security/UX work.
 

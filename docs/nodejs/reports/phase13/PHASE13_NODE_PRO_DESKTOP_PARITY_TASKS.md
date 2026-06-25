@@ -597,21 +597,23 @@ P13 task 本身使用以下执行状态：
     - Open before closure: real 8h/24h device soak reports with comparable RSS/native heap/Java heap/thread/fd/bridge diagnostics and no leak/orphan/runtime failure flags.
 
 - [ ] P13-09: 实现 Android-side package installation manager。
-  - 范围：Node 项目/插件/依赖包在 Android 侧的 install/update/remove/list/verify/prune。
+  - 范围：Node 项目/插件/依赖包在 Android 侧的 install/update/remove/list/verify/prune 与 dry-run plan。
   - 边界：不运行 npm lifecycle scripts；不允许未签名 native payload 直接执行。
   - 验收：
     - transactional、cancellable、locked、integrity checked。
     - 能服务后续 npm/package manager 和 plugin distribution。
   - Progress Evidence (2026-06-24, partial; checkbox remains open):
     - Android store: `NodeAndroidPackageInstallManager`.
-    - Operations: `install`, `update`, `remove`, `list`, `verify`, `prune`.
+    - Operations: `install`, `update`, `remove`, `list`, `verify`, `prune`,
+      plus dry-run `planInstall`, `planUpdate`, and `planRemove`.
     - Boundaries: lifecycle scripts, `bin`, native payloads, symlinks, and path escapes are rejected.
     - Integrity: SHA-512 expected integrity and installed-record verification.
     - Transaction model: store lock, transaction staging, atomic move/restore, cancellation token.
-    - Read-maintenance JS facade:
+    - Read-maintenance + dry-run plan JS facade:
       `require("package_manager").status()/policy()/sourcePolicy()` reports
       the current fail-closed policy and source authority, while
-      `list/verify/prune` dispatch to the Android app-private store and
+      `planInstall/planUpdate/planRemove/list/verify/prune` dispatch to the
+      Android app-private store without granting install authority and
       `install/update/remove` throw
       `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED`.
     - Focused instrumentation: `NodeAndroidPackageInstallManagerInstrumentationTest`.
@@ -620,7 +622,7 @@ P13 task 本身使用以下执行状态：
     - Report: `docs/nodejs/reports/phase13/P13_09_ANDROID_PACKAGE_INSTALL_MANAGER.md`.
     - Open before closure: mutating JS/runtime package-manager operations,
       registry/download policy, npm CLI decision, signed native-payload
-      decision, prepared-device instrumentation run, and plugin/package
+      decision, broader device/distribution evidence, and plugin/package
       distribution integration.
 
 - [x] P13-10: 发布 Phase 13 capability truth report。
@@ -1374,14 +1376,17 @@ P13 task 本身使用以下执行状态：
       host-managed package manager + Android app-private local store substrate
       的边界。
     - Android runtime install 当前限定为 `local_unpacked_only`：可对已解包包目录执行
-      install/update/remove/list/verify/prune。
+      install/update/remove/list/verify/prune，并可从 JS 侧 dry-run plan
+      install/update/remove。
     - `NodeAndroidPackageInstallManager.nativeValues()` 现在输出 npm CLI、
       registry download、lockfile、lifecycle、bin link、symlink、native payload、
       postinstall download、network install、source authority、read-maintenance
       JS bridge 等策略。
-    - `require("package_manager")` 已作为 read-maintenance facade 暴露：
+    - `require("package_manager")` 已作为 read-maintenance + dry-run plan
+      facade 暴露：
       `status()`/`policy()`/`sourcePolicy()` 可读，`list/verify/prune` 经
-      Android app-private store bridge 执行，`install/update/remove` 仍以
+      Android app-private store bridge 执行，`planInstall/planUpdate/planRemove`
+      返回 frozen dry-run `PackagePlan`，`install/update/remove` 仍以
       `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` 同步拒绝。
     - 新增 focused instrumentation:
       `NodePackageManagerPhase13DecisionInstrumentationTest`。
@@ -1400,7 +1405,7 @@ P13 task 本身使用以下执行状态：
     - Surface manifest evidence:
       `phase13-package-manager-android-decision`。
   - Remaining: Android 侧 registry metadata/tarball 下载、npm CLI、script-visible
-    `npm` facade、mutating `package_manager` operations、debug-only lifecycle runner、bin shim、signed
+    `npm` facade、mutating `package_manager.install/update/remove` operations、debug-only lifecycle runner、bin shim、signed
     native payload policy、native build strategy、packaged dependency install/distribution
     evidence、真实 npm corpus 通过率提升仍未完成。
 

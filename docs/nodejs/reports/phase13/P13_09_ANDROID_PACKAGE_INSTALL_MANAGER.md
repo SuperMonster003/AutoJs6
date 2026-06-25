@@ -6,9 +6,10 @@ P13-09 starts the Android-side package installation manager without promoting a
 user-facing npm or registry installer. The landed pieces are a local,
 app-private package store that can install already-unpacked package directories
 after policy validation, plus a read-maintenance `require("package_manager")`
-facade that reports policy and can list, verify, and prune the app-private
-store. Install/update/remove remain unpromoted from JavaScript. It is intended
-as the Android runtime substrate for future dependency, plugin, and package
+facade that reports policy, can dry-run install/update/remove planning, and
+can list, verify, and prune the app-private store. Mutating
+install/update/remove remain unpromoted from JavaScript. It is intended as the
+Android runtime substrate for future dependency, plugin, and package
 distribution work.
 
 ## Landed
@@ -37,6 +38,9 @@ distribution work.
 - `install`
 - `update`
 - `remove`
+- `planInstall` (dry-run only)
+- `planUpdate` (dry-run only)
+- `planRemove` (dry-run only)
 - `list`
 - `verify`
 - `prune`
@@ -61,6 +65,11 @@ distribution and package-manager work can build on the same store.
   allowed substrate is a host-managed local unpacked directory; raw registry,
   remote tarball, URL/git, workspace symlink, and unverified-cache sources
   remain denied.
+- `planInstall({ name, version, sourceDir, expectedIntegrity?, kind? })` and
+  `planUpdate(...)` validate a relative, project-scoped local unpacked source
+  and return a frozen `autojs6-node-android-package-plan-v1` dry-run result.
+- `planRemove({ name, version })` reports whether an installed package would be
+  removed. Plan results set `dryRun: true` and `grantsInstallAuthority: false`.
 - `list()` returns frozen Android package records from the app-private store.
 - `verify({ name, version })` verifies an installed record or returns
   `missing` for absent packages.
@@ -87,7 +96,6 @@ The focused instrumentation compiles and is selected by:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeAndroidPackageInstallManagerInstrumentationTest"
 ```
 
-On 2026-06-24 the connected Sony device had an existing `org.autojs.autojs6`
-install with a different signature, so Gradle could not install the debug APK
-without uninstalling the user's app. The code and test sources compile; device
-execution remains to be rerun on a prepared test device.
+On 2026-06-25 the focused connected suite passed on `XQ-AT72 - 12` with the
+Android package manager, bridge conformance, provider registry, and
+read-maintenance/dry-run facade tests selected.

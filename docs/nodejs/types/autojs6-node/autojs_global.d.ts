@@ -79,6 +79,7 @@ declare namespace AutoJs6Node {
     readonly installAuthority: "internal_substrate_only" | string;
     readonly allowedSources: readonly string[];
     readonly deniedSources: readonly string[];
+    readonly planOperations: readonly string[];
     readonly operations: readonly string[];
     readonly packageKinds: readonly string[];
     readonly jsBridge: "read_maintenance_partial" | "diagnostic_only" | "not_exposed" | "partial" | string;

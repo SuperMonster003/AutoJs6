@@ -753,8 +753,10 @@ download, lifecycle scripts, bin shim creation, symlink materialization, native
 builds/native payloads, postinstall downloads, raw executable launch,
 script-visible `npm`, mutating `package_manager` operations, and raw
 `node_modules` mutation remain denied until separate Desktop-profile evidence
-proves them safe. `package_manager` itself is limited to read-maintenance
-`status`/`policy`/`sourcePolicy`/`list`/`verify`/`prune`; it does not grant install authority.
+proves them safe. `package_manager` itself is limited to read-maintenance plus
+dry-run planning: `status`/`policy`/`sourcePolicy`,
+`planInstall`/`planUpdate`/`planRemove`, and `list`/`verify`/`prune`; it does
+not grant install authority.
 
 P13-43 records Node stdlib conformance as partial. `stdlibProfile` is
 diagnostic metadata only and does not grant raw desktop stdlib authority.

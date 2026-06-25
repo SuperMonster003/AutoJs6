@@ -1,6 +1,7 @@
 declare module "package_manager" {
   namespace packageManager {
     export type Operation = "install" | "update" | "remove" | "list" | "verify" | "prune";
+    export type PlanOperation = "planInstall" | "planUpdate" | "planRemove";
     export type PackageKind = "dependency" | "plugin" | "project";
 
     export interface BridgeOptions {
@@ -29,6 +30,19 @@ declare module "package_manager" {
       readonly maxTransactionAgeMs?: number;
     }
 
+    export interface PlanSourceRequest extends BridgeOptions {
+      readonly name: string;
+      readonly version: string;
+      readonly sourceDir: string;
+      readonly expectedIntegrity?: string;
+      readonly kind?: PackageKind;
+    }
+
+    export interface PlanRemoveRequest extends BridgeOptions {
+      readonly name: string;
+      readonly version: string;
+    }
+
     export interface PackageRecord {
       readonly schema: "autojs6-node-android-package-record-v1" | string;
       readonly name: string;
@@ -47,6 +61,19 @@ declare module "package_manager" {
       readonly transactionId: string;
       readonly message: string;
       readonly record: PackageRecord | null;
+    }
+
+    export interface PackagePlan {
+      readonly schema: "autojs6-node-android-package-plan-v1";
+      readonly operation: "install" | "update" | "remove" | string;
+      readonly status: "ready" | "missing" | "already_installed" | string;
+      readonly dryRun: true;
+      readonly sourceAuthority: SourceAuthority;
+      readonly installAuthority: InstallAuthority;
+      readonly grantsInstallAuthority: false;
+      readonly message: string;
+      readonly record: PackageRecord | null;
+      readonly existingRecord: PackageRecord | null;
     }
 
     export type SourceAuthority = "local_unpacked_host_managed_only" | string;
@@ -106,6 +133,7 @@ declare module "package_manager" {
       readonly grantsInstallAuthority: false;
       readonly allowedSources: readonly AllowedSource[];
       readonly deniedSources: readonly DeniedSource[];
+      readonly planOperations: readonly PlanOperation[];
       readonly localUnpacked: LocalUnpackedSourcePolicy;
       readonly registry: RegistrySourcePolicy;
       readonly tarball: TarballSourcePolicy;
@@ -128,6 +156,7 @@ declare module "package_manager" {
       readonly installAuthority: InstallAuthority;
       readonly allowedSources: readonly AllowedSource[];
       readonly deniedSources: readonly DeniedSource[];
+      readonly planOperations: readonly PlanOperation[];
       readonly operations: readonly Operation[];
       readonly packageKinds: readonly PackageKind[];
       readonly npmCli: "denied" | string;
@@ -166,6 +195,7 @@ declare module "package_manager" {
       readonly installAuthority: InstallAuthority;
       readonly allowedSources: readonly AllowedSource[];
       readonly deniedSources: readonly DeniedSource[];
+      readonly planOperations: readonly PlanOperation[];
       readonly operations: readonly Operation[];
       readonly packageKinds: readonly PackageKind[];
       readonly androidNetwork: "denied" | string;
@@ -178,6 +208,9 @@ declare module "package_manager" {
       status(): DiagnosticStatus;
       policy(): DiagnosticPolicy;
       sourcePolicy(): SourcePolicy;
+      planInstall(request: PlanSourceRequest): Promise<PackagePlan>;
+      planUpdate(request: PlanSourceRequest): Promise<PackagePlan>;
+      planRemove(request: PlanRemoveRequest): Promise<PackagePlan>;
       install(request?: PackageRequest): never;
       update(request?: PackageRequest): never;
       remove(request?: PackageRequest): never;

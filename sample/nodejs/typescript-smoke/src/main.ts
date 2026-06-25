@@ -515,6 +515,9 @@ async function smoke(): Promise<void> {
   const packageManagerStatus: packageManager.DiagnosticStatus = packageManager.status();
   const packageManagerPolicy: packageManager.DiagnosticPolicy = packageManager.policy();
   const packageManagerSourcePolicy: packageManager.SourcePolicy = packageManager.sourcePolicy();
+  const packageManagerPlanInstall: (request: packageManager.PlanSourceRequest) => Promise<packageManager.PackagePlan> = packageManager.planInstall;
+  const packageManagerPlanUpdate: (request: packageManager.PlanSourceRequest) => Promise<packageManager.PackagePlan> = packageManager.planUpdate;
+  const packageManagerPlanRemove: (request: packageManager.PlanRemoveRequest) => Promise<packageManager.PackagePlan> = packageManager.planRemove;
   const packageManagerInstall: (request?: packageManager.PackageRequest) => never = packageManager.install;
   const packageManagerList: (options?: packageManager.ListOptions) => Promise<readonly packageManager.PackageRecord[]> = packageManager.list;
   const packageManagerVerify: (request: packageManager.VerifyRequest) => Promise<packageManager.OperationResult> = packageManager.verify;
@@ -536,6 +539,7 @@ async function smoke(): Promise<void> {
   const packageManagerProfileRuntimeInstall: string = autojsProfile.packageManagerProfile.androidRuntimeInstall;
   const packageManagerProfileSourceAuthority: string = autojsProfile.packageManagerProfile.sourceAuthority;
   const packageManagerProfileAllowedSources: readonly string[] = autojsProfile.packageManagerProfile.allowedSources;
+  const packageManagerProfilePlanOperations: readonly string[] = autojsProfile.packageManagerProfile.planOperations;
   const packageManagerProfileLifecycleScripts: string = autojsProfile.packageManagerProfile.lifecycleScripts;
   const packageManagerProfileBinLinks: string = autojsProfile.packageManagerProfile.binLinks;
   const packageManagerProfileRawRegistryAccess: boolean = autojsProfile.packageManagerProfile.rawRegistryAccess;
@@ -880,6 +884,7 @@ async function smoke(): Promise<void> {
   void packageManagerProfileRuntimeInstall;
   void packageManagerProfileSourceAuthority;
   void packageManagerProfileAllowedSources;
+  void packageManagerProfilePlanOperations;
   void packageManagerProfileLifecycleScripts;
   void packageManagerProfileBinLinks;
   void packageManagerProfileRawRegistryAccess;
@@ -1009,6 +1014,9 @@ async function smoke(): Promise<void> {
   void packageManagerStatus;
   void packageManagerPolicy;
   void packageManagerSourcePolicy;
+  void packageManagerPlanInstall;
+  void packageManagerPlanUpdate;
+  void packageManagerPlanRemove;
   void packageManagerInstall;
   void packageManagerList;
   void packageManagerVerify;

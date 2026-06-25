@@ -1147,7 +1147,8 @@ parity. Android npm CLI, registry download/cache, remote tarball install, lifecy
 shims, symlinks, native builds, signed native payloads, script-visible `npm`,
 `package_manager.install/update/remove`, packaged dependency distribution, and
 real npm corpus growth remain open. The script-visible `package_manager`
-facade is limited to status/policy/sourcePolicy/list/verify/prune over the app-private
+facade is limited to status/policy/sourcePolicy, dry-run
+planInstall/planUpdate/planRemove, and list/verify/prune over the app-private
 store.
 
 P13-43 records Node stdlib conformance as partial: Safe Node now exposes
@@ -1195,7 +1196,8 @@ has a shared `NodePackageIntegrityPolicy` and runtime
 native addon artifacts. Android local-store rollback, stale transaction prune,
 corruption detection, and reinstall/update recovery are covered, while signed
 plugin archives, signed native artifacts, marketplace install/update, raw
-registry install, and package-manager JavaScript facades remain future work.
+registry install, and mutating package-manager JavaScript facades remain future
+work.
 
 P13-49 records profile selection UX and diagnostics as partial: AutoJs6 Node
 now exposes `profileSelection` diagnostics through `autojs6:profile` and Node

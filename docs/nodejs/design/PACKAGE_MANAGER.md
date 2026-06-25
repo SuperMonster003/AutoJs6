@@ -183,7 +183,9 @@ Supported:
 - partial Android local package store through `NodeAndroidPackageInstallManager`
   for already-unpacked app-private packages with transaction staging, store
   locking, cancellation checks, SHA-512 integrity, and
-  install/update/remove/list/verify/prune operations
+  install/update/remove/list/verify/prune operations plus dry-run
+  planInstall/planUpdate/planRemove diagnostics through the script-visible
+  facade
 
 P13-48 unifies the lock and integrity policy across the Android-side package
 manager, plugin packages, and native addon artifacts. The shared policy is
@@ -202,7 +204,8 @@ Unsupported:
 - postinstall-generated sources
 - arbitrary `.bin` execution
 - mobile registry downloads
-- JavaScript/runtime package-manager API exposure for the Android local store
+- mutating JavaScript/runtime package-manager API exposure for the Android
+  local store
 
 ## Follow-Up Implementation
 
@@ -317,6 +320,9 @@ Current operations:
 - `install`
 - `update`
 - `remove`
+- `planInstall` (dry-run)
+- `planUpdate` (dry-run)
+- `planRemove` (dry-run)
 - `list`
 - `verify`
 - `prune`
@@ -346,8 +352,9 @@ Android package-manager partial. The current equivalent to
 substrate for already-unpacked packages. Android-side npm CLI execution,
 registry/tarball download, lifecycle execution, bin shims, native builds,
 postinstall downloads, and mutating package-manager operations remain deferred.
-The script-visible `package_manager` facade is limited to read-maintenance
-status/policy/sourcePolicy/list/verify/prune. Its source policy records
-`local_unpacked_host_managed` as the only allowed source substrate and keeps raw
-registry, remote tarball, URL/git, workspace symlink, and unverified-cache
-sources denied without granting script-visible install authority.
+The script-visible `package_manager` facade is limited to read-maintenance plus
+dry-run planning: status/policy/sourcePolicy/planInstall/planUpdate/planRemove/
+list/verify/prune. Its source policy records `local_unpacked_host_managed` as
+the only allowed source substrate and keeps raw registry, remote tarball,
+URL/git, workspace symlink, and unverified-cache sources denied without
+granting script-visible install authority.

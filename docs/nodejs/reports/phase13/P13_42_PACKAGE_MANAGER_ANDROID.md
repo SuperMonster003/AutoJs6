@@ -6,8 +6,8 @@ The current target is "Auto.js Pro capability + desktop Node.js capability",
 but package installation is still split between a host-managed npm-compatible
 validator and an Android app-private local package store substrate. This phase
 does not promote the npm CLI, registry download, lifecycle script execution, bin
-shim creation, native build execution, or install/update/remove JavaScript
-package-manager operations on Android.
+shim creation, native build execution, or mutating install/update/remove
+JavaScript package-manager operations on Android.
 
 ## Landed
 
@@ -28,12 +28,18 @@ package-manager operations on Android.
   - JS bridge: `read_maintenance_partial`
   - `require("package_manager")`: `read_maintenance_partial`
   - raw executable and raw registry authority: `false`
-- `require("package_manager")` exposes a frozen read-maintenance facade:
+- `require("package_manager")` exposes a frozen read-maintenance plus dry-run
+  planning facade:
   - `status()` and `policy()` return frozen policy snapshots.
   - `sourcePolicy()` returns a frozen source-authority snapshot. The only
     allowed substrate is `local_unpacked_host_managed`; raw registry, remote
     tarball, URL/git, workspace symlink, and unverified-cache sources remain
     denied and `grantsInstallAuthority` is `false`.
+  - `planInstall(...)`, `planUpdate(...)`, and `planRemove(...)` dispatch to
+    the Android store as dry-run planning operations. They validate the same
+    local unpacked source/remove targets, return frozen
+    `autojs6-node-android-package-plan-v1` results, and never grant install
+    authority.
   - `list()` dispatches to the Android app-private store and returns frozen
     installed package records.
   - `verify({ name, version })` verifies installed package integrity or returns
@@ -61,6 +67,9 @@ already-unpacked package directory operations inside an app-private store:
 - install
 - update
 - remove
+- planInstall (dry-run)
+- planUpdate (dry-run)
+- planRemove (dry-run)
 - list
 - verify
 - prune
@@ -80,7 +89,7 @@ constrained to the local store substrate.
 - Running `npm install` or `npm i --no-bin-links` directly on Android.
 - Android registry metadata/tarball download and cache management.
 - A script-visible `npm` module.
-- Mutating `package_manager` operations.
+- Mutating `package_manager.install/update/remove` operations.
 - Lifecycle script execution, including `preinstall`, `install`,
   `postinstall`, and `prepare`.
 - Debug-only lifecycle execution.
