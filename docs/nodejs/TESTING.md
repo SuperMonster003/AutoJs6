@@ -1692,11 +1692,12 @@ Phase 13 crash evidence automation gate:
 This host gate records P13-05 as partial. It verifies the runtime marker store,
 next-launch collector, embedded/native process writers, required metadata
 fields, libnode hashes, Phase 11 symbolization tooling, simulated native fatal
-running-marker collection, packaged launch-surface marker contract, and
-signal-safe marker boundary. The focused instrumentation class is
-`NodeCrashEvidenceStoreInstrumentationTest`; real fatal native chaos injection,
-real packaged APK crash smoke, and signal-safe fixed-size native marker proof
-remain required before `crash_evidence_automation` can close.
+running-marker collection, real fatal native SIGKILL chaos collection through
+`:nodejs_embedded`, packaged launch-surface marker contract, and signal-safe
+marker boundary. The focused instrumentation class is
+`NodeCrashEvidenceStoreInstrumentationTest`; real packaged APK crash smoke and
+signal-safe fixed-size native marker proof remain required before
+`crash_evidence_automation` can close.
 
 Current bridge concurrency and resource-limit focused instrumentation:
 

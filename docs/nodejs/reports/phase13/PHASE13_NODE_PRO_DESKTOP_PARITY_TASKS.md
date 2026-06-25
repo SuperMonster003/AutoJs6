@@ -505,12 +505,13 @@ P13 task 本身使用以下执行状态：
     - Native process marker writes: `app/src/main/java/org/autojs/autojs/engine/NativeNodeProcessService.kt`
     - Bridge crash marker assertion: `app/src/androidTest/java/org/autojs/autojs/engine/NodeCrashEvidenceStoreInstrumentationTest.kt`
     - Simulated native fatal running-marker assertion: `collectsRunningMarkerAfterSimulatedNativeFatalProcessDeath`.
+    - Real fatal native chaos assertion: `collectsRunningMarkerAfterRealFatalNativeChaosProbeDeath` writes a marker in `:nodejs_embedded`, injects `SIGKILL`, and verifies next-launch collection.
     - Packaged launch-surface marker contract: `markerRecordsPackagedLaunchSurfaceForFutureCrashSmoke`.
     - Signal-safe marker boundary assertion: `markerRecordsSignalSafeNativeMarkerBoundary`.
     - Host collector: `tools/nodejs/phase13/collect-crash-evidence.js`
     - Gradle gate: `:app:collectNodePhase13CrashEvidence`
     - Report: `docs/nodejs/reports/phase13/P13_05_CRASH_EVIDENCE_AUTOMATION.md`
-    - Open before closure: real fatal native chaos injection, real packaged APK crash smoke, signal-safe fixed-size native marker proof.
+    - Open before closure: real packaged APK crash smoke, signal-safe fixed-size native marker proof.
 
 - [ ] P13-06: 推进 second execution slot 到可调度状态。
   - 范围：从 Phase 12 的 explicit slot evidence 推进到默认 scheduler 可选择

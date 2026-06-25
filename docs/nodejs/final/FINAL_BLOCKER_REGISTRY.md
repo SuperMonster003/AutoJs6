@@ -25,10 +25,10 @@ Current crash evidence progress:
   runtime resource snapshots and timeline tails as first-class evidence. Phase
   13 adds a runtime JSON marker store, next-launch collector, embedded script
   service marker writes, native process service marker writes, a host collector,
-  simulated native fatal running-marker collection, packaged launch-surface
-  marker contract, and signal-safe marker boundary evidence. Real fatal native
-  chaos injection, real packaged APK crash smoke, and signal-safe fixed-size
-  native marker proof remain open.
+  simulated native fatal running-marker collection, real fatal native SIGKILL
+  chaos collection, packaged launch-surface marker contract, and signal-safe
+  marker boundary evidence. Real packaged APK crash smoke and signal-safe
+  fixed-size native marker proof remain open.
 
 Current multi-instance progress:
 

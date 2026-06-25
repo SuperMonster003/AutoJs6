@@ -956,10 +956,11 @@ an archive audit report and refuses dirty or under-duration inputs.
 evidence automation. It verifies the runtime marker store, next-launch
 collector, embedded/native process marker writers, required crash marker
 metadata, libnode hashes, Phase 11 symbolization tooling, simulated native fatal
-running-marker collection, packaged launch-surface marker contract, and
-signal-safe marker boundary. It intentionally keeps `crash_evidence_automation`
-open until real fatal native chaos injection, real packaged APK crash smoke, and
-signal-safe fixed-size native marker proof are available.
+running-marker collection, real fatal native SIGKILL chaos collection through
+`:nodejs_embedded`, packaged launch-surface marker contract, and signal-safe
+marker boundary. It intentionally keeps `crash_evidence_automation` open until
+real packaged APK crash smoke and signal-safe fixed-size native marker proof are
+available.
 
 ## Release Gate
 

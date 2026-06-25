@@ -48,12 +48,12 @@ workstreams, target profiles, evidence, risk, and rollback policy.
 
 Current `runtime.graduation_blockers` evidence includes the P13-05 crash marker
 store/host collector plus simulated native fatal running-marker collection,
-packaged launch-surface marker contract, and signal-safe marker boundary
-evidence, P13-06 default one-shot scheduler gate, P13-07 partial packaged
-long-running dispatch gate, P13-08 full heavy stress report gate with contract
-fixtures/archive helper, and P13-09 partial Android local package store. The
-surface remains `planned` until P13-05 fully closes real fatal native chaos
-injection, real packaged APK crash smoke, and signal-safe fixed-size native
+real fatal native SIGKILL chaos collection, packaged launch-surface marker
+contract, and signal-safe marker boundary evidence, P13-06 default one-shot
+scheduler gate, P13-07 partial packaged long-running dispatch gate, P13-08 full
+heavy stress report gate with contract fixtures/archive helper, and P13-09
+partial Android local package store. The surface remains `planned` until P13-05
+fully closes real packaged APK crash smoke and signal-safe fixed-size native
 marker proof, P13-06 adds packaged/fatal-crash/stress evidence, P13-07 adds
 packaged install/run restore/background-policy evidence, P13-08 has real 8h/24h
 clean soak reports, and P13-09 exposes a complete package
