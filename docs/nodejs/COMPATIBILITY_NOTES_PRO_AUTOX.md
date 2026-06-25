@@ -454,6 +454,14 @@ packaged WASI behavior remain unavailable. Packages that require desktop WASI
 still need a future controlled profile with scoped or user-authorized roots,
 resource budgets, and escape-denial evidence.
 
+P13-53 records Pro parity examples as partial. AutoJs6 Node now ships
+`sample/nodejs/pro-parity-suite`, a guarded catalog for `$autojs.java`,
+`rhino.install`, UI, floaty/overlay, tasks, screenshot/OCR, and accessibility
+migration. The catalog records required capabilities, expected output,
+packaged behavior, and skip reasons for unavailable providers or permissions.
+It is documentation and static-verification evidence only; the snippets are
+not part of default runtime smoke and do not grant Pro profile authority.
+
 Porting note: migrate one-shot disposable task cases to `work_manager` or
 `compat.tasks`. Keep Rhino scripts that depend on daily/weekly user task rows,
 IntentTask triggers, or raw task object mutation on Rhino until a dedicated

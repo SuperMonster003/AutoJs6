@@ -2153,6 +2153,20 @@ This suite verifies Kotlin privacy/disclosure policy, runtime frozen
 Android permission metadata, packaged denial policy, and Doctor privacy
 redaction metadata. P13-52 records privacy and disclosure policy as partial.
 
+Phase 13 Pro parity examples gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProParityExamples
+```
+
+This host gate records P13-53 as partial. It requires the
+`sample/nodejs/pro-parity-suite` catalog, `examples.json` snippet metadata,
+expected output markers, README capability/packaged-behavior/skip-reason
+coverage, root example manifest registration, surface manifest evidence,
+release matrix updates, and Phase 13 docs. The examples cover `$autojs.java`,
+`rhino.install`, UI, floaty/overlay, tasks, screenshot/OCR, and accessibility,
+but remain outside default runtime smoke and do not grant Pro authority.
+
 Current feature flag registry focused instrumentation:
 
 ```powershell

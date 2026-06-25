@@ -765,7 +765,7 @@
         "P13-56",
         "P13-57"
       ],
-      "summary": "Publish Pro/Desktop examples, type declarations, migration docs, Pro9 comparison updates, summary generator, and final Phase 13 gate.",
+      "summary": "Publish Pro/Desktop examples, type declarations, migration docs, Pro9 comparison updates, summary generator, and final Phase 13 gate. P13-53 records Pro parity examples as partial with phase13-pro-parity-examples evidence.",
       "risk": "medium",
       "runtimeSurface": [
         "sample/nodejs Pro parity examples",
@@ -773,7 +773,15 @@
         "autojs6-node TypeScript declarations",
         "Phase 13 generated summary"
       ],
-      "evidence": [],
+      "evidence": [
+        "sample/nodejs/pro-parity-suite",
+        "sample/nodejs/pro-parity-suite/examples.json",
+        "tools/nodejs/phase13/verify-pro-parity-examples.js",
+        ":app:verifyNodePhase13ProParityExamples",
+        "docs/nodejs/reports/phase13/P13_53_PRO_PARITY_EXAMPLES.md",
+        "build/reports/nodejs/phase13-pro-parity-examples.json",
+        "build/reports/nodejs/phase13-pro-parity-examples.md"
+      ],
       "rollback": "Keep Phase 13 examples and docs marked as gated until runtime promotion evidence lands."
     }
   ]

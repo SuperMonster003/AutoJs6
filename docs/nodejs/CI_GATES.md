@@ -847,6 +847,14 @@ manifest evidence, and docs updates while keeping implicit high privilege and
 packaged implicit high privilege denied. P13-52 records privacy and disclosure
 policy as partial; prompt UI, foreground notification ownership, packaged
 review UI, and runtime enforcement remain unpromoted.
+`verifyNodePhase13ProParityExamples` records P13-53 as the Pro parity examples
+gate. It requires the `sample/nodejs/pro-parity-suite` catalog, per-snippet
+required capabilities, expected outputs, packaged behavior, skip reasons,
+`verifyNodeExamples` registration, surface manifest evidence, release matrix
+updates, and docs updates while keeping the high-risk snippets out of default
+runtime smoke. P13-53 records Pro parity examples as partial; live packaged Pro
+execution, prompt/disclosure UI, provider promotion, and device permission
+matrices remain unpromoted.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
 require/resolve denial, local shadow-package protection, the existing VM design

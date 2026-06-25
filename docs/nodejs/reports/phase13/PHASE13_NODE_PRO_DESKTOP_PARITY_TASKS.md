@@ -1657,6 +1657,20 @@ P13 task 本身使用以下执行状态：
   - 验收：
     - 每个示例有 expected output、required capabilities、packaged behavior。
     - 不可用条件写入 README 和 smoke skip reason。
+  - Progress:
+    - P13-53 partial landing adds `sample/nodejs/pro-parity-suite` with
+      guarded snippets for `$autojs.java`, `rhino.install`, UI,
+      floaty/overlay, tasks, screenshot/OCR, and accessibility.
+    - Each catalog entry in `sample/nodejs/pro-parity-suite/examples.json`
+      records required capabilities, expected output, packaged behavior, and
+      skip reason.
+    - Host verifier: `tools/nodejs/phase13/verify-pro-parity-examples.js`.
+    - Gradle gate: `:app:verifyNodePhase13ProParityExamples`.
+    - Report:
+      `docs/nodejs/reports/phase13/P13_53_PRO_PARITY_EXAMPLES.md`.
+    - Remaining P13-53 blockers: live packaged Pro examples, prompt/disclosure
+      UI, provider promotion, permission device matrix, and default-runtime
+      smoke inclusion remain gated.
 
 - [ ] P13-54: 发布 desktop Node parity examples。
   - 范围：新增示例覆盖 ESM、worker、http/https、fs advanced、WASI、inspector、

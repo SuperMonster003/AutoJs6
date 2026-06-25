@@ -1,0 +1,67 @@
+# P13-53 Pro Parity Examples
+
+P13-53 records Pro parity examples as partial. The landing adds
+`sample/nodejs/pro-parity-suite` as a static, machine-verifiable catalog for
+Auto.js Pro-style migration snippets without promoting the underlying
+high-risk providers.
+
+## Scope
+
+The catalog covers:
+
+- `$autojs.java` / `require("java")` allowlist interop.
+- `rhino.install({ experimental: true })` Java proxy globals.
+- Activity-owned UI layout.
+- Floaty-style overlay permission and settings flow.
+- WorkManager one-shot task migration.
+- Screenshot plus OCR migration.
+- Accessibility selector migration.
+
+Each entry in `sample/nodejs/pro-parity-suite/examples.json` declares:
+
+- `requiredCapabilities`
+- `targetProfile`
+- `expectedOutput`
+- `packagedBehavior`
+- `skipReason`
+
+The default runner `main.cjs` prints the catalog-backed expected markers listed
+in `expected-output.txt`. The runnable snippets under `snippets/` keep guarded
+try/catch paths and print explicit skip markers when a provider, permission, or
+profile is unavailable.
+
+## Gate
+
+Host verifier:
+
+```powershell
+node tools/nodejs/phase13/verify-pro-parity-examples.js --repo-root . --report-dir build\reports\nodejs
+```
+
+Gradle gate:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProParityExamples
+```
+
+Reports:
+
+- `build/reports/nodejs/phase13-pro-parity-examples.json`
+- `build/reports/nodejs/phase13-pro-parity-examples.md`
+
+## Current Decision
+
+Status is `partial`.
+
+This gate proves the example catalog, metadata, documentation, and skip
+contract. It does not grant `pro_compat_opt_in` authority, does not add the
+high-risk snippets to default runtime smoke, and does not claim packaged Pro
+execution is ready.
+
+Remaining blockers:
+
+- Live packaged Pro examples need reviewed prompt/disclosure UI and packaged
+  APK evidence.
+- Java/UI/overlay/accessibility/screenshot/OCR providers still need promotion
+  gates before the snippets can be treated as normal runnable examples.
+- Device matrix coverage and permission-state smoke remain future work.

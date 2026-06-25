@@ -1231,6 +1231,14 @@ root/Shizuku shell, `child_process`, native addon, inspector, and WASI without
 granting implicit high privilege; prompt UI, notification ownership, and
 packaged disclosure review remain future work.
 
+P13-53 records Pro parity examples as partial: AutoJs6 Node now includes
+`sample/nodejs/pro-parity-suite`, a static example catalog for `$autojs.java`,
+`rhino.install`, UI, floaty/overlay, tasks, screenshot/OCR, and accessibility
+migration. Each snippet records required capabilities, expected output,
+packaged behavior, and a skip reason. The catalog improves script developer
+porting evidence without adding the high-risk snippets to default runtime
+smoke or granting Pro authority.
+
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
 yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout

@@ -91,7 +91,28 @@ node tools/nodejs/project/autojs6-node-project.js validate D:\work\my-node-app
 - `wasi-scoped-fs`: controlled WASI facade and scoped-fs policy placeholder.
 - `wasm-worker`: design-gated WASM worker integration placeholder.
 - `wasm-plugin`: JS plus WASM plugin package policy placeholder.
+- `pro-parity-suite`: Phase 13 Pro parity examples for Java interop, Rhino proxy install, UI, overlay, tasks, screenshot/OCR, and accessibility migration.
 - `typescript-smoke`: compile-time smoke for the checked-in AutoJs6 Node bridge declarations.
+
+## Phase 13 Pro Parity Examples
+
+`sample/nodejs/pro-parity-suite` is a migration catalog for high-value
+Auto.js Pro-style APIs. It includes guarded snippets for `$autojs.java`,
+`rhino.install`, UI, floaty/overlay, tasks, screenshot/OCR, and accessibility.
+Each catalog entry declares required capabilities, expected output, packaged
+behavior, and the skip reason used when a provider, permission, or profile is
+unavailable.
+
+Verify the catalog with:
+
+```powershell
+.\gradlew.bat --console=plain :app:verifyNodePhase13ProParityExamples
+```
+
+P13-53 keeps these examples out of the default runtime smoke list. The catalog
+is static evidence for migration shape and docs parity; packaged Pro execution
+remains gated by provider promotion, disclosure review, and device permission
+evidence.
 
 ## Smoke Coverage
 
