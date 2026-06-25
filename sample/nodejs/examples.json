@@ -392,6 +392,13 @@
       "tags": ["phase13", "main-app", "bridge", "pro-parity", "ui", "requires-accessibility", "requires-screen-capture", "requires-image", "ocr", "design-gated"],
       "mainAppSmoke": false,
       "packagedCompatible": false
+    },
+    {
+      "name": "desktop-parity-suite",
+      "status": "partial",
+      "tags": ["phase13", "main-app", "desktop-parity", "commonjs", "esm", "worker", "network", "http", "scoped-fs", "fs-promises", "filehandle", "fs-watch", "wasi", "inspector", "pure-js-npm", "design-gated", "security"],
+      "mainAppSmoke": false,
+      "packagedCompatible": false
     }
   ]
 }

@@ -1,0 +1,119 @@
+{
+  "schema": "autojs6-node-desktop-parity-examples-v1",
+  "phase": "P13-54",
+  "status": "partial",
+  "examples": [
+    {
+      "id": "esm-loader",
+      "title": "managed local ESM loader migration",
+      "file": "snippets/esm-loader.cjs",
+      "targetProfile": "desktop_compat_opt_in",
+      "requiredCapabilities": ["esm_loader"],
+      "expectedOutput": "sample.desktop-parity-suite.esm-loader=PASS",
+      "safeProfile": {
+        "profile": "safe_default",
+        "denialExample": "snippets/safe-denials.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.safe-denial.esm-loader=DENIED",
+        "behavior": "Safe profile allows managed local ESM only and keeps raw loader hooks plus network/file/data URL imports denied"
+      },
+      "packagedBehavior": "managed local ESM graph only until packaged encrypted graph parity lands",
+      "skipReason": "managed ESM loader or dynamic import graph may be unavailable"
+    },
+    {
+      "id": "worker-threads",
+      "title": "worker_threads opt-in migration",
+      "file": "snippets/worker-threads.cjs",
+      "targetProfile": "desktop_compat_opt_in",
+      "requiredCapabilities": ["worker_threads"],
+      "expectedOutput": "sample.desktop-parity-suite.worker-threads=PASS",
+      "safeProfile": {
+        "profile": "safe_default",
+        "denialExample": "snippets/safe-denials.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.safe-denial.worker-threads=DENIED",
+        "behavior": "Safe profile rejects default worker authority and requires explicit native preflight"
+      },
+      "packagedBehavior": "packaged worker execution remains gated by native preflight and source graph evidence",
+      "skipReason": "native worker_threads provider may be unavailable"
+    },
+    {
+      "id": "http-https",
+      "title": "controlled HTTP/HTTPS client migration",
+      "file": "snippets/http-https.cjs",
+      "targetProfile": "desktop_compat_opt_in",
+      "requiredCapabilities": ["network", "http", "https"],
+      "expectedOutput": "sample.desktop-parity-suite.http-https=PASS",
+      "safeProfile": {
+        "profile": "safe_default",
+        "denialExample": "snippets/safe-denials.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.safe-denial.http-https=DENIED",
+        "behavior": "Safe profile denies raw server/listen/CONNECT/socket authority"
+      },
+      "packagedBehavior": "packaged network requires explicit capability, Android permission, and provider evidence",
+      "skipReason": "controlled HTTP/HTTPS provider or network permission may be unavailable"
+    },
+    {
+      "id": "fs-advanced",
+      "title": "scoped advanced fs migration",
+      "file": "snippets/fs-advanced.cjs",
+      "targetProfile": "desktop_compat_opt_in",
+      "requiredCapabilities": ["fs.advanced", "scoped_fs"],
+      "expectedOutput": "sample.desktop-parity-suite.fs-advanced=PASS",
+      "safeProfile": {
+        "profile": "safe_default",
+        "denialExample": "snippets/safe-denials.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.safe-denial.fs-advanced=DENIED",
+        "behavior": "Safe profile stays scoped to the project working directory and denies expanded roots"
+      },
+      "packagedBehavior": "packaged advanced fs remains gated by close-on-destroy and expanded-root evidence",
+      "skipReason": "advanced scoped fs APIs or watcher support may be unavailable"
+    },
+    {
+      "id": "wasi",
+      "title": "controlled WASI profile migration",
+      "file": "snippets/wasi.cjs",
+      "targetProfile": "desktop_compat_opt_in",
+      "requiredCapabilities": ["wasi"],
+      "expectedOutput": "sample.desktop-parity-suite.wasi=PASS",
+      "safeProfile": {
+        "profile": "safe_default",
+        "denialExample": "snippets/safe-denials.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.safe-denial.wasi=DENIED",
+        "behavior": "Safe profile denies raw wasi and node:wasi while pure WebAssembly remains separate"
+      },
+      "packagedBehavior": "packaged WASI requires scoped preopen, fd/env/args, resource, and worker evidence",
+      "skipReason": "controlled WASI provider may be unavailable"
+    },
+    {
+      "id": "inspector",
+      "title": "debug inspector profile migration",
+      "file": "snippets/inspector.cjs",
+      "targetProfile": "desktop_compat_opt_in",
+      "requiredCapabilities": ["inspector"],
+      "expectedOutput": "sample.desktop-parity-suite.inspector=PASS",
+      "safeProfile": {
+        "profile": "safe_default",
+        "denialExample": "snippets/safe-denials.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.safe-denial.inspector=DENIED",
+        "behavior": "Safe profile denies inspector and debug session authority"
+      },
+      "packagedBehavior": "packaged inspector is release-denied until debug UI and redaction evidence land",
+      "skipReason": "debug profile or inspector provider may be unavailable"
+    },
+    {
+      "id": "npm-dependency",
+      "title": "sanitized pure JavaScript npm dependency migration",
+      "file": "snippets/npm-dependency.cjs",
+      "targetProfile": "desktop_compat_opt_in",
+      "requiredCapabilities": ["package_manager", "pure_js_npm"],
+      "expectedOutput": "sample.desktop-parity-suite.npm-dependency=PASS",
+      "safeProfile": {
+        "profile": "safe_default",
+        "denialExample": "snippets/safe-denials.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.safe-denial.npm-dependency=DENIED",
+        "behavior": "Safe profile allows only checked-in sanitized pure JS dependencies and denies registry/lifecycle/native paths"
+      },
+      "packagedBehavior": "packaged dependency distribution remains gated by integrity and builder evidence",
+      "skipReason": "package manager facade or dependency corpus metadata may be unavailable"
+    }
+  ]
+}
