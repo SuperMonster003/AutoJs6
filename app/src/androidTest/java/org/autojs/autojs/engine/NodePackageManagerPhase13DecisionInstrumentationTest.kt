@@ -436,10 +436,40 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   assert.strictEqual(tarballPlan.resolution.status, "integrity_supplied");
                   assert.strictEqual(tarballPlan.resolution.tarballUrl, "https://registry.npmjs.org/@autojs6/test/-/test-1.0.0.tgz");
                   assert.strictEqual(tarballPlan.resolution.integrity, "sha512-test");
+                  assert.strictEqual(tarballPlan.resolution.integrityAlgorithm, "sha512");
+                  assert.strictEqual(tarballPlan.resolution.integrityAlgorithmAllowed, true);
+                  assert.strictEqual(tarballPlan.resolution.integrityStatus, "expected_integrity_sha512");
+                  assert.strictEqual(tarballPlan.resolution.urlProtocol, "https");
+                  assert.strictEqual(tarballPlan.resolution.urlHost, "registry.npmjs.org");
+                  assert.strictEqual(tarballPlan.resolution.urlStatus, "remote_url");
+                  assert.strictEqual(tarballPlan.resolution.archiveExtension, ".tgz");
+                  assert.strictEqual(tarballPlan.resolution.tarballBasename, "test-1.0.0.tgz");
+                  assert.strictEqual(tarballPlan.resolution.inferredName, "@autojs6/test");
+                  assert.strictEqual(tarballPlan.resolution.resolvedName, "@autojs6/test");
+                  assert.strictEqual(tarballPlan.resolution.inferredVersion, "1.0.0");
+                  assert.strictEqual(tarballPlan.resolution.resolvedVersion, "1.0.0");
+                  assert.strictEqual(tarballPlan.resolution.nameMatches, true);
+                  assert.strictEqual(tarballPlan.resolution.versionMatches, true);
                   assert.strictEqual(Object.isFrozen(tarballPlan), true);
                   assert.strictEqual(Object.isFrozen(tarballPlan.request), true);
                   assert.strictEqual(Object.isFrozen(tarballPlan.resolution), true);
                   assert.strictEqual(Object.isFrozen(tarballPlan.policy), true);
+                  const tarballMismatchPlan = await packageManager.planTarballInstall({
+                    tarballUrl: "http://registry.npmjs.org/left-pad/-/left-pad-1.3.0.tgz",
+                    name: "right-pad",
+                    version: "1.2.0",
+                    expectedIntegrity: "sha1-test"
+                  });
+                  assert.strictEqual(tarballMismatchPlan.status, "blocked_by_policy");
+                  assert.strictEqual(tarballMismatchPlan.resolution.urlProtocol, "http");
+                  assert.strictEqual(tarballMismatchPlan.resolution.urlStatus, "remote_url");
+                  assert.strictEqual(tarballMismatchPlan.resolution.inferredName, "left-pad");
+                  assert.strictEqual(tarballMismatchPlan.resolution.inferredVersion, "1.3.0");
+                  assert.strictEqual(tarballMismatchPlan.resolution.nameMatches, false);
+                  assert.strictEqual(tarballMismatchPlan.resolution.versionMatches, false);
+                  assert.strictEqual(tarballMismatchPlan.resolution.integrityAlgorithm, "sha1");
+                  assert.strictEqual(tarballMismatchPlan.resolution.integrityAlgorithmAllowed, false);
+                  assert.strictEqual(tarballMismatchPlan.resolution.integrityStatus, "expected_integrity_unsupported_algorithm");
                   const planInstallResult = await packageManager.planInstall({
                     name: planName,
                     version: "1.0.0",
@@ -574,6 +604,12 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     tarballPlan.status,
                     tarballPlan.sourceAuthority,
                     tarballPlan.resolution.status,
+                    tarballPlan.resolution.inferredName,
+                    tarballPlan.resolution.inferredVersion,
+                    tarballPlan.resolution.integrityStatus,
+                    tarballMismatchPlan.resolution.nameMatches,
+                    tarballMismatchPlan.resolution.versionMatches,
+                    tarballMismatchPlan.resolution.integrityStatus,
                     planInstallResult.status,
                     planInstallResult.grantsInstallAuthority,
                     installedResult.status,
@@ -615,7 +651,7 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "guarded_local_unpacked_mutation|local_unpacked_host_managed_only|" +
                     "local_unpacked_host_managed|true|true|" +
                     "planInstall,planUpdate,planRemove,planRegistryInstall,planTarballInstall|install,update,remove|" +
-                    "blocked_by_policy|raw_registry_denied|resolved_from_dist_tag|1.2.3|resolved_from_range|1.2.3|expected_integrity_matched|expected_integrity_mismatch|blocked_by_policy|blocked_by_policy|remote_tarball_denied|integrity_supplied|" +
+                    "blocked_by_policy|raw_registry_denied|resolved_from_dist_tag|1.2.3|resolved_from_range|1.2.3|expected_integrity_matched|expected_integrity_mismatch|blocked_by_policy|blocked_by_policy|remote_tarball_denied|integrity_supplied|@autojs6/test|1.0.0|expected_integrity_sha512|false|false|expected_integrity_unsupported_algorithm|" +
                     "ready|false|installed|already_installed|" +
                     "ready|updated|ready|removed|ERR_AUTOJS6_PACKAGE_MANAGER_MUTATION_NOT_CONFIRMED|" +
                     "ERR_AUTOJS6_BRIDGE_INVALID_REQUEST|ERR_AUTOJS6_NPM_CLI_DENIED|ERR_AUTOJS6_NPM_REGISTRY_DENIED|" +

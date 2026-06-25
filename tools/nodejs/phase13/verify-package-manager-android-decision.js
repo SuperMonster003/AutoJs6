@@ -152,11 +152,14 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "function planTarballInstall(request)"),
       token(files.nodeBridgeSources, "function __autojs6_package_manager_registry_resolution"),
       token(files.nodeBridgeSources, "function __autojs6_package_manager_registry_resolve_range"),
+      token(files.nodeBridgeSources, "function __autojs6_package_manager_tarball_url_fields"),
       token(files.nodeBridgeSources, "autojs6-node-package-manager-registry-resolution-v1"),
       token(files.nodeBridgeSources, "autojs6-node-package-manager-tarball-resolution-v1"),
       token(files.nodeBridgeSources, "resolved_from_dist_tag"),
       token(files.nodeBridgeSources, "resolved_from_range"),
       token(files.nodeBridgeSources, "expected_integrity_mismatch"),
+      token(files.nodeBridgeSources, "expected_integrity_unsupported_algorithm"),
+      token(files.nodeBridgeSources, "inferredVersion"),
       token(files.nodeBridgeSources, "function install(request)"),
       token(files.nodeBridgeSources, "function update(request)"),
       token(files.nodeBridgeSources, "function remove(request)"),
@@ -178,6 +181,7 @@ function buildReport(files) {
       token(files.typesPackageManager, "export interface RegistryPackument"),
       token(files.typesPackageManager, "export interface RemotePlanResolution"),
       token(files.typesPackageManager, "export type RemotePlanIntegrityStatus"),
+      token(files.typesPackageManager, "export type RemotePlanUrlStatus"),
       token(files.typesPackageManager, "sourcePolicy(): SourcePolicy"),
       token(files.typesPackageManager, "planInstall(request: PlanSourceRequest): Promise<PackagePlan>"),
       token(files.typesPackageManager, "planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>"),
@@ -190,11 +194,14 @@ function buildReport(files) {
       token(files.typesIndex, './npm.d.ts'),
       token(files.typescriptSmoke, "packageManager.RegistryPackument"),
       token(files.typescriptSmoke, "packageManagerRangeRegistryRequest"),
+      token(files.typescriptSmoke, "packageManagerTarballRequest"),
       token(files.p13PackageManagerTest, "metadataRegistryPlan.resolution.status"),
       token(files.p13PackageManagerTest, "rangeRegistryPlan.resolution.status"),
       token(files.p13PackageManagerTest, "expected_integrity_mismatch"),
+      token(files.p13PackageManagerTest, "tarballMismatchPlan.resolution.integrityStatus"),
       token(files.conformanceTest, "metadataRegistryPlanResult.resolution.status"),
       token(files.conformanceTest, "rangeRegistryPlanResult.resolution.status"),
+      token(files.conformanceTest, "npmTarballPlanResult.resolution.inferredName"),
       token(files.p13AndroidManagerReport, "`NodeAndroidPackageInstallManager` supports"),
       token(files.p13AndroidManagerVerifier, "verifyNodePhase13AndroidPackageInstallManager"),
     ], [
@@ -301,11 +308,14 @@ function buildReport(files) {
         files.nodeBridgeSources.text.includes("function planTarballInstall(request)") &&
         files.nodeBridgeSources.text.includes("function __autojs6_package_manager_registry_resolution") &&
         files.nodeBridgeSources.text.includes("function __autojs6_package_manager_registry_resolve_range") &&
+        files.nodeBridgeSources.text.includes("function __autojs6_package_manager_tarball_url_fields") &&
         files.nodeBridgeSources.text.includes("autojs6-node-package-manager-registry-resolution-v1") &&
         files.nodeBridgeSources.text.includes("autojs6-node-package-manager-tarball-resolution-v1") &&
         files.nodeBridgeSources.text.includes("resolved_from_dist_tag") &&
         files.nodeBridgeSources.text.includes("resolved_from_range") &&
         files.nodeBridgeSources.text.includes("expected_integrity_mismatch") &&
+        files.nodeBridgeSources.text.includes("expected_integrity_unsupported_algorithm") &&
+        files.nodeBridgeSources.text.includes("inferredVersion") &&
         files.nodeBridgeSources.text.includes("function install(request)") &&
         files.nodeBridgeSources.text.includes('permissions: ["package_manager", "package_manager.mutate"]') &&
         files.nodeBridgeSources.text.includes("autojs6-node-package-manager-source-policy-v1") &&
@@ -319,6 +329,7 @@ function buildReport(files) {
         files.typesPackageManager.text.includes("export interface RegistryPackument") &&
         files.typesPackageManager.text.includes("export interface RemotePlanResolution") &&
         files.typesPackageManager.text.includes("export type RemotePlanIntegrityStatus") &&
+        files.typesPackageManager.text.includes("export type RemotePlanUrlStatus") &&
         files.typesPackageManager.text.includes("sourcePolicy(): SourcePolicy") &&
         files.typesPackageManager.text.includes("planInstall(request: PlanSourceRequest): Promise<PackagePlan>") &&
         files.typesPackageManager.text.includes("planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>") &&
@@ -330,15 +341,19 @@ function buildReport(files) {
         files.typesNpm.text.includes("status(): NpmFacadeStatus") &&
         files.typesNpm.text.includes("export type RegistryPackument = packageManager.RegistryPackument") &&
         files.typesNpm.text.includes("export type RemotePlanIntegrityStatus = packageManager.RemotePlanIntegrityStatus") &&
+        files.typesNpm.text.includes("export type RemotePlanUrlStatus = packageManager.RemotePlanUrlStatus") &&
         files.typesNpm.text.includes("planRegistryInstall(request: PlanRegistryInstallRequest): Promise<RemotePackagePlan>") &&
         files.typesNpm.text.includes("cli(...args: readonly unknown[]): never") &&
         files.typescriptSmoke.text.includes("packageManager.RegistryPackument") &&
         files.typescriptSmoke.text.includes("packageManagerRangeRegistryRequest") &&
+        files.typescriptSmoke.text.includes("packageManagerTarballRequest") &&
         files.p13PackageManagerTest.text.includes("metadataRegistryPlan.resolution.status") &&
         files.p13PackageManagerTest.text.includes("rangeRegistryPlan.resolution.status") &&
         files.p13PackageManagerTest.text.includes("expected_integrity_mismatch") &&
+        files.p13PackageManagerTest.text.includes("tarballMismatchPlan.resolution.integrityStatus") &&
         files.conformanceTest.text.includes("metadataRegistryPlanResult.resolution.status") &&
         files.conformanceTest.text.includes("rangeRegistryPlanResult.resolution.status") &&
+        files.conformanceTest.text.includes("npmTarballPlanResult.resolution.inferredName") &&
         files.typesIndex.text.includes('./npm.d.ts') &&
         !packageManagerProfile.includes('jsBridge: "partial"') &&
         !packageManagerProfile.includes('requirePackageManager: "partial"') &&
@@ -381,6 +396,8 @@ function buildReport(files) {
         files.nodeBridgeSources.text.includes("autojs6-node-package-manager-tarball-resolution-v1") &&
         files.nodeBridgeSources.text.includes("resolved_from_range") &&
         files.nodeBridgeSources.text.includes("expected_integrity_mismatch") &&
+        files.nodeBridgeSources.text.includes("function __autojs6_package_manager_tarball_url_fields") &&
+        files.nodeBridgeSources.text.includes("expected_integrity_unsupported_algorithm") &&
         files.nodeBridgeSources.text.includes("function planRegistryInstall(request)") &&
         files.nodeBridgeSources.text.includes("function planTarballInstall(request)"),
       lifecycleScriptsPromoted: false,

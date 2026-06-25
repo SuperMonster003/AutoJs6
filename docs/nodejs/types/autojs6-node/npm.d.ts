@@ -12,6 +12,7 @@ declare module "npm" {
     export type RemotePlanResolution = packageManager.RemotePlanResolution;
     export type RemotePlanSelectorKind = packageManager.RemotePlanSelectorKind;
     export type RemotePlanIntegrityStatus = packageManager.RemotePlanIntegrityStatus;
+    export type RemotePlanUrlStatus = packageManager.RemotePlanUrlStatus;
     export type SourcePolicy = packageManager.SourcePolicy;
     export type PlanSourceRequest = packageManager.PlanSourceRequest;
     export type PlanRemoveRequest = packageManager.PlanRemoveRequest;

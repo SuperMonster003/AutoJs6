@@ -861,6 +861,13 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(npmTarballPlanResult.sourceAuthority, "remote_tarball_denied");
               assert.strictEqual(npmTarballPlanResult.networkAccess, false);
               assert.strictEqual(npmTarballPlanResult.resolution.status, "integrity_supplied");
+              assert.strictEqual(npmTarballPlanResult.resolution.urlStatus, "remote_url");
+              assert.strictEqual(npmTarballPlanResult.resolution.inferredName, "@autojs6/conformance");
+              assert.strictEqual(npmTarballPlanResult.resolution.inferredVersion, "1.0.0");
+              assert.strictEqual(npmTarballPlanResult.resolution.resolvedVersion, "1.0.0");
+              assert.strictEqual(npmTarballPlanResult.resolution.integrityAlgorithm, "sha512");
+              assert.strictEqual(npmTarballPlanResult.resolution.integrityAlgorithmAllowed, true);
+              assert.strictEqual(npmTarballPlanResult.resolution.integrityStatus, "expected_integrity_sha512");
               assert.strictEqual(requests.length, beforeRemotePackagePlans, "remote package plan APIs must not dispatch bridge requests");
               const planInstallResult = await expectPromise("package_manager.planInstall", packageManager.planInstall({ name: "@autojs6/conformance", version: "1.0.0", sourceDir: "node_modules/@autojs6/conformance", timeoutMs: 1059 }));
               assert.strictEqual(planInstallResult.status, "ready");

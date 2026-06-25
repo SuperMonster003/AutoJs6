@@ -26185,6 +26185,80 @@ std::string buildEmbeddedScriptExecutionSource(
       ? "expected_integrity_matched"
       : "expected_integrity_mismatch";
   }
+  function __autojs6_package_manager_integrity_algorithm(value) {
+    const match = /^([A-Za-z0-9][A-Za-z0-9-]*)-/.exec(__autojs6_package_manager_string(value).trim());
+    return match ? match[1].toLowerCase() : "";
+  }
+  function __autojs6_package_manager_tarball_integrity_status(expectedIntegrity) {
+    if (!expectedIntegrity) {
+      return "expected_integrity_missing";
+    }
+    const algorithm = __autojs6_package_manager_integrity_algorithm(expectedIntegrity);
+    if (!algorithm) {
+      return "expected_integrity_malformed";
+    }
+    return algorithm === "sha512"
+      ? "expected_integrity_sha512"
+      : "expected_integrity_unsupported_algorithm";
+  }
+  function __autojs6_package_manager_decode_url_segment(value) {
+    const text = __autojs6_package_manager_string(value);
+    try {
+      return decodeURIComponent(text);
+    } catch (error) {
+      return text;
+    }
+  }
+  function __autojs6_package_manager_tarball_package_from_parts(parts) {
+    const markerIndex = parts.indexOf("-");
+    if (markerIndex <= 0) {
+      return "";
+    }
+    const first = parts[0] || "";
+    if (first.charAt(0) === "@") {
+      return first.indexOf("/") >= 0
+        ? first
+        : parts.length > 1
+          ? first + "/" + (parts[1] || "")
+          : first;
+    }
+    return first;
+  }
+  function __autojs6_package_manager_tarball_url_fields(tarballUrl) {
+    const source = __autojs6_package_manager_string(tarballUrl).trim();
+    const fields = {
+      urlProtocol: "",
+      urlHost: "",
+      urlPath: "",
+      urlStatus: source ? "invalid_url" : "empty_url",
+      archiveExtension: "",
+      tarballBasename: "",
+      inferredName: "",
+      inferredVersion: ""
+    };
+    const match = /^([A-Za-z][A-Za-z0-9+.-]*):\/\/([^/?#]+)([^?#]*)/.exec(source);
+    if (!match) {
+      return Object.freeze(fields);
+    }
+    fields.urlProtocol = match[1].toLowerCase();
+    fields.urlHost = match[2];
+    fields.urlPath = match[3] || "/";
+    const parts = fields.urlPath.split("/").filter(Boolean).map(__autojs6_package_manager_decode_url_segment);
+    fields.tarballBasename = parts.length ? parts[parts.length - 1] : "";
+    fields.archiveExtension = /\.tgz$/i.test(fields.tarballBasename) ? ".tgz" : "";
+    fields.inferredName = __autojs6_package_manager_tarball_package_from_parts(parts);
+    const basename = fields.archiveExtension
+      ? fields.tarballBasename.slice(0, -fields.archiveExtension.length)
+      : fields.tarballBasename;
+    const versionMatch = /-(\d+\.\d+\.\d+)$/.exec(basename);
+    fields.inferredVersion = versionMatch ? versionMatch[1] : "";
+    fields.urlStatus = fields.urlProtocol === "http" || fields.urlProtocol === "https"
+      ? fields.archiveExtension
+        ? "remote_url"
+        : "unsupported_archive"
+      : "unsupported_protocol";
+    return Object.freeze(fields);
+  }
   function __autojs6_package_manager_registry_resolution(request, input) {
     const metadata = __autojs6_package_manager_registry_packument(input);
     const requestedVersion = __autojs6_package_manager_string(request.version).trim();
@@ -26203,14 +26277,26 @@ std::string buildEmbeddedScriptExecutionSource(
       selector: requestedVersion || requestedRange || requestedTag,
       selectorKind: requestedVersion ? "version" : requestedRange ? "range" : "tag",
       resolvedVersion: requestedVersion,
+      inferredName: "",
+      resolvedName: request.name,
+      inferredVersion: "",
+      versionMatches: true,
       registry: request.registry,
       tarballUrl: "",
       integrity: expectedIntegrity,
       expectedIntegrity,
       integrityStatus: __autojs6_package_manager_integrity_status(expectedIntegrity, "", !!metadata),
+      integrityAlgorithm: __autojs6_package_manager_integrity_algorithm(expectedIntegrity),
+      integrityAlgorithmAllowed: __autojs6_package_manager_integrity_algorithm(expectedIntegrity) === "sha512",
       shasum: "",
       hasMetadata: !!metadata,
-      rangeSupported: true
+      rangeSupported: true,
+      urlProtocol: "",
+      urlHost: "",
+      urlPath: "",
+      urlStatus: "not_applicable",
+      archiveExtension: "",
+      tarballBasename: ""
     };
     if (!metadata) {
       base.status = requestedVersion
@@ -26270,26 +26356,46 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_package_manager_tarball_resolution(request) {
     const expectedIntegrity = __autojs6_package_manager_string(request.expectedIntegrity).trim();
+    const urlFields = __autojs6_package_manager_tarball_url_fields(request.tarballUrl);
+    const requestedName = __autojs6_package_manager_string(request.name).trim();
+    const requestedVersion = __autojs6_package_manager_string(request.version).trim();
+    const inferredName = urlFields.inferredName;
+    const inferredVersion = urlFields.inferredVersion;
+    const resolvedName = requestedName || inferredName;
+    const resolvedVersion = requestedVersion || inferredVersion;
+    const integrityAlgorithm = __autojs6_package_manager_integrity_algorithm(expectedIntegrity);
     return Object.freeze({
       schema: "autojs6-node-package-manager-tarball-resolution-v1",
       status: expectedIntegrity ? "integrity_supplied" : "integrity_required",
-      name: request.name,
+      name: requestedName,
       metadataName: "",
-      nameMatches: true,
-      requestedVersion: request.version,
+      nameMatches: !requestedName || !inferredName || requestedName === inferredName,
+      requestedVersion,
       requestedRange: "",
       requestedTag: "",
       selector: request.tarballUrl,
       selectorKind: "tarball_url",
-      resolvedVersion: request.version,
+      resolvedVersion,
+      inferredName,
+      resolvedName,
+      inferredVersion,
+      versionMatches: !requestedVersion || !inferredVersion || requestedVersion === inferredVersion,
       registry: "",
       tarballUrl: request.tarballUrl,
       integrity: expectedIntegrity,
       expectedIntegrity,
-      integrityStatus: expectedIntegrity ? "expected_integrity_provided" : "expected_integrity_missing",
+      integrityStatus: __autojs6_package_manager_tarball_integrity_status(expectedIntegrity),
+      integrityAlgorithm,
+      integrityAlgorithmAllowed: integrityAlgorithm === "sha512",
       shasum: "",
       hasMetadata: false,
-      rangeSupported: true
+      rangeSupported: true,
+      urlProtocol: urlFields.urlProtocol,
+      urlHost: urlFields.urlHost,
+      urlPath: urlFields.urlPath,
+      urlStatus: urlFields.urlStatus,
+      archiveExtension: urlFields.archiveExtension,
+      tarballBasename: urlFields.tarballBasename
     });
   }
   function __autojs6_package_manager_record(value) {

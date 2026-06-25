@@ -147,7 +147,7 @@ declare module "package_manager" {
       | "integrity_required"
       | string;
 
-    export type RemotePlanSelectorKind = "version" | "range" | "tag" | string;
+    export type RemotePlanSelectorKind = "version" | "range" | "tag" | "tarball_url" | string;
 
     export type RemotePlanIntegrityStatus =
       | "metadata_not_provided"
@@ -156,6 +156,18 @@ declare module "package_manager" {
       | "expected_integrity_mismatch"
       | "metadata_integrity_missing"
       | "expected_integrity_provided"
+      | "expected_integrity_sha512"
+      | "expected_integrity_unsupported_algorithm"
+      | "expected_integrity_malformed"
+      | string;
+
+    export type RemotePlanUrlStatus =
+      | "not_applicable"
+      | "remote_url"
+      | "unsupported_protocol"
+      | "unsupported_archive"
+      | "invalid_url"
+      | "empty_url"
       | string;
 
     export interface RemotePlanResolution {
@@ -173,14 +185,26 @@ declare module "package_manager" {
       readonly selector: string;
       readonly selectorKind: RemotePlanSelectorKind;
       readonly resolvedVersion: string;
+      readonly inferredName: string;
+      readonly resolvedName: string;
+      readonly inferredVersion: string;
+      readonly versionMatches: boolean;
       readonly registry: string;
       readonly tarballUrl: string;
       readonly integrity: string;
       readonly expectedIntegrity: string;
       readonly integrityStatus: RemotePlanIntegrityStatus;
+      readonly integrityAlgorithm: string;
+      readonly integrityAlgorithmAllowed: boolean;
       readonly shasum: string;
       readonly hasMetadata: boolean;
       readonly rangeSupported: boolean;
+      readonly urlProtocol: string;
+      readonly urlHost: string;
+      readonly urlPath: string;
+      readonly urlStatus: RemotePlanUrlStatus;
+      readonly archiveExtension: string;
+      readonly tarballBasename: string;
     }
 
     export interface RemotePackagePlan {

@@ -548,9 +548,14 @@ async function smoke(): Promise<void> {
     expectedIntegrity: "sha512-types-smoke",
     packument: packageManagerPackument
   };
+  const packageManagerTarballRequest: packageManager.PlanTarballInstallRequest = {
+    tarballUrl: "https://registry.npmjs.org/@autojs6/types-smoke/-/types-smoke-1.0.0.tgz",
+    expectedIntegrity: "sha512-types-smoke"
+  };
   const packageManagerRemoteResolution: packageManager.RemotePlanResolution = {} as packageManager.RemotePlanResolution;
   const packageManagerRemoteSelectorKind: packageManager.RemotePlanSelectorKind = "range";
   const packageManagerRemoteIntegrityStatus: packageManager.RemotePlanIntegrityStatus = "expected_integrity_matched";
+  const packageManagerRemoteUrlStatus: packageManager.RemotePlanUrlStatus = "remote_url";
   const packageManagerInstall: (request: packageManager.MutationSourceRequest) => Promise<packageManager.OperationResult> = packageManager.install;
   const packageManagerUpdate: (request: packageManager.MutationSourceRequest) => Promise<packageManager.OperationResult> = packageManager.update;
   const packageManagerRemove: (request: packageManager.MutationRemoveRequest) => Promise<packageManager.OperationResult> = packageManager.remove;
@@ -565,6 +570,7 @@ async function smoke(): Promise<void> {
   const npmRemoteResolution: npm.RemotePlanResolution = packageManagerRemoteResolution;
   const npmRemoteSelectorKind: npm.RemotePlanSelectorKind = packageManagerRemoteSelectorKind;
   const npmRemoteIntegrityStatus: npm.RemotePlanIntegrityStatus = packageManagerRemoteIntegrityStatus;
+  const npmRemoteUrlStatus: npm.RemotePlanUrlStatus = packageManagerRemoteUrlStatus;
   const npmPlanRegistryInstall: (request: npm.PlanRegistryInstallRequest) => Promise<npm.RemotePackagePlan> = npm.planRegistryInstall;
   const npmPlanTarballInstall: (request: npm.PlanTarballInstallRequest) => Promise<npm.RemotePackagePlan> = npm.planTarballInstall;
   const npmInstall: (request: npm.MutationSourceRequest) => Promise<npm.OperationResult> = npm.install;
@@ -1078,9 +1084,11 @@ async function smoke(): Promise<void> {
   void packageManagerPackument;
   void packageManagerRegistryRequest;
   void packageManagerRangeRegistryRequest;
+  void packageManagerTarballRequest;
   void packageManagerRemoteResolution;
   void packageManagerRemoteSelectorKind;
   void packageManagerRemoteIntegrityStatus;
+  void packageManagerRemoteUrlStatus;
   void packageManagerInstall;
   void packageManagerUpdate;
   void packageManagerRemove;
@@ -1095,6 +1103,7 @@ async function smoke(): Promise<void> {
   void npmRemoteResolution;
   void npmRemoteSelectorKind;
   void npmRemoteIntegrityStatus;
+  void npmRemoteUrlStatus;
   void npmPlanRegistryInstall;
   void npmPlanTarballInstall;
   void npmInstall;
