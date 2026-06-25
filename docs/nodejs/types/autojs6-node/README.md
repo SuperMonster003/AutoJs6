@@ -111,10 +111,10 @@ callable `process_worker`/`compute_worker` facade, raw `child_process`, raw
 process handles, and packaged process-worker behavior remain unintroduced.
 
 P13-36 extends the `autojs6:profile` declaration with `vmProfile`. The field
-reports default VM denial and future Desktop/Debug enablement requirements for
-`vm.Script`, contexts, timeout cancellation, private binding denial, bridge and
-host object denial, scoped-fs preservation, memory limits, and packaged
-behavior. It does not declare `require("vm")` or make VM APIs callable.
+reports native VM availability and the remaining Desktop/Debug hardening
+requirements for memory limits, compiled-script budgets, bridge and host object
+boundaries, scoped-fs preservation, and packaged behavior. Runtime now routes
+`require("vm")` and `require("node:vm")` to Node's native VM builtin.
 
 P13-37 extends the `autojs6:profile` declaration with `inspectorProfile`. The
 field reports default inspector denial and future Debug enablement requirements

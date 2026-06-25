@@ -114,7 +114,7 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 ## ERR_AUTOJS6_BUILTIN_DISABLED
 
 - Meaning: A Node builtin is disabled by the Safe Node Profile.
-- Common cause: requiring `child_process`, `vm`, `inspector`, `dgram`, or another denied builtin.
+- Common cause: requiring `child_process`, `inspector`, `dgram`, `wasi`, or another denied builtin.
 - Example: `require("child_process")`.
 - How to fix: use the AutoJs-controlled module for the task, or keep the dependency out of the stable profile.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [SECURITY_MODEL.md](SECURITY_MODEL.md).
@@ -298,7 +298,7 @@ canonical AutoJs6 value through `autojs6Code` and `legacyCode`.
 ## ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED
 
 - Meaning: injected moduleSources exceeded the Safe Node Profile budget before native Node startup.
-- Common cause: too many preloaded modules, a single module over `262144` UTF-8 bytes, or total moduleSources over `524288` UTF-8 bytes.
+- Common cause: too many preloaded modules, a single module over `16777216` UTF-8 bytes, or total moduleSources over `67108864` UTF-8 bytes.
 - Example: packaging a large CommonJS graph into encrypted moduleSources.
 - How to fix: reduce bundled dependencies, split unsupported packages out of the packaged graph, or keep the app on disk-backed scoped `fs` instead of injected moduleSources.
 - Related docs: [COMPATIBILITY_PROFILE.md](COMPATIBILITY_PROFILE.md), [TESTING.md](TESTING.md).

@@ -1290,10 +1290,10 @@ install, lifecycle scripts, and native payloads remain gated unless a later
 runtime promotion gate explicitly changes their status.
 
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
-`vmProfile` diagnostics while keeping `vm` and `node:vm` denied. This is not
-yet Pro/desktop parity for packages that use `vm.Script` or contexts; timeout
-cancellation, memory budgets, context cleanup, bridge/process/global leakage
-denial, private binding denial, and packaged behavior remain open.
+`vmProfile` diagnostics and routes `vm` / `node:vm` to Node's native builtin.
+This improves Pro/desktop parity for packages that use `vm.Script` or contexts.
+Memory budgets, context cleanup stress, bridge/process/global leakage probes,
+private binding checks, and packaged behavior remain open.
 
 P13-37 records inspector/devtools debug profile as partial: Safe Node now
 exposes `inspectorProfile` diagnostics while keeping `inspector` and

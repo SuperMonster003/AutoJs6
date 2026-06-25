@@ -905,11 +905,11 @@ The gate lists completed/open/deferred/rejected categories, requires evidence
 for every promoted surface, and keeps open or decision-required blockers out of
 the completed bucket.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
-gate. It requires `vmProfile` diagnostics, stable `vm`/`node:vm`
-require/resolve denial, local shadow-package protection, the existing VM design
-gate, TypeScript declarations, surface manifest evidence, and docs updates
-while keeping callable `vm.Script`, context APIs, timeout cancellation, memory
-budgets, escape-denial evidence, and packaged behavior unpromoted.
+gate. It requires `vmProfile` diagnostics, native `vm`/`node:vm`
+require/resolve behavior, local shadow-package protection, the updated VM
+design gate, TypeScript declarations, surface manifest evidence, and docs
+updates while keeping memory/compiled-script budgets and packaged VM behavior
+as follow-up evidence.
 `verifyNodePhase13InspectorDebugProfileDecision` records P13-37 as the
 inspector/devtools debug profile decision gate. It requires `inspectorProfile`
 diagnostics, stable `inspector`/`node:inspector` require/resolve denial, local

@@ -460,10 +460,11 @@ inspector, and WASI. This blocks implicit high privilege while prompt UI,
 notification ownership, and packaged disclosure review remain future work.
 
 P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
-`vmProfile` diagnostics, but `vm`, `node:vm`, `vm.Script`, contexts,
-`compileFunction`, and VM module APIs remain unavailable. Packages that require
-Node's VM APIs still need a future Desktop/Debug profile with timeout, memory,
-escape-denial, and packaged behavior evidence.
+`vmProfile` diagnostics and now routes `vm` / `node:vm` to Node's native VM
+builtin. `vm.Script`, contexts, `compileFunction`, VM module APIs, and native
+timeout options are available for npm compatibility. This is not a sandbox
+boundary; memory/compiled-script budgets and packaged behavior evidence remain
+future hardening work.
 
 P13-37 records inspector/devtools debug profile as partial. AutoJs6 Node
 exposes `inspectorProfile` diagnostics, but `inspector`, `node:inspector`,

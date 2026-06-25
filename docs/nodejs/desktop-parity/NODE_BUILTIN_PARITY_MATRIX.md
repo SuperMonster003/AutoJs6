@@ -12,10 +12,11 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 
 ## Summary
 
-- `disabled`: 10
+- `disabled`: 9
 - `limited_network_gated`: 6
 - `missing_from_registry`: 2
 - `partial`: 35
+- `partial_native`: 1
 
 ## Matrix
 
@@ -69,7 +70,7 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | `util` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless a future Phase 13 task promotes broader desktop conformance. |
 | `util/types` | `partial` | `safe_default` | `limited` | Keep current Safe subset unless a future Phase 13 task promotes broader desktop conformance. |
 | `v8` | `partial` | `safe_default` | `limited`, `commonjs-known` | Keep current Safe subset unless a future Phase 13 task promotes broader desktop conformance. |
-| `vm` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-36 records vm module diagnostics as partial; Safe/default keeps vm denied while vm.Script/context/timeout, escape denial, memory budget, and packaged behavior evidence remain future work. |
+| `vm` | `partial_native` | `desktop_compat_opt_in` | `limited`, `commonjs-known` | P13-36 promotes vm/node:vm to the native Node builtin for desktop npm compatibility; keep profile diagnostics, shadow-package protection, and follow-up evidence for memory, timeout, and packaged behavior. |
 | `wasi` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-38 records controlled WASI diagnostics as partial; pure WebAssembly stays available while raw WASI remains denied and controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remain future work. |
 | `worker_threads` | `disabled` | `desktop_compat_opt_in` | `commonjs-known`, `disabled` | P13-34 records worker_threads opt-in diagnostics as partial; default denial, profile diagnostics, and native preflight are covered while native runnable evidence, crash/resource stress, packaged worker smoke, and final Desktop worker policy remain open. |
 | `zlib` | `partial` | `safe_default` | `limited`, `commonjs-known` | P13-43 records stdlib conformance as partial; representative Safe subset coverage, Android difference notes, builtin precedence, and npm/modern-core evidence are present while full desktop parity remains future work. |

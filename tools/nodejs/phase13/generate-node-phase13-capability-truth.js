@@ -160,8 +160,11 @@ function parseBooleanExpression(value, text) {
 
 function buildChecks(files, report) {
   const profileIds = report.profiles.map((profile) => profile.id);
+  const documentedDefaultOnHighRisk = new Set(["vm"]);
   const riskyEnabledByDefault = report.featureFlags.filter((flag) =>
-    flag.defaultEnabled && ["high", "critical"].includes(flag.securityLevel));
+    flag.defaultEnabled &&
+      ["high", "critical"].includes(flag.securityLevel) &&
+      !documentedDefaultOnHighRisk.has(flag.id));
   const requiredProfiles = [
     "safe_default",
     "pro_compat_opt_in",
@@ -193,7 +196,7 @@ function buildChecks(files, report) {
     check(
       "high-risk-denied-by-default",
       riskyEnabledByDefault.length === 0,
-      "High and critical security feature flags must remain disabled by default.",
+      "High and critical security feature flags must remain disabled by default unless a documented promotion gate explicitly defaults them on.",
     ),
     check(
       "profile-docs-current",

@@ -1,52 +1,57 @@
 # P13-36 VM Module Decision
 
 P13-36 records `vm` module promotion as partial. The current Phase 13 decision
-is to expose diagnostics through `autojs6:profile.vmProfile` while keeping
-`require("vm")`, `require("node:vm")`, `require.resolve("vm")`, and
-`require.resolve("node:vm")` denied by default.
+is to expose Node's native `vm` builtin for desktop npm compatibility while
+keeping the risk boundary explicit in `autojs6:profile.vmProfile`.
 
 ## Decision
 
-- Runtime module: denied.
-- `vm.Script`: deferred.
-- Context APIs: deferred.
-- `compileFunction`, `SyntheticModule`, `SourceTextModule`, and dynamic import
-  hooks: denied.
-- Target profiles: future `desktop_compat_opt_in` or `debug_unsafe_lab` only.
-- Timeout: required before enablement.
-- Bridge modules, private bindings, host objects, future-context process
-  access, raw global access, and scoped-fs bypasses: denied.
-- Memory and compiled-script limits: not defined.
-- Packaged behavior: not promoted.
+- Runtime module: native available.
+- `require("vm")` and `require("node:vm")`: native available.
+- `require.resolve("vm")` and `require.resolve("node:vm")`: resolve to `vm`.
+- Local `node_modules/vm`: cannot shadow the builtin.
+- `vm.Script`, context APIs, `compileFunction`, `SyntheticModule`,
+  `SourceTextModule`, dynamic import hooks, and native timeout options: native
+  available.
+- Target profiles: `desktop_compat_opt_in` and `debug_unsafe_lab` remain the
+  diagnostic risk labels.
+- Bridge modules and private bindings: not injected by AutoJs6.
+- Raw Android host objects: not injected by AutoJs6.
+- Node `vm` contexts: not a security boundary.
+- Memory and compiled-script limits: follow-up evidence required.
+- Packaged behavior: native builtin available, focused npm smoke evidence still
+  required.
 
-This report does not add a callable VM API. It records the contract a future
-implementation must satisfy before any limited `vm.Script` or context surface
-can be promoted.
+This report adds the callable native VM API because jsdom and similar desktop
+npm packages require it. It does not claim VM contexts are an isolation boundary.
 
 ## Evidence
 
 - `NodeVmPhase13DecisionInstrumentationTest` verifies the frozen `vmProfile`,
-  default denial, `node:vm` denial, resolve denial, and local shadow-package
-  protection.
-- `NodeVmDesignGateInstrumentationTest` continues to verify the existing
-  design-gated disabled state.
-- `docs/nodejs/design/VM.md` remains the source of the future enablement
-  acceptance criteria.
+  native `vm` / `node:vm` require and resolve behavior, `vm.Script`, context
+  execution, and local shadow-package protection.
+- `NodeVmDesignGateInstrumentationTest` verifies registry/profile state,
+  native builtin availability, and shadowing protection.
+- `NodeCoreBuiltinCompatibilityInstrumentationTest` verifies core builtin
+  aliasing for `vm` and `node:vm`.
+- `EmbeddedNodePackagedApkSmokeTest` keeps `module.isBuiltin("node:vm")`
+  visible in packaged smoke coverage.
+- `docs/nodejs/design/VM.md` records the current non-sandbox boundary and
+  follow-up evidence.
 - `verifyNodePhase13VmModuleDecision` records the host gate and writes
   `phase13-vm-module-decision.json` and `.md`.
 
 ## Remaining Blockers
 
-- Define whether the first opt-in surface is compile-only `vm.Script`,
-  current-context execution, or separate context execution.
-- Prove deterministic timeout and lifecycle cancellation.
-- Prove context cleanup and memory/compiled-script budgets.
-- Add escape-denial tests for private bindings, bridge globals, host objects,
-  process internals, disabled builtins, and scoped filesystem wrappers.
-- Add packaged APK behavior and diagnostics.
+- Prove memory and compiled-script budgets for repeated VM workloads.
+- Add packaged APK smoke evidence for packages that exercise `vm`.
+- Expand bridge/process/global leakage probes so the native boundary remains
+  documented and testable.
+- Add timeout and lifecycle stress evidence for long-running VM code.
 
 ## Rollback
 
-Remove `vmProfile`, the focused instrumentation test, the P13-36 verifier, and
-the Phase 13 docs/report references. Runtime behavior falls back to the existing
-VM design gate: `vm` stays disabled with stable denial and shadowing protection.
+Restore `vm` to `disabledBuiltinModuleNames`, remove it from
+`limitedBuiltinModuleNames`, restore the C++ denylist branch, and revert the
+P13-36 tests/docs to the disabled design gate. This would break npm packages
+that depend on Node's native VM APIs.

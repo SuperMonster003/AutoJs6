@@ -534,7 +534,7 @@ TypeScript source project shape, CJS `require(esm)`, default-denied `node:http`,
 fixtures with WebAssembly, WASI-policy detection, inspector-free diagnostics, promise-pool concurrency, a wider
 compile-cache graph, TypeScript+WASM metadata, worker+WASM fallback, large ESM graph, and package-integrity coverage.
 The Android connected runner executes the corpus in fixed 6-fixture batches so corpus growth does not require loosening
-the existing 64-moduleSources runtime budget. It also checks that the corpus contains no native addons, no
+the existing 8192-moduleSources runtime budget. It also checks that the corpus contains no native addons, no
 install/postinstall scripts, and no ESM root runner; ESM-only package metadata is allowed only below fixture
 `node_modules`.
 
@@ -1107,16 +1107,16 @@ Promise/timer/fs/bridge/fetch boundaries plus cleanup, S7-32 frozen primitive di
 runtime telemetry, safe `performance.eventLoopUtilization()` snapshots, S7-33 single-runtime `node:test` TAP reporting,
 hooks/skip/todo/timeout/failure handling, late async activity detection, S7-34 `timers/promises`, `stream/promises`,
 `readline/promises`, `AbortSignal`, `structuredClone`, and limited global/WebCrypto coverage including random values,
-UUIDs, SHA digest, HMAC sign/verify/export, and negative cases, `process.getBuiltinModule()` denial, and unchanged denial
-for disabled builtins such as `child_process`, `vm`, and `dgram`.
+UUIDs, SHA digest, HMAC sign/verify/export, and negative cases, `process.getBuiltinModule()` denial, native `vm`
+availability, and unchanged denial for disabled builtins such as `child_process` and `dgram`.
 
-Current `vm` design gate focused instrumentation:
+Current `vm` native availability focused instrumentation:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeVmDesignGateInstrumentationTest"
 ```
 
-This suite verifies the registry/profile disabled state for `vm`, denial for `require("vm")`, `require("node:vm")`, `require.resolve("vm")`, `require.resolve("node:vm")`, and shadowing protection against `node_modules/vm`.
+This suite verifies the registry/profile partial state for `vm`, native `require("vm")` / `require("node:vm")`, `require.resolve("vm")` / `require.resolve("node:vm")`, `vm.Script`, context execution, and shadowing protection against `node_modules/vm`.
 
 Phase 13 vm module decision gate:
 
@@ -1125,12 +1125,10 @@ Phase 13 vm module decision gate:
 ```
 
 This host gate records P13-36 as partial. It requires `vmProfile`
-diagnostics, default `vm`/`node:vm` denial, `require.resolve()` denial,
-shadowing protection, existing design-gate evidence, TypeScript declarations,
-the desktop builtin matrix, and Phase13 docs. It keeps callable `vm.Script`,
-context APIs, `compileFunction`, VM module APIs, dynamic import hooks, timeout
-policy, memory/compiled-script budgets, escape-denial coverage, and packaged
-behavior open.
+diagnostics, native `vm`/`node:vm` require and resolve behavior, shadowing
+protection, updated design-gate evidence, TypeScript declarations, the desktop
+builtin matrix, and Phase13 docs. It keeps memory/compiled-script budgets,
+packaged VM smoke coverage, and broader hardening evidence open.
 
 Phase 13 inspector debug profile decision gate:
 
@@ -2489,13 +2487,13 @@ diagnostics APKs pulled from the device and writes separate verifier reports for
 For packaged Node outputs that request full smoke moduleSources, the verifier requires
 `assets/project/preload-budget.expected.txt` and fails before runtime when any budget is exceeded or missing:
 
-- module count must be at most `64`
-- total moduleSources bytes must be at most `524288`
-- every module source must be at most `262144` UTF-8 bytes
+- module count must be at most `8192`
+- total moduleSources bytes must be at most `67108864`
+- every module source must be at most `16777216` UTF-8 bytes
 - the report must include largest moduleSources for triage
 
 The entry script budget is tracked separately from injected moduleSources. Runtime rejects a single entry script over
-`524288` UTF-8 bytes, while moduleSources keep the stricter per-module `262144` byte limit.
+`524288` UTF-8 bytes, while moduleSources keep the per-module `16777216` byte limit.
 
 If `autojs.embeddedNode.expectedAbis` is omitted, the verifier derives the ABI policy from `autojs.nodejs.releaseFlavor`:
 

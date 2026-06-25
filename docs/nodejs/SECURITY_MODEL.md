@@ -151,7 +151,7 @@ but it does not grant Java interop, Android plugin APK access, native provider
 loading, update authority, package download authority, or packaged APK manifest
 injection.
 
-`vm` remains disabled because a second JavaScript context is not a security boundary in this embedder. A limited `vm.Script` subset is deferred until timeout, global leakage, bridge leakage, and process object exposure can be proven safe.
+`vm` is enabled as a native Node builtin for desktop npm compatibility, but a second JavaScript context is not a security boundary in this embedder. AutoJs6 does not inject raw Android or bridge host objects into VM contexts, and disabled builtins remain governed by the loader policy. Memory/compiled-script budgets and packaged VM smoke evidence remain follow-up work.
 
 Inspector remains disabled because it is a live debugger control channel, not a passive diagnostic API. Any future support must be debug-build-only, loopback-only, explicitly user-started, and closed through the embedded service lifecycle. See `docs/nodejs/design/INSPECTOR.md`.
 
@@ -811,12 +811,14 @@ executable extraction remain denied by dependency scanning and runtime policy;
 P13-47 only improves reporting and pass-rate visibility by reason kind.
 
 P13-36 records `vm` module promotion as partial. `vmProfile` is diagnostic
-metadata only and does not make a second JavaScript context a security
-boundary. `vm` and `node:vm` remain denied; `vm.Script`, context APIs,
-`compileFunction`, VM module APIs, and dynamic import hooks are not surfaced.
-Any future opt-in must prove timeout cancellation, memory budgets, context
-cleanup, private binding denial, bridge and host object denial, process/global
-leakage denial, scoped filesystem preservation, and packaged diagnostics.
+metadata and does not make a second JavaScript context a security boundary.
+`vm` and `node:vm` resolve to Node's native builtin; `vm.Script`, context APIs,
+`compileFunction`, VM module APIs, dynamic import hooks, and native timeout
+options follow Node behavior. AutoJs6 does not inject bridge or raw Android
+host objects into VM contexts, and disabled builtins remain governed by the
+loader policy. Follow-up work must prove memory budgets, repeated context
+cleanup, process/global leakage expectations, scoped filesystem preservation,
+and packaged diagnostics.
 
 P13-37 records inspector/devtools debug profile as partial.
 `inspectorProfile` is diagnostic metadata only and does not open a debugger

@@ -584,24 +584,24 @@ declare namespace AutoJs6Node {
   }
 
   export interface VmProfile {
-    readonly status: "disabled_by_default" | "experimental_opt_in" | string;
+    readonly status: "disabled_by_default" | "experimental_opt_in" | "native_available" | string;
     readonly defaultEnabled: boolean;
     readonly targetProfiles: readonly string[];
-    readonly module: "denied" | "partial" | string;
-    readonly script: "deferred" | "partial" | string;
-    readonly context: "deferred" | "partial" | string;
-    readonly timeout: "required_before_enablement" | string;
-    readonly compileFunction: "denied" | string;
-    readonly syntheticModule: "denied" | string;
-    readonly sourceTextModule: "denied" | string;
-    readonly dynamicImportHooks: "denied" | string;
+    readonly module: "denied" | "partial" | "native_available" | string;
+    readonly script: "deferred" | "partial" | "native_available" | string;
+    readonly context: "deferred" | "partial" | "native_available" | string;
+    readonly timeout: "required_before_enablement" | "native_run_options" | string;
+    readonly compileFunction: "denied" | "native_available" | string;
+    readonly syntheticModule: "denied" | "native_available" | string;
+    readonly sourceTextModule: "denied" | "native_available" | string;
+    readonly dynamicImportHooks: "denied" | "native_available" | string;
     readonly bridgeModules: "denied" | string;
-    readonly processAccess: "denied_for_future_contexts" | string;
+    readonly processAccess: "denied_for_future_contexts" | "not_security_boundary" | string;
     readonly scopedFs: "must_preserve" | string;
     readonly privateBindings: "denied" | string;
-    readonly hostObjects: "denied" | string;
-    readonly memoryLimits: "not_defined" | string;
-    readonly packagedBehavior: "not_promoted" | string;
+    readonly hostObjects: "denied" | "not_injected_by_autojs6" | string;
+    readonly memoryLimits: "not_defined" | "native_node_defaults" | string;
+    readonly packagedBehavior: "not_promoted" | "native_builtin" | string;
     readonly rawGlobalAccess: boolean;
   }
 

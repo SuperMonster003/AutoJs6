@@ -246,18 +246,18 @@
 
 ## P13-36 Partial Landing Note
 
-- P13-36 partial `vm` module gate records `vmProfile` diagnostics and keeps
-  `vm`/`node:vm` denied by default.
-- The gate documents the future enablement contract for `vm.Script`, context,
-  timeout, private binding denial, host object denial, bridge denial, scoped fs
-  preservation, memory limits, and packaged behavior.
+- P13-36 partial `vm` module gate records `vmProfile` diagnostics and routes
+  `vm`/`node:vm` to Node's native builtin by default.
+- The gate documents the native `vm.Script`, context, `compileFunction`, VM
+  module APIs, native timeout options, shadowing protection, and non-sandbox
+  boundary for desktop npm compatibility.
 - Host verifier: `tools/nodejs/phase13/verify-vm-module-decision.js`.
 - Gradle gate: `:app:verifyNodePhase13VmModuleDecision`.
 - Report: `docs/nodejs/reports/phase13/P13_36_VM_MODULE_DECISION.md`.
 - Surface manifest evidence: `phase13-vm-module-decision`.
-- Remaining P13-36 blockers: limited VM API design, context isolation, timeout
-  cancellation, memory/compiled-script budgets, disabled-builtin escape tests,
-  bridge/process/global leakage tests, and packaged APK behavior.
+- Remaining P13-36 blockers: memory/compiled-script budgets, packaged APK
+  smoke evidence, bridge/process/global leakage probes, and timeout/lifecycle
+  stress evidence.
 
 ## P13-19 Partial Landing Note
 
@@ -1217,17 +1217,18 @@ P13 task 本身使用以下执行状态：
       `phase13-process-worker-replacement-decision`。
 
 - [ ] P13-36: 推进 `vm` module。
-  - 范围：在 Desktop/Debug profile 中支持受控 `vm.Script`、context 和 timeout。
+  - 范围：为 Desktop/npm 兼容开放原生 `vm.Script`、context 和 timeout。
   - 验收：
     - 禁止逃逸到 private bindings、bridge globals 或 host objects。
     - context resource cleanup 和 memory budget 有测试。
   - Partial landing:
-    - `autojs6:profile.vmProfile` 已暴露 P13-36 决策快照。
-    - `vm` / `node:vm` 保持默认拒绝，`node_modules/vm` 不能 shadow。
+    - `autojs6:profile.vmProfile` 已暴露 P13-36 原生可用快照。
+    - `vm` / `node:vm` 默认路由到 Node 原生 builtin，`node_modules/vm`
+      不能 shadow。
     - `vm.Script`、context、`compileFunction`、ES module VM APIs、
-      dynamic import hooks 均未引入 runtime surface。
-    - future enablement gate 明确要求 timeout、context cleanup、memory
-      budget、private binding/bridge/host object/process/global leakage denial
+      dynamic import hooks 使用 Node 原生 runtime surface。
+    - follow-up gate 明确要求 context cleanup、memory budget、
+      private binding/bridge/host object/process/global leakage probes
       和 packaged APK behavior 证据。
     - Device test: `NodeVmPhase13DecisionInstrumentationTest`。
     - Existing design gate: `NodeVmDesignGateInstrumentationTest`。

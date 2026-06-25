@@ -19,8 +19,9 @@ authority surface by accident.
 - `rhino`, `native`, `embedded`, and `auto` backend switches remain available.
 - Native one-shot remains a regression oracle.
 - Scoped fs policy is not loosened in patch releases.
-- Native addons, unrestricted `child_process`, raw network, inspector, unrestricted Java/Android interop, unrestricted
-  `worker_threads`, and unrestricted `vm` remain default-off or disabled unless a documented promotion gate passes.
+- Native addons, unrestricted `child_process`, raw network, inspector, unrestricted Java/Android interop, and unrestricted
+  `worker_threads` remain default-off or disabled unless a documented promotion gate passes. Native `vm` is available after
+  P13-36 but remains documented as a non-sandbox compatibility surface.
 - Packaged APK support remains a first-class release target.
 
 ## Weekly Smoke

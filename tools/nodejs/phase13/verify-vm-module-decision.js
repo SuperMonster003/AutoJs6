@@ -63,50 +63,46 @@ function loadFiles(repoRoot) {
 function buildReport(files) {
   const executionSurface = surface(files.surfaceManifest.text, "desktop.execution_runtime");
   const scenarios = [
-    scenario("diagnostic_profile_default_denial", "vmProfile records default denial and future enablement requirements", [
+    scenario("diagnostic_profile_native_availability", "vmProfile records native availability and risk boundaries", [
       token(files.nodeBridgeSources, "vmProfile: Object.freeze({"),
-      token(files.nodeBridgeSources, 'status: "disabled_by_default"'),
+      token(files.nodeBridgeSources, 'status: "native_available"'),
       token(files.nodeBridgeSources, 'targetProfiles: Object.freeze(["desktop_compat_opt_in", "debug_unsafe_lab"])'),
-      token(files.nodeBridgeSources, 'module: "denied"'),
-      token(files.nodeBridgeSources, 'timeout: "required_before_enablement"'),
+      token(files.nodeBridgeSources, 'module: "native_available"'),
+      token(files.nodeBridgeSources, 'timeout: "native_run_options"'),
       token(files.nodeBridgeSources, 'privateBindings: "denied"'),
-      token(files.nodeBridgeSources, 'hostObjects: "denied"'),
-      token(files.p13VmTest, "vmProfileKeepsModuleDeniedAndEnablementDeferred"),
-      token(files.p13VmTest, "p13vm.profile=disabled_by_default|false|desktop_compat_opt_in,debug_unsafe_lab"),
+      token(files.nodeBridgeSources, 'hostObjects: "not_injected_by_autojs6"'),
+      token(files.p13VmTest, "vmProfileRecordsNativeAvailabilityAndShadowProtection"),
+      token(files.p13VmTest, "p13vm.profile=native_available|true|desktop_compat_opt_in,debug_unsafe_lab"),
       token(files.typesAutojsGlobal, "export interface VmProfile"),
       token(files.typesAutojsGlobal, "readonly vmProfile: VmProfile"),
       token(files.typescriptSmoke, "autojsProfile.vmProfile.timeout"),
     ], []),
-    scenario("require_resolve_shadow_denial", "vm and node:vm stay denied before local shadow packages", [
-      token(files.p13VmTest, "p13vm.requireBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
-      token(files.p13VmTest, "p13vm.requireNodePrefix=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
-      token(files.p13VmTest, "p13vm.resolveBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
-      token(files.p13VmTest, "p13vm.resolveNodePrefix=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
+    scenario("require_resolve_shadow_native", "vm and node:vm resolve to the native builtin before local shadow packages", [
+      token(files.p13VmTest, "p13vm.module=true|vm|vm|function|function|function|42|42|true"),
       token(files.p13VmTest, "p13vm.shadowLoaded=false"),
-      token(files.vmDesignGateTest, "vmRemainsDesignGatedAndDisabledByDefault"),
+      token(files.vmDesignGateTest, "vmNativeBuiltinIsAvailableAndCannotBeShadowed"),
       token(files.vmDesignGateTest, "require(\"node:vm\")"),
       token(files.vmDesignGateTest, "require.resolve(\"node:vm\")"),
-      token(files.coreBuiltinTest, "requireDenied(\"node:vm\")"),
+      token(files.coreBuiltinTest, "core.builtin.vm=true"),
       token(files.packagedSmokeTest, 'moduleBuiltin.isBuiltin("node:vm")'),
     ], []),
-    scenario("future_enablement_blockers", "context isolation, timeout, memory, bridge, process, and packaged blockers remain explicit", [
+    scenario("native_vm_risk_boundaries", "native vm risk boundaries and follow-up evidence remain explicit", [
       token(files.vmDesignDoc, "no access to raw Android or AutoJs bridge objects"),
       token(files.vmDesignDoc, "no bypass of scoped filesystem"),
-      token(files.vmDesignDoc, "no access to disabled builtins or process internals"),
-      token(files.vmDesignDoc, "deterministic timeout and lifecycle cancellation"),
-      token(files.vmDesignDoc, "memory and compiled-script limits"),
+      token(files.vmDesignDoc, "not a security boundary"),
+      token(files.vmDesignDoc, "native timeout options"),
+      token(files.vmDesignDoc, "memory and compiled-script follow-up limits"),
       token(files.vmDesignDoc, "packaged APK behavior and diagnostics"),
-      token(files.securityModel, "`vm` remains disabled because a second JavaScript context is not a security boundary"),
+      token(files.securityModel, "`vm` is enabled as a native Node builtin"),
       token(files.runtimeCapabilities, 'id = "vm"'),
-      token(files.runtimeCapabilities, 'status = "disabled"'),
-      token(files.desktopMatrix, "| `vm` | `disabled` |"),
+      token(files.runtimeCapabilities, 'status = "partial"'),
+      token(files.desktopMatrix, "| `vm` | `partial_native` |"),
     ], [
-      "Design and implement a limited vm.Script or context surface only after timeout, memory, global leakage, bridge leakage, and process exposure are proven safe.",
-      "Add positive/negative instrumentation for context cleanup, memory budgets, and disabled-builtin escape attempts before any opt-in promotion.",
-      "Add packaged APK behavior and diagnostics evidence for the final Desktop/Debug profile.",
+      "Add focused memory and compiled-script budget evidence for native vm workloads.",
+      "Add packaged APK smoke evidence for packages that exercise vm.Script and vm contexts.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-36", [
-      token(files.phase13Tasks, "P13-36 partial landing"),
+      token(files.phase13Tasks, "P13-36 Partial Landing Note"),
       token(files.p13Report, "P13-36 records `vm` module promotion as partial"),
       token(files.phase13GradleGate, "verifyNodePhase13VmModuleDecision"),
       token(files.testingDoc, "verifyNodePhase13VmModuleDecision"),
@@ -118,11 +114,11 @@ function buildReport(files) {
       token(files.typesReadme, "P13-36 extends the `autojs6:profile` declaration"),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
-      token(files.desktopMatrix, "P13-36 records vm module diagnostics as partial"),
-      token(files.builtinMatrixGenerator, "P13-36 records vm module diagnostics as partial"),
+      token(files.desktopMatrix, "P13-36 promotes vm/node:vm to the native Node builtin"),
+      token(files.builtinMatrixGenerator, "P13-36 promotes vm/node:vm to the native Node builtin"),
       token(files.capabilityMatrix, "P13-36 vm module decision"),
     ], [
-      "P13-36 remains partial until a limited VM API and escape/timeout/memory/packaged evidence are complete.",
+      "P13-36 remains partial until memory/compiled-script and packaged native-vm evidence are complete.",
     ]),
   ];
 
@@ -141,26 +137,24 @@ function buildReport(files) {
       "`desktop.execution_runtime` surface must reference P13-36 evidence.",
     ),
     check(
-      "vm-stays-disabled",
-      files.desktopMatrix.text.includes("| `vm` | `disabled` |") &&
+      "vm-native-available",
+      files.desktopMatrix.text.includes("| `vm` | `partial_native` |") &&
         files.runtimeCapabilities.text.includes('id = "vm"') &&
-        files.runtimeCapabilities.text.includes('status = "disabled"') &&
-        files.nodeBridgeSources.text.includes('module: "denied"'),
-      "vm must remain disabled while P13-36 is only a decision/profile gate.",
+        files.runtimeCapabilities.text.includes('status = "partial"') &&
+        files.nodeBridgeSources.text.includes('module: "native_available"'),
+      "vm must be recorded as a native partial builtin after P13-36 promotion.",
     ),
     check(
-      "no-default-vm-enable",
-      files.nodeBridgeSources.text.includes("defaultEnabled: false") &&
-        !files.nodeBridgeSources.text.includes('vm: Object.freeze({\n        id: "vm",\n        diagnosticName: "vm",\n        gradleProperty: null,\n        defaultEnabled: true'),
-      "P13-36 must not enable vm by default.",
+      "default-vm-enabled",
+      files.nodeBridgeSources.text.includes('vm: Object.freeze({\n        id: "vm",\n        diagnosticName: "vm",\n        gradleProperty: null,\n        defaultEnabled: true'),
+      "P13-36 must enable vm by default for desktop npm compatibility.",
     ),
     check(
-      "no-vm-script-runtime-surface",
-      !files.nodeBridgeSources.text.includes("class AutoJs6VmScript") &&
-        !files.nodeBridgeSources.text.includes("function __autojs6_vm_script") &&
-        !files.nodeBridgeSources.text.includes('Script: function') &&
-        !files.typesAutojsGlobal.text.includes('declare module "vm"'),
-      "P13-36 must not introduce a callable vm.Script runtime surface.",
+      "native-vm-script-runtime-surface",
+      files.nodeBridgeSources.text.includes("function __autojs6_vm_module") &&
+        files.vmDesignGateTest.text.includes('typeof vm.Script') &&
+        files.p13VmTest.text.includes('typeof vm.createContext'),
+      "P13-36 must expose the native vm.Script/context surface through the Node builtin.",
     ),
   ];
 
@@ -186,14 +180,14 @@ function buildReport(files) {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
       phase13TaskComplete: false,
       finalBlockerClosable,
-      diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile_default_denial").status === "ready",
-      defaultDeniedReady: scenarioById(scenarios, "require_resolve_shadow_denial").status === "ready",
-      callableVmScriptIntroduced: false,
+      diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile_native_availability").status === "ready",
+      defaultDeniedReady: false,
+      callableVmScriptIntroduced: true,
       contextIsolationProven: false,
       timeoutPolicyProven: false,
       memoryBudgetProven: false,
       packagedBehaviorPromoted: false,
-      desktopSurfacePromoted: false,
+      desktopSurfacePromoted: true,
     },
   };
 }

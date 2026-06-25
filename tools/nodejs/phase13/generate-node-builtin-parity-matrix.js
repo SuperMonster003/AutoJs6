@@ -161,10 +161,11 @@ function classifyBuiltin(name, sets) {
     };
   }
   if (limited) {
+    const nativeVm = bareName === "vm";
     return {
       name,
-      status: "partial",
-      targetProfile: "safe_default",
+      status: nativeVm ? "partial_native" : "partial",
+      targetProfile: nativeVm ? highRiskProfileFor(bareName) : "safe_default",
       source: sourceTags({ disabled, network, limited, commonJs }),
       nextStep: nextStepForLimited(bareName),
     };
@@ -198,6 +199,9 @@ function networkNextStepFor(name) {
 }
 
 function nextStepForLimited(name) {
+  if (name === "vm") {
+    return "P13-36 promotes vm/node:vm to the native Node builtin for desktop npm compatibility; keep profile diagnostics, shadow-package protection, and follow-up evidence for memory, timeout, and packaged behavior.";
+  }
   if (name === "fs" || name === "fs/promises") {
     return "P13-32 records scoped filesystem profile and P13-33 records advanced fs APIs as partial; Safe profile stays working-directory scoped while expanded roots, packaged watcher/fd/FileHandle close-on-destroy, Android unsupported behavior notes, and full desktop fs semantics remain future work.";
   }
@@ -284,7 +288,7 @@ function buildChecks(files, report, markdown) {
     ),
     check(
       "disabled-builtins-visible",
-      ["child_process", "dgram", "inspector", "vm", "wasi", "worker_threads"].every((name) =>
+      ["child_process", "dgram", "inspector", "wasi", "worker_threads"].every((name) =>
         report.modules.some((module) => module.name === name && module.status === "disabled")),
       "High-risk disabled builtins must stay visible in the matrix.",
     ),

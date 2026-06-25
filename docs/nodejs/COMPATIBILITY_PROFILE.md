@@ -71,7 +71,7 @@ with surface ownership in
 
 ## Feature Flag Registry
 
-`NodeRuntimeCapabilities.featureFlags` is the single registry for experimental, partial, disabled, and unsupported Node capability flags. Normal builds keep high and critical security features disabled by default. Project-level and packaged-APK overrides are audited and rejected unless a future design-gated task explicitly changes the registry. Release builds reject release-forbidden experimental Gradle flags; debug experimental builds remain the validation path.
+`NodeRuntimeCapabilities.featureFlags` is the single registry for experimental, partial, disabled, and unsupported Node capability flags. Normal builds keep high and critical security features disabled by default except for the P13-36 native `vm` promotion needed for desktop npm compatibility. Project-level and packaged-APK overrides are audited and rejected unless a future design-gated task explicitly changes the registry. Release builds reject release-forbidden experimental Gradle flags; debug experimental builds remain the validation path.
 
 | Flag id | Gradle property | Default | Build override | project.json override | Packaged APK override | Release forbidden | Security | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -83,7 +83,7 @@ with surface ownership in
 | `worker_threads` | `autojs.nodejs.worker_threads.experimental` | false | true | false | false | true | high | experimental |
 | `fs_streams` | none | true | false | false | false | false | medium | partial |
 | `zlib_streams` | none | true | false | false | false | false | medium | partial |
-| `vm` | none | false | false | false | false | true | high | disabled |
+| `vm` | none | true | false | false | false | true | high | partial |
 | `inspector` | none | false | false | false | false | true | high | disabled |
 | `java_interop` | `autojs.nodejs.javaInterop.experimental` | false | true | false | false | true | critical | experimental |
 | `native_addon` | none | false | false | false | false | true | critical | unsupported |
@@ -916,7 +916,7 @@ bounded stdio behavior, explicit args, empty-by-default env, limited
 clock/random, network/process-exit denial, resource budgets, worker
 integration, and packaged `.wasm`/WASI behavior before promotion.
 
-`vm` is intentionally disabled, including local `node_modules/vm` shadowing, until a future design gate explicitly proves a safe subset. See `docs/nodejs/design/VM.md`.
+`vm` is enabled as the native Node builtin for desktop npm compatibility, including `require("vm")`, `require("node:vm")`, `require.resolve("vm")`, and `require.resolve("node:vm")`. Local `node_modules/vm` packages cannot shadow the builtin. This is not a sandbox boundary; `autojs6:profile.vmProfile` records the native surface and remaining memory/packaged evidence. See `docs/nodejs/design/VM.md`.
 
 `inspector` is intentionally disabled, including debugger port binding and script-visible inspector APIs. S8-37 adds a focused disabled-state gate that proves metadata cannot enable the feature flag, `node_modules/inspector` cannot shadow the policy, process debugging APIs remain inert, and `NODE_OPTIONS` / `NODE_INSPECT_RESUME_ON_START` are filtered from script-visible `process.env`. S8-40 extends the boundary by stripping Node startup/debugger/cache env keys before native startup, initializing embedded Node with `NODE_OPTIONS` parsing disabled, proving hostile `--inspect` host/port attempts leave no checked listener after stop or timeout, and proving profiler artifacts / sensitive marker data remain absent. A future positive implementation must be debug-build-only and must prove explicit user action, loopback binding, visible/revocable active-session state, lifecycle close, and packaged APK denial. See `docs/nodejs/design/INSPECTOR.md`, `docs/nodejs/reports/phase8/INSPECTOR_DESIGN_GATE.md`, and `docs/nodejs/reports/phase8/INSPECTOR_SECURITY_GATE.md`.
 
@@ -984,9 +984,9 @@ See `docs/nodejs/design/ESM.md` for package `type`, CJS/ESM interop, top-level a
 
 Injected `moduleSources` are bounded before native runtime startup. The v1 limits are:
 
-- module count: `2048`
-- per-module UTF-8 source bytes: `2097152`
-- total UTF-8 source bytes: `33554432`
+- module count: `8192`
+- per-module UTF-8 source bytes: `16777216`
+- total UTF-8 source bytes: `67108864`
 
 The limits apply to CommonJS preload records and encrypted packaged/runtime module source records, including partial ESM `.mjs` records. Over-budget requests fail with `ERR_AUTOJS6_MODULE_SOURCE_BUDGET_EXCEEDED` before the embedded service starts native Node.
 
@@ -1349,12 +1349,13 @@ and does not grant authority; actual prompt UI, notification ownership, and
 packaged disclosure review remain future work.
 
 P13-36 records `vm` module promotion as partial. The runtime exposes
-`autojs6:profile.vmProfile` to document that `vm` remains denied by default
-while any future Desktop/Debug opt-in must prove `vm.Script` or context
-isolation, timeout cancellation, private binding denial, bridge and host object
-denial, process/global leakage denial, scoped-fs preservation, memory limits,
-and packaged behavior. No callable `vm.Script`, context, `compileFunction`, VM
-module, dynamic import hook, or raw global access is promoted.
+`autojs6:profile.vmProfile` to document that `vm` and `node:vm` now resolve to
+the native Node builtin for desktop npm compatibility. `vm.Script`, contexts,
+`compileFunction`, VM module APIs, and native timeout options are available
+through Node's own implementation. AutoJs6 does not inject bridge modules or
+raw Android host objects into VM contexts, but the Node `vm` module is not a
+security boundary. Follow-up evidence remains for memory/compiled-script
+budgets and packaged APK smoke coverage.
 
 P13-37 records inspector/devtools debug profile as partial. The runtime exposes
 `autojs6:profile.inspectorProfile` to document that `inspector` and
@@ -1487,7 +1488,7 @@ Packaged Node APKs require:
 - `android.permission.FOREGROUND_SERVICE`
 - `android.permission.FOREGROUND_SERVICE_SPECIAL_USE`
 - `android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE`
-- Node project metadata and module source entries within the `2048` module, `2097152` byte per-module, and `33554432` byte total budgets
+- Node project metadata and module source entries within the `8192` module, `16777216` byte per-module, and `67108864` byte total budgets
 - packaged smoke coverage for the current user-facing `toast`, `app`, `clipboard`, and `device` bridge modules, plus v1.1 fake-provider packaged coverage for controlled `fetch`, `ocr`, `storage`/`storages`, `notifications`, `ui`, `work_manager`, and project-local JS-only plugins using isolated capabilities and resources
 
 Release packaging profile:
