@@ -75,6 +75,11 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   packageManagerProfile.postinstallDownload,
                   packageManagerProfile.nodeModulesMutation,
                   packageManagerProfile.transaction,
+                  packageManagerProfile.sourcePolicy,
+                  packageManagerProfile.sourceAuthority,
+                  packageManagerProfile.installAuthority,
+                  Array.isArray(packageManagerProfile.allowedSources) && packageManagerProfile.allowedSources.join(","),
+                  Array.isArray(packageManagerProfile.deniedSources) && packageManagerProfile.deniedSources.join(","),
                   Array.isArray(packageManagerProfile.operations) && packageManagerProfile.operations.join(","),
                   Array.isArray(packageManagerProfile.packageKinds) && packageManagerProfile.packageKinds.join(","),
                   packageManagerProfile.jsBridge,
@@ -85,6 +90,8 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   packageManagerProfile.rawRegistryAccess,
                   Object.isFrozen(packageManagerProfile),
                   Object.isFrozen(packageManagerProfile.targetProfiles),
+                  Object.isFrozen(packageManagerProfile.allowedSources),
+                  Object.isFrozen(packageManagerProfile.deniedSources),
                   Object.isFrozen(packageManagerProfile.operations),
                   Object.isFrozen(packageManagerProfile.packageKinds)
                 ].join("|"));
@@ -115,9 +122,13 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     "host_managed_plus_android_store_substrate|deferred|host_side_only|" +
                     "autojs6_lock_host_managed|sha512_required|denied|not_promoted|denied|" +
                     "denied|denied|denied|denied|transactional_store_only|" +
-                    "locked_cancellable_atomic|install,update,remove,list,verify,prune|" +
+                    "locked_cancellable_atomic|decision_only_no_install_authority|" +
+                    "local_unpacked_host_managed_only|internal_substrate_only|" +
+                    "local_unpacked_host_managed|" +
+                    "raw_registry,remote_tarball,git,http_url,file_url,workspace_symlink,unverified_cache|" +
+                    "install,update,remove,list,verify,prune|" +
                     "dependency,plugin,project|read_maintenance_partial|read_maintenance_partial|not_promoted|denied|" +
-                    "false|false|true|true|true|true",
+                    "false|false|true|true|true|true|true|true",
             ),
         )
         assertTrue(
@@ -138,20 +149,47 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                   const packageManager = require("package_manager");
                   const status = packageManager.status();
                   const policy = packageManager.policy();
+                  const sourcePolicy = packageManager.sourcePolicy();
 
                   assert.strictEqual(Object.isFrozen(packageManager), true);
                   assert.strictEqual(Object.isFrozen(status), true);
                   assert.strictEqual(Object.isFrozen(policy), true);
+                  assert.strictEqual(Object.isFrozen(sourcePolicy), true);
                   assert.strictEqual(Object.isFrozen(status.operations), true);
                   assert.strictEqual(Object.isFrozen(policy.operations), true);
+                  assert.strictEqual(Object.isFrozen(sourcePolicy.allowedSources), true);
+                  assert.strictEqual(Object.isFrozen(sourcePolicy.deniedSources), true);
+                  assert.strictEqual(Object.isFrozen(sourcePolicy.localUnpacked), true);
+                  assert.strictEqual(Object.isFrozen(sourcePolicy.registry), true);
+                  assert.strictEqual(Object.isFrozen(sourcePolicy.tarball), true);
+                  assert.strictEqual(Object.isFrozen(sourcePolicy.futurePromotionRequires), true);
                   assert.strictEqual(status.status, "read_maintenance_partial");
                   assert.strictEqual(status.jsBridge, "read_maintenance_partial");
                   assert.strictEqual(status.requirePackageManager, "read_maintenance_partial");
                   assert.strictEqual(status.grantsInstallAuthority, false);
+                  assert.strictEqual(status.sourcePolicy, "decision_only_no_install_authority");
+                  assert.strictEqual(status.sourceAuthority, "local_unpacked_host_managed_only");
+                  assert.strictEqual(status.installAuthority, "internal_substrate_only");
                   assert.strictEqual(policy.npmCli, "denied");
                   assert.strictEqual(policy.registryDownload, "deferred");
                   assert.strictEqual(policy.lifecycleScripts, "denied");
                   assert.strictEqual(policy.rawRegistryAccess, false);
+                  assert.strictEqual(policy.sourceAuthority, "local_unpacked_host_managed_only");
+                  assert.strictEqual(policy.installAuthority, "internal_substrate_only");
+                  assert.deepStrictEqual(policy.allowedSources, ["local_unpacked_host_managed"]);
+                  assert(policy.deniedSources.includes("raw_registry"));
+                  assert(policy.deniedSources.includes("remote_tarball"));
+                  assert.strictEqual(sourcePolicy.schema, "autojs6-node-package-manager-source-policy-v1");
+                  assert.strictEqual(sourcePolicy.status, "decision_only_no_install_authority");
+                  assert.strictEqual(sourcePolicy.grantsInstallAuthority, false);
+                  assert.deepStrictEqual(sourcePolicy.allowedSources, ["local_unpacked_host_managed"]);
+                  assert(sourcePolicy.deniedSources.includes("raw_registry"));
+                  assert(sourcePolicy.deniedSources.includes("remote_tarball"));
+                  assert.strictEqual(sourcePolicy.localUnpacked.status, "allowed_substrate");
+                  assert.strictEqual(sourcePolicy.localUnpacked.requiresSha512, true);
+                  assert.strictEqual(sourcePolicy.registry.rawRegistryAccess, false);
+                  assert.strictEqual(sourcePolicy.tarball.androidDownload, "denied");
+                  assert.strictEqual(sourcePolicy.npmCli.status, "denied");
                   assert.deepStrictEqual(status.operations, ["install", "update", "remove", "list", "verify", "prune"]);
                   assert.deepStrictEqual(policy.packageKinds, ["dependency", "plugin", "project"]);
 
@@ -197,6 +235,12 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
                     Object.isFrozen(packageManager),
                     Object.isFrozen(status),
                     Object.isFrozen(policy),
+                    Object.isFrozen(sourcePolicy),
+                    sourcePolicy.status,
+                    sourcePolicy.sourceAuthority,
+                    sourcePolicy.allowedSources.join(","),
+                    sourcePolicy.deniedSources.includes("raw_registry"),
+                    sourcePolicy.grantsInstallAuthority,
                     deniedCodes.join(","),
                     listResult.length >= 0,
                     verifyResult.status,
@@ -219,7 +263,9 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
             result.stdout,
             result.stdout.contains(
                 "p13pm.facade=read_maintenance_partial|read_maintenance_partial|read_maintenance_partial|denied|deferred|false|" +
-                    "true|true|true|ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED,ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED," +
+                    "true|true|true|true|decision_only_no_install_authority|local_unpacked_host_managed_only|" +
+                    "local_unpacked_host_managed|true|false|" +
+                    "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED,ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED," +
                     "ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED|true|missing|pruned|" +
                     "package_manager|undefined",
             ),
@@ -264,6 +310,13 @@ class NodePackageManagerPhase13DecisionInstrumentationTest {
         assertEquals("disabled", nativeValues["android_package_manager.native_payload_execution"])
         assertEquals("disabled", nativeValues["android_package_manager.postinstall_download"])
         assertEquals("disabled", nativeValues["android_package_manager.network_install"])
+        assertEquals("decision_only_no_install_authority", nativeValues["android_package_manager.source_policy"])
+        assertEquals("local_unpacked_host_managed_only", nativeValues["android_package_manager.source_authority"])
+        assertEquals("local_unpacked_host_managed", nativeValues["android_package_manager.allowed_sources"])
+        assertEquals("disabled", nativeValues["android_package_manager.raw_registry_authority"])
+        assertEquals("disabled", nativeValues["android_package_manager.remote_tarball_install"])
+        assertEquals("disabled", nativeValues["android_package_manager.unverified_cache_reuse"])
+        assertEquals("internal_substrate_only", nativeValues["android_package_manager.install_authority"])
         assertEquals("read_maintenance_partial", nativeValues["android_package_manager.js_bridge"])
 
         val postinstall = packageSource(

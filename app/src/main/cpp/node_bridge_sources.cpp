@@ -8905,6 +8905,11 @@ std::string buildEmbeddedScriptExecutionSource(
         postinstallDownload: "denied",
         nodeModulesMutation: "transactional_store_only",
         transaction: "locked_cancellable_atomic",
+        sourcePolicy: "decision_only_no_install_authority",
+        sourceAuthority: "local_unpacked_host_managed_only",
+        installAuthority: "internal_substrate_only",
+        allowedSources: Object.freeze(["local_unpacked_host_managed"]),
+        deniedSources: Object.freeze(["raw_registry", "remote_tarball", "git", "http_url", "file_url", "workspace_symlink", "unverified_cache"]),
         operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
         packageKinds: Object.freeze(["dependency", "plugin", "project"]),
         jsBridge: "read_maintenance_partial",
@@ -25874,6 +25879,65 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     return __autojs6_limited_plugins_cache;
   }
+  const __autojs6_package_manager_allowed_sources = Object.freeze(["local_unpacked_host_managed"]);
+  const __autojs6_package_manager_denied_sources = Object.freeze([
+    "raw_registry",
+    "remote_tarball",
+    "git",
+    "http_url",
+    "file_url",
+    "workspace_symlink",
+    "unverified_cache"
+  ]);
+  const __autojs6_package_manager_future_promotion_requirements = Object.freeze([
+    "signed_or_host_managed_source_manifest",
+    "sha512_integrity_lock",
+    "transaction_rollback_evidence",
+    "cache_corruption_recovery",
+    "packaged_distribution_evidence",
+    "user_visible_install_authority"
+  ]);
+  const __autojs6_package_manager_source_policy = Object.freeze({
+    schema: "autojs6-node-package-manager-source-policy-v1",
+    status: "decision_only_no_install_authority",
+    sourceAuthority: "local_unpacked_host_managed_only",
+    installAuthority: "internal_substrate_only",
+    grantsInstallAuthority: false,
+    allowedSources: __autojs6_package_manager_allowed_sources,
+    deniedSources: __autojs6_package_manager_denied_sources,
+    localUnpacked: Object.freeze({
+      status: "allowed_substrate",
+      source: "host_managed_unpacked_directory",
+      requiresPackageJson: true,
+      requiresNameVersionMatch: true,
+      requiresSha512: true,
+      requiresHostManagedLockfile: true,
+      lifecycleScripts: "denied",
+      binLinks: "denied",
+      symlinks: "denied",
+      nativePayloads: "denied",
+      pathEscapes: "denied"
+    }),
+    registry: Object.freeze({
+      status: "deferred",
+      rawRegistryAccess: false,
+      networkInstall: "denied",
+      metadataDownload: "deferred",
+      cacheReuse: "unverified_cache_denied"
+    }),
+    tarball: Object.freeze({
+      status: "host_side_only",
+      androidDownload: "denied",
+      androidExtraction: "deferred",
+      integrity: "sha512_required"
+    }),
+    npmCli: Object.freeze({
+      status: "denied",
+      lifecycleScripts: "denied",
+      nativeBuild: "denied"
+    }),
+    futurePromotionRequires: __autojs6_package_manager_future_promotion_requirements
+  });
   const __autojs6_package_manager_policy = Object.freeze({
     schema: "autojs6-node-package-manager-policy-v1",
     status: "read_maintenance_partial",
@@ -25894,6 +25958,11 @@ std::string buildEmbeddedScriptExecutionSource(
     postinstallDownload: "denied",
     nodeModulesMutation: "transactional_store_only",
     transaction: "locked_cancellable_atomic",
+    sourcePolicy: "decision_only_no_install_authority",
+    sourceAuthority: "local_unpacked_host_managed_only",
+    installAuthority: "internal_substrate_only",
+    allowedSources: __autojs6_package_manager_allowed_sources,
+    deniedSources: __autojs6_package_manager_denied_sources,
     operations: Object.freeze(["install", "update", "remove", "list", "verify", "prune"]),
     packageKinds: Object.freeze(["dependency", "plugin", "project"]),
     androidNetwork: "denied",
@@ -26006,6 +26075,11 @@ std::string buildEmbeddedScriptExecutionSource(
         jsBridge: profile.jsBridge,
         requirePackageManager: profile.requirePackageManager,
         diagnosticFacade: profile.diagnosticFacade,
+        sourcePolicy: profile.sourcePolicy,
+        sourceAuthority: profile.sourceAuthority,
+        installAuthority: profile.installAuthority,
+        allowedSources: __autojs6_package_manager_allowed_sources,
+        deniedSources: __autojs6_package_manager_denied_sources,
         operations: __autojs6_package_manager_policy.operations,
         packageKinds: __autojs6_package_manager_policy.packageKinds,
         npmCli: profile.npmCli,
@@ -26021,6 +26095,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     function policy() {
       return __autojs6_package_manager_policy;
+    }
+    function sourcePolicy() {
+      return __autojs6_package_manager_source_policy;
     }
     function list(options) {
       const input = __autojs6_package_manager_options(options);
@@ -26066,6 +26143,7 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_limited_package_manager_cache = Object.freeze({
       status,
       policy,
+      sourcePolicy,
       install: __autojs6_package_manager_denied("install"),
       update: __autojs6_package_manager_denied("update"),
       remove: __autojs6_package_manager_denied("remove"),

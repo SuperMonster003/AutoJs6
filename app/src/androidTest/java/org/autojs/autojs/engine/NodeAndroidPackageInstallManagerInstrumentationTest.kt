@@ -176,6 +176,13 @@ class NodeAndroidPackageInstallManagerInstrumentationTest {
         assertEquals("disabled", nativeValues["android_package_manager.native_payload_execution"])
         assertEquals("disabled", nativeValues["android_package_manager.postinstall_download"])
         assertEquals("disabled", nativeValues["android_package_manager.network_install"])
+        assertEquals("decision_only_no_install_authority", nativeValues["android_package_manager.source_policy"])
+        assertEquals("local_unpacked_host_managed_only", nativeValues["android_package_manager.source_authority"])
+        assertEquals("local_unpacked_host_managed", nativeValues["android_package_manager.allowed_sources"])
+        assertEquals("disabled", nativeValues["android_package_manager.raw_registry_authority"])
+        assertEquals("disabled", nativeValues["android_package_manager.remote_tarball_install"])
+        assertEquals("disabled", nativeValues["android_package_manager.unverified_cache_reuse"])
+        assertEquals("internal_substrate_only", nativeValues["android_package_manager.install_authority"])
         assertEquals("read_maintenance_partial", nativeValues["android_package_manager.js_bridge"])
     }
 

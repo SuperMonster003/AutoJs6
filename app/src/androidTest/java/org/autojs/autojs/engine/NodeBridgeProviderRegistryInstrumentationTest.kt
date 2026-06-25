@@ -126,6 +126,8 @@ class NodeBridgeProviderRegistryInstrumentationTest {
         assertEquals(NodeWorkManagerBridgeScheduler.SCHEDULER_NAME, healthById.getValue("work_manager").details.getValue("scheduler"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("package_manager").status)
         assertEquals("read_maintenance_partial", healthById.getValue("package_manager").details.getValue("jsBridge"))
+        assertEquals("local_unpacked_host_managed_only", healthById.getValue("package_manager").details.getValue("sourceAuthority"))
+        assertEquals("internal_substrate_only", healthById.getValue("package_manager").details.getValue("installAuthority"))
         assertTrue(healthById.getValue("package_manager").details.getValue("liveMethods").contains("verify"))
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("shell").status)
         assertTrue(

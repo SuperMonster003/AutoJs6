@@ -427,7 +427,7 @@ class NodeBridgeConformanceInstrumentationTest {
               expectExports("sensors", sensors, ["getAvailableSensors", "once", "subscribe"]);
               expectExports("ui", ui, ["showLayout", "state", "bind"]);
               expectExports("work_manager", workManager, ["scheduleOnce", "schedulePeriodic", "cancel", "list"]);
-              expectExports("package_manager", packageManager, ["status", "policy", "install", "update", "remove", "list", "verify", "prune"]);
+              expectExports("package_manager", packageManager, ["status", "policy", "sourcePolicy", "install", "update", "remove", "list", "verify", "prune"]);
               expectExports("jsox", jsox, ["extend", "extendAll", "status"]);
               expectExports("jsox.mathx", jsoxMathx, ["randInt", "randomInt", "randFloat", "randomFloat", "random", "sum", "mean", "avg", "median", "var", "std", "cv", "mode", "dist", "logMn", "floorLog", "ceilLog", "roundLog", "floorPow", "ceilPow", "roundPow", "max", "maxi", "min", "mini"]);
               expectExports("autojs6:compat.jsox", compat.jsox, ["extend", "extendAll", "status"]);
@@ -482,15 +482,26 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(typeof workManager.policy.maxTasksPerProvider, "number");
               const packageManagerStatus = packageManager.status();
               const packageManagerPolicy = packageManager.policy();
+              const packageManagerSourcePolicy = packageManager.sourcePolicy();
               assert.strictEqual(Object.isFrozen(packageManagerStatus), true, "package_manager.status result must be frozen");
               assert.strictEqual(Object.isFrozen(packageManagerPolicy), true, "package_manager.policy result must be frozen");
+              assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy), true, "package_manager.sourcePolicy result must be frozen");
+              assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.allowedSources), true, "package_manager.sourcePolicy allowedSources must be frozen");
+              assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.deniedSources), true, "package_manager.sourcePolicy deniedSources must be frozen");
+              assert.strictEqual(Object.isFrozen(packageManagerSourcePolicy.localUnpacked), true, "package_manager.sourcePolicy localUnpacked must be frozen");
               assert.strictEqual(packageManagerStatus.status, "read_maintenance_partial");
               assert.strictEqual(packageManagerStatus.jsBridge, "read_maintenance_partial");
               assert.strictEqual(packageManagerStatus.requirePackageManager, "read_maintenance_partial");
               assert.strictEqual(packageManagerStatus.grantsInstallAuthority, false);
+              assert.strictEqual(packageManagerStatus.sourceAuthority, "local_unpacked_host_managed_only");
               assert.strictEqual(packageManagerPolicy.npmCli, "denied");
               assert.strictEqual(packageManagerPolicy.registryDownload, "deferred");
               assert.strictEqual(packageManagerPolicy.rawRegistryAccess, false);
+              assert.strictEqual(packageManagerPolicy.installAuthority, "internal_substrate_only");
+              assert.deepStrictEqual(packageManagerSourcePolicy.allowedSources, ["local_unpacked_host_managed"]);
+              assert.strictEqual(packageManagerSourcePolicy.status, "decision_only_no_install_authority");
+              assert.strictEqual(packageManagerSourcePolicy.grantsInstallAuthority, false);
+              assert.strictEqual(packageManagerSourcePolicy.registry.rawRegistryAccess, false);
               assert.strictEqual(engines.myEngine().engineName, "nodejs");
 
               await expectPromise("toast.showToast", toast.showToast("hello", { timeoutMs: 1010 }));
