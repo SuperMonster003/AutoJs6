@@ -27,7 +27,7 @@
       "id": "android_side_package_installation",
       "classification": "required_internal",
       "status": "open",
-      "currentEvidence": "Host-managed/offline fixture remains available; Phase 13 adds a partial Android-side local package store with transactional install/update/remove/list/verify/prune, cancellation, store locking, SHA-512 integrity, lifecycle/bin/native/path-escape denial, focused instrumentation, and a diagnostic-only require(\"package_manager\") facade whose mutating operations reject with ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED. Mutating JavaScript/runtime package-manager operations, registry/download policy, npm CLI decision, signed native-payload decision, prepared-device run evidence, and plugin/package distribution integration remain open.",
+      "currentEvidence": "Host-managed/offline fixture remains available; Phase 13 adds a partial Android-side local package store with transactional install/update/remove/list/verify/prune, cancellation, store locking, SHA-512 integrity, lifecycle/bin/native/path-escape denial, focused instrumentation, and a read-maintenance require(\"package_manager\") facade whose list/verify/prune operations dispatch to the Android app-private store while install/update/remove reject with ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED. Mutating JavaScript/runtime package-manager operations, registry/download policy, npm CLI decision, signed native-payload decision, prepared-device run evidence, and plugin/package distribution integration remain open.",
       "requiredResolution": "Android package install/update/remove/list/verify/prune is transactional, cancellable, locked, integrity checked, and lifecycle-script free."
     },
     {

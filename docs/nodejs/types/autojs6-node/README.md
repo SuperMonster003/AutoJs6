@@ -39,7 +39,7 @@ These declarations describe the AutoJs6 Safe Node Profile bridge modules exposed
 - `axios`
 - `websocket`
 - `work_manager`
-- `package_manager` (diagnostic-only)
+- `package_manager` (read-maintenance partial)
 - `autojs6:lifecycle`
 - `autojs6:compat`
 - `files`
@@ -155,11 +155,11 @@ P13-42 extends the `autojs6:profile` declaration with
 `packageManagerProfile`. The field reports the current partial Android package
 manager boundary: host-managed package validation is available, the Android
 runtime has a local app-private store substrate for already-unpacked packages,
-and the `package_manager` module is diagnostic-only for status/policy
-inspection. npm CLI, registry download, lifecycle scripts, bin links,
-symlinks, native builds, native payloads, postinstall downloads, mutating
-package-manager operations, raw executables, and raw registry access remain
-denied.
+and the `package_manager` module exposes status/policy plus `list`,
+`verify`, and `prune` for the app-private store. npm CLI, registry download,
+lifecycle scripts, bin links, symlinks, native builds, native payloads,
+postinstall downloads, `install`/`update`/`remove`, raw executables, and raw
+registry access remain denied.
 
 P13-43 extends the `autojs6:profile` declaration with `stdlibProfile`. The
 field reports the current partial Safe Node stdlib conformance subset for

@@ -515,7 +515,9 @@ async function smoke(): Promise<void> {
   const packageManagerStatus: packageManager.DiagnosticStatus = packageManager.status();
   const packageManagerPolicy: packageManager.DiagnosticPolicy = packageManager.policy();
   const packageManagerInstall: (request?: packageManager.PackageRequest) => never = packageManager.install;
-  const packageManagerList: (request?: packageManager.PackageRequest) => never = packageManager.list;
+  const packageManagerList: (options?: packageManager.ListOptions) => Promise<readonly packageManager.PackageRecord[]> = packageManager.list;
+  const packageManagerVerify: (request: packageManager.VerifyRequest) => Promise<packageManager.OperationResult> = packageManager.verify;
+  const packageManagerPrune: (options?: packageManager.PruneOptions) => Promise<packageManager.OperationResult> = packageManager.prune;
   const pluginInfo: plugins.PluginManifest = plugins.manifest("org.example.types");
   const pluginEntry: string = plugins.resolve("org.example.types");
   const typedPlugin: TypeSmokePlugin = plugins.load<TypeSmokePlugin>("org.example.types");
@@ -612,9 +614,9 @@ async function smoke(): Promise<void> {
   const debugInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "debug_unsafe_lab"> = "profile_gated";
   const safeInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "safe_default"> = "denied";
   const packageManagerRequiredProfile: AutoJs6Node.ProfileRequiredFor<"package_manager"> = "desktop_compat_opt_in";
-  const packageManagerSafeMode: AutoJs6Node.SafeDefaultModeFor<"package_manager"> = "diagnostic_only";
-  const packageManagerTargetMode: AutoJs6Node.TargetProfileModeFor<"package_manager"> = "diagnostic_only";
-  const packageManagerPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"package_manager"> = "metadata_only";
+  const packageManagerSafeMode: AutoJs6Node.SafeDefaultModeFor<"package_manager"> = "partial";
+  const packageManagerTargetMode: AutoJs6Node.TargetProfileModeFor<"package_manager"> = "partial";
+  const packageManagerPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"package_manager"> = "partial";
   const autojsJavaPackagedBehavior: AutoJs6Node.PackagedBehaviorFor<"$autojs.java"> = "metadata_only";
   const npmPureJsSafeMode: AutoJs6Node.SafeDefaultModeFor<"npm.pure_js"> = "partial";
   const workerRequiresDeclaration: AutoJs6Node.ProfileModuleRequiresDeclaration<"worker_threads"> = true;
@@ -1003,6 +1005,8 @@ async function smoke(): Promise<void> {
   void packageManagerPolicy;
   void packageManagerInstall;
   void packageManagerList;
+  void packageManagerVerify;
+  void packageManagerPrune;
   void autojsVersionCode;
   void autojsPackageName;
   void autojsContextAvailable;

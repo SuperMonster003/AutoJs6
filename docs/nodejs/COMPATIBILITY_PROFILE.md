@@ -1234,8 +1234,9 @@ SHA-512 integrity, and verify/prune support. Android npm CLI execution,
 registry download, lifecycle scripts, bin shims, symlink materialization,
 native builds/native payloads, postinstall downloads, raw `node_modules`
 mutation, script-visible `npm`, mutating `package_manager` operations, and raw
-registry/executable authority remain unpromoted. `package_manager` is
-diagnostic-only for status and policy inspection.
+registry/executable authority remain unpromoted. `package_manager` now exposes
+read-maintenance access for status, policy, `list`, `verify`, and `prune`;
+`install`/`update`/`remove` remain fail-closed.
 
 P13-43 records Node stdlib conformance as partial. The runtime exposes
 `autojs6:profile.stdlibProfile` to document the current Safe stdlib subset for

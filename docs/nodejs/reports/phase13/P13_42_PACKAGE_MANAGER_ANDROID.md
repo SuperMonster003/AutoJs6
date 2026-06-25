@@ -6,8 +6,8 @@ The current target is "Auto.js Pro capability + desktop Node.js capability",
 but package installation is still split between a host-managed npm-compatible
 validator and an Android app-private local package store substrate. This phase
 does not promote the npm CLI, registry download, lifecycle script execution, bin
-shim creation, native build execution, or mutating JavaScript package-manager
-operations on Android.
+shim creation, native build execution, or install/update/remove JavaScript
+package-manager operations on Android.
 
 ## Landed
 
@@ -25,21 +25,25 @@ operations on Android.
   - integrity: `sha512_required`
   - lifecycle scripts, bin links, symlinks, native build/native payloads, and
     postinstall downloads: `denied`
-  - JS bridge: `diagnostic_only`
-  - `require("package_manager")`: `diagnostic_only`
+  - JS bridge: `read_maintenance_partial`
+  - `require("package_manager")`: `read_maintenance_partial`
   - raw executable and raw registry authority: `false`
-- `require("package_manager")` exposes a frozen diagnostic facade:
+- `require("package_manager")` exposes a frozen read-maintenance facade:
   - `status()` and `policy()` return frozen policy snapshots.
-  - `install`, `update`, `remove`, `list`, `verify`, and `prune` throw
-    `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` without dispatching Android
-    package-store work.
+  - `list()` dispatches to the Android app-private store and returns frozen
+    installed package records.
+  - `verify({ name, version })` verifies installed package integrity or returns
+    `missing` for absent packages.
+  - `prune({ maxTransactionAgeMs })` removes stale transaction directories.
+  - `install`, `update`, and `remove` throw
+    `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` without mutating package content.
 - `NodeAndroidPackageInstallManager.nativeValues()` now exposes the same
   Android-side policy details for native test reports.
 - `NodePackageManagerPhase13DecisionInstrumentationTest` verifies the runtime
-  profile, denied npm globals, diagnostic package-manager facade, and the
+  profile, denied npm globals, read-maintenance package-manager facade, and the
   local Android store substrate.
 - Type declarations and TypeScript smoke now include
-  `PackageManagerProfile` and the diagnostic `package_manager` module.
+  `PackageManagerProfile` and the read-maintenance `package_manager` module.
 - Host verifier and Gradle gate:
   - `tools/nodejs/phase13/verify-package-manager-android-decision.js`
   - `:app:verifyNodePhase13PackageManagerAndroidDecision`

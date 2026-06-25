@@ -76,8 +76,8 @@ declare namespace AutoJs6Node {
     readonly transaction: "locked_cancellable_atomic" | string;
     readonly operations: readonly string[];
     readonly packageKinds: readonly string[];
-    readonly jsBridge: "diagnostic_only" | "not_exposed" | "partial" | string;
-    readonly requirePackageManager: "diagnostic_only" | "denied" | "partial" | string;
+    readonly jsBridge: "read_maintenance_partial" | "diagnostic_only" | "not_exposed" | "partial" | string;
+    readonly requirePackageManager: "read_maintenance_partial" | "diagnostic_only" | "denied" | "partial" | string;
     readonly diagnosticFacade: "available" | string;
     readonly packagedBehavior: "not_promoted" | string;
     readonly androidNetwork: "denied" | "partial" | string;

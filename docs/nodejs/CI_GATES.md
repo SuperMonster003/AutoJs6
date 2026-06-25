@@ -348,7 +348,8 @@ not enable full npm CLI behavior. `verifyNodePhase13AndroidPackageInstallManager
 covers the partial Android local package store with transaction staging, store
 locking, cancellation, SHA-512 integrity, lifecycle/bin/native/path denial, and
 install/update/remove/list/verify/prune. It does not enable registry download or
-a JavaScript package-manager API.
+mutating JavaScript package-manager install/update/remove APIs; the
+script-visible facade is limited to read-maintenance status/policy/list/verify/prune.
 `verifyNodePhase13ProEntryDirectives` records the P13-11 Pro-style Node entry
 directive state for `"nodejs ui"` and `"nodejs ui-thread"`, including
 `NodeEntryDirective`, descriptor/project config metadata, debug/native values,
@@ -758,7 +759,9 @@ package manager boundary, focused instrumentation, TypeScript declarations,
 surface manifest evidence, and docs updates while keeping Android npm CLI,
 registry download, lifecycle execution, bin shims, symlink materialization,
 native builds/native payloads, postinstall downloads, JS package-manager
-facades, raw executable authority, and raw registry access unpromoted. P13-42
+install/update/remove operations, script-visible `npm`, raw executable
+authority, and raw registry access unpromoted. The `package_manager`
+read-maintenance facade is limited to status/policy/list/verify/prune. P13-42
 records Android package manager parity as partial.
 `verifyNodePhase13StdlibConformanceDecision` records P13-43 as the stdlib
 conformance decision gate. It requires `stdlibProfile` diagnostics,

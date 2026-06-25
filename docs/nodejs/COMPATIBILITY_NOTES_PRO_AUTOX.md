@@ -372,8 +372,9 @@ manager plus Android local-store substrate. Pure JavaScript dependencies can be
 prepared by host tooling and stored through the internal app-private Android
 store, but Android npm CLI, registry download, lifecycle scripts, bin shims,
 symlinks, native builds/native payloads, postinstall downloads, and
-script-visible `npm` remain unavailable. `package_manager` is available only
-as a diagnostic facade; install/update/remove/list/verify/prune still reject.
+script-visible `npm` remain unavailable. `package_manager` is available as a
+read-maintenance facade for status/policy/list/verify/prune; install/update/remove
+still reject.
 
 P13-43 records Node stdlib conformance as partial. AutoJs6 Node exposes
 `stdlibProfile` diagnostics for representative Safe stdlib coverage across

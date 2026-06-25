@@ -1144,9 +1144,11 @@ host-managed validation plus Android app-private local store substrate. This
 narrows the gap for pure JavaScript dependencies that have already been
 resolved and sanitized by host tooling, but it is not yet Pro/Desktop npm
 parity. Android npm CLI, registry download/cache, lifecycle scripts, bin
-shims, symlinks, native builds, signed native payloads, script-visible
-`package_manager`/`npm`, packaged dependency distribution, and real npm corpus
-growth remain open.
+shims, symlinks, native builds, signed native payloads, script-visible `npm`,
+`package_manager.install/update/remove`, packaged dependency distribution, and
+real npm corpus growth remain open. The script-visible `package_manager`
+facade is limited to status/policy/list/verify/prune over the app-private
+store.
 
 P13-43 records Node stdlib conformance as partial: Safe Node now exposes
 `stdlibProfile` diagnostics for the representative stdlib subset covering

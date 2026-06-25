@@ -608,10 +608,10 @@ P13 task 本身使用以下执行状态：
     - Boundaries: lifecycle scripts, `bin`, native payloads, symlinks, and path escapes are rejected.
     - Integrity: SHA-512 expected integrity and installed-record verification.
     - Transaction model: store lock, transaction staging, atomic move/restore, cancellation token.
-    - Diagnostic JS facade: `require("package_manager").status()/policy()`
-      reports the current fail-closed policy, while
-      `install/update/remove/list/verify/prune` throw
-      `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED`.
+    - Read-maintenance JS facade: `require("package_manager").status()/policy()`
+      reports the current fail-closed policy, while `list/verify/prune`
+      dispatch to the Android app-private store and `install/update/remove`
+      throw `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED`.
     - Focused instrumentation: `NodeAndroidPackageInstallManagerInstrumentationTest`.
     - Host verifier: `tools/nodejs/phase13/verify-android-package-install-manager.js`.
     - Gradle gate: `:app:verifyNodePhase13AndroidPackageInstallManager`.
@@ -1375,10 +1375,11 @@ P13 task 本身使用以下执行状态：
       install/update/remove/list/verify/prune。
     - `NodeAndroidPackageInstallManager.nativeValues()` 现在输出 npm CLI、
       registry download、lockfile、lifecycle、bin link、symlink、native payload、
-      postinstall download、network install、diagnostic JS bridge 等策略。
-    - `require("package_manager")` 已作为 diagnostic-only facade 暴露：
-      `status()`/`policy()` 可读，`install/update/remove/list/verify/prune`
-      仍以 `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` 同步拒绝。
+      postinstall download、network install、read-maintenance JS bridge 等策略。
+    - `require("package_manager")` 已作为 read-maintenance facade 暴露：
+      `status()`/`policy()` 可读，`list/verify/prune` 经 Android app-private
+      store bridge 执行，`install/update/remove` 仍以
+      `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` 同步拒绝。
     - 新增 focused instrumentation:
       `NodePackageManagerPhase13DecisionInstrumentationTest`。
     - Existing Android store gate:

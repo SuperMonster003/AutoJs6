@@ -5,8 +5,9 @@ Status: partial
 P13-09 starts the Android-side package installation manager without promoting a
 user-facing npm or registry installer. The landed pieces are a local,
 app-private package store that can install already-unpacked package directories
-after policy validation, plus a diagnostic-only `require("package_manager")`
-facade that reports policy and rejects all mutating operations. It is intended
+after policy validation, plus a read-maintenance `require("package_manager")`
+facade that reports policy and can list, verify, and prune the app-private
+store. Install/update/remove remain unpromoted from JavaScript. It is intended
 as the Android runtime substrate for future dependency, plugin, and package
 distribution work.
 
@@ -16,7 +17,7 @@ distribution work.
   `app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt`
 - Focused instrumentation:
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManagerInstrumentationTest.kt`
-- Diagnostic facade instrumentation:
+- Read-maintenance facade instrumentation:
   `app/src/androidTest/java/org/autojs/autojs/engine/NodePackageManagerPhase13DecisionInstrumentationTest.kt`
 - Type declaration:
   `docs/nodejs/types/autojs6-node/package_manager.d.ts`
@@ -52,13 +53,16 @@ operation checks, and SHA-512 integrity. It rejects:
 Records include dependency/plugin/project package kinds so future plugin
 distribution and package-manager work can build on the same store.
 
-`require("package_manager")` is now script-visible in diagnostic-only mode:
+`require("package_manager")` is now script-visible in read-maintenance mode:
 
 - `status()` returns a frozen runtime policy snapshot.
 - `policy()` returns a frozen fail-closed package-manager policy.
-- `install`, `update`, `remove`, `list`, `verify`, and `prune` throw
-  `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` before dispatching any Android
-  package-store operation.
+- `list()` returns frozen Android package records from the app-private store.
+- `verify({ name, version })` verifies an installed record or returns
+  `missing` for absent packages.
+- `prune({ maxTransactionAgeMs })` removes stale transaction directories.
+- `install`, `update`, and `remove` throw
+  `ERR_AUTOJS6_PACKAGE_MANAGER_NOT_PROMOTED` before mutating package content.
 
 ## Not Promoted Yet
 
