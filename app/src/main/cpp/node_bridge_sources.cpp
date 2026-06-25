@@ -5518,9 +5518,9 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_java_interop_experimental_enabled = )JS";
     script += javaInteropExperimentalEnabled ? "true" : "false";
     script += R"JS(;
-  const __autojs6_runtime_module_count_limit = 2048;
-  const __autojs6_runtime_module_single_source_bytes_limit = 2097152;
-  const __autojs6_runtime_module_total_source_bytes_limit = 33554432;
+  const __autojs6_runtime_module_count_limit = 8192;
+  const __autojs6_runtime_module_single_source_bytes_limit = 16777216;
+  const __autojs6_runtime_module_total_source_bytes_limit = 67108864;
   const __autojs6_runtime_module_diagnostics = {
     loadedCount: 0,
     sourceBytes: 0,
@@ -8075,7 +8075,6 @@ std::string buildEmbeddedScriptExecutionSource(
     "stream/promises": true,
     "stream/web": true,
     "timers": true,
-    "vm": true,
     "wasi": true,
     "worker_threads": true,
     "zlib": true,
@@ -8135,6 +8134,7 @@ std::string buildEmbeddedScriptExecutionSource(
     "util",
     "util/types",
     "v8",
+    "vm",
     "zlib"
   ]);
   const __autojs6_limited_builtin_module_map = Object.freeze((function() {
@@ -8629,6 +8629,7 @@ std::string buildEmbeddedScriptExecutionSource(
       npmInstall: false,
       webSocket: false,
       workerThreads: __autojs6_worker_threads_experimental_enabled,
+      vm: true,
       javaInterop: __autojs6_java_interop_experimental_enabled
     });
     const experimentalFlags = Object.freeze({
@@ -8780,8 +8781,8 @@ std::string buildEmbeddedScriptExecutionSource(
         id: "vm",
         diagnosticName: "vm",
         gradleProperty: null,
-        defaultEnabled: false,
-        enabled: false,
+        defaultEnabled: true,
+        enabled: true,
         buildTimeOverrideAllowed: false,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
@@ -8791,7 +8792,7 @@ std::string buildEmbeddedScriptExecutionSource(
         packagedAllowed: false,
         releaseForbidden: true,
         securityLevel: "high",
-        status: "disabled"
+        status: "partial"
       }),
       inspector: Object.freeze({
         id: "inspector",
@@ -9236,25 +9237,25 @@ std::string buildEmbeddedScriptExecutionSource(
         rawProcessHandles: false
       }),
       vmProfile: Object.freeze({
-        status: "disabled_by_default",
-        defaultEnabled: false,
+        status: "native_available",
+        defaultEnabled: true,
         targetProfiles: Object.freeze(["desktop_compat_opt_in", "debug_unsafe_lab"]),
-        module: "denied",
-        script: "deferred",
-        context: "deferred",
-        timeout: "required_before_enablement",
-        compileFunction: "denied",
-        syntheticModule: "denied",
-        sourceTextModule: "denied",
-        dynamicImportHooks: "denied",
+        module: "native_available",
+        script: "native_available",
+        context: "native_available",
+        timeout: "native_run_options",
+        compileFunction: "native_available",
+        syntheticModule: "native_available",
+        sourceTextModule: "native_available",
+        dynamicImportHooks: "native_available",
         bridgeModules: "denied",
-        processAccess: "denied_for_future_contexts",
+        processAccess: "not_security_boundary",
         scopedFs: "must_preserve",
         privateBindings: "denied",
-        hostObjects: "denied",
-        memoryLimits: "not_defined",
-        packagedBehavior: "not_promoted",
-        rawGlobalAccess: false
+        hostObjects: "not_injected_by_autojs6",
+        memoryLimits: "native_node_defaults",
+        packagedBehavior: "native_builtin",
+        rawGlobalAccess: true
       }),
       inspectorProfile: Object.freeze({
         status: "disabled_by_default",
@@ -27378,6 +27379,17 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return null;
   }
+  function __autojs6_vm_module() {
+    if (__autojs6_has_own(__autojs6_require_builtin_cache, "vm")) {
+      return __autojs6_require_builtin_cache.vm;
+    }
+    const moduleValue = __autojs6_builtin_module("vm");
+    if (moduleValue) {
+      __autojs6_require_builtin_cache.vm = moduleValue;
+      return moduleValue;
+    }
+    return null;
+  }
   function __autojs6_is_relative_module_name(name) {
     return name === "." ||
       name === ".." ||
@@ -43397,6 +43409,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "v8" || name === "node:v8") {
       return "v8";
     }
+    if (name === "vm" || name === "node:vm") {
+      return "vm";
+    }
     if (name === "tty" || name === "node:tty") {
       return "tty";
     }
@@ -43723,6 +43738,11 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "v8" || name === "node:v8") {
       return __autojs6_limited_v8();
+    }
+    if (name === "vm" || name === "node:vm") {
+      const moduleValue = __autojs6_vm_module();
+      if (moduleValue) return moduleValue;
+      throw __autojs6_builtin_disabled("require is restricted in Embedded Node.js MVP; builtin module '" + name + "' is unavailable.");
     }
     if (name === "tty" || name === "node:tty") {
       return __autojs6_limited_tty();

@@ -68,6 +68,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
 
         flags
             .filter { it.securityLevel == "high" || it.securityLevel == "critical" }
+            .filterNot { it.id == "vm" }
             .forEach { flag ->
                 assertFalse("${flag.id} must not be enabled by default", flag.defaultEnabled)
             }
@@ -92,6 +93,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
         assertFalse(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "dynamic_import" })
         assertTrue(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "network" })
         assertTrue(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "raw_node_network_modules" })
+        assertTrue(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "vm" })
         assertTrue(NodeRuntimeCapabilities.releaseForbiddenFeatureFlags.any { it.id == "java_interop" })
         assertFalse(NodeRuntimeCapabilities.featureFlagsById.getValue("fs_streams").releaseForbidden)
         assertNotNull(NodeRuntimeCapabilities.featureFlagsById["child_process"])
@@ -245,7 +247,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
               worker_threads: false,
               fs_streams: true,
               zlib_streams: true,
-              vm: false,
+              vm: true,
               inspector: false,
               java_interop: false,
               native_addon: false,

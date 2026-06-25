@@ -40,7 +40,7 @@ class NodeModuleSafeSubsetInstrumentationTest {
                 const moduleBuiltin = require("module");
                 const nodeModuleBuiltin = require("node:module");
                 const keys = Object.keys(moduleBuiltin).join(",");
-                const disabled = ["child_process", "node:worker_threads", "vm", "node:inspector", "dgram"];
+                const disabled = ["child_process", "node:worker_threads", "node:inspector", "dgram"];
                 const disabledState = disabled.map((name) => moduleBuiltin.isBuiltin(name)).join("/");
                 const disabledListed = disabled.some((name) => {
                   const bare = name.replace(/^node:/, "");
@@ -55,7 +55,8 @@ class NodeModuleSafeSubsetInstrumentationTest {
                   "node:stream/web",
                   "dns",
                   "node:http",
-                  "tls"
+                  "tls",
+                  "node:vm"
                 ].map((name) => moduleBuiltin.isBuiltin(name)).join("/");
                 const shadowLoaded = Object.keys(require.cache).some((filename) => {
                   return filename.replace(/\\/g, "/").includes("/node_modules/module/");
@@ -87,9 +88,9 @@ class NodeModuleSafeSubsetInstrumentationTest {
         assertTrue(result.stdout.contains("module.safe.frozen=true"))
         assertTrue(result.stdout.contains("module.safe.keys=createRequire,isBuiltin,builtinModules,syncBuiltinESMExports"))
         assertTrue(result.stdout.contains("module.safe.dangerous=true"))
-        assertTrue(result.stdout.contains("module.safe.disabledState=false/false/false/false/false"))
+        assertTrue(result.stdout.contains("module.safe.disabledState=false/false/false/false"))
         assertTrue(result.stdout.contains("module.safe.disabledListed=false"))
-        assertTrue(result.stdout.contains("module.safe.allowed=true/true/true/true/true/true/true/true/true"))
+        assertTrue(result.stdout.contains("module.safe.allowed=true/true/true/true/true/true/true/true/true/true"))
         assertTrue(result.stdout.contains("module.safe.shadow=true"))
     }
 

@@ -82,9 +82,14 @@ class NodeSecurityRegressionInstrumentationTest {
                 console.log("security.process.getBuiltinModule=absent");
               }
 
-              for (const name of ["child_process", "worker_threads", "dgram", "vm", "inspector"]) {
+              for (const name of ["child_process", "worker_threads", "dgram", "inspector"]) {
                 expectDenied("require." + name, () => require(name), "ERR_AUTOJS6_BUILTIN_DISABLED");
               }
+              const vm = require("vm");
+              console.log("security.require.vm=" + [
+                typeof vm.Script,
+                require.resolve("node:vm")
+              ].join("/"));
 
               await expectDeniedAsync("fetch", () => fetch("https://example.invalid/"), "ERR_AUTOJS6_NETWORK_DISABLED");
               expectDenied("http.request", () => require("http").request("http://127.0.0.1/"), "ERR_AUTOJS6_NETWORK_DISABLED");

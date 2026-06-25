@@ -9731,7 +9731,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                         Object.isFrozen(util) &&
                         Object.isFrozen(utilTypes);
                       const deniedOk = limitedHttpGuard() &&
-                        captureDenied(() => require("node:vm"), "node:vm") &&
+                        typeof require("node:vm").Script === "function" &&
                         require.resolve("timers/promises") === "timers/promises" &&
                         require.resolve("node:timers/promises") === "timers/promises" &&
                         captureDenied(() => process.getBuiltinModule("util/types"), "process.getBuiltinModule");
@@ -11378,7 +11378,6 @@ class EmbeddedScriptMvpInstrumentationTest {
                 "child_process",
                 "worker_threads",
                 "cluster",
-                "vm",
                 "inspector",
                 "repl",
                 "zlib/promises",
@@ -11419,6 +11418,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 "stream/promises",
                 "stream/web",
                 "zlib",
+                "vm",
             )
             val result = runEmbeddedScript(
                 """
@@ -20189,7 +20189,8 @@ class EmbeddedScriptMvpInstrumentationTest {
                   moduleBuiltin.builtinModules.includes("timers/promises") &&
                   moduleBuiltin.builtinModules.includes("http") &&
                   moduleBuiltin.builtinModules.includes("https") &&
-                  moduleBuiltin.builtinModules.includes("tls")
+                  moduleBuiltin.builtinModules.includes("tls") &&
+                  moduleBuiltin.builtinModules.includes("vm")
                 ));
                 console.log("module.builtin.sync=" + (
                   typeof moduleBuiltin.syncBuiltinESMExports === "function" &&
@@ -20219,7 +20220,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("module.builtin.frozen=true"))
             assertTrue(result.stdout.contains("module.builtin.keys=createRequire,isBuiltin,builtinModules,syncBuiltinESMExports"))
             assertTrue(result.stdout.contains("module.builtin.createRequire=function"))
-            assertTrue(result.stdout.contains("module.builtin.isBuiltin=true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/false"))
+            assertTrue(result.stdout.contains("module.builtin.isBuiltin=true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true"))
             assertTrue(result.stdout.contains("module.builtin.modules=true"))
             assertTrue(result.stdout.contains("module.builtin.sync=true"))
             assertTrue(result.stdout.contains("module.builtin.dangerous_missing=true"))

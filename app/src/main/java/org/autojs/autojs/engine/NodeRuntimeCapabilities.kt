@@ -92,9 +92,9 @@ object NodeRuntimeCapabilities {
     const val JAVA_INTEROP_EXPERIMENTAL_DEFAULT = false
 
     const val RUNTIME_SCRIPT_SOURCE_MAX_BYTES = 524_288
-    const val RUNTIME_MODULE_SOURCE_MAX_BYTES = 2_097_152
-    const val RUNTIME_MODULE_SOURCES_MAX_BYTES = 33_554_432
-    const val RUNTIME_MODULE_SOURCE_MAX_COUNT = 2048
+    const val RUNTIME_MODULE_SOURCE_MAX_BYTES = 16_777_216
+    const val RUNTIME_MODULE_SOURCES_MAX_BYTES = 67_108_864
+    const val RUNTIME_MODULE_SOURCE_MAX_COUNT = 8192
 
     val featureFlags = listOf(
         NodeRuntimeFeatureFlag(
@@ -189,12 +189,12 @@ object NodeRuntimeCapabilities {
             id = "vm",
             diagnosticName = "vm",
             gradleProperty = null,
-            defaultEnabled = false,
+            defaultEnabled = true,
             buildTimeOverrideAllowed = false,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "disabled",
+            status = "partial",
         ),
         NodeRuntimeFeatureFlag(
             id = "inspector",
@@ -469,6 +469,7 @@ object NodeRuntimeCapabilities {
         "util",
         "util/types",
         "v8",
+        "vm",
         "zlib",
     )
 
@@ -521,7 +522,6 @@ object NodeRuntimeCapabilities {
         "domain",
         "inspector",
         "repl",
-        "vm",
         "wasi",
         "worker_threads",
         "zlib/promises",

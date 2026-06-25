@@ -47,6 +47,8 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                   const nodeEvents = require("node:events");
                   const diagnostics = require("diagnostics_channel");
                   const nodeDiagnostics = require("node:diagnostics_channel");
+                  const vm = require("vm");
+                  const nodeVm = require("node:vm");
                   const req = createRequire(__filename);
 
                   function denied(action) {
@@ -161,6 +163,13 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                     hasAfter === false &&
                     typeof diagnostics.Channel === "undefined" &&
                     typeof channel._subscribers === "undefined";
+                  const vmOk =
+                    vm === nodeVm &&
+                    req("vm") === vm &&
+                    req("node:vm") === vm &&
+                    require.resolve("vm") === "vm" &&
+                    require.resolve("node:vm") === "vm" &&
+                    new vm.Script("value + 1").runInNewContext({ value: 41 }, { timeout: 1000 }) === 42;
 
                   console.log("core.builtin.aliases=" + aliases);
                   console.log("core.builtin.resolve=" + resolveSummary);
@@ -175,6 +184,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                   console.log("core.builtin.util_types=" + utilTypesOk);
                   console.log("core.builtin.events=" + eventsOk);
                   console.log("core.builtin.diagnostics=" + diagnosticsOk);
+                  console.log("core.builtin.vm=" + vmOk);
                   console.log("core.builtin.getBuiltin=" + [
                     "constants",
                     "util/types",
@@ -183,7 +193,6 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                   ].map((name) => name + ":" + denied(() => process.getBuiltinModule(name))).join("|"));
                   console.log("core.builtin.disabled=" + [
                     requireDenied("child_process"),
-                    requireDenied("node:vm"),
                     requireDenied("dgram")
                   ].join("|"));
                 })().catch((error) => {
@@ -203,12 +212,12 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
         assertTrue(result.stdout.contains("core.builtin.util_types=true"))
         assertTrue(result.stdout.contains("core.builtin.events=true"))
         assertTrue(result.stdout.contains("core.builtin.diagnostics=true"))
+        assertTrue(result.stdout.contains("core.builtin.vm=true"))
         assertTrue(result.stdout.contains("constants:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true"))
         assertTrue(result.stdout.contains("util/types:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true"))
         assertTrue(result.stdout.contains("events:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true"))
         assertTrue(result.stdout.contains("diagnostics_channel:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true"))
         assertTrue(result.stdout.contains("child_process:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}:${NodeRuntimeErrorCodes.BUILTIN_DISABLED}:true"))
-        assertTrue(result.stdout.contains("node:vm:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}:${NodeRuntimeErrorCodes.BUILTIN_DISABLED}:true"))
         assertTrue(result.stdout.contains("dgram:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}:${NodeRuntimeErrorCodes.BUILTIN_DISABLED}:true"))
     }
 

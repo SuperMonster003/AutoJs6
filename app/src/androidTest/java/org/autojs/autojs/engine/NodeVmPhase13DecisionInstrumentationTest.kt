@@ -22,8 +22,8 @@ class NodeVmPhase13DecisionInstrumentationTest {
     }
 
     @Test
-    fun vmProfileKeepsModuleDeniedAndEnablementDeferred() {
-        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-36 vm module decision")
+    fun vmProfileRecordsNativeAvailabilityAndShadowProtection() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-36 vm native availability")
 
         val workDir = File(context.cacheDir, "node-vm-p13-36-${System.nanoTime()}").apply {
             deleteRecursively()
@@ -43,23 +43,11 @@ class NodeVmPhase13DecisionInstrumentationTest {
                     "nodejs";
                     const profile = require("autojs6:profile");
                     const vmProfile = profile.vmProfile || {};
-
-                    function detailOf(error) {
-                      return [
-                        error && error.code,
-                        error && error.autojs6Code,
-                        error && error.legacyCode
-                      ].filter(Boolean).join("/");
-                    }
-                    function expectDenied(label, action) {
-                      try {
-                        action();
-                      } catch (error) {
-                        console.log("p13vm." + label + "=" + detailOf(error));
-                        return;
-                      }
-                      throw new Error(label + " was unexpectedly allowed");
-                    }
+                    const vm = require("vm");
+                    const nodeVm = require("node:vm");
+                    const scriptResult = new vm.Script("value + 1").runInNewContext({ value: 41 }, { timeout: 1000 });
+                    const context = vm.createContext({ value: 21 });
+                    const contextResult = vm.runInContext("value * 2", context, { timeout: 1000 });
 
                     console.log("p13vm.profile=" + [
                       vmProfile.status,
@@ -90,13 +78,21 @@ class NodeVmPhase13DecisionInstrumentationTest {
                       profile.featureFlags.vm.projectJsonOverrideAllowed,
                       profile.featureFlags.vm.packagedApkOverrideAllowed,
                       profile.disabledBuiltins.includes("vm"),
+                      profile.limitedBuiltins.includes("vm"),
                       typeof globalThis.__autojs6_vm,
                       typeof globalThis.vm
                     ].join("|"));
-                    expectDenied("requireBare", () => require("vm"));
-                    expectDenied("requireNodePrefix", () => require("node:vm"));
-                    expectDenied("resolveBare", () => require.resolve("vm"));
-                    expectDenied("resolveNodePrefix", () => require.resolve("node:vm"));
+                    console.log("p13vm.module=" + [
+                      vm === nodeVm,
+                      require.resolve("vm"),
+                      require.resolve("node:vm"),
+                      typeof vm.Script,
+                      typeof vm.createContext,
+                      typeof vm.compileFunction,
+                      scriptResult,
+                      contextResult,
+                      vm.shadow !== true
+                    ].join("|"));
                     console.log("p13vm.shadowLoaded=" + Object.keys(require.cache).some((filename) => {
                       return filename.replace(/\\/g, "/").includes("/node_modules/vm/");
                     }));
@@ -107,33 +103,19 @@ class NodeVmPhase13DecisionInstrumentationTest {
                 timeoutMs = 10_000L,
             )
 
-            NodeEmbeddedTestHarness.assertSucceeded("P13-36 vm module decision", result)
+            NodeEmbeddedTestHarness.assertSucceeded("P13-36 vm native availability", result)
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "p13vm.profile=disabled_by_default|false|desktop_compat_opt_in,debug_unsafe_lab|" +
-                        "denied|deferred|deferred|required_before_enablement|denied|denied|denied|" +
-                        "denied|denied|denied_for_future_contexts|must_preserve|denied|denied|" +
-                        "not_defined|not_promoted|false|true|true",
+                    "p13vm.profile=native_available|true|desktop_compat_opt_in,debug_unsafe_lab|" +
+                        "native_available|native_available|native_available|native_run_options|" +
+                        "native_available|native_available|native_available|native_available|denied|" +
+                        "not_security_boundary|must_preserve|denied|not_injected_by_autojs6|" +
+                        "native_node_defaults|native_builtin|true|true|true",
                 ),
             )
-            assertTrue(result.stdout, result.stdout.contains("p13vm.boundary=false|false|false|false|true|undefined|undefined"))
-            assertTrue(
-                result.stdout,
-                result.stdout.contains("p13vm.requireBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
-            )
-            assertTrue(
-                result.stdout,
-                result.stdout.contains("p13vm.requireNodePrefix=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
-            )
-            assertTrue(
-                result.stdout,
-                result.stdout.contains("p13vm.resolveBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
-            )
-            assertTrue(
-                result.stdout,
-                result.stdout.contains("p13vm.resolveNodePrefix=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
-            )
+            assertTrue(result.stdout, result.stdout.contains("p13vm.boundary=true|true|false|false|false|true|undefined|undefined"))
+            assertTrue(result.stdout, result.stdout.contains("p13vm.module=true|vm|vm|function|function|function|42|42|true"))
             assertTrue(result.stdout, result.stdout.contains("p13vm.shadowLoaded=false"))
             assertTrue(result.stdout, result.stdout.contains("p13vm.ready=true"))
         } finally {

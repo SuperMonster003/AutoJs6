@@ -7068,7 +7068,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 moduleBuiltin.isBuiltin("https"),
                 moduleBuiltin.isBuiltin("tls"),
                 moduleBuiltin.isBuiltin("node:vm")
-              ].join("/") === "true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/false" &&
+              ].join("/") === "true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true/true" &&
                 Array.isArray(moduleBuiltin.builtinModules) &&
                 Object.isFrozen(moduleBuiltin.builtinModules) &&
                 moduleBuiltin.builtinModules.includes("fs") &&
@@ -7087,6 +7087,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 moduleBuiltin.builtinModules.includes("http") &&
                 moduleBuiltin.builtinModules.includes("https") &&
                 moduleBuiltin.builtinModules.includes("tls") &&
+                moduleBuiltin.builtinModules.includes("vm") &&
                 typeof moduleBuiltin.syncBuiltinESMExports === "function" &&
                 moduleBuiltin.syncBuiltinESMExports() === undefined;
               const ready = moduleBuiltin === nodeModuleBuiltin &&
