@@ -54,8 +54,8 @@
   `url` descriptor aliases, URL string `app.startActivity()` input,
   pure `app.intentToShell()` shell-argument serialization, `app.openUrl()`,
   `app.sendEmail()`, `app.uninstall()`, exact `app.query` installed-app lookup
-  helpers, and settings aliases backed by the existing scoped activity/settings
-  bridge.
+  helpers, scoped `app.viewFile()` / `app.editFile()` Activity helpers, and
+  settings aliases backed by the existing scoped activity/settings bridge.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
@@ -957,10 +957,10 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
     - Report:
       `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
-    - Open before closure: Rhino app helper aliases, URI/email/settings
-      helpers, broadcast send promotion, root/Shizuku/dual-user routing through
-      P13-24 capabilities, installed-app lookup privacy policy, packaged smoke,
-      negative device corpus, and migration examples.
+    - Open before closure: remaining Rhino app helper aliases, broadcast send
+      promotion, root/Shizuku/dual-user routing through P13-24 capabilities,
+      raw installed-app list APIs, packaged smoke, negative device corpus, and
+      migration examples.
 
 - [ ] P13-24: 扩展 shell/root/Shizuku 能力。
   - 范围：将 shell、root shell、Shizuku 拆成独立 capability。

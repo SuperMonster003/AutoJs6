@@ -58,6 +58,7 @@ import okhttp3.WebSocketListener
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccessibilityService
 import org.autojs.autojs.core.accessibility.OnKeyListener
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.json.JSONArray
@@ -595,6 +596,8 @@ object NodeBridgeModules {
         "getPackageName",
         "getAppName",
         "isInstalled",
+        "viewFile",
+        "editFile",
     )
     val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile")
     val dialogsMethods = setOf("alert", "confirm", "input", "select")
@@ -4279,6 +4282,12 @@ class AndroidNodeBridgeCapabilityProvider(
                     request.id,
                     isPackageInstalled(request.firstStringArg()).toString(),
                 )
+                "viewFile" -> dispatchScopedAppFileAction(request, "viewFile") { file ->
+                    IntentUtils.viewFile(appContext, file.absolutePath)
+                }
+                "editFile" -> dispatchScopedAppFileAction(request, "editFile") { file ->
+                    IntentUtils.editFile(appContext, file.absolutePath)
+                }
                 "openAppSetting" -> {
                     openAppSetting(request.firstStringArg().ifBlank { appContext.packageName })
                     NodeBridgeResponse.success(request.id, "null")
@@ -4705,6 +4714,58 @@ class AndroidNodeBridgeCapabilityProvider(
             appContext.packageManager.getPackageInfo(packageName, 0)
             true
         }.getOrDefault(false)
+    }
+
+    private fun dispatchScopedAppFileAction(
+        request: NodeBridgeRequest,
+        methodName: String,
+        launcher: (File) -> Boolean,
+    ): NodeBridgeResponse {
+        val rawPath = request.firstStringArg()
+        val file = resolveScopedAppFile(rawPath)
+            ?: return NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.permissionDenied(
+                    message = "app.$methodName path must stay inside the scoped working directory.",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        if (!file.isFile) {
+            return NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.invalidRequest(
+                    message = "app.$methodName target does not exist or is not a file: $rawPath",
+                    module = request.module,
+                    method = request.method,
+                ),
+            )
+        }
+        return NodeBridgeResponse.success(request.id, launcher(file).toString())
+    }
+
+    private fun resolveScopedAppFile(rawPath: String): File? {
+        if (rawPath.isBlank() || rawPath.indexOf('\u0000') >= 0) {
+            return null
+        }
+        val base = File(engineInfo.cwd.takeIf { it.isNotBlank() } ?: appContext.filesDir.absolutePath).canonicalFile
+        val trimmed = rawPath.trim()
+        val candidate = runCatching {
+            val input = File(trimmed)
+            if (input.isAbsolute) {
+                input.canonicalFile
+            } else {
+                val normalized = trimmed.replace('\\', '/')
+                val segments = normalized.split('/').filter { it.isNotBlank() }
+                if (segments.isEmpty()) {
+                    return null
+                }
+                File(base, segments.joinToString(File.separator)).canonicalFile
+            }
+        }.getOrNull() ?: return null
+        val basePath = base.path.trimEnd(File.separatorChar)
+        val candidatePath = candidate.path
+        return candidate.takeIf { candidatePath == basePath || candidatePath.startsWith(basePath + File.separator) }
     }
 
     private fun openAppSetting(packageName: String) {

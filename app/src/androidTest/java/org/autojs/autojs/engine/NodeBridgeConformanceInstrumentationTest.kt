@@ -133,6 +133,7 @@ class NodeBridgeConformanceInstrumentationTest {
                     else if (method === "getPackageName") result = request.args[0] === "AutoJs6" ? "org.autojs.autojs6" : null;
                     else if (method === "getAppName") result = request.args[0] === "org.autojs.autojs6" ? "AutoJs6" : null;
                     else if (method === "isInstalled") result = request.args[0] === "org.autojs.autojs6";
+                    else if (method === "viewFile" || method === "editFile") result = true;
                     else result = null;
                   } else if (moduleName === "dialogs") {
                     result = method === "confirm" ? true : (method === "input" ? "typed" : (method === "select" ? 1 : null));
@@ -460,7 +461,7 @@ class NodeBridgeConformanceInstrumentationTest {
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
               expectExports("toast", toast, ["showToast", "toast"]);
-              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "uninstall", "getPackageName", "getAppName", "isInstalled", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
+              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "uninstall", "getPackageName", "getAppName", "isInstalled", "viewFile", "editFile", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"]);
@@ -589,6 +590,8 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("app.getPackageName.missing", app.getPackageName("__autojs6_missing_app__", { timeoutMs: 1013 })), null);
               assert.strictEqual(await expectPromise("app.getAppName.missing", app.getAppName("org.autojs6.missing", { timeoutMs: 1013 })), null);
               assert.strictEqual(await expectPromise("app.isInstalled.missing", app.isInstalled("org.autojs6.missing", { timeoutMs: 1013 })), false);
+              assert.strictEqual(await expectPromise("app.viewFile", app.viewFile("README.md", { timeoutMs: 1013 })), true);
+              assert.strictEqual(await expectPromise("app.editFile", app.editFile("README.md", { timeoutMs: 1013 })), true);
               await expectPromise("app.openAppSetting", app.openAppSetting("org.autojs.autojs6", { timeoutMs: 1014 }));
               const viewIntent = app.intent({
                 action: "VIEW",
@@ -1205,6 +1208,8 @@ class NodeBridgeConformanceInstrumentationTest {
                 "getPackageName",
                 "getAppName",
                 "isInstalled",
+                "viewFile",
+                "editFile",
             ),
             NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select"),
             NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),

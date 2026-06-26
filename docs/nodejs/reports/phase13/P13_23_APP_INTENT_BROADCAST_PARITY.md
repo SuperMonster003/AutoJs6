@@ -30,6 +30,11 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
   expose exact installed-app lookup through an explicit `app.query` capability.
   They return JSON-safe string/null/boolean values and do not expose raw
   `ApplicationInfo`, `PackageInfo`, or installed-app lists.
+- `app.viewFile()` and `app.editFile()` launch Android `ACTION_VIEW` /
+  `ACTION_EDIT` for files resolved inside the scoped Node working directory.
+  They accept relative paths or absolute paths under the same working directory,
+  return JSON-safe boolean launch results, and do not expose raw `Uri` or
+  `FileProvider` handles.
 - `app.intentToShell()` serializes the same JSON-safe descriptors into `am`
   intent arguments for migration scripts. It is a pure helper and does not
   execute shell commands or dispatch Android bridge requests.
@@ -71,9 +76,9 @@ No raw Android `Intent`, `Uri`, `Bundle`, `ComponentName`, `PackageManager`,
 
 ## Remaining Blockers
 
-- Full Rhino app helper parity: `parseUri`, `getUriForFile`, `viewFile`,
-  `editFile`, `kill`, `launch()`, `getInstalledApps()`,
-  `getInstalledPackages()`, preset app aliases, and dual-app helpers.
+- Full Rhino app helper parity: `parseUri`, `getUriForFile`, `kill`,
+  `launch()`, `getInstalledApps()`, `getInstalledPackages()`, preset app
+  aliases, and dual-app helpers.
 - Activity short-form mapping beyond URL strings and JSON-safe descriptors.
 - Root/Shizuku examples that combine `app.intentToShell()` with explicit
   P13-24 shell capabilities.

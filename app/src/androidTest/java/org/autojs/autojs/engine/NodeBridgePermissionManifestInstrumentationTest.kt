@@ -156,6 +156,14 @@ class NodeBridgePermissionManifestInstrumentationTest {
             listOf(NodeBridgePermissionManifest.APP_QUERY),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("app", "isInstalled"),
         )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.APP_ACTIVITY),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("app", "viewFile"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.APP_ACTIVITY),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("app", "editFile"),
+        )
         assertEquals(NodeBridgePermissionManifest.APP_QUERY, NodeBridgePermissionManifest.normalizeCapability("package-query"))
         assertEquals(
             listOf(NodeBridgePermissionManifest.APP_QUERY),

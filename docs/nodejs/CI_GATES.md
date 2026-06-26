@@ -426,7 +426,7 @@ broadcast wakeups remain blocked.
 app/intent/broadcast Pro parity state: JSON-safe `app.intent()` descriptors,
 `app.startActivity()` descriptor normalization, TypeScript/conformance evidence,
 and stable `app.sendBroadcast()` plus privileged app-option rejection are
-present, while broadcast send promotion, root/Shizuku app routing, URI/email/
+present, while broadcast send promotion, root/Shizuku app routing,
 raw installed-app list APIs, packaged smoke, and raw Android
 app/intent objects remain blocked.
 `verifyNodePhase13ShellRootShizukuCapability` records the P13-24 partial
@@ -621,9 +621,10 @@ manifest synthesis, packaged install/trigger/remove behavior, and raw broadcast
 objects require separate evidence.
 P13-23 additionally uses `verifyNodePhase13AppIntentBroadcastParity` as the
 host promotion-status gate for app/intent/broadcast parity and keeps the surface
-partial: JSON-safe `app.intent()` and normalized `app.startActivity()` are
-covered, while `sendBroadcast`, root/Shizuku app options, dual-user helpers,
-raw installed-app list APIs, packaged behavior, and
+partial: JSON-safe `app.intent()`, normalized `app.startActivity()`, and
+scoped file view/edit helpers are covered, while `sendBroadcast`,
+root/Shizuku app options, dual-user helpers, raw installed-app list APIs,
+packaged behavior, and
 raw Android objects require separate evidence.
 P13-24 additionally uses `verifyNodePhase13ShellRootShizukuCapability` as the
 host promotion-status gate for shell/root/Shizuku capability parity and keeps

@@ -10896,6 +10896,7 @@ std::string buildEmbeddedScriptExecutionSource(
       if (methodName === "launchPackage" || methodName === "launchApp") return ["app.launch"];
       if (methodName === "openAppSetting") return ["app.settings"];
       if (methodName === "startActivity") return ["app.activity"];
+      if (methodName === "viewFile" || methodName === "editFile") return ["app.activity"];
       if (methodName === "getPackageName" || methodName === "getAppName" || methodName === "isInstalled") return ["app.query"];
       return ["app"];
     }
@@ -21856,6 +21857,36 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_app_bridge_options(options, 10000)
       );
     }
+    function viewFile(path, options) {
+      const target = __autojs6_app_non_empty_string(path).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "viewFile",
+          "app.viewFile requires a non-empty scoped file path."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "viewFile",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function editFile(path, options) {
+      const target = __autojs6_app_non_empty_string(path).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "editFile",
+          "app.editFile requires a non-empty scoped file path."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "editFile",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
     function launchPackage(packageName, options) {
       const target = __autojs6_app_non_empty_string(packageName);
       if (!target) {
@@ -21941,6 +21972,8 @@ std::string buildEmbeddedScriptExecutionSource(
       getPackageName,
       getAppName,
       isInstalled,
+      viewFile,
+      editFile,
       launchPackage,
       launchApp,
       openAppSetting,

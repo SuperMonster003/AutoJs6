@@ -373,6 +373,7 @@ object NodeBridgePermissionManifest {
                 "launchPackage", "launchApp" -> listOf(APP_LAUNCH)
                 "openAppSetting" -> listOf(APP_SETTINGS)
                 "startActivity" -> listOf(APP_ACTIVITY)
+                "viewFile", "editFile" -> listOf(APP_ACTIVITY)
                 "getPackageName", "getAppName", "isInstalled" -> listOf(APP_QUERY)
                 else -> listOf(APP)
             }

@@ -149,6 +149,29 @@ function buildReport(files) {
       "Keep raw `getInstalledApps()` / `getInstalledPackages()` Java-object list APIs blocked until a redacted JSON schema and disclosure policy exist.",
       "Add packaged privacy disclosure examples for app-name/package lookup before default promotion.",
     ]),
+    scenario("scoped_file_activity_helpers", "File view/edit helpers resolve paths inside the scoped working directory", [
+      token(files.permissionManifest, '"viewFile", "editFile" -> listOf(APP_ACTIVITY)'),
+      token(files.nodeBridgeSources, 'if (methodName === "viewFile" || methodName === "editFile") return ["app.activity"];'),
+      token(files.nodeBridgeSources, "function viewFile(path, options)"),
+      token(files.nodeBridgeSources, "function editFile(path, options)"),
+      token(files.protocol, '"viewFile",'),
+      token(files.protocol, '"editFile",'),
+      token(files.protocol, "private fun dispatchScopedAppFileAction("),
+      token(files.protocol, "private fun resolveScopedAppFile(rawPath: String): File?"),
+      token(files.protocol, "IntentUtils.viewFile(appContext, file.absolutePath)"),
+      token(files.protocol, "IntentUtils.editFile(appContext, file.absolutePath)"),
+      token(files.appTypes, "viewFile(path: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;"),
+      token(files.appTypes, "editFile(path: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;"),
+      token(files.typeSmoke, 'const viewedFile: boolean = await app.viewFile("README.md"'),
+      token(files.typeSmoke, 'const editedFile: boolean = await app.editFile("README.md"'),
+      token(files.conformanceTest, 'assert.strictEqual(await expectPromise("app.viewFile"'),
+      token(files.conformanceTest, 'assert.strictEqual(await expectPromise("app.editFile"'),
+      token(files.p13Report, "`app.viewFile()`"),
+      token(files.p13Report, "`app.editFile()`"),
+    ], [
+      "Add packaged device evidence for scoped file view/edit Activity routing and disclosure.",
+      "Keep raw `Uri` / `FileProvider` handles unavailable to Node scripts.",
+    ]),
     scenario("broadcast_and_privileged_boundary", "Broadcast send and privileged Rhino options remain rejected before bridge dispatch", [
       token(files.nodeBridgeSources, "function __autojs6_app_send_broadcast_unavailable_error()"),
       token(files.nodeBridgeSources, "app.sendBroadcast is not available in the Node.js engine yet"),
@@ -177,7 +200,7 @@ function buildReport(files) {
       token(files.proComparison, "P13-23 records app/intent/broadcast Pro parity as partial"),
       token(files.proAutoxNotes, "P13-23 records app/intent/broadcast Pro parity as partial"),
     ], [
-      "Map Rhino aliases such as `launch()`, `viewFile()`, `editFile()`, `kill()`, raw installed-app list APIs, and dual-app helpers to separate JSON-safe providers or stable rejections.",
+      "Map Rhino aliases such as `launch()`, `kill()`, raw installed-app list APIs, and dual-app helpers to separate JSON-safe providers or stable rejections.",
     ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-23 as partial", [
       token(files.p13Report, "Status: partial"),
@@ -190,7 +213,7 @@ function buildReport(files) {
       token(files.typesReadme, "P13-23 records the partial app/intent/broadcast parity gate"),
       token(files.surfaceManifestDoc, "phase13-app-intent-broadcast-parity"),
     ], [
-      "Keep P13-23 open until URI/email/settings/broadcast helpers, packaged smoke, negative corpus, and migration examples land.",
+      "Keep P13-23 open until broadcast send promotion, packaged smoke, negative corpus, raw installed-app list policy, and migration examples land.",
     ]),
   ];
   const checks = [

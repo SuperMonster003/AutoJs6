@@ -1480,7 +1480,7 @@ This host gate records P13-23 as partial. It requires the JSON-safe
 coverage, conformance coverage, and stable pre-dispatch rejection for
 `app.sendBroadcast()` plus privileged `root`/`shizuku`/`dual` app options. It
 does not promote broadcast sending, root/Shizuku routing through ordinary app
-APIs, full Rhino app helper aliases, raw installed-app list APIs, packaged
+APIs, remaining Rhino app helper aliases, raw installed-app list APIs, packaged
 behavior, or raw Android app/intent objects.
 
 Phase 13 shell/root/Shizuku capability status gate:

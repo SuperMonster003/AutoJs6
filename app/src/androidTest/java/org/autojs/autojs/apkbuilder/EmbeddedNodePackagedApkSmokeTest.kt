@@ -11190,6 +11190,8 @@ class EmbeddedNodePackagedApkSmokeTest {
                 typeof app.getPackageName === "function" &&
                 typeof app.getAppName === "function" &&
                 typeof app.isInstalled === "function" &&
+                typeof app.viewFile === "function" &&
+                typeof app.editFile === "function" &&
                 typeof app.startActivity === "function";
               const launchOk = launchResult === true;
               const shadowOk = app.shadow !== true;

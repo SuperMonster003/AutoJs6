@@ -1680,6 +1680,14 @@ runtime.
   - `versionName: string`
   - `versionCode: number`
   - `intent(intentOptions): IntentDescriptor`
+  - `openUrl(url, options?): Promise<void>`
+  - `sendEmail(request, options?): Promise<void>`
+  - `uninstall(packageName, options?): Promise<void>`
+  - `getPackageName(appName, options?): Promise<string | null>`
+  - `getAppName(packageName, options?): Promise<string | null>`
+  - `isInstalled(packageName, options?): Promise<boolean>`
+  - `viewFile(path, options?): Promise<boolean>`
+  - `editFile(path, options?): Promise<boolean>`
   - `launchPackage(packageName, options?): Promise<boolean>`
   - `launchApp(name, options?): Promise<boolean>`
   - `openAppSetting(packageName?, options?): Promise<void>`
@@ -1687,9 +1695,10 @@ runtime.
   - `sendBroadcast(intentOptionsOrName, options?): Promise<never>`
   - P13-23 records app/intent/broadcast Pro parity as partial: `app.intent()`
     and `app.startActivity()` use JSON-safe descriptors with
-    `category`/`categories`, numeric flag arrays, and primitive extras, while
-    broadcast sending, root/Shizuku/dual-user routes, raw Android objects,
-    raw installed-app list APIs, and packaged app smoke remain blocked.
+    `category`/`categories`, numeric flag arrays, primitive extras, and scoped
+    file view/edit Activity helpers, while broadcast sending,
+    root/Shizuku/dual-user routes, raw Android objects, raw installed-app list
+    APIs, and packaged app smoke remain blocked.
 - `barcode` / `qrcode`
   - `detect(imageOrPath, options?): Promise<BarcodeSnapshot | null>`
   - `detectAll(imageOrPath, options?): Promise<readonly BarcodeSnapshot[]>`
