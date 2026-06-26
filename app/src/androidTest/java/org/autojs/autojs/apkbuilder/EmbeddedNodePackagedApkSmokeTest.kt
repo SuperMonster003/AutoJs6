@@ -11186,6 +11186,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 typeof app.launchApp === "function" &&
                 typeof app.openAppSetting === "function" &&
                 typeof app.intentToShell === "function" &&
+                typeof app.uninstall === "function" &&
                 typeof app.startActivity === "function";
               const launchOk = launchResult === true;
               const shadowOk = app.shadow !== true;

@@ -82,6 +82,7 @@ async function smoke(): Promise<void> {
     subject: "AutoJs6",
     text: "Node app facade"
   }, { timeoutMs: 1000 });
+  await app.uninstall("com.example.invalid", { timeoutMs: 1000 });
   await app.openAppSettings({ timeoutMs: 1000 });
   await app.launchSettings(app.packageName, { timeoutMs: 1000 });
   await app.launchAppDetailsSettings(app.packageName, { timeoutMs: 1000 });

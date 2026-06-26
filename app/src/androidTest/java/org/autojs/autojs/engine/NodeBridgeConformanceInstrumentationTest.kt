@@ -456,7 +456,7 @@ class NodeBridgeConformanceInstrumentationTest {
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
               expectExports("toast", toast, ["showToast", "toast"]);
-              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
+              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "uninstall", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"]);
@@ -622,6 +622,12 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.deepStrictEqual(viewStartRequest.args[0].categories, ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]);
               assert.strictEqual(viewStartRequest.args[0].flags, 0x10000020);
               assert.deepStrictEqual(viewStartRequest.args[0].extras.labels, ["node", "intent"]);
+              const beforeUninstall = requests.length;
+              await expectPromise("app.uninstall", app.uninstall("com.example.invalid", { timeoutMs: 1022 }));
+              const uninstallRequest = requests.slice(beforeUninstall).find((request) => request.module === "app" && request.method === "startActivity");
+              assert(uninstallRequest, "app.uninstall must dispatch through startActivity");
+              assert.strictEqual(uninstallRequest.args[0].action, "android.intent.action.DELETE");
+              assert.strictEqual(uninstallRequest.args[0].data, "package:com.example.invalid");
               const appSettingsRequests = requests.filter((request) => request.module === "app" && request.method === "openAppSetting");
               assert(appSettingsRequests.length >= 4, "app settings aliases must dispatch through openAppSetting bridge method");
               const beforeAppRejects = requests.length;

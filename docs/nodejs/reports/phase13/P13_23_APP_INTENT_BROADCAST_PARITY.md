@@ -23,6 +23,9 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
   `app.launchSettings()`, and `app.launchAppDetailsSettings()` now reuse the
   existing scoped `startActivity` / settings bridge methods instead of adding a
   new Android authority surface.
+- `app.uninstall()` opens the Android package uninstall flow through
+  `ACTION_DELETE` and the existing scoped activity bridge; it does not perform
+  silent uninstall or package-manager mutation.
 - `app.intentToShell()` serializes the same JSON-safe descriptors into `am`
   intent arguments for migration scripts. It is a pure helper and does not
   execute shell commands or dispatch Android bridge requests.
@@ -64,8 +67,8 @@ No raw Android `Intent`, `Uri`, `Bundle`, `ComponentName`, `PackageManager`,
 ## Remaining Blockers
 
 - Full Rhino app helper parity: `parseUri`, `getUriForFile`, `viewFile`,
-  `editFile`, `uninstall`, `kill`, `getPackageName`, `getAppName`, preset app
-  aliases, and dual-app helpers.
+  `editFile`, `kill`, `getPackageName`, `getAppName`, preset app aliases, and
+  dual-app helpers.
 - Activity short-form mapping beyond URL strings and JSON-safe descriptors.
 - Root/Shizuku examples that combine `app.intentToShell()` with explicit
   P13-24 shell capabilities.

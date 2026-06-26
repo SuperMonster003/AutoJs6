@@ -21623,6 +21623,16 @@ std::string buildEmbeddedScriptExecutionSource(
       extras: extras
     }, methodName);
   }
+  function __autojs6_app_uninstall_descriptor(packageName, methodName) {
+    const target = __autojs6_app_non_empty_string(packageName).trim();
+    if (!target) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " requires a non-empty package name.");
+    }
+    return __autojs6_app_normalize_intent_descriptor({
+      action: "DELETE",
+      data: "package:" + target
+    }, methodName);
+  }
   function __autojs6_app_shell_quote(value) {
     return "'" + String(value).replace(/'/g, "'\\''") + "'";
   }
@@ -21777,6 +21787,23 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_app_bridge_options(options, 10000)
       );
     }
+    function uninstall(packageName, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_app_uninstall_descriptor(packageName, "uninstall");
+      } catch (error) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "uninstall",
+          error && error.message ? error.message : "app.uninstall requires a non-empty package name."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "startActivity",
+        [descriptor],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
     function launchPackage(packageName, options) {
       const target = __autojs6_app_non_empty_string(packageName);
       if (!target) {
@@ -21858,6 +21885,7 @@ std::string buildEmbeddedScriptExecutionSource(
       intentToShell,
       openUrl,
       sendEmail,
+      uninstall,
       launchPackage,
       launchApp,
       openAppSetting,
