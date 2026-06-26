@@ -8497,6 +8497,7 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_plugin_registry = new Map();
   let __autojs6_limited_java_cache = null;
   let __autojs6_limited_worker_threads_cache = null;
+  let __autojs6_worker_threads_shape_facade_cache = null;
   const __autojs6_fetch_policy = Object.freeze({
     maxConcurrentRequests: __autojs6_bridge_limits_policy().maxNetworkRequests,
     defaultTimeoutMs: 30000,
@@ -12928,6 +12929,72 @@ std::string buildEmbeddedScriptExecutionSource(
       "AutoJs6 experimental worker_threads is disabled; enable autojs.nodejs.worker_threads.experimental for an experimental run.",
       "ERR_AUTOJS6_WORKER_DISABLED"
     );
+  }
+  function __autojs6_worker_threads_shape_facade() {
+    if (__autojs6_worker_threads_shape_facade_cache) {
+      return __autojs6_worker_threads_shape_facade_cache;
+    }
+    const messageClasses = (typeof globalThis.MessageChannel === "function" && typeof globalThis.MessagePort === "function")
+      ? {
+          MessageChannel: globalThis.MessageChannel,
+          MessagePort: globalThis.MessagePort
+        }
+      : __autojs6_create_limited_message_channel_classes();
+    const environmentData = new Map();
+    function DisabledWorker() {
+      throw __autojs6_worker_threads_disabled_error();
+    }
+    function receiveMessageOnPort() {
+      return undefined;
+    }
+    function markAsUntransferable() {
+      return undefined;
+    }
+    function isMarkedAsUntransferable() {
+      return false;
+    }
+    function moveMessagePortToContext(port) {
+      return port;
+    }
+    function setEnvironmentData(key, value) {
+      environmentData.set(key, value);
+    }
+    function getEnvironmentData(key) {
+      return environmentData.get(key);
+    }
+    function getHeapSnapshot() {
+      return Promise.reject(__autojs6_worker_threads_disabled_error());
+    }
+    Object.freeze(DisabledWorker.prototype);
+    Object.freeze(DisabledWorker);
+    const facade = {
+      Worker: DisabledWorker,
+      MessageChannel: messageClasses.MessageChannel,
+      MessagePort: messageClasses.MessagePort,
+      receiveMessageOnPort,
+      markAsUntransferable,
+      isMarkedAsUntransferable,
+      moveMessagePortToContext,
+      setEnvironmentData,
+      getEnvironmentData,
+      getHeapSnapshot,
+      isMainThread: true,
+      parentPort: null,
+      workerData: undefined,
+      threadId: 0,
+      SHARE_ENV: Symbol.for("autojs6.worker_threads.SHARE_ENV"),
+      policy: Object.freeze({
+        status: "shape_only",
+        workerCreationEnabled: false,
+        reason: "worker_threads experimental capability is disabled"
+      }),
+      diagnostics: __autojs6_worker_threads_diagnostics_snapshot
+    };
+    if (typeof globalThis.BroadcastChannel === "function") {
+      facade.BroadcastChannel = globalThis.BroadcastChannel;
+    }
+    __autojs6_worker_threads_shape_facade_cache = Object.freeze(facade);
+    return __autojs6_worker_threads_shape_facade_cache;
   }
   function __autojs6_worker_threads_record_policy_rejection(reason) {
     __autojs6_worker_threads_diagnostics.rejectedByPolicyCount += 1;
@@ -41008,7 +41075,10 @@ std::string buildEmbeddedScriptExecutionSource(
     if (key === "node:test") {
       return true;
     }
-    if (__autojs6_worker_threads_experimental_enabled && (key === "worker_threads" || key === "node:worker_threads")) {
+    if (key === "node:worker_threads") {
+      return true;
+    }
+    if (__autojs6_worker_threads_experimental_enabled && key === "worker_threads") {
       return true;
     }
     return __autojs6_has_own(__autojs6_limited_builtin_module_map, key);
@@ -43094,6 +43164,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "node:test") {
       return "node:test";
     }
+    if (name === "node:worker_threads") {
+      return "node:worker_threads";
+    }
     if (name === "rhino") {
       return "rhino";
     }
@@ -43878,7 +43951,10 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       return "java";
     }
-    if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
+    if (name === "node:worker_threads") {
+      return "worker_threads";
+    }
+    if (name === "worker_threads" && __autojs6_worker_threads_experimental_enabled) {
       return "worker_threads";
     }
     if (name === "node:test") {
@@ -44207,6 +44283,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "java") {
       return __autojs6_limited_java();
+    }
+    if (name === "node:worker_threads" && !__autojs6_worker_threads_experimental_enabled) {
+      return __autojs6_worker_threads_shape_facade();
     }
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return __autojs6_limited_worker_threads();

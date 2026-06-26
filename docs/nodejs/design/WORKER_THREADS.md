@@ -1,6 +1,6 @@
 # Worker Threads Design Gate v1
 
-Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and `worker_threads` remains disabled in normal AutoJs6 Safe Node Profile runs. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds. S7-29 adds stress and packaged `.mjs` worker smoke coverage to the same internal gate, but it does not promote workers to a user-visible release surface. P12-20 rechecked this as part of Rhino `threads` migration and kept worker_threads out of the default migration path. P12-22 defers a compute/process-worker replacement API and requires separate naming plus permissions, scoped path, message, cleanup, nested-worker denial, bridge-isolation, stress, packaged, and `second_execution_slot` gates before any future script-author surface.
+Status: experimental design gate, blocked for Node Profile v1.1 runnable execution. `autojs.nodejs.worker_threads.experimental=false` is the default, and runnable `worker_threads` authority remains disabled in normal AutoJs6 Safe Node Profile runs. The default profile exposes only a `node:worker_threads` shape facade for npm feature detection. Task 122 found that the current Embedded Node build does not expose a usable native `worker_threads` module even when the experimental flag is enabled. Task 170 rechecked the v1.1 partial target on 2026-06-17 and kept the runnable worker surface blocked for the same native availability reason. S7-24 adds a focused bootstrap/preflight gate so default denial and experimental native availability are verified without claiming runnable worker support. S7-26 prepares limited MessageChannel/transferList coverage for native-worker-capable builds. S7-29 adds stress and packaged `.mjs` worker smoke coverage to the same internal gate, but it does not promote workers to a user-visible release surface. P12-20 rechecked this as part of Rhino `threads` migration and kept worker_threads out of the default migration path. P12-22 defers a compute/process-worker replacement API and requires separate naming plus permissions, scoped path, message, cleanup, nested-worker denial, bridge-isolation, stress, packaged, and `second_execution_slot` gates before any future script-author surface.
 
 ## Goal
 
@@ -39,7 +39,8 @@ The flag remains off by default. Instrumentation can enable it per embedded scri
 With the flag off:
 
 - `require("worker_threads")` rejects with the stable disabled-builtin error shape
-- `require("node:worker_threads")` rejects with the stable disabled-builtin error shape
+- `require("node:worker_threads")` exposes a shape-only facade for npm feature
+  detection, but `Worker` construction rejects with `ERR_AUTOJS6_WORKER_DISABLED`
 - `require.resolve("worker_threads")` rejects before resolving a local shadow package
 - `require("autojs6:profile").workerThreads === false`
 - `require("autojs6:profile").highRiskCapabilities.workerThreads === false`

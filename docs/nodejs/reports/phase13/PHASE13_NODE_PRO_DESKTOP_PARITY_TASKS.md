@@ -218,6 +218,10 @@
   `workerThreadsProfile` diagnostics, request-local experimental preflight, and
   existing native-available worker/MessageChannel/WorkerPool/resource/packaged
   evidence without promoting workers by default.
+  The default Safe profile exposes a `node:worker_threads` shape-only facade for
+  npm feature detection (`jsdom` top-level `require("node:worker_threads")`);
+  actual `Worker` construction still requires the experimental flag and remains
+  denied by default.
 - Host verifier:
   `tools/nodejs/phase13/verify-worker-threads-opt-in-promotion.js`.
 - Gradle gate: `:app:verifyNodePhase13WorkerThreadsOptInPromotion`.

@@ -3,10 +3,12 @@
 Status: partial
 
 P13-34 records `worker_threads` opt-in promotion as partial. The default Safe
-Node Profile still rejects `worker_threads`, while the request-local
-experimental path exposes explicit diagnostics, a native availability preflight,
-and native-available promotion gates for pure-JS workers, MessageChannel,
-transfer lists, WorkerPool, resource stress, and packaged `.mjs` worker smoke.
+Node Profile still rejects bare `worker_threads` and runnable worker authority,
+while `node:worker_threads` exposes a shape-only npm compatibility facade for
+feature detection. The request-local experimental path exposes explicit
+diagnostics, a native availability preflight, and native-available promotion
+gates for pure-JS workers, MessageChannel, transfer lists, WorkerPool, resource
+stress, and packaged `.mjs` worker smoke.
 
 ## Decision
 
@@ -14,6 +16,10 @@ transfer lists, WorkerPool, resource stress, and packaged `.mjs` worker smoke.
   snapshot for default denial and request-local experimental preflight.
 - `workerThreadsProfile.defaultEnabled=false`; no default worker authority is
   promoted.
+- `require("node:worker_threads")` is shape-only in the default profile:
+  package top-level detection can read `Worker`, `MessageChannel`,
+  `MessagePort`, and `receiveMessageOnPort`, but `new Worker()` still rejects
+  with `ERR_AUTOJS6_WORKER_DISABLED`.
 - `workerThreadsProfile.requestLocalOptIn` reflects the per-request
   experimental flag.
 - `nativeAvailability="preflight_required"` remains explicit. A runnable worker

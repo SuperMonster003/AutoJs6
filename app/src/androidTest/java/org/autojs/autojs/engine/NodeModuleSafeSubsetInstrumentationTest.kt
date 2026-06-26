@@ -88,7 +88,7 @@ class NodeModuleSafeSubsetInstrumentationTest {
         assertTrue(result.stdout.contains("module.safe.frozen=true"))
         assertTrue(result.stdout.contains("module.safe.keys=createRequire,isBuiltin,builtinModules,syncBuiltinESMExports"))
         assertTrue(result.stdout.contains("module.safe.dangerous=true"))
-        assertTrue(result.stdout.contains("module.safe.disabledState=false/false/false/false"))
+        assertTrue(result.stdout.contains("module.safe.disabledState=false/true/false/false"))
         assertTrue(result.stdout.contains("module.safe.disabledListed=false"))
         assertTrue(result.stdout.contains("module.safe.allowed=true/true/true/true/true/true/true/true/true/true"))
         assertTrue(result.stdout.contains("module.safe.shadow=true"))

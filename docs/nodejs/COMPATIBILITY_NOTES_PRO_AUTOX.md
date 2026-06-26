@@ -104,7 +104,8 @@ AutoJs6 behavior:
 - checked-in `node_modules` package trees are supported.
 - `npm install`, postinstall scripts, and native addon installation are not supported by the Safe Node Profile.
 - raw Node network modules remain disabled by default, with a debug/build-time `autojs.nodejs.rawNetworkModules.experimental=true` opt-in for native `dns`, `dns/promises`, `http`, `https`, `net`, and `tls`.
-- `worker_threads` remains disabled by default.
+- runnable `worker_threads` remains disabled by default; `node:worker_threads`
+  exposes only a shape facade for npm feature detection.
 - native `.node` addons remain disabled by default.
 
 P13-39 records native addon loading as partial. AutoJs6 now reports
@@ -339,10 +340,11 @@ fd access, recursive watchers, expanded roots, and full packaged
 watcher/fd/FileHandle lifecycle parity are not yet Pro/Desktop-promoted.
 
 P13-34 records `worker_threads` opt-in promotion as partial. AutoJs6 Node keeps
-`worker_threads` disabled by default, and `workerThreadsProfile` is diagnostic
-only. Pro/AutoX scripts should not treat worker threads as a portable threading
-replacement until native worker availability, packaged worker smoke, crash
-evidence, and Android resource ceilings are promoted.
+runnable workers disabled by default while exposing a `node:worker_threads`
+shape facade for npm feature detection, and `workerThreadsProfile` is
+diagnostic only. Pro/AutoX scripts should not treat worker threads as a
+portable threading replacement until native worker availability, packaged worker
+smoke, crash evidence, and Android resource ceilings are promoted.
 
 P13-35 records process-worker replacement as partial. AutoJs6 Node exposes
 `processWorkerReplacementProfile` diagnostics to show that WorkerPool is the
@@ -568,7 +570,8 @@ AutoX.js v7 public docs also describe replacing Node-engine multithreading with 
 AutoJs6 behavior:
 
 - Rhino `threads` APIs are not available in Node scripts.
-- `worker_threads` is disabled by default.
+- runnable `worker_threads` is disabled by default; `node:worker_threads` is
+  shape-only for npm feature detection.
 - background work should use Promise-based APIs, bridge providers, or future design-gated task APIs.
 
 Porting note: convert threaded Rhino code to `async` / `await` and bridge calls.
@@ -610,7 +613,7 @@ Porting note: a Pro/AutoX Node script that runs in its original environment may 
 | Pure-JS CJS packages | broad npm-oriented docs | not equivalent | supported target |
 | Scoped fs | not described as AutoJs6 policy | not equivalent | enforced |
 | Raw `http`/`https` | documented as usable | not equivalent | disabled by default |
-| `worker_threads` | documented with Auto.js API restrictions | no old-style multithreading | disabled by default |
+| `worker_threads` | documented with Auto.js API restrictions | no old-style multithreading | runnable workers disabled by default; `node:worker_threads` shape facade only |
 | `tasks` / user task database | timed task database APIs | compatibility varies | P13-21 partial: `work_manager` and one-shot `compat.tasks` only |
 | Direct Java/Android access | `$autojs` / `rhino` docs | Java Promise direction | bridge modules only by default |
 | Packaged APK Node runtime | product-specific | product-specific | verified Safe Node Profile |

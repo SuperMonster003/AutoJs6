@@ -11555,6 +11555,71 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
+    fun nodeWorkerThreadsDefaultFacadeSupportsNpmFeatureDetection() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            const moduleBuiltin = require("module");
+            const {
+              Worker,
+              MessageChannel,
+              MessagePort,
+              receiveMessageOnPort,
+              isMainThread,
+              parentPort,
+              workerData
+            } = require("node:worker_threads");
+            const channel = new MessageChannel();
+            console.log("worker.facade.shape=" + [
+              typeof Worker,
+              typeof MessageChannel,
+              typeof MessagePort,
+              typeof receiveMessageOnPort,
+              isMainThread,
+              parentPort === null,
+              workerData === undefined
+            ].join("/"));
+            console.log("worker.facade.resolve=" + require.resolve("node:worker_threads"));
+            console.log("worker.facade.isBuiltin=" + moduleBuiltin.isBuiltin("node:worker_threads"));
+            console.log("worker.facade.receive=" + (receiveMessageOnPort(channel.port1) === undefined));
+            channel.port1.close();
+            channel.port2.close();
+            try {
+              new Worker(__filename);
+              console.log("worker.facade.worker=allowed");
+            } catch (error) {
+              console.log("worker.facade.worker=" + (
+                error &&
+                error.code === "ERR_AUTOJS6_WORKER_DISABLED" &&
+                String(error.message || "").includes("worker_threads")
+              ));
+            }
+            try {
+              require("worker_threads");
+              console.log("worker.facade.bare=allowed");
+            } catch (error) {
+              console.log("worker.facade.bare=" + (
+                error &&
+                error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" &&
+                String(error.message || "").includes("worker_threads")
+              ));
+            }
+            """.trimIndent(),
+            "<embedded-node-worker-threads-facade-source.js>",
+        )
+
+        assertTrue(result.errorMessage.orEmpty(), result.succeeded)
+        assertTrue(result.stdout.contains("worker.facade.shape=function/function/function/function/true/true/true"))
+        assertTrue(result.stdout.contains("worker.facade.resolve=worker_threads"))
+        assertTrue(result.stdout.contains("worker.facade.isBuiltin=true"))
+        assertTrue(result.stdout.contains("worker.facade.receive=true"))
+        assertTrue(result.stdout.contains("worker.facade.worker=true"))
+        assertTrue(result.stdout.contains("worker.facade.bare=true"))
+    }
+
+    @Test
     fun pureJsNpmRealWorldCompatibilityPackUsesCurrentRestrictedRuntime() {
         assumeEmbeddedScriptExecutionEnabled()
 

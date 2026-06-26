@@ -1171,7 +1171,9 @@ autojs.nodejs.worker_threads.experimental=false
 With the flag off:
 
 - `require("worker_threads")` rejects with disabled-builtin error shape
-- `require("node:worker_threads")` rejects with disabled-builtin error shape
+- `require("node:worker_threads")` exposes a shape-only npm compatibility
+  facade for feature detection and packages such as `jsdom`; `Worker`
+  construction still rejects with `ERR_AUTOJS6_WORKER_DISABLED`
 - `require.resolve("worker_threads")` rejects before a local `node_modules/worker_threads` package can shadow the builtin
 - no worker can access AutoJs bridge modules, Android Context, accessibility, media projection, image handles, shell, engines, raw network, child process, native addon, `vm`, inspector, or unrestricted filesystem APIs
 
