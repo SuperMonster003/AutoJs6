@@ -387,7 +387,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             .withHostAppInfo()
             .withDeviceInfo()
             .withEngineInfo(engineInfo.toJson())
-            .withBridgePermissionManifest(workingDirectory)
+            .withBridgePermissionManifest(workingDirectory, preparedServiceRequest.sandboxRoot)
             .withBridgeLimitPolicy(bridgeLimits)
             .withBridgeLiveConfig(bridgeSession.configJson())
             .withLifecycleConfig(
@@ -996,13 +996,20 @@ open class NativeNodeEmbeddedScriptService : Service() {
         }
     }
 
-    private fun Map<String, String>.withBridgePermissionManifest(workingDirectory: String?): Map<String, String> {
+    private fun Map<String, String>.withBridgePermissionManifest(
+        workingDirectory: String?,
+        sandboxRoot: String?,
+    ): Map<String, String> {
         return linkedMapOf<String, String>().apply {
             putAll(this@withBridgePermissionManifest)
             if (!containsKey(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME)) {
                 put(
                     NodeBridgePermissionManifest.RUNTIME_MODULE_NAME,
-                    NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(workingDirectory),
+                    NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(
+                        workingDirectory,
+                        sandboxRoot,
+                        includeBuildNetworkPolicy = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+                    ),
                 )
             }
         }

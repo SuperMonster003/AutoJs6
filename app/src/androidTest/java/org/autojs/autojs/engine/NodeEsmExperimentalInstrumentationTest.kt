@@ -225,6 +225,42 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun partialEsmNamedGeneratorFunctionExportsWork() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM named generator function exports")
+        val workDir = freshWorkDir("esm-generator-exports")
+        val entry = File(workDir, "main.mjs")
+        File(workDir, "generators.mjs").writeText(
+            """
+                export function* syncValues() {
+                  yield "sync-a";
+                  yield "sync-b";
+                }
+                export async function* asyncValues() {
+                  yield "async-a";
+                  yield "async-b";
+                }
+            """.trimIndent(),
+        )
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import { asyncValues, syncValues } from "./generators.mjs";
+                const syncRows = Array.from(syncValues());
+                const asyncRows = [];
+                for await (const row of asyncValues()) {
+                  asyncRows.push(row);
+                }
+                console.log("esm.generator.exports=" + syncRows.join("/") + "|" + asyncRows.join("/"));
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM generator function exports", result)
+        assertTrue(result.stdout.contains("esm.generator.exports=sync-a/sync-b|async-a/async-b"))
+    }
+
+    @Test
     fun partialPackageTypeModuleEntryRunsAsEsmByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package type=module bootstrap")
         val workDir = freshWorkDir("esm-type-module")

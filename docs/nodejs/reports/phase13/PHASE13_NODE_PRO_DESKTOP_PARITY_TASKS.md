@@ -134,6 +134,11 @@
 - P13-29 partial HTTP/HTTPS client parity gate records the existing
   controlled `http`/`https` client facade as a Desktop-profile compatibility
   subset, backed only by AutoJs6 controlled fetch.
+- Follow-up runtime policy propagation now treats
+  `autojs.nodejs.network.experimental=true` as an explicit AutoJs6 network
+  policy for the controlled `http`/`https` facade, and merges package manifests
+  from both runtime working directory and sandbox root for subdirectory `.mjs`
+  utilities.
 - Host verifier: `tools/nodejs/phase13/verify-http-https-client-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13HttpHttpsClientParity`.
 - Report:
@@ -1098,6 +1103,10 @@ P13 task 本身使用以下执行状态：
       `NodeHttpsClientFacadeInstrumentationTest`,
       `NodeHttpAgentFacadeInstrumentationTest`,
       `NodeRawNetworkPolicyInstrumentationTest`
+    - Runtime permission manifest propagation:
+      `NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(...)`
+      now merges working-directory and sandbox-root manifests, and the embedded
+      service injects the build-time network opt-in as controlled-client policy.
     - Types: `docs/nodejs/types/autojs6-node/http.d.ts`,
       `docs/nodejs/types/autojs6-node/https.d.ts`
     - Host verifier:
@@ -1393,6 +1402,9 @@ P13 task 本身使用以下执行状态：
       `\p{ID_Start}` / `\p{ID_Continue}` 降级为 ASCII identifier fallback，
       用于兼容 `puppeteer-core` QueryHandler 等真实 npm package；字符串、
       注释和 template literal 内容保持不改写。
+    - partial ESM transform 现在支持 `export function*` 和
+      `export async function*`，用于兼容 `puppeteer-core` HandleIterator 等
+      真实 npm package 的 generator helper exports。
     - loader hooks、raw `node:module` loader authority、network import、
       `file:` / `data:` URL import、absolute path import、workingDirectory
       escape、disabled builtin import 继续拒绝。

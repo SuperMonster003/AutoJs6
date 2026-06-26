@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import org.json.JSONArray
 import org.json.JSONObject
+import org.autojs.autojs6.BuildConfig
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Locale
@@ -239,6 +240,52 @@ object NodeBridgePermissionManifest {
 
     fun runtimeModuleSourceForWorkingDirectory(workingDirectory: String?): String =
         fromWorkingDirectory(workingDirectory).toJson()
+
+    fun runtimeModuleSourceForWorkingDirectory(
+        workingDirectory: String?,
+        sandboxRoot: String?,
+        includeBuildNetworkPolicy: Boolean = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
+    ): String = fromRuntimeWorkingDirectory(
+        workingDirectory = workingDirectory,
+        sandboxRoot = sandboxRoot,
+        includeBuildNetworkPolicy = includeBuildNetworkPolicy,
+    ).toJson()
+
+    fun fromRuntimeWorkingDirectory(
+        workingDirectory: String?,
+        sandboxRoot: String?,
+        includeBuildNetworkPolicy: Boolean = false,
+    ): Manifest {
+        val primary = fromWorkingDirectory(workingDirectory)
+        val fallback = sandboxRoot
+            ?.takeIf { it.isNotBlank() && it != workingDirectory }
+            ?.let { fromWorkingDirectory(it) }
+            ?: Manifest.empty()
+        if (!includeBuildNetworkPolicy && !fallback.enforced) {
+            return primary
+        }
+        val permissions = (
+                primary.permissions +
+                        fallback.permissions +
+                        if (includeBuildNetworkPolicy) listOf(NETWORK) else emptyList()
+                )
+            .map(::normalizeCapability)
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .sorted()
+        val sources = (
+                primary.sources.filterNot { it == "none" } +
+                        fallback.sources.filterNot { it == "none" } +
+                        if (includeBuildNetworkPolicy) listOf("gradle:autojs.nodejs.network.experimental") else emptyList()
+                )
+            .distinct()
+        return buildManifest(
+            enforced = primary.enforced || fallback.enforced || includeBuildNetworkPolicy,
+            permissions = permissions,
+            sources = sources,
+            warnings = (primary.warnings + fallback.warnings).distinct(),
+        )
+    }
 
     fun androidPermissionsForWorkingDirectory(workingDirectory: String?): List<String> =
         fromWorkingDirectory(workingDirectory).androidPermissions

@@ -76,6 +76,49 @@ class NodeBridgePermissionManifestInstrumentationTest {
     }
 
     @Test
+    fun kotlinRuntimeManifestMergesSandboxRootAndBuildNetworkPolicy() {
+        val sandboxRoot = File(context.cacheDir, "node-bridge-runtime-manifest").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create bridge runtime manifest test directory: $absolutePath" }
+        }
+        val workDir = File(sandboxRoot, "utils").apply {
+            check(mkdirs()) { "Failed to create bridge runtime manifest work directory: $absolutePath" }
+        }
+        File(sandboxRoot, "package.json").writeText(
+            """
+            {
+              "name": "bridge-runtime-manifest",
+              "autojs6": {
+                "node": {
+                  "permissions": ["toast"]
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val fallbackManifest = NodeBridgePermissionManifest.fromRuntimeWorkingDirectory(
+            workingDirectory = workDir.absolutePath,
+            sandboxRoot = sandboxRoot.absolutePath,
+            includeBuildNetworkPolicy = false,
+        )
+        assertTrue(fallbackManifest.enforced)
+        assertEquals(listOf("toast"), fallbackManifest.permissions)
+        assertTrue(fallbackManifest.sources.contains("package.json:autojs6.node.permissions"))
+
+        val buildNetworkManifest = NodeBridgePermissionManifest.fromRuntimeWorkingDirectory(
+            workingDirectory = workDir.absolutePath,
+            sandboxRoot = sandboxRoot.absolutePath,
+            includeBuildNetworkPolicy = true,
+        )
+        assertTrue(buildNetworkManifest.enforced)
+        assertTrue(buildNetworkManifest.permissions.contains(NodeBridgePermissionManifest.NETWORK))
+        assertTrue(buildNetworkManifest.permissions.contains(NodeBridgePermissionManifest.TOAST))
+        assertTrue(buildNetworkManifest.sources.contains("gradle:autojs.nodejs.network.experimental"))
+        assertTrue(buildNetworkManifest.androidPermissions.contains(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET))
+    }
+
+    @Test
     fun kotlinRegistryDeclaresCapabilitiesForEverySupportedBridgeMethod() {
         NodeBridgeModules.supportedMethodsByModule.forEach { (module, methods) ->
             methods.forEach { method ->

@@ -43506,13 +43506,13 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       return prefix || "";
     });
-    body = body.replace(/\bexport\s+default\s+(async\s+)?function\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, name) {
+    body = body.replace(/\bexport\s+default\s+(async\s+)?function(\s*\*)?\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, starPrefix, name) {
       if (hasDefault) {
         throw __autojs6_esm_error("Embedded Node partial ESM module has more than one default export: " + sourceName);
       }
       hasDefault = true;
       defaultLocal = name;
-      return (asyncPrefix || "") + "function " + name + "(";
+      return (asyncPrefix || "") + "function" + (starPrefix || " ") + name + "(";
     });
     body = body.replace(/\bexport\s+default\s+class\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, name) {
       if (hasDefault) {
@@ -43534,9 +43534,9 @@ std::string buildEmbeddedScriptExecutionSource(
       namedExports.push({ exported: name, local: name });
       return kind + " " + name;
     });
-    body = body.replace(/\bexport\s+(async\s+)?function\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, name) {
+    body = body.replace(/\bexport\s+(async\s+)?function(\s*\*)?\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, starPrefix, name) {
       namedExports.push({ exported: name, local: name });
-      return (asyncPrefix || "") + "function " + name + "(";
+      return (asyncPrefix || "") + "function" + (starPrefix || " ") + name + "(";
     });
     body = body.replace(/\bexport\s+class\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, name) {
       namedExports.push({ exported: name, local: name });
