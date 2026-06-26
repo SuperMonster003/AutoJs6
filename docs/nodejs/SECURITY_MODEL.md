@@ -740,11 +740,11 @@ Desktop profile authority can be promoted.
 P13-41 records ESM loader parity as partial. `esmLoaderProfile` is diagnostic
 metadata for the existing AutoJs6-managed partial ESM loader; it does not grant
 raw Node loader authority. `.mjs`, `type=module`, TLA, local static/dynamic
-import, package `exports` / `imports`, JSON import attributes, scoped
+import, controlled JavaScript/JSON `data:` URL imports, package `exports` / `imports`, JSON import attributes, scoped
 `import.meta`, ESM/CJS interop, and sync `require(esm)` remain constrained by
 scoped filesystem, builtin allowlist, native-addon denial, and package target
 policy. Raw loader hooks, raw `node:module` loader authority, network imports,
-`file:` / `data:` URL imports, absolute paths, working-directory escapes,
+`file:` URL imports, unrestricted URL imports, absolute paths, working-directory escapes,
 custom condition sets, import maps, and raw loader handles remain denied until
 separate Desktop-profile evidence proves them safe.
 

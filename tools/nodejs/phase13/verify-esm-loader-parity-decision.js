@@ -76,9 +76,11 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'loaderHooks: "denied"'),
       token(files.nodeBridgeSources, 'networkImports: "denied"'),
       token(files.nodeBridgeSources, 'fileUrlImports: "denied"'),
+      token(files.nodeBridgeSources, 'dataUrlImports: "inline_js_json_partial"'),
       token(files.nodeBridgeSources, 'rawNodeLoader: false'),
       token(files.p13EsmLoaderTest, "esmLoaderProfileRecordsPartialParityAndDeniedBoundaries"),
-      token(files.p13EsmLoaderTest, "p13esm.profile=partial_default|true|true|true|true|autojs6_managed_transform"),
+      token(files.p13EsmLoaderTest, "inline_js_json_partial"),
+      token(files.p13EsmLoaderTest, "p13esm.dynamic=dep|true|true|inline-data"),
       token(files.typesAutojsGlobal, "export interface EsmLoaderProfile"),
       token(files.typesAutojsGlobal, "readonly esmLoaderProfile: EsmLoaderProfile"),
       token(files.typescriptSmoke, "autojsProfile.esmLoaderProfile.dynamicImport"),
@@ -96,19 +98,21 @@ function buildReport(files) {
       token(files.esmExperimentalTest, "experimentalNestedPackageImportAndSelfReferenceUseEsmConditions"),
       token(files.designEsm, "ESM is partial and enabled by default for Node Profile v1.1"),
     ], []),
-    scenario("denied_loader_boundaries", "Raw loader hooks, URL/network imports, path escapes, disabled builtins, and native addon targets stay denied", [
+    scenario("controlled_data_url_and_denied_boundaries", "Controlled JS/JSON data URL imports are partial while raw loader hooks, network/file URL imports, path escapes, disabled builtins, and native addon targets stay denied", [
       token(files.p13EsmLoaderTest, "p13esm.dynamic=dep|true|true"),
+      token(files.esmExperimentalTest, "partialEsmSupportsControlledDataUrlImports"),
+      token(files.esmExperimentalTest, "esm.dataUrl=inline-js|named|b64|inline-json|dynamic-js|dynamic-json|true|true|true"),
       token(files.esmExperimentalTest, "localDynamicImportRejectsUrlAndAbsoluteSpecifiers"),
       token(files.esmExperimentalTest, "localDynamicImportCannotEscapeWorkingDirectory"),
       token(files.esmExperimentalTest, "experimentalPackageNullBlockingAndUnsafeTargetsFail"),
       token(files.securityRegressionTest, "dynamic import network URL"),
       token(files.designEsm, "custom loaders and `node:module` loader hooks"),
-      token(files.designEsm, "network, `file:`, `data:`, or other URL imports"),
+      token(files.designEsm, "controlled `data:` URL imports"),
       token(files.designEsm, "imports outside `workingDirectory`"),
       token(files.sourceMapTest, "externalSourceMapOutsideWorkingDirectoryIsDenied"),
     ], [
       "Native Node ESM loader hooks and raw node:module loader authority remain denied.",
-      "Network, file:, data:, and unrestricted URL imports remain denied.",
+      "Network, file:, and unrestricted URL imports remain denied.",
       "Custom condition sets, import maps, and raw loader registration remain unimplemented.",
     ]),
     scenario("packaged_and_stack_evidence", "Packaged ESM and stack/source evidence are present but still scoped to focused gates", [
@@ -165,11 +169,11 @@ function buildReport(files) {
       esmLoaderProfile.includes('loaderHooks: "denied"') &&
         esmLoaderProfile.includes('networkImports: "denied"') &&
         esmLoaderProfile.includes('fileUrlImports: "denied"') &&
-        esmLoaderProfile.includes('dataUrlImports: "denied"') &&
+        esmLoaderProfile.includes('dataUrlImports: "inline_js_json_partial"') &&
         esmLoaderProfile.includes('workingDirectoryEscape: "denied"') &&
         esmLoaderProfile.includes("rawNodeLoader: false") &&
         esmLoaderProfile.includes("customConditions: false"),
-      "esmLoaderProfile must keep raw loader, URL imports, escapes, and custom conditions fail-closed.",
+      "esmLoaderProfile must keep raw loader, network/file/unrestricted URL imports, escapes, and custom conditions fail-closed while recording controlled data URL import parity.",
     ),
     check(
       "no-raw-loader-promotion",
@@ -206,7 +210,7 @@ function buildReport(files) {
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       localLoaderParityReady: scenarioById(scenarios, "local_loader_parity").status === "ready",
-      deniedBoundariesReady: scenarioById(scenarios, "denied_loader_boundaries").status !== "missing_evidence",
+      controlledDataUrlAndDeniedBoundariesReady: scenarioById(scenarios, "controlled_data_url_and_denied_boundaries").status !== "missing_evidence",
       packagedAndStackEvidenceReady: scenarioById(scenarios, "packaged_and_stack_evidence").status !== "missing_evidence",
       rawLoaderHooksIntroduced: false,
       networkImportsPromoted: false,

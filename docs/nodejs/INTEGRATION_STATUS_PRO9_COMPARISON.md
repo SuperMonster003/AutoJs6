@@ -1139,10 +1139,11 @@ packaged evidence, and hostile corpus coverage.
 P13-41 records ESM loader parity as partial: Safe Node now exposes
 `esmLoaderProfile` diagnostics for the AutoJs6-managed partial ESM loader.
 `.mjs`, `type=module`, TLA, local static/dynamic import, package
-`exports`/`imports`, JSON import attributes, scoped `import.meta`, and CJS
-interop have focused evidence, but raw loader hooks, network/file/data URL
-imports, custom conditions/import maps, broad packaged encrypted graphs, and
-pending evaluation cleanup remain outside Desktop parity.
+`exports`/`imports`, JSON import attributes, controlled JavaScript/JSON
+`data:` URL imports, scoped `import.meta`, and CJS interop have focused
+evidence, but raw loader hooks, network/file/unrestricted URL imports, custom
+conditions/import maps, broad packaged encrypted graphs, and pending evaluation
+cleanup remain outside Desktop parity.
 
 P13-42 records Android package manager parity as partial: Safe Node now exposes
 `packageManagerProfile` diagnostics and keeps the practical install path as

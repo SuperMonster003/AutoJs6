@@ -9389,7 +9389,7 @@ std::string buildEmbeddedScriptExecutionSource(
         rawNodeModuleLoader: "denied",
         networkImports: "denied",
         fileUrlImports: "denied",
-        dataUrlImports: "denied",
+        dataUrlImports: "inline_js_json_partial",
         absolutePathImports: "denied",
         workingDirectoryEscape: "denied",
         disabledBuiltinImports: "denied",
@@ -28702,6 +28702,9 @@ std::string buildEmbeddedScriptExecutionSource(
       name.indexOf("../") === 0;
   }
   function __autojs6_module_dirname(filename) {
+    if (__autojs6_is_data_url_module_id(filename)) {
+      return "";
+    }
     const path = __autojs6_path_module();
     if (!path || typeof path.dirname !== "function") {
       return __autojs6_current_working_directory || __autojs6_sandbox_root || "";
@@ -43513,6 +43516,7 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_module_cache = Object.create(null);
   const __autojs6_plugin_module_roots = Object.create(null);
   const __autojs6_esm_module_cache = Object.create(null);
+  const __autojs6_esm_data_url_records = Object.create(null);
   let __autojs6_main_module_ref = null;
   function __autojs6_module_resolution_root(filename) {
     const path = __autojs6_path_module();
@@ -43921,6 +43925,95 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_supported_local_module_extension(extension)) return "cjs";
     return "";
   }
+  function __autojs6_is_data_url_module_id(value) {
+    return /^data:/i.test(String(value || ""));
+  }
+  function __autojs6_esm_data_url_media_type(header) {
+    const first = String(header || "").split(";")[0].trim().toLowerCase();
+    return first;
+  }
+  function __autojs6_esm_data_url_is_base64(header) {
+    const parts = String(header || "").split(";");
+    for (let index = 1; index < parts.length; index += 1) {
+      if (parts[index].trim().toLowerCase() === "base64") return true;
+    }
+    return false;
+  }
+  function __autojs6_esm_data_url_format(mediaType, specifier) {
+    const type = String(mediaType || "").toLowerCase();
+    if (
+      type === "text/javascript" ||
+      type === "application/javascript" ||
+      type === "text/ecmascript" ||
+      type === "application/ecmascript"
+    ) {
+      return "module";
+    }
+    if (type === "application/json" || /\+json$/.test(type)) {
+      return "json";
+    }
+    throw __autojs6_esm_error(
+      "Embedded Node partial ESM supports only JavaScript or JSON data URL imports: " + specifier,
+      "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
+    );
+  }
+  function __autojs6_esm_decode_data_url_body(body, isBase64, specifier) {
+    if (isBase64) {
+      const BufferCtor = __autojs6_buffer_constructor();
+      if (!BufferCtor || typeof BufferCtor.from !== "function") {
+        throw __autojs6_esm_error("Embedded Node partial ESM data URL import needs Buffer support.");
+      }
+      try {
+        return BufferCtor.from(String(body || ""), "base64").toString("utf8");
+      } catch (error) {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM rejects malformed base64 data URL import: " + specifier,
+          "ERR_INVALID_ARG_TYPE"
+        );
+      }
+    }
+    try {
+      return decodeURIComponent(String(body || ""));
+    } catch (error) {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM rejects malformed percent-encoded data URL import: " + specifier,
+        "ERR_INVALID_ARG_TYPE"
+      );
+    }
+  }
+  function __autojs6_resolve_esm_data_url(specifier) {
+    const id = String(specifier || "");
+    if (__autojs6_has_own(__autojs6_esm_data_url_records, id)) {
+      return __autojs6_esm_data_url_records[id];
+    }
+    const comma = id.indexOf(",");
+    if (comma < 0) {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM rejects malformed data URL import: " + id,
+        "ERR_INVALID_ARG_TYPE"
+      );
+    }
+    const header = id.slice("data:".length, comma);
+    const mediaType = __autojs6_esm_data_url_media_type(header);
+    const format = __autojs6_esm_data_url_format(mediaType, id);
+    const source = __autojs6_esm_decode_data_url_body(
+      id.slice(comma + 1),
+      __autojs6_esm_data_url_is_base64(header),
+      id
+    );
+    __autojs6_enforce_runtime_module_budget(id, source);
+    const resolved = Object.freeze({
+      kind: format === "json" ? "data-json" : "data",
+      resolved: id,
+      mediaType,
+      record: Object.freeze({
+        source,
+        sourceURL: id.replace(/[\r\n]/g, " ")
+      })
+    });
+    __autojs6_esm_data_url_records[id] = resolved;
+    return resolved;
+  }
   function __autojs6_resolve_esm_file_candidate(candidates, root, specifier, parentFilename, packageDir) {
     const path = __autojs6_path_module();
     for (const candidate of candidates) {
@@ -43974,9 +44067,24 @@ std::string buildEmbeddedScriptExecutionSource(
       });
       return { kind: "builtin", name };
     }
+    if (__autojs6_is_data_url_module_id(name)) {
+      const resolvedData = __autojs6_resolve_esm_data_url(name);
+      __autojs6_resolve_trace("esm data url matched", {
+        request: "data:",
+        from: parentFilename,
+        format: resolvedData.kind
+      });
+      return resolvedData;
+    }
     if (__autojs6_protocol_specifier(name)) {
       const code = /^https?:/i.test(name) ? "ERR_AUTOJS6_NETWORK_DISABLED" : "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
       throw __autojs6_esm_error("Embedded Node partial ESM rejects protocol import: " + name, code);
+    }
+    if (__autojs6_is_data_url_module_id(parentFilename)) {
+      throw __autojs6_esm_error(
+        "Embedded Node partial ESM data URL modules cannot resolve scoped package or relative imports: " + name,
+        "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED"
+      );
     }
     const root = __autojs6_module_resolution_root(parentFilename);
     if (name.indexOf("#") === 0) {
@@ -44263,6 +44371,23 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       return;
     }
+    if (resolved.kind === "data-json") {
+      if (attributeType !== "json") {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM JSON data URL import requires with { type: \"json\" } for '" +
+            specifier + "' from '" + parentFilename + "'."
+        );
+      }
+      return;
+    }
+    if (resolved.kind === "data") {
+      if (attributeType) {
+        throw __autojs6_esm_error(
+          "Embedded Node partial ESM import attributes are only supported for JSON modules: " + specifier
+        );
+      }
+      return;
+    }
     const extension = __autojs6_source_extension(resolved.resolved);
     const isJson = extension === ".json";
     if (isJson) {
@@ -44323,27 +44448,28 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_import_meta_for_module(filename) {
     const path = __autojs6_path_module();
     const resolvedFilename = path && typeof path.resolve === "function"
-      ? path.resolve(filename)
+      ? (__autojs6_is_data_url_module_id(filename) ? String(filename || "") : path.resolve(filename))
       : String(filename || "");
     const entryFilename = path && typeof path.resolve === "function"
       ? path.resolve(__autojs6_esm_entry_filename())
       : String(__autojs6_esm_entry_filename() || "");
+    const dataUrlModule = __autojs6_is_data_url_module_id(resolvedFilename);
     const meta = Object.create(null);
     Object.defineProperties(meta, {
       url: {
-        value: __autojs6_import_meta_file_url(resolvedFilename),
+        value: dataUrlModule ? resolvedFilename : __autojs6_import_meta_file_url(resolvedFilename),
         enumerable: true
       },
       filename: {
-        value: resolvedFilename,
+        value: dataUrlModule ? "" : resolvedFilename,
         enumerable: true
       },
       dirname: {
-        value: __autojs6_module_dirname(resolvedFilename),
+        value: dataUrlModule ? "" : __autojs6_module_dirname(resolvedFilename),
         enumerable: true
       },
       main: {
-        value: resolvedFilename === entryFilename,
+        value: !dataUrlModule && resolvedFilename === entryFilename,
         enumerable: true
       },
       resolve: {
@@ -44446,6 +44572,12 @@ std::string buildEmbeddedScriptExecutionSource(
     if (resolved.kind === "builtin") {
       return __autojs6_esm_namespace_from_commonjs(__autojs6_restricted_require(resolved.name, null));
     }
+    if (resolved.kind === "data-json") {
+      return __autojs6_load_esm_data_json_module(resolved);
+    }
+    if (resolved.kind === "data") {
+      return __autojs6_execute_esm_module_sync(resolved.resolved, resolved.record);
+    }
     if (resolved.kind === "cjs") {
       return __autojs6_esm_namespace_from_commonjs(__autojs6_load_local_module(resolved.resolved, null));
     }
@@ -44457,10 +44589,44 @@ std::string buildEmbeddedScriptExecutionSource(
     if (resolved.kind === "builtin") {
       return Promise.resolve(__autojs6_esm_namespace_from_commonjs(__autojs6_restricted_require(resolved.name, null)));
     }
+    if (resolved.kind === "data-json") {
+      return Promise.resolve(__autojs6_load_esm_data_json_module(resolved));
+    }
+    if (resolved.kind === "data") {
+      return __autojs6_execute_esm_module(resolved.resolved, resolved.record);
+    }
     if (resolved.kind === "cjs") {
       return Promise.resolve(__autojs6_esm_namespace_from_commonjs(__autojs6_load_local_module(resolved.resolved, null)));
     }
     return __autojs6_execute_esm_module(resolved.resolved, null);
+  }
+  function __autojs6_load_esm_data_json_module(resolved) {
+    const id = resolved && resolved.resolved ? String(resolved.resolved) : "";
+    if (__autojs6_has_own(__autojs6_esm_module_cache, id)) {
+      const cached = __autojs6_esm_module_cache[id];
+      if (cached.evaluated) return cached.namespace;
+    }
+    let value;
+    try {
+      value = JSON.parse(String(resolved.record && resolved.record.source || ""));
+    } catch (error) {
+      throw __autojs6_esm_error(
+        "Invalid Embedded Node partial ESM JSON data URL module '" + id + "': " +
+          (error && error.message ? error.message : String(error)),
+        "ERR_INVALID_ARG_TYPE"
+      );
+    }
+    const namespace = __autojs6_esm_namespace_from_commonjs(value);
+    __autojs6_esm_module_cache[id] = {
+      namespace,
+      promise: null,
+      evaluated: true,
+      evaluating: false,
+      sync: true
+    };
+    __autojs6_esm_diagnostics.graphSize += 1;
+    __autojs6_esm_diagnostics.graphModules.push(id);
+    return namespace;
   }
   function __autojs6_dynamic_import(parentFilename, specifier, options) {
     return Promise.resolve().then(function() {
@@ -44484,7 +44650,7 @@ std::string buildEmbeddedScriptExecutionSource(
         throw __autojs6_esm_error("Embedded Node local dynamic import rejects absolute path: " + name, "ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED");
       }
       const protocolMatch = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(name);
-      if (protocolMatch && !__autojs6_esm_builtin_specifier(name)) {
+      if (protocolMatch && !__autojs6_esm_builtin_specifier(name) && !__autojs6_is_data_url_module_id(name)) {
         const protocol = protocolMatch[1].toLowerCase();
         if (protocol === "http" || protocol === "https") {
           throw __autojs6_error("Embedded Node local dynamic import rejects network URL imports: " + name, "ERR_AUTOJS6_NETWORK_DISABLED");

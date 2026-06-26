@@ -1432,8 +1432,11 @@ P13 task 本身使用以下执行状态：
     - partial ESM transform 现在支持 `export function*` 和
       `export async function*`，用于兼容 `puppeteer-core` HandleIterator 等
       真实 npm package 的 generator helper exports。
+    - controlled `data:` URL import 现在支持 inline JavaScript 与 JSON data
+      modules；JSON data URL 需要 import attributes，unsupported MIME 与
+      data-module relative/package import 仍拒绝。
     - loader hooks、raw `node:module` loader authority、network import、
-      `file:` / `data:` URL import、absolute path import、workingDirectory
+      `file:` URL import、unrestricted URL import、absolute path import、workingDirectory
       escape、disabled builtin import 继续拒绝。
     - 新增 focused gate:
       `NodeEsmLoaderPhase13DecisionInstrumentationTest`。
@@ -1450,7 +1453,7 @@ P13 task 本身使用以下执行状态：
     - Surface manifest evidence:
       `phase13-esm-loader-parity-decision`。
   - Remaining: native loader hooks、raw `node:module` loader authority、
-    network/file/data URL import、custom condition sets/import maps、packaged
+    network/file/unrestricted URL import、custom condition sets/import maps、packaged
     encrypted package exports/imports graph、broader dynamic-import package
     graph、pending TLA/linking cancellation cleanup、full desktop source-map
     parity 仍未完成。

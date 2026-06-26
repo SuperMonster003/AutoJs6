@@ -147,9 +147,10 @@ P13-41 extends the `autojs6:profile` declaration with `esmLoaderProfile`. The
 field reports the current partial AutoJs6-managed ESM loader contract for
 `.mjs`, `type=module`, TLA, local static/dynamic import, package
 `exports`/`imports`, JSON import attributes, scoped `import.meta`, CJS interop,
-source-name stack behavior, and focused packaged ESM evidence. It also records
-raw loader hooks, raw `node:module` loader authority, network/file/data URL
-imports, working-directory escapes, and raw Node loader handles as denied.
+controlled JavaScript/JSON `data:` URL imports, source-name stack behavior, and
+focused packaged ESM evidence. It also records raw loader hooks, raw
+`node:module` loader authority, network/file/unrestricted URL imports,
+working-directory escapes, and raw Node loader handles as denied.
 
 P13-42 extends the `autojs6:profile` declaration with
 `packageManagerProfile`. The field reports the current partial Android package

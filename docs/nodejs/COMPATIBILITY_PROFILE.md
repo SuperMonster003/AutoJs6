@@ -1001,9 +1001,9 @@ Node Profile v1.1 partial ESM supports:
 
 CommonJS package condition matching uses active conditions `autojs6`, `require`, `node`, `default` while preserving package key order. `development` and `production` are recognized for diagnostics but are not active by default.
 
-Partial ESM still rejects CJS `require()` of asynchronous ESM graphs containing `await` or dynamic `import()`, legacy ESM JSON import assertions, missing/unknown import attributes, import attributes on non-JSON modules, custom loaders, network/URL imports, disabled builtins, any import outside `workingDirectory`, and Node's full `import.meta` loader surface beyond the scoped metadata and resolver subset.
+Partial ESM still rejects CJS `require()` of asynchronous ESM graphs containing `await` or dynamic `import()`, legacy ESM JSON import assertions, missing/unknown import attributes, import attributes on non-JSON modules, custom loaders, network/file/unrestricted URL imports, disabled builtins, any import outside `workingDirectory`, and Node's full `import.meta` loader surface beyond the scoped metadata and resolver subset. Controlled `data:` URL imports are partial for inline JavaScript and JSON modules only; JSON data modules require `with { type: "json" }`.
 
-Dynamic `import()` is local-only partial support. It allows local relative `.mjs`, CommonJS, and JSON modules, allowed builtins, and packages resolved inside `workingDirectory` with ESM package condition matching. Dynamic JSON imports require `{ with: { type: "json" } }`. It rejects disabled builtins, absolute paths, `file:`/`data:` URLs, network URLs, path escapes, loader hooks, and dynamic-code sources such as `eval` and `Function` with stable AutoJs6 errors. `import.meta.resolve()` follows the same scoped ESM resolver, returning `file:` URLs for local/package targets and `node:` URLs for allowed builtins while keeping disabled builtins denied.
+Dynamic `import()` is local-only partial support. It allows local relative `.mjs`, CommonJS, and JSON modules, allowed builtins, controlled JavaScript/JSON `data:` URL modules, and packages resolved inside `workingDirectory` with ESM package condition matching. Dynamic JSON imports require `{ with: { type: "json" } }`, including JSON data URLs. It rejects disabled builtins, absolute paths, `file:` URLs, network URLs, unsupported data URL MIME types, data-module relative/package imports, path escapes, loader hooks, and dynamic-code sources such as `eval` and `Function` with stable AutoJs6 errors. `import.meta.resolve()` follows the same scoped ESM resolver, returning `file:` URLs for local/package targets and `node:` URLs for allowed builtins while keeping disabled builtins denied.
 
 Runtime diagnostics include `esmEnabled`, `esmEntry`, `esmModuleGraphRoot`, `esmModuleGraphSize`, `esmModuleGraphModules`, and `dynamicImportEnabled` in the embedded script result envelope.
 
@@ -1264,11 +1264,11 @@ packaged plus hostile-corpus evidence before promotion.
 P13-41 records ESM loader parity as partial. The runtime exposes
 `autojs6:profile.esmLoaderProfile` to document that v1.1 supports the
 AutoJs6-managed partial ESM loader for `.mjs`, `type=module`, TLA, local
-static/dynamic import, package `exports` / `imports`, JSON import attributes,
+static/dynamic import, controlled JavaScript/JSON `data:` URL imports, package `exports` / `imports`, JSON import attributes,
 scoped `import.meta`, ESM/CJS interop, sync `require(esm)`, and focused
 packaged ESM smokes. This is not full desktop loader parity: raw loader hooks,
-raw `node:module` loader authority, network imports, `file:` / `data:` URL
-imports, arbitrary absolute paths, working-directory escapes, custom condition
+raw `node:module` loader authority, network imports, `file:` URL imports,
+unrestricted URL imports, arbitrary absolute paths, working-directory escapes, custom condition
 sets, import maps, broad packaged encrypted graphs, and pending-evaluation
 cleanup remain unpromoted.
 

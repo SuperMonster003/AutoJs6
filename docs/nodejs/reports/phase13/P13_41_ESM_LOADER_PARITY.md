@@ -17,12 +17,15 @@ current split:
   dynamic import, JSON import attributes,
   `import.meta`, simple ESM re-exports, package `exports` / `imports`, and
   synchronous CJS `require(esm)` are partial.
+- Controlled `data:` URL imports are partial for inline JavaScript and JSON
+  modules. JSON data URLs require `with { type: "json" }`; other MIME types
+  and data-module relative/package imports remain denied.
 - Named import/export/re-export specifier lists accept ordinary block and line
   comments, covering generated package output such as parse5's
   `export { /** @internal */ Parser } from ...`.
 - `moduleSources` and focused packaged ESM/dynamic import smokes are partial.
 - loader hooks, raw `node:module` loader authority, network imports, `file:`
-  / `data:` URL imports, absolute path imports, working-directory escapes,
+  URL imports, unrestricted URL imports, absolute path imports, working-directory escapes,
   disabled builtins, and raw Node loader handles are denied.
 
 ## Evidence
@@ -50,7 +53,7 @@ current split:
 
 - Native Node ESM loader hooks and raw `node:module` loader authority remain
   denied.
-- Network, `file:`, `data:`, and unrestricted URL imports remain denied.
+- Network, `file:`, and unrestricted URL imports remain denied.
 - Custom condition sets, import maps, and raw loader registration are not
   implemented.
 - Packaged encrypted package `exports` / `imports` graphs and broader dynamic

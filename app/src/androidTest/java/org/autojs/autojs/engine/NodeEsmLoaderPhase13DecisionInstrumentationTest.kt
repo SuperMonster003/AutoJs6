@@ -85,7 +85,8 @@ class NodeEsmLoaderPhase13DecisionInstrumentationTest {
                       } catch (error) {
                         fileUrlDenied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_DYNAMIC_IMPORT_UNSUPPORTED";
                       }
-                      console.log("p13esm.dynamic=" + [mod.default.value, networkDenied, fileUrlDenied].join("|"));
+                      const dataUrl = await import("data:text/javascript,export%20default%20%22inline-data%22%3B");
+                      console.log("p13esm.dynamic=" + [mod.default.value, networkDenied, fileUrlDenied, dataUrl.default].join("|"));
                     })().catch((error) => {
                       console.error("p13esm.profile.error=" + (error && (error.stack || error.message) || error));
                       process.exitCode = 1;
@@ -103,11 +104,11 @@ class NodeEsmLoaderPhase13DecisionInstrumentationTest {
                     "p13esm.profile=partial_default|true|true|true|true|autojs6_managed_transform|" +
                         "partial|partial|partial|local_scoped_partial|local_scoped_partial|partial|" +
                         "partial|partial|scoped_partial|sync_esm_only|partial|focused_smoke_partial|" +
-                        "sourceURL_stack_only|denied|denied|denied|denied|denied|denied|denied|" +
+                        "sourceURL_stack_only|denied|denied|denied|denied|inline_js_json_partial|denied|denied|" +
                         "denied|not_promoted|not_proven|partial_required|false|false|true",
                 ),
             )
-            assertTrue(profileResult.stdout, profileResult.stdout.contains("p13esm.dynamic=dep|true|true"))
+            assertTrue(profileResult.stdout, profileResult.stdout.contains("p13esm.dynamic=dep|true|true|inline-data"))
 
             NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
 

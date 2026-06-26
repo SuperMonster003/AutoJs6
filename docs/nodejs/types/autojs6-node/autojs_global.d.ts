@@ -41,7 +41,7 @@ declare namespace AutoJs6Node {
     readonly rawNodeModuleLoader: "denied" | string;
     readonly networkImports: "denied" | string;
     readonly fileUrlImports: "denied" | string;
-    readonly dataUrlImports: "denied" | string;
+    readonly dataUrlImports: "inline_js_json_partial" | "denied" | string;
     readonly absolutePathImports: "denied" | string;
     readonly workingDirectoryEscape: "denied" | string;
     readonly disabledBuiltinImports: "denied" | string;

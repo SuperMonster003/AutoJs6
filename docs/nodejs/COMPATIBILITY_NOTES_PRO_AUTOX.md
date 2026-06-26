@@ -376,8 +376,9 @@ declaration exports and local `createRequire()` declarations used by package
 entrypoints such as `css-tree`, keyword property names inside default-exported
 object literals, JSON import attributes, scoped `import.meta`, and CJS interop.
 It does not enable raw loader hooks,
-network/file/data URL imports, import maps, custom condition profiles, or broad
-packaged encrypted ESM graphs.
+network/file/unrestricted URL imports, import maps, custom condition profiles,
+or broad packaged encrypted ESM graphs. Controlled JavaScript/JSON `data:` URL
+imports are partial evidence only.
 
 P13-42 records Android package manager parity as partial. AutoJs6 Node exposes
 `packageManagerProfile` diagnostics for the current host-managed package

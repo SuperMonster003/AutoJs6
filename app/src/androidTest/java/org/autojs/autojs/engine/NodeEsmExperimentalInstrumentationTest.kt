@@ -1289,6 +1289,65 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun partialEsmSupportsControlledDataUrlImports() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM controlled data URL imports")
+        val workDir = freshWorkDir("esm-data-url")
+        File(workDir, "dep.mjs").writeText("""export default "local";""")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import inline, { named } from "data:text/javascript,export%20default%20%7B%20value%3A%20%22inline-js%22%20%7D%3B%20export%20const%20named%20%3D%20%22named%22%3B";
+                import base64Value from "data:text/javascript;base64,ZXhwb3J0IGRlZmF1bHQgImI2NCI7";
+                import config from "data:application/json,%7B%22value%22%3A%22inline-json%22%7D" with { type: "json" };
+                const dynamicJs = await import("data:application/javascript,export%20default%20%22dynamic-js%22%3B");
+                const dynamicJson = await import(
+                  "data:application/json,%7B%22value%22%3A%22dynamic-json%22%7D",
+                  { with: { type: "json" } }
+                );
+                let relativeDenied = false;
+                try {
+                  await import("data:text/javascript,import%20%22.%2Fdep.mjs%22%3B%20export%20default%20%22bad%22%3B");
+                } catch (error) {
+                  relativeDenied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+                }
+                let mimeDenied = false;
+                try {
+                  await import("data:text/plain,export%20default%20%22bad%22%3B");
+                } catch (error) {
+                  mimeDenied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+                }
+                let jsonAttributeDenied = false;
+                try {
+                  await import("data:application/json,%7B%22value%22%3A%22missing-attr%22%7D");
+                } catch (error) {
+                  jsonAttributeDenied = error && error.code === "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED";
+                }
+                console.log("esm.dataUrl=" + [
+                  inline.value,
+                  named,
+                  base64Value,
+                  config.value,
+                  dynamicJs.default,
+                  dynamicJson.default.value,
+                  relativeDenied,
+                  mimeDenied,
+                  jsonAttributeDenied
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = File(workDir, "main.mjs").absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("controlled data URL imports", result)
+        assertTrue(
+            result.stdout,
+            result.stdout.contains("esm.dataUrl=inline-js|named|b64|inline-json|dynamic-js|dynamic-json|true|true|true"),
+        )
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "true")
+    }
+
+    @Test
     fun localDynamicImportCannotEscapeWorkingDirectory() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("local dynamic import scoped guard")
         val parent = freshWorkDir("esm-dynamic-escape-parent")

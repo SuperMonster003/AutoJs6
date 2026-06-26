@@ -757,9 +757,11 @@ parity decision gate. It requires `esmLoaderProfile` diagnostics, focused
 local ESM loader evidence, existing ESM/package/source-map/security evidence,
 TypeScript declarations, surface manifest evidence, and docs updates while
 keeping raw loader hooks, raw `node:module` loader authority,
-network/file/data URL imports, custom conditions/import maps, broad packaged
-encrypted graphs, pending-evaluation cleanup, and full desktop source-map
-parity unpromoted. P13-41 records ESM loader parity as partial.
+network/file/unrestricted URL imports, custom conditions/import maps, broad
+packaged encrypted graphs, pending-evaluation cleanup, and full desktop
+source-map parity unpromoted. Controlled JavaScript/JSON `data:` URL imports
+are partial evidence, not raw loader authority. P13-41 records ESM loader parity
+as partial.
 `verifyNodePhase13PackageManagerAndroidDecision` records P13-42 as the Android
 package manager decision gate. It requires `packageManagerProfile`
 diagnostics, the P13-09 Android local package store, the Phase 10 host-managed
