@@ -26,7 +26,8 @@ class Versions @JvmOverloads constructor(
     private val javaVersionInt: Int = System.getProperty("gradle.java.version.select").toInt()
     private val javaVersionInfoSuffix: String = System.getProperty("gradle.java.version.suffix", "")
 
-    private val isBuildNumberAutoIncrementEnabled = booleanGradleProperty(BUILD_NUMBER_AUTO_INCREMENT_PROPERTY, false)
+    private val isBuildNumberAutoIncrementEnabled = booleanGradleProperty(BUILD_NUMBER_AUTO_INCREMENT_ENABLED_PROPERTY, false)
+    private val isBuildTimeUpdateEnabled = booleanGradleProperty(BUILD_TIME_UPDATE_ENABLED_PROPERTY, false)
     private var wasBuildNumberAutoIncremented = false
     private val minBuildTimeGap = Utils.hours2Millis(0.75)
 
@@ -103,7 +104,7 @@ class Versions @JvmOverloads constructor(
     }
 
     private fun updateProperties() {
-        if (!isBuildNumberAutoIncrementEnabled) {
+        if (!isBuildNumberAutoIncrementEnabled && !isBuildTimeUpdateEnabled) {
             return
         }
 
@@ -112,16 +113,26 @@ class Versions @JvmOverloads constructor(
             FileInputStream(propsPath).use { load(it) }
         }
 
-        if (isBuildGapEnough) {
+        var hasChanged = false
+
+        if (isBuildNumberAutoIncrementEnabled && isBuildGapEnough) {
             val isBuildAppRelease = gradle.startParameter.taskNames.any {
                 it.contains(Regex("^(:?app:)?assemble(app|inrt)release", IGNORE_CASE))
             }
             if (!isBuildAppRelease) {
                 props["VERSION_BUILD"] = "${appVersionCode + 1}"
                 wasBuildNumberAutoIncremented = true
+                hasChanged = true
             }
         }
-        props["BUILD_TIME"] = "${Date().time}"
+        if (isBuildTimeUpdateEnabled) {
+            props["BUILD_TIME"] = "${Date().time}"
+            hasChanged = true
+        }
+
+        if (!hasChanged) {
+            return
+        }
 
         FileOutputStream(propsPath).use { out ->
             props.store(out, null)
@@ -141,7 +152,8 @@ class Versions @JvmOverloads constructor(
     }
 
     private companion object {
-        const val BUILD_NUMBER_AUTO_INCREMENT_PROPERTY = "isBuildNumberAutoIncremented"
+        const val BUILD_NUMBER_AUTO_INCREMENT_ENABLED_PROPERTY = "autojs.gradle.build.number.auto.increment.enabled"
+        const val BUILD_TIME_UPDATE_ENABLED_PROPERTY = "autojs.gradle.build.time.update.enabled"
     }
 
 }
