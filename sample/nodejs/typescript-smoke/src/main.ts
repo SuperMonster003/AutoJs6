@@ -65,6 +65,9 @@ async function smoke(): Promise<void> {
 
   const launched: boolean = await app.launchPackage(app.packageName, { timeoutMs: 1000 });
   const launchByName: boolean = await app.launchApp("AutoJs6", { timeoutMs: 1000 });
+  const packageByName: string | null = await app.getPackageName("AutoJs6", { timeoutMs: 1000 });
+  const nameByPackage: string | null = await app.getAppName(app.packageName, { timeoutMs: 1000 });
+  const installed: boolean = await app.isInstalled(app.packageName, { timeoutMs: 1000 });
   await app.openAppSetting(app.packageName, { timeoutMs: 1000 });
   const viewIntent: app.IntentDescriptor = app.intent({
     action: "VIEW",
@@ -804,6 +807,9 @@ async function smoke(): Promise<void> {
 
   void launched;
   void launchByName;
+  void packageByName;
+  void nameByPackage;
+  void installed;
   void viewIntent;
   void shellIntent;
   void broadcastDenied;

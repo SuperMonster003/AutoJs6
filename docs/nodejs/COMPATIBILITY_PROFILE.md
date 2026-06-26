@@ -1626,7 +1626,7 @@ View/Activity/Context objects out of Node.
 Declared capability names:
 
 - `toast`
-- `app`, `app.launch`, `app.settings`, `app.activity`
+- `app`, `app.launch`, `app.settings`, `app.activity`, `app.query`
 - `barcode`
 - `dialogs`
 - `engines`, `engines.exec`
@@ -1689,7 +1689,7 @@ runtime.
     and `app.startActivity()` use JSON-safe descriptors with
     `category`/`categories`, numeric flag arrays, and primitive extras, while
     broadcast sending, root/Shizuku/dual-user routes, raw Android objects,
-    installed-app lookup policy, and packaged app smoke remain blocked.
+    raw installed-app list APIs, and packaged app smoke remain blocked.
 - `barcode` / `qrcode`
   - `detect(imageOrPath, options?): Promise<BarcodeSnapshot | null>`
   - `detectAll(imageOrPath, options?): Promise<readonly BarcodeSnapshot[]>`

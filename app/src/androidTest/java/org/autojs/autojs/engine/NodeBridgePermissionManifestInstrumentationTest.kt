@@ -145,6 +145,26 @@ class NodeBridgePermissionManifestInstrumentationTest {
             NodeBridgePermissionManifest.requiredCapabilitiesFor("image", "captureScreen"),
         )
         assertEquals(
+            listOf(NodeBridgePermissionManifest.APP_QUERY),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("app", "getPackageName"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.APP_QUERY),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("app", "getAppName"),
+        )
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.APP_QUERY),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("app", "isInstalled"),
+        )
+        assertEquals(NodeBridgePermissionManifest.APP_QUERY, NodeBridgePermissionManifest.normalizeCapability("package-query"))
+        assertEquals(
+            listOf(NodeBridgePermissionManifest.APP_QUERY),
+            NodeBridgePermissionManifest.missingCapabilities(
+                declaredCapabilities = listOf(NodeBridgePermissionManifest.APP),
+                requiredCapabilities = listOf(NodeBridgePermissionManifest.APP_QUERY),
+            ),
+        )
+        assertEquals(
             listOf(NodeBridgePermissionManifest.IMAGE),
             NodeBridgePermissionManifest.requiredCapabilitiesFor("image", "grayscale"),
         )

@@ -382,6 +382,8 @@ capability 映射示例：
 - `app.launchPackage` / `app.launchApp` 需要 `app.launch`
 - `app.openAppSetting` 需要 `app.settings`
 - `app.startActivity` 需要 `app.activity`
+- `app.getPackageName` / `app.getAppName` / `app.isInstalled` 需要显式
+  `app.query`
 - `media_projection` 映射到 `screen_capture`
 - `image.captureScreen` 需要 `image` 和 `screen_capture`
 - `ocr` 需要 `ocr` 和 `image`
@@ -597,7 +599,7 @@ await ok.click({ timeoutMs: 3000 });
 | Rhino/augment 类别 | Rhino 典型用法 | Node 当前对应 | 状态 |
 | --- | --- | --- | --- |
 | `global` | `toastLog`, `sleep`, `setClip`, `getClip`, selector globals | `autojs6:compat` | 部分，已覆盖低风险和部分自动化全局 |
-| `app` | `app.launchPackage`, intent/broadcast/helpers | `app`, `autojs6:compat.app` | 部分，基础启动/设置/Activity 可用，广播等缺口仍在 |
+| `app` | `app.launchPackage`, intent/broadcast/helpers | `app`, `autojs6:compat.app` | 部分，基础启动/设置/Activity、URL/email/uninstall、exact app lookup 可用，广播/列表/dual 等缺口仍在 |
 | `autojs` | `$autojs`, version/resource 等 | `autojs6:profile`, `engines` 等分散能力 | 部分 |
 | `automator` / `auto` / `selector` | `text("OK").findOne().click()` | `accessibility`, `autojs6:compat` selector handle | 部分，P13-19 固定 selector v2/compat handle 证据；`waitFor`、手势、raw node、packaged service、root/Shizuku 仍未完成 |
 | `root_automator` | root input event 自动化 | 无稳定 Node bridge | `blocked_by_design` 或待单独 provider |
@@ -1022,7 +1024,7 @@ startup/custom triggers, packaged install/trigger/remove behavior, and raw
 P13-23 records app/intent/broadcast Pro parity as partial: JSON-safe
 `app.intent()` descriptors and normalized `app.startActivity()` options are
 evidence-backed, while `sendBroadcast`, root/Shizuku app options, dual-user
-helpers, URI/email/settings helpers, installed-app lookup policy, packaged
+helpers, raw installed-app list APIs, packaged
 behavior, and raw Android app/intent objects remain blocked.
 
 P13-24 records shell/root/Shizuku capability promotion as partial: ordinary

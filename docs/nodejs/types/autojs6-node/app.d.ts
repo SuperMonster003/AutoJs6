@@ -64,6 +64,9 @@ declare module "app" {
       openUrl(url: string, options?: AutoJs6Node.BridgeCallOptions): Promise<void>;
       sendEmail(request: SendEmailRequest | EmailAddressList, options?: AutoJs6Node.BridgeCallOptions & Partial<SendEmailRequest>): Promise<void>;
       uninstall(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<void>;
+      getPackageName(appName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<string | null>;
+      getAppName(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<string | null>;
+      isInstalled(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       launchPackage(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       launchApp(appName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       openAppSetting(options?: AutoJs6Node.BridgeCallOptions): Promise<void>;

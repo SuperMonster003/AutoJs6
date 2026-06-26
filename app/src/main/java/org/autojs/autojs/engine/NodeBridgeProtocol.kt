@@ -587,7 +587,15 @@ object NodeBridgeModules {
     const val INPUT_OBSERVER = "input_observer"
 
     val toastMethods = setOf("showToast", "toast")
-    val appMethods = setOf("launchPackage", "launchApp", "openAppSetting", "startActivity")
+    val appMethods = setOf(
+        "launchPackage",
+        "launchApp",
+        "openAppSetting",
+        "startActivity",
+        "getPackageName",
+        "getAppName",
+        "isInstalled",
+    )
     val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile")
     val dialogsMethods = setOf("alert", "confirm", "input", "select")
     val accessibilityMethods = setOf(
@@ -4259,6 +4267,18 @@ class AndroidNodeBridgeCapabilityProvider(
                     request.id,
                     launchAppByLabel(request.firstStringArg()).toString(),
                 )
+                "getPackageName" -> NodeBridgeResponse.success(
+                    request.id,
+                    NodeBridgeJson.valueToJson(packageNameForLabel(request.firstStringArg())),
+                )
+                "getAppName" -> NodeBridgeResponse.success(
+                    request.id,
+                    NodeBridgeJson.valueToJson(appLabelForPackage(request.firstStringArg())),
+                )
+                "isInstalled" -> NodeBridgeResponse.success(
+                    request.id,
+                    isPackageInstalled(request.firstStringArg()).toString(),
+                )
                 "openAppSetting" -> {
                     openAppSetting(request.firstStringArg().ifBlank { appContext.packageName })
                     NodeBridgeResponse.success(request.id, "null")
@@ -4647,6 +4667,44 @@ class AndroidNodeBridgeCapabilityProvider(
             }.getOrDefault(false)
         } ?: return false
         return launchPackage(matched.packageName)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun packageNameForLabel(label: String): String? {
+        if (label.isBlank()) {
+            return null
+        }
+        val packageManager = appContext.packageManager
+        val applications = runCatching {
+            packageManager.getInstalledApplications(0)
+        }.getOrDefault(emptyList())
+        return applications.firstOrNull { applicationInfo ->
+            runCatching {
+                packageManager.getApplicationLabel(applicationInfo).toString() == label
+            }.getOrDefault(false)
+        }?.packageName
+    }
+
+    @Suppress("DEPRECATION")
+    private fun appLabelForPackage(packageName: String): String? {
+        if (packageName.isBlank()) {
+            return null
+        }
+        val packageManager = appContext.packageManager
+        return runCatching {
+            packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageName, 0)).toString()
+        }.getOrNull()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun isPackageInstalled(packageName: String): Boolean {
+        if (packageName.isBlank()) {
+            return false
+        }
+        return runCatching {
+            appContext.packageManager.getPackageInfo(packageName, 0)
+            true
+        }.getOrDefault(false)
     }
 
     private fun openAppSetting(packageName: String) {

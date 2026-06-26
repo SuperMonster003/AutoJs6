@@ -108,7 +108,7 @@ function buildReport(files) {
       "Add root/Shizuku execution examples only after the P13-24 shell capability path is promoted.",
     ]),
     scenario("android_start_activity_schema", "Android bridge parses category/categories, flags arrays, and JSON-safe extras", [
-      token(files.protocol, 'val appMethods = setOf("launchPackage", "launchApp", "openAppSetting", "startActivity")'),
+      token(files.protocol, "val appMethods = setOf("),
       token(files.protocol, "private fun parseIntentCategories(options: JSONObject): List<String>?"),
       token(files.protocol, "private fun parseIntentFlags(options: JSONObject): Int?"),
       token(files.protocol, "private fun putJsonIntentExtraArray(intent: Intent, key: String, values: JSONArray)"),
@@ -122,6 +122,32 @@ function buildReport(files) {
     ], [
       "Add device-side smoke for actual safe Activity short forms without launching arbitrary third-party apps.",
       "Add negative device tests for invalid component, invalid flags, and non-object extras through the live provider.",
+    ]),
+    scenario("installed_app_query_policy", "Installed-app lookup helpers use explicit app.query capability and JSON-safe return values", [
+      token(files.permissionManifest, 'const val APP_QUERY = "app.query"'),
+      token(files.permissionManifest, '"getPackageName", "getAppName", "isInstalled" -> listOf(APP_QUERY)'),
+      token(files.nodeBridgeSources, 'if (methodName === "getPackageName" || methodName === "getAppName" || methodName === "isInstalled") return ["app.query"];'),
+      token(files.nodeBridgeSources, "function getPackageName(appName, options)"),
+      token(files.nodeBridgeSources, "function getAppName(packageName, options)"),
+      token(files.nodeBridgeSources, "function isInstalled(packageName, options)"),
+      token(files.protocol, '"getPackageName",'),
+      token(files.protocol, '"getAppName",'),
+      token(files.protocol, '"isInstalled",'),
+      token(files.protocol, "private fun packageNameForLabel(label: String): String?"),
+      token(files.protocol, "private fun appLabelForPackage(packageName: String): String?"),
+      token(files.protocol, "private fun isPackageInstalled(packageName: String): Boolean"),
+      token(files.appTypes, "getPackageName(appName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<string | null>;"),
+      token(files.appTypes, "getAppName(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<string | null>;"),
+      token(files.appTypes, "isInstalled(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;"),
+      token(files.typeSmoke, 'const packageByName: string | null = await app.getPackageName("AutoJs6"'),
+      token(files.typeSmoke, "const nameByPackage: string | null = await app.getAppName(app.packageName"),
+      token(files.typeSmoke, "const installed: boolean = await app.isInstalled(app.packageName"),
+      token(files.conformanceTest, 'assert.strictEqual(await expectPromise("app.getPackageName"'),
+      token(files.conformanceTest, 'assert.strictEqual(await expectPromise("app.isInstalled.missing"'),
+      token(files.p13Report, "`app.query`"),
+    ], [
+      "Keep raw `getInstalledApps()` / `getInstalledPackages()` Java-object list APIs blocked until a redacted JSON schema and disclosure policy exist.",
+      "Add packaged privacy disclosure examples for app-name/package lookup before default promotion.",
     ]),
     scenario("broadcast_and_privileged_boundary", "Broadcast send and privileged Rhino options remain rejected before bridge dispatch", [
       token(files.nodeBridgeSources, "function __autojs6_app_send_broadcast_unavailable_error()"),
@@ -151,8 +177,7 @@ function buildReport(files) {
       token(files.proComparison, "P13-23 records app/intent/broadcast Pro parity as partial"),
       token(files.proAutoxNotes, "P13-23 records app/intent/broadcast Pro parity as partial"),
     ], [
-      "Map Rhino aliases such as `launch()`, `getPackageName()`, `viewFile()`, `editFile()`, `kill()`, and dual-app helpers to separate JSON-safe providers or stable rejections.",
-      "Decide whether app-name/package lookup APIs may query installed application labels in the selected profile.",
+      "Map Rhino aliases such as `launch()`, `viewFile()`, `editFile()`, `kill()`, raw installed-app list APIs, and dual-app helpers to separate JSON-safe providers or stable rejections.",
     ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-23 as partial", [
       token(files.p13Report, "Status: partial"),
@@ -189,7 +214,7 @@ function buildReport(files) {
     ),
     check(
       "broadcast-not-bridge-method",
-      files.protocol.text.includes('val appMethods = setOf("launchPackage", "launchApp", "openAppSetting", "startActivity")') &&
+      files.protocol.text.includes("val appMethods = setOf(") &&
         !files.permissionManifest.text.includes('"sendBroadcast" ->') &&
         !files.protocol.text.includes('"sendBroadcast" -> NodeBridgeResponse.success'),
       "P13-23 must not add sendBroadcast to the Android bridge dispatch table.",

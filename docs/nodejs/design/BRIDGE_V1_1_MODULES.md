@@ -19,7 +19,7 @@ native addons, child processes, inspector, or broader filesystem access.
 Current declared capability names:
 
 - `toast`
-- `app`, `app.launch`, `app.settings`, `app.activity`
+- `app`, `app.launch`, `app.settings`, `app.activity`, `app.query`
 - `dialogs`
 - `engines`, `engines.exec`
 - `accessibility`

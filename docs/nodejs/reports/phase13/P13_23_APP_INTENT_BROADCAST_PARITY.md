@@ -26,6 +26,10 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
 - `app.uninstall()` opens the Android package uninstall flow through
   `ACTION_DELETE` and the existing scoped activity bridge; it does not perform
   silent uninstall or package-manager mutation.
+- `app.getPackageName()`, `app.getAppName()`, and `app.isInstalled()` now
+  expose exact installed-app lookup through an explicit `app.query` capability.
+  They return JSON-safe string/null/boolean values and do not expose raw
+  `ApplicationInfo`, `PackageInfo`, or installed-app lists.
 - `app.intentToShell()` serializes the same JSON-safe descriptors into `am`
   intent arguments for migration scripts. It is a pure helper and does not
   execute shell commands or dispatch Android bridge requests.
@@ -62,20 +66,21 @@ paths remain P13-24 work and must stay auditable under explicit shell/root/
 Shizuku capabilities.
 
 No raw Android `Intent`, `Uri`, `Bundle`, `ComponentName`, `PackageManager`,
-`ResolveInfo`, `BroadcastReceiver`, or `Context` object crosses the bridge.
+`ResolveInfo`, `ApplicationInfo`, `PackageInfo`, `BroadcastReceiver`, or
+`Context` object crosses the bridge.
 
 ## Remaining Blockers
 
 - Full Rhino app helper parity: `parseUri`, `getUriForFile`, `viewFile`,
-  `editFile`, `kill`, `getPackageName`, `getAppName`, preset app aliases, and
-  dual-app helpers.
+  `editFile`, `kill`, `launch()`, `getInstalledApps()`,
+  `getInstalledPackages()`, preset app aliases, and dual-app helpers.
 - Activity short-form mapping beyond URL strings and JSON-safe descriptors.
 - Root/Shizuku examples that combine `app.intentToShell()` with explicit
   P13-24 shell capabilities.
 - Broadcast send promotion with receiver authority, exported/non-exported
   policy, manifest synthesis, user disclosure, rate limits, and packaged smoke.
 - root/Shizuku/dual-user routes through explicit P13-24 capability surfaces.
-- Installed app/package lookup privacy policy and packaged behavior.
+- Packaged privacy disclosure examples for exact app/package lookup.
 - Negative device tests for invalid component names, invalid flag values,
   non-object extras, and blocked privileged options.
 - Migration examples for Rhino `app.intent()` and `app.startActivity()` scripts.

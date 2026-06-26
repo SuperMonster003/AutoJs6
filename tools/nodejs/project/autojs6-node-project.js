@@ -10,6 +10,7 @@ const KNOWN_CAPABILITIES = new Set([
   "app.launch",
   "app.settings",
   "app.activity",
+  "app.query",
   "dialogs",
   "engines",
   "engines.exec",
@@ -45,6 +46,10 @@ const CAPABILITY_ALIASES = new Map([
   ["screencapture", "screen_capture"],
   ["engines:exec", "engines.exec"],
   ["engine.exec", "engines.exec"],
+  ["app-query", "app.query"],
+  ["app:query", "app.query"],
+  ["package-query", "app.query"],
+  ["package.query", "app.query"],
   ["shell:root", "shell.root"],
   ["shell-shizuku", "shell.shizuku"],
   ["shell:shizuku", "shell.shizuku"],
@@ -734,7 +739,7 @@ function validatePermissions(projectJson, packageJson, issues) {
           "UNKNOWN_PERMISSION",
           label,
           "Unknown Node bridge capability '" + item + "'.",
-          "Use a known capability such as toast, app, app.launch, image, ocr, barcode, network, storage, shell, or plugin.<id>."
+          "Use a known capability such as toast, app, app.launch, app.query, image, ocr, barcode, network, storage, shell, or plugin.<id>."
         );
       }
     });

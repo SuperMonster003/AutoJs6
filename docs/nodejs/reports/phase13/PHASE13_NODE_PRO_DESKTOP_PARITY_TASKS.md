@@ -53,8 +53,9 @@
 - Follow-up helper parity records short `action`/`category` normalization,
   `url` descriptor aliases, URL string `app.startActivity()` input,
   pure `app.intentToShell()` shell-argument serialization, `app.openUrl()`,
-  `app.sendEmail()`, `app.uninstall()`, and settings aliases backed by the
-  existing scoped activity/settings bridge.
+  `app.sendEmail()`, `app.uninstall()`, exact `app.query` installed-app lookup
+  helpers, and settings aliases backed by the existing scoped activity/settings
+  bridge.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
@@ -62,7 +63,7 @@
   `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
 - Surface manifest evidence: `phase13-app-intent-broadcast-parity`.
 - Remaining P13-23 blockers: remaining Rhino app helper aliases,
-  installed-app lookup privacy policy, broadcast send promotion,
+  raw installed-app list APIs, broadcast send promotion,
   root/Shizuku/dual-user routing through explicit capabilities, packaged smoke,
   negative device corpus, and migration examples.
 

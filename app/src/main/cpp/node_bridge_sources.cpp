@@ -10400,6 +10400,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (text === "sqlite") {
       return "database";
     }
+    if (text === "app-query" || text === "app.query" || text === "package-query" || text === "package.query") {
+      return "app.query";
+    }
     if (
       text === "package-manager.mutate" ||
       text === "package.manager.mutate" ||
@@ -10893,6 +10896,7 @@ std::string buildEmbeddedScriptExecutionSource(
       if (methodName === "launchPackage" || methodName === "launchApp") return ["app.launch"];
       if (methodName === "openAppSetting") return ["app.settings"];
       if (methodName === "startActivity") return ["app.activity"];
+      if (methodName === "getPackageName" || methodName === "getAppName" || methodName === "isInstalled") return ["app.query"];
       return ["app"];
     }
     if (moduleName === "dialogs") return ["dialogs"];
@@ -10958,6 +10962,7 @@ std::string buildEmbeddedScriptExecutionSource(
       required === "media.audio" ||
       required === "media.metadata" ||
       required === "media.recording" ||
+      required === "app.query" ||
       required === "package_manager.mutate"
     ) {
       return declared.indexOf(required) >= 0;
@@ -10982,6 +10987,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (text === "fs.write" || text === "filesystem.write" || text === "file.write") return "fs.write";
     if (text === "worker" || text === "workers" || text === "worker_threads" || text === "workerthreads") return "worker";
     if (text === "network" || text === "net" || text === "http" || text === "https") return "network";
+    if (text === "app.query" || text === "app_query" || text === "app-query" || text === "package.query" || text === "package_query" || text === "package-query") return "app.query";
     if (text === "shell") return "shell";
     if (
       text === "package_manager.mutate" ||
@@ -11096,6 +11102,7 @@ std::string buildEmbeddedScriptExecutionSource(
       "network",
       "worker",
       "shell",
+      "app.query",
       "accessibility",
       "screen_capture",
       "notifications",
@@ -21804,6 +21811,51 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_app_bridge_options(options, 10000)
       );
     }
+    function getPackageName(appName, options) {
+      const target = __autojs6_app_non_empty_string(appName).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "getPackageName",
+          "app.getPackageName requires a non-empty app name."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "getPackageName",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function getAppName(packageName, options) {
+      const target = __autojs6_app_non_empty_string(packageName).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "getAppName",
+          "app.getAppName requires a non-empty package name."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "getAppName",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function isInstalled(packageName, options) {
+      const target = __autojs6_app_non_empty_string(packageName).trim();
+      if (!target) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "isInstalled",
+          "app.isInstalled requires a non-empty package name."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "isInstalled",
+        [target],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
     function launchPackage(packageName, options) {
       const target = __autojs6_app_non_empty_string(packageName);
       if (!target) {
@@ -21886,6 +21938,9 @@ std::string buildEmbeddedScriptExecutionSource(
       openUrl,
       sendEmail,
       uninstall,
+      getPackageName,
+      getAppName,
+      isInstalled,
       launchPackage,
       launchApp,
       openAppSetting,

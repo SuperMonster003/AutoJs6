@@ -16,6 +16,7 @@ object NodeBridgePermissionManifest {
     const val APP_LAUNCH = "app.launch"
     const val APP_SETTINGS = "app.settings"
     const val APP_ACTIVITY = "app.activity"
+    const val APP_QUERY = "app.query"
     const val DIALOGS = "dialogs"
     const val ENGINES = "engines"
     const val ENGINES_EXEC = "engines.exec"
@@ -74,6 +75,7 @@ object NodeBridgePermissionManifest {
         APP_LAUNCH,
         APP_SETTINGS,
         APP_ACTIVITY,
+        APP_QUERY,
         DIALOGS,
         ENGINES,
         ENGINES_EXEC,
@@ -142,6 +144,10 @@ object NodeBridgePermissionManifest {
         "mediainfo" to MEDIA_METADATA,
         "media-info" to MEDIA_METADATA,
         "media_info" to MEDIA_METADATA,
+        "app-query" to APP_QUERY,
+        "app:query" to APP_QUERY,
+        "package-query" to APP_QUERY,
+        "package.query" to APP_QUERY,
         "media.record" to MEDIA_RECORDING,
         "media:recording" to MEDIA_RECORDING,
         "media-recording" to MEDIA_RECORDING,
@@ -367,6 +373,7 @@ object NodeBridgePermissionManifest {
                 "launchPackage", "launchApp" -> listOf(APP_LAUNCH)
                 "openAppSetting" -> listOf(APP_SETTINGS)
                 "startActivity" -> listOf(APP_ACTIVITY)
+                "getPackageName", "getAppName", "isInstalled" -> listOf(APP_QUERY)
                 else -> listOf(APP)
             }
             NodeBridgeModules.ENGINES -> when (method) {
@@ -476,6 +483,7 @@ object NodeBridgePermissionManifest {
             required == MEDIA_AUDIO ||
             required == MEDIA_METADATA ||
             required == MEDIA_RECORDING ||
+            required == APP_QUERY ||
             required == PACKAGE_MANAGER_MUTATE
         ) {
             return required in declared

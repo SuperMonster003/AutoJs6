@@ -129,7 +129,11 @@ class NodeBridgeConformanceInstrumentationTest {
                   if (moduleName === "toast") {
                     result = null;
                   } else if (moduleName === "app") {
-                    result = method === "launchPackage" || method === "launchApp" ? true : null;
+                    if (method === "launchPackage" || method === "launchApp") result = true;
+                    else if (method === "getPackageName") result = request.args[0] === "AutoJs6" ? "org.autojs.autojs6" : null;
+                    else if (method === "getAppName") result = request.args[0] === "org.autojs.autojs6" ? "AutoJs6" : null;
+                    else if (method === "isInstalled") result = request.args[0] === "org.autojs.autojs6";
+                    else result = null;
                   } else if (moduleName === "dialogs") {
                     result = method === "confirm" ? true : (method === "input" ? "typed" : (method === "select" ? 1 : null));
                   } else if (moduleName === "clipboard") {
@@ -456,7 +460,7 @@ class NodeBridgeConformanceInstrumentationTest {
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
               expectExports("toast", toast, ["showToast", "toast"]);
-              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "uninstall", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
+              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "uninstall", "getPackageName", "getAppName", "isInstalled", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"]);
@@ -579,6 +583,12 @@ class NodeBridgeConformanceInstrumentationTest {
               await expectPromise("toast.toast", toast.toast("alias", { timeoutMs: 1011 }));
               await expectPromise("app.launchPackage", app.launchPackage("org.autojs.autojs6", { timeoutMs: 1012 }));
               await expectPromise("app.launchApp", app.launchApp("AutoJs6", { timeoutMs: 1013 }));
+              assert.strictEqual(await expectPromise("app.getPackageName", app.getPackageName("AutoJs6", { timeoutMs: 1013 })), "org.autojs.autojs6");
+              assert.strictEqual(await expectPromise("app.getAppName", app.getAppName("org.autojs.autojs6", { timeoutMs: 1013 })), "AutoJs6");
+              assert.strictEqual(await expectPromise("app.isInstalled", app.isInstalled("org.autojs.autojs6", { timeoutMs: 1013 })), true);
+              assert.strictEqual(await expectPromise("app.getPackageName.missing", app.getPackageName("__autojs6_missing_app__", { timeoutMs: 1013 })), null);
+              assert.strictEqual(await expectPromise("app.getAppName.missing", app.getAppName("org.autojs6.missing", { timeoutMs: 1013 })), null);
+              assert.strictEqual(await expectPromise("app.isInstalled.missing", app.isInstalled("org.autojs6.missing", { timeoutMs: 1013 })), false);
               await expectPromise("app.openAppSetting", app.openAppSetting("org.autojs.autojs6", { timeoutMs: 1014 }));
               const viewIntent = app.intent({
                 action: "VIEW",
@@ -1187,7 +1197,15 @@ class NodeBridgeConformanceInstrumentationTest {
     private companion object {
         private val stableDispatchMethods: Map<String, Set<String>> = linkedMapOf(
             NodeBridgeModules.TOAST to setOf("showToast", "toast"),
-            NodeBridgeModules.APP to setOf("launchPackage", "launchApp", "openAppSetting", "startActivity"),
+            NodeBridgeModules.APP to setOf(
+                "launchPackage",
+                "launchApp",
+                "openAppSetting",
+                "startActivity",
+                "getPackageName",
+                "getAppName",
+                "isInstalled",
+            ),
             NodeBridgeModules.DIALOGS to setOf("alert", "confirm", "input", "select"),
             NodeBridgeModules.CLIPBOARD to setOf("getText", "setText", "hasText"),
             NodeBridgeModules.DEVICE to setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"),
