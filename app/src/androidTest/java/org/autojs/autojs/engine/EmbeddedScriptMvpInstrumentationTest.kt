@@ -29503,7 +29503,7 @@ class EmbeddedScriptMvpInstrumentationTest {
     }
 
     @Test
-    fun dynamicAndStaticImportSyntaxAreRejectedWithStableErrorCodes() {
+    fun dynamicImportRunsAndStaticEntrySyntaxUsesPartialEsm() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val scriptDir = File(context.cacheDir, "embedded-import-syntax-gate-${System.nanoTime()}").apply {
@@ -29537,16 +29537,34 @@ class EmbeddedScriptMvpInstrumentationTest {
                 source = """
                     "nodejs";
                     import value from "./dependency.js";
-                    console.log(value);
+                    console.log("static.import.cjs=" + value.value);
                 """.trimIndent(),
                 sourceName = main.canonicalPath,
                 workingDirectory = scriptDir.canonicalPath,
                 moduleSources = moduleSourcesFor(dependency),
             )
-            assertFalse(staticImport.succeeded)
-            assertEquals("ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED", staticImport.errorCode)
-            assertTrue(staticImport.errorMessage.orEmpty().contains("ESM/import is not supported in Embedded Node.js MVP"))
-            assertTrue(staticImport.errorMessage.orEmpty().contains("static import syntax is disabled"))
+            assertTrue(staticImport.errorMessage.orEmpty() + "\n" + staticImport.stdout, staticImport.succeeded)
+            assertTrue(staticImport.stdout.contains("static.import.cjs=dependency"))
+
+            settleEmbeddedScriptServiceProcess()
+
+            val remoteImportMeta = runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    import { fileURLToPath } from "node:url";
+                    console.log("remote.esm.meta.main=" + import.meta.main);
+                    console.log("remote.esm.meta.direct=" + (fileURLToPath(import.meta.url) === process.argv[1]));
+                    console.log("remote.esm.meta.filename=" + (import.meta.filename === process.argv[1]));
+                    console.log("remote.esm.meta.dirname=" + (import.meta.dirname === process.cwd()));
+                """.trimIndent(),
+                sourceName = "\$remote/Untitled-235.js",
+                workingDirectory = scriptDir.canonicalPath,
+            )
+            assertTrue(remoteImportMeta.errorMessage.orEmpty() + "\n" + remoteImportMeta.stdout, remoteImportMeta.succeeded)
+            assertTrue(remoteImportMeta.stdout.contains("remote.esm.meta.main=true"))
+            assertTrue(remoteImportMeta.stdout.contains("remote.esm.meta.direct=true"))
+            assertTrue(remoteImportMeta.stdout.contains("remote.esm.meta.filename=true"))
+            assertTrue(remoteImportMeta.stdout.contains("remote.esm.meta.dirname=true"))
 
             settleEmbeddedScriptServiceProcess()
 

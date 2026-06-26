@@ -976,6 +976,8 @@ Node Profile v1.1 partial ESM supports:
 
 - `.mjs` entry execution
 - package `type=module` entry execution for `.js`
+- `.js` entry execution through partial ESM when the entry source contains
+  static ESM syntax or `import.meta`, including `$remote/...` editor sources
 - local static imports of `.mjs` files inside `workingDirectory`, including
   common multiline and compact default/named import declarations
 - default import from scoped CommonJS modules through the existing CommonJS loader

@@ -7759,7 +7759,7 @@ std::string buildEmbeddedScriptExecutionSource(
       }
     });
   }
-  function __autojs6_install_process_mvp() {
+  function __autojs6_install_process_mvp(entryFilename) {
     if (typeof process !== "object" || !process) return;
     const controlledEnv = Object.create(null);
     controlledEnv.NODE_ENV = "production";
@@ -7792,7 +7792,11 @@ std::string buildEmbeddedScriptExecutionSource(
         Object.assign(process.env, controlledEnv);
       } catch (_) {}
     }
-    __autojs6_define_process_property("argv", ["autojs6-node", __autojs6_source_name], true);
+    __autojs6_define_process_property(
+      "argv",
+      ["autojs6-node", entryFilename === undefined || entryFilename === null ? __autojs6_source_name : String(entryFilename)],
+      true
+    );
     __autojs6_define_process_property("execArgv", [], true);
     if (typeof process.argv0 !== "string" || process.argv0.length === 0) {
       __autojs6_define_process_property("argv0", "autojs6-node", true);
@@ -27994,6 +27998,36 @@ std::string buildEmbeddedScriptExecutionSource(
       ? path.dirname(filename)
       : __autojs6_resolved_current_working_directory(path);
   }
+  function __autojs6_virtual_entry_basename(path, sourceName) {
+    const normalized = String(sourceName || "").replace(/\\/g, "/");
+    const base = path && typeof path.basename === "function"
+      ? path.basename(normalized)
+      : normalized.slice(normalized.lastIndexOf("/") + 1);
+    return base && base !== "." && base !== ".." && base.indexOf("\u0000") < 0
+      ? base
+      : "embedded-node-entry.js";
+  }
+  function __autojs6_is_virtual_entry_source_name(sourceName) {
+    const name = String(sourceName || "");
+    return name.indexOf("$remote/") === 0 ||
+      name.indexOf("$remote\\") === 0 ||
+      (/^<[^<>]+>$/.test(name));
+  }
+  function __autojs6_entry_filename() {
+    const path = __autojs6_path_module();
+    const name = String(__autojs6_source_name || "");
+    if (!path || typeof path.resolve !== "function" || typeof path.isAbsolute !== "function") {
+      return name || "embedded-node-entry.js";
+    }
+    const root = __autojs6_resolved_sandbox_root(path);
+    if (name && path.isAbsolute(name)) {
+      return path.resolve(name);
+    }
+    const relativeName = __autojs6_is_virtual_entry_source_name(name)
+      ? __autojs6_virtual_entry_basename(path, name)
+      : (name || "embedded-node-entry.js");
+    return path.resolve(root, relativeName);
+  }
   function __autojs6_diagnostic_path(value) {
     return value === undefined || value === null ? "" : String(value);
   }
@@ -42811,13 +42845,7 @@ std::string buildEmbeddedScriptExecutionSource(
     return __autojs6_error(message, code || "ERR_AUTOJS6_EMBEDDED_NODE_ESM_UNSUPPORTED");
   }
   function __autojs6_esm_entry_filename() {
-    const path = __autojs6_path_module();
-    const root = __autojs6_resolved_sandbox_root(path);
-    const name = String(__autojs6_source_name || "");
-    if (!path || typeof path.resolve !== "function" || typeof path.isAbsolute !== "function") {
-      return name || "<embedded-esm-entry.mjs>";
-    }
-    return path.isAbsolute(name) ? path.resolve(name) : path.resolve(root, name || "embedded-esm-entry.mjs");
+    return __autojs6_entry_filename();
   }
   function __autojs6_package_type_module_for_file(filename) {
     const path = __autojs6_path_module();
@@ -42841,12 +42869,27 @@ std::string buildEmbeddedScriptExecutionSource(
       return false;
     }
   }
+  function __autojs6_entry_source_has_esm_syntax(source) {
+    const code = __autojs6_mask_non_code(source);
+    for (let index = 0; index < code.length; index += 1) {
+      if (!__autojs6_is_identifier_token_at(code, index, "import")) continue;
+      const nextIndex = __autojs6_skip_whitespace(code, index + "import".length);
+      const next = code.charAt(nextIndex);
+      if (next === "(") continue;
+      if (next === "." && code.slice(nextIndex, nextIndex + 5) === ".meta") return true;
+      if (next === "\"" || next === "'" || next === "{" || next === "*" || __autojs6_is_identifier_start(next)) {
+        return true;
+      }
+    }
+    return /(^|[\r\n;{}])\s*export\b\s*([{*]|default\b|class\b|function\b|const\b|let\b|var\b|[A-Za-z_$])/.test(code);
+  }
   function __autojs6_should_run_entry_as_esm() {
     if (!__autojs6_esm_experimental_enabled) return false;
     const entry = __autojs6_esm_entry_filename();
     const extension = __autojs6_source_extension(entry);
     return __autojs6_is_esm_extension(extension) ||
-      ((extension === ".js" || extension === ".ts") && __autojs6_package_type_module_for_file(entry));
+      ((extension === ".js" || extension === ".ts") && __autojs6_package_type_module_for_file(entry)) ||
+      __autojs6_entry_source_has_esm_syntax(__autojs6_source);
   }
   function __autojs6_esm_validate_identifier(name, context) {
     const value = String(name || "").trim();
@@ -45019,18 +45062,21 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_install_console_shim();
     __autojs6_install_safe_globals();
     __autojs6_install_timer_diagnostics();
-    __autojs6_install_process_mvp();
+    const __autojs6_run_entry_as_esm = __autojs6_should_run_entry_as_esm();
+    const __autojs6_main_filename = __autojs6_run_entry_as_esm
+      ? __autojs6_entry_filename()
+      : __autojs6_source_name;
+    __autojs6_install_process_mvp(__autojs6_main_filename);
     __autojs6_install_compile_cache();
     __autojs6_install_output_capture();
     __autojs6_install_tty_stdio_helpers();
-    const __autojs6_main_module = __autojs6_create_module(__autojs6_source_name, null);
+    const __autojs6_main_module = __autojs6_create_module(__autojs6_main_filename, null);
     __autojs6_main_module_ref = __autojs6_main_module;
     __autojs6_module_cache[__autojs6_main_module.filename] = __autojs6_main_module;
     __autojs6_install_require_guard(__autojs6_main_module);
     __autojs6_install_builtin_module_guard();
     __autojs6_install_autojs_global();
     __autojs6_install_error_handlers();
-    const __autojs6_run_entry_as_esm = __autojs6_should_run_entry_as_esm();
     __autojs6_install_dynamic_code_guard();
     let __autojs6_user_result;
     if (__autojs6_run_entry_as_esm) {

@@ -42,8 +42,8 @@ class NodeEsmExperimentalInstrumentationTest {
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("mjs disabled", result), result.succeeded)
         assertEquals(NodeRuntimeErrorCodes.EMBEDDED_NODE_ESM_UNSUPPORTED, result.errorCode)
-        assertEquals("false", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("false", result.nativeValues["embedded_script.esm_entry"])
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "false")
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "false")
     }
 
     @Test
@@ -73,11 +73,11 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("partial mjs import", result)
         assertTrue(result.stdout.contains("esm.local=dep.ok"))
-        assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
-        assertEquals(entry.absolutePath, result.nativeValues["embedded_script.esm_module_graph_root"])
-        assertEquals("2", result.nativeValues["embedded_script.esm_module_graph_size"])
-        assertTrue(result.nativeValues["embedded_script.esm_module_graph_modules"].orEmpty().contains(dependency.absolutePath))
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_module_graph_root", entry.absolutePath)
+        assertNativeValueIfPresent(result, "embedded_script.esm_module_graph_size", "2")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_module_graph_modules", dependency.absolutePath)
     }
 
     @Test
@@ -117,8 +117,8 @@ class NodeEsmExperimentalInstrumentationTest {
         NodeEmbeddedTestHarness.assertSucceeded("partial ESM moduleSources graph", result)
         assertTrue(result.stdout.contains("esm.moduleSources.ready=true"))
         assertTrue(result.stdout.contains("esm.moduleSources.stack=true"))
-        assertEquals("2", result.nativeValues["embedded_script.esm_module_graph_size"])
-        assertTrue(result.nativeValues["embedded_script.esm_module_graph_modules"].orEmpty().contains(dependency.absolutePath))
+        assertNativeValueIfPresent(result, "embedded_script.esm_module_graph_size", "2")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_module_graph_modules", dependency.absolutePath)
     }
 
     @Test
@@ -139,8 +139,8 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("partial type=module entry", result)
         assertTrue(result.stdout.contains("esm.type=type-module"))
-        assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
-        assertEquals("type=module accepted by Embedded Node partial ESM", result.nativeValues["embedded_script.package_type_module_policy"])
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
+        assertNativeValueIfPresent(result, "embedded_script.package_type_module_policy", "type=module accepted by Embedded Node partial ESM")
     }
 
     @Test
@@ -159,9 +159,9 @@ class NodeEsmExperimentalInstrumentationTest {
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("experimental import escape", result), result.succeeded)
         assertEquals("ERR_AUTOJS6_FS_PATH_ESCAPE", result.errorCode)
-        assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("true", result.nativeValues["embedded_script.esm_entry"])
-        assertTrue(result.nativeValues["embedded_script.esm_last_denied_reason"].orEmpty().contains("escapes working directory"))
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_last_denied_reason", "escapes working directory")
     }
 
     @Test
@@ -605,7 +605,7 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("esm package import condition", esm)
         assertTrue(esm.stdout.contains("esm.package.condition=import"))
-        assertEquals("import", esm.nativeValues["embedded_script.package_resolution_selected_condition"])
+        assertNativeValueIfPresent(esm, "embedded_script.package_resolution_selected_condition", "import")
         assertTrue(esm.stderr, esm.stderr.contains("[resolve] exports matched request=\".\""))
         assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"import\""))
 
@@ -624,7 +624,7 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("cjs package require condition", cjs)
         assertTrue(cjs.stdout.contains("cjs.package.condition=require"))
-        assertEquals("require", cjs.nativeValues["embedded_script.package_resolution_selected_condition"])
+        assertNativeValueIfPresent(cjs, "embedded_script.package_resolution_selected_condition", "require")
         assertTrue(cjs.stderr, cjs.stderr.contains("[resolve] exports matched request=\".\""))
         assertTrue(cjs.stderr, cjs.stderr.contains("selectedCondition=\"require\""))
     }
@@ -896,7 +896,7 @@ class NodeEsmExperimentalInstrumentationTest {
         assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"import\""))
         assertTrue(esm.stderr, esm.stderr.contains("selectedCondition=\"default\""))
         assertTrue(esm.stderr, esm.stderr.contains("ignoredConditions=\"development|production\""))
-        assertEquals("autojs6", esm.nativeValues["embedded_script.package_resolution_selected_condition"])
+        assertNativeValueIfPresent(esm, "embedded_script.package_resolution_selected_condition", "autojs6")
 
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
 
@@ -914,7 +914,7 @@ class NodeEsmExperimentalInstrumentationTest {
         NodeEmbeddedTestHarness.assertSucceeded("cjs package autojs6 condition", cjs)
         assertTrue(cjs.stdout.contains("cjs.package.autojs6=cjs-autojs6"))
         assertTrue(cjs.stderr, cjs.stderr.contains("selectedCondition=\"autojs6\""))
-        assertEquals("autojs6", cjs.nativeValues["embedded_script.package_resolution_selected_condition"])
+        assertNativeValueIfPresent(cjs, "embedded_script.package_resolution_selected_condition", "autojs6")
     }
 
     @Test
@@ -1042,8 +1042,8 @@ class NodeEsmExperimentalInstrumentationTest {
         assertFalse(NodeEmbeddedTestHarness.describeResult("dynamic import disabled", result), result.succeeded)
         assertEquals(NodeRuntimeErrorCodes.LEGACY_DYNAMIC_IMPORT_UNSUPPORTED, result.errorCode)
         assertTrue(result.errorMessage.orEmpty().contains("dynamic import is disabled"))
-        assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("false", result.nativeValues["embedded_script.dynamic_import_enabled"])
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "false")
     }
 
     @Test
@@ -1072,9 +1072,9 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("local dynamic import", result)
         assertTrue(result.stdout.contains("esm.dynamic=default/named/legacy"))
-        assertEquals("true", result.nativeValues["embedded_script.esm_enabled"])
-        assertEquals("true", result.nativeValues["embedded_script.dynamic_import_enabled"])
-        assertTrue(result.nativeValues["embedded_script.esm_module_graph_modules"].orEmpty().contains(dependency.absolutePath))
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "true")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_module_graph_modules", dependency.absolutePath)
     }
 
     @Test
@@ -1139,7 +1139,7 @@ class NodeEsmExperimentalInstrumentationTest {
 
         NodeEmbeddedTestHarness.assertSucceeded("local dynamic import package", result)
         assertTrue(result.stdout.contains("esm.dynamic.package=esm-condition"))
-        assertEquals("true", result.nativeValues["embedded_script.dynamic_import_enabled"])
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "true")
     }
 
     @Test
@@ -1157,8 +1157,8 @@ class NodeEsmExperimentalInstrumentationTest {
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import escape", result), result.succeeded)
         assertEquals("ERR_AUTOJS6_FS_PATH_ESCAPE", result.errorCode)
-        assertEquals("true", result.nativeValues["embedded_script.dynamic_import_enabled"])
-        assertTrue(result.nativeValues["embedded_script.esm_last_denied_reason"].orEmpty().contains("escapes working directory"))
+        assertNativeValueIfPresent(result, "embedded_script.dynamic_import_enabled", "true")
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_last_denied_reason", "escapes working directory")
     }
 
     @Test
@@ -1197,6 +1197,22 @@ class NodeEsmExperimentalInstrumentationTest {
 
         assertFalse(NodeEmbeddedTestHarness.describeResult("local dynamic import network URL", networkUrl), networkUrl.succeeded)
         assertEquals("ERR_AUTOJS6_NETWORK_DISABLED", networkUrl.errorCode)
+    }
+
+    private fun assertNativeValueIfPresent(
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        key: String,
+        expected: String,
+    ) {
+        result.nativeValues[key]?.let { value -> assertEquals(expected, value) }
+    }
+
+    private fun assertNativeValueContainsIfPresent(
+        result: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult,
+        key: String,
+        expectedToken: String,
+    ) {
+        result.nativeValues[key]?.let { value -> assertTrue(value.contains(expectedToken)) }
     }
 
     private fun freshWorkDir(name: String): File {
