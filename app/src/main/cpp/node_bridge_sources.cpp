@@ -12124,6 +12124,147 @@ std::string buildEmbeddedScriptExecutionSource(
         return this.__autojs6Pools.get(key);
       }
     }
+    function toRawHeaderValue(value) {
+      if (Array.isArray(value)) {
+        return value.map(function(item) {
+          return Buffer.from(String(item), "latin1");
+        });
+      }
+      return Buffer.from(String(value), "latin1");
+    }
+    function toRawHeaders(headers) {
+      const rawHeaders = [];
+      if (!headers || typeof headers !== "object") {
+        return rawHeaders;
+      }
+      Object.keys(headers).forEach(function(key) {
+        const value = headers[key];
+        if (value === undefined || value === null) {
+          return;
+        }
+        rawHeaders.push(Buffer.from(String(key), "latin1"), toRawHeaderValue(value));
+      });
+      return rawHeaders;
+    }
+    class LimitedDecoratorHandler {
+      constructor(handler) {
+        if (!handler || typeof handler !== "object") {
+          throw new TypeError("handler must be an object");
+        }
+        Object.defineProperties(this, {
+          __autojs6LimitedUndiciHandler: {
+            value: handler,
+            enumerable: false
+          },
+          __autojs6OnCompleteCalled: {
+            value: false,
+            writable: true,
+            enumerable: false
+          },
+          __autojs6OnErrorCalled: {
+            value: false,
+            writable: true,
+            enumerable: false
+          },
+          __autojs6OnResponseStartCalled: {
+            value: false,
+            writable: true,
+            enumerable: false
+          }
+        });
+      }
+      __autojs6AssertActive() {
+        if (this.__autojs6OnCompleteCalled) {
+          throw new Error("DecoratorHandler response already completed");
+        }
+        if (this.__autojs6OnErrorCalled) {
+          throw new Error("DecoratorHandler response already failed");
+        }
+      }
+      onRequestStart(controller, context) {
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onRequestStart === "function") {
+          return handler.onRequestStart(controller, context);
+        }
+        if (typeof handler.onConnect === "function") {
+          const abort = controller && typeof controller.abort === "function"
+            ? function(reason) { return controller.abort(reason); }
+            : function() {};
+          return handler.onConnect(abort, context);
+        }
+        return undefined;
+      }
+      onRequestUpgrade(controller, statusCode, headers, socket) {
+        this.__autojs6AssertActive();
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onRequestUpgrade === "function") {
+          return handler.onRequestUpgrade(controller, statusCode, headers, socket);
+        }
+        if (typeof handler.onUpgrade === "function") {
+          return handler.onUpgrade(statusCode, toRawHeaders(headers), socket);
+        }
+        return undefined;
+      }
+      onResponseStart(controller, statusCode, headers, statusMessage) {
+        this.__autojs6AssertActive();
+        if (this.__autojs6OnResponseStartCalled) {
+          throw new Error("DecoratorHandler response already started");
+        }
+        this.__autojs6OnResponseStartCalled = true;
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onResponseStart === "function") {
+          return handler.onResponseStart(controller, statusCode, headers, statusMessage);
+        }
+        if (typeof handler.onHeaders === "function") {
+          const resume = controller && typeof controller.resume === "function"
+            ? function() { return controller.resume(); }
+            : function() {};
+          const result = handler.onHeaders(statusCode, toRawHeaders(headers), resume, statusMessage);
+          if (result === false && controller && typeof controller.pause === "function") {
+            controller.pause();
+          }
+        }
+        return undefined;
+      }
+      onResponseData(controller, chunk) {
+        this.__autojs6AssertActive();
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onResponseData === "function") {
+          return handler.onResponseData(controller, chunk);
+        }
+        if (typeof handler.onData === "function") {
+          const result = handler.onData(chunk);
+          if (result === false && controller && typeof controller.pause === "function") {
+            controller.pause();
+          }
+        }
+        return undefined;
+      }
+      onResponseEnd(controller, trailers) {
+        this.__autojs6AssertActive();
+        this.__autojs6OnCompleteCalled = true;
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onResponseEnd === "function") {
+          return handler.onResponseEnd(controller, trailers);
+        }
+        if (typeof handler.onComplete === "function") {
+          return handler.onComplete(toRawHeaders(trailers));
+        }
+        return undefined;
+      }
+      onResponseError(controller, error) {
+        this.__autojs6OnErrorCalled = true;
+        const handler = this.__autojs6LimitedUndiciHandler;
+        if (typeof handler.onResponseError === "function") {
+          return handler.onResponseError(controller, error);
+        }
+        if (typeof handler.onError === "function") {
+          return handler.onError(error);
+        }
+        throw error;
+      }
+      onBodySent() {}
+    }
     const defaultDispatcher = new LimitedAgent({});
     let globalDispatcher = defaultDispatcher;
     function validateFetchInit(init) {
@@ -12173,7 +12314,8 @@ std::string buildEmbeddedScriptExecutionSource(
       LimitedAgent,
       LimitedMockAgent,
       LimitedMockPool,
-      LimitedMockInterceptor
+      LimitedMockInterceptor,
+      LimitedDecoratorHandler
     ].forEach(function(ctor) {
       Object.freeze(ctor.prototype);
       Object.freeze(ctor);
@@ -12190,6 +12332,7 @@ std::string buildEmbeddedScriptExecutionSource(
       Dispatcher: { value: LimitedDispatcher, enumerable: true },
       Agent: { value: LimitedAgent, enumerable: true },
       MockAgent: { value: LimitedMockAgent, enumerable: true },
+      DecoratorHandler: { value: LimitedDecoratorHandler, enumerable: true },
       setGlobalDispatcher: { value: setGlobalDispatcher, enumerable: true },
       getGlobalDispatcher: { value: getGlobalDispatcher, enumerable: true },
       connect: { value: deniedConnector("connect"), enumerable: true },

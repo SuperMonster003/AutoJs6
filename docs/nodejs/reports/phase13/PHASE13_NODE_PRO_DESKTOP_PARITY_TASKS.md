@@ -1493,6 +1493,10 @@ P13 task 本身使用以下执行状态：
       已有专用字段的大块重复内容，并对剩余 native payload 应用
       512 项 / 65536 字符预算，避免 `cheerio` / `jsdom` 这类真实
       npm 依赖的大失败 envelope 触发 Android Binder 事务过大。
+    - `require("undici").DecoratorHandler` 现在暴露可继承的 shape-only
+      handler delegate，支持 jsdom `decompress-interceptor` 的
+      `super.onResponse*()` 调用和旧 `onHeaders` / `onData` /
+      `onComplete` 委托，同时保持 raw Undici dispatcher / socket 管线拒绝。
     - 已新增 `NodeStdlibPhase13DecisionInstrumentationTest`，覆盖
       `crypto`、`stream` / `stream/promises` / `stream/consumers` /
       `stream/web`、`zlib`、`buffer`、`url`、`os`、`readline` /

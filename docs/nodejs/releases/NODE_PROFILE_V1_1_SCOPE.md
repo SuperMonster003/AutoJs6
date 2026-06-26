@@ -72,7 +72,7 @@ small set of already-gated features toward practical use.
 | HTTPS client facade policy | experimental controlled client | HTTPS uses the same controlled client facade while keeping certificate validation provider-owned; `rejectUnauthorized=false`, custom TLS/OpenSSL context, client certificate fields, request-level `createConnection`, and unsafe agent TLS options are rejected, with pinning/client certificates left design-gated. |
 | HTTP stream semantics | experimental controlled client | `ClientRequest` and `IncomingMessage` stream compatibility now has focused coverage for writable request chunks, readable `data`/`end`/`close`, `pipe()` backpressure smoke, request-level `AbortSignal`, `maxResponseBytes`, service-destroy cancellation, and pending cleanup without exposing raw sockets. |
 | HTTP Agent facade | experimental controlled client | `http.Agent` and `https.Agent` expose only a limited compatibility shape for safe option fields, `getName()`, and `destroy()`; custom `createConnection`, `addRequest`, and `socketPath` paths reject without exposing raw socket pools. |
-| Undici facade | experimental controlled client | `require("undici")` is reserved and exposes controlled-fetch-backed `fetch()` / `request()`, Web Platform constructors, and shape-only `Dispatcher` / `Agent` / `MockAgent` helpers while denying raw connectors, dispatcher injection, socket/proxy/tunnel options, upgrades, streams, and local shadowing. |
+| Undici facade | experimental controlled client | `require("undici")` is reserved and exposes controlled-fetch-backed `fetch()` / `request()`, Web Platform constructors, and shape-only `Dispatcher` / `Agent` / `MockAgent` / `DecoratorHandler` helpers while denying raw connectors, dispatcher injection, socket/proxy/tunnel options, upgrades, streams, and local shadowing. |
 | HTTP npm corpus | compatibility evidence | Six offline npm-shaped fixtures cover packages using `http.get()`, `https.request()`, `IncomingMessage` stream consumption, form-style POST bodies, request-level `AbortSignal`, and safe Agent options through the controlled client facade. |
 | Controlled axios | experimental | `require("axios")` exposes an AutoJs6-owned fetch-backed compatibility adapter for `get`/`post`/`request`, `baseURL`, params, headers, timeout, response types, and Axios-like errors while denying custom adapter/agent/proxy/raw transport paths. |
 | WebSocket | experimental | Controlled bridge surface covers connect, send/receive text and binary messages, close/error events, handler properties, listener aliases, bounded queue/message policy, service-destroy cleanup, and raw socket denial; live provider remains default-off. |
@@ -171,9 +171,10 @@ small set of already-gated features toward practical use.
   fail-closed denial for custom connector and `socketPath` options.
 - Controlled Undici facade smoke passes for reserved `require("undici")`,
   controlled `fetch()` / `request()`, Web Platform constructor reuse,
-  `Dispatcher` / `Agent` / `MockAgent` safe shapes, global dispatcher
-  validation, local shadow denial, request permission tagging, pending cleanup,
-  and fail-closed denial for raw connectors, dispatcher injection,
+  `Dispatcher` / `Agent` / `MockAgent` safe shapes, `DecoratorHandler`
+  callback delegation, global dispatcher validation, local shadow denial,
+  request permission tagging, pending cleanup, and fail-closed denial for raw
+  connectors, dispatcher injection,
   socket/proxy/tunnel options, upgrades, streams, and direct dispatch.
 - HTTP npm corpus smoke passes for offline fixtures using `http.get()`,
   `https.request()`, `IncomingMessage` `data` / `end`, form-style POST

@@ -130,7 +130,7 @@ The Undici-shaped facade supports:
   trailers, opaque, and context fields
 - Web Platform constructor reuse for `Headers`, `Request`, `Response`,
   `FormData`, and `File`
-- shape-only `Dispatcher`, `Agent`, and `MockAgent`
+- shape-only `Dispatcher`, `Agent`, `MockAgent`, and `DecoratorHandler`
 - stable denial for dispatcher injection, custom `connect` / `factory`,
   `socketPath`, proxy/tunnel options, raw `connect`, `upgrade`, `stream`,
   `pipeline`, and direct `dispatch()`

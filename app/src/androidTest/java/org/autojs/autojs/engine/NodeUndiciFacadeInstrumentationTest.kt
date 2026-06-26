@@ -122,6 +122,82 @@ class NodeUndiciFacadeInstrumentationTest {
                         .persist()
                         .delay(1);
 
+                      const decoratorEvents = [];
+                      class JsdomLikeDecompressHandler extends undici.DecoratorHandler {
+                        onRequestStart(controller, context) {
+                          return super.onRequestStart(controller, context);
+                        }
+                        onResponseStart(controller, statusCode, headers, statusMessage) {
+                          return super.onResponseStart(controller, statusCode, headers, statusMessage);
+                        }
+                        onResponseData(controller, chunk) {
+                          return super.onResponseData(controller, chunk);
+                        }
+                        onResponseEnd(controller, trailers) {
+                          return super.onResponseEnd(controller, trailers);
+                        }
+                      }
+                      const decorator = new JsdomLikeDecompressHandler({
+                        onRequestStart(controller, context) {
+                          decoratorEvents.push("request:" + context.kind);
+                          return "request";
+                        },
+                        onResponseStart(controller, statusCode, headers, statusMessage) {
+                          decoratorEvents.push("start:" + statusCode + ":" + statusMessage);
+                          return "started";
+                        },
+                        onResponseData(controller, chunk) {
+                          decoratorEvents.push("data:" + chunk.toString());
+                          return false;
+                        },
+                        onResponseEnd(controller, trailers) {
+                          decoratorEvents.push("end:" + Object.keys(trailers).length);
+                          return "ended";
+                        }
+                      });
+                      const decoratorRequest = decorator.onRequestStart({}, { kind: "new" });
+                      const decoratorStart = decorator.onResponseStart({}, 200, { "content-type": "text/plain" }, "OK");
+                      const decoratorData = decorator.onResponseData({}, Buffer.from("x"));
+                      const decoratorEnd = decorator.onResponseEnd({}, { "x-trailer": "done" });
+
+                      const oldEvents = [];
+                      const oldController = {
+                        paused: false,
+                        pause() {
+                          oldEvents.push("pause");
+                          this.paused = true;
+                        },
+                        resume() {
+                          oldEvents.push("resume");
+                          this.paused = false;
+                        },
+                        abort(reason) {
+                          oldEvents.push("abort:" + reason);
+                        }
+                      };
+                      const oldDecorator = new undici.DecoratorHandler({
+                        onConnect(abort, context) {
+                          oldEvents.push("connect:" + context.kind);
+                          abort("stop");
+                        },
+                        onHeaders(statusCode, rawHeaders, resume, statusMessage) {
+                          oldEvents.push("headers:" + statusCode + ":" + statusMessage + ":" + rawHeaders.length);
+                          resume();
+                          return false;
+                        },
+                        onData(chunk) {
+                          oldEvents.push("data:" + chunk.toString());
+                          return false;
+                        },
+                        onComplete(rawTrailers) {
+                          oldEvents.push("complete:" + rawTrailers.length);
+                        }
+                      });
+                      oldDecorator.onRequestStart(oldController, { kind: "old" });
+                      oldDecorator.onResponseStart(oldController, 202, { "x-old": "yes" }, "Accepted");
+                      oldDecorator.onResponseData(oldController, Buffer.from("legacy"));
+                      oldDecorator.onResponseEnd(oldController, { "x-trailer": "done" });
+
                       const denialCodes = [
                         syncCode(() => new undici.Agent({ connect() {} })),
                         syncCode(() => new undici.Agent({ factory() {} })),
@@ -178,6 +254,19 @@ class NodeUndiciFacadeInstrumentationTest {
                         interceptor.remaining,
                         interceptor.persisted
                       ].join("|"));
+                      console.log("undici.decorator=" + [
+                        typeof undici.DecoratorHandler,
+                        Object.isFrozen(undici.DecoratorHandler),
+                        Object.isFrozen(undici.DecoratorHandler.prototype),
+                        decorator instanceof undici.DecoratorHandler,
+                        decoratorRequest,
+                        decoratorStart,
+                        decoratorData,
+                        decoratorEnd,
+                        decoratorEvents.join(","),
+                        oldController.paused,
+                        oldEvents.join(",")
+                      ].join("|"));
                       console.log("undici.denials=" + denialCodes.join("|"));
                       console.log("undici.requests=" + requests.map((request) => {
                         const payload = request.args[0];
@@ -204,6 +293,12 @@ class NodeUndiciFacadeInstrumentationTest {
             assertTrue(
                 result.stdout,
                 result.stdout.contains("undici.mock=true|true|true|https://mock.invalid|1|200|mock-ok|2|true"),
+            )
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "undici.decorator=function|true|true|true|request|started|false|ended|request:new,start:200:OK,data:x,end:1|true|connect:old,abort:stop,headers:202:Accepted:2,resume,pause,data:legacy,pause,complete:2",
+                ),
             )
             assertTrue(
                 result.stdout,

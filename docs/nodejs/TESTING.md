@@ -495,6 +495,7 @@ Focused controlled Undici facade instrumentation:
 This S8-25 gate verifies the reserved `require("undici")` compatibility
 facade. It covers controlled `fetch()` / `request()` dispatch, Web Platform
 constructor reuse, `Dispatcher` / `Agent` / `MockAgent` safe shapes,
+`DecoratorHandler` jsdom-style callback delegation,
 `setGlobalDispatcher()` / `getGlobalDispatcher()` validation, local
 `node_modules/undici` shadow denial, bridge permission tagging, pending
 cleanup, and fail-closed denial for raw connectors, dispatcher injection,

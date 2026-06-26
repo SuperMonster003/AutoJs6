@@ -23,6 +23,9 @@ raw connector, socket, proxy, upgrade, and pipeline paths remain unavailable.
   exposed by the runtime
 - `Dispatcher`, `Agent`, and `MockAgent` expose safe package-compatibility
   shapes without opening sockets
+- `DecoratorHandler` exposes a subclassable, shape-only handler delegate for
+  npm compatibility, including jsdom-style `super.onResponse*()` calls and
+  legacy `onHeaders` / `onData` / `onComplete` delegation
 - `setGlobalDispatcher()` and `getGlobalDispatcher()` accept only AutoJs6
   limited dispatcher instances
 - `MockAgent.disableNetConnect()`, `get()`, `intercept()`, `reply()`,
@@ -64,6 +67,8 @@ S8-25 keeps Undici as a controlled facade:
 - `Dispatcher`, `Agent`, and `MockAgent` are shape-only compatibility objects;
   they do not own sockets, native handles, DNS lookup, TLS sessions, pools, or
   Android provider resources
+- `DecoratorHandler` is also shape-only and only delegates handler callbacks
+  inside the controlled facade
 - raw `connect`, `upgrade`, `stream`, and `pipeline` APIs remain denied
 - raw dispatcher injection, custom `connect` / `factory`, `socketPath`, proxy,
   and tunnel options remain denied

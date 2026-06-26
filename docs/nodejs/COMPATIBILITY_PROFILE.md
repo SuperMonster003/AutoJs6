@@ -1613,9 +1613,11 @@ Declared capability names:
 
 - `toast`
 - `app`, `app.launch`, `app.settings`, `app.activity`
+- `barcode`
 - `dialogs`
 - `engines`, `engines.exec`
 - `accessibility`
+- `input_observer`, `input_observer.keys`, `input_observer.touch`, `input_observer.intercept`
 - `screen_capture` (`media_projection` is accepted as an alias)
 - `image`
 - `ocr`
@@ -1674,6 +1676,14 @@ runtime.
     `category`/`categories`, numeric flag arrays, and primitive extras, while
     broadcast sending, root/Shizuku/dual-user routes, raw Android objects,
     installed-app lookup policy, and packaged app smoke remain blocked.
+- `barcode` / `qrcode`
+  - `detect(imageOrPath, options?): Promise<BarcodeSnapshot | null>`
+  - `detectAll(imageOrPath, options?): Promise<readonly BarcodeSnapshot[]>`
+  - `recognizeText(imageOrPath, options?): Promise<string | null>`
+  - `recognizeTexts(imageOrPath, options?): Promise<readonly string[]>`
+  - requests require `barcode` and `image` capabilities because the provider consumes image handles or scoped image paths
+  - JavaScript receives frozen JSON barcode snapshots only; no raw ML Kit barcode, Bitmap, ImageWrapper, or Android object crosses into Node
+  - current Android provider uses ML Kit barcode scanning when available and reports active operation cleanup through bridge diagnostics
 - `engines`
   - `myEngine(): EngineInfo`
   - `all(options?): Promise<EngineInfo[]>`
@@ -1736,6 +1746,14 @@ runtime.
   - the focused accessibility/image gate launches a controlled Activity and exercises real selector `findOne`/`click` only when the service is already enabled; it does not modify device accessibility settings
   - when an accessibility provider is unavailable in the current process, including isolated embedded service processes that cannot see the main-process service instance, `isEnabled`/`ensureEnabled` return `false` and action/query methods reject with `ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED`
   - P13-19 records the current accessibility selector promotion state as partial: direct `accessibility` and explicit `autojs6:compat` selector handles are covered by host/device/type evidence, while `swipe`, `gesture`, `powerDialog`, direct `waitFor`, broader Rhino selector aliases, packaged service/settings lifecycle, expanded real-device evidence, and root/Shizuku gesture tiers remain blocked
+- `input_observer`
+  - `getAvailableSources(options?): Promise<readonly string[]>`
+  - `observeKeys(descriptor, options?): Promise<InputObserverSubscription>`
+  - `InputObserverSubscription.drainEvents(options?): Promise<readonly InputObserverEvent[]>`
+  - `InputObserverSubscription.close(options?): Promise<boolean>`
+  - requests require `input_observer`; key observation also requires `input_observer.keys`
+  - current live source is bounded key observation through the accessibility-backed provider; touch observation and interception remain design-gated behind `input_observer.touch` and `input_observer.intercept`
+  - event delivery uses bounded `drainEvents` JSON snapshots and provider-owned subscription handles that are closed on execution destroy
 - `media_projection`
   - `requestScreenCapture(options?): Promise<ScreenCapturer>`
   - `ScreenCapturer.nextImage(options?): Promise<Image | null>`
@@ -1963,6 +1981,7 @@ runtime.
   - `fetch(input, init?): Promise<Response>` and `request(input, init?): Promise<{ statusCode: number, status: number, statusText: string, headers: object, body: ReadableStream | null, trailers: object, opaque: null, context: null }>` through reserved `require("undici")`
   - reuses runtime Web Platform constructors for `Headers`, `Request`, `Response`, `FormData`, and `File`
   - `Dispatcher`, `Agent`, and `MockAgent` expose only safe package-compatibility shapes; `MockAgent` helpers such as `disableNetConnect()`, `get()`, `intercept()`, `reply()`, `times()`, `persist()`, and `delay()` do not intercept real network traffic
+  - `DecoratorHandler` exposes a shape-only, subclassable handler delegate for npm packages such as `jsdom`; it forwards new handler callbacks and legacy `onHeaders` / `onData` / `onComplete` methods without opening raw Undici dispatch
   - `setGlobalDispatcher()` accepts only AutoJs6 limited dispatcher instances, and `getGlobalDispatcher()` returns that limited facade object
   - `connect()`, `upgrade()`, `stream()`, `pipeline()`, direct `dispatch()`, raw dispatcher injection, custom `connect` / `factory`, `socketPath`, proxy, and tunnel options reject with `ERR_AUTOJS6_NETWORK_POLICY_DENIED`
   - backed by controlled fetch only; local `node_modules/undici` cannot shadow it, and raw network modules remain denied
