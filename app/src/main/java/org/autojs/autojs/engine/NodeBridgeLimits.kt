@@ -15,7 +15,7 @@ object NodeBridgeLimits {
         "maxPendingBridgeCalls" to LimitField(defaultValue = 32, minValue = 1, hardMax = 128),
         "maxImageHandles" to LimitField(defaultValue = 32, minValue = 0, hardMax = 128),
         "maxShellCommands" to LimitField(defaultValue = 2, minValue = 0, hardMax = 4),
-        "maxNetworkRequests" to LimitField(defaultValue = 4, minValue = 0, hardMax = 8),
+        "maxNetworkRequests" to LimitField(defaultValue = 16, minValue = 0, hardMax = 32),
         "maxWebSocketConnections" to LimitField(defaultValue = 2, minValue = 0, hardMax = 4),
         "accessibilityQueriesPerSecond" to LimitField(defaultValue = 20, minValue = 1, hardMax = 60),
     )

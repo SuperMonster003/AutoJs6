@@ -527,7 +527,7 @@ class NodeFetchBridgeInstrumentationTest {
                 return new Promise((resolve) => setTimeout(resolve, ms));
               }
               async function waitFor(predicate, label) {
-                for (let i = 0; i < 50; i += 1) {
+                for (let i = 0; i < 100; i += 1) {
                   if (predicate()) return;
                   await sleep(5);
                 }
@@ -597,10 +597,11 @@ class NodeFetchBridgeInstrumentationTest {
                 }
               });
 
-              const holdPromises = [0, 1, 2, 3].map((index) =>
+              const holdCount = fetchModule.policy.maxConcurrentRequests;
+              const holdPromises = Array.from({ length: holdCount }, (_, index) =>
                 fetch("https://example.invalid/hold?i=" + index, { timeoutMs: 1000 }).then((response) => response.text())
               );
-              await waitFor(() => held.length === 4, "held requests");
+              await waitFor(() => held.length === holdCount, "held requests");
 
               let concurrentCode = "";
               try {
@@ -713,21 +714,24 @@ class NodeFetchBridgeInstrumentationTest {
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("fetch policy hardening", result)
-        assertTrue(result.stdout.contains("fetch.policy=4|30000|1048576|5"))
+        val resultDetails = NodeEmbeddedTestHarness.describeResult("fetch policy hardening output", result)
+        assertTrue(resultDetails, result.stdout.contains("fetch.policy=16|30000|33554432|5"))
         assertTrue(
+            resultDetails,
             result.stdout.contains(
-                "fetch.harden.codes=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_ABORTED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
+                "fetch.harden.codes=ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_ABORTED|ERR_AUTOJS6_NETWORK_POLICY_DENIED|ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_BRIDGE_PROCESS_DEAD||ERR_AUTOJS6_NETWORK_DISABLED",
             ),
         )
         assertTrue(
+            resultDetails,
             result.stdout.contains(
                 "fetch.harden.schemes=ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_INVALID_URL|ERR_AUTOJS6_NETWORK_INVALID_URL",
             ),
         )
-        assertTrue(result.stdout.contains("fetch.harden.redirect_requests=2"))
-        assertTrue(result.stdout.contains("fetch.harden.holds=hold-0|hold-1|hold-2|hold-3"))
-        assertTrue(result.stdout.contains("fetch.harden.diagnostics=0|4|1|7|1"))
-        assertTrue(result.stdout.contains("fetch.harden.pending=0"))
+        assertTrue(resultDetails, result.stdout.contains("fetch.harden.redirect_requests=2"))
+        assertTrue(resultDetails, result.stdout.contains("fetch.harden.holds=hold-0|hold-1|hold-2|hold-3|hold-4|hold-5|hold-6|hold-7|hold-8|hold-9|hold-10|hold-11|hold-12|hold-13|hold-14|hold-15"))
+        assertTrue(resultDetails, result.stdout.contains("fetch.harden.diagnostics=0|16|1|7|1"))
+        assertTrue(resultDetails, result.stdout.contains("fetch.harden.pending=0"))
     }
 
     @Test

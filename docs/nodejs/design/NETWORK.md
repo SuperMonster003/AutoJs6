@@ -79,7 +79,7 @@ User-facing entries:
 const response = await fetch("https://example.com/data.json", {
   method: "GET",
   timeoutMs: 30000,
-  maxResponseBytes: 1048576,
+  maxResponseBytes: 33554432,
   maxRedirects: 5,
   signal: abortController.signal,
 });
@@ -94,7 +94,7 @@ const response = await fetch("https://example.com/data.json", {
   body: JSON.stringify({ ok: true }),
   headers: { "content-type": "application/json" },
   timeoutMs: 30000,
-  maxResponseBytes: 1048576,
+  maxResponseBytes: 33554432,
   maxRedirects: 5,
 });
 ```
@@ -170,11 +170,11 @@ Normal builds still reject at provider entry because `BuildConfig.NODEJS_NETWORK
 
 Controlled fetch is bounded before it reaches any raw network authority. Current policy:
 
-- max concurrent user fetches per script: `4`
+- max concurrent user fetches per script: `16`
 - default timeout: `30000` ms
 - hard timeout cap: `120000` ms
-- default max response body: `1048576` bytes
-- hard max response body: `16777216` bytes
+- default max response body: `33554432` bytes
+- hard max response body: `67108864` bytes
 - default redirect count: `5`
 - hard redirect count: `10`
 - allowed URL schemes: `http:` and `https:` only
@@ -303,8 +303,8 @@ network responses remain deferred to a later design gate.
 
 Recommended defaults:
 
-- default max response body: `1048576` bytes
-- hard max response body: `16777216` bytes
+- default max response body: `33554432` bytes
+- hard max response body: `67108864` bytes
 - request body budget documented separately before uploads are enabled
 
 Responses exceeding the active budget reject with `ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE` before returning partial data to user code.

@@ -5428,11 +5428,11 @@ private fun JSONArray.optIntOrNull(index: Int): Int? {
 }
 
 private object ControlledFetchPolicy {
-    const val MAX_CONCURRENT_REQUESTS = 4
+    const val MAX_CONCURRENT_REQUESTS = 16
     const val DEFAULT_TIMEOUT_MS = 30_000L
     const val HARD_TIMEOUT_MS = 120_000L
-    const val DEFAULT_MAX_RESPONSE_BYTES = 1_048_576L
-    const val HARD_MAX_RESPONSE_BYTES = 16_777_216L
+    const val DEFAULT_MAX_RESPONSE_BYTES = 33_554_432L
+    const val HARD_MAX_RESPONSE_BYTES = 67_108_864L
     const val DEFAULT_MAX_REDIRECTS = 5
     const val HARD_MAX_REDIRECTS = 10
 }

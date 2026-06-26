@@ -8674,8 +8674,8 @@ std::string buildEmbeddedScriptExecutionSource(
     maxConcurrentRequests: __autojs6_bridge_limits_policy().maxNetworkRequests,
     defaultTimeoutMs: 30000,
     hardTimeoutMs: 120000,
-    defaultMaxResponseBytes: 1048576,
-    hardMaxResponseBytes: 16777216,
+    defaultMaxResponseBytes: 33554432,
+    hardMaxResponseBytes: 67108864,
     defaultMaxRedirects: 5,
     hardMaxRedirects: 10,
     allowedSchemes: Object.freeze(["http:", "https:"])
@@ -10773,7 +10773,7 @@ std::string buildEmbeddedScriptExecutionSource(
       maxPendingBridgeCalls: 32,
       maxImageHandles: 32,
       maxShellCommands: 2,
-      maxNetworkRequests: 4,
+      maxNetworkRequests: 16,
       maxWebSocketConnections: 2,
       accessibilityQueriesPerSecond: 20
     });
@@ -10783,7 +10783,7 @@ std::string buildEmbeddedScriptExecutionSource(
       maxPendingBridgeCalls: 128,
       maxImageHandles: 128,
       maxShellCommands: 4,
-      maxNetworkRequests: 8,
+      maxNetworkRequests: 32,
       maxWebSocketConnections: 4,
       accessibilityQueriesPerSecond: 60
     });
@@ -37578,8 +37578,8 @@ std::string buildEmbeddedScriptExecutionSource(
     __autojs6_limited_stream_consumers_cache = Object.freeze(limitedConsumers);
     return __autojs6_limited_stream_consumers_cache;
   }
-  const __autojs6_zlib_input_limit = 512 * 1024;
-  const __autojs6_zlib_output_limit = 2 * 1024 * 1024;
+  const __autojs6_zlib_input_limit = 8 * 1024 * 1024;
+  const __autojs6_zlib_output_limit = 32 * 1024 * 1024;
   function __autojs6_binary_like_size(value) {
     if (typeof value === "string") {
       return Buffer.byteLength(value);
@@ -44089,19 +44089,21 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_regex_literal_allowed(previous) {
     return !previous || "([{=:;,!&|?+-*~^<>".indexOf(previous) >= 0;
   }
-  let __autojs6_unicode_identifier_regex_supported_cache = undefined;
-  function __autojs6_unicode_identifier_regex_supported() {
-    if (__autojs6_unicode_identifier_regex_supported_cache !== undefined) {
-      return __autojs6_unicode_identifier_regex_supported_cache;
+  let __autojs6_unicode_property_regex_supported_cache = undefined;
+  function __autojs6_unicode_property_regex_supported() {
+    if (__autojs6_unicode_property_regex_supported_cache !== undefined) {
+      return __autojs6_unicode_property_regex_supported_cache;
     }
     try {
       new RegExp("\\p{ID_Start}", "u");
       new RegExp("\\p{ID_Continue}", "u");
-      __autojs6_unicode_identifier_regex_supported_cache = true;
+      new RegExp("\\p{ASCII}", "u");
+      new RegExp("\\P{ASCII}", "u");
+      __autojs6_unicode_property_regex_supported_cache = true;
     } catch (_) {
-      __autojs6_unicode_identifier_regex_supported_cache = false;
+      __autojs6_unicode_property_regex_supported_cache = false;
     }
-    return __autojs6_unicode_identifier_regex_supported_cache;
+    return __autojs6_unicode_property_regex_supported_cache;
   }
   function __autojs6_regex_literal_close_index(text, start) {
     let escaped = false;
@@ -44142,21 +44144,44 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return end;
   }
-  function __autojs6_rewrite_unicode_identifier_regex_literal(literal) {
+  function __autojs6_unicode_property_regex_replacement(token, inClass) {
+    if (token === "\\p{ID_Start}") {
+      return inClass ? "A-Za-z" : "[A-Za-z]";
+    }
+    if (token === "\\p{ID_Continue}") {
+      return inClass ? "0-9A-Za-z" : "[0-9A-Za-z]";
+    }
+    if (token === "\\p{ASCII}") {
+      return inClass ? "\\x00-\\x7F" : "[\\x00-\\x7F]";
+    }
+    if (token === "\\P{ASCII}") {
+      return inClass ? "\\x80-\\uFFFF" : "[\\x80-\\uFFFF]";
+    }
+    return null;
+  }
+  function __autojs6_source_needs_unicode_property_regex_rewrite(text) {
+    return text.indexOf("\\p{ID_") >= 0 ||
+      text.indexOf("\\p{ASCII}") >= 0 ||
+      text.indexOf("\\P{ASCII}") >= 0;
+  }
+  function __autojs6_rewrite_unicode_property_regex_literal(literal) {
     const close = __autojs6_regex_literal_close_index(literal, 0);
     if (close < 0) return literal;
     const body = literal.slice(1, close);
     let rewritten = "";
     let inClass = false;
     for (let index = 0; index < body.length; index += 1) {
-      if (body.slice(index, index + 12) === "\\p{ID_Start}") {
-        rewritten += inClass ? "A-Za-z" : "[A-Za-z]";
-        index += 11;
-        continue;
+      const replacementTokens = ["\\p{ID_Start}", "\\p{ID_Continue}", "\\p{ASCII}", "\\P{ASCII}"];
+      let replaced = false;
+      for (const token of replacementTokens) {
+        if (body.slice(index, index + token.length) === token) {
+          rewritten += __autojs6_unicode_property_regex_replacement(token, inClass);
+          index += token.length - 1;
+          replaced = true;
+          break;
+        }
       }
-      if (body.slice(index, index + 15) === "\\p{ID_Continue}") {
-        rewritten += inClass ? "0-9A-Za-z" : "[0-9A-Za-z]";
-        index += 14;
+      if (replaced) {
         continue;
       }
       const ch = body.charAt(index);
@@ -44176,7 +44201,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_transform_unsupported_unicode_identifier_regex_literals(source) {
     const text = String(source || "");
-    if (text.indexOf("\\p{ID_") < 0 || __autojs6_unicode_identifier_regex_supported()) {
+    if (!__autojs6_source_needs_unicode_property_regex_rewrite(text) || __autojs6_unicode_property_regex_supported()) {
       return text;
     }
     let output = "";
@@ -44245,9 +44270,9 @@ std::string buildEmbeddedScriptExecutionSource(
         const end = __autojs6_regex_literal_end_index(text, index);
         if (end > index) {
           const literal = text.slice(index, end);
-          if (literal.indexOf("\\p{ID_") >= 0) {
+          if (__autojs6_source_needs_unicode_property_regex_rewrite(literal)) {
             output += text.slice(cursor, index);
-            output += __autojs6_rewrite_unicode_identifier_regex_literal(literal);
+            output += __autojs6_rewrite_unicode_property_regex_literal(literal);
             cursor = end;
           }
           index = end - 1;

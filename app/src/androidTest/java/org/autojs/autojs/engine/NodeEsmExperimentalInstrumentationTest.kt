@@ -210,10 +210,16 @@ class NodeEsmExperimentalInstrumentationTest {
             source = """
                 const parserLike = /^(async)*\s*(?:[_\p{ID_Start}])(?:[\u200C\u200D\p{ID_Continue}])*\s*=>/u;
                 const literalText = "\\p{ID_Start}";
+                const nonAscii = String.fromCharCode(0x00E9);
+                const selectorLike = /\[\s*(?:(?<namespace>\*|[-\w\P{ASCII}]*)\|)?(?<name>[-\w\P{ASCII}]+)\s*(?:(?<operator>\W?=)\s*(?<value>.+?)\s*(\s(?<caseSensitive>[iIsS]))?\s*)?\]/gu;
+                const selectorMatch = selectorLike.exec("[svg|caf" + nonAscii + "=value i]");
                 console.log("esm.unicode.regex=" + [
                   parserLike.test("value=>"),
                   parserLike.test("async value =>"),
-                  literalText
+                  literalText,
+                  selectorMatch && selectorMatch.groups.namespace,
+                  selectorMatch && selectorMatch.groups.name,
+                  selectorMatch && selectorMatch.groups.caseSensitive
                 ].join("|"));
             """.trimIndent(),
             sourceName = entry.absolutePath,
@@ -221,7 +227,8 @@ class NodeEsmExperimentalInstrumentationTest {
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("partial ESM unicode identifier regex fallback", result)
-        assertTrue(result.stdout.contains("""esm.unicode.regex=true|true|\p{ID_Start}"""))
+        assertTrue(result.stdout.contains("""esm.unicode.regex=true|true|\p{ID_Start}|svg|caf"""))
+        assertTrue(result.stdout.contains("|i"))
     }
 
     @Test

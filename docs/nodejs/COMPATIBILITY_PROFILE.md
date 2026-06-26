@@ -1098,9 +1098,9 @@ root reruns, Android unsupported behavior notes, and final full `fs` semantics.
 
 The controlled request policy is bounded even when fake or experimental live providers are used:
 
-- max concurrent user fetches: `4`
+- max concurrent user fetches: `16`
 - default timeout: `30000` ms, hard cap `120000` ms
-- default response budget: `1048576` bytes, hard cap `16777216` bytes
+- default response budget: `33554432` bytes, hard cap `67108864` bytes
 - default redirect budget: `5`, hard cap `10`
 - allowed URL schemes: `http:` and `https:` only
 - `file:`, `content:`, `about:`, `data:`, malformed URLs, and redirect targets outside `http:`/`https:` are rejected before raw network authority is reached
@@ -1649,7 +1649,7 @@ Default bridge limits:
 - `maxPendingBridgeCalls`: `32`, hard max `128`
 - `maxImageHandles`: `32`, hard max `128`
 - `maxShellCommands`: `2`, hard max `4`
-- `maxNetworkRequests`: `4`, hard max `8`
+- `maxNetworkRequests`: `16`, hard max `32`
 - `maxWebSocketConnections`: `2`, hard max `4`
 - `accessibilityQueriesPerSecond`: `20`, hard max `60`
 

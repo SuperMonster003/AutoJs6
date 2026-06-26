@@ -84,6 +84,8 @@ class NodeZlibBufferInstrumentationTest {
 
                   const gzip = zlib.gzipSync(Buffer.from("gzip-value"));
                   assert.strictEqual(zlib.gunzipSync(gzip).toString("utf8"), "gzip-value");
+                  const largePayload = Buffer.alloc(3 * 1024 * 1024, 65);
+                  assert.strictEqual(zlib.gunzipSync(zlib.gzipSync(largePayload)).length, largePayload.length);
 
                   const deflated = zlib.deflateSync(Buffer.from("deflate-value"));
                   assert.strictEqual(zlib.inflateSync(deflated).toString("utf8"), "deflate-value");

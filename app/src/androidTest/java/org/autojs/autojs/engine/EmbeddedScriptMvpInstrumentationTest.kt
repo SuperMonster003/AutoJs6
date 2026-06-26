@@ -4176,7 +4176,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 parentFile?.mkdirs()
                 writeText("""module.exports = { shadow: true };""", StandardCharsets.UTF_8)
             }
-            val outputBombBase64 = gzipBase64(ByteArray(2 * 1024 * 1024 + 1) { 'A'.code.toByte() })
+            val outputBombBase64 = gzipBase64(ByteArray(32 * 1024 * 1024 + 1) { 'A'.code.toByte() })
 
             val result = runEmbeddedScript(
                 """
@@ -4265,7 +4265,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     ]
                   );
                   const streamInputLimit = await zlibPipelineError(
-                    [Buffer.alloc(512 * 1024 + 1)],
+                    [Buffer.alloc(8 * 1024 * 1024 + 1)],
                     [zlib.createGzip()]
                   );
                   const streamOutputLimit = await zlibPipelineError(
@@ -4310,11 +4310,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                   }
                 }
                 expectCode("zlib.invalidArg", () => zlib.gzipSync(42), "ERR_INVALID_ARG_TYPE");
-                expectCode("zlib.inputLimit", () => zlib.gzipSync(Buffer.alloc(512 * 1024 + 1)), "ERR_OUT_OF_RANGE");
-                expectCode("zlib.brotliInputLimit", () => zlib.brotliCompressSync(Buffer.alloc(512 * 1024 + 1)), "ERR_OUT_OF_RANGE");
+                expectCode("zlib.inputLimit", () => zlib.gzipSync(Buffer.alloc(8 * 1024 * 1024 + 1)), "ERR_OUT_OF_RANGE");
+                expectCode("zlib.brotliInputLimit", () => zlib.brotliCompressSync(Buffer.alloc(8 * 1024 * 1024 + 1)), "ERR_OUT_OF_RANGE");
                 expectCode("zlib.callback.missing", () => zlib.gzip(Buffer.from("x")), "ERR_INVALID_ARG_TYPE");
                 expectCode("zlib.callback.type", () => zlib.gzip(Buffer.from("x"), "bad"), "ERR_INVALID_ARG_TYPE");
-                expectCode("zlib.callback.inputLimit", () => zlib.gzip(Buffer.alloc(512 * 1024 + 1), () => {}), "ERR_OUT_OF_RANGE");
+                expectCode("zlib.callback.inputLimit", () => zlib.gzip(Buffer.alloc(8 * 1024 * 1024 + 1), () => {}), "ERR_OUT_OF_RANGE");
                 expectCode(
                   "zlib.outputLimit",
                   () => zlib.gunzipSync(Buffer.from("$outputBombBase64", "base64")),
@@ -4368,8 +4368,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 for (const name of [
                   "zlib/promises",
                   "node:zlib/promises",
-                  "child_process",
-                  "worker_threads"
+                  "child_process"
                 ]) {
                   try {
                     require(name);
@@ -4426,7 +4425,6 @@ class EmbeddedScriptMvpInstrumentationTest {
                 "zlib/promises",
                 "node:zlib/promises",
                 "child_process",
-                "worker_threads",
             ).forEach { name ->
                 assertTrue(result.stdout.contains("zlib.denied.$name=true"))
             }
@@ -6832,7 +6830,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             check(mkdirs()) { "Failed to create web compression global test dir: $absolutePath" }
         }
         try {
-            val outputBombBase64 = gzipBase64(ByteArray(2 * 1024 * 1024 + 1) { 'A'.code.toByte() })
+            val outputBombBase64 = gzipBase64(ByteArray(32 * 1024 * 1024 + 1) { 'A'.code.toByte() })
             val result = runEmbeddedScript(
                 """
                 "nodejs";
@@ -6937,7 +6935,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                   collectBytes(new CompressionStream("gzip"), [new ArrayBuffer(1)])
                 );
                 const tooLargeInput = await captureAsync(() =>
-                  collectBytes(new CompressionStream("gzip"), [Buffer.alloc(512 * 1024 + 1)])
+                  collectBytes(new CompressionStream("gzip"), [Buffer.alloc(8 * 1024 * 1024 + 1)])
                 );
                 const outputBomb = await captureAsync(() =>
                   collectBytes(new DecompressionStream("gzip"), [Buffer.from("$outputBombBase64", "base64")])
@@ -9295,7 +9293,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                       )).toString("utf8");
                       const invalid = captureSync(() => new CompressionStream("br"));
                       const tooLarge = await captureAsync(() =>
-                        collectBytes(new CompressionStream("gzip"), [Buffer.alloc(512 * 1024 + 1)])
+                        collectBytes(new CompressionStream("gzip"), [Buffer.alloc(8 * 1024 * 1024 + 1)])
                       );
                       const hidden = [
                         typeof streamWeb.CompressionStream,

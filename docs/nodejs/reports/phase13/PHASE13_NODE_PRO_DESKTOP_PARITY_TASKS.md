@@ -139,6 +139,10 @@
   policy for the controlled `http`/`https` facade, and merges package manifests
   from both runtime working directory and sandbox root for subdirectory `.mjs`
   utilities.
+- Follow-up compatibility pass raises the controlled fetch concurrency budget
+  to 16 active requests by default (hard max 32) and the default response-body
+  budget to 32 MiB (hard max 64 MiB), while preserving explicit per-request
+  lower `maxResponseBytes` denials.
 - Host verifier: `tools/nodejs/phase13/verify-http-https-client-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13HttpHttpsClientParity`.
 - Report:
@@ -1107,6 +1111,9 @@ P13 task 本身使用以下执行状态：
       `NodeBridgePermissionManifest.runtimeModuleSourceForWorkingDirectory(...)`
       now merges working-directory and sandbox-root manifests, and the embedded
       service injects the build-time network opt-in as controlled-client policy.
+    - Controlled fetch policy now allows 16 active requests by default
+      (hard max 32) and a 32 MiB default response body budget (hard max 64 MiB)
+      for real utility scripts with paginated HTTP calls and large HTML pages.
     - Types: `docs/nodejs/types/autojs6-node/http.d.ts`,
       `docs/nodejs/types/autojs6-node/https.d.ts`
     - Host verifier:
@@ -1402,6 +1409,9 @@ P13 task 本身使用以下执行状态：
       `\p{ID_Start}` / `\p{ID_Continue}` 降级为 ASCII identifier fallback，
       用于兼容 `puppeteer-core` QueryHandler 等真实 npm package；字符串、
       注释和 template literal 内容保持不改写。
+    - no-ICU regex literal 降级已扩展到 `\p{ASCII}` / `\P{ASCII}`，
+      用于兼容 `puppeteer-core` PSelectorParser 中的 attribute selector
+      parser regex。
     - partial ESM transform 现在支持 `export function*` 和
       `export async function*`，用于兼容 `puppeteer-core` HandleIterator 等
       真实 npm package 的 generator helper exports。
@@ -1518,6 +1528,9 @@ P13 task 本身使用以下执行状态：
       指向 native `Stream.prototype`，使 `import Stream from "node:stream"`
       与 `body instanceof Stream` 这类 `node-fetch` 检查正常工作；同时继续
       保持 `stream/promises` 独立导入、`stream.promises` 不提升。
+    - `zlib` / Web `CompressionStream` 输入上限提升到 8 MiB，输出上限提升到
+      32 MiB，用于兼容真实文档页面和 `node-fetch` 解压响应；超过上限仍以
+      `ERR_OUT_OF_RANGE` 稳定拒绝。
     - 普通 one-shot Embedded Node 脚本默认 timeout 从 probe 用的 3000ms
       调整为 300000ms；显式 `timeoutMs` 仍保持原语义，用于降低大 npm
       module graph 启动时的误超时。

@@ -124,7 +124,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             parentFile?.mkdirs()
             writeText("""exports.value = "dynamic-dir";""" + "\n", StandardCharsets.UTF_8)
         }
-        val zlibOutputBombBase64 = gzipBase64(ByteArray(2 * 1024 * 1024 + 1) { 'A'.code.toByte() })
+        val zlibOutputBombBase64 = gzipBase64(ByteArray(32 * 1024 * 1024 + 1) { 'A'.code.toByte() })
         listOf(
             "path",
             "console",
@@ -6653,7 +6653,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 collectPackagedWebCompression(new CompressionStream("gzip"), [new ArrayBuffer(1)])
               );
               const packagedWebCompressionTooLarge = await webCompressionCaptureAsync(() =>
-                collectPackagedWebCompression(new CompressionStream("gzip"), [Buffer.alloc(512 * 1024 + 1)])
+                collectPackagedWebCompression(new CompressionStream("gzip"), [Buffer.alloc(8 * 1024 * 1024 + 1)])
               );
               const packagedWebCompressionBomb = await webCompressionCaptureAsync(() =>
                 collectPackagedWebCompression(
@@ -6790,7 +6790,7 @@ class EmbeddedNodePackagedApkSmokeTest {
                 ]
               );
               const zlibStreamInputLimit = await packagedZlibPipelineError(
-                [Buffer.alloc(512 * 1024 + 1)],
+                [Buffer.alloc(8 * 1024 * 1024 + 1)],
                 [zlib.createGzip()]
               );
               const zlibStreamOutputLimit = await packagedZlibPipelineError(
@@ -6873,11 +6873,11 @@ class EmbeddedNodePackagedApkSmokeTest {
                 hasCode(() => crypto.hkdf("sha256", "ikm", "salt", "info", 16), "ERR_INVALID_ARG_TYPE");
               const zlibLimitsOk =
                 hasCode(() => zlib.gzipSync(42), "ERR_INVALID_ARG_TYPE") &&
-                hasCode(() => zlib.gzipSync(Buffer.alloc(512 * 1024 + 1)), "ERR_OUT_OF_RANGE") &&
-                hasCode(() => zlib.brotliCompressSync(Buffer.alloc(512 * 1024 + 1)), "ERR_OUT_OF_RANGE") &&
+                hasCode(() => zlib.gzipSync(Buffer.alloc(8 * 1024 * 1024 + 1)), "ERR_OUT_OF_RANGE") &&
+                hasCode(() => zlib.brotliCompressSync(Buffer.alloc(8 * 1024 * 1024 + 1)), "ERR_OUT_OF_RANGE") &&
                 hasCode(() => zlib.gzip(Buffer.from("x")), "ERR_INVALID_ARG_TYPE") &&
                 hasCode(() => zlib.gzip(Buffer.from("x"), "bad"), "ERR_INVALID_ARG_TYPE") &&
-                hasCode(() => zlib.gzip(Buffer.alloc(512 * 1024 + 1), () => {}), "ERR_OUT_OF_RANGE") &&
+                hasCode(() => zlib.gzip(Buffer.alloc(8 * 1024 * 1024 + 1), () => {}), "ERR_OUT_OF_RANGE") &&
                 hasCode(() => zlib.gunzipSync(Buffer.from("$zlibOutputBombBase64", "base64")), "ERR_OUT_OF_RANGE");
               let zlibCorruptOk = false;
               try {
