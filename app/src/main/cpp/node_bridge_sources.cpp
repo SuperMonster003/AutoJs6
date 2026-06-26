@@ -40900,12 +40900,17 @@ std::string buildEmbeddedScriptExecutionSource(
     if (baseValue.indexOf("\u0000") >= 0) {
       throw __autojs6_create_require_error(baseValue, "NUL paths are not allowed.", "ERR_INVALID_ARG_TYPE");
     }
+    let basePathValue = baseValue;
     if (__autojs6_protocol_specifier(baseValue)) {
-      throw __autojs6_create_require_error(
-        baseValue,
-        "file URL and protocol bases are not supported in Embedded Node.js MVP.",
-        "ERR_INVALID_ARG_TYPE"
-      );
+      if (/^file:/i.test(baseValue)) {
+        basePathValue = __autojs6_file_url_to_absolute_path(baseValue, "module.createRequire");
+      } else {
+        throw __autojs6_create_require_error(
+          baseValue,
+          "protocol bases other than file URLs are not supported in Embedded Node.js MVP.",
+          "ERR_INVALID_ARG_TYPE"
+        );
+      }
     }
     const path = __autojs6_path_module();
     const fs = __autojs6_fs_module();
@@ -40922,7 +40927,7 @@ std::string buildEmbeddedScriptExecutionSource(
       throw __autojs6_create_require_error(baseValue, "allowlisted path and fs modules are required.", "EPERM");
     }
     const scope = __autojs6_fs_root(path, fs);
-    const target = path.resolve(path.isAbsolute(baseValue) ? baseValue : path.resolve(scope.cwd, baseValue));
+    const target = path.resolve(path.isAbsolute(basePathValue) ? basePathValue : path.resolve(scope.cwd, basePathValue));
     if (!__autojs6_path_within_root(target, scope.root) || __autojs6_sensitive_path(target)) {
       throw __autojs6_create_require_error(baseValue, "base escapes sandboxRoot.", "EPERM");
     }
@@ -43292,7 +43297,7 @@ std::string buildEmbeddedScriptExecutionSource(
         "module",
         "__filename",
         "__dirname",
-        "\"use strict\";\n" + transformed + "\n//# sourceURL=" + (record.sourceURL || resolved)
+        "\"use strict\";\n{\n" + transformed + "\n}\n//# sourceURL=" + (record.sourceURL || resolved)
       );
       await moduleFunction.call(
         undefined,
@@ -43351,7 +43356,7 @@ std::string buildEmbeddedScriptExecutionSource(
         "module",
         "__filename",
         "__dirname",
-        "\"use strict\";\n" + transformed + "\n//# sourceURL=" + (record.sourceURL || resolved)
+        "\"use strict\";\n{\n" + transformed + "\n}\n//# sourceURL=" + (record.sourceURL || resolved)
       );
       moduleFunction.call(
         undefined,

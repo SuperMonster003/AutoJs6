@@ -1363,6 +1363,9 @@ P13 task 本身使用以下执行状态：
     - declaration export 已覆盖 identifier declaration 以及对象/数组
       destructuring declaration export，用于兼容 `css-tree` / `jsdom` 这类
       npm package 入口常见形态。
+    - partial ESM wrapper 已兼容 ESM package 中
+      `import { createRequire } from "module"; const require = ...` 的局部
+      `require` 声明，避免与 AutoJs6 wrapper 参数同名冲突。
     - named import/export/re-export specifier list 现在允许普通 block/line
       comments，用于兼容 `parse5` / `jsdom` 等真实 npm package 输出中的
       `export { /** @internal */ Parser } from ...` 形态。

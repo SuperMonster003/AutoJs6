@@ -82,6 +82,8 @@ flag to false preserves the previous fail-closed path for diagnostics.
 - ESM package `exports` and `imports` may target `.mjs` files inside the package root.
 - ESM self-reference and nested package imports use the ESM condition set.
 - CommonJS `require()` may load synchronous partial ESM targets without changing CommonJS package condition matching.
+- ESM modules may import `createRequire` from `module` and declare a local
+  `require`, matching package entrypoints such as `css-tree`.
 - ESM may import scoped JSON modules only with `with { type: "json" }`; the resulting default export shares the existing CommonJS JSON cache object.
 - ESM exposes `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)` for AutoJs6-managed modules. `resolve()` reuses the scoped ESM resolver, returns `file:` URLs for local/package targets, returns `node:` URLs for allowed builtins, and keeps disabled builtins denied.
 - simple named exports are supported for local `.mjs` modules, including

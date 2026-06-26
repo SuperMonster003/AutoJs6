@@ -985,6 +985,8 @@ Node Profile v1.1 partial ESM supports:
 - package `exports`/`imports` targets that point to `.mjs` files inside the package root
 - nested package imports and package self-reference under ESM mode
 - CommonJS `require()` of synchronous partial ESM targets, returning the ESM namespace object while preserving CommonJS package condition matching
+- ESM modules may import `createRequire` from `module` and declare a local
+  `require`, matching package entrypoints such as `css-tree`
 - ESM JSON imports with `with { type: "json" }`, sharing the CommonJS JSON cache object
 - scoped `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)`
 - simple named exports, including identifier declarations and object/array

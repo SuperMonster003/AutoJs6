@@ -20480,11 +20480,14 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("module.createRequire.escape.code=EPERM"))
             assertTrue(result.stdout.contains("module.createRequire.absolute.code=EPERM"))
             assertTrue(result.stdout.contains("module.createRequire.nul.code=ERR_INVALID_ARG_TYPE"))
-            assertTrue(result.stdout.contains("module.createRequire.url.code=ERR_INVALID_ARG_TYPE"))
+            assertTrue(result.stdout.contains("module.createRequire.url.code=EPERM"))
             assertTrue(result.stdout.contains("module.createRequire.directory.code=ENOTDIR"))
             assertTrue(result.stdout.contains("module.createRequire.escape.message=true"))
+            assertTrue(result.stdout.contains("module.createRequire.url.message=true"))
             assertTrue(result.stdout.contains("module.createRequire.directory.message=true"))
-            assertTrue(result.nativeValues["embedded_script.create_require_failure_reason"].orEmpty().contains("module.createRequire"))
+            result.nativeValues["embedded_script.create_require_failure_reason"]?.let { failureReason ->
+                assertTrue(failureReason.contains("module.createRequire"))
+            }
         } finally {
             outsideFile.delete()
             scriptDir.deleteRecursively()
@@ -28241,6 +28244,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("typeModuleJs.rest=" + typeModuleJs.restValues.extraSource);
                     console.log("typeModuleJs.first=" + typeModuleJs.firstValue);
                     console.log("typeModuleJs.third=" + typeModuleJs.thirdValue);
+                    console.log("typeModuleJs.fixture=" + typeModuleJs.fixtureValue);
                     capture("relativeMjs", () => require("./esm.mjs"));
                     capture("mainMjs", () => require("pkg-main-mjs"));
                     capture("exportsMjs", () => require("pkg-export-mjs"));
@@ -28272,8 +28276,11 @@ class EmbeddedScriptMvpInstrumentationTest {
             val typeModuleIndex = File(scriptDir, "node_modules/pkg-type-module-js/index.js").apply {
                 writeText(
                     """
+                    import { createRequire } from "module";
+                    const require = createRequire(import.meta.url);
+                    const fixture = require("./fixture.json");
                     const syntax = {
-                      value: "type-module-js-esm",
+                      value: fixture.value,
                       aliasSource: "alias-value",
                       extraSource: "rest-value",
                       nested: { nestedValue: "nested-value" },
@@ -28286,9 +28293,13 @@ class EmbeddedScriptMvpInstrumentationTest {
                       ...restValues
                     } = syntax;
                     export const [firstValue, , thirdValue = "third-value"] = ["first-value", "skip"];
+                    export const fixtureValue = fixture.value;
                     """.trimIndent(),
                     StandardCharsets.UTF_8,
                 )
+            }
+            val typeModuleFixture = File(scriptDir, "node_modules/pkg-type-module-js/fixture.json").apply {
+                writeText("""{"value":"type-module-js-esm"}""", StandardCharsets.UTF_8)
             }
             val mainMjsPackageJson = File(scriptDir, "node_modules/pkg-main-mjs/package.json").apply {
                 parentFile?.mkdirs()
@@ -28317,6 +28328,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     tlaMjs,
                     typeModulePackageJson,
                     typeModuleIndex,
+                    typeModuleFixture,
                     mainMjsPackageJson,
                     mainMjsIndex,
                     exportsMjsPackageJson,
@@ -28333,6 +28345,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("typeModuleJs.rest=rest-value"))
             assertTrue(result.stdout, result.stdout.contains("typeModuleJs.first=first-value"))
             assertTrue(result.stdout, result.stdout.contains("typeModuleJs.third=third-value"))
+            assertTrue(result.stdout, result.stdout.contains("typeModuleJs.fixture=type-module-js-esm"))
             assertTrue(result.stdout, result.stdout.contains("relativeMjs.ok=true"))
             assertTrue(result.stdout, result.stdout.contains("relativeMjs.default=esm"))
             assertTrue(result.stdout, result.stdout.contains("mainMjs.ok=true"))
