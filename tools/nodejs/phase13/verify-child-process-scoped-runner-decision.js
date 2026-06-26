@@ -71,16 +71,16 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "childProcessProfile: Object.freeze({"),
       token(files.nodeBridgeSources, 'status: "disabled_by_default"'),
       token(files.nodeBridgeSources, 'targetProfiles: Object.freeze(["desktop_compat_opt_in"])'),
-      token(files.nodeBridgeSources, 'module: "denied"'),
-      token(files.nodeBridgeSources, 'nodePrefix: "denied"'),
-      token(files.nodeBridgeSources, 'scopedRunner: "deferred"'),
+      token(files.nodeBridgeSources, 'module: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"'),
+      token(files.nodeBridgeSources, 'nodePrefix: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"'),
+      token(files.nodeBridgeSources, 'scopedRunner: __autojs6_child_process_experimental_enabled ? "native_node_builtin" : "deferred"'),
       token(files.nodeBridgeSources, 'shellBridge: "separate_scoped_command_bridge"'),
       token(files.nodeBridgeSources, 'androidShellProvider: "available_with_shell_capability"'),
-      token(files.nodeBridgeSources, 'appPrivateBinaries: "required_before_enablement"'),
-      token(files.nodeBridgeSources, 'allowlistedBinaries: "required_before_enablement"'),
-      token(files.nodeBridgeSources, 'arbitraryPaths: "denied"'),
-      token(files.nodeBridgeSources, 'processHandles: "denied"'),
-      token(files.nodeBridgeSources, 'rawProcessHandles: false'),
+      token(files.nodeBridgeSources, 'appPrivateBinaries: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "required_before_enablement"'),
+      token(files.nodeBridgeSources, 'allowlistedBinaries: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "required_before_enablement"'),
+      token(files.nodeBridgeSources, 'arbitraryPaths: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "denied"'),
+      token(files.nodeBridgeSources, 'processHandles: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"'),
+      token(files.nodeBridgeSources, "rawProcessHandles: __autojs6_child_process_experimental_enabled"),
       token(files.p13ChildProcessTest, "childProcessProfileKeepsBuiltinDeniedAndShellSeparate"),
       token(files.p13ChildProcessTest, "p13child.profile=disabled_by_default|false|desktop_compat_opt_in"),
       token(files.typesAutojsGlobal, "export interface ChildProcessProfile"),
@@ -96,8 +96,24 @@ function buildReport(files) {
       token(files.processWorkerTest, "p13processworker.childProcessBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
       token(files.securityRegressionTest, "require.child_process"),
       token(files.packagedSmokeTest, "packaged.dynamic_import.child_process_denied=true"),
-      token(files.desktopMatrix, "| `child_process` | `disabled` |"),
+      token(files.desktopMatrix, "Safe/default keeps child_process denied"),
     ], []),
+    scenario("experimental_native_opt_in", "Debug/Desktop compatibility builds can route child_process to the native builtin", [
+      token(files.nodeBridgeSources, 'if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled)'),
+      token(files.nodeBridgeSources, 'child_process: Object.freeze({'),
+      token(files.nodeBridgeSources, 'gradleProperty: "autojs.nodejs.child_process.experimental"'),
+      token(files.nodeBridgeSources, "enabled: __autojs6_child_process_experimental_enabled"),
+      token(files.nodeBridgeSources, "buildTimeOverrideAllowed: true"),
+      token(files.nodeBridgeSources, "releaseForbidden: true"),
+      token(files.p13ChildProcessTest, "childProcessExperimentalOptInExposesNativeBuiltin"),
+      token(files.p13ChildProcessTest, "childProcessExperimentalEnabled = true"),
+      token(files.p13ChildProcessTest, "p13child.opt.profile=experimental_opt_in_native|native_available|native_available|true|true|false"),
+      token(files.p13ChildProcessTest, "p13child.opt.require=true|true|function|function|child_process|child_process|true|true|child-ok"),
+      token(files.desktopMatrix, "| `child_process` | `experimental` | `desktop_compat_opt_in` |"),
+      token(files.desktopMatrix, "native opt-in"),
+    ], [
+      "Native child_process opt-in remains debug/build-time only until a scoped runner has app-private allowlists, bounded stdio, cleanup, packaged evidence, and hostile corpus coverage.",
+    ]),
     scenario("shell_bridge_separate_alternative", "shell remains the current separately permissioned scoped command alternative", [
       token(files.p13ChildProcessTest, "p13child.shell=function|function|undefined|undefined|0|file-ok|2|shell|shell|bin|40|'bin/tool.sh' '--arg'|0"),
       token(files.shellTest, "jsShellModuleIsChildProcessAlternativeAndRequiresDeclaredCapability"),
@@ -107,7 +123,7 @@ function buildReport(files) {
       token(files.processSweepTest, "permission.has(\"child_process\")"),
       token(files.securityRegressionTest, "security.phase5.shell_child_process"),
       token(files.securityModel, "The `shell` bridge is the controlled AutoJs6 replacement for Node `child_process`"),
-      token(files.compatibilityProfile, "migration mapping: `child_process.exec()` -> `require(\"shell\").exec()`"),
+      token(files.compatibilityProfile, "migration mapping for Safe profile scripts: `child_process.exec()` -> `require(\"shell\").exec()`"),
     ], []),
     scenario("future_scoped_runner_blockers", "Future child_process opt-in requires app-private allowlist, stdio/cancel/cleanup, and packaged evidence", [
       token(files.projectAnalyzer, '["child_process", "child_process"]'),
@@ -135,7 +151,7 @@ function buildReport(files) {
       token(files.proComparison, "P13-40 records child_process scoped runner as partial"),
       token(files.proAutoxNotes, "P13-40 records child_process scoped runner as partial"),
       token(files.typesReadme, "P13-40 extends the `autojs6:profile` declaration"),
-      token(files.surfaceManifestDoc, REPORT_BASENAME),
+      token(files.surfaceManifestDoc, "P13-40 records child_process scoped-runner diagnostics"),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.desktopMatrix, "P13-40 records child_process scoped-runner diagnostics as partial"),
       token(files.builtinMatrixGenerator, "P13-40 records child_process scoped-runner diagnostics as partial"),
@@ -160,41 +176,46 @@ function buildReport(files) {
       "`desktop.execution_runtime` surface must reference P13-40 evidence.",
     ),
     check(
-      "child-process-feature-stays-disabled",
+      "child-process-feature-debug-opt-in-only",
       childProcessFeature.includes("defaultEnabled: false") &&
-        childProcessFeature.includes("enabled: false") &&
+        childProcessFeature.includes("enabled: __autojs6_child_process_experimental_enabled") &&
+        childProcessFeature.includes("buildTimeOverrideAllowed: true") &&
         childProcessFeature.includes("projectJsonOverrideAllowed: false") &&
         childProcessFeature.includes("packagedApkOverrideAllowed: false") &&
+        childProcessFeature.includes("buildOnly: true") &&
+        childProcessFeature.includes("debugOnly: true") &&
+        childProcessFeature.includes("projectAllowed: false") &&
+        childProcessFeature.includes("packagedAllowed: false") &&
         childProcessFeature.includes("releaseForbidden: true") &&
-        childProcessFeature.includes('status: "disabled"') &&
+        childProcessFeature.includes('status: "experimental"') &&
         files.runtimeCapabilities.text.includes('id = "child_process"') &&
         files.runtimeCapabilities.text.includes('status = "disabled"'),
-      "child_process feature flags and capability metadata must stay disabled.",
+      "child_process native builtin opt-in must stay build-time/debug-only and release-forbidden.",
     ),
     check(
-      "child-process-profile-fail-closed",
+      "child-process-profile-default-fail-closed",
       childProcessProfile.includes("defaultEnabled: false") &&
-        childProcessProfile.includes('module: "denied"') &&
-        childProcessProfile.includes('nodePrefix: "denied"') &&
-        childProcessProfile.includes('arbitraryPaths: "denied"') &&
-        childProcessProfile.includes('processHandles: "denied"') &&
-        childProcessProfile.includes("rawProcessHandles: false"),
-      "childProcessProfile must report fail-closed module, arbitrary path, and handle state.",
+        childProcessProfile.includes('module: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"') &&
+        childProcessProfile.includes('nodePrefix: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"') &&
+        childProcessProfile.includes('arbitraryPaths: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "denied"') &&
+        childProcessProfile.includes('processHandles: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"') &&
+        childProcessProfile.includes("rawProcessHandles: __autojs6_child_process_experimental_enabled"),
+      "childProcessProfile must report default fail-closed state and explicit experimental native state.",
     ),
     check(
-      "builtin-denial-present",
+      "safe-default-builtin-denial-present",
       files.nodeBridgeSources.text.includes('"child_process": true') &&
-        files.desktopMatrix.text.includes("| `child_process` | `disabled` |"),
-      "child_process must remain on the disabled builtin path.",
+        files.nodeBridgeSources.text.includes('if (name === "child_process" && __autojs6_child_process_experimental_enabled)') &&
+        files.desktopMatrix.text.includes("Safe/default keeps child_process denied"),
+      "child_process must remain denied by default while the native builtin is debug opt-in.",
     ),
     check(
-      "no-child-process-types-or-runtime-facade",
+      "no-scoped-runner-types-or-runtime-facade",
       !files.typesAutojsGlobal.text.includes('declare module "child_process"') &&
         !files.typesAutojsGlobal.text.includes('declare module "node:child_process"') &&
-        !files.nodeBridgeSources.text.includes("function __autojs6_child_process") &&
         !files.nodeBridgeSources.text.includes("ChildProcessRunner") &&
         !files.nodeBridgeSources.text.includes("childProcessProfile.enabled"),
-      "P13-40 must not introduce a callable child_process module, child runner, or type declaration.",
+      "P13-40 must not introduce a supported scoped runner or child_process type declaration.",
     ),
   ];
 
@@ -222,6 +243,7 @@ function buildReport(files) {
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile_default_denial").status === "ready",
       defaultDeniedReady: scenarioById(scenarios, "require_resolve_shadow_denial").status === "ready",
+      experimentalNativeOptInReady: scenarioById(scenarios, "experimental_native_opt_in").status !== "missing_evidence",
       shellBridgeAlternativeReady: scenarioById(scenarios, "shell_bridge_separate_alternative").status === "ready",
       scopedRunnerIntroduced: false,
       appPrivateBinaryAllowlistReady: false,

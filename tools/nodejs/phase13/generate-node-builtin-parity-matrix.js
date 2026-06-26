@@ -142,6 +142,15 @@ function classifyBuiltin(name, sets) {
   const network = sets.network.includes(bareName) || sets.network.includes(name);
   const limited = sets.limited.includes(bareName) || sets.limited.includes(name);
   const commonJs = sets.commonJs.includes(bareName) || sets.commonJs.includes(name);
+  if (bareName === "child_process" && disabled && commonJs) {
+    return {
+      name,
+      status: "experimental",
+      targetProfile: "desktop_compat_opt_in",
+      source: ["commonjs-known", "native opt-in"],
+      nextStep: nextStepForExperimental(bareName),
+    };
+  }
   if (disabled) {
     return {
       name,
@@ -229,6 +238,13 @@ function nextStepForLimited(name) {
   return "Keep current Safe subset unless a future Phase 13 task promotes broader desktop conformance.";
 }
 
+function nextStepForExperimental(name) {
+  if (name === "child_process") {
+    return "P13-40 records child_process scoped-runner diagnostics as partial; Safe/default keeps child_process denied, while debug builds can enable Node's native builtin with `autojs.nodejs.child_process.experimental=true`. App-private allowlisted binaries, bounded stdio, timeout/cancel/kill cleanup, packaged evidence, and hostile corpus coverage remain future work before release/profile promotion.";
+  }
+  return "Keep experimental builtin opt-ins debug-only until the corresponding Phase 13 promotion gate closes.";
+}
+
 function highRiskProfileFor(name) {
   if (["inspector"].includes(name)) {
     return "debug_unsafe_lab";
@@ -288,9 +304,18 @@ function buildChecks(files, report, markdown) {
     ),
     check(
       "disabled-builtins-visible",
-      ["child_process", "dgram", "inspector", "wasi", "worker_threads"].every((name) =>
+      ["dgram", "inspector", "wasi", "worker_threads"].every((name) =>
         report.modules.some((module) => module.name === name && module.status === "disabled")),
       "High-risk disabled builtins must stay visible in the matrix.",
+    ),
+    check(
+      "experimental-builtins-visible",
+      report.modules.some((module) =>
+        module.name === "child_process" &&
+          module.status === "experimental" &&
+          module.targetProfile === "desktop_compat_opt_in" &&
+          module.nextStep.includes("autojs.nodejs.child_process.experimental=true")),
+      "Release-forbidden experimental builtins must stay visible with their opt-in property.",
     ),
     check(
       "network-builtins-gated",
@@ -348,6 +373,7 @@ function renderMarkdown(report) {
     "",
     "- `partial`: available as a Safe Node subset or wrapper.",
     "- `limited_network_gated`: present for controlled feature detection or facade behavior, but raw network I/O remains gated.",
+    "- `experimental`: available only behind a release-forbidden build-time/debug opt-in.",
     "- `disabled`: registry-disabled with stable denial.",
     "- `known_not_wrapped`: known to the CommonJS registry but not currently surfaced as a limited wrapper.",
     "- `missing_from_registry`: in the desktop reference list but not explicitly classified by the current registry.",

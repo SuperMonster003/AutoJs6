@@ -95,7 +95,7 @@ function buildReport(files) {
       "Runnable process-worker replacement remains blocked on native worker availability and archived WorkerPool evidence on target ABIs.",
       "No user-facing process-worker launch surface exists until worker_computation and second execution slot promotion evidence are current.",
     ]),
-    scenario("child_process_shell_boundary", "child_process stays denied and shell remains a separate scoped command bridge", [
+    scenario("child_process_shell_boundary", "child_process stays default-denied and shell remains a separate scoped command bridge", [
       token(files.nodeBridgeSources, 'childProcess: "denied"'),
       token(files.nodeBridgeSources, 'shellBridge: "separate_scoped_command_bridge"'),
       token(files.runtimeCapabilities, 'id = "child_process"'),
@@ -104,7 +104,8 @@ function buildReport(files) {
       token(files.shellTest, "jsShellModuleIsChildProcessAlternativeAndRequiresDeclaredCapability"),
       token(files.shellTest, "shell.policy.child_process=ERR_AUTOJS6_BUILTIN_DISABLED"),
       token(files.securityModel, "The `shell` bridge is the controlled AutoJs6 replacement for Node `child_process`"),
-      token(files.desktopMatrix, "| `child_process` | `disabled` |"),
+      token(files.desktopMatrix, "| `child_process` | `experimental` | `desktop_compat_opt_in` |"),
+      token(files.desktopMatrix, "Safe/default keeps child_process denied"),
     ], [
       "P13-40 must separately design any scoped child_process runner; P13-35 does not promote raw spawn, fork, stdio streams, signals, or process handles.",
     ]),
@@ -161,11 +162,12 @@ function buildReport(files) {
       "P13-35 must not add a callable process_worker or compute_worker facade.",
     ),
     check(
-      "child-process-stays-disabled",
-      files.desktopMatrix.text.includes("| `child_process` | `disabled` |") &&
+      "child-process-stays-default-denied",
+      files.desktopMatrix.text.includes("| `child_process` | `experimental` | `desktop_compat_opt_in` |") &&
+        files.desktopMatrix.text.includes("Safe/default keeps child_process denied") &&
         files.runtimeCapabilities.text.includes('id = "child_process"') &&
         files.runtimeCapabilities.text.includes('status = "disabled"'),
-      "child_process must remain disabled while process-worker replacement is only a decision profile.",
+      "child_process must remain default-denied while process-worker replacement is only a decision profile.",
     ),
     check(
       "worker-computation-stays-reserved",

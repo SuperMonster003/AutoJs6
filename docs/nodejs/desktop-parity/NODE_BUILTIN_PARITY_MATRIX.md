@@ -6,13 +6,15 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 
 - `partial`: available as a Safe Node subset or wrapper.
 - `limited_network_gated`: present for controlled feature detection or facade behavior, but raw network I/O remains gated.
+- `experimental`: available only behind a release-forbidden build-time/debug opt-in.
 - `disabled`: registry-disabled with stable denial.
 - `known_not_wrapped`: known to the CommonJS registry but not currently surfaced as a limited wrapper.
 - `missing_from_registry`: in the desktop reference list but not explicitly classified by the current registry.
 
 ## Summary
 
-- `disabled`: 9
+- `disabled`: 8
+- `experimental`: 1
 - `limited_network_gated`: 6
 - `missing_from_registry`: 2
 - `partial`: 35
@@ -82,6 +84,7 @@ This matrix is generated from `NodeRuntimeCapabilities.kt` and the Phase 13 desk
 | --- | --- | --- |
 | `builtins-covered` | passed | Desktop reference builtins must all appear in the generated parity matrix. |
 | `disabled-builtins-visible` | passed | High-risk disabled builtins must stay visible in the matrix. |
+| `experimental-builtins-visible` | passed | Release-forbidden experimental builtins must stay visible with their opt-in property. |
 | `network-builtins-gated` | passed | Network-shaped builtins must be marked limited_network_gated until P13 network promotion tasks land. |
 | `docs-mention-builtins` | passed | Compatibility profile must keep the existing builtin policy documentation. |
 | `task-checklist-current` | passed | Phase 13 task checklist must record P13-28 evidence. |

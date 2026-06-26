@@ -158,7 +158,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Generated Phase 13 Reports
 
 - Total reports: 54
-- Reports with policy violations: 1
+- Reports with policy violations: 0
 - Reports with blockers: 47
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
@@ -169,7 +169,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-autojs-global-v1.json` | `verifyNodePhase13AutoJsGlobalV1` | `P13-12` | `ready` | 0 | 0 |
 | `phase13-baseline-verification.json` | `verifyNodePhase13Baseline` | `-` | `passed` | 0 | 0 |
 | `phase13-capability-truth.json` | `generateNodePhase13CapabilityTruth` | `-` | `passed` | 0 | 0 |
-| `phase13-child-process-scoped-runner-decision.json` | `verifyNodePhase13ChildProcessScopedRunnerDecision` | `P13-40` | `failed` | 3 | 15 |
+| `phase13-child-process-scoped-runner-decision.json` | `verifyNodePhase13ChildProcessScopedRunnerDecision` | `P13-40` | `partial` | 0 | 8 |
 | `phase13-controlled-wasi-profile-decision.json` | `verifyNodePhase13ControlledWasiProfileDecision` | `P13-38` | `partial` | 0 | 7 |
 | `phase13-crash-evidence-automation.json` | `collectNodePhase13CrashEvidence` | `P13-05` | `ready` | 0 | 0 |
 | `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `partial` | 0 | 2 |
