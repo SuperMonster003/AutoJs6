@@ -271,10 +271,12 @@ P13-23 records app/intent/broadcast Pro parity as partial. AutoJs6 Node now has
 JSON-safe `app.intent()` descriptors and stricter `app.startActivity()`
 descriptor parsing for `category`/`categories`, numeric flag arrays, and
 primitive extras, plus URL/email/settings/uninstall helpers, exact `app.query`
-installed-app lookups, scoped file view/edit helpers, and `app.launch()` alias
-parity. It still keeps `app.sendBroadcast()`, root/Shizuku app options,
-dual-user helpers, raw installed-app list APIs, packaged behavior, and raw
-Android app/intent objects blocked.
+installed-app lookups, scoped file view/edit helpers, `app.launch()` alias
+parity, and JSON-safe `app.parseUri()` descriptors. It keeps
+`app.getUriForFile()`, `app.kill()`, dual-user helpers, and
+`app.sendBroadcast()` as stable denials, while raw URI/FileProvider handles,
+root/Shizuku app options, raw installed-app list APIs, packaged behavior, and
+raw Android app/intent objects remain blocked.
 
 P13-24 records shell/root/Shizuku capability promotion as partial. AutoJs6 Node
 now has explicit `shell`, `shell.root`, and `shell.shizuku` capability tokens,

@@ -1697,9 +1697,11 @@ runtime.
   - P13-23 records app/intent/broadcast Pro parity as partial: `app.intent()`
     and `app.startActivity()` use JSON-safe descriptors with
     `category`/`categories`, numeric flag arrays, primitive extras, and scoped
-    file view/edit Activity helpers, while broadcast sending,
-    root/Shizuku/dual-user routes, raw Android objects, raw installed-app list
-    APIs, and packaged app smoke remain blocked.
+    file view/edit Activity helpers. `app.parseUri()` returns JSON-safe URI
+    descriptors, while `app.getUriForFile()`, `app.kill()`, dual-user helpers,
+    and broadcast sending remain stable denials until raw URI/FileProvider
+    policy, root/Shizuku/dual-user routes, raw Android objects, raw
+    installed-app list APIs, and packaged app smoke are resolved.
 - `barcode` / `qrcode`
   - `detect(imageOrPath, options?): Promise<BarcodeSnapshot | null>`
   - `detectAll(imageOrPath, options?): Promise<readonly BarcodeSnapshot[]>`

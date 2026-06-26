@@ -71,6 +71,11 @@ async function smoke(): Promise<void> {
   const viewedFile: boolean = await app.viewFile("README.md", { timeoutMs: 1000 });
   const editedFile: boolean = await app.editFile("README.md", { timeoutMs: 1000 });
   const launchAlias: boolean = await app.launch(app.packageName, { timeoutMs: 1000 });
+  const parsedUri: app.UriDescriptor | null = app.parseUri("https://example.invalid/path?q=1#frag");
+  const getUriForFileDenied: () => never = () => app.getUriForFile("README.md");
+  const killDenied: Promise<never> = app.kill(app.packageName, { timeoutMs: 1000 });
+  const launchDualDenied: Promise<never> = app.launchDualPackage(app.packageName, { timeoutMs: 1000 });
+  const dualInstalledDenied: Promise<never> = app.isDualInstalled(app.packageName, { timeoutMs: 1000 });
   await app.openAppSetting(app.packageName, { timeoutMs: 1000 });
   const viewIntent: app.IntentDescriptor = app.intent({
     action: "VIEW",
@@ -135,6 +140,9 @@ async function smoke(): Promise<void> {
     categories: "BROWSABLE"
   });
   const compatShellIntent: string = rhinoCompat.app.intentToShell(compatIntent);
+  const compatParsedUri: app.UriDescriptor | null = rhinoCompat.app.parseUri("content://org.autojs6.example/item/1");
+  const compatGetUriForFileDenied: () => never = () => rhinoCompat.app.getUriForFile("README.md");
+  const compatKillDenied: Promise<never> = rhinoCompat.app.kill(app.packageName, { timeoutMs: 1000 });
   await rhinoCompat.app.openUrl("https://example.invalid", { timeoutMs: 1000 });
   const compatBroadcastDenied: Promise<never> = rhinoCompat.app.sendBroadcast("inspect_layout_bounds", { timeoutMs: 1000 });
   const compatScreenOn: boolean = await rhinoCompat.device.isScreenOn({ timeoutMs: 1000 });

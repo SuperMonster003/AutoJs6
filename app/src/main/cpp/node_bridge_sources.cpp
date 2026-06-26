@@ -21395,6 +21395,42 @@ std::string buildEmbeddedScriptExecutionSource(
   function __autojs6_app_has_uri_scheme(value) {
     return /^[a-z][a-z0-9+.-]*:/i.test(String(value || ""));
   }
+  function __autojs6_app_parse_uri_descriptor(value, methodName) {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    const text = String(value);
+    const descriptor = {
+      schema: "autojs6-node-app-uri-descriptor-v1",
+      value: text
+    };
+    const schemeMatch = /^([a-z][a-z0-9+.-]*):(.*)$/i.exec(text);
+    if (!schemeMatch) {
+      if (text.length > 0) {
+        descriptor.path = text;
+      }
+      return Object.freeze(descriptor);
+    }
+    descriptor.scheme = schemeMatch[1].toLowerCase();
+    try {
+      const parsed = new URL(text);
+      const userInfo = parsed.username || parsed.password
+        ? parsed.username + (parsed.password ? ":" + parsed.password : "")
+        : "";
+      const authority = (userInfo ? userInfo + "@" : "") + parsed.host;
+      if (authority) descriptor.authority = authority;
+      if (userInfo) descriptor.userInfo = userInfo;
+      if (parsed.hostname) descriptor.host = parsed.hostname;
+      if (parsed.port) descriptor.port = Number(parsed.port);
+      if (parsed.pathname) descriptor.path = parsed.pathname;
+      if (parsed.search) descriptor.query = parsed.search.slice(1);
+      if (parsed.hash) descriptor.fragment = parsed.hash.slice(1);
+    } catch (_) {
+      const rest = schemeMatch[2] || "";
+      if (rest) descriptor.path = rest;
+    }
+    return Object.freeze(descriptor);
+  }
   function __autojs6_app_looks_like_web_url(value) {
     const text = String(value || "").trim();
     return /^(www\.)?[-a-z0-9]+(\.[a-z0-9-]+)+(\/|$|\?|#)/i.test(text);
@@ -21744,6 +21780,22 @@ std::string buildEmbeddedScriptExecutionSource(
       "sendBroadcast"
     );
   }
+  function __autojs6_app_raw_uri_unavailable_error(methodName) {
+    return __autojs6_bridge_error(
+      "app." + methodName + " is not available in the Node.js engine yet; P13-23 keeps raw Android Uri and FileProvider handles out of Node. Use app.parseUri() for JSON-safe URI inspection or app.viewFile()/app.editFile() for scoped file activity routing.",
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "app",
+      methodName
+    );
+  }
+  function __autojs6_app_privileged_unavailable_error(methodName) {
+    return __autojs6_bridge_error(
+      "app." + methodName + " is not available in the Node.js engine yet; P13-23 keeps root, Shizuku, and dual-user app helpers blocked until they are routed through explicit P13-24 shell/root/Shizuku capabilities.",
+      "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED",
+      "app",
+      methodName
+    );
+  }
   function __autojs6_limited_app() {
     if (__autojs6_limited_app_cache) {
       return __autojs6_limited_app_cache;
@@ -21751,6 +21803,12 @@ std::string buildEmbeddedScriptExecutionSource(
     const info = __autojs6_host_app_info();
     function intent(options) {
       return __autojs6_app_normalize_intent_descriptor(options, "intent");
+    }
+    function parseUri(uri) {
+      return __autojs6_app_parse_uri_descriptor(uri, "parseUri");
+    }
+    function getUriForFile(path) {
+      throw __autojs6_app_raw_uri_unavailable_error("getUriForFile");
     }
     function intentToShell(options) {
       return __autojs6_app_intent_to_shell(
@@ -21957,32 +22015,74 @@ std::string buildEmbeddedScriptExecutionSource(
         __autojs6_app_bridge_options(callOptions, 10000)
       );
     }
+    function startDualActivity(options, callOptions) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("startDualActivity"));
+    }
     function sendBroadcast(options, callOptions) {
       return Promise.reject(__autojs6_app_send_broadcast_unavailable_error());
+    }
+    function openDualUrl(url, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("openDualUrl"));
+    }
+    function launchDualPackage(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("launchDualPackage"));
+    }
+    function launchDualApp(appName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("launchDualApp"));
+    }
+    function launchDualAppDetailsSettings(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("launchDualAppDetailsSettings"));
+    }
+    function isDualInstalled(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("isDualInstalled"));
+    }
+    function uninstallDual(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("uninstallDual"));
+    }
+    function kill(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("kill"));
+    }
+    function killDual(packageName, options) {
+      return Promise.reject(__autojs6_app_privileged_unavailable_error("killDual"));
     }
     __autojs6_limited_app_cache = Object.freeze({
       packageName: info.packageName,
       versionName: info.versionName,
       versionCode: info.versionCode,
       intent,
+      parseUri,
+      getUriForFile,
       intentToShell,
       openUrl,
+      openDualUrl,
       sendEmail,
       uninstall,
+      uninstallDual,
       getPackageName,
       getAppName,
       isInstalled,
+      isDualInstalled,
       viewFile,
       editFile,
       launch: launchPackage,
+      launchDual: launchDualPackage,
       launchPackage,
+      launchDualPackage,
       launchApp,
+      launchDualApp,
       openAppSetting,
       openAppSettings: openAppSetting,
       launchSettings: openAppSetting,
       launchAppDetailsSettings: openAppSetting,
+      openDualAppSetting: launchDualAppDetailsSettings,
+      openDualAppSettings: launchDualAppDetailsSettings,
+      launchDualSettings: launchDualAppDetailsSettings,
+      launchDualAppDetailsSettings,
       startActivity,
-      sendBroadcast
+      startDualActivity,
+      sendBroadcast,
+      kill,
+      killDual
     });
     return __autojs6_limited_app_cache;
   }

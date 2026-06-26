@@ -41,6 +41,17 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
 - `app.intentToShell()` serializes the same JSON-safe descriptors into `am`
   intent arguments for migration scripts. It is a pure helper and does not
   execute shell commands or dispatch Android bridge requests.
+- `app.parseUri()` is available as a pure JSON-safe URI inspection helper. It
+  returns a frozen descriptor with string/number fields only and does not expose
+  Android `Uri` instances.
+- `app.getUriForFile()` is present only as a synchronous stable rejection stub
+  because raw Android `Uri` and `FileProvider` handles still cannot cross into
+  Node. Scoped file activity routing remains available through
+  `app.viewFile()` and `app.editFile()`.
+- `app.kill()`, `app.killDual()`, `app.startDualActivity()`,
+  `app.launchDual*()`, `app.openDual*()`, `app.uninstallDual()`, and
+  `app.isDualInstalled()` are present only as stable rejection stubs. They do
+  not execute shell commands and do not dispatch bridge requests.
 - `app.sendBroadcast()` is present only as a stable rejection stub. It does not
   dispatch to the bridge and does not register, send, or receive Android
   broadcasts.
@@ -79,9 +90,12 @@ No raw Android `Intent`, `Uri`, `Bundle`, `ComponentName`, `PackageManager`,
 
 ## Remaining Blockers
 
-- Full Rhino app helper parity: `parseUri`, `getUriForFile`, `kill`,
-  `getInstalledApps()`, `getInstalledPackages()`, preset app aliases, and
-  dual-app helpers.
+- Raw Android `Uri`/`FileProvider` promotion for `getUriForFile()`.
+- `kill()` and dual-user helper promotion through explicit P13-24
+  root/Shizuku/dual-user capability surfaces.
+- Raw installed-app list APIs: `getInstalledApps()` and
+  `getInstalledPackages()`.
+- Preset app aliases beyond exact package/name lookup.
 - Activity short-form mapping beyond URL strings and JSON-safe descriptors.
 - Root/Shizuku examples that combine `app.intentToShell()` with explicit
   P13-24 shell capabilities.

@@ -593,6 +593,16 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("app.viewFile", app.viewFile("README.md", { timeoutMs: 1013 })), true);
               assert.strictEqual(await expectPromise("app.editFile", app.editFile("README.md", { timeoutMs: 1013 })), true);
               assert.strictEqual(await expectPromise("app.launch", app.launch("org.autojs.autojs6", { timeoutMs: 1013 })), true);
+              const parsedUri = app.parseUri("https://example.com/path?q=1#frag");
+              assert.strictEqual(Object.isFrozen(parsedUri), true, "app.parseUri descriptor must be frozen");
+              assert.strictEqual(parsedUri.schema, "autojs6-node-app-uri-descriptor-v1");
+              assert.strictEqual(parsedUri.scheme, "https");
+              assert.strictEqual(parsedUri.host, "example.com");
+              assert.strictEqual(parsedUri.path, "/path");
+              assert.strictEqual(parsedUri.query, "q=1");
+              assert.strictEqual(parsedUri.fragment, "frag");
+              assert.strictEqual(app.parseUri("README.md").path, "README.md");
+              assert.strictEqual(app.parseUri(null), null);
               await expectPromise("app.openAppSetting", app.openAppSetting("org.autojs.autojs6", { timeoutMs: 1014 }));
               const viewIntent = app.intent({
                 action: "VIEW",
@@ -646,8 +656,13 @@ class NodeBridgeConformanceInstrumentationTest {
               assert(appSettingsRequests.length >= 4, "app settings aliases must dispatch through openAppSetting bridge method");
               const beforeAppRejects = requests.length;
               await expectRejectCode("app.sendBroadcast", app.sendBroadcast({ action: "org.autojs6.TEST" }), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
+              expectThrowCode("app.getUriForFile", () => app.getUriForFile("README.md"), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
+              await expectRejectCode("app.kill", app.kill("org.autojs.autojs6"), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
+              await expectRejectCode("app.startDualActivity", app.startDualActivity({ action: "VIEW", url: "example.com" }), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
+              await expectRejectCode("app.launchDualPackage", app.launchDualPackage("org.autojs.autojs6"), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
+              await expectRejectCode("app.isDualInstalled", app.isDualInstalled("org.autojs.autojs6"), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               await expectRejectCode("app.intent.root", Promise.resolve().then(() => app.intent({ action: "android.intent.action.VIEW", root: true })), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
-              assert.strictEqual(requests.length, beforeAppRejects, "app sendBroadcast/root rejected stubs must not dispatch bridge requests");
+              assert.strictEqual(requests.length, beforeAppRejects, "app raw Uri/kill/dual/sendBroadcast/root rejected stubs must not dispatch bridge requests");
               await expectPromise("dialogs.alert", dialogs.alert("title", "message", { timeoutMs: 1016 }));
               assert.strictEqual(await expectPromise("dialogs.confirm", dialogs.confirm("title", "message", { timeoutMs: 1017 })), true);
               assert.strictEqual(await expectPromise("dialogs.input", dialogs.input("title", "prefill", { timeoutMs: 1018 })), "typed");

@@ -55,18 +55,19 @@
   pure `app.intentToShell()` shell-argument serialization, `app.openUrl()`,
   `app.sendEmail()`, `app.uninstall()`, exact `app.query` installed-app lookup
   helpers, scoped `app.viewFile()` / `app.editFile()` Activity helpers,
-  settings aliases, and `app.launch()` as a `launchPackage()` alias backed by
-  the existing scoped activity/settings bridge.
+  settings aliases, `app.launch()` as a `launchPackage()` alias, JSON-safe
+  `app.parseUri()`, and stable fail-closed stubs for raw URI, kill, and
+  dual-user app helpers backed by the existing scoped activity/settings bridge.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
 - Report:
   `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
 - Surface manifest evidence: `phase13-app-intent-broadcast-parity`.
-- Remaining P13-23 blockers: remaining Rhino app helper aliases,
-  raw installed-app list APIs, broadcast send promotion,
-  root/Shizuku/dual-user routing through explicit capabilities, packaged smoke,
-  negative device corpus, and migration examples.
+- Remaining P13-23 blockers: raw URI/FileProvider promotion, raw installed-app
+  list APIs, broadcast send promotion, root/Shizuku/dual-user routing through
+  explicit capabilities, packaged smoke, negative device corpus, preset alias
+  mapping, and migration examples.
 
 ## P13-24 Partial Landing Note
 
@@ -949,6 +950,10 @@ P13 task 本身使用以下执行状态：
     - Stable blocked boundary: `app.sendBroadcast()` rejects before bridge
       dispatch, and `root`/`shizuku`/`dual`/`user` options are rejected by the
       JS facade.
+    - Follow-up helper parity: JSON-safe `app.parseUri()` descriptors plus
+      stable fail-closed `app.getUriForFile()`, `app.kill()`, `app.killDual()`,
+      `app.startDualActivity()`, `app.launchDual*()`, `app.openDual*()`,
+      `app.uninstallDual()`, and `app.isDualInstalled()` stubs.
     - Type declarations: `docs/nodejs/types/autojs6-node/app.d.ts`.
     - Type smoke: `sample/nodejs/typescript-smoke/src/main.ts`.
     - Focused conformance:
@@ -958,10 +963,10 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
     - Report:
       `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
-    - Open before closure: remaining Rhino app helper aliases, broadcast send
+    - Open before closure: raw URI/FileProvider promotion, broadcast send
       promotion, root/Shizuku/dual-user routing through P13-24 capabilities,
-      raw installed-app list APIs, packaged smoke, negative device corpus, and
-      migration examples.
+      raw installed-app list APIs, packaged smoke, negative device corpus,
+      preset alias mapping, and migration examples.
 
 - [ ] P13-24: 扩展 shell/root/Shizuku 能力。
   - 范围：将 shell、root shell、Shizuku 拆成独立 capability。

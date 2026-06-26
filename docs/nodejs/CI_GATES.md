@@ -425,10 +425,11 @@ broadcast wakeups remain blocked.
 `verifyNodePhase13AppIntentBroadcastParity` records the P13-23 partial
 app/intent/broadcast Pro parity state: JSON-safe `app.intent()` descriptors,
 `app.startActivity()` descriptor normalization, TypeScript/conformance evidence,
-and stable `app.sendBroadcast()` plus privileged app-option rejection are
-present, while broadcast send promotion, root/Shizuku app routing,
-raw installed-app list APIs, packaged smoke, and raw Android
-app/intent objects remain blocked.
+JSON-safe `app.parseUri()` descriptors, and stable `app.sendBroadcast()`,
+raw-URI, kill, dual-user, plus privileged app-option rejection are present,
+while broadcast send promotion, raw URI/FileProvider handles, root/Shizuku app
+routing, raw installed-app list APIs, packaged smoke, and raw Android app/intent
+objects remain blocked.
 `verifyNodePhase13ShellRootShizukuCapability` records the P13-24 partial
 shell/root/Shizuku capability state: `shell`, `shell.root`, and
 `shell.shizuku` are split capability tokens, `execRoot()` routes through the
@@ -622,10 +623,11 @@ objects require separate evidence.
 P13-23 additionally uses `verifyNodePhase13AppIntentBroadcastParity` as the
 host promotion-status gate for app/intent/broadcast parity and keeps the surface
 partial: JSON-safe `app.intent()`, normalized `app.startActivity()`, scoped
-file view/edit helpers, and `app.launch()` alias parity are covered, while
-`sendBroadcast`, root/Shizuku app options, dual-user helpers, raw
-installed-app list APIs, packaged behavior, and
-raw Android objects require separate evidence.
+file view/edit helpers, `app.launch()` alias parity, JSON-safe
+`app.parseUri()`, and stable raw-URI/kill/dual-user rejections are covered,
+while `sendBroadcast` promotion, raw URI/FileProvider handles, root/Shizuku app
+options, raw installed-app list APIs, packaged behavior, and raw Android objects
+require separate evidence.
 P13-24 additionally uses `verifyNodePhase13ShellRootShizukuCapability` as the
 host promotion-status gate for shell/root/Shizuku capability parity and keeps
 the surface partial: ordinary shell and explicit root facades are covered by
