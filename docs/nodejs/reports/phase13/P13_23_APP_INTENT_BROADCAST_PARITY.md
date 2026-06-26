@@ -16,6 +16,13 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
   JSON-safe primitive extras and primitive arrays.
 - Android bridge parsing now accepts `category`/`categories`, merged numeric
   flags, and primitive array extras before creating the Android `Intent`.
+- Follow-up Pro helper parity now normalizes short `action`/`category` strings
+  such as `VIEW` and `BROWSABLE`, accepts `url` as a descriptor alias for
+  `data`, and allows URL string input through `app.startActivity()`.
+- `app.openUrl()`, `app.sendEmail()`, `app.openAppSettings()`,
+  `app.launchSettings()`, and `app.launchAppDetailsSettings()` now reuse the
+  existing scoped `startActivity` / settings bridge methods instead of adding a
+  new Android authority surface.
 - `app.sendBroadcast()` is present only as a stable rejection stub. It does not
   dispatch to the bridge and does not register, send, or receive Android
   broadcasts.
@@ -53,10 +60,10 @@ No raw Android `Intent`, `Uri`, `Bundle`, `ComponentName`, `PackageManager`,
 
 ## Remaining Blockers
 
-- Full Rhino app helper parity: `sendEmail`, `openUrl`, `parseUri`,
-  `getUriForFile`, `viewFile`, `editFile`, `uninstall`, `kill`,
-  `getPackageName`, `getAppName`, and app alias helpers.
-- Activity short-form mapping and URI/email/settings helper descriptors.
+- Full Rhino app helper parity: `parseUri`, `getUriForFile`, `viewFile`,
+  `editFile`, `uninstall`, `kill`, `getPackageName`, `getAppName`, preset app
+  aliases, and dual-app helpers.
+- Activity short-form mapping beyond URL strings and JSON-safe descriptors.
 - Broadcast send promotion with receiver authority, exported/non-exported
   policy, manifest synthesis, user disclosure, rate limits, and packaged smoke.
 - root/Shizuku/dual-user routes through explicit P13-24 capability surfaces.

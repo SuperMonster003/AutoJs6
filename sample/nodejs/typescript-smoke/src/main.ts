@@ -67,13 +67,23 @@ async function smoke(): Promise<void> {
   const launchByName: boolean = await app.launchApp("AutoJs6", { timeoutMs: 1000 });
   await app.openAppSetting(app.packageName, { timeoutMs: 1000 });
   const viewIntent: app.IntentDescriptor = app.intent({
-    action: "android.intent.action.VIEW",
-    data: "https://example.invalid",
-    category: ["android.intent.category.BROWSABLE"],
+    action: "VIEW",
+    url: "example.invalid",
+    category: ["BROWSABLE"],
     flags: [0x10000000],
     extras: { source: "typescript-smoke", retry: 1, active: true, tags: ["node", "app"] }
   });
   await app.startActivity(viewIntent, { timeoutMs: 1000 });
+  await app.startActivity("https://example.invalid", { timeoutMs: 1000 });
+  await app.openUrl("example.invalid/path", { timeoutMs: 1000 });
+  await app.sendEmail({
+    to: ["dev@example.invalid"],
+    subject: "AutoJs6",
+    text: "Node app facade"
+  }, { timeoutMs: 1000 });
+  await app.openAppSettings({ timeoutMs: 1000 });
+  await app.launchSettings(app.packageName, { timeoutMs: 1000 });
+  await app.launchAppDetailsSettings(app.packageName, { timeoutMs: 1000 });
   const broadcastDenied: Promise<never> = app.sendBroadcast({ action: "org.autojs6.TEST" }, { timeoutMs: 1000 });
 
   await dialogs.alert("Title", "Message", { timeoutMs: 1000 });
@@ -112,10 +122,11 @@ async function smoke(): Promise<void> {
   const shizukuShellDenied: Promise<never> = shell.execShizuku("id", { timeoutMs: 1000 });
   const compatLaunch: boolean = await rhinoCompat.app.launchPackage(app.packageName, { timeoutMs: 1000 });
   const compatIntent: app.IntentDescriptor = rhinoCompat.app.intent({
-    action: "android.intent.action.VIEW",
-    data: "https://example.invalid",
-    categories: "android.intent.category.BROWSABLE"
+    action: "VIEW",
+    url: "https://example.invalid",
+    categories: "BROWSABLE"
   });
+  await rhinoCompat.app.openUrl("https://example.invalid", { timeoutMs: 1000 });
   const compatBroadcastDenied: Promise<never> = rhinoCompat.app.sendBroadcast("inspect_layout_bounds", { timeoutMs: 1000 });
   const compatScreenOn: boolean = await rhinoCompat.device.isScreenOn({ timeoutMs: 1000 });
   const compatBatteryIgnored: boolean = await rhinoCompat.device.isIgnoringBatteryOptimizations({ timeoutMs: 1000 });

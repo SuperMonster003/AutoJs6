@@ -50,14 +50,18 @@
 - P13-23 partial app/intent/broadcast Pro parity gate records JSON-safe
   `app.intent()` descriptors, stricter `app.startActivity()` descriptor
   parsing, and stable `app.sendBroadcast()` rejection.
+- Follow-up helper parity records short `action`/`category` normalization,
+  `url` descriptor aliases, URL string `app.startActivity()` input,
+  `app.openUrl()`, `app.sendEmail()`, and settings aliases backed by the
+  existing scoped activity/settings bridge.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.
 - Report:
   `docs/nodejs/reports/phase13/P13_23_APP_INTENT_BROADCAST_PARITY.md`.
 - Surface manifest evidence: `phase13-app-intent-broadcast-parity`.
-- Remaining P13-23 blockers: Rhino app helper aliases, URI/email/settings
-  helpers, installed-app lookup privacy policy, broadcast send promotion,
+- Remaining P13-23 blockers: remaining Rhino app helper aliases,
+  installed-app lookup privacy policy, broadcast send promotion,
   root/Shizuku/dual-user routing through explicit capabilities, packaged smoke,
   negative device corpus, and migration examples.
 

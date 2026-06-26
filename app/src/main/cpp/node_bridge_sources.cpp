@@ -21365,6 +21365,49 @@ std::string buildEmbeddedScriptExecutionSource(
     const text = String(value);
     return text.length > 0 ? text : undefined;
   }
+  function __autojs6_app_expand_android_constant(kind, value) {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+    const text = String(value).trim();
+    if (!text) {
+      return undefined;
+    }
+    if (text.indexOf(".") >= 0) {
+      return text;
+    }
+    return "android.intent." + kind + "." + text.toUpperCase();
+  }
+  function __autojs6_app_normalize_action(value) {
+    return __autojs6_app_expand_android_constant("action", value);
+  }
+  function __autojs6_app_normalize_category(value) {
+    return __autojs6_app_expand_android_constant("category", value);
+  }
+  function __autojs6_app_has_uri_scheme(value) {
+    return /^[a-z][a-z0-9+.-]*:/i.test(String(value || ""));
+  }
+  function __autojs6_app_looks_like_web_url(value) {
+    const text = String(value || "").trim();
+    return /^(www\.)?[-a-z0-9]+(\.[a-z0-9-]+)+(\/|$|\?|#)/i.test(text);
+  }
+  function __autojs6_app_normalize_url(value, methodName, fieldName) {
+    const text = __autojs6_app_optional_intent_string(value, methodName, fieldName);
+    if (text === undefined) {
+      return undefined;
+    }
+    const trimmed = text.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    if (__autojs6_app_has_uri_scheme(trimmed)) {
+      return trimmed;
+    }
+    if (__autojs6_app_looks_like_web_url(trimmed)) {
+      return "http://" + trimmed;
+    }
+    __autojs6_app_intent_error(methodName, "app." + methodName + " " + fieldName + " must include a URI scheme or a web host.");
+  }
   function __autojs6_app_intent_categories(value, methodName, fieldName) {
     if (value === undefined || value === null) {
       return [];
@@ -21374,7 +21417,7 @@ std::string buildEmbeddedScriptExecutionSource(
       if (entry === undefined || entry === null) {
         return "";
       }
-      return String(entry);
+      return __autojs6_app_normalize_category(entry) || "";
     }).filter(function(entry) {
       return entry.length > 0;
     });
@@ -21462,15 +21505,26 @@ std::string buildEmbeddedScriptExecutionSource(
     [
       "action",
       "data",
+      "url",
       "type",
       "packageName",
       "package",
       "className",
       "component"
     ].forEach(function(key) {
-      const value = __autojs6_app_optional_intent_string(options[key], methodName, key);
+      const value = key === "url"
+        ? __autojs6_app_normalize_url(options[key], methodName, key)
+        : __autojs6_app_optional_intent_string(options[key], methodName, key);
       if (value !== undefined) {
-        descriptor[key === "package" ? "packageName" : key] = value;
+        if (key === "package") {
+          descriptor.packageName = value;
+        } else if (key === "url") {
+          descriptor.data = value;
+        } else if (key === "action") {
+          descriptor.action = __autojs6_app_normalize_action(value);
+        } else {
+          descriptor[key] = value;
+        }
       }
     });
     const categories = []
@@ -21502,12 +21556,72 @@ std::string buildEmbeddedScriptExecutionSource(
     return Boolean(
       options.action ||
       options.data ||
+      options.url ||
       options.type ||
       options.packageName ||
       options.package ||
       options.className ||
       options.component
     );
+  }
+  function __autojs6_app_open_url_descriptor(url, methodName) {
+    return __autojs6_app_normalize_intent_descriptor({
+      action: "VIEW",
+      url: url,
+      category: "BROWSABLE"
+    }, methodName);
+  }
+  function __autojs6_app_email_values(value, methodName, fieldName) {
+    if (value === undefined || value === null) {
+      return [];
+    }
+    const values = Array.isArray(value) ? value : [value];
+    return values.map(function(entry) {
+      return String(entry === undefined || entry === null ? "" : entry).trim();
+    }).filter(function(entry) {
+      return entry.length > 0;
+    }).map(function(entry) {
+      if (/[\r\n]/.test(entry)) {
+        __autojs6_app_intent_error(methodName, "app." + methodName + " " + fieldName + " must not contain line breaks.");
+      }
+      return entry;
+    });
+  }
+  function __autojs6_app_email_request(value, methodName) {
+    if (typeof value === "string" || Array.isArray(value)) {
+      return { to: value };
+    }
+    if (!__autojs6_app_intent_plain_object(value)) {
+      __autojs6_app_intent_error(methodName, "app." + methodName + " requires an email request object or recipient string.");
+    }
+    return value;
+  }
+  function __autojs6_app_email_descriptor(value, methodName) {
+    const request = __autojs6_app_email_request(value, methodName);
+    const to = __autojs6_app_email_values(request.to || request.email || request.address, methodName, "to");
+    const cc = __autojs6_app_email_values(request.cc, methodName, "cc");
+    const bcc = __autojs6_app_email_values(request.bcc, methodName, "bcc");
+    const subject = request.subject === undefined || request.subject === null ? "" : String(request.subject);
+    const body = request.text === undefined || request.text === null
+      ? request.body === undefined || request.body === null ? "" : String(request.body)
+      : String(request.text);
+    const query = [];
+    if (cc.length > 0) query.push("cc=" + encodeURIComponent(cc.join(",")));
+    if (bcc.length > 0) query.push("bcc=" + encodeURIComponent(bcc.join(",")));
+    if (subject) query.push("subject=" + encodeURIComponent(subject));
+    if (body) query.push("body=" + encodeURIComponent(body));
+    const data = "mailto:" + to.map(encodeURIComponent).join(",") + (query.length > 0 ? "?" + query.join("&") : "");
+    const extras = {};
+    if (to.length > 0) extras["android.intent.extra.EMAIL"] = Object.freeze(to.slice());
+    if (cc.length > 0) extras["android.intent.extra.CC"] = Object.freeze(cc.slice());
+    if (bcc.length > 0) extras["android.intent.extra.BCC"] = Object.freeze(bcc.slice());
+    if (subject) extras["android.intent.extra.SUBJECT"] = subject;
+    if (body) extras["android.intent.extra.TEXT"] = body;
+    return __autojs6_app_normalize_intent_descriptor({
+      action: "SENDTO",
+      data: data,
+      extras: extras
+    }, methodName);
   }
   function __autojs6_app_send_broadcast_unavailable_error() {
     return __autojs6_bridge_error(
@@ -21524,6 +21638,43 @@ std::string buildEmbeddedScriptExecutionSource(
     const info = __autojs6_host_app_info();
     function intent(options) {
       return __autojs6_app_normalize_intent_descriptor(options, "intent");
+    }
+    function openUrl(url, options) {
+      let descriptor;
+      try {
+        descriptor = __autojs6_app_open_url_descriptor(url, "openUrl");
+      } catch (error) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "openUrl",
+          error && error.message ? error.message : "app.openUrl requires a URI string."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "startActivity",
+        [descriptor],
+        __autojs6_app_bridge_options(options, 10000)
+      );
+    }
+    function sendEmail(request, options) {
+      let descriptor;
+      try {
+        const emailRequest = (typeof request === "string" || Array.isArray(request)) && options && typeof options === "object"
+          ? Object.assign({}, options, { to: request })
+          : request;
+        descriptor = __autojs6_app_email_descriptor(emailRequest, "sendEmail");
+      } catch (error) {
+        return Promise.reject(__autojs6_app_invalid_argument_error(
+          "sendEmail",
+          error && error.message ? error.message : "app.sendEmail requires a JSON-safe email request."
+        ));
+      }
+      return __autojs6_call_autojs(
+        "app",
+        "startActivity",
+        [descriptor],
+        __autojs6_app_bridge_options(options, 10000)
+      );
     }
     function launchPackage(packageName, options) {
       const target = __autojs6_app_non_empty_string(packageName);
@@ -21579,7 +21730,9 @@ std::string buildEmbeddedScriptExecutionSource(
     function startActivity(options, callOptions) {
       let descriptor;
       try {
-        descriptor = __autojs6_app_normalize_intent_descriptor(options, "startActivity");
+        descriptor = typeof options === "string"
+          ? __autojs6_app_open_url_descriptor(options, "startActivity")
+          : __autojs6_app_normalize_intent_descriptor(options, "startActivity");
       } catch (error) {
         return Promise.reject(__autojs6_app_invalid_argument_error(
           "startActivity",
@@ -21601,9 +21754,14 @@ std::string buildEmbeddedScriptExecutionSource(
       versionName: info.versionName,
       versionCode: info.versionCode,
       intent,
+      openUrl,
+      sendEmail,
       launchPackage,
       launchApp,
       openAppSetting,
+      openAppSettings: openAppSetting,
+      launchSettings: openAppSetting,
+      launchAppDetailsSettings: openAppSetting,
       startActivity,
       sendBroadcast
     });

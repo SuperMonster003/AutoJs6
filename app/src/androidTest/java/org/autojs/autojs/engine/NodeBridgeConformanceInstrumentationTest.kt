@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.json.JSONArray
 import java.io.File
 
 class NodeBridgeConformanceInstrumentationTest {
@@ -44,6 +45,7 @@ class NodeBridgeConformanceInstrumentationTest {
             check(mkdirs()) { "Failed to create bridge conformance working directory: $absolutePath" }
         }
         File(workDir, "main.cjs").writeText("""console.log("scheduled");""")
+        writeBridgePermissionManifest(workDir)
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             """
@@ -579,22 +581,36 @@ class NodeBridgeConformanceInstrumentationTest {
               await expectPromise("app.launchApp", app.launchApp("AutoJs6", { timeoutMs: 1013 }));
               await expectPromise("app.openAppSetting", app.openAppSetting("org.autojs.autojs6", { timeoutMs: 1014 }));
               const viewIntent = app.intent({
-                action: "android.intent.action.VIEW",
-                data: "https://example.com",
-                category: "android.intent.category.BROWSABLE",
+                action: "VIEW",
+                url: "example.com",
+                category: "BROWSABLE",
                 categories: ["android.intent.category.DEFAULT", "android.intent.category.BROWSABLE"],
                 flags: [0x10000000, 0x00000020],
                 extras: { source: "conformance", retry: 2, enabled: true, labels: ["node", "intent"] }
               });
               assert.strictEqual(Object.isFrozen(viewIntent), true, "app.intent descriptor must be frozen");
+              assert.strictEqual(viewIntent.action, "android.intent.action.VIEW");
+              assert.strictEqual(viewIntent.data, "http://example.com");
               assert.deepStrictEqual(viewIntent.categories, ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]);
               assert.strictEqual(viewIntent.flags, 0x10000020);
               await expectPromise("app.startActivity", app.startActivity(viewIntent, { timeoutMs: 1015 }));
+              await expectPromise("app.startActivity.url", app.startActivity("https://example.com/path", { timeoutMs: 1016 }));
+              await expectPromise("app.openUrl", app.openUrl("example.com/docs", { timeoutMs: 1017 }));
+              await expectPromise("app.sendEmail", app.sendEmail({ to: ["dev@example.com"], subject: "AutoJs6", text: "Node app facade" }, { timeoutMs: 1018 }));
+              await expectPromise("app.openAppSettings", app.openAppSettings({ timeoutMs: 1019 }));
+              await expectPromise("app.launchSettings", app.launchSettings("org.autojs.autojs6", { timeoutMs: 1020 }));
+              await expectPromise("app.launchAppDetailsSettings", app.launchAppDetailsSettings("org.autojs.autojs6", { timeoutMs: 1021 }));
               const appStartRequest = requests.filter((request) => request.module === "app" && request.method === "startActivity").pop();
               assert(appStartRequest, "app.startActivity request must be dispatched");
-              assert.deepStrictEqual(appStartRequest.args[0].categories, ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]);
-              assert.strictEqual(appStartRequest.args[0].flags, 0x10000020);
-              assert.deepStrictEqual(appStartRequest.args[0].extras.labels, ["node", "intent"]);
+              assert.strictEqual(appStartRequest.args[0].action, "android.intent.action.SENDTO");
+              assert.strictEqual(appStartRequest.args[0].data, "mailto:dev%40example.com?subject=AutoJs6&body=Node%20app%20facade");
+              assert.deepStrictEqual(appStartRequest.args[0].extras["android.intent.extra.EMAIL"], ["dev@example.com"]);
+              const viewStartRequest = requests.filter((request) => request.module === "app" && request.method === "startActivity")[0];
+              assert.deepStrictEqual(viewStartRequest.args[0].categories, ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]);
+              assert.strictEqual(viewStartRequest.args[0].flags, 0x10000020);
+              assert.deepStrictEqual(viewStartRequest.args[0].extras.labels, ["node", "intent"]);
+              const appSettingsRequests = requests.filter((request) => request.module === "app" && request.method === "openAppSetting");
+              assert(appSettingsRequests.length >= 4, "app settings aliases must dispatch through openAppSetting bridge method");
               const beforeAppRejects = requests.length;
               await expectRejectCode("app.sendBroadcast", app.sendBroadcast({ action: "org.autojs6.TEST" }), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
               await expectRejectCode("app.intent.root", Promise.resolve().then(() => app.intent({ action: "android.intent.action.VIEW", root: true })), "ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED");
@@ -989,12 +1005,22 @@ class NodeBridgeConformanceInstrumentationTest {
             """.trimIndent(),
             "<embedded-autojs-bridge-conformance.js>",
             workingDirectory = workDir,
+            sandboxRoot = workDir,
             timeoutMs = 30_000L,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("bridge API conformance", result)
         assertTrue(result.stdout, result.stdout.contains("bridge.conformance=PASS"))
         assertTrue(result.stdout, result.stdout.contains("bridge.conformance.pending=0"))
+    }
+
+    private fun writeBridgePermissionManifest(workDir: File) {
+        val permissions = stableDispatchMethods
+            .flatMap { (module, methods) ->
+                methods.flatMap { method -> NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method) }
+            }
+            .distinct()
+        File(workDir, "project.json").writeText("""{"node":{"permissions":${JSONArray(permissions)}}}""")
     }
 
     @Test
