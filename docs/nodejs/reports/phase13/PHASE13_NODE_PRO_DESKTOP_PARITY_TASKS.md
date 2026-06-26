@@ -183,11 +183,16 @@
 ## P13-32 Partial Landing Note
 
 - P13-32 partial filesystem profile gate records the current Safe profile as
-  scoped to `workingDirectory` and exposes a frozen diagnostic
-  `filesystemProfile` snapshot without adding any extra root authority.
+  keeping `process.cwd()` at the script working directory while allowing a
+  distinct scoped `sandboxRoot` for the containing AutoJs6 workspace/project
+  root, and exposes a frozen diagnostic `filesystemProfile` snapshot without
+  adding any external root authority.
 - Scoped absolute paths under `workingDirectory` are now allowed for Node/npm
   package resource loading patterns such as `path.join(__dirname, "file.css")`;
   absolute paths outside the sandbox remain rejected.
+- Scripts launched from a subdirectory of the AutoJs6 working directory can now
+  read parent files that remain inside the workspace, for example
+  `../version.properties` from `$cwd/utils`.
 - Host verifier:
   `tools/nodejs/phase13/verify-filesystem-profile-decision.js`.
 - Gradle gate: `:app:verifyNodePhase13FilesystemProfileDecision`.
@@ -1156,7 +1161,10 @@ P13 task 本身使用以下执行状态：
       中静默开放 `/sdcard`、SAF、app-private 或用户授权根。
     - scoped fs 现在允许解析后仍位于 `workingDirectory` / `sandboxRoot`
       内的绝对路径，用于兼容 `jsdom` 等 npm package 通过 `__dirname`
-      读取包内 CSS/fixture 资源；越界绝对路径仍返回绝对路径拒绝策略。
+      读取包内 CSS/fixture 资源；当脚本位于 AutoJs6 工作目录子目录时，
+      `process.cwd()` 保持脚本目录，但 `sandboxRoot` 可提升到工作目录根，
+      因而 `../version.properties` 这类仍在工作目录内的读取可通过；
+      越界绝对路径仍返回绝对路径拒绝策略。
     - `autojs6:profile.filesystemProfile` 暴露冻结诊断：
       `mode="scoped_working_directory"` 且 `additionalRoots=[]`。
     - `NodeFilesystemProfileDecisionInstrumentationTest` 覆盖 scoped 读写、

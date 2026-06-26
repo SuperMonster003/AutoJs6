@@ -418,6 +418,7 @@ object NativeNodeEmbeddedProjectRunner {
             source = source,
             sourceName = entryFile.canonicalPath,
             workingDirectory = projectRoot.canonicalPath,
+            sandboxRoot = projectRoot.canonicalPath,
             executionMode = NodeExecutionModePolicy.normalize(request.executionMode),
             timeoutMs = request.timeoutMs,
             moduleSources = request.moduleSources,

@@ -5453,6 +5453,7 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::string& source,
         const std::string& sourceName,
         const std::string& workingDirectory,
+        const std::string& sandboxRoot,
         const std::vector<std::pair<std::string, std::string>>& moduleSources,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
         const std::vector<std::pair<std::string, std::string>>& env,
@@ -5464,6 +5465,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const std::string sourceLiteral = jsonStringLiteral(source);
     const std::string sourceNameLiteral = jsonStringLiteral(sanitizeSourceUrl(sourceName));
     const std::string workingDirectoryLiteral = jsonStringLiteral(workingDirectory);
+    const std::string sandboxRootLiteral = jsonStringLiteral(sandboxRoot.empty() ? workingDirectory : sandboxRoot);
     const std::string moduleSourcesLiteral = buildEmbeddedModuleSourcesLiteral(moduleSources);
     const std::string runtimeModuleSourcesLiteral = buildEmbeddedModuleSourcesLiteral(runtimeModuleSources);
     const std::string envLiteral = buildEmbeddedModuleSourcesLiteral(env);
@@ -5472,6 +5474,7 @@ std::string buildEmbeddedScriptExecutionSource(
             source.size() +
             sourceName.size() +
             workingDirectory.size() +
+            sandboxRoot.size() +
             moduleSourcesLiteral.size() +
             runtimeModuleSourcesLiteral.size() +
             envLiteral.size() +
@@ -5489,8 +5492,10 @@ std::string buildEmbeddedScriptExecutionSource(
   const __autojs6_module_root = ")JS";
     script += workingDirectoryLiteral;
     script += R"JS(";
-  const __autojs6_sandbox_root = __autojs6_module_root;
-  let __autojs6_current_working_directory = __autojs6_sandbox_root;
+  const __autojs6_sandbox_root = ")JS";
+    script += sandboxRootLiteral;
+    script += R"JS(";
+  let __autojs6_current_working_directory = __autojs6_module_root || __autojs6_sandbox_root;
   let __autojs6_chdir_last_failure_reason = "";
   let __autojs6_create_require_last_failure_reason = "";
   const __autojs6_module_sources = Object.freeze()JS";
@@ -28298,7 +28303,7 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     const absolute = path.resolve(resolved);
     __autojs6_record_runtime_module_candidate(absolute);
-    const root = path.resolve(__autojs6_module_root || ".");
+    const root = __autojs6_resolved_sandbox_root(path);
     let realRoot;
     try {
       realRoot = fs.realpathSync(root);
@@ -42933,7 +42938,7 @@ std::string buildEmbeddedScriptExecutionSource(
     if (!path || typeof path.resolve !== "function") {
       return __autojs6_module_root || __autojs6_module_dirname(filename);
     }
-    const fallbackRoot = path.resolve(__autojs6_module_root || __autojs6_module_dirname(filename));
+    const fallbackRoot = __autojs6_resolved_sandbox_root(path);
     const resolvedFilename = path.resolve(filename || fallbackRoot);
     for (const root of Object.keys(__autojs6_plugin_module_roots)) {
       if (__autojs6_path_within_root(resolvedFilename, root)) {

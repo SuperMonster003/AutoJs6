@@ -335,6 +335,7 @@ bool parseModuleSourcesJson(
         const char* json,
         std::vector<std::pair<std::string, std::string>>& moduleSources,
         std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
+        std::string& sandboxRoot,
         std::string& error
 ) {
     if (json == nullptr || std::strlen(json) == 0) {
@@ -367,6 +368,11 @@ bool parseModuleSourcesJson(
             }
         } else if (key == "runtimeModuleSources") {
             if (!parseStringPairArray(cursor, runtimeModuleSources)) {
+                error = cursor.error();
+                return false;
+            }
+        } else if (key == "sandboxRoot") {
+            if (!cursor.parseString(sandboxRoot)) {
                 error = cursor.error();
                 return false;
             }
@@ -518,8 +524,9 @@ int32_t executeRequest(
     execution.workingDirectory = request->working_directory != nullptr
             ? request->working_directory
             : handle->workingDirectory;
+    std::string sandboxRoot;
     std::string parseError;
-    if (!parseModuleSourcesJson(request->module_sources_json, execution.moduleSources, execution.runtimeModuleSources, parseError) ||
+    if (!parseModuleSourcesJson(request->module_sources_json, execution.moduleSources, execution.runtimeModuleSources, sandboxRoot, parseError) ||
             !parseStandalonePairArray(request->environment_json, execution.env, parseError)) {
         handle->lastResultJson = buildFailureResultJson(
                 request->source_name,
@@ -543,6 +550,7 @@ int32_t executeRequest(
         setHandleState(handle, AUTOJS_NODE_RUNTIME_STATE_FAILED);
         return fillExecutionResult(handle, result, AUTOJS_NODE_RESULT_INVALID_ARGUMENT);
     }
+    execution.sandboxRoot = sandboxRoot.empty() ? execution.workingDirectory : sandboxRoot;
     const uint32_t flags = requestFlags(request);
     execution.esmExperimentalEnabled = (flags & AUTOJS_NODE_EXECUTION_FLAG_ESM_EXPERIMENTAL) != 0;
     execution.dynamicImportExperimentalEnabled = (flags & AUTOJS_NODE_EXECUTION_FLAG_DYNAMIC_IMPORT_EXPERIMENTAL) != 0;

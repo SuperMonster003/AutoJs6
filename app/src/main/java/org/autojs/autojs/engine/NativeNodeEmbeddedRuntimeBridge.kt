@@ -667,6 +667,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.source,
                     preparedRequest.sourceName,
                     preparedRequest.workingDirectory,
+                    preparedRequest.sandboxRoot,
                     preparedRequest.moduleSources.keys.toTypedArray(),
                     preparedRequest.moduleSources.values.toTypedArray(),
                     preparedRequest.runtimeModuleSources.keys.toTypedArray(),
@@ -684,6 +685,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.source,
                     preparedRequest.sourceName,
                     preparedRequest.workingDirectory,
+                    preparedRequest.sandboxRoot,
                     preparedRequest.moduleSources.keys.toTypedArray(),
                     preparedRequest.moduleSources.values.toTypedArray(),
                     preparedRequest.env.keys.toTypedArray(),
@@ -699,6 +701,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.source,
                     preparedRequest.sourceName,
                     preparedRequest.workingDirectory,
+                    preparedRequest.sandboxRoot,
                     preparedRequest.moduleSources.keys.toTypedArray(),
                     preparedRequest.moduleSources.values.toTypedArray(),
                     preparedRequest.runtimeModuleSources.keys.toTypedArray(),
@@ -1059,6 +1062,7 @@ object NativeNodeEmbeddedRuntimeBridge {
     private fun compileCacheProjectKey(request: EmbeddedScriptRequest): String = sha256Hex {
         updatePart(COMPILE_CACHE_SCHEMA_VERSION)
         updatePart(request.workingDirectory?.takeIf { it.isNotBlank() } ?: File(request.sourceName).parent.orEmpty())
+        updatePart(request.sandboxRoot.orEmpty())
     }.take(24)
 
     private fun compileCacheContentKey(
@@ -15321,6 +15325,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        sandboxRoot: String?,
         envNames: Array<String>,
         envValues: Array<String>,
         esmExperimentalEnabled: Boolean,
@@ -15334,6 +15339,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        sandboxRoot: String?,
         moduleSourceNames: Array<String>,
         moduleSources: Array<String>,
         envNames: Array<String>,
@@ -15349,6 +15355,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        sandboxRoot: String?,
         moduleSourceNames: Array<String>,
         moduleSources: Array<String>,
         runtimeModuleSourceNames: Array<String>,
@@ -15375,6 +15382,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         source: String,
         sourceName: String,
         workingDirectory: String?,
+        sandboxRoot: String?,
         moduleSourceNames: Array<String>,
         moduleSources: Array<String>,
         runtimeModuleSourceNames: Array<String>,
@@ -17649,6 +17657,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val source: String,
         val sourceName: String,
         val workingDirectory: String? = null,
+        val sandboxRoot: String? = null,
         val executionId: String? = null,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val timeoutMs: Long = DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS,

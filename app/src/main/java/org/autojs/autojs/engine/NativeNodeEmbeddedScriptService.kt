@@ -403,6 +403,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             source = source,
             sourceName = sourceName,
             workingDirectory = workingDirectory,
+            sandboxRoot = serviceRequest.sandboxRoot,
             executionMode = executionMode,
             timeoutMs = timeoutMs,
             captureStdout = serviceRequest.captureStdout,
@@ -470,6 +471,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             TAG,
                     "script.enter executionId=$executionId processName=$processName pid=$pid sourceName=$sourceName " +
                     "env=${env.size} moduleSources=${moduleSources.size} runtimeModuleSources=${enrichedRuntimeModuleSources.size} " +
+                    "sandboxRoot=${request.sandboxRoot.orEmpty()} " +
                     "esmExperimentalEnabled=$esmExperimentalEnabled " +
                     "dynamicImportLocalEnabled=$dynamicImportLocalEnabled " +
                     "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
@@ -1735,6 +1737,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_SOURCE = "source"
         private const val EXTRA_SOURCE_NAME = "source_name"
         private const val EXTRA_WORKING_DIRECTORY = "working_directory"
+        private const val EXTRA_SANDBOX_ROOT = "sandbox_root"
         private const val EXTRA_EXECUTION_MODE = "execution_mode"
         private const val EXTRA_LAUNCH_SURFACE = "launch_surface"
         private const val EXTRA_TIMEOUT_MS = "timeout_ms"
@@ -1807,6 +1810,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "embedded_script.runtime_state",
             "embedded_script.lifecycle_transitions",
             "embedded_script.source_name",
+            "embedded_script.working_directory",
+            "embedded_script.sandbox_root",
             "embedded_script.current_working_directory",
             "embedded_script.esm_entry",
             "embedded_script.esm_module_graph_root",
@@ -2030,6 +2035,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 putExtra(EXTRA_RESULT_RECEIVER, receiver)
                 putExtra(EXTRA_SOURCE_NAME, scheduledRequestForService.sourceName)
                 putExtra(EXTRA_WORKING_DIRECTORY, scheduledRequestForService.workingDirectory)
+                putExtra(EXTRA_SANDBOX_ROOT, scheduledRequestForService.sandboxRoot)
                 putExtra(EXTRA_EXECUTION_MODE, scheduledRequestForService.executionMode)
                 putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
                 putExtra(EXTRA_TIMEOUT_MS, scheduledRequestForService.timeoutMs.coerceAtLeast(1L))
@@ -2235,6 +2241,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     action = ACTION_RUN_SCRIPT
                     putExtra(EXTRA_SOURCE_NAME, requestForService.sourceName)
                     putExtra(EXTRA_WORKING_DIRECTORY, requestForService.workingDirectory)
+                    putExtra(EXTRA_SANDBOX_ROOT, requestForService.sandboxRoot)
                     putExtra(EXTRA_EXECUTION_MODE, requestForService.executionMode)
                     putExtra(EXTRA_LAUNCH_SURFACE, launchSurface)
                     putExtra(EXTRA_TIMEOUT_MS, requestForService.timeoutMs.coerceAtLeast(1L))
@@ -3231,6 +3238,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 source = getStringExtra(EXTRA_SOURCE).orEmpty(),
                 sourceName = getStringExtra(EXTRA_SOURCE_NAME).orEmpty().ifBlank { DEFAULT_SOURCE_NAME },
                 workingDirectory = getStringExtra(EXTRA_WORKING_DIRECTORY)?.takeIf { it.isNotBlank() },
+                sandboxRoot = getStringExtra(EXTRA_SANDBOX_ROOT)?.takeIf { it.isNotBlank() },
                 executionId = getStringExtra(EXTRA_EXECUTION_ID)?.takeIf { it.isNotBlank() },
                 executionMode = NodeExecutionModePolicy.normalize(getStringExtra(EXTRA_EXECUTION_MODE)),
                 timeoutMs = getLongExtra(EXTRA_TIMEOUT_MS, DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),
@@ -3286,6 +3294,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 put("source", request.source)
                 put("sourceName", request.sourceName)
                 put("workingDirectory", request.workingDirectory)
+                put("sandboxRoot", request.sandboxRoot)
                 put("executionId", request.executionId)
                 put("executionMode", NodeExecutionModePolicy.normalize(request.executionMode))
                 put("timeoutMs", request.timeoutMs.coerceAtLeast(1L))
@@ -3318,6 +3327,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 source = json.optString("source"),
                 sourceName = json.optString("sourceName").ifBlank { DEFAULT_SOURCE_NAME },
                 workingDirectory = json.optString("workingDirectory").takeIf { it.isNotBlank() },
+                sandboxRoot = json.optString("sandboxRoot").takeIf { it.isNotBlank() },
                 executionId = json.optString("executionId").takeIf { it.isNotBlank() },
                 executionMode = NodeExecutionModePolicy.normalize(json.optString("executionMode")),
                 timeoutMs = json.optLong("timeoutMs", DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),

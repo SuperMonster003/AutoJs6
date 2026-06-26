@@ -11,6 +11,7 @@ import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchSource
+import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.BuildConfig
 import java.io.File
 import java.util.UUID
@@ -397,6 +398,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         val requestSource = normalizeEmbeddedSource(sourceText(source))
         val requestSourceName = sourceName(source)
         val requestWorkingDirectory = workingDirectory(source)
+        val requestSandboxRoot = sandboxRoot(requestWorkingDirectory)
         val preload = collectCommonJsModuleSources(
             source = requestSource,
             sourceName = requestSourceName,
@@ -420,6 +422,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             source = requestSource,
             sourceName = requestSourceName,
             workingDirectory = requestWorkingDirectory,
+            sandboxRoot = requestSandboxRoot,
             moduleSources = preload.moduleSources,
             runtimeModuleSources = runtimeModuleSources,
             spawnDepth = currentSpawnDepth(),
@@ -1110,6 +1113,21 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             ?.let { runCatching { File(it).parentFile?.absolutePath }.getOrNull() }
     }
 
+    private fun sandboxRoot(workingDirectory: String?): String? {
+        val cwd = workingDirectory
+            ?.takeIf { it.isNotBlank() }
+            ?.let { File(it).normalizedCanonicalFile() }
+            ?: return null
+        val defaultRoot = WorkingDirectoryUtils.path
+            .takeIf { it.isNotBlank() }
+            ?.let { File(it).normalizedCanonicalFile() }
+        return if (defaultRoot != null && cwd.isInsideOrSame(defaultRoot)) {
+            defaultRoot.normalizedAbsolutePath()
+        } else {
+            cwd.normalizedAbsolutePath()
+        }
+    }
+
     private fun JavaScriptSource.semanticFileFromOverriddenFullPath(): File? {
         return overriddenFullPath
             ?.takeIf { it.isNotBlank() }
@@ -1550,6 +1568,7 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 source = entrySource,
                 sourceName = sourceName,
                 workingDirectory = workingDirectory,
+                sandboxRoot = workingDirectory,
                 executionMode = NodeExecutionModePolicy.normalize(executionMode),
                 timeoutMs = timeoutMs,
                 moduleSources = preload.moduleSources,

@@ -3,21 +3,27 @@
 Status: partial
 
 P13-32 records filesystem profile expansion as partial. The current Node
-Profile v1.1 Safe track remains scoped to the script working directory, while
-Pro/Desktop expansion to user-authorized roots, `/sdcard`, SAF/document roots,
-and app-private roots stays staged behind explicit authority and packaged
-evidence.
+Profile v1.1 Safe track keeps `process.cwd()` scoped to the script working
+directory while allowing a distinct scoped `sandboxRoot` for the containing
+AutoJs6 workspace or project root. Pro/Desktop expansion to user-authorized
+roots, `/sdcard`, SAF/document roots, and app-private roots stays staged behind
+explicit authority and packaged evidence.
 
 ## Decision
 
 - `require("autojs6:profile").filesystemProfile` exposes a frozen diagnostic
   snapshot with `mode="scoped_working_directory"` and
   `additionalRoots=[]`.
-- Normal scoped file reads and `realpath` inside `workingDirectory` remain
-  allowed.
+- Normal scoped file reads and `realpath` inside `sandboxRoot` remain allowed.
+  `process.cwd()` remains the script directory, so relative paths still resolve
+  from the launched script location.
+- Scripts launched from a subdirectory of the AutoJs6 working directory may
+  read parent files that remain inside that workspace, for example
+  `../version.properties` from `$cwd/utils`.
 - Absolute outside paths, `/sdcard`, `/proc`, `/sys`, `/dev`, NUL-containing
-  paths, parent-directory escapes, promise escapes, symlink escapes, and
-  realpath escapes remain denied with stable AutoJs6 scoped-fs error codes.
+  paths, parent-directory escapes outside `sandboxRoot`, promise escapes,
+  symlink escapes, and realpath escapes remain denied with stable AutoJs6
+  scoped-fs error codes.
 - No user-authorized root, SAF root, app-private root, or Android shared
   storage root is promoted by this phase.
 
@@ -30,7 +36,7 @@ The following remain future work before filesystem profile expansion:
 - manifest/project metadata, grant persistence, revocation, diagnostics, and
   rollback behavior for each promoted root class;
 - full symlink, realpath, `..`, NUL, `/proc`, `/sys`, `/dev`, and sensitive
-  path audit for every root class;
+  path audit for every future root class;
 - packaged APK smoke tests proving explicit metadata, runtime disclosure,
   missing-grant failure behavior, and downgrade rollback;
 - P13-33 advanced desktop fs API decision for APIs that are still unavailable
@@ -47,6 +53,8 @@ The following remain future work before filesystem profile expansion:
   `NodeScopedFsFuzzerInstrumentationTest`,
   `NodeSafeFileOperationsInstrumentationTest`, and
   `NodeFileHandleAdvancedInstrumentationTest`
+- Focused expanded sandbox regression:
+  `NodeSafeFileOperationsInstrumentationTest#expandedSandboxKeepsCwdAndAllowsWorkspaceParentRead`
 - Type declarations:
   `docs/nodejs/types/autojs6-node/autojs_global.d.ts` and
   `sample/nodejs/typescript-smoke/src/main.ts`

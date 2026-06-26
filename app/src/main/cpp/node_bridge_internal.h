@@ -941,6 +941,7 @@ struct EmbeddedScriptExecutionRequest {
     std::string source;
     std::string sourceName;
     std::string workingDirectory;
+    std::string sandboxRoot;
     std::vector<std::pair<std::string, std::string>> moduleSources;
     std::vector<std::pair<std::string, std::string>> runtimeModuleSources;
     std::vector<std::pair<std::string, std::string>> env;
@@ -1013,6 +1014,7 @@ std::string buildEmbeddedScriptExecutionSource(
         const std::string& source,
         const std::string& sourceName,
         const std::string& workingDirectory,
+        const std::string& sandboxRoot,
         const std::vector<std::pair<std::string, std::string>>& moduleSources,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSources,
         const std::vector<std::pair<std::string, std::string>>& env,

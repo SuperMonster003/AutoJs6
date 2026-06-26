@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -19,6 +20,56 @@ class NodeSafeFileOperationsInstrumentationTest {
     @After
     fun settleAfter() {
         NodeEmbeddedTestHarness.settleEmbeddedScriptServiceProcess()
+    }
+
+    @Test
+    fun expandedSandboxKeepsCwdAndAllowsWorkspaceParentRead() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node expanded sandbox root regression")
+
+        val workspace = File(context.cacheDir, "node-expanded-sandbox-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create expanded sandbox workspace: $absolutePath" }
+        }
+        val utilsDir = File(workspace, "utils").apply {
+            check(mkdirs()) { "Failed to create expanded sandbox utils dir: $absolutePath" }
+        }
+        val outsideFile = File(context.cacheDir, "node-expanded-sandbox-outside-${System.nanoTime()}.txt").apply {
+            writeText("outside")
+        }
+        try {
+            File(workspace, "version.properties").writeText("versionName=6.7.0\n")
+            val workspacePath = workspace.absolutePath.replace("\\", "\\\\").replace("\"", "\\\"")
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const assert = require("assert/strict");
+                    const fs = require("fs");
+                    const path = require("path");
+
+                    assert.strictEqual(process.cwd(), path.join("$workspacePath", "utils"));
+                    assert.strictEqual(fs.readFileSync("../version.properties", "utf8").trim(), "versionName=6.7.0");
+                    try {
+                      fs.readFileSync("../../${outsideFile.name}", "utf8");
+                    } catch (error) {
+                      assert.ok(String(error && error.message || error).includes("escapes working directory"));
+                      console.log("expanded.sandbox.rootEscape=denied");
+                    }
+                    console.log("expanded.sandbox.parentRead=ok");
+                """.trimIndent(),
+                sourceName = File(utilsDir, "main.js").absolutePath,
+                workingDirectory = utilsDir,
+                sandboxRoot = workspace,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("expanded sandbox parent read", result)
+            assertTrue(result.stdout.contains("expanded.sandbox.parentRead=ok"))
+            assertTrue(result.stdout.contains("expanded.sandbox.rootEscape=denied"))
+            assertEquals(workspace.absolutePath, result.nativeValues["embedded_script.sandbox_root"])
+            assertEquals(utilsDir.absolutePath, result.nativeValues["embedded_script.current_working_directory"])
+        } finally {
+            outsideFile.delete()
+            workspace.deleteRecursively()
+        }
     }
 
     @Test

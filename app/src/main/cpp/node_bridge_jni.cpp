@@ -102,6 +102,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& envPairs,
@@ -115,6 +116,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     request.source = toStdString(env, source);
     request.sourceName = toStdString(env, sourceName);
     request.workingDirectory = toStdString(env, workingDirectory);
+    request.sandboxRoot = toStdString(env, sandboxRoot);
     request.moduleSources = moduleSourcePairs;
     request.runtimeModuleSources = runtimeModuleSourcePairs;
     request.env = envPairs;
@@ -345,9 +347,11 @@ static std::string orderedStringPairsJson(const std::vector<std::pair<std::strin
 
 static std::string adapterModuleSourcesJson(
         const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
-        const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs
+        const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
+        const std::string& sandboxRoot
 ) {
-    return std::string("{\"moduleSources\":") + orderedStringPairsJson(moduleSourcePairs) +
+    return std::string("{\"sandboxRoot\":") + jsonStringLiteral(sandboxRoot) +
+            ",\"moduleSources\":" + orderedStringPairsJson(moduleSourcePairs) +
             ",\"runtimeModuleSources\":" + orderedStringPairsJson(runtimeModuleSourcePairs) + "}";
 }
 
@@ -479,6 +483,7 @@ static jobjectArray runEmbeddedScriptAdapterV1ExecuteNative(
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         const std::vector<std::pair<std::string, std::string>>& moduleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& runtimeModuleSourcePairs,
         const std::vector<std::pair<std::string, std::string>>& envPairs,
@@ -495,12 +500,14 @@ static jobjectArray runEmbeddedScriptAdapterV1ExecuteNative(
             ? "<embedded-user-script.js>"
             : sourceNameInput;
     const std::string workingDirectoryText = toStdString(env, workingDirectory);
-    const std::string moduleSourcesJson = adapterModuleSourcesJson(moduleSourcePairs, runtimeModuleSourcePairs);
+    const std::string sandboxRootText = toStdString(env, sandboxRoot);
+    const std::string moduleSourcesJson = adapterModuleSourcesJson(moduleSourcePairs, runtimeModuleSourcePairs, sandboxRootText);
     const std::string environmentJson = orderedStringPairsJson(envPairs);
     std::vector<std::string> payload;
     putPayload(payload, "embedded_script.request.source_name", sourceNameText);
     putPayload(payload, "embedded_script.request.source.length", static_cast<long long>(sourceText.size()));
     putPayload(payload, "embedded_script.request.working_directory", workingDirectoryText);
+    putPayload(payload, "embedded_script.request.sandbox_root", sandboxRootText);
     putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(envPairs.size()));
     putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(moduleSourcePairs.size()));
     putPayload(
@@ -627,6 +634,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            workingDirectory,
             {},
             {},
             {},
@@ -667,6 +675,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         jobjectArray moduleSourceNames,
         jobjectArray moduleSources,
         jobjectArray runtimeModuleSourceNames,
@@ -735,6 +744,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            sandboxRoot,
             moduleSourcePairs,
             runtimeModuleSourcePairs,
             envPairs,
@@ -753,6 +763,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         jobjectArray envNames,
         jobjectArray envValues,
         jboolean esmExperimentalEnabled,
@@ -783,6 +794,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            sandboxRoot,
             {},
             {},
             envPairs,
@@ -828,6 +840,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            workingDirectory,
             moduleSourcePairs,
             {},
             {},
@@ -846,6 +859,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         jobjectArray moduleSourceNames,
         jobjectArray moduleSources,
         jobjectArray envNames,
@@ -895,6 +909,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            sandboxRoot,
             moduleSourcePairs,
             {},
             envPairs,
@@ -959,6 +974,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            workingDirectory,
             moduleSourcePairs,
             runtimeModuleSourcePairs,
             {},
@@ -977,6 +993,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jstring source,
         jstring sourceName,
         jstring workingDirectory,
+        jstring sandboxRoot,
         jobjectArray moduleSourceNames,
         jobjectArray moduleSources,
         jobjectArray runtimeModuleSourceNames,
@@ -1045,6 +1062,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             source,
             sourceName,
             workingDirectory,
+            sandboxRoot,
             moduleSourcePairs,
             runtimeModuleSourcePairs,
             envPairs,

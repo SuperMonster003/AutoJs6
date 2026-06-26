@@ -508,6 +508,7 @@ std::vector<std::string> runEmbeddedScriptExecution(
     putPayload(payload, "embedded_script.request.source_name", sourceNameText);
     putPayload(payload, "embedded_script.request.source.length", static_cast<long long>(request.source.size()));
     putPayload(payload, "embedded_script.request.working_directory", request.workingDirectory);
+    putPayload(payload, "embedded_script.request.sandbox_root", request.sandboxRoot);
     putPayload(payload, "embedded_script.request.env.count", static_cast<long long>(request.env.size()));
     putPayload(payload, "embedded_script.request.module_sources.count", static_cast<long long>(request.moduleSources.size()));
     putPayload(
@@ -563,6 +564,7 @@ std::vector<std::string> runEmbeddedScriptExecution(
             request.source,
             sourceNameText,
             request.workingDirectory,
+            request.sandboxRoot,
             request.moduleSources,
             request.runtimeModuleSources,
             request.env,
