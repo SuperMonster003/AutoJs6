@@ -180,8 +180,9 @@ P13-44 extends the `autojs6:profile` declaration with `processParityProfile`.
 The field reports the current partial process/env/argv subset: controlled
 `process.env`, script-local env mutation, scoped cwd/chdir, `process.argv`,
 `exitCode`, versions, timing, resource snapshots, permission/report
-diagnostics, bounded stdio, and stable denials for raw exit, signals, native
-bindings, raw inherited env, and full desktop process parity.
+diagnostics, bounded stdio, lifecycle-mapped `process.exit(code)`, and stable
+denials for native process exit, signals, native bindings, raw inherited env,
+and full desktop process parity.
 
 P13-45 extends the `autojs6:profile` declaration with
 `packagedCapabilityProfile` and makes `bridgePermissions.packagedMetadata`

@@ -6210,6 +6210,47 @@ std::string buildEmbeddedScriptExecutionSource(
       );
     };
   }
+  function __autojs6_process_exit_code(value) {
+    let candidate = value;
+    if (candidate === undefined || candidate === null) {
+      candidate = process && process.exitCode !== undefined && process.exitCode !== null
+        ? process.exitCode
+        : 0;
+    }
+    if (typeof candidate === "string" && candidate.trim() !== "") {
+      candidate = Number(candidate);
+    }
+    if (typeof candidate !== "number" || !Number.isFinite(candidate)) {
+      throw __autojs6_invalid_arg_type("process.exit code must be a finite number or integer string.");
+    }
+    return Math.trunc(candidate);
+  }
+  function __autojs6_process_exit_signal(exitCode) {
+    const error = __autojs6_error(
+      "process.exit(" + exitCode + ") requested embedded script termination.",
+      "ERR_AUTOJS6_PROCESS_EXIT"
+    );
+    try {
+      error.name = "AutoJs6ProcessExit";
+    } catch (_) {}
+    __autojs6_define_error_property(error, "autojs6ProcessExit", true);
+    __autojs6_define_error_property(error, "exitCode", exitCode);
+    return error;
+  }
+  function __autojs6_is_process_exit_signal(error) {
+    return !!(error && typeof error === "object" && error.autojs6ProcessExit === true);
+  }
+  function __autojs6_limited_process_exit(code) {
+    const exitCode = __autojs6_process_exit_code(code);
+    try {
+      process.exitCode = exitCode;
+    } catch (_) {}
+    const signal = __autojs6_process_exit_signal(exitCode);
+    if (typeof __autojs6_finish_process_exit === "function") {
+      __autojs6_finish_process_exit(exitCode);
+    }
+    throw signal;
+  }
   function __autojs6_define_disabled_process_api(apiName, exposeWhenMissing) {
     if (typeof process !== "object" || !process) return;
     if (exposeWhenMissing || typeof process[apiName] === "function") {
@@ -7622,7 +7663,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_install_process_safety_guards() {
     if (typeof process !== "object" || !process) return;
-    __autojs6_define_disabled_process_api("exit", true);
+    __autojs6_define_process_property("exit", __autojs6_limited_process_exit, false);
     __autojs6_define_disabled_process_api("abort", true);
     __autojs6_define_disabled_process_api("kill", true);
     __autojs6_define_disabled_process_api("reallyExit", false);
@@ -9480,7 +9521,7 @@ std::string buildEmbeddedScriptExecutionSource(
         ]),
         cwd: "scoped_working_directory",
         chdir: "scoped_relative_directory_only",
-        exit: "exitCode_only_process_exit_denied",
+        exit: "lifecycle_mapped_process_exit",
         signals: "denied_no_android_signal_delivery",
         versions: "partial_node_v8_available",
         resourceUsage: "partial_runtime_snapshot",
@@ -9493,7 +9534,7 @@ std::string buildEmbeddedScriptExecutionSource(
         androidUnsupported: Object.freeze([
           "process.kill",
           "process.abort",
-          "process.exit",
+          "native_process_exit",
           "signals",
           "privilege_posix_apis",
           "raw_process_binding",
@@ -45987,8 +46028,34 @@ std::string buildEmbeddedScriptExecutionSource(
       errorCode: ""
     }));
   }
+  function __autojs6_finish_process_exit(exitCode) {
+    if (__autojs6_finished) return;
+    const normalizedExitCode = Number.isFinite(Number(exitCode)) ? Math.trunc(Number(exitCode)) : 0;
+    const succeeded = normalizedExitCode === 0;
+    __autojs6_terminate_all_worker_threads("process.exit");
+    __autojs6_destroy_all_zlib_streams("process.exit");
+    __autojs6_destroy_all_scoped_fs_streams("process.exit");
+    __autojs6_close_all_scoped_fs_watches();
+    __autojs6_close_all_scoped_watch_files();
+    __autojs6_close_all_scoped_fds();
+    __autojs6_flush_compile_cache("process.exit");
+    __autojs6_finished = true;
+    globalThis.__autojs6_probe_result = JSON.stringify(__autojs6_result_envelope({
+      succeeded,
+      exitCode: normalizedExitCode,
+      resultText: "",
+      errorName: succeeded ? "" : "AutoJs6ProcessExit",
+      errorMessage: succeeded ? "" : "process.exit(" + normalizedExitCode + ")",
+      errorStack: "",
+      errorCode: succeeded ? "" : "ERR_AUTOJS6_PROCESS_EXIT"
+    }));
+  }
   function __autojs6_finish_error(error) {
     if (__autojs6_finished) return;
+    if (__autojs6_is_process_exit_signal(error)) {
+      __autojs6_finish_process_exit(error.exitCode);
+      return;
+    }
     __autojs6_terminate_all_worker_threads("script failure");
     __autojs6_destroy_all_zlib_streams("script failure");
     __autojs6_destroy_all_scoped_fs_streams("script failure");

@@ -2004,10 +2004,10 @@ class EmbeddedScriptMvpInstrumentationTest {
               }
             }
             (async () => {
-              await capture("err.builtin", () => require("child_process"));
+              await capture("err.builtin", () => require("dgram"));
               await capture("err.getBuiltin", () => process.getBuiltinModule("fs"));
-              await capture("err.process", () => process.exit(1));
-              await capture("err.fetch", () => fetch("https://example.com"));
+              await capture("err.process", () => process.abort());
+              await capture("err.fetch", () => fetch("http://127.0.0.1/"));
               await capture("err.fs.escape", () => fs.readFileSync("../outside.txt", "utf8"));
               await capture("err.fs.absolute", () => fs.readFileSync("/tmp/outside.txt", "utf8"));
             })();
@@ -2019,7 +2019,14 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("err.builtin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
         assertTrue(result.stdout, result.stdout.contains("err.getBuiltin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
         assertTrue(result.stdout, result.stdout.contains("err.process=ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/"))
-        assertTrue(result.stdout, result.stdout.contains("err.fetch=ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED"))
+        if (BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
+            assertTrue(result.stdout, result.stdout.contains("err.fetch=ERR_AUTOJS6_NETWORK_"))
+        } else {
+            assertTrue(
+                result.stdout,
+                result.stdout.contains("err.fetch=ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED/ERR_AUTOJS6_NETWORK_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_FETCH_DISABLED"),
+            )
+        }
         assertTrue(result.stdout, result.stdout.contains("err.fs.escape=EPERM/ERR_AUTOJS6_FS_PATH_ESCAPE/"))
         assertTrue(result.stdout, result.stdout.contains("err.fs.absolute=EPERM/ERR_AUTOJS6_FS_ABSOLUTE_PATH_DENIED/"))
     }
@@ -19904,7 +19911,6 @@ class EmbeddedScriptMvpInstrumentationTest {
             "binding" to """process.binding("fs");""",
             "dlopen" to """process.dlopen({}, "native.node");""",
             "_linkedBinding" to """process._linkedBinding("fs");""",
-            "exit" to """process.exit(1);""",
             "abort" to """process.abort();""",
             "kill" to """process.kill(process.pid, 0);""",
             "umask" to """process.umask(0);""",
@@ -31581,14 +31587,14 @@ class EmbeddedScriptMvpInstrumentationTest {
         settleEmbeddedScriptServiceProcess()
 
         val disabledBuiltin = runEmbeddedScript(
-            """require("child_process");""",
+            """require("dgram");""",
             "<embedded-envelope-disabled-builtin-source.js>",
         )
         assertErrorEnvelope(
             result = disabledBuiltin,
             sourceName = "<embedded-envelope-disabled-builtin-source.js>",
             errorName = "Error",
-            messageToken = "child_process",
+            messageToken = "dgram",
             errorCode = "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED",
         )
 
@@ -31986,12 +31992,12 @@ class EmbeddedScriptMvpInstrumentationTest {
     fun requireRejectsUnsafeModulesAndBuiltinBypass() {
         assumeEmbeddedScriptExecutionEnabled()
 
-        val result = runEmbeddedScript("""require("child_process");""")
+        val result = runEmbeddedScript("""require("dgram");""")
 
         assertFalse(result.succeeded)
         assertEquals("Error", result.errorName)
         assertTrue(result.errorMessage.orEmpty().contains("require is restricted in Embedded Node.js MVP"))
-        assertTrue(result.errorMessage.orEmpty().contains("child_process"))
+        assertTrue(result.errorMessage.orEmpty().contains("dgram"))
         assertTrue(result.errorMessage.orEmpty().contains("not allowed"))
 
         settleEmbeddedScriptServiceProcess()

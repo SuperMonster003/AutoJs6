@@ -1,6 +1,8 @@
 package org.autojs.autojs.engine
 
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -65,7 +67,7 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                       processProfile.envFilteredKeys.join(",") === "NODE_OPTIONS,NODE_INSPECT_RESUME_ON_START,NODE_COMPILE_CACHE,NODE_DISABLE_COMPILE_CACHE,AUTOJS6_NODE_COMPILE_CACHE_DIR,AUTOJS6_NODE_COMPILE_CACHE_KEY,AUTOJS6_NODE_COMPILE_CACHE_RUNTIME_KEY,AUTOJS6_NODE_COMPILE_CACHE_PROJECT_KEY,AUTOJS6_NODE_COMPILE_CACHE_LOADER" &&
                       processProfile.cwd === "scoped_working_directory" &&
                       processProfile.chdir === "scoped_relative_directory_only" &&
-                      processProfile.exit === "exitCode_only_process_exit_denied" &&
+                      processProfile.exit === "lifecycle_mapped_process_exit" &&
                       processProfile.signals === "denied_no_android_signal_delivery" &&
                       processProfile.versions === "partial_node_v8_available" &&
                       processProfile.resourceUsage === "partial_runtime_snapshot" &&
@@ -75,7 +77,7 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                       processProfile.stdio === "bounded_non_tty" &&
                       processProfile.moduleAliases.join(",") === "process,node:process" &&
                       processProfile.androidDifferences === "documented_stable" &&
-                      processProfile.androidUnsupported.join(",") === "process.kill,process.abort,process.exit,signals,privilege_posix_apis,raw_process_binding,raw_dlopen,report.writeReport,unrestricted_chdir" &&
+                      processProfile.androidUnsupported.join(",") === "process.kill,process.abort,native_process_exit,signals,privilege_posix_apis,raw_process_binding,raw_dlopen,report.writeReport,unrestricted_chdir" &&
                       processProfile.packagedBehavior === "existing_project_runner_smokes_partial" &&
                       processProfile.rawDesktopParity === false &&
                       processProfile.rawEnvInheritance === false &&
@@ -138,7 +140,7 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                     process.exitCode = 44;
                     const exitOk =
                       process.exitCode === 44 &&
-                      denied(() => process.exit(2)) === "ERR_AUTOJS6_PROCESS_API_DISABLED" &&
+                      typeof process.exit === "function" &&
                       denied(() => process.abort()) === "ERR_AUTOJS6_PROCESS_API_DISABLED" &&
                       denied(() => process.kill(process.pid, 0)) === "ERR_AUTOJS6_PROCESS_API_DISABLED" &&
                       denied(() => process.reallyExit(2)) === "ERR_AUTOJS6_PROCESS_API_DISABLED";
@@ -297,10 +299,10 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                         "AUTOJS6_NODE_COMPILE_CACHE_DIR,AUTOJS6_NODE_COMPILE_CACHE_KEY," +
                         "AUTOJS6_NODE_COMPILE_CACHE_RUNTIME_KEY,AUTOJS6_NODE_COMPILE_CACHE_PROJECT_KEY," +
                         "AUTOJS6_NODE_COMPILE_CACHE_LOADER|scoped_working_directory|scoped_relative_directory_only|" +
-                        "exitCode_only_process_exit_denied|denied_no_android_signal_delivery|partial_node_v8_available|" +
+                        "lifecycle_mapped_process_exit|denied_no_android_signal_delivery|partial_node_v8_available|" +
                         "partial_runtime_snapshot|partial_uptime_hrtime_cpu_memory|autojs6_readonly_capability_query|" +
                         "getReport_only_write_denied|bounded_non_tty|process,node:process|documented_stable|" +
-                        "process.kill,process.abort,process.exit,signals,privilege_posix_apis,raw_process_binding," +
+                        "process.kill,process.abort,native_process_exit,signals,privilege_posix_apis,raw_process_binding," +
                         "raw_dlopen,report.writeReport,unrestricted_chdir|existing_project_runner_smokes_partial|" +
                         "false|false|false|false|false|true|true|true|true|true|true",
                 ),
@@ -316,5 +318,62 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
         } finally {
             workDir.deleteRecursively()
         }
+    }
+
+    @Test
+    fun processExitMapsToEmbeddedLifecycleResult() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-44 process.exit lifecycle mapping")
+
+        val zero = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                console.log("p13process.exit.zero.before");
+                process.exit(0);
+                console.log("p13process.exit.zero.after");
+            """.trimIndent(),
+            sourceName = "<node-process-exit-zero-p13-44.js>",
+            timeoutMs = 10_000L,
+        )
+        NodeEmbeddedTestHarness.assertSucceeded("P13-44 process.exit(0)", zero)
+        assertEquals(0, zero.exitCode ?: -1)
+        assertTrue(zero.stdout, zero.stdout.contains("p13process.exit.zero.before"))
+        assertFalse(zero.stdout, zero.stdout.contains("p13process.exit.zero.after"))
+
+        val seven = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                console.log("p13process.exit.seven.before");
+                process.exit(7);
+                console.log("p13process.exit.seven.after");
+            """.trimIndent(),
+            sourceName = "<node-process-exit-seven-p13-44.js>",
+            timeoutMs = 10_000L,
+        )
+        assertFalse(NodeEmbeddedTestHarness.describeResult("P13-44 process.exit(7)", seven), seven.succeeded)
+        assertEquals(7, seven.exitCode ?: -1)
+        assertEquals("AutoJs6ProcessExit", seven.errorName)
+        assertEquals("ERR_AUTOJS6_PROCESS_EXIT", seven.errorCode)
+        assertTrue(seven.stdout, seven.stdout.contains("p13process.exit.seven.before"))
+        assertFalse(seven.stdout, seven.stdout.contains("p13process.exit.seven.after"))
+
+        val async = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                return new Promise(() => {
+                  setTimeout(() => {
+                    console.log("p13process.exit.async.before");
+                    process.exit("5");
+                    console.log("p13process.exit.async.after");
+                  }, 0);
+                });
+            """.trimIndent(),
+            sourceName = "<node-process-exit-async-p13-44.js>",
+            timeoutMs = 10_000L,
+        )
+        assertFalse(NodeEmbeddedTestHarness.describeResult("P13-44 async process.exit(\"5\")", async), async.succeeded)
+        assertEquals(5, async.exitCode ?: -1)
+        assertEquals("ERR_AUTOJS6_PROCESS_EXIT", async.errorCode)
+        assertTrue(async.stdout, async.stdout.contains("p13process.exit.async.before"))
+        assertFalse(async.stdout, async.stdout.contains("p13process.exit.async.after"))
     }
 }

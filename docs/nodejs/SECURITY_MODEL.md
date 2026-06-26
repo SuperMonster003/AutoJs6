@@ -786,10 +786,11 @@ denied until separate Desktop-profile evidence proves them safe.
 
 P13-44 records process/env/argv parity as partial. `processParityProfile` is
 diagnostic metadata only and does not grant raw process authority. The Safe
-subset keeps env script-local and filtered, cwd scoped, `process.exit()` and
-signals denied, raw process handles unavailable, native bindings denied, and
-`report.writeReport()` blocked until separate Desktop-profile and lifecycle
-evidence proves them safe.
+subset keeps env script-local and filtered, cwd scoped, maps
+`process.exit(code)` to an embedded-script lifecycle result without native
+process termination, denies signals, keeps raw process handles unavailable,
+denies native bindings, and blocks `report.writeReport()` until separate
+Desktop-profile and packaged lifecycle evidence proves them safe.
 
 P13-45 records packaged APK capability metadata as partial.
 `packagedCapabilityProfile` and `bridgePermissions.packagedMetadata` are

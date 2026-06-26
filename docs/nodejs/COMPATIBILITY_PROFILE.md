@@ -1318,9 +1318,10 @@ P13-44 records process/env/argv parity as partial. The runtime exposes
 subset: controlled mutable `process.env`, filtered sensitive env variables,
 scoped cwd/chdir, `process.argv`, `exitCode`, versions, timing, cpu/memory and
 `resourceUsage()` snapshots, `process.permission`, `process.report.getReport()`,
-and bounded stdio. Raw `process.exit()` lifecycle, Android signal delivery,
-raw inherited env, raw process handles, native bindings, `process.dlopen`,
-`process.binding`, and `report.writeReport()` remain unpromoted.
+bounded stdio, and `process.exit(code)` mapped to the embedded-script lifecycle.
+Native/raw process termination, Android signal delivery, raw inherited env, raw
+process handles, native bindings, `process.dlopen`, `process.binding`, and
+`report.writeReport()` remain unpromoted.
 
 P13-45 records packaged APK capability metadata as partial. The runtime exposes
 `autojs6:profile.packagedCapabilityProfile` and

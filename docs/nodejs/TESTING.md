@@ -1975,7 +1975,7 @@ diagnostics, focused P13-44 instrumentation, existing process sweep evidence,
 project-runner argv/env/cwd evidence, inspector and compile-cache env filtering
 evidence, modern-core process permission evidence, TypeScript declarations,
 surface manifest evidence, release matrix updates, and Phase13 docs. It keeps
-raw `process.exit()` lifecycle, Android signals, raw inherited env, raw process
+native/raw process exit, Android signals, raw inherited env, raw process
 handles, native bindings, and full desktop process parity open.
 
 Phase 13 process/env/argv parity focused instrumentation:
@@ -1986,9 +1986,10 @@ Phase 13 process/env/argv parity focused instrumentation:
 
 This suite verifies `processParityProfile` diagnostics, `process` /
 `node:process` aliases, argv metadata, script-local env mutation, sensitive env
-filtering, scoped cwd/chdir, `exitCode`, stable denial for raw exit and signal
-APIs, versions, timing, CPU/memory/resource snapshots, permission/report
-facades, bounded stdio, and denial of private process/native entry points.
+filtering, scoped cwd/chdir, `exitCode`, lifecycle-mapped `process.exit(code)`,
+stable denial for native exit and signal APIs, versions, timing,
+CPU/memory/resource snapshots, permission/report facades, bounded stdio, and
+denial of private process/native entry points.
 P13-44 records process/env/argv parity as partial.
 
 Phase 13 packaged APK capability metadata decision gate:

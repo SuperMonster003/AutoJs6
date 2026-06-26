@@ -74,7 +74,7 @@ function buildReport(files) {
       token(files.nodeBridgeSources, 'envMutation: "script_local_mutable"'),
       token(files.nodeBridgeSources, 'cwd: "scoped_working_directory"'),
       token(files.nodeBridgeSources, 'chdir: "scoped_relative_directory_only"'),
-      token(files.nodeBridgeSources, 'exit: "exitCode_only_process_exit_denied"'),
+      token(files.nodeBridgeSources, 'exit: "lifecycle_mapped_process_exit"'),
       token(files.nodeBridgeSources, 'signals: "denied_no_android_signal_delivery"'),
       token(files.nodeBridgeSources, 'permission: "autojs6_readonly_capability_query"'),
       token(files.nodeBridgeSources, 'report: "getReport_only_write_denied"'),
@@ -98,6 +98,11 @@ function buildReport(files) {
       token(files.p13ProcessTest, "process.permission.query()"),
       token(files.p13ProcessTest, "process.allowedNodeEnvironmentFlags"),
       token(files.p13ProcessTest, "process.umask(0)"),
+      token(files.p13ProcessTest, "processExitMapsToEmbeddedLifecycleResult"),
+      token(files.p13ProcessTest, "p13process.exit.zero.before"),
+      token(files.p13ProcessTest, "p13process.exit.seven.before"),
+      token(files.p13ProcessTest, "p13process.exit.async.before"),
+      token(files.p13ProcessTest, "ERR_AUTOJS6_PROCESS_EXIT"),
       token(files.processSweepTest, "processCompatibilityAndDangerousApiBoundariesWork"),
       token(files.processSweepTest, "processPermissionReadonlyFacadeReflectsManifestAndScopedFsPolicy"),
       token(files.processSweepTest, "process.sweep.exitCode=23"),
@@ -109,7 +114,7 @@ function buildReport(files) {
       token(files.moduleCompileCacheTest, "NODE_COMPILE_CACHE"),
     ], [
       "Full desktop process parity is not claimed; P13-44 records Safe process subset behavior only.",
-      "Android signal delivery, raw process exit coordination, inherited environment policy, and packaged lifecycle evidence remain future work.",
+      "Android signal delivery, native process termination, inherited environment policy, and packaged lifecycle evidence remain future work.",
     ]),
     scenario("matrix_modern_core_and_docs", "Builtin matrix, modern-core differential, docs, release matrix, surface manifest, and Gradle gate record P13-44", [
       token(files.runtimeCapabilities, '"process"'),
@@ -131,7 +136,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-44 process/env/argv parity"),
     ], [
-      "P13-44 remains partial until env write policy, Android process signal differences, and process.exit lifecycle coordination are fully closed.",
+      "P13-44 remains partial until env write policy, Android process signal differences, native process-exit boundaries, and packaged lifecycle evidence are fully closed.",
     ]),
   ];
 
@@ -158,14 +163,15 @@ function buildReport(files) {
     ),
     check(
       "profile-fail-closed-boundaries",
-      processProfile.includes('exit: "exitCode_only_process_exit_denied"') &&
+      processProfile.includes('exit: "lifecycle_mapped_process_exit"') &&
         processProfile.includes('signals: "denied_no_android_signal_delivery"') &&
+        processProfile.includes('"native_process_exit"') &&
         processProfile.includes("rawDesktopParity: false") &&
         processProfile.includes("rawEnvInheritance: false") &&
         processProfile.includes("rawSignals: false") &&
         processProfile.includes("rawProcessHandles: false") &&
         processProfile.includes("nativeBindings: false"),
-      "processParityProfile must keep raw desktop parity, raw env inheritance, signals, process handles, and native bindings fail-closed.",
+      "processParityProfile must keep raw desktop parity, raw env inheritance, signals, process handles, native process exit, and native bindings fail-closed.",
     ),
     check(
       "no-unsafe-process-promotion",
@@ -176,7 +182,7 @@ function buildReport(files) {
         !files.nodeBridgeSources.text.includes("rawSignals: true") &&
         !files.nodeBridgeSources.text.includes("rawProcessHandles: true") &&
         !files.nodeBridgeSources.text.includes("nativeBindings: true"),
-      "P13-44 must not mark raw process exit, signals, env inheritance, handles, native bindings, or full desktop parity as promoted.",
+      "P13-44 must not mark native process exit, signals, env inheritance, handles, native bindings, or full desktop parity as promoted.",
     ),
   ];
 

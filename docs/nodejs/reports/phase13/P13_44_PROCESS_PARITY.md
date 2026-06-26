@@ -18,8 +18,10 @@ surface-manifest evidence for the Safe process subset.
 - `process.cwd()` and `process.chdir()` are scoped to the script working
   directory; relative in-scope movement is allowed and absolute or escape paths
   remain denied.
-- `process.exitCode` is writable, while `process.exit()`, `process.abort()`,
-  `process.kill()`, and `process.reallyExit()` remain denied.
+- `process.exitCode` is writable. `process.exit(code)` maps to an AutoJs6
+  embedded-script lifecycle result without calling native process exit;
+  `process.abort()`, `process.kill()`, and `process.reallyExit()` remain
+  denied.
 - `process.version`, `process.versions`, `process.release`, `platform`, `arch`,
   pid metadata, timing, CPU usage, memory usage, `resourceUsage()`,
   `permission`, `report.getReport()`, stdio shape, and stable denial of private
@@ -30,8 +32,8 @@ surface-manifest evidence for the Safe process subset.
 - Full desktop process parity is not claimed.
 - Raw signal delivery and Android process signal differences need a complete
   policy and device matrix.
-- `process.exit()` still needs explicit coordination with the AutoJs script
-  lifecycle before it can be promoted beyond stable denial.
+- Native/raw process termination remains denied; the supported
+  `process.exit(code)` path is only the embedded-script lifecycle mapping.
 - Raw inherited environment policy, packaged lifecycle evidence, raw process
   handles, native bindings, `process.dlopen`, `process.binding`, and
   `report.writeReport()` remain future Desktop-profile work.

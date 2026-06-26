@@ -407,9 +407,11 @@ P13-44 records process/env/argv parity as partial. AutoJs6 Node exposes
 `processParityProfile` diagnostics for controlled `process.env`, script-local
 env writes, filtered sensitive env variables, scoped cwd/chdir, argv metadata,
 `exitCode`, versions, timing/resource snapshots, permission/report facades, and
-bounded stdio. Desktop packages that need raw `process.exit()`, signal
-delivery, inherited host env, raw process handles, native bindings,
-`process.dlopen`, or report file writes still need later Desktop-profile work.
+bounded stdio. `process.exit(code)` maps to the embedded-script lifecycle
+without native process termination. Desktop packages that need native/raw
+process exit, signal delivery, inherited host env, raw process handles, native
+bindings, `process.dlopen`, or report file writes still need later
+Desktop-profile work.
 
 P13-45 records packaged APK capability metadata as partial. AutoJs6 Node
 exposes `packagedCapabilityProfile` and typed

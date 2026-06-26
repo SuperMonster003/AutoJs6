@@ -94,7 +94,6 @@ class NodeProcessSweepInstrumentationTest {
               expectDenied("dlopen", () => process.dlopen({}, "native.node"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
               expectDenied("_linkedBinding", () => process._linkedBinding("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
               expectDenied("getBuiltinModule", () => process.getBuiltinModule("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
-              expectDenied("exit", () => process.exit(2), "ERR_AUTOJS6_PROCESS_API_DISABLED");
               expectDenied("chdir.absolute", () => process.chdir("/"), "EPERM");
               expectDenied("chdir.escape", () => process.chdir(".."), "EPERM");
 
@@ -214,6 +213,7 @@ class NodeProcessSweepInstrumentationTest {
               "network",
               "worker",
               "shell",
+              "app.query",
               "accessibility",
               "screen_capture",
               "notifications",
@@ -223,6 +223,8 @@ class NodeProcessSweepInstrumentationTest {
               "media.audio",
               "media.metadata",
               "media.recording",
+              "package_manager",
+              "package_manager.mutate",
               "sensors",
               "ocr",
               "barcode"
@@ -239,6 +241,9 @@ class NodeProcessSweepInstrumentationTest {
             assert.strictEqual(query.scopes["media.audio"], true);
             assert.strictEqual(query.scopes["media.metadata"], true);
             assert.strictEqual(query.scopes["media.recording"], true);
+            assert.strictEqual(query.scopes["app.query"], false);
+            assert.strictEqual(query.scopes.package_manager, false);
+            assert.strictEqual(query.scopes["package_manager.mutate"], false);
             assert.strictEqual(query.scopes.sensors, true);
             assert.strictEqual(query.scopes.ocr, true);
             assert.strictEqual(query.scopes.barcode, false);

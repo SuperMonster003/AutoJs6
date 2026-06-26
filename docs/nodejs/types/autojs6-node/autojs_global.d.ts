@@ -132,7 +132,7 @@ declare namespace AutoJs6Node {
     readonly envFilteredKeys: readonly string[];
     readonly cwd: "scoped_working_directory" | string;
     readonly chdir: "scoped_relative_directory_only" | string;
-    readonly exit: "exitCode_only_process_exit_denied" | string;
+    readonly exit: "lifecycle_mapped_process_exit" | string;
     readonly signals: "denied_no_android_signal_delivery" | string;
     readonly versions: "partial_node_v8_available" | string;
     readonly resourceUsage: "partial_runtime_snapshot" | string;

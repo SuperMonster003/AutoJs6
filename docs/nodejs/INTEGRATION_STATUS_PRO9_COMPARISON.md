@@ -1176,9 +1176,10 @@ P13-44 records process/env/argv parity as partial: Safe Node now exposes
 `processParityProfile` diagnostics for controlled `process.env`, script-local
 env writes, filtered sensitive env, scoped cwd/chdir, argv metadata,
 `exitCode`, timing, resource snapshots, permission/report facades, and bounded
-stdio. Full desktop process parity still requires raw exit lifecycle
-coordination, Android signal policy, raw inherited env policy, native binding
-decisions, raw process handles, and packaged lifecycle evidence.
+stdio. `process.exit(code)` maps to the embedded-script lifecycle without
+native process termination. Full desktop process parity still requires native
+process-exit policy, Android signal policy, raw inherited env policy, native
+binding decisions, raw process handles, and packaged lifecycle evidence.
 
 P13-45 records packaged APK capability metadata as partial: packaged projects
 can now expose diagnostic `packagedMetadata` for profile, builtin, native asset,
