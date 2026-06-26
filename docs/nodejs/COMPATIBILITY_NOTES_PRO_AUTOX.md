@@ -364,8 +364,9 @@ P13-41 records ESM loader parity as partial. AutoJs6 Node exposes
 `.mjs`, `type=module`, TLA, local static/dynamic import, package
 `exports`/`imports`, simple re-export syntax, object/array destructuring
 declaration exports and local `createRequire()` declarations used by package
-entrypoints such as `css-tree`, JSON import attributes, scoped `import.meta`,
-and CJS interop. It does not enable raw loader hooks,
+entrypoints such as `css-tree`, keyword property names inside default-exported
+object literals, JSON import attributes, scoped `import.meta`, and CJS interop.
+It does not enable raw loader hooks,
 network/file/data URL imports, import maps, custom condition profiles, or broad
 packaged encrypted ESM graphs.
 

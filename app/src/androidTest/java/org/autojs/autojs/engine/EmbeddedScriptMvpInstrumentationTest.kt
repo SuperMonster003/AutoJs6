@@ -28245,6 +28245,9 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("typeModuleJs.first=" + typeModuleJs.firstValue);
                     console.log("typeModuleJs.third=" + typeModuleJs.thirdValue);
                     console.log("typeModuleJs.fixture=" + typeModuleJs.fixtureValue);
+                    const keywordObject = require("./keyword-object.mjs").default;
+                    console.log("keywordObject.import=" + keywordObject.import);
+                    console.log("keywordObject.export=" + keywordObject.export);
                     capture("relativeMjs", () => require("./esm.mjs"));
                     capture("mainMjs", () => require("pkg-main-mjs"));
                     capture("exportsMjs", () => require("pkg-export-mjs"));
@@ -28268,6 +28271,19 @@ class EmbeddedScriptMvpInstrumentationTest {
             }
             val tlaMjs = File(scriptDir, "tla.mjs").apply {
                 writeText("""export default await Promise.resolve("tla");""", StandardCharsets.UTF_8)
+            }
+            val keywordObjectMjs = File(scriptDir, "keyword-object.mjs").apply {
+                writeText(
+                    """
+                    import value from "./esm.mjs";
+                    export default {
+                      import: value,
+                      export: "keyword-key",
+                      "font-face": "font-face",
+                    };
+                    """.trimIndent(),
+                    StandardCharsets.UTF_8,
+                )
             }
             val typeModulePackageJson = File(scriptDir, "node_modules/pkg-type-module-js/package.json").apply {
                 parentFile?.mkdirs()
@@ -28326,6 +28342,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                     innerCjs,
                     relativeMjs,
                     tlaMjs,
+                    keywordObjectMjs,
                     typeModulePackageJson,
                     typeModuleIndex,
                     typeModuleFixture,
@@ -28346,6 +28363,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout, result.stdout.contains("typeModuleJs.first=first-value"))
             assertTrue(result.stdout, result.stdout.contains("typeModuleJs.third=third-value"))
             assertTrue(result.stdout, result.stdout.contains("typeModuleJs.fixture=type-module-js-esm"))
+            assertTrue(result.stdout, result.stdout.contains("keywordObject.import=esm"))
+            assertTrue(result.stdout, result.stdout.contains("keywordObject.export=keyword-key"))
             assertTrue(result.stdout, result.stdout.contains("relativeMjs.ok=true"))
             assertTrue(result.stdout, result.stdout.contains("relativeMjs.default=esm"))
             assertTrue(result.stdout, result.stdout.contains("mainMjs.ok=true"))

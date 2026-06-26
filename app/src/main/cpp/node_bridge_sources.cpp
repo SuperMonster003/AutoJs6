@@ -42949,6 +42949,37 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return false;
   }
+  function __autojs6_esm_has_residual_import_export(source) {
+    const sourceText = String(source || "");
+    if (sourceText.indexOf("import") < 0 && sourceText.indexOf("export") < 0) {
+      return false;
+    }
+    const masked = __autojs6_mask_non_code(sourceText);
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    for (let index = 0; index < masked.length; index += 1) {
+      if (
+        braceDepth === 0 &&
+        bracketDepth === 0 &&
+        parenDepth === 0 &&
+        (
+          __autojs6_is_identifier_token_at(masked, index, "import") ||
+          __autojs6_is_identifier_token_at(masked, index, "export")
+        )
+      ) {
+        return true;
+      }
+      const ch = masked.charAt(index);
+      if (ch === "{") braceDepth += 1;
+      else if (ch === "}") braceDepth = Math.max(0, braceDepth - 1);
+      else if (ch === "[") bracketDepth += 1;
+      else if (ch === "]") bracketDepth = Math.max(0, bracketDepth - 1);
+      else if (ch === "(") parenDepth += 1;
+      else if (ch === ")") parenDepth = Math.max(0, parenDepth - 1);
+    }
+    return false;
+  }
   function __autojs6_transform_dynamic_import_calls(source, sourceName, parentExpression) {
     const sourceText = String(source || "");
     if (sourceText.indexOf("import") < 0) {
@@ -43202,8 +43233,7 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     const importMetaBody = __autojs6_transform_import_meta(exportTransform.body, filename);
     const transformedBody = __autojs6_transform_dynamic_import_calls(importMetaBody, filename, "__filename");
-    const remaining = __autojs6_mask_non_code(transformedBody);
-    if (/(^|[\r\n;{}])\s*import\b/.test(remaining) || /(^|[\r\n;{}])\s*export\b/.test(remaining)) {
+    if (__autojs6_esm_has_residual_import_export(transformedBody)) {
       throw __autojs6_esm_error("Embedded Node partial ESM v1 found unsupported import/export syntax in " + filename + ".");
     }
     return bindingLines.join("\n") + "\n" + transformedBody + "\n" + exportTransform.tail;

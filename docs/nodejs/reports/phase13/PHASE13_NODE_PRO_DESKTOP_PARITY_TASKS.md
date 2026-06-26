@@ -1366,6 +1366,9 @@ P13 task 本身使用以下执行状态：
     - partial ESM wrapper 已兼容 ESM package 中
       `import { createRequire } from "module"; const require = ...` 的局部
       `require` 声明，避免与 AutoJs6 wrapper 参数同名冲突。
+    - partial ESM residual syntax validation 现在仅检查顶层
+      `import`/`export` token，允许 `css-tree` 这类 package 在
+      `export default { import: ... }` 对象字面量中使用关键字属性名。
     - named import/export/re-export specifier list 现在允许普通 block/line
       comments，用于兼容 `parse5` / `jsdom` 等真实 npm package 输出中的
       `export { /** @internal */ Parser } from ...` 形态。

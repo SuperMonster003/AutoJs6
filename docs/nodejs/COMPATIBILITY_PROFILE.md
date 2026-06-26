@@ -991,6 +991,8 @@ Node Profile v1.1 partial ESM supports:
 - scoped `import.meta.url`, `import.meta.filename`, `import.meta.dirname`, `import.meta.main`, and `import.meta.resolve(specifier)`
 - simple named exports, including identifier declarations and object/array
   destructuring declaration exports used by package entrypoints such as `css-tree`
+- default-exported object literals may contain keyword property names such as
+  `import` and `export`, matching package entrypoints such as `css-tree`
 - simple re-export syntax: `export { name as alias } from`, `export * from`, and `export * as namespace from`
 - block and line comments inside named import/export/re-export specifier lists
 - simple top-level await

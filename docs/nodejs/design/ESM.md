@@ -89,6 +89,8 @@ flag to false preserves the previous fail-closed path for diagnostics.
 - simple named exports are supported for local `.mjs` modules, including
   identifier declarations and object/array destructuring declaration exports
   used by package entrypoints such as `css-tree`.
+- Default-exported object literals may use keyword property names such as
+  `import` and `export`, matching package entrypoints such as `css-tree`.
 - simple re-exports are supported for local/package ESM graphs:
   `export { name as alias } from "./dep.mjs"`,
   `export * from "./dep.mjs"`, and
