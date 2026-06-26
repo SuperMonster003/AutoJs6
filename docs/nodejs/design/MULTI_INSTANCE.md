@@ -20,9 +20,9 @@ When a second execution request reaches the same embedded service process while 
 ERR_AUTOJS6_NODE_ENGINE_BUSY
 ```
 
-The rejected request is not queued silently.
+This rejection path is now reserved for explicit `reject_when_busy` requests and other fail-fast diagnostics.
 
-Callers that deliberately want queueing must use the controlled caller-side enqueue API. Queueing is not the default startup behavior.
+Ordinary script starts use `enqueue_when_busy` and wait in a bounded queue when the target process slot is occupied.
 
 Focused Phase 11 diagnostics may explicitly route a one-shot execution to
 `overflow_1`, which runs in `:nodejs_embedded_2`. Phase 13 default scheduling
@@ -49,7 +49,7 @@ after an execution finishes. Allowing overlapping executions in the same process
 would make stop, timeout, native handle cleanup, bridge callbacks, and stdout
 capture ambiguous.
 
-Rejecting concurrent starts by default is safer than silent queueing. The controlled queue keeps max queued executions, timeout ownership, cancellation, status, and service-exit behavior explicit.
+Default bounded queueing keeps rapid user-triggered runs from failing with transient busy errors while still preserving max queued executions, timeout ownership, cancellation, status, and service-exit behavior.
 
 ## Current Runtime Behavior
 
@@ -71,13 +71,24 @@ Concurrent execution:
 ```text
 start request
   -> active execution slot already owned
+  -> enter bounded execution queue
+  -> active execution releases the slot
+  -> run script in a fresh one-shot service execution
+  -> return queue diagnostics in nativeValues
+```
+
+Explicit fail-fast execution:
+
+```text
+start request with queueMode=reject_when_busy
+  -> active execution slot already owned
   -> return EmbeddedNodeEngineBusyError
   -> errorCode=ERR_AUTOJS6_NODE_ENGINE_BUSY
   -> nativeValues.embedded_script.engine_busy=true
   -> nativeValues.embedded_script.concurrent_policy=single-active-execution-per-process
 ```
 
-Explicit queued execution:
+Explicit enqueue API:
 
 ```text
 enqueue request
@@ -97,7 +108,8 @@ Packaged APKs use the same `NativeNodeEmbeddedScriptService` and `:nodejs_embedd
 Packaged behavior is:
 
 - first active execution owns the process
-- concurrent starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`
+- ordinary concurrent starts wait in the bounded queue; explicit `reject_when_busy`
+  starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`
 - after the first execution exits and the service settles, a later execution may run normally
 - packaged Node launch descriptors may include `processPoolSlot=primary|overflow_1`
   and `processPoolSlotSource=explicit_request` for internal process-pool smoke
@@ -109,7 +121,7 @@ The execution queue is intentionally small and explicit. It does not make embedd
 
 - still one active V8/libuv/Node environment per `:nodejs_embedded` process
 - queued executions are serialized before service start and run as separate one-shot service executions
-- max queued executions is currently `1`
+- max queued executions is currently `16`
 - queue cancellation works only before the queued script starts
 - queue timeout is separate from script execution timeout
 - queue failures return stable `ERR_AUTOJS6_NODE_QUEUE_*` codes
@@ -138,7 +150,8 @@ Current S8-43 behavior:
   slot replacement until a real coordinator lands;
 - device-memory-aware recommended slot count is diagnostic only;
 - the long-running dedicated slot is reserved but disabled;
-- queue-when-full remains disabled until a real pool coordinator exists.
+- default scheduler queue-when-full is enabled as a bounded wait for an available
+  `primary` / `overflow_1` slot on eligible devices.
 
 Future promotion still needs:
 
@@ -157,8 +170,10 @@ See [PROCESS_POOL.md](PROCESS_POOL.md).
 Current focused coverage:
 
 - start a long-running embedded script
-- start a second embedded script while the first is active
-- assert the second returns `ERR_AUTOJS6_NODE_ENGINE_BUSY`
+- start a second ordinary embedded script while the first is active
+- assert the second queues and runs after the first releases the process slot
+- start a second explicit `reject_when_busy` script while the first is active
+- assert it returns `ERR_AUTOJS6_NODE_ENGINE_BUSY`
 - assert the first completes normally
 - assert a later script runs after the active slot is released
 - enqueue a second script explicitly and assert it runs after the first

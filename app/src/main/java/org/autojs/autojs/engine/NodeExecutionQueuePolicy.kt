@@ -5,8 +5,8 @@ object NodeExecutionQueuePolicy {
     const val MODE_REJECT_WHEN_BUSY = "reject_when_busy"
     const val MODE_ENQUEUE_WHEN_BUSY = "enqueue_when_busy"
 
-    const val DEFAULT_MAX_QUEUED_EXECUTIONS = 1
-    const val DEFAULT_QUEUE_TIMEOUT_MS = 30_000L
+    const val DEFAULT_MAX_QUEUED_EXECUTIONS = 16
+    const val DEFAULT_QUEUE_TIMEOUT_MS = 300_000L
     const val MAX_QUEUE_TIMEOUT_MS = 300_000L
     const val CONTROL_TIMEOUT_MS = 3_000L
 

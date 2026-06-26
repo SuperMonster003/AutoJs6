@@ -163,7 +163,7 @@ Java interop off, and injects an enforced bridge permission manifest. The
 default REPL manifest declares no bridge capabilities; callers must explicitly
 opt in to each bridge capability and the provider audit still applies.
 
-Embedded Node execution is single-active per `:nodejs_embedded` process. Normal concurrent starts reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY` instead of overlapping V8/libuv lifecycle ownership or silently queuing. A bounded execution queue exists only for explicit enqueue requests; queue full, timeout, and cancellation paths use stable `ERR_AUTOJS6_NODE_QUEUE_*` errors. See `docs/nodejs/design/MULTI_INSTANCE.md` and `docs/nodejs/design/EXECUTION_QUEUE.md`.
+Embedded Node execution is single-active per `:nodejs_embedded` process. Normal concurrent starts wait in a bounded queue instead of overlapping V8/libuv lifecycle ownership; explicit fail-fast requests still reject with `ERR_AUTOJS6_NODE_ENGINE_BUSY`. Queue full, timeout, and cancellation paths use stable `ERR_AUTOJS6_NODE_QUEUE_*` errors. See `docs/nodejs/design/MULTI_INSTANCE.md` and `docs/nodejs/design/EXECUTION_QUEUE.md`.
 Process-pool diagnostics are reported under
 `embedded_script.process_pool.*`, but S8-43 does not enable same-process
 concurrency, cross-process slot routing, or reusable Node environments. Future

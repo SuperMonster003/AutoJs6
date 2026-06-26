@@ -18,9 +18,9 @@ Status: partial runtime scheduler and focused stress promotion landed; long-dura
   execution is not rejected by the old primary-only `:nodejs_embedded` guard.
 - Explicit `primary` / `overflow_1` routing remains supported and distinct from
   default scheduler routing through `processPoolSlotSource`.
-- When both default scheduler slots are occupied, the client path returns
-  `EmbeddedNodeProcessPoolBusyError` with
-  `ERR_AUTOJS6_NODE_ENGINE_BUSY` and `embedded_script.process_pool.busy=true`.
+- When both default scheduler slots are occupied, the client path waits in a
+  bounded queue for an available `primary` / `overflow_1` slot and reports
+  `embedded_script.process_pool.queue_queued=true` after dequeue.
 - Request spool and Intent metadata now preserve `processPoolSlotSource`, so the
   target service process can publish default-scheduler diagnostics.
 - Crash evidence markers use `processPoolPlan.selectedSlot.id`, so normal
@@ -59,6 +59,9 @@ Instrumentation coverage in
 - explicit primary/overflow concurrent execution in separate service processes;
 - default scheduler concurrent one-shot execution in separate service processes
   on eligible devices;
+- default scheduler queue-when-full execution when both default slots are busy,
+  proving the third ordinary script waits and then succeeds instead of returning
+  `ERR_AUTOJS6_NODE_ENGINE_BUSY`;
 - overflow-slot no-restart crash marker collection with a subsequent explicit
   primary-slot survivor execution;
 - focused two-slot shared-resource stress, including

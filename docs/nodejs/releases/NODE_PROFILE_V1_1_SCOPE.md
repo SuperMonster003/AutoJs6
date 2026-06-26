@@ -272,10 +272,10 @@ small set of already-gated features toward practical use.
   notifications, sensors, accessibility selector, image, UI, shell timeout,
   and WebSocket loops with zero active provider resources, shell commands,
   WebSocket connections, leaked resources, or close errors after cleanup.
-- Execution queue smoke passes for default `ERR_AUTOJS6_NODE_ENGINE_BUSY`
-  rejection, explicit enqueue order, queued cancellation, queued timeout before
-  user code runs, one-entry queue-full denial, queue status diagnostics, and
-  recovery after the active execution stops.
+- Execution queue smoke passes for default bounded concurrent execution,
+  explicit `reject_when_busy` rejection, explicit enqueue order, queued
+  cancellation, queued timeout before user code runs, queue-full denial, queue
+  status diagnostics, and recovery after the active execution stops.
 - Interactive long-running foreground mode passes status, foreground survival,
   Stop action, runtime heartbeat/budget diagnostics, Android
   foreground-service timeout cleanup, cooperative checkpoint-on-stop,

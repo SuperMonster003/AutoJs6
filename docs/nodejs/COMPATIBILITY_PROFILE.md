@@ -272,9 +272,9 @@ plugin adapters.
 
 ## Execution Queue
 
-Embedded Node is not multi-instance inside a single `:nodejs_embedded` process. The default behavior rejects concurrent starts with `ERR_AUTOJS6_NODE_ENGINE_BUSY`.
+Embedded Node is not multi-instance inside a single `:nodejs_embedded` process. Ordinary starts now use bounded queueing when the target process slot is busy, so rapid repeated runs wait for the active execution to finish instead of failing with `ERR_AUTOJS6_NODE_ENGINE_BUSY`.
 
-Callers that need ordered execution can opt in to the bounded caller-side queue through `NativeNodeEmbeddedScriptService.enqueueScript(...)`. The queue currently allows one waiting execution, supports cancellation by execution id, exposes queue status for queue participants, and separates queue timeout from script execution timeout. Each dequeued item starts a normal one-shot embedded service execution after the previous service process has settled.
+The queue currently allows up to 16 waiting executions, supports cancellation by execution id for explicit enqueue participants, exposes queue status, and separates queue timeout from script execution timeout. Each dequeued item starts a normal one-shot embedded service execution after the previous service process has settled. Explicit `reject_when_busy` remains available for fail-fast diagnostics and still reports `ERR_AUTOJS6_NODE_ENGINE_BUSY`.
 
 Stable queue errors:
 
@@ -1472,13 +1472,13 @@ restart policy beyond `never`.
 
 ## Embedded Execution Lifecycle
 
-The `:nodejs_embedded` service process allows one active embedded Node execution at a time. A concurrent start in the same process is rejected, not queued, with:
+The `:nodejs_embedded` service process allows one active embedded Node execution at a time. A normal concurrent start in the same process waits in the bounded queue. An explicit fail-fast start is rejected with:
 
 - `errorCode=ERR_AUTOJS6_NODE_ENGINE_BUSY`
 - `nativeValues.embedded_script.engine_busy=true`
 - `nativeValues.embedded_script.concurrent_policy=single-active-execution-per-process`
 
-After the active execution completes and the service settles, a later execution can run normally. Queueing remains a separate design gate; see `docs/nodejs/design/MULTI_INSTANCE.md`.
+After the active execution completes and the service settles, queued or later executions can run normally. See `docs/nodejs/design/MULTI_INSTANCE.md`.
 
 If Embedded Node script execution is disabled at build time, embedded execution fails before service startup or native entry with:
 
@@ -2178,4 +2178,4 @@ Examples:
 - bridge resource limit: `code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`
 - bridge rate limit: `code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RATE_LIMITED`
 - embedded Node disabled: `errorCode=ERR_AUTOJS6_NODE_DISABLED`
-- concurrent embedded execution: `errorCode=ERR_AUTOJS6_NODE_ENGINE_BUSY`
+- explicit fail-fast concurrent embedded execution: `errorCode=ERR_AUTOJS6_NODE_ENGINE_BUSY`

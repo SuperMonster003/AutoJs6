@@ -311,8 +311,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
         }
         val processName = currentProcessName()
         val pid = Process.myPid()
-        val queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY
-        val queueTimeoutMs = 0L
+        val queueMode = NodeExecutionQueuePolicy.normalizeMode(preparedServiceRequest.queueMode)
+        val queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
+            queueMode,
+            preparedServiceRequest.queueTimeoutMs,
+        )
         val slotDecision = acquireExecutionSlot(
             executionId = executionId,
             queueMode = queueMode,
@@ -420,7 +423,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
             executionId = executionId,
             queueMode = queueMode,
-            queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(queueMode, queueTimeoutMs),
+            queueTimeoutMs = queueTimeoutMs,
             runtimeAdapter = preparedServiceRequest.runtimeAdapter,
             processPoolSlot = preparedServiceRequest.processPoolSlot,
             processPoolSlotSource = preparedServiceRequest.processPoolSlotSource,
@@ -1465,7 +1468,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             return
         }
         exitScheduled = true
-        Handler(Looper.getMainLooper()).postDelayed({
+        mainHandler.postDelayed({
             exitProcess(status)
         }, PROCESS_EXIT_DELAY_MS)
     }
@@ -1497,7 +1500,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
 
         data class Acquired(val lease: DefaultProcessPoolSlotLease) : DefaultProcessPoolSlotDecision()
 
-        data class Rejected(val activeSlotIds: List<String>) : DefaultProcessPoolSlotDecision()
+        data class Rejected(
+            val failure: ExecutionSlotFailure,
+            val activeSlotIds: List<String>,
+        ) : DefaultProcessPoolSlotDecision()
 
         object NotEligible : DefaultProcessPoolSlotDecision()
     }
@@ -1516,6 +1522,9 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val slot: NodeEmbeddedProcessPoolPolicy.ProcessSlot,
         val activeSlotIdsAtAcquire: List<String>,
         val acquiredAtElapsedMs: Long,
+        val queueMode: String,
+        val queued: Boolean,
+        val queueWaitMs: Long,
     )
 
     private data class ExecutionSlotFailure(
@@ -1850,6 +1859,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         fun enqueueScript(
             context: Context,
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            launchSurface: String = NodeExecutionModePolicy.LAUNCH_SURFACE_SCRIPT,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val executionId = request.executionId?.takeIf { it.isNotBlank() } ?: newExecutionId()
             val queueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
@@ -1879,6 +1889,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                         queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
                         queueTimeoutMs = 0L,
                     ),
+                    launchSurface,
                 ).withClientQueueLease(slotLease)
             } finally {
                 settleBetweenQueuedExecutions()
@@ -2004,8 +2015,25 @@ open class NativeNodeEmbeddedScriptService : Service() {
             NativeNodeEmbeddedRuntimeBridge.validateEmbeddedScriptRequestBeforeServiceStart(requestForService, launchSurface)?.let {
                 return it.withLifecycle(preflightFailureLifecycle(executionId, request))
             }
-            val startedAt = android.os.SystemClock.elapsedRealtime()
             val appContext = context.applicationContext
+            val requestQueueMode = NodeExecutionQueuePolicy.normalizeMode(requestForService.queueMode)
+            val defaultSchedulerEligible = requestForService.processPoolSlot.isNullOrBlank() &&
+                    NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(
+                        context = appContext,
+                        executionMode = requestForService.executionMode,
+                        launchSurface = launchSurface,
+                    )
+            if (
+                requestQueueMode == NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY &&
+                !defaultSchedulerEligible
+            ) {
+                return enqueueScript(
+                    context = appContext,
+                    request = requestForService,
+                    launchSurface = launchSurface,
+                )
+            }
+            val startedAt = android.os.SystemClock.elapsedRealtime()
             val defaultSlotDecision = acquireDefaultProcessPoolSlot(
                 context = appContext,
                 executionId = executionId,
@@ -2013,12 +2041,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 launchSurface = launchSurface,
             )
             if (defaultSlotDecision is DefaultProcessPoolSlotDecision.Rejected) {
-                return defaultProcessPoolBusyResult(
+                return defaultProcessPoolFailureResult(
                     context = appContext,
                     request = requestForService,
                     executionId = executionId,
                     startedAt = startedAt,
                     launchSurface = launchSurface,
+                    failure = defaultSlotDecision.failure,
                     activeSlotIds = defaultSlotDecision.activeSlotIds,
                 )
             }
@@ -2027,8 +2056,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 requestForService.copy(
                     processPoolSlot = lease.slot.id,
                     processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+                    queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                    queueTimeoutMs = 0L,
                 )
-            } ?: requestForService
+            } ?: requestForService.copy(
+                queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                queueTimeoutMs = 0L,
+            )
             val completion = CountDownLatch(1)
             val result = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
             val receiver = object : ResultReceiver(null) {
@@ -2093,7 +2127,13 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     startOutcome = startOutcome,
                 )
                 CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] = component
-                val completed = completion.await(clientAwaitTimeoutMs(request.timeoutMs), TimeUnit.MILLISECONDS)
+                val completed = completion.await(
+                    clientAwaitTimeoutMs(
+                        request = scheduledRequestForService,
+                        includeQueueTimeout = defaultSlotLease == null,
+                    ),
+                    TimeUnit.MILLISECONDS,
+                )
                 if (!completed) {
                     coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.timeout")
                     appContext.stopService(Intent().setComponent(component))
@@ -2125,14 +2165,20 @@ open class NativeNodeEmbeddedScriptService : Service() {
             } finally {
                 component?.let { CLIENT_RUNNING_SCRIPT_COMPONENTS.remove(executionId, it) }
                 requestSpoolFile?.parentFile?.deleteRecursively()
+                if (defaultSlotLease != null && component != null) {
+                    settleBetweenQueuedExecutions()
+                }
                 releaseDefaultProcessPoolSlot(defaultSlotLease)
             }
-            return result.get() ?: processCrashedOrTimedOut(
+            val scriptResult = result.get() ?: processCrashedOrTimedOut(
                 request = scheduledRequestForService,
                 message = "Embedded script process crashed or timed out.",
                 startedAt = startedAt,
                 executionId = executionId,
             )
+            return scriptResult
+                .withProcessPoolPlan(processPoolPlan)
+                .withDefaultProcessPoolLease(defaultSlotLease)
         }
 
         fun cancelRunningScript(context: Context, executionId: String): Boolean {
@@ -2551,31 +2597,101 @@ open class NativeNodeEmbeddedScriptService : Service() {
             ) {
                 return DefaultProcessPoolSlotDecision.NotEligible
             }
-            synchronized(DEFAULT_PROCESS_POOL_LOCK) {
-                val now = android.os.SystemClock.elapsedRealtime()
-                pruneDefaultProcessPoolSlotCooldownsLocked(now)
-                val coolingSlotIds = DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS.keys
-                    .map { "$it:cooling" }
-                val activeSlotIds = DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.toList() + coolingSlotIds
-                val slot = NodeEmbeddedProcessPoolPolicy.defaultSchedulerSelectableSlots(
-                    context = context,
-                    executionMode = request.executionMode,
-                    launchSurface = launchSurface,
-                ).firstOrNull { candidate ->
-                    candidate.id !in DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS &&
-                            candidate.id !in DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS
+            val normalizedMode = NodeExecutionQueuePolicy.normalizeMode(request.queueMode)
+            val normalizedQueueTimeoutMs = NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
+                normalizedMode,
+                request.queueTimeoutMs,
+            )
+            val queuedAt = android.os.SystemClock.elapsedRealtime()
+            var queued = false
+            while (true) {
+                synchronized(DEFAULT_PROCESS_POOL_LOCK) {
+                    val now = android.os.SystemClock.elapsedRealtime()
+                    val queueWaitMs = (now - queuedAt).coerceAtLeast(0L)
+                    val deadline = queuedAt + normalizedQueueTimeoutMs
+                    val remainingMs = deadline - now
+                    pruneDefaultProcessPoolSlotCooldownsLocked(now)
+                    val coolingSlotIds = DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS.keys
+                        .map { "$it:cooling" }
+                    val activeSlotIds = DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.toList() + coolingSlotIds
+                    val slot = NodeEmbeddedProcessPoolPolicy.defaultSchedulerSelectableSlots(
+                        context = context,
+                        executionMode = request.executionMode,
+                        launchSurface = launchSurface,
+                    ).firstOrNull { candidate ->
+                        candidate.id !in DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS &&
+                                candidate.id !in DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS
+                    }
+                    if (slot != null) {
+                        DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.add(slot.id)
+                        return DefaultProcessPoolSlotDecision.Acquired(
+                            DefaultProcessPoolSlotLease(
+                                executionId = executionId,
+                                slot = slot,
+                                activeSlotIdsAtAcquire = activeSlotIds,
+                                acquiredAtElapsedMs = android.os.SystemClock.elapsedRealtime(),
+                                queueMode = normalizedMode,
+                                queued = queued,
+                                queueWaitMs = queueWaitMs,
+                            ),
+                        )
+                    }
+                    if (normalizedMode != NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY) {
+                        return DefaultProcessPoolSlotDecision.Rejected(
+                            failure = defaultProcessPoolBusyFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queuedAt = queuedAt,
+                                activeSlotIds = activeSlotIds,
+                            ),
+                            activeSlotIds = activeSlotIds,
+                        )
+                    }
+                    if (remainingMs <= 0L) {
+                        return DefaultProcessPoolSlotDecision.Rejected(
+                            failure = queueTimeoutFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queueWaitMs = queueWaitMs,
+                            ),
+                            activeSlotIds = activeSlotIds,
+                        )
+                    }
+                    queued = true
+                    try {
+                        DEFAULT_PROCESS_POOL_LOCK.wait(remainingMs.coerceAtMost(100L))
+                    } catch (e: InterruptedException) {
+                        Thread.currentThread().interrupt()
+                        return DefaultProcessPoolSlotDecision.Rejected(
+                            failure = queueCancelledFailure(
+                                executionId = executionId,
+                                queueMode = normalizedMode,
+                                queueWaitMs = (android.os.SystemClock.elapsedRealtime() - queuedAt).coerceAtLeast(0L),
+                            ),
+                            activeSlotIds = activeSlotIds,
+                        )
+                    }
                 }
-                    ?: return DefaultProcessPoolSlotDecision.Rejected(activeSlotIds)
-                DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.add(slot.id)
-                return DefaultProcessPoolSlotDecision.Acquired(
-                    DefaultProcessPoolSlotLease(
-                        executionId = executionId,
-                        slot = slot,
-                        activeSlotIdsAtAcquire = activeSlotIds,
-                        acquiredAtElapsedMs = android.os.SystemClock.elapsedRealtime(),
-                    ),
-                )
             }
+        }
+
+        private fun defaultProcessPoolBusyFailure(
+            executionId: String,
+            queueMode: String,
+            queuedAt: Long,
+            activeSlotIds: List<String>,
+        ): ExecutionSlotFailure {
+            return ExecutionSlotFailure(
+                errorName = "EmbeddedNodeProcessPoolBusyError",
+                errorCode = NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+                errorMessage = "Embedded Node.js default process pool is busy; active slots=${activeSlotIds.joinToString(",")}.",
+                queueMode = queueMode,
+                reason = "default_process_pool_busy",
+                activeExecutionId = null,
+                queueWaitMs = (android.os.SystemClock.elapsedRealtime() - queuedAt).coerceAtLeast(0L),
+                queuedCount = 0,
+                maxQueuedExecutions = NodeEmbeddedProcessPoolPolicy.DEFAULT_SCHEDULER_EFFECTIVE_MAX_ACTIVE_SLOTS,
+            )
         }
 
         private fun releaseDefaultProcessPoolSlot(lease: DefaultProcessPoolSlotLease?) {
@@ -2615,19 +2731,20 @@ open class NativeNodeEmbeddedScriptService : Service() {
             }
         }
 
-        private fun defaultProcessPoolBusyResult(
+        private fun defaultProcessPoolFailureResult(
             context: Context,
             request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
             executionId: String,
             startedAt: Long,
             launchSurface: String,
+            failure: ExecutionSlotFailure,
             activeSlotIds: List<String>,
         ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
             val processName = currentProcessNameCompat()
             val pid = Process.myPid()
             val lifecycle = NodeEmbeddedRuntimeLifecycle(TAG, executionId, processName, pid, request.sourceName)
                 .apply {
-                    transition(NodeEmbeddedRuntimeState.FAILED, "client.default_process_pool_busy")
+                    transition(NodeEmbeddedRuntimeState.FAILED, "client.${failure.reason}")
                 }
             val processPoolPlan = NodeEmbeddedProcessPoolPolicy.plan(
                 context = context,
@@ -2639,11 +2756,21 @@ open class NativeNodeEmbeddedScriptService : Service() {
             val nativeValues = linkedMapOf<String, String>().apply {
                 putAll(processPoolPlan.nativeValues())
                 put("embedded_script.process_pool.scheduler_rejected", "true")
-                put("embedded_script.process_pool.busy", "true")
                 put("embedded_script.process_pool.active_slot_ids", activeSlotIds.joinToString(","))
                 put("embedded_script.concurrent_policy", "one-active-execution-per-process-slot")
                 put("embedded_script.rejected_execution_id", executionId)
-                put("embedded_script.error_code", NodeRuntimeErrorCodes.NODE_ENGINE_BUSY)
+                put("embedded_script.queue_mode", failure.queueMode)
+                put("embedded_script.queue_status", failure.reason)
+                put("embedded_script.queue_wait_ms", failure.queueWaitMs.toString())
+                put("embedded_script.error_code", failure.errorCode)
+                when (failure.errorCode) {
+                    NodeRuntimeErrorCodes.NODE_ENGINE_BUSY -> {
+                        put("embedded_script.process_pool.busy", "true")
+                        put("embedded_script.engine_busy", "true")
+                    }
+                    NodeRuntimeErrorCodes.NODE_QUEUE_TIMEOUT -> put("embedded_script.queue_timeout", "true")
+                    NodeRuntimeErrorCodes.NODE_QUEUE_CANCELLED -> put("embedded_script.queue_cancelled", "true")
+                }
             }
             return NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult(
                 succeeded = false,
@@ -2651,10 +2778,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 resultText = null,
                 stdout = "",
                 stderr = "",
-                errorName = "EmbeddedNodeProcessPoolBusyError",
-                errorMessage = "Embedded Node.js default process pool is busy; active slots=${activeSlotIds.joinToString(",")}.",
+                errorName = failure.errorName,
+                errorMessage = failure.errorMessage,
                 errorStack = null,
-                errorCode = NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+                errorCode = failure.errorCode,
                 elapsedMs = (android.os.SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L),
                 processName = processName,
                 pid = pid,
@@ -2963,6 +3090,26 @@ open class NativeNodeEmbeddedScriptService : Service() {
             )
         }
 
+        private fun NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult.withDefaultProcessPoolLease(
+            lease: DefaultProcessPoolSlotLease?,
+        ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+            if (lease == null) {
+                return this
+            }
+            return copy(
+                nativeValues = linkedMapOf<String, String>().apply {
+                    putAll(nativeValues)
+                    put("embedded_script.process_pool.queue_mode", lease.queueMode)
+                    put("embedded_script.process_pool.queue_queued", lease.queued.toString())
+                    put(
+                        "embedded_script.process_pool.queue_status",
+                        if (lease.queued) "dequeued" else "not_queued",
+                    )
+                    put("embedded_script.process_pool.queue_wait_ms", lease.queueWaitMs.toString())
+                },
+            )
+        }
+
         private fun settleBetweenQueuedExecutions() {
             runCatching {
                 Thread.sleep(CLIENT_QUEUE_PROCESS_SETTLE_MS)
@@ -3084,9 +3231,20 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private fun currentProcessNameCompat(): String = runCatching { App.getProcessNameCompat() }
             .getOrElse { "unknown" }
 
-        private fun clientAwaitTimeoutMs(requestTimeoutMs: Long): Long {
-            val scriptTimeoutMs = requestTimeoutMs.coerceAtLeast(1L)
-            return (scriptTimeoutMs + CLIENT_SERVICE_START_GRACE_MS).coerceAtLeast(scriptTimeoutMs)
+        private fun clientAwaitTimeoutMs(
+            request: NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest,
+            includeQueueTimeout: Boolean,
+        ): Long {
+            val scriptTimeoutMs = request.timeoutMs.coerceAtLeast(1L)
+            val queueTimeoutMs = if (includeQueueTimeout) {
+                NodeExecutionQueuePolicy.normalizedQueueTimeoutMs(
+                    NodeExecutionQueuePolicy.normalizeMode(request.queueMode),
+                    request.queueTimeoutMs,
+                )
+            } else {
+                0L
+            }
+            return (scriptTimeoutMs + queueTimeoutMs + CLIENT_SERVICE_START_GRACE_MS).coerceAtLeast(scriptTimeoutMs)
         }
 
         private fun timeoutNativeValues(
@@ -3349,7 +3507,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 executionId = json.optString("executionId").takeIf { it.isNotBlank() },
                 executionMode = NodeExecutionModePolicy.normalize(json.optString("executionMode")),
                 timeoutMs = json.optLong("timeoutMs", DEFAULT_TIMEOUT_MS).coerceAtLeast(1L),
-                queueMode = json.optString("queueMode").ifBlank { NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY },
+                queueMode = json.optString("queueMode").ifBlank { NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY },
                 queueTimeoutMs = json.optLong("queueTimeoutMs", 0L),
                 captureStdout = json.optBoolean("captureStdout", true),
                 captureStderr = json.optBoolean("captureStderr", true),

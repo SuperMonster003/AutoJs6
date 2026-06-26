@@ -47,6 +47,8 @@ internal object NodeEmbeddedTestHarness {
         childProcessExperimentalEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
         javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
         runtimeAdapter: String? = null,
+        queueMode: String = NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
+        queueTimeoutMs: Long = 0L,
         processPoolSlot: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
@@ -62,11 +64,13 @@ internal object NodeEmbeddedTestHarness {
                 runtimeModuleSources = runtimeModuleSources,
                 esmExperimentalEnabled = esmExperimentalEnabled,
                 dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
-            rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled,
-            workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
-            childProcessExperimentalEnabled = childProcessExperimentalEnabled,
-            javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
+                rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled,
+                workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
+                childProcessExperimentalEnabled = childProcessExperimentalEnabled,
+                javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
                 runtimeAdapter = runtimeAdapter,
+                queueMode = queueMode,
+                queueTimeoutMs = queueTimeoutMs,
                 processPoolSlot = processPoolSlot,
             ),
         )

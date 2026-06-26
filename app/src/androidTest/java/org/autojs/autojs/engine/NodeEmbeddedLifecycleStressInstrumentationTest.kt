@@ -358,7 +358,7 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
     }
 
     @Test
-    fun concurrentExecutionIsRejectedAndNextRunWorks() {
+    fun explicitRejectWhenBusyStillRejectsAndNextRunWorks() {
         assumeEmbeddedScriptExecutionEnabled()
 
         val scriptDir = File(context.cacheDir, "embedded-concurrent-${System.nanoTime()}").apply {
@@ -383,6 +383,9 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                     sourceName = "<lifecycle-stress-concurrent-first.js>",
                     workingDirectory = scriptDir.absolutePath,
                     timeoutMs = CONCURRENT_TIMEOUT_MS,
+                    queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                    processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                    processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
                 )
             }.onSuccess { result ->
                 firstResult.set(result)
@@ -407,6 +410,9 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                 """.trimIndent(),
                 sourceName = "<lifecycle-stress-concurrent-second.js>",
                 timeoutMs = SIMPLE_TIMEOUT_MS,
+                queueMode = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+                processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
             )
 
             firstThread.join(CONCURRENT_TIMEOUT_MS + 3000L)
@@ -428,6 +434,108 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
 
             settleEmbeddedScriptServiceProcess()
             assertRecoveryRun("after.concurrent.busy")
+        } finally {
+            scriptDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun defaultConcurrentExecutionQueuesInsteadOfEngineBusy() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val scriptDir = File(context.cacheDir, "embedded-default-queue-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create default queue dir: $absolutePath" }
+        }
+        val firstStarted = File(scriptDir, "first-started.txt")
+        val order = File(scriptDir, "order.txt")
+        val firstResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        val secondResult = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult?>()
+        val firstFailure = AtomicReference<Throwable?>()
+        val secondFailure = AtomicReference<Throwable?>()
+
+        val firstThread = Thread {
+            runCatching {
+                runEmbeddedScript(
+                    source = """
+                        "nodejs";
+                        const fs = require("fs");
+                        fs.writeFileSync("./first-started.txt", "started");
+                        fs.appendFileSync("./order.txt", "first-started\n");
+                        console.log("stress.default.queue.first.started");
+                        return new Promise((resolve) => setTimeout(() => {
+                          fs.appendFileSync("./order.txt", "first-done\n");
+                          console.log("stress.default.queue.first.done");
+                          resolve();
+                        }, 1500));
+                    """.trimIndent(),
+                    sourceName = "<lifecycle-stress-default-queue-first.js>",
+                    workingDirectory = scriptDir.absolutePath,
+                    timeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    queueTimeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                    processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+                )
+            }.onSuccess(firstResult::set)
+                .onFailure(firstFailure::set)
+        }.apply {
+            name = "AutoJs6NodeDefaultQueueFirst"
+            start()
+        }
+
+        val secondThread = Thread {
+            runCatching {
+                runEmbeddedScript(
+                    source = """
+                        "nodejs";
+                        const fs = require("fs");
+                        fs.appendFileSync("./order.txt", "second-run\n");
+                        console.log("stress.default.queue.second.run");
+                    """.trimIndent(),
+                    sourceName = "<lifecycle-stress-default-queue-second.js>",
+                    workingDirectory = scriptDir.absolutePath,
+                    timeoutMs = SIMPLE_TIMEOUT_MS,
+                    queueTimeoutMs = QUEUE_TEST_TIMEOUT_MS,
+                    processPoolSlot = NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID,
+                    processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_EXPLICIT_REQUEST,
+                )
+            }.onSuccess(secondResult::set)
+                .onFailure(secondFailure::set)
+        }.apply {
+            name = "AutoJs6NodeDefaultQueueSecond"
+        }
+
+        try {
+            assertTrue(
+                "First default queue run did not enter user script before timeout.",
+                waitUntil(5000L) { firstStarted.isFile },
+            )
+            secondThread.start()
+
+            firstThread.join(QUEUE_TEST_TIMEOUT_MS + 3000L)
+            secondThread.join(QUEUE_TEST_TIMEOUT_MS + SIMPLE_TIMEOUT_MS + 3000L)
+            firstFailure.get()?.let { throw AssertionError("First default queue run failed.", it) }
+            secondFailure.get()?.let { throw AssertionError("Second default queue run failed.", it) }
+            assertFalse("First default queue run did not finish.", firstThread.isAlive)
+            assertFalse("Second default queue run did not finish.", secondThread.isAlive)
+
+            val first = firstResult.get()
+            val second = secondResult.get()
+            assertTrue("First default queue run did not produce a result.", first != null)
+            assertTrue("Second default queue run did not produce a result.", second != null)
+            assertSucceeded("default queue first", first!!)
+            assertSucceeded("default queue second", second!!)
+            assertEquals("true", second.nativeValues["embedded_script.queue_queued"])
+            assertEquals("dequeued", second.nativeValues["embedded_script.queue_status"])
+            assertTrue(
+                second.nativeValues["embedded_script.queue_wait_ms"].orEmpty(),
+                second.nativeValues["embedded_script.queue_wait_ms"].orEmpty().toLongOrNull() ?: 0L > 0L,
+            )
+            assertFalse("Default queued run must not report engine busy.", second.errorCode == NodeRuntimeErrorCodes.NODE_ENGINE_BUSY)
+
+            val orderText = order.readText()
+            assertTrue(orderText, orderText.indexOf("first-started") >= 0)
+            assertTrue(orderText, orderText.indexOf("first-done") > orderText.indexOf("first-started"))
+            assertTrue(orderText, orderText.indexOf("second-run") > orderText.indexOf("first-done"))
         } finally {
             scriptDir.deleteRecursively()
         }
@@ -855,6 +963,10 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
         workingDirectory: String? = context.cacheDir.absolutePath,
         timeoutMs: Long = SIMPLE_TIMEOUT_MS,
         executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
+        queueMode: String = NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
+        queueTimeoutMs: Long = 0L,
+        processPoolSlot: String? = null,
+        processPoolSlotSource: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             context,
@@ -864,6 +976,10 @@ class NodeEmbeddedLifecycleStressInstrumentationTest {
                 workingDirectory = workingDirectory,
                 executionMode = executionMode,
                 timeoutMs = timeoutMs,
+                queueMode = queueMode,
+                queueTimeoutMs = queueTimeoutMs,
+                processPoolSlot = processPoolSlot,
+                processPoolSlotSource = processPoolSlotSource,
             ),
         )
     }

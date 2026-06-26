@@ -251,8 +251,12 @@ object NodeEmbeddedProcessPoolPolicy {
             failedSlotReplacementEnabled = false,
             failedSlotQuarantinePolicy = SLOT_CRASH_QUARANTINE_POLICY_NONE,
             survivingSlotExecutionPolicy = SLOT_CRASH_SURVIVOR_POLICY_ALLOW_OTHER_SLOTS,
-            queueWhenPoolFullEnabled = false,
-            queuePolicy = "caller_side_queue_only_until_process_pool_enabled",
+            queueWhenPoolFullEnabled = selectedByDefaultScheduler,
+            queuePolicy = if (selectedByDefaultScheduler) {
+                "bounded_wait_for_available_process_slot"
+            } else {
+                "caller_side_queue_only_until_process_pool_enabled"
+            },
             oneActiveEnvironmentPerSlot = true,
             sharedV8EnvironmentAllowed = false,
             crashIsolationPolicy = "per_process_slot_when_enabled",

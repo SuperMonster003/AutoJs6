@@ -17669,7 +17669,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val executionId: String? = null,
         val executionMode: String = NodeExecutionModePolicy.MODE_ONE_SHOT,
         val timeoutMs: Long = DEFAULT_EMBEDDED_SCRIPT_TIMEOUT_MS,
-        val queueMode: String = NodeExecutionQueuePolicy.MODE_REJECT_WHEN_BUSY,
+        val queueMode: String = NodeExecutionQueuePolicy.MODE_ENQUEUE_WHEN_BUSY,
         val queueTimeoutMs: Long = 0L,
         val captureStdout: Boolean = true,
         val captureStderr: Boolean = true,

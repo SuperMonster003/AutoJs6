@@ -64,12 +64,14 @@ Focused embedded execution queue coverage:
 
 ```powershell
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#queuedExecutionRunsAfterActiveExecution"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#defaultConcurrentExecutionQueuesInsteadOfEngineBusy"
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#explicitRejectWhenBusyStillRejectsAndNextRunWorks"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#queuedExecutionCanBeCancelled"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#queuedExecutionTimeoutReturnsStableError"
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeEmbeddedLifecycleStressInstrumentationTest#queueLimitReachedReturnsStableError"
 ```
 
-These tests verify that default concurrent starts still reject, explicit enqueue runs after the active script, queued executions can be cancelled by execution id, queue wait timeout returns `ERR_AUTOJS6_NODE_QUEUE_TIMEOUT` before user code runs, and the one-entry queue limit returns `ERR_AUTOJS6_NODE_QUEUE_FULL`.
+These tests verify that default concurrent starts queue, explicit `reject_when_busy` still fails fast, explicit enqueue runs after the active script, queued executions can be cancelled by execution id, queue wait timeout returns `ERR_AUTOJS6_NODE_QUEUE_TIMEOUT` before user code runs, and the queue limit returns `ERR_AUTOJS6_NODE_QUEUE_FULL`.
 
 Long-running service mode has a controlled interactive foreground MVP:
 
@@ -2708,7 +2710,8 @@ Current lifecycle stress cases:
 - uncleared interval times out and next run succeeds
 - nested callbacks drain before success
 - stdout and stderr close after run
-- concurrent embedded execution rejects with `ERR_AUTOJS6_NODE_ENGINE_BUSY` and a later run succeeds
+- normal concurrent embedded execution queues and runs after the active process slot releases
+- explicit `reject_when_busy` concurrent execution rejects with `ERR_AUTOJS6_NODE_ENGINE_BUSY` and a later run succeeds
 - interactive stop writes a project-scoped checkpoint and a later explicit
   restore reads it without automatic restart
 - repeated interactive stop drains timers, writes checkpoints, and leaves the

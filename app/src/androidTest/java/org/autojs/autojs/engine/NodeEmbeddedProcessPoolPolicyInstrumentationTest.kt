@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONObject
 import org.junit.After
@@ -90,7 +91,6 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
         assertEquals(NodeEmbeddedProcessPoolPolicy.PRIMARY_SLOT_ID, result.nativeValues["embedded_script.process_pool.selected_slot_id"])
         assertEquals(":nodejs_embedded", result.nativeValues["embedded_script.process_pool.selected_process_suffix"])
         assertEquals("false", result.nativeValues["embedded_script.process_pool.long_running_dedicated_slot_enabled"])
-        assertEquals("false", result.nativeValues["embedded_script.process_pool.queue_when_full_enabled"])
         assertEquals("true", result.nativeValues["embedded_script.process_pool.one_active_environment_per_slot"])
         assertEquals("false", result.nativeValues["embedded_script.process_pool.shared_v8_environment_allowed"])
         if (NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(context)) {
@@ -102,11 +102,17 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
             )
             assertEquals("2", result.nativeValues["embedded_script.process_pool.effective_max_active_slots"])
             assertEquals("true", result.nativeValues["embedded_script.process_pool.default_scheduler_enabled"])
+            assertEquals("true", result.nativeValues["embedded_script.process_pool.queue_when_full_enabled"])
+            assertEquals(
+                "bounded_wait_for_available_process_slot",
+                result.nativeValues["embedded_script.process_pool.queue_policy"],
+            )
         } else {
             assertEquals("false", result.nativeValues["embedded_script.process_pool.enabled"])
             assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_PRIMARY_ONLY, result.nativeValues["embedded_script.process_pool.mode"])
             assertEquals("1", result.nativeValues["embedded_script.process_pool.effective_max_active_slots"])
             assertEquals("false", result.nativeValues["embedded_script.process_pool.default_scheduler_enabled"])
+            assertEquals("false", result.nativeValues["embedded_script.process_pool.queue_when_full_enabled"])
         }
     }
 
@@ -127,6 +133,8 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
         assertEquals(NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER, plan.slotSelectionSource)
         assertEquals(NodeEmbeddedProcessPoolPolicy.defaultSchedulerSlotIds(), plan.defaultSchedulerSlotIds)
         assertFalse(plan.defaultSchedulerFallbackEnabled)
+        assertTrue(plan.queueWhenPoolFullEnabled)
+        assertEquals("bounded_wait_for_available_process_slot", plan.queuePolicy)
         assertTrue(plan.reason.contains("default_scheduler_selected"))
     }
 
@@ -347,6 +355,99 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
             secondResult.nativeValues["embedded_script.process_pool.slot_selection_source"],
         )
         assertTrue("expected different default scheduler service processes", firstResult.pid != secondResult.pid)
+    }
+
+    @Test
+    fun defaultSchedulerQueuesWhenBothDefaultSlotsAreBusy() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("embedded process pool default scheduler queue")
+        assumeTrue(
+            "Default process-pool scheduler requires a device profile with at least two recommended slots.",
+            NodeEmbeddedProcessPoolPolicy.defaultSchedulerEligible(context),
+        )
+
+        val root = File(context.cacheDir, "node-process-pool-default-queue-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create process-pool default queue directory: $absolutePath" }
+        }
+        val startGate = CountDownLatch(1)
+        val first = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
+        val second = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
+        val third = AtomicReference<NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult>()
+        val firstError = AtomicReference<Throwable>()
+        val secondError = AtomicReference<Throwable>()
+        val thirdError = AtomicReference<Throwable>()
+        val firstThread = Thread {
+            runCatching {
+                startGate.await(5, TimeUnit.SECONDS)
+                first.set(runDefaultSchedulerQueueScript("first", root, 3_000L))
+            }.onFailure { firstError.set(it) }
+        }
+        val secondThread = Thread {
+            runCatching {
+                startGate.await(5, TimeUnit.SECONDS)
+                second.set(runDefaultSchedulerQueueScript("second", root, 3_000L))
+            }.onFailure { secondError.set(it) }
+        }
+        val thirdThread = Thread {
+            runCatching {
+                third.set(runDefaultSchedulerQueueScript("third", root, 0L))
+            }.onFailure { thirdError.set(it) }
+        }
+
+        try {
+            firstThread.start()
+            secondThread.start()
+            startGate.countDown()
+            assertTrue(
+                "first two default scheduler scripts did not both start before timeout.",
+                waitUntil(10_000L) {
+                    File(root, "first-started.txt").isFile && File(root, "second-started.txt").isFile
+                },
+            )
+            thirdThread.start()
+
+            firstThread.join(30_000L)
+            secondThread.join(30_000L)
+            thirdThread.join(30_000L)
+            firstError.get()?.let { throw AssertionError("first default scheduler queue thread failed", it) }
+            secondError.get()?.let { throw AssertionError("second default scheduler queue thread failed", it) }
+            thirdError.get()?.let { throw AssertionError("third default scheduler queue thread failed", it) }
+            assertFalse("first default scheduler queue thread did not finish", firstThread.isAlive)
+            assertFalse("second default scheduler queue thread did not finish", secondThread.isAlive)
+            assertFalse("third default scheduler queue thread did not finish", thirdThread.isAlive)
+
+            val firstResult = requireNotNull(first.get()) { "first default scheduler queue result missing" }
+            val secondResult = requireNotNull(second.get()) { "second default scheduler queue result missing" }
+            val thirdResult = requireNotNull(third.get()) { "third default scheduler queue result missing" }
+            NodeEmbeddedTestHarness.assertSucceeded("first default scheduler queue", firstResult)
+            NodeEmbeddedTestHarness.assertSucceeded("second default scheduler queue", secondResult)
+            NodeEmbeddedTestHarness.assertSucceeded("third default scheduler queue", thirdResult)
+            assertEquals("true", thirdResult.nativeValues["embedded_script.process_pool.queue_queued"])
+            assertEquals("dequeued", thirdResult.nativeValues["embedded_script.process_pool.queue_status"])
+            assertTrue(
+                thirdResult.nativeValues["embedded_script.process_pool.queue_wait_ms"].orEmpty(),
+                thirdResult.nativeValues["embedded_script.process_pool.queue_wait_ms"].orEmpty().toLongOrNull() ?: 0L > 0L,
+            )
+            assertFalse(
+                "default process-pool queued run must not report engine busy.",
+                thirdResult.errorCode == NodeRuntimeErrorCodes.NODE_ENGINE_BUSY,
+            )
+            assertEquals(NodeEmbeddedProcessPoolPolicy.MODE_DEFAULT_TWO_SLOT, thirdResult.nativeValues["embedded_script.process_pool.mode"])
+            assertEquals(
+                NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER,
+                thirdResult.nativeValues["embedded_script.process_pool.slot_selection_source"],
+            )
+
+            val orderText = File(root, "order.txt").readText(Charsets.UTF_8)
+            val thirdStart = orderText.indexOf("third-start")
+            val firstDone = orderText.indexOf("first-done")
+            val secondDone = orderText.indexOf("second-done")
+            assertTrue(orderText, thirdStart >= 0)
+            assertTrue(orderText, firstDone >= 0 || secondDone >= 0)
+            assertTrue(orderText, thirdStart > listOf(firstDone, secondDone).filter { it >= 0 }.minOrNull()!!)
+        } finally {
+            root.deleteRecursively()
+        }
     }
 
     @Test
@@ -669,6 +770,43 @@ class NodeEmbeddedProcessPoolPolicyInstrumentationTest {
             sourceName = "<process-pool-default-$label.js>",
             timeoutMs = 15_000L,
         )
+    }
+
+    private fun runDefaultSchedulerQueueScript(
+        label: String,
+        workDir: File,
+        holdMs: Long,
+    ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                const fs = require("fs");
+                fs.writeFileSync("./$label-started.txt", "started");
+                fs.appendFileSync("./order.txt", "$label-start\n");
+                return new Promise((resolve) => {
+                  setTimeout(() => {
+                    fs.appendFileSync("./order.txt", "$label-done\n");
+                    console.log("slot.queue.$label=" + process.pid);
+                    resolve("$label-ok");
+                  }, $holdMs);
+                });
+            """.trimIndent(),
+            sourceName = "<process-pool-default-queue-$label.js>",
+            workingDirectory = workDir,
+            timeoutMs = 20_000L,
+            queueTimeoutMs = 10_000L,
+        )
+    }
+
+    private fun waitUntil(timeoutMs: Long, condition: () -> Boolean): Boolean {
+        val deadline = SystemClock.elapsedRealtime() + timeoutMs
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (condition()) {
+                return true
+            }
+            SystemClock.sleep(50L)
+        }
+        return condition()
     }
 
     @Suppress("DEPRECATION")
