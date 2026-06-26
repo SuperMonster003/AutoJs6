@@ -380,6 +380,7 @@ capability 映射示例：
 
 - `toast` 需要 `toast`
 - `app.launchPackage` / `app.launchApp` 需要 `app.launch`
+- `app.launch` 是 `app.launchPackage` 的 Node 兼容别名
 - `app.openAppSetting` 需要 `app.settings`
 - `app.startActivity` / `app.viewFile` / `app.editFile` 需要 `app.activity`
 - `app.getPackageName` / `app.getAppName` / `app.isInstalled` 需要显式
@@ -1023,10 +1024,10 @@ startup/custom triggers, packaged install/trigger/remove behavior, and raw
 
 P13-23 records app/intent/broadcast Pro parity as partial: JSON-safe
 `app.intent()` descriptors, normalized `app.startActivity()` options, exact
-`app.query` lookups, and scoped file view/edit helpers are evidence-backed,
-while `sendBroadcast`, root/Shizuku app options, dual-user helpers, raw
-installed-app list APIs, packaged behavior, and raw Android app/intent objects
-remain blocked.
+`app.query` lookups, scoped file view/edit helpers, and `app.launch()` alias
+parity are evidence-backed, while `sendBroadcast`, root/Shizuku app options,
+dual-user helpers, raw installed-app list APIs, packaged behavior, and raw
+Android app/intent objects remain blocked.
 
 P13-24 records shell/root/Shizuku capability promotion as partial: ordinary
 `shell.exec()` stays on the controlled provider, `shell.execRoot()` and

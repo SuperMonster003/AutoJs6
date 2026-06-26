@@ -621,10 +621,10 @@ manifest synthesis, packaged install/trigger/remove behavior, and raw broadcast
 objects require separate evidence.
 P13-23 additionally uses `verifyNodePhase13AppIntentBroadcastParity` as the
 host promotion-status gate for app/intent/broadcast parity and keeps the surface
-partial: JSON-safe `app.intent()`, normalized `app.startActivity()`, and
-scoped file view/edit helpers are covered, while `sendBroadcast`,
-root/Shizuku app options, dual-user helpers, raw installed-app list APIs,
-packaged behavior, and
+partial: JSON-safe `app.intent()`, normalized `app.startActivity()`, scoped
+file view/edit helpers, and `app.launch()` alias parity are covered, while
+`sendBroadcast`, root/Shizuku app options, dual-user helpers, raw
+installed-app list APIs, packaged behavior, and
 raw Android objects require separate evidence.
 P13-24 additionally uses `verifyNodePhase13ShellRootShizukuCapability` as the
 host promotion-status gate for shell/root/Shizuku capability parity and keeps

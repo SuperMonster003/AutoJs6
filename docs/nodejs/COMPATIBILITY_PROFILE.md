@@ -1688,6 +1688,7 @@ runtime.
   - `isInstalled(packageName, options?): Promise<boolean>`
   - `viewFile(path, options?): Promise<boolean>`
   - `editFile(path, options?): Promise<boolean>`
+  - `launch(packageName, options?): Promise<boolean>`
   - `launchPackage(packageName, options?): Promise<boolean>`
   - `launchApp(name, options?): Promise<boolean>`
   - `openAppSetting(packageName?, options?): Promise<void>`

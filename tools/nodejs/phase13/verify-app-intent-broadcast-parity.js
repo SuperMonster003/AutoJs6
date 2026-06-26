@@ -172,6 +172,17 @@ function buildReport(files) {
       "Add packaged device evidence for scoped file view/edit Activity routing and disclosure.",
       "Keep raw `Uri` / `FileProvider` handles unavailable to Node scripts.",
     ]),
+    scenario("launch_alias_parity", "Rhino-style app.launch is a launchPackage alias without new bridge authority", [
+      token(files.nodeBridgeSources, "launch: launchPackage"),
+      token(files.appTypes, "launch(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;"),
+      token(files.typeSmoke, "const launchAlias: boolean = await app.launch(app.packageName"),
+      token(files.conformanceTest, 'assert.strictEqual(await expectPromise("app.launch"'),
+      token(files.p13Report, "`app.launch()`"),
+      token(files.p13Report, "`app.launchPackage()`"),
+    ], [
+      "Add migration examples for scripts that used Rhino global `launch()`.",
+      "Keep dual-user launch helpers under explicit P13-24 capability routing.",
+    ]),
     scenario("broadcast_and_privileged_boundary", "Broadcast send and privileged Rhino options remain rejected before bridge dispatch", [
       token(files.nodeBridgeSources, "function __autojs6_app_send_broadcast_unavailable_error()"),
       token(files.nodeBridgeSources, "app.sendBroadcast is not available in the Node.js engine yet"),
@@ -200,7 +211,7 @@ function buildReport(files) {
       token(files.proComparison, "P13-23 records app/intent/broadcast Pro parity as partial"),
       token(files.proAutoxNotes, "P13-23 records app/intent/broadcast Pro parity as partial"),
     ], [
-      "Map Rhino aliases such as `launch()`, `kill()`, raw installed-app list APIs, and dual-app helpers to separate JSON-safe providers or stable rejections.",
+      "Map Rhino aliases such as `kill()`, raw installed-app list APIs, and dual-app helpers to separate JSON-safe providers or stable rejections.",
     ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-23 as partial", [
       token(files.p13Report, "Status: partial"),

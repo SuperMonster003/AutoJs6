@@ -69,6 +69,7 @@ declare module "app" {
       isInstalled(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       viewFile(path: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       editFile(path: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
+      launch(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       launchPackage(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       launchApp(appName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;
       openAppSetting(options?: AutoJs6Node.BridgeCallOptions): Promise<void>;

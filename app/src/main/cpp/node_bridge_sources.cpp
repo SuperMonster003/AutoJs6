@@ -21974,6 +21974,7 @@ std::string buildEmbeddedScriptExecutionSource(
       isInstalled,
       viewFile,
       editFile,
+      launch: launchPackage,
       launchPackage,
       launchApp,
       openAppSetting,

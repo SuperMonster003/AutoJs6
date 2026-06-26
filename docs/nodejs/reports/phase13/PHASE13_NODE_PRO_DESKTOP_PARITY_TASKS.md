@@ -54,8 +54,9 @@
   `url` descriptor aliases, URL string `app.startActivity()` input,
   pure `app.intentToShell()` shell-argument serialization, `app.openUrl()`,
   `app.sendEmail()`, `app.uninstall()`, exact `app.query` installed-app lookup
-  helpers, scoped `app.viewFile()` / `app.editFile()` Activity helpers, and
-  settings aliases backed by the existing scoped activity/settings bridge.
+  helpers, scoped `app.viewFile()` / `app.editFile()` Activity helpers,
+  settings aliases, and `app.launch()` as a `launchPackage()` alias backed by
+  the existing scoped activity/settings bridge.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.

@@ -70,6 +70,7 @@ async function smoke(): Promise<void> {
   const installed: boolean = await app.isInstalled(app.packageName, { timeoutMs: 1000 });
   const viewedFile: boolean = await app.viewFile("README.md", { timeoutMs: 1000 });
   const editedFile: boolean = await app.editFile("README.md", { timeoutMs: 1000 });
+  const launchAlias: boolean = await app.launch(app.packageName, { timeoutMs: 1000 });
   await app.openAppSetting(app.packageName, { timeoutMs: 1000 });
   const viewIntent: app.IntentDescriptor = app.intent({
     action: "VIEW",
@@ -814,6 +815,7 @@ async function smoke(): Promise<void> {
   void installed;
   void viewedFile;
   void editedFile;
+  void launchAlias;
   void viewIntent;
   void shellIntent;
   void broadcastDenied;

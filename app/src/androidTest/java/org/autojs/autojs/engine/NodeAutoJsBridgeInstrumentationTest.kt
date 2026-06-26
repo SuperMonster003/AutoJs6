@@ -400,6 +400,7 @@ class NodeAutoJsBridgeInstrumentationTest {
                 typeof app.isInstalled,
                 typeof app.viewFile,
                 typeof app.editFile,
+                typeof app.launch,
                 typeof app.startActivity
               ].join("|"));
             })();
@@ -417,7 +418,7 @@ class NodeAutoJsBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("app.launchMissing.result=false"))
         assertTrue(result.stdout.contains("app.shadow=false"))
         assertTrue(result.stdout.contains("app.frozen=true"))
-        assertTrue(result.stdout.contains("app.methods=function|function|function|function|function|function|function|function|function|function|function"))
+        assertTrue(result.stdout.contains("app.methods=function|function|function|function|function|function|function|function|function|function|function|function"))
         assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
         assertEquals("2", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
         assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])

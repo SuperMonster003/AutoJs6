@@ -461,7 +461,7 @@ class NodeBridgeConformanceInstrumentationTest {
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
               expectExports("toast", toast, ["showToast", "toast"]);
-              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "uninstall", "getPackageName", "getAppName", "isInstalled", "viewFile", "editFile", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
+              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "uninstall", "getPackageName", "getAppName", "isInstalled", "viewFile", "editFile", "launch", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"]);
@@ -592,6 +592,7 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(await expectPromise("app.isInstalled.missing", app.isInstalled("org.autojs6.missing", { timeoutMs: 1013 })), false);
               assert.strictEqual(await expectPromise("app.viewFile", app.viewFile("README.md", { timeoutMs: 1013 })), true);
               assert.strictEqual(await expectPromise("app.editFile", app.editFile("README.md", { timeoutMs: 1013 })), true);
+              assert.strictEqual(await expectPromise("app.launch", app.launch("org.autojs.autojs6", { timeoutMs: 1013 })), true);
               await expectPromise("app.openAppSetting", app.openAppSetting("org.autojs.autojs6", { timeoutMs: 1014 }));
               const viewIntent = app.intent({
                 action: "VIEW",
