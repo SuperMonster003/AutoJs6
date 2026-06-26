@@ -47,7 +47,7 @@ open class NativeNodeProcessService : Service() {
                     START_NOT_STICKY
                 } else {
                     prewarmNode(startId)
-                    START_STICKY
+                    START_NOT_STICKY
                 }
             }
             ACTION_RUN -> {

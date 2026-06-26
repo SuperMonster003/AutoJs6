@@ -31,6 +31,7 @@ import org.json.JSONObject
 import java.io.File
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -1723,6 +1724,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private val QUEUED_EXECUTION_IDS = ArrayDeque<String>()
         private val CANCELLED_QUEUED_EXECUTION_IDS = mutableSetOf<String>()
         private val DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS = linkedSetOf<String>()
+        private val DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS = linkedMapOf<String, Long>()
+        private val CLIENT_RUNNING_SCRIPT_COMPONENTS = ConcurrentHashMap<String, ComponentName>()
         private const val ACTION_PREWARM_RUNTIME = "org.autojs.autojs.engine.action.PREWARM_NATIVE_NODE_RUNTIME"
         private const val ACTION_RUN_SCRIPT = "org.autojs.autojs.engine.action.RUN_NATIVE_NODE_EMBEDDED_SCRIPT"
         private const val ACTION_STOP_INTERACTIVE = NodeInteractiveLongRunningStatusStore.STOP_ACTION_NAME
@@ -1782,6 +1785,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES = 512
         private const val RESULT_TRANSPORT_OMITTED_KEYS_MAX_CHARS = 4_096
         private const val CLIENT_SERVICE_START_GRACE_MS = 10_000L
+        private const val DEFAULT_PROCESS_POOL_STOP_COOLDOWN_MS = 10_000L
         private const val TIMEOUT_EXIT_CODE = 124
         private const val TIMEOUT_ERROR_CODE = NodeRuntimeErrorCodes.LEGACY_SCRIPT_TIMEOUT
         private const val DEFAULT_SOURCE_NAME = "<embedded-script>"
@@ -1800,6 +1804,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "stderr_capture.text.hex",
         )
         private val RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS = listOf(
+            "embedded_script.runtime_state",
+            "embedded_script.lifecycle_transitions",
             "embedded_script.source_name",
             "embedded_script.current_working_directory",
             "embedded_script.esm_entry",
@@ -2068,8 +2074,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     executionId = executionId,
                     startOutcome = startOutcome,
                 )
+                CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] = component
                 val completed = completion.await(clientAwaitTimeoutMs(request.timeoutMs), TimeUnit.MILLISECONDS)
                 if (!completed) {
+                    coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.timeout")
                     appContext.stopService(Intent().setComponent(component))
                     val lifecycle = timeoutLifecycle(executionId, scheduledRequestForService)
                     return processCrashedOrTimedOut(
@@ -2082,10 +2090,12 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     )
                 }
             } catch (e: InterruptedException) {
+                coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.interrupted")
                 component?.let { appContext.stopService(Intent().setComponent(it)) }
                 Thread.currentThread().interrupt()
                 throw ScriptInterruptedException(e)
             } catch (e: Throwable) {
+                coolDownDefaultProcessPoolSlot(defaultSlotLease, "client.throwable")
                 component?.let { appContext.stopService(Intent().setComponent(it)) }
                 return processCrashedOrTimedOut(
                     scheduledRequestForService,
@@ -2095,6 +2105,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     executionId = executionId,
                 )
             } finally {
+                component?.let { CLIENT_RUNNING_SCRIPT_COMPONENTS.remove(executionId, it) }
                 requestSpoolFile?.parentFile?.deleteRecursively()
                 releaseDefaultProcessPoolSlot(defaultSlotLease)
             }
@@ -2104,6 +2115,17 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 startedAt = startedAt,
                 executionId = executionId,
             )
+        }
+
+        fun cancelRunningScript(context: Context, executionId: String): Boolean {
+            val component = CLIENT_RUNNING_SCRIPT_COMPONENTS[executionId] ?: return false
+            return runCatching {
+                context.applicationContext.stopService(Intent().setComponent(component))
+            }.onSuccess {
+                Log.i(TAG, "client.cancel requested executionId=$executionId component=${component.flattenToShortString()}")
+            }.onFailure {
+                Log.w(TAG, "Failed to cancel embedded script executionId=$executionId.", it)
+            }.getOrDefault(false)
         }
 
         data class InteractiveLongRunningSession(
@@ -2510,12 +2532,19 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 return DefaultProcessPoolSlotDecision.NotEligible
             }
             synchronized(DEFAULT_PROCESS_POOL_LOCK) {
-                val activeSlotIds = DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.toList()
+                val now = android.os.SystemClock.elapsedRealtime()
+                pruneDefaultProcessPoolSlotCooldownsLocked(now)
+                val coolingSlotIds = DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS.keys
+                    .map { "$it:cooling" }
+                val activeSlotIds = DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.toList() + coolingSlotIds
                 val slot = NodeEmbeddedProcessPoolPolicy.defaultSchedulerSelectableSlots(
                     context = context,
                     executionMode = request.executionMode,
                     launchSurface = launchSurface,
-                ).firstOrNull { candidate -> candidate.id !in DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS }
+                ).firstOrNull { candidate ->
+                    candidate.id !in DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS &&
+                            candidate.id !in DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS
+                }
                     ?: return DefaultProcessPoolSlotDecision.Rejected(activeSlotIds)
                 DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.add(slot.id)
                 return DefaultProcessPoolSlotDecision.Acquired(
@@ -2536,6 +2565,33 @@ open class NativeNodeEmbeddedScriptService : Service() {
             synchronized(DEFAULT_PROCESS_POOL_LOCK) {
                 DEFAULT_PROCESS_POOL_BUSY_SLOT_IDS.remove(lease.slot.id)
                 DEFAULT_PROCESS_POOL_LOCK.notifyAll()
+            }
+        }
+
+        private fun coolDownDefaultProcessPoolSlot(lease: DefaultProcessPoolSlotLease?, reason: String) {
+            if (lease == null) {
+                return
+            }
+            val until = android.os.SystemClock.elapsedRealtime() + DEFAULT_PROCESS_POOL_STOP_COOLDOWN_MS
+            synchronized(DEFAULT_PROCESS_POOL_LOCK) {
+                DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS[lease.slot.id] = until
+                DEFAULT_PROCESS_POOL_LOCK.notifyAll()
+            }
+            Log.i(
+                TAG,
+                "default_process_pool.slot_cooldown slot=${lease.slot.id} " +
+                        "executionId=${lease.executionId} reason=$reason " +
+                        "cooldownMs=$DEFAULT_PROCESS_POOL_STOP_COOLDOWN_MS",
+            )
+        }
+
+        private fun pruneDefaultProcessPoolSlotCooldownsLocked(now: Long) {
+            val iterator = DEFAULT_PROCESS_POOL_SLOT_COOLDOWN_UNTIL_MS.iterator()
+            while (iterator.hasNext()) {
+                val entry = iterator.next()
+                if (entry.value <= now) {
+                    iterator.remove()
+                }
             }
         }
 

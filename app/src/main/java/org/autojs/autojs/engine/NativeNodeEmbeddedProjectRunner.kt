@@ -189,15 +189,17 @@ object NativeNodeEmbeddedProjectRunner {
     fun runProject(
         context: Context,
         request: ProjectRequest,
+        executionId: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return runResolvedProjectLaunchPlan(context, resolveProjectLaunchPlanWithDescriptor(request))
+        return runResolvedProjectLaunchPlan(context, resolveProjectLaunchPlanWithDescriptor(request), executionId)
     }
 
     fun runResolvedProjectLaunchPlan(
         context: Context,
         plan: ProjectLaunchPlan,
+        executionId: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
-        return runNormalized(context, plan.toEntryRequest(), describe(plan))
+        return runNormalized(context, plan.toEntryRequest(), describe(plan), executionId)
     }
 
     fun buildResolvedProjectLaunchRequest(
@@ -352,17 +354,20 @@ object NativeNodeEmbeddedProjectRunner {
     fun run(
         context: Context,
         request: Request,
+        executionId: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val normalizedRequest = normalizeRequest(request)
-        return runNormalized(context, normalizedRequest, describe(normalizedRequest))
+        return runNormalized(context, normalizedRequest, describe(normalizedRequest), executionId)
     }
 
     private fun runNormalized(
         context: Context,
         request: Request,
         descriptor: Descriptor,
+        executionId: String? = null,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val embeddedRequest = buildEmbeddedScriptRequest(request, descriptor)
+            .let { if (executionId == null) it else it.copy(executionId = executionId) }
         val result = NativeNodeEmbeddedScriptService.runScript(context, embeddedRequest)
         return withDescriptorNativeValues(result, descriptor)
     }

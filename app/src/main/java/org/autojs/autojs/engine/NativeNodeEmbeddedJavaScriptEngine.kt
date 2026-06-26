@@ -13,6 +13,7 @@ import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.NodeProjectLaunchSource
 import org.autojs.autojs6.BuildConfig
 import java.io.File
+import java.util.UUID
 
 internal fun nodeEmbeddedConsoleOutputLines(text: String): Sequence<String> {
     if (text.isEmpty()) {
@@ -61,15 +62,40 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     var lastEmbeddedScriptResultNativeValues: Map<String, String> = emptyMap()
         private set
 
+    @Volatile
+    private var activeEmbeddedExecutionId: String? = null
+
     override fun doExecution(source: JavaScriptSource): Any? {
         lastNodeProjectRunnerDescriptor = null
         lastEmbeddedScriptResultNativeValues = emptyMap()
         tryRunNodeProjectLaunch(source)?.let { return it }
         tryRunNodeProjectFile(source)?.let { return it }
 
+        val executionId = newEmbeddedExecutionId()
         val request = buildEmbeddedScriptRequest(source)
-        val result = NativeNodeEmbeddedScriptService.runScript(androidContext, request)
+            .copy(executionId = executionId)
+        val result = withActiveEmbeddedExecutionId(executionId) {
+            NativeNodeEmbeddedScriptService.runScript(androidContext, request)
+        }
         return finishEmbeddedScriptExecution(request, result)
+    }
+
+    override fun forceStop() {
+        activeEmbeddedExecutionId?.let { executionId ->
+            NativeNodeEmbeddedScriptService.cancelRunningScript(androidContext, executionId)
+        }
+        super.forceStop()
+    }
+
+    private inline fun <T> withActiveEmbeddedExecutionId(executionId: String, block: () -> T): T {
+        activeEmbeddedExecutionId = executionId
+        try {
+            return block()
+        } finally {
+            if (activeEmbeddedExecutionId == executionId) {
+                activeEmbeddedExecutionId = null
+            }
+        }
     }
 
     fun prepareNodeProjectLaunchRequest(
@@ -132,9 +158,13 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
         )
         lastCommonJsPreloadDiagnostics = preparation.preload.diagnostics
         lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(plan)
-        val result = NativeNodeEmbeddedProjectRunner.runResolvedProjectLaunchPlan(androidContext, plan)
+        val executionId = newEmbeddedExecutionId()
+        val result = withActiveEmbeddedExecutionId(executionId) {
+            NativeNodeEmbeddedProjectRunner.runResolvedProjectLaunchPlan(androidContext, plan, executionId)
+        }
         return finishEmbeddedScriptExecution(
-            preparation.toBridgeRequest(plan.timeoutMs, currentSpawnDepth(), plan.executionMode),
+            preparation.toBridgeRequest(plan.timeoutMs, currentSpawnDepth(), plan.executionMode)
+                .copy(executionId = executionId),
             result,
         )
     }
@@ -167,8 +197,15 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             entrySource = preparation.entrySource,
         )
         lastNodeProjectRunnerDescriptor = NativeNodeEmbeddedProjectRunner.describe(request)
-        val result = NativeNodeEmbeddedProjectRunner.run(androidContext, request)
-        return finishEmbeddedScriptExecution(preparation.toBridgeRequest(request.timeoutMs, currentSpawnDepth()), result)
+        val executionId = newEmbeddedExecutionId()
+        val result = withActiveEmbeddedExecutionId(executionId) {
+            NativeNodeEmbeddedProjectRunner.run(androidContext, request, executionId)
+        }
+        return finishEmbeddedScriptExecution(
+            preparation.toBridgeRequest(request.timeoutMs, currentSpawnDepth())
+                .copy(executionId = executionId),
+            result,
+        )
     }
 
     private fun prepareNodeProjectRun(
@@ -1078,6 +1115,13 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             ?.takeIf { it.isNotBlank() }
             ?.let { File(it) }
             ?.takeIf { it.isAbsolute }
+    }
+
+    private fun newEmbeddedExecutionId(): String {
+        val engineId = id.takeIf { it != org.autojs.autojs.execution.ScriptExecution.NO_ID }
+            ?.toString()
+            ?: "no-id"
+        return "engine-$engineId-${UUID.randomUUID()}"
     }
 
     private fun File.normalizedAbsolutePath(): String {
