@@ -17,8 +17,10 @@ that keep broader Desktop behavior future work.
 - `moduleStatus` records the representative modules as `partial` and keeps
   `zlib/promises` as `disabled`.
 - CJS aliases use bare and `node:` prefixes; ESM imports remain partial.
-- Builtin precedence is preserved, while `process.getBuiltinModule` remains
-  denied.
+- Builtin precedence is preserved. `process.getBuiltinModule` is now a
+  controlled partial API: allowed builtin names return the same AutoJs6 limited
+  wrappers as `require()`, unknown builtin probes return `undefined`, and
+  disabled builtins still fail through the builtin policy gate.
 - The `buffer` wrapper is a frozen ordinary object, so legacy npm packages can
   use `require("buffer").hasOwnProperty(...)` and `Buffer.hasOwnProperty(...)`
   probes without loading `node_modules/buffer` shadows.
@@ -29,8 +31,7 @@ that keep broader Desktop behavior future work.
   than the `3000` ms probe timeout, reducing false timeouts while large pure-JS
   npm module graphs initialize.
 - Android differences are documented as stable for `os.setPriority`, real
-  network interfaces, raw TTY mode, `process.getBuiltinModule`,
-  `zlib/promises`, and `node:test/reporters`.
+  network interfaces, raw TTY mode, `zlib/promises`, and `node:test/reporters`.
 
 ## Evidence
 
@@ -59,8 +60,8 @@ that keep broader Desktop behavior future work.
   pass-rate deltas before P13-43 can satisfy the original corpus-growth
   acceptance criterion.
 - Full desktop parity still needs future policy for raw native handles, broad
-  terminal behavior, unrestricted network/OS surfaces, `process.getBuiltinModule`,
-  and `zlib/promises`.
+  terminal behavior, unrestricted network/OS surfaces, raw
+  `process.getBuiltinModule` bypass behavior, and `zlib/promises`.
 
 ## Verification
 

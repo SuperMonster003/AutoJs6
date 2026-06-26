@@ -93,7 +93,8 @@ class NodeProcessSweepInstrumentationTest {
               expectDenied("binding", () => process.binding("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
               expectDenied("dlopen", () => process.dlopen({}, "native.node"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
               expectDenied("_linkedBinding", () => process._linkedBinding("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
-              expectDenied("getBuiltinModule", () => process.getBuiltinModule("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
+              assert.strictEqual(process.getBuiltinModule("fs"), require("fs"));
+              expectDenied("getBuiltinModule.dgram", () => process.getBuiltinModule("dgram"), "ERR_AUTOJS6_BUILTIN_DISABLED");
               expectDenied("chdir.absolute", () => process.chdir("/"), "EPERM");
               expectDenied("chdir.escape", () => process.chdir(".."), "EPERM");
 

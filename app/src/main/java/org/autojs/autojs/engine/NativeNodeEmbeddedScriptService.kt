@@ -3626,6 +3626,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             pendingCryptoCallbacks?.let { putInt(EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS, it) }
             pendingDnsCallbacks?.let { putInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS, it) }
             pendingZlibCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS, it) }
+            pendingNodeTestCallbacks?.let { putInt(EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS, it) }
             pendingZlibStreams?.let { putBoolean(EXTRA_RESULT_PENDING_ZLIB_STREAMS, it) }
             pendingZlibStreamCount?.let { putInt(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT, it) }
             pendingAsyncCallbacks?.let { putInt(EXTRA_RESULT_PENDING_ASYNC_CALLBACKS, it) }
@@ -3771,6 +3772,8 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     ?.getInt(EXTRA_RESULT_PENDING_DNS_CALLBACKS),
                 pendingZlibCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS) }
                     ?.getInt(EXTRA_RESULT_PENDING_ZLIB_CALLBACKS),
+                pendingNodeTestCallbacks = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS) }
+                    ?.getInt(EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS),
                 pendingZlibStreams = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_STREAMS) }
                     ?.getBoolean(EXTRA_RESULT_PENDING_ZLIB_STREAMS),
                 pendingZlibStreamCount = this?.takeIf { it.containsKey(EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT) }
@@ -3809,6 +3812,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RESULT_PENDING_CRYPTO_CALLBACKS = "result_pending_crypto_callbacks"
         private const val EXTRA_RESULT_PENDING_DNS_CALLBACKS = "result_pending_dns_callbacks"
         private const val EXTRA_RESULT_PENDING_ZLIB_CALLBACKS = "result_pending_zlib_callbacks"
+        private const val EXTRA_RESULT_PENDING_NODE_TEST_CALLBACKS = "result_pending_node_test_callbacks"
         private const val EXTRA_RESULT_PENDING_ZLIB_STREAMS = "result_pending_zlib_streams"
         private const val EXTRA_RESULT_PENDING_ZLIB_STREAM_COUNT = "result_pending_zlib_stream_count"
         private const val EXTRA_RESULT_PENDING_ASYNC_CALLBACKS = "result_pending_async_callbacks"

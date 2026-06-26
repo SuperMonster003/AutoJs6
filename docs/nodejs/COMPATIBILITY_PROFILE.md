@@ -563,7 +563,7 @@ Limited means API-compatible enough for the current tests and targeted pure-JS n
 
 The v1.1 core builtin compatibility gate treats `constants`, `util/types`, `events`, and `diagnostics_channel` as
 low-risk feature-detection modules. Bare and `node:` specifiers route to the same frozen wrappers, `node_modules` shadows
-are ignored, and `process.getBuiltinModule()` remains disabled so scripts cannot bypass the limited wrappers. The
+are ignored, and controlled `process.getBuiltinModule()` returns the same limited wrappers without bypassing policy. The
 `events` wrapper exposes `EventEmitter` and helper functions such as `once()`/`on()`, but does not expose
 `EventEmitterAsyncResource` or `EventTarget`; Web-style `EventTarget` remains a global. `diagnostics_channel` exposes a
 bounded publish/subscribe/tracing surface without raw subscriber internals.
@@ -630,8 +630,8 @@ already permitted streams. `readline/promises` supports `Interface`,
 `Readline`, and `createInterface()` over already permitted streams. The Web
 Platform sweep covers `AbortSignal.abort()`, `AbortSignal.timeout()`,
 `AbortSignal.any()`, `structuredClone()`, and the limited global `crypto`
-surface. `process.getBuiltinModule()` remains disabled, builtin shadows remain
-ignored, and these APIs do not grant raw network, process, native addon,
+surface. Controlled `process.getBuiltinModule()` keeps builtin shadows ignored,
+and these APIs do not grant raw network, process, native addon,
 Android, or unscoped filesystem authority.
 
 S8-20 adds a focused Web Platform globals alignment gate for the constructors
@@ -897,7 +897,7 @@ These surfaces must stay disabled unless a future task explicitly opens them beh
 - unrestricted `process.binding`
 - unrestricted `process.dlopen`
 - unrestricted `process._linkedBinding`
-- unrestricted `process.getBuiltinModule`
+- unrestricted `process.getBuiltinModule` bypass
 - unrestricted `vm`
 - unrestricted Java/Android interop
 - Rhino compatibility shim and old global AutoJs API installation
@@ -1299,7 +1299,8 @@ P13-43 records Node stdlib conformance as partial. The runtime exposes
 `autojs6:profile.stdlibProfile` to document the current Safe stdlib subset for
 `crypto`, `stream`, `stream/promises`, `stream/consumers`, `stream/web`,
 `zlib`, `buffer`, `url`, `os`, `readline`, `readline/promises`, `tty`,
-`perf_hooks`, and `async_hooks`. `zlib/promises`, `process.getBuiltinModule`,
+`perf_hooks`, and `async_hooks`. `process.getBuiltinModule` is controlled
+partial and returns the same limited wrappers as `require()`. `zlib/promises`,
 raw desktop parity, raw native handles, unrestricted network behavior, and
 broad terminal control remain unpromoted while broader Android difference
 coverage and real npm corpus growth stay future work.

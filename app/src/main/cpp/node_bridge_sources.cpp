@@ -9480,13 +9480,12 @@ std::string buildEmbeddedScriptExecutionSource(
         cjsAliases: "bare_and_node_prefix",
         esmImports: "partial",
         shadowing: "builtin_precedence",
-        processGetBuiltinModule: "denied",
+        processGetBuiltinModule: "controlled_partial",
         androidDifferences: "documented_stable",
         androidUnsupported: Object.freeze([
           "os.setPriority",
           "real_network_interfaces",
           "tty_raw_mode",
-          "process.getBuiltinModule",
           "zlib/promises",
           "node:test/reporters"
         ]),
@@ -45976,15 +45975,27 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_resolve_trace_end(traceRecord);
     }
   }
-  function __autojs6_disabled_builtin_module(moduleName) {
-    const name = moduleName === undefined ? "" : String(moduleName);
-    throw __autojs6_error(
-      name
-        ? "process.getBuiltinModule is disabled in Embedded Node.js MVP; module '" + name + "' is not available."
-        : "process.getBuiltinModule is disabled in Embedded Node.js MVP.",
-      "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED",
-      "ERR_AUTOJS6_PROCESS_API_DISABLED"
-    );
+  function __autojs6_process_get_builtin_module(moduleName) {
+    if (typeof moduleName !== "string") {
+      throw __autojs6_invalid_arg_type("The \"id\" argument must be of type string.");
+    }
+    const name = moduleName;
+    if (!name) return undefined;
+    const bareName = name.indexOf("node:") === 0 ? name.slice("node:".length) : name;
+    const knownControlledBuiltin = __autojs6_limited_module_is_builtin(name);
+    const knownDeniedBuiltin = __autojs6_has_own(__autojs6_require_builtin_denylist, bareName) ||
+      name === "node:test/reporters";
+    if (!knownControlledBuiltin && !knownDeniedBuiltin) {
+      return undefined;
+    }
+    if (!knownControlledBuiltin && knownDeniedBuiltin) {
+      throw __autojs6_error(
+        "process.getBuiltinModule is restricted in Embedded Node.js MVP; builtin module '" + name + "' is disabled or not allowed.",
+        "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED",
+        "ERR_AUTOJS6_BUILTIN_DISABLED"
+      );
+    }
+    return __autojs6_restricted_require(name, null);
   }
   function __autojs6_install_require_guard(mainModule) {
     __autojs6_prime_restricted_require();
@@ -46003,17 +46014,17 @@ std::string buildEmbeddedScriptExecutionSource(
     }
   }
   function __autojs6_install_builtin_module_guard() {
-    if (typeof process !== "object" || !process || typeof process.getBuiltinModule !== "function") return;
+    if (typeof process !== "object" || !process) return;
     try {
       Object.defineProperty(process, "getBuiltinModule", {
-        value: __autojs6_disabled_builtin_module,
+        value: __autojs6_process_get_builtin_module,
         configurable: true,
         enumerable: false,
         writable: false
       });
     } catch (_) {
       try {
-        process.getBuiltinModule = __autojs6_disabled_builtin_module;
+        process.getBuiltinModule = __autojs6_process_get_builtin_module;
       } catch (_) {}
     }
   }

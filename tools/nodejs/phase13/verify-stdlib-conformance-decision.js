@@ -86,7 +86,7 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "defaultEnabled: true"),
       token(files.nodeBridgeSources, 'targetProfiles: Object.freeze(["safe_default", "desktop_compat_opt_in"])'),
       token(files.nodeBridgeSources, 'conformanceSet: "node24_safe_stdlib_subset"'),
-      token(files.nodeBridgeSources, 'processGetBuiltinModule: "denied"'),
+      token(files.nodeBridgeSources, 'processGetBuiltinModule: "controlled_partial"'),
       token(files.nodeBridgeSources, 'androidDifferences: "documented_stable"'),
       token(files.nodeBridgeSources, 'resourceLimits: "bounded_callbacks_streams_crypto_zlib"'),
       token(files.nodeBridgeSources, 'npmCorpus: "real_npm_phase9_30_fixture_baseline"'),
@@ -113,6 +113,8 @@ function buildReport(files) {
       token(files.p13StdlibTest, "const perfHooks = require(\"perf_hooks\")"),
       token(files.p13StdlibTest, "const asyncHooks = require(\"async_hooks\")"),
       token(files.p13StdlibTest, "process.getBuiltinModule(\"crypto\")"),
+      token(files.p13StdlibTest, "process.getBuiltinModule(\"left-pad\") === undefined"),
+      token(files.p13StdlibTest, "process.getBuiltinModule(\"dgram\")"),
       token(files.p13StdlibTest, "requireDenied(\"zlib/promises\")"),
       token(files.p13StdlibTest, "p13stdlib.modules=true|true|true|true|true|true|true|true|true|true"),
       token(files.coreBuiltinTest, "lowRiskCoreBuiltinsExposeAliasesShadowsAndDenials"),
@@ -180,22 +182,21 @@ function buildReport(files) {
     ),
     check(
       "profile-fail-closed-boundaries",
-      stdlibProfile.includes('processGetBuiltinModule: "denied"') &&
+      stdlibProfile.includes('processGetBuiltinModule: "controlled_partial"') &&
         stdlibProfile.includes('"zlib/promises": "disabled"') &&
         stdlibProfile.includes("rawDesktopParity: false") &&
         stdlibProfile.includes("rawNativeHandles: false") &&
         stdlibProfile.includes("unrestrictedNetwork: false") &&
         stdlibProfile.includes("broadTerminal: false"),
-      "stdlibProfile must keep raw desktop parity, native handles, unrestricted network, broad terminal, process.getBuiltinModule, and zlib/promises fail-closed.",
+      "stdlibProfile must keep raw desktop parity, native handles, unrestricted network, broad terminal, raw process.getBuiltinModule bypass behavior, and zlib/promises fail-closed.",
     ),
     check(
       "no-unsafe-stdlib-promotion",
-      !files.nodeBridgeSources.text.includes('processGetBuiltinModule: "partial"') &&
-        !files.nodeBridgeSources.text.includes("rawDesktopParity: true") &&
+      !files.nodeBridgeSources.text.includes("rawDesktopParity: true") &&
         !files.nodeBridgeSources.text.includes("rawNativeHandles: true") &&
         !files.nodeBridgeSources.text.includes("unrestrictedNetwork: true") &&
         !files.nodeBridgeSources.text.includes('"zlib/promises": "partial"'),
-      "P13-43 must not mark full desktop stdlib parity or zlib/promises as promoted.",
+      "P13-43 must not mark full desktop stdlib parity, raw native handles, unrestricted network, or zlib/promises as promoted.",
     ),
   ];
 
@@ -226,7 +227,7 @@ function buildReport(files) {
       representativeModulesReady: scenarioById(scenarios, "representative_module_conformance").status !== "missing_evidence",
       matrixCorpusDifferentialReady: scenarioById(scenarios, "matrix_corpus_and_differential").status !== "missing_evidence",
       rawDesktopParityPromoted: false,
-      processGetBuiltinModulePromoted: false,
+      processGetBuiltinModuleControlledPartial: true,
       zlibPromisesPromoted: false,
       npmCorpusExpandedInP13_43: false,
     },

@@ -164,7 +164,7 @@ These surfaces are blocked by policy in normal v1 builds:
 - `process.binding`
 - `process.dlopen`
 - `process._linkedBinding`
-- `process.getBuiltinModule`
+- unrestricted `process.getBuiltinModule` bypass
 - raw Android scheduler, broadcast, content provider, account, telephony, VPN, camera, audio, display, print, and system manager access
 
 ## Unsupported

@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import androidx.test.runner.AndroidJUnit4
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -60,7 +61,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                         error.code,
                         error.autojs6Code,
                         String(error.message).includes("process.getBuiltinModule")
-                      ].join("/");
+                      ].filter((value) => value !== undefined).join("/");
                     }
                   }
 
@@ -186,11 +187,17 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                   console.log("core.builtin.diagnostics=" + diagnosticsOk);
                   console.log("core.builtin.vm=" + vmOk);
                   console.log("core.builtin.getBuiltin=" + [
-                    "constants",
-                    "util/types",
-                    "events",
-                    "diagnostics_channel"
-                  ].map((name) => name + ":" + denied(() => process.getBuiltinModule(name))).join("|"));
+                    process.getBuiltinModule("constants") === constants,
+                    process.getBuiltinModule("node:constants") === constants,
+                    process.getBuiltinModule("util/types") === utilTypes,
+                    process.getBuiltinModule("node:util/types") === utilTypes,
+                    process.getBuiltinModule("events") === events,
+                    process.getBuiltinModule("node:events") === events,
+                    process.getBuiltinModule("diagnostics_channel") === diagnostics,
+                    process.getBuiltinModule("node:diagnostics_channel") === diagnostics,
+                    process.getBuiltinModule("left-pad") === undefined,
+                    denied(() => process.getBuiltinModule("dgram"))
+                  ].join("|"));
                   console.log("core.builtin.disabled=" + [
                     requireDenied("child_process"),
                     requireDenied("dgram")
@@ -214,10 +221,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
         assertTrue(result.stdout.contains("core.builtin.events=true"))
         assertTrue(result.stdout.contains("core.builtin.diagnostics=true"))
         assertTrue(result.stdout.contains("core.builtin.vm=true"))
-        assertTrue(result.stdout.contains("constants:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true"))
-        assertTrue(result.stdout.contains("util/types:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true"))
-        assertTrue(result.stdout.contains("events:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true"))
-        assertTrue(result.stdout.contains("diagnostics_channel:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true"))
+        assertTrue(result.stdout.contains("core.builtin.getBuiltin=true|true|true|true|true|true|true|true|true|${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/true"))
         assertTrue(result.stdout.contains("child_process:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}:${NodeRuntimeErrorCodes.BUILTIN_DISABLED}:true"))
         assertTrue(result.stdout.contains("dgram:${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}:${NodeRuntimeErrorCodes.BUILTIN_DISABLED}:true"))
     }
@@ -266,6 +270,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
     fun asyncLocalStoragePropagatesAcrossSafeAsyncBoundariesAndCleansUp() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("async_hooks context propagation")
         val workDir = freshWorkDir("node-async-context")
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("toast", "network"))
         File(workDir, "data.txt").writeText("data\n")
         writeShadow(workDir, "async_hooks/index.js")
 
@@ -401,23 +406,25 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.js").absolutePath,
             workingDirectory = workDir,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
             timeoutMs = 10_000L,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("async_hooks context propagation", result)
         assertTrue(
-            result.stdout,
+            NodeEmbeddedTestHarness.describeResult("async_hooks context propagation", result),
             result.stdout.contains("async.context.summary=ctx|ctx|ctx|ctx|ctx|ctx|ctx:data|data:ctx|ctx:ctx:ctx|ctx:fetch:ctx:ctx|ctx"),
         )
         assertTrue(result.stdout, result.stdout.contains("async.context.requests=toast:toast:ctx|fetch:request:ctx"))
         assertTrue(result.stdout, result.stdout.contains("async.context.cleanup=none|0|true|true|false|undefined|true|undefined|undefined|undefined"))
-        assertTrue(result.nativeValues["embedded_script.pending_scoped_fs_callbacks"], result.nativeValues["embedded_script.pending_scoped_fs_callbacks"] == "0")
+        assertEquals(0, result.pendingScopedFsCallbacks)
     }
 
     @Test
     fun perfHooksAndDiagnosticsChannelExposeSafeRuntimeTelemetry() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("perf_hooks diagnostics_channel runtime telemetry")
         val workDir = freshWorkDir("node-runtime-telemetry")
+        val manifest = NodeBridgePermissionManifest.fromDeclaredCapabilities(listOf("toast", "network"))
 
         val result = NodeEmbeddedTestHarness.runEmbeddedScript(
             source = """
@@ -567,11 +574,15 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.js").absolutePath,
             workingDirectory = workDir,
+            runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
             timeoutMs = 10_000L,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("perf_hooks diagnostics_channel runtime telemetry", result)
-        assertTrue(result.stdout, result.stdout.contains("perf_hooks.runtime_elu=function|true|true|number|number|number"))
+        assertTrue(
+            NodeEmbeddedTestHarness.describeResult("perf_hooks diagnostics_channel runtime telemetry", result),
+            result.stdout.contains("perf_hooks.runtime_elu=function|true|true|number|number|number"),
+        )
         assertTrue(result.stdout, result.stdout.contains("diagnostics.runtime.safe=true"))
         assertTrue(result.stdout, result.stdout.contains("diagnostics.runtime.subscribers=true|false"))
         assertTrue(result.stdout, result.stdout.contains("diagnostics.runtime.unsubscribe=true"))
@@ -637,8 +648,9 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                   userTestPackage.shadow === true,
                   require.resolve("test").replace(/\\/g, "/").includes("/node_modules/test/index.js")
                 ].join("|"));
-                console.log("node_test.denied=" + [
-                  denied(() => process.getBuiltinModule("node:test")),
+                console.log("node_test.getBuiltin=" + [
+                  process.getBuiltinModule("node:test") === nodeTest,
+                  denied(() => process.getBuiltinModule("node:test/reporters")),
                   denied(() => require("node:test/reporters"))
                 ].join("|"));
 
@@ -691,7 +703,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("node_test.module=true|false|true|false|node:test|true|true"))
         assertTrue(
             result.stdout,
-            result.stdout.contains("node_test.denied=${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true|${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/true"),
+            result.stdout.contains("node_test.getBuiltin=true|${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/true|${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/true"),
         )
         assertTrue(result.stdout, result.stdout.contains("TAP version 13"))
         assertTrue(result.stdout, result.stdout.contains("# diag-ok"))
@@ -713,7 +725,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                     "beforeEach:context todo>afterEach:context todo",
             ),
         )
-        assertTrue(result.nativeValues["embedded_script.pending_node_test_callbacks"], result.nativeValues["embedded_script.pending_node_test_callbacks"] == "0")
+        assertEquals(0, result.pendingNodeTestCallbacks)
     }
 
     @Test
@@ -751,7 +763,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("ERR_AUTOJS6_NODE_TEST_ASYNC_ACTIVITY"))
         assertTrue(result.stdout, result.stdout.contains("# fail 3"))
         assertTrue(result.errorCode, result.errorCode == "ERR_AUTOJS6_NODE_TEST_FAILURE")
-        assertTrue(result.nativeValues["embedded_script.pending_node_test_callbacks"], result.nativeValues["embedded_script.pending_node_test_callbacks"] == "0")
+        assertEquals(0, result.pendingNodeTestCallbacks)
     }
 
     @Test
@@ -1083,12 +1095,10 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                     typeof crypto.createPrivateKey === "undefined" &&
                     typeof webCrypto.subtle.generateKey === "undefined" &&
                     typeof webCrypto.subtle.deriveBits === "undefined";
-                  let getBuiltinDenied = "allowed";
-                  try {
-                    process.getBuiltinModule("crypto");
-                  } catch (error) {
-                    getBuiltinDenied = [error.code, error.autojs6Code].join(":");
-                  }
+                  const getBuiltinOk =
+                    process.getBuiltinModule("crypto") === crypto &&
+                    process.getBuiltinModule("node:crypto") === crypto &&
+                    process.getBuiltinModule("missing-builtin") === undefined;
 
                   emit("modern.promise_web.crypto_random=" + [randomValuesOk, uuidOk].join("|"));
                   emit("modern.promise_web.crypto_digest=" + digestSummary);
@@ -1109,7 +1119,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
                     hmacAlgError,
                     hmacExportError,
                     asymmetricAbsent,
-                    getBuiltinDenied
+                    getBuiltinOk
                   ].join("|"));
                   return output.join("\n");
                 })().catch((error) => {
@@ -1156,11 +1166,10 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
             output,
             output.contains(
                 "modern.promise_web.crypto_denied=" +
-                    "TypeMismatchError:17|QuotaExceededError:22|NotSupportedError:9|SyntaxError:12|NotSupportedError:9|InvalidAccessError:15|true|" +
-                    "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED:ERR_AUTOJS6_PROCESS_API_DISABLED"
+                    "TypeMismatchError:17|QuotaExceededError:22|NotSupportedError:9|SyntaxError:12|NotSupportedError:9|InvalidAccessError:15|true|true"
             ),
         )
-        assertTrue(result.nativeValues["embedded_script.pending_timer_count"], result.nativeValues["embedded_script.pending_timer_count"] == "0")
+        assertEquals(0, result.pendingTimerCount)
     }
 
     @Test

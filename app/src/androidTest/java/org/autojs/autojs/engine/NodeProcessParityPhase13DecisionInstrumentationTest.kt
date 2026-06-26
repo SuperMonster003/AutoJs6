@@ -210,7 +210,8 @@ class NodeProcessParityPhase13DecisionInstrumentationTest {
                       denied(() => process.binding("fs")) === "ERR_AUTOJS6_PROCESS_API_DISABLED" &&
                       denied(() => process._linkedBinding("fs")) === "ERR_AUTOJS6_PROCESS_API_DISABLED" &&
                       denied(() => process.dlopen({}, "native.node")) === "ERR_AUTOJS6_PROCESS_API_DISABLED" &&
-                      denied(() => process.getBuiltinModule("fs")) === "ERR_AUTOJS6_PROCESS_API_DISABLED" &&
+                      process.getBuiltinModule("fs") === require("fs") &&
+                      denied(() => process.getBuiltinModule("dgram")) === "ERR_AUTOJS6_BUILTIN_DISABLED" &&
                       typeof process.umask() === "number" &&
                       denied(() => process.umask(0)) === "ERR_AUTOJS6_PROCESS_API_DISABLED" &&
                       process.allowedNodeEnvironmentFlags instanceof Set &&

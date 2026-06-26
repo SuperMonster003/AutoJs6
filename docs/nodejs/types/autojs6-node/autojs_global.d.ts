@@ -107,7 +107,7 @@ declare namespace AutoJs6Node {
     readonly cjsAliases: "bare_and_node_prefix" | string;
     readonly esmImports: "partial" | string;
     readonly shadowing: "builtin_precedence" | string;
-    readonly processGetBuiltinModule: "denied" | string;
+    readonly processGetBuiltinModule: "controlled_partial" | "denied" | string;
     readonly androidDifferences: "documented_stable" | string;
     readonly androidUnsupported: readonly string[];
     readonly resourceLimits: "bounded_callbacks_streams_crypto_zlib" | string;

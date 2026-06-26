@@ -175,7 +175,9 @@ field reports the current partial Safe Node stdlib conformance subset for
 `crypto`, streams, zlib, Buffer, URL, OS, readline, TTY, `perf_hooks`, and
 `async_hooks`; it also records stable Android differences and keeps raw desktop
 parity, raw native handles, unrestricted network behavior, broad terminal
-control, `process.getBuiltinModule`, and `zlib/promises` denied.
+control, raw `process.getBuiltinModule` bypass behavior, and `zlib/promises`
+denied. Controlled `process.getBuiltinModule` returns the same limited wrappers
+as `require()`.
 
 P13-44 extends the `autojs6:profile` declaration with `processParityProfile`.
 The field reports the current partial process/env/argv subset: controlled

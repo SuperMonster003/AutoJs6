@@ -2005,7 +2005,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             }
             (async () => {
               await capture("err.builtin", () => require("dgram"));
-              await capture("err.getBuiltin", () => process.getBuiltinModule("fs"));
+              await capture("err.getBuiltin", () => process.getBuiltinModule("dgram"));
               await capture("err.process", () => process.abort());
               await capture("err.fetch", () => fetch("http://127.0.0.1/"));
               await capture("err.fs.escape", () => fs.readFileSync("../outside.txt", "utf8"));
@@ -2017,7 +2017,7 @@ class EmbeddedScriptMvpInstrumentationTest {
 
         assertTrue(result.errorMessage.orEmpty(), result.succeeded)
         assertTrue(result.stdout, result.stdout.contains("err.builtin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
-        assertTrue(result.stdout, result.stdout.contains("err.getBuiltin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
+        assertTrue(result.stdout, result.stdout.contains("err.getBuiltin=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
         assertTrue(result.stdout, result.stdout.contains("err.process=ERR_AUTOJS6_PROCESS_API_DISABLED/ERR_AUTOJS6_PROCESS_API_DISABLED/"))
         if (BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED) {
             assertTrue(result.stdout, result.stdout.contains("err.fetch=ERR_AUTOJS6_NETWORK_"))
@@ -2542,12 +2542,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("events.timers.denied." + name + "=" + error.message.includes(name));
                   }
                 }
-                try {
-                  process.getBuiltinModule("timers");
-                  console.log("events.timers.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("events.timers.getBuiltinModule=" + error.message.includes("disabled"));
-                }
+                console.log("events.timers.getBuiltinModule=" + (
+                  process.getBuiltinModule("timers") === require("timers") &&
+                  process.getBuiltinModule("node:timers") === require("timers")
+                ));
                 Promise.all([
                   oncePromise,
                   iteratorPromise,
@@ -3451,12 +3449,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                   readable.pipe(writable);
                 });
 
-                try {
-                  process.getBuiltinModule("stream");
-                  console.log("stream.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("stream.getBuiltinModule=" + error.message.includes("disabled"));
-                }
+                console.log("stream.getBuiltinModule=" + (
+                  process.getBuiltinModule("stream") === stream &&
+                  process.getBuiltinModule("node:stream") === stream
+                ));
 
                 Promise.all([
                   readablePromise,
@@ -4384,12 +4380,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("zlib.denied." + name + "=" + error.message.includes(name));
                   }
                 }
-                try {
-                  process.getBuiltinModule("zlib");
-                  console.log("zlib.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("zlib.getBuiltinModule=" + error.message.includes("disabled"));
-                }
+                console.log("zlib.getBuiltinModule=" + (
+                  process.getBuiltinModule("zlib") === zlib &&
+                  process.getBuiltinModule("node:zlib") === zlib
+                ));
                 console.log("zlib.scheduled=true");
                 return zlibStreamChecks;
                 """.trimIndent(),
@@ -5823,11 +5817,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("crypto.os.tmpdir.same=" + result.tmpdirSame);
                     console.log("crypto.os.extended=" + result.osExtended);
                     console.log("crypto.os.alias=" + result.alias);
-                    try {
-                      process.getBuiltinModule("crypto");
-                    } catch (error) {
-                      console.log("crypto.os.getBuiltinModule=" + error.message.includes("disabled"));
-                    }
+                    console.log("crypto.os.getBuiltinModule=" + (
+                      process.getBuiltinModule("crypto") === require("crypto") &&
+                      process.getBuiltinModule("node:crypto") === require("crypto")
+                    ));
                     try {
                       require("worker_threads");
                     } catch (error) {
@@ -6347,16 +6340,11 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("buffer.builtin.resolve=" + require.resolve("buffer") + "/" + require.resolve("node:buffer"));
                 console.log("buffer.builtin.shadow=" + (buffer.shadow !== true && nodeBuffer.shadow !== true && !shadowLoaded));
 
-                try {
-                  process.getBuiltinModule("buffer");
-                  console.log("buffer.builtin.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("buffer.builtin.getBuiltinModule=" + (
-                    error &&
-                    error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" &&
-                    String(error.message).includes("process.getBuiltinModule")
-                  ));
-                }
+                console.log("buffer.builtin.getBuiltinModule=" + (
+                  process.getBuiltinModule("buffer") === buffer &&
+                  process.getBuiltinModule("node:buffer") === buffer &&
+                  process.getBuiltinModule("node:missing-buffer") === undefined
+                ));
                 })();
                 """.trimIndent(),
                 "<embedded-buffer-builtin-source.js>",
@@ -7681,7 +7669,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                 captureSync("url.reject.nul.path", () => url.pathToFileURL(nulPath));
                 captureSync("url.reject.nul.file", () => url.fileURLToPath(new URL("bad%00path", sandboxRootUrl)));
                 captureSync("url.reject.fs.sync", () => fs.readFileSync(new URL(outsideUrl), "utf8"));
-                captureSync("url.reject.getBuiltinModule", () => process.getBuiltinModule("url"));
+                console.log("url.getBuiltinModule=" + (
+                  process.getBuiltinModule("url") === url &&
+                  process.getBuiltinModule("node:url") === url
+                ));
                 console.log("url.reject.shadow=" + (url.shadow === true));
 
                 return Promise.all([
@@ -7722,7 +7713,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("url.reject.fs.promise.fileToken=true"))
             assertTrue(result.stdout.contains("url.reject.opendir.isError=true"))
             assertTrue(result.stdout.contains("url.reject.opendir.code=EPERM"))
-            assertTrue(result.stdout.contains("url.reject.getBuiltinModule.isError=true"))
+            assertTrue(result.stdout.contains("url.getBuiltinModule=true"))
             assertTrue(result.stdout.contains("url.reject.shadow=false"))
             assertFalse(result.stdout.contains(".unexpected=true"))
             assertTrue(result.stdout.contains("url.reject.done=true"))
@@ -9933,11 +9924,15 @@ class EmbeddedScriptMvpInstrumentationTest {
                         Object.isFrozen(os) &&
                         Object.isFrozen(util) &&
                         Object.isFrozen(utilTypes);
+                      const getBuiltinOk =
+                        process.getBuiltinModule("util/types") === utilTypes &&
+                        process.getBuiltinModule("node:util/types") === utilTypes &&
+                        process.getBuiltinModule("missing-util-types") === undefined;
                       const deniedOk = limitedHttpGuard() &&
                         typeof require("node:vm").Script === "function" &&
                         require.resolve("timers/promises") === "timers/promises" &&
                         require.resolve("node:timers/promises") === "timers/promises" &&
-                        captureDenied(() => process.getBuiltinModule("util/types"), "process.getBuiltinModule");
+                        getBuiltinOk;
                       return {
                         ok: aliasOk && resolveOk && shadowOk && pathUrlOk && osOk && utilOk && mimeOk && utilTypesOk && frozenOk && deniedOk,
                         alias: aliasOk,
@@ -10110,12 +10105,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                     console.log("legacy.denied." + name + "=" + error.message.includes(name));
                   }
                 }
-                try {
-                  process.getBuiltinModule("querystring");
-                  console.log("legacy.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("legacy.getBuiltinModule=" + error.message.includes("disabled"));
-                }
+                console.log("legacy.getBuiltinModule=" + (
+                  process.getBuiltinModule("querystring") === querystring &&
+                  process.getBuiltinModule("node:querystring") === querystring
+                ));
                 """.trimIndent(),
                 "<embedded-legacy-core-source.js>",
                 workingDirectory = scriptDir.canonicalPath,
@@ -11666,7 +11659,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 }
 
                 try {
-                  process.getBuiltinModule("http");
+                  process.getBuiltinModule("dgram");
                   console.log("deny.getBuiltinModule=false");
                 } catch (error) {
                   console.log("deny.getBuiltinModule=" + (
@@ -18892,7 +18885,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                         limitedNetGuard &&
                         limitedTlsGuard &&
                         deniedRequire("worker_threads") &&
-                        deniedGetBuiltin("fs");
+                        deniedGetBuiltin("dgram");
                       const treeOk = fs.existsSync("./npm-fs-failure/safe.txt") &&
                         fs.existsSync("./npm-fs-failure/dir/sub");
                       assert.equal(syncChecks.filter(Boolean).length, syncChecks.length);
@@ -20016,12 +20009,16 @@ class EmbeddedScriptMvpInstrumentationTest {
                   process.argv.includes("--process-builtin") &&
                   processBuiltin.argv === process.argv &&
                   processBuiltin.cwd() === process.cwd();
+                const processGetBuiltinModule =
+                  processBuiltin.getBuiltinModule("fs") === fs &&
+                  processBuiltin.getBuiltinModule("node:fs") === fs &&
+                  processBuiltin.getBuiltinModule("left-pad") === undefined &&
+                  disabled(() => processBuiltin.getBuiltinModule("dgram"));
                 const processDangerous =
-                  disabled(() => processBuiltin.getBuiltinModule("fs")) &&
                   disabled(() => processBuiltin.binding("fs")) &&
                   disabled(() => processBuiltin.dlopen({}, "native.node")) &&
                   disabled(() => processBuiltin._linkedBinding("fs")) &&
-                  disabled(() => processBuiltin.exit(1)) &&
+                  typeof processBuiltin.exit === "function" &&
                   disabled(() => processBuiltin.abort()) &&
                   disabled(() => processBuiltin.kill(process.pid, 0)) &&
                   typeof processBuiltin.umask() === "number" &&
@@ -20060,6 +20057,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("process.builtin.alias=" + (processBuiltin === nodeProcessBuiltin));
                 console.log("process.builtin.global=" + processState);
                 console.log("process.builtin.surface=" + processSurface);
+                console.log("process.builtin.getBuiltinModule=" + processGetBuiltinModule);
                 console.log("process.builtin.dangerous=" + processDangerous);
                 console.log("process.builtin.resolve=" + (
                   require.resolve("process") === "process" &&
@@ -20090,6 +20088,7 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertTrue(result.stdout.contains("process.builtin.alias=true"))
             assertTrue(result.stdout.contains("process.builtin.global=true"))
             assertTrue(result.stdout.contains("process.builtin.surface=true"))
+            assertTrue(result.stdout.contains("process.builtin.getBuiltinModule=true"))
             assertTrue(result.stdout.contains("process.builtin.dangerous=true"))
             assertTrue(result.stdout.contains("process.builtin.resolve=true"))
             assertTrue(result.stdout.contains("process.builtin.shadow=true"))
@@ -20505,16 +20504,10 @@ class EmbeddedScriptMvpInstrumentationTest {
                 console.log("module.builtin.dangerous_missing=" + dangerousMissing);
                 console.log("module.builtin.resolve=" + require.resolve("module") + "/" + require.resolve("node:module"));
                 console.log("module.builtin.shadow=" + (moduleBuiltin.shadow !== true && nodeModuleBuiltin.shadow !== true && !shadowLoaded));
-                try {
-                  process.getBuiltinModule("module");
-                  console.log("module.builtin.getBuiltinModule=false");
-                } catch (error) {
-                  console.log("module.builtin.getBuiltinModule=" + (
-                    error &&
-                    error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" &&
-                    /disabled/.test(error.message)
-                  ));
-                }
+                console.log("module.builtin.getBuiltinModule=" + (
+                  process.getBuiltinModule("module") === moduleBuiltin &&
+                  process.getBuiltinModule("node:module") === moduleBuiltin
+                ));
                 """.trimIndent(),
                 "<embedded-module-builtin-source.js>",
                 workingDirectory = scriptDir.canonicalPath,
@@ -32016,14 +32009,20 @@ class EmbeddedScriptMvpInstrumentationTest {
         val builtinAccess = runEmbeddedScript(
             """
             "nodejs";
-            process.getBuiltinModule("fs");
+            const fs = require("fs");
+            if (process.getBuiltinModule("fs") !== fs) {
+              throw new Error("process.getBuiltinModule did not return scoped fs wrapper");
+            }
+            try {
+              process.getBuiltinModule("dgram");
+            } catch (error) {
+              console.log("builtin.getBuiltin.dgram=" + (error.autojs6Code || error.code));
+            }
             """.trimIndent(),
             "<embedded-builtin-module-guard-source.js>",
         )
-        assertFalse(builtinAccess.succeeded)
-        assertEquals("Error", builtinAccess.errorName)
-        assertTrue(builtinAccess.errorMessage.orEmpty().contains("process.getBuiltinModule is disabled"))
-        assertTrue(builtinAccess.errorMessage.orEmpty().contains("fs"))
+        assertTrue(builtinAccess.errorMessage.orEmpty(), builtinAccess.succeeded)
+        assertTrue(builtinAccess.stdout, builtinAccess.stdout.contains("builtin.getBuiltin.dgram=ERR_AUTOJS6_BUILTIN_DISABLED"))
     }
 
     @Test

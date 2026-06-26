@@ -77,7 +77,11 @@ class NodeSecurityRegressionInstrumentationTest {
               expectDenied("process.dlopen", () => process.dlopen({}, "native.node"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
               expectDenied("process._linkedBinding", () => process._linkedBinding("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
               if (typeof process.getBuiltinModule === "function") {
-                expectDenied("process.getBuiltinModule", () => process.getBuiltinModule("fs"), "ERR_AUTOJS6_PROCESS_API_DISABLED");
+                const scopedFs = require("fs");
+                if (process.getBuiltinModule("fs") !== scopedFs) {
+                  throw new Error("process.getBuiltinModule did not return scoped fs wrapper");
+                }
+                expectDenied("process.getBuiltinModule.dgram", () => process.getBuiltinModule("dgram"), "ERR_AUTOJS6_BUILTIN_DISABLED");
               } else {
                 console.log("security.process.getBuiltinModule=absent");
               }

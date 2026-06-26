@@ -779,10 +779,12 @@ plan.
 P13-43 records Node stdlib conformance as partial. `stdlibProfile` is
 diagnostic metadata only and does not grant raw desktop stdlib authority.
 Representative Safe subsets are available for `crypto`, streams, zlib, Buffer,
-URL, OS, readline, TTY, `perf_hooks`, and `async_hooks`, but
-`process.getBuiltinModule`, `zlib/promises`, raw native handles, unrestricted
-network/OS surfaces, raw terminal control, and full desktop parity remain
-denied until separate Desktop-profile evidence proves them safe.
+URL, OS, readline, TTY, `perf_hooks`, and `async_hooks`. Controlled
+`process.getBuiltinModule` returns the same limited wrappers as `require()`,
+but raw `process.getBuiltinModule` bypass behavior, `zlib/promises`, raw native
+handles, unrestricted network/OS surfaces, raw terminal control, and full
+desktop parity remain denied until separate Desktop-profile evidence proves
+them safe.
 
 P13-44 records process/env/argv parity as partial. `processParityProfile` is
 diagnostic metadata only and does not grant raw process authority. The Safe

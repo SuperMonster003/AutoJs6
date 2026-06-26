@@ -400,9 +400,11 @@ install, lifecycle, publish, and pack entry points remain stable-denied.
 P13-43 records Node stdlib conformance as partial. AutoJs6 Node exposes
 `stdlibProfile` diagnostics for representative Safe stdlib coverage across
 `crypto`, streams, zlib, Buffer, URL, OS, readline, TTY, `perf_hooks`, and
-`async_hooks`. Desktop packages that need broader OS/terminal behavior,
-`process.getBuiltinModule`, `zlib/promises`, unrestricted network/native
-handles, or full Node stdlib parity still need later Desktop-profile work.
+`async_hooks`. Controlled `process.getBuiltinModule` returns the same limited
+wrappers as `require()`. Desktop packages that need broader OS/terminal
+behavior, raw `process.getBuiltinModule` bypass behavior, `zlib/promises`,
+unrestricted network/native handles, or full Node stdlib parity still need
+later Desktop-profile work.
 
 P13-44 records process/env/argv parity as partial. AutoJs6 Node exposes
 `processParityProfile` diagnostics for controlled `process.env`, script-local

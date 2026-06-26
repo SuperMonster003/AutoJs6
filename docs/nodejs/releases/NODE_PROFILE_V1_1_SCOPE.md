@@ -56,7 +56,7 @@ small set of already-gated features toward practical use.
 | Dynamic import | partial | Local-only dynamic import is enabled by default for relative modules, allowed builtins, and scoped packages. |
 | Packaged ESM | partial | Packaged `.mjs` entry plus local `.mjs`/CommonJS graph smoke is required; dynamic import local graph smoke is covered separately. |
 | Buffer module | partial | `require("buffer")`, `require("node:buffer")`, and ESM `node:buffer` use the same builtin wrapper and cannot be shadowed by `node_modules/buffer`. |
-| Core builtin feature-detect modules | partial | `constants`, `util/types`, `events`, and `diagnostics_channel` support CJS and partial ESM import paths with shadowing denial and no `process.getBuiltinModule()` bypass. |
+| Core builtin feature-detect modules | partial | `constants`, `util/types`, `events`, and `diagnostics_channel` support CJS and partial ESM import paths with shadowing denial; controlled `process.getBuiltinModule()` returns the same limited wrappers without bypass. |
 | Stream primitives | partial | Async iteration, callback/promise pipeline and finished helpers, Web Streams adapters, backpressure smoke, destroy propagation, and shadowing denial stay covered as pure-JS compatibility surface. |
 | Web Streams | partial | `stream/web`, globals, Blob streams, Node/Web adapters, and bounded fetch `response.body.stream()` reads are supported without direct network streaming. |
 | Web Platform globals | partial | `Headers`, `Request`, `Response`, `FormData`, `Blob`, `File`, `URLPattern`, `DOMException`, `EventTarget`, `MessageEvent`, `CompressionStream`, and `DecompressionStream` are aligned by a focused S8-20 gate as a compatibility prelude to controlled HTTP client facades. |
@@ -130,8 +130,8 @@ small set of already-gated features toward practical use.
   construction APIs, and `node_modules/buffer` shadow denial.
 - Core builtin compatibility smoke passes for `constants`, `util/types`,
   `events`, and `diagnostics_channel` aliases, CJS and partial ESM import
-  forms, shadow denial, `process.getBuiltinModule()` denial, and disabled
-  builtin regressions.
+  forms, shadow denial, controlled `process.getBuiltinModule()` wrapper
+  identity, and disabled builtin regressions.
 - Stream smoke passes for async iteration, callback and promise pipeline,
   callback and promise finished, Web Streams adapters, slow-writable
   backpressure, destroy propagation, and `node_modules/stream` shadow denial.

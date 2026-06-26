@@ -1110,8 +1110,9 @@ Promise/timer/fs/bridge/fetch boundaries plus cleanup, S7-32 frozen primitive di
 runtime telemetry, safe `performance.eventLoopUtilization()` snapshots, S7-33 single-runtime `node:test` TAP reporting,
 hooks/skip/todo/timeout/failure handling, late async activity detection, S7-34 `timers/promises`, `stream/promises`,
 `readline/promises`, `AbortSignal`, `structuredClone`, and limited global/WebCrypto coverage including random values,
-UUIDs, SHA digest, HMAC sign/verify/export, and negative cases, `process.getBuiltinModule()` denial, native `vm`
-availability, and unchanged denial for disabled builtins such as `child_process` and `dgram`.
+UUIDs, SHA digest, HMAC sign/verify/export, and negative cases, controlled
+`process.getBuiltinModule()` guard behavior, native `vm` availability, and
+unchanged denial for disabled builtins such as `child_process` and `dgram`.
 
 Current `vm` native availability focused instrumentation:
 
@@ -1950,8 +1951,9 @@ diagnostics, the focused P13-43 instrumentation test, existing core builtin
 compatibility evidence, the real npm corpus baseline, modern-core
 differential evidence, TypeScript declarations, surface manifest evidence,
 release matrix updates, and Phase13 docs. It keeps full desktop stdlib parity,
-raw native handles, unrestricted network behavior, broad terminal control,
-`process.getBuiltinModule`, and `zlib/promises` open.
+raw native handles, unrestricted network behavior, broad terminal control, raw
+`process.getBuiltinModule` bypass behavior, and `zlib/promises` open while
+covering controlled `process.getBuiltinModule` parity.
 
 Phase 13 stdlib conformance focused instrumentation:
 
@@ -1961,9 +1963,10 @@ Phase 13 stdlib conformance focused instrumentation:
 
 This suite verifies `stdlibProfile` diagnostics and representative Safe
 subset behavior for `crypto`, streams, zlib, Buffer, URL, OS, readline, TTY,
-`perf_hooks`, and `async_hooks`. It also verifies stable denial for
-`process.getBuiltinModule` and `zlib/promises`, plus native callback/stream
-cleanup counters. P13-43 records Node stdlib conformance as partial.
+`perf_hooks`, and `async_hooks`. It also verifies controlled
+`process.getBuiltinModule`, stable denial for `zlib/promises`, and native
+callback/stream cleanup counters. P13-43 records Node stdlib conformance as
+partial.
 
 Phase 13 process/env/argv parity decision gate:
 

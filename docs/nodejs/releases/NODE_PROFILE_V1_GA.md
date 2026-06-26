@@ -154,7 +154,7 @@ The following remain disabled in normal v1 builds:
 - `process.binding`
 - `process.dlopen`
 - `process._linkedBinding`
-- `process.getBuiltinModule`
+- unrestricted `process.getBuiltinModule` bypass
 
 ## Migration Links
 

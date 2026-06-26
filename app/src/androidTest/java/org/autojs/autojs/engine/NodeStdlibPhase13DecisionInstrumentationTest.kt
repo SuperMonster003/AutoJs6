@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -226,7 +227,20 @@ class NodeStdlibPhase13DecisionInstrumentationTest {
                         typeof asyncHooks.createHook === "undefined" &&
                         typeof asyncHooks.executionAsyncId === "undefined";
 
-                      const getBuiltinDenied = denySummary(() => process.getBuiltinModule("crypto"));
+                      const getBuiltinOk =
+                        process.getBuiltinModule("crypto") === crypto &&
+                        process.getBuiltinModule("node:crypto") === crypto &&
+                        process.getBuiltinModule("fs") === require("fs") &&
+                        process.getBuiltinModule("node:process") === require("node:process") &&
+                        process.getBuiltinModule("left-pad") === undefined &&
+                        process.getBuiltinModule("node:left-pad") === undefined;
+                      const getBuiltinDenied = denySummary(() => process.getBuiltinModule("dgram"));
+                      let getBuiltinInvalidArg = false;
+                      try {
+                        process.getBuiltinModule(42);
+                      } catch (error) {
+                        getBuiltinInvalidArg = error && error.code === "ERR_INVALID_ARG_TYPE";
+                      }
                       const zlibPromisesDenied = requireDenied("zlib/promises");
 
                       console.log("p13stdlib.modules=" + [
@@ -240,7 +254,9 @@ class NodeStdlibPhase13DecisionInstrumentationTest {
                         ttyOk,
                         perfOk,
                         asyncOk,
+                        getBuiltinOk,
                         getBuiltinDenied,
+                        getBuiltinInvalidArg,
                         zlibPromisesDenied
                       ].join("|"));
                     })().catch((error) => {
@@ -262,8 +278,8 @@ class NodeStdlibPhase13DecisionInstrumentationTest {
                         "partial|partial|partial|partial|partial|disabled|" +
                         "crypto,stream,stream/promises,stream/consumers,stream/web,zlib,buffer,url,os," +
                         "readline,readline/promises,tty,perf_hooks,async_hooks|" +
-                        "bare_and_node_prefix|partial|builtin_precedence|denied|documented_stable|" +
-                        "os.setPriority,real_network_interfaces,tty_raw_mode,process.getBuiltinModule,zlib/promises,node:test/reporters|" +
+                        "bare_and_node_prefix|partial|builtin_precedence|controlled_partial|documented_stable|" +
+                        "os.setPriority,real_network_interfaces,tty_raw_mode,zlib/promises,node:test/reporters|" +
                         "bounded_callbacks_streams_crypto_zlib|real_npm_phase9_30_fixture_baseline|" +
                         "modern_core_s7_36_partial|existing_v1_1_smokes_partial|false|false|false|false|true|true|true|true",
                 ),
@@ -271,14 +287,14 @@ class NodeStdlibPhase13DecisionInstrumentationTest {
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "p13stdlib.modules=true|true|true|true|true|true|true|true|true|true|" +
-                        "${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.PROCESS_API_DISABLED}/true|" +
+                    "p13stdlib.modules=true|true|true|true|true|true|true|true|true|true|true|" +
+                        "${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}/true|true|" +
                         "${NodeRuntimeErrorCodes.LEGACY_BUILTIN_DISABLED}/${NodeRuntimeErrorCodes.BUILTIN_DISABLED}",
                 ),
             )
-            assertTrue(result.nativeValues["embedded_script.pending_crypto_callbacks"], result.nativeValues["embedded_script.pending_crypto_callbacks"] == "0")
-            assertTrue(result.nativeValues["embedded_script.pending_zlib_callbacks"], result.nativeValues["embedded_script.pending_zlib_callbacks"] == "0")
-            assertTrue(result.nativeValues["embedded_script.pending_zlib_streams"], result.nativeValues["embedded_script.pending_zlib_streams"] == "false")
+            assertEquals(0, result.pendingCryptoCallbacks)
+            assertEquals(0, result.pendingZlibCallbacks)
+            assertEquals(false, result.pendingZlibStreams)
         } finally {
             workDir.deleteRecursively()
         }

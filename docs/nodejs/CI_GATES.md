@@ -787,8 +787,10 @@ representative focused instrumentation, existing core builtin compatibility
 evidence, real npm corpus baseline evidence, modern-core differential
 evidence, TypeScript declarations, surface manifest evidence, and docs updates
 while keeping full desktop stdlib parity, raw native handles, unrestricted
-network behavior, broad terminal control, `process.getBuiltinModule`, and
-`zlib/promises` unpromoted. P13-43 records Node stdlib conformance as partial.
+network behavior, broad terminal control, raw `process.getBuiltinModule`
+bypass behavior, and `zlib/promises` unpromoted. Controlled
+`process.getBuiltinModule` is partial and returns the same limited wrappers as
+`require()`. P13-43 records Node stdlib conformance as partial.
 `verifyNodePhase13ProcessParityDecision` records P13-44 as the process/env/argv
 parity decision gate. It requires `processParityProfile` diagnostics, focused
 process parity instrumentation, existing process sweep evidence, embedded
