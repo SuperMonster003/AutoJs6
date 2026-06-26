@@ -26,7 +26,8 @@ class Versions @JvmOverloads constructor(
     private val javaVersionInt: Int = System.getProperty("gradle.java.version.select").toInt()
     private val javaVersionInfoSuffix: String = System.getProperty("gradle.java.version.suffix", "")
 
-    private var isBuildNumberAutoIncremented = false
+    private val isBuildNumberAutoIncrementEnabled = booleanGradleProperty(BUILD_NUMBER_AUTO_INCREMENT_PROPERTY, false)
+    private var wasBuildNumberAutoIncremented = false
     private val minBuildTimeGap = Utils.hours2Millis(0.75)
 
     private val isBuildGapEnough
@@ -54,7 +55,7 @@ class Versions @JvmOverloads constructor(
         val title = "Version information for ${project.rootProject.name} app library"
 
         val infoVerName = "Version name: $appVersionName"
-        val infoVerCode = "Version code: ${if (isBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
+        val infoVerCode = "Version code: ${if (wasBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
         val infoVerSdk = "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
         val infoVerJdk = "JDK versions: min [$javaVersionMinSupported] / select [$javaVersionInt] / current [$javaVersionCurrentInt] / max [$javaVersionMaxSupported]"
         val infoVerJava = "Java version: $javaVersion${
@@ -102,6 +103,10 @@ class Versions @JvmOverloads constructor(
     }
 
     private fun updateProperties() {
+        if (!isBuildNumberAutoIncrementEnabled) {
+            return
+        }
+
         val propsPath = bp.path
         val props = Properties().apply {
             FileInputStream(propsPath).use { load(it) }
@@ -113,7 +118,7 @@ class Versions @JvmOverloads constructor(
             }
             if (!isBuildAppRelease) {
                 props["VERSION_BUILD"] = "${appVersionCode + 1}"
-                isBuildNumberAutoIncremented = true
+                wasBuildNumberAutoIncremented = true
             }
         }
         props["BUILD_TIME"] = "${Date().time}"
@@ -121,6 +126,22 @@ class Versions @JvmOverloads constructor(
         FileOutputStream(propsPath).use { out ->
             props.store(out, null)
         }
+    }
+
+    private fun booleanGradleProperty(propertyName: String, defaultValue: Boolean): Boolean {
+        val value = project.findProperty(propertyName)?.toString()
+            ?: System.getProperty(propertyName)
+            ?: return defaultValue
+
+        return when (value.trim().lowercase(Locale.ROOT)) {
+            "true", "1", "yes", "y", "on" -> true
+            "false", "0", "no", "n", "off" -> false
+            else -> defaultValue
+        }
+    }
+
+    private companion object {
+        const val BUILD_NUMBER_AUTO_INCREMENT_PROPERTY = "isBuildNumberAutoIncremented"
     }
 
 }
