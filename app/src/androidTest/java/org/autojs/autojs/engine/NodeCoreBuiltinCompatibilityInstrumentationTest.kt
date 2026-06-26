@@ -202,6 +202,7 @@ class NodeCoreBuiltinCompatibilityInstrumentationTest {
             """.trimIndent(),
             sourceName = File(workDir, "main.js").absolutePath,
             workingDirectory = workDir,
+            childProcessExperimentalEnabled = false,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("core builtin CJS compatibility", result)

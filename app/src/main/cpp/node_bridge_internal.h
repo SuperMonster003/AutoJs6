@@ -949,6 +949,7 @@ struct EmbeddedScriptExecutionRequest {
     bool dynamicImportExperimentalEnabled = false;
     bool rawNodeNetworkModulesExperimentalEnabled = false;
     bool workerThreadsExperimentalEnabled = false;
+    bool childProcessExperimentalEnabled = false;
     bool javaInteropExperimentalEnabled = false;
 };
 
@@ -1022,6 +1023,7 @@ std::string buildEmbeddedScriptExecutionSource(
         bool dynamicImportExperimentalEnabled,
         bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
         bool javaInteropExperimentalEnabled);
 void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const std::string& text);
 std::vector<std::string> toStringVector(JNIEnv* env, jobjectArray values, const char* label = "array");

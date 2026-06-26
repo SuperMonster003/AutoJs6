@@ -88,6 +88,8 @@ object NodeRuntimeCapabilities {
     const val RAW_NETWORK_MODULES_EXPERIMENTAL_DEFAULT = false
     const val WORKER_THREADS_EXPERIMENTAL_PROPERTY = "autojs.nodejs.worker_threads.experimental"
     const val WORKER_THREADS_EXPERIMENTAL_DEFAULT = false
+    const val CHILD_PROCESS_EXPERIMENTAL_PROPERTY = "autojs.nodejs.child_process.experimental"
+    const val CHILD_PROCESS_EXPERIMENTAL_DEFAULT = false
     const val JAVA_INTEROP_EXPERIMENTAL_PROPERTY = "autojs.nodejs.javaInterop.experimental"
     const val JAVA_INTEROP_EXPERIMENTAL_DEFAULT = false
 
@@ -232,13 +234,13 @@ object NodeRuntimeCapabilities {
         NodeRuntimeFeatureFlag(
             id = "child_process",
             diagnosticName = "childProcess",
-            gradleProperty = null,
-            defaultEnabled = false,
-            buildTimeOverrideAllowed = false,
+            gradleProperty = CHILD_PROCESS_EXPERIMENTAL_PROPERTY,
+            defaultEnabled = CHILD_PROCESS_EXPERIMENTAL_DEFAULT,
+            buildTimeOverrideAllowed = true,
             projectJsonOverrideAllowed = false,
             packagedApkOverrideAllowed = false,
             securityLevel = "high",
-            status = "disabled",
+            status = "experimental",
         ),
     )
     val featureFlagsById = featureFlags.associateBy { it.id }

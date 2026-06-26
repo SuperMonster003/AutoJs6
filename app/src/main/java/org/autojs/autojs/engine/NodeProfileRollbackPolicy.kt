@@ -29,6 +29,7 @@ object NodeProfileRollbackPolicy {
         NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY,
         NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
         NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY,
+        NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY,
         NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY,
         RELAXED_CAPABILITIES_PROPERTY,
     )
@@ -83,7 +84,7 @@ object NodeProfileRollbackPolicy {
         .put("all_relaxed_capabilities", RELAXED_CAPABILITIES_PROPERTY)
         .put("raw_node_network_modules", NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY)
         .put("filesystem_relaxation", "safe_profile_scoped_fs")
-        .put("child_process", "stable_denial_no_runtime_switch")
+        .put("child_process", NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY)
         .put("native_addon", "stable_denial_no_runtime_switch")
         .put("inspector", "debug_profile_only_no_runtime_switch")
         .put("wasi", "stable_denial_no_runtime_switch")
@@ -169,9 +170,9 @@ object NodeProfileRollbackPolicy {
         CapabilityState(
             id = "child_process",
             profile = DESKTOP_COMPAT_OPT_IN,
-            property = "stable_denial_no_runtime_switch",
-            enabled = false,
-            rollbackAction = "keep_child_process_builtin_denied",
+            property = NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY,
+            enabled = BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
+            rollbackAction = "set_autojs_nodejs_child_process_experimental_false",
         ),
         CapabilityState(
             id = "native_addon",

@@ -355,11 +355,14 @@ semantics should remain on Rhino or explicit bridge-backed alternatives until a
 future profile promotes them.
 
 P13-40 records child_process scoped runner as partial. AutoJs6 Node exposes
-`childProcessProfile` diagnostics, but it does not enable `child_process`,
-`node:child_process`, `spawn`, `fork`, streaming stdio, or process handles.
-Continue using the controlled `shell` bridge for the supported migration path
-until a future Desktop profile promotes a scoped runner with app-private binary
-allowlists and cleanup evidence.
+`childProcessProfile` diagnostics and keeps `child_process` /
+`node:child_process` denied by default. Debug/Desktop compatibility builds can
+set `autojs.nodejs.child_process.experimental=true` to route CommonJS and ESM
+imports to Node's native builtin before local shadow packages, which helps
+desktop npm packages that expect `node:child_process`. Continue using the
+controlled `shell` bridge for the Safe-profile migration path until a future
+Desktop profile promotes a scoped runner with app-private binary allowlists and
+cleanup evidence.
 
 P13-41 records ESM loader parity as partial. AutoJs6 Node exposes
 `esmLoaderProfile` diagnostics for the current AutoJs6-managed ESM subset:

@@ -678,6 +678,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.dynamicImportExperimentalEnabled,
                     preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
                     preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.childProcessExperimentalEnabled,
                     preparedRequest.javaInteropExperimentalEnabled,
                 )
             } else if (preparedRequest.runtimeModuleSources.isEmpty()) {
@@ -694,6 +695,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.dynamicImportExperimentalEnabled,
                     preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
                     preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.childProcessExperimentalEnabled,
                     preparedRequest.javaInteropExperimentalEnabled,
                 )
             } else {
@@ -712,6 +714,7 @@ object NativeNodeEmbeddedRuntimeBridge {
                     preparedRequest.dynamicImportExperimentalEnabled,
                     preparedRequest.rawNodeNetworkModulesExperimentalEnabled,
                     preparedRequest.workerThreadsExperimentalEnabled,
+                    preparedRequest.childProcessExperimentalEnabled,
                     preparedRequest.javaInteropExperimentalEnabled,
                 )
             }
@@ -1056,6 +1059,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         updatePart(request.dynamicImportExperimentalEnabled.toString())
         updatePart(request.rawNodeNetworkModulesExperimentalEnabled.toString())
         updatePart(request.workerThreadsExperimentalEnabled.toString())
+        updatePart(request.childProcessExperimentalEnabled.toString())
         updatePart(request.javaInteropExperimentalEnabled.toString())
     }.take(32)
 
@@ -15332,6 +15336,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         dynamicImportExperimentalEnabled: Boolean,
         rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        childProcessExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -15348,6 +15353,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         dynamicImportExperimentalEnabled: Boolean,
         rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        childProcessExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -15366,6 +15372,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         dynamicImportExperimentalEnabled: Boolean,
         rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        childProcessExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -15393,6 +15400,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         dynamicImportExperimentalEnabled: Boolean,
         rawNodeNetworkModulesExperimentalEnabled: Boolean,
         workerThreadsExperimentalEnabled: Boolean,
+        childProcessExperimentalEnabled: Boolean,
         javaInteropExperimentalEnabled: Boolean,
     ): Array<String>?
 
@@ -17672,6 +17680,7 @@ object NativeNodeEmbeddedRuntimeBridge {
         val dynamicImportExperimentalEnabled: Boolean = BuildConfig.NODEJS_DYNAMIC_IMPORT_EXPERIMENTAL_ENABLED,
         val rawNodeNetworkModulesExperimentalEnabled: Boolean = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
         val workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+        val childProcessExperimentalEnabled: Boolean = BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
         val javaInteropExperimentalEnabled: Boolean = BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
         val spawnDepth: Int = 0,
         val runtimeAdapter: String? = null,

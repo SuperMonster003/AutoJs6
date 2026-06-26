@@ -156,6 +156,7 @@ object NodeDoctorReportGenerator {
         "network" -> BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED
         "raw_node_network_modules" -> BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED
         "worker_threads" -> BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED
+        "child_process" -> BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED
         "java_interop" -> BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED
         else -> NodeRuntimeCapabilities.featureFlagsById[id]?.defaultEnabled ?: false
     }
@@ -192,7 +193,7 @@ object NodeDoctorReportGenerator {
         put("commonJsExtensions", JSONArray(NodeRuntimeCapabilities.commonJsModuleExtensions.sorted()))
         put("directBuiltins", JSONArray(NodeRuntimeCapabilities.directBuiltinAliases.keys.sorted()))
         put("limitedBuiltins", JSONArray(NodeRuntimeCapabilities.limitedBuiltinModuleNames.sorted()))
-        put("disabledBuiltins", JSONArray(NodeRuntimeCapabilities.disabledBuiltinModuleNames.sorted()))
+        put("disabledBuiltins", JSONArray(disabledBuiltinModuleNames().sorted()))
         put("networkBuiltins", JSONArray(NodeRuntimeCapabilities.networkBuiltinModuleNames.sorted()))
         put("disabledProcessApis", JSONArray(NodeRuntimeCapabilities.disabledProcessApis.sorted()))
         put("scopedFs", true)
@@ -200,6 +201,13 @@ object NodeDoctorReportGenerator {
         put("esmDefaultEnabled", NodeRuntimeCapabilities.featureFlagsById.getValue("esm").defaultEnabled)
         put("nativeAddonDefaultEnabled", false)
         put("childProcessDefaultEnabled", false)
+    }
+
+    private fun disabledBuiltinModuleNames(): Set<String> {
+        return NodeRuntimeCapabilities.disabledBuiltinModuleNames
+            .filterNot { it == "worker_threads" && BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED }
+            .filterNot { it == "child_process" && BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED }
+            .toSet()
     }
 
     private fun bridgeCapabilitiesJson() = JSONObject().apply {

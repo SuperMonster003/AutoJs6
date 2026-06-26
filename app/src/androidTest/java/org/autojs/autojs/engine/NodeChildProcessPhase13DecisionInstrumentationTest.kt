@@ -22,7 +22,7 @@ class NodeChildProcessPhase13DecisionInstrumentationTest {
     }
 
     @Test
-    fun childProcessProfileKeepsBuiltinDeniedAndShellSeparate() {
+    fun childProcessProfileKeepsBuiltinDeniedAndShellSeparateWhenDisabled() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-40 child_process scoped runner decision")
 
         val workDir = File(context.cacheDir, "node-child-process-p13-40-${System.nanoTime()}").apply {
@@ -167,6 +167,7 @@ class NodeChildProcessPhase13DecisionInstrumentationTest {
                 sourceName = "<node-child-process-phase13-p13-40.js>",
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
+                childProcessExperimentalEnabled = false,
                 runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to shellManifest.toJson()),
             )
 
@@ -209,6 +210,89 @@ class NodeChildProcessPhase13DecisionInstrumentationTest {
             )
             assertTrue(result.stdout, result.stdout.contains("p13child.shadowLoaded=false"))
             assertTrue(result.stdout, result.stdout.contains("p13child.ready=true"))
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun childProcessExperimentalOptInExposesNativeBuiltin() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-44 child_process experimental opt-in")
+
+        val workDir = File(context.cacheDir, "node-child-process-opt-in-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create child_process opt-in work dir: $absolutePath" }
+        }
+        try {
+            File(workDir, "node_modules/child_process").apply {
+                mkdirs()
+                File(this, "index.js").writeText(
+                    """module.exports = { shadowed: true };""" + "\n",
+                    StandardCharsets.UTF_8,
+                )
+            }
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    (async () => {
+                      const profile = require("autojs6:profile");
+                      const moduleBuiltin = require("module");
+                      const childProcess = require("child_process");
+                      const childProcessNode = require("node:child_process");
+                      const imported = await import("node:child_process");
+                      const output = childProcess.execFileSync("/system/bin/sh", ["-c", "printf child-ok"], {
+                        encoding: "utf8"
+                      });
+                      console.log("p13child.opt.profile=" + [
+                        profile.childProcessProfile.status,
+                        profile.childProcessProfile.module,
+                        profile.childProcessProfile.nodePrefix,
+                        profile.highRiskCapabilities.childProcess,
+                        profile.featureFlags.child_process.enabled,
+                        profile.disabledBuiltins.includes("child_process")
+                      ].join("|"));
+                      console.log("p13child.opt.require=" + [
+                        childProcess === childProcessNode,
+                        imported.default === childProcess,
+                        typeof childProcess.execFile,
+                        typeof childProcess.spawn,
+                        require.resolve("child_process"),
+                        require.resolve("node:child_process"),
+                        moduleBuiltin.isBuiltin("child_process"),
+                        moduleBuiltin.isBuiltin("node:child_process"),
+                        output
+                      ].join("|"));
+                      console.log("p13child.opt.shadowLoaded=" + Object.keys(require.cache).some((filename) => {
+                        return filename.replace(/\\/g, "/").includes("/node_modules/child_process/");
+                      }));
+                      console.log("p13child.opt.ready=true");
+                    })().catch((error) => {
+                      console.error("p13child.opt.error=" + (error && (error.stack || error.message) || error));
+                      process.exitCode = 1;
+                    });
+                """.trimIndent(),
+                sourceName = "<node-child-process-phase13-opt-in.mjs>",
+                workingDirectory = workDir,
+                timeoutMs = 10_000L,
+                childProcessExperimentalEnabled = true,
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("P13-44 child_process experimental opt-in", result)
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "p13child.opt.profile=experimental_opt_in_native|native_available|native_available|true|true|false",
+                ),
+            )
+            assertTrue(
+                result.stdout,
+                result.stdout.contains(
+                    "p13child.opt.require=true|true|function|function|child_process|child_process|true|true|child-ok",
+                ),
+            )
+            assertTrue(result.stdout, result.stdout.contains("p13child.opt.shadowLoaded=false"))
+            assertTrue(result.stdout, result.stdout.contains("p13child.opt.ready=true"))
         } finally {
             workDir.deleteRecursively()
         }

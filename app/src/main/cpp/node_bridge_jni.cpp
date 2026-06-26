@@ -110,6 +110,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
         bool dynamicImportExperimentalEnabled,
         bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
         bool javaInteropExperimentalEnabled
 ) {
     EmbeddedScriptExecutionRequest request;
@@ -124,6 +125,7 @@ static jobjectArray runEmbeddedScriptLifecycleNative(
     request.dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled;
     request.rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled;
     request.workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled;
+    request.childProcessExperimentalEnabled = childProcessExperimentalEnabled;
     request.javaInteropExperimentalEnabled = javaInteropExperimentalEnabled;
     std::vector<std::string> payload = runEmbeddedScriptExecution(request);
     return toJavaStringArray(env, payload);
@@ -360,6 +362,7 @@ static uint32_t adapterExecutionFlags(
         bool dynamicImportExperimentalEnabled,
         bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
         bool javaInteropExperimentalEnabled
 ) {
     uint32_t flags = 0;
@@ -374,6 +377,9 @@ static uint32_t adapterExecutionFlags(
     }
     if (workerThreadsExperimentalEnabled) {
         flags |= AUTOJS_NODE_EXECUTION_FLAG_WORKER_THREADS_EXPERIMENTAL;
+    }
+    if (childProcessExperimentalEnabled) {
+        flags |= AUTOJS_NODE_EXECUTION_FLAG_CHILD_PROCESS_EXPERIMENTAL;
     }
     if (javaInteropExperimentalEnabled) {
         flags |= AUTOJS_NODE_EXECUTION_FLAG_JAVA_INTEROP_EXPERIMENTAL;
@@ -491,6 +497,7 @@ static jobjectArray runEmbeddedScriptAdapterV1ExecuteNative(
         bool dynamicImportExperimentalEnabled,
         bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
         bool javaInteropExperimentalEnabled
 ) {
     const auto startedAt = Clock::now();
@@ -574,6 +581,7 @@ static jobjectArray runEmbeddedScriptAdapterV1ExecuteNative(
             dynamicImportExperimentalEnabled,
             rawNodeNetworkModulesExperimentalEnabled,
             workerThreadsExperimentalEnabled,
+            childProcessExperimentalEnabled,
             javaInteropExperimentalEnabled
     );
     executionRequest.source_name = sourceNameText.c_str();
@@ -642,6 +650,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             false,
             false,
             false,
+            false,
             false
     );
 }
@@ -686,6 +695,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jboolean dynamicImportExperimentalEnabled,
         jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
+        jboolean childProcessExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
@@ -752,6 +762,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             dynamicImportExperimentalEnabled == JNI_TRUE,
             rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
+            childProcessExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
@@ -770,6 +781,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jboolean dynamicImportExperimentalEnabled,
         jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
+        jboolean childProcessExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> envNameValues = toStringVectorOrEmpty(env, envNames, "envNames");
@@ -802,6 +814,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             dynamicImportExperimentalEnabled == JNI_TRUE,
             rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
+            childProcessExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
@@ -848,6 +861,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             false,
             false,
             false,
+            false,
             false
     );
 }
@@ -868,6 +882,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jboolean dynamicImportExperimentalEnabled,
         jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
+        jboolean childProcessExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
@@ -917,6 +932,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             dynamicImportExperimentalEnabled == JNI_TRUE,
             rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
+            childProcessExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
 }
@@ -982,6 +998,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             false,
             false,
             false,
+            false,
             false
     );
 }
@@ -1004,6 +1021,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
         jboolean dynamicImportExperimentalEnabled,
         jboolean rawNodeNetworkModulesExperimentalEnabled,
         jboolean workerThreadsExperimentalEnabled,
+        jboolean childProcessExperimentalEnabled,
         jboolean javaInteropExperimentalEnabled
 ) {
     const std::vector<std::string> moduleSourceNameValues = toStringVectorOrEmpty(env, moduleSourceNames, "moduleSourceNames");
@@ -1070,6 +1088,7 @@ Java_org_autojs_autojs_engine_NativeNodeEmbeddedRuntimeBridge_nativeRunEmbeddedS
             dynamicImportExperimentalEnabled == JNI_TRUE,
             rawNodeNetworkModulesExperimentalEnabled == JNI_TRUE,
             workerThreadsExperimentalEnabled == JNI_TRUE,
+            childProcessExperimentalEnabled == JNI_TRUE,
             javaInteropExperimentalEnabled == JNI_TRUE
     );
 }

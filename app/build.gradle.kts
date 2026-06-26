@@ -223,6 +223,9 @@ val nodeJsRawNetworkModulesExperimentalEnabled = providers.gradleProperty("autoj
 val nodeJsWorkerThreadsExperimentalEnabled = providers.gradleProperty("autojs.nodejs.worker_threads.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
+val nodeJsChildProcessExperimentalEnabled = providers.gradleProperty("autojs.nodejs.child_process.experimental").orElse("false").get()
+    .trim()
+    .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val nodeJsJavaInteropExperimentalEnabled = providers.gradleProperty("autojs.nodejs.javaInterop.experimental").orElse("false").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
@@ -258,6 +261,7 @@ val nodeJsReleaseForbiddenExperimentalFlags = linkedMapOf(
     "autojs.nodejs.network.experimental" to nodeJsNetworkExperimentalEnabled,
     "autojs.nodejs.rawNetworkModules.experimental" to nodeJsRawNetworkModulesExperimentalEnabled,
     "autojs.nodejs.worker_threads.experimental" to nodeJsWorkerThreadsExperimentalEnabled,
+    "autojs.nodejs.child_process.experimental" to nodeJsChildProcessExperimentalEnabled,
     "autojs.nodejs.javaInterop.experimental" to nodeJsJavaInteropExperimentalEnabled,
     "autojs.nodejs.profile.pro.enabled" to nodeJsProfileProEnabled,
     "autojs.nodejs.profile.desktop.enabled" to nodeJsProfileDesktopEnabled,
@@ -2150,6 +2154,7 @@ android {
         buildConfigField("boolean", "NODEJS_NETWORK_EXPERIMENTAL_ENABLED", "$nodeJsNetworkExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED", "$nodeJsRawNetworkModulesExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED", "$nodeJsWorkerThreadsExperimentalEnabled")
+        buildConfigField("boolean", "NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED", "$nodeJsChildProcessExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED", "$nodeJsJavaInteropExperimentalEnabled")
         buildConfigField("boolean", "NODEJS_PROFILE_PRO_ENABLED", "$nodeJsProfileProEnabled")
         buildConfigField("boolean", "NODEJS_PROFILE_DESKTOP_ENABLED", "$nodeJsProfileDesktopEnabled")

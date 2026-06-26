@@ -5461,6 +5461,7 @@ std::string buildEmbeddedScriptExecutionSource(
         bool dynamicImportExperimentalEnabled,
         bool rawNodeNetworkModulesExperimentalEnabled,
         bool workerThreadsExperimentalEnabled,
+        bool childProcessExperimentalEnabled,
         bool javaInteropExperimentalEnabled) {
     const std::string sourceLiteral = jsonStringLiteral(source);
     const std::string sourceNameLiteral = jsonStringLiteral(sanitizeSourceUrl(sourceName));
@@ -5519,6 +5520,9 @@ std::string buildEmbeddedScriptExecutionSource(
     script += R"JS(;
   const __autojs6_worker_threads_experimental_enabled = )JS";
     script += workerThreadsExperimentalEnabled ? "true" : "false";
+    script += R"JS(;
+  const __autojs6_child_process_experimental_enabled = )JS";
+    script += childProcessExperimentalEnabled ? "true" : "false";
     script += R"JS(;
   const __autojs6_java_interop_experimental_enabled = )JS";
     script += javaInteropExperimentalEnabled ? "true" : "false";
@@ -8076,6 +8080,24 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return moduleValue;
   }
+  function __autojs6_child_process_builtin(name) {
+    if (!__autojs6_child_process_experimental_enabled) {
+      return null;
+    }
+    const request = name === undefined ? "" : String(name);
+    const normalized = request.indexOf("node:") === 0 ? request.slice(5) : request;
+    if (normalized !== "child_process") {
+      return null;
+    }
+    const moduleValue = __autojs6_builtin_module("child_process");
+    if (!moduleValue) {
+      throw __autojs6_error(
+        "Embedded Node child_process module is unavailable.",
+        "ERR_AUTOJS6_BUILTIN_DISABLED"
+      );
+    }
+    return moduleValue;
+  }
   function __autojs6_internal_request_env_value(key) {
     try {
       const record = __autojs6_request_env_sources && __autojs6_request_env_sources[key];
@@ -9015,6 +9037,9 @@ std::string buildEmbeddedScriptExecutionSource(
       if (name === "worker_threads" && __autojs6_worker_threads_experimental_enabled) {
         continue;
       }
+      if (name === "child_process" && __autojs6_child_process_experimental_enabled) {
+        continue;
+      }
       if (
         !__autojs6_has_own(__autojs6_limited_builtin_module_map, name) &&
         !__autojs6_has_own(__autojs6_require_builtin_allowlist, name)
@@ -9027,7 +9052,7 @@ std::string buildEmbeddedScriptExecutionSource(
       directBuiltinAliases[name] = __autojs6_require_builtin_allowlist[name];
     }
     const highRiskCapabilities = Object.freeze({
-      childProcess: false,
+      childProcess: __autojs6_child_process_experimental_enabled,
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       esm: __autojs6_esm_experimental_enabled,
       nativeAddon: false,
@@ -9044,6 +9069,7 @@ std::string buildEmbeddedScriptExecutionSource(
       dynamicImport: __autojs6_dynamic_import_experimental_enabled,
       network: false,
       rawNodeNetworkModules: __autojs6_raw_node_network_modules_experimental_enabled,
+      childProcess: __autojs6_child_process_experimental_enabled,
       workerThreads: __autojs6_worker_threads_experimental_enabled,
       javaInterop: __autojs6_java_interop_experimental_enabled
     });
@@ -9255,19 +9281,19 @@ std::string buildEmbeddedScriptExecutionSource(
       child_process: Object.freeze({
         id: "child_process",
         diagnosticName: "childProcess",
-        gradleProperty: null,
+        gradleProperty: "autojs.nodejs.child_process.experimental",
         defaultEnabled: false,
-        enabled: false,
-        buildTimeOverrideAllowed: false,
+        enabled: __autojs6_child_process_experimental_enabled,
+        buildTimeOverrideAllowed: true,
         projectJsonOverrideAllowed: false,
         packagedApkOverrideAllowed: false,
-        buildOnly: false,
-        debugOnly: false,
+        buildOnly: true,
+        debugOnly: true,
         projectAllowed: false,
         packagedAllowed: false,
         releaseForbidden: true,
         securityLevel: "high",
-        status: "disabled"
+        status: "experimental"
       })
     });
     const enabledExperimentalFlags = Object.freeze(Object.keys(featureFlags).filter(function(name) {
@@ -9732,33 +9758,33 @@ std::string buildEmbeddedScriptExecutionSource(
         downloadExec: false
       }),
       childProcessProfile: Object.freeze({
-        status: "disabled_by_default",
+        status: __autojs6_child_process_experimental_enabled ? "experimental_opt_in_native" : "disabled_by_default",
         defaultEnabled: false,
         targetProfiles: Object.freeze(["desktop_compat_opt_in"]),
-        module: "denied",
-        nodePrefix: "denied",
-        scopedRunner: "deferred",
+        module: __autojs6_child_process_experimental_enabled ? "native_available" : "denied",
+        nodePrefix: __autojs6_child_process_experimental_enabled ? "native_available" : "denied",
+        scopedRunner: __autojs6_child_process_experimental_enabled ? "native_node_builtin" : "deferred",
         shellBridge: "separate_scoped_command_bridge",
         androidShellProvider: "available_with_shell_capability",
-        appPrivateBinaries: "required_before_enablement",
-        allowlistedBinaries: "required_before_enablement",
-        arbitraryPaths: "denied",
+        appPrivateBinaries: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "required_before_enablement",
+        allowlistedBinaries: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "required_before_enablement",
+        arbitraryPaths: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "denied",
         cwd: "scoped_working_directory",
         env: "string_map_scoped",
-        stdin: "deferred",
-        stdout: "bounded_required",
-        stderr: "bounded_required",
-        timeout: "required",
-        cancellation: "required_before_enablement",
-        kill: "required_before_enablement",
-        cleanup: "required_before_enablement",
-        processHandles: "denied",
-        fdStreams: "denied",
+        stdin: __autojs6_child_process_experimental_enabled ? "native_node_streams" : "deferred",
+        stdout: __autojs6_child_process_experimental_enabled ? "native_node_streams" : "bounded_required",
+        stderr: __autojs6_child_process_experimental_enabled ? "native_node_streams" : "bounded_required",
+        timeout: __autojs6_child_process_experimental_enabled ? "caller_managed" : "required",
+        cancellation: __autojs6_child_process_experimental_enabled ? "native_node_kill" : "required_before_enablement",
+        kill: __autojs6_child_process_experimental_enabled ? "native_available" : "required_before_enablement",
+        cleanup: __autojs6_child_process_experimental_enabled ? "native_node_lifecycle" : "required_before_enablement",
+        processHandles: __autojs6_child_process_experimental_enabled ? "native_available" : "denied",
+        fdStreams: __autojs6_child_process_experimental_enabled ? "native_available" : "denied",
         detached: "denied",
-        shellOperators: "denied",
-        packagedBehavior: "not_promoted",
-        rawProcessHandles: false,
-        rawSignals: false
+        shellOperators: __autojs6_child_process_experimental_enabled ? "native_shell_option" : "denied",
+        packagedBehavior: __autojs6_child_process_experimental_enabled ? "experimental_build_only" : "not_promoted",
+        rawProcessHandles: __autojs6_child_process_experimental_enabled,
+        rawSignals: __autojs6_child_process_experimental_enabled
       }),
       processPermission: __autojs6_process_permission_query(),
       directBuiltinAliases: Object.freeze(directBuiltinAliases),
@@ -9843,7 +9869,7 @@ std::string buildEmbeddedScriptExecutionSource(
       all_relaxed_capabilities: "autojs.nodejs.relaxedCapabilities.enabled",
       raw_node_network_modules: "autojs.nodejs.rawNetworkModules.experimental",
       filesystem_relaxation: "safe_profile_scoped_fs",
-      child_process: "stable_denial_no_runtime_switch",
+      child_process: "autojs.nodejs.child_process.experimental",
       native_addon: "stable_denial_no_runtime_switch",
       inspector: "debug_profile_only_no_runtime_switch",
       wasi: "stable_denial_no_runtime_switch"
@@ -9955,8 +9981,8 @@ std::string buildEmbeddedScriptExecutionSource(
           id: "child_process",
           profile: "desktop_compat_opt_in",
           property: capabilityKillSwitches.child_process,
-          enabled: false,
-          rollbackAction: "keep_child_process_builtin_denied",
+          enabled: flagEnabled("child_process"),
+          rollbackAction: "set_autojs_nodejs_child_process_experimental_false",
           fallbackProfile: "safe_default"
         }),
         Object.freeze({
@@ -28578,6 +28604,9 @@ std::string buildEmbeddedScriptExecutionSource(
       normalized === ".json";
   }
   function __autojs6_denied_builtin_module_name(name) {
+    if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return false;
+    }
     return name.indexOf("node:") === 0 || __autojs6_has_own(__autojs6_require_builtin_denylist, name);
   }
   function __autojs6_protocol_specifier(name) {
@@ -41625,6 +41654,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (__autojs6_worker_threads_experimental_enabled && key === "worker_threads") {
       return true;
     }
+    if ((key === "child_process" || key === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return true;
+    }
     return __autojs6_has_own(__autojs6_limited_builtin_module_map, key);
   }
   function __autojs6_limited_module_sync_builtin_esm_exports() {
@@ -41650,6 +41682,9 @@ std::string buildEmbeddedScriptExecutionSource(
           names.push("node:test");
           if (__autojs6_worker_threads_experimental_enabled) {
             names.push("worker_threads");
+          }
+          if (__autojs6_child_process_experimental_enabled) {
+            names.push("child_process");
           }
           return names;
         })()),
@@ -43342,6 +43377,7 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_esm_builtin_specifier(name) {
     return name === "node:test" ||
+      ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) ||
       name === "rhino" ||
       __autojs6_has_own(__autojs6_require_builtin_allowlist, name) ||
       __autojs6_has_own(__autojs6_limited_builtin_module_map, name) ||
@@ -43736,6 +43772,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if (name === "node:worker_threads") {
       return "node:worker_threads";
+    }
+    if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return "node:child_process";
     }
     if (name === "rhino") {
       return "rhino";
@@ -44728,6 +44767,9 @@ std::string buildEmbeddedScriptExecutionSource(
     if (name === "worker_threads" && __autojs6_worker_threads_experimental_enabled) {
       return "worker_threads";
     }
+    if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return "child_process";
+    }
     if (name === "node:test") {
       return "node:test";
     }
@@ -45060,6 +45102,9 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     if ((name === "worker_threads" || name === "node:worker_threads") && __autojs6_worker_threads_experimental_enabled) {
       return __autojs6_limited_worker_threads();
+    }
+    if ((name === "child_process" || name === "node:child_process") && __autojs6_child_process_experimental_enabled) {
+      return __autojs6_child_process_builtin(name);
     }
     if (name === "node:test") {
       return __autojs6_limited_node_test();

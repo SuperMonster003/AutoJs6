@@ -110,6 +110,7 @@ class NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest {
                 workingDirectory = workDir,
                 timeoutMs = 10_000L,
                 workerThreadsExperimentalEnabled = false,
+                childProcessExperimentalEnabled = false,
             )
 
             NodeEmbeddedTestHarness.assertSucceeded("P13-35 process-worker replacement decision", result)

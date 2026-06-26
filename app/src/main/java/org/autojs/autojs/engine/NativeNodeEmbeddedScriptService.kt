@@ -260,6 +260,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         val dynamicImportExperimentalEnabled = preparedServiceRequest.dynamicImportExperimentalEnabled
         val rawNodeNetworkModulesExperimentalEnabled = preparedServiceRequest.rawNodeNetworkModulesExperimentalEnabled
         val workerThreadsExperimentalEnabled = preparedServiceRequest.workerThreadsExperimentalEnabled
+        val childProcessExperimentalEnabled = preparedServiceRequest.childProcessExperimentalEnabled
         val javaInteropExperimentalEnabled = preparedServiceRequest.javaInteropExperimentalEnabled
         val spawnDepth = preparedServiceRequest.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH)
         val env = preparedServiceRequest.env
@@ -415,6 +416,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
             dynamicImportExperimentalEnabled = dynamicImportExperimentalEnabled,
             rawNodeNetworkModulesExperimentalEnabled = rawNodeNetworkModulesExperimentalEnabled,
             workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
+            childProcessExperimentalEnabled = childProcessExperimentalEnabled,
             javaInteropExperimentalEnabled = javaInteropExperimentalEnabled,
             executionId = executionId,
             queueMode = queueMode,
@@ -477,6 +479,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     "dynamicImportExperimentalEnabled=$dynamicImportExperimentalEnabled " +
                     "rawNodeNetworkModulesExperimentalEnabled=$rawNodeNetworkModulesExperimentalEnabled " +
                     "workerThreadsExperimentalEnabled=$workerThreadsExperimentalEnabled " +
+                    "childProcessExperimentalEnabled=$childProcessExperimentalEnabled " +
                     "javaInteropExperimentalEnabled=$javaInteropExperimentalEnabled " +
                     "queueMode=$queueMode queued=${slotLease.queued} queueWaitMs=${slotLease.queueWaitMs} " +
                     "executionMode=$executionMode " +
@@ -1753,6 +1756,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
         private const val EXTRA_RAW_NODE_NETWORK_MODULES_EXPERIMENTAL_ENABLED =
             "raw_node_network_modules_experimental_enabled"
         private const val EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED = "worker_threads_experimental_enabled"
+        private const val EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED = "child_process_experimental_enabled"
         private const val EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED = "java_interop_experimental_enabled"
         private const val EXTRA_SPAWN_DEPTH = "spawn_depth"
         private const val EXTRA_RUNTIME_ADAPTER = "runtime_adapter"
@@ -2053,6 +2057,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     scheduledRequestForService.rawNodeNetworkModulesExperimentalEnabled,
                 )
                 putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, scheduledRequestForService.workerThreadsExperimentalEnabled)
+                putExtra(EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED, scheduledRequestForService.childProcessExperimentalEnabled)
                 putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, scheduledRequestForService.javaInteropExperimentalEnabled)
                 putExtra(
                     EXTRA_SPAWN_DEPTH,
@@ -2262,6 +2267,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                         requestForService.rawNodeNetworkModulesExperimentalEnabled,
                     )
                     putExtra(EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED, requestForService.workerThreadsExperimentalEnabled)
+                    putExtra(EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED, requestForService.childProcessExperimentalEnabled)
                     putExtra(EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED, requestForService.javaInteropExperimentalEnabled)
                     putExtra(EXTRA_SPAWN_DEPTH, requestForService.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                     putExtra(EXTRA_RUNTIME_ADAPTER, requestForService.runtimeAdapter)
@@ -3268,6 +3274,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                     EXTRA_WORKER_THREADS_EXPERIMENTAL_ENABLED,
                     BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
                 ),
+                childProcessExperimentalEnabled = getBooleanExtra(
+                    EXTRA_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
+                    BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
+                ),
                 javaInteropExperimentalEnabled = getBooleanExtra(
                     EXTRA_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
                     BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED,
@@ -3316,6 +3326,7 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 put("dynamicImportExperimentalEnabled", request.dynamicImportExperimentalEnabled)
                 put("rawNodeNetworkModulesExperimentalEnabled", request.rawNodeNetworkModulesExperimentalEnabled)
                 put("workerThreadsExperimentalEnabled", request.workerThreadsExperimentalEnabled)
+                put("childProcessExperimentalEnabled", request.childProcessExperimentalEnabled)
                 put("javaInteropExperimentalEnabled", request.javaInteropExperimentalEnabled)
                 put("spawnDepth", request.spawnDepth.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH))
                 request.runtimeAdapter?.takeIf { it.isNotBlank() }?.let { put("runtimeAdapter", it) }
@@ -3360,6 +3371,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
                 workerThreadsExperimentalEnabled = json.optBoolean(
                     "workerThreadsExperimentalEnabled",
                     BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
+                ),
+                childProcessExperimentalEnabled = json.optBoolean(
+                    "childProcessExperimentalEnabled",
+                    BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED,
                 ),
                 javaInteropExperimentalEnabled = json.optBoolean(
                     "javaInteropExperimentalEnabled",

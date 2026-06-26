@@ -53,6 +53,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
         assertFalse(BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED)
+        assertFalse(BuildConfig.NODEJS_CHILD_PROCESS_EXPERIMENTAL_ENABLED)
         assertFalse(BuildConfig.NODEJS_JAVA_INTEROP_EXPERIMENTAL_ENABLED)
         assertEquals(null, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.ESM_EXPERIMENTAL_PROPERTY])
         assertEquals(null, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.DYNAMIC_IMPORT_LOCAL_PROPERTY])
@@ -60,6 +61,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY])
+        assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY])
         assertEquals(false, NodeRuntimeCapabilities.experimentalFlags[NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY])
         assertTrue(NodeRuntimeCapabilities.featureFlagsById.getValue("esm").defaultEnabled)
         assertEquals("partial", NodeRuntimeCapabilities.featureFlagsById.getValue("esm").status)
@@ -82,7 +84,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
 
         val buildOverrideAllowed = flags.filter { it.buildTimeOverrideAllowed }.map { it.id }.toSet()
         assertEquals(
-            setOf("esm", "dynamic_import", "network", "raw_node_network_modules", "worker_threads", "java_interop"),
+            setOf("esm", "dynamic_import", "network", "raw_node_network_modules", "worker_threads", "child_process", "java_interop"),
             buildOverrideAllowed,
         )
         assertEquals(buildOverrideAllowed, NodeRuntimeCapabilities.buildOnlyFeatureFlags.map { it.id }.toSet())
@@ -282,17 +284,26 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             if (profile.featureFlags.java_interop.gradleProperty !== "autojs.nodejs.javaInterop.experimental") {
               throw new Error("java_interop gradle property mismatch");
             }
+            if (profile.featureFlags.child_process.gradleProperty !== "autojs.nodejs.child_process.experimental") {
+              throw new Error("child_process gradle property mismatch");
+            }
             if (profile.featureFlags.dynamic_import.status !== "partial") {
               throw new Error("dynamic_import status mismatch");
             }
             if (profile.featureFlags.java_interop.status !== "experimental") {
               throw new Error("java_interop status mismatch");
             }
+            if (profile.featureFlags.child_process.status !== "experimental") {
+              throw new Error("child_process status mismatch");
+            }
             if (profile.featureFlags.dynamic_import.buildTimeOverrideAllowed !== true) {
               throw new Error("dynamic_import build override mismatch");
             }
             if (profile.featureFlags.java_interop.buildTimeOverrideAllowed !== true) {
               throw new Error("java_interop build override mismatch");
+            }
+            if (profile.featureFlags.child_process.buildTimeOverrideAllowed !== true) {
+              throw new Error("child_process build override mismatch");
             }
             if (
               profile.featureFlags.esm.buildOnly !== true ||
@@ -362,6 +373,7 @@ class NodeFeatureFlagRegistryInstrumentationTest {
             source = source,
             sourceName = "<node-feature-flag-registry.js>",
             timeoutMs = 10_000L,
+            childProcessExperimentalEnabled = false,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("Node feature flag registry profile", result)

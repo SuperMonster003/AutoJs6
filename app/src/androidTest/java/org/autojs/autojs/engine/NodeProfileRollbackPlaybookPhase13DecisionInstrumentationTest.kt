@@ -60,7 +60,7 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
         assertEquals(NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("worker_threads"))
         assertEquals(NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("java_interop"))
         assertEquals(NodeProfileRollbackPolicy.RELAXED_CAPABILITIES_PROPERTY, capabilitySwitches.getString("all_relaxed_capabilities"))
-        assertEquals("stable_denial_no_runtime_switch", capabilitySwitches.getString("child_process"))
+        assertEquals(NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY, capabilitySwitches.getString("child_process"))
 
         val profileStates = policy.getJSONArray("profileStates").toString()
         assertTrue(profileStates.contains(NodeProfileRollbackPolicy.SAFE_DEFAULT))
@@ -115,6 +115,7 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
                 assert.strictEqual(rollback.profileKillSwitches.desktop_compat_opt_in, "${NodeProfileRollbackPolicy.DESKTOP_PROFILE_PROPERTY}");
                 assert.strictEqual(rollback.capabilityKillSwitches.network, "${NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY}");
                 assert.strictEqual(rollback.capabilityKillSwitches.raw_node_network_modules, "${NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY}");
+                assert.strictEqual(rollback.capabilityKillSwitches.child_process, "${NodeRuntimeCapabilities.CHILD_PROCESS_EXPERIMENTAL_PROPERTY}");
                 assert.strictEqual(rollback.capabilityKillSwitches.all_relaxed_capabilities, "${NodeProfileRollbackPolicy.RELAXED_CAPABILITIES_PROPERTY}");
                 assert.ok(rollback.profileStates.some((item) => item.id === "safe_default" && item.enabled === true));
                 assert.ok(rollback.profileStates.some((item) => item.id === "desktop_compat_opt_in" && item.fallbackProfile === "safe_default"));
@@ -140,6 +141,7 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
             sourceName = "<node-profile-rollback-phase13-p13-51.js>",
             workingDirectory = root,
             timeoutMs = 10_000L,
+            childProcessExperimentalEnabled = false,
         )
 
         NodeEmbeddedTestHarness.assertSucceeded("P13-51 profile rollback playbook", result)

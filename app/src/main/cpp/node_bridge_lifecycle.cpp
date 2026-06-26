@@ -530,6 +530,7 @@ std::vector<std::string> runEmbeddedScriptExecution(
     putPayload(payload, "embedded_script.request.dynamic_import_experimental_enabled", request.dynamicImportExperimentalEnabled);
     putPayload(payload, "embedded_script.request.raw_node_network_modules_experimental_enabled", request.rawNodeNetworkModulesExperimentalEnabled);
     putPayload(payload, "embedded_script.request.worker_threads_experimental_enabled", request.workerThreadsExperimentalEnabled);
+    putPayload(payload, "embedded_script.request.child_process_experimental_enabled", request.childProcessExperimentalEnabled);
     putPayload(payload, "embedded_script.request.java_interop_experimental_enabled", request.javaInteropExperimentalEnabled);
     putPayload(payload, "embedded_script.request.node_modules_allowed", "working_directory_commonjs_mvp");
     putPayload(payload, "embedded_script.request.autojs_api_allowed", false);
@@ -572,6 +573,7 @@ std::vector<std::string> runEmbeddedScriptExecution(
             request.dynamicImportExperimentalEnabled,
             request.rawNodeNetworkModulesExperimentalEnabled,
             request.workerThreadsExperimentalEnabled,
+            request.childProcessExperimentalEnabled,
             request.javaInteropExperimentalEnabled
     );
     void* handle = probeLoadedLibnodeHandle(payload);

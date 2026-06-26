@@ -1359,6 +1359,11 @@ P13 task 本身使用以下执行状态：
   - Progress:
     - P13-40 partial landing 已添加 `childProcessProfile` 诊断，保持
       `child_process` / `node:child_process` 默认拒绝。
+    - Debug/Desktop 兼容实验开关
+      `autojs.nodejs.child_process.experimental=true` 已可将
+      `child_process` / `node:child_process` 的 CommonJS 与 ESM 入口路由到
+      Node 原生 builtin，并在 local `node_modules/child_process` shadow
+      package 之前生效；该开关 release-forbidden，默认仍关闭。
     - 当前替代路径仍是单独 capability 的 `shell` bridge，不暴露
       `spawn` / `fork` / stdio stream / signal / process handle。
     - 新增 focused gate:

@@ -87,7 +87,7 @@ with surface ownership in
 | `inspector` | none | false | false | false | false | true | high | disabled |
 | `java_interop` | `autojs.nodejs.javaInterop.experimental` | false | true | false | false | true | critical | experimental |
 | `native_addon` | none | false | false | false | false | true | critical | unsupported |
-| `child_process` | none | false | false | false | false | true | high | disabled |
+| `child_process` | `autojs.nodejs.child_process.experimental` | false | true | false | false | true | high | experimental |
 
 Runtime diagnostics expose the same state through `require("autojs6:profile").featureFlags`, `enabledExperimentalFlags`, and `deniedFeatureFlags`. The legacy `experimentalFlags` and `highRiskCapabilities` snapshots are retained for compatibility.
 
@@ -1240,20 +1240,26 @@ ceilings remain open.
 P13-35 records process-worker replacement as partial. The runtime exposes
 `autojs6:profile.processWorkerReplacementProfile` to document that the current
 replacement path is request-local `worker_threads.WorkerPool`, not a new
-`process_worker` or `compute_worker` facade. `child_process` stays denied,
-`shell` remains a separate scoped command bridge, `worker_computation` remains
-reserved, `second_execution_slot` is not closed by this decision, and raw
-process handles, spawn/fork, stdio streams, signals, bridge modules, nested
-workers, and packaged process-worker behavior remain unpromoted.
+`process_worker` or `compute_worker` facade. `child_process` stays denied in
+the Safe/default profile, `shell` remains a separate scoped command bridge,
+`worker_computation` remains reserved, `second_execution_slot` is not closed by
+this decision, and raw process handles, spawn/fork, stdio streams, signals,
+bridge modules, nested workers, and packaged process-worker behavior remain
+unpromoted.
 
 P13-40 records child_process scoped runner as partial. The runtime exposes
 `autojs6:profile.childProcessProfile` to document that `child_process` and
-`node:child_process` remain denied while the existing `shell` bridge stays the
-only command-execution migration path. Any future Desktop scoped runner must
-use app-private allowlisted binaries, reject arbitrary paths/downloaded
-binaries/shell operators/detached handles, bound stdin/stdout/stderr, prove
-timeout/cancel/kill/cleanup behavior, and add packaged plus hostile-corpus
-evidence before promotion.
+`node:child_process` remain denied by default while the existing `shell` bridge
+stays the Safe-profile command-execution migration path. A debug/build-time
+Desktop compatibility experiment can enable the native Node builtin with
+`autojs.nodejs.child_process.experimental=true`; this routes bare and
+`node:`-prefixed CommonJS and ESM imports to Node's builtin before local
+`node_modules` shadowing, and reports the flag through the profile registry.
+The flag is release-forbidden and does not promote a stable scoped runner. Any
+future release/Desktop scoped runner must use app-private allowlisted binaries,
+reject arbitrary paths/downloaded binaries/shell operators/detached handles,
+bound stdin/stdout/stderr, prove timeout/cancel/kill/cleanup behavior, and add
+packaged plus hostile-corpus evidence before promotion.
 
 P13-41 records ESM loader parity as partial. The runtime exposes
 `autojs6:profile.esmLoaderProfile` to document that v1.1 supports the
@@ -1953,7 +1959,7 @@ runtime.
   - `setDefaultTimeout(ms): number`
   - options: `{ root?: boolean, timeoutMs?: number, cwd?: string, env?: Record<string, string> }`; `shizuku: true` is reserved and rejected in v1.1
   - runs through the AutoJs6 bridge provider, not Node `child_process`
-  - migration mapping: `child_process.exec()` -> `require("shell").exec()` with declared `shell` capability; `child_process.spawn()`, `fork()`, streaming stdio, and interactive shells are not supported by the Safe Node Profile
+  - migration mapping for Safe profile scripts: `child_process.exec()` -> `require("shell").exec()` with declared `shell` capability; `child_process.spawn()`, `fork()`, streaming stdio, and interactive shells are not supported by the Safe Node Profile
   - non-root mode uses a controlled non-interactive shell process on a provider thread; root mode is explicit and attempts `su -c`
   - `execRoot()` is a JavaScript facade over `exec(..., { root: true })` and requires the explicit `shell.root` capability when a manifest is enforced
   - `execShizuku()` and `exec(..., { shizuku: true })` reject before bridge dispatch with `ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED`
