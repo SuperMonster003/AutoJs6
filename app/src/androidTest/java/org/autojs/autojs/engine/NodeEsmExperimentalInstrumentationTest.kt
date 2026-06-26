@@ -144,6 +144,37 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun partialEsmDefaultNamedClassKeepsLocalBinding() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM named default class local binding")
+        val workDir = freshWorkDir("esm-default-named-class")
+        val entry = File(workDir, "main.mjs")
+        val dependency = File(workDir, "body.mjs").apply {
+            writeText(
+                """
+                export default class Body {
+                  text() { return "body"; }
+                }
+                Body.kind = "node-fetch-shape";
+                export const bodyKind = Body.kind;
+                """.trimIndent(),
+            )
+        }
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import Body, { bodyKind } from "./body.mjs";
+                console.log("esm.defaultNamedClass=" + bodyKind + "/" + new Body().text());
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM named default class binding", result)
+        assertTrue(result.stdout.contains("esm.defaultNamedClass=node-fetch-shape/body"))
+        assertNativeValueContainsIfPresent(result, "embedded_script.esm_module_graph_modules", dependency.absolutePath)
+    }
+
+    @Test
     fun partialPackageTypeModuleEntryRunsAsEsmByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package type=module bootstrap")
         val workDir = freshWorkDir("esm-type-module")

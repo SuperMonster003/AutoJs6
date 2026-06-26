@@ -43444,6 +43444,7 @@ std::string buildEmbeddedScriptExecutionSource(
     const namedExports = [];
     const reExportTail = [];
     let hasDefault = false;
+    let defaultLocal = "";
     const state = importState || { nextIndex: 0, bindingLines: [] };
     if (!Array.isArray(state.bindingLines)) state.bindingLines = [];
     if (typeof state.nextIndex !== "number") state.nextIndex = 0;
@@ -43471,6 +43472,22 @@ std::string buildEmbeddedScriptExecutionSource(
         }
       }
       return prefix || "";
+    });
+    body = body.replace(/\bexport\s+default\s+(async\s+)?function\s+([A-Za-z_$][0-9A-Za-z_$]*)\s*\(/g, function(_, asyncPrefix, name) {
+      if (hasDefault) {
+        throw __autojs6_esm_error("Embedded Node partial ESM module has more than one default export: " + sourceName);
+      }
+      hasDefault = true;
+      defaultLocal = name;
+      return (asyncPrefix || "") + "function " + name + "(";
+    });
+    body = body.replace(/\bexport\s+default\s+class\s+([A-Za-z_$][0-9A-Za-z_$]*)\b/g, function(_, name) {
+      if (hasDefault) {
+        throw __autojs6_esm_error("Embedded Node partial ESM module has more than one default export: " + sourceName);
+      }
+      hasDefault = true;
+      defaultLocal = name;
+      return "class " + name;
     });
     body = body.replace(/\bexport\s+default\s+/g, function() {
       if (hasDefault) {
@@ -43500,7 +43517,7 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     const tail = [];
     if (hasDefault) {
-      tail.push("__autojs6_esm_namespace[\"default\"] = __autojs6_esm_default;");
+      tail.push("__autojs6_esm_namespace[\"default\"] = " + (defaultLocal || "__autojs6_esm_default") + ";");
     }
     for (const item of namedExports) {
       tail.push("__autojs6_esm_namespace[" + JSON.stringify(item.exported) + "] = " + item.local + ";");
