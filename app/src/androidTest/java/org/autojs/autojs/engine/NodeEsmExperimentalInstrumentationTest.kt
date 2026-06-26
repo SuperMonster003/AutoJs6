@@ -47,6 +47,28 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun mjsEntryRunsAsNodeEsmWithoutDirective() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("mjs no directive routing")
+
+        val workDir = freshWorkDir("esm-no-directive")
+        val entry = File(workDir, "main.mjs")
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const nodeVersion = await Promise.resolve(process.version);
+                console.log("esm.noDirective=" + nodeVersion.startsWith("v"));
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("mjs no directive", result)
+        assertTrue(result.stdout.contains("esm.noDirective=true"))
+        assertNativeValueIfPresent(result, "embedded_script.esm_enabled", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_entry", "true")
+        assertNativeValueIfPresent(result, "embedded_script.esm_module_graph_root", entry.absolutePath)
+    }
+
+    @Test
     fun partialMjsEntrySupportsLocalStaticImportAndTopLevelAwaitByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM partial bootstrap")
         val workDir = freshWorkDir("esm-local-import")

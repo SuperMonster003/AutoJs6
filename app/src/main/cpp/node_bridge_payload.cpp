@@ -23,6 +23,9 @@ void putEmbeddedScriptExecutionFields(std::vector<std::string>& payload, const s
     putPayload(payload, "embedded_script.stderr.bytes", jsonNumberField(text, "stderrBytes"));
     putPayload(payload, "embedded_script.stdout.truncated", jsonBooleanField(text, "stdoutTruncated"));
     putPayload(payload, "embedded_script.stderr.truncated", jsonBooleanField(text, "stderrTruncated"));
+    putPayload(payload, "embedded_script.console_events_json", jsonStringField(text, "consoleEventsJson"));
+    putPayload(payload, "embedded_script.console_event_count", jsonNumberField(text, "consoleEventCount"));
+    putPayload(payload, "embedded_script.console_events_truncated", jsonBooleanField(text, "consoleEventsTruncated"));
     putPayload(payload, "embedded_script.chdir_failure_reason", jsonStringField(text, "chdirFailureReason"));
     putPayload(payload, "embedded_script.create_require_failure_reason", jsonStringField(text, "createRequireFailureReason"));
     putPayload(payload, "embedded_script.node_version", jsonStringField(text, "nodeVersion"));

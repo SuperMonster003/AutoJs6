@@ -1799,6 +1799,11 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "stderr_capture.text",
             "stderr_capture.text.hex",
         )
+        private val RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS = listOf(
+            "embedded_script.console_events_json",
+            "embedded_script.console_event_count",
+            "embedded_script.console_events_truncated",
+        )
         private const val EXTRA_PREWARM_STARTED = "prewarm_started"
         private const val EXTRA_PREWARM_STATUS = "prewarm_status"
         private const val EXTRA_PREWARM_REASON = "prewarm_reason"
@@ -3388,29 +3393,42 @@ open class NativeNodeEmbeddedScriptService : Service() {
         ): MutableMap<String, String> {
             val transport = linkedMapOf<String, String>()
             val omittedKeys = mutableListOf<String>()
-            var originalChars = 0
+            var originalChars = entries.sumOf { (key, value) -> key.length + 1 + value.length }
             var sentChars = 0
             var omittedChars = 0
-            for ((key, value) in this) {
+            val priorityKeys = RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS.toSet()
+
+            fun appendTransportEntry(key: String, value: String, priority: Boolean) {
                 val originalEntryChars = key.length + 1 + value.length
-                originalChars += originalEntryChars
                 if (key in RESULT_TRANSPORT_NATIVE_PAYLOAD_DEDICATED_KEYS) {
                     omittedKeys += key
                     omittedChars += originalEntryChars
-                    continue
+                    return
                 }
                 val limitedValue = value.limitResultTransportString("native:$key", truncations)
                 val transportEntryChars = key.length + 1 + limitedValue.length
                 if (
-                    transport.size >= RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES ||
-                    sentChars + transportEntryChars > RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS
+                    !priority && (
+                        transport.size >= RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_ENTRIES ||
+                            sentChars + transportEntryChars > RESULT_TRANSPORT_NATIVE_PAYLOAD_MAX_CHARS
+                    )
                 ) {
                     omittedKeys += key
                     omittedChars += originalEntryChars
-                    continue
+                    return
                 }
                 transport[key] = limitedValue
                 sentChars += transportEntryChars
+            }
+
+            RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS.forEach { key ->
+                this[key]?.let { appendTransportEntry(key, it, priority = true) }
+            }
+            for ((key, value) in this) {
+                if (key in priorityKeys) {
+                    continue
+                }
+                appendTransportEntry(key, value, priority = false)
             }
             val omittedCount = omittedKeys.size
             if (omittedCount > 0) {

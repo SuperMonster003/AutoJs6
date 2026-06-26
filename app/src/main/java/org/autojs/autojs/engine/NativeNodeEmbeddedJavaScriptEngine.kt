@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
+import org.json.JSONArray
 import org.json.JSONObject
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.pio.PFiles
@@ -213,8 +214,10 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                     "succeeded=${result.succeeded} elapsed=${result.elapsedMs}ms",
         )
         lastEmbeddedScriptResultNativeValues = result.nativeValues
-        printScriptOutput(Log.DEBUG, result.stdout)
-        printScriptOutput(Log.ERROR, result.stderr)
+        if (!printStructuredConsoleOutput(result.nativeValues)) {
+            printScriptOutput(Log.DEBUG, result.stdout)
+            printScriptOutput(Log.ERROR, result.stderr)
+        }
         if (!result.succeeded) {
             result.errorStack?.takeIf { it.isNotBlank() }?.let { printScriptOutput(Log.ERROR, it) }
             val failureEnvelope = buildFailureEnvelope(request, result)
@@ -293,6 +296,42 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
                 printScriptOutputChunk(level, line.substring(start, end), console)
                 start = end
             }
+        }
+    }
+
+    private fun printStructuredConsoleOutput(nativeValues: Map<String, String>): Boolean {
+        val eventsJson = embeddedConsoleEventsJson(nativeValues)
+            ?: return false
+        val events = runCatching { JSONArray(eventsJson) }.getOrNull() ?: return false
+        if (events.length() == 0) {
+            return false
+        }
+        for (index in 0 until events.length()) {
+            val event = events.optJSONObject(index) ?: continue
+            printScriptOutput(
+                nodeConsoleLevel(event.optString("level")),
+                event.optString("text"),
+            )
+        }
+        return true
+    }
+
+    private fun embeddedConsoleEventsJson(nativeValues: Map<String, String>): String? {
+        nativeValues["embedded_script.console_events_json"].takeUnless { it.isNullOrBlank() }?.let { return it }
+        val resultJson = nativeValues["embedded_script.result_json"].takeUnless { it.isNullOrBlank() } ?: return null
+        return runCatching { JSONObject(resultJson).optString("consoleEventsJson") }
+            .getOrNull()
+            ?.takeUnless { it.isBlank() }
+    }
+
+    private fun nodeConsoleLevel(level: String): Int {
+        return when (level.uppercase()) {
+            "VERBOSE" -> Log.VERBOSE
+            "INFO" -> Log.INFO
+            "WARN" -> Log.WARN
+            "ERROR" -> Log.ERROR
+            "ASSERT" -> Log.ASSERT
+            else -> Log.DEBUG
         }
     }
 

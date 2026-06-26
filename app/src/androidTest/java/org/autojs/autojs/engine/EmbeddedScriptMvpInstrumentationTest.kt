@@ -24,6 +24,7 @@ import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.timing.IntentTask
 import org.autojs.autojs.timing.TimedTask
 import org.autojs.autojs.ui.main.task.Task
+import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs.runtime.api.Engines as RuntimeEngines
 import org.junit.After
@@ -88,6 +89,8 @@ class EmbeddedScriptMvpInstrumentationTest {
         try {
             val mjs = File(scriptDir, "module.mjs").apply { writeText("console.log('mjs');") }
             val cjs = File(scriptDir, "common.cjs").apply { writeText("console.log('cjs');") }
+            val mts = File(scriptDir, "module-ts.mts").apply { writeText("console.log('mts');") }
+            val cts = File(scriptDir, "common-ts.cts").apply { writeText("console.log('cts');") }
             val nodeJs = File(scriptDir, "explicit.node.js").apply { writeText("console.log('node.js');") }
             val directiveJs = File(scriptDir, "directive.js").apply { writeText(""""nodejs"; console.log('directive');""") }
             val rhinoJs = File(scriptDir, "rhino.js").apply { writeText("console.log('rhino');") }
@@ -101,12 +104,19 @@ class EmbeddedScriptMvpInstrumentationTest {
 
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(mjs).engineName)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(cjs).engineName)
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(mts).engineName)
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(cts).engineName)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(nodeJs).engineName)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(directiveJs).engineName)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, JavaScriptFileSource(projectMain).engineName)
             assertEquals(JavaScriptSource.ENGINE, JavaScriptFileSource(rhinoJs).engineName)
             assertEquals(projectDir.canonicalFile, JavaScriptFileSource(projectMain).nodeProjectRoot)
             assertEquals(null, JavaScriptFileSource(rhinoJs).nodeProjectRoot)
+            assertNodeScriptFileType(mjs, FileUtils.TYPE.MODULE_JAVASCRIPT)
+            assertNodeScriptFileType(cjs, FileUtils.TYPE.COMMONJS_JAVASCRIPT)
+            assertNodeScriptFileType(mts, FileUtils.TYPE.MODULE_TYPESCRIPT)
+            assertNodeScriptFileType(cts, FileUtils.TYPE.COMMONJS_TYPESCRIPT)
+            assertNodeScriptFileType(nodeJs, FileUtils.TYPE.NODE_JAVASCRIPT)
             assertEquals(ScriptFile.TYPE_JAVASCRIPT, ScriptFile(cjs).type)
             assertEquals(JavaScriptSource.ENGINE_NODEJS, ScriptFile(cjs).toSource().engineName)
             val projectMainSource = ScriptFile(projectMain).toSource()
@@ -134,6 +144,8 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(JavaScriptSource.ENGINE, ScriptFile(rhinoJs).toSource().engineName)
             assertPendingTaskEngineName(cjs, JavaScriptSource.ENGINE_NODEJS)
             assertPendingTaskEngineName(mjs, JavaScriptSource.ENGINE_NODEJS)
+            assertPendingTaskEngineName(mts, JavaScriptSource.ENGINE_NODEJS)
+            assertPendingTaskEngineName(cts, JavaScriptSource.ENGINE_NODEJS)
             assertPendingTaskEngineName(nodeJs, JavaScriptSource.ENGINE_NODEJS)
             assertPendingTaskEngineName(directiveJs, JavaScriptSource.ENGINE_NODEJS)
             assertPendingTaskEngineName(projectMain, JavaScriptSource.ENGINE_NODEJS)
@@ -145,6 +157,77 @@ class EmbeddedScriptMvpInstrumentationTest {
         } finally {
             scriptDir.deleteRecursively()
         }
+    }
+
+    @Test
+    fun consoleMethodsAlignWithRhinoLevelsAndSupportTable() {
+        assumeTrue(BuildConfig.NODEJS_EMBEDDED_SCRIPT_EXECUTION_BUILD_ENABLED)
+
+        val result = runEmbeddedScript(
+            """
+            "nodejs";
+            console.verbose("verbose-line", 1);
+            console.log("debug-line", 2);
+            console.info("info-line", 3);
+            console.warn("warn-line", 4);
+            console.error("error-line", 5);
+            try {
+              console.assert(false, "assert-line", 6);
+            } catch (error) {
+              console.log("assert.error=" + error.name + ":" + error.message);
+            }
+            console.assert(true, "hidden-line");
+            console.table([{ name: "gradle", version: "8" }]);
+            """.trimIndent(),
+            sourceName = "<embedded-console-rhino-parity.js>",
+        )
+
+        assertTrue(result.errorMessage.orEmpty(), result.succeeded)
+        assertTrue(result.stdout.contains("verbose-line 1"))
+        assertTrue(result.stdout.contains("debug-line 2"))
+        assertTrue(result.stdout.contains("info-line 3"))
+        assertTrue(result.stdout.contains("assert.error=AssertionError:assert-line 6"))
+        assertTrue(result.stdout.contains("gradle"))
+        assertTrue(result.stderr.contains("warn-line 4"))
+        assertTrue(result.stderr.contains("error-line 5"))
+        assertTrue(result.stderr.contains("assert-line 6"))
+
+        val eventsJson = embeddedConsoleEventsJson(result.nativeValues)
+        assertTrue(
+            "missing console events; keys=${result.nativeValues.keys.sorted()} stdout=${result.stdout} stderr=${result.stderr}",
+            eventsJson.isNotBlank(),
+        )
+        val events = JSONArray(eventsJson)
+        assertConsoleEvent(events, "VERBOSE", "verbose-line 1")
+        assertConsoleEvent(events, "DEBUG", "debug-line 2")
+        assertConsoleEvent(events, "INFO", "info-line 3")
+        assertConsoleEvent(events, "WARN", "warn-line 4")
+        assertConsoleEvent(events, "ERROR", "error-line 5")
+        assertConsoleEvent(events, "ASSERT", "assert-line 6")
+        assertConsoleEvent(events, "DEBUG", "gradle")
+        assertFalse(embeddedConsoleEventsTruncated(result.nativeValues))
+    }
+
+    private fun embeddedConsoleEventsJson(nativeValues: Map<String, String>): String {
+        nativeValues["embedded_script.console_events_json"].takeUnless { it.isNullOrBlank() }?.let { return it }
+        val resultJson = nativeValues["embedded_script.result_json"].takeUnless { it.isNullOrBlank() }
+            ?: return ""
+        return JSONObject(resultJson).optString("consoleEventsJson")
+    }
+
+    private fun embeddedConsoleEventsTruncated(nativeValues: Map<String, String>): Boolean {
+        nativeValues["embedded_script.console_events_truncated"]?.toBooleanStrictOrNull()?.let { return it }
+        return JSONObject(nativeValues["embedded_script.result_json"].orEmpty()).optBoolean("consoleEventsTruncated")
+    }
+
+    private fun assertConsoleEvent(events: JSONArray, expectedLevel: String, expectedTextPart: String) {
+        for (index in 0 until events.length()) {
+            val event = events.optJSONObject(index) ?: continue
+            if (event.optString("level") == expectedLevel && event.optString("text").contains(expectedTextPart)) {
+                return
+            }
+        }
+        throw AssertionError("Missing console event level=$expectedLevel text=$expectedTextPart in $events")
     }
 
     @Test
@@ -11552,6 +11635,15 @@ class EmbeddedScriptMvpInstrumentationTest {
         } finally {
             scriptDir.deleteRecursively()
         }
+    }
+
+    private fun assertNodeScriptFileType(file: File, expectedType: FileUtils.TYPE) {
+        val actualType = FileUtils.TYPE.determineBy(file)
+        assertEquals(expectedType, actualType)
+        assertTrue(actualType.isExecutable())
+        assertTrue(actualType.isTextEditable())
+        assertEquals(ScriptFile.TYPE_JAVASCRIPT, ScriptFile(file).type)
+        assertEquals(JavaScriptSource.ENGINE_NODEJS, ScriptFile(file).toSource().engineName)
     }
 
     @Test

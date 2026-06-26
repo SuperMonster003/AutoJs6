@@ -188,6 +188,7 @@ object FileUtils {
      */
     internal object TypeDataHolder {
         val JAVASCRIPT = TypeData(IconData("J"), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
+        val NODE_JAVASCRIPT = TypeData(IconData("N"), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
         val AUTO = TypeData(IconData("R", toTop = 1), TYPE.IDENTITY_EXECUTABLE or TYPE.IDENTITY_TEXT_EDITABLE)
         val APK = TypeData(IconData("❖", size = 23, toTop = 1, toEnd = 0.5), TYPE.IDENTITY_INSTALLABLE)
         val APK_EXT = TypeData(APK.iconData)
@@ -267,6 +268,11 @@ object FileUtils {
         // 可执行脚本 (Executable script)
 
         JAVASCRIPT("js", TypeDataHolder.JAVASCRIPT),
+        NODE_JAVASCRIPT("node.js", TypeDataHolder.NODE_JAVASCRIPT),
+        MODULE_JAVASCRIPT("mjs", TypeDataHolder.NODE_JAVASCRIPT),
+        COMMONJS_JAVASCRIPT("cjs", TypeDataHolder.NODE_JAVASCRIPT),
+        MODULE_TYPESCRIPT("mts", TypeDataHolder.NODE_JAVASCRIPT),
+        COMMONJS_TYPESCRIPT("cts", TypeDataHolder.NODE_JAVASCRIPT),
         AUTO("auto", TypeDataHolder.AUTO),
 
         // 编程语言 (Programming language)
@@ -291,9 +297,6 @@ object FileUtils {
 
         /** React JavaScript file, used for React components with JavaScript. */
         REACT_JAVASCRIPT("jsx", TypeDataHolder.CODE),
-
-        /** ECMAScript Module, JavaScript module file. */
-        MODULE_JAVASCRIPT("mjs", TypeDataHolder.CODE),
 
         /** Embedded JavaScript templating file, used for HTML templates. */
         EJS("ejs", TypeDataHolder.CODE),

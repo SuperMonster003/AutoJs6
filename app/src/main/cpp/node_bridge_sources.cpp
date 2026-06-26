@@ -5649,10 +5649,121 @@ std::string buildEmbeddedScriptExecutionSource(
       return "";
     }
   }
-  function __autojs6_console_write(stream, values) {
-    if (!stream || typeof stream.write !== "function") return;
+  const __autojs6_console_level_verbose = "VERBOSE";
+  const __autojs6_console_level_debug = "DEBUG";
+  const __autojs6_console_level_info = "INFO";
+  const __autojs6_console_level_warn = "WARN";
+  const __autojs6_console_level_error = "ERROR";
+  const __autojs6_console_level_assert = "ASSERT";
+  const __autojs6_console_event_max_count = 512;
+  const __autojs6_console_event_text_max = 8192;
+  const __autojs6_console_events = [];
+  let __autojs6_console_events_truncated = false;
+  function __autojs6_console_record(level, text) {
+    if (__autojs6_console_events.length >= __autojs6_console_event_max_count) {
+      __autojs6_console_events_truncated = true;
+      return;
+    }
+    let eventText = "";
+    try {
+      eventText = String(text);
+    } catch (_) {
+      eventText = "";
+    }
+    if (eventText.length > __autojs6_console_event_text_max) {
+      eventText = eventText.slice(0, __autojs6_console_event_text_max);
+      __autojs6_console_events_truncated = true;
+    }
+    __autojs6_console_events.push({
+      level: level || __autojs6_console_level_debug,
+      text: eventText
+    });
+  }
+  function __autojs6_console_events_json() {
+    try {
+      return JSON.stringify(__autojs6_console_events);
+    } catch (_) {
+      return "[]";
+    }
+  }
+  function __autojs6_console_write(stream, values, level) {
     const text = Array.prototype.map.call(values, __autojs6_console_text).join(" ");
+    __autojs6_console_record(level || __autojs6_console_level_debug, text);
+    if (!stream || typeof stream.write !== "function") return;
     stream.write(text + "\n");
+  }
+  function __autojs6_console_assert_error(message) {
+    const error = new Error(message);
+    try {
+      error.name = "AssertionError";
+    } catch (_) {}
+    return error;
+  }
+  function __autojs6_console_cell_text(value) {
+    return __autojs6_console_text(value).replace(/\r/g, "\\r").replace(/\n/g, "\\n");
+  }
+  function __autojs6_console_pad_right(value, width) {
+    const text = String(value);
+    return text.length >= width ? text : text + " ".repeat(width - text.length);
+  }
+  function __autojs6_console_table_text(data, properties) {
+    const rows = [];
+    const columns = ["(index)"];
+    const requested = Array.isArray(properties)
+      ? properties.map(function (value) { return String(value); })
+      : null;
+    function addColumn(name) {
+      if (columns.indexOf(name) < 0) columns.push(name);
+    }
+    function addRow(index, value) {
+      const row = Object.create(null);
+      row["(index)"] = index;
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const keys = requested || Object.keys(value);
+        for (let i = 0; i < keys.length; i += 1) {
+          const key = String(keys[i]);
+          addColumn(key);
+          row[key] = value[key];
+        }
+      } else {
+        addColumn("Values");
+        row.Values = value;
+      }
+      rows.push(row);
+    }
+    if (Array.isArray(data)) {
+      for (let i = 0; i < data.length; i += 1) addRow(i, data[i]);
+    } else if (data && typeof data === "object") {
+      const keys = Object.keys(data);
+      for (let i = 0; i < keys.length; i += 1) addRow(keys[i], data[keys[i]]);
+    } else {
+      return __autojs6_console_text(data);
+    }
+    if (rows.length === 0) return "(empty)";
+    const widths = columns.map(function (column) { return column.length; });
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+      for (let columnIndex = 0; columnIndex < columns.length; columnIndex += 1) {
+        const column = columns[columnIndex];
+        const value = rows[rowIndex][column];
+        const text = value === undefined ? "" : __autojs6_console_cell_text(value);
+        widths[columnIndex] = Math.max(widths[columnIndex], text.length);
+      }
+    }
+    const separator = "+-" + widths.map(function (width) { return "-".repeat(width); }).join("-+-") + "-+";
+    const lines = [separator];
+    lines.push("| " + columns.map(function (column, index) {
+      return __autojs6_console_pad_right(column, widths[index]);
+    }).join(" | ") + " |");
+    lines.push(separator);
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+      lines.push("| " + columns.map(function (column, index) {
+        const value = rows[rowIndex][column];
+        const text = value === undefined ? "" : __autojs6_console_cell_text(value);
+        return __autojs6_console_pad_right(text, widths[index]);
+      }).join(" | ") + " |");
+    }
+    lines.push(separator);
+    return lines.join("\n");
   }
   const __autojs6_output_capture_text_max = 4096;
   const __autojs6_output_capture_state = {
@@ -5750,20 +5861,72 @@ std::string buildEmbeddedScriptExecutionSource(
       ? globalThis.console
       : {};
     const shim = Object.assign({}, existing);
-    shim.log = function () {
+    function write(level, stream, values) {
       __autojs6_console_write(
+        typeof process === "object" && process ? stream : null,
+        values,
+        level
+      );
+    }
+    shim.log = function () {
+      write(
+        __autojs6_console_level_debug,
         typeof process === "object" && process ? process.stdout : null,
         arguments
       );
     };
-    shim.info = shim.log;
+    shim.debug = shim.log;
+    shim.verbose = function () {
+      write(
+        __autojs6_console_level_verbose,
+        typeof process === "object" && process ? process.stdout : null,
+        arguments
+      );
+    };
+    shim.info = function () {
+      write(
+        __autojs6_console_level_info,
+        typeof process === "object" && process ? process.stdout : null,
+        arguments
+      );
+    };
     shim.error = function () {
-      __autojs6_console_write(
+      write(
+        __autojs6_console_level_error,
         typeof process === "object" && process ? process.stderr : null,
         arguments
       );
     };
-    shim.warn = shim.error;
+    shim.warn = function () {
+      write(
+        __autojs6_console_level_warn,
+        typeof process === "object" && process ? process.stderr : null,
+        arguments
+      );
+    };
+    shim.assert = function (value) {
+      if (value) return undefined;
+      const output = [];
+      for (let i = 1; i < arguments.length; i += 1) {
+        output.push(arguments[i]);
+      }
+      if (output.length === 0) output.push("");
+      write(
+        __autojs6_console_level_assert,
+        typeof process === "object" && process ? process.stderr : null,
+        output
+      );
+      throw __autojs6_console_assert_error(
+        output.map(__autojs6_console_text).join(" ")
+      );
+    };
+    shim.table = function (tabularData, properties) {
+      write(
+        __autojs6_console_level_debug,
+        typeof process === "object" && process ? process.stdout : null,
+        [__autojs6_console_table_text(tabularData, properties)]
+      );
+    };
     globalThis.console = shim;
   }
   function __autojs6_define_global(name, value) {
@@ -38462,23 +38625,48 @@ std::string buildEmbeddedScriptExecutionSource(
       }
       return consoleStates.get(receiver);
     }
-    function consoleWrite(state, streamName, values) {
-      __autojs6_console_write(streamName === "stderr" ? state.stderr : state.stdout, values);
+    function consoleWrite(state, streamName, values, level) {
+      __autojs6_console_write(
+        streamName === "stderr" ? state.stderr : state.stdout,
+        values,
+        level || (streamName === "stderr" ? __autojs6_console_level_error : __autojs6_console_level_debug)
+      );
       return undefined;
     }
     function consoleLog() {
-      return consoleWrite(consoleState(this), "stdout", arguments);
+      return consoleWrite(consoleState(this), "stdout", arguments, __autojs6_console_level_debug);
+    }
+    function consoleInfo() {
+      return consoleWrite(consoleState(this), "stdout", arguments, __autojs6_console_level_info);
+    }
+    function consoleVerbose() {
+      return consoleWrite(consoleState(this), "stdout", arguments, __autojs6_console_level_verbose);
     }
     function consoleError() {
-      return consoleWrite(consoleState(this), "stderr", arguments);
+      return consoleWrite(consoleState(this), "stderr", arguments, __autojs6_console_level_error);
+    }
+    function consoleWarn() {
+      return consoleWrite(consoleState(this), "stderr", arguments, __autojs6_console_level_warn);
     }
     function consoleAssert(value) {
       if (value) return undefined;
-      const output = arguments.length > 1 ? ["Assertion failed:"] : ["Assertion failed"];
+      const output = [];
       for (let i = 1; i < arguments.length; i += 1) {
         output.push(arguments[i]);
       }
-      return consoleWrite(consoleState(this), "stderr", output);
+      if (output.length === 0) output.push("");
+      consoleWrite(consoleState(this), "stderr", output, __autojs6_console_level_assert);
+      throw __autojs6_console_assert_error(
+        output.map(__autojs6_console_text).join(" ")
+      );
+    }
+    function consoleTable(tabularData, properties) {
+      return consoleWrite(
+        consoleState(this),
+        "stdout",
+        [__autojs6_console_table_text(tabularData, properties)],
+        __autojs6_console_level_debug
+      );
     }
     function consoleCount(label) {
       const state = consoleState(this);
@@ -38589,13 +38777,14 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     Object.defineProperties(Console.prototype, {
       log: { value: consoleLog, enumerable: true },
-      info: { value: consoleLog, enumerable: true },
+      info: { value: consoleInfo, enumerable: true },
       debug: { value: consoleLog, enumerable: true },
       dir: { value: consoleLog, enumerable: true },
       dirxml: { value: consoleLog, enumerable: true },
-      table: { value: consoleLog, enumerable: true },
+      table: { value: consoleTable, enumerable: true },
       error: { value: consoleError, enumerable: true },
-      warn: { value: consoleError, enumerable: true },
+      warn: { value: consoleWarn, enumerable: true },
+      verbose: { value: consoleVerbose, enumerable: true },
       assert: { value: consoleAssert, enumerable: true },
       count: { value: consoleCount, enumerable: true },
       countReset: { value: consoleCountReset, enumerable: true },
@@ -38717,7 +38906,7 @@ std::string buildEmbeddedScriptExecutionSource(
       timeLog: { value: defaultMethod("timeLog"), enumerable: true },
       timeStamp: { value: defaultMethod("clear"), enumerable: true },
       trace: { value: defaultMethod("trace"), enumerable: true },
-      verbose: { value: defaultMethod("debug"), enumerable: true },
+      verbose: { value: defaultMethod("verbose"), enumerable: true },
       warn: { value: defaultMethod("warn"), enumerable: true }
     });
     __autojs6_limited_console_cache = Object.freeze(limitedConsole);
@@ -44890,6 +45079,9 @@ std::string buildEmbeddedScriptExecutionSource(
     fields.stderrBytes = __autojs6_output_capture_state.stderrBytes;
     fields.stdoutTruncated = __autojs6_output_capture_state.stdoutTruncated;
     fields.stderrTruncated = __autojs6_output_capture_state.stderrTruncated;
+    fields.consoleEventsJson = __autojs6_console_events_json();
+    fields.consoleEventCount = __autojs6_console_events.length;
+    fields.consoleEventsTruncated = __autojs6_console_events_truncated;
     fields.chdirFailureReason = __autojs6_chdir_last_failure_reason;
     fields.createRequireFailureReason = __autojs6_create_require_last_failure_reason;
     fields.nodeVersion = __autojs6_node_version();
