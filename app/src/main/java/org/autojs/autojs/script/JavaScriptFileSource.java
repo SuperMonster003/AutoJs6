@@ -126,7 +126,7 @@ public class JavaScriptFileSource extends JavaScriptSource {
     }
 
     private boolean isNodeJsExtension() {
-        return JavaScriptSource.isNodeJsFileName(mFile.getName());
+        return JavaScriptSource.isNodeJsFileName(getSemanticFile().getName());
     }
 
     private boolean isNodeProjectType() {
@@ -164,7 +164,7 @@ public class JavaScriptFileSource extends JavaScriptSource {
             return mNearestProjectConfigFile;
         }
         mNearestProjectConfigFileResolved = true;
-        File dir = mFile.getParentFile();
+        File dir = getSemanticFile().getParentFile();
         while (dir != null) {
             File projectConfig = new File(dir, PROJECT_CONFIG_NAME);
             if (projectConfig.isFile()) {
@@ -173,5 +173,14 @@ public class JavaScriptFileSource extends JavaScriptSource {
             dir = dir.getParentFile();
         }
         return null;
+    }
+
+    @NonNull
+    private File getSemanticFile() {
+        String overridden = getOverriddenFullPath();
+        if (overridden != null && !overridden.isBlank()) {
+            return new File(overridden);
+        }
+        return mFile;
     }
 }

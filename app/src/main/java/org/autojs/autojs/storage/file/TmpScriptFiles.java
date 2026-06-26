@@ -19,8 +19,12 @@ public class TmpScriptFiles {
     public static final String RHINO_TMP_SCRIPTS_DIR_NAME = "tmp-scripts/";
 
     public static File create(Context context) throws IOException {
+        return create(context, JAVASCRIPT.extensionWithDot);
+    }
+
+    public static File create(Context context, String extensionWithDot) throws IOException {
         ensureTmpDir(context);
-        File tmp = new File(getTmpDir(context), "tmp-" + System.currentTimeMillis() + JAVASCRIPT.extensionWithDot);
+        File tmp = new File(getTmpDir(context), "tmp-" + System.currentTimeMillis() + sanitizeExtension(extensionWithDot));
         tmp.createNewFile();
         return tmp;
     }
@@ -48,6 +52,17 @@ public class TmpScriptFiles {
         if (!dir.exists()) {
             dir.mkdirs();
         }
+    }
+
+    private static String sanitizeExtension(String extensionWithDot) {
+        if (extensionWithDot == null || extensionWithDot.isBlank()) {
+            return JAVASCRIPT.extensionWithDot;
+        }
+        String extension = extensionWithDot.startsWith(".") ? extensionWithDot : "." + extensionWithDot;
+        if (extension.indexOf('/') >= 0 || extension.indexOf('\\') >= 0 || extension.indexOf('\0') >= 0) {
+            return JAVASCRIPT.extensionWithDot;
+        }
+        return extension;
     }
 
 }

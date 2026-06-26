@@ -1800,6 +1800,10 @@ open class NativeNodeEmbeddedScriptService : Service() {
             "stderr_capture.text.hex",
         )
         private val RESULT_TRANSPORT_NATIVE_PAYLOAD_PRIORITY_KEYS = listOf(
+            "embedded_script.source_name",
+            "embedded_script.current_working_directory",
+            "embedded_script.esm_entry",
+            "embedded_script.esm_module_graph_root",
             "embedded_script.console_events_json",
             "embedded_script.console_event_count",
             "embedded_script.console_events_truncated",

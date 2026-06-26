@@ -60,6 +60,7 @@ import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.pio.PFiles.write
+import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.storage.file.StableDraftFileHelper
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.storage.history.HistoryPrefs
@@ -2730,11 +2731,25 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @SuppressLint("CheckResult")
     private fun saveToTmpFile(): Observable<File> {
         return Observable.fromCallable {
-            TmpScriptFiles.create(context).also {
+            TmpScriptFiles.create(context, temporaryScriptExtensionWithDot()).also {
                 write(it, editor.text)
                 mTmpSavedFileForRunning = it
             }
         }.observeOn(Schedulers.io())
+    }
+
+    private fun temporaryScriptExtensionWithDot(): String {
+        val fileName = uri?.path
+            ?.let { File(it).name }
+            ?.takeIf { it.isNotBlank() }
+            ?: return ".js"
+        if (fileName.endsWith(".node.js", ignoreCase = true)) {
+            return ".node.js"
+        }
+        if (!JavaScriptSource.isJavaScriptFileName(fileName)) {
+            return ".js"
+        }
+        return "." + fileName.substringAfterLast('.', "js")
     }
 
     fun cleanBeforeExit() {

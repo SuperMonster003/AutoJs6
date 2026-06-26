@@ -497,6 +497,8 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
             ?.normalizedCanonicalFile()
             ?.takeIf { it.isFile && it.isInsideOrSame(root) }
             ?: (source as? JavaScriptFileSource)?.file
+                ?.normalizedCanonicalFile()
+                ?.takeIf { it.isFile && it.isInsideOrSame(root) }
             ?: File(sourceName).takeIf { it.isAbsolute && it.isFile && it.isInsideOrSame(root) }
             ?: return emptyMap()
         val excluded = moduleSources.keys.toMutableSet()
@@ -1047,6 +1049,9 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     }
 
     private fun sourceName(source: JavaScriptSource): String {
+        source.semanticFileFromOverriddenFullPath()?.normalizedAbsolutePath()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return it }
         (source as? JavaScriptFileSource)?.file?.normalizedAbsolutePath()
             ?.takeIf { it.isNotBlank() }
             ?.let { return it }
@@ -1056,11 +1061,23 @@ class NativeNodeEmbeddedJavaScriptEngine(private val androidContext: Context) : 
     }
 
     private fun workingDirectory(source: JavaScriptSource): String? {
+        source.semanticFileFromOverriddenFullPath()
+            ?.parentFile
+            ?.normalizedAbsolutePath()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return it }
+        cwd().takeUnless { it.isNullOrBlank() }?.let { return it }
         val file = (source as? JavaScriptFileSource)?.file
         file?.parentFile?.normalizedAbsolutePath()?.takeIf { it.isNotBlank() }?.let { return it }
-        cwd().takeUnless { it.isNullOrBlank() }?.let { return it }
         return source.fullPath.takeIf { it.isNotBlank() }
             ?.let { runCatching { File(it).parentFile?.absolutePath }.getOrNull() }
+    }
+
+    private fun JavaScriptSource.semanticFileFromOverriddenFullPath(): File? {
+        return overriddenFullPath
+            ?.takeIf { it.isNotBlank() }
+            ?.let { File(it) }
+            ?.takeIf { it.isAbsolute }
     }
 
     private fun File.normalizedAbsolutePath(): String {

@@ -112,6 +112,16 @@ class EmbeddedScriptMvpInstrumentationTest {
             assertEquals(JavaScriptSource.ENGINE, JavaScriptFileSource(rhinoJs).engineName)
             assertEquals(projectDir.canonicalFile, JavaScriptFileSource(projectMain).nodeProjectRoot)
             assertEquals(null, JavaScriptFileSource(rhinoJs).nodeProjectRoot)
+            val editorTmpJs = File(scriptDir, "tmp-editor.js").apply { writeText("console.log('editor tmp');") }
+            val editorTmpMjsSource = JavaScriptFileSource(editorTmpJs).apply {
+                overriddenFullPath = mjs.absolutePath
+            }
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, editorTmpMjsSource.engineName)
+            val editorTmpProjectSource = JavaScriptFileSource(editorTmpJs).apply {
+                overriddenFullPath = projectMain.absolutePath
+            }
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, editorTmpProjectSource.engineName)
+            assertEquals(projectDir.canonicalFile, editorTmpProjectSource.nodeProjectRoot)
             assertNodeScriptFileType(mjs, FileUtils.TYPE.MODULE_JAVASCRIPT)
             assertNodeScriptFileType(cjs, FileUtils.TYPE.COMMONJS_JAVASCRIPT)
             assertNodeScriptFileType(mts, FileUtils.TYPE.MODULE_TYPESCRIPT)
@@ -228,6 +238,49 @@ class EmbeddedScriptMvpInstrumentationTest {
             }
         }
         throw AssertionError("Missing console event level=$expectedLevel text=$expectedTextPart in $events")
+    }
+
+    @Test
+    fun editorTemporaryMjsSourceUsesOriginalPathAndWorkingDirectory() {
+        assumeEmbeddedScriptExecutionEnabled()
+
+        val workDir = File(context.cacheDir, "embedded-node-editor-mjs-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create editor mjs work dir: $absolutePath" }
+        }
+        val tempDir = File(context.cacheDir, "embedded-node-editor-tmp-${System.nanoTime()}").apply {
+            check(mkdirs()) { "Failed to create editor temp dir: $absolutePath" }
+        }
+        try {
+            val original = File(workDir, "editor-main.mjs").apply {
+                writeText("// original editor path placeholder\n")
+            }
+            File(workDir, "dep.mjs").writeText("""export const label = "from-workdir";""")
+            val temp = File(tempDir, "tmp-editor.mjs").apply {
+                writeText(
+                    """
+                    import { label } from "./dep.mjs";
+                    console.log("editor.temp.mjs=" + label);
+                    """.trimIndent(),
+                )
+            }
+            val source = JavaScriptFileSource(temp).apply {
+                overriddenFullPath = original.absolutePath
+            }
+            assertEquals(JavaScriptSource.ENGINE_NODEJS, source.engineName)
+
+            val engine = NativeNodeEmbeddedJavaScriptEngine(context).apply {
+                setTag(ScriptEngine.TAG_WORKING_DIRECTORY, workDir.canonicalPath)
+            }
+            assertEquals(0, engine.doExecution(source))
+            val nativeValues = engine.lastEmbeddedScriptResultNativeValues
+            assertEquals(original.canonicalPath, nativeValues["embedded_script.source_name"])
+            assertEquals(workDir.canonicalPath, nativeValues["embedded_script.current_working_directory"])
+            assertEquals("true", nativeValues["embedded_script.esm_entry"])
+            assertEquals(original.canonicalPath, nativeValues["embedded_script.esm_module_graph_root"])
+        } finally {
+            tempDir.deleteRecursively()
+            workDir.deleteRecursively()
+        }
     }
 
     @Test
