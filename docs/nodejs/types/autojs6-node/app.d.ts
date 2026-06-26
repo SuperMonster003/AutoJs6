@@ -60,6 +60,7 @@ declare module "app" {
       readonly versionName: string;
       readonly versionCode: number;
       intent(request: IntentRequest): IntentDescriptor;
+      intentToShell(request: IntentRequest | IntentDescriptor): string;
       openUrl(url: string, options?: AutoJs6Node.BridgeCallOptions): Promise<void>;
       sendEmail(request: SendEmailRequest | EmailAddressList, options?: AutoJs6Node.BridgeCallOptions & Partial<SendEmailRequest>): Promise<void>;
       launchPackage(packageName: string, options?: AutoJs6Node.BridgeCallOptions): Promise<boolean>;

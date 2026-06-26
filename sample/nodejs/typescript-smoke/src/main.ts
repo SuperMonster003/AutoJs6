@@ -73,6 +73,7 @@ async function smoke(): Promise<void> {
     flags: [0x10000000],
     extras: { source: "typescript-smoke", retry: 1, active: true, tags: ["node", "app"] }
   });
+  const shellIntent: string = app.intentToShell(viewIntent);
   await app.startActivity(viewIntent, { timeoutMs: 1000 });
   await app.startActivity("https://example.invalid", { timeoutMs: 1000 });
   await app.openUrl("example.invalid/path", { timeoutMs: 1000 });
@@ -126,6 +127,7 @@ async function smoke(): Promise<void> {
     url: "https://example.invalid",
     categories: "BROWSABLE"
   });
+  const compatShellIntent: string = rhinoCompat.app.intentToShell(compatIntent);
   await rhinoCompat.app.openUrl("https://example.invalid", { timeoutMs: 1000 });
   const compatBroadcastDenied: Promise<never> = rhinoCompat.app.sendBroadcast("inspect_layout_bounds", { timeoutMs: 1000 });
   const compatScreenOn: boolean = await rhinoCompat.device.isScreenOn({ timeoutMs: 1000 });
@@ -802,8 +804,10 @@ async function smoke(): Promise<void> {
   void launched;
   void launchByName;
   void viewIntent;
+  void shellIntent;
   void broadcastDenied;
   void compatIntent;
+  void compatShellIntent;
   void compatBroadcastDenied;
   void confirmed;
   void input;

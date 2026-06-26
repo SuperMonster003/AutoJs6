@@ -23,6 +23,9 @@ P13-23 extends the existing Node `app` module without promoting the full Rhino
   `app.launchSettings()`, and `app.launchAppDetailsSettings()` now reuse the
   existing scoped `startActivity` / settings bridge methods instead of adding a
   new Android authority surface.
+- `app.intentToShell()` serializes the same JSON-safe descriptors into `am`
+  intent arguments for migration scripts. It is a pure helper and does not
+  execute shell commands or dispatch Android bridge requests.
 - `app.sendBroadcast()` is present only as a stable rejection stub. It does not
   dispatch to the bridge and does not register, send, or receive Android
   broadcasts.
@@ -64,6 +67,8 @@ No raw Android `Intent`, `Uri`, `Bundle`, `ComponentName`, `PackageManager`,
   `editFile`, `uninstall`, `kill`, `getPackageName`, `getAppName`, preset app
   aliases, and dual-app helpers.
 - Activity short-form mapping beyond URL strings and JSON-safe descriptors.
+- Root/Shizuku examples that combine `app.intentToShell()` with explicit
+  P13-24 shell capabilities.
 - Broadcast send promotion with receiver authority, exported/non-exported
   policy, manifest synthesis, user disclosure, rate limits, and packaged smoke.
 - root/Shizuku/dual-user routes through explicit P13-24 capability surfaces.

@@ -52,8 +52,9 @@
   parsing, and stable `app.sendBroadcast()` rejection.
 - Follow-up helper parity records short `action`/`category` normalization,
   `url` descriptor aliases, URL string `app.startActivity()` input,
-  `app.openUrl()`, `app.sendEmail()`, and settings aliases backed by the
-  existing scoped activity/settings bridge.
+  pure `app.intentToShell()` shell-argument serialization, `app.openUrl()`,
+  `app.sendEmail()`, and settings aliases backed by the existing scoped
+  activity/settings bridge.
 - Host verifier:
   `tools/nodejs/phase13/verify-app-intent-broadcast-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13AppIntentBroadcastParity`.

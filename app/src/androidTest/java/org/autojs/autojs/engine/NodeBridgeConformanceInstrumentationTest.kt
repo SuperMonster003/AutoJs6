@@ -456,7 +456,7 @@ class NodeBridgeConformanceInstrumentationTest {
               ].forEach(([name, moduleValue]) => expectFrozen(name, moduleValue));
 
               expectExports("toast", toast, ["showToast", "toast"]);
-              expectExports("app", app, ["intent", "launchPackage", "launchApp", "openAppSetting", "startActivity", "sendBroadcast"]);
+              expectExports("app", app, ["intent", "intentToShell", "openUrl", "sendEmail", "launchPackage", "launchApp", "openAppSetting", "openAppSettings", "launchSettings", "launchAppDetailsSettings", "startActivity", "sendBroadcast"]);
               expectExports("dialogs", dialogs, ["alert", "confirm", "input", "prompt", "select"]);
               expectExports("clipboard", clipboard, ["getText", "setText", "hasText"]);
               expectExports("device", device, ["isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings"]);
@@ -593,6 +593,19 @@ class NodeBridgeConformanceInstrumentationTest {
               assert.strictEqual(viewIntent.data, "http://example.com");
               assert.deepStrictEqual(viewIntent.categories, ["android.intent.category.BROWSABLE", "android.intent.category.DEFAULT"]);
               assert.strictEqual(viewIntent.flags, 0x10000020);
+              const beforeIntentToShell = requests.length;
+              const shellIntent = app.intentToShell(viewIntent);
+              assert.strictEqual(typeof shellIntent, "string");
+              assert(shellIntent.includes("-a 'android.intent.action.VIEW'"), shellIntent);
+              assert(shellIntent.includes("-d 'http://example.com'"), shellIntent);
+              assert(shellIntent.includes("-c 'android.intent.category.BROWSABLE'"), shellIntent);
+              assert(shellIntent.includes("-c 'android.intent.category.DEFAULT'"), shellIntent);
+              assert(shellIntent.includes("-f 268435488"), shellIntent);
+              assert(shellIntent.includes("--es 'source' 'conformance'"), shellIntent);
+              assert(shellIntent.includes("--ei 'retry' 2"), shellIntent);
+              assert(shellIntent.includes("--ez 'enabled' true"), shellIntent);
+              assert(shellIntent.includes("--esa 'labels' 'node,intent'"), shellIntent);
+              assert.strictEqual(requests.length, beforeIntentToShell, "app.intentToShell must not dispatch bridge requests");
               await expectPromise("app.startActivity", app.startActivity(viewIntent, { timeoutMs: 1015 }));
               await expectPromise("app.startActivity.url", app.startActivity("https://example.com/path", { timeoutMs: 1016 }));
               await expectPromise("app.openUrl", app.openUrl("example.com/docs", { timeoutMs: 1017 }));

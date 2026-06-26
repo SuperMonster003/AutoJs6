@@ -21623,6 +21623,101 @@ std::string buildEmbeddedScriptExecutionSource(
       extras: extras
     }, methodName);
   }
+  function __autojs6_app_shell_quote(value) {
+    return "'" + String(value).replace(/'/g, "'\\''") + "'";
+  }
+  function __autojs6_app_shell_array_value(value) {
+    return String(value).replace(/\\/g, "\\\\").replace(/,/g, "\\,");
+  }
+  function __autojs6_app_shell_join_array(values) {
+    return values.map(__autojs6_app_shell_array_value).join(",");
+  }
+  function __autojs6_app_shell_number_type(value) {
+    if (Number.isInteger(value)) {
+      return value >= -2147483648 && value <= 2147483647 ? "i" : "l";
+    }
+    return "f";
+  }
+  function __autojs6_app_shell_number_array_type(values) {
+    let allInt32 = true;
+    let allInteger = true;
+    values.forEach(function(value) {
+      if (!Number.isInteger(value)) {
+        allInt32 = false;
+        allInteger = false;
+      } else if (value < -2147483648 || value > 2147483647) {
+        allInt32 = false;
+      }
+    });
+    return allInt32 ? "ia" : allInteger ? "la" : "fa";
+  }
+  function __autojs6_app_shell_extra_option(value, methodName, key) {
+    if (value === null) {
+      return "esn";
+    }
+    if (typeof value === "string") {
+      return "es";
+    }
+    if (typeof value === "boolean") {
+      return "ez";
+    }
+    if (typeof value === "number") {
+      return "e" + __autojs6_app_shell_number_type(value);
+    }
+    if (Array.isArray(value)) {
+      if (value.length === 0 || typeof value[0] === "string") {
+        return "esa";
+      }
+      if (typeof value[0] === "boolean") {
+        return "eza";
+      }
+      if (typeof value[0] === "number") {
+        return "e" + __autojs6_app_shell_number_array_type(value);
+      }
+    }
+    __autojs6_app_intent_error(methodName, "app." + methodName + " extras." + key + " cannot be converted to shell intent arguments.");
+  }
+  function __autojs6_app_intent_to_shell(descriptor, methodName) {
+    const parts = [];
+    const component = descriptor.component ||
+      (descriptor.packageName && descriptor.className ? descriptor.packageName + "/" + descriptor.className : "") ||
+      (descriptor.className || "");
+    if (component) {
+      parts.push("-n", __autojs6_app_shell_quote(component));
+    } else if (descriptor.packageName) {
+      parts.push("-p", __autojs6_app_shell_quote(descriptor.packageName));
+    }
+    if (descriptor.extras) {
+      Object.keys(descriptor.extras).forEach(function(key) {
+        const value = descriptor.extras[key];
+        const option = __autojs6_app_shell_extra_option(value, methodName, key);
+        if (option === "esn") {
+          parts.push("--" + option, __autojs6_app_shell_quote(key));
+        } else if (Array.isArray(value)) {
+          parts.push("--" + option, __autojs6_app_shell_quote(key), __autojs6_app_shell_quote(__autojs6_app_shell_join_array(value)));
+        } else {
+          const shellValue = typeof value === "string" ? __autojs6_app_shell_quote(value) : String(value);
+          parts.push("--" + option, __autojs6_app_shell_quote(key), shellValue);
+        }
+      });
+    }
+    (descriptor.categories || []).forEach(function(category) {
+      parts.push("-c", __autojs6_app_shell_quote(category));
+    });
+    if (descriptor.action) {
+      parts.push("-a", __autojs6_app_shell_quote(descriptor.action));
+    }
+    if (descriptor.flags !== undefined) {
+      parts.push("-f", String(descriptor.flags));
+    }
+    if (descriptor.type) {
+      parts.push("-t", __autojs6_app_shell_quote(descriptor.type));
+    }
+    if (descriptor.data) {
+      parts.push("-d", __autojs6_app_shell_quote(descriptor.data));
+    }
+    return parts.join(" ");
+  }
   function __autojs6_app_send_broadcast_unavailable_error() {
     return __autojs6_bridge_error(
       "app.sendBroadcast is not available in the Node.js engine yet; P13-23 keeps broadcast send APIs blocked until receiver authority, manifest policy, and root/Shizuku separation are complete.",
@@ -21638,6 +21733,12 @@ std::string buildEmbeddedScriptExecutionSource(
     const info = __autojs6_host_app_info();
     function intent(options) {
       return __autojs6_app_normalize_intent_descriptor(options, "intent");
+    }
+    function intentToShell(options) {
+      return __autojs6_app_intent_to_shell(
+        __autojs6_app_normalize_intent_descriptor(options, "intentToShell"),
+        "intentToShell"
+      );
     }
     function openUrl(url, options) {
       let descriptor;
@@ -21754,6 +21855,7 @@ std::string buildEmbeddedScriptExecutionSource(
       versionName: info.versionName,
       versionCode: info.versionCode,
       intent,
+      intentToShell,
       openUrl,
       sendEmail,
       launchPackage,
