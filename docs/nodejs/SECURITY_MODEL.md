@@ -298,16 +298,18 @@ See `docs/nodejs/design/WEBSOCKET.md`.
 autojs.nodejs.worker_threads.experimental=false
 ```
 
-With the flag off, `require("worker_threads")` and `require("node:worker_threads")` reject with the disabled-builtin error shape. A local `node_modules/worker_threads` package must not shadow that denial.
+With the flag off, `require("worker_threads")` rejects with the disabled-builtin error shape. `require("node:worker_threads")` exposes only a shape-only npm compatibility facade: `MessageChannel` / `MessagePort` are local compatibility objects, `Worker` construction creates an inert disabled worker, and worker execution or `postMessage()` rejects with `ERR_AUTOJS6_WORKER_DISABLED`. A local `node_modules/worker_threads` package must not shadow the bare-module denial.
 
 With the experimental request flag on, the bootstrap first checks whether the
 Embedded Node build exposes a usable native `worker_threads` module. If it does
-not, the request fails closed with `ERR_AUTOJS6_WORKER_DISABLED`, zero active
-workers, and no same-thread fallback. When native workers are available, workers
-are pure JavaScript compute workers with a smaller capability set than the
-parent script. Worker source is resolved and read by the parent scoped resolver,
-then executed through a worker-local restricted `require`. Worker scripts must
-not access:
+not, `require("worker_threads")` and `require("node:worker_threads")` fall back
+to the same shape-only facade with `nativeAvailable=false`; `Worker`
+construction remains inert, `postMessage()` rejects with
+`ERR_AUTOJS6_WORKER_DISABLED`, active-worker diagnostics stay at zero, and there
+is no same-thread fallback. When native workers are available, workers are pure
+JavaScript compute workers with a smaller capability set than the parent script.
+Worker source is resolved and read by the parent scoped resolver, then executed
+through a worker-local restricted `require`. Worker scripts must not access:
 
 - AutoJs bridge modules or `autojs6:bridge`
 - Android `Context`

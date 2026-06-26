@@ -1173,7 +1173,8 @@ With the flag off:
 - `require("worker_threads")` rejects with disabled-builtin error shape
 - `require("node:worker_threads")` exposes a shape-only npm compatibility
   facade for feature detection and packages such as `jsdom`; `Worker`
-  construction still rejects with `ERR_AUTOJS6_WORKER_DISABLED`
+  construction returns an inert disabled worker object, while `postMessage()`
+  and heap snapshot operations reject with `ERR_AUTOJS6_WORKER_DISABLED`
 - `require.resolve("worker_threads")` rejects before a local `node_modules/worker_threads` package can shadow the builtin
 - no worker can access AutoJs bridge modules, Android Context, accessibility, media projection, image handles, shell, engines, raw network, child process, native addon, `vm`, inspector, or unrestricted filesystem APIs
 
@@ -1184,7 +1185,12 @@ Current `verifyNodeWorkerGate` normal builds also run
 default denial, shadowing protection, and request-local experimental preflight.
 On the current Embedded Node build, that preflight reports
 `ERR_AUTOJS6_WORKER_DISABLED`, `embedded_script.worker_active_count=0`, and no
-same-thread fallback.
+same-thread fallback. If the experimental request flag is on but the native
+`worker_threads` surface is unavailable, `require("worker_threads")` and
+`require("node:worker_threads")` return the same shape-only facade with
+`nativeAvailable=false` so npm packages can finish top-level feature detection;
+actual worker execution and `postMessage()` still reject with
+`ERR_AUTOJS6_WORKER_DISABLED`.
 
 When the experimental request flag is enabled in a build that exposes native `worker_threads`, the intended limited module
 for local worker scripts inside `workingDirectory` is:

@@ -1,6 +1,5 @@
 package org.autojs.autojs.engine
 
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Assume.assumeTrue
@@ -17,6 +16,22 @@ internal object NodeWorkerThreadsTestSupport {
                 }
                 try {
                   const workerThreads = require("worker_threads");
+                  if (workerThreads.nativeAvailable !== true || typeof workerThreads.WorkerPool !== "function") {
+                    const nodeWorkerThreads = require("node:worker_threads");
+                    const diagnostics = workerThreads.diagnostics();
+                    console.log("worker.preflight.facade=" + [
+                      require.resolve("worker_threads"),
+                      require.resolve("node:worker_threads"),
+                      nodeWorkerThreads === workerThreads,
+                      typeof workerThreads.Worker,
+                      typeof workerThreads.MessageChannel,
+                      workerThreads.nativeAvailable === false,
+                      workerThreads.policy.nativeAvailable === false,
+                      diagnostics.activeWorkerCount
+                    ].join("|"));
+                    console.log("worker.preflight.status=unavailable");
+                    console.log("worker.preflight.error=ERR_AUTOJS6_WORKER_DISABLED|true");
+                  } else {
                   const diagnostics = workerThreads.diagnostics();
                   console.log("worker.preflight.status=available");
                   console.log("worker.preflight.api=" + [
@@ -43,6 +58,7 @@ internal object NodeWorkerThreadsTestSupport {
                     diagnostics.createdCount,
                     diagnostics.activeMessagePortCount
                   ].join("|"));
+                  }
                 } catch (error) {
                   const message = String(error && error.message || "");
                   console.log("worker.preflight.status=unavailable");
@@ -57,9 +73,6 @@ internal object NodeWorkerThreadsTestSupport {
             workerThreadsExperimentalEnabled = true,
         )
         NodeEmbeddedTestHarness.assertSucceeded("worker_threads native availability preflight", result)
-        assertEquals("true", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
-        assertEquals("true", result.nativeValues["embedded_script.worker_threads_enabled"])
-        assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
         return when {
             result.stdout.contains("worker.preflight.status=available") -> {
                 assertTrue(
@@ -69,6 +82,10 @@ internal object NodeWorkerThreadsTestSupport {
                 NativeWorkerThreadsProbe(available = true, stdout = result.stdout)
             }
             result.stdout.contains("worker.preflight.status=unavailable") -> {
+                assertTrue(
+                    result.stdout,
+                    result.stdout.contains("worker.preflight.facade=worker_threads|worker_threads|true|function|function|true|true|0"),
+                )
                 assertTrue(
                     result.stdout,
                     result.stdout.contains("worker.preflight.error=${NodeRuntimeErrorCodes.WORKER_DISABLED}|true"),

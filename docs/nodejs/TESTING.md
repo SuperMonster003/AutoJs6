@@ -1734,14 +1734,16 @@ Current `worker_threads` bootstrap/design gate focused instrumentation:
 
 This suite runs `NodeWorkerThreadsBootstrapInstrumentationTest` and
 `NodeWorkerThreadsDesignGateInstrumentationTest` in normal builds. It verifies
-request-local default denial, JavaScript profile flags, bare and `node:`
-`worker_threads` denial, `require.resolve("worker_threads")` denial before
+request-local default denial, JavaScript profile flags, bare
+`worker_threads` denial, default `node:worker_threads` shape-only facade with
+inert disabled `Worker`, `require.resolve("worker_threads")` denial before
 `node_modules/worker_threads` shadowing, frozen profile flags, and the
 request-local experimental preflight. The preflight must report either a usable
 native Worker bootstrap surface (`Worker`, `isMainThread`, `parentPort`,
 `workerData`, `threadId`, `MessageChannel`, `MessagePort`, bounded messaging
 policy, diagnostics) or stable
-`ERR_AUTOJS6_WORKER_DISABLED` diagnostics with zero active workers.
+`ERR_AUTOJS6_WORKER_DISABLED` diagnostics with `nativeAvailable=false` and zero
+active workers.
 
 Task 122 GA evaluation report: [reports/WORKER_EXPERIMENTAL_EVALUATION.md](reports/WORKER_EXPERIMENTAL_EVALUATION.md).
 
@@ -2613,7 +2615,7 @@ Every release candidate should cover these classes of denial:
 - static ESM import
 - dynamic import
 - `autojs.nodejs.esm.experimental=true` keeps `.mjs` enabled by default; explicit ESM-off requests still reject
-- `autojs.nodejs.worker_threads.experimental=false` keeps worker threads rejected by default
+- `autojs.nodejs.worker_threads.experimental=false` keeps worker execution rejected by default while preserving the `node:worker_threads` shape-only npm facade
 - absolute filesystem paths
 - `..` filesystem escape
 - NUL byte paths

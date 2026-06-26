@@ -40,7 +40,7 @@ availability in the current Embedded Node build:
 
 ```text
 ERR_AUTOJS6_WORKER_DISABLED
-AutoJs6 experimental worker_threads is unavailable in this Embedded Node build.
+worker_threads native surface unavailable; shape-only facade reports nativeAvailable=false.
 ```
 
 This means `worker_threads` should remain an internal unblock/debug gate, not a
@@ -53,8 +53,10 @@ S7-24 adds `NodeWorkerThreadsBootstrapInstrumentationTest` and changes the
 focused worker gate contract: normal builds verify default denial and
 request-local native availability preflight; experimental builds skip runnable
 creation/stress promotion tests when that preflight reports
-`ERR_AUTOJS6_WORKER_DISABLED`, instead of treating a native-unavailable build as
-failed runnable support.
+`ERR_AUTOJS6_WORKER_DISABLED` with `nativeAvailable=false`, instead of treating
+a native-unavailable build as failed runnable support. The require path may
+return a shape-only compatibility facade so npm package initialization can
+continue, but real `Worker` execution remains blocked.
 
 S7-26 extends the native-available promotion target with limited
 `MessageChannel`/`MessagePort`, ArrayBuffer transfer detachment, transfer-list
@@ -195,12 +197,12 @@ experimental gate: 30 tests selected, 0 failures, 11 native-availability skips
 | default build flag | Pass | `BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED=false` in normal builds. |
 | capability registry default | Pass | Kotlin and JavaScript profiles report worker threads disabled. |
 | bare `require("worker_threads")` denial | Pass | Default path rejects before local shadowing. |
-| `require("node:worker_threads")` denial | Pass | `node:` alias is denied in the default profile. |
+| `require("node:worker_threads")` shape facade | Pass | `node:` alias exposes only the shape-only npm compatibility facade; inert workers can be constructed, but `postMessage()` and execution remain disabled. |
 | `require.resolve("worker_threads")` denial | Pass | Resolution rejects before local `node_modules` shadowing. |
 | profile immutability | Pass | `profile.experimentalFlags` remains frozen. |
 | experimental flag delivery | Pass | Native diagnostics report the request flag and worker gate as enabled. |
 | native Worker availability | Blocked | Bootstrap preflight reports `ERR_AUTOJS6_WORKER_DISABLED` and zero active workers. |
-| pure JS Worker creation | Blocked | No Worker is constructed; created count remains `0`. |
+| pure JS Worker creation | Blocked | No native Worker is constructed; created count remains `0`. The default `node:` facade may create inert disabled worker objects for npm compatibility only. |
 | worker data and parentPort messaging | Blocked | Cannot run because Worker creation fails. |
 | worker-local AutoJs bridge denial | Prepared, skipped on Sony | Native-available gate denies bridge modules and user-facing AutoJs modules in worker scope. |
 | worker-local Android Context / Java denial | Prepared, skipped on Sony | Worker profile denies Java interop and exposes no Android Context. |

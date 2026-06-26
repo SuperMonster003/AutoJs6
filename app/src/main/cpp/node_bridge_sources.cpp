@@ -13084,8 +13084,86 @@ std::string buildEmbeddedScriptExecutionSource(
         }
       : __autojs6_create_limited_message_channel_classes();
     const environmentData = new Map();
-    function DisabledWorker() {
-      throw __autojs6_worker_threads_disabled_error();
+    const disabledWorkerStates = new WeakMap();
+    function disabledWorkerState(worker, operation) {
+      if (worker && (typeof worker === "object" || typeof worker === "function") && disabledWorkerStates.has(worker)) {
+        return disabledWorkerStates.get(worker);
+      }
+      throw new TypeError("Illegal invocation of Worker." + operation);
+    }
+    function disabledWorkerEmit(worker, eventName) {
+      const state = disabledWorkerState(worker, "emit");
+      const args = Array.prototype.slice.call(arguments, 2);
+      const listeners = (state.listeners[eventName] || []).slice();
+      if (listeners.length === 0) {
+        return false;
+      }
+      listeners.forEach(function(entry) {
+        if (entry.once) {
+          const bucket = state.listeners[eventName] || [];
+          const index = bucket.indexOf(entry);
+          if (index >= 0) {
+            bucket.splice(index, 1);
+          }
+        }
+        entry.listener.apply(worker, args);
+      });
+      return true;
+    }
+    function disabledWorkerAddListener(worker, eventName, listener, once) {
+      if (typeof listener !== "function") {
+        throw new TypeError("listener must be a function");
+      }
+      const state = disabledWorkerState(worker, "on");
+      const name = String(eventName);
+      if (!state.listeners[name]) {
+        state.listeners[name] = [];
+      }
+      state.listeners[name].push({ listener, once: once === true });
+      return worker;
+    }
+    function disabledWorkerRemoveListener(worker, eventName, listener) {
+      const state = disabledWorkerState(worker, "off");
+      const name = String(eventName);
+      const bucket = state.listeners[name];
+      if (!bucket || typeof listener !== "function") {
+        return worker;
+      }
+      state.listeners[name] = bucket.filter(function(entry) {
+        return entry.listener !== listener;
+      });
+      return worker;
+    }
+    function disabledWorkerClose(worker) {
+      const state = disabledWorkerState(worker, "close");
+      if (state.closed) {
+        return false;
+      }
+      state.closed = true;
+      __autojs6_schedule_task(function() {
+        disabledWorkerEmit(worker, "exit", 0);
+      });
+      return true;
+    }
+    function DisabledWorker(filename, options) {
+      if (!(this instanceof DisabledWorker)) {
+        return new DisabledWorker(filename, options);
+      }
+      const state = {
+        filename: filename === undefined || filename === null ? "" : String(filename),
+        options: options && typeof options === "object" ? Object.assign(Object.create(null), options) : Object.create(null),
+        listeners: Object.create(null),
+        closed: false
+      };
+      disabledWorkerStates.set(this, state);
+      Object.defineProperties(this, {
+        threadId: { value: 0, enumerable: true },
+        stdin: { value: null, enumerable: true },
+        stdout: { value: null, enumerable: true },
+        stderr: { value: null, enumerable: true },
+        resourceLimits: { value: Object.freeze(Object.create(null)), enumerable: true }
+      });
+      disabledWorkerClose(this);
     }
     function receiveMessageOnPort() {
       return undefined;
@@ -13108,6 +13186,73 @@ std::string buildEmbeddedScriptExecutionSource(
     function getHeapSnapshot() {
       return Promise.reject(__autojs6_worker_threads_disabled_error());
     }
+    Object.defineProperties(DisabledWorker.prototype, {
+      constructor: { value: DisabledWorker, configurable: true },
+      postMessage: {
+        value: function() {
+          throw __autojs6_worker_threads_disabled_error();
+        },
+        enumerable: true
+      },
+      terminate: {
+        value: function() {
+          disabledWorkerClose(this);
+          return Promise.resolve(0);
+        },
+        enumerable: true
+      },
+      ref: {
+        value: function() {
+          disabledWorkerState(this, "ref");
+          return this;
+        },
+        enumerable: true
+      },
+      unref: {
+        value: function() {
+          disabledWorkerState(this, "unref");
+          return this;
+        },
+        enumerable: true
+      },
+      on: {
+        value: function(eventName, listener) {
+          return disabledWorkerAddListener(this, eventName, listener, false);
+        },
+        enumerable: true
+      },
+      once: {
+        value: function(eventName, listener) {
+          return disabledWorkerAddListener(this, eventName, listener, true);
+        },
+        enumerable: true
+      },
+      off: {
+        value: function(eventName, listener) {
+          return disabledWorkerRemoveListener(this, eventName, listener);
+        },
+        enumerable: true
+      },
+      addListener: {
+        value: function(eventName, listener) {
+          return this.on(eventName, listener);
+        },
+        enumerable: true
+      },
+      removeListener: {
+        value: function(eventName, listener) {
+          return this.off(eventName, listener);
+        },
+        enumerable: true
+      },
+      getHeapSnapshot: {
+        value: function() {
+          return Promise.reject(__autojs6_worker_threads_disabled_error());
+        },
+        enumerable: true
+      },
+      [Symbol.toStringTag]: { value: "Worker" }
+    });
     Object.freeze(DisabledWorker.prototype);
     Object.freeze(DisabledWorker);
     const facade = {
@@ -13129,8 +13274,10 @@ std::string buildEmbeddedScriptExecutionSource(
       policy: Object.freeze({
         status: "shape_only",
         workerCreationEnabled: false,
-        reason: "worker_threads experimental capability is disabled"
+        nativeAvailable: false,
+        reason: "worker_threads native capability is disabled or unavailable"
       }),
+      nativeAvailable: false,
       diagnostics: __autojs6_worker_threads_diagnostics_snapshot
     };
     if (typeof globalThis.BroadcastChannel === "function") {
@@ -14554,10 +14701,7 @@ std::string buildEmbeddedScriptExecutionSource(
       !eventsModule ||
       typeof eventsModule.EventEmitter !== "function"
     ) {
-      throw __autojs6_worker_threads_error(
-        "AutoJs6 experimental worker_threads is unavailable in this Embedded Node build.",
-        "ERR_AUTOJS6_WORKER_DISABLED"
-      );
+      return __autojs6_worker_threads_shape_facade();
     }
     const nativeMessagePortCtor = nativeModule.MessagePort;
     const workerPortStates = new WeakMap();
@@ -15541,6 +15685,7 @@ std::string buildEmbeddedScriptExecutionSource(
       workerData: undefined,
       threadId: nativeModule.threadId,
       policy: __autojs6_worker_threads_policy_snapshot(),
+      nativeAvailable: true,
       diagnostics: __autojs6_worker_threads_diagnostics_snapshot
     });
     return __autojs6_limited_worker_threads_cache;

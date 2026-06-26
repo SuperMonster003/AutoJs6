@@ -40,13 +40,23 @@ With the flag off:
 
 - `require("worker_threads")` rejects with the stable disabled-builtin error shape
 - `require("node:worker_threads")` exposes a shape-only facade for npm feature
-  detection, but `Worker` construction rejects with `ERR_AUTOJS6_WORKER_DISABLED`
+  detection; `Worker` construction returns an inert disabled worker object, but
+  `postMessage()` and real worker execution reject with
+  `ERR_AUTOJS6_WORKER_DISABLED`
 - `require.resolve("worker_threads")` rejects before resolving a local shadow package
 - `require("autojs6:profile").workerThreads === false`
 - `require("autojs6:profile").highRiskCapabilities.workerThreads === false`
 - raw Android, AutoJs, bridge, Context, UI, accessibility, image, shell, and process authority remains unavailable to workers because workers do not exist
 
 `node_modules/worker_threads` must not shadow the disabled builtin.
+
+When the request-local experimental flag is enabled but the current libnode
+build still does not expose native `worker_threads`, both `require("worker_threads")`
+and `require("node:worker_threads")` return the same shape-only facade with
+`nativeAvailable=false`. This keeps package initialization paths such as
+`jsdom` top-level feature detection moving, while inert `Worker` instances,
+`postMessage()`, and real execution remain disabled with
+`ERR_AUTOJS6_WORKER_DISABLED`.
 
 ## Intended Experimental Scope
 

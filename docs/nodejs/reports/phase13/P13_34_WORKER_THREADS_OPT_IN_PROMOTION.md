@@ -18,8 +18,13 @@ stress, and packaged `.mjs` worker smoke.
   promoted.
 - `require("node:worker_threads")` is shape-only in the default profile:
   package top-level detection can read `Worker`, `MessageChannel`,
-  `MessagePort`, and `receiveMessageOnPort`, but `new Worker()` still rejects
-  with `ERR_AUTOJS6_WORKER_DISABLED`.
+  `MessagePort`, and `receiveMessageOnPort`; `new Worker()` creates an inert
+  disabled worker object for npm initialization paths, but `postMessage()` and
+  real execution still reject with `ERR_AUTOJS6_WORKER_DISABLED`.
+- If the request-local experimental flag is enabled on a native-worker-unavailable
+  build, `require("worker_threads")` and `require("node:worker_threads")` return
+  the same shape-only facade with `nativeAvailable=false` instead of aborting
+  package initialization.
 - `workerThreadsProfile.requestLocalOptIn` reflects the per-request
   experimental flag.
 - `nativeAvailability="preflight_required"` remains explicit. A runnable worker

@@ -1,7 +1,6 @@
 package org.autojs.autojs.engine
 
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -66,6 +65,15 @@ class NodeWorkerThreadsPhase13DecisionInstrumentationTest {
                       }
                       throw new Error(label + " was unexpectedly allowed");
                     }
+                    function expectWorkerDisabled(label, action) {
+                      try {
+                        action();
+                      } catch (error) {
+                        console.log("p13worker." + label + "=" + detailOf(error));
+                        return;
+                      }
+                      throw new Error(label + " was unexpectedly allowed");
+                    }
 
                     console.log("p13worker.default=" + [
                       profile.workerThreads,
@@ -112,9 +120,31 @@ class NodeWorkerThreadsPhase13DecisionInstrumentationTest {
                       Object.isFrozen(resourceLimits)
                     ].join("|"));
                     expectDenied("requireBare", () => require("worker_threads"));
-                    expectDenied("requireNodePrefix", () => require("node:worker_threads"));
                     expectDenied("resolveBare", () => require.resolve("worker_threads"));
-                    console.log("p13worker.ready=true");
+                    const workerFacade = require("node:worker_threads");
+                    const workerDiagnostics = workerFacade.diagnostics();
+                    const disabledWorker = new workerFacade.Worker("./disabled-worker.cjs");
+                    disabledWorker.unref();
+                    console.log("p13worker.nodePrefixFacade=" + [
+                      require.resolve("node:worker_threads"),
+                      typeof workerFacade.Worker,
+                      typeof workerFacade.MessageChannel,
+                      typeof workerFacade.receiveMessageOnPort,
+                      workerFacade.nativeAvailable === false,
+                      workerFacade.policy.nativeAvailable === false,
+                      workerFacade.isMainThread,
+                      workerFacade.parentPort === null,
+                      disabledWorker instanceof workerFacade.Worker,
+                      typeof disabledWorker.on,
+                      typeof disabledWorker.terminate,
+                      disabledWorker.threadId,
+                      workerDiagnostics.activeWorkerCount
+                    ].join("|"));
+                    expectWorkerDisabled("workerPost", () => disabledWorker.postMessage({ ok: true }));
+                    return disabledWorker.terminate().then((exitCode) => {
+                      console.log("p13worker.workerTerminate=" + exitCode);
+                      console.log("p13worker.ready=true");
+                    });
                 """.trimIndent(),
                 sourceName = "<node-worker-phase13-default-p13-34.js>",
                 workingDirectory = workDir,
@@ -144,16 +174,18 @@ class NodeWorkerThreadsPhase13DecisionInstrumentationTest {
             )
             assertTrue(
                 denied.stdout,
-                denied.stdout.contains("p13worker.requireNodePrefix=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
+                denied.stdout.contains("p13worker.resolveBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
             )
             assertTrue(
                 denied.stdout,
-                denied.stdout.contains("p13worker.resolveBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"),
+                denied.stdout.contains("p13worker.nodePrefixFacade=worker_threads|function|function|function|true|true|true|true|true|function|function|0|0"),
             )
+            assertTrue(
+                denied.stdout,
+                denied.stdout.contains("p13worker.workerPost=ERR_AUTOJS6_WORKER_DISABLED/ERR_AUTOJS6_WORKER_DISABLED"),
+            )
+            assertTrue(denied.stdout, denied.stdout.contains("p13worker.workerTerminate=0"))
             assertTrue(denied.stdout, denied.stdout.contains("p13worker.ready=true"))
-            assertEquals("false", denied.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
-            assertEquals("false", denied.nativeValues["embedded_script.worker_threads_enabled"])
-            assertEquals("0", denied.nativeValues["embedded_script.worker_active_count"])
         } finally {
             workDir.deleteRecursively()
         }

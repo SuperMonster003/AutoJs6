@@ -220,8 +220,12 @@
   evidence without promoting workers by default.
   The default Safe profile exposes a `node:worker_threads` shape-only facade for
   npm feature detection (`jsdom` top-level `require("node:worker_threads")`);
-  actual `Worker` construction still requires the experimental flag and remains
-  denied by default.
+  `Worker` construction returns an inert disabled worker for package
+  initialization paths, while `postMessage()` / real worker execution still
+  reject with `ERR_AUTOJS6_WORKER_DISABLED` by default. If an experimental
+  request enables worker_threads on a native-worker-unavailable build, the
+  require path now falls back to the same facade with `nativeAvailable=false`
+  rather than aborting npm package initialization.
 - Host verifier:
   `tools/nodejs/phase13/verify-worker-threads-opt-in-promotion.js`.
 - Gradle gate: `:app:verifyNodePhase13WorkerThreadsOptInPromotion`.

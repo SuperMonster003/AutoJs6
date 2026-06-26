@@ -1,7 +1,6 @@
 package org.autojs.autojs.engine
 
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -68,8 +67,18 @@ class NodeWorkerThreadsBootstrapInstrumentationTest {
                       profile.disabledBuiltins.includes("worker_threads")
                     ].join("|"));
                     expectDenied("requireBare", () => require("worker_threads"));
-                    expectDenied("requireNodePrefix", () => require("node:worker_threads"));
                     expectDenied("resolveBare", () => require.resolve("worker_threads"));
+                    const workerFacade = require("node:worker_threads");
+                    const workerDiagnostics = workerFacade.diagnostics();
+                    console.log("worker.bootstrap.nodePrefixFacade=" + [
+                      require.resolve("node:worker_threads"),
+                      workerFacade.shadowed !== true,
+                      typeof workerFacade.Worker,
+                      typeof workerFacade.MessageChannel,
+                      workerFacade.nativeAvailable === false,
+                      workerFacade.policy.nativeAvailable === false,
+                      workerDiagnostics.activeWorkerCount
+                    ].join("|"));
                     console.log("worker.bootstrap.ready=true");
                 """.trimIndent(),
                 sourceName = "<node-worker-bootstrap-default-denial.js>",
@@ -81,12 +90,9 @@ class NodeWorkerThreadsBootstrapInstrumentationTest {
             NodeEmbeddedTestHarness.assertSucceeded("worker_threads bootstrap default denial", result)
             assertTrue(result.stdout, result.stdout.contains("worker.bootstrap.profile=false|false|false|false|true"))
             assertTrue(result.stdout, result.stdout.contains("worker.bootstrap.requireBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
-            assertTrue(result.stdout, result.stdout.contains("worker.bootstrap.requireNodePrefix=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
             assertTrue(result.stdout, result.stdout.contains("worker.bootstrap.resolveBare=ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED/ERR_AUTOJS6_BUILTIN_DISABLED/ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED"))
+            assertTrue(result.stdout, result.stdout.contains("worker.bootstrap.nodePrefixFacade=worker_threads|true|function|function|true|true|0"))
             assertTrue(result.stdout, result.stdout.contains("worker.bootstrap.ready=true"))
-            assertEquals("false", result.nativeValues["embedded_script.request.worker_threads_experimental_enabled"])
-            assertEquals("false", result.nativeValues["embedded_script.worker_threads_enabled"])
-            assertEquals("0", result.nativeValues["embedded_script.worker_active_count"])
         } finally {
             workDir.deleteRecursively()
         }

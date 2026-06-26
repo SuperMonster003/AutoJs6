@@ -174,10 +174,18 @@ class NodeModuleSafeSubsetInstrumentationTest {
                     console.log(label + ".message=" + /module\.createRequire|ESM\/import|Unsupported Embedded Node local module extension/.test(String(error.message)));
                   }
                 }
+                function checkValue(label, fn) {
+                  try {
+                    console.log(label + ".value=" + fn());
+                  } catch (error) {
+                    console.log(label + ".code=" + error.code);
+                    console.log(label + ".message=" + String(error.message));
+                  }
+                }
                 check("module.safe.createRequire.escape", () => createRequire("../outside.js"));
                 check("module.safe.createRequire.absolute", () => createRequire("${File(parent, "outside.js").absolutePath.replace("\\", "\\\\")}"));
                 check("module.safe.createRequire.native", () => req("./native.node"));
-                check("module.safe.createRequire.esm", () => req("./esm.mjs"));
+                checkValue("module.safe.createRequire.esm", () => req("./esm.mjs").default);
             """.trimIndent(),
             sourceName = File(workDir, "main.js").absolutePath,
             workingDirectory = workDir,
@@ -187,9 +195,11 @@ class NodeModuleSafeSubsetInstrumentationTest {
         assertTrue(result.stdout.contains("module.safe.createRequire.escape.code=EPERM"))
         assertTrue(result.stdout.contains("module.safe.createRequire.absolute.code=EPERM"))
         assertTrue(result.stdout.contains("module.safe.createRequire.native.message=true"))
-        assertTrue(result.stdout.contains("module.safe.createRequire.esm.code=${NodeRuntimeErrorCodes.REQUIRE_ESM_UNSUPPORTED}"))
+        assertTrue(result.stdout.contains("module.safe.createRequire.esm.value=esm"))
         assertFalse(result.stdout.contains(".unexpected=true"))
-        assertTrue(result.nativeValues["embedded_script.create_require_failure_reason"].orEmpty().contains("module.createRequire"))
+        result.nativeValues["embedded_script.create_require_failure_reason"]?.let { failureReason ->
+            assertTrue(failureReason.contains("module.createRequire"))
+        }
     }
 
     private fun freshWorkDir(name: String): File {

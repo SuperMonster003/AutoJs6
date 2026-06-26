@@ -11561,53 +11561,72 @@ class EmbeddedScriptMvpInstrumentationTest {
         val result = runEmbeddedScript(
             """
             "nodejs";
-            const moduleBuiltin = require("module");
-            const {
-              Worker,
-              MessageChannel,
-              MessagePort,
-              receiveMessageOnPort,
-              isMainThread,
-              parentPort,
-              workerData
-            } = require("node:worker_threads");
-            const channel = new MessageChannel();
-            console.log("worker.facade.shape=" + [
-              typeof Worker,
-              typeof MessageChannel,
-              typeof MessagePort,
-              typeof receiveMessageOnPort,
-              isMainThread,
-              parentPort === null,
-              workerData === undefined
-            ].join("/"));
-            console.log("worker.facade.resolve=" + require.resolve("node:worker_threads"));
-            console.log("worker.facade.isBuiltin=" + moduleBuiltin.isBuiltin("node:worker_threads"));
-            console.log("worker.facade.receive=" + (receiveMessageOnPort(channel.port1) === undefined));
-            channel.port1.close();
-            channel.port2.close();
-            try {
-              new Worker(__filename);
-              console.log("worker.facade.worker=allowed");
-            } catch (error) {
-              console.log("worker.facade.worker=" + (
-                error &&
-                error.code === "ERR_AUTOJS6_WORKER_DISABLED" &&
-                String(error.message || "").includes("worker_threads")
-              ));
-            }
-            try {
-              require("worker_threads");
-              console.log("worker.facade.bare=allowed");
-            } catch (error) {
-              console.log("worker.facade.bare=" + (
-                error &&
-                error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" &&
-                String(error.message || "").includes("worker_threads")
-              ));
-            }
+            return (async () => {
+              const moduleBuiltin = require("module");
+              const {
+                Worker,
+                MessageChannel,
+                MessagePort,
+                receiveMessageOnPort,
+                isMainThread,
+                parentPort,
+                workerData
+              } = require("node:worker_threads");
+              const channel = new MessageChannel();
+              console.log("worker.facade.shape=" + [
+                typeof Worker,
+                typeof MessageChannel,
+                typeof MessagePort,
+                typeof receiveMessageOnPort,
+                isMainThread,
+                parentPort === null,
+                workerData === undefined
+              ].join("/"));
+              console.log("worker.facade.resolve=" + require.resolve("node:worker_threads"));
+              console.log("worker.facade.isBuiltin=" + moduleBuiltin.isBuiltin("node:worker_threads"));
+              console.log("worker.facade.receive=" + (receiveMessageOnPort(channel.port1) === undefined));
+              channel.port1.close();
+              channel.port2.close();
+
+              const worker = new Worker(__filename);
+              const exitCode = await new Promise((resolve) => {
+                worker.once("exit", resolve);
+                worker.unref();
+              });
+              console.log("worker.facade.worker=" + [
+                worker instanceof Worker,
+                typeof worker.postMessage,
+                typeof worker.terminate,
+                typeof worker.unref,
+                worker.threadId,
+                exitCode
+              ].join("/"));
+              try {
+                worker.postMessage({ ok: true });
+                console.log("worker.facade.post=allowed");
+              } catch (error) {
+                console.log("worker.facade.post=" + (
+                  error &&
+                  error.code === "ERR_AUTOJS6_WORKER_DISABLED" &&
+                  String(error.message || "").includes("worker_threads")
+                ));
+              }
+              console.log("worker.facade.terminate=" + await worker.terminate());
+
+              try {
+                require("worker_threads");
+                console.log("worker.facade.bare=allowed");
+              } catch (error) {
+                console.log("worker.facade.bare=" + (
+                  error &&
+                  error.code === "ERR_AUTOJS6_EMBEDDED_NODE_BUILTIN_DISABLED" &&
+                  String(error.message || "").includes("worker_threads")
+                ));
+              }
+            })();
             """.trimIndent(),
             "<embedded-node-worker-threads-facade-source.js>",
+            workerThreadsExperimentalEnabled = false,
         )
 
         assertTrue(result.errorMessage.orEmpty(), result.succeeded)
@@ -11615,7 +11634,9 @@ class EmbeddedScriptMvpInstrumentationTest {
         assertTrue(result.stdout.contains("worker.facade.resolve=worker_threads"))
         assertTrue(result.stdout.contains("worker.facade.isBuiltin=true"))
         assertTrue(result.stdout.contains("worker.facade.receive=true"))
-        assertTrue(result.stdout.contains("worker.facade.worker=true"))
+        assertTrue(result.stdout.contains("worker.facade.worker=true/function/function/function/0/0"))
+        assertTrue(result.stdout.contains("worker.facade.post=true"))
+        assertTrue(result.stdout.contains("worker.facade.terminate=0"))
         assertTrue(result.stdout.contains("worker.facade.bare=true"))
     }
 
@@ -31907,6 +31928,7 @@ class EmbeddedScriptMvpInstrumentationTest {
         moduleSources: Map<String, String> = emptyMap(),
         runtimeModuleSources: Map<String, String> = emptyMap(),
         env: Map<String, String> = emptyMap(),
+        workerThreadsExperimentalEnabled: Boolean = BuildConfig.NODEJS_WORKER_THREADS_EXPERIMENTAL_ENABLED,
     ): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return NativeNodeEmbeddedScriptService.runScript(
             context,
@@ -31918,6 +31940,7 @@ class EmbeddedScriptMvpInstrumentationTest {
                 env = env,
                 moduleSources = moduleSources,
                 runtimeModuleSources = runtimeModuleSources,
+                workerThreadsExperimentalEnabled = workerThreadsExperimentalEnabled,
             ),
         )
     }
