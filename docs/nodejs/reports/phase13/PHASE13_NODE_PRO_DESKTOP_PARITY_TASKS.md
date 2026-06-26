@@ -1389,6 +1389,10 @@ P13 task 本身使用以下执行状态：
     - named import/export/re-export specifier list 现在允许普通 block/line
       comments，用于兼容 `parse5` / `jsdom` 等真实 npm package 输出中的
       `export { /** @internal */ Parser } from ...` 形态。
+    - partial ESM loader 在 no-ICU Embedded Node 上会将 regex literal 中的
+      `\p{ID_Start}` / `\p{ID_Continue}` 降级为 ASCII identifier fallback，
+      用于兼容 `puppeteer-core` QueryHandler 等真实 npm package；字符串、
+      注释和 template literal 内容保持不改写。
     - loader hooks、raw `node:module` loader authority、network import、
       `file:` / `data:` URL import、absolute path import、workingDirectory
       escape、disabled builtin import 继续拒绝。
@@ -1498,6 +1502,10 @@ P13 task 本身使用以下执行状态：
     - `buffer` wrapper 现在使用冻结的普通对象导出，保留
       `hasOwnProperty()`，用于兼容 `cheerio` / `iconv-lite` /
       `safer-buffer` 这类真实 npm 依赖。
+    - `stream` wrapper 现在暴露 callable module shape，并保持 prototype
+      指向 native `Stream.prototype`，使 `import Stream from "node:stream"`
+      与 `body instanceof Stream` 这类 `node-fetch` 检查正常工作；同时继续
+      保持 `stream/promises` 独立导入、`stream.promises` 不提升。
     - 普通 one-shot Embedded Node 脚本默认 timeout 从 probe 用的 3000ms
       调整为 300000ms；显式 `timeoutMs` 仍保持原语义，用于降低大 npm
       module graph 启动时的误超时。

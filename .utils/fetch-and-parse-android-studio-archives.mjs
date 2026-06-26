@@ -7,6 +7,7 @@ import { getRemoteFileSizeBytes } from './utils/fetch.mjs';
 import { readPropertiesSync } from './utils/properties.mjs';
 
 const URL = 'https://jb.gg/android-studio-releases-list.json';
+const DEFAULT_MIN_SUPPORTED_ANDROID_STUDIO_VERSION = '2023.3';
 
 /**
  * @returns {Promise<AndroidStudioReleaseItem[]>}
@@ -59,8 +60,7 @@ export function formatDate(date) {
 }
 
 async function main() {
-    const props = readPropertiesSync();
-    const minSupportedAndroidStudioVersion = props.get('MIN_SUPPORTED_ANDROID_STUDIO_IDE_VERSION');
+    const minSupportedAndroidStudioVersion = readMinSupportedAndroidStudioVersion();
     const releases = await getAndroidStudioReleases();
     const results = releases.filter(release => {
         return compareVersionStrings(release.version, minSupportedAndroidStudioVersion) >= 0;
@@ -76,6 +76,17 @@ async function main() {
         return compareVersionStrings(b.version, a.version);
     });
     console.table(results);
+}
+
+function readMinSupportedAndroidStudioVersion() {
+    try {
+        return readPropertiesSync().get('MIN_SUPPORTED_ANDROID_STUDIO_IDE_VERSION') || DEFAULT_MIN_SUPPORTED_ANDROID_STUDIO_VERSION;
+    } catch (err) {
+        if (err?.code === 'ENOENT') {
+            return DEFAULT_MIN_SUPPORTED_ANDROID_STUDIO_VERSION;
+        }
+        throw err;
+    }
 }
 
 // Determine if this file is being run directly.

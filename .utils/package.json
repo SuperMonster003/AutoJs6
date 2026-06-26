@@ -1,5 +1,12 @@
 {
   "type": "module",
+  "autojs6": {
+    "node": {
+      "permissions": [
+        "network"
+      ]
+    }
+  },
   "dependencies": {
     "cheerio": "^1.1.2",
     "domhandler": "^5.0.3",

@@ -37346,74 +37346,102 @@ std::string buildEmbeddedScriptExecutionSource(
     ) {
       throw new Error("require is restricted in Embedded Node.js MVP; allowlisted module 'stream' is unavailable.");
     }
-    const limitedStream = Object.create(null);
+    const nativeStream = nodeStream.Stream;
+    const nativeReadable = nodeStream.Readable;
+    const nativeWritable = nodeStream.Writable;
+    const nativeDuplex = nodeStream.Duplex;
+    const nativeTransform = nodeStream.Transform;
+    const nativePassThrough = nodeStream.PassThrough;
+    const nativePipeline = nodeStream.pipeline;
+    const nativeFinished = nodeStream.finished;
+    const nativeAddAbortSignal = nodeStream.addAbortSignal;
+    const nativeCompose = nodeStream.compose;
+    const nativeDuplexPair = nodeStream.duplexPair;
+    const nativeIsReadable = nodeStream.isReadable;
+    const nativeIsWritable = nodeStream.isWritable;
+    const nativeIsErrored = nodeStream.isErrored;
+    const nativeIsDestroyed = nodeStream.isDestroyed;
+    const nativeIsDisturbed = nodeStream.isDisturbed;
+    function limitedStream() {
+      return Reflect.construct(nativeStream, arguments, new.target || nativeStream);
+    }
+    try {
+      Object.setPrototypeOf(limitedStream, nativeStream);
+    } catch (_) {
+      // Best effort only; instanceof compatibility comes from the prototype below.
+    }
+    Object.defineProperty(limitedStream, "prototype", {
+      value: nativeStream.prototype,
+      enumerable: false
+    });
     Object.defineProperties(limitedStream, {
-      Stream: { value: nodeStream.Stream, enumerable: true },
-      Readable: { value: nodeStream.Readable, enumerable: true },
-      Writable: { value: nodeStream.Writable, enumerable: true },
-      Duplex: { value: nodeStream.Duplex, enumerable: true },
-      Transform: { value: nodeStream.Transform, enumerable: true },
-      PassThrough: { value: nodeStream.PassThrough, enumerable: true },
+      Stream: { value: limitedStream, enumerable: true },
+      Readable: { value: nativeReadable, enumerable: true },
+      Writable: { value: nativeWritable, enumerable: true },
+      Duplex: { value: nativeDuplex, enumerable: true },
+      Transform: { value: nativeTransform, enumerable: true },
+      PassThrough: { value: nativePassThrough, enumerable: true },
       pipeline: {
         value: function() {
-          return nodeStream.pipeline.apply(nodeStream, arguments);
+          return nativePipeline.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       finished: {
         value: function() {
-          return nodeStream.finished.apply(nodeStream, arguments);
+          return nativeFinished.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       addAbortSignal: {
         value: function() {
-          return nodeStream.addAbortSignal.apply(nodeStream, arguments);
+          return nativeAddAbortSignal.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       compose: {
         value: function() {
-          return nodeStream.compose.apply(nodeStream, arguments);
+          return nativeCompose.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       duplexPair: {
         value: function() {
-          return nodeStream.duplexPair.apply(nodeStream, arguments);
+          return nativeDuplexPair.apply(nodeStream, arguments);
         },
         enumerable: true
       },
       isReadable: {
         value: function(value) {
-          return nodeStream.isReadable(value);
+          return nativeIsReadable(value);
         },
         enumerable: true
       },
       isWritable: {
         value: function(value) {
-          return nodeStream.isWritable(value);
+          return nativeIsWritable(value);
         },
         enumerable: true
       },
       isErrored: {
         value: function(value) {
-          return nodeStream.isErrored(value);
+          return nativeIsErrored(value);
         },
         enumerable: true
       },
       isDestroyed: {
         value: function(value) {
-          return nodeStream.isDestroyed(value);
+          return nativeIsDestroyed(value);
         },
         enumerable: true
       },
       isDisturbed: {
         value: function(value) {
-          return nodeStream.isDisturbed(value);
+          return nativeIsDisturbed(value);
         },
         enumerable: true
-      }
+      },
+      promises: { value: undefined, enumerable: true }
     });
     __autojs6_limited_stream_cache = Object.freeze(limitedStream);
     return __autojs6_limited_stream_cache;
@@ -43847,7 +43875,9 @@ std::string buildEmbeddedScriptExecutionSource(
       nextIndex: importIndex
     });
     const importMetaBody = __autojs6_transform_import_meta(exportTransform.body, filename);
-    const transformedBody = __autojs6_transform_dynamic_import_calls(importMetaBody, filename, "__filename");
+    const transformedBody = __autojs6_transform_unsupported_unicode_identifier_regex_literals(
+      __autojs6_transform_dynamic_import_calls(importMetaBody, filename, "__filename")
+    );
     if (__autojs6_esm_has_residual_import_export(transformedBody)) {
       throw __autojs6_esm_error("Embedded Node partial ESM v1 found unsupported import/export syntax in " + filename + ".");
     }
@@ -44058,6 +44088,178 @@ std::string buildEmbeddedScriptExecutionSource(
   }
   function __autojs6_regex_literal_allowed(previous) {
     return !previous || "([{=:;,!&|?+-*~^<>".indexOf(previous) >= 0;
+  }
+  let __autojs6_unicode_identifier_regex_supported_cache = undefined;
+  function __autojs6_unicode_identifier_regex_supported() {
+    if (__autojs6_unicode_identifier_regex_supported_cache !== undefined) {
+      return __autojs6_unicode_identifier_regex_supported_cache;
+    }
+    try {
+      new RegExp("\\p{ID_Start}", "u");
+      new RegExp("\\p{ID_Continue}", "u");
+      __autojs6_unicode_identifier_regex_supported_cache = true;
+    } catch (_) {
+      __autojs6_unicode_identifier_regex_supported_cache = false;
+    }
+    return __autojs6_unicode_identifier_regex_supported_cache;
+  }
+  function __autojs6_regex_literal_close_index(text, start) {
+    let escaped = false;
+    let inClass = false;
+    for (let index = start + 1; index < text.length; index += 1) {
+      const ch = text.charAt(index);
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (ch === "[") {
+        inClass = true;
+        continue;
+      }
+      if (ch === "]") {
+        inClass = false;
+        continue;
+      }
+      if ((ch === "\n" || ch === "\r") && !inClass) {
+        return -1;
+      }
+      if (ch === "/" && !inClass) {
+        return index;
+      }
+    }
+    return -1;
+  }
+  function __autojs6_regex_literal_end_index(text, start) {
+    const close = __autojs6_regex_literal_close_index(text, start);
+    if (close < 0) return -1;
+    let end = close + 1;
+    while (end < text.length && /[A-Za-z]/.test(text.charAt(end))) {
+      end += 1;
+    }
+    return end;
+  }
+  function __autojs6_rewrite_unicode_identifier_regex_literal(literal) {
+    const close = __autojs6_regex_literal_close_index(literal, 0);
+    if (close < 0) return literal;
+    const body = literal.slice(1, close);
+    let rewritten = "";
+    let inClass = false;
+    for (let index = 0; index < body.length; index += 1) {
+      if (body.slice(index, index + 12) === "\\p{ID_Start}") {
+        rewritten += inClass ? "A-Za-z" : "[A-Za-z]";
+        index += 11;
+        continue;
+      }
+      if (body.slice(index, index + 15) === "\\p{ID_Continue}") {
+        rewritten += inClass ? "0-9A-Za-z" : "[0-9A-Za-z]";
+        index += 14;
+        continue;
+      }
+      const ch = body.charAt(index);
+      if (ch === "\\") {
+        rewritten += body.slice(index, index + 2);
+        index += 1;
+        continue;
+      }
+      if (ch === "[") {
+        inClass = true;
+      } else if (ch === "]") {
+        inClass = false;
+      }
+      rewritten += ch;
+    }
+    return "/" + rewritten + literal.slice(close);
+  }
+  function __autojs6_transform_unsupported_unicode_identifier_regex_literals(source) {
+    const text = String(source || "");
+    if (text.indexOf("\\p{ID_") < 0 || __autojs6_unicode_identifier_regex_supported()) {
+      return text;
+    }
+    let output = "";
+    let cursor = 0;
+    let state = "normal";
+    let previous = "";
+    let escaped = false;
+    for (let index = 0; index < text.length; index += 1) {
+      const ch = text.charAt(index);
+      const next = text.charAt(index + 1);
+      if (state === "line_comment") {
+        if (ch === "\n" || ch === "\r") state = "normal";
+        continue;
+      }
+      if (state === "block_comment") {
+        if (ch === "*" && next === "/") {
+          index += 1;
+          state = "normal";
+        }
+        continue;
+      }
+      if (state === "single" || state === "double" || state === "template") {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (
+          (state === "single" && ch === "'") ||
+          (state === "double" && ch === "\"") ||
+          (state === "template" && ch === "`")
+        ) {
+          state = "normal";
+        }
+        continue;
+      }
+      if (ch === "/" && next === "/") {
+        index += 1;
+        state = "line_comment";
+        continue;
+      }
+      if (ch === "/" && next === "*") {
+        index += 1;
+        state = "block_comment";
+        continue;
+      }
+      if (ch === "'") {
+        state = "single";
+        escaped = false;
+        continue;
+      }
+      if (ch === "\"") {
+        state = "double";
+        escaped = false;
+        continue;
+      }
+      if (ch === "`") {
+        state = "template";
+        escaped = false;
+        continue;
+      }
+      if (ch === "/" && __autojs6_regex_literal_allowed(previous)) {
+        const end = __autojs6_regex_literal_end_index(text, index);
+        if (end > index) {
+          const literal = text.slice(index, end);
+          if (literal.indexOf("\\p{ID_") >= 0) {
+            output += text.slice(cursor, index);
+            output += __autojs6_rewrite_unicode_identifier_regex_literal(literal);
+            cursor = end;
+          }
+          index = end - 1;
+          previous = "/";
+          continue;
+        }
+      }
+      if (!__autojs6_is_whitespace(ch)) {
+        previous = ch;
+      }
+    }
+    return output + text.slice(cursor);
   }
   function __autojs6_mask_non_code(source) {
     const text = String(source || "");
@@ -44307,7 +44509,9 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_record_type_module_commonjs_policy(resolved);
     }
     __autojs6_assert_common_js_source_supported(record.source, resolved);
-    const transformedSource = __autojs6_transform_dynamic_import_calls(record.source, resolved, "__filename");
+    const transformedSource = __autojs6_transform_unsupported_unicode_identifier_regex_literals(
+      __autojs6_transform_dynamic_import_calls(record.source, resolved, "__filename")
+    );
     const moduleFunction = __autojs6_native_function(
       "exports",
       "require",
@@ -45297,10 +45501,12 @@ std::string buildEmbeddedScriptExecutionSource(
       __autojs6_user_result = __autojs6_run_esm_entry();
     } else {
       __autojs6_assert_common_js_source_supported(__autojs6_source, __autojs6_source_name);
-      const __autojs6_transformed_source = __autojs6_transform_dynamic_import_calls(
-        __autojs6_source,
-        __autojs6_source_name,
-        "__filename"
+      const __autojs6_transformed_source = __autojs6_transform_unsupported_unicode_identifier_regex_literals(
+        __autojs6_transform_dynamic_import_calls(
+          __autojs6_source,
+          __autojs6_source_name,
+          "__filename"
+        )
       );
       const __autojs6_user_function = __autojs6_native_function(
         "exports",

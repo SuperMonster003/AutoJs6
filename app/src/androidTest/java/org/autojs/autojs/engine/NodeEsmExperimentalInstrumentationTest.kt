@@ -175,6 +175,56 @@ class NodeEsmExperimentalInstrumentationTest {
     }
 
     @Test
+    fun partialEsmBuiltinStreamDefaultImportKeepsNodeFetchInstanceofShape() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM stream default import shape")
+        val workDir = freshWorkDir("esm-stream-default")
+        val entry = File(workDir, "main.mjs")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                import Stream, { PassThrough, pipeline } from "node:stream";
+                const pass = new PassThrough();
+                console.log("esm.stream.default=" + [
+                  typeof Stream,
+                  Stream === Stream.Stream,
+                  pass instanceof Stream,
+                  Stream.PassThrough === PassThrough,
+                  typeof pipeline
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM stream default import", result)
+        assertTrue(result.stdout.contains("esm.stream.default=function|true|true|true|function"))
+    }
+
+    @Test
+    fun partialEsmUnicodeIdentifierRegexFallsBackWithoutIcu() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM unicode identifier regex fallback")
+        val workDir = freshWorkDir("esm-unicode-regex")
+        val entry = File(workDir, "main.mjs")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                const parserLike = /^(async)*\s*(?:[_\p{ID_Start}])(?:[\u200C\u200D\p{ID_Continue}])*\s*=>/u;
+                const literalText = "\\p{ID_Start}";
+                console.log("esm.unicode.regex=" + [
+                  parserLike.test("value=>"),
+                  parserLike.test("async value =>"),
+                  literalText
+                ].join("|"));
+            """.trimIndent(),
+            sourceName = entry.absolutePath,
+            workingDirectory = workDir,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("partial ESM unicode identifier regex fallback", result)
+        assertTrue(result.stdout.contains("""esm.unicode.regex=true|true|\p{ID_Start}"""))
+    }
+
+    @Test
     fun partialPackageTypeModuleEntryRunsAsEsmByDefault() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("ESM package type=module bootstrap")
         val workDir = freshWorkDir("esm-type-module")
