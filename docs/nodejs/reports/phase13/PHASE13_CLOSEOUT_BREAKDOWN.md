@@ -246,6 +246,7 @@ Reason open: `implementation`, `packaging`.
 - [ ] Add `zip`, `canvas`, OpenCC, and full pinyin resource providers.
 - [ ] Add packaged resource smoke and resource lookup diagnostics.
 - [x] Decide raw Android/OpenCV object parity or keep stable denials.
+- [x] Keep docs/status-manifest evidence gate from counting resource-backed utility promotion work twice.
 
 ### Desktop Network And Filesystem
 

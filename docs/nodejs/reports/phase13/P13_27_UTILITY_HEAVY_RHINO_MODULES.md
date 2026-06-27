@@ -97,6 +97,10 @@ dedicated ownership, lifecycle, and permission evidence.
 - Rhino `util`: still needs smaller pure/type/density/logging split batches.
 - `sysprops`: needs Android system-property policy and privacy review.
 
+The docs, status manifest, surface manifest, and Gradle gate are evidence
+checks only. They do not add a second blocker for the same resource-backed
+utility module promotion work.
+
 ## Gate
 
 ```powershell

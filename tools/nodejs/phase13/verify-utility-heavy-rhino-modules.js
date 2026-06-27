@@ -114,7 +114,7 @@ function buildReport(files) {
       token(files.utilityTest, "numberx.parseAny(\"0xFF\")"),
       token(files.utilityTest, "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"),
     ], [
-      "Packaged APK resource smoke remains open because this batch is provider-free and resource-free.",
+      "Resource-backed utility modules need dedicated gates with packaged resource smoke, lookup diagnostics, and provider ownership before promotion.",
     ]),
     scenario("docs_manifest_and_gate", "docs, status manifest, surface manifest, and Gradle gate record P13-27", [
       token(files.p13Report, "Status: partial"),
@@ -133,9 +133,7 @@ function buildReport(files) {
       token(files.statusManifest, '"decision": "p13_27_pure_js_arrayx_facade"'),
       token(files.statusManifest, '"decision": "p13_27_pure_js_numberx_facade"'),
       token(files.statusManifest, '"decision": "p13_27_pure_js_mathx_facade"'),
-    ], [
-      "P13-27 remains open until resource-backed utility modules receive dedicated gates.",
-    ]),
+    ], []),
     scenario("raw_object_boundary", "raw Android/OpenCV object parity is stable-denied for P13-27", [
       token(files.p13Report, "Raw Android/OpenCV `Point` and `Rect` object parity is stable-denied for"),
       token(files.p13Report, "Any future raw"),
