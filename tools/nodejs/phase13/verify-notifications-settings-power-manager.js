@@ -116,7 +116,7 @@ function buildReport(files) {
       token(files.providerRegistry, '"phase13Promotion" to "P13-25 partial notifications/settings/power manager evidence gate"'),
       token(files.providerRegistry, '"rawObjectPolicy" to "no raw Notification'),
       token(files.providerRegistry, '"rawObjectPolicy" to "no raw PowerManager'),
-      token(files.providerRegistryTest, 'assertEquals(19, definitions.size)'),
+      token(files.providerRegistryTest, 'assertEquals(20, definitions.size)'),
       token(files.providerRegistryTest, 'id = "device"'),
       token(files.permissionManifestTest, "NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS"),
       token(files.permissionManifestTest, "NodeBridgePermissionManifest.DEVICE_POWER"),
