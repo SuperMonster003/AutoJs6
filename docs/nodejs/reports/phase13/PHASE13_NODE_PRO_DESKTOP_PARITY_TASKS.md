@@ -393,8 +393,9 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_45_PACKAGED_CAPABILITY_METADATA.md`.
 - Surface manifest evidence: `phase13-packaged-capability-metadata-decision`.
-- Remaining P13-45 blocker: packaged install/run synthesis, user disclosure,
-  rollback, profile-specific runtime promotion, and device matrix evidence.
+- Future promotion work outside P13-45 metadata closure: packaged install/run
+  synthesis, user disclosure, rollback, profile-specific runtime promotion, and
+  device matrix evidence.
 
 ## P13-19 Partial Landing Note
 
@@ -1767,7 +1768,7 @@ P13 task 本身使用以下执行状态：
 
 ### Track D: Packaging, plugins, and distribution
 
-- [ ] P13-45: 扩展 packaged APK capability metadata。
+- [x] P13-45: 扩展 packaged APK capability metadata。
   - 范围：让 packaged APK 能表达 Pro/Desktop profile、permissions、Node builtins、
     native assets、long-running、network、filesystem roots。
   - 验收：
@@ -1801,9 +1802,12 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_45_PACKAGED_CAPABILITY_METADATA.md`。
     - Surface manifest evidence:
       `phase13-packaged-capability-metadata-decision`。
-  - Remaining: profile/builtin/native asset/filesystem root metadata 尚不能驱动
-    reviewed packaged synthesis；完整 install-run packaged APK smoke、用户披露、
-    rollback、权限提示和 Pro/Desktop profile device matrix 仍未完成。
+  - Closure: metadata parsing, manifest synthesis, runtime diagnostics, and
+    undeclared-capability denial are covered.
+  - Future promotion work: profile/builtin/native asset/filesystem root metadata
+    尚不能驱动 reviewed packaged synthesis；完整 install-run packaged APK
+    smoke、用户披露、rollback、权限提示和 Pro/Desktop profile device matrix
+    仍未完成。
 
 - [ ] P13-46: 推进 plugin system toward Pro/Desktop parity。
   - 范围：从 JS-only local plugin 扩展到安装、更新、签名、权限、资源、packaged

@@ -1,7 +1,8 @@
 # P13-45 Packaged APK Capability Metadata
 
-P13-45 records packaged APK capability metadata as partial. The current landing
-adds `packagedCapabilityProfile` diagnostics, a structured
+P13-45 records packaged APK capability metadata as partial capability evidence.
+The P13-45 metadata gate is ready: the current landing adds
+`packagedCapabilityProfile` diagnostics, a structured
 `packagedMetadata` summary inside the bridge permission manifest, focused
 device instrumentation, a host verifier, and a Gradle gate.
 
@@ -30,13 +31,14 @@ metadata stay diagnostic-only. They are accepted only as reviewable metadata
 and must not select runtime profiles, widen builtin allowlists, load native
 assets, expand filesystem roots, or grant bridge authority.
 
-## Remaining Work
+## Future Promotion Work
 
 - Full packaged install/run synthesis, user disclosure, rollback, and
   profile-specific device matrices remain future work.
 
-The generated gate keeps full install/run plus disclosure/profile promotion as
-the remaining blocker class.
+The generated gate treats full install/run plus disclosure/profile promotion as
+future packaged promotion work, not as a blocker for the P13-45 metadata
+closure.
 
 ## Evidence
 

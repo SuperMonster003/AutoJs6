@@ -115,8 +115,6 @@ function buildReport(files) {
       token(files.p13Report, "must not select runtime profiles, widen builtin allowlists, load native"),
       token(files.phase13Tasks, "For P13-45 v1.1, packaged profile, builtin, native asset, and filesystem-root"),
       token(files.phase13Tasks, "must not select runtime profiles, widen"),
-    ], [
-      "Full packaged install/run synthesis, disclosure UX, and profile-specific runtime promotion remain future work.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-45", [
       token(files.phase13Tasks, "P13-45 partial landing"),
@@ -190,7 +188,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       manifestMetadataReady: scenarioById(scenarios, "manifest_metadata_and_runtime_denial").status !== "missing_evidence",

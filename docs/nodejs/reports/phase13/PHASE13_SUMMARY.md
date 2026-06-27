@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 13
-- Open tasks: 45
+- Completed tasks: 14
+- Open tasks: 44
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -59,7 +59,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-42` | `open` | `desktop.modules_npm_process` | 推进 npm/package manager on Android。 |
 | `P13-43` | `open` | `desktop.modules_npm_process` | 扩展 Node stdlib conformance。 |
 | `P13-44` | `open` | `desktop.modules_npm_process` | 推进 process/env/argv parity。 |
-| `P13-45` | `open` | `packaging.plugins_distribution` | 扩展 packaged APK capability metadata。 |
+| `P13-45` | `completed` | `packaging.plugins_distribution` | 扩展 packaged APK capability metadata。 |
 | `P13-46` | `open` | `packaging.plugins_distribution` | 推进 plugin system toward Pro/Desktop parity。 |
 | `P13-47` | `open` | `packaging.plugins_distribution` | 增加 dependency compatibility corpus。 |
 | `P13-48` | `open` | `packaging.plugins_distribution` | 实现 package lock and integrity policy。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 44
+- Reports with blockers: 43
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -192,7 +192,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-overlay-provider-promotion.json` | `verifyNodePhase13OverlayProviderPromotion` | `P13-18` | `partial` | 0 | 5 |
 | `phase13-package-lock-integrity-policy.json` | `verifyNodePhase13PackageLockIntegrityPolicy` | `P13-48` | `partial` | 0 | 2 |
 | `phase13-package-manager-android-decision.json` | `verifyNodePhase13PackageManagerAndroidDecision` | `P13-42` | `partial` | 0 | 1 |
-| `phase13-packaged-capability-metadata-decision.json` | `verifyNodePhase13PackagedCapabilityMetadataDecision` | `P13-45` | `partial` | 0 | 1 |
+| `phase13-packaged-capability-metadata-decision.json` | `verifyNodePhase13PackagedCapabilityMetadataDecision` | `P13-45` | `ready` | 0 | 0 |
 | `phase13-packaged-long-running-service.json` | `verifyNodePhase13PackagedLongRunningService` | `P13-07` | `partial` | 0 | 2 |
 | `phase13-plugin-system-parity-decision.json` | `verifyNodePhase13PluginSystemParityDecision` | `P13-46` | `partial` | 0 | 1 |
 | `phase13-privacy-disclosure-policy.json` | `verifyNodePhase13PrivacyDisclosurePolicy` | `P13-52` | `partial` | 0 | 1 |

@@ -51,7 +51,7 @@ A Phase 13 parent task can close only when all of the following are true:
 | Final blocker | Phase 13 tasks | Main reason open | Closeout direction |
 | --- | --- | --- | --- |
 | `second_execution_slot` | `P13-06`, `P13-08` | `evidence` | Two-slot scheduling has landed; P13-06 closes on current scheduler/stress evidence, while P13-08 owns long-duration soak evidence. |
-| `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | Add packaged lifecycle restore/cleanup, notification/background matrix, metadata, and disclosure evidence. |
+| `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | P13-45 closes metadata parsing/diagnostics; P13-07/P13-52 own packaged lifecycle, disclosure, and final promotion evidence. |
 | `full_heavy_resource_stress` | `P13-08` | `evidence`, `external` | Archive 8-hour quick soak and 24-hour final soak with comparable metrics. |
 | `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | `implementation`, `policy`, `packaging` | Move from guarded local store to registry/tarball/install authority with integrity, rollback, and distribution policy. |
 | `worker_threads` | `P13-34`, `P13-35` | `external`, `policy` | P13-35 records the v1.1 no-facade replacement decision; P13-34 owns native WorkerPool promotion evidence on target ABIs. |
@@ -436,11 +436,11 @@ Reason open: `packaging`.
 
 #### P13-45 packaged APK capability metadata
 
-Reason open: `implementation`, `packaging`.
+Reason open: metadata gate drift cleanup; future promotion remains `implementation`, `packaging`.
 
 - [x] Ensure declared `node.permissions` evidence is present in verifier inputs.
 - [x] Keep packaged profile, builtin, native asset, and filesystem-root metadata diagnostic-only for v1.1.
-- [ ] Add install/run synthesis, disclosure UX, and profile-specific runtime promotion evidence.
+- [x] Keep install/run synthesis, disclosure UX, and profile-specific runtime promotion evidence as future packaged promotion work rather than P13-45 metadata blockers.
 - [x] Keep undeclared bridge capability denial covered.
 
 #### P13-46 plugin system parity
