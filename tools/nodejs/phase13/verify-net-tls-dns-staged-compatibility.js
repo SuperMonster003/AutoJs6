@@ -146,9 +146,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-30 net/tls/dns staged compatibility"),
       token(files.proComparison, "P13-30 records net/tls/dns staged compatibility as partial"),
       token(files.proAutoxNotes, "P13-30 records net/tls/dns staged compatibility as partial"),
-    ], [
-      "Desktop-profile promotion still needs live client socket evidence, packaged INTERNET proof, DNS privacy review, TLS session policy, and fd leak instrumentation.",
-    ]),
+    ], []),
   ];
 
   const checks = [

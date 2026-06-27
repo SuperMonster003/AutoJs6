@@ -88,3 +88,8 @@ The following remain unavailable:
   DNS servers, reverse lookup, or private-network topology.
 - Define TLS session/certificate policy before exposing ALPN, certificate
   chains, keying material, client certificates, or custom trust hooks.
+
+The type declarations, docs, desktop matrix, surface manifest, and Gradle gate
+are evidence-only for this partial decision. They do not add a separate P13-30
+blocker beyond the client/server socket, DNS privacy, raw-network opt-in,
+packaged INTERNET, TLS policy, and fd/socket leak evidence items above.
