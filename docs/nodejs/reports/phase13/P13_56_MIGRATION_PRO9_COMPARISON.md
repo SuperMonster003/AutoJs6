@@ -33,6 +33,12 @@ The gate also links this migration taxonomy to the P13-57 summary output so
 P13-56 remains listed as open while the summary enumerates completed, open,
 deferred, and rejected blocker state.
 
+Runtime parity claims remain partial until promoted paths are executable. The
+docs can reference static examples, diagnostics, and type metadata as migration
+evidence, but they must keep Pro/Desktop parity claims open until the
+corresponding runtime providers, packaged behavior, prompt/disclosure UX, and
+device permission evidence exist.
+
 ## Gate
 
 Host verifier:

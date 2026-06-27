@@ -137,6 +137,15 @@ function buildReport(files) {
       "P13-56 docs must link the Pro/Desktop examples, raw_network marker, and profile declarations as evidence, not authority grants.",
     ),
     check(
+      "runtime-parity-claims-stay-partial",
+      files.p13Report.text.includes("Runtime parity claims remain partial until promoted paths are executable") &&
+        [files.migrationDoc, files.proComparison, files.proAutoxNotes].every((file) =>
+          file.text.includes("debug-only/provider POC is not formal availability") &&
+            file.text.includes("runtime promotion gate")) &&
+        files.phase13Summary.text.includes("| `P13-56` | `open` | `docs.examples.final_gate`"),
+      "P13-56 runtime parity claims must remain partial until promoted paths are executable and summary state stays open.",
+    ),
+    check(
       "surface-entry",
       Boolean(surfaceEntry) &&
         Array.isArray(surfaceEntry.tasks) &&
@@ -183,6 +192,7 @@ function buildReport(files) {
       pro9ComparisonClassified: scenarioById(scenarios, "pro9_comparison_taxonomy").status === "ready",
       proAutoxNotesClassified: scenarioById(scenarios, "pro_autox_notes_taxonomy").status === "ready",
       phase13SummaryStateLinked: scenarioById(scenarios, "evidence_chain").status === "ready",
+      runtimeParityClaimsPartial: checkById(checks, "runtime-parity-claims-stay-partial").passed,
       grantsAuthority: false,
     },
   };
@@ -210,6 +220,10 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function scenarioById(scenarios, id) {
