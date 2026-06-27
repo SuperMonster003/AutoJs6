@@ -812,9 +812,10 @@ Phase 13 accessibility selector promotion:
 descriptors, frozen node snapshots, direct selector find/action APIs, Rhino
 compat selector handles, unavailable-provider rejection, and raw node denial
 are checked. The gate remains partial because `swipe`, `gesture`,
-`powerDialog`, direct `waitFor`, broader Rhino selector aliases, packaged
-accessibility service/settings lifecycle, expanded real-device evidence, and
-root/Shizuku gesture tiers are still missing.
+`powerDialog`, broader Rhino selector aliases, packaged accessibility
+service/settings lifecycle, expanded real-device evidence, and root/Shizuku
+gesture tiers are still missing. Direct `waitFor`, `pickup`, selector-style
+`detect`, `existsAll`, and `existsOne` stay stable-denied for P13-19 v1.1.
 
 Phase 13 screenshot/image/OCR promotion:
 

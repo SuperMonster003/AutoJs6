@@ -320,10 +320,11 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_19_ACCESSIBILITY_SELECTOR_PROMOTION.md`.
 - Surface manifest evidence: `phase13-accessibility-selector-promotion`.
-- Remaining P13-19 blockers: `swipe`/`gesture`/`powerDialog`, direct
-  `waitFor`, broader Rhino selector aliases, packaged accessibility
-  service/settings lifecycle, real-device matrix expansion, and root/Shizuku
-  gesture tiers.
+- Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
+  `existsOne` stay stable-denied for P13-19 v1.1.
+- Remaining P13-19 blockers: `swipe`/`gesture`/`powerDialog`, broader Rhino
+  selector aliases, packaged accessibility service/settings lifecycle,
+  real-device matrix expansion, and root/Shizuku gesture tiers.
 
 盘点日期：2026-06-24
 

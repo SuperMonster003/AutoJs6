@@ -492,9 +492,12 @@ The `accessibility` bridge currently exposes a stable JavaScript Promise API and
 P13-19 records accessibility/selector promotion as partial. The current gate
 allows direct JSON selector APIs and explicit Rhino compat selector handles to
 remain documented and tested, but it must not imply `swipe`, `gesture`,
-`powerDialog`, raw node handles, direct `waitFor`, root input automation, or
-Shizuku authority. Those paths need separate capability, lifecycle, packaged,
-and disclosure evidence before promotion.
+`powerDialog`, raw node handles, root input automation, or Shizuku authority.
+Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
+`existsOne` stay stable-denied for P13-19 v1.1 because they can imply live
+Rhino node handles or callback return values. Gesture/root/Shizuku paths need
+separate capability, lifecycle, packaged, and disclosure evidence before
+promotion.
 
 The `media_projection` bridge currently exposes the JavaScript Promise API and opaque screen-capturer handle shape, but the Android provider rejects until an Activity-owned MediaProjection capability provider is connected. S11-19 `require("autojs6:compat").requestScreenCapture()` and `requestScreenCaptureAsync()` are only Rhino-style wrappers over that controlled provider. They cache an opaque capturer handle for later stop/cleanup, return `true` only after the provider grants a capturer, and preserve provider denial as a stable bridge error. They must not request screen-capture permission from the embedded Node service process directly, expose a raw `MediaProjection`, or create a packaged fallback prompt path.
 

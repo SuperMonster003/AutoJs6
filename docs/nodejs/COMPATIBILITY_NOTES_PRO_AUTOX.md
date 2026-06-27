@@ -196,9 +196,10 @@ AutoJs6 behavior:
   selector actions, coordinate `click`, and Back/Home/Recents wrappers.
 - Returned nodes are frozen JSON snapshots, not raw `AccessibilityNodeInfo` or
   Rhino/UiAutomator node objects.
-- `swipe`, `gesture`, `powerDialog`, direct `waitFor`, packaged
-  accessibility-service lifecycle, and root/Shizuku automation tiers remain
-  unpromoted.
+- Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
+  `existsOne` stay stable-denied for P13-19 v1.1.
+- `swipe`, `gesture`, `powerDialog`, packaged accessibility-service lifecycle,
+  and root/Shizuku automation tiers remain unpromoted.
 
 Porting note: use explicit `await` with direct `accessibility` or
 `autojs6:compat` selector calls. Keep scripts that require synchronous Rhino

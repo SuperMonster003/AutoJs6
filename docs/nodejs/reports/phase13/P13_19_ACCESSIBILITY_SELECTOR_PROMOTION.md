@@ -12,8 +12,9 @@ through the explicit compat loader.
 
 The surface is not promoted to `pro_compat_opt_in` yet. Full Auto.js Pro
 automation parity still needs a packaged accessibility-service lifecycle,
-broader selector aliases, `waitFor` semantics, gesture APIs, and clear
-root/Shizuku separation.
+broader selector aliases, gesture APIs, and clear root/Shizuku separation.
+Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
+`existsOne` stay stable-denied for P13-19 v1.1.
 
 ## Implemented Evidence
 
@@ -43,9 +44,11 @@ root/Shizuku separation.
 
 ## Boundaries
 
-- `swipe`, `gesture`, `powerDialog`, direct `waitFor`, raw node handles,
-  raw `UiObject`, and root/Shizuku gesture fallbacks are not promoted by
-  P13-19.
+- `swipe`, `gesture`, `powerDialog`, raw node handles, raw `UiObject`, and
+  root/Shizuku gesture fallbacks are not promoted by P13-19.
+- Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
+  `existsOne` stay stable-denied for P13-19 v1.1. `findOne(timeout)` and
+  `exists(options)` are the supported async JSON-snapshot alternatives.
 - Direct coordinate `click(x, y)` is part of the JavaScript facade and fake
   transport tests, but the live Android provider currently performs real
   clicks only through selector descriptors.
@@ -59,8 +62,8 @@ root/Shizuku separation.
 
 ## Remaining Blockers
 
-- Implement or explicitly deny more Rhino selector aliases and common chain
-  helpers, including `waitFor`, `pickup`, `detect`, and scrollable helpers.
+- Add more Rhino selector aliases and common chain helpers beyond the current
+  v2 descriptor subset, including scrollable helpers.
 - Add a separate reviewed gesture provider for `swipe`, `gesture`, and
   `powerDialog`, including root/Shizuku tiers when applicable.
 - Decide and test live coordinate-click behavior, or keep it as a stable

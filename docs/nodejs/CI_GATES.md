@@ -400,9 +400,11 @@ block opt-in promotion.
 `accessibility` selector state: selector v2 JSON descriptors, direct
 find/action APIs, explicit Rhino compat selector handles, unavailable-provider
 rejection, and raw node denial are present, while `swipe`, `gesture`,
-`powerDialog`, direct `waitFor`, broader Rhino selector aliases, packaged
-accessibility service/settings lifecycle, expanded real-device evidence, and
-root/Shizuku gesture tiers still block opt-in promotion.
+`powerDialog`, broader Rhino selector aliases, packaged accessibility
+service/settings lifecycle, expanded real-device evidence, and root/Shizuku
+gesture tiers still block opt-in promotion. Direct `waitFor`, `pickup`,
+selector-style `detect`, `existsAll`, and `existsOne` stay stable-denied for
+P13-19 v1.1.
 `verifyNodePhase13ScreenshotImageOcrPromotion` records the P13-20 partial
 `media_projection`, `image`/`images`, and `ocr` promotion state: reserved
 screen-capture API shape, scoped image read/recycle, ML Kit OCR over
