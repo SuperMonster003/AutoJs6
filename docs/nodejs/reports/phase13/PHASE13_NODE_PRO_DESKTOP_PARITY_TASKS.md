@@ -1988,6 +1988,9 @@ P13 task 本身使用以下执行状态：
     - The summary aggregates task checklist status, Phase 13 surface manifest
       status, `FINAL_BLOCKER_REGISTRY.json`, `phase13-capability-truth`, and
       generated conformance reports.
+    - The summary keeps old registry status for `raw_network` history but
+      classifies it as open in Phase 13 because P13-50 through P13-56 reopened
+      it as a gated Desktop/relaxed-capability track.
     - It lists completed/open/deferred/rejected categories, verifies promoted
       surfaces have evidence, and keeps open or decision-required blockers out
       of the completed bucket.

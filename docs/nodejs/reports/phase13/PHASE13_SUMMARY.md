@@ -124,9 +124,9 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total blockers: 15
 - Completed blockers: 2
-- Open blockers: 7
+- Open blockers: 8
 - Deferred blockers: 1
-- Rejected blockers: 5
+- Rejected blockers: 4
 
 | Blocker | Summary status | Registry status | Classification | Required resolution |
 | --- | --- | --- | --- | --- |
@@ -141,7 +141,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `x86` | `deferred` | `optional` | `conditional` | Optional experiment only; does not block the three required ABIs. |
 | `native_addon` | `rejected` | `permanently_unsupported` | `intentional_non_goal` | Stable denial remains documented and tested. |
 | `unrestricted_child_process` | `rejected` | `permanently_unsupported` | `intentional_non_goal` | Stable denial remains documented and tested. |
-| `raw_network` | `rejected` | `permanently_unsupported` | `intentional_non_goal` | Stable denial remains documented and tested. |
+| `raw_network` | `open` | `permanently_unsupported` | `intentional_non_goal` | Stable denial remains documented and tested. Phase 13 override: P13 reopened raw_network as a gated Desktop/relaxed-capability track; keep the registry status for P12 history. |
 | `private_node_bindings` | `rejected` | `permanently_unsupported` | `intentional_non_goal` | Stable denial remains documented and tested. |
 | `production_inspector` | `rejected` | `permanently_unsupported` | `intentional_non_goal` | Stable release bypass denial remains documented and tested. |
 | `node_24_17_community_fork` | `open` | `waiting_for_android_artifacts` | `external_runtime_maintenance` | Future runtime upgrade lane only; does not block Phase 11 completion on node24_5. |

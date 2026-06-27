@@ -2276,7 +2276,9 @@ This host gate records P13-57 as partial. It generates
 surface manifest, final blocker registry, profile truth report, and generated
 Phase 13 conformance reports. The summary must list completed/open/deferred/
 rejected categories, require evidence for every promoted surface, and keep open
-or decision-required blockers out of the completed bucket.
+or decision-required blockers out of the completed bucket. It keeps the old
+registry status for `raw_network` history while classifying it as open in Phase
+13 because the relaxed/Desktop track has reopened it.
 
 Current feature flag registry focused instrumentation:
 

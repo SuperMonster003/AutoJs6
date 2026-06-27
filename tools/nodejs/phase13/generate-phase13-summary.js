@@ -16,6 +16,12 @@ const REJECTED_SURFACE_STATUSES = new Set(["rejected"]);
 const OPEN_BLOCKER_STATUSES = new Set(["open", "decision_required", "waiting_for_android_artifacts"]);
 const DEFERRED_BLOCKER_STATUSES = new Set(["optional"]);
 const REJECTED_BLOCKER_STATUSES = new Set(["permanently_unsupported"]);
+const PHASE13_REOPENED_BLOCKER_OVERRIDES = new Map([
+  [
+    "raw_network",
+    "P13 reopened raw_network as a gated Desktop/relaxed-capability track; keep the registry status for P12 history.",
+  ],
+]);
 
 const FILES = {
   phase13Tasks: "docs/nodejs/reports/phase13/PHASE13_NODE_PRO_DESKTOP_PARITY_TASKS.md",
@@ -199,6 +205,7 @@ function countTasks(tasks) {
 function parseBlockers(blockers) {
   return blockers.map((blocker) => {
     let summaryStatus = "open";
+    let phase13Override = "";
     if (blocker.status === "closed") {
       summaryStatus = "completed";
     } else if (DEFERRED_BLOCKER_STATUSES.has(blocker.status)) {
@@ -208,11 +215,16 @@ function parseBlockers(blockers) {
     } else if (OPEN_BLOCKER_STATUSES.has(blocker.status)) {
       summaryStatus = "open";
     }
+    if (PHASE13_REOPENED_BLOCKER_OVERRIDES.has(blocker.id)) {
+      summaryStatus = "open";
+      phase13Override = PHASE13_REOPENED_BLOCKER_OVERRIDES.get(blocker.id);
+    }
     return {
       id: blocker.id,
       classification: blocker.classification,
       status: blocker.status,
       summaryStatus,
+      phase13Override,
       currentEvidence: blocker.currentEvidence,
       requiredResolution: blocker.requiredResolution,
     };
@@ -285,7 +297,12 @@ function buildChecks(files, generatedReports, summary, markdown) {
       openBlockersMarkedCompleted.length === 0 &&
         summary.blockers.some((blocker) => blocker.id === "crash_evidence_automation" && blocker.summaryStatus === "completed") &&
         summary.blockers.some((blocker) => blocker.id === "full_heavy_resource_stress" && blocker.summaryStatus === "open") &&
-        summary.blockers.some((blocker) => blocker.id === "worker_threads" && blocker.summaryStatus === "open"),
+        summary.blockers.some((blocker) => blocker.id === "worker_threads" && blocker.summaryStatus === "open") &&
+        summary.blockers.some((blocker) =>
+          blocker.id === "raw_network" &&
+          blocker.status === "permanently_unsupported" &&
+          blocker.summaryStatus === "open" &&
+          blocker.phase13Override.includes("P13 reopened raw_network")),
       "Open and decision-required blockers must remain open while closed required blockers are counted completed.",
     ),
     check(
@@ -394,7 +411,8 @@ function renderMarkdown(summary) {
     "| --- | --- | --- | --- | --- |",
   );
   for (const blocker of summary.blockers) {
-    lines.push(`| \`${blocker.id}\` | \`${blocker.summaryStatus}\` | \`${blocker.status}\` | \`${blocker.classification}\` | ${escapeTable(blocker.requiredResolution)} |`);
+    const override = blocker.phase13Override ? ` Phase 13 override: ${blocker.phase13Override}` : "";
+    lines.push(`| \`${blocker.id}\` | \`${blocker.summaryStatus}\` | \`${blocker.status}\` | \`${blocker.classification}\` | ${escapeTable(blocker.requiredResolution + override)} |`);
   }
 
   lines.push(

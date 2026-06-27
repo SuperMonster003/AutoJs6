@@ -912,7 +912,9 @@ registry, `phase13-capability-truth`, generated conformance reports, Testing/CI
 docs, release matrix updates, and `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`.
 The gate lists completed/open/deferred/rejected categories, requires evidence
 for every promoted surface, and keeps open or decision-required blockers out of
-the completed bucket.
+the completed bucket. It preserves the old registry status for `raw_network`
+history but classifies it as open in Phase 13 after the relaxed/Desktop track
+reopened it.
 `verifyNodePhase13VmModuleDecision` records P13-36 as the `vm` module decision
 gate. It requires `vmProfile` diagnostics, native `vm`/`node:vm`
 require/resolve behavior, local shadow-package protection, the updated VM
