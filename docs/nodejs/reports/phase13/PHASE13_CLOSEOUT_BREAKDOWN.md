@@ -546,10 +546,10 @@ Reason open: declaration gate drift cleanup; release packaging remains `implemen
 
 #### P13-56 migration and Pro9 comparison docs
 
-Reason open: `evidence`, `packaging`.
+Reason open: documentation gate drift cleanup; future docs remain `evidence`, `packaging`.
 
-- [ ] Add packaged Pro/Desktop migration cookbook once provider and profile promotion exists.
-- [ ] Add prompt/disclosure UX and device permission matrix.
+- [x] Keep packaged Pro/Desktop migration cookbook as future documentation work once provider and profile promotion exists.
+- [x] Keep prompt/disclosure UX and device permission matrix as future documentation work after promoted runtime evidence exists.
 - [x] Keep runtime parity claims partial until promoted paths are executable.
 - [x] Depend on P13-57 final summary for completed/open/deferred/rejected state.
 

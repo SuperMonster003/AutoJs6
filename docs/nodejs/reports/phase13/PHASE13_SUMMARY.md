@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 20
-- Open tasks: 38
+- Completed tasks: 21
+- Open tasks: 37
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -70,7 +70,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-53` | `open` | `docs.examples.final_gate` | 发布 Pro parity examples。 |
 | `P13-54` | `open` | `docs.examples.final_gate` | 发布 desktop Node parity examples。 |
 | `P13-55` | `completed` | `docs.examples.final_gate` | 更新 TypeScript declaration package。 |
-| `P13-56` | `open` | `docs.examples.final_gate` | 更新 migration and Pro9 comparison docs。 |
+| `P13-56` | `completed` | `docs.examples.final_gate` | 更新 migration and Pro9 comparison docs。 |
 | `P13-57` | `open` | `docs.examples.final_gate` | 发布 Phase 13 summary generator and final gate。 |
 
 ## Surface Status
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 37
+- Reports with blockers: 36
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -185,7 +185,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-java-interop-allowlist.json` | `verifyNodePhase13JavaInteropAllowlist` | `P13-13` | `partial` | 0 | 3 |
 | `phase13-live-ui-provider-promotion.json` | `verifyNodePhase13LiveUiProviderPromotion` | `P13-17` | `partial` | 0 | 4 |
 | `phase13-media-recorder-mediainfo-provider.json` | `verifyNodePhase13MediaRecorderMediainfoProvider` | `P13-26` | `partial` | 0 | 6 |
-| `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56` | `partial` | 0 | 1 |
+| `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56` | `ready` | 0 | 0 |
 | `phase13-native-addon-loading-decision.json` | `verifyNodePhase13NativeAddonLoadingDecision` | `P13-39` | `partial` | 0 | 6 |
 | `phase13-net-tls-dns-staged-compatibility.json` | `verifyNodePhase13NetTlsDnsStagedCompatibility` | `P13-30` | `partial` | 0 | 6 |
 | `phase13-notifications-settings-power-manager.json` | `verifyNodePhase13NotificationsSettingsPowerManager` | `P13-25` | `partial` | 0 | 6 |

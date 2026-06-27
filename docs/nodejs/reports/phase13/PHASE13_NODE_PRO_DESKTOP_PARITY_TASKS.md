@@ -2126,7 +2126,7 @@ P13 task 本身使用以下执行状态：
     - Future release work: runtime profile promotion and generated declaration
       package release checks remain gated.
 
-- [ ] P13-56: 更新 migration and Pro9 comparison docs。
+- [x] P13-56: 更新 migration and Pro9 comparison docs。
   - 范围：同步 `MIGRATION_FROM_RHINO.md`、`INTEGRATION_STATUS_PRO9_COMPARISON.md`、
     `COMPATIBILITY_NOTES_PRO_AUTOX.md`。
   - 验收：
@@ -2144,15 +2144,17 @@ P13 task 本身使用以下执行状态：
     - The migration docs now list the `raw_network` desktop marker and raw
       network modules opt-in as evidence/metadata only, matching P13-54 and
       P13-55 without granting default authority.
-    - The P13-56 verifier now links the docs taxonomy to the P13-57 summary
-      output for completed/open/deferred/rejected state while keeping P13-56
-      open.
+    - The P13-56 verifier links the docs taxonomy to the P13-57 summary output
+      for completed/open/deferred/rejected state.
     - Host verifier:
       `tools/nodejs/phase13/verify-migration-pro9-comparison.js`.
     - Gradle gate: `:app:verifyNodePhase13MigrationPro9Comparison`.
     - Report:
       `docs/nodejs/reports/phase13/P13_56_MIGRATION_PRO9_COMPARISON.md`.
-    - Remaining P13-56 blockers: runtime profile promotion, packaged
+    - Closure: migration, Pro9 comparison, and Pro/AutoX notes share the same
+      Pro-compatible/Desktop-compatible/gated taxonomy without treating
+      debug-only/provider POC evidence as formal availability.
+    - Future documentation work: runtime profile promotion, packaged
       Pro/Desktop migration cookbook, prompt/disclosure UX, and device
       permission matrix remain gated.
 

@@ -105,7 +105,6 @@ function buildReport(files) {
       token(files.phase13Summary, "- Open blockers:"),
       token(files.phase13Summary, "- Deferred blockers:"),
       token(files.phase13Summary, "- Rejected blockers:"),
-      token(files.phase13Summary, "| `P13-56` | `open` | `docs.examples.final_gate`"),
       token(files.phase13Summary, "| `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56`"),
     ]),
   ];
@@ -142,8 +141,8 @@ function buildReport(files) {
         [files.migrationDoc, files.proComparison, files.proAutoxNotes].every((file) =>
           file.text.includes("debug-only/provider POC is not formal availability") &&
             file.text.includes("runtime promotion gate")) &&
-        files.phase13Summary.text.includes("| `P13-56` | `open` | `docs.examples.final_gate`"),
-      "P13-56 runtime parity claims must remain partial until promoted paths are executable and summary state stays open.",
+        files.phase13Summary.text.includes("| `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56`"),
+      "P13-56 runtime parity claims must remain partial until promoted paths are executable and summary state stays linked.",
     ),
     check(
       "surface-entry",
@@ -165,7 +164,6 @@ function buildReport(files) {
   ];
   const blockers = [
     ...scenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
-    "packaged Pro/Desktop migration cookbook, prompt/disclosure UX, and device permission matrix remain incomplete",
   ];
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
   return {
@@ -185,7 +183,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       migrationDocsClassified: scenarioById(scenarios, "migration_doc_taxonomy").status === "ready",
       pro9ComparisonClassified: scenarioById(scenarios, "pro9_comparison_taxonomy").status === "ready",

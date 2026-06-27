@@ -1,7 +1,8 @@
 # P13-56 Migration And Pro9 Comparison Docs
 
-P13-56 records migration and Pro9 comparison docs as partial. The landing
-updates `MIGRATION_FROM_RHINO.md`,
+P13-56 records migration and Pro9 comparison docs as partial capability
+evidence. The P13-56 documentation taxonomy gate is ready: the landing updates
+`MIGRATION_FROM_RHINO.md`,
 `INTEGRATION_STATUS_PRO9_COMPARISON.md`, and
 `COMPATIBILITY_NOTES_PRO_AUTOX.md` so script developers see the same
 classification vocabulary across Rhino migration, Auto.js Pro 9 comparison, and
@@ -29,9 +30,8 @@ network sockets, raw network modules opt-in, expanded filesystem roots,
 Android npm CLI, registry install, lifecycle scripts, and native payloads
 remains gated.
 
-The gate also links this migration taxonomy to the P13-57 summary output so
-P13-56 remains listed as open while the summary enumerates completed, open,
-deferred, and rejected blocker state.
+The gate also links this migration taxonomy to the P13-57 summary output so the
+summary enumerates completed, open, deferred, and rejected blocker state.
 
 Runtime parity claims remain partial until promoted paths are executable. The
 docs can reference static examples, diagnostics, and type metadata as migration
@@ -60,12 +60,13 @@ Reports:
 
 ## Current Decision
 
-Status is `partial`.
+Status is `ready` for the documentation taxonomy gate.
 
 This gate proves the migration and comparison docs use the same
 Pro-compatible, Desktop-compatible, and gated/diagnostic-only taxonomy without
 turning debug-only/provider POC evidence into formal availability. P13-57
 summary aggregation is linked as evidence. Runtime profile promotion remains a
-gated dependency owned by the runtime/profile promotion tracks. The remaining
-P13-56 blocker is packaged Pro/Desktop migration cookbooks,
-prompt/disclosure UX, and device permission matrices.
+gated dependency owned by the runtime/profile promotion tracks. Packaged
+Pro/Desktop migration cookbooks, prompt/disclosure UX, and device permission
+matrices remain future documentation work after the corresponding runtime and
+packaged promotion evidence exists.
