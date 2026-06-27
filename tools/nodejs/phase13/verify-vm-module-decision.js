@@ -146,7 +146,19 @@ function buildReport(files) {
     ),
     check(
       "default-vm-enabled",
-      files.nodeBridgeSources.text.includes('vm: Object.freeze({\n        id: "vm",\n        diagnosticName: "vm",\n        gradleProperty: null,\n        defaultEnabled: true'),
+      containsInOrder(files.runtimeCapabilities.text, [
+        'id = "vm"',
+        'diagnosticName = "vm"',
+        "gradleProperty = null",
+        "defaultEnabled = true",
+        'status = "partial"',
+      ]) &&
+        containsInOrder(files.nodeBridgeSources.text, [
+          "vmProfile: Object.freeze({",
+          'status: "native_available"',
+          "defaultEnabled: true",
+          'module: "native_available"',
+        ]),
       "P13-36 must enable vm by default for desktop npm compatibility.",
     ),
     check(
@@ -214,6 +226,18 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function containsInOrder(text, tokens) {
+  let offset = 0;
+  for (const token of tokens) {
+    const index = text.indexOf(token, offset);
+    if (index < 0) {
+      return false;
+    }
+    offset = index + token.length;
+  }
+  return true;
 }
 
 function scenarioById(scenarios, id) {
