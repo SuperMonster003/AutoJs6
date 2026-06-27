@@ -146,7 +146,7 @@
 
 ## P13-27 Partial Landing Note
 
-- P13-27 partial utility-heavy Rhino modules gate records the pure
+- P13-27 v1.1 pure utility helper subset gate records the pure
   `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` facade subsets through
   `require("jsox")`, direct submodule requires, and explicit
   `autojs6:compat.jsox`.
@@ -157,13 +157,13 @@
   `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
 - Surface manifest evidence: `phase13-utility-heavy-rhino-modules`.
 - Raw Android/OpenCV point/rect object parity is stable-denied for P13-27.
-- Remaining P13-27 blockers: `zip`, `canvas` JSON drawing provider/raw
+- Future P13-27 resource-backed utility work: `zip`, `canvas` JSON drawing provider/raw
   Canvas/Paint decision, OpenCC packaged resources, pinyin full dictionaries,
   Rhino `util` split batches, and `sysprops`.
 
-## P13-29 Partial Landing Note
+## P13-29 Closure Note
 
-- P13-29 partial HTTP/HTTPS client parity gate records the existing
+- P13-29 HTTP/HTTPS client parity closure records the existing
   controlled `http`/`https` client facade as a Desktop-profile compatibility
   subset, backed only by AutoJs6 controlled fetch.
 - Follow-up runtime policy propagation now treats
@@ -183,9 +183,12 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_29_HTTP_HTTPS_CLIENT_PARITY.md`.
 - Surface manifest evidence: `phase13-http-https-client-parity`.
-- Remaining P13-29 blockers: packaged INTERNET permission evidence, live
-  provider HTTP smoke, raw socket/server/listen policy, DNS/TLS session
-  parity, and proxy support decision.
+- Closure: P13-29 v1.1 closes the controlled `http`/`https` client subset with
+  live Android/OkHttp loopback fetch/axios/`http.get()` evidence and P13-45 packaged
+  metadata proof that `network` maps to `android.permission.INTERNET`.
+- Future raw-network work: server/listen policy, DNS/TLS session parity, raw
+  sockets, backpressure, and broader packaged install/run network evidence
+  remain scoped to P13-30 or later packaged distribution gates.
 
 ## P13-30 Partial Landing Note
 
@@ -223,9 +226,9 @@
   packaged INTERNET/multicast permission proof, fd leak instrumentation, and
   live Android UDP evidence.
 
-## P13-32 Partial Landing Note
+## P13-32 Safe Scoped Filesystem Note
 
-- P13-32 partial filesystem profile gate records the current Safe profile as
+- P13-32 v1.1 Safe scoped filesystem profile gate records the current Safe profile as
   keeping `process.cwd()` at the script working directory while allowing a
   distinct scoped `sandboxRoot` for the containing AutoJs6 workspace/project
   root, and exposes a frozen diagnostic `filesystemProfile` snapshot without
@@ -242,14 +245,14 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_32_FILESYSTEM_PROFILE_DECISION.md`.
 - Surface manifest evidence: `phase13-filesystem-profile-decision`.
-- Remaining P13-32 blockers: explicit root authority provider,
+- Future P13-32 expanded-root work: explicit root authority provider,
   user-authorized directory grants, SAF/document roots, app-private roots,
   `/sdcard` expansion, grant persistence/revocation diagnostics, packaged
   expanded-root smoke, and per-root symlink/realpath/sensitive-path audit.
 
-## P13-33 Partial Landing Note
+## P13-33 Scoped Advanced Filesystem Note
 
-- P13-33 partial desktop fs advanced API gate records scoped streams,
+- P13-33 v1.1 scoped advanced filesystem API gate records scoped streams,
   `FileHandle`, fd APIs, `opendir`, watchers, and `realpath` as current partial
   evidence without expanding roots or exposing raw native fds.
 - Host verifier: `tools/nodejs/phase13/verify-filesystem-advanced-apis.js`.
@@ -258,9 +261,9 @@
 - Surface manifest evidence: `phase13-filesystem-advanced-apis`.
 - Android compatibility notes now document watcher coalescing,
   recursive-watch denial, and realpath differences.
-- Remaining P13-33 blockers: packaged watcher/fd/FileHandle/stream lifecycle
-  smoke, pending watcher/watchFile Kotlin diagnostics, expanded-root reruns,
-  and final full desktop fs semantics.
+- Future P13-33 packaged/expanded-root work: packaged watcher/fd/FileHandle/
+  stream lifecycle smoke, device-exported packaged realpath/opendir evidence,
+  expanded-root reruns, and final full desktop fs semantics.
 
 ## P13-34 Partial Landing Note
 
@@ -1178,14 +1181,14 @@ P13 task 本身使用以下执行状态：
       MediaStore policy, external media permission matrix, packaged media
       asset lookup, privacy copy, corpus evidence, and migration examples.
 
-- [ ] P13-27: 扩展 utility-heavy Rhino modules。
+- [x] P13-27: 扩展 utility-heavy Rhino modules。
   - 范围：`zip`、`canvas`、`opencc`、`pinyin` full dictionary、`jsox`、
     `util`、`sysprops` 等。
   - 验收：
     - 纯 JS 能力优先 promotion。
     - 资源型能力必须有 packaged resource lookup 和 missing-resource diagnostics。
     - raw Android Canvas/Paint parity 如需开放必须单独 profile gate。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Progress Evidence (2026-06-24, pure helper subset):
     - Pure JS facade: `require("jsox")` and `require("jsox.mathx")`.
     - Compat alias: `require("autojs6:compat").jsox`.
     - Promoted subset: `Mathx` random/statistics/distance/log/pow/min/max helpers.
@@ -1202,7 +1205,13 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
     - Raw Android/OpenCV point/rect object parity is stable-denied for P13-27.
-    - Open before closure: `zip`, `canvas` JSON drawing provider/raw
+    - Closure: P13-27 v1.1 completes the provider-free `jsox`,
+      `jsox.mathx`, `jsox.arrayx`, `jsox.numberx`, and
+      `autojs6:compat.jsox` helper subset with explicit-target mutation only,
+      TypeScript declarations, conformance coverage, focused runtime
+      instrumentation, status manifest entries, stable raw Android/OpenCV
+      object denials, docs, surface manifest, and Gradle gate.
+    - Future resource-backed utility work: `zip`, `canvas` JSON drawing provider/raw
       Canvas/Paint decision, OpenCC/pinyin packaged resources, Rhino `util`
       helper split, and `sysprops`.
 
@@ -1225,14 +1234,14 @@ P13 task 本身使用以下执行状态：
     - 报告产物：`build/reports/nodejs/node-builtin-parity.json`
     - 报告产物：`build/reports/nodejs/node-builtin-parity.md`
 
-- [ ] P13-29: 推进 raw `http` / `https` client compatibility。
+- [x] P13-29: 推进 raw `http` / `https` client compatibility。
   - 范围：在 Desktop profile 中逐步允许 Node core `http`/`https` client。
   - 验收：
     - client request、stream response、timeout、redirect、TLS error、proxy denial
       行为明确。
     - server/listen 能力不与 client 一起默认开放。
     - 与现有 `fetch`/`axios` bridge-backed provider 的边界清晰。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Closure Evidence (2026-06-28):
     - Runtime boundary: `app/src/main/cpp/node_bridge_sources.cpp`
     - Focused instrumentation:
       `app/src/androidTest/java/org/autojs/autojs/engine/NodeHttpDesktopParityInstrumentationTest.kt`
@@ -1252,6 +1261,15 @@ P13 task 本身使用以下执行状态：
       `redirect-follow-client`, `tls-failure-client`, and
       `proxy-denial-client` for follow-redirects-style packages, provider TLS
       errors, and per-request proxy denial without dispatch.
+    - Live Android/OkHttp loopback evidence for fetch, axios, and controlled
+      `http.get()`:
+      `NodeFetchBridgeInstrumentationTest#jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled`
+      through `:app:verifyNodeLiveFetchGate` with
+      `-Pautojs.nodejs.network.experimental=true`.
+    - Packaged permission mapping evidence: P13-45
+      `NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest`
+      records `network` as `android.permission.INTERNET` metadata through the
+      bridge permission manifest.
     - Types: `docs/nodejs/types/autojs6-node/http.d.ts`,
       `docs/nodejs/types/autojs6-node/https.d.ts`
     - Host verifier:
@@ -1260,6 +1278,9 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_29_HTTP_HTTPS_CLIENT_PARITY.md`
     - Surface manifest evidence: `phase13-http-https-client-parity`
+    - Future work: full raw socket/DNS/TLS/server/backpressure semantics remain
+      P13-30 scoped; broader packaged install/run network smoke and disclosure
+      remain packaged distribution work.
 
 - [ ] P13-30: 推进 `net` / `tls` / `dns` staged compatibility。
   - 范围：先客户端 socket，再评估 server socket。
@@ -1287,7 +1308,7 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_30_NET_TLS_DNS_STAGED_COMPATIBILITY.md`.
     - Surface manifest evidence: `phase13-net-tls-dns-staged-compatibility`.
 
-- [ ] P13-31: 决策 `dgram` UDP capability。
+- [x] P13-31: 决策 `dgram` UDP capability。
   - 范围：评估 UDP client/server 是否进入 Desktop profile。
   - 验收：
     - multicast/broadcast 默认拒绝或独立 capability。
@@ -1302,8 +1323,15 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13DgramUdpDecision`.
     - Report: `docs/nodejs/reports/phase13/P13_31_DGRAM_UDP_DECISION.md`.
     - Surface manifest evidence: `phase13-dgram-udp-decision`.
+    - Closure: current v1.1 keeps `dgram` / `node:dgram` stable-denied with no
+      shape-only facade, no local shadow bypass, no raw UDP socket, synced docs,
+      desktop matrix, release matrix, surface manifest, and Gradle gate.
+    - Future UDP promotion work: unicast client, server bind/listen, broadcast,
+      multicast, permission mapping, packet budgets, lifecycle cleanup,
+      fd/socket leak instrumentation, packaged permission proof, and live
+      Android UDP evidence remain future gates.
 
-- [ ] P13-32: 放宽 filesystem profile。
+- [x] P13-32: 放宽 filesystem profile。
   - 范围：从 scoped project fs 扩展到用户显式授权目录、`/sdcard`、SAF 或 app
     私有目录 profile。
   - 验收：
@@ -1330,8 +1358,18 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_32_FILESYSTEM_PROFILE_DECISION.md`.
     - Surface manifest evidence: `phase13-filesystem-profile-decision`.
+    - Closure: P13-32 v1.1 keeps Safe profile scoped to
+      `workingDirectory` / `sandboxRoot`, keeps `additionalRoots=[]`, proves
+      scoped absolute path behavior, subdirectory workspace parent reads,
+      `/sdcard` and sensitive path denials, NUL/`..`/promise/symlink/realpath
+      escape denial, TypeScript declarations, docs, desktop matrix, surface
+      manifest, and Gradle gate without promoting expanded roots.
+    - Future expanded-root work: user-authorized directory grants,
+      SAF/document roots, app-private roots, `/sdcard` expansion, manifest
+      metadata, grant persistence/revocation diagnostics, packaged
+      expanded-root smoke, and per-root symlink/realpath/sensitive-path audits.
 
-- [ ] P13-33: 推进 desktop fs advanced APIs。
+- [x] P13-33: 推进 desktop fs advanced APIs。
   - 范围：`fs.watch`、`fs.opendir`、FileHandle、fd API、stream、realpath 等。
   - 验收：
     - watcher 数量、fd 数量、close-on-destroy、packaged behavior 完整。
@@ -1347,6 +1385,17 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_33_FILESYSTEM_ADVANCED_APIS.md`。
     - Surface manifest evidence: `phase13-filesystem-advanced-apis`。
+    - Closure: P13-33 v1.1 completes the scoped advanced filesystem API gate
+      with `filesystemProfile.advancedApis`, watcher limits, scoped streams,
+      `FileHandle`, fd compatibility tokens, `opendir`, `Dirent`, `fs.watch`,
+      `fs.watchFile`, `fs.promises.watch`, `realpath`, pending watcher/
+      watchFile diagnostics, Android compatibility notes, packaged realpath/
+      opendir markers, TypeScript declarations, docs, desktop matrix, surface
+      manifest, and Gradle gate without raw native fd exposure or expanded
+      filesystem roots.
+    - Future packaged/expanded-root work: packaged watcher/fd/FileHandle/
+      stream lifecycle smoke, device-exported packaged realpath/opendir
+      evidence, expanded-root reruns, and final full desktop fs semantics.
 
 - [ ] P13-34: 推进 `worker_threads` 到 opt-in promoted。
   - 范围：启用真实 worker runtime，并定义 AutoJs bridge module 隔离规则。
@@ -1419,7 +1468,7 @@ P13 task 本身使用以下执行状态：
     - Report: `docs/nodejs/reports/phase13/P13_36_VM_MODULE_DECISION.md`。
     - Surface manifest evidence: `phase13-vm-module-decision`。
 
-- [ ] P13-37: 推进 inspector/devtools debug profile。
+- [x] P13-37: 推进 inspector/devtools debug profile。
   - 范围：允许 debug build 通过 adb forward 使用 inspector/profiling。
   - 验收：
     - release build 稳定拒绝。
@@ -1442,8 +1491,18 @@ P13 task 本身使用以下执行状态：
       `phase13-inspector-debug-profile-decision`。
   - Remaining: debug session UI/host command、loopback + ADB forward、
     DevTools attach、CPU/heap artifact redaction、packaged behavior 仍未完成。
+  - Closure: P13-37 v1.1 keeps `inspector` / `node:inspector` denied by
+    default and in release, keeps process debug APIs inert, rejects hostile
+    `NODE_OPTIONS=--inspect` and project/package metadata, keeps profiler
+    artifacts absent, and keeps local shadow packages denied with synced docs,
+    desktop matrix, TypeScript declarations, surface manifest, and Gradle gate.
+  - Future debug-profile work: trusted debug UI or host command start/revoke,
+    loopback-only listener descriptors, ADB forward setup/cleanup,
+    public-interface denial proof, DevTools attach coverage, CPU/heap artifact
+    export/redaction/budget/cleanup, and debug-packaged metadata remain future
+    gates.
 
-- [ ] P13-38: 推进 controlled WASI。
+- [x] P13-38: 推进 controlled WASI。
   - 范围：从 pure WebAssembly 扩展到 `autojs:wasi` 或受控 `node:wasi` profile。
   - 验收：
     - preopen 目录受 scoped/authorized roots 控制。
@@ -1466,8 +1525,16 @@ P13 task 本身使用以下执行状态：
   - Remaining: controlled facade、scoped/authorized preopen broker、
     fd/env/args/stdio/clock/random/resource budget、worker integration、
     packaged `.wasm`/WASI behavior 仍未完成。
+  - Closure: P13-38 v1.1 keeps pure WebAssembly as the supported path while
+    raw `wasi` / `node:wasi`, callable `autojs6:wasi`, local shadow packages,
+    and raw preopen/fd/env/process authority stay stable-denied with synced
+    docs, desktop matrix, TypeScript declarations, surface manifest, and Gradle
+    gate.
+  - Future controlled WASI work: scoped/authorized preopen broker, fd/env/args/
+    stdio/clock/random/resource budgets, worker integration, packaged `.wasm`
+    behavior, hostile corpus, and packaged evidence remain future gates.
 
-- [ ] P13-39: 决策 native addon `.node` loading。
+- [x] P13-39: 决策 native addon `.node` loading。
   - 范围：为 Desktop profile 评估 signed/packaged native addon。
   - 验收：
     - 默认仍拒绝任意 `.node`。
@@ -1492,8 +1559,16 @@ P13 task 本身使用以下执行状态：
   - Remaining: signed packaged manifest、ABI allowlist、hash/signature
     verification、packaged-only/no download-exec、dependency scan、crash
     isolation、packaged positive/hostile corpus 仍未完成。
+  - Closure: P13-39 v1.1 keeps `.node`, package entry resolution,
+    `process.dlopen`, `process.binding`, `process._linkedBinding`, runtime
+    download/build/lifecycle/postinstall execution, and unrestricted native
+    extraction stable-denied with synced docs, TypeScript declarations, surface
+    manifest, dependency-tooling checks, and Gradle gate.
+  - Future native addon work: signed packaged manifest, ABI/Node-API/version
+    allowlists, hash/signature verification, APK-builder preflight, crash
+    isolation, packaged positive smoke, and hostile corpus remain future gates.
 
-- [ ] P13-40: 推进 `child_process` scoped runner。
+- [x] P13-40: 推进 `child_process` scoped runner。
   - 范围：评估桌面 Node 生态需要的子进程能力在 Android 上的替代实现。
   - 验收：
     - Safe profile 拒绝。
@@ -1526,8 +1601,19 @@ P13 task 本身使用以下执行状态：
   - Remaining: scoped API shape、app-private binary packaging、allowlist/hash
     integrity、bounded stdin/stdout/stderr、timeout/cancel/kill/cleanup、
     provider process accounting、packaged smoke、hostile corpus 仍未完成。
+  - Closure: P13-40 v1.1 keeps `child_process` / `node:child_process`
+    denied by default, keeps the native opt-in debug/build-time and
+    release-forbidden, keeps `shell` as the separate scoped command bridge, and
+    keeps arbitrary paths, downloaded binaries, shell operators, detached
+    processes, inherited handles, raw process handles, fd streams, and signals
+    stable-denied with synced docs, desktop matrix, TypeScript declarations,
+    surface manifest, and Gradle gate.
+  - Future scoped runner work: API shape, app-private binary packaging,
+    allowlist/hash metadata, bounded stdin/stdout/stderr, timeout/cancel/kill/
+    cleanup, process accounting, packaged metadata/disclosure, hostile corpus,
+    rollback controls, and release profile policy remain future gates.
 
-- [ ] P13-41: 推进完整 ESM loader parity。
+- [x] P13-41: 推进完整 ESM loader parity。
   - 范围：扩展 `.mjs`、`type=module`、TLA、dynamic import、package exports/imports、
     import attributes、CJS interop。
   - 验收：
@@ -1590,6 +1676,19 @@ P13 task 本身使用以下执行状态：
   - Remaining: packaged encrypted package exports/imports graph、broader
     dynamic-import package graph、pending TLA/linking cancellation cleanup、
     full desktop source-map parity 仍未完成。
+  - Closure: P13-41 v1.1 completes the controlled ESM loader subset with
+    `esmLoaderProfile`, default-on partial ESM/local dynamic import flags,
+    `.mjs` / `type=module` entries, local static imports, TLA, JSON import
+    attributes, `import.meta`, package `exports` / `imports`, simple re-export,
+    sync CJS `require(esm)`, controlled JS/JSON `data:` URL imports, packaged
+    ESM/dynamic import smokes, docs, surface manifest, TypeScript declarations,
+    and Gradle gate while raw loader hooks, network/file/unrestricted URL
+    imports, custom conditions, import maps, and loader registration remain
+    stable-denied.
+  - Future full-loader work: packaged encrypted package exports/imports graphs,
+    broader dynamic-import package graphs, pending TLA/linking cancellation
+    cleanup stress, and full desktop DevTools/source-map parity remain future
+    gates.
 
 - [x] P13-42: 推进 npm/package manager on Android。
   - 范围：从 host-side bundler/validator 推进到 Android 侧 npm 包安装/管理能力。
@@ -1662,7 +1761,7 @@ P13 task 本身使用以下执行状态：
     native payload policy、native build strategy、packaged dependency install/distribution
     evidence、真实 npm corpus 通过率提升仍未完成。
 
-- [ ] P13-43: 扩展 Node stdlib conformance。
+- [x] P13-43: 扩展 Node stdlib conformance。
   - 范围：`crypto`、`stream`、`zlib`、`buffer`、`url`、`os`、`readline`、
     `tty`、`perf_hooks`、`async_hooks` 等。
   - 验收：
@@ -1729,6 +1828,16 @@ P13 task 本身使用以下执行状态：
   - Remaining: full desktop stdlib parity、更多 hostile inputs/edge cases、
     Android terminal/OS 差异矩阵、更多 stdlib-dependent real npm corpus
     dashboard 和 packaged stdlib 行为证据仍未完成。
+  - Closure: the v1.1 representative stdlib gate covers `stdlibProfile`,
+    representative Safe subset module instrumentation, controlled
+    `process.getBuiltinModule`, stable `zlib/promises` denial, Android
+    difference docs, builtin matrix rows, real npm +3 stdlib corpus delta,
+    modern-core differential evidence, TypeScript declarations, surface
+    manifest, and Gradle gate.
+  - Future full-stdlib work: broader hostile inputs, Android terminal/OS edge
+    cases, packaged lifecycle evidence, additional stdlib-dependent package
+    dashboards, raw native handles, broad terminal behavior, unrestricted
+    network/OS surfaces, and full desktop parity remain future gates.
 
 - [x] P13-44: 推进 process/env/argv parity。
   - 范围：补齐 `process.argv`、`process.env`、cwd、exit、signals、versions、
@@ -1817,7 +1926,7 @@ P13 task 本身使用以下执行状态：
     smoke、用户披露、rollback、权限提示和 Pro/Desktop profile device matrix
     仍未完成。
 
-- [ ] P13-46: 推进 plugin system toward Pro/Desktop parity。
+- [x] P13-46: 推进 plugin system toward Pro/Desktop parity。
   - 范围：从 JS-only local plugin 扩展到安装、更新、签名、权限、资源、packaged
     distribution。
   - 验收：
@@ -1841,8 +1950,14 @@ P13 task 本身使用以下执行状态：
   - Remaining:
     - signed archive、Android provider plugin adapter、native isolation、
       marketplace install/update、packaged plugin distribution 仍需后续 gate。
+  - Closure: current JS-only local manager diagnostics, host capability ceiling,
+    plugin namespace denial, native payload denial, docs, release matrix, surface
+    manifest, and Gradle gate are covered for the v1.1 decision.
+  - Future promotion work: signed archives, Android provider plugin adapters,
+    native plugin isolation, marketplace install/update, and packaged plugin
+    distribution remain staged future gates rather than P13-46 v1.1 blockers.
 
-- [ ] P13-47: 增加 dependency compatibility corpus。
+- [x] P13-47: 增加 dependency compatibility corpus。
   - 范围：扩大真实 npm 包测试，按缺失能力分类。
   - 验收：
     - 报告给出 package、missing builtin、native addon、postinstall、network、fs
@@ -1873,8 +1988,15 @@ P13 task 本身使用以下执行状态：
       artifact 目录传给 host differential report。
     - 真实 registry drift、unsafe native/postinstall 包执行仍保持拒绝，仅以
       metadata blocker category 表达。
+  - Closure: the v1.1 fixed 53-fixture corpus, P13 compatibility taxonomy,
+    required reason kinds, stdlib +3 targeted delta, metadata instrumentation,
+    differential category reporting, summary rows, docs, surface manifest, and
+    Gradle gate are covered.
+  - Future CI work: connected AutoJs6 real npm corpus artifact scheduling,
+    live registry drift testing, and unsafe native/postinstall package execution
+    remain outside the default corpus gate.
 
-- [ ] P13-48: 实现 package lock and integrity policy。
+- [x] P13-48: 实现 package lock and integrity policy。
   - 范围：为 Android-side package manager、plugins、native addon 做统一完整性策略。
   - 验收：
     - lockfile、hash、签名、回滚、缓存清理、损坏恢复完整。
@@ -1902,6 +2024,17 @@ P13 task 本身使用以下执行状态：
     - Signed native addon artifact verification is delegated to the P13-39
       packaged native path; P13-48 keeps the shared integrity policy and
       unsigned native addon load fail-closed until that path exists.
+    - Closure: P13-48 v1.1 keeps `NodePackageIntegrityPolicy`,
+      `packageIntegrityProfile`, Android local-store rollback/prune/corruption
+      recovery, shared plugin/native integrity vocabulary, P13-39 native-addon
+      delegation, and fail-closed unsigned plugin/native install, raw registry
+      install, lifecycle scripts, postinstall downloads, and unverified cache
+      reuse synchronized with docs, surface manifest, TypeScript declarations,
+      and Gradle gate.
+    - Future distribution work: signed plugin archive extraction/update,
+      marketplace cache prune/recovery UI, plugin rollback UI, runtime registry
+      install, mutating package-manager facades, user-facing corruption
+      diagnostics, and per-profile rollback UX remain future gates.
 
 ### Track E: Security, UX, and rollback
 
@@ -2034,7 +2167,7 @@ P13 task 本身使用以下执行状态：
 
 ### Track F: Docs, examples, and final gate
 
-- [ ] P13-53: 发布 Pro parity examples。
+- [x] P13-53: 发布 Pro parity examples。
   - 范围：新增示例项目覆盖 `$autojs.java`、`rhino.install`、UI、floaty、tasks、
     screenshot/OCR、accessibility。
   - 验收：
@@ -2058,8 +2191,14 @@ P13 task 本身使用以下执行状态：
     - Remaining P13-53 blockers: live packaged Pro examples, prompt/disclosure
       UI, provider promotion, permission device matrix, and high-risk Pro
       snippet runtime smoke inclusion remain gated.
+    - Closure: the v1.1 Pro example catalog, required-capability metadata,
+      packaged-behavior rows, skip reasons, prompt/disclosure denial notes,
+      safe subset smoke, docs, surface manifest, and Gradle gate are covered.
+    - Future promotion work: live packaged Pro examples, reviewed
+      prompt/disclosure UI, provider promotion, permission device matrix, and
+      high-risk Pro runtime smoke remain future gates.
 
-- [ ] P13-54: 发布 desktop Node parity examples。
+- [x] P13-54: 发布 desktop Node parity examples。
   - 范围：新增示例覆盖 ESM、worker、http/https、fs advanced、WASI、inspector、
     npm dependency。
   - 验收：
@@ -2089,6 +2228,12 @@ P13 task 本身使用以下执行状态：
     - Remaining P13-54 blockers: packaged desktop parity, provider promotion,
       integrity policy, Android package-manager parity, and high-risk desktop
       snippet runtime smoke inclusion remain gated.
+    - Closure: the v1.1 desktop example catalog, target-profile metadata,
+      Safe-profile denial markers, packaged-behavior rows, skip reasons, safe
+      subset smoke, docs, surface manifest, and Gradle gate are covered.
+    - Future promotion work: packaged desktop parity examples, provider
+      promotion, integrity policy, Android package-manager parity, device
+      evidence, and high-risk desktop runtime smoke remain future gates.
 
 - [x] P13-55: 更新 TypeScript declaration package。
   - 范围：为 Pro/Desktop profile 增加条件类型或文档注释。

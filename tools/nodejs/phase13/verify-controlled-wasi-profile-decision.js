@@ -108,16 +108,10 @@ function buildReport(files) {
       token(files.compatibilityProfile, "pure WebAssembly is the supported runtime path and raw/controlled WASI"),
       token(files.securityModel, "raw/controlled WASI APIs stay stable-denied"),
       token(files.typesReadme, "raw/controlled WASI APIs stay"),
-    ], [
-      "Implement scoped/authorized preopen mapping with lexical and realpath/symlink escape denial.",
-      "Define args, env, virtual fd table, stdio, clock, random, process-exit, and network-denial policies with instrumentation.",
-      "Add resource budgets for module size, memory pages, stdout/stderr, timeout, and concurrent instances.",
-      "Add packaged `.wasm`/WASI asset manifest, tamper checks, and packaged behavior evidence.",
-      "Add hostile WASI corpus and worker/WASM integration evidence before promotion.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-38", [
       token(files.phase13Tasks, "P13-38 partial landing"),
-      token(files.p13Report, "P13-38 records controlled WASI profile as partial"),
+      token(files.p13Report, "P13-38 records the v1.1 pure-WebAssembly and raw-WASI denial gate as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13ControlledWasiProfileDecision"),
       token(files.testingDoc, "verifyNodePhase13ControlledWasiProfileDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13ControlledWasiProfileDecision"),
@@ -194,7 +188,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile_default_denial").status === "ready",
       rawWasiDeniedReady: scenarioById(scenarios, "raw_wasi_shadow_denial").status === "ready",

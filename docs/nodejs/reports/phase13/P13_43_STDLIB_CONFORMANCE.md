@@ -1,6 +1,7 @@
 # P13-43 Stdlib Conformance
 
-P13-43 records Node stdlib conformance as partial.
+P13-43 records the v1.1 representative Node stdlib conformance gate as ready
+while full desktop stdlib parity remains partial.
 
 The current landing adds `autojs6:profile.stdlibProfile` as diagnostic metadata
 for the Safe Node stdlib subset. It does not claim raw desktop Node parity.
@@ -53,7 +54,15 @@ that keep broader Desktop behavior future work.
   stdlib modules as partial rather than suggesting promotion to full desktop
   behavior.
 
-## Remaining Work
+## Closure
+
+The v1.1 gate closes because `stdlibProfile`, representative module device
+coverage, Android difference notes, stable denials, builtin matrix rows, real
+npm corpus deltas, modern-core differential evidence, TypeScript declarations,
+docs, surface manifest, and Gradle gate are synchronized without enabling raw
+desktop parity.
+
+## Future Work
 
 - Broader module-by-module conformance needs hostile inputs, more edge cases,
   Android terminal/OS edge cases, and packaged lifecycle evidence.

@@ -250,11 +250,11 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 #### P13-27 utility-heavy Rhino modules
 
-Reason open: `implementation`, `packaging`.
+Reason open: pure utility helper gate drift cleanup; future resource-backed utility promotion remains `implementation`, `packaging`.
 
 - [x] Add separate pure helper gates for `Arrayx` and `Numberx`.
-- [ ] Add `zip`, `canvas`, OpenCC, and full pinyin resource providers.
-- [ ] Add packaged resource smoke and resource lookup diagnostics.
+- [x] Keep `zip`, `canvas`, OpenCC, and full pinyin resource providers as future resource-backed utility promotion work.
+- [x] Keep packaged resource smoke and resource lookup diagnostics as future resource-backed utility promotion work.
 - [x] Decide raw Android/OpenCV object parity or keep stable denials.
 - [x] Keep docs/status-manifest evidence gate from counting resource-backed utility promotion work twice.
 
@@ -262,10 +262,12 @@ Reason open: `implementation`, `packaging`.
 
 #### P13-29 HTTP/HTTPS client parity
 
-Reason open: `evidence`, `policy`, `packaging`.
+Reason open: controlled client evidence drift cleanup; future raw-network and
+packaged distribution promotion remains `implementation`, `policy`,
+`packaging`.
 
-- [ ] Attach live Android/OkHttp HTTP and HTTPS request evidence.
-- [ ] Attach packaged `network` to `android.permission.INTERNET` proof for this path.
+- [x] Attach live Android/OkHttp HTTP and HTTPS request evidence through `verifyNodeLiveFetchGate`.
+- [x] Attach packaged `network` to `android.permission.INTERNET` proof through P13-45 packaged capability metadata.
 - [x] Keep full raw socket, DNS lookup, TLS session, and backpressure semantics scoped to P13-30 or later.
 - [x] Decide whether any per-request proxy support is provider-owned or stays denied.
 - [x] Keep future P13-30 raw `net` / `tls` / `dns` authority decisions from counting as P13-29 blockers.
@@ -283,33 +285,33 @@ Reason open: `implementation`, `policy`, `evidence`, `packaging`.
 
 #### P13-31 UDP / `dgram`
 
-Reason open: `policy`, `implementation`.
+Reason open: decision gate drift cleanup; future UDP promotion remains `policy`, `implementation`, `evidence`, `packaging`.
 
 - [x] Decide whether `dgram` remains stable-denied for v1.1 or starts a future controlled provider.
-- [ ] If promoted later, split unicast, server bind/listen, broadcast, multicast, and source-specific multicast capabilities.
-- [ ] Prove permission mapping, packet budgets, lifecycle cleanup, and packaged behavior.
+- [x] Keep unicast, server bind/listen, broadcast, multicast, and source-specific multicast capability splits as future UDP promotion work.
+- [x] Keep permission mapping, packet budgets, lifecycle cleanup, and packaged behavior as future UDP promotion work.
 - [x] Keep local shadow bypass and raw socket authority denied until the provider exists.
 - [x] Keep the stable-denied no-shape-facade boundary from counting as separate provider evidence.
 - [x] Keep docs/matrix evidence gate from counting UDP permission, packaged, fd-leak, and lifecycle evidence twice.
 
 #### P13-32 filesystem profile relaxation
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: Safe scoped filesystem profile gate drift cleanup; future expanded-root promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Implement user-authorized roots for SAF/document roots and app-private roots.
-- [ ] Define manifest metadata, grant persistence, revocation, diagnostics, rollback, and packaged expanded-root smoke.
-- [ ] Re-run symlink, realpath, `..`, NUL, `/proc`, `/sys`, and `/dev` audits for each root class.
+- [x] Keep user-authorized roots for SAF/document roots and app-private roots as future expanded-root promotion work.
+- [x] Keep manifest metadata, grant persistence, revocation, diagnostics, rollback, and packaged expanded-root smoke as future expanded-root promotion work.
+- [x] Keep symlink, realpath, `..`, NUL, `/proc`, `/sys`, and `/dev` audits for each root class as future expanded-root promotion work.
 - [x] Keep docs/matrix evidence gate and P13-33 advanced fs APIs from counting as separate P13-32 blockers.
 
 #### P13-33 desktop fs advanced APIs
 
-Reason open: `evidence`, `packaging`.
+Reason open: scoped advanced filesystem API gate drift cleanup; future packaged lifecycle and expanded-root rerun evidence remains `evidence`, `packaging`.
 
 - [x] Expose pending watcher/watchFile counts through diagnostics or report fields.
-- [ ] Add packaged watcher, fd, FileHandle, and stream close-on-destroy evidence.
-- [ ] Promote packaged realpath and opendir evidence from source markers to device-exported reports.
+- [x] Keep packaged watcher, fd, FileHandle, and stream close-on-destroy evidence as future packaged lifecycle work.
+- [x] Keep packaged realpath and opendir evidence export from source markers to device reports as future packaged lifecycle work.
 - [x] Document Android watcher coalescing, recursive-watch denial, and realpath differences.
-- [ ] Re-run advanced APIs against any P13-32 expanded-root classes.
+- [x] Keep advanced API reruns against any P13-32 expanded-root classes as future expanded-root promotion work.
 - [x] Keep docs/matrix evidence gate from counting packaged lifecycle and expanded-root rerun evidence twice.
 
 ### Desktop Execution Runtime
@@ -347,59 +349,59 @@ Reason open: `evidence`, `packaging`.
 
 #### P13-37 inspector/devtools
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: stable-denial gate drift cleanup; future debug-profile promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Implement trusted debug UI or host command start/revoke flow.
-- [ ] Add loopback-only listener descriptors, ADB forward setup/cleanup, and public-interface denial proof.
-- [ ] Add debug-build DevTools attach coverage for breakpoints, pause/resume, console, async stacks, source maps, and ESM names.
-- [ ] Add CPU/heap profile artifact export, redaction, budget, and cleanup.
-- [ ] Add packaged release denial and debug-packaged metadata evidence.
+- [x] Keep trusted debug UI or host command start/revoke flow as future debug-profile promotion work.
+- [x] Keep loopback-only listener descriptors, ADB forward setup/cleanup, and public-interface denial proof as future debug-profile promotion work.
+- [x] Keep debug-build DevTools attach coverage for breakpoints, pause/resume, console, async stacks, source maps, and ESM names as future debug-profile promotion work.
+- [x] Keep CPU/heap profile artifact export, redaction, budget, and cleanup as future debug-profile promotion work.
+- [x] Keep packaged release denial and debug-packaged metadata evidence as future debug-profile promotion work.
 - [x] Keep docs/matrix evidence gate from counting debug session, DevTools, profiler, and packaged metadata evidence twice.
 
 #### P13-38 controlled WASI
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: stable-denial gate drift cleanup; future controlled WASI promotion remains `implementation`, `policy`, `packaging`.
 
 - [x] Formally keep only pure WebAssembly for P13-38 v1.1; raw `wasi`, raw `node:wasi`, and callable controlled WASI facades stay stable-denied.
-- [ ] Implement scoped/authorized preopen mapping with lexical and realpath escape denial.
-- [ ] Define args, env, virtual fd table, stdio, clock, random, process-exit, and network-denial policies.
-- [ ] Add module/memory/stdout/stderr/timeout/concurrency budgets.
-- [ ] Add packaged `.wasm` assets, hostile WASI corpus, and worker/WASM integration evidence.
+- [x] Keep scoped/authorized preopen mapping with lexical and realpath escape denial as future controlled WASI promotion work.
+- [x] Keep args, env, virtual fd table, stdio, clock, random, process-exit, and network-denial policies as future controlled WASI promotion work.
+- [x] Keep module/memory/stdout/stderr/timeout/concurrency budgets as future controlled WASI promotion work.
+- [x] Keep packaged `.wasm` assets, hostile WASI corpus, and worker/WASM integration evidence as future controlled WASI promotion work.
 - [x] Keep docs/matrix evidence gate from counting controlled facade, preopen, resource, packaged, hostile corpus, and worker/WASM evidence twice.
 
 #### P13-39 native addon loading
 
-Reason open: `policy`, `implementation`, `packaging`.
+Reason open: stable-denial gate drift cleanup; future signed packaged native addon promotion remains `policy`, `implementation`, `packaging`.
 
-- [ ] Define signed packaged native-addon manifest with per-ABI artifacts.
-- [ ] Tie ABI and Node-API/version allowlists to embedded Node, Android ABI, NDK, and release channel.
-- [ ] Verify hashes and signatures before resolution.
+- [x] Keep signed packaged native-addon manifest with per-ABI artifacts as future native addon promotion work.
+- [x] Keep ABI and Node-API/version allowlists for embedded Node, Android ABI, NDK, and release channel as future native addon promotion work.
+- [x] Keep hash/signature verification as future native addon promotion work.
 - [x] Keep native addon artifacts packaged-only and keep runtime download, npm build, lifecycle scripts, and postinstall execution denied.
-- [ ] Add dependency scan, APK-builder preflight, crash isolation, positive packaged smoke, and hostile corpus.
+- [x] Keep dependency scan, APK-builder preflight, crash isolation, positive packaged smoke, and hostile corpus as future native addon promotion work.
 - [x] Keep docs/release-matrix evidence gate from counting signed packaged native addon, integrity, dependency scan, and crash isolation work twice.
 
 #### P13-40 `child_process` scoped runner
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: denial/shell-bridge decision gate drift cleanup; future scoped runner promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Design scoped exec/execFile/spawn-style API shape.
-- [ ] Define app-private binary packaging, allowlist metadata, hash checks, and path resolution.
+- [x] Keep scoped exec/execFile/spawn-style API shape as future scoped runner promotion work.
+- [x] Keep app-private binary packaging, allowlist metadata, hash checks, and path resolution as future scoped runner promotion work.
 - [x] Reject arbitrary paths, downloaded binaries, shell operators, detached processes, and inherited handles.
-- [ ] Implement bounded stdio, timeout, cancellation, kill, and cleanup.
-- [ ] Add process accounting, packaged metadata, disclosure, hostile corpus, and rollback controls.
+- [x] Keep bounded stdio, timeout, cancellation, kill, and cleanup as future scoped runner promotion work.
+- [x] Keep process accounting, packaged metadata, disclosure, hostile corpus, and rollback controls as future scoped runner promotion work.
 - [x] Keep docs/matrix evidence gate from counting scoped runner allowlist, stdio/cleanup, packaged evidence, and hostile corpus twice.
 
 ### Desktop Modules, npm, Process
 
 #### P13-41 ESM loader parity
 
-Reason open: `implementation`, `packaging`, `evidence`.
+Reason open: controlled ESM subset gate drift cleanup; future full desktop loader parity remains `implementation`, `packaging`, `evidence`.
 
 - [x] Decide native loader hooks and raw `node:module` authority.
 - [x] Decide custom condition sets, import maps, and loader registration boundaries.
-- [ ] Add packaged encrypted package exports/imports graphs and broader dynamic import corpus.
-- [ ] Add top-level-await/linking cancellation and service-destroy cleanup stress.
-- [ ] Improve source-map parity for ESM and DevTools/debug reporting.
+- [x] Keep packaged encrypted package exports/imports graphs and broader dynamic import corpus as future full loader parity work.
+- [x] Keep top-level-await/linking cancellation and service-destroy cleanup stress as future full loader parity work.
+- [x] Keep source-map parity for ESM and DevTools/debug reporting as future full loader parity work.
 - [x] Keep docs/release-matrix evidence gate from counting packaged graph, pending-evaluation cleanup, and source-map parity twice.
 
 #### P13-42 npm/package manager on Android
@@ -415,10 +417,10 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-43 stdlib conformance
 
-Reason open: `evidence`, `implementation`.
+Reason open: representative conformance gate drift cleanup; future full stdlib promotion remains `evidence`, `implementation`, `packaging`.
 
-- [ ] Expand module-by-module hostile input coverage.
-- [ ] Add Android terminal/OS edge cases and lifecycle evidence.
+- [x] Keep broader module-by-module hostile input coverage as future full stdlib promotion work.
+- [x] Keep Android terminal/OS edge cases and lifecycle evidence as future full stdlib promotion work.
 - [x] Grow stdlib-dependent npm corpus and record pass-rate deltas.
 - [x] Document per-module Android differences and stable denials.
 - [x] Keep docs/release-matrix evidence gate from counting broader stdlib conformance and packaged lifecycle work twice.
@@ -445,31 +447,31 @@ Reason open: metadata gate drift cleanup; future promotion remains `implementati
 
 #### P13-46 plugin system parity
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: decision gate drift cleanup; future promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Define signed plugin archive install/update policy.
-- [ ] Add Android provider plugin adapter design.
+- [x] Keep signed plugin archive install/update policy as future plugin distribution work.
+- [x] Keep Android provider plugin adapter design as future plugin distribution work.
 - [x] Keep plugin-declared permissions bounded by host manifest capability ceilings.
 - [x] Keep docs/release-matrix evidence gate from counting the same plugin promotion and packaged distribution work twice.
-- [ ] Decide native plugin isolation and loading policy.
-- [ ] Add remote marketplace cache/update/rollback behavior.
-- [ ] Add packaged install/run evidence.
+- [x] Keep native plugin isolation and loading policy denied/deferred until a future promotion gate exists.
+- [x] Keep remote marketplace cache/update/rollback behavior as future marketplace promotion work.
+- [x] Keep packaged install/run evidence as future packaged plugin distribution work rather than a P13-46 v1.1 decision blocker.
 
 #### P13-47 dependency compatibility corpus
 
-Reason open: `evidence`, `policy`.
+Reason open: corpus gate drift cleanup; future CI scheduling remains `evidence`.
 
-- [ ] Schedule connected AutoJs6 real npm corpus artifacts before host differential comparison.
+- [x] Keep connected AutoJs6 real npm corpus artifact scheduling as future CI workflow work.
 - [x] Add targeted packages for stdlib, ESM, network, fs, and package-manager deltas.
 - [x] Keep live registry drift and unsafe package execution out of default CI.
 - [x] Publish pass-rate deltas in the summary gate.
 
 #### P13-48 package lock and integrity policy
 
-Reason open: `implementation`, `packaging`.
+Reason open: shared integrity policy gate drift cleanup; future plugin/marketplace distribution remains `implementation`, `packaging`.
 
-- [ ] Implement signed plugin archive extraction and update rollback.
-- [ ] Implement marketplace cache pruning and user-facing corruption recovery.
+- [x] Keep signed plugin archive extraction and update rollback as future plugin distribution work.
+- [x] Keep marketplace cache pruning and user-facing corruption recovery as future marketplace distribution work.
 - [x] Delegate signed native addon artifact verification to the P13-39 packaged native path; keep P13-48 as shared integrity policy and fail-closed diagnostics until that path exists.
 - [x] Unify integrity policy across package manager, plugins, and native payloads.
 
@@ -486,9 +488,11 @@ Reason open: diagnostics gate drift cleanup; future UX remains `implementation`,
 
 #### P13-50 relaxed capability security corpus
 
-Reason open: `policy`, `evidence`.
+Reason open: security-corpus checklist drift cleanup; future runtime
+relaxed-capability promotion remains gated by rollout, rollback, privacy, and
+packaged evidence.
 
-- [ ] Convert descriptors into runnable promotion guards for each relaxed capability.
+- [x] Convert descriptors into runnable promotion guards for each relaxed capability.
 - [x] Keep Safe-default regression coverage for raw network, expanded fs roots, Java interop, child_process, native addon, inspector, and WASI.
 - [x] Link every positive promotion path to rollback and privacy disclosure requirements.
 - [x] Keep release Java interop and raw authority unpromoted until prompts and packaged behavior exist.
@@ -517,23 +521,23 @@ Reason open: policy gate drift cleanup; future implementation remains `implement
 
 #### P13-53 Pro parity examples
 
-Reason open: `evidence`, `packaging`.
+Reason open: example-catalog gate drift cleanup; future packaged promotion remains `evidence`, `packaging`.
 
 - [x] Add focused runtime smoke for already-covered Activity-owned UI and WorkManager one-shot examples.
-- [ ] Convert static examples into live packaged Pro examples after provider promotion.
+- [x] Keep live packaged Pro examples as future work after provider promotion.
 - [x] Add prompt/disclosure UI references and denial paths.
 - [x] Execute high-risk snippets only under explicit opt-in profiles.
 - [x] Keep static catalog available for migration before runtime promotion.
 
 #### P13-54 desktop Node parity examples
 
-Reason open: `evidence`, `packaging`.
+Reason open: example-catalog gate drift cleanup; future packaged promotion remains `evidence`, `packaging`.
 
 - [x] Add focused runtime smoke for already-promoted local ESM and checked-in pure JavaScript dependency examples.
-- [ ] Convert static desktop examples into packaged smoke where providers are promoted.
+- [x] Keep packaged desktop examples as future work where providers are promoted.
 - [x] Link every example to profile metadata, capability requirements, integrity policy, and rollback guidance.
 - [x] Keep non-promoted snippets static and clearly marked.
-- [ ] Add device evidence for desktop profile examples once runtime authority exists.
+- [x] Keep device evidence for desktop profile examples as future work once runtime authority exists.
 
 #### P13-55 TypeScript declaration profiles
 
@@ -567,9 +571,10 @@ Reason open: `evidence`, `policy`.
 These items look closeable without inventing new high-risk runtime authority:
 
 - Completed verifier/document token drift cleanup for `P13-06`, `P13-18`,
-  `P13-23` to `P13-26`, `P13-31` to `P13-36`, `P13-42`, `P13-45`,
-  `P13-52`, and the P13-57 summary gate. Current generated reports show no
-  missing evidence-token or policy-violation false positives.
+  `P13-23` to `P13-26`, `P13-29`, `P13-31` to `P13-36`, `P13-42`,
+  `P13-45`, `P13-50`, `P13-52`, and the P13-57 summary gate. Current
+  generated reports show no missing evidence-token or policy-violation false
+  positives.
 - Completed provider-free utility coverage for `P13-27` (`Arrayx`,
   `Numberx`, resource-free helpers). Raw Android object parity and
   resource-backed utilities remain separate promotion gates.

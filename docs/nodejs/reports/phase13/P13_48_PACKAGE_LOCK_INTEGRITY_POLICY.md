@@ -1,7 +1,8 @@
 # P13-48 Package Lock And Integrity Policy
 
-P13-48 records package lock and integrity policy as partial. The current
-landing adds a unified policy descriptor for Android-side package manager,
+P13-48 records the v1.1 shared package lock and integrity policy as ready while
+plugin archive and marketplace distribution promotion remains future work. The
+current landing adds a unified policy descriptor for Android-side package manager,
 plugin packages, and native addon artifacts, exposes the same contract through
 `packageIntegrityProfile`, and verifies Android local-store rollback, cache
 cleanup, and corruption recovery behavior.
@@ -32,7 +33,18 @@ cleanup, and corruption recovery behavior.
   packaged native path. P13-48 records the shared signature/hash policy and
   keeps native addon loading fail-closed until that path exists.
 
-## Remaining Work
+## Closure
+
+The v1.1 gate closes because `NodePackageIntegrityPolicy`,
+`packageIntegrityProfile`, Android local-store transactional rollback, stale
+transaction prune, corruption detection, recovery actions, shared plugin/native
+integrity vocabulary, signed-native delegation to P13-39, fail-closed unsigned
+plugin/native install, fail-closed raw registry install, docs, surface manifest,
+TypeScript declarations, and Gradle gate are synchronized without promoting
+signed plugin archives, marketplace installs, native addon loading, lifecycle
+scripts, postinstall downloads, or unverified cache reuse.
+
+## Future Work
 
 - Signed plugin archive extraction, update channels, marketplace cache pruning,
   and plugin rollback UI are not implemented yet.

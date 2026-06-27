@@ -1071,13 +1071,15 @@ number parse/clamp/format helpers to Node, and can copy helpers with
 or prototype mutation, `zip`, `canvas`, OpenCC/pinyin packaged resources,
 `sysprops`, and raw Android/OpenCV object parity remain blocked.
 
-P13-29 records HTTP/HTTPS client parity as partial: `require("http")`,
-`require("node:http")`, `require("https")`, and `require("node:https")`
-provide a controlled client facade over AutoJs6 fetch for request/get,
-stream-style responses, timeout, redirect, and provider-owned TLS errors. This
-is not unrestricted desktop networking; server/listen, raw sockets,
-proxy/tunnel options, `CONNECT`, DNS/TLS session APIs, packaged INTERNET proof,
-and live provider HTTP smoke remain blocked.
+P13-29 closes the controlled HTTP/HTTPS client subset for v1.1:
+`require("http")`, `require("node:http")`, `require("https")`, and
+`require("node:https")` provide a controlled client facade over AutoJs6 fetch
+for request/get, stream-style responses, timeout, redirect, provider-owned TLS
+errors, live Android/OkHttp loopback fetch/axios/`http.get()` evidence, and
+packaged `network` to `android.permission.INTERNET` metadata proof. This is not
+unrestricted desktop networking; server/listen, raw sockets, proxy/tunnel
+options, `CONNECT`, DNS/TLS session APIs, and broader packaged install/run
+network behavior remain blocked.
 
 P13-30 records net/tls/dns staged compatibility as partial: `require("net")`,
 `require("node:net")`, `require("tls")`, `require("node:tls")`,

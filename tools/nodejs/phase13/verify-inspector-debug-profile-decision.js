@@ -108,16 +108,10 @@ function buildReport(files) {
       token(files.phase9InspectorPolicy, "Phase 9 inspector policy decision"),
       token(files.securityModel, "Future inspector support must be"),
       token(files.desktopMatrix, "| `inspector` | `disabled` |"),
-    ], [
-      "Implement trusted debug UI or host command session start/revoke with visible execution state.",
-      "Add loopback-only listener descriptors, ADB forward cleanup instructions, and public-interface denial proof.",
-      "Add positive debug-build DevTools attach coverage for breakpoints, pause/resume, console, async stacks, source maps, and ESM source names.",
-      "Add CPU/heap profile lifecycle, app-private artifact export, redaction, budget, and cleanup evidence.",
-      "Add packaged release denial plus explicit debug-packaged metadata, manifest, and diagnostics evidence.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-37", [
       token(files.phase13Tasks, "P13-37 partial landing"),
-      token(files.p13Report, "P13-37 records inspector/devtools debug profile as partial"),
+      token(files.p13Report, "P13-37 records the v1.1 inspector stable-denial debug-profile decision as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13InspectorDebugProfileDecision"),
       token(files.testingDoc, "verifyNodePhase13InspectorDebugProfileDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13InspectorDebugProfileDecision"),
@@ -195,7 +189,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile_default_denial").status === "ready",
       defaultDeniedReady: scenarioById(scenarios, "require_resolve_shadow_denial").status === "ready",

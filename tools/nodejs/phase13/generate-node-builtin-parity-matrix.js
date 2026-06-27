@@ -199,7 +199,7 @@ function classifyBuiltin(name, sets) {
 
 function networkNextStepFor(name) {
   if (name === "http" || name === "https") {
-    return "P13-29 records the controlled client subset as partial; raw server/listen, proxy/tunnel, custom TLS/session control, and packaged live-network evidence remain open.";
+    return "P13-29 records the controlled client subset as ready; raw server/listen, proxy/tunnel, custom TLS/session control, and broader packaged install/run network evidence remain future work.";
   }
   if (name === "net" || name === "tls" || name === "dns" || name === "dns/promises") {
     return "P13-30 records staged limited facades as partial and a release-forbidden raw network module opt-in; release/default client sockets, server sockets, network DNS policy, TLS sessions, fd leak proof, and packaged live-network evidence remain open.";

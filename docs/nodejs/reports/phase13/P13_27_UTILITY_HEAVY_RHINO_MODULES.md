@@ -1,10 +1,11 @@
 # P13-27 Utility-Heavy Rhino Modules
 
-Status: partial.
+Status: ready.
 
-P13-27 is intentionally split. This landing promotes the pure JavaScript
-`jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` subsets and keeps
-resource-backed or raw Android object surfaces behind later gates.
+P13-27 records the v1.1 pure utility helper subset as ready. This landing
+promotes the pure JavaScript `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx`
+subsets and keeps resource-backed or raw Android object surfaces behind later
+gates.
 
 ## Promoted Surface
 
@@ -84,7 +85,16 @@ dedicated ownership, lifecycle, and permission evidence.
 - Gradle gate: `:app:verifyNodePhase13UtilityHeavyRhinoModules`
 - Surface evidence: `phase13-utility-heavy-rhino-modules`
 
-## Remaining Work
+## Closure
+
+The v1.1 gate closes because `jsox`, `jsox.mathx`, `jsox.arrayx`,
+`jsox.numberx`, `autojs6:compat.jsox`, explicit-target `jsox.extend(...)`,
+TypeScript declarations, conformance coverage, focused runtime instrumentation,
+status manifest entries, raw Android/OpenCV object stable denials, docs, surface
+manifest, and Gradle gate are synchronized without promoting resource-backed
+utility providers or hidden global/prototype mutation.
+
+## Future Work
 
 - `zip`: needs scoped archive paths, zip-slip denial, size and compression
   budgets, overwrite policy, cleanup, and packaged smoke.

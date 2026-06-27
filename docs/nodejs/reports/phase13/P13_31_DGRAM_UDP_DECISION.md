@@ -1,6 +1,6 @@
 # P13-31 dgram UDP Decision
 
-Status: partial
+Status: ready for the current v1.1 stable-denied decision
 
 P13-31 records `dgram` / `node:dgram` as stable-denied for the current Node
 Profile v1.1 Desktop track. UDP is not promoted as a client, server, or
@@ -49,7 +49,14 @@ The following remain future work before any UDP promotion:
   `NodeCoreBuiltinCompatibilityInstrumentationTest`, and
   `NodeSecurityRegressionInstrumentationTest`
 
-## Remaining Work
+## Closure
+
+The v1.1 decision gate closes because the runtime disabled builtin boundary,
+`node:` alias denial, `require.resolve()` denial, transitive/local shadow-bypass
+denial, raw UDP socket denial, docs, desktop matrix, release matrix, surface
+manifest, and Gradle gate are synchronized.
+
+## Future Work
 
 - Decide whether a future Desktop-profile UDP provider should split unicast
   client, server bind/listen, broadcast, multicast, and source-specific

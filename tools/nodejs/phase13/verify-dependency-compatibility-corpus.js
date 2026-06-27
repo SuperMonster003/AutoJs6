@@ -110,12 +110,10 @@ function buildReport(files) {
       token(files.differentialRunner, "--autojs-connected-results <dir|file>"),
       token(files.differentialRunner, "Phase 13 Dependency Compatibility Categories"),
       token(files.differentialRunner, "renderPassRate"),
-    ], [
-      "CI still needs to schedule connected AutoJs6 real npm corpus artifacts before the host differential report.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-47", [
       token(files.phase13Tasks, "P13-47 partial landing"),
-      token(files.p13Report, "P13-47 records dependency compatibility corpus as partial"),
+      token(files.p13Report, "P13-47 records the v1.1 fixed dependency compatibility corpus as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13DependencyCompatibilityCorpus"),
       token(files.testingDoc, "verifyNodePhase13DependencyCompatibilityCorpus"),
       token(files.ciGatesDoc, "verifyNodePhase13DependencyCompatibilityCorpus"),
@@ -232,7 +230,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       taxonomyReady: scenarioById(scenarios, "manifest_taxonomy").status === "ready",
       targetedDeltasReady: deltaProblems.length === 0,

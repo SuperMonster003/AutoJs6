@@ -116,13 +116,10 @@ function buildReport(files) {
       token(files.packagedPreflight, "packaged.dirent.opendir=true"),
       token(files.p13Report, "Existing packaged smoke sources and preflight checks already include packaged"),
       token(files.p13Report, "realpath and opendir markers:"),
-    ], [
-      "Add packaged APK live-smoke coverage and current device-exported evidence for watcher, fd, FileHandle, stream, close-on-destroy, realpath, and opendir behavior.",
-      "Re-run advanced-fs suites against each P13-32 expanded-root class once root authority providers are promoted.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-33", [
-      token(files.phase13Tasks, "P13-33 partial landing"),
-      token(files.p13Report, "P13-33 records desktop fs advanced APIs as partial"),
+      token(files.phase13Tasks, "P13-33 v1.1 scoped advanced filesystem API gate"),
+      token(files.p13Report, "P13-33 records the v1.1 scoped advanced filesystem API gate as ready"),
       token(files.gradleGate, "verifyNodePhase13FilesystemAdvancedApis"),
       token(files.testingDoc, "verifyNodePhase13FilesystemAdvancedApis"),
       token(files.ciGatesDoc, "verifyNodePhase13FilesystemAdvancedApis"),
@@ -204,7 +201,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       advancedFsDiagnosticExposed: scenarioById(scenarios, "advanced_surface_profile").status === "ready",
       scopedAdvancedCoreEvidenceReady: scenarioById(scenarios, "owned_resource_lifecycle").status !== "missing_evidence",

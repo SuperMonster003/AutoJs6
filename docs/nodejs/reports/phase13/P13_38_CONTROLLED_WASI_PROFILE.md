@@ -1,10 +1,10 @@
 # P13-38 Controlled WASI Profile Decision
 
-P13-38 records controlled WASI profile as partial. The current Phase 13
-decision is to expose diagnostics through `autojs6:profile.wasiProfile` while
-keeping raw `require("wasi")`, `require("node:wasi")`,
-`require.resolve("wasi")`, and `require.resolve("node:wasi")` denied by
-default.
+P13-38 records the v1.1 pure-WebAssembly and raw-WASI denial gate as ready while
+controlled WASI promotion remains future work. The current Phase 13 decision is
+to expose diagnostics through `autojs6:profile.wasiProfile` while keeping raw
+`require("wasi")`, `require("node:wasi")`, `require.resolve("wasi")`, and
+`require.resolve("node:wasi")` denied by default.
 
 ## Decision
 
@@ -48,7 +48,15 @@ promotion remains a separate Desktop-profile provider decision.
 - `verifyNodePhase13ControlledWasiProfileDecision` records the host gate and
   writes `phase13-controlled-wasi-profile-decision.json` and `.md`.
 
-## Remaining Blockers
+## Closure
+
+The v1.1 gate closes because pure WebAssembly availability, `wasiProfile`
+diagnostics, raw `wasi` / `node:wasi` require and resolve denial, local shadow
+package protection, docs, desktop matrix, surface manifest, TypeScript
+declarations, and Gradle gate are synchronized without introducing a callable
+WASI facade.
+
+## Future Work
 
 - Implement scoped/authorized preopen mapping with lexical and realpath/symlink
   escape denial.

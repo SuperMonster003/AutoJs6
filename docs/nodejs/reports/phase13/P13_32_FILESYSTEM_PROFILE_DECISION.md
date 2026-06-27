@@ -1,13 +1,13 @@
 # P13-32 Filesystem Profile Decision
 
-Status: partial
+Status: ready
 
-P13-32 records filesystem profile expansion as partial. The current Node
-Profile v1.1 Safe track keeps `process.cwd()` scoped to the script working
-directory while allowing a distinct scoped `sandboxRoot` for the containing
-AutoJs6 workspace or project root. Pro/Desktop expansion to user-authorized
-roots, `/sdcard`, SAF/document roots, and app-private roots stays staged behind
-explicit authority and packaged evidence.
+P13-32 records the v1.1 Safe scoped filesystem profile decision as ready. The
+current Node Profile v1.1 Safe track keeps `process.cwd()` scoped to the script
+working directory while allowing a distinct scoped `sandboxRoot` for the
+containing AutoJs6 workspace or project root. Pro/Desktop expansion to
+user-authorized roots, `/sdcard`, SAF/document roots, and app-private roots
+stays staged behind explicit authority and packaged evidence.
 
 ## Decision
 
@@ -62,7 +62,16 @@ add a second blocker for expanded-root promotion.
   `docs/nodejs/types/autojs6-node/autojs_global.d.ts` and
   `sample/nodejs/typescript-smoke/src/main.ts`
 
-## Remaining Work
+## Closure
+
+The v1.1 gate closes because `filesystemProfile`, scoped working-directory and
+sandbox-root semantics, scoped absolute path allow/deny behavior, subdirectory
+workspace parent reads, `/sdcard` and sensitive path denials, NUL/`..`/promise/
+symlink/realpath escape denial, TypeScript declarations, docs, desktop matrix,
+surface manifest, and Gradle gate are synchronized without promoting any
+additional filesystem roots.
+
+## Future Work
 
 - Implement the explicit root authority provider and decide whether it is
   Pro-profile, Desktop-profile, or split by root type.

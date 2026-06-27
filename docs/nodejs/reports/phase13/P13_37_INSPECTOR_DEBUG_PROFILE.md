@@ -1,10 +1,11 @@
 # P13-37 Inspector Debug Profile Decision
 
-P13-37 records inspector/devtools debug profile as partial. The current Phase
-13 decision is to expose diagnostics through `autojs6:profile.inspectorProfile`
-while keeping `require("inspector")`, `require("node:inspector")`,
-`require.resolve("inspector")`, and `require.resolve("node:inspector")`
-denied by default.
+P13-37 records the v1.1 inspector stable-denial debug-profile decision as ready
+while promoted DevTools/profiling support remains future work. The current
+Phase 13 decision is to expose diagnostics through
+`autojs6:profile.inspectorProfile` while keeping `require("inspector")`,
+`require("node:inspector")`, `require.resolve("inspector")`, and
+`require.resolve("node:inspector")` denied by default.
 
 ## Decision
 
@@ -41,7 +42,17 @@ profiling surface can be promoted.
 - `verifyNodePhase13InspectorDebugProfileDecision` records the host gate and
   writes `phase13-inspector-debug-profile-decision.json` and `.md`.
 
-## Remaining Blockers
+## Closure
+
+The v1.1 gate closes because `inspectorProfile` diagnostics, default and release
+denial, `inspector` / `node:inspector` require and resolve denial, local
+shadow-package protection, disabled process debug APIs, hostile `NODE_OPTIONS`
+denial, packaged metadata denial, docs, desktop matrix, surface manifest,
+TypeScript declarations, and Gradle gate are synchronized without introducing a
+debug endpoint, port listener, profiler API, or script-visible `inspector`
+module.
+
+## Future Work
 
 - Implement trusted debug UI or host command session start/revoke with visible
   execution state.

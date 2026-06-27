@@ -141,13 +141,10 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "downloadInstaller: false"),
       token(files.nodeBridgeSources, "nativeAddonLoading: false"),
       token(files.nodeBridgeSources, "marketplaceInstall: false"),
-    ], [
-      "Implement signed plugin archive extraction and update rollback.",
-      "Implement marketplace cache pruning and user-facing corruption recovery.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-48", [
       token(files.phase13Tasks, "P13-48 partial landing"),
-      token(files.p13Report, "P13-48 records package lock and integrity policy as partial"),
+      token(files.p13Report, "P13-48 records the v1.1 shared package lock and integrity policy as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13PackageLockIntegrityPolicy"),
       token(files.testingDoc, "verifyNodePhase13PackageLockIntegrityPolicy"),
       token(files.ciGatesDoc, "verifyNodePhase13PackageLockIntegrityPolicy"),
@@ -244,7 +241,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "runtime_profile_and_types").status === "ready",
       androidStorePolicyReady: scenarioById(scenarios, "android_store_integrity_recovery").status === "ready",

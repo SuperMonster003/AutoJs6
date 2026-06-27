@@ -458,16 +458,18 @@ Phase 13 HTTP/HTTPS client parity gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13HttpHttpsClientParity
 ```
 
-P13-29 records HTTP/HTTPS client parity as partial. The host gate requires the
-existing controlled `http` / `https` facade, `NodeHttpDesktopParityInstrumentationTest`,
-minimal TypeScript declarations, desktop builtin matrix evidence, and cross-doc
-policy text. The focused device test covers client request, stream-backed
-response consumption through the existing S8 tests, timeout, manual and explicit
-redirect follow, TLS/provider error propagation, proxy/tunnel/`CONNECT` denial,
-server/listen denial, `node_modules` shadow denial, and the controlled
-fetch/axios boundary. It does not promote raw sockets, DNS/TLS session APIs,
-server authority, per-request proxy support, packaged INTERNET permission
-evidence, or live provider HTTP smoke.
+P13-29 closes the controlled HTTP/HTTPS client subset for v1.1. The host gate
+requires the existing controlled `http` / `https` facade,
+`NodeHttpDesktopParityInstrumentationTest`, live Android/OkHttp loopback
+fetch/axios/`http.get()` evidence, packaged `network` to
+`android.permission.INTERNET` metadata proof, minimal TypeScript declarations,
+desktop builtin matrix evidence, and cross-doc policy text. The focused device
+test covers client request, stream-backed response consumption through the
+existing S8 tests, timeout, manual and explicit redirect follow, TLS/provider
+error propagation, proxy/tunnel/`CONNECT` denial, server/listen denial,
+`node_modules` shadow denial, and the controlled fetch/axios boundary. It does
+not promote raw sockets, DNS/TLS session APIs, server authority, per-request
+proxy support, or broader packaged install/run network behavior.
 
 Focused HTTP stream semantics instrumentation:
 
@@ -1572,11 +1574,14 @@ Phase 13 HTTP/HTTPS client parity status gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13HttpHttpsClientParity
 ```
 
-This host gate records P13-29 as partial. It requires the controlled
-`http`/`https` client facade, focused device evidence, TypeScript declarations,
-desktop builtin matrix updates, security/profile docs, and release matrix text.
-It keeps server/listen, raw sockets, DNS/TLS session control, proxy/tunnel
-configuration, packaged INTERNET proof, and live provider HTTP evidence open.
+This host gate records P13-29 as ready for the controlled HTTP/HTTPS client
+subset. It requires the controlled `http`/`https` client facade, focused device
+evidence, live Android/OkHttp loopback fetch/axios/`http.get()` evidence,
+packaged `network` to `android.permission.INTERNET` metadata proof, TypeScript
+declarations, desktop builtin matrix updates, security/profile docs, and
+release matrix text. It keeps server/listen, raw sockets, DNS/TLS session
+control, proxy/tunnel configuration, and broader packaged install/run network
+behavior scoped to later gates.
 
 Phase 13 net/tls/dns staged compatibility status gate:
 

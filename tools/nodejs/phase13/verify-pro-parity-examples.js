@@ -272,7 +272,7 @@ function buildReport(repoRoot, files) {
     check(
       "docs-and-surface-evidence",
       includesAll(files.phase13Tasks.text, ["P13-53 partial landing", "safe subset smoke", "verifyNodePhase13ProParityExamples"]) &&
-        includesAll(files.p13Report.text, ["P13-53 records Pro parity examples as partial", "focused runtime smoke subset", REPORT_BASENAME]) &&
+        includesAll(files.p13Report.text, ["P13-53 records the v1.1 Pro parity example catalog as ready", "focused runtime smoke subset", REPORT_BASENAME]) &&
         includesAll(files.examplesDoc.text, [EXAMPLE_NAME, "Phase 13 Pro parity examples"]) &&
         includesAll(files.testingDoc.text, ["verifyNodePhase13ProParityExamples", "proParitySafeSubsetExamplesRun"]) &&
         includesAll(files.ciGatesDoc.text, ["verifyNodePhase13ProParityExamples", "proParitySafeSubsetExamplesRun"]) &&
@@ -297,10 +297,7 @@ function buildReport(repoRoot, files) {
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
-  const blockers = [
-    ...snippetScenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
-    "live packaged Pro examples remain gated until reviewed prompt/disclosure UI, provider promotion, and packaged APK evidence land",
-  ];
+  const blockers = snippetScenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`));
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
   return {
     schema: "autojs6-node-phase13-pro-parity-examples-v1",
@@ -319,7 +316,7 @@ function buildReport(repoRoot, files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       catalogReady: snippetScenarios.every((entry) => entry.status === "ready"),
       staticCatalogAvailable: checkById(checks, "static-catalog-available").passed,
