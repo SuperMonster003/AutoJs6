@@ -86,7 +86,7 @@ function buildReport(files) {
       token(files.protocol, "overlayLiveProviderMissing"),
       token(files.protocol, "P12-14 exposes only permission/settings/cleanup live-gate evidence"),
       token(files.overlayTest, "ui.overlay live creation must remain fail-closed after the P12-14 live gate"),
-      token(files.p13Report, "live overlay creation remains fail-closed"),
+      token(files.p13Report, "Live overlay creation remains fail-closed."),
     ], [
       "Implement actual Android live overlay show/update/drainEvents/close provider.",
       "Record granted and denied overlay permission device matrix, including OEM settings behavior.",
