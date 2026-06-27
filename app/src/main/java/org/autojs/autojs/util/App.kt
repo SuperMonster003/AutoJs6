@@ -6,7 +6,6 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.util.StringUtils.str
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 
 /**
@@ -22,7 +21,7 @@ enum class App(private val appNameResId: Int, val packageName: String, alias: St
     APPOPS(R.string.text_app_name_appops, "rikka.appops"),
     AQUAMAIL(R.string.text_app_name_aquamail, "org.kman.AquaMail"),
     AUTOJS(R.string.text_app_name_autojs, "org.autojs.autojs"),
-    AUTOJS6(R.string.text_app_name_autojs6, BuildConfig.APPLICATION_ID),
+    AUTOJS6(R.string.text_app_name_autojs6, "org.autojs.autojs6"),
     AUTOJSPRO(R.string.text_app_name_autojspro, "org.autojs.autojspro"),
     BAIDUMAP(R.string.text_app_name_baidumap, "com.baidu.BaiduMap"),
     BILIBILI(R.string.text_app_name_bilibili, "tv.danmaku.bili"),

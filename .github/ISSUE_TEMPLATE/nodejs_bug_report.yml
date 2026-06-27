@@ -35,7 +35,6 @@ body:
       label: Package identity
       options:
         - org.autojs.autojs6
-        - org.autojs.autojs6.nodejs
         - packaged APK
         - other
     validations:

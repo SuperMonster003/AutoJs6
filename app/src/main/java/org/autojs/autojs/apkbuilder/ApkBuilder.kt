@@ -1866,8 +1866,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         const val LIBRARY_DIR = "lib"
 
         const val TEMPLATE_APK_NAME = "template.apk"
-        @JvmField
-        val INRT_APP_ID = "${BuildConfig.APPLICATION_ID}.inrt"
+        const val INRT_APP_ID = "org.autojs.autojs6.inrt"
 
         private val PLUGIN_WAKE_RETRY_DELAYS_MS = longArrayOf(300L, 800L, 1500L)
         private const val PLUGIN_INFO_QUERY_TIMEOUT_SECONDS = 60L

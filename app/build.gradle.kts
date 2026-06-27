@@ -29,7 +29,6 @@ idea {
     }
 }
 
-val globalNamespace = "org.autojs.autojs6"
 val globalApplicationId = "org.autojs.autojs6"
 
 val flavorDimension = "channel"
@@ -2071,11 +2070,11 @@ dependencies /* Reserved for auto append by IDE */ {
 
 android {
 
-    namespace = globalNamespace
+    namespace = globalApplicationId
     compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
-        applicationId = globalApplicationId
+        applicationId = applicationId
 
         minSdk = versions.sdkVersionMin
         targetSdk = versions.sdkVersionTarget
@@ -2168,7 +2167,7 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 mapOf(
-                    "resourcePackageName" to globalNamespace,
+                    "resourcePackageName" to (this@defaultConfig.applicationId ?: globalApplicationId),
                     "androidManifestFile" to ("$projectDir/src/main/AndroidManifest.xml")
                 ).let { arguments(it) }
             }
@@ -2194,7 +2193,7 @@ android {
                     "appName" to "@string/node_identity_app_label",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
-                    "authorities" to "$nodeJsEffectiveApplicationId.fileprovider",
+                    "authorities" to "org.autojs.autojs6.fileprovider",
                     "icon" to "@mipmap/ic_app_launcher_adaptive",
                 )
             )
@@ -2218,7 +2217,7 @@ android {
                     "appName" to "AutoJs6.$flavorNameInrt",
                     "intentCategory" to "android.intent.category.DEFAULT",
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
-                    "authorities" to "$nodeJsEffectiveApplicationId.$flavorNameInrt.fileprovider",
+                    "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
                     "icon" to "@mipmap/ic_launcher",
                 )
             )

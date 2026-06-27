@@ -31,7 +31,6 @@ import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.paddle.ocr.api.IOcrPlugin
@@ -65,7 +64,6 @@ object PaddleOcrPluginHost {
     private const val IDLE_UNBIND_MS = 30_000L
     private const val RETRY_WAKE_DELAY_MS = 300L
     private const val MODULE_LABEL_PADDLE_OCR = "Paddle OCR"
-    private val pluginPermission = "${BuildConfig.APPLICATION_ID}.permission.PLUGIN"
 
     private val externalServiceFlag = runCatching { ServiceInfo::class.java.getField("FLAG_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
     private val bindExternalServiceFlag = runCatching { Context::class.java.getField("BIND_EXTERNAL_SERVICE").getInt(null) }.getOrNull() ?: 0
@@ -660,7 +658,7 @@ object PaddleOcrPluginHost {
             failWaiters(
                 entry,
                 IllegalStateException(
-                    "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"$pluginPermission\"/> and the Service uses this permission.",
+                    "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.",
                     se
                 )
             )
@@ -673,7 +671,7 @@ object PaddleOcrPluginHost {
                 failWaiters(
                     entry,
                     IllegalStateException(
-                        "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"$pluginPermission\"/> and the Service uses this permission.",
+                        "bindService SecurityException: ${entry.cn}. Please make sure the plugin declares <uses-permission android:name=\"org.autojs.permission.PLUGIN\"/> and the Service uses this permission.",
                         se
                     )
                 )

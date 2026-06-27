@@ -19,7 +19,6 @@ import org.autojs.autojs.util.DeviceUtils
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
-import org.autojs.autojs6.BuildConfig
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Undefined
@@ -212,9 +211,9 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getSharedDeviceId(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String? = ensureArgumentsIsEmpty(args) {
-            // val b = globalContext.contentResolver.call("content://${BuildConfig.APPLICATION_ID}.deviceid.provider".toUri(), "getDeviceId", null, null)
+            // val b = globalContext.contentResolver.call("content://org.autojs.autojs6.deviceid.provider".toUri(), "getDeviceId", null, null)
             // b?.getString("device_id")
-            val uri = "content://${BuildConfig.APPLICATION_ID}.deviceid.provider/v1/device_id".toUri()
+            val uri = "content://org.autojs.autojs6.deviceid.provider/v1/device_id".toUri()
             globalContext.contentResolver.query(uri, arrayOf("device_id"), null, null, null)?.use { c ->
                 if (c.moveToFirst()) c.getString(0) else null
             }
