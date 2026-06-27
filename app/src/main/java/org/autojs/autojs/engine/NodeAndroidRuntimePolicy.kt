@@ -61,6 +61,7 @@ object NodeAndroidRuntimePolicy {
         }
     }
 
+    @Suppress("DEPRECATION")
     fun validateForegroundServiceType(
         sdkInt: Int,
         manifestType: Int,
@@ -212,6 +213,7 @@ object NodeAndroidRuntimePolicy {
         return values
     }
 
+    @Suppress("DEPRECATION")
     fun foregroundServiceTypeNames(type: Int): String {
         if (type == FOREGROUND_SERVICE_TYPE_UNKNOWN) {
             return "unknown"
