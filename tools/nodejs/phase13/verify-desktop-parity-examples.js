@@ -314,7 +314,6 @@ function buildReport(repoRoot, files) {
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
   const blockers = [
     ...snippetScenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
-    "desktop_compat_opt_in metadata remains diagnostic-only and does not grant raw worker/network/filesystem/WASI/inspector/package-manager authority by itself",
     "packaged desktop parity examples remain gated until provider promotion, integrity policy, and packaged APK evidence land",
   ];
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;

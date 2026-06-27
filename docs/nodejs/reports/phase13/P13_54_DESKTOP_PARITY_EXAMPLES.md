@@ -76,10 +76,8 @@ subset for already-promoted desktop-safe examples. It does not grant
 `desktop_compat_opt_in` authority, does not add high-risk desktop snippets to
 default runtime smoke, and does not claim packaged desktop parity is ready.
 
-Remaining blockers:
+Remaining blocker:
 
-- Desktop profile metadata is still diagnostic-only.
-- Worker/network/raw-network/filesystem-root/WASI/inspector/package-manager
-  snippets remain static until provider promotion and policy gates exist.
-- Packaged desktop parity needs provider promotion, integrity policy, and
-  packaged APK evidence.
+- Packaged desktop parity examples need provider promotion, integrity policy,
+  packaged APK evidence, and device evidence for promoted desktop profile
+  examples.

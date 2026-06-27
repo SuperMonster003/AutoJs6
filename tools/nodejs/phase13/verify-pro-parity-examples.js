@@ -300,7 +300,6 @@ function buildReport(repoRoot, files) {
   const blockers = [
     ...snippetScenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
     "live packaged Pro examples remain gated until reviewed prompt/disclosure UI, provider promotion, and packaged APK evidence land",
-    "pro_compat_opt_in metadata remains diagnostic-only and does not grant Java/UI/overlay/accessibility/screenshot/OCR authority by itself",
   ];
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
   return {

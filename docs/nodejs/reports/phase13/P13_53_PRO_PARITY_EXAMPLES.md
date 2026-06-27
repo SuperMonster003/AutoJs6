@@ -80,10 +80,8 @@ paths. It does not grant `pro_compat_opt_in` authority, does not add high-risk
 snippets to default runtime smoke, and does not claim packaged Pro execution is
 ready.
 
-Remaining blockers:
+Remaining blocker:
 
-- Live packaged Pro examples need reviewed prompt/disclosure UI and packaged
-  APK evidence.
-- Java/Rhino/overlay/accessibility/screenshot/OCR snippets remain static until
-  provider promotion and policy gates exist.
-- Device matrix coverage and permission-state smoke remain future work.
+- Live packaged Pro examples need reviewed prompt/disclosure UI, provider
+  promotion, packaged APK evidence, device matrix coverage, and
+  permission-state smoke.
