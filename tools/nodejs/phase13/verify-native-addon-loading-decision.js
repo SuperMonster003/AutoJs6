@@ -184,6 +184,22 @@ function buildReport(files) {
       ".node resolver denial and process.dlopen denial must stay present.",
     ),
     check(
+      "runtime-download-build-lifecycle-denied",
+      nativeAddonProfile.includes('downloadedArtifacts: "denied"') &&
+        nativeAddonProfile.includes("downloadExec: false") &&
+        files.nodeBridgeSources.text.includes('lifecycleScripts: "denied"') &&
+        files.nodeBridgeSources.text.includes('nativeBuild: "denied"') &&
+        files.nodeBridgeSources.text.includes('postinstallDownload: "denied"') &&
+        files.dependencyManager.text.includes("nativeAddonsEnabled: false") &&
+        files.dependencyManager.text.includes("lifecycleScriptsExecuted: false") &&
+        files.dependencyManager.text.includes("ERR_AUTOJS6_PM_NATIVE_ADDON_DISABLED") &&
+        files.projectAnalyzer.text.includes("DEPENDENCY_LIFECYCLE_SCRIPT_UNSUPPORTED") &&
+        files.projectAnalyzer.text.includes("NODE_GYP_ARTIFACT_UNSUPPORTED") &&
+        files.p13Report.text.includes("Runtime downloads, npm native builds, lifecycle scripts, and download-exec") &&
+        files.p13Report.text.includes("postinstall execution must stay denied"),
+      "P13-39 must keep runtime download, npm native build, lifecycle script, and postinstall execution paths denied.",
+    ),
+    check(
       "no-node-addon-types-or-runtime-facade",
       !files.typesAutojsGlobal.text.includes('declare module "*.node"') &&
         !files.typesAutojsGlobal.text.includes("declare module '*.node'") &&
@@ -225,6 +241,7 @@ function buildReport(files) {
       dependencyScanReady: false,
       crashIsolationReady: false,
       runtimeDownloadExecAllowed: false,
+      runtimeDownloadBuildLifecycleDenied: checkById(checks, "runtime-download-build-lifecycle-denied").passed,
       desktopSurfacePromoted: false,
     },
   };
@@ -252,6 +269,10 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function scenarioById(scenarios, id) {
