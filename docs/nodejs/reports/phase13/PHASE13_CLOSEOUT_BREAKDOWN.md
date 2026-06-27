@@ -267,7 +267,7 @@ Reason open: `implementation`, `policy`, `evidence`, `packaging`.
 
 Reason open: `policy`, `implementation`.
 
-- [ ] Decide whether `dgram` remains stable-denied for v1.1 or starts a future controlled provider.
+- [x] Decide whether `dgram` remains stable-denied for v1.1 or starts a future controlled provider.
 - [ ] If promoted later, split unicast, server bind/listen, broadcast, multicast, and source-specific multicast capabilities.
 - [ ] Prove permission mapping, packet budgets, lifecycle cleanup, and packaged behavior.
 - [ ] Keep local shadow bypass and raw socket authority denied until the provider exists.
@@ -319,7 +319,7 @@ Reason open: `evidence`, `packaging`.
 - [ ] Add focused memory and compiled-script budget evidence.
 - [ ] Add timeout/lifecycle stress and leakage probes.
 - [ ] Add packaged smoke for packages using `vm.Script` and contexts.
-- [ ] Keep VM documented as compatibility, not a security boundary.
+- [x] Keep VM documented as compatibility, not a security boundary.
 
 #### P13-37 inspector/devtools
 
@@ -523,7 +523,7 @@ Reason open: `evidence`, `packaging`.
 Reason open: `evidence`, `policy`.
 
 - [ ] Require every task verifier to report zero blockers before final completion.
-- [ ] Keep open/deferred/rejected categories explicit and non-promoted.
+- [x] Keep open/deferred/rejected categories explicit and non-promoted.
 - [ ] Convert partial summary into strict release gate after runtime Pro/Desktop promotion.
 - [ ] Close only when required final blockers are completed or explicitly deferred/rejected by policy.
 
@@ -531,9 +531,10 @@ Reason open: `evidence`, `policy`.
 
 These items look closeable without inventing new high-risk runtime authority:
 
-- Fix verifier/document token drift in `P13-06`, `P13-24`, `P13-32`,
-  `P13-35`, `P13-42`, `P13-45`, and `P13-52` where reports currently show
-  missing evidence tokens that may already exist under a renamed form.
+- Completed verifier/document token drift cleanup for `P13-06`, `P13-18`,
+  `P13-23` to `P13-26`, `P13-31` to `P13-36`, `P13-42`, `P13-45`,
+  `P13-52`, and the P13-57 summary gate. Current generated reports show no
+  missing evidence-token or policy-violation false positives.
 - Expand provider-free utility coverage for `P13-27` (`Arrayx`, `Numberx`,
   resource-free helpers) before touching raw Android object parity.
 - Grow offline corpora for `P13-43` and `P13-47` with fixed package fixtures,
