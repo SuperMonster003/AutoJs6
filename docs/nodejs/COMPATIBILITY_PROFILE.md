@@ -1374,7 +1374,9 @@ verification, stale transaction pruning, reinstall from a verified source,
 transaction snapshot restore, and disabling unsigned plugin/native subjects.
 Unsigned plugin install, unsigned native addon load, raw registry install,
 lifecycle scripts, postinstall downloads, and unverified cache reuse remain
-fail-closed.
+fail-closed. Signed native addon artifact verification is delegated to the
+P13-39 packaged native path; P13-48 keeps only the shared integrity policy and
+fail-closed diagnostics until that path exists.
 
 P13-49 records profile selection UX and diagnostics as partial. The runtime
 exposes `autojs6:profile.profileSelection`, backed by

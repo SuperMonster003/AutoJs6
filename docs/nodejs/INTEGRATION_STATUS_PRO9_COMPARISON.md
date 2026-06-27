@@ -1220,9 +1220,10 @@ has a shared `NodePackageIntegrityPolicy` and runtime
 `packageIntegrityProfile` for Android package manager, plugin packages, and
 native addon artifacts. Android local-store rollback, stale transaction prune,
 corruption detection, and reinstall/update recovery are covered, while signed
-plugin archives, signed native artifacts, marketplace install/update, raw
-registry install, and mutating package-manager JavaScript facades remain future
-work.
+plugin archives and marketplace install/update remain future work. Signed
+native artifact verification is delegated to the P13-39 packaged native path;
+P13-48 keeps native addon integrity diagnostics fail-closed until that path
+exists.
 
 P13-49 records profile selection UX and diagnostics as partial: AutoJs6 Node
 now exposes `profileSelection` diagnostics through `autojs6:profile` and Node

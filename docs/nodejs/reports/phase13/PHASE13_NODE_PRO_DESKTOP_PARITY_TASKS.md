@@ -1882,9 +1882,11 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_48_PACKAGE_LOCK_INTEGRITY_POLICY.md`。
     - Remaining P13-48 blockers: signed plugin archive extraction/update,
-      marketplace cache prune/rollback UI, signed native artifact ABI/hash
-      allowlists, crash isolation, Android registry install, JS facade, and
-      user-facing corruption recovery diagnostics.
+      marketplace cache prune/rollback UI, and user-facing corruption recovery
+      diagnostics.
+    - Signed native addon artifact verification is delegated to the P13-39
+      packaged native path; P13-48 keeps the shared integrity policy and
+      unsigned native addon load fail-closed until that path exists.
 
 ### Track E: Security, UX, and rollback
 

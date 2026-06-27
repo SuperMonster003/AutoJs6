@@ -28,16 +28,16 @@ cleanup, and corruption recovery behavior.
   fail-closed: unsigned plugin installs, native addon loading, raw registry
   install, lifecycle scripts, postinstall downloads, and unverified cache reuse
   are still denied.
+- Signed native addon artifact verification is delegated to P13-39's future
+  packaged native path. P13-48 records the shared signature/hash policy and
+  keeps native addon loading fail-closed until that path exists.
 
 ## Remaining Work
 
 - Signed plugin archive extraction, update channels, marketplace cache pruning,
   and plugin rollback UI are not implemented yet.
-- Native addon promotion still requires signed packaged artifacts, ABI/hash
-  allowlists, dependency scanning, crash isolation, and packaged positive plus
-  hostile corpus evidence.
 - Android runtime registry install and mutating package-manager JavaScript
-  facades remain unpromoted.
+  facades remain owned by P13-42 and unpromoted here.
 - User-facing corruption recovery diagnostics and per-profile rollback UX remain
   future P13 security/UX work.
 

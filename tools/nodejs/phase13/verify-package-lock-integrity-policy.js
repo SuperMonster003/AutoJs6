@@ -144,7 +144,6 @@ function buildReport(files) {
     ], [
       "Implement signed plugin archive extraction and update rollback.",
       "Implement marketplace cache pruning and user-facing corruption recovery.",
-      "Implement signed native addon artifact verification once P13-39 has a packaged path.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-48", [
       token(files.phase13Tasks, "P13-48 partial landing"),
@@ -214,6 +213,15 @@ function buildReport(files) {
         !files.nodeBridgeSources.text.includes("signedNativeAddonLoader: true"),
       "P13-48 must not promote unsafe package execution, unsigned installs, lifecycle/postinstall execution, unverified cache reuse, or signed native addon loading.",
     ),
+    check(
+      "native-addon-verification-delegated-to-p13-39",
+      files.p13Report.text.includes("Signed native addon artifact verification is delegated to P13-39") &&
+        files.p13NativeAddonReport.text.includes("For P13-39 v1.1, native addon artifacts stay packaged-only future inputs") &&
+        files.p13NativeAddonReport.text.includes("signed packaged native-addon manifest") &&
+        profileBlock.includes('nativeAddons: "denied_until_signed_packaged_artifacts"') &&
+        profileBlock.includes("unsignedNativeAddonLoad: false"),
+      "P13-48 must delegate signed native addon artifact verification to the P13-39 packaged native path while keeping native addon loading fail-closed.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -242,6 +250,7 @@ function buildReport(files) {
       androidStorePolicyReady: scenarioById(scenarios, "android_store_integrity_recovery").status === "ready",
       integrityPolicyUnifiedAcrossSubjects: checkById(checks, "integrity-policy-unified-across-subjects").passed,
       pluginNativePolicyReady: scenarioById(scenarios, "plugin_native_fail_closed").status !== "missing_evidence",
+      nativeAddonVerificationDelegatedToP13_39: checkById(checks, "native-addon-verification-delegated-to-p13-39").passed,
       unsignedPluginInstallPromoted: false,
       unsignedNativeAddonLoadPromoted: false,
       rawRegistryInstallPromoted: false,

@@ -455,9 +455,10 @@ P13-48 records package lock and integrity policy as partial. AutoJs6 Node
 exposes `packageIntegrityProfile` diagnostics for shared lockfile/hash/signature
 policy across Android package manager, plugin packages, and native addon
 artifacts. Android local-store rollback/prune/corruption recovery is covered,
-but signed plugin archives, signed native artifacts, raw registry install,
-package-manager JavaScript facades, and unverified cache reuse remain
-unavailable.
+but signed plugin archives, marketplace cache/update flows, and user-facing
+corruption recovery remain unavailable. Signed native artifact verification is
+delegated to the P13-39 packaged native path; P13-48 keeps native addon
+integrity diagnostics fail-closed until that path exists.
 
 P13-49 records profile selection UX and diagnostics as partial. AutoJs6 Node
 exposes `profileSelection` diagnostics through `autojs6:profile` and Node
