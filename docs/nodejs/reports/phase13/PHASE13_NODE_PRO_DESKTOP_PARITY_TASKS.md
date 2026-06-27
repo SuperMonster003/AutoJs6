@@ -341,6 +341,24 @@
   args/stdio/clock/random policy, resource budgets, worker integration, hostile
   WASI corpus, and packaged `.wasm`/WASI behavior.
 
+## P13-39 Stable-Denied v1.1 Note
+
+- P13-39 records `nativeAddonProfile` diagnostics, `.node` require/resolve
+  denial, private process native API denial, and dependency-tooling native
+  payload rejection.
+- For P13-39 v1.1, native addon artifacts stay packaged-only future inputs;
+  runtime download, npm native build, lifecycle-script execution, postinstall
+  download/exec, and unrestricted native payload extraction stay stable-denied.
+- Host verifier:
+  `tools/nodejs/phase13/verify-native-addon-loading-decision.js`.
+- Gradle gate: `:app:verifyNodePhase13NativeAddonLoadingDecision`.
+- Report: `docs/nodejs/reports/phase13/P13_39_NATIVE_ADDON_LOADING.md`.
+- Surface manifest evidence: `phase13-native-addon-loading-decision`.
+- Remaining P13-39 blockers: signed packaged native-addon manifest, ABI and
+  Node-API/version allowlists, hash/signature verification, dependency scan and
+  APK-builder preflight, crash isolation, and packaged positive/hostile-corpus
+  evidence.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current

@@ -352,7 +352,7 @@ Reason open: `policy`, `implementation`, `packaging`.
 - [ ] Define signed packaged native-addon manifest with per-ABI artifacts.
 - [ ] Tie ABI and Node-API/version allowlists to embedded Node, Android ABI, NDK, and release channel.
 - [ ] Verify hashes and signatures before resolution.
-- [x] Keep runtime download, npm build, lifecycle scripts, and postinstall execution denied.
+- [x] Keep native addon artifacts packaged-only and keep runtime download, npm build, lifecycle scripts, and postinstall execution denied.
 - [ ] Add dependency scan, APK-builder preflight, crash isolation, positive packaged smoke, and hostile corpus.
 
 #### P13-40 `child_process` scoped runner

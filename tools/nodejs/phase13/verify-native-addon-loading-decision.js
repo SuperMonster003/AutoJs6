@@ -113,11 +113,14 @@ function buildReport(files) {
       token(files.phase9ChaosSecurity, "`process.binding`, `process.dlopen`, signed native plugin archives"),
       token(files.compatibilityProfile, "NATIVE_ADDON_DISABLED"),
       token(files.securityModel, "Runtime npm/native build tooling must not be used as the enablement path"),
+      token(files.p13Report, "For P13-39 v1.1, native addon artifacts stay packaged-only future inputs"),
+      token(files.p13Report, "Runtime download, npm native build, lifecycle-script execution, postinstall"),
+      token(files.phase13Tasks, "For P13-39 v1.1, native addon artifacts stay packaged-only future inputs"),
+      token(files.phase13Tasks, "unrestricted native payload extraction stay stable-denied"),
     ], [
       "Define a signed packaged native-addon manifest with per-ABI artifact declarations.",
       "Tie ABI and Node-API/version allowlists to the embedded Node runtime, Android ABI, NDK, and release channel.",
       "Verify hashes and signatures before resolution and reject tampered or unlisted artifacts.",
-      "Keep native addon artifacts packaged-only; runtime download, npm build, lifecycle script, and postinstall execution must stay denied.",
       "Add dependency scan and APK-builder preflight evidence for every native payload and node-gyp trace.",
       "Add crash isolation or a host-owned native service boundary before allowing code into, or beside, the embedded runtime.",
       "Add packaged positive and hostile-corpus evidence before promotion.",
@@ -195,8 +198,8 @@ function buildReport(files) {
         files.dependencyManager.text.includes("ERR_AUTOJS6_PM_NATIVE_ADDON_DISABLED") &&
         files.projectAnalyzer.text.includes("DEPENDENCY_LIFECYCLE_SCRIPT_UNSUPPORTED") &&
         files.projectAnalyzer.text.includes("NODE_GYP_ARTIFACT_UNSUPPORTED") &&
-        files.p13Report.text.includes("Runtime downloads, npm native builds, lifecycle scripts, and download-exec") &&
-        files.p13Report.text.includes("postinstall execution must stay denied"),
+        files.p13Report.text.includes("Runtime download, npm native build, lifecycle-script execution, postinstall") &&
+        files.p13Report.text.includes("unrestricted native payload extraction remain stable-denied"),
       "P13-39 must keep runtime download, npm native build, lifecycle script, and postinstall execution paths denied.",
     ),
     check(

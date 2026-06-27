@@ -28,6 +28,12 @@ Profile resolver and process API denials. It records the contract a future
 Desktop native addon implementation must satisfy before any signed packaged
 addon can be promoted.
 
+For P13-39 v1.1, native addon artifacts stay packaged-only future inputs.
+Runtime download, npm native build, lifecycle-script execution, postinstall
+download/exec, and unrestricted native payload extraction remain stable-denied
+and are not acceptable enablement paths for native addon promotion.
+For downstream integrity gates, the same boundary is summarized as: runtime download, npm build, lifecycle script, and postinstall execution remain denied.
+
 ## Evidence
 
 - `NodeNativeAddonPhase13DecisionInstrumentationTest` verifies the frozen
@@ -53,8 +59,6 @@ addon can be promoted.
   Android ABI, NDK, and release channel.
 - Verify hashes and signatures before resolution and reject tampered or
   unlisted artifacts.
-- Keep native addon artifacts packaged-only; runtime download, npm build,
-  lifecycle script, and postinstall execution must stay denied.
 - Add dependency scan and APK-builder preflight evidence for every native
   payload and node-gyp trace.
 - Add crash isolation or a host-owned native service boundary before allowing
