@@ -57,3 +57,7 @@ The following remain future work before any UDP promotion:
 - Add fd/socket leak instrumentation before exposing any UDP socket object.
 - Add live-device UDP tests for packet budgets, timeout/cancel behavior,
   network loss, background policy, and process/service destroy cleanup.
+
+The docs, desktop matrix, release matrix, surface manifest, and Gradle gate are
+evidence checks only. They do not add a second blocker for the same UDP provider
+permission, packaged, fd-leak, and lifecycle evidence.

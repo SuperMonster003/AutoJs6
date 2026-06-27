@@ -80,7 +80,7 @@ function buildReport(files) {
       token(files.proAutoxNotes, "P13-31 records dgram UDP capability as stable-denied"),
     ], [
       "A future UDP promotion must split unicast client, server bind/listen, broadcast, multicast, and source-specific multicast into explicit capability tiers.",
-      "A future UDP promotion must prove Android background behavior, INTERNET/multicast permission mapping, packet budgets, and lifecycle cleanup.",
+      "A future UDP promotion must prove Android background behavior, INTERNET/multicast permission mapping, packaged permission proof, packet budgets, fd/socket leak instrumentation, and lifecycle cleanup.",
     ]),
     scenario("docs_gate_and_matrix", "docs, desktop matrix, release matrix, and Gradle gate record the P13-31 decision", [
       token(files.phase13Tasks, "P13-31 stable-denied landing"),
@@ -92,9 +92,7 @@ function buildReport(files) {
       token(files.desktopMatrix, "P13-31 records UDP/dgram as stable-denied"),
       token(files.builtinMatrixGenerator, "P13-31 records UDP/dgram as stable-denied"),
       token(files.capabilityMatrix, "P13-31 dgram UDP decision"),
-    ], [
-      "Packaged INTERNET permission proof and fd leak instrumentation remain required before any future UDP promotion.",
-    ]),
+    ], []),
   ];
 
   const checks = [
