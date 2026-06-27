@@ -274,7 +274,7 @@ Reason open: `policy`, `implementation`.
 - [x] Decide whether `dgram` remains stable-denied for v1.1 or starts a future controlled provider.
 - [ ] If promoted later, split unicast, server bind/listen, broadcast, multicast, and source-specific multicast capabilities.
 - [ ] Prove permission mapping, packet budgets, lifecycle cleanup, and packaged behavior.
-- [ ] Keep local shadow bypass and raw socket authority denied until the provider exists.
+- [x] Keep local shadow bypass and raw socket authority denied until the provider exists.
 
 #### P13-32 filesystem profile relaxation
 

@@ -122,6 +122,16 @@ function buildReport(files) {
         !files.nodeBridgeSources.text.includes('if (name === "dgram" || name === "node:dgram")'),
       "P13-31 must not accidentally expose a limited dgram facade.",
     ),
+    check(
+      "local-shadow-and-raw-socket-denied",
+      files.p13DgramTest.text.includes("writeShadowModule(workDir, \"dgram\")") &&
+        files.p13DgramTest.text.includes("p13dgram.shadow=false") &&
+        files.p13DgramTest.text.includes("process.getBuiltinModule(\"dgram\")") &&
+        files.rawNetworkTest.text.includes("resolve_node_dgram") &&
+        files.p13Report.text.includes("Local `node_modules/dgram`") &&
+        files.p13Report.text.includes("No UDP socket is opened"),
+      "P13-31 must keep local dgram shadow bypass and raw UDP socket authority denied until a provider exists.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -151,6 +161,7 @@ function buildReport(files) {
       udpServerPromoted: false,
       multicastPromoted: false,
       broadcastPromoted: false,
+      localShadowAndRawSocketDenied: checkById(checks, "local-shadow-and-raw-socket-denied").passed,
       packagedLiveNetworkReady: false,
       fdLeakProofReady: false,
       desktopSurfacePromoted: false,
@@ -180,6 +191,10 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function scenarioById(scenarios, id) {
