@@ -205,8 +205,6 @@ function buildReport(files) {
       token(files.conformanceTest, "npmTarballPlanResult.resolution.inferredName"),
       token(files.p13AndroidManagerReport, "`NodeAndroidPackageInstallManager` supports"),
       token(files.p13AndroidManagerVerifier, "verifyNodePhase13AndroidPackageInstallManager"),
-    ], [
-      "Signed packaged native payloads, native build execution, lifecycle debug mode, bin shim strategy, and packaged distribution evidence remain future work.",
     ]),
     scenario("host_managed_install_equivalent", "Host-side package manager remains the equivalent npm install path while Android runtime install stays constrained", [
       token(files.phase10PackageManager, 'const REPORT_BASENAME = "phase10-package-manager-boundary"'),
@@ -426,7 +424,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "read_maintenance_profile").status === "ready",
       androidLocalStoreReady: scenarioById(scenarios, "android_local_store_substrate").status !== "missing_evidence",

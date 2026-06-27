@@ -1,6 +1,7 @@
 # P13-42 Android Package Manager
 
-P13-42 records Android package manager parity as partial.
+P13-42 records Android package manager parity as partial capability evidence.
+The P13-42 v1.1 package-manager decision gate is ready.
 
 The current target is "Auto.js Pro capability + desktop Node.js capability",
 but package installation is still split between a host-managed npm-compatible
@@ -163,9 +164,12 @@ constrained to the local store substrate.
 - Raw `node_modules` mutation APIs from scripts.
 - Packaged APK dependency install/distribution evidence.
 
-The docs, release matrix, surface manifest, and Gradle gate remain evidence
-checks only. They do not add a second blocker for the same signed native
-payload and packaged distribution promotion work.
+Future promotion work still includes signed packaged native payload policy,
+native build execution, debug lifecycle execution, bin shim strategy, registry
+download/cache/tarball installation, and packaged dependency distribution
+evidence. The docs, release matrix, surface manifest, and Gradle gate remain
+evidence checks only. They do not add a second blocker for that future
+promotion work.
 
 ## Verification
 

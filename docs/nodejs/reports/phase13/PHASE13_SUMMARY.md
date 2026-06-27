@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 15
-- Open tasks: 43
+- Completed tasks: 16
+- Open tasks: 42
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -56,7 +56,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-39` | `open` | `desktop.execution_runtime` | 决策 native addon `.node` loading。 |
 | `P13-40` | `open` | `desktop.execution_runtime` | 推进 `child_process` scoped runner。 |
 | `P13-41` | `open` | `desktop.modules_npm_process` | 推进完整 ESM loader parity。 |
-| `P13-42` | `open` | `desktop.modules_npm_process` | 推进 npm/package manager on Android。 |
+| `P13-42` | `completed` | `desktop.modules_npm_process` | 推进 npm/package manager on Android。 |
 | `P13-43` | `open` | `desktop.modules_npm_process` | 扩展 Node stdlib conformance。 |
 | `P13-44` | `open` | `desktop.modules_npm_process` | 推进 process/env/argv parity。 |
 | `P13-45` | `completed` | `packaging.plugins_distribution` | 扩展 packaged APK capability metadata。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 42
+- Reports with blockers: 41
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -191,7 +191,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-notifications-settings-power-manager.json` | `verifyNodePhase13NotificationsSettingsPowerManager` | `P13-25` | `partial` | 0 | 6 |
 | `phase13-overlay-provider-promotion.json` | `verifyNodePhase13OverlayProviderPromotion` | `P13-18` | `partial` | 0 | 5 |
 | `phase13-package-lock-integrity-policy.json` | `verifyNodePhase13PackageLockIntegrityPolicy` | `P13-48` | `partial` | 0 | 2 |
-| `phase13-package-manager-android-decision.json` | `verifyNodePhase13PackageManagerAndroidDecision` | `P13-42` | `partial` | 0 | 1 |
+| `phase13-package-manager-android-decision.json` | `verifyNodePhase13PackageManagerAndroidDecision` | `P13-42` | `ready` | 0 | 0 |
 | `phase13-packaged-capability-metadata-decision.json` | `verifyNodePhase13PackagedCapabilityMetadataDecision` | `P13-45` | `ready` | 0 | 0 |
 | `phase13-packaged-long-running-service.json` | `verifyNodePhase13PackagedLongRunningService` | `P13-07` | `partial` | 0 | 2 |
 | `phase13-plugin-system-parity-decision.json` | `verifyNodePhase13PluginSystemParityDecision` | `P13-46` | `partial` | 0 | 1 |

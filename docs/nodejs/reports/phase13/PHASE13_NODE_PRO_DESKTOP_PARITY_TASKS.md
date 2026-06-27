@@ -1591,7 +1591,7 @@ P13 task 本身使用以下执行状态：
     dynamic-import package graph、pending TLA/linking cancellation cleanup、
     full desktop source-map parity 仍未完成。
 
-- [ ] P13-42: 推进 npm/package manager on Android。
+- [x] P13-42: 推进 npm/package manager on Android。
   - 范围：从 host-side bundler/validator 推进到 Android 侧 npm 包安装/管理能力。
   - 验收：
     - `npm i --no-bin-links` 或等价安装流程可用。
@@ -1653,7 +1653,11 @@ P13 task 本身使用以下执行状态：
       remains the equivalent install path.
     - Surface manifest evidence:
       `phase13-package-manager-android-decision`。
-  - Remaining: Android 侧 registry metadata/tarball 下载、npm CLI、
+  - Closure: host-managed package validation plus Android local-store substrate
+    is the accepted v1.1 equivalent install path; npm CLI, registry/tarball
+    install authority, lifecycle/bin/native behavior, and raw mutation remain
+    fail-closed with policy diagnostics.
+  - Future promotion work: Android 侧 registry metadata/tarball 下载、npm CLI、
     unrestricted package-manager install authority、debug-only lifecycle runner、bin shim、signed
     native payload policy、native build strategy、packaged dependency install/distribution
     evidence、真实 npm corpus 通过率提升仍未完成。
