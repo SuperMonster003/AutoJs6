@@ -1,8 +1,9 @@
 # P13-39 Native Addon Loading Decision
 
-P13-39 records native addon loading as partial. The current Phase 13 decision
-is to expose diagnostics through `autojs6:profile.nativeAddonProfile` while
-keeping arbitrary `.node` loading, `process.dlopen`, `process.binding`, and
+P13-39 records the v1.1 native addon denial gate as ready while signed packaged
+native addon promotion remains future work. The current Phase 13 decision is to
+expose diagnostics through `autojs6:profile.nativeAddonProfile` while keeping
+arbitrary `.node` loading, `process.dlopen`, `process.binding`, and
 `process._linkedBinding` denied by default.
 
 ## Decision
@@ -51,7 +52,15 @@ For downstream integrity gates, the same boundary is summarized as: runtime down
 - `verifyNodePhase13NativeAddonLoadingDecision` records the host gate and
   writes `phase13-native-addon-loading-decision.json` and `.md`.
 
-## Remaining Blockers
+## Closure
+
+The v1.1 gate closes because `nativeAddonProfile`, default feature-flag denial,
+direct `.node` require/resolve denial, package entry denial, private process
+native API denial, host dependency tooling rejection, runtime download/build/
+lifecycle denial, docs, surface manifest, TypeScript declarations, and Gradle
+gate are synchronized without introducing a callable native-addon loader.
+
+## Future Work
 
 - Define a signed packaged native-addon manifest with per-ABI artifact
   declarations.

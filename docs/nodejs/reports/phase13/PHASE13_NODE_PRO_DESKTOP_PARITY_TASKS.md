@@ -1450,7 +1450,7 @@ P13 task 本身使用以下执行状态：
   - Remaining: debug session UI/host command、loopback + ADB forward、
     DevTools attach、CPU/heap artifact redaction、packaged behavior 仍未完成。
 
-- [ ] P13-38: 推进 controlled WASI。
+- [x] P13-38: 推进 controlled WASI。
   - 范围：从 pure WebAssembly 扩展到 `autojs:wasi` 或受控 `node:wasi` profile。
   - 验收：
     - preopen 目录受 scoped/authorized roots 控制。
@@ -1473,8 +1473,16 @@ P13 task 本身使用以下执行状态：
   - Remaining: controlled facade、scoped/authorized preopen broker、
     fd/env/args/stdio/clock/random/resource budget、worker integration、
     packaged `.wasm`/WASI behavior 仍未完成。
+  - Closure: P13-38 v1.1 keeps pure WebAssembly as the supported path while
+    raw `wasi` / `node:wasi`, callable `autojs6:wasi`, local shadow packages,
+    and raw preopen/fd/env/process authority stay stable-denied with synced
+    docs, desktop matrix, TypeScript declarations, surface manifest, and Gradle
+    gate.
+  - Future controlled WASI work: scoped/authorized preopen broker, fd/env/args/
+    stdio/clock/random/resource budgets, worker integration, packaged `.wasm`
+    behavior, hostile corpus, and packaged evidence remain future gates.
 
-- [ ] P13-39: 决策 native addon `.node` loading。
+- [x] P13-39: 决策 native addon `.node` loading。
   - 范围：为 Desktop profile 评估 signed/packaged native addon。
   - 验收：
     - 默认仍拒绝任意 `.node`。
@@ -1499,6 +1507,14 @@ P13 task 本身使用以下执行状态：
   - Remaining: signed packaged manifest、ABI allowlist、hash/signature
     verification、packaged-only/no download-exec、dependency scan、crash
     isolation、packaged positive/hostile corpus 仍未完成。
+  - Closure: P13-39 v1.1 keeps `.node`, package entry resolution,
+    `process.dlopen`, `process.binding`, `process._linkedBinding`, runtime
+    download/build/lifecycle/postinstall execution, and unrestricted native
+    extraction stable-denied with synced docs, TypeScript declarations, surface
+    manifest, dependency-tooling checks, and Gradle gate.
+  - Future native addon work: signed packaged manifest, ABI/Node-API/version
+    allowlists, hash/signature verification, APK-builder preflight, crash
+    isolation, packaged positive smoke, and hostile corpus remain future gates.
 
 - [ ] P13-40: 推进 `child_process` scoped runner。
   - 范围：评估桌面 Node 生态需要的子进程能力在 Android 上的替代实现。

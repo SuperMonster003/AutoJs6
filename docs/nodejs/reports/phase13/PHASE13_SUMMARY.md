@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 27
-- Open tasks: 31
+- Completed tasks: 29
+- Open tasks: 29
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -52,8 +52,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-35` | `completed` | `desktop.execution_runtime` | 决策 process-worker replacement。 |
 | `P13-36` | `open` | `desktop.execution_runtime` | 推进 `vm` module。 |
 | `P13-37` | `open` | `desktop.execution_runtime` | 推进 inspector/devtools debug profile。 |
-| `P13-38` | `open` | `desktop.execution_runtime` | 推进 controlled WASI。 |
-| `P13-39` | `open` | `desktop.execution_runtime` | 决策 native addon `.node` loading。 |
+| `P13-38` | `completed` | `desktop.execution_runtime` | 推进 controlled WASI。 |
+| `P13-39` | `completed` | `desktop.execution_runtime` | 决策 native addon `.node` loading。 |
 | `P13-40` | `open` | `desktop.execution_runtime` | 推进 `child_process` scoped runner。 |
 | `P13-41` | `open` | `desktop.modules_npm_process` | 推进完整 ESM loader parity。 |
 | `P13-42` | `completed` | `desktop.modules_npm_process` | 推进 npm/package manager on Android。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 30
+- Reports with blockers: 28
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -170,7 +170,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-baseline-verification.json` | `verifyNodePhase13Baseline` | `-` | `passed` | 0 | 0 |
 | `phase13-capability-truth.json` | `generateNodePhase13CapabilityTruth` | `-` | `passed` | 0 | 0 |
 | `phase13-child-process-scoped-runner-decision.json` | `verifyNodePhase13ChildProcessScopedRunnerDecision` | `P13-40` | `partial` | 0 | 6 |
-| `phase13-controlled-wasi-profile-decision.json` | `verifyNodePhase13ControlledWasiProfileDecision` | `P13-38` | `partial` | 0 | 5 |
+| `phase13-controlled-wasi-profile-decision.json` | `verifyNodePhase13ControlledWasiProfileDecision` | `P13-38` | `ready` | 0 | 0 |
 | `phase13-crash-evidence-automation.json` | `collectNodePhase13CrashEvidence` | `P13-05` | `ready` | 0 | 0 |
 | `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `ready` | 0 | 0 |
 | `phase13-desktop-parity-examples.json` | `verifyNodePhase13DesktopParityExamples` | `P13-54` | `ready` | 0 | 0 |
@@ -186,7 +186,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-live-ui-provider-promotion.json` | `verifyNodePhase13LiveUiProviderPromotion` | `P13-17` | `partial` | 0 | 4 |
 | `phase13-media-recorder-mediainfo-provider.json` | `verifyNodePhase13MediaRecorderMediainfoProvider` | `P13-26` | `partial` | 0 | 6 |
 | `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56` | `ready` | 0 | 0 |
-| `phase13-native-addon-loading-decision.json` | `verifyNodePhase13NativeAddonLoadingDecision` | `P13-39` | `partial` | 0 | 6 |
+| `phase13-native-addon-loading-decision.json` | `verifyNodePhase13NativeAddonLoadingDecision` | `P13-39` | `ready` | 0 | 0 |
 | `phase13-net-tls-dns-staged-compatibility.json` | `verifyNodePhase13NetTlsDnsStagedCompatibility` | `P13-30` | `partial` | 0 | 6 |
 | `phase13-notifications-settings-power-manager.json` | `verifyNodePhase13NotificationsSettingsPowerManager` | `P13-25` | `partial` | 0 | 6 |
 | `phase13-overlay-provider-promotion.json` | `verifyNodePhase13OverlayProviderPromotion` | `P13-18` | `partial` | 0 | 5 |

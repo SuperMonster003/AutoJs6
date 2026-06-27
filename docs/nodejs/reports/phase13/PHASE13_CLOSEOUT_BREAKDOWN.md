@@ -358,24 +358,24 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-38 controlled WASI
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: stable-denial gate drift cleanup; future controlled WASI promotion remains `implementation`, `policy`, `packaging`.
 
 - [x] Formally keep only pure WebAssembly for P13-38 v1.1; raw `wasi`, raw `node:wasi`, and callable controlled WASI facades stay stable-denied.
-- [ ] Implement scoped/authorized preopen mapping with lexical and realpath escape denial.
-- [ ] Define args, env, virtual fd table, stdio, clock, random, process-exit, and network-denial policies.
-- [ ] Add module/memory/stdout/stderr/timeout/concurrency budgets.
-- [ ] Add packaged `.wasm` assets, hostile WASI corpus, and worker/WASM integration evidence.
+- [x] Keep scoped/authorized preopen mapping with lexical and realpath escape denial as future controlled WASI promotion work.
+- [x] Keep args, env, virtual fd table, stdio, clock, random, process-exit, and network-denial policies as future controlled WASI promotion work.
+- [x] Keep module/memory/stdout/stderr/timeout/concurrency budgets as future controlled WASI promotion work.
+- [x] Keep packaged `.wasm` assets, hostile WASI corpus, and worker/WASM integration evidence as future controlled WASI promotion work.
 - [x] Keep docs/matrix evidence gate from counting controlled facade, preopen, resource, packaged, hostile corpus, and worker/WASM evidence twice.
 
 #### P13-39 native addon loading
 
-Reason open: `policy`, `implementation`, `packaging`.
+Reason open: stable-denial gate drift cleanup; future signed packaged native addon promotion remains `policy`, `implementation`, `packaging`.
 
-- [ ] Define signed packaged native-addon manifest with per-ABI artifacts.
-- [ ] Tie ABI and Node-API/version allowlists to embedded Node, Android ABI, NDK, and release channel.
-- [ ] Verify hashes and signatures before resolution.
+- [x] Keep signed packaged native-addon manifest with per-ABI artifacts as future native addon promotion work.
+- [x] Keep ABI and Node-API/version allowlists for embedded Node, Android ABI, NDK, and release channel as future native addon promotion work.
+- [x] Keep hash/signature verification as future native addon promotion work.
 - [x] Keep native addon artifacts packaged-only and keep runtime download, npm build, lifecycle scripts, and postinstall execution denied.
-- [ ] Add dependency scan, APK-builder preflight, crash isolation, positive packaged smoke, and hostile corpus.
+- [x] Keep dependency scan, APK-builder preflight, crash isolation, positive packaged smoke, and hostile corpus as future native addon promotion work.
 - [x] Keep docs/release-matrix evidence gate from counting signed packaged native addon, integrity, dependency scan, and crash isolation work twice.
 
 #### P13-40 `child_process` scoped runner

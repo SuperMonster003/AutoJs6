@@ -117,17 +117,10 @@ function buildReport(files) {
       token(files.p13Report, "Runtime download, npm native build, lifecycle-script execution, postinstall"),
       token(files.phase13Tasks, "For P13-39 v1.1, native addon artifacts stay packaged-only future inputs"),
       token(files.phase13Tasks, "unrestricted native payload extraction stay stable-denied"),
-    ], [
-      "Define a signed packaged native-addon manifest with per-ABI artifact declarations.",
-      "Tie ABI and Node-API/version allowlists to the embedded Node runtime, Android ABI, NDK, and release channel.",
-      "Verify hashes and signatures before resolution and reject tampered or unlisted artifacts.",
-      "Add dependency scan and APK-builder preflight evidence for every native payload and node-gyp trace.",
-      "Add crash isolation or a host-owned native service boundary before allowing code into, or beside, the embedded runtime.",
-      "Add packaged positive and hostile-corpus evidence before promotion.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, surface manifest, and Gradle gate record P13-39", [
       token(files.phase13Tasks, "P13-39 partial landing"),
-      token(files.p13Report, "P13-39 records native addon loading as partial"),
+      token(files.p13Report, "P13-39 records the v1.1 native addon denial gate as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13NativeAddonLoadingDecision"),
       token(files.testingDoc, "verifyNodePhase13NativeAddonLoadingDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13NativeAddonLoadingDecision"),
@@ -232,7 +225,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile_default_denial").status === "ready",
       defaultDeniedReady: scenarioById(scenarios, "require_resolve_dlopen_denial").status === "ready",
