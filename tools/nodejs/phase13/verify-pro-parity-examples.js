@@ -232,6 +232,20 @@ function buildReport(repoRoot, files) {
       "High-risk Pro snippets must stay out of default runtime smoke and require explicit Pro opt-in metadata.",
     ),
     check(
+      "prompt-disclosure-denial-paths",
+      entries.every((entry) =>
+        typeof entry.packagedBehavior === "string" &&
+        entry.packagedBehavior.length >= 24 &&
+        typeof entry.skipReason === "string" &&
+        entry.skipReason.length >= 16) &&
+        files.exampleReadme.text.includes("Prompt and disclosure references are deliberately metadata-only") &&
+        files.exampleReadme.text.includes("reviewed disclosure") &&
+        files.exampleReadme.text.includes("permission review") &&
+        files.exampleReadme.text.includes("provider, permission, or profile denial paths") &&
+        files.p13Report.text.includes("Prompt/disclosure UI references and denial paths remain metadata-only"),
+      "Pro parity examples must reference prompt/disclosure review and preserve explicit provider, permission, and profile denial paths.",
+    ),
+    check(
       "readme-acceptance",
       files.exampleReadme.text.includes("$autojs.java") &&
         files.exampleReadme.text.includes("rhino.install") &&
@@ -315,6 +329,7 @@ function buildReport(repoRoot, files) {
       smokeSubsetExamples,
       highRiskSnippetsStatic: true,
       highRiskSnippetsOptInOnly: checkById(checks, "high-risk-snippets-opt-in-only").passed,
+      promptDisclosureDenialPathsReady: checkById(checks, "prompt-disclosure-denial-paths").passed,
       packagedRuntimePromoted: false,
       grantsAuthority: false,
       targetProfile: "pro_compat_opt_in",

@@ -38,6 +38,11 @@ keeps `pro-parity-suite` out of the default app smoke path. High-risk snippets
 stay tied to `pro_compat_opt_in` metadata and remain outside the focused runtime
 smoke subset unless the relevant provider/profile gates are explicitly opened.
 
+Prompt/disclosure UI references and denial paths remain metadata-only. The
+catalog links packaged-behavior rows to future disclosure, permission, service,
+and foreground-ownership review while guarded snippet skip paths keep provider,
+permission, and profile denials explicit.
+
 `smoke.cjs` is the focused runtime smoke subset. It executes only the
 Activity-owned JSON UI path represented by `snippets/ui-layout.cjs` and the
 WorkManager one-shot schedule/cancel path represented by

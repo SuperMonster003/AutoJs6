@@ -18,6 +18,11 @@ permissions or future providers are already promoted.
 | Screenshot/OCR | `snippets/screenshot-ocr.cjs` | `screen_capture`, `image`, `ocr` | packaged capture/OCR remains gated by disclosure and permission review | MediaProjection permission, image handle, or OCR provider may be unavailable |
 | Accessibility | `snippets/accessibility-selector.cjs` | `accessibility` | packaged accessibility needs explicit service/disclosure review | accessibility service may be disabled |
 
+Prompt and disclosure references are deliberately metadata-only. The packaged
+behavior rows identify where reviewed disclosure, foreground ownership, service
+review, or permission review is required, while the skip reasons and guarded
+snippets keep provider, permission, or profile denial paths explicit.
+
 Expected output is listed in `expected-output.txt`.
 
 `smoke.cjs` is the focused runtime smoke subset. It executes only the
