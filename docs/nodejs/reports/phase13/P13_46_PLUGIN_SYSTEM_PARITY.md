@@ -42,6 +42,10 @@ declared by the host project or package manifest.
 - Previously returned JavaScript object references cannot be revoked after a
   plugin is disabled; stronger isolation still needs a worker/process boundary.
 
+The docs, release matrix, surface manifest, and Gradle gate are evidence checks
+only. They do not add a second blocker for the same plugin promotion and
+packaged distribution work.
+
 ## Evidence
 
 - Runtime diagnostics: `pluginSystemProfile`

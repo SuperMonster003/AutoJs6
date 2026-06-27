@@ -108,7 +108,7 @@ function buildReport(files) {
       token(files.compatibilityProfile, "the host project/package permission manifest remains the authority ceiling"),
       token(files.securityModel, "declared by the host"),
     ], [
-      "Android provider plugins, native plugin loading, signed archives, remote marketplace install/update, and packaged distribution remain staged decisions.",
+      "Android provider plugins, native plugin loading/isolation, signed archives, remote marketplace install/update, packaged install/run evidence, and packaged distribution remain staged decisions.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-46", [
       token(files.phase13Tasks, "P13-46 partial landing"),
@@ -124,9 +124,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-46 plugin system parity"),
-    ], [
-      "P13-46 remains partial until signed package/update policy, Android provider plugin adapters, native isolation, and packaged install/run evidence land.",
-    ]),
+    ], []),
   ];
 
   const checks = [
