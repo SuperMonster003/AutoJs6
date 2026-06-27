@@ -127,6 +127,7 @@ function buildReport(files) {
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-49", [
       token(files.phase13Tasks, "P13-49 partial landing"),
       token(files.p13Report, "P13-49 records profile selection UX and diagnostics as partial"),
+      token(files.p13Report, "Denied or undeclared capability failures remain explicit"),
       token(files.p13Report, "declarationExamples"),
       token(files.phase13GradleGate, "verifyNodePhase13ProfileSelectionDiagnostics"),
       token(files.testingDoc, "verifyNodePhase13ProfileSelectionDiagnostics"),
@@ -220,6 +221,7 @@ function buildReport(files) {
       diagnosticSelectorReady: scenarioById(scenarios, "diagnostic_selector").status !== "missing_evidence",
       runtimeProfileSelectionReady: scenarioById(scenarios, "runtime_profile_and_error_hints").status === "ready",
       doctorUxReady: scenarioById(scenarios, "doctor_ux").status === "ready",
+      deniedOrUndeclaredDiagnosticsExplicit: checkById(checks, "actionable-error-hints").passed,
       profilePromotionPromoted: false,
       userSelectableProfilePromoted: false,
       effectiveProfile: "safe_default",
@@ -253,6 +255,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id);
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {

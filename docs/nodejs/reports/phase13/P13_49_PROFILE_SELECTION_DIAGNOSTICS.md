@@ -18,6 +18,9 @@ capability errors with profile, capability, and Android permission hints.
 - `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED` errors now include
   `requiredProfiles`, `requiredNodePermissions`, `requiredAndroidPermissions`,
   and `profileSelectionHint`.
+- Denied or undeclared capability failures remain explicit: the stable error
+  surface carries required profile, Node permission, Android permission, and
+  declaration example diagnostics without promoting the requested profile.
 - `profileSelectionHint.declarationExamples` now carries JSON-safe
   `nodePermissions`, `projectJson.node.permissions`, and
   `packageJson.autojs6.node.permissions` snippets for the missing capabilities.
