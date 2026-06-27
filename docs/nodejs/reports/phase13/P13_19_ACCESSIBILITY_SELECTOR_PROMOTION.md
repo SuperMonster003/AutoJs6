@@ -74,6 +74,12 @@ Direct `waitFor`, `pickup`, selector-style `detect`, `existsAll`, and
 - Expand the real-device accessibility matrix for selector actions and safe
   optional Back/Home/Recents validation.
 
+The docs, compatibility notes, device matrix, surface manifest, and Gradle gate
+are evidence-only for this partial decision. They do not add a separate P13-19
+blocker beyond Rhino selector aliases, packaged accessibility-service lifecycle
+evidence, real-device selector/action matrices, gesture provider design, and
+root/Shizuku input-automation separation above.
+
 ## Gate
 
 Host verifier:

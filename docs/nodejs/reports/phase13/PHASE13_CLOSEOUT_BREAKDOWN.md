@@ -168,6 +168,7 @@ Reason open: `implementation`, `evidence`.
 - [ ] Add packaged accessibility-service lifecycle evidence.
 - [ ] Add real-device matrix for selector actions, Back/Home/Recents, and denial paths.
 - [ ] Split gesture and root/Shizuku input automation into explicit future capabilities.
+- [x] Keep docs/device-matrix evidence gate from counting selector aliases, packaged service, action matrix, gesture, and root/Shizuku evidence twice.
 
 #### P13-20 screenshot/image/OCR parity
 

@@ -144,9 +144,7 @@ function buildReport(files) {
       token(files.typesReadme, 'P13-19 records the partial accessibility selector promotion gate'),
       token(files.deviceMatrix, 'P13-19 keeps optional accessibility smoke manual'),
       token(files.surfaceManifestDoc, 'phase13-accessibility-selector-promotion'),
-    ], [
-      "Keep P13-19 checklist open until advanced automation, packaged service, and root/Shizuku tier evidence land.",
-    ]),
+    ], []),
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-19"), "P13-19 must remain listed in the Phase 13 checklist."),
