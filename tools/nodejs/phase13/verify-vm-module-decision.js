@@ -117,9 +117,7 @@ function buildReport(files) {
       token(files.desktopMatrix, "P13-36 promotes vm/node:vm to the native Node builtin"),
       token(files.builtinMatrixGenerator, "P13-36 promotes vm/node:vm to the native Node builtin"),
       token(files.capabilityMatrix, "P13-36 vm module decision"),
-    ], [
-      "P13-36 remains partial until memory/compiled-script and packaged native-vm evidence are complete.",
-    ]),
+    ], []),
   ];
 
   const checks = [

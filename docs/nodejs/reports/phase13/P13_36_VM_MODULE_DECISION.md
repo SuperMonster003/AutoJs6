@@ -49,6 +49,10 @@ npm packages require it. It does not claim VM contexts are an isolation boundary
   documented and testable.
 - Add timeout and lifecycle stress evidence for long-running VM code.
 
+The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
+evidence checks only. They do not add a second blocker for the same memory,
+compiled-script, lifecycle, leakage, and packaged VM evidence.
+
 ## Rollback
 
 Restore `vm` to `disabledBuiltinModuleNames`, remove it from

@@ -327,6 +327,7 @@ Reason open: `evidence`, `packaging`.
 - [ ] Add timeout/lifecycle stress and leakage probes.
 - [ ] Add packaged smoke for packages using `vm.Script` and contexts.
 - [x] Keep VM documented as compatibility, not a security boundary.
+- [x] Keep docs/matrix evidence gate from counting VM memory, lifecycle, leakage, and packaged evidence twice.
 
 #### P13-37 inspector/devtools
 
