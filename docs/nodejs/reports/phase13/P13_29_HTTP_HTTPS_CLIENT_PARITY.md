@@ -24,6 +24,9 @@ provider flag and Android permission policy.
 - P13-29 adds focused instrumentation for TLS/provider error propagation,
   proxy/tunnel option denial, `CONNECT` denial, server/listen denial, and the
   fetch/axios boundary.
+- P13-29 expands the offline npm-shaped HTTP corpus from six to nine fixtures
+  with follow-redirects-style redirect handling, TLS provider failure handling,
+  and per-request proxy configuration denial.
 - P13-29 adds minimal TypeScript declarations for the controlled client subset.
 
 ## Boundary
@@ -60,6 +63,3 @@ The following remain unavailable:
 - Run a live Android/OkHttp HTTP/HTTPS smoke under the existing experimental
   network provider flag.
 - Decide whether P13-30 allows any raw `net` / `tls` / `dns` opt-in authority.
-- Expand the offline package corpus for desktop clients that expect
-  `follow-redirects`, agent option probes, TLS failure handling, and proxy
-  configuration.

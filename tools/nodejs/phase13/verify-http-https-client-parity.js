@@ -19,6 +19,8 @@ const FILES = {
   httpsClientTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeHttpsClientFacadeInstrumentationTest.kt",
   httpAgentTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeHttpAgentFacadeInstrumentationTest.kt",
   rawNetworkTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeRawNetworkPolicyInstrumentationTest.kt",
+  httpNpmCorpusTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeHttpNpmCorpusInstrumentationTest.kt",
+  httpNpmCorpusManifest: "app/src/androidTest/assets/http_compat_corpus/manifest.json",
   httpTypes: "docs/nodejs/types/autojs6-node/http.d.ts",
   httpsTypes: "docs/nodejs/types/autojs6-node/https.d.ts",
   indexTypes: "docs/nodejs/types/autojs6-node/index.d.ts",
@@ -92,6 +94,19 @@ function buildReport(files) {
     ], [
       "P13-30 must decide whether any net/tls/dns opt-in authority exists beyond these denials.",
       "Proxy support remains provider/system-owned only; per-request proxy configuration is still denied.",
+    ]),
+    scenario("desktop_client_package_corpus", "offline npm-shaped client corpus covers redirects, TLS failure, and proxy denial", [
+      token(files.httpNpmCorpusManifest, '"name": "redirect-follow-client"'),
+      token(files.httpNpmCorpusManifest, '"name": "tls-failure-client"'),
+      token(files.httpNpmCorpusManifest, '"name": "proxy-denial-client"'),
+      token(files.httpNpmCorpusManifest, "package following redirects"),
+      token(files.httpNpmCorpusManifest, "package handling TLS provider failure"),
+      token(files.httpNpmCorpusManifest, "package expecting proxy configuration denial"),
+      token(files.httpNpmCorpusTest, "EXPECTED_FIXTURE_COUNT = 9"),
+      token(files.httpNpmCorpusTest, "GET:http:/redirect-start|GET:http:/redirect-final|GET:https:/tls-fail"),
+      token(files.p13Report, "P13-29 expands the offline npm-shaped HTTP corpus"),
+      token(files.compatibilityProfile, "It adds nine"),
+      token(files.testingDoc, "runs nine offline npm-shaped fixtures"),
     ]),
     scenario("types_docs_and_gate", "types, docs, matrix, and Gradle gate record P13-29 partial progress", [
       token(files.httpTypes, 'declare module "http"'),

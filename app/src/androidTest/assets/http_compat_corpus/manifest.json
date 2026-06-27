@@ -47,6 +47,30 @@
         "http.Agent safe shape",
         "https.Agent safe shape"
       ]
+    },
+    {
+      "name": "redirect-follow-client",
+      "patterns": [
+        "package following redirects",
+        "follow-redirects style wrapper",
+        "controlled redirect response handling"
+      ]
+    },
+    {
+      "name": "tls-failure-client",
+      "patterns": [
+        "package handling TLS provider failure",
+        "https request error propagation",
+        "controlled TLS failure code"
+      ]
+    },
+    {
+      "name": "proxy-denial-client",
+      "patterns": [
+        "package expecting proxy configuration denial",
+        "per-request proxy remains denied",
+        "controlled proxy policy error"
+      ]
     }
   ]
 }

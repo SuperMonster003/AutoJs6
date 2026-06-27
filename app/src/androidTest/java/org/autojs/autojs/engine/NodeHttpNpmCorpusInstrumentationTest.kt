@@ -175,6 +175,24 @@ class NodeHttpNpmCorpusInstrumentationTest {
                         bodyBase64: Buffer.from("agent-https-ok").toString("base64")
                       };
                     }
+                    if (path === "/redirect-start") {
+                      return {
+                        url: payload.url,
+                        status: 302,
+                        statusText: "Found",
+                        headers: headers.concat([["location", "/redirect-final"]]),
+                        bodyBase64: Buffer.from("redirecting").toString("base64")
+                      };
+                    }
+                    if (path === "/redirect-final") {
+                      return {
+                        url: payload.url,
+                        status: 200,
+                        statusText: "OK",
+                        headers,
+                        bodyBase64: Buffer.from("redirect-ok").toString("base64")
+                      };
+                    }
                     return {
                       url: payload.url,
                       status: 404,
@@ -190,6 +208,21 @@ class NodeHttpNpmCorpusInstrumentationTest {
                       requests.push(request);
                       const payload = request.args[0];
                       if (pathOf(payload.url) === "/abort-during") {
+                        return;
+                      }
+                      if (pathOf(payload.url) === "/tls-fail") {
+                        setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
+                          id: request.id,
+                          ok: false,
+                          error: {
+                            name: "Error",
+                            message: "fake TLS handshake failed",
+                            code: "ERR_AUTOJS6_NETWORK_ERROR",
+                            category: "network-error",
+                            module: "fetch",
+                            method: "request"
+                          }
+                        })));
                         return;
                       }
                       setImmediate(() => bridge.__test.receiveMessage(JSON.stringify({
@@ -256,7 +289,7 @@ class NodeHttpNpmCorpusInstrumentationTest {
             assertTrue(
                 result.stdout,
                 result.stdout.contains(
-                    "httpnpm.requests=GET:http:/http-get?pkg=1|POST:https:/https-request|GET:http:/incoming-stream|POST:http:/form-post|GET:http:/abort-during|GET:http:/agent-http|GET:https:/agent-https",
+                    "httpnpm.requests=GET:http:/http-get?pkg=1|POST:https:/https-request|GET:http:/incoming-stream|POST:http:/form-post|GET:http:/abort-during|GET:http:/agent-http|GET:https:/agent-https|GET:http:/redirect-start|GET:http:/redirect-final|GET:https:/tls-fail",
                 ),
             )
             assertTrue(result.stdout, result.stdout.contains("httpnpm.permissions=true"))
@@ -322,7 +355,7 @@ class NodeHttpNpmCorpusInstrumentationTest {
 
     companion object {
         private const val CORPUS_ASSET_DIR = "http_compat_corpus"
-        private const val EXPECTED_FIXTURE_COUNT = 6
+        private const val EXPECTED_FIXTURE_COUNT = 9
         private val FORBIDDEN_PACKAGE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")
         private val REQUIRED_PATTERNS = setOf(
             "package using http.get",
@@ -331,6 +364,9 @@ class NodeHttpNpmCorpusInstrumentationTest {
             "package posting form data",
             "package expecting AbortSignal",
             "package expecting Agent options",
+            "package following redirects",
+            "package handling TLS provider failure",
+            "package expecting proxy configuration denial",
         )
     }
 }

@@ -459,9 +459,10 @@ Canvas/Paint, and raw Android/OpenCV object parity remain blocked.
 HTTP/HTTPS client parity state: controlled `http`/`https` request/get,
 stream-response, timeout, redirect, TLS/provider-error, proxy/tunnel denial,
 server/listen denial, shadow denial, TypeScript declarations, and desktop
-builtin matrix evidence are covered, while raw socket authority, DNS/TLS
-session APIs, packaged INTERNET proof, live HTTP provider smoke, and proxy
-support remain blocked.
+builtin matrix evidence are covered. The offline HTTP npm corpus also covers
+follow-redirects-style handling, TLS provider failure handling, and proxy
+configuration denial. Raw socket authority, DNS/TLS session APIs, packaged
+INTERNET proof, live HTTP provider smoke, and proxy support remain blocked.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through
@@ -658,9 +659,11 @@ P13-29 additionally uses `verifyNodePhase13HttpHttpsClientParity` as the host
 promotion-status gate for controlled HTTP/HTTPS client parity and keeps the
 desktop network/fs surface partial: client request, stream response, timeout,
 redirect, TLS/provider error, proxy/tunnel denial, and fetch/axios boundary are
-covered, while packaged INTERNET evidence, live provider HTTP smoke, raw
-sockets, server/listen, DNS/TLS session control, and proxy support require
-separate evidence.
+covered. The offline HTTP npm corpus also covers follow-redirects-style
+handling, TLS provider failure handling, and proxy configuration denial, while
+packaged INTERNET evidence, live provider HTTP smoke, raw sockets,
+server/listen, DNS/TLS session control, and proxy support require separate
+evidence.
 P13-30 additionally uses `verifyNodePhase13NetTlsDnsStagedCompatibility` as
 the host promotion-status gate for staged `net`/`tls`/`dns` compatibility and
 keeps the desktop network/fs surface partial: reserved builtin identity,

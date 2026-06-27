@@ -151,6 +151,9 @@
   to 16 active requests by default (hard max 32) and the default response-body
   budget to 32 MiB (hard max 64 MiB), while preserving explicit per-request
   lower `maxResponseBytes` denials.
+- Follow-up corpus expansion grows the offline HTTP npm corpus from six to
+  nine fixtures with follow-redirects-style redirect handling, TLS provider
+  failure handling, and per-request proxy configuration denial.
 - Host verifier: `tools/nodejs/phase13/verify-http-https-client-parity.js`.
 - Gradle gate: `:app:verifyNodePhase13HttpHttpsClientParity`.
 - Report:
@@ -158,8 +161,7 @@
 - Surface manifest evidence: `phase13-http-https-client-parity`.
 - Remaining P13-29 blockers: packaged INTERNET permission evidence, live
   provider HTTP smoke, raw socket/server/listen policy, DNS/TLS session
-  parity, proxy support decision, richer redirect/TLS failure corpus, and
-  desktop client package corpus expansion.
+  parity, and proxy support decision.
 
 ## P13-30 Partial Landing Note
 
@@ -1126,6 +1128,10 @@ P13 task 本身使用以下执行状态：
     - Controlled fetch policy now allows 16 active requests by default
       (hard max 32) and a 32 MiB default response body budget (hard max 64 MiB)
       for real utility scripts with paginated HTTP calls and large HTML pages.
+    - HTTP npm corpus now includes nine fixtures, adding
+      `redirect-follow-client`, `tls-failure-client`, and
+      `proxy-denial-client` for follow-redirects-style packages, provider TLS
+      errors, and per-request proxy denial without dispatch.
     - Types: `docs/nodejs/types/autojs6-node/http.d.ts`,
       `docs/nodejs/types/autojs6-node/https.d.ts`
     - Host verifier:

@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/proxy-denial-client-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "proxy-denial-wrapper": "1.0.0"
+  }
+}

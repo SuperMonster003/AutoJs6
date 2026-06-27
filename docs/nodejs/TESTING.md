@@ -511,12 +511,14 @@ Focused HTTP npm compatibility corpus instrumentation:
 ```
 
 This S8-26 gate copies `app/src/androidTest/assets/http_compat_corpus/` into a
-scoped working directory and runs six offline npm-shaped fixtures through the
+scoped working directory and runs nine offline npm-shaped fixtures through the
 controlled `node:http` / `node:https` client facade. It covers packages using
 `http.get()`, `https.request()`, `IncomingMessage` `data` / `end`
 consumption, form-style POST bodies, request-level `AbortSignal`, safe Agent
-options, fixture metadata completeness, native-addon absence, lifecycle-script
-absence, bridge permission tagging, and pending cleanup.
+options, follow-redirects-style redirect handling, TLS provider failure
+handling, per-request proxy configuration denial, fixture metadata
+completeness, native-addon absence, lifecycle-script absence, bridge permission
+tagging, and pending cleanup.
 
 Current fixed real npm corpus instrumentation:
 

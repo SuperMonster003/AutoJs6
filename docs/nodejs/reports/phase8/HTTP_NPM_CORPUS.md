@@ -12,7 +12,7 @@ asset with local `node_modules` snapshots authored for the gate.
 `NodeHttpNpmCorpusInstrumentationTest` copies
 `app/src/androidTest/assets/http_compat_corpus/` into a scoped working
 directory, injects an enforced `network` manifest, installs a fake controlled
-fetch transport, and verifies six fixture patterns:
+fetch transport, and verifies nine fixture patterns:
 
 - package using `http.get()`
 - package using `https.request()`
@@ -20,6 +20,9 @@ fetch transport, and verifies six fixture patterns:
 - package posting `application/x-www-form-urlencoded` data
 - package expecting request-level `AbortSignal`
 - package expecting safe `http.Agent` / `https.Agent` options
+- package following redirects with a follow-redirects-style wrapper
+- package handling TLS provider failures from `https.request()`
+- package expecting per-request proxy configuration denial without dispatch
 
 The metadata subtest verifies:
 

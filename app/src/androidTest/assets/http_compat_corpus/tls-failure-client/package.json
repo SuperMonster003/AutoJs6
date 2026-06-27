@@ -1,0 +1,12 @@
+{
+  "name": "@autojs6-fixtures/tls-failure-client-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs"
+  },
+  "dependencies": {
+    "tls-failure-wrapper": "1.0.0"
+  }
+}
