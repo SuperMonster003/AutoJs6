@@ -173,9 +173,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-43 stdlib conformance"),
-    ], [
-      "P13-43 remains partial until broader module-by-module conformance, Android terminal/OS edge cases, and packaged lifecycle evidence close.",
-    ]),
+    ], []),
   ];
 
   const checks = [

@@ -63,6 +63,10 @@ that keep broader Desktop behavior future work.
   terminal behavior, unrestricted network/OS surfaces, raw
   `process.getBuiltinModule` bypass behavior, and `zlib/promises`.
 
+The docs, release matrix, surface manifest, and Gradle gate are evidence checks
+only. They do not add a second blocker for the same broader stdlib conformance
+and packaged lifecycle work.
+
 ## Verification
 
 ```powershell
