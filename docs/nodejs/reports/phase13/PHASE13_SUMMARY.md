@@ -157,8 +157,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 ## Generated Phase 13 Reports
 
-- Total reports: 54
-- Reports with policy violations: 0
+- Total reports: 53
+- Reports with policy violations: 1
 - Reports with blockers: 47
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
@@ -178,7 +178,6 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `partial` | 0 | 7 |
 | `phase13-filesystem-advanced-apis.json` | `verifyNodePhase13FilesystemAdvancedApis` | `P13-33` | `partial` | 0 | 5 |
 | `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `partial` | 0 | 5 |
-| `phase13-full-heavy-resource-stress-archive.json` | `-` | `-` | `validated` | 0 | 0 |
 | `phase13-full-heavy-resource-stress.json` | `verifyNodePhase13FullHeavyResourceStress` | `P13-08` | `partial` | 0 | 3 |
 | `phase13-http-https-client-parity.json` | `verifyNodePhase13HttpHttpsClientParity` | `P13-29` | `partial` | 0 | 5 |
 | `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `partial` | 0 | 6 |
@@ -215,7 +214,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-task-database-provider.json` | `verifyNodePhase13TaskDatabaseProvider` | `P13-21` | `partial` | 0 | 9 |
 | `phase13-type-declaration-profiles.json` | `verifyNodePhase13TypeDeclarationProfiles` | `P13-55` | `partial` | 0 | 3 |
 | `phase13-utility-heavy-rhino-modules.json` | `verifyNodePhase13UtilityHeavyRhinoModules` | `P13-27` | `partial` | 0 | 4 |
-| `phase13-vm-module-decision.json` | `verifyNodePhase13VmModuleDecision` | `P13-36` | `partial` | 0 | 3 |
+| `phase13-vm-module-decision.json` | `verifyNodePhase13VmModuleDecision` | `P13-36` | `failed` | 1 | 3 |
 | `phase13-worker-threads-opt-in-promotion.json` | `verifyNodePhase13WorkerThreadsOptInPromotion` | `P13-34` | `partial` | 0 | 7 |
 
 ## Verification
