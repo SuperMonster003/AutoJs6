@@ -21,9 +21,10 @@ The synchronized labels are:
 
 debug-only/provider POC is not formal availability. The docs explicitly keep
 `sample/nodejs/pro-parity-suite`, `sample/nodejs/desktop-parity-suite`, and
-`profile_capabilities.d.ts` as evidence or metadata only. Runtime authority for
-Java/Rhino proxy globals, raw floaty, unrestricted UI-thread execution,
-daily/weekly task rows, raw network sockets, expanded filesystem roots,
+`profile_capabilities.d.ts` as evidence or metadata only, including the
+`raw_network` desktop marker. Runtime authority for Java/Rhino proxy globals,
+raw floaty, unrestricted UI-thread execution, daily/weekly task rows, raw
+network sockets, raw network modules opt-in, expanded filesystem roots,
 `worker_threads`, `vm`, `inspector`, WASI, native addons, `child_process`,
 Android npm CLI, registry install, lifecycle scripts, and native payloads
 remains gated.

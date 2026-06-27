@@ -904,7 +904,8 @@ Pro9 comparison docs gate. It requires `MIGRATION_FROM_RHINO.md`,
 updates, and docs updates while classifying surfaces as Pro-compatible,
 Desktop-compatible, or gated/diagnostic-only. P13-56 records migration and Pro9
 comparison docs as partial; debug-only/provider POC is not formal availability,
-and examples or profile declarations remain evidence only.
+and examples, the `raw_network` desktop marker, or profile declarations remain
+evidence only.
 `generateNodePhase13Summary` records P13-57 as the Phase 13 summary and partial
 final gate. It requires the task checklist, surface manifest, final blocker
 registry, `phase13-capability-truth`, generated conformance reports, Testing/CI

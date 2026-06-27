@@ -32,6 +32,7 @@ const REQUIRED_DOC_TOKENS = [
   "sample/nodejs/pro-parity-suite",
   "sample/nodejs/desktop-parity-suite",
   "profile_capabilities.d.ts",
+  "raw_network",
 ];
 
 function main() {
@@ -68,6 +69,7 @@ function buildReport(files) {
       token(files.migrationDoc, "covered `autojs6:compat`"),
       token(files.migrationDoc, "$autojs.java"),
       token(files.migrationDoc, "raw network sockets"),
+      token(files.migrationDoc, "raw network modules opt-in"),
       token(files.migrationDoc, "Android npm CLI"),
     ]),
     scenario("pro9_comparison_taxonomy", "Auto.js Pro 9 comparison records the same partial taxonomy", [
@@ -93,8 +95,10 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.typesProfileCapabilities, "ProfileDeclarationMatrix"),
+      token(files.typesProfileCapabilities, "raw_network"),
       token(files.proParityManifest, "java-interop"),
       token(files.desktopParityManifest, "worker-threads"),
+      token(files.desktopParityManifest, "raw-network"),
     ], [
       "P13-57 summary/final gate still needs to aggregate the completed/open/deferred/rejected Phase 13 state.",
     ]),
@@ -121,9 +125,10 @@ function buildReport(files) {
       [files.migrationDoc, files.proComparison, files.proAutoxNotes].every((file) =>
         file.text.includes("sample/nodejs/pro-parity-suite") &&
           file.text.includes("sample/nodejs/desktop-parity-suite") &&
-          file.text.includes("profile_capabilities.d.ts"),
+          file.text.includes("profile_capabilities.d.ts") &&
+          file.text.includes("raw_network"),
       ),
-      "P13-56 docs must link the Pro/Desktop examples and profile declarations as evidence, not authority grants.",
+      "P13-56 docs must link the Pro/Desktop examples, raw_network marker, and profile declarations as evidence, not authority grants.",
     ),
     check(
       "surface-entry",

@@ -1954,6 +1954,9 @@ P13 task 本身使用以下执行状态：
       availability and keep `sample/nodejs/pro-parity-suite`,
       `sample/nodejs/desktop-parity-suite`, and `profile_capabilities.d.ts` as
       evidence or metadata rather than runtime authority.
+    - The migration docs now list the `raw_network` desktop marker and raw
+      network modules opt-in as evidence/metadata only, matching P13-54 and
+      P13-55 without granting default authority.
     - Host verifier:
       `tools/nodejs/phase13/verify-migration-pro9-comparison.js`.
     - Gradle gate: `:app:verifyNodePhase13MigrationPro9Comparison`.

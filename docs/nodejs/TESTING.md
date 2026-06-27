@@ -2261,7 +2261,7 @@ Desktop-compatible, or gated/diagnostic-only. The gate also checks that
 debug-only/provider POC is not formal availability and that
 `sample/nodejs/pro-parity-suite`, `sample/nodejs/desktop-parity-suite`, and
 `profile_capabilities.d.ts` remain evidence or metadata rather than runtime
-authority.
+authority, including the `raw_network` desktop marker.
 
 Phase 13 summary and partial final gate:
 
