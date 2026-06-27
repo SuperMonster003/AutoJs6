@@ -129,8 +129,6 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-45 packaged APK capability metadata"),
-    ], [
-      "P13-45 remains partial until profile/builtin/native/fs metadata can drive reviewed packaged synthesis and install-run evidence.",
     ]),
   ];
 
@@ -193,6 +191,11 @@ function buildReport(files) {
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       manifestMetadataReady: scenarioById(scenarios, "manifest_metadata_and_runtime_denial").status !== "missing_evidence",
+      undeclaredCapabilityDenialCovered:
+        checks.find((entry) => entry.id === "metadata-does-not-grant-authority").passed &&
+        files.p13PackagedTest.text.includes(
+          "p13packaged.denial=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|accessibility|0",
+        ),
       rawPackagedPromotion: false,
       nativeAssetsPromoted: false,
       expandedFilesystemRootsPromoted: false,

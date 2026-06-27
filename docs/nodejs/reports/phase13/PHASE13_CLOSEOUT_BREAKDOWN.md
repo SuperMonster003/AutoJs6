@@ -414,7 +414,7 @@ Reason open: `implementation`, `packaging`.
 - [x] Ensure declared `node.permissions` evidence is present in verifier inputs.
 - [ ] Make packaged profile, builtin, native asset, and filesystem-root metadata drive reviewed synthesis rather than diagnostics only.
 - [ ] Add install/run synthesis, disclosure UX, and profile-specific runtime promotion evidence.
-- [ ] Keep undeclared bridge capability denial covered.
+- [x] Keep undeclared bridge capability denial covered.
 
 #### P13-46 plugin system parity
 

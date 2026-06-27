@@ -1640,6 +1640,8 @@ P13 task 本身使用以下执行状态：
       `processParityProfile`、env 敏感变量过滤、script-local env 写入字符串化、
       scoped cwd/chdir、`process.exit(code)` lifecycle mapping、signal/native
       API 稳定拒绝、versions/resource/timing/report/permission/stdio 行为。
+    - The host verifier now treats undeclared bridge capability denial as
+      covered evidence rather than a remaining P13-45 blocker.
     - Existing evidence:
       `NodeProcessSweepInstrumentationTest`、`EmbeddedScriptMvpInstrumentationTest`、
       inspector env filtering tests、compile-cache env filtering tests 和

@@ -22,7 +22,8 @@ device instrumentation, a host verifier, and a Gradle gate.
   diagnostics through `bridge.permissions()` and `autojs6:profile`.
 - Declared builtins, native assets, filesystem roots, and profiles are
   diagnostic-only and do not grant runtime authority.
-- Missing bridge capabilities still reject before dispatch in JavaScript.
+- Missing bridge capabilities still reject before dispatch in JavaScript; this
+  denial evidence is covered by focused instrumentation and the host verifier.
 
 ## Remaining Work
 
@@ -34,6 +35,9 @@ device instrumentation, a host verifier, and a Gradle gate.
   scoped working directory policy.
 - Full packaged install/run synthesis, user disclosure, rollback, and
   profile-specific device matrices remain future work.
+
+The generated gate keeps these as two blocker classes: reviewed packaged
+metadata synthesis and full install/run plus disclosure/profile promotion.
 
 ## Evidence
 
