@@ -113,7 +113,7 @@ open class MaterialListPreference : MaterialDialogPreference {
                 }
                 return@itemsCallbackSingleChoice true
             }
-            val options = builderOptions
+            val options = createOptionMenuItemSpecs()
             if (defaultEntry != null) {
                 options.add(0, MaterialDialog.OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_use_default), ::useDefaultOptionMenuItemSpecOnClickListener))
             }

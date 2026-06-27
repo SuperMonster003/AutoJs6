@@ -102,13 +102,18 @@ open class MaterialDialogPreference : MaterialPreference {
                     builder.positiveColorRes(R.color.dialog_button_attraction)
                 }
             }
+            builder.options(createOptionMenuItemSpecs())
+        }
+
+    protected open fun createOptionMenuItemSpecs(): MutableList<OptionMenuItemSpec> {
+        return builderOptions.toMutableList().also { options ->
             if (longClickPrompt != null) {
-                builderOptions += OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_details)) {
+                options += OptionMenuItemSpec(prefContext.getString(R.string.dialog_button_details)) {
                     displayDetailsOptionMenuItemSpecDialog(prefContext, dialogTitle, longClickPrompt, longClickPromptMore)
                 }
             }
-            builder.options(builderOptions)
         }
+    }
 
     private fun setNeutralTextIfNeeded(builder: MaterialDialog.Builder) {
         if (neutralTextShort != null && mayBeStack()) {
