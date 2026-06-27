@@ -903,7 +903,7 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13RhinoImportHelpersDecision`.
     - Report: `docs/nodejs/reports/phase13/P13_15_IMPORT_HELPERS_DECISION.md`.
 
-- [ ] P13-16: 决策 `JavaAdapter` / `$java.defineClass` replacement。
+- [x] P13-16: 决策 `JavaAdapter` / `$java.defineClass` replacement。
   - 范围：提供 Java interface implementation 的迁移路径。
   - 验收：
     - 优先设计 `$java.defineClass` 或 proxy-interface API。
@@ -920,9 +920,14 @@ P13 task 本身使用以下执行状态：
       `tools/nodejs/phase13/verify-rhino-java-adapter-decision.js`.
     - Gradle gate: `:app:verifyNodePhase13RhinoJavaAdapterDecision`.
     - Report: `docs/nodejs/reports/phase13/P13_16_JAVA_ADAPTER_DECISION.md`.
-  - Remaining: actual proxy-interface / `defineClass` provider, listener
-    examples, callback cleanup, thread dispatch, packaged metadata, and leak
-    diagnostics still block full P13-16 closure.
+  - Closure: P13-16 v1.1 keeps `rhino.JavaAdapter()` as a stable unsupported
+    helper, keeps global `JavaAdapter` absent, reserves `java.defineClass()` /
+    `$autojs.java.defineClass()` as denial-only future provider names, and does
+    not dispatch bridge calls or retain callback handles.
+  - Future provider work: actual proxy-interface / `defineClass` provider,
+    listener examples, callback cleanup, thread dispatch, packaged metadata,
+    and leak diagnostics remain future gates before any Pro listener parity
+    claim.
 
 - [ ] P13-17: 推进 live UI provider 到 opt-in promoted。
   - 范围：基于 P12 `ui.compat` provider POC，补齐 live packaged UI。

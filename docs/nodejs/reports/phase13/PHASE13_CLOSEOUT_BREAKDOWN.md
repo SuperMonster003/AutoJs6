@@ -132,12 +132,12 @@ Reason open: `implementation`, `packaging`.
 
 #### P13-16 `JavaAdapter` / `defineClass` replacement
 
-Reason open: `implementation`, `policy`, `evidence`.
+Reason open: stable-denial decision drift cleanup; future proxy-interface promotion remains `implementation`, `policy`, `evidence`.
 
-- [ ] Implement a bounded proxy-interface or `java.defineClass()` provider.
-- [ ] Add listener/interface examples backed by connected-device instrumentation.
-- [ ] Prove callback cleanup, thread dispatch, timeout, leak diagnostics, and packaged metadata.
-- [ ] Keep global `JavaAdapter` unsupported unless a secure compatibility shape is explicitly accepted.
+- [x] Keep bounded proxy-interface or `java.defineClass()` provider implementation as future provider work rather than a P13-16 v1.1 decision blocker.
+- [x] Keep listener/interface examples backed by connected-device instrumentation as future provider promotion work.
+- [x] Keep callback cleanup, thread dispatch, timeout, leak diagnostics, and packaged metadata as future provider promotion work.
+- [x] Keep global `JavaAdapter` unsupported unless a secure compatibility shape is explicitly accepted.
 
 ### Pro UI, Automation, Media
 

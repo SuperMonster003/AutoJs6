@@ -1,6 +1,6 @@
 # P13-16 JavaAdapter / defineClass Replacement Decision
 
-- Status: partial
+- Status: ready
 - Gate: `:app:verifyNodePhase13RhinoJavaAdapterDecision`
 - Decision: Rhino `JavaAdapter` stays unsupported in Node. The replacement name
   is reserved as `java.defineClass()` / `$autojs.java.defineClass()` for a
@@ -47,9 +47,12 @@ not a Rhino `JavaAdapter` clone. Required boundaries:
   and service destroy
 - packaged metadata that stays fail-closed until callback cleanup evidence lands
 
-Common listener/interface examples remain implementation work. P13-16 only fixes
-the stable error surface, bounded lifecycle requirements, and the reserved
-migration name.
+Common listener/interface examples remain future provider work. P13-16 closes
+the v1.1 decision by fixing the stable error surface, bounded lifecycle
+requirements, and the reserved migration name without adding callback authority.
+
+P13-16 v1.1 closure is a stable-denial decision, not a proxy-interface
+implementation.
 
 ## Evidence
 
@@ -68,9 +71,18 @@ migration name.
   - `build/reports/nodejs/phase13-rhino-java-adapter-decision.json`
   - `build/reports/nodejs/phase13-rhino-java-adapter-decision.md`
 
-## Remaining
+## Closure
 
-- Implement a bounded proxy-interface / `defineClass` provider.
+The v1.1 gate closes because `rhino.JavaAdapter()` has a stable explicit
+unsupported error, global `JavaAdapter` remains absent, `java.defineClass()` and
+`$autojs.java.defineClass()` are reserved stable denials that do not dispatch to
+the bridge, type declarations and smoke samples expose denial-only signatures,
+and docs/security guidance keep actual proxy-interface callback authority out of
+the Node surface.
+
+## Future Provider Work
+
+- Implement a bounded proxy-interface / `defineClass` provider in a future task.
 - Cover common listener use cases such as click, attach-state, runnable, and
   simple callback interfaces.
 - Add thread dispatch, callback cleanup, packaged metadata, and leak stress

@@ -378,8 +378,8 @@ and full Pro profile promotion remain fail-closed.
 `require("rhino").importClass()` and `.importPackage()` are stable
 `ERR_AUTOJS6_RHINO_IMPORT_UNSUPPORTED` helpers, no global helpers are installed,
 and migration uses local assignment from a P13-14 Java proxy target.
-`verifyNodePhase13RhinoJavaAdapterDecision` records the P13-16 partial
-decision: `require("rhino").JavaAdapter()` is a stable
+`verifyNodePhase13RhinoJavaAdapterDecision` records the P13-16 ready v1.1
+stable-denial decision: `require("rhino").JavaAdapter()` is a stable
 `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED` helper, no global `JavaAdapter` is
 installed, and `java.defineClass()` / `$autojs.java.defineClass()` stay
 `ERR_AUTOJS6_JAVA_METHOD_DENIED` until the bounded proxy-interface provider and

@@ -76,19 +76,17 @@ function buildReport(files) {
       token(files.javaTest, "ERR_AUTOJS6_JAVA_METHOD_DENIED|ERR_AUTOJS6_JAVA_METHOD_DENIED"),
       token(files.autojsTypes, "defineClass(descriptor?: unknown, options?: BridgeCallOptions): never"),
     ]),
-    scenario("migration_decision_docs", "Docs describe the P13-16 replacement boundary and remaining implementation work", [
-      token(files.p13Report, "Status: partial"),
+    scenario("migration_decision_docs", "Docs close the P13-16 v1.1 stable-denial boundary and future provider work", [
+      token(files.p13Report, "Status: ready"),
       token(files.p13Report, "$java.defineClass"),
       token(files.p13Report, "proxy-interface"),
       token(files.p13Report, "bounded lifecycle"),
+      token(files.p13Report, "P13-16 v1.1 closure is a stable-denial decision"),
+      token(files.p13Report, "Future Provider Work"),
       token(files.rhinoDesign, "P13-16"),
       token(files.javaDesign, "P13-16"),
       token(files.compatibilityProfile, "P13-16"),
       token(files.securityModel, "P13-16"),
-    ], [
-      "Implement an actual proxy-interface or defineClass provider with bounded callback lifecycle.",
-      "Add device-backed listener/interface examples before claiming common listener parity.",
-      "Prove callback cleanup, thread dispatch, packaged metadata, and leak diagnostics before promotion.",
     ]),
     scenario("types_and_smoke", "Type declarations and smoke sample expose reserved signatures only", [
       token(files.rhinoTypes, 'ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED'),
