@@ -107,7 +107,7 @@ function buildReport(files) {
       token(files.workerStressTest, "worker.resource.cleanup.error="),
       token(files.workerStressTest, "worker.resource.throw=true|"),
       token(files.workerStressTest, "assertResourceGrowthBounded"),
-      token(files.workerDesignDoc, "crash evidence"),
+      token(files.workerDesignDoc, "focused instrumentation for 50 sequential worker create/terminate cycles, worker exceptions, infinite-loop worker timeout recovery, and parent-completion cleanup"),
       token(files.p13Report, "native worker availability"),
       token(files.p13Report, "packaged `.mjs` worker smoke"),
     ], [

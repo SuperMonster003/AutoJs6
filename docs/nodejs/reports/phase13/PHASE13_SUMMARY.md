@@ -216,7 +216,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-type-declaration-profiles.json` | `verifyNodePhase13TypeDeclarationProfiles` | `P13-55` | `partial` | 0 | 3 |
 | `phase13-utility-heavy-rhino-modules.json` | `verifyNodePhase13UtilityHeavyRhinoModules` | `P13-27` | `partial` | 0 | 4 |
 | `phase13-vm-module-decision.json` | `verifyNodePhase13VmModuleDecision` | `P13-36` | `partial` | 0 | 3 |
-| `phase13-worker-threads-opt-in-promotion.json` | `verifyNodePhase13WorkerThreadsOptInPromotion` | `P13-34` | `partial` | 0 | 8 |
+| `phase13-worker-threads-opt-in-promotion.json` | `verifyNodePhase13WorkerThreadsOptInPromotion` | `P13-34` | `partial` | 0 | 7 |
 
 ## Verification
 
