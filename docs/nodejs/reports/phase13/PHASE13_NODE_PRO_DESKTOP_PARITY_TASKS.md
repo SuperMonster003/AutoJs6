@@ -1848,7 +1848,7 @@ P13 task 本身使用以下执行状态：
     native plugin isolation, marketplace install/update, and packaged plugin
     distribution remain staged future gates rather than P13-46 v1.1 blockers.
 
-- [ ] P13-47: 增加 dependency compatibility corpus。
+- [x] P13-47: 增加 dependency compatibility corpus。
   - 范围：扩大真实 npm 包测试，按缺失能力分类。
   - 验收：
     - 报告给出 package、missing builtin、native addon、postinstall、network、fs
@@ -1879,6 +1879,13 @@ P13 task 本身使用以下执行状态：
       artifact 目录传给 host differential report。
     - 真实 registry drift、unsafe native/postinstall 包执行仍保持拒绝，仅以
       metadata blocker category 表达。
+  - Closure: the v1.1 fixed 53-fixture corpus, P13 compatibility taxonomy,
+    required reason kinds, stdlib +3 targeted delta, metadata instrumentation,
+    differential category reporting, summary rows, docs, surface manifest, and
+    Gradle gate are covered.
+  - Future CI work: connected AutoJs6 real npm corpus artifact scheduling,
+    live registry drift testing, and unsafe native/postinstall package execution
+    remain outside the default corpus gate.
 
 - [ ] P13-48: 实现 package lock and integrity policy。
   - 范围：为 Android-side package manager、plugins、native addon 做统一完整性策略。

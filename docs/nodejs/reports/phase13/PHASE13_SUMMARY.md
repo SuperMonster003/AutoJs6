@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 24
-- Open tasks: 34
+- Completed tasks: 25
+- Open tasks: 33
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -61,7 +61,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-44` | `completed` | `desktop.modules_npm_process` | 推进 process/env/argv parity。 |
 | `P13-45` | `completed` | `packaging.plugins_distribution` | 扩展 packaged APK capability metadata。 |
 | `P13-46` | `completed` | `packaging.plugins_distribution` | 推进 plugin system toward Pro/Desktop parity。 |
-| `P13-47` | `open` | `packaging.plugins_distribution` | 增加 dependency compatibility corpus。 |
+| `P13-47` | `completed` | `packaging.plugins_distribution` | 增加 dependency compatibility corpus。 |
 | `P13-48` | `open` | `packaging.plugins_distribution` | 实现 package lock and integrity policy。 |
 | `P13-49` | `completed` | `profile.promotion_model` | 实现 profile selection UX and diagnostics。 |
 | `P13-50` | `completed` | `security.rollback_privacy` | 扩展 security corpus for relaxed capabilities。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 33
+- Reports with blockers: 32
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -172,7 +172,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-child-process-scoped-runner-decision.json` | `verifyNodePhase13ChildProcessScopedRunnerDecision` | `P13-40` | `partial` | 0 | 6 |
 | `phase13-controlled-wasi-profile-decision.json` | `verifyNodePhase13ControlledWasiProfileDecision` | `P13-38` | `partial` | 0 | 5 |
 | `phase13-crash-evidence-automation.json` | `collectNodePhase13CrashEvidence` | `P13-05` | `ready` | 0 | 0 |
-| `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `partial` | 0 | 1 |
+| `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `ready` | 0 | 0 |
 | `phase13-desktop-parity-examples.json` | `verifyNodePhase13DesktopParityExamples` | `P13-54` | `ready` | 0 | 0 |
 | `phase13-dgram-udp-decision.json` | `verifyNodePhase13DgramUdpDecision` | `P13-31` | `partial` | 0 | 2 |
 | `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `partial` | 0 | 3 |

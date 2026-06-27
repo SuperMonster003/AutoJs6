@@ -1,9 +1,10 @@
 # P13-47 Dependency Compatibility Corpus
 
-P13-47 records dependency compatibility corpus as partial. The current landing
-adds Phase 13 classification metadata to the fixed real npm corpus, raises the
-offline fixture count to 53, extends the desktop differential report with
-category pass-rate rows, and adds a host verifier plus Gradle gate.
+P13-47 records the v1.1 fixed dependency compatibility corpus as ready while
+live registry and connected-CI expansion remain future work. The current
+landing adds Phase 13 classification metadata to the fixed real npm corpus,
+raises the offline fixture count to 53, extends the desktop differential report
+with category pass-rate rows, and adds a host verifier plus Gradle gate.
 
 ## Covered
 
@@ -35,7 +36,14 @@ category pass-rate rows, and adds a host verifier plus Gradle gate.
   lifecycle scripts, postinstall downloads, and executable extraction are
   represented as metadata blocker categories, not vendored runnable payloads.
 
-## Remaining Work
+## Closure
+
+The v1.1 corpus gate closes because the fixed 53-fixture manifest taxonomy,
+required reason kinds, targeted stdlib pass-rate delta, metadata
+instrumentation, differential category reporting, summary rows, unsafe payload
+denials, docs, surface manifest, and Gradle gate are synchronized.
+
+## Future Work
 
 - CI still needs to schedule the connected AutoJs6 real npm corpus and pass its
   connected-results artifact directory into the host differential report.

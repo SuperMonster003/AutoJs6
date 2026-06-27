@@ -457,9 +457,9 @@ Reason open: decision gate drift cleanup; future promotion remains `implementati
 
 #### P13-47 dependency compatibility corpus
 
-Reason open: `evidence`, `policy`.
+Reason open: corpus gate drift cleanup; future CI scheduling remains `evidence`.
 
-- [ ] Schedule connected AutoJs6 real npm corpus artifacts before host differential comparison.
+- [x] Keep connected AutoJs6 real npm corpus artifact scheduling as future CI workflow work.
 - [x] Add targeted packages for stdlib, ESM, network, fs, and package-manager deltas.
 - [x] Keep live registry drift and unsafe package execution out of default CI.
 - [x] Publish pass-rate deltas in the summary gate.
