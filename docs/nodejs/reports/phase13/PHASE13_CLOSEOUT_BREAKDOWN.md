@@ -254,8 +254,8 @@ Reason open: `evidence`, `policy`, `packaging`.
 
 - [ ] Attach live Android/OkHttp HTTP and HTTPS request evidence.
 - [ ] Attach packaged `network` to `android.permission.INTERNET` proof for this path.
-- [ ] Keep full raw socket, DNS lookup, TLS session, and backpressure semantics scoped to P13-30 or later.
-- [ ] Decide whether any per-request proxy support is provider-owned or stays denied.
+- [x] Keep full raw socket, DNS lookup, TLS session, and backpressure semantics scoped to P13-30 or later.
+- [x] Decide whether any per-request proxy support is provider-owned or stays denied.
 
 #### P13-30 `net` / `tls` / `dns`
 

@@ -80,7 +80,6 @@ function buildReport(files) {
       token(files.p13HttpTest, "p13http.redirect=302|/target|manual|200|followed"),
     ], [
       "Live Android/OkHttp HTTP request evidence remains tied to the existing controlled network experiment.",
-      "Full desktop raw socket semantics, DNS lookup, TLS session APIs, and HTTP streaming backpressure remain outside this gate.",
     ]),
     scenario("negative_security_boundary", "raw network, server/listen, proxy/tunnel, and TLS customization remain denied", [
       token(files.nodeBridgeSources, '"proxyTunnel"'),
@@ -93,7 +92,6 @@ function buildReport(files) {
       token(files.compatibilityProfile, "P13-29 records HTTP/HTTPS client parity as partial"),
     ], [
       "P13-30 must decide whether any net/tls/dns opt-in authority exists beyond these denials.",
-      "Proxy support remains provider/system-owned only; per-request proxy configuration is still denied.",
     ]),
     scenario("desktop_client_package_corpus", "offline npm-shaped client corpus covers redirects, TLS failure, and proxy denial", [
       token(files.httpNpmCorpusManifest, '"name": "redirect-follow-client"'),
@@ -159,6 +157,22 @@ function buildReport(files) {
         files.nodeBridgeSources.text.includes('throw __autojs6_limited_http_disabled_error(protocol, "listen");'),
       "P13-29 must keep server listen fail-closed.",
     ),
+    check(
+      "raw-network-semantics-scoped-to-p13-30",
+      files.p13Report.text.includes("Full raw socket, DNS lookup, TLS session, and backpressure semantics stay scoped") &&
+        files.p13Report.text.includes("to P13-30 or later") &&
+        files.p13Report.text.includes("P13-29 only tracks controlled fetch-backed client") &&
+        files.p13Report.text.includes("semantics"),
+      "P13-29 must keep full raw socket/DNS/TLS/backpressure semantics scoped to P13-30 or later.",
+    ),
+    check(
+      "per-request-proxy-denied",
+      files.p13Report.text.includes("Per-request proxy support stays denied in P13-29") &&
+        files.p13Report.text.includes("only provider/system-owned") &&
+        files.p13Report.text.includes("proxy behavior may exist behind controlled fetch") &&
+        files.httpNpmCorpusManifest.text.includes('"name": "proxy-denial-client"'),
+      "P13-29 must keep per-request proxy support denied unless a provider-owned design promotes it later.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -185,6 +199,8 @@ function buildReport(files) {
       finalBlockerClosable,
       controlledHttpClientReady: scenarioById(scenarios, "controlled_client_surface").status !== "missing_evidence",
       rawSocketAuthorityPromoted: false,
+      rawNetworkSemanticsScopedToP13_30: checkById(checks, "raw-network-semantics-scoped-to-p13-30").passed,
+      perRequestProxyDenied: checkById(checks, "per-request-proxy-denied").passed,
       packagedLiveNetworkReady: false,
       desktopSurfacePromoted: false,
     },
@@ -217,6 +233,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id) || { status: "missing_evidence" };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {

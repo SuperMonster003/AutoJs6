@@ -43,6 +43,13 @@ The following remain unavailable:
 - packaged APK INTERNET permission proof for this specific Desktop-profile
   client path.
 
+Full raw socket, DNS lookup, TLS session, and backpressure semantics stay scoped
+to P13-30 or later. P13-29 only tracks controlled fetch-backed client
+semantics.
+
+Per-request proxy support stays denied in P13-29; only provider/system-owned
+proxy behavior may exist behind controlled fetch.
+
 ## Verification
 
 - Host verifier: `tools/nodejs/phase13/verify-http-https-client-parity.js`
