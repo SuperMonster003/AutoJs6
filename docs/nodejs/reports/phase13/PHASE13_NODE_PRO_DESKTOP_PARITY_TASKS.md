@@ -1730,7 +1730,7 @@ P13 task 本身使用以下执行状态：
     Android terminal/OS 差异矩阵、更多 stdlib-dependent real npm corpus
     dashboard 和 packaged stdlib 行为证据仍未完成。
 
-- [ ] P13-44: 推进 process/env/argv parity。
+- [x] P13-44: 推进 process/env/argv parity。
   - 范围：补齐 `process.argv`、`process.env`、cwd、exit、signals、versions、
     resourceUsage 等。
   - 验收：
@@ -1768,7 +1768,11 @@ P13 task 本身使用以下执行状态：
     native/raw process exit、raw inherited env、raw process handles/native
     bindings、`process.dlopen`/`process.binding` 和 `report.writeReport()`
     stay stable-denied for P13-44 v1.1.
-  - Remaining: packaged lifecycle evidence.
+  - Closure: Safe process subset runtime behavior, Android signal/native exit
+    stable denial, inherited-env policy, and lifecycle-mapped process exit are
+    covered.
+  - Future packaged evidence: packaged lifecycle argv/env/cwd/process-exit
+    smoke remains gated by packaged profile promotion.
 
 ### Track D: Packaging, plugins, and distribution
 

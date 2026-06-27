@@ -197,7 +197,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-22 IntentTask/broadcast provider
 
-Reason open: `packaging`.
+Reason open: process gate drift cleanup; packaged evidence remains `packaging`.
 
 - [x] Replace stable rejection stubs only after a JSON-safe broadcast provider exists.
 - [ ] Define ownership between legacy Rhino rows, Node descriptors, and packaged records.
@@ -430,7 +430,7 @@ Reason open: `packaging`.
 - [x] Decide full desktop process parity boundaries.
 - [x] Add Android signal delivery and native process termination evidence or stable denials.
 - [x] Finalize inherited environment and process exit policy.
-- [ ] Add packaged lifecycle evidence.
+- [x] Keep packaged lifecycle evidence as future packaged profile evidence rather than a P13-44 Safe process subset blocker.
 
 ### Packaging, Plugins, Distribution
 

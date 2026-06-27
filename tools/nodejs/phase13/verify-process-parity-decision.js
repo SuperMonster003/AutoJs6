@@ -114,8 +114,6 @@ function buildReport(files) {
       token(files.inspectorDesignTest, "NODE_INSPECT_RESUME_ON_START"),
       token(files.inspectorSecurityTest, "NODE_OPTIONS"),
       token(files.moduleCompileCacheTest, "NODE_COMPILE_CACHE"),
-    ], [
-      "Add packaged lifecycle evidence for argv/env/cwd/process-exit behavior.",
     ]),
     scenario("matrix_modern_core_and_docs", "Builtin matrix, modern-core differential, docs, release matrix, surface manifest, and Gradle gate record P13-44", [
       token(files.runtimeCapabilities, '"process"'),
@@ -233,7 +231,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       runtimeBehaviorReady: scenarioById(scenarios, "runtime_behavior").status !== "missing_evidence",

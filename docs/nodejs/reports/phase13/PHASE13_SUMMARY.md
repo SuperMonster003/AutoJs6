@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 18
-- Open tasks: 40
+- Completed tasks: 19
+- Open tasks: 39
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -58,7 +58,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-41` | `open` | `desktop.modules_npm_process` | 推进完整 ESM loader parity。 |
 | `P13-42` | `completed` | `desktop.modules_npm_process` | 推进 npm/package manager on Android。 |
 | `P13-43` | `open` | `desktop.modules_npm_process` | 扩展 Node stdlib conformance。 |
-| `P13-44` | `open` | `desktop.modules_npm_process` | 推进 process/env/argv parity。 |
+| `P13-44` | `completed` | `desktop.modules_npm_process` | 推进 process/env/argv parity。 |
 | `P13-45` | `completed` | `packaging.plugins_distribution` | 扩展 packaged APK capability metadata。 |
 | `P13-46` | `open` | `packaging.plugins_distribution` | 推进 plugin system toward Pro/Desktop parity。 |
 | `P13-47` | `open` | `packaging.plugins_distribution` | 增加 dependency compatibility corpus。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 39
+- Reports with blockers: 38
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -198,7 +198,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-privacy-disclosure-policy.json` | `verifyNodePhase13PrivacyDisclosurePolicy` | `P13-52` | `ready` | 0 | 0 |
 | `phase13-pro-entry-directives.json` | `verifyNodePhase13ProEntryDirectives` | `P13-11` | `partial` | 0 | 3 |
 | `phase13-pro-parity-examples.json` | `verifyNodePhase13ProParityExamples` | `P13-53` | `partial` | 0 | 1 |
-| `phase13-process-parity-decision.json` | `verifyNodePhase13ProcessParityDecision` | `P13-44` | `partial` | 0 | 1 |
+| `phase13-process-parity-decision.json` | `verifyNodePhase13ProcessParityDecision` | `P13-44` | `ready` | 0 | 0 |
 | `phase13-process-worker-replacement-decision.json` | `verifyNodePhase13ProcessWorkerReplacementDecision` | `P13-35` | `ready` | 0 | 0 |
 | `phase13-profile-rollback-playbook.json` | `verifyNodePhase13ProfileRollbackPlaybook` | `P13-51` | `ready` | 0 | 0 |
 | `phase13-profile-selection-diagnostics.json` | `verifyNodePhase13ProfileSelectionDiagnostics` | `P13-49` | `ready` | 0 | 0 |

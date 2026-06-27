@@ -1,9 +1,10 @@
 # P13-44 Process/env/argv Parity
 
-P13-44 records process/env/argv parity as partial. The current landing adds a
-diagnostic `processParityProfile` to `autojs6:profile`, focused device
-instrumentation, a host verifier, a Gradle gate, TypeScript declarations, and
-surface-manifest evidence for the Safe process subset.
+P13-44 records process/env/argv parity as partial capability evidence. The
+P13-44 Safe process subset gate is ready: the current landing adds a diagnostic
+`processParityProfile` to `autojs6:profile`, focused device instrumentation, a
+host verifier, a Gradle gate, TypeScript declarations, and surface-manifest
+evidence for the Safe process subset.
 
 ## Covered
 
@@ -43,9 +44,10 @@ surface-manifest evidence for the Safe process subset.
   `process.binding()`, and `report.writeReport()` remain denied unless a later
   Desktop-profile gate promotes them explicitly.
 
-## Remaining Work
+## Future Packaged Evidence
 
-- Add packaged lifecycle evidence for argv/env/cwd/process-exit behavior.
+- Add packaged lifecycle evidence for argv/env/cwd/process-exit behavior before
+  broader packaged profile promotion.
 
 ## Evidence
 
