@@ -471,7 +471,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 - [ ] Implement runtime profile promotion rollback controls.
 - [ ] Add automatic crash circuit breaker.
 - [ ] Add settings UI and packaged builder rollback controls.
-- [ ] Add remote packaged kill-switch policy or explicitly reject it.
+- [x] Add remote packaged kill-switch policy or explicitly reject it.
 - [ ] Add packaged Safe-profile patch/downgrade evidence.
 
 #### P13-52 privacy and disclosure policy

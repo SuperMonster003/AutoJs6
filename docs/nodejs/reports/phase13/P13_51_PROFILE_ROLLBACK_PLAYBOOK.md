@@ -23,6 +23,8 @@ to a host verifier.
   id for the `autojs.nodejs.rawNetworkModules.experimental` kill switch, while
   `raw_node_network_modules` remains available as the implementation-specific
   alias.
+- Remote packaged kill switches are explicitly rejected for v1.1; packaged
+  rollback uses a published Safe-profile patch or removal of promoted metadata.
 - Node Doctor JSON/text reports include a Profile Rollback Policy section.
 - TypeScript declarations and the smoke project cover
   `ProfileRollbackPolicy`, profile/capability rollback states, triggers,
@@ -34,8 +36,8 @@ to a host verifier.
 
 - Runtime profile promotion and user-selectable profile switching remain
   unpromoted.
-- Settings UI, packaged builder UI, automatic crash circuit breaker, remote
-  packaged kill switch, and privacy disclosure prompts remain future work.
+- Settings UI, packaged builder UI, automatic crash circuit breaker, and
+  privacy disclosure prompts remain future work.
 - The rollback playbook does not grant Pro/Desktop/Debug authority; effective
   runtime authority remains `safe_default`.
 

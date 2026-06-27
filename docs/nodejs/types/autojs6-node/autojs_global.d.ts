@@ -384,6 +384,7 @@ declare namespace AutoJs6Node {
     readonly authority: "metadata_only_no_authority" | string;
     readonly publishSafeProfilePatch: boolean;
     readonly remoteKillSwitchAvailable: boolean;
+    readonly remoteKillSwitchPolicy: "rejected_v1_1_publish_safe_profile_patch" | string;
     readonly requiresUserDisclosure: boolean;
     readonly actions: readonly string[];
   }

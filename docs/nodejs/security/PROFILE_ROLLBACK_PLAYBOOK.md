@@ -62,5 +62,7 @@ strategy:
 - keep stable denial errors for undeclared capabilities;
 - record crash/stress evidence before re-enabling any profile or capability.
 
-Remote packaged kill switches, automatic crash circuit breakers, settings UI,
-packaged builder UI, and privacy disclosure prompts are still future work.
+Remote packaged kill switches are explicitly rejected for v1.1 because packaged
+rollback must be auditable through a published Safe-profile patch or removal of
+promoted metadata. Automatic crash circuit breakers, settings UI, packaged
+builder UI, and privacy disclosure prompts are still future work.

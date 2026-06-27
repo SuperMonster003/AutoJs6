@@ -726,6 +726,7 @@ async function smoke(): Promise<void> {
     autojsProfile.profileRollbackPolicy.rollbackTriggers[0];
   const packagedDowngrade: AutoJs6Node.ProfileRollbackPackagedDowngrade =
     autojsProfile.profileRollbackPolicy.packagedDowngrade;
+  const packagedRemoteKillSwitchPolicy: string = packagedDowngrade.remoteKillSwitchPolicy;
   const rollbackReleasePolicy: AutoJs6Node.ProfileRollbackReleasePolicy =
     autojsProfile.profileRollbackPolicy.releasePolicy;
   const privacyDisclosureStatus: string = autojsProfile.privacyDisclosurePolicy.status;
@@ -1090,6 +1091,7 @@ async function smoke(): Promise<void> {
   void capabilityRollbackStates;
   void rollbackTrigger;
   void packagedDowngrade;
+  void packagedRemoteKillSwitchPolicy;
   void rollbackReleasePolicy;
   void privacyDisclosureStatus;
   void privacyDisclosureSurfaces;

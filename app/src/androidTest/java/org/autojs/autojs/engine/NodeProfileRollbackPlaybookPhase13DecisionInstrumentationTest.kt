@@ -92,6 +92,10 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
         assertEquals("metadata_only_no_authority", packagedDowngrade.getString("authority"))
         assertTrue(packagedDowngrade.getBoolean("publishSafeProfilePatch"))
         assertFalse(packagedDowngrade.getBoolean("remoteKillSwitchAvailable"))
+        assertEquals(
+            "rejected_v1_1_publish_safe_profile_patch",
+            packagedDowngrade.getString("remoteKillSwitchPolicy"),
+        )
         assertTrue(packagedDowngrade.getBoolean("requiresUserDisclosure"))
     }
 
@@ -130,6 +134,7 @@ class NodeProfileRollbackPlaybookPhase13DecisionInstrumentationTest {
                 assert.ok(rollback.capabilityStates.some((item) => item.id === "child_process" && item.enabled === false));
                 assert.ok(rollback.rollbackTriggers.some((item) => item.id === "stress_regression" && item.fallbackProfile === "safe_default"));
                 assert.strictEqual(rollback.packagedDowngrade.strategy, "publish_safe_profile_patch_or_remove_promoted_metadata");
+                assert.strictEqual(rollback.packagedDowngrade.remoteKillSwitchPolicy, "rejected_v1_1_publish_safe_profile_patch");
                 console.log("p13rollback.policy=" + [
                   rollback.schema,
                   rollback.status,

@@ -10200,6 +10200,7 @@ std::string buildEmbeddedScriptExecutionSource(
         authority: "metadata_only_no_authority",
         publishSafeProfilePatch: true,
         remoteKillSwitchAvailable: false,
+        remoteKillSwitchPolicy: "rejected_v1_1_publish_safe_profile_patch",
         requiresUserDisclosure: true,
         actions: Object.freeze([
           "remove pro_compat_opt_in or desktop_compat_opt_in metadata",

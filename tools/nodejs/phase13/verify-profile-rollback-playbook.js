@@ -111,6 +111,7 @@ function buildReport(files) {
       token(files.rollbackPolicy, "BuildConfig.NODEJS_RELAXED_CAPABILITIES_ENABLED"),
       ...RELAXED_CAPABILITIES.map((id) => token(files.rollbackPolicy, `id = "${id}"`)),
       token(files.rollbackPolicy, "publish_safe_profile_patch_or_remove_promoted_metadata"),
+      token(files.rollbackPolicy, 'put("remoteKillSwitchPolicy", "rejected_v1_1_publish_safe_profile_patch")'),
     ], [
       "Runtime profile promotion and automatic crash circuit breaker remain future work; P13-51 records the rollback playbook and switches.",
     ]),
@@ -126,6 +127,7 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "profileStates: Object.freeze(["),
       token(files.nodeBridgeSources, "capabilityStates: Object.freeze(["),
       token(files.nodeBridgeSources, "rollbackTriggers: Object.freeze(["),
+      token(files.nodeBridgeSources, 'remoteKillSwitchPolicy: "rejected_v1_1_publish_safe_profile_patch"'),
       token(files.doctorGenerator, 'put("profileRollbackPolicy", NodeProfileRollbackPolicy.toJsonObject())'),
       token(files.doctorGenerator, 'appendLine("Profile Rollback Policy:")'),
       token(files.doctorTest, "NodeProfileRollbackPolicy.SCHEMA"),
@@ -138,15 +140,19 @@ function buildReport(files) {
       token(files.typesAutojsGlobal, "export interface ProfileRollbackState"),
       token(files.typesAutojsGlobal, "export interface CapabilityRollbackState"),
       token(files.typesAutojsGlobal, "export interface ProfileRollbackTrigger"),
+      token(files.typesAutojsGlobal, "readonly remoteKillSwitchPolicy"),
       token(files.typesAutojsGlobal, "readonly profileRollbackPolicy: ProfileRollbackPolicy"),
       token(files.typesReadme, "P13-51 extends the `autojs6:profile` declaration with `profileRollbackPolicy`"),
       token(files.typescriptSmoke, "autojsProfile.profileRollbackPolicy.status"),
+      token(files.typescriptSmoke, "packagedRemoteKillSwitchPolicy"),
       token(files.typescriptSmoke, "AutoJs6Node.ProfileRollbackTrigger"),
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-51", [
       token(files.phase13Tasks, "P13-51 partial landing"),
       token(files.p13Report, "P13-51 records per-profile rollback playbook as partial"),
+      token(files.p13Report, "Remote packaged kill switches are explicitly rejected for v1.1"),
       token(files.rollbackPlaybook, "autojs6-node-profile-rollback-policy-v1"),
+      token(files.rollbackPlaybook, "Remote packaged kill switches are explicitly rejected for v1.1"),
       token(files.phase13GradleGate, "verifyNodePhase13ProfileRollbackPlaybook"),
       token(files.testingDoc, "verifyNodePhase13ProfileRollbackPlaybook"),
       token(files.ciGatesDoc, "verifyNodePhase13ProfileRollbackPlaybook"),
@@ -158,7 +164,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
     ], [
-      "Remote packaged kill switch, settings UI, privacy prompts, and automatic crash circuit breaker remain deferred to later promotion/privacy work.",
+      "Settings UI, packaged builder UI, privacy prompts, and automatic crash circuit breaker remain deferred to later promotion/privacy work.",
     ]),
   ];
 
@@ -205,6 +211,15 @@ function buildReport(files) {
       "Kotlin and runtime rollback policy must fall back to safe_default for rollback/crash/stress.",
     ),
     check(
+      "remote-packaged-kill-switch-rejected",
+      kotlinBlock.includes('put("remoteKillSwitchAvailable", false)') &&
+        kotlinBlock.includes('put("remoteKillSwitchPolicy", "rejected_v1_1_publish_safe_profile_patch")') &&
+        runtimeBlock.includes("remoteKillSwitchAvailable: false") &&
+        runtimeBlock.includes('remoteKillSwitchPolicy: "rejected_v1_1_publish_safe_profile_patch"') &&
+        files.rollbackPlaybook.text.includes("Remote packaged kill switches are explicitly rejected for v1.1"),
+      "P13-51 must explicitly reject remote packaged kill switches or provide a policy.",
+    ),
+    check(
       "no-runtime-profile-promotion",
       forbiddenRuntimePromotions.every((value) => !runtimeBlock.includes(value)) &&
         !kotlinBlock.includes('put("profilePromotion", true)') &&
@@ -239,6 +254,7 @@ function buildReport(files) {
       kotlinPolicyReady: scenarioById(scenarios, "kotlin_policy").status !== "missing_evidence",
       runtimeDiagnosticsReady: scenarioById(scenarios, "runtime_and_doctor_diagnostics").status === "ready",
       typescriptSurfaceReady: scenarioById(scenarios, "typescript_surface").status === "ready",
+      remotePackagedKillSwitchRejected: checkById(checks, "remote-packaged-kill-switch-rejected").passed,
       rollbackTargetProfile: "safe_default",
       profilePromotionPromoted: false,
       automaticCrashCircuitBreakerReady: false,
@@ -273,6 +289,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id);
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {

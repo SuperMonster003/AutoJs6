@@ -243,6 +243,7 @@ object NodeProfileRollbackPolicy {
         .put("authority", "metadata_only_no_authority")
         .put("publishSafeProfilePatch", true)
         .put("remoteKillSwitchAvailable", false)
+        .put("remoteKillSwitchPolicy", "rejected_v1_1_publish_safe_profile_patch")
         .put("requiresUserDisclosure", true)
         .put(
             "actions",
