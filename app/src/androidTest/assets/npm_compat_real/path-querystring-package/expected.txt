@@ -1,0 +1,1 @@
+realnpm.path-querystring=pathquery:/root/b/file.txt:one two:a+b:true

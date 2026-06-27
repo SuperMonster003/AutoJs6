@@ -90,20 +90,22 @@ function buildReport(files) {
       token(files.realNpmManifest, '"reasonKind": "fs"'),
       token(files.realNpmManifest, '"packages"'),
       token(files.realNpmManifest, '"reason"'),
-      token(files.realNpmManifest, '"fixtureCount": 53'),
+      token(files.realNpmManifest, '"fixtureCount": 55'),
       token(files.realNpmManifest, '"targetedFixtureDeltas"'),
       token(files.realNpmManifest, '"area": "stdlib"'),
       token(files.realNpmManifest, '"stdlib-digest-stream-package"'),
       token(files.realNpmManifest, '"perf-async-hooks-package"'),
       token(files.realNpmManifest, '"url-buffer-codec-package"'),
-      token(files.realNpmManifest, '"passDelta": 3'),
+      token(files.realNpmManifest, '"util-events-package"'),
+      token(files.realNpmManifest, '"path-querystring-package"'),
+      token(files.realNpmManifest, '"passDelta": 5'),
     ]),
     scenario("instrumentation_and_differential", "Instrumentation and differential reports keep the taxonomy measurable", [
       token(files.realNpmTest, "assertPhase13CompatibilityMetadata"),
       token(files.realNpmTest, "PHASE13_REQUIRED_REASON_KINDS"),
       token(files.realNpmTest, "PHASE13_TARGETED_DELTA_AREAS"),
       token(files.realNpmTest, "fixtureMetadataIsCompleteAndSafe"),
-      token(files.realNpmTest, "EXPECTED_FIXTURE_COUNT = 53"),
+      token(files.realNpmTest, "EXPECTED_FIXTURE_COUNT = 55"),
       token(files.differentialRunner, "phase13Compatibility: summarizePhase13CompatibilityCategories"),
       token(files.differentialRunner, "summarizePhase13CompatibilityCategories"),
       token(files.differentialRunner, "readAutoJsConnectedResults"),
@@ -124,8 +126,8 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-47 dependency compatibility corpus"),
-      token(files.phase13Summary, "P13-47 records dependency compatibility corpus as partial with 53 fixed offline fixtures"),
-      token(files.phase13Summary, "stdlib targetedFixtureDeltas +3"),
+      token(files.phase13Summary, "P13-47 records dependency compatibility corpus as partial with 55 fixed offline fixtures"),
+      token(files.phase13Summary, "stdlib targetedFixtureDeltas +5"),
       token(files.phase13Summary, "differential pass-rate rows"),
     ]),
   ];
@@ -162,9 +164,15 @@ function buildReport(files) {
   if (!stdlibDelta) {
     deltaProblems.push("missing targeted fixture delta area: stdlib");
   } else {
-    const requiredStdlibFixtures = ["stdlib-digest-stream-package", "perf-async-hooks-package", "url-buffer-codec-package"];
-    if (stdlibDelta.passDelta !== 3) {
-      deltaProblems.push("stdlib targeted fixture delta must record passDelta 3");
+    const requiredStdlibFixtures = [
+      "stdlib-digest-stream-package",
+      "perf-async-hooks-package",
+      "url-buffer-codec-package",
+      "util-events-package",
+      "path-querystring-package",
+    ];
+    if (stdlibDelta.passDelta !== 5) {
+      deltaProblems.push("stdlib targeted fixture delta must record passDelta 5");
     }
     for (const fixture of requiredStdlibFixtures) {
       if (!stdlibDelta.fixtures.includes(fixture)) {
@@ -187,7 +195,7 @@ function buildReport(files) {
     check("task-listed", files.phase13Tasks.text.includes("P13-47"), "P13-47 must remain listed in the Phase 13 checklist."),
     check("report-present", files.p13Report.exists, "P13-47 report must exist."),
     check("manifest-parseable", Boolean(manifest), "real npm corpus manifest must parse as JSON."),
-    check("fixture-count", fixtureNames.size === 53 && compatibility.fixtureCount === 53, "real npm corpus must keep the 53-fixture baseline."),
+    check("fixture-count", fixtureNames.size === 55 && compatibility.fixtureCount === 55, "real npm corpus must keep the 55-fixture baseline."),
     check("required-reason-kinds", categoryProblems.length === 0, "phase13Compatibility must cover required package reason categories."),
     check("targeted-deltas", deltaProblems.length === 0, "phase13Compatibility must record targeted fixture deltas."),
     check("surface-present", Boolean(surfaceEntry), "`packaging.plugins_distribution` surface must exist."),
