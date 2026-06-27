@@ -221,7 +221,6 @@ function buildReport(files) {
       token(files.phase10PackageManagerReport, "scripts, `.bin` execution, native addons"),
       token(files.designPackageManager, "partial Android local package store through `NodeAndroidPackageInstallManager`"),
     ], [
-      "`npm i --no-bin-links` parity is represented by host-managed validation plus Android local-store substrate, not by running the npm CLI on device.",
       "Mobile registry resolution, cache management, tarball extraction, and integrity-lock authority are not Android runtime user APIs yet.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, surface manifest, and Gradle gate record P13-42", [
@@ -361,6 +360,22 @@ function buildReport(files) {
         !packageManagerProfile.includes("rawRegistryAccess: true"),
       "P13-42 may expose only guarded local package_manager mutation plus a guarded npm facade; npm CLI, registry install, full partial promotion, and raw registry authority must remain absent.",
     ),
+    check(
+      "host-managed-install-safe-default",
+      packageManagerProfile.includes('npmInstallEquivalent: "host_managed_plus_android_store_substrate"') &&
+        packageManagerProfile.includes('hostPackageManager: "available"') &&
+        packageManagerProfile.includes('androidRuntimeInstall: "local_unpacked_only"') &&
+        packageManagerProfile.includes('npmCli: "denied"') &&
+        packageManagerProfile.includes('registryDownload: "deferred"') &&
+        packageManagerProfile.includes('sourceAuthority: "local_unpacked_host_managed_only"') &&
+        files.phase10PackageManager.text.includes("hostManaged: true") &&
+        files.phase10PackageManager.text.includes("androidRuntimeInstall: false") &&
+        files.phase10PackageManager.text.includes("binLinks: false") &&
+        files.p13Report.text.includes("Phase 10 remains the host-managed package manager boundary") &&
+        files.p13Report.text.includes("Android runtime installation remains") &&
+        files.p13Report.text.includes("constrained to the local store substrate"),
+      "P13-42 must keep host-managed install validation as the safe default until mobile install authority is reviewed.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -388,6 +403,7 @@ function buildReport(files) {
       diagnosticProfileReady: scenarioById(scenarios, "read_maintenance_profile").status === "ready",
       androidLocalStoreReady: scenarioById(scenarios, "android_local_store_substrate").status !== "missing_evidence",
       hostManagedEquivalentReady: scenarioById(scenarios, "host_managed_install_equivalent").status !== "missing_evidence",
+      hostManagedInstallSafeDefault: checkById(checks, "host-managed-install-safe-default").passed,
       npmCliPromoted: false,
       npmFacadeReady: files.nodeBridgeSources.text.includes("function __autojs6_limited_npm()") &&
         files.typesNpm.text.includes('declare module "npm"'),
@@ -438,6 +454,10 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function scenarioById(scenarios, id) {
