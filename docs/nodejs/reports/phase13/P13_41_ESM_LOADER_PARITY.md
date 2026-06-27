@@ -28,6 +28,18 @@ current split:
   URL imports, unrestricted URL imports, absolute path imports, working-directory escapes,
   disabled builtins, and raw Node loader handles are denied.
 
+## Boundary Decision
+
+- Native Node ESM loader hooks and raw `node:module` loader authority remain
+  stable-denied for P13-41. The only exposed module behavior is the
+  AutoJs6-managed local transform/loader path.
+- Custom condition sets, import maps, and loader registration APIs are not
+  promoted. Package `exports` / `imports` condition handling stays limited to
+  the controlled AutoJs6 package policy and importer-mode split already covered
+  by instrumentation.
+- Network, `file:`, unrestricted URL, absolute path, working-directory escape,
+  disabled builtin, and raw loader-handle imports remain denied.
+
 ## Evidence
 
 - Runtime diagnostics:
@@ -51,11 +63,6 @@ current split:
 
 ## Remaining Blockers
 
-- Native Node ESM loader hooks and raw `node:module` loader authority remain
-  denied.
-- Network, `file:`, and unrestricted URL imports remain denied.
-- Custom condition sets, import maps, and raw loader registration are not
-  implemented.
 - Packaged encrypted package `exports` / `imports` graphs and broader dynamic
   import package graphs remain design-gated.
 - Pending top-level-await/linking cancellation and service-destroy cleanup need

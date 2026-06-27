@@ -1490,11 +1490,12 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_41_ESM_LOADER_PARITY.md`。
     - Surface manifest evidence:
       `phase13-esm-loader-parity-decision`。
-  - Remaining: native loader hooks、raw `node:module` loader authority、
-    network/file/unrestricted URL import、custom condition sets/import maps、packaged
-    encrypted package exports/imports graph、broader dynamic-import package
-    graph、pending TLA/linking cancellation cleanup、full desktop source-map
-    parity 仍未完成。
+  - Boundary decision: native loader hooks、raw `node:module` loader authority、
+    network/file/unrestricted URL import、custom condition sets/import maps 和
+    loader registration stay stable-denied for P13-41 v1.1.
+  - Remaining: packaged encrypted package exports/imports graph、broader
+    dynamic-import package graph、pending TLA/linking cancellation cleanup、
+    full desktop source-map parity 仍未完成。
 
 - [ ] P13-42: 推进 npm/package manager on Android。
   - 范围：从 host-side bundler/validator 推进到 Android 侧 npm 包安装/管理能力。

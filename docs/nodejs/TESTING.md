@@ -1898,8 +1898,9 @@ focused local ESM loader evidence, packaged ESM gate references, source-map
 stack evidence, TypeScript declarations, surface manifest evidence, release
 matrix updates, and Phase13 docs. It keeps raw Node loader hooks, raw
 `node:module` loader authority, network/file/unrestricted URL imports, custom
-condition sets, import maps, broad packaged encrypted graphs, pending
-evaluation cleanup, and full desktop source-map parity open. Controlled
+condition sets, and import maps stable-denied. Broad packaged encrypted graphs,
+pending evaluation cleanup, and full desktop source-map parity remain open.
+Controlled
 JavaScript/JSON `data:` URL imports are covered as partial evidence.
 
 Phase 13 ESM loader parity focused instrumentation:

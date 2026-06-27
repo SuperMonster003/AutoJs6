@@ -369,10 +369,10 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-41 ESM loader parity
 
-Reason open: `implementation`, `policy`, `packaging`, `evidence`.
+Reason open: `implementation`, `packaging`, `evidence`.
 
-- [ ] Decide native loader hooks and raw `node:module` authority.
-- [ ] Decide custom condition sets, import maps, and loader registration boundaries.
+- [x] Decide native loader hooks and raw `node:module` authority.
+- [x] Decide custom condition sets, import maps, and loader registration boundaries.
 - [ ] Add packaged encrypted package exports/imports graphs and broader dynamic import corpus.
 - [ ] Add top-level-await/linking cancellation and service-destroy cleanup stress.
 - [ ] Improve source-map parity for ESM and DevTools/debug reporting.

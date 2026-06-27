@@ -110,10 +110,6 @@ function buildReport(files) {
       token(files.designEsm, "controlled `data:` URL imports"),
       token(files.designEsm, "imports outside `workingDirectory`"),
       token(files.sourceMapTest, "externalSourceMapOutsideWorkingDirectoryIsDenied"),
-    ], [
-      "Native Node ESM loader hooks and raw node:module loader authority remain denied.",
-      "Network, file:, and unrestricted URL imports remain denied.",
-      "Custom condition sets, import maps, and raw loader registration remain unimplemented.",
     ]),
     scenario("packaged_and_stack_evidence", "Packaged ESM and stack/source evidence are present but still scoped to focused gates", [
       token(files.packagedSmokeTest, "installAndRunExperimentalEsmEmbeddedNodePackagedApk"),
@@ -142,7 +138,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-41 ESM loader parity"),
     ], [
-      "P13-41 remains partial until raw loader hook decisions, packaged encrypted graph parity, broader ESM package corpus, and pending-evaluation cleanup evidence close.",
+      "P13-41 remains partial until packaged encrypted graph parity, broader ESM package corpus, pending-evaluation cleanup evidence, and source-map parity close.",
     ]),
   ];
 
@@ -184,6 +180,23 @@ function buildReport(files) {
         !files.nodeBridgeSources.text.includes("rawNodeLoader: true"),
       "P13-41 must not introduce raw Node loader hooks or mark raw loader authority enabled.",
     ),
+    check(
+      "raw-loader-authority-denied",
+      files.p13Report.text.includes("Native Node ESM loader hooks and raw `node:module` loader authority remain") &&
+        files.p13Report.text.includes("stable-denied for P13-41") &&
+        esmLoaderProfile.includes('loaderHooks: "denied"') &&
+        esmLoaderProfile.includes("rawNodeLoader: false"),
+      "P13-41 must decide native loader hooks and raw node:module authority as stable-denied.",
+    ),
+    check(
+      "custom-loader-boundaries-denied",
+      files.p13Report.text.includes("Custom condition sets, import maps, and loader registration APIs are not") &&
+        files.p13Report.text.includes("promoted") &&
+        esmLoaderProfile.includes("customConditions: false") &&
+        esmLoaderProfile.includes('packageExports: "partial"') &&
+        esmLoaderProfile.includes('packageImports: "partial"'),
+      "P13-41 must decide custom conditions, import maps, and loader registration boundaries.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -212,6 +225,8 @@ function buildReport(files) {
       localLoaderParityReady: scenarioById(scenarios, "local_loader_parity").status === "ready",
       controlledDataUrlAndDeniedBoundariesReady: scenarioById(scenarios, "controlled_data_url_and_denied_boundaries").status !== "missing_evidence",
       packagedAndStackEvidenceReady: scenarioById(scenarios, "packaged_and_stack_evidence").status !== "missing_evidence",
+      rawLoaderAuthorityDenied: checkById(checks, "raw-loader-authority-denied").passed,
+      customLoaderBoundariesDenied: checkById(checks, "custom-loader-boundaries-denied").passed,
       rawLoaderHooksIntroduced: false,
       networkImportsPromoted: false,
       packagedEncryptedGraphPromoted: false,
@@ -246,6 +261,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id);
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {
