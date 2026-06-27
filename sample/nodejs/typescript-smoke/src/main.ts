@@ -740,6 +740,10 @@ async function smoke(): Promise<void> {
     autojsProfile.privacyDisclosurePolicy.implicitHighPrivilegeDenied;
   const privacyDisclosureDoctorPrivacy: AutoJs6Node.PrivacyDisclosureDoctorPrivacy =
     autojsProfile.privacyDisclosurePolicy.doctorPrivacy;
+  const privacyDisclosureAutomation: AutoJs6Node.PrivacyDisclosureAutomationImplications =
+    autojsProfile.privacyDisclosurePolicy.automationImplications;
+  const privacyDisclosureRemoteKillSwitch: string =
+    privacyDisclosureAutomation.remotePackagedKillSwitch;
   const runtimeProfileId: AutoJs6Node.RuntimeProfileId = "safe_default";
   const proRuntimeProfileId: AutoJs6Node.RuntimeProfileId = "pro_compat_opt_in";
   const desktopRuntimeProfileId: AutoJs6Node.RuntimeProfileId = "desktop_compat_opt_in";
@@ -1099,6 +1103,8 @@ async function smoke(): Promise<void> {
   void privacyDisclosurePackaged;
   void privacyDisclosureImplicitDenied;
   void privacyDisclosureDoctorPrivacy;
+  void privacyDisclosureAutomation;
+  void privacyDisclosureRemoteKillSwitch;
   void runtimeProfileId;
   void proRuntimeProfileId;
   void desktopRuntimeProfileId;

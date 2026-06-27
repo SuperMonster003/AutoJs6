@@ -16,6 +16,8 @@ object NodePrivacyDisclosurePolicy {
     const val PACKAGED_DISCLOSURE_SCHEMA = "autojs6-node-packaged-disclosure-manifest-v1"
     const val PROMOTION_BLOCKED_UNTIL = "user_prompt_and_foreground_disclosure_implemented"
     const val PACKAGED_BEHAVIOR_BLOCKED = "deny_without_reviewed_disclosure_manifest"
+    const val CRASH_CIRCUIT_BREAKER_PRIVACY = "metadata_only_no_script_contents"
+    const val REMOTE_PACKAGED_KILL_SWITCH_POLICY = "rejected_v1_1_publish_safe_profile_patch"
     const val ANDROID_PERMISSION_SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW"
     const val ANDROID_PERMISSION_BIND_ACCESSIBILITY_SERVICE = "android.permission.BIND_ACCESSIBILITY_SERVICE"
 
@@ -37,6 +39,7 @@ object NodePrivacyDisclosurePolicy {
         put("channels", JSONArray(channels().map { it.toJson() }))
         put("packagedPolicy", packagedPolicyJson())
         put("doctorPrivacy", doctorPrivacyJson())
+        put("automationImplications", automationImplicationsJson())
         put(
             "pending",
             JSONArray(
@@ -268,6 +271,13 @@ object NodePrivacyDisclosurePolicy {
         .put("environmentValuesIncluded", false)
         .put("pathsRedacted", true)
         .put("surfaceMetadataOnly", true)
+
+    private fun automationImplicationsJson(): JSONObject = JSONObject()
+        .put("automaticCrashCircuitBreaker", "future_metadata_only_safe_profile_fallback")
+        .put("crashEvidencePrivacy", CRASH_CIRCUIT_BREAKER_PRIVACY)
+        .put("remotePackagedKillSwitch", REMOTE_PACKAGED_KILL_SWITCH_POLICY)
+        .put("requiresDisclosureBeforeReenable", true)
+        .put("grantsAuthority", false)
 
     private data class DisclosureSurface(
         val id: String,

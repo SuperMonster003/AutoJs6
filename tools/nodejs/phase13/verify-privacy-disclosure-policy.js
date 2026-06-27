@@ -91,6 +91,9 @@ function buildReport(files) {
       token(files.kotlinPolicy, 'put("packagedImplicitHighPrivilegeDenied", true)'),
       token(files.kotlinPolicy, 'put("requiresDisclosureManifest", true)'),
       token(files.kotlinPolicy, 'put("denyUndeclaredHighRiskSurfaces", true)'),
+      token(files.kotlinPolicy, 'put("automationImplications", automationImplicationsJson())'),
+      token(files.kotlinPolicy, 'CRASH_CIRCUIT_BREAKER_PRIVACY = "metadata_only_no_script_contents"'),
+      token(files.kotlinPolicy, 'REMOTE_PACKAGED_KILL_SWITCH_POLICY = "rejected_v1_1_publish_safe_profile_patch"'),
       ...REQUIRED_SURFACES.map((id) => token(files.kotlinPolicy, `id = "${id}"`)),
       token(files.kotlinPolicy, "foreground_service_notification"),
       token(files.kotlinPolicy, "project.json:node.disclosures"),
@@ -105,6 +108,9 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "implicitHighPrivilegeDenied: true"),
       token(files.nodeBridgeSources, "packagedImplicitHighPrivilegeDenied: true"),
       token(files.nodeBridgeSources, "surfaces: Object.freeze(["),
+      token(files.nodeBridgeSources, "automationImplications: Object.freeze({"),
+      token(files.nodeBridgeSources, 'crashEvidencePrivacy: "metadata_only_no_script_contents"'),
+      token(files.nodeBridgeSources, 'remotePackagedKillSwitch: "rejected_v1_1_publish_safe_profile_patch"'),
       token(files.doctorGenerator, 'put("privacyDisclosurePolicy", NodePrivacyDisclosurePolicy.toJsonObject())'),
       token(files.doctorGenerator, 'appendLine("Privacy Disclosure Policy:")'),
       token(files.doctorTest, "NodePrivacyDisclosurePolicy.SCHEMA"),
@@ -116,16 +122,20 @@ function buildReport(files) {
       token(files.typesAutojsGlobal, "export interface PrivacyDisclosurePolicy"),
       token(files.typesAutojsGlobal, "export interface PrivacyDisclosureSurface"),
       token(files.typesAutojsGlobal, "export interface PrivacyDisclosurePackagedPolicy"),
+      token(files.typesAutojsGlobal, "export interface PrivacyDisclosureAutomationImplications"),
       token(files.typesAutojsGlobal, "readonly privacyDisclosurePolicy: PrivacyDisclosurePolicy"),
       token(files.typesReadme, "P13-52 extends the `autojs6:profile` declaration with"),
       token(files.typesReadme, "`privacyDisclosurePolicy`. The field reports sensitive surface prompt"),
       token(files.typescriptSmoke, "autojsProfile.privacyDisclosurePolicy.status"),
+      token(files.typescriptSmoke, "privacyDisclosureRemoteKillSwitch"),
       token(files.typescriptSmoke, "AutoJs6Node.PrivacyDisclosureSurface"),
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-52", [
       token(files.phase13Tasks, "P13-52 partial landing"),
       token(files.p13Report, "P13-52 records privacy and disclosure policy as partial"),
+      token(files.p13Report, "Automatic crash circuit breaker disclosure implications are recorded"),
       token(files.privacyDisclosurePolicy, "autojs6-node-privacy-disclosure-policy-v1"),
+      token(files.privacyDisclosurePolicy, "Remote packaged kill switches are rejected for v1.1"),
       token(files.phase13GradleGate, "verifyNodePhase13PrivacyDisclosurePolicy"),
       token(files.testingDoc, "verifyNodePhase13PrivacyDisclosurePolicy"),
       token(files.ciGatesDoc, "verifyNodePhase13PrivacyDisclosurePolicy"),
@@ -183,6 +193,17 @@ function buildReport(files) {
         runtimeBlock.includes("userPromptRequiredForPromotedSensitiveSurfaces: true"),
       "P13-52 must require user prompts and foreground disclosure before sensitive surface promotion.",
     ),
+    check(
+      "automation-disclosure-implications",
+      kotlinBlock.includes('put("automationImplications", automationImplicationsJson())') &&
+        kotlinBlock.includes('CRASH_CIRCUIT_BREAKER_PRIVACY = "metadata_only_no_script_contents"') &&
+        kotlinBlock.includes('REMOTE_PACKAGED_KILL_SWITCH_POLICY = "rejected_v1_1_publish_safe_profile_patch"') &&
+        runtimeBlock.includes("automationImplications: Object.freeze({") &&
+        runtimeBlock.includes('crashEvidencePrivacy: "metadata_only_no_script_contents"') &&
+        runtimeBlock.includes('remotePackagedKillSwitch: "rejected_v1_1_publish_safe_profile_patch"') &&
+        files.privacyDisclosurePolicy.text.includes("Remote packaged kill switches are rejected for v1.1"),
+      "P13-52 must record automatic crash circuit breaker and remote packaged kill-switch disclosure implications.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -213,6 +234,7 @@ function buildReport(files) {
       implicitHighPrivilegeDenied: true,
       packagedImplicitHighPrivilegeDenied: true,
       grantsAuthority: false,
+      automationDisclosureImplicationsReady: checkById(checks, "automation-disclosure-implications").passed,
       promptUiReady: false,
       foregroundDisclosureReady: false,
       packagedReviewReady: false,
@@ -246,6 +268,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id);
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {

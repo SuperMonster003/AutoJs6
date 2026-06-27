@@ -24,6 +24,9 @@ and disclosure surface.
 - TypeScript declarations and the smoke project cover
   `PrivacyDisclosurePolicy`, surfaces, channels, packaged policy, and Doctor
   privacy fields.
+- Automatic crash circuit breaker disclosure implications are recorded as
+  metadata-only crash evidence with no script contents or environment values,
+  and remote packaged kill switches are rejected for v1.1.
 - `verifyNodePhase13PrivacyDisclosurePolicy` generates
   `phase13-privacy-disclosure-policy.json` and `.md`.
 

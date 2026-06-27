@@ -481,7 +481,7 @@ Reason open: `implementation`, `packaging`, `policy`.
 - [ ] Add settings UI prompt copy and localization.
 - [ ] Add real foreground disclosure ownership and stop behavior.
 - [ ] Add packaged disclosure manifest review UI.
-- [ ] Add automatic crash circuit breaker and remote packaged kill-switch disclosure implications.
+- [x] Add automatic crash circuit breaker and remote packaged kill-switch disclosure implications.
 - [x] Ensure TypeScript declaration and verifier evidence stay synchronized.
 
 ### Docs, Examples, And Final Gate

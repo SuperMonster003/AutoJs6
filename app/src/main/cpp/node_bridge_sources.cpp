@@ -10530,6 +10530,13 @@ std::string buildEmbeddedScriptExecutionSource(
         pathsRedacted: true,
         surfaceMetadataOnly: true
       }),
+      automationImplications: Object.freeze({
+        automaticCrashCircuitBreaker: "future_metadata_only_safe_profile_fallback",
+        crashEvidencePrivacy: "metadata_only_no_script_contents",
+        remotePackagedKillSwitch: "rejected_v1_1_publish_safe_profile_patch",
+        requiresDisclosureBeforeReenable: true,
+        grantsAuthority: false
+      }),
       pending: Object.freeze([
         "settings UI disclosure review",
         "localized prompt copy",

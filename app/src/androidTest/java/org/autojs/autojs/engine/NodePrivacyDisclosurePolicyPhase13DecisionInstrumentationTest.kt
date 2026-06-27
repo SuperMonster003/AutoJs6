@@ -141,6 +141,22 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
         assertFalse(doctorPrivacy.getBoolean("environmentValuesIncluded"))
         assertTrue(doctorPrivacy.getBoolean("pathsRedacted"))
         assertTrue(doctorPrivacy.getBoolean("surfaceMetadataOnly"))
+
+        val automationImplications = policy.getJSONObject("automationImplications")
+        assertEquals(
+            "future_metadata_only_safe_profile_fallback",
+            automationImplications.getString("automaticCrashCircuitBreaker"),
+        )
+        assertEquals(
+            NodePrivacyDisclosurePolicy.CRASH_CIRCUIT_BREAKER_PRIVACY,
+            automationImplications.getString("crashEvidencePrivacy"),
+        )
+        assertEquals(
+            NodePrivacyDisclosurePolicy.REMOTE_PACKAGED_KILL_SWITCH_POLICY,
+            automationImplications.getString("remotePackagedKillSwitch"),
+        )
+        assertTrue(automationImplications.getBoolean("requiresDisclosureBeforeReenable"))
+        assertFalse(automationImplications.getBoolean("grantsAuthority"))
     }
 
     @Test
@@ -167,6 +183,8 @@ class NodePrivacyDisclosurePolicyPhase13DecisionInstrumentationTest {
                 assert.strictEqual(policy.packagedPolicy.defaultAction, "${NodePrivacyDisclosurePolicy.PACKAGED_BEHAVIOR_BLOCKED}");
                 assert.strictEqual(policy.doctorPrivacy.scriptContentsIncluded, false);
                 assert.strictEqual(policy.doctorPrivacy.pathsRedacted, true);
+                assert.strictEqual(policy.automationImplications.crashEvidencePrivacy, "${NodePrivacyDisclosurePolicy.CRASH_CIRCUIT_BREAKER_PRIVACY}");
+                assert.strictEqual(policy.automationImplications.remotePackagedKillSwitch, "${NodePrivacyDisclosurePolicy.REMOTE_PACKAGED_KILL_SWITCH_POLICY}");
                 const byId = Object.fromEntries(policy.surfaces.map((surface) => [surface.id, surface]));
                 assert.strictEqual(byId.screen_capture.capability, "screen_capture");
                 assert.strictEqual(byId.screen_capture.requiresForegroundDisclosure, true);

@@ -467,6 +467,14 @@ declare namespace AutoJs6Node {
     readonly surfaceMetadataOnly: boolean;
   }
 
+  export interface PrivacyDisclosureAutomationImplications {
+    readonly automaticCrashCircuitBreaker: "future_metadata_only_safe_profile_fallback" | string;
+    readonly crashEvidencePrivacy: "metadata_only_no_script_contents" | string;
+    readonly remotePackagedKillSwitch: "rejected_v1_1_publish_safe_profile_patch" | string;
+    readonly requiresDisclosureBeforeReenable: boolean;
+    readonly grantsAuthority: boolean;
+  }
+
   export interface PrivacyDisclosurePolicy {
     readonly schema: "autojs6-node-privacy-disclosure-policy-v1" | string;
     readonly status: "policy_partial" | string;
@@ -483,6 +491,7 @@ declare namespace AutoJs6Node {
     readonly channels: readonly PrivacyDisclosureChannel[];
     readonly packagedPolicy: PrivacyDisclosurePackagedPolicy;
     readonly doctorPrivacy: PrivacyDisclosureDoctorPrivacy;
+    readonly automationImplications: PrivacyDisclosureAutomationImplications;
     readonly pending: readonly string[];
   }
 

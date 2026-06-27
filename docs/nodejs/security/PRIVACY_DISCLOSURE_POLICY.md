@@ -63,6 +63,19 @@ packaged review UI and installer/runtime enforcement path lands.
 script contents and environment values redacted while reporting prompt and
 foreground disclosure counts.
 
+## Automation And Rollback Disclosure
+
+Automatic crash circuit breaker evidence is a future implementation input, not
+a new disclosure bypass. P13-52 records the privacy implication as
+`metadata_only_no_script_contents`: crash evidence may drive Safe-profile
+fallback, but script contents and environment values remain excluded and paths
+stay redacted. Re-enabling a disabled sensitive surface still requires the
+normal user disclosure path.
+
+Remote packaged kill switches are rejected for v1.1. Packaged rollback uses the
+P13-51 Safe-profile patch or promoted-metadata removal path, so there is no
+remote packaged kill-switch disclosure prompt to expose in this policy version.
+
 ## Remaining Work
 
 - Settings UI disclosure review and localized prompt copy.
