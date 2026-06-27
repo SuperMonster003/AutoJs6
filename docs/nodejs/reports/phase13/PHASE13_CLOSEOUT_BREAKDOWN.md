@@ -227,6 +227,7 @@ Reason open: `implementation`, `evidence`, `packaging`.
 - [ ] Add DND, exact alarm, foreground disclosure, and notification action packaged evidence.
 - [ ] Add wakelocks, request-ignore-battery-optimizations flow, callbacks, and direct mutation policy.
 - [ ] Add OEM matrix, packaged disclosure, and background-launch behavior evidence.
+- [x] Keep docs/surface evidence gate from counting notification actions, settings helpers, wakelock/power APIs, OEM matrix, and packaged evidence twice.
 
 #### P13-26 media/recorder/mediainfo
 

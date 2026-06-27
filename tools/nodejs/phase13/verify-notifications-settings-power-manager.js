@@ -142,9 +142,7 @@ function buildReport(files) {
       token(files.typesReadme, "P13-25 records the partial notifications/settings/power manager gate"),
       token(files.surfaceManifestDoc, "phase13-notifications-settings-power-manager"),
       token(files.shellRootShizukuReport, "Status: partial"),
-    ], [
-      "Keep P13-25 open until notification actions/listeners, advanced settings helpers, wakelock/power APIs, and packaged evidence land.",
-    ]),
+    ], []),
   ];
 
   const checks = [

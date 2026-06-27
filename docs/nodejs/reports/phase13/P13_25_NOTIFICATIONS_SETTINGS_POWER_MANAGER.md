@@ -72,6 +72,12 @@ Opening settings remains a user-visible Android settings handoff. Tests use
 - Packaged notification/settings/power disclosure, install/run smoke, rollback
   diagnostics, and migration examples.
 
+The docs, compatibility notes, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-25
+blocker beyond the notification actions/listeners, advanced settings helpers,
+wakelock/power APIs, OEM matrix, packaged disclosure, and install/run evidence
+items above.
+
 ## Verification
 
 ```powershell
