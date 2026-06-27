@@ -421,7 +421,8 @@ Reason open: `implementation`, `packaging`.
 Reason open: `implementation`, `policy`, `packaging`.
 
 - [ ] Define signed plugin archive install/update policy.
-- [ ] Add Android provider plugin adapter design and host capability ceilings.
+- [ ] Add Android provider plugin adapter design.
+- [x] Keep plugin-declared permissions bounded by host manifest capability ceilings.
 - [ ] Decide native plugin isolation and loading policy.
 - [ ] Add remote marketplace cache/update/rollback behavior.
 - [ ] Add packaged install/run evidence.

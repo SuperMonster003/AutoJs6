@@ -103,9 +103,12 @@ function buildReport(files) {
       token(files.pluginDesign, "project metadata must declare exact `plugin.<id>` capability"),
       token(files.pluginDesign, "it cannot declare `plugin` or `plugin.*` namespace capabilities"),
       token(files.phase9PluginPolicy, "project-local JS-only manager"),
+      token(files.p13Report, "For P13-46 v1.1, plugin-declared permissions are request metadata only"),
+      token(files.p13Report, "cannot promote host bridge authority beyond the exact capabilities"),
+      token(files.compatibilityProfile, "the host project/package permission manifest remains the authority ceiling"),
+      token(files.securityModel, "declared by the host"),
     ], [
       "Android provider plugins, native plugin loading, signed archives, remote marketplace install/update, and packaged distribution remain staged decisions.",
-      "Plugin permission grants are host-manifest ceilings; there is no plugin-declared authority promotion in P13-46.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-46", [
       token(files.phase13Tasks, "P13-46 partial landing"),

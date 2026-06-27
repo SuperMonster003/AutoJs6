@@ -25,6 +25,10 @@ Phase 13 verifier plus Gradle gate.
   remote marketplace install/update, signed archives, and persistent global
   install state remain denied or deferred.
 
+For P13-46 v1.1, plugin-declared permissions are request metadata only. They
+cannot promote host bridge authority beyond the exact capabilities already
+declared by the host project or package manifest.
+
 ## Remaining Work
 
 - Android provider plugin adapters need a signed protocol, permission mapping,
