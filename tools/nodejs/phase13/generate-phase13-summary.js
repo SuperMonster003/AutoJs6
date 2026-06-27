@@ -62,8 +62,10 @@ function main() {
       taskCoverage: checkById(checks, "task-coverage"),
       promotedSurfaceEvidence: checkById(checks, "promoted-surface-evidence"),
       openBlockersNotCompleted: checkById(checks, "open-blockers-not-completed"),
+      zeroBlockerFinalRequirement: checkById(checks, "zero-blocker-final-requirement"),
       profileTruthPresent: checkById(checks, "profile-truth-report"),
       conformanceReportsPresent: checkById(checks, "conformance-reports"),
+      allTaskVerifiersZeroBlockers: generatedReports.every((report) => report.policyViolations === 0 && report.blockers === 0),
       finalBlockerClosable: false,
     },
   };
@@ -265,6 +267,7 @@ function buildChecks(files, generatedReports, summary, markdown) {
   const docsFinalSurface = [...summary.openSurfaces, ...summary.deferredSurfaces, ...summary.promotedSurfaces]
     .find((surface) => surface.id === "docs.examples.final_gate");
   const reportBasenames = new Set(generatedReports.map((report) => report.basename));
+  const reportsWithOpenBlockers = generatedReports.filter((report) => report.blockers > 0);
   return [
     check(
       "task-coverage",
@@ -304,6 +307,15 @@ function buildChecks(files, generatedReports, summary, markdown) {
           blocker.summaryStatus === "open" &&
           blocker.phase13Override.includes("P13 reopened raw_network")),
       "Open and decision-required blockers must remain open while closed required blockers are counted completed.",
+    ),
+    check(
+      "zero-blocker-final-requirement",
+      (reportsWithOpenBlockers.length === 0 && summary.generatedReportCounts.withPolicyViolations === 0) ||
+        (reportsWithOpenBlockers.length > 0 &&
+          summary.taskCounts.open > 0 &&
+          summary.generatedReportCounts.withBlockers === reportsWithOpenBlockers.length &&
+          markdown.includes(`- Reports with blockers: ${reportsWithOpenBlockers.length}`)),
+      "Summary final completion must require every generated Phase 13 task verifier to report zero blockers and zero policy violations.",
     ),
     check(
       "profile-truth-report",
@@ -454,6 +466,7 @@ function renderMarkdown(summary) {
     "- Gradle: `:app:generateNodePhase13Summary`",
     "- Reports: `build/reports/nodejs/phase13-summary.json` and `build/reports/nodejs/phase13-summary.md`",
     "- Canonical docs output: `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`",
+    "- Final completion requires every generated Phase 13 task verifier to report zero blockers and zero policy violations.",
   );
   return lines.join("\n") + "\n";
 }

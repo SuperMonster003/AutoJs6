@@ -528,7 +528,7 @@ Reason open: `evidence`, `packaging`.
 
 Reason open: `evidence`, `policy`.
 
-- [ ] Require every task verifier to report zero blockers before final completion.
+- [x] Require every task verifier to report zero blockers before final completion.
 - [x] Keep open/deferred/rejected categories explicit and non-promoted.
 - [ ] Convert partial summary into strict release gate after runtime Pro/Desktop promotion.
 - [ ] Close only when required final blockers are completed or explicitly deferred/rejected by policy.

@@ -223,3 +223,4 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 - Gradle: `:app:generateNodePhase13Summary`
 - Reports: `build/reports/nodejs/phase13-summary.json` and `build/reports/nodejs/phase13-summary.md`
 - Canonical docs output: `docs/nodejs/reports/phase13/PHASE13_SUMMARY.md`
+- Final completion requires every generated Phase 13 task verifier to report zero blockers and zero policy violations.
