@@ -67,5 +67,7 @@ profile policy type alignment, and Phase 13 docs. Denied desktop modules are
 enforced as type-described gated surfaces instead of callable module
 declarations.
 
-Remaining blockers are runtime profile promotion and generated declaration
-package release checks after promotion and release packaging.
+Runtime profile promotion remains owned by P13-49/P13-52 and later promotion
+gates; P13-55 keeps declarations metadata-only until then. The remaining
+P13-55 blocker is generated declaration package release checks after promotion
+and release packaging.

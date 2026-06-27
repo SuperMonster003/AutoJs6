@@ -214,7 +214,6 @@ function buildReport(files) {
   ];
   const blockers = [
     ...scenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
-    "runtime profile promotion is still diagnostic-only and does not grant Pro/Desktop authority",
   ];
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
   return {
