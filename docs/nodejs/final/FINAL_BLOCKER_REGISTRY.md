@@ -37,7 +37,8 @@ Current multi-instance progress:
   concurrent primary/overflow execution in different Android service processes.
   Phase 13 adds a client-side default one-shot scheduler that can lease
   `primary` / `overflow_1` on eligible devices, preserves
-  `processPoolSlotSource` diagnostics, and reports pool-busy failures. Packaged
+  `processPoolSlotSource` diagnostics, and reports full-pool queue/dequeue
+  diagnostics. Packaged
   behavior, fatal slot-crash fallback/quarantine, and stress promotion remain
   open.
 

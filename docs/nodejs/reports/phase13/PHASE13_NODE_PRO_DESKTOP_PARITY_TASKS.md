@@ -580,7 +580,11 @@ P13 task 本身使用以下执行状态：
     - Default one-shot scheduler policy: `NodeEmbeddedProcessPoolPolicy.STATUS_DEFAULT_SCHEDULER_ENABLED` / `MODE_DEFAULT_TWO_SLOT`.
     - Client-side slot lease: `NativeNodeEmbeddedScriptService.acquireDefaultProcessPoolSlot(...)`.
     - Slot source propagation: `NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.processPoolSlotSource`.
-    - Default busy rejection: `EmbeddedNodeProcessPoolBusyError` with `embedded_script.process_pool.busy=true`.
+    - Default full-pool queue/dequeue:
+      `defaultSchedulerQueuesWhenBothDefaultSlotsAreBusy` with
+      `embedded_script.process_pool.queue_queued=true`,
+      `embedded_script.process_pool.queue_status=dequeued`, and
+      `embedded_script.process_pool.queue_wait_ms`.
     - Internal descriptor process-pool slot metadata:
       `processPoolSlot=primary|overflow_1` and `processPoolSlotSource=explicit_request|default_scheduler`.
     - Embedded script process guard now accepts every declared script slot suffix

@@ -76,11 +76,15 @@ function buildReport(files) {
       token(files.service, "processPoolSlotSource = NodeEmbeddedProcessPoolPolicy.SLOT_SELECTION_DEFAULT_SCHEDULER"),
       token(files.policyTest, "defaultSchedulerRoutesConcurrentOneShotScriptsToDifferentProcesses"),
     ]),
-    scenario("slot_busy", "Default scheduler reports pool busy when all default slots are occupied", [
-      token(files.service, "defaultProcessPoolBusyResult"),
-      token(files.service, "embedded_script.process_pool.scheduler_rejected"),
-      token(files.service, "embedded_script.process_pool.active_slot_ids"),
-      token(files.service, "EmbeddedNodeProcessPoolBusyError"),
+    scenario("slot_busy", "Default scheduler queues when all default slots are occupied", [
+      token(files.policy, "queueWhenPoolFullEnabled"),
+      token(files.policy, "bounded_wait_for_available_process_slot"),
+      token(files.service, "defaultProcessPoolBusyFailure"),
+      token(files.service, "embedded_script.process_pool.queue_queued"),
+      token(files.service, "embedded_script.process_pool.queue_status"),
+      token(files.service, "embedded_script.process_pool.queue_wait_ms"),
+      token(files.policyTest, "defaultSchedulerQueuesWhenBothDefaultSlotsAreBusy"),
+      token(files.policyTest, "default process-pool queued run must not report engine busy"),
     ]),
     scenario("resource_isolation", "Per-execution bridge/provider/output/crash metadata remains slot scoped", [
       token(files.service, "File(cacheDir, \"embedded-node-bridge/$executionId\")"),

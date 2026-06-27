@@ -63,8 +63,8 @@ A Phase 13 parent task can close only when all of the following are true:
 
 Reason open: mostly `evidence`.
 
-- [ ] Refresh or replace the `defaultProcessPoolBusyResult` evidence token in the verifier/report.
-- [ ] Attach current focused primary/overflow shared-resource stress evidence.
+- [x] Refresh or replace the `defaultProcessPoolBusyResult` evidence token in the verifier/report.
+- [x] Attach current focused primary/overflow shared-resource stress evidence.
 - [ ] Depend on completed P13-08 soak evidence before marking slot promotion complete.
 - [ ] Re-run `verifyNodePhase13SecondExecutionSlotScheduler` and summary generation with zero blockers.
 
