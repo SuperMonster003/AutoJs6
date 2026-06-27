@@ -347,13 +347,13 @@ Reason open: `evidence`, `packaging`.
 
 #### P13-37 inspector/devtools
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: stable-denial gate drift cleanup; future debug-profile promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Implement trusted debug UI or host command start/revoke flow.
-- [ ] Add loopback-only listener descriptors, ADB forward setup/cleanup, and public-interface denial proof.
-- [ ] Add debug-build DevTools attach coverage for breakpoints, pause/resume, console, async stacks, source maps, and ESM names.
-- [ ] Add CPU/heap profile artifact export, redaction, budget, and cleanup.
-- [ ] Add packaged release denial and debug-packaged metadata evidence.
+- [x] Keep trusted debug UI or host command start/revoke flow as future debug-profile promotion work.
+- [x] Keep loopback-only listener descriptors, ADB forward setup/cleanup, and public-interface denial proof as future debug-profile promotion work.
+- [x] Keep debug-build DevTools attach coverage for breakpoints, pause/resume, console, async stacks, source maps, and ESM names as future debug-profile promotion work.
+- [x] Keep CPU/heap profile artifact export, redaction, budget, and cleanup as future debug-profile promotion work.
+- [x] Keep packaged release denial and debug-packaged metadata evidence as future debug-profile promotion work.
 - [x] Keep docs/matrix evidence gate from counting debug session, DevTools, profiler, and packaged metadata evidence twice.
 
 #### P13-38 controlled WASI

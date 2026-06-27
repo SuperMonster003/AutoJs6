@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 30
-- Open tasks: 28
+- Completed tasks: 31
+- Open tasks: 27
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -51,7 +51,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-34` | `open` | `desktop.execution_runtime` | 推进 `worker_threads` 到 opt-in promoted。 |
 | `P13-35` | `completed` | `desktop.execution_runtime` | 决策 process-worker replacement。 |
 | `P13-36` | `open` | `desktop.execution_runtime` | 推进 `vm` module。 |
-| `P13-37` | `open` | `desktop.execution_runtime` | 推进 inspector/devtools debug profile。 |
+| `P13-37` | `completed` | `desktop.execution_runtime` | 推进 inspector/devtools debug profile。 |
 | `P13-38` | `completed` | `desktop.execution_runtime` | 推进 controlled WASI。 |
 | `P13-39` | `completed` | `desktop.execution_runtime` | 决策 native addon `.node` loading。 |
 | `P13-40` | `completed` | `desktop.execution_runtime` | 推进 `child_process` scoped runner。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 27
+- Reports with blockers: 26
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -180,7 +180,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `partial` | 0 | 3 |
 | `phase13-full-heavy-resource-stress.json` | `verifyNodePhase13FullHeavyResourceStress` | `P13-08` | `partial` | 0 | 2 |
 | `phase13-http-https-client-parity.json` | `verifyNodePhase13HttpHttpsClientParity` | `P13-29` | `partial` | 0 | 2 |
-| `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `partial` | 0 | 5 |
+| `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `ready` | 0 | 0 |
 | `phase13-intent-broadcast-provider.json` | `verifyNodePhase13IntentBroadcastProvider` | `P13-22` | `partial` | 0 | 4 |
 | `phase13-java-interop-allowlist.json` | `verifyNodePhase13JavaInteropAllowlist` | `P13-13` | `partial` | 0 | 3 |
 | `phase13-live-ui-provider-promotion.json` | `verifyNodePhase13LiveUiProviderPromotion` | `P13-17` | `partial` | 0 | 4 |

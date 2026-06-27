@@ -1426,7 +1426,7 @@ P13 task 本身使用以下执行状态：
     - Report: `docs/nodejs/reports/phase13/P13_36_VM_MODULE_DECISION.md`。
     - Surface manifest evidence: `phase13-vm-module-decision`。
 
-- [ ] P13-37: 推进 inspector/devtools debug profile。
+- [x] P13-37: 推进 inspector/devtools debug profile。
   - 范围：允许 debug build 通过 adb forward 使用 inspector/profiling。
   - 验收：
     - release build 稳定拒绝。
@@ -1449,6 +1449,16 @@ P13 task 本身使用以下执行状态：
       `phase13-inspector-debug-profile-decision`。
   - Remaining: debug session UI/host command、loopback + ADB forward、
     DevTools attach、CPU/heap artifact redaction、packaged behavior 仍未完成。
+  - Closure: P13-37 v1.1 keeps `inspector` / `node:inspector` denied by
+    default and in release, keeps process debug APIs inert, rejects hostile
+    `NODE_OPTIONS=--inspect` and project/package metadata, keeps profiler
+    artifacts absent, and keeps local shadow packages denied with synced docs,
+    desktop matrix, TypeScript declarations, surface manifest, and Gradle gate.
+  - Future debug-profile work: trusted debug UI or host command start/revoke,
+    loopback-only listener descriptors, ADB forward setup/cleanup,
+    public-interface denial proof, DevTools attach coverage, CPU/heap artifact
+    export/redaction/budget/cleanup, and debug-packaged metadata remain future
+    gates.
 
 - [x] P13-38: 推进 controlled WASI。
   - 范围：从 pure WebAssembly 扩展到 `autojs:wasi` 或受控 `node:wasi` profile。
