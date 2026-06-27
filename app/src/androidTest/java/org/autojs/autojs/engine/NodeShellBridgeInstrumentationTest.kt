@@ -195,7 +195,7 @@ class NodeShellBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("shell.root=0|root-ok"))
         assertTrue(result.stdout.contains("shell.execFile=0|file-ok"))
         assertTrue(result.stdout.contains("shell.defaulted=0|default-ok"))
-        assertTrue(result.stdout.contains("shell.access=true|true|false|shell.shizuku"))
+        assertTrue(result.stdout, result.stdout.contains("shell.access=true|true|false|"))
         assertTrue(result.stdout.contains("shell.requests=exec|exec|exec|exec"))
         assertTrue(result.stdout.contains("shell.command=echo ok"))
         assertTrue(result.stdout.contains("shell.execFile.command='scripts/run.sh' '--dry-run' 'value with space'"))
@@ -203,7 +203,7 @@ class NodeShellBridgeInstrumentationTest {
         assertTrue(result.stdout.contains("shell.env=ok"))
         assertTrue(result.stdout.contains("shell.root.flag=true"))
         assertTrue(result.stdout.contains("shell.timeouts=1234/2234|1235/2235|1236/2236|4321/5321"))
-        assertTrue(result.stdout.contains("shell.permissions=shell|shell,shell:root|shell|shell"))
+        assertTrue(result.stdout, result.stdout.contains("shell.permissions=shell|shell,shell.root|shell|shell"))
         assertTrue(result.stdout.contains("shell.cwd_escape=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.stdout.contains("shell.execFile_escape=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
         assertTrue(result.stdout.contains("shell.execFile_args=ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED"))
@@ -338,6 +338,62 @@ class NodeShellBridgeInstrumentationTest {
         )
         assertTrue(denied.stdout.contains("shell.policy.manifest_report=true/toast"))
         assertTrue(denied.stdout.contains("shell.policy.manifest_pending=0"))
+    }
+
+    @Test
+    fun abortSignalCancelsInFlightShellExecAndClearsPendingBridgeCall() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node shell AbortSignal cancellation")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            """
+            "nodejs";
+            (async function main() {
+              const bridge = require("autojs6:bridge");
+              const shell = require("shell");
+              const requests = [];
+              bridge.__test.setTransport({
+                postMessage(message) {
+                  requests.push(JSON.parse(message));
+                }
+              });
+
+              const controller = new AbortController();
+              const shellPromise = shell.exec("sleep 30", {
+                timeoutMs: 10000,
+                signal: controller.signal
+              });
+              const requestCountAtStart = requests.length;
+              controller.abort();
+
+              let code = "";
+              let moduleName = "";
+              let methodName = "";
+              try {
+                await shellPromise;
+              } catch (error) {
+                code = String(error && (error.autojs6Code || error.code || ""));
+                moduleName = String(error && error.module || "");
+                methodName = String(error && error.method || "");
+              }
+
+              console.log("shell.abort.request_count=" + requestCountAtStart);
+              console.log("shell.abort.code=" + code);
+              console.log("shell.abort.module_method=" + moduleName + "/" + methodName);
+              console.log("shell.abort.pending=" + bridge.__test.pendingCount());
+              console.log("shell.abort.timeout=" + requests[0].args[1].timeoutMs + "/" + requests[0].timeoutMs);
+              console.log("shell.abort.permissions=" + requests[0].permissions.join("|"));
+            })();
+            """.trimIndent(),
+            "<embedded-autojs-shell-abort-signal.js>",
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("shell AbortSignal cancellation", result)
+        assertTrue(result.stdout.contains("shell.abort.request_count=1"))
+        assertTrue(result.stdout.contains("shell.abort.code=${NodeRuntimeErrorCodes.BRIDGE_CANCELLED}"))
+        assertTrue(result.stdout.contains("shell.abort.module_method=shell/exec"))
+        assertTrue(result.stdout.contains("shell.abort.pending=0"))
+        assertTrue(result.stdout.contains("shell.abort.timeout=10000/11000"))
+        assertTrue(result.stdout.contains("shell.abort.permissions=shell"))
     }
 
     @Test

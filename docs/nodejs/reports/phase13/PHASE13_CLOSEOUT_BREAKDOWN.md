@@ -222,7 +222,7 @@ Reason open: `implementation`, `evidence`, `packaging`.
 - [x] Split `shell.root` and `shell.shizuku` capability checks and diagnostics in runtime/verifier evidence.
 - [x] Add project/package metadata examples for both capabilities.
 - [ ] Add root-available/root-unavailable device matrix, packaged shell/root disclosure, rollback, audit taxonomy, and migration evidence.
-- [ ] Add AbortSignal cancellation for in-flight shell commands.
+- [x] Add AbortSignal cancellation for in-flight shell commands.
 - [x] Keep docs/release-matrix evidence gate from counting the same root/package shell evidence twice.
 - [x] Keep Shizuku execution stable-denied for v1.1; implement it only after service binding, permission, lifecycle, cleanup, packaged disclosure, and rollback evidence exist.
 

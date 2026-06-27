@@ -104,9 +104,12 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "__autojs6_shell_quote"),
       token(files.shellTypes, "execRoot(command: string"),
       token(files.typeSmoke, "const rootShellResult: shell.ShellResult = await shell.execRoot"),
+      token(files.shellBridgeTest, "abortSignalCancelsInFlightShellExecAndClearsPendingBridgeCall"),
+      token(files.shellBridgeTest, "AbortController"),
+      token(files.shellBridgeTest, "shell.abort.code="),
+      token(files.shellBridgeTest, "shell.abort.pending=0"),
     ], [
       "Add device root-available/root-unavailable matrix, packaged shell/root disclosure and rollback, audit taxonomy, and migration evidence without assuming `su` exists.",
-      "Add cancellation-specific shell instrumentation that aborts an in-flight command through AbortSignal.",
     ]),
     scenario("shizuku_stable_denial", "Shizuku execution is explicit but still denied before bridge dispatch", [
       token(files.nodeBridgeSources, "function __autojs6_shell_shizuku_unsupported_error(methodName)"),

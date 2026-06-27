@@ -73,6 +73,8 @@ authority by declaration alone.
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeShellBridgeInstrumentationTest.kt`
   and
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgePermissionManifestInstrumentationTest.kt`
+- AbortSignal cancellation instrumentation:
+  `NodeShellBridgeInstrumentationTest.abortSignalCancelsInFlightShellExecAndClearsPendingBridgeCall`
 - Host verifier:
   `tools/nodejs/phase13/verify-shell-root-shizuku-capability.js`
 - Gradle gate: `:app:verifyNodePhase13ShellRootShizukuCapability`
@@ -103,7 +105,6 @@ partial until user-facing disclosure and failure diagnostics are complete.
   stable denial and command-result evidence, packaged shell/root capability
   disclosure and rollback policy, expanded audit taxonomy, and migration
   examples from Rhino `shell` and root shorthand.
-- AbortSignal cancellation instrumentation for in-flight shell commands.
 
 The docs, release matrix, surface manifest, and Gradle gate are evidence checks
 only. They do not add a separate blocker for the same root/package shell
