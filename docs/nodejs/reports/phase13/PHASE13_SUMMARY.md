@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 12
-- Open tasks: 46
+- Completed tasks: 13
+- Open tasks: 45
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -49,7 +49,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-32` | `open` | `desktop.network_fs` | 放宽 filesystem profile。 |
 | `P13-33` | `open` | `desktop.network_fs` | 推进 desktop fs advanced APIs。 |
 | `P13-34` | `open` | `desktop.execution_runtime` | 推进 `worker_threads` 到 opt-in promoted。 |
-| `P13-35` | `open` | `desktop.execution_runtime` | 决策 process-worker replacement。 |
+| `P13-35` | `completed` | `desktop.execution_runtime` | 决策 process-worker replacement。 |
 | `P13-36` | `open` | `desktop.execution_runtime` | 推进 `vm` module。 |
 | `P13-37` | `open` | `desktop.execution_runtime` | 推进 inspector/devtools debug profile。 |
 | `P13-38` | `open` | `desktop.execution_runtime` | 推进 controlled WASI。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 45
+- Reports with blockers: 44
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -199,7 +199,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-pro-entry-directives.json` | `verifyNodePhase13ProEntryDirectives` | `P13-11` | `partial` | 0 | 3 |
 | `phase13-pro-parity-examples.json` | `verifyNodePhase13ProParityExamples` | `P13-53` | `partial` | 0 | 1 |
 | `phase13-process-parity-decision.json` | `verifyNodePhase13ProcessParityDecision` | `P13-44` | `partial` | 0 | 1 |
-| `phase13-process-worker-replacement-decision.json` | `verifyNodePhase13ProcessWorkerReplacementDecision` | `P13-35` | `partial` | 0 | 1 |
+| `phase13-process-worker-replacement-decision.json` | `verifyNodePhase13ProcessWorkerReplacementDecision` | `P13-35` | `ready` | 0 | 0 |
 | `phase13-profile-rollback-playbook.json` | `verifyNodePhase13ProfileRollbackPlaybook` | `P13-51` | `partial` | 0 | 1 |
 | `phase13-profile-selection-diagnostics.json` | `verifyNodePhase13ProfileSelectionDiagnostics` | `P13-49` | `partial` | 0 | 1 |
 | `phase13-relaxed-capability-security-corpus.json` | `verifyNodePhase13RelaxedCapabilitySecurityCorpus` | `P13-50` | `ready` | 0 | 0 |

@@ -1,9 +1,9 @@
 # P13-35 Process Worker Replacement
 
-P13-35 records process-worker replacement as partial. The current Phase 13
-decision is to avoid introducing a new `process_worker`, `compute_worker`, or
-`autojs6:process-worker` runtime facade while the native worker and execution
-slot evidence remains incomplete.
+P13-35 records process-worker replacement as partial capability evidence. The
+current Phase 13 decision is closed: do not introduce a new `process_worker`,
+`compute_worker`, or `autojs6:process-worker` runtime facade for v1.1 while the
+native worker and execution slot evidence remains incomplete.
 
 ## Decision
 
@@ -48,7 +48,7 @@ facade decision.
 - `verifyNodePhase13ProcessWorkerReplacementDecision` records the host gate and
   writes `phase13-process-worker-replacement-decision.json` and `.md`.
 
-## Remaining Blockers
+## Future Promotion Work
 
 - Native WorkerPool evidence must be archived on target ABIs.
 - Process-worker packaged behavior is not defined.
@@ -59,7 +59,8 @@ facade decision.
 
 The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
 evidence checks only. They do not add a second blocker for the same WorkerPool
-promotion and process-worker packaging work.
+promotion and process-worker packaging work, and those future promotion items do
+not block the P13-35 v1.1 decision closure.
 
 ## Rollback
 

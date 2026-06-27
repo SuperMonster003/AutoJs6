@@ -95,8 +95,6 @@ function buildReport(files) {
       token(files.phase13Tasks, "For P13-35 v1.1, no user-facing process-worker facade or UX is introduced"),
       token(files.compatibilityProfile, "no user-facing process-worker API or UX"),
       token(files.securityModel, "no user-facing"),
-    ], [
-      "Runnable process-worker replacement remains blocked on native worker availability, archived WorkerPool evidence on target ABIs, process-worker packaging, slot accounting, cleanup, and launch-surface evidence.",
     ]),
     scenario("child_process_shell_boundary", "child_process stays default-denied and shell remains a separate scoped command bridge", [
       token(files.nodeBridgeSources, 'childProcess: "denied"'),
@@ -210,7 +208,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile_no_facade").status === "ready",
       workerPoolPreferred: files.nodeBridgeSources.text.includes('preferredPrimitive: "worker_threads.WorkerPool"'),

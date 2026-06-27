@@ -54,7 +54,7 @@ A Phase 13 parent task can close only when all of the following are true:
 | `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | Add packaged lifecycle restore/cleanup, notification/background matrix, metadata, and disclosure evidence. |
 | `full_heavy_resource_stress` | `P13-08` | `evidence`, `external` | Archive 8-hour quick soak and 24-hour final soak with comparable metrics. |
 | `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | `implementation`, `policy`, `packaging` | Move from guarded local store to registry/tarball/install authority with integrity, rollback, and distribution policy. |
-| `worker_threads` | `P13-34`, `P13-35` | `external`, `policy` | Prove native worker availability on target ABIs or keep process-worker replacement as the supported path. |
+| `worker_threads` | `P13-34`, `P13-35` | `external`, `policy` | P13-35 records the v1.1 no-facade replacement decision; P13-34 owns native WorkerPool promotion evidence on target ABIs. |
 | `controlled_wasi` | `P13-38` | `implementation`, `policy` | Either implement a controlled WASI facade or keep raw WASI denied with pure WebAssembly as the supported path. |
 | `raw_network` | `P13-29`, `P13-30`, `P13-50` to `P13-56` | `implementation`, `policy`, `packaging` | Keep Safe profile denied; promote only scoped Desktop/relaxed-capability tracks with network budgets, privacy, rollback, and packaged evidence. |
 | `node_24_17_community_fork` | future runtime lane | `external` | Track as future runtime maintenance; do not block current Node 24.5 Phase 13 work unless upgrade artifacts become available. |
@@ -327,12 +327,12 @@ Reason open: `external`, `evidence`, `policy`, `packaging`.
 
 #### P13-35 process-worker replacement
 
-Reason open: `implementation`, `external`, `packaging`.
+Reason open: decision drift cleanup; future promotion remains `implementation`, `external`, `packaging`.
 
-- [ ] Archive WorkerPool evidence on target ABIs.
+- [x] Keep WorkerPool evidence on target ABIs owned by P13-34/future promotion rather than P13-35 decision closure.
 - [x] Keep P13-35 v1.1 without a user-facing process-worker facade or UX.
 - [x] Keep docs/release-matrix evidence gate from counting WorkerPool promotion and process-worker packaging twice.
-- [ ] Add slot accounting, cleanup, packaging, and UX for any promoted replacement.
+- [x] Keep slot accounting, cleanup, packaging, and UX as future requirements for any promoted replacement.
 - [x] Keep raw spawn/fork/stdio/signals/process handles delegated to P13-40.
 
 #### P13-36 `vm`

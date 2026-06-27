@@ -304,9 +304,9 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_35_PROCESS_WORKER_REPLACEMENT.md`.
 - Surface manifest evidence: `phase13-process-worker-replacement-decision`.
-- Remaining P13-35 blockers: native WorkerPool evidence on target ABIs,
-  process-worker packaging behavior, slot accounting, cleanup stress, and
-  launch-surface evidence for any future promoted replacement.
+- Future promotion work outside P13-35 closure: native WorkerPool evidence on
+  target ABIs, process-worker packaging behavior, slot accounting, cleanup
+  stress, and launch-surface evidence for any future promoted replacement.
 
 ## P13-36 Partial Landing Note
 
@@ -1367,7 +1367,7 @@ P13 task 本身使用以下执行状态：
       Atomics are not promoted as cross-worker guarantees; resource limits,
       one-worker thread ceiling, and RSS evidence gating are documented.
 
-- [ ] P13-35: 决策 process-worker replacement。
+- [x] P13-35: 决策 process-worker replacement。
   - 范围：如果 `worker_threads` 无法满足 Android 稳定性，提供 AutoJs6
     process-worker API。
   - 验收：
@@ -1393,6 +1393,9 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_35_PROCESS_WORKER_REPLACEMENT.md`。
     - Surface manifest evidence:
       `phase13-process-worker-replacement-decision`。
+    - Closure: P13-35 v1.1 does not introduce a user-facing process-worker
+      facade or UX; future WorkerPool promotion evidence remains owned by
+      P13-34/future provider work.
 
 - [ ] P13-36: 推进 `vm` module。
   - 范围：为 Desktop/npm 兼容开放原生 `vm.Script`、context 和 timeout。
