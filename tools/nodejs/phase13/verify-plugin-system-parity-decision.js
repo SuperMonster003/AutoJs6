@@ -107,12 +107,10 @@ function buildReport(files) {
       token(files.p13Report, "cannot promote host bridge authority beyond the exact capabilities"),
       token(files.compatibilityProfile, "the host project/package permission manifest remains the authority ceiling"),
       token(files.securityModel, "declared by the host"),
-    ], [
-      "Android provider plugins, native plugin loading/isolation, signed archives, remote marketplace install/update, packaged install/run evidence, and packaged distribution remain staged decisions.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-46", [
       token(files.phase13Tasks, "P13-46 partial landing"),
-      token(files.p13Report, "P13-46 records plugin system parity as partial"),
+      token(files.p13Report, "P13-46 records the v1.1 plugin system parity decision as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13PluginSystemParityDecision"),
       token(files.testingDoc, "verifyNodePhase13PluginSystemParityDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13PluginSystemParityDecision"),
@@ -182,7 +180,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       hostCapabilityCeilingReady: scenarioById(scenarios, "host_capability_ceiling").status !== "missing_evidence",

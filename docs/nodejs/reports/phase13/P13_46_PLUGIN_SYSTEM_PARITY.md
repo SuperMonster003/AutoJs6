@@ -1,9 +1,10 @@
 # P13-46 Plugin System Parity
 
-P13-46 records plugin system parity as partial. The current landing adds
-`pluginSystemProfile` diagnostics, keeps the JS-only local plugin manager as the
-only callable plugin surface, verifies the host capability ceiling, and adds a
-Phase 13 verifier plus Gradle gate.
+P13-46 records the v1.1 plugin system parity decision as ready for the current
+JS-only local manager scope. The landing adds `pluginSystemProfile`
+diagnostics, keeps the JS-only local plugin manager as the only callable plugin
+surface, verifies the host capability ceiling, and adds a Phase 13 verifier plus
+Gradle gate.
 
 ## Covered
 
@@ -29,7 +30,15 @@ For P13-46 v1.1, plugin-declared permissions are request metadata only. They
 cannot promote host bridge authority beyond the exact capabilities already
 declared by the host project or package manifest.
 
-## Remaining Work
+## Closure
+
+The v1.1 gate closes because the diagnostic profile, JS-only manager evidence,
+host capability ceiling, native payload denial, plugin namespace denial,
+documentation references, release matrix, surface manifest, and Gradle gate are
+synchronized. Future plugin promotion work remains staged and does not grant
+new runtime authority.
+
+## Future Promotion Work
 
 - Android provider plugin adapters need a signed protocol, permission mapping,
   lifecycle ownership, and device evidence.
@@ -43,7 +52,7 @@ declared by the host project or package manifest.
   plugin is disabled; stronger isolation still needs a worker/process boundary.
 
 The docs, release matrix, surface manifest, and Gradle gate are evidence checks
-only. They do not add a second blocker for the same plugin promotion and
+only. They do not add a second blocker for the same future plugin promotion and
 packaged distribution work.
 
 ## Evidence

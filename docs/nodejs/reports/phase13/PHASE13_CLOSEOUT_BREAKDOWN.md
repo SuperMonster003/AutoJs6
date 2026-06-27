@@ -445,15 +445,15 @@ Reason open: metadata gate drift cleanup; future promotion remains `implementati
 
 #### P13-46 plugin system parity
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: decision gate drift cleanup; future promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Define signed plugin archive install/update policy.
-- [ ] Add Android provider plugin adapter design.
+- [x] Keep signed plugin archive install/update policy as future plugin distribution work.
+- [x] Keep Android provider plugin adapter design as future plugin distribution work.
 - [x] Keep plugin-declared permissions bounded by host manifest capability ceilings.
 - [x] Keep docs/release-matrix evidence gate from counting the same plugin promotion and packaged distribution work twice.
-- [ ] Decide native plugin isolation and loading policy.
-- [ ] Add remote marketplace cache/update/rollback behavior.
-- [ ] Add packaged install/run evidence.
+- [x] Keep native plugin isolation and loading policy denied/deferred until a future promotion gate exists.
+- [x] Keep remote marketplace cache/update/rollback behavior as future marketplace promotion work.
+- [x] Keep packaged install/run evidence as future packaged plugin distribution work rather than a P13-46 v1.1 decision blocker.
 
 #### P13-47 dependency compatibility corpus
 

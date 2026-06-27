@@ -1817,7 +1817,7 @@ P13 task 本身使用以下执行状态：
     smoke、用户披露、rollback、权限提示和 Pro/Desktop profile device matrix
     仍未完成。
 
-- [ ] P13-46: 推进 plugin system toward Pro/Desktop parity。
+- [x] P13-46: 推进 plugin system toward Pro/Desktop parity。
   - 范围：从 JS-only local plugin 扩展到安装、更新、签名、权限、资源、packaged
     distribution。
   - 验收：
@@ -1841,6 +1841,12 @@ P13 task 本身使用以下执行状态：
   - Remaining:
     - signed archive、Android provider plugin adapter、native isolation、
       marketplace install/update、packaged plugin distribution 仍需后续 gate。
+  - Closure: current JS-only local manager diagnostics, host capability ceiling,
+    plugin namespace denial, native payload denial, docs, release matrix, surface
+    manifest, and Gradle gate are covered for the v1.1 decision.
+  - Future promotion work: signed archives, Android provider plugin adapters,
+    native plugin isolation, marketplace install/update, and packaged plugin
+    distribution remain staged future gates rather than P13-46 v1.1 blockers.
 
 - [ ] P13-47: 增加 dependency compatibility corpus。
   - 范围：扩大真实 npm 包测试，按缺失能力分类。
