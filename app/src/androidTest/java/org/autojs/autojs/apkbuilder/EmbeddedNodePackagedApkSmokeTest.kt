@@ -124,6 +124,37 @@ class EmbeddedNodePackagedApkSmokeTest {
             parentFile?.mkdirs()
             writeText("""exports.value = "dynamic-dir";""" + "\n", StandardCharsets.UTF_8)
         }
+        File(projectDir, "node_modules/packaged-vm-user/index.js").apply {
+            parentFile?.mkdirs()
+            writeText(
+                """
+                const vm = require("vm");
+                const nodeVm = require("node:vm");
+
+                module.exports.run = function runPackagedVmUser() {
+                  const script = new vm.Script("value + 1");
+                  const context = vm.createContext({ value: 41 });
+                  const scriptOk = script.runInContext(context, { timeout: 1000 }) === 42;
+                  const newContextOk = nodeVm.runInNewContext("value * 2", { value: 21 }, { timeout: 1000 }) === 42;
+                  const compiled = vm.compileFunction("return value + 1;", ["value"]);
+                  let timeoutOk = false;
+                  try {
+                    new vm.Script("while (true) {}").runInNewContext({}, { timeout: 25 });
+                  } catch (error) {
+                    timeoutOk = String(error && error.message || "").includes("Script execution timed out");
+                  }
+                  return {
+                    sameBuiltin: vm === nodeVm,
+                    script: scriptOk,
+                    context: newContextOk,
+                    compileFunction: compiled(41) === 42,
+                    timeout: timeoutOk
+                  };
+                };
+                """.trimIndent() + "\n",
+                StandardCharsets.UTF_8,
+            )
+        }
         val zlibOutputBombBase64 = gzipBase64(ByteArray(32 * 1024 * 1024 + 1) { 'A'.code.toByte() })
         listOf(
             "path",
@@ -150,6 +181,7 @@ class EmbeddedNodePackagedApkSmokeTest {
             "async_hooks",
             "diagnostics_channel",
             "perf_hooks",
+            "vm",
         ).forEach { builtinName ->
             File(projectDir, "node_modules/$builtinName/index.js").apply {
                 parentFile?.mkdirs()
@@ -258,6 +290,8 @@ class EmbeddedNodePackagedApkSmokeTest {
             const nodeDiagnosticsChannel = require("node:diagnostics_channel");
             const perfHooks = require("perf_hooks");
             const nodePerfHooks = require("node:perf_hooks");
+            const vmBuiltin = require("vm");
+            const nodeVmBuiltin = require("node:vm");
 
             const writeFile = promisify(fs.writeFile);
             const readFile = promisify(fs.readFile);
@@ -7111,6 +7145,38 @@ class EmbeddedNodePackagedApkSmokeTest {
               console.log("packaged.module.builtin_helpers=" + builtinHelpers);
             }
 
+            function runPackagedVmCorpus() {
+              const packageResult = require("packaged-vm-user").run();
+              const directScript = new vmBuiltin.Script("value + 1");
+              const directContext = vmBuiltin.createContext({ value: 41 });
+              const directScriptOk = directScript.runInContext(directContext, { timeout: 1000 }) === 42;
+              const directContextOk = nodeVmBuiltin.runInNewContext("value * 2", { value: 21 }, { timeout: 1000 }) === 42;
+              const compileOk = vmBuiltin.compileFunction("return value + 1;", ["value"])(41) === 42;
+              const timeoutOk = captureSync(
+                () => new vmBuiltin.Script("while (true) {}").runInNewContext({}, { timeout: 25 }),
+                "Script execution timed out"
+              );
+              const shadowOk = vmBuiltin === nodeVmBuiltin &&
+                require.resolve("vm") === "vm" &&
+                require.resolve("node:vm") === "vm" &&
+                vmBuiltin.shadow !== true &&
+                !Object.keys(require.cache).some(filename => filename.replace(/\\/g, "/").includes("/node_modules/vm/"));
+              const packageOk = packageResult.sameBuiltin &&
+                packageResult.script &&
+                packageResult.context &&
+                packageResult.compileFunction &&
+                packageResult.timeout;
+              console.log("packaged.vm.ready=" + (
+                packageOk && directScriptOk && directContextOk && compileOk && timeoutOk && shadowOk
+              ));
+              console.log("packaged.vm.package=" + packageOk);
+              console.log("packaged.vm.script=" + directScriptOk);
+              console.log("packaged.vm.context=" + directContextOk);
+              console.log("packaged.vm.compile_function=" + compileOk);
+              console.log("packaged.vm.timeout=" + timeoutOk);
+              console.log("packaged.vm.shadow=" + shadowOk);
+            }
+
             async function runCliStyleCorpus() {
               await fsp.mkdir("./packaged-cli/workspace", { recursive: true });
               await fsp.writeFile("./packaged-cli/config.json", JSON.stringify({
@@ -7962,6 +8028,7 @@ class EmbeddedNodePackagedApkSmokeTest {
               await runPackagedTempRenameAtomicCorpus();
               runDynamicRequireFallbackCorpus();
               runModuleCreateRequireCorpus();
+              runPackagedVmCorpus();
               await runChdirCorpus();
               runPackagedNpmAndCommonJsTailCorpus();
               await new Promise(resolve => setTimeout(resolve, 50));
@@ -14615,6 +14682,13 @@ $nodeConfigJson
             "packaged.module.create_require.resolve=true",
             "packaged.module.create_require.cache=true",
             "packaged.module.builtin_helpers=true",
+            "packaged.vm.ready=true",
+            "packaged.vm.package=true",
+            "packaged.vm.script=true",
+            "packaged.vm.context=true",
+            "packaged.vm.compile_function=true",
+            "packaged.vm.timeout=true",
+            "packaged.vm.shadow=true",
             "packaged.cli.ready=true",
             "packaged.cli.argv=true",
             "packaged.cli.require_main=true",

@@ -501,8 +501,8 @@ P13-36 records `vm` module promotion as partial. AutoJs6 Node exposes
 `vmProfile` diagnostics and now routes `vm` / `node:vm` to Node's native VM
 builtin. `vm.Script`, contexts, `compileFunction`, VM module APIs, and native
 timeout options are available for npm compatibility. This is not a sandbox
-boundary; memory/compiled-script budgets and packaged behavior evidence remain
-future hardening work.
+boundary; P13-36 focused evidence now covers repeated compiled-script budgets,
+native timeout interruption, VM boundary probes, and packaged fixture behavior.
 
 P13-37 records inspector/devtools debug profile as partial. AutoJs6 Node
 exposes `inspectorProfile` diagnostics, but `inspector`, `node:inspector`,

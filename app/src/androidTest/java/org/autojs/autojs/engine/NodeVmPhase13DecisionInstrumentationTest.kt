@@ -122,4 +122,65 @@ class NodeVmPhase13DecisionInstrumentationTest {
             workDir.deleteRecursively()
         }
     }
+
+    @Test
+    fun vmMemoryCompiledScriptBudgetAndTimeoutStressAreBounded() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-36 vm stress evidence")
+
+        val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+            source = """
+                "nodejs";
+                const vm = require("vm");
+                const v8 = require("v8");
+                const beforeHeap = v8.getHeapStatistics().used_heap_size;
+                const retainedScripts = [];
+                let checksum = 0;
+                for (let index = 0; index < 96; index += 1) {
+                  const script = new vm.Script("value + " + index);
+                  const context = vm.createContext({ value: 42 });
+                  checksum += script.runInContext(context, { timeout: 1000 });
+                  if (index % 8 === 0) {
+                    retainedScripts.push(script);
+                  }
+                }
+                const afterHeap = v8.getHeapStatistics().used_heap_size;
+                const heapDelta = Math.max(0, afterHeap - beforeHeap);
+                const heapBudgetBytes = 32 * 1024 * 1024;
+                let timeoutOk = false;
+                let timeoutName = "";
+                let timeoutMessageOk = false;
+                try {
+                  new vm.Script("while (true) {}").runInNewContext({}, { timeout: 25 });
+                } catch (error) {
+                  timeoutName = error && error.name || "";
+                  timeoutMessageOk = String(error && error.message || "").includes("Script execution timed out");
+                  timeoutOk = timeoutMessageOk;
+                }
+                const boundaryProbe = vm.runInNewContext([
+                  "typeof globalThis.__autojs6",
+                  "typeof globalThis.autojs",
+                  "typeof globalThis.require",
+                  "typeof globalThis.process"
+                ].join(" + '|' + "));
+                console.log("p13vm.budget=" + [
+                  retainedScripts.length,
+                  checksum,
+                  heapDelta <= heapBudgetBytes,
+                  heapBudgetBytes
+                ].join("|"));
+                console.log("p13vm.timeout=" + [timeoutOk, timeoutName, timeoutMessageOk].join("|"));
+                console.log("p13vm.boundary_probe=" + boundaryProbe);
+                console.log("p13vm.stress=true");
+            """.trimIndent(),
+            sourceName = "<node-vm-phase13-stress-p13-36.js>",
+            timeoutMs = 30_000L,
+        )
+
+        NodeEmbeddedTestHarness.assertSucceeded("P13-36 vm stress evidence", result)
+        val description = NodeEmbeddedTestHarness.describeResult("P13-36 vm stress evidence", result)
+        assertTrue(description, result.stdout.contains("p13vm.budget=12|8592|true|33554432"))
+        assertTrue(description, result.stdout.contains("p13vm.timeout=true|"))
+        assertTrue(description, result.stdout.contains("p13vm.boundary_probe=undefined|undefined|undefined|undefined"))
+        assertTrue(description, result.stdout.contains("p13vm.stress=true"))
+    }
 }

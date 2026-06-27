@@ -38,14 +38,16 @@ The native module is available for compatibility, not isolation. Scripts must no
 - no bypass of scoped filesystem policy is granted by the loader
 - disabled builtins such as `child_process`, `inspector`, `wasi`, and default-off `worker_threads` remain governed by their own policies
 - VM code that uses native timeout options is still owned by the embedded script lifecycle
-- memory and compiled-script follow-up limits remain open
-- packaged APK behavior and diagnostics need focused smoke evidence
+- focused memory and compiled-script budget evidence covers repeated `vm.Script` and context workloads
+- packaged APK smoke coverage now exercises a fixture package that uses `vm.Script`
 
 ## Follow-Up Evidence
 
-Future hardening should add:
+Current focused evidence covers:
 
-- memory and compiled-script budget tests for repeated `vm.Script` and context workloads
-- packaged APK smoke coverage for npm packages that exercise `vm`
-- bridge/process/global leakage probes that document the native Node boundary clearly
-- timeout and lifecycle cancellation stress evidence for long-running VM code
+- repeated `vm.Script` and `createContext` workloads under a 32 MiB heap-delta budget
+- native timeout interruption for long-running VM code
+- boundary probes showing AutoJs6 bridge globals, `require`, and `process` are not injected into new VM contexts
+- packaged APK smoke coverage for a fixture package that exercises `vm.Script`, contexts, `compileFunction`, timeout behavior, and builtin shadow protection
+
+Future hardening may broaden the matrix with longer stress runs, package corpus expansion, and any stricter membrane design if a future profile tries to treat VM contexts as an isolation primitive.

@@ -943,8 +943,8 @@ reopened it.
 gate. It requires `vmProfile` diagnostics, native `vm`/`node:vm`
 require/resolve behavior, local shadow-package protection, the updated VM
 design gate, TypeScript declarations, surface manifest evidence, and docs
-updates while keeping memory/compiled-script budgets and packaged VM behavior
-as follow-up evidence.
+updates plus focused repeated-script budget, timeout, boundary-probe, and
+packaged fixture smoke evidence.
 `verifyNodePhase13InspectorDebugProfileDecision` records P13-37 as the
 inspector/devtools debug profile decision gate. It requires `inspectorProfile`
 diagnostics, stable `inspector`/`node:inspector` require/resolve denial, local

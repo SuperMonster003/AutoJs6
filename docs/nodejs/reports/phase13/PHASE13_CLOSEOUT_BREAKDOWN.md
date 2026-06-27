@@ -341,9 +341,9 @@ Reason open: decision drift cleanup; future promotion remains `implementation`, 
 
 Reason open: `evidence`, `packaging`.
 
-- [ ] Add focused memory and compiled-script budget evidence.
-- [ ] Add timeout/lifecycle stress and leakage probes.
-- [ ] Add packaged smoke for packages using `vm.Script` and contexts.
+- [x] Add focused memory and compiled-script budget evidence.
+- [x] Add timeout/lifecycle stress and leakage probes.
+- [x] Add packaged smoke for packages using `vm.Script` and contexts.
 - [x] Keep VM documented as compatibility, not a security boundary.
 - [x] Keep docs/matrix evidence gate from counting VM memory, lifecycle, leakage, and packaged evidence twice.
 

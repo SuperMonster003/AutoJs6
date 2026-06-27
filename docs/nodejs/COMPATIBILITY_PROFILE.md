@@ -1438,8 +1438,10 @@ the native Node builtin for desktop npm compatibility. `vm.Script`, contexts,
 `compileFunction`, VM module APIs, and native timeout options are available
 through Node's own implementation. AutoJs6 does not inject bridge modules or
 raw Android host objects into VM contexts, but the Node `vm` module is not a
-security boundary. Follow-up evidence remains for memory/compiled-script
-budgets and packaged APK smoke coverage.
+security boundary. Focused P13-36 evidence covers repeated compiled-script
+workloads under a 32 MiB heap-delta budget, native timeout interruption,
+bridge/process/global non-injection probes, and packaged APK fixture smoke
+coverage.
 
 P13-37 records inspector/devtools debug profile as partial. The runtime exposes
 `autojs6:profile.inspectorProfile` to document that `inspector` and
