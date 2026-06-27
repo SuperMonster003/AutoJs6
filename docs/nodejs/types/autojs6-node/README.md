@@ -300,12 +300,12 @@ P13-27 records the partial utility-heavy Rhino modules gate. `jsox.mathx`,
 `Math`/prototype mutation, `zip`, `canvas`, OpenCC/pinyin packaged resources,
 `sysprops`, and raw Android/OpenCV object parity remain future work.
 
-P13-29 records the partial HTTP/HTTPS client parity gate. `http`/`node:http`
+P13-29 records the controlled HTTP/HTTPS client subset as ready. `http`/`node:http`
 and `https`/`node:https` are typed as controlled client facades over AutoJs6
 fetch: `request()`, `get()`, `ClientRequest`, `IncomingMessage`, and safe
 shape-only `Agent` fields are declared. Server/listen, raw sockets, proxy and
-tunnel options, custom TLS/session control, and packaged live-network behavior
-remain future work.
+tunnel options, custom TLS/session control, and broader packaged install/run
+network behavior remain future work.
 
 P13-30 records the partial net/tls/dns staged compatibility gate. By default,
 `net`, `node:net`, `tls`, `node:tls`, `dns`, `node:dns`, `dns/promises`, and

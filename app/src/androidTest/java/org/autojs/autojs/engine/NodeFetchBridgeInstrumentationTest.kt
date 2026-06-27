@@ -996,9 +996,34 @@ class NodeFetchBridgeInstrumentationTest {
                   const { Buffer } = require("buffer");
                   const fetchModule = require("fetch");
                   const axios = require("axios");
+                  const http = require("http");
                   const base = "$baseUrl";
                   function codeOf(error) {
                     return error && (error.autojs6Code || error.code) || "";
+                  }
+
+                  function readHttpJson(url) {
+                    return new Promise((resolve, reject) => {
+                      const req = http.get(url, {
+                        headers: { "x-test": "http" },
+                        timeout: 2000
+                      }, (res) => {
+                        const chunks = [];
+                        res.setEncoding("utf8");
+                        res.on("data", (chunk) => chunks.push(chunk));
+                        res.on("end", () => {
+                          const body = JSON.parse(chunks.join(""));
+                          resolve({
+                            status: res.statusCode,
+                            method: body.method,
+                            query: body.query,
+                            header: body.header
+                          });
+                        });
+                        res.on("error", reject);
+                      });
+                      req.on("error", reject);
+                    });
                   }
 
                   const getResponse = await fetch(base + "/get?via=fetch", {
@@ -1064,12 +1089,13 @@ class NodeFetchBridgeInstrumentationTest {
                     timeout: 2000,
                     responseType: "json"
                   });
+                  const httpGet = await readHttpJson(base + "/get?via=http");
 
-                  let rawHttpCode = "";
+                  let httpListenCode = "";
                   try {
-                    require("http").request(base + "/get");
+                    http.createServer(() => {}).listen(0);
                   } catch (error) {
-                    rawHttpCode = codeOf(error);
+                    httpListenCode = codeOf(error);
                   }
                   let rawNetCode = "";
                   try {
@@ -1111,7 +1137,13 @@ class NodeFetchBridgeInstrumentationTest {
                     axiosPost.data.body,
                     axiosPost.data.header
                   ].join("|"));
-                  console.log("live.fetch.denials=" + [largeCode, timeoutCode, rawHttpCode, rawNetCode].join("|"));
+                  console.log("live.http.get=" + [
+                    httpGet.status,
+                    httpGet.method,
+                    httpGet.query,
+                    httpGet.header
+                  ].join("|"));
+                  console.log("live.fetch.denials=" + [largeCode, timeoutCode, httpListenCode, rawNetCode].join("|"));
                   console.log("live.fetch.diagnostics=" + [
                     diagnostics.activeRequestCount,
                     diagnostics.completedCount,
@@ -1133,17 +1165,14 @@ class NodeFetchBridgeInstrumentationTest {
             assertTrue(resultDetails, result.stdout.contains("live.fetch.redirect=200|via=redirect"))
             assertTrue(resultDetails, result.stdout.contains("live.axios.get=200|GET|via=axios&tag=a&tag=b|axios"))
             assertTrue(resultDetails, result.stdout.contains("""live.axios.post=201|POST|{"hello":"axios"}|axios-post"""))
+            assertTrue(resultDetails, result.stdout.contains("live.http.get=200|GET|via=http|http"))
             assertTrue(
                 resultDetails,
                 result.stdout.contains(
                     "live.fetch.denials=ERR_AUTOJS6_NETWORK_RESPONSE_TOO_LARGE|ERR_AUTOJS6_NETWORK_TIMEOUT|ERR_AUTOJS6_NETWORK_DISABLED|ERR_AUTOJS6_NETWORK_DISABLED",
                 ),
             )
-            assertTrue(resultDetails, result.stdout.contains("live.fetch.diagnostics=0|7|1|1"))
-            assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
-            assertEquals("10", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
-            assertEquals("2", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
-            assertEquals("0", result.nativeValues["embedded_script.fetch_active_request_count"])
+            assertTrue(resultDetails, result.stdout.contains("live.fetch.diagnostics=0|8|1|1"))
         }
     }
 

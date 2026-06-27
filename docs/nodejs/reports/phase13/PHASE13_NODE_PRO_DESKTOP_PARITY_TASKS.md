@@ -161,9 +161,9 @@
   Canvas/Paint decision, OpenCC packaged resources, pinyin full dictionaries,
   Rhino `util` split batches, and `sysprops`.
 
-## P13-29 Partial Landing Note
+## P13-29 Closure Note
 
-- P13-29 partial HTTP/HTTPS client parity gate records the existing
+- P13-29 HTTP/HTTPS client parity closure records the existing
   controlled `http`/`https` client facade as a Desktop-profile compatibility
   subset, backed only by AutoJs6 controlled fetch.
 - Follow-up runtime policy propagation now treats
@@ -183,9 +183,12 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_29_HTTP_HTTPS_CLIENT_PARITY.md`.
 - Surface manifest evidence: `phase13-http-https-client-parity`.
-- Remaining P13-29 blockers: packaged INTERNET permission evidence, live
-  provider HTTP smoke, raw socket/server/listen policy, DNS/TLS session
-  parity, and proxy support decision.
+- Closure: P13-29 v1.1 closes the controlled `http`/`https` client subset with
+  live Android/OkHttp loopback fetch/axios/`http.get()` evidence and P13-45 packaged
+  metadata proof that `network` maps to `android.permission.INTERNET`.
+- Future raw-network work: server/listen policy, DNS/TLS session parity, raw
+  sockets, backpressure, and broader packaged install/run network evidence
+  remain scoped to P13-30 or later packaged distribution gates.
 
 ## P13-30 Partial Landing Note
 
@@ -1231,14 +1234,14 @@ P13 task 本身使用以下执行状态：
     - 报告产物：`build/reports/nodejs/node-builtin-parity.json`
     - 报告产物：`build/reports/nodejs/node-builtin-parity.md`
 
-- [ ] P13-29: 推进 raw `http` / `https` client compatibility。
+- [x] P13-29: 推进 raw `http` / `https` client compatibility。
   - 范围：在 Desktop profile 中逐步允许 Node core `http`/`https` client。
   - 验收：
     - client request、stream response、timeout、redirect、TLS error、proxy denial
       行为明确。
     - server/listen 能力不与 client 一起默认开放。
     - 与现有 `fetch`/`axios` bridge-backed provider 的边界清晰。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Closure Evidence (2026-06-28):
     - Runtime boundary: `app/src/main/cpp/node_bridge_sources.cpp`
     - Focused instrumentation:
       `app/src/androidTest/java/org/autojs/autojs/engine/NodeHttpDesktopParityInstrumentationTest.kt`
@@ -1258,6 +1261,15 @@ P13 task 本身使用以下执行状态：
       `redirect-follow-client`, `tls-failure-client`, and
       `proxy-denial-client` for follow-redirects-style packages, provider TLS
       errors, and per-request proxy denial without dispatch.
+    - Live Android/OkHttp loopback evidence for fetch, axios, and controlled
+      `http.get()`:
+      `NodeFetchBridgeInstrumentationTest#jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled`
+      through `:app:verifyNodeLiveFetchGate` with
+      `-Pautojs.nodejs.network.experimental=true`.
+    - Packaged permission mapping evidence: P13-45
+      `NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest`
+      records `network` as `android.permission.INTERNET` metadata through the
+      bridge permission manifest.
     - Types: `docs/nodejs/types/autojs6-node/http.d.ts`,
       `docs/nodejs/types/autojs6-node/https.d.ts`
     - Host verifier:
@@ -1266,6 +1278,9 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_29_HTTP_HTTPS_CLIENT_PARITY.md`
     - Surface manifest evidence: `phase13-http-https-client-parity`
+    - Future work: full raw socket/DNS/TLS/server/backpressure semantics remain
+      P13-30 scoped; broader packaged install/run network smoke and disclosure
+      remain packaged distribution work.
 
 - [ ] P13-30: 推进 `net` / `tls` / `dns` staged compatibility。
   - 范围：先客户端 socket，再评估 server socket。

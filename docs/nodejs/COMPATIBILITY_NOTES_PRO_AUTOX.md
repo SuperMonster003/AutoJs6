@@ -316,11 +316,13 @@ default global `Math`/prototype mutation, `zip`, `canvas`, OpenCC/pinyin
 packaged dictionaries, `sysprops`, or raw Android/OpenCV objects on Rhino until
 separate gates land.
 
-P13-29 records HTTP/HTTPS client parity as partial. AutoJs6 Node supports the
-controlled `http`/`https` client facade for request/get, stream response,
-timeout, redirect, and provider-owned TLS errors, but still rejects
-server/listen, raw sockets, proxy/tunnel options, `CONNECT`, custom TLS/session
-control, and per-request proxy configuration.
+P13-29 closes the controlled HTTP/HTTPS client subset for v1.1. AutoJs6 Node
+supports the controlled `http`/`https` client facade for request/get, stream
+response, timeout, redirect, provider-owned TLS errors, live Android/OkHttp
+loopback fetch/axios/`http.get()` evidence, and packaged `network` to
+`android.permission.INTERNET` metadata proof, but still rejects server/listen,
+raw sockets, proxy/tunnel options, `CONNECT`, custom TLS/session control, and
+per-request proxy configuration.
 
 P13-30 records net/tls/dns staged compatibility as partial. AutoJs6 Node now
 keeps `net`, `tls`, `dns`, and `dns/promises` reserved and typed for package

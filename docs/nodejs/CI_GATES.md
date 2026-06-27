@@ -460,14 +460,16 @@ utility-heavy Rhino modules state: pure `jsox.mathx`, `jsox.arrayx`, and
 and `compat.jsox`, while `zip`, `canvas`, OpenCC/pinyin packaged resources,
 `sysprops`, raw Canvas/Paint, and raw Android/OpenCV object parity remain
 blocked.
-`verifyNodePhase13HttpHttpsClientParity` records the P13-29 partial
-HTTP/HTTPS client parity state: controlled `http`/`https` request/get,
+`verifyNodePhase13HttpHttpsClientParity` records the P13-29 controlled
+HTTP/HTTPS client subset as ready: controlled `http`/`https` request/get,
 stream-response, timeout, redirect, TLS/provider-error, proxy/tunnel denial,
-server/listen denial, shadow denial, TypeScript declarations, and desktop
-builtin matrix evidence are covered. The offline HTTP npm corpus also covers
-follow-redirects-style handling, TLS provider failure handling, and proxy
-configuration denial. Raw socket authority, DNS/TLS session APIs, packaged
-INTERNET proof, live HTTP provider smoke, and proxy support remain blocked.
+server/listen denial, shadow denial, TypeScript declarations, desktop builtin
+matrix evidence, live Android/OkHttp loopback fetch/axios/`http.get()` evidence,
+and packaged `network` to `android.permission.INTERNET` metadata proof are
+covered. The offline HTTP npm corpus also covers follow-redirects-style
+handling, TLS provider failure handling, and proxy configuration denial. Raw
+socket authority, DNS/TLS session APIs, broader packaged install/run network
+behavior, and proxy support remain blocked or scoped to later gates.
 `verifyNodePhase10LongRunningActivation` records the S10-29 through S10-36
 long-running, scheduled, queue, checkpoint, and multi-instance boundary state.
 Interactive foreground long-running and the scheduled runner are active through

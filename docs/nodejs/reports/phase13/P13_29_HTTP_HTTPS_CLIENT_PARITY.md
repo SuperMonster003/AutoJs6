@@ -1,12 +1,21 @@
 # P13-29 HTTP/HTTPS Client Parity
 
-Status: partial
+Status: ready
 
 P13-29 records the controlled `http` / `https` client facade as a Desktop
 profile compatibility subset. It does not expose raw Node sockets. Requests are
 still serialized through AutoJs6 controlled fetch, require an enforced
 `network` capability manifest, and remain subject to the existing network
 provider flag and Android permission policy.
+
+## Closure
+
+P13-29 closes the controlled HTTP/HTTPS client subset for v1.1. The closure
+evidence now includes the focused `http`/`https` client facade instrumentation,
+the nine-fixture offline HTTP npm corpus, the live Android/OkHttp loopback
+fetch/axios/`http.get()` smoke from `verifyNodeLiveFetchGate`, and the P13-45 packaged
+capability metadata proof that `network` maps to
+`android.permission.INTERNET`.
 
 ## Promoted Evidence
 
@@ -28,6 +37,13 @@ provider flag and Android permission policy.
   with follow-redirects-style redirect handling, TLS provider failure handling,
   and per-request proxy configuration denial.
 - P13-29 adds minimal TypeScript declarations for the controlled client subset.
+- Live Android/OkHttp evidence for fetch, axios, and controlled `http.get()`
+  is covered by
+  `NodeFetchBridgeInstrumentationTest#jsFetchAndAxiosUseAndroidLiveProviderWhenNetworkExperimentEnabled`
+  under `-Pautojs.nodejs.network.experimental=true`.
+- Packaged permission synthesis evidence is covered by the P13-45 packaged
+  capability metadata gate: declaring `network` records
+  `android.permission.INTERNET` through the bridge permission manifest.
 
 ## Boundary
 
@@ -39,9 +55,7 @@ The following remain unavailable:
   and per-request proxy configuration;
 - unrestricted desktop Node agent pooling;
 - live provider promotion in normal builds without
-  `autojs.nodejs.network.experimental=true`;
-- packaged APK INTERNET permission proof for this specific Desktop-profile
-  client path.
+  `autojs.nodejs.network.experimental=true`.
 
 Full raw socket, DNS lookup, TLS session, and backpressure semantics stay scoped
 to P13-30 or later. P13-29 only tracks controlled fetch-backed client
@@ -64,9 +78,10 @@ proxy behavior may exist behind controlled fetch.
   `NodeHttpAgentFacadeInstrumentationTest`, and
   `NodeRawNetworkPolicyInstrumentationTest`
 
-## Remaining Work
+## Future Work
 
-- Attach packaged APK evidence proving `network` maps to
-  `android.permission.INTERNET` for this path.
-- Run a live Android/OkHttp HTTP/HTTPS smoke under the existing experimental
-  network provider flag.
+- Full raw socket, DNS lookup, TLS session, server/listen, and backpressure
+  semantics remain scoped to P13-30 or later.
+- Broader packaged install/run network smoke, disclosure UX, and rollback
+  diagnostics remain future packaged distribution work beyond this controlled
+  client subset.

@@ -610,12 +610,11 @@ objects remain denied.
 
 The `fetch` bridge is the controlled AutoJs6 Safe-profile replacement for Node raw network modules. JavaScript receives only a fetch-compatible Promise wrapper and buffered response helpers. Request descriptors are JSON-serialized, method-limited to `GET` and `POST`, bounded by `timeoutMs`, `maxResponseBytes`, `maxRedirects`, and max active request count, and may be cancelled through `AbortController.signal`. Only `http:` and `https:` URLs are accepted. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy cancels tracked OkHttp calls and must not call back into a destroyed Node environment.
 
-P13-29 records HTTP/HTTPS client parity as partial. The `http`/`https` modules
-remain controlled-fetch facades in the Safe profile and raw Node network modules
-remain disabled by default:
-server/listen, raw sockets, DNS/TLS session control, proxy/tunnel options,
-`CONNECT`, upgrade, and custom connector hooks reject before raw transport
-authority can be acquired.
+P13-29 closes the controlled HTTP/HTTPS client subset for v1.1. The
+`http`/`https` modules remain controlled-fetch facades in the Safe profile and
+raw Node network modules remain disabled by default: server/listen, raw sockets,
+DNS/TLS session control, proxy/tunnel options, `CONNECT`, upgrade, and custom
+connector hooks reject before raw transport authority can be acquired.
 
 P13-30 records net/tls/dns staged compatibility as partial. By default, the `net`, `tls`,
 `dns`, and `dns/promises` modules are reserved limited builtins for compatibility
