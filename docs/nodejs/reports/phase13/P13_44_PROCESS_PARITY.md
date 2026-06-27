@@ -29,16 +29,23 @@ surface-manifest evidence for the Safe process subset.
   `permission`, `report.getReport()`, stdio shape, and stable denial of private
   process/native entry points are covered by instrumentation.
 
+## Boundary Decision
+
+- P13-44 is a Safe process subset only and does not claim full desktop process
+  parity.
+- Android signal delivery and native/raw process termination are stable-denied
+  for this gate. `process.exit(code)` remains lifecycle-mapped to the embedded
+  script result and never calls native process exit.
+- Inherited env is not raw host inheritance. Scripts receive controlled request
+  values plus safe defaults; writes stay script-local and coerce assigned values
+  to strings.
+- Raw process handles, native bindings, `process.dlopen`,
+  `process.binding()`, and `report.writeReport()` remain denied unless a later
+  Desktop-profile gate promotes them explicitly.
+
 ## Remaining Work
 
-- Full desktop process parity is not claimed.
-- Raw signal delivery and Android process signal differences need a complete
-  policy and device matrix.
-- Native/raw process termination remains denied; the supported
-  `process.exit(code)` path is only the embedded-script lifecycle mapping.
-- Raw inherited environment policy, packaged lifecycle evidence, raw process
-  handles, native bindings, `process.dlopen`, `process.binding`, and
-  `report.writeReport()` remain future Desktop-profile work.
+- Add packaged lifecycle evidence for argv/env/cwd/process-exit behavior.
 
 ## Evidence
 

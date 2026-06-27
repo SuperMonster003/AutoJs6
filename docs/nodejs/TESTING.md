@@ -1991,7 +1991,8 @@ project-runner argv/env/cwd evidence, inspector and compile-cache env filtering
 evidence, modern-core process permission evidence, TypeScript declarations,
 surface manifest evidence, release matrix updates, and Phase13 docs. It keeps
 native/raw process exit, Android signals, raw inherited env, raw process
-handles, native bindings, and full desktop process parity open.
+handles, native bindings, and full desktop process parity stable-denied while
+packaged lifecycle evidence remains open.
 
 Phase 13 process/env/argv parity focused instrumentation:
 

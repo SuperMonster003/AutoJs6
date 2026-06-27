@@ -215,7 +215,7 @@ function nextStepForLimited(name) {
     return "P13-32 records scoped filesystem profile and P13-33 records advanced fs APIs as partial; Safe profile stays working-directory scoped while Android watcher coalescing, recursive-watch denial, and realpath differences are documented; expanded roots, packaged watcher/fd/FileHandle close-on-destroy, and full desktop fs semantics remain future work.";
   }
   if (name === "process") {
-    return "P13-44 records process/env/argv parity as partial; argv/env/cwd/timing/resource/report/permission and lifecycle-mapped process.exit(code) evidence is present while native process exit, signals, native bindings, raw environment inheritance, and full desktop process parity remain future work.";
+    return "P13-44 records process/env/argv parity as partial; argv/env/cwd/timing/resource/report/permission and lifecycle-mapped process.exit(code) evidence is present with stable denials for native process exit, signals, native bindings, raw environment inheritance, and full desktop process parity while packaged lifecycle evidence remains future work.";
   }
   if ([
     "async_hooks",

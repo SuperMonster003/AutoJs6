@@ -1658,11 +1658,11 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_44_PROCESS_PARITY.md`。
     - Surface manifest evidence:
       `phase13-process-parity-decision`。
-  - Remaining: full desktop process parity、raw Android signal delivery、
-    native/raw process exit policy、raw inherited env policy、raw process
-    handles/native bindings、`process.dlopen`/`process.binding`、
-    `report.writeReport()`、Android signal policy 和 packaged lifecycle
-    evidence 仍未完成。
+  - Boundary decision: full desktop process parity、raw Android signal delivery、
+    native/raw process exit、raw inherited env、raw process handles/native
+    bindings、`process.dlopen`/`process.binding` 和 `report.writeReport()`
+    stay stable-denied for P13-44 v1.1.
+  - Remaining: packaged lifecycle evidence.
 
 ### Track D: Packaging, plugins, and distribution
 

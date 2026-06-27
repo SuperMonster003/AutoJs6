@@ -398,11 +398,11 @@ Reason open: `evidence`, `implementation`.
 
 #### P13-44 process/env/argv parity
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: `packaging`.
 
-- [ ] Decide full desktop process parity boundaries.
-- [ ] Add Android signal delivery and native process termination evidence or stable denials.
-- [ ] Finalize inherited environment and process exit policy.
+- [x] Decide full desktop process parity boundaries.
+- [x] Add Android signal delivery and native process termination evidence or stable denials.
+- [x] Finalize inherited environment and process exit policy.
 - [ ] Add packaged lifecycle evidence.
 
 ### Packaging, Plugins, Distribution

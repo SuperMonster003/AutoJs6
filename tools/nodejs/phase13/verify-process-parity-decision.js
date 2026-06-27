@@ -115,8 +115,7 @@ function buildReport(files) {
       token(files.inspectorSecurityTest, "NODE_OPTIONS"),
       token(files.moduleCompileCacheTest, "NODE_COMPILE_CACHE"),
     ], [
-      "Full desktop process parity is not claimed; P13-44 records Safe process subset behavior only.",
-      "Android signal delivery, native process termination, inherited environment policy, and packaged lifecycle evidence remain future work.",
+      "Add packaged lifecycle evidence for argv/env/cwd/process-exit behavior.",
     ]),
     scenario("matrix_modern_core_and_docs", "Builtin matrix, modern-core differential, docs, release matrix, surface manifest, and Gradle gate record P13-44", [
       token(files.runtimeCapabilities, '"process"'),
@@ -137,8 +136,6 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-44 process/env/argv parity"),
-    ], [
-      "P13-44 remains partial until env write policy, Android process signal differences, native process-exit boundaries, and packaged lifecycle evidence are fully closed.",
     ]),
   ];
 
@@ -186,6 +183,34 @@ function buildReport(files) {
         !files.nodeBridgeSources.text.includes("nativeBindings: true"),
       "P13-44 must not mark native process exit, signals, env inheritance, handles, native bindings, or full desktop parity as promoted.",
     ),
+    check(
+      "full-desktop-process-boundary-decided",
+      files.p13Report.text.includes("P13-44 is a Safe process subset only") &&
+        files.p13Report.text.includes("does not claim full desktop process") &&
+        files.p13Report.text.includes("parity") &&
+        processProfile.includes("rawDesktopParity: false"),
+      "P13-44 must decide and document the full desktop process parity boundary.",
+    ),
+    check(
+      "signal-and-native-exit-stable-denied",
+      files.p13Report.text.includes("Android signal delivery and native/raw process termination are stable-denied") &&
+        files.p13Report.text.includes("never calls native process exit") &&
+        processProfile.includes('signals: "denied_no_android_signal_delivery"') &&
+        processProfile.includes('"native_process_exit"') &&
+        processProfile.includes("rawSignals: false"),
+      "P13-44 must keep Android signal delivery and native process termination stable-denied.",
+    ),
+    check(
+      "inherited-env-and-exit-policy-finalized",
+      files.p13Report.text.includes("Inherited env is not raw host inheritance") &&
+        files.p13Report.text.includes("Scripts receive controlled request") &&
+        files.p13Report.text.includes("values plus safe defaults") &&
+        files.p13Report.text.includes("`process.exit(code)` remains lifecycle-mapped") &&
+        processProfile.includes('env: "controlled_string_map"') &&
+        processProfile.includes("rawEnvInheritance: false") &&
+        processProfile.includes('exit: "lifecycle_mapped_process_exit"'),
+      "P13-44 must finalize inherited environment and process exit policy.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -212,6 +237,9 @@ function buildReport(files) {
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       runtimeBehaviorReady: scenarioById(scenarios, "runtime_behavior").status !== "missing_evidence",
+      fullDesktopProcessBoundaryDecided: checkById(checks, "full-desktop-process-boundary-decided").passed,
+      signalAndNativeExitStableDenied: checkById(checks, "signal-and-native-exit-stable-denied").passed,
+      inheritedEnvAndProcessExitPolicyFinalized: checkById(checks, "inherited-env-and-exit-policy-finalized").passed,
       rawProcessExitPromoted: false,
       rawSignalsPromoted: false,
       rawEnvInheritancePromoted: false,
@@ -246,6 +274,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id);
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {
