@@ -260,9 +260,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-23 app/intent/broadcast parity"),
       token(files.typesReadme, "P13-23 records the partial app/intent/broadcast parity gate"),
       token(files.surfaceManifestDoc, "phase13-app-intent-broadcast-parity"),
-    ], [
-      "Keep P13-23 open until packaged smoke, negative corpus, redacted installed-app list policy, alias matrix, and migration examples land.",
-    ]),
+    ], []),
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-23"), "P13-23 must remain listed in the Phase 13 checklist."),

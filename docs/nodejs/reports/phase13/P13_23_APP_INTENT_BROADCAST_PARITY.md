@@ -105,6 +105,12 @@ P13-24 shell/root/Shizuku capability gates instead of expanding the ordinary
   non-object extras, and blocked privileged options.
 - Migration examples for Rhino `app.intent()` and `app.startActivity()` scripts.
 
+The docs, compatibility notes, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-23
+blocker beyond the descriptor alias matrix, safe Activity device smokes,
+redacted installed-app list policy, packaged scoped-file evidence, negative
+corpus, privacy disclosure, and migration examples above.
+
 ## Verification
 
 Expected commands:

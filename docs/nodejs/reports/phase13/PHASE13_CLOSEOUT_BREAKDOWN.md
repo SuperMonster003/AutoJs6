@@ -210,6 +210,7 @@ Reason open: `implementation`, `evidence`, `packaging`.
 - [ ] Define redacted installed-app list schemas and privacy disclosure policy.
 - [ ] Add packaged scoped file view/edit evidence.
 - [x] Decide `sendBroadcast`, raw `Uri`/`FileProvider`, dual-user, and root/Shizuku app tiers.
+- [x] Keep docs/surface evidence gate from counting alias matrix, device smokes, installed-app privacy, packaged scoped-file, negative corpus, and migration evidence twice.
 
 #### P13-24 shell/root/Shizuku
 
