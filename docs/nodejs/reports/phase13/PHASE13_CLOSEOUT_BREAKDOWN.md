@@ -382,7 +382,7 @@ Reason open: `implementation`, `packaging`, `evidence`.
 Reason open: `implementation`, `policy`, `packaging`.
 
 - [x] Fix current verifier/source evidence for local-store `remove(name, version)`.
-- [ ] Implement Android registry downloader, cache management, tarball extraction, and integrity-lock authority.
+- [x] Keep Android registry downloader, cache management, tarball extraction, and integrity-lock authority stable-denied as runtime user APIs for v1.1; implement only after a reviewed mobile install authority exists.
 - [x] Decide npm CLI, lifecycle, bin, native execution, and raw node_modules mutation policy.
 - [x] Keep host-managed install equivalent as the safe default until mobile install authority is reviewed.
 - [ ] Add packaged distribution evidence.

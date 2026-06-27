@@ -782,7 +782,10 @@ install authority; registry plans can parse caller-provided npm
 and tarball plans can parse URL/name/version/sha512 shape locally. `npm` is
 script-visible only as a guarded package-manager alias facade; its CLI,
 lifecycle, registry install, publish, and pack entry points reject with stable
-policy errors.
+policy errors. Android registry downloader, cache management, tarball
+extraction, and integrity-lock install authority stay stable-denied as runtime
+user APIs for P13-42 v1.1; host-managed validation remains the equivalent
+install path.
 Mutating calls require
 `package_manager.mutate`, `allowMutation: true`, a project-scoped local
 unpacked source where relevant, and expected SHA-512 integrity from a dry-run

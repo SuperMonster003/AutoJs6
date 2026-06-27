@@ -1296,7 +1296,10 @@ registry plans can resolve caller-provided npm `metadata`/`packument` into
 frozen dist-tag/semver/integrity diagnostics, and tarball plans can parse URL,
 inferred package identity, and sha512 integrity shape locally. `npm` is
 script-visible as a guarded package-manager alias facade; it does not run the
-npm CLI or fetch from registries. Mutating calls are capability-gated by
+npm CLI or fetch from registries. Android registry downloader, cache
+management, tarball extraction, and integrity-lock install authority stay
+stable-denied as runtime user APIs for P13-42 v1.1; host-managed validation
+remains the equivalent install path. Mutating calls are capability-gated by
 `package_manager.mutate`, require
 `allowMutation: true`, and use dry-run SHA-512 integrity.
 

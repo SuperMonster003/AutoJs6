@@ -109,6 +109,10 @@ unrestricted JavaScript package-manager mutation on Android. A script-visible
   limited to the guarded local-unpacked app-private store path, requires
   `package_manager.mutate`, `allowMutation: true`, and expected integrity from
   a dry-run plan, and never grants registry/tarball install authority.
+- Android registry downloader, cache management, tarball extraction, and
+  integrity-lock install authority stay stable-denied as runtime user APIs for
+  P13-42 v1.1. Future promotion requires a reviewed mobile install authority;
+  Phase 10 host-managed validation remains the equivalent install path.
 
 ## Existing Substrate
 
@@ -140,7 +144,8 @@ constrained to the local store substrate.
 ## Not Promoted
 
 - Running `npm install` or `npm i --no-bin-links` directly on Android.
-- Android registry metadata/tarball download and cache management.
+- Android registry metadata/tarball download and cache management; these stay
+  stable-denied runtime user APIs for P13-42 v1.1.
 - `planRegistryInstall()` / `planTarballInstall()` beyond policy-only dry-run
   diagnostics; registry semver/integrity resolution uses caller-provided
   metadata only, tarball URL parsing is local-only, and the APIs do not

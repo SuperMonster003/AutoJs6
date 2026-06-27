@@ -219,9 +219,7 @@ function buildReport(files) {
       token(files.phase10PackageManagerReport, "`autojs6-lock.json` generation"),
       token(files.phase10PackageManagerReport, "scripts, `.bin` execution, native addons"),
       token(files.designPackageManager, "partial Android local package store through `NodeAndroidPackageInstallManager`"),
-    ], [
-      "Mobile registry resolution, cache management, tarball extraction, and integrity-lock authority are not Android runtime user APIs yet.",
-    ]),
+    ], []),
     scenario("docs_gate_and_matrix", "Docs, release matrix, surface manifest, and Gradle gate record P13-42", [
       token(files.phase13Tasks, "P13-42 partial landing"),
       token(files.p13Report, "P13-42 records Android package manager parity as partial"),
@@ -237,7 +235,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-42 Android package manager"),
     ], [
-      "P13-42 remains partial until Android-side registry install, unrestricted install authority, signed native payloads, and packaged distribution evidence close.",
+      "P13-42 remains partial until signed native payloads and packaged distribution evidence close.",
     ]),
   ];
 
@@ -376,6 +374,25 @@ function buildReport(files) {
       "P13-42 must keep host-managed install validation as the safe default until mobile install authority is reviewed.",
     ),
     check(
+      "android-registry-tarball-authority-stable-denied",
+      hasAll(files.p13Report, [
+        "Android registry downloader, cache management",
+        "integrity-lock install authority stay stable-denied as runtime user APIs",
+        "P13-42 v1.1",
+      ]) &&
+        hasAll(files.compatibilityProfile, [
+          "Android registry downloader, cache",
+          "integrity-lock install authority stay",
+          "stable-denied as runtime user APIs for P13-42 v1.1",
+        ]) &&
+        hasAll(files.securityModel, [
+          "Android registry downloader, cache management",
+          "integrity-lock install authority stay stable-denied as runtime",
+          "user APIs for P13-42 v1.1",
+        ]),
+      "P13-42 must keep Android registry/tarball/cache/integrity-lock runtime install authority stable-denied for v1.1.",
+    ),
+    check(
       "npm-cli-lifecycle-bin-native-mutation-policy-decided",
       files.p13Report.text.includes("## Policy Decision") &&
         files.p13Report.text.includes("npm CLI, `npm.exec()`, `npm.runScript()`, registry install, publish, and pack") &&
@@ -417,6 +434,7 @@ function buildReport(files) {
       androidLocalStoreReady: scenarioById(scenarios, "android_local_store_substrate").status !== "missing_evidence",
       hostManagedEquivalentReady: scenarioById(scenarios, "host_managed_install_equivalent").status !== "missing_evidence",
       hostManagedInstallSafeDefault: checkById(checks, "host-managed-install-safe-default").passed,
+      registryTarballAuthorityStableDenied: checkById(checks, "android-registry-tarball-authority-stable-denied").passed,
       npmCliLifecycleBinNativeMutationPolicyDecided: checkById(checks, "npm-cli-lifecycle-bin-native-mutation-policy-decided").passed,
       npmCliPromoted: false,
       npmFacadeReady: files.nodeBridgeSources.text.includes("function __autojs6_limited_npm()") &&
@@ -464,6 +482,10 @@ function token(file, value) {
     token: value,
     present: file.exists && file.text.includes(value),
   };
+}
+
+function hasAll(file, values) {
+  return file.exists && values.every((value) => file.text.includes(value));
 }
 
 function check(id, passed, message) {

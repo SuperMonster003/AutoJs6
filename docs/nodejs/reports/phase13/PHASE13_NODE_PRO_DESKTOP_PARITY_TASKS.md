@@ -1643,6 +1643,10 @@ P13 task 本身使用以下执行状态：
       `:app:verifyNodePhase13PackageManagerAndroidDecision`。
     - Report:
       `docs/nodejs/reports/phase13/P13_42_PACKAGE_MANAGER_ANDROID.md`。
+    - P13-42 v1.1 policy: Android registry downloader, cache management,
+      tarball extraction, and integrity-lock install authority stay
+      stable-denied as runtime user APIs; Phase 10 host-managed validation
+      remains the equivalent install path.
     - Surface manifest evidence:
       `phase13-package-manager-android-decision`。
   - Remaining: Android 侧 registry metadata/tarball 下载、npm CLI、
