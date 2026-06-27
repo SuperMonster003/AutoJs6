@@ -144,11 +144,21 @@ function buildReport(files, soakReports, contractFixtures) {
   const contractFixtureViolations = contractFixtures
     .filter((entry) => !entry.passed)
     .map((entry) => `${entry.id}: expected ready=${entry.expectedReady}, actual ready=${entry.ready}`);
-  const registryBlocker = blockerEntry && blockerEntry.status === "open"
-    ? [`full_heavy_resource_stress: ${blockerEntry.currentEvidence}`]
-    : blockerEntry && blockerEntry.status === "closed"
-      ? []
-      : ["full_heavy_resource_stress: blocker registry entry is missing"];
+  const quickSoakReady = reportById(soakReports, "quick_soak_8h").ready;
+  const finalSoakReady = reportById(soakReports, "final_soak_24h").ready;
+  const comparableReportReady = soakReports.every((entry) => entry.available && entry.requiredMetricsReady);
+  const registryBlocker = (() => {
+    if (!blockerEntry) {
+      return ["full_heavy_resource_stress: blocker registry entry is missing"];
+    }
+    if (blockerEntry.status === "closed") {
+      return [];
+    }
+    if (quickSoakReady && finalSoakReady && comparableReportReady) {
+      return ["full_heavy_resource_stress: close FINAL_BLOCKER_REGISTRY after quick/final soak reports are archived and ready."];
+    }
+    return [];
+  })();
   const policyViolations = [
     ...missingAnchors,
     ...contractFixtureViolations,
@@ -160,9 +170,6 @@ function buildReport(files, soakReports, contractFixtures) {
     ...soakBlockers,
     ...registryBlocker,
   ];
-  const quickSoakReady = reportById(soakReports, "quick_soak_8h").ready;
-  const finalSoakReady = reportById(soakReports, "final_soak_24h").ready;
-  const comparableReportReady = soakReports.every((entry) => entry.available && entry.requiredMetricsReady);
   const finalBlockerClosable = (
     policyViolations.length === 0 &&
     blockers.length === 0 &&

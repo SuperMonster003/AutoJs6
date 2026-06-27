@@ -34,6 +34,12 @@ The gate is intentionally non-closing while either long-duration report is
 missing, under-duration, missing comparable metrics, or reporting leaks,
 orphan processes, or unrecoverable runtime failures.
 
+The generated verifier report counts the two canonical missing soak reports
+once: `quick-soak-8h.json` and `final-soak-24h.json`. The final blocker
+registry entry remains open during that period, but it is reported as a
+separate blocker only after both reports are archived and ready and the registry
+entry still has not been closed.
+
 ## Focused Two-Slot Resource Stress
 
 P13-08 now has a focused resource-stress anchor that runs the `primary` and

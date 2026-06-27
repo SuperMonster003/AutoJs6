@@ -89,6 +89,7 @@ Reason open: `evidence`, `external`.
 - [ ] Produce `build/reports/nodejs/final-soak/final-soak-24h.json`.
 - [ ] Archive comparable memory, fd, thread, runtime, and orphan-process metrics.
 - [ ] Re-run `verifyNodePhase13FullHeavyResourceStress` and update the final summary.
+- [x] Keep final blocker registry prose from double-counting the canonical quick/final soak blockers while evidence files are absent.
 
 #### P13-09 Android-side package installation manager
 
