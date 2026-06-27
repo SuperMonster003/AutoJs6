@@ -313,6 +313,7 @@ Reason open: `implementation`, `external`, `packaging`.
 
 - [ ] Archive WorkerPool evidence on target ABIs.
 - [x] Keep P13-35 v1.1 without a user-facing process-worker facade or UX.
+- [x] Keep docs/release-matrix evidence gate from counting WorkerPool promotion and process-worker packaging twice.
 - [ ] Add slot accounting, cleanup, packaging, and UX for any promoted replacement.
 - [x] Keep raw spawn/fork/stdio/signals/process handles delegated to P13-40.
 

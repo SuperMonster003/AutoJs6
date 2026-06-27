@@ -57,6 +57,10 @@ facade decision.
 - `second_execution_slot` remains open for default scheduling, packaged
   behavior, per-slot crash evidence, and stress promotion.
 
+The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
+evidence checks only. They do not add a second blocker for the same WorkerPool
+promotion and process-worker packaging work.
+
 ## Rollback
 
 Remove `processWorkerReplacementProfile`, the focused instrumentation test, the

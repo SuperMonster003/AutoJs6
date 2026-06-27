@@ -96,7 +96,7 @@ function buildReport(files) {
       token(files.compatibilityProfile, "no user-facing process-worker API or UX"),
       token(files.securityModel, "no user-facing"),
     ], [
-      "Runnable process-worker replacement remains blocked on native worker availability and archived WorkerPool evidence on target ABIs.",
+      "Runnable process-worker replacement remains blocked on native worker availability, archived WorkerPool evidence on target ABIs, process-worker packaging, slot accounting, cleanup, and launch-surface evidence.",
     ]),
     scenario("child_process_shell_boundary", "child_process stays default-denied and shell remains a separate scoped command bridge", [
       token(files.nodeBridgeSources, 'childProcess: "denied"'),
@@ -127,9 +127,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-35 process-worker replacement"),
-    ], [
-      "P13-35 remains partial until WorkerPool native evidence, process-worker packaging, slot accounting, cleanup, and launch-surface evidence are ready.",
-    ]),
+    ], []),
   ];
 
   const checks = [
