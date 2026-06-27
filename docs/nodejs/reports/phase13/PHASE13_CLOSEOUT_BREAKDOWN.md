@@ -533,7 +533,7 @@ Reason open: example-catalog gate drift cleanup; future packaged promotion remai
 
 Reason open: example-catalog gate drift cleanup; future packaged promotion remains `evidence`, `packaging`.
 
-- [x] Add focused runtime smoke for already-promoted local ESM and checked-in pure JavaScript dependency examples.
+- [x] Add focused runtime smoke for already-promoted local ESM, checked-in pure JavaScript dependency, and scoped advanced fs examples.
 - [x] Keep packaged desktop examples as future work where providers are promoted.
 - [x] Link every example to profile metadata, capability requirements, integrity policy, and rollback guidance.
 - [x] Keep non-promoted snippets static and clearly marked.

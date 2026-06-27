@@ -106,12 +106,16 @@ class NodeExampleProjectInstrumentationTest {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node desktop parity safe subset example smoke")
 
         val result = runExample("desktop-parity-suite", "smoke.cjs")
+        val description = NodeEmbeddedTestHarness.describeResult("desktop-parity-suite safe subset smoke", result)
 
         NodeEmbeddedTestHarness.assertSucceeded("desktop-parity-suite safe subset smoke", result)
-        assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.smoke.catalog=2"))
-        assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.esm-loader=PASS"))
-        assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.npm-dependency=PASS"))
-        assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.smoke=PASS"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.smoke.catalog=3"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.esm-loader=PASS"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.npm-dependency=PASS"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.fs-advanced.handle=true"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.fs-advanced.watch=true"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.fs-advanced=PASS"))
+        assertTrue(description, result.stdout.contains("sample.desktop-parity-suite.smoke=PASS"))
     }
 
     @Test

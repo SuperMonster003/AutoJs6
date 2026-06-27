@@ -2273,9 +2273,10 @@ profile/packaged-behavior/skip-reason coverage, root example manifest
 registration, surface manifest evidence, release matrix updates, and Phase 13
 docs. The examples cover ESM, `worker_threads`, HTTP/HTTPS, raw network,
 advanced fs, WASI, inspector, and sanitized pure JavaScript npm dependency
-usage. Only the managed local ESM and checked-in pure JavaScript dependency
-paths run in the focused smoke; high-risk desktop authority remains outside
-default runtime smoke and does not grant Desktop authority.
+usage. Only the managed local ESM, checked-in pure JavaScript dependency, and
+scoped advanced fs FileHandle/watch paths run in the focused smoke; high-risk
+desktop authority remains outside default runtime smoke and does not grant
+Desktop authority.
 
 Phase 13 profile-aware TypeScript declarations gate:
 
