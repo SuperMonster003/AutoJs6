@@ -91,9 +91,12 @@ function buildReport(files) {
       token(files.workerStressTest, "worker.resource.pool.shutdown=0|0|104|1|1|0"),
       token(files.phase12DecisionReport, "Defer the compute/process-worker replacement API"),
       token(files.workerDesignDoc, "P12-22 records the current compute/process-worker decision"),
+      token(files.p13Report, "For P13-35 v1.1, there is no user-facing process-worker API or UX"),
+      token(files.phase13Tasks, "For P13-35 v1.1, no user-facing process-worker facade or UX is introduced"),
+      token(files.compatibilityProfile, "no user-facing process-worker API or UX"),
+      token(files.securityModel, "no user-facing"),
     ], [
       "Runnable process-worker replacement remains blocked on native worker availability and archived WorkerPool evidence on target ABIs.",
-      "No user-facing process-worker launch surface exists until worker_computation and second execution slot promotion evidence are current.",
     ]),
     scenario("child_process_shell_boundary", "child_process stays default-denied and shell remains a separate scoped command bridge", [
       token(files.nodeBridgeSources, 'childProcess: "denied"'),
@@ -106,8 +109,9 @@ function buildReport(files) {
       token(files.securityModel, "The `shell` bridge is the controlled AutoJs6 replacement for Node `child_process`"),
       token(files.desktopMatrix, "| `child_process` | `experimental` | `desktop_compat_opt_in` |"),
       token(files.desktopMatrix, "Safe/default keeps child_process denied"),
-    ], [
-      "P13-40 must separately design any scoped child_process runner; P13-35 does not promote raw spawn, fork, stdio streams, signals, or process handles.",
+      token(files.p13Report, "P13-40 is a separate child_process scoped-runner track"),
+      token(files.phase13Tasks, "P13-40 remains the separate track"),
+      token(files.capabilityMatrix, "P13-40 is the separate scoped child_process track"),
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-35", [
       token(files.phase13Tasks, "P13-35 partial process-worker replacement gate"),
@@ -124,7 +128,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-35 process-worker replacement"),
     ], [
-      "P13-35 remains partial until WorkerPool native evidence, process-worker packaging, slot accounting, cleanup, and UX are ready.",
+      "P13-35 remains partial until WorkerPool native evidence, process-worker packaging, slot accounting, cleanup, and launch-surface evidence are ready.",
     ]),
   ];
 
@@ -179,7 +183,8 @@ function buildReport(files) {
       files.p13Report.text.includes("does not create a callable process-worker surface") &&
         files.p13Report.text.includes("raw process") &&
         files.p13Report.text.includes("handles, spawn/fork, stdio streams, signals") &&
-        files.p13Report.text.includes("P13-40 must separately decide any scoped `child_process` runner") &&
+        files.p13Report.text.includes("P13-40 is a separate child_process scoped-runner track") &&
+        files.p13Report.text.includes("delegates raw") &&
         files.nodeBridgeSources.text.includes('childProcess: "denied"') &&
         files.nodeBridgeSources.text.includes('shellBridge: "separate_scoped_command_bridge"') &&
         files.shellTest.text.includes("shell.policy.child_process=ERR_AUTOJS6_BUILTIN_DISABLED"),

@@ -736,7 +736,9 @@ request-local `worker_threads.WorkerPool` after native preflight succeeds.
 `child_process` remains denied, `shell` stays a separately permissioned scoped
 command bridge, `worker_computation` stays reserved, and no raw process handle,
 spawn/fork, stdio stream, signal, bridge-module, nested-worker, or packaged
-process-worker authority is promoted.
+process-worker authority is promoted. For P13-35 v1.1, there is no user-facing
+process-worker API or UX; P13-40 remains the separate child_process
+scoped-runner track.
 
 P13-40 records child_process scoped runner as partial. `childProcessProfile` is
 diagnostic metadata only: `child_process` and `node:child_process` remain

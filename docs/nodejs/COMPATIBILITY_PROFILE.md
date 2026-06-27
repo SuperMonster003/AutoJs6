@@ -1247,7 +1247,8 @@ the Safe/default profile, `shell` remains a separate scoped command bridge,
 `worker_computation` remains reserved, `second_execution_slot` is not closed by
 this decision, and raw process handles, spawn/fork, stdio streams, signals,
 bridge modules, nested workers, and packaged process-worker behavior remain
-unpromoted.
+unpromoted. For P13-35 v1.1, there is no user-facing process-worker API or UX;
+P13-40 remains the separate track for any future scoped `child_process` runner.
 
 P13-40 records child_process scoped runner as partial. The runtime exposes
 `autojs6:profile.childProcessProfile` to document that `child_process` and

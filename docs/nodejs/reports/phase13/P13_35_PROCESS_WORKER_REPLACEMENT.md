@@ -24,6 +24,17 @@ The runtime exposes this decision through
 only; it does not create a callable process-worker surface or grant raw process
 handles, spawn/fork, stdio streams, signals, or shell authority.
 
+For P13-35 v1.1, there is no user-facing process-worker API or UX. The
+diagnostic profile is the only accepted surface, and `process_worker`,
+`compute_worker`, and `autojs6:process-worker` remain absent until a future
+provider owns native WorkerPool evidence, slot accounting, cleanup, packaged
+behavior, and launch UX.
+
+P13-40 is a separate child_process scoped-runner track. P13-35 delegates raw
+spawn, fork, stdio, signals, and process handles to that track and does not
+wait for a scoped child_process runner before closing its own replacement
+facade decision.
+
 ## Evidence
 
 - `NodeProcessWorkerReplacementPhase13DecisionInstrumentationTest` verifies the
@@ -45,7 +56,6 @@ handles, spawn/fork, stdio streams, signals, or shell authority.
 - `worker_computation` needs a supported launch surface before it can execute.
 - `second_execution_slot` remains open for default scheduling, packaged
   behavior, per-slot crash evidence, and stress promotion.
-- P13-40 must separately decide any scoped `child_process` runner.
 
 ## Rollback
 

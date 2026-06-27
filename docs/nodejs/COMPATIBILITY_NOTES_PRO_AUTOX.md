@@ -364,7 +364,9 @@ current replacement path, but it does not add `process_worker`,
 `compute_worker`, raw `child_process`, raw process handles, or packaged
 process-worker behavior. Scripts that need old threading/process-worker
 semantics should remain on Rhino or explicit bridge-backed alternatives until a
-future profile promotes them.
+future profile promotes them. For v1.1 there is no user-facing process-worker
+API or UX, and any scoped `child_process` runner remains a separate P13-40
+track.
 
 P13-40 records child_process scoped runner as partial. AutoJs6 Node exposes
 `childProcessProfile` diagnostics and keeps `child_process` /

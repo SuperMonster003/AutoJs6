@@ -1864,8 +1864,9 @@ default worker denial, WorkerPool replacement-path evidence, reserved
 `worker_computation`, open `second_execution_slot` relation, TypeScript
 declarations, the desktop builtin matrix, and Phase13 docs. It keeps native
 WorkerPool evidence, packaged process-worker behavior, slot accounting,
-cleanup stress, user-facing API/UX, and any future P13-40 scoped
-`child_process` runner open.
+cleanup stress, and future launch-surface evidence open while keeping P13-35
+v1.1 without a user-facing process-worker API or UX. P13-40 is the separate
+track for any future scoped `child_process` runner.
 
 Phase 13 child_process scoped runner decision gate:
 

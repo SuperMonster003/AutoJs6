@@ -1131,7 +1131,8 @@ P13-35 records process-worker replacement as partial: Safe Node now exposes
 a `process_worker` or `compute_worker` facade. `child_process` remains denied,
 `shell` remains the scoped command bridge, and `worker_computation` plus
 `second_execution_slot` stay unpromoted until future evidence closes those
-gates.
+gates. For v1.1 there is no user-facing process-worker API or UX; any scoped
+`child_process` runner remains a separate P13-40 track.
 
 P13-40 records child_process scoped runner as partial: Safe Node now exposes
 `childProcessProfile` diagnostics while `child_process` and

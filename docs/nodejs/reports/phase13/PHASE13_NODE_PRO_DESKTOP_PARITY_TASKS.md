@@ -295,6 +295,9 @@
 - The gate keeps `child_process` denied, keeps `shell` as a separate scoped
   command bridge, and keeps `worker_computation` plus `second_execution_slot`
   from being promoted by this decision.
+- For P13-35 v1.1, no user-facing process-worker facade or UX is introduced;
+  P13-40 remains the separate track for any future scoped `child_process`
+  runner.
 - Host verifier:
   `tools/nodejs/phase13/verify-process-worker-replacement-decision.js`.
 - Gradle gate: `:app:verifyNodePhase13ProcessWorkerReplacementDecision`.
@@ -302,8 +305,8 @@
   `docs/nodejs/reports/phase13/P13_35_PROCESS_WORKER_REPLACEMENT.md`.
 - Surface manifest evidence: `phase13-process-worker-replacement-decision`.
 - Remaining P13-35 blockers: native WorkerPool evidence on target ABIs,
-  process-worker packaging behavior, slot accounting, cleanup stress,
-  user-facing API/UX, and any future P13-40 scoped `child_process` runner.
+  process-worker packaging behavior, slot accounting, cleanup stress, and
+  launch-surface evidence for any future promoted replacement.
 
 ## P13-36 Partial Landing Note
 
