@@ -297,6 +297,7 @@ Reason open: `evidence`, `packaging`.
 - [ ] Promote packaged realpath and opendir evidence from source markers to device-exported reports.
 - [x] Document Android watcher coalescing, recursive-watch denial, and realpath differences.
 - [ ] Re-run advanced APIs against any P13-32 expanded-root classes.
+- [x] Keep docs/matrix evidence gate from counting packaged lifecycle and expanded-root rerun evidence twice.
 
 ### Desktop Execution Runtime
 

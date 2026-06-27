@@ -96,7 +96,6 @@ function buildReport(files) {
       token(files.scopedFsFuzzerTest, "realpath.symlink_escape"),
     ], [
       "Expose pending watcher/watchFile counts through Kotlin result diagnostics or an equivalent report field.",
-      "Add packaged APK live-smoke coverage for watcher, fd, FileHandle, and stream close-on-destroy behavior.",
     ]),
     scenario("opendir_realpath_packaged_evidence", "Packaged evidence already covers realpath and opendir markers, but not the full advanced fs lifecycle", [
       token(files.packagedSmokeTest, "packaged.fs.realpath=true"),
@@ -107,7 +106,8 @@ function buildReport(files) {
       token(files.p13Report, "Existing packaged smoke sources and preflight checks already include packaged"),
       token(files.p13Report, "realpath and opendir markers:"),
     ], [
-      "Promote packaged watcher/fd/FileHandle/stream evidence from runtime source markers to current device-exported report evidence.",
+      "Add packaged APK live-smoke coverage and current device-exported evidence for watcher, fd, FileHandle, stream, close-on-destroy, realpath, and opendir behavior.",
+      "Re-run advanced-fs suites against each P13-32 expanded-root class once root authority providers are promoted.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-33", [
       token(files.phase13Tasks, "P13-33 partial landing"),
@@ -125,9 +125,7 @@ function buildReport(files) {
       token(files.desktopMatrix, "P13-32 records scoped filesystem profile and P13-33 records advanced fs APIs as partial"),
       token(files.builtinMatrixGenerator, "P13-32 records scoped filesystem profile and P13-33 records advanced fs APIs as partial"),
       token(files.capabilityMatrix, "P13-33 advanced filesystem APIs"),
-    ], [
-      "P13-33 remains partial until expanded-root reruns and packaged lifecycle evidence are complete.",
-    ]),
+    ], []),
   ];
 
   const checks = [

@@ -61,6 +61,11 @@ These are evidence for realpath/opendir compatibility only. They are not a full
 packaged lifecycle proof for watcher, fd, FileHandle, stream, or
 close-on-destroy behavior.
 
+The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-33
+blocker beyond the pending diagnostics, packaged device-exported evidence, and
+future expanded-root rerun items above.
+
 ## Verification
 
 - Host verifier: `tools/nodejs/phase13/verify-filesystem-advanced-apis.js`
