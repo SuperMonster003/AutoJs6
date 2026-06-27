@@ -29,6 +29,10 @@ network sockets, raw network modules opt-in, expanded filesystem roots,
 Android npm CLI, registry install, lifecycle scripts, and native payloads
 remains gated.
 
+The gate also links this migration taxonomy to the P13-57 summary output so
+P13-56 remains listed as open while the summary enumerates completed, open,
+deferred, and rejected blocker state.
+
 ## Gate
 
 Host verifier:
@@ -54,6 +58,7 @@ Status is `partial`.
 
 This gate proves the migration and comparison docs use the same
 Pro-compatible, Desktop-compatible, and gated/diagnostic-only taxonomy without
-turning debug-only/provider POC evidence into formal availability. Runtime
-profile promotion, packaged Pro/Desktop migration cookbooks, prompt/disclosure
-UX, device permission matrices, and the P13-57 final summary gate remain open.
+turning debug-only/provider POC evidence into formal availability. P13-57
+summary aggregation is linked as evidence. Runtime profile promotion, packaged
+Pro/Desktop migration cookbooks, prompt/disclosure UX, and device permission
+matrices remain open.

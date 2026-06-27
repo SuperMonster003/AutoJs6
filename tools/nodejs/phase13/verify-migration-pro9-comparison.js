@@ -21,6 +21,7 @@ const FILES = {
   capabilityMatrix: "docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md",
   surfaceManifest: "docs/nodejs/phase13/phase13-surface-manifest.json",
   surfaceManifestDoc: "docs/nodejs/phase13/PHASE13_SURFACE_MANIFEST.md",
+  phase13Summary: "docs/nodejs/reports/phase13/PHASE13_SUMMARY.md",
 };
 
 const REQUIRED_DOC_TOKENS = [
@@ -84,7 +85,7 @@ function buildReport(files) {
       token(files.proAutoxNotes, "runtime promotion gate"),
       token(files.proAutoxNotes, "native payloads"),
     ]),
-    scenario("evidence_chain", "P13-56 is wired into docs, gates, examples, types, and surface manifest", [
+    scenario("evidence_chain", "P13-56 is wired into docs, gates, examples, types, surface manifest, and summary state", [
       token(files.phase13Tasks, "P13-56 partial landing"),
       token(files.p13Report, "P13-56 records migration and Pro9 comparison docs as partial"),
       token(files.phase13GradleGate, "verifyNodePhase13MigrationPro9Comparison"),
@@ -99,8 +100,13 @@ function buildReport(files) {
       token(files.proParityManifest, "java-interop"),
       token(files.desktopParityManifest, "worker-threads"),
       token(files.desktopParityManifest, "raw-network"),
-    ], [
-      "P13-57 summary/final gate still needs to aggregate the completed/open/deferred/rejected Phase 13 state.",
+      token(files.phase13Summary, "Status: P13-57 summary generator published as a partial final gate."),
+      token(files.phase13Summary, "- Completed blockers:"),
+      token(files.phase13Summary, "- Open blockers:"),
+      token(files.phase13Summary, "- Deferred blockers:"),
+      token(files.phase13Summary, "- Rejected blockers:"),
+      token(files.phase13Summary, "| `P13-56` | `open` | `docs.examples.final_gate`"),
+      token(files.phase13Summary, "| `phase13-migration-pro9-comparison.json` | `verifyNodePhase13MigrationPro9Comparison` | `P13-56`"),
     ]),
   ];
 
@@ -176,6 +182,7 @@ function buildReport(files) {
       migrationDocsClassified: scenarioById(scenarios, "migration_doc_taxonomy").status === "ready",
       pro9ComparisonClassified: scenarioById(scenarios, "pro9_comparison_taxonomy").status === "ready",
       proAutoxNotesClassified: scenarioById(scenarios, "pro_autox_notes_taxonomy").status === "ready",
+      phase13SummaryStateLinked: scenarioById(scenarios, "evidence_chain").status === "ready",
       grantsAuthority: false,
     },
   };

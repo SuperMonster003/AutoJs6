@@ -917,7 +917,9 @@ updates, and docs updates while classifying surfaces as Pro-compatible,
 Desktop-compatible, or gated/diagnostic-only. P13-56 records migration and Pro9
 comparison docs as partial; debug-only/provider POC is not formal availability,
 and examples, the `raw_network` desktop marker, or profile declarations remain
-evidence only.
+evidence only. The gate also links P13-56 to the P13-57
+completed/open/deferred/rejected summary output without closing runtime or
+packaged migration blockers.
 `generateNodePhase13Summary` records P13-57 as the Phase 13 summary and partial
 final gate. It requires the task checklist, surface manifest, final blocker
 registry, `phase13-capability-truth`, generated conformance reports, Testing/CI

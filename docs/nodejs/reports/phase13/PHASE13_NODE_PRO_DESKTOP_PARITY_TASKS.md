@@ -2007,14 +2007,17 @@ P13 task 本身使用以下执行状态：
     - The migration docs now list the `raw_network` desktop marker and raw
       network modules opt-in as evidence/metadata only, matching P13-54 and
       P13-55 without granting default authority.
+    - The P13-56 verifier now links the docs taxonomy to the P13-57 summary
+      output for completed/open/deferred/rejected state while keeping P13-56
+      open.
     - Host verifier:
       `tools/nodejs/phase13/verify-migration-pro9-comparison.js`.
     - Gradle gate: `:app:verifyNodePhase13MigrationPro9Comparison`.
     - Report:
       `docs/nodejs/reports/phase13/P13_56_MIGRATION_PRO9_COMPARISON.md`.
     - Remaining P13-56 blockers: runtime profile promotion, packaged
-      Pro/Desktop migration cookbook, prompt/disclosure UX, device permission
-      matrix, and P13-57 summary/final gate remain gated.
+      Pro/Desktop migration cookbook, prompt/disclosure UX, and device
+      permission matrix remain gated.
 
 - [ ] P13-57: 发布 Phase 13 summary generator and final gate。
   - 范围：新增 summary generator，汇总 task checklist、surface manifest、

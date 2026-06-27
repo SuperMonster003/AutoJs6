@@ -522,7 +522,7 @@ Reason open: `evidence`, `packaging`.
 - [ ] Add packaged Pro/Desktop migration cookbook once provider and profile promotion exists.
 - [ ] Add prompt/disclosure UX and device permission matrix.
 - [ ] Keep runtime parity claims partial until promoted paths are executable.
-- [ ] Depend on P13-57 final summary for completed/open/deferred/rejected state.
+- [x] Depend on P13-57 final summary for completed/open/deferred/rejected state.
 
 #### P13-57 Phase 13 summary and final gate
 
