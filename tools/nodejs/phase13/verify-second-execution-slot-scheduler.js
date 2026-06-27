@@ -132,8 +132,6 @@ function buildReport(files) {
       token(files.policyTest, "bridge.__test.pendingCount()"),
       token(files.policyTest, "embedded_script.crash_evidence.marker_path"),
       token(files.policyTest, "runtimeSlotId"),
-    ], [
-      "Focused two-slot resource stress has landed; long-duration P13-08 quick/final soak remains open before P13-06 closure.",
     ]),
   ];
   const checks = [

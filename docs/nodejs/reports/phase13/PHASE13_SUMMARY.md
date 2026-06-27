@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 11
-- Open tasks: 47
+- Completed tasks: 12
+- Open tasks: 46
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -20,7 +20,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-03` | `completed` | `profile.promotion_model` | 将 profile promotion model 写入正式兼容文档。 |
 | `P13-04` | `completed` | `profile.promotion_model` | 建立安全边界放开 rubric。 |
 | `P13-05` | `completed` | `runtime.graduation_blockers` | 关闭 crash evidence automation blocker。 |
-| `P13-06` | `open` | `runtime.graduation_blockers` | 推进 second execution slot 到可调度状态。 |
+| `P13-06` | `completed` | `runtime.graduation_blockers` | 推进 second execution slot 到可调度状态。 |
 | `P13-07` | `open` | `runtime.graduation_blockers` | 推进 packaged long-running service mode。 |
 | `P13-08` | `open` | `runtime.graduation_blockers` | 完成 full heavy resource stress。 |
 | `P13-09` | `open` | `runtime.graduation_blockers` | 实现 Android-side package installation manager。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 46
+- Reports with blockers: 45
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -207,7 +207,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-rhino-install-java-proxy.json` | `verifyNodePhase13RhinoInstallJavaProxy` | `P13-14` | `partial` | 0 | 3 |
 | `phase13-rhino-java-adapter-decision.json` | `verifyNodePhase13RhinoJavaAdapterDecision` | `P13-16` | `partial` | 0 | 3 |
 | `phase13-screenshot-image-ocr-promotion.json` | `verifyNodePhase13ScreenshotImageOcrPromotion` | `P13-20` | `partial` | 0 | 7 |
-| `phase13-second-execution-slot-scheduler.json` | `verifyNodePhase13SecondExecutionSlotScheduler` | `P13-06` | `partial` | 0 | 1 |
+| `phase13-second-execution-slot-scheduler.json` | `verifyNodePhase13SecondExecutionSlotScheduler` | `P13-06` | `ready` | 0 | 0 |
 | `phase13-shell-root-shizuku-capability.json` | `verifyNodePhase13ShellRootShizukuCapability` | `P13-24` | `partial` | 0 | 1 |
 | `phase13-stdlib-conformance-decision.json` | `verifyNodePhase13StdlibConformanceDecision` | `P13-43` | `partial` | 0 | 1 |
 | `phase13-surface-manifest-verification.json` | `verifyNodePhase13SurfaceManifest` | `-` | `passed` | 0 | 0 |

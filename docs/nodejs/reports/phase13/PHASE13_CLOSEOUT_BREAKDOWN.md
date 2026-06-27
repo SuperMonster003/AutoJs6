@@ -50,7 +50,7 @@ A Phase 13 parent task can close only when all of the following are true:
 
 | Final blocker | Phase 13 tasks | Main reason open | Closeout direction |
 | --- | --- | --- | --- |
-| `second_execution_slot` | `P13-06`, `P13-08` | `evidence` | Two-slot scheduling has landed; close after pool-busy evidence is current and P13-08 soak evidence is archived. |
+| `second_execution_slot` | `P13-06`, `P13-08` | `evidence` | Two-slot scheduling has landed; P13-06 closes on current scheduler/stress evidence, while P13-08 owns long-duration soak evidence. |
 | `packaged_long_running` | `P13-07`, `P13-45`, `P13-52` | `evidence`, `packaging` | Add packaged lifecycle restore/cleanup, notification/background matrix, metadata, and disclosure evidence. |
 | `full_heavy_resource_stress` | `P13-08` | `evidence`, `external` | Archive 8-hour quick soak and 24-hour final soak with comparable metrics. |
 | `android_side_package_installation` | `P13-09`, `P13-42`, `P13-48` | `implementation`, `policy`, `packaging` | Move from guarded local store to registry/tarball/install authority with integrity, rollback, and distribution policy. |
@@ -69,8 +69,8 @@ Reason open: mostly `evidence`.
 
 - [x] Refresh or replace the `defaultProcessPoolBusyResult` evidence token in the verifier/report.
 - [x] Attach current focused primary/overflow shared-resource stress evidence.
-- [ ] Depend on completed P13-08 soak evidence before marking slot promotion complete.
-- [ ] Re-run `verifyNodePhase13SecondExecutionSlotScheduler` and summary generation with zero blockers.
+- [x] Keep P13-08 long-duration soak evidence as the P13-08/final-promotion closure signal instead of a P13-06 blocker.
+- [x] Re-run `verifyNodePhase13SecondExecutionSlotScheduler` and summary generation with zero blockers.
 
 #### P13-07 packaged long-running service
 

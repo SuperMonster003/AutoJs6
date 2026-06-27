@@ -659,14 +659,14 @@ P13 task 本身使用以下执行状态：
     - Report: `docs/nodejs/reports/phase13/P13_05_CRASH_EVIDENCE_AUTOMATION.md`
     - Closure: `collectNodePhase13CrashEvidence` reports `ready` with zero blockers and zero policy violations.
 
-- [ ] P13-06: 推进 second execution slot 到可调度状态。
+- [x] P13-06: 推进 second execution slot 到可调度状态。
   - 范围：从 Phase 12 的 explicit slot evidence 推进到默认 scheduler 可选择
     primary/overflow slot。
   - 验收：
     - 至少两个 Node execution slot 可并发运行独立脚本。
     - ResourceRegistry、provider handles、stdout/stderr、crash evidence 相互隔离。
     - 默认调度、显式 slot、slot busy、slot crash fallback 均有测试。
-  - Progress Evidence (2026-06-25, partial; checkbox remains open):
+  - Progress Evidence (2026-06-28, ready):
     - Default one-shot scheduler policy: `NodeEmbeddedProcessPoolPolicy.STATUS_DEFAULT_SCHEDULER_ENABLED` / `MODE_DEFAULT_TWO_SLOT`.
     - Client-side slot lease: `NativeNodeEmbeddedScriptService.acquireDefaultProcessPoolSlot(...)`.
     - Slot source propagation: `NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptRequest.processPoolSlotSource`.
@@ -695,9 +695,9 @@ P13 task 本身使用以下执行状态：
     - Host verifier: `tools/nodejs/phase13/verify-second-execution-slot-scheduler.js`.
     - Gradle gate: `:app:verifyNodePhase13SecondExecutionSlotScheduler`.
     - Report: `docs/nodejs/reports/phase13/P13_06_SECOND_EXECUTION_SLOT_SCHEDULER.md`.
-    - Open before closure: P13-08 long-duration quick/final soak evidence
-      across both active slots, plus future automatic slot replacement/quarantine
-      before enabling scheduler fallback.
+    - Remaining outside P13-06 closure: P13-08 owns long-duration quick/final
+      soak evidence across both active slots; future automatic slot
+      replacement/quarantine stays disabled until a pool coordinator promotion.
 
 - [ ] P13-07: 推进 packaged long-running service mode。
   - 范围：打包 APK 中支持 foreground long-running Node runtime。

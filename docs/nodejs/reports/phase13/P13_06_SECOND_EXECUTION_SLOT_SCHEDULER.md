@@ -1,6 +1,6 @@
 # P13-06 Second Execution Slot Scheduler
 
-Status: partial runtime scheduler and focused stress promotion landed; long-duration soak remains open.
+Status: ready for P13-06; long-duration soak remains tracked by P13-08.
 
 ## Landed In Phase 13
 
@@ -99,14 +99,16 @@ build/reports/nodejs/phase13-second-execution-slot-scheduler.json
 build/reports/nodejs/phase13-second-execution-slot-scheduler.md
 ```
 
-The gate is expected to report `partial` with one remaining blocker until the
-P13-08 quick/final long-duration soak evidence lands.
+The gate is expected to report `ready` with zero P13-06 blockers. P13-08 still
+owns the quick/final long-duration soak evidence before final profile
+promotion.
 
 ## Remaining Work
 
 - Keep `defaultSchedulerFallbackEnabled=false` until a future pool coordinator
   implements and tests automatic slot replacement/quarantine.
 - Reuse P13-08 long-duration quick/final soak evidence across both active slots
-  as the closing signal before marking `second_execution_slot` complete.
+  as the final profile-promotion signal for `second_execution_slot`.
 
-P13-06 remains unchecked until these final acceptance items pass.
+P13-06 is complete once the scheduler verifier reports ready; P13-08 remains
+open for long-duration soak evidence.
