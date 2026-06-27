@@ -831,8 +831,10 @@ state: reserved screen-capture API shape, scoped `image.readImage()` and
 `recycle()`, ML Kit OCR over provider-owned image handles, Rhino image/OCR
 wrappers, resource cleanup, and raw object denial are checked. The gate remains
 partial because MediaProjection bridge prompting, advanced image processing,
-packaged capture/OCR behavior, Paddle/Rapid fallback, and raw Bitmap/OpenCV
-profile decisions are still missing. The optional `screen_capture` smoke stays
+packaged capture/OCR behavior, and packaged disclosure evidence are still
+missing. Paddle/Rapid/plugin OCR provider selection and raw
+Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1.
+The optional `screen_capture` smoke stays
 manual because it requires approving the Android prompt on a prepared device.
 
 `verifyNodePhase10LongRunningActivation` writes the S10-29 through S10-36

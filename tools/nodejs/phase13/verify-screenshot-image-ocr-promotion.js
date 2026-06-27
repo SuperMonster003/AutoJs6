@@ -121,7 +121,6 @@ function buildReport(files) {
       token(files.ocrTypes, 'declare module "ocr"'),
       token(files.typeSmoke, "const ocrResults: readonly ocr.OcrResult[] = await ocr.recognize"),
     ], [
-      "Define Paddle/Rapid/plugin fallback and packaged model lookup policy.",
       "Add capture/path/temp-handle positive and denial evidence for packaged OCR workflows.",
     ]),
     scenario("rhino_compat_media_image_ocr", "Explicit Rhino compat wrappers route through the same controlled providers", [
@@ -139,7 +138,15 @@ function buildReport(files) {
       token(files.phase11CleanupSecurity, "`image` | `verified_zero_after_recycle_or_stop`"),
     ], [
       "Add packaged compat-image and compat-OCR positive/negative smoke after live providers are promoted.",
-      "Decide whether unsupported Rhino OCR modes stay blocked or map to a future provider selector.",
+    ]),
+    scenario("ocr_fallback_policy_boundary", "Paddle/Rapid/plugin OCR provider selection stays stable-denied for v1.1", [
+      token(files.p13Report, "Paddle/Rapid/plugin model"),
+      token(files.p13Report, "stay stable-denied"),
+      token(files.p13Report, "separate provider-selector gate"),
+      token(files.phase13Tasks, "Paddle/Rapid/plugin OCR provider selection"),
+      token(files.providerRegistry, '"fallbackPromotion" to "blocked_until_Paddle_Rapid_plugin_model_selection_and_packaged_asset_policy_evidence"'),
+      token(files.rhinoCompatTypes, 'tap(mode: "mlkit"): "mlkit";'),
+      token(files.typeSmoke, 'const compatOcrMode: "mlkit" = rhinoCompat.ocr.tap("mlkit");'),
     ]),
     scenario("security_packaged_raw_boundary", "Raw media/image/OCR objects remain blocked and packaged promotion is explicit", [
       token(files.providerRegistry, '"rawObjectPolicy" to "no raw MediaProjection, ImageReader, ScreenCapturer, Image, Bitmap, or ImageWrapper crosses the bridge"'),
@@ -152,8 +159,16 @@ function buildReport(files) {
       token(files.ocrTest, "ocr.manifest.denied="),
       token(files.securityModel, "JavaScript must never receive raw `Bitmap`, `Mat`, `ImageWrapper`, native pointer, or filesystem path handles outside the scoped policy."),
     ], [
-      "Create a separate profile decision before exposing raw Bitmap/OpenCV/MediaProjection objects.",
       "Add packaged capability metadata and disclosure denial evidence for screen capture and OCR/image access.",
+    ]),
+    scenario("raw_object_profile_boundary", "Raw Bitmap/OpenCV/MediaProjection object parity stays stable-denied for v1.1", [
+      token(files.p13Report, "Raw Bitmap/OpenCV/MediaProjection object parity stays stable-denied"),
+      token(files.p13Report, "provider-owned opaque handles"),
+      token(files.phase13Tasks, "raw Bitmap/OpenCV/"),
+      token(files.phase13Tasks, "MediaProjection object parity stay stable-denied for P13-20 v1.1"),
+      token(files.providerRegistry, '"rawObjectPolicy" to "no raw MediaProjection, ImageReader, ScreenCapturer, Image, Bitmap, or ImageWrapper crosses the bridge"'),
+      token(files.providerRegistry, '"rawObjectPolicy" to "no raw Bitmap, Mat, ImageWrapper, OpenCV object, native pointer, or filesystem path handle crosses the bridge"'),
+      token(files.providerRegistry, '"rawObjectPolicy" to "no raw TextRecognizer, OCR engine, ML Kit Text, Paddle/Rapid model, Bitmap, Mat, ImageWrapper, or Java object crosses the bridge"'),
     ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-20 as partial", [
       token(files.p13Report, "Status: partial"),
@@ -170,7 +185,7 @@ function buildReport(files) {
       token(files.deviceMatrix, "P13-20 keeps screen_capture smoke manual"),
       token(files.surfaceManifestDoc, "phase13-screenshot-image-ocr-promotion"),
     ], [
-      "Keep P13-20 checklist open until MediaProjection, advanced image, packaged OCR, and raw-object profile decisions land.",
+      "Keep P13-20 checklist open until MediaProjection, advanced image, packaged OCR/image smoke, and packaged disclosure evidence land.",
     ]),
   ];
   const checks = [

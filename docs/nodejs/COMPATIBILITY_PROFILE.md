@@ -1848,7 +1848,8 @@ runtime.
   - current Android provider uses MLKit Chinese text recognition over active provider-owned image handles, supports optional bounded `region` descriptors, and reports zero active OCR operations after success, timeout, failure, or destroy cleanup
   - unknown, recycled, or non-provider-owned image handles reject with `ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
   - no raw OCR engine, model path, native pointer, `Bitmap`, `Mat`, `ImageWrapper`, or Java object crosses into Node
-  - P13-20 records the current screenshot/image/OCR promotion state as partial: scoped `image.readImage()`/`recycle()` and ML Kit OCR over provider-owned image handles are live, while MediaProjection bridge prompting, advanced image processing, packaged capture/OCR behavior, Paddle/Rapid fallback, and raw Bitmap/OpenCV exposure remain blocked
+  - Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1
+  - P13-20 records the current screenshot/image/OCR promotion state as partial: scoped `image.readImage()`/`recycle()` and ML Kit OCR over provider-owned image handles are live, while MediaProjection bridge prompting, advanced image processing, packaged capture/OCR behavior, and packaged disclosure evidence remain blocked
 - `storage` / `storages`
   - `create(name): StorageStore`
   - `open(name): StorageStore`

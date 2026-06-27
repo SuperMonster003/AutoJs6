@@ -12,9 +12,9 @@ the same controlled bridge APIs.
 
 The surface is not promoted to `pro_compat_opt_in` yet. Full Auto.js Pro parity
 still needs an Activity-owned MediaProjection bridge provider, real image
-processing providers, packaged capture/image/OCR evidence, Paddle/Rapid fallback
-policy, and a separate decision before any raw Bitmap/OpenCV objects are
-exposed.
+processing providers, and packaged capture/image/OCR evidence. Paddle/Rapid or
+plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection object
+parity stay stable-denied for P13-20 v1.1.
 
 ## Implemented Evidence
 
@@ -48,13 +48,18 @@ exposed.
   search remain fail-closed in the live Android provider until owned image
   processing providers and packaged scoped file evidence exist.
 - OCR is ML Kit-only for the current live provider. Paddle/Rapid/plugin model
-  selection, packaged model lookup, and fallback diagnostics remain blocked.
+  selection, packaged model lookup, and fallback diagnostics stay stable-denied
+  for P13-20 v1.1 until a separate provider-selector gate owns model assets,
+  fallback behavior, diagnostics, and rollback.
 - Packaged APK screenshot, image, and OCR behavior is not promoted by P13-20.
   Missing capability, missing Android permission, disclosure, output path,
   quota, and cleanup evidence still need dedicated gates.
 - The current Rhino compat surface is async/Promise based. It is not a
   synchronous Rhino image/OCR runtime and unsupported Rhino OCR modes stay
   blocked.
+- Raw Bitmap/OpenCV/MediaProjection object parity stays stable-denied for
+  P13-20 v1.1. Node receives only JSON-safe descriptors, frozen result
+  snapshots, and provider-owned opaque handles.
 
 ## Remaining Blockers
 
@@ -65,14 +70,9 @@ exposed.
 - Promote real image processing providers for save, clip, resize, grayscale,
   threshold, image matching, and color search with scoped input/output paths and
   leak/stress evidence.
-- Define Paddle/Rapid/plugin OCR fallback policy, packaged model ownership,
-  asset lookup diagnostics, and mode-selection compatibility rules.
 - Add packaged positive and negative smokes for screenshot/image/OCR capability
   metadata, Android permissions, provider absence, temporary-handle cleanup, and
   relaunch/crash recovery.
-- Decide whether raw Bitmap/OpenCV/MediaProjection objects ever enter a
-  separate high-risk profile; until then only JSON-safe descriptors and opaque
-  handles are allowed.
 
 ## Gate
 

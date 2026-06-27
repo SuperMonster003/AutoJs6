@@ -508,8 +508,9 @@ The `ocr` bridge module exposes `recognize(image, options?)`, `recognizeText(ima
 P13-20 records screenshot/image/OCR promotion as partial. The current security
 boundary allows scoped image handles, explicit recycle, and ML Kit OCR over
 provider-owned handles, but it keeps MediaProjection bridge prompting, advanced
-image processing, packaged capture/OCR fallback behavior, Paddle/Rapid provider
-selection, and raw Bitmap/OpenCV/MediaProjection exposure behind later gates.
+image processing, and packaged capture/OCR behavior behind later gates.
+Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/MediaProjection
+object parity stay stable-denied for P13-20 v1.1.
 
 S11-21 records Rhino `events`/`events.keys`/input observer compatibility as design-gated. P12-03 promotes only `events.keys` constants through `autojs6:compat`; `require("autojs6:compat")` must not expose Rhino `events.__asEmitter__()`, Java `EventEmitter`, Rhino `ScriptableObject`, `Thread`, `MainThreadProxy`, raw `KeyEvent`, raw touch events, or Android listener objects. P12-05 adds a direct `input_observer` fake-source provider POC with bounded queues, `drainEvents`, explicit `close()`, ResourceRegistry-owned subscription cleanup, and capability checks for `input_observer` and `input_observer.keys`. P12-06 adds the accessibility live-source gate: `source: "accessibility"` registers a controlled `OnKeyListener` only when an operational AutoJs6 accessibility service is visible in the current process, queues JSON snapshots, and removes the listener through the same resource close path or accessibility-service disconnect callback. P12-07 adds cleanup/security diagnostics and scheduled/background rejection: active subscriptions, pending events, dropped events, and live listener count are reported; scheduled/background launch surfaces reject live observation before listener registration; fake queue overflow is bounded and reports `droppedCount`. Live touch observation, `input_observer.touch`, and `input_observer.intercept` remain separate rejected provider gates. Pure JavaScript code can use Node's built-in `node:events`. Packaged or background support must reject without a valid foreground/user-visible provider state; it must not create silent service-process key/touch listeners, shell/root/overlay fallback capture, or hidden key interception.
 

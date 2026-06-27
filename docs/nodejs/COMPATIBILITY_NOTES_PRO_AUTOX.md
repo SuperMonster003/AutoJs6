@@ -176,7 +176,9 @@ P13-20 records screenshot/image/OCR as partial. AutoJs6 has the direct
 Scoped `image.readImage()`/`recycle()` and ML Kit OCR over provider-owned image
 handles are live. Bridge-owned MediaProjection prompting, advanced image save
 or transform operations, template/color search, packaged capture/OCR behavior,
-Paddle/Rapid fallback, and raw Bitmap/OpenCV object exposure are still blocked.
+and packaged disclosure evidence are still blocked. Paddle/Rapid/plugin OCR
+provider selection and raw Bitmap/OpenCV/MediaProjection object parity stay
+stable-denied for P13-20 v1.1.
 
 ## Accessibility And Selector
 

@@ -175,7 +175,7 @@ Reason open: `implementation`, `evidence`, `packaging`.
 - [ ] Implement Activity-owned MediaProjection request/capture/stop provider.
 - [ ] Add foreground disclosure, stop action, task-removal cleanup, relaunch, crash, and denial evidence.
 - [ ] Promote image operations such as save, clip, resize, grayscale, threshold, findImage, matchTemplate, and color matching.
-- [ ] Define OCR fallback/model lookup policy for ML Kit, Paddle, Rapid, and plugin providers.
+- [x] Define OCR fallback/model lookup policy for ML Kit, Paddle, Rapid, and plugin providers.
 - [ ] Add packaged image/OCR smoke, quota, temp-handle, and leak/stress evidence.
 
 ### Pro Tasks, App, Shell, Media, Utilities

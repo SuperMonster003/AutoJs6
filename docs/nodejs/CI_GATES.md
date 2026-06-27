@@ -410,8 +410,10 @@ P13-19 v1.1.
 screen-capture API shape, scoped image read/recycle, ML Kit OCR over
 provider-owned image handles, Rhino compat wrappers, cleanup, and raw object
 denial are present, while bridge-owned MediaProjection prompting, advanced
-image processing, packaged capture/OCR behavior, Paddle/Rapid fallback, and raw
-Bitmap/OpenCV profile decisions still block opt-in promotion.
+image processing, packaged capture/OCR behavior, and packaged disclosure
+evidence still block opt-in promotion. Paddle/Rapid/plugin OCR provider
+selection and raw Bitmap/OpenCV/MediaProjection object parity stay
+stable-denied for P13-20 v1.1.
 `verifyNodePhase13TaskDatabaseProvider` records the P13-21 partial
 daily/weekly/user task database provider state: live `work_manager` scheduled
 work, `compat.tasks` one-shot migration, rejection stubs, Android/Rhino task
@@ -610,8 +612,9 @@ P13-20 additionally uses `verifyNodePhase13ScreenshotImageOcrPromotion` as the
 host promotion-status gate for screenshot/image/OCR parity and keeps the
 Android providers partial: `image.readImage()`/`recycle()` and ML Kit OCR over
 provider-owned handles are live, while MediaProjection prompting, capture,
-save/transform/match/color providers, packaged behavior, Paddle/Rapid fallback,
-and raw Bitmap/OpenCV exposure require separate evidence.
+save/transform/match/color providers, packaged behavior, and disclosure evidence
+require separate evidence. Paddle/Rapid/plugin OCR provider selection and raw
+Bitmap/OpenCV/MediaProjection object parity stay stable-denied for P13-20 v1.1.
 P13-21 additionally uses `verifyNodePhase13TaskDatabaseProvider` as the host
 promotion-status gate for daily/weekly/user task database parity and keeps the
 provider partial: `work_manager` and `compat.tasks` one-shot scheduling are

@@ -26,8 +26,9 @@
 - Surface manifest evidence: `phase13-screenshot-image-ocr-promotion`.
 - Remaining P13-20 blockers: Activity-owned MediaProjection prompting,
   foreground disclosure, capturer cleanup, advanced image processing,
-  packaged capture/OCR behavior, Paddle/Rapid fallback, and raw
-  Bitmap/OpenCV profile decisions.
+  and packaged capture/OCR behavior.
+- Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/
+  MediaProjection object parity stay stable-denied for P13-20 v1.1.
 
 ## P13-21 Partial Landing Note
 
@@ -915,7 +916,8 @@ P13 task 本身使用以下执行状态：
   - Remaining blockers:
     - MediaProjection bridge provider still needs Activity-owned prompt, denial, foreground disclosure, `nextImage`, `stop`, cleanup, and packaged evidence.
     - Real image save/transform/match/color providers and packaged scoped path/quota evidence remain unpromoted.
-    - Paddle/Rapid/plugin fallback, packaged OCR model lookup, and raw Bitmap/OpenCV object profile decisions remain open.
+    - Paddle/Rapid/plugin OCR provider selection and raw Bitmap/OpenCV/
+      MediaProjection object parity stay stable-denied for P13-20 v1.1.
 
 - [ ] P13-21: 实现 tasks daily/weekly/user database provider。
   - 范围：将 P12 中 rejected 的 daily/weekly/user task database 重新作为
