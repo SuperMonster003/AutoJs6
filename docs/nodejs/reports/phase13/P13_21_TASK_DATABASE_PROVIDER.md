@@ -74,6 +74,12 @@ packaged behavior, scheduler semantics, and deletion/update policy.
 - Add packaged APK metadata, manifest/permission synthesis, install-run
   positive/negative smokes, user disclosure, and cleanup evidence.
 
+The docs, compatibility notes, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-21
+blocker beyond the task schema, ownership/id mapping, JSON snapshot operations,
+wall-clock scheduler semantics, packaged metadata, disclosure, and cleanup
+evidence above.
+
 ## Gate
 
 Host verifier:

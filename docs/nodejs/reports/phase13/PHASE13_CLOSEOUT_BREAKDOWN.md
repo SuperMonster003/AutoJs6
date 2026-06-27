@@ -190,6 +190,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 - [ ] Define JSON task schema, row ownership, id mapping, migrations, downgrade behavior, and legacy visibility.
 - [ ] Implement add/query/update/remove over frozen JSON snapshots.
 - [ ] Add capability metadata, disclosure, rollback, and packaged task smoke.
+- [x] Keep docs/surface evidence gate from counting task schema, ownership, JSON operations, scheduler semantics, and packaged evidence twice.
 
 #### P13-22 IntentTask/broadcast provider
 

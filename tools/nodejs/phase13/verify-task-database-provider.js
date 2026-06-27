@@ -140,9 +140,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-21 task database provider"),
       token(files.typesReadme, "P13-21 records the partial task database provider gate"),
       token(files.surfaceManifestDoc, "phase13-task-database-provider"),
-    ], [
-      "Keep P13-21 checklist open until add/query/update/remove daily/weekly task database behavior lands.",
-    ]),
+    ], []),
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-21"), "P13-21 must remain listed in the Phase 13 checklist."),
