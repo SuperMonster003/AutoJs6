@@ -111,8 +111,11 @@ function buildReport(files) {
       token(files.projectRuntimeDescriptor, "currentJson("),
       token(files.projectLaunchDescriptor, "DESCRIPTOR_FILE_NAME = \".autojs6-node-launch.json\""),
       token(files.workManagerTest, "jsWorkManagerModuleUsesFakeTransportAndSerializesPackagedMetadata"),
+      token(files.p13Report, "For P13-45 v1.1, packaged profile, builtin, native asset, and filesystem-root"),
+      token(files.p13Report, "must not select runtime profiles, widen builtin allowlists, load native"),
+      token(files.phase13Tasks, "For P13-45 v1.1, packaged profile, builtin, native asset, and filesystem-root"),
+      token(files.phase13Tasks, "must not select runtime profiles, widen"),
     ], [
-      "Packaged profile, builtin, native asset, and filesystem-root metadata are diagnostic-only in P13-45.",
       "Full packaged install/run synthesis, disclosure UX, and profile-specific runtime promotion remain future work.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-45", [

@@ -378,6 +378,24 @@
   process accounting, packaged metadata/disclosure/smoke, hostile corpus, and
   rollback controls.
 
+## P13-45 Diagnostic-Only v1.1 Note
+
+- P13-45 records `packagedCapabilityProfile`, structured packaged metadata,
+  `node.permissions` manifest enforcement, Android permission synthesis
+  evidence, and stable denial for undeclared bridge capabilities.
+- For P13-45 v1.1, packaged profile, builtin, native asset, and filesystem-root
+  metadata stay diagnostic-only; they must not select runtime profiles, widen
+  builtin allowlists, load native assets, expand filesystem roots, or grant
+  bridge authority.
+- Host verifier:
+  `tools/nodejs/phase13/verify-packaged-capability-metadata-decision.js`.
+- Gradle gate: `:app:verifyNodePhase13PackagedCapabilityMetadataDecision`.
+- Report:
+  `docs/nodejs/reports/phase13/P13_45_PACKAGED_CAPABILITY_METADATA.md`.
+- Surface manifest evidence: `phase13-packaged-capability-metadata-decision`.
+- Remaining P13-45 blocker: packaged install/run synthesis, user disclosure,
+  rollback, profile-specific runtime promotion, and device matrix evidence.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current

@@ -25,19 +25,18 @@ device instrumentation, a host verifier, and a Gradle gate.
 - Missing bridge capabilities still reject before dispatch in JavaScript; this
   denial evidence is covered by focused instrumentation and the host verifier.
 
+For P13-45 v1.1, packaged profile, builtin, native asset, and filesystem-root
+metadata stay diagnostic-only. They are accepted only as reviewable metadata
+and must not select runtime profiles, widen builtin allowlists, load native
+assets, expand filesystem roots, or grant bridge authority.
+
 ## Remaining Work
 
-- Profile metadata does not yet select a real Pro/Desktop packaged runtime
-  profile.
-- Builtin metadata does not widen the builtin allowlist.
-- Native asset metadata does not load `.node` files or signed artifacts.
-- Filesystem-root metadata does not grant broader roots beyond the current
-  scoped working directory policy.
 - Full packaged install/run synthesis, user disclosure, rollback, and
   profile-specific device matrices remain future work.
 
-The generated gate keeps these as two blocker classes: reviewed packaged
-metadata synthesis and full install/run plus disclosure/profile promotion.
+The generated gate keeps full install/run plus disclosure/profile promotion as
+the remaining blocker class.
 
 ## Evidence
 

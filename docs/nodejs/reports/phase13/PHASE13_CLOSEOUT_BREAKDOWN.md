@@ -191,7 +191,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-22 IntentTask/broadcast provider
 
-Reason open: `implementation`, `packaging`.
+Reason open: `packaging`.
 
 - [x] Replace stable rejection stubs only after a JSON-safe broadcast provider exists.
 - [ ] Define ownership between legacy Rhino rows, Node descriptors, and packaged records.
@@ -412,7 +412,7 @@ Reason open: `packaging`.
 Reason open: `implementation`, `packaging`.
 
 - [x] Ensure declared `node.permissions` evidence is present in verifier inputs.
-- [ ] Make packaged profile, builtin, native asset, and filesystem-root metadata drive reviewed synthesis rather than diagnostics only.
+- [x] Keep packaged profile, builtin, native asset, and filesystem-root metadata diagnostic-only for v1.1.
 - [ ] Add install/run synthesis, disclosure UX, and profile-specific runtime promotion evidence.
 - [x] Keep undeclared bridge capability denial covered.
 
