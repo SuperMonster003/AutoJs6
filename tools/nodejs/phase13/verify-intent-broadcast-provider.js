@@ -151,9 +151,7 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-22 IntentTask/broadcast provider"),
       token(files.typesReadme, "P13-22 records the partial IntentTask/broadcast provider gate"),
       token(files.surfaceManifestDoc, "phase13-intent-broadcast-provider"),
-    ], [
-      "Keep P13-22 checklist open until controlled receiver registration, trigger payloads, and packaged trigger/remove evidence land.",
-    ]),
+    ], []),
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-22"), "P13-22 must remain listed in the Phase 13 checklist."),

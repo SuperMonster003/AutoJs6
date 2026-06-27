@@ -74,6 +74,12 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
 - Add user-visible consent, task UI visibility, disable/delete authority,
   foreground disclosure, rate limits, cooldowns, and failure diagnostics.
 
+The docs, compatibility notes, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-22
+blocker beyond receiver ownership/migration, JSON snapshots, capability split,
+manifest/export policy, trigger payload serialization, packaged trigger/remove
+smokes, consent, disclosure, and rollback evidence above.
+
 ## Gate
 
 Host verifier:
