@@ -86,13 +86,9 @@ function buildReport(files) {
       token(files.securityModel, "P13-32 records filesystem profile expansion as partial"),
       token(files.proComparison, "P13-32 records filesystem profile expansion as partial"),
       token(files.proAutoxNotes, "P13-32 records filesystem profile expansion as partial"),
-    ], [
-      "Implement a filesystem root authority provider for user-authorized directories, SAF/document roots, and app-private roots.",
-      "Define manifest/project metadata, user grant persistence, revocation, diagnostics, rollback behavior, and packaged expanded-root smoke for promoted roots.",
-      "Re-run symlink, realpath, `..`, NUL, `/proc`, `/sys`, and `/dev` audits against every promoted root class.",
     ]),
     scenario("docs_gate_and_matrix", "docs, desktop matrix, release matrix, and Gradle gate record P13-32", [
-      token(files.phase13Tasks, "P13-32 partial filesystem profile gate"),
+      token(files.phase13Tasks, "P13-32 v1.1 Safe scoped filesystem profile gate"),
       token(files.gradleGate, "verifyNodePhase13FilesystemProfileDecision"),
       token(files.testingDoc, "verifyNodePhase13FilesystemProfileDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13FilesystemProfileDecision"),
@@ -154,7 +150,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       safeProfileScoped: scenarioById(scenarios, "safe_profile_scoped_boundary").status === "ready",
       filesystemProfileDiagnosticExposed: files.nodeBridgeSources.text.includes("filesystemProfile: Object.freeze({"),

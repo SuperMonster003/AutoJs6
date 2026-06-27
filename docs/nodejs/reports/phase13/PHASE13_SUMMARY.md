@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 34
-- Open tasks: 24
+- Completed tasks: 35
+- Open tasks: 23
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -46,7 +46,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-29` | `open` | `desktop.network_fs` | 推进 raw `http` / `https` client compatibility。 |
 | `P13-30` | `open` | `desktop.network_fs` | 推进 `net` / `tls` / `dns` staged compatibility。 |
 | `P13-31` | `completed` | `desktop.network_fs` | 决策 `dgram` UDP capability。 |
-| `P13-32` | `open` | `desktop.network_fs` | 放宽 filesystem profile。 |
+| `P13-32` | `completed` | `desktop.network_fs` | 放宽 filesystem profile。 |
 | `P13-33` | `open` | `desktop.network_fs` | 推进 desktop fs advanced APIs。 |
 | `P13-34` | `open` | `desktop.execution_runtime` | 推进 `worker_threads` 到 opt-in promoted。 |
 | `P13-35` | `completed` | `desktop.execution_runtime` | 决策 process-worker replacement。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 23
+- Reports with blockers: 22
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -177,7 +177,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-dgram-udp-decision.json` | `verifyNodePhase13DgramUdpDecision` | `P13-31` | `ready` | 0 | 0 |
 | `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `ready` | 0 | 0 |
 | `phase13-filesystem-advanced-apis.json` | `verifyNodePhase13FilesystemAdvancedApis` | `P13-33` | `partial` | 0 | 2 |
-| `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `partial` | 0 | 3 |
+| `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `ready` | 0 | 0 |
 | `phase13-full-heavy-resource-stress.json` | `verifyNodePhase13FullHeavyResourceStress` | `P13-08` | `partial` | 0 | 2 |
 | `phase13-http-https-client-parity.json` | `verifyNodePhase13HttpHttpsClientParity` | `P13-29` | `partial` | 0 | 2 |
 | `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `ready` | 0 | 0 |

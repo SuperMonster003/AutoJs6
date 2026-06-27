@@ -223,9 +223,9 @@
   packaged INTERNET/multicast permission proof, fd leak instrumentation, and
   live Android UDP evidence.
 
-## P13-32 Partial Landing Note
+## P13-32 Safe Scoped Filesystem Note
 
-- P13-32 partial filesystem profile gate records the current Safe profile as
+- P13-32 v1.1 Safe scoped filesystem profile gate records the current Safe profile as
   keeping `process.cwd()` at the script working directory while allowing a
   distinct scoped `sandboxRoot` for the containing AutoJs6 workspace/project
   root, and exposes a frozen diagnostic `filesystemProfile` snapshot without
@@ -242,7 +242,7 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_32_FILESYSTEM_PROFILE_DECISION.md`.
 - Surface manifest evidence: `phase13-filesystem-profile-decision`.
-- Remaining P13-32 blockers: explicit root authority provider,
+- Future P13-32 expanded-root work: explicit root authority provider,
   user-authorized directory grants, SAF/document roots, app-private roots,
   `/sdcard` expansion, grant persistence/revocation diagnostics, packaged
   expanded-root smoke, and per-root symlink/realpath/sensitive-path audit.
@@ -1316,7 +1316,7 @@ P13 task 本身使用以下执行状态：
       fd/socket leak instrumentation, packaged permission proof, and live
       Android UDP evidence remain future gates.
 
-- [ ] P13-32: 放宽 filesystem profile。
+- [x] P13-32: 放宽 filesystem profile。
   - 范围：从 scoped project fs 扩展到用户显式授权目录、`/sdcard`、SAF 或 app
     私有目录 profile。
   - 验收：
@@ -1343,6 +1343,16 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_32_FILESYSTEM_PROFILE_DECISION.md`.
     - Surface manifest evidence: `phase13-filesystem-profile-decision`.
+    - Closure: P13-32 v1.1 keeps Safe profile scoped to
+      `workingDirectory` / `sandboxRoot`, keeps `additionalRoots=[]`, proves
+      scoped absolute path behavior, subdirectory workspace parent reads,
+      `/sdcard` and sensitive path denials, NUL/`..`/promise/symlink/realpath
+      escape denial, TypeScript declarations, docs, desktop matrix, surface
+      manifest, and Gradle gate without promoting expanded roots.
+    - Future expanded-root work: user-authorized directory grants,
+      SAF/document roots, app-private roots, `/sdcard` expansion, manifest
+      metadata, grant persistence/revocation diagnostics, packaged
+      expanded-root smoke, and per-root symlink/realpath/sensitive-path audits.
 
 - [ ] P13-33: 推进 desktop fs advanced APIs。
   - 范围：`fs.watch`、`fs.opendir`、FileHandle、fd API、stream、realpath 等。

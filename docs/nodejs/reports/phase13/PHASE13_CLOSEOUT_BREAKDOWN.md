@@ -294,11 +294,11 @@ Reason open: decision gate drift cleanup; future UDP promotion remains `policy`,
 
 #### P13-32 filesystem profile relaxation
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: Safe scoped filesystem profile gate drift cleanup; future expanded-root promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Implement user-authorized roots for SAF/document roots and app-private roots.
-- [ ] Define manifest metadata, grant persistence, revocation, diagnostics, rollback, and packaged expanded-root smoke.
-- [ ] Re-run symlink, realpath, `..`, NUL, `/proc`, `/sys`, and `/dev` audits for each root class.
+- [x] Keep user-authorized roots for SAF/document roots and app-private roots as future expanded-root promotion work.
+- [x] Keep manifest metadata, grant persistence, revocation, diagnostics, rollback, and packaged expanded-root smoke as future expanded-root promotion work.
+- [x] Keep symlink, realpath, `..`, NUL, `/proc`, `/sys`, and `/dev` audits for each root class as future expanded-root promotion work.
 - [x] Keep docs/matrix evidence gate and P13-33 advanced fs APIs from counting as separate P13-32 blockers.
 
 #### P13-33 desktop fs advanced APIs
