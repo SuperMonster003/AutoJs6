@@ -359,6 +359,25 @@
   APK-builder preflight, crash isolation, and packaged positive/hostile-corpus
   evidence.
 
+## P13-40 Stable-Denied v1.1 Note
+
+- P13-40 records `childProcessProfile` diagnostics, default
+  `child_process`/`node:child_process` denial, debug/build-time native opt-in
+  diagnostics, and the separate `shell` bridge alternative.
+- For P13-40 v1.1, arbitrary executable paths, package-managed downloaded
+  binaries, shell operators, detached processes, inherited handles, raw process
+  handles, file descriptors, streams, and signals stay stable-denied in the
+  Safe/default profile.
+- Host verifier:
+  `tools/nodejs/phase13/verify-child-process-scoped-runner-decision.js`.
+- Gradle gate: `:app:verifyNodePhase13ChildProcessScopedRunnerDecision`.
+- Report: `docs/nodejs/reports/phase13/P13_40_CHILD_PROCESS_SCOPED_RUNNER.md`.
+- Surface manifest evidence: `phase13-child-process-scoped-runner-decision`.
+- Remaining P13-40 blockers: scoped API shape, app-private binary packaging,
+  allowlist metadata, bounded stdio, timeout/cancellation/kill cleanup,
+  process accounting, packaged metadata/disclosure/smoke, hostile corpus, and
+  rollback controls.
+
 ## P13-19 Partial Landing Note
 
 - P13-19 partial accessibility selector promotion gate records the current

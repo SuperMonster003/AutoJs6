@@ -35,6 +35,11 @@ scoped runner, spawn/fork facade, stream-backed stdio, signal handle, or process
 handle. It records the contract a future Desktop-profile scoped runner must
 satisfy before any child-process-like authority can be promoted.
 
+For P13-40 v1.1, arbitrary executable paths, package-managed downloaded
+binaries, shell operators, detached processes, inherited handles, raw process
+handles, file descriptors, streams, and signals stay stable-denied in the
+Safe/default profile.
+
 ## Evidence
 
 - `NodeChildProcessPhase13DecisionInstrumentationTest` verifies the frozen
@@ -62,8 +67,6 @@ satisfy before any child-process-like authority can be promoted.
   exec/execFile/spawn-style calls are allowed.
 - Define app-private binary packaging, allowlist metadata, hash/integrity
   checks, and path resolution.
-- Reject arbitrary paths, package-managed downloaded binaries, shell operators,
-  detached processes, and inherited handles.
 - Implement bounded stdin/stdout/stderr, timeout, cancellation, kill, and
   resource cleanup semantics.
 - Add provider-side cleanup and process accounting evidence for normal exit,

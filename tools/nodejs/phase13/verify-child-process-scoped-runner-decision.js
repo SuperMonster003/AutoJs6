@@ -132,10 +132,13 @@ function buildReport(files) {
       token(files.dependencyManager, "dependency compatibility analyzer for lifecycle scripts, native addons, raw network, child_process"),
       token(files.compatibilityProfile, "`child_process.spawn()`, `fork()`, streaming stdio, and interactive shells are not supported"),
       token(files.securityModel, "JavaScript never receives a `Process`, file descriptor, stream, signal handle, or raw Android shell object"),
+      token(files.p13Report, "For P13-40 v1.1, arbitrary executable paths"),
+      token(files.p13Report, "stable-denied"),
+      token(files.phase13Tasks, "For P13-40 v1.1, arbitrary executable paths"),
+      token(files.phase13Tasks, "file descriptors, streams, and signals stay stable-denied"),
     ], [
       "Design the scoped child_process API shape, including which exec/execFile/spawn-style calls are allowed.",
       "Define app-private binary packaging, allowlist metadata, hash/integrity checks, and path resolution.",
-      "Reject arbitrary paths, package-managed downloaded binaries, shell operators, detached processes, and inherited handles.",
       "Implement bounded stdin/stdout/stderr, timeout, cancellation, kill, and resource cleanup semantics.",
       "Add provider-side cleanup and process accounting evidence for normal exit, timeout, cancellation, app stop, and crash.",
       "Add packaged APK metadata, disclosure, install/run smoke, hostile corpus, and rollback controls before promotion.",
@@ -214,12 +217,13 @@ function buildReport(files) {
       childProcessProfile.includes('arbitraryPaths: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "denied"') &&
         childProcessProfile.includes('detached: "denied"') &&
         childProcessProfile.includes('shellOperators: __autojs6_child_process_experimental_enabled ? "native_shell_option" : "denied"') &&
-        childProcessProfile.includes('processHandles: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"') &&
+      childProcessProfile.includes('processHandles: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"') &&
         childProcessProfile.includes('fdStreams: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"') &&
         files.p13Report.text.includes("Arbitrary paths, detached processes, shell operators") &&
         files.p13Report.text.includes("raw file descriptors, streams, and signals") &&
-        files.p13Report.text.includes("package-managed downloaded binaries") &&
-        files.compatibilityProfile.text.includes("`child_process.spawn()`, `fork()`, streaming stdio, and interactive shells are not supported") &&
+        files.p13Report.text.includes("package-managed downloaded") &&
+        files.p13Report.text.includes("binaries, shell operators") &&
+        files.compatibilityProfile.text.includes("spawn()`, `fork()`, streaming stdio, and interactive shells are not supported") &&
         files.securityModel.text.includes("JavaScript never receives a `Process`, file descriptor, stream, signal handle, or raw Android shell object"),
       "P13-40 must keep arbitrary paths, downloaded binaries, shell operators, detached processes, and inherited handles rejected in the Safe/default boundary.",
     ),
