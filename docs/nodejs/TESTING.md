@@ -2082,7 +2082,7 @@ Phase 13 dependency compatibility corpus gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13DependencyCompatibilityCorpus
 ```
 
-This host gate records P13-47 as partial. It requires the 53-fixture real npm
+This host gate records P13-47 as partial. It requires the 55-fixture real npm
 manifest, `phase13Compatibility` classification metadata, targeted fixture
 deltas, package/reason rows for `missing_builtin`, `native_addon`,
 `postinstall`, `network`, and `fs`, metadata instrumentation, desktop

@@ -421,11 +421,27 @@
         "URL and Buffer package",
         "query codec helper"
       ]
+    },
+    {
+      "name": "util-events-package",
+      "patterns": [
+        "Phase 13 stdlib corpus delta",
+        "util and events package",
+        "promisify and EventEmitter helper"
+      ]
+    },
+    {
+      "name": "path-querystring-package",
+      "patterns": [
+        "Phase 13 stdlib corpus delta",
+        "path and querystring package",
+        "URL query helper"
+      ]
     }
   ],
   "phase13Compatibility": {
     "schema": "autojs6-phase13-dependency-compatibility-corpus-v1",
-    "fixtureCount": 53,
+    "fixtureCount": 55,
     "requiredReasonKinds": [
       "missing_builtin",
       "native_addon",
@@ -439,10 +455,12 @@
         "fixtures": [
           "stdlib-digest-stream-package",
           "perf-async-hooks-package",
-          "url-buffer-codec-package"
+          "url-buffer-codec-package",
+          "util-events-package",
+          "path-querystring-package"
         ],
-        "passDelta": 3,
-        "notes": "P13-43/P13-47 adds fixed pure-JS stdlib package snapshots for crypto+stream, perf_hooks+async_hooks, and URL+Buffer coverage."
+        "passDelta": 5,
+        "notes": "P13-43/P13-47 adds fixed pure-JS stdlib package snapshots for crypto+stream, perf_hooks+async_hooks, URL+Buffer, util+events, and path+querystring coverage."
       }
     ],
     "categories": [

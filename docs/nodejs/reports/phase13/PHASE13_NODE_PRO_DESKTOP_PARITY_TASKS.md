@@ -1771,7 +1771,7 @@ P13 task 本身使用以下执行状态：
   - Progress:
     - P13-43 partial landing 已添加 `stdlibProfile` 诊断，记录当前 Safe
       Node stdlib subset、代表性模块状态、Android 稳定差异、npm corpus
-      `real_npm_phase13_53_fixture_corpus` 和 desktop differential 证据，同时保持
+      `real_npm_phase13_55_fixture_corpus` 和 desktop differential 证据，同时保持
       raw desktop parity、
       raw native handles、unrestricted network、broad terminal、raw
       `process.getBuiltinModule` bypass 和 `zlib/promises` 未提升。
@@ -1818,7 +1818,7 @@ P13 task 本身使用以下执行状态：
     - real npm corpus 已新增 3 个 stdlib-dependent fixed fixture：
       `stdlib-digest-stream-package`、`perf-async-hooks-package` 和
       `url-buffer-codec-package`，并在 `phase13Compatibility.targetedFixtureDeltas`
-      中记录 stdlib +3 pass delta。
+      中记录 stdlib +5 pass delta。
     - Gradle gate:
       `:app:verifyNodePhase13StdlibConformanceDecision`。
     - Report:
@@ -1966,7 +1966,7 @@ P13 task 本身使用以下执行状态：
   - Progress:
     - P13-47 partial landing 已在 `npm_compat_real/manifest.json` 增加
       `phase13Compatibility` 分类元数据，固定 53 个离线 fixture baseline。
-    - `phase13Compatibility.targetedFixtureDeltas` 记录 stdlib +3 pass delta，
+    - `phase13Compatibility.targetedFixtureDeltas` 记录 stdlib +5 pass delta，
       对应 `stdlib-digest-stream-package`、`perf-async-hooks-package` 和
       `url-buffer-codec-package`。
     - 分类覆盖 `missing_builtin`、`native_addon`、`postinstall`、`network`
@@ -1988,8 +1988,8 @@ P13 task 本身使用以下执行状态：
       artifact 目录传给 host differential report。
     - 真实 registry drift、unsafe native/postinstall 包执行仍保持拒绝，仅以
       metadata blocker category 表达。
-  - Closure: the v1.1 fixed 53-fixture corpus, P13 compatibility taxonomy,
-    required reason kinds, stdlib +3 targeted delta, metadata instrumentation,
+  - Closure: the v1.1 fixed 55-fixture corpus, P13 compatibility taxonomy,
+    required reason kinds, stdlib +5 targeted delta, metadata instrumentation,
     differential category reporting, summary rows, docs, surface manifest, and
     Gradle gate are covered.
   - Future CI work: connected AutoJs6 real npm corpus artifact scheduling,

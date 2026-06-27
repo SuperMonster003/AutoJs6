@@ -292,9 +292,15 @@ class NodeRealNpmCompatInstrumentationTest {
             }
             if (area == "stdlib") {
                 sawStdlibDelta = true
-                assertEquals(3, delta.getInt("passDelta"))
+                assertEquals(5, delta.getInt("passDelta"))
                 assertEquals(
-                    setOf("stdlib-digest-stream-package", "perf-async-hooks-package", "url-buffer-codec-package"),
+                    setOf(
+                        "stdlib-digest-stream-package",
+                        "perf-async-hooks-package",
+                        "url-buffer-codec-package",
+                        "util-events-package",
+                        "path-querystring-package",
+                    ),
                     (0 until deltaFixtures.length()).map { deltaFixtures.getString(it) }.toSet(),
                 )
             }
@@ -360,7 +366,7 @@ class NodeRealNpmCompatInstrumentationTest {
         private const val PHASE7_FIXTURE_COUNT = 13
         private const val PHASE8_FIXTURE_COUNT = 20
         private const val PHASE9_FIXTURE_COUNT = 30
-        private const val EXPECTED_FIXTURE_COUNT = 53
+        private const val EXPECTED_FIXTURE_COUNT = 55
         private const val REAL_NPM_FIXTURE_BATCH_SIZE = 6
         private const val REAL_NPM_FIXTURE_BATCH_TIMEOUT_MS = 30_000L
         private val FORBIDDEN_PACKAGE_SCRIPTS = setOf("preinstall", "install", "postinstall", "prepare")

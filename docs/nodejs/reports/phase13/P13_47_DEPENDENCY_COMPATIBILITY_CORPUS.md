@@ -3,7 +3,7 @@
 P13-47 records the v1.1 fixed dependency compatibility corpus as ready while
 live registry and connected-CI expansion remain future work. The current
 landing adds Phase 13 classification metadata to the fixed real npm corpus,
-raises the offline fixture count to 53, extends the desktop differential report
+raises the offline fixture count to 55, extends the desktop differential report
 with category pass-rate rows, and adds a host verifier plus Gradle gate.
 
 ## Covered
@@ -13,9 +13,10 @@ with category pass-rate rows, and adds a host verifier plus Gradle gate.
   `autojs6-phase13-dependency-compatibility-corpus-v1`.
 - The taxonomy covers the required P13-47 reason kinds:
   `missing_builtin`, `native_addon`, `postinstall`, `network`, and `fs`.
-- `targetedFixtureDeltas` records the Phase 13 stdlib +3 pass delta for
-  `stdlib-digest-stream-package`, `perf-async-hooks-package`, and
-  `url-buffer-codec-package`.
+- `targetedFixtureDeltas` records the Phase 13 stdlib +5 pass delta for
+  `stdlib-digest-stream-package`, `perf-async-hooks-package`,
+  `url-buffer-codec-package`, `util-events-package`, and
+  `path-querystring-package`.
 - Each category records fixture references plus package/reason rows so reports
   can explain which package class is blocked and why.
 - `NodeRealNpmCompatInstrumentationTest.fixtureMetadataIsCompleteAndSafe`
@@ -26,8 +27,8 @@ with category pass-rate rows, and adds a host verifier plus Gradle gate.
   differential artifacts are collected. Desktop-baseline-only runs can still
   return non-zero for fixtures that intentionally assert AutoJs6 policy
   denials.
-- `PHASE13_SUMMARY.md` records the 53 fixed offline fixtures, stdlib
-  `targetedFixtureDeltas` +3 pass delta, and differential pass-rate rows.
+- `PHASE13_SUMMARY.md` records the 55 fixed offline fixtures, stdlib
+  `targetedFixtureDeltas` +5 pass delta, and differential pass-rate rows.
 - The differential runner can import connected AutoJs6 artifacts directly with
   `--autojs-connected-results <dir|file>`, scanning Gradle connected test
   result directories, XML reports, logcat text, and test logs for
@@ -38,7 +39,7 @@ with category pass-rate rows, and adds a host verifier plus Gradle gate.
 
 ## Closure
 
-The v1.1 corpus gate closes because the fixed 53-fixture manifest taxonomy,
+The v1.1 corpus gate closes because the fixed 55-fixture manifest taxonomy,
 required reason kinds, targeted stdlib pass-rate delta, metadata
 instrumentation, differential category reporting, summary rows, unsafe payload
 denials, docs, surface manifest, and Gradle gate are synchronized.
@@ -47,7 +48,7 @@ denials, docs, surface manifest, and Gradle gate are synchronized.
 
 - CI still needs to schedule the connected AutoJs6 real npm corpus and pass its
   connected-results artifact directory into the host differential report.
-- The corpus remains fixed and offline after the 53-fixture expansion; live
+- The corpus remains fixed and offline after the 55-fixture expansion; live
   registry drift testing is still a separate security and reproducibility
   problem.
 - Future capability relaxations should update the same category rows so
@@ -59,7 +60,8 @@ denials, docs, surface manifest, and Gradle gate are synchronized.
   `app/src/androidTest/assets/npm_compat_real/manifest.json`
 - Added fixed package fixtures:
   `stdlib-digest-stream-package`, `perf-async-hooks-package`, and
-  `url-buffer-codec-package`
+  `url-buffer-codec-package`, `util-events-package`, and
+  `path-querystring-package`
 - Metadata instrumentation:
   `NodeRealNpmCompatInstrumentationTest.fixtureMetadataIsCompleteAndSafe`
 - Differential report:
