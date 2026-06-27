@@ -305,7 +305,7 @@ Reason open: `external`, `evidence`, `policy`, `packaging`.
 - [ ] Run and archive the experimental worker gate with `autojs.nodejs.worker_threads.experimental=true`.
 - [ ] Add packaged worker smoke evidence.
 - [ ] Add crash/resource evidence for startup failure, exception, timeout, parent cleanup, and packaged failure modes.
-- [ ] Decide nested worker policy and document SharedArrayBuffer, Atomics, resourceLimits, thread, and RSS ceilings.
+- [x] Decide nested worker policy and document SharedArrayBuffer, Atomics, resourceLimits, thread, and RSS ceilings.
 
 #### P13-35 process-worker replacement
 

@@ -35,6 +35,21 @@ stress, and packaged `.mjs` worker smoke.
   65536 byte messages, 32 queued messages, scoped worker fs, WorkerPool
   `maxWorkers=1`, and capped resource limits.
 
+## Worker Policy Boundary
+
+- Nested workers remain denied for P13-34 v1.1. No nested worker tier is
+  promoted by the default profile or by the request-local experimental preflight.
+- SharedArrayBuffer and Atomics are not promoted as cross-worker compatibility
+  guarantees. The current gate only covers bounded structured-clone and
+  transfer-list message paths under the existing message budgets.
+- Resource limits stay explicit and conservative: one active worker, one
+  WorkerPool worker, 5000 ms startup/task timeout, 65536 byte messages, 32
+  queued messages, and V8 resource limits of 64 MiB old generation, 16 MiB
+  young generation, 32 MiB code range, and 8 MiB stack.
+- Android thread and RSS behavior remains evidence-gated. P13-34 documents the
+  current one-worker thread ceiling, but it does not promote a release RSS
+  ceiling until the resource and crash evidence gates are current.
+
 ## Boundary
 
 The following remain future work before opt-in promotion can close:
@@ -45,8 +60,7 @@ The following remain future work before opt-in promotion can close:
 - current device-exported packaged `.mjs` worker smoke evidence;
 - crash evidence for worker startup failure, worker exception, timeout,
   parent-completion cleanup, and packaged worker failure modes;
-- final Desktop policy for nested workers, SharedArrayBuffer/Atomics,
-  resourceLimits, Android thread/RSS ceilings, and release disclosure.
+- release disclosure for any future worker profile promotion.
 
 ## Verification
 

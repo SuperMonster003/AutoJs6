@@ -1841,8 +1841,9 @@ MessageChannel, transfer-list, WorkerPool, resource-stress, and packaged worker
 smoke source markers, TypeScript declarations, the desktop builtin matrix, and
 Phase13 docs. It keeps native runnable evidence on target ABIs, archived
 experimental worker gate output, packaged `.mjs` worker smoke evidence, crash
-evidence, nested-worker policy, SharedArrayBuffer/Atomics policy, and Android
-resource ceilings open.
+evidence, and Android RSS/resource evidence open while nested-worker,
+SharedArrayBuffer/Atomics, resourceLimits, and one-worker thread ceilings are
+documented in the P13-34 report.
 
 Phase 13 process-worker replacement decision gate:
 

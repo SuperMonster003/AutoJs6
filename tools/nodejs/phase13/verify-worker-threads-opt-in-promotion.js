@@ -112,8 +112,6 @@ function buildReport(files) {
       token(files.p13Report, "packaged `.mjs` worker smoke"),
     ], [
       "Add current crash evidence bundle references for worker startup failure, worker exception, timeout, parent cleanup, and packaged worker failure modes.",
-      "Decide whether nested workers remain permanently denied or become a later Desktop profile tier.",
-      "Document SharedArrayBuffer, Atomics, resourceLimits, and Android thread/RSS ceilings in the final Desktop worker profile.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-34", [
       token(files.phase13Tasks, "P13-34 partial landing"),
@@ -169,6 +167,19 @@ function buildReport(files) {
         !files.nodeBridgeSources.text.includes("defaultEnabled: true,\n        requestLocalOptIn: __autojs6_worker_threads_experimental_enabled"),
       "P13-34 must not enable worker_threads by default.",
     ),
+    check(
+      "worker-policy-boundaries-documented",
+      files.p13Report.text.includes("## Worker Policy Boundary") &&
+        files.p13Report.text.includes("Nested workers remain denied for P13-34 v1.1") &&
+        files.p13Report.text.includes("SharedArrayBuffer and Atomics are not promoted as cross-worker compatibility") &&
+        files.p13Report.text.includes("Resource limits stay explicit and conservative") &&
+        files.p13Report.text.includes("Android thread and RSS behavior remains evidence-gated") &&
+        files.nodeBridgeSources.text.includes("nestedWorkers: false") &&
+        files.nodeBridgeSources.text.includes("maxWorkers: 1") &&
+        files.nodeBridgeSources.text.includes("maxOldGenerationSizeMb: 64") &&
+        files.nodeBridgeSources.text.includes("stackSizeMb: 8"),
+      "P13-34 must document nested worker, SharedArrayBuffer/Atomics, resource limit, thread, and RSS policy boundaries.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -196,6 +207,7 @@ function buildReport(files) {
       defaultDeniedReady: scenarioById(scenarios, "default_denial_and_profile").status === "ready",
       profileDiagnosticExposed: files.nodeBridgeSources.text.includes("workerThreadsProfile: Object.freeze({"),
       requestLocalExperimentalPreflightReady: scenarioById(scenarios, "experimental_preflight_and_isolation").status !== "missing_evidence",
+      workerPolicyBoundariesDocumented: checkById(checks, "worker-policy-boundaries-documented").passed,
       nativeRunnableEvidenceRequired: true,
       packagedWorkerEvidenceReady: false,
       crashEvidenceReady: false,
@@ -232,6 +244,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id) || { status: "missing_evidence" };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {

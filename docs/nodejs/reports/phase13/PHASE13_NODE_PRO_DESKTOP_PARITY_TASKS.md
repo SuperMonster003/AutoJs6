@@ -1273,6 +1273,9 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_34_WORKER_THREADS_OPT_IN_PROMOTION.md`。
     - Surface manifest evidence: `phase13-worker-threads-opt-in-promotion`。
+    - Worker policy boundary: nested workers stay denied; SharedArrayBuffer /
+      Atomics are not promoted as cross-worker guarantees; resource limits,
+      one-worker thread ceiling, and RSS evidence gating are documented.
 
 - [ ] P13-35: 决策 process-worker replacement。
   - 范围：如果 `worker_threads` 无法满足 Android 稳定性，提供 AutoJs6
