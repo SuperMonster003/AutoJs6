@@ -84,8 +84,6 @@ function buildReport(files) {
       token(files.integrityPolicy, 'reinstallRequired'),
       token(files.integrityPolicy, 'recoveryActions'),
       token(files.integrityPolicy, 'disable_unsigned_plugin_or_native_subject'),
-    ], [
-      "Plugin archive signature verification and native signed-artifact loading are policy-required but not implemented as executable install paths yet.",
     ]),
     scenario("runtime_profile_and_types", "Runtime diagnostics, TypeScript declarations, and smoke sample expose the same packageIntegrityProfile", [
       token(files.nodeBridgeSources, "packageIntegrityProfile: Object.freeze({"),
@@ -144,7 +142,9 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "nativeAddonLoading: false"),
       token(files.nodeBridgeSources, "marketplaceInstall: false"),
     ], [
-      "Signed plugin archive extraction, update rollback, marketplace cache pruning, and signed native addon artifact verification remain future implementation work.",
+      "Implement signed plugin archive extraction and update rollback.",
+      "Implement marketplace cache pruning and user-facing corruption recovery.",
+      "Implement signed native addon artifact verification once P13-39 has a packaged path.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-48", [
       token(files.phase13Tasks, "P13-48 partial landing"),
@@ -161,8 +161,6 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-48 package lock and integrity policy"),
       token(files.packageManagerDesign, "P13-48 unifies the lock and integrity policy"),
-    ], [
-      "The policy remains partial until signed plugin/native package stores and user-facing rollback diagnostics are implemented.",
     ]),
   ];
 
@@ -181,6 +179,17 @@ function buildReport(files) {
         policyBlock.includes('id = "plugin_packages"') &&
         policyBlock.includes('id = "native_addons"'),
       "policy descriptor must cover Android package manager, plugins, and native addons.",
+    ),
+    check(
+      "integrity-policy-unified-across-subjects",
+      files.p13Report.text.includes("unified policy descriptor for Android-side package manager") &&
+        files.p13Report.text.includes("plugin packages, and native addon artifacts") &&
+        files.packageManagerDesign.text.includes("P13-48 unifies the lock and integrity policy across the Android-side package") &&
+        files.securityModel.text.includes("shared lockfile, SHA-512 integrity, signature, rollback, cache cleanup, corruption recovery requirements") &&
+        policyBlock.includes('id = "android_package_manager"') &&
+        policyBlock.includes('id = "plugin_packages"') &&
+        policyBlock.includes('id = "native_addons"'),
+      "P13-48 must unify integrity policy across package manager, plugins, and native payloads.",
     ),
     check(
       "profile-fail-closed-boundaries",
@@ -231,6 +240,7 @@ function buildReport(files) {
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "runtime_profile_and_types").status === "ready",
       androidStorePolicyReady: scenarioById(scenarios, "android_store_integrity_recovery").status === "ready",
+      integrityPolicyUnifiedAcrossSubjects: checkById(checks, "integrity-policy-unified-across-subjects").passed,
       pluginNativePolicyReady: scenarioById(scenarios, "plugin_native_fail_closed").status !== "missing_evidence",
       unsignedPluginInstallPromoted: false,
       unsignedNativeAddonLoadPromoted: false,
@@ -266,6 +276,10 @@ function check(id, passed, message) {
 
 function scenarioById(scenarios, id) {
   return scenarios.find((entry) => entry.id === id);
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function surface(text, id) {

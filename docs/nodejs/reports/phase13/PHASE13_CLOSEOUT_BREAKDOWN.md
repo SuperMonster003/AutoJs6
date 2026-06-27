@@ -442,7 +442,7 @@ Reason open: `implementation`, `packaging`.
 - [ ] Implement signed plugin archive extraction and update rollback.
 - [ ] Implement marketplace cache pruning and user-facing corruption recovery.
 - [ ] Implement signed native addon artifact verification once P13-39 has a packaged path.
-- [ ] Unify integrity policy across package manager, plugins, and native payloads.
+- [x] Unify integrity policy across package manager, plugins, and native payloads.
 
 ### Profile, Security, Rollback, Privacy
 
