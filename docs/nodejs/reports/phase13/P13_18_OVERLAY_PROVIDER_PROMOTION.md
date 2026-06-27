@@ -54,6 +54,12 @@ fail-closed for `show`, `update`, `drainEvents`, and per-handle `close`.
   crash evidence.
 - Add leak/stress evidence over real overlay windows and event queues.
 
+The docs, compatibility notes, design records, surface manifest, and Gradle
+gate are evidence-only for this partial decision. They do not add a separate
+P13-18 blocker beyond the live overlay provider, permission matrix, foreground
+disclosure/stop action, packaged metadata/denial, cleanup, and leak/stress
+evidence above.
+
 ## Gate
 
 Host verifier:

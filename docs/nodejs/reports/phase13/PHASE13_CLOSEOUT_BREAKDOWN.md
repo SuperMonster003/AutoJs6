@@ -157,6 +157,7 @@ Reason open: `implementation`, `evidence`, `packaging`.
 - [ ] Record granted/denied `SYSTEM_ALERT_WINDOW` device matrix, including OEM settings behavior.
 - [ ] Add foreground disclosure ownership and stop action.
 - [ ] Add packaged install/run smoke, denial paths, and leak/cleanup stress.
+- [x] Keep docs/design evidence gate from counting live overlay provider, permission matrix, foreground disclosure, packaged, and leak evidence twice.
 
 #### P13-19 accessibility/selector parity
 

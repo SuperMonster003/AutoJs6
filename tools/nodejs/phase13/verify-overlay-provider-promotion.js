@@ -144,9 +144,7 @@ function buildReport(files) {
       token(files.phase12Verifier, "verifyNodeRhinoCompatOverlayLiveGate"),
       token(files.phase12Summary, "P12-14"),
       token(files.surfaceManifestDoc, "phase13-overlay-provider-promotion"),
-    ], [
-      "Keep P13-18 checklist open until the live Android overlay provider and packaged/leak evidence land.",
-    ]),
+    ], []),
   ];
   const checks = [
     check("task-listed", files.phase13Tasks.text.includes("P13-18"), "P13-18 must remain listed in the Phase 13 checklist."),
