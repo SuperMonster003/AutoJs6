@@ -262,10 +262,12 @@ Reason open: pure utility helper gate drift cleanup; future resource-backed util
 
 #### P13-29 HTTP/HTTPS client parity
 
-Reason open: `evidence`, `policy`, `packaging`.
+Reason open: controlled client evidence drift cleanup; future raw-network and
+packaged distribution promotion remains `implementation`, `policy`,
+`packaging`.
 
-- [ ] Attach live Android/OkHttp HTTP and HTTPS request evidence.
-- [ ] Attach packaged `network` to `android.permission.INTERNET` proof for this path.
+- [x] Attach live Android/OkHttp HTTP and HTTPS request evidence through `verifyNodeLiveFetchGate`.
+- [x] Attach packaged `network` to `android.permission.INTERNET` proof through P13-45 packaged capability metadata.
 - [x] Keep full raw socket, DNS lookup, TLS session, and backpressure semantics scoped to P13-30 or later.
 - [x] Decide whether any per-request proxy support is provider-owned or stays denied.
 - [x] Keep future P13-30 raw `net` / `tls` / `dns` authority decisions from counting as P13-29 blockers.
@@ -486,9 +488,11 @@ Reason open: diagnostics gate drift cleanup; future UX remains `implementation`,
 
 #### P13-50 relaxed capability security corpus
 
-Reason open: `policy`, `evidence`.
+Reason open: security-corpus checklist drift cleanup; future runtime
+relaxed-capability promotion remains gated by rollout, rollback, privacy, and
+packaged evidence.
 
-- [ ] Convert descriptors into runnable promotion guards for each relaxed capability.
+- [x] Convert descriptors into runnable promotion guards for each relaxed capability.
 - [x] Keep Safe-default regression coverage for raw network, expanded fs roots, Java interop, child_process, native addon, inspector, and WASI.
 - [x] Link every positive promotion path to rollback and privacy disclosure requirements.
 - [x] Keep release Java interop and raw authority unpromoted until prompts and packaged behavior exist.
@@ -567,9 +571,10 @@ Reason open: `evidence`, `policy`.
 These items look closeable without inventing new high-risk runtime authority:
 
 - Completed verifier/document token drift cleanup for `P13-06`, `P13-18`,
-  `P13-23` to `P13-26`, `P13-31` to `P13-36`, `P13-42`, `P13-45`,
-  `P13-52`, and the P13-57 summary gate. Current generated reports show no
-  missing evidence-token or policy-violation false positives.
+  `P13-23` to `P13-26`, `P13-29`, `P13-31` to `P13-36`, `P13-42`,
+  `P13-45`, `P13-50`, `P13-52`, and the P13-57 summary gate. Current
+  generated reports show no missing evidence-token or policy-violation false
+  positives.
 - Completed provider-free utility coverage for `P13-27` (`Arrayx`,
   `Numberx`, resource-free helpers). Raw Android object parity and
   resource-backed utilities remain separate promotion gates.
