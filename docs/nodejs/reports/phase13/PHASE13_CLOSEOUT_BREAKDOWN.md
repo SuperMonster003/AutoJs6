@@ -213,7 +213,7 @@ Reason open: `implementation`, `policy`, `evidence`, `packaging`.
 Reason open: `implementation`, `evidence`, `policy`.
 
 - [x] Split `shell.root` and `shell.shizuku` capability checks and diagnostics in runtime/verifier evidence.
-- [ ] Add project/package metadata examples for both capabilities.
+- [x] Add project/package metadata examples for both capabilities.
 - [ ] Add root-available and root-unavailable device matrix.
 - [ ] Add AbortSignal cancellation for in-flight shell commands.
 - [ ] Implement Shizuku only after service binding, permission, lifecycle, cleanup, packaged disclosure, and rollback evidence exist.

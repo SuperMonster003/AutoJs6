@@ -31,6 +31,24 @@ vocabulary for ordinary shell, root shell, and Shizuku.
 - `autojs6:compat.shell` exposes the same `execRoot`, `execShizuku`,
   `execFile`, `checkAccess`, and timeout helpers.
 
+## Metadata Examples
+
+`project.json shell.root metadata example`:
+
+```json
+{"node":{"permissions":["shell","shell.root"]}}
+```
+
+`package.json shell.shizuku metadata example`:
+
+```json
+{"autojs6":{"node":{"permissions":["shell","shell.shizuku"]}}}
+```
+
+These examples document separate capability declarations only. Declaring
+`shell.shizuku` does not promote Shizuku execution; `shell.execShizuku()` and
+`shell.exec(..., { shizuku: true })` still reject before bridge dispatch.
+
 ## Evidence
 
 - Capability split:

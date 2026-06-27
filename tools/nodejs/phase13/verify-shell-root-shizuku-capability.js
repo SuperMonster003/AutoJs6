@@ -80,8 +80,11 @@ function buildReport(files) {
       token(files.shellBridgeTest, "shell.policy.access=true|false|false|shell.root|shell.shizuku"),
       token(files.shellBridgeTest, "shell.policy.root_denied="),
       token(files.conformanceTest, "bridge.conformance.shell_shizuku_missing=shell|shell.shizuku"),
-    ], [
-      "Add project/package metadata examples that explicitly declare shell.root and shell.shizuku separately.",
+      token(files.p13Report, "project.json shell.root metadata example"),
+      token(files.p13Report, '{"node":{"permissions":["shell","shell.root"]}}'),
+      token(files.p13Report, "package.json shell.shizuku metadata example"),
+      token(files.p13Report, '{"autojs6":{"node":{"permissions":["shell","shell.shizuku"]}}}'),
+      token(files.p13Report, "does not promote Shizuku execution"),
     ]),
     scenario("controlled_shell_exec", "controlled shell execution remains bounded and resource-owned", [
       token(files.protocol, 'val shellMethods = setOf("exec")'),

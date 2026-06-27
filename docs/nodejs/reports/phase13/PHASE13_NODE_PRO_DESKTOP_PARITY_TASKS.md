@@ -1010,6 +1010,9 @@ P13 task 本身使用以下执行状态：
     - Controlled execution evidence: scoped `cwd`, string-only `env`, bounded
       output, timeout code `124`, `ResourceRegistry` process cleanup, and
       active shell command limits.
+    - Metadata examples now show separate project/package declarations for
+      `shell.root` and vocabulary-only `shell.shizuku` without promoting
+      Shizuku execution.
     - Type declarations:
       `docs/nodejs/types/autojs6-node/shell.d.ts` and
       `docs/nodejs/types/autojs6-node/rhino_compat.d.ts`.
@@ -1023,9 +1026,8 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md`.
     - Open before closure: root available/unavailable device matrix, Shizuku
       service authorization and lifecycle, AbortSignal cancellation
-      instrumentation, project/package metadata examples, packaged
-      disclosure/failure diagnostics, expanded audit taxonomy, and migration
-      examples.
+      instrumentation, packaged disclosure/failure diagnostics, expanded audit
+      taxonomy, and migration examples.
 
 - [ ] P13-25: 扩展 notifications/settings/power manager。
   - 范围：补齐通知渠道、设置、电池优化、唤醒/亮屏等 Pro 能力。
