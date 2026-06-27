@@ -131,9 +131,7 @@ function buildReport(files) {
       token(files.desktopMatrix, "P13-37 records inspector debug-profile diagnostics as partial"),
       token(files.builtinMatrixGenerator, "P13-37 records inspector debug-profile diagnostics as partial"),
       token(files.capabilityMatrix, "P13-37 inspector debug profile"),
-    ], [
-      "P13-37 remains partial until a real debug-only inspector session and DevTools/profiling lifecycle evidence exist.",
-    ]),
+    ], []),
   ];
 
   const checks = [

@@ -54,6 +54,11 @@ profiling surface can be promoted.
 - Add packaged release denial plus explicit debug-packaged metadata, manifest,
   and diagnostics evidence.
 
+The docs, release matrix, desktop matrix, surface manifest, and Gradle gate are
+evidence-only for this partial decision. They do not add a separate P13-37
+blocker beyond the debug session, loopback/ADB, DevTools attach, profiler, and
+packaged metadata evidence items above.
+
 ## Rollback
 
 Remove `inspectorProfile`, the focused instrumentation test, the P13-37

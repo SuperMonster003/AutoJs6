@@ -341,6 +341,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 - [ ] Add debug-build DevTools attach coverage for breakpoints, pause/resume, console, async stacks, source maps, and ESM names.
 - [ ] Add CPU/heap profile artifact export, redaction, budget, and cleanup.
 - [ ] Add packaged release denial and debug-packaged metadata evidence.
+- [x] Keep docs/matrix evidence gate from counting debug session, DevTools, profiler, and packaged metadata evidence twice.
 
 #### P13-38 controlled WASI
 

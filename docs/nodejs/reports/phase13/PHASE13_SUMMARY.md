@@ -180,7 +180,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `partial` | 0 | 3 |
 | `phase13-full-heavy-resource-stress.json` | `verifyNodePhase13FullHeavyResourceStress` | `P13-08` | `partial` | 0 | 3 |
 | `phase13-http-https-client-parity.json` | `verifyNodePhase13HttpHttpsClientParity` | `P13-29` | `partial` | 0 | 3 |
-| `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `partial` | 0 | 6 |
+| `phase13-inspector-debug-profile-decision.json` | `verifyNodePhase13InspectorDebugProfileDecision` | `P13-37` | `partial` | 0 | 5 |
 | `phase13-intent-broadcast-provider.json` | `verifyNodePhase13IntentBroadcastProvider` | `P13-22` | `partial` | 0 | 5 |
 | `phase13-java-interop-allowlist.json` | `verifyNodePhase13JavaInteropAllowlist` | `P13-13` | `partial` | 0 | 3 |
 | `phase13-live-ui-provider-promotion.json` | `verifyNodePhase13LiveUiProviderPromotion` | `P13-17` | `partial` | 0 | 4 |
