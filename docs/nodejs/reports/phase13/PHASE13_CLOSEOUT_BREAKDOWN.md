@@ -502,8 +502,8 @@ Reason open: `evidence`, `packaging`.
 
 - [x] Add focused runtime smoke for already-promoted local ESM and checked-in pure JavaScript dependency examples.
 - [ ] Convert static desktop examples into packaged smoke where providers are promoted.
-- [ ] Link every example to profile metadata, capability requirements, integrity policy, and rollback guidance.
-- [ ] Keep non-promoted snippets static and clearly marked.
+- [x] Link every example to profile metadata, capability requirements, integrity policy, and rollback guidance.
+- [x] Keep non-promoted snippets static and clearly marked.
 - [ ] Add device evidence for desktop profile examples once runtime authority exists.
 
 #### P13-55 TypeScript declaration profiles

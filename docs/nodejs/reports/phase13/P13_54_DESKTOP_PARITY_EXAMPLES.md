@@ -41,6 +41,12 @@ local ESM path represented by `snippets/esm-loader.cjs` and the checked-in
 filesystem-root, WASI, inspector, and package-manager authority examples remain
 static until their providers and policy gates are promoted.
 
+Each example remains linked to profile metadata, capability requirements,
+integrity policy, and rollback guidance through `examples.json`, `project.json`,
+README packaged-behavior rows, and Safe-profile denial markers. Non-promoted
+snippets stay static/catalog-backed and clearly marked outside the Safe smoke
+subset.
+
 ## Gate
 
 Host verifier:

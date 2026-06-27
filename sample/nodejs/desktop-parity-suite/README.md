@@ -22,6 +22,12 @@ claiming that gated desktop authority is already promoted.
 Safe-profile denial markers are centralized in `snippets/safe-denials.cjs`.
 Expected output is listed in `expected-output.txt`.
 
+Package integrity and rollback guidance is intentionally referenced through
+metadata instead of live packaged execution: each entry carries required
+profile/capability metadata plus packaged behavior text, and packaged desktop
+promotion remains gated by the Phase 13 integrity, disclosure, and rollback
+policies before any static snippet can become a packaged smoke.
+
 `smoke.cjs` is the focused runtime smoke subset. It executes only
 `snippets/esm-loader.cjs` equivalent local ESM behavior and the checked-in
 `vendor/pure-math` dependency path used by `snippets/npm-dependency.cjs`. It

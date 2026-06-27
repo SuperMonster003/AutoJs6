@@ -231,6 +231,36 @@ function buildReport(repoRoot, files) {
       "`desktop-parity-suite` must include a focused runtime smoke subset for already-promoted desktop-safe examples.",
     ),
     check(
+      "example-policy-links",
+      entries.every((entry) =>
+        entry.targetProfile === "desktop_compat_opt_in" &&
+        Array.isArray(entry.requiredCapabilities) &&
+        entry.requiredCapabilities.length > 0 &&
+        entry.safeProfile &&
+        entry.safeProfile.profile === "safe_default" &&
+        typeof entry.packagedBehavior === "string" &&
+        entry.packagedBehavior.length >= 24) &&
+        files.exampleReadme.text.includes("Package integrity and rollback guidance") &&
+        includesAll(files.p13Report.text, ["profile metadata", "capability requirements", "integrity policy", "rollback guidance"]),
+      "Every desktop parity example must link profile metadata, capability requirements, integrity policy, and rollback guidance.",
+    ),
+    check(
+      "non-promoted-snippets-static",
+      exampleManifest.status === "partial" &&
+        files.exampleMain.text.includes("entry.expectedOutput") &&
+        files.exampleMain.text.includes("entry.safeProfile.expectedOutput") &&
+        rootManifest.examples.some((entry) => entry.name === EXAMPLE_NAME && entry.mainAppSmoke === false) &&
+        smokeSubset.profile === "safe_default" &&
+        REQUIRED_SMOKE_EXAMPLES.every((id) => smokeSubsetExamples.includes(id)) &&
+        !smokeSubsetExamples.includes("worker-threads") &&
+        !smokeSubsetExamples.includes("http-https") &&
+        !smokeSubsetExamples.includes("raw-network") &&
+        !smokeSubsetExamples.includes("fs-advanced") &&
+        !smokeSubsetExamples.includes("wasi") &&
+        !smokeSubsetExamples.includes("inspector"),
+      "Non-promoted desktop snippets must remain static/catalog-backed and clearly marked outside the Safe smoke subset.",
+    ),
+    check(
       "readme-acceptance",
       files.exampleReadme.text.includes("Required profile") &&
         files.exampleReadme.text.includes("Safe profile behavior") &&
@@ -308,10 +338,12 @@ function buildReport(repoRoot, files) {
       phase13TaskComplete: false,
       finalBlockerClosable,
       catalogReady: snippetScenarios.every((entry) => entry.status === "ready"),
+      examplePolicyLinksReady: checkById(checks, "example-policy-links").passed,
       defaultSmokeEnabled: false,
       smokeSubsetEnabled: smokeSubsetReady,
       smokeSubsetExamples,
       highRiskSnippetsStatic: true,
+      nonPromotedSnippetsStatic: checkById(checks, "non-promoted-snippets-static").passed,
       packagedRuntimePromoted: false,
       grantsAuthority: false,
       targetProfile: "desktop_compat_opt_in",
@@ -400,6 +432,10 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function includesAll(text, values) {
