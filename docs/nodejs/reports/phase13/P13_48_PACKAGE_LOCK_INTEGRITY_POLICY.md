@@ -14,6 +14,9 @@ cleanup, and corruption recovery behavior.
   SHA-512 SSRI-style integrity, signature scheme
   `autojs6-package-signature-v1`, rollback, cache cleanup, and corruption
   recovery requirements.
+- The policy and runtime profile expose machine-readable recovery actions for
+  verify, stale transaction prune, reinstall from a verified source, transaction
+  snapshot restore, and disabling unsigned plugin/native subjects.
 - `packageIntegrityProfile` exposes the policy as read-only diagnostics through
   `require("autojs6:profile")`.
 - The Android local package store advertises the same policy through

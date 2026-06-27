@@ -12,6 +12,13 @@ object NodePackageIntegrityPolicy {
     const val HASH_ALGORITHM = "sha512"
     const val HASH_FORMAT = "ssri_sha512_base64"
     const val SIGNATURE_SCHEME = "autojs6-package-signature-v1"
+    private val RECOVERY_ACTIONS = listOf(
+        "verify_package_integrity",
+        "prune_stale_transactions",
+        "reinstall_from_verified_source",
+        "restore_previous_transaction_snapshot",
+        "disable_unsigned_plugin_or_native_subject",
+    )
 
     private val subjects = listOf(
         SubjectPolicy(
@@ -51,6 +58,8 @@ object NodePackageIntegrityPolicy {
 
     fun subjectIds(): List<String> = subjects.map { it.id }
 
+    fun recoveryActions(): List<String> = RECOVERY_ACTIONS
+
     fun toJson(): JSONObject = JSONObject()
         .put("schema", SCHEMA)
         .put("status", STATUS)
@@ -65,6 +74,7 @@ object NodePackageIntegrityPolicy {
         .put("rollback", rollbackPolicy())
         .put("cacheCleanup", cacheCleanupPolicy())
         .put("corruptionRecovery", corruptionRecoveryPolicy())
+        .put("recoveryActions", JSONArray(RECOVERY_ACTIONS))
         .put("subjects", JSONArray(subjects.map { it.toJson() }))
         .put("unsafePackageExecution", false)
         .put("rawRegistryInstall", false)
@@ -91,6 +101,7 @@ object NodePackageIntegrityPolicy {
         .put("mismatchBlocksLoad", true)
         .put("reinstallRequired", true)
         .put("rawCacheRepair", false)
+        .put("actions", JSONArray(RECOVERY_ACTIONS))
 
     data class SubjectPolicy(
         val id: String,

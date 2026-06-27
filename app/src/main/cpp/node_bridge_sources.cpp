@@ -9732,6 +9732,13 @@ std::string buildEmbeddedScriptExecutionSource(
         cacheCleanup: "staging_prune_and_reinstall_required",
         corruptionRecovery: "verify_mismatch_reinstall_required",
         lockfileAuthority: "host_managed_required",
+        recoveryActions: Object.freeze([
+          "verify_package_integrity",
+          "prune_stale_transactions",
+          "reinstall_from_verified_source",
+          "restore_previous_transaction_snapshot",
+          "disable_unsigned_plugin_or_native_subject"
+        ]),
         subjects: Object.freeze([
           "android_package_manager",
           "plugin_packages",

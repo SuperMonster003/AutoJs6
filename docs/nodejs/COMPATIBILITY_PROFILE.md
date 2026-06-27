@@ -1360,9 +1360,12 @@ exposes `autojs6:profile.packageIntegrityProfile`, backed by
 policy for Android package manager, plugin packages, and native addon
 artifacts. Android local store rollback, stale transaction prune, corruption
 detection, and reinstall/update recovery are covered by focused
-instrumentation. Unsigned plugin install, unsigned native addon load, raw
-registry install, lifecycle scripts, postinstall downloads, and unverified
-cache reuse remain fail-closed.
+instrumentation. The profile exposes recovery action hints for integrity
+verification, stale transaction pruning, reinstall from a verified source,
+transaction snapshot restore, and disabling unsigned plugin/native subjects.
+Unsigned plugin install, unsigned native addon load, raw registry install,
+lifecycle scripts, postinstall downloads, and unverified cache reuse remain
+fail-closed.
 
 P13-49 records profile selection UX and diagnostics as partial. The runtime
 exposes `autojs6:profile.profileSelection`, backed by

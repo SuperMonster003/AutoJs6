@@ -1725,6 +1725,8 @@ P13 task 本身使用以下执行状态：
       `packageIntegrityProfile` 诊断，统一记录 Android package manager、
       plugin packages、native addons 的 lock/hash/signature/rollback/cache
       cleanup/corruption recovery 策略。
+    - `packageIntegrityProfile.recoveryActions` 暴露 verify/prune/reinstall/
+      transaction restore/disable unsigned subject 的机器可读恢复动作。
     - Android local store 已将 policy 暴露到 `nativeValues()`，并通过 focused
       instrumentation 覆盖 integrity mismatch rollback、stale transaction
       prune、corruption detection 与 reinstall/update recovery。

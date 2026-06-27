@@ -245,6 +245,7 @@ declare namespace AutoJs6Node {
     readonly cacheCleanup: "staging_prune_and_reinstall_required" | string;
     readonly corruptionRecovery: "verify_mismatch_reinstall_required" | string;
     readonly lockfileAuthority: "host_managed_required" | string;
+    readonly recoveryActions: readonly string[];
     readonly subjects: readonly string[];
     readonly unsafePackageExecution: boolean;
     readonly rawRegistryInstall: boolean;

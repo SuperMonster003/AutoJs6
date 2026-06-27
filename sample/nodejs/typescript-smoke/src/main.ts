@@ -688,6 +688,7 @@ async function smoke(): Promise<void> {
   const pluginSystemProfileNative: boolean = autojsProfile.pluginSystemProfile.nativeAddonLoading;
   const packageIntegrityProfileStatus: string = autojsProfile.packageIntegrityProfile.status;
   const packageIntegrityProfileHash: string = autojsProfile.packageIntegrityProfile.hashAlgorithm;
+  const packageIntegrityProfileRecoveryActions: readonly string[] = autojsProfile.packageIntegrityProfile.recoveryActions;
   const packageIntegrityProfileSubjects: readonly string[] = autojsProfile.packageIntegrityProfile.subjects;
   const packageIntegrityProfileUnsignedNative: boolean = autojsProfile.packageIntegrityProfile.unsignedNativeAddonLoad;
   const profileSelectionStatus: string = autojsProfile.profileSelection.status;
@@ -1046,6 +1047,7 @@ async function smoke(): Promise<void> {
   void pluginSystemProfileNative;
   void packageIntegrityProfileStatus;
   void packageIntegrityProfileHash;
+  void packageIntegrityProfileRecoveryActions;
   void packageIntegrityProfileSubjects;
   void packageIntegrityProfileUnsignedNative;
   void profileSelectionStatus;

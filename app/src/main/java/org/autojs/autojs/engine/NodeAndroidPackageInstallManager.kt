@@ -289,6 +289,7 @@ class NodeAndroidPackageInstallManager(
         "package_integrity_policy.rollback" to "staging_restore_previous_on_failure",
         "package_integrity_policy.cache_cleanup" to "staging_prune_and_reinstall_required",
         "package_integrity_policy.corruption_recovery" to "verify_mismatch_reinstall_required",
+        "package_integrity_policy.recovery_actions" to NodePackageIntegrityPolicy.recoveryActions().joinToString(","),
         "package_integrity_policy.subjects" to NodePackageIntegrityPolicy.subjectIds().joinToString(","),
         "package_integrity_policy.raw_registry_install" to "disabled",
         "package_integrity_policy.unsigned_plugin_install" to "disabled",

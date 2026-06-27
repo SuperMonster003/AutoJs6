@@ -51,6 +51,11 @@ class NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest {
         assertTrue(policy.getJSONObject("corruptionRecovery").getBoolean("mismatchBlocksLoad"))
         assertTrue(policy.getJSONObject("corruptionRecovery").getBoolean("reinstallRequired"))
         assertEquals(
+            "verify_package_integrity,prune_stale_transactions,reinstall_from_verified_source," +
+                "restore_previous_transaction_snapshot,disable_unsigned_plugin_or_native_subject",
+            policy.getJSONArray("recoveryActions").joinStrings(),
+        )
+        assertEquals(
             listOf("android_package_manager", "plugin_packages", "native_addons"),
             policy.getJSONArray("subjects").toSubjectIds(),
         )
@@ -67,6 +72,11 @@ class NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest {
         assertEquals("staging_restore_previous_on_failure", nativeValues["package_integrity_policy.rollback"])
         assertEquals("staging_prune_and_reinstall_required", nativeValues["package_integrity_policy.cache_cleanup"])
         assertEquals("verify_mismatch_reinstall_required", nativeValues["package_integrity_policy.corruption_recovery"])
+        assertEquals(
+            "verify_package_integrity,prune_stale_transactions,reinstall_from_verified_source," +
+                "restore_previous_transaction_snapshot,disable_unsigned_plugin_or_native_subject",
+            nativeValues["package_integrity_policy.recovery_actions"],
+        )
         assertEquals(
             "android_package_manager,plugin_packages,native_addons",
             nativeValues["package_integrity_policy.subjects"],
@@ -147,6 +157,7 @@ class NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest {
                   packageIntegrityProfile.cacheCleanup,
                   packageIntegrityProfile.corruptionRecovery,
                   packageIntegrityProfile.lockfileAuthority,
+                  packageIntegrityProfile.recoveryActions.join(","),
                   packageIntegrityProfile.subjects.join(","),
                   packageIntegrityProfile.unsafePackageExecution,
                   packageIntegrityProfile.rawRegistryInstall,
@@ -157,6 +168,7 @@ class NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest {
                   packageIntegrityProfile.unverifiedCacheReuse,
                   Object.isFrozen(packageIntegrityProfile),
                   Object.isFrozen(packageIntegrityProfile.targetProfiles),
+                  Object.isFrozen(packageIntegrityProfile.recoveryActions),
                   Object.isFrozen(packageIntegrityProfile.subjects)
                 ].join("|"));
             """.trimIndent(),
@@ -176,8 +188,11 @@ class NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest {
                     "denied_until_signed_packaged_artifacts|autojs6-package-signature-v1|" +
                     "required_before_plugin_native_promotion|staging_restore_previous_on_failure|" +
                     "staging_prune_and_reinstall_required|verify_mismatch_reinstall_required|" +
-                    "host_managed_required|android_package_manager,plugin_packages,native_addons|" +
-                    "false|false|false|false|false|false|false|true|true|true",
+                    "host_managed_required|verify_package_integrity,prune_stale_transactions," +
+                    "reinstall_from_verified_source,restore_previous_transaction_snapshot," +
+                    "disable_unsigned_plugin_or_native_subject|" +
+                    "android_package_manager,plugin_packages,native_addons|" +
+                    "false|false|false|false|false|false|false|true|true|true|true",
             ),
         )
     }
@@ -232,5 +247,9 @@ class NodePackageLockIntegrityPolicyPhase13DecisionInstrumentationTest {
 
     private fun JSONArray.toSubjectIds(): List<String> {
         return (0 until length()).map { index -> getJSONObject(index).getString("id") }
+    }
+
+    private fun JSONArray.joinStrings(): String {
+        return (0 until length()).joinToString(",") { index -> getString(index) }
     }
 }
