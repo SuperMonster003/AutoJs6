@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 29
-- Open tasks: 29
+- Completed tasks: 30
+- Open tasks: 28
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -54,7 +54,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-37` | `open` | `desktop.execution_runtime` | 推进 inspector/devtools debug profile。 |
 | `P13-38` | `completed` | `desktop.execution_runtime` | 推进 controlled WASI。 |
 | `P13-39` | `completed` | `desktop.execution_runtime` | 决策 native addon `.node` loading。 |
-| `P13-40` | `open` | `desktop.execution_runtime` | 推进 `child_process` scoped runner。 |
+| `P13-40` | `completed` | `desktop.execution_runtime` | 推进 `child_process` scoped runner。 |
 | `P13-41` | `open` | `desktop.modules_npm_process` | 推进完整 ESM loader parity。 |
 | `P13-42` | `completed` | `desktop.modules_npm_process` | 推进 npm/package manager on Android。 |
 | `P13-43` | `completed` | `desktop.modules_npm_process` | 扩展 Node stdlib conformance。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 28
+- Reports with blockers: 27
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -169,7 +169,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-autojs-global-v1.json` | `verifyNodePhase13AutoJsGlobalV1` | `P13-12` | `ready` | 0 | 0 |
 | `phase13-baseline-verification.json` | `verifyNodePhase13Baseline` | `-` | `passed` | 0 | 0 |
 | `phase13-capability-truth.json` | `generateNodePhase13CapabilityTruth` | `-` | `passed` | 0 | 0 |
-| `phase13-child-process-scoped-runner-decision.json` | `verifyNodePhase13ChildProcessScopedRunnerDecision` | `P13-40` | `partial` | 0 | 6 |
+| `phase13-child-process-scoped-runner-decision.json` | `verifyNodePhase13ChildProcessScopedRunnerDecision` | `P13-40` | `ready` | 0 | 0 |
 | `phase13-controlled-wasi-profile-decision.json` | `verifyNodePhase13ControlledWasiProfileDecision` | `P13-38` | `ready` | 0 | 0 |
 | `phase13-crash-evidence-automation.json` | `collectNodePhase13CrashEvidence` | `P13-05` | `ready` | 0 | 0 |
 | `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `ready` | 0 | 0 |

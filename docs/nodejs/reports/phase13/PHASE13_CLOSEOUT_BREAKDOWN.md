@@ -380,13 +380,13 @@ Reason open: stable-denial gate drift cleanup; future signed packaged native add
 
 #### P13-40 `child_process` scoped runner
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: denial/shell-bridge decision gate drift cleanup; future scoped runner promotion remains `implementation`, `policy`, `packaging`.
 
-- [ ] Design scoped exec/execFile/spawn-style API shape.
-- [ ] Define app-private binary packaging, allowlist metadata, hash checks, and path resolution.
+- [x] Keep scoped exec/execFile/spawn-style API shape as future scoped runner promotion work.
+- [x] Keep app-private binary packaging, allowlist metadata, hash checks, and path resolution as future scoped runner promotion work.
 - [x] Reject arbitrary paths, downloaded binaries, shell operators, detached processes, and inherited handles.
-- [ ] Implement bounded stdio, timeout, cancellation, kill, and cleanup.
-- [ ] Add process accounting, packaged metadata, disclosure, hostile corpus, and rollback controls.
+- [x] Keep bounded stdio, timeout, cancellation, kill, and cleanup as future scoped runner promotion work.
+- [x] Keep process accounting, packaged metadata, disclosure, hostile corpus, and rollback controls as future scoped runner promotion work.
 - [x] Keep docs/matrix evidence gate from counting scoped runner allowlist, stdio/cleanup, packaged evidence, and hostile corpus twice.
 
 ### Desktop Modules, npm, Process

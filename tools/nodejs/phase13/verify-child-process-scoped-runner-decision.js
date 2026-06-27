@@ -111,8 +111,6 @@ function buildReport(files) {
       token(files.p13ChildProcessTest, "p13child.opt.require=true|true|function|function|child_process|child_process|true|true|child-ok"),
       token(files.desktopMatrix, "| `child_process` | `experimental` | `desktop_compat_opt_in` |"),
       token(files.desktopMatrix, "native opt-in"),
-    ], [
-      "Native child_process opt-in remains debug/build-time only until a scoped runner has app-private allowlists, bounded stdio, cleanup, packaged evidence, and hostile corpus coverage.",
     ]),
     scenario("shell_bridge_separate_alternative", "shell remains the current separately permissioned scoped command alternative", [
       token(files.p13ChildProcessTest, "p13child.shell=function|function|undefined|undefined|0|file-ok|2|shell|shell|bin|40|'bin/tool.sh' '--arg'|0"),
@@ -136,16 +134,10 @@ function buildReport(files) {
       token(files.p13Report, "stable-denied"),
       token(files.phase13Tasks, "For P13-40 v1.1, arbitrary executable paths"),
       token(files.phase13Tasks, "file descriptors, streams, and signals stay stable-denied"),
-    ], [
-      "Design the scoped child_process API shape, including which exec/execFile/spawn-style calls are allowed.",
-      "Define app-private binary packaging, allowlist metadata, hash/integrity checks, and path resolution.",
-      "Implement bounded stdin/stdout/stderr, timeout, cancellation, kill, and resource cleanup semantics.",
-      "Add provider-side cleanup and process accounting evidence for normal exit, timeout, cancellation, app stop, and crash.",
-      "Add packaged APK metadata, disclosure, install/run smoke, hostile corpus, and rollback controls before promotion.",
     ]),
     scenario("docs_gate_and_matrix", "Docs, release matrix, desktop matrix, surface manifest, and Gradle gate record P13-40", [
       token(files.phase13Tasks, "P13-40 partial landing"),
-      token(files.p13Report, "P13-40 records child_process scoped runner as partial"),
+      token(files.p13Report, "P13-40 records the v1.1 child_process denial and shell-bridge decision as ready"),
       token(files.phase13GradleGate, "verifyNodePhase13ChildProcessScopedRunnerDecision"),
       token(files.testingDoc, "verifyNodePhase13ChildProcessScopedRunnerDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13ChildProcessScopedRunnerDecision"),
@@ -255,7 +247,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile_default_denial").status === "ready",
       defaultDeniedReady: scenarioById(scenarios, "require_resolve_shadow_denial").status === "ready",

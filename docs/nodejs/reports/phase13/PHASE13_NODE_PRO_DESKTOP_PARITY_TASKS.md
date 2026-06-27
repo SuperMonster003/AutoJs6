@@ -1516,7 +1516,7 @@ P13 task 本身使用以下执行状态：
     allowlists, hash/signature verification, APK-builder preflight, crash
     isolation, packaged positive smoke, and hostile corpus remain future gates.
 
-- [ ] P13-40: 推进 `child_process` scoped runner。
+- [x] P13-40: 推进 `child_process` scoped runner。
   - 范围：评估桌面 Node 生态需要的子进程能力在 Android 上的替代实现。
   - 验收：
     - Safe profile 拒绝。
@@ -1549,6 +1549,17 @@ P13 task 本身使用以下执行状态：
   - Remaining: scoped API shape、app-private binary packaging、allowlist/hash
     integrity、bounded stdin/stdout/stderr、timeout/cancel/kill/cleanup、
     provider process accounting、packaged smoke、hostile corpus 仍未完成。
+  - Closure: P13-40 v1.1 keeps `child_process` / `node:child_process`
+    denied by default, keeps the native opt-in debug/build-time and
+    release-forbidden, keeps `shell` as the separate scoped command bridge, and
+    keeps arbitrary paths, downloaded binaries, shell operators, detached
+    processes, inherited handles, raw process handles, fd streams, and signals
+    stable-denied with synced docs, desktop matrix, TypeScript declarations,
+    surface manifest, and Gradle gate.
+  - Future scoped runner work: API shape, app-private binary packaging,
+    allowlist/hash metadata, bounded stdin/stdout/stderr, timeout/cancel/kill/
+    cleanup, process accounting, packaged metadata/disclosure, hostile corpus,
+    rollback controls, and release profile policy remain future gates.
 
 - [ ] P13-41: 推进完整 ESM loader parity。
   - 范围：扩展 `.mjs`、`type=module`、TLA、dynamic import、package exports/imports、

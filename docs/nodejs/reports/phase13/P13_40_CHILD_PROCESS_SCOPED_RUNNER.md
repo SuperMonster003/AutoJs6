@@ -1,13 +1,14 @@
 # P13-40 Child Process Scoped Runner Decision
 
-P13-40 records child_process scoped runner as partial. The current Phase 13
+P13-40 records the v1.1 child_process denial and shell-bridge decision as ready
+while a promoted scoped runner remains future work. The current Phase 13
 decision is to expose diagnostics through `autojs6:profile.childProcessProfile`
 while keeping `require("child_process")`, `require("node:child_process")`,
-`require.resolve("child_process")`, and
-`require.resolve("node:child_process")` denied by default. A debug/build-time
-Desktop compatibility experiment can route those specifiers to Node's native
-builtin when `autojs.nodejs.child_process.experimental=true`; this opt-in is
-release-forbidden and is not the stable Safe-profile command runner.
+`require.resolve("child_process")`, and `require.resolve("node:child_process")`
+denied by default. A debug/build-time Desktop compatibility experiment can
+route those specifiers to Node's native builtin when
+`autojs.nodejs.child_process.experimental=true`; this opt-in is release-
+forbidden and is not the stable Safe-profile command runner.
 
 ## Decision
 
@@ -61,7 +62,15 @@ Safe/default profile.
 - `verifyNodePhase13ChildProcessScopedRunnerDecision` records the host gate and
   writes `phase13-child-process-scoped-runner-decision.json` and `.md`.
 
-## Remaining Blockers
+## Closure
+
+The v1.1 gate closes because default child_process require/resolve denial,
+local shadow-package protection, release-forbidden debug native opt-in evidence,
+the separate `shell` bridge migration path, dangerous process-shape denials,
+docs, desktop matrix, surface manifest, TypeScript declarations, and Gradle
+gate are synchronized without introducing a supported scoped runner.
+
+## Future Work
 
 - Design the scoped child_process API shape, including which
   exec/execFile/spawn-style calls are allowed.
