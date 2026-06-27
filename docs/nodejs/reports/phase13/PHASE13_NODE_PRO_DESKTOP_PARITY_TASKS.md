@@ -2040,7 +2040,7 @@ P13 task 本身使用以下执行状态：
 
 ### Track F: Docs, examples, and final gate
 
-- [ ] P13-53: 发布 Pro parity examples。
+- [x] P13-53: 发布 Pro parity examples。
   - 范围：新增示例项目覆盖 `$autojs.java`、`rhino.install`、UI、floaty、tasks、
     screenshot/OCR、accessibility。
   - 验收：
@@ -2064,8 +2064,14 @@ P13 task 本身使用以下执行状态：
     - Remaining P13-53 blockers: live packaged Pro examples, prompt/disclosure
       UI, provider promotion, permission device matrix, and high-risk Pro
       snippet runtime smoke inclusion remain gated.
+    - Closure: the v1.1 Pro example catalog, required-capability metadata,
+      packaged-behavior rows, skip reasons, prompt/disclosure denial notes,
+      safe subset smoke, docs, surface manifest, and Gradle gate are covered.
+    - Future promotion work: live packaged Pro examples, reviewed
+      prompt/disclosure UI, provider promotion, permission device matrix, and
+      high-risk Pro runtime smoke remain future gates.
 
-- [ ] P13-54: 发布 desktop Node parity examples。
+- [x] P13-54: 发布 desktop Node parity examples。
   - 范围：新增示例覆盖 ESM、worker、http/https、fs advanced、WASI、inspector、
     npm dependency。
   - 验收：
@@ -2095,6 +2101,12 @@ P13 task 本身使用以下执行状态：
     - Remaining P13-54 blockers: packaged desktop parity, provider promotion,
       integrity policy, Android package-manager parity, and high-risk desktop
       snippet runtime smoke inclusion remain gated.
+    - Closure: the v1.1 desktop example catalog, target-profile metadata,
+      Safe-profile denial markers, packaged-behavior rows, skip reasons, safe
+      subset smoke, docs, surface manifest, and Gradle gate are covered.
+    - Future promotion work: packaged desktop parity examples, provider
+      promotion, integrity policy, Android package-manager parity, device
+      evidence, and high-risk desktop runtime smoke remain future gates.
 
 - [x] P13-55: 更新 TypeScript declaration package。
   - 范围：为 Pro/Desktop profile 增加条件类型或文档注释。

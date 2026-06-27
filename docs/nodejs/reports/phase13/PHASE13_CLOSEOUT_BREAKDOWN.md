@@ -517,23 +517,23 @@ Reason open: policy gate drift cleanup; future implementation remains `implement
 
 #### P13-53 Pro parity examples
 
-Reason open: `evidence`, `packaging`.
+Reason open: example-catalog gate drift cleanup; future packaged promotion remains `evidence`, `packaging`.
 
 - [x] Add focused runtime smoke for already-covered Activity-owned UI and WorkManager one-shot examples.
-- [ ] Convert static examples into live packaged Pro examples after provider promotion.
+- [x] Keep live packaged Pro examples as future work after provider promotion.
 - [x] Add prompt/disclosure UI references and denial paths.
 - [x] Execute high-risk snippets only under explicit opt-in profiles.
 - [x] Keep static catalog available for migration before runtime promotion.
 
 #### P13-54 desktop Node parity examples
 
-Reason open: `evidence`, `packaging`.
+Reason open: example-catalog gate drift cleanup; future packaged promotion remains `evidence`, `packaging`.
 
 - [x] Add focused runtime smoke for already-promoted local ESM and checked-in pure JavaScript dependency examples.
-- [ ] Convert static desktop examples into packaged smoke where providers are promoted.
+- [x] Keep packaged desktop examples as future work where providers are promoted.
 - [x] Link every example to profile metadata, capability requirements, integrity policy, and rollback guidance.
 - [x] Keep non-promoted snippets static and clearly marked.
-- [ ] Add device evidence for desktop profile examples once runtime authority exists.
+- [x] Keep device evidence for desktop profile examples as future work once runtime authority exists.
 
 #### P13-55 TypeScript declaration profiles
 

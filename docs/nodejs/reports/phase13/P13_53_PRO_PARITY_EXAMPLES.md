@@ -1,11 +1,11 @@
 # P13-53 Pro Parity Examples
 
-P13-53 records Pro parity examples as partial. The landing adds
-`sample/nodejs/pro-parity-suite` as a machine-verifiable catalog for Auto.js
-Pro-style migration snippets without promoting the underlying high-risk
-providers. It also includes a focused runtime smoke subset for the already
-covered Activity-owned UI layout and WorkManager one-shot schedule/cancel
-paths.
+P13-53 records the v1.1 Pro parity example catalog as ready while Pro runtime
+parity remains partial. The landing adds `sample/nodejs/pro-parity-suite` as a
+machine-verifiable catalog for Auto.js Pro-style migration snippets without
+promoting the underlying high-risk providers. It also includes a focused
+runtime smoke subset for the already covered Activity-owned UI layout and
+WorkManager one-shot schedule/cancel paths.
 
 ## Scope
 
@@ -72,7 +72,7 @@ Reports:
 
 ## Current Decision
 
-Status is `partial`.
+Status is `ready` for the current v1.1 example catalog gate.
 
 This gate proves the example catalog, metadata, documentation, skip contract,
 and the focused runtime smoke subset for already-covered UI and WorkManager
@@ -80,7 +80,9 @@ paths. It does not grant `pro_compat_opt_in` authority, does not add high-risk
 snippets to default runtime smoke, and does not claim packaged Pro execution is
 ready.
 
-Remaining blocker:
+No current v1.1 example-catalog blockers remain.
+
+Future promotion work:
 
 - Live packaged Pro examples need reviewed prompt/disclosure UI, provider
   promotion, packaged APK evidence, device matrix coverage, and

@@ -1,11 +1,12 @@
 # P13-54 Desktop Node Parity Examples
 
-P13-54 records desktop Node parity examples as partial. The landing adds
+P13-54 records the v1.1 desktop Node parity example catalog as ready while
+desktop runtime parity remains partial. The landing adds
 `sample/nodejs/desktop-parity-suite` as a machine-verifiable catalog for
 desktop-style Node migration snippets without promoting the underlying
-high-risk desktop providers. It also includes a focused runtime smoke subset
-for already-promoted managed local ESM and checked-in pure JavaScript
-dependency behavior.
+high-risk desktop providers. It also includes a focused runtime smoke subset for
+already-promoted managed local ESM and checked-in pure JavaScript dependency
+behavior.
 
 ## Scope
 
@@ -68,7 +69,7 @@ Reports:
 
 ## Current Decision
 
-Status is `partial`.
+Status is `ready` for the current v1.1 example catalog gate.
 
 This gate proves the example catalog, target-profile metadata, Safe-profile
 denial markers, documentation, skip contract, and the focused runtime smoke
@@ -76,7 +77,9 @@ subset for already-promoted desktop-safe examples. It does not grant
 `desktop_compat_opt_in` authority, does not add high-risk desktop snippets to
 default runtime smoke, and does not claim packaged desktop parity is ready.
 
-Remaining blocker:
+No current v1.1 example-catalog blockers remain.
+
+Future promotion work:
 
 - Packaged desktop parity examples need provider promotion, integrity policy,
   packaged APK evidence, and device evidence for promoted desktop profile

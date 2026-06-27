@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 22
-- Open tasks: 36
+- Completed tasks: 24
+- Open tasks: 34
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -67,8 +67,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-50` | `completed` | `security.rollback_privacy` | 扩展 security corpus for relaxed capabilities。 |
 | `P13-51` | `completed` | `security.rollback_privacy` | 增加 per-profile rollback playbook。 |
 | `P13-52` | `completed` | `security.rollback_privacy` | 增加 privacy and disclosure policy。 |
-| `P13-53` | `open` | `docs.examples.final_gate` | 发布 Pro parity examples。 |
-| `P13-54` | `open` | `docs.examples.final_gate` | 发布 desktop Node parity examples。 |
+| `P13-53` | `completed` | `docs.examples.final_gate` | 发布 Pro parity examples。 |
+| `P13-54` | `completed` | `docs.examples.final_gate` | 发布 desktop Node parity examples。 |
 | `P13-55` | `completed` | `docs.examples.final_gate` | 更新 TypeScript declaration package。 |
 | `P13-56` | `completed` | `docs.examples.final_gate` | 更新 migration and Pro9 comparison docs。 |
 | `P13-57` | `open` | `docs.examples.final_gate` | 发布 Phase 13 summary generator and final gate。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 35
+- Reports with blockers: 33
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -173,7 +173,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-controlled-wasi-profile-decision.json` | `verifyNodePhase13ControlledWasiProfileDecision` | `P13-38` | `partial` | 0 | 5 |
 | `phase13-crash-evidence-automation.json` | `collectNodePhase13CrashEvidence` | `P13-05` | `ready` | 0 | 0 |
 | `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `partial` | 0 | 1 |
-| `phase13-desktop-parity-examples.json` | `verifyNodePhase13DesktopParityExamples` | `P13-54` | `partial` | 0 | 1 |
+| `phase13-desktop-parity-examples.json` | `verifyNodePhase13DesktopParityExamples` | `P13-54` | `ready` | 0 | 0 |
 | `phase13-dgram-udp-decision.json` | `verifyNodePhase13DgramUdpDecision` | `P13-31` | `partial` | 0 | 2 |
 | `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `partial` | 0 | 3 |
 | `phase13-filesystem-advanced-apis.json` | `verifyNodePhase13FilesystemAdvancedApis` | `P13-33` | `partial` | 0 | 2 |
@@ -197,7 +197,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-plugin-system-parity-decision.json` | `verifyNodePhase13PluginSystemParityDecision` | `P13-46` | `ready` | 0 | 0 |
 | `phase13-privacy-disclosure-policy.json` | `verifyNodePhase13PrivacyDisclosurePolicy` | `P13-52` | `ready` | 0 | 0 |
 | `phase13-pro-entry-directives.json` | `verifyNodePhase13ProEntryDirectives` | `P13-11` | `partial` | 0 | 3 |
-| `phase13-pro-parity-examples.json` | `verifyNodePhase13ProParityExamples` | `P13-53` | `partial` | 0 | 1 |
+| `phase13-pro-parity-examples.json` | `verifyNodePhase13ProParityExamples` | `P13-53` | `ready` | 0 | 0 |
 | `phase13-process-parity-decision.json` | `verifyNodePhase13ProcessParityDecision` | `P13-44` | `ready` | 0 | 0 |
 | `phase13-process-worker-replacement-decision.json` | `verifyNodePhase13ProcessWorkerReplacementDecision` | `P13-35` | `ready` | 0 | 0 |
 | `phase13-profile-rollback-playbook.json` | `verifyNodePhase13ProfileRollbackPlaybook` | `P13-51` | `ready` | 0 | 0 |
