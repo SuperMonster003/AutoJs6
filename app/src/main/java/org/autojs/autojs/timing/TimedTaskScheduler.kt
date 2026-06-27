@@ -77,6 +77,10 @@ object TimedTaskScheduler {
     @JvmStatic
     fun scheduleTaskIfNeeded(context: Context, timedTask: TimedTask, force: Boolean) {
         val millis = timedTask.getNextTime(context)
+        if (millis < 0) {
+            TimedTaskManager.removeTask(timedTask)
+            return
+        }
         if (millis <= System.currentTimeMillis()) {
             runTask(context, timedTask)
             return

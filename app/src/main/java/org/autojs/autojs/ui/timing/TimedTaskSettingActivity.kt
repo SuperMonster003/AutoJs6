@@ -68,6 +68,8 @@ class TimedTaskSettingActivity : BaseActivity() {
     private lateinit var mDisposableTaskRadio: RadioButton
     private lateinit var mDailyTaskRadio: RadioButton
     private lateinit var mWeeklyTaskRadio: RadioButton
+    private lateinit var mMonthlyTaskRadio: RadioButton
+    private lateinit var mYearlyTaskRadio: RadioButton
     private lateinit var mRunOnBroadcastRadio: RadioButton
     private lateinit var mRunOnCustomBroadcast: RadioButton
     private lateinit var mCustomBroadcastAction: EditText
@@ -76,7 +78,18 @@ class TimedTaskSettingActivity : BaseActivity() {
     private lateinit var mDisposableTaskDate: TextView
     private lateinit var mDailyTaskTimePicker: TimePicker
     private lateinit var mWeeklyTaskTimePicker: TimePicker
+    private lateinit var mMonthlyTaskTimePicker: TimePicker
+    private lateinit var mYearlyTaskTimePicker: TimePicker
+    private lateinit var mMonthlyTaskDate: TextView
+    private lateinit var mYearlyTaskDate: TextView
     private lateinit var mWeeklyTaskContainer: LinearLayout
+    private lateinit var mRepeatEndContainer: LinearLayout
+    private lateinit var mRepeatEndGroup: RadioGroup
+    private lateinit var mRepeatEndForever: RadioButton
+    private lateinit var mRepeatEndUntilDate: RadioButton
+    private lateinit var mRepeatEndCount: RadioButton
+    private lateinit var mRepeatUntilDate: TextView
+    private lateinit var mRepeatCount: EditText
 
     private val mDayOfWeekCheckBoxes: MutableList<CheckBox> = ArrayList()
 
@@ -112,10 +125,49 @@ class TimedTaskSettingActivity : BaseActivity() {
         mDailyTaskTimePicker = binding.dailyTaskTimePicker.apply {
             setIs24HourView(true)
         }
+        mMonthlyTaskTimePicker = binding.monthlyTaskTimePicker.apply {
+            setIs24HourView(true)
+        }
+        mYearlyTaskTimePicker = binding.yearlyTaskTimePicker.apply {
+            setIs24HourView(true)
+        }
+        mMonthlyTaskDate = binding.monthlyTaskDate.apply {
+            text = DATE_FORMATTER.print(LocalDate.now())
+            setOnClickListener { showMonthlyTaskDatePicker() }
+        }
+        mYearlyTaskDate = binding.yearlyTaskDate.apply {
+            text = DATE_FORMATTER.print(LocalDate.now())
+            setOnClickListener { showYearlyTaskDatePicker() }
+        }
+        mRepeatEndContainer = binding.repeatEndContainer
+        mRepeatEndGroup = binding.repeatEndGroup
+        mRepeatEndForever = binding.repeatEndForever
+        mRepeatEndUntilDate = binding.repeatEndUntilDate
+        mRepeatEndCount = binding.repeatEndCount
+        mRepeatUntilDate = binding.repeatUntilDate.apply {
+            text = DATE_FORMATTER.print(LocalDate.now())
+            setOnClickListener {
+                mRepeatEndUntilDate.isChecked = true
+                showRepeatUntilDatePicker()
+            }
+        }
+        mRepeatCount = binding.repeatCount.apply {
+            setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) mRepeatEndCount.isChecked = true
+            }
+        }
+        mRepeatEndForever.isChecked = true
+        mRepeatEndGroup.setOnCheckedChangeListener { _, _ -> updateRepeatEndInputState() }
         mDailyTaskRadio = binding.dailyTaskRadio.apply {
             setUpRadioButton()
         }
         mWeeklyTaskRadio = binding.weeklyTaskRadio.apply {
+            setUpRadioButton()
+        }
+        mMonthlyTaskRadio = binding.monthlyTaskRadio.apply {
+            setUpRadioButton()
+        }
+        mYearlyTaskRadio = binding.yearlyTaskRadio.apply {
             setUpRadioButton()
         }
         mDisposableTaskRadio = binding.disposableTaskRadio.apply {
@@ -138,6 +190,8 @@ class TimedTaskSettingActivity : BaseActivity() {
         mToolbar.subtitle = mScriptFile.name
 
         setUpTaskSettings()
+        updateRepeatEndVisibility()
+        updateRepeatEndInputState()
 
         binding.scrollView.excludePaddingClippableViewFromBottomNavigationBar()
 
@@ -232,17 +286,72 @@ class TimedTaskSettingActivity : BaseActivity() {
             return
         }
         val time = LocalTime.fromMillisOfDay(timedTask.millis)
-        mDailyTaskTimePicker.hour = time.hourOfDay
-        mDailyTaskTimePicker.minute = time.minuteOfHour
-        mWeeklyTaskTimePicker.hour = time.hourOfDay
-        mWeeklyTaskTimePicker.minute = time.minuteOfHour
-        if (timedTask.isDaily) {
-            mDailyTaskRadio.isChecked = true
-        } else {
-            mWeeklyTaskRadio.isChecked = true
-            for (i in mDayOfWeekCheckBoxes.indices) {
-                mDayOfWeekCheckBoxes[i].isChecked = timedTask.hasDayOfWeek(this, i + 1)
+        setTimePickerValue(mDailyTaskTimePicker, time)
+        setTimePickerValue(mWeeklyTaskTimePicker, time)
+        setTimePickerValue(mMonthlyTaskTimePicker, time)
+        setTimePickerValue(mYearlyTaskTimePicker, time)
+        when {
+            timedTask.isDaily -> mDailyTaskRadio.isChecked = true
+            timedTask.isMonthly -> {
+                mMonthlyTaskRadio.isChecked = true
+                mMonthlyTaskDate.text = DATE_FORMATTER.print(createDateForDayOfMonth(timedTask.dayOfMonth))
             }
+            timedTask.isYearly -> {
+                mYearlyTaskRadio.isChecked = true
+                mYearlyTaskDate.text = DATE_FORMATTER.print(createDateForMonthDay(timedTask.monthOfYear, timedTask.dayOfMonth))
+            }
+            else -> {
+                mWeeklyTaskRadio.isChecked = true
+                for (i in mDayOfWeekCheckBoxes.indices) {
+                    mDayOfWeekCheckBoxes[i].isChecked = timedTask.hasDayOfWeek(this, i + 1)
+                }
+            }
+        }
+        setUpRepeatEnd(timedTask)
+    }
+
+    private fun setTimePickerValue(timePicker: TimePicker, time: LocalTime) {
+        timePicker.hour = time.hourOfDay
+        timePicker.minute = time.minuteOfHour
+    }
+
+    private fun createDateForDayOfMonth(dayOfMonth: Int): LocalDate {
+        val today = LocalDate.now()
+        val firstDay = LocalDate(today.year, 1, 1)
+        return firstDay.withDayOfMonth(dayOfMonth.coerceIn(1, 31))
+    }
+
+    private fun createDateForMonthDay(monthOfYear: Int, dayOfMonth: Int): LocalDate {
+        val today = LocalDate.now()
+        val month = monthOfYear.coerceIn(1, 12)
+        val year = when {
+            month == 2 && dayOfMonth == 29 -> findNearestLeapYear(today.year)
+            else -> today.year
+        }
+        val firstDay = LocalDate(year, month, 1)
+        val maxDay = firstDay.dayOfMonth().maximumValue
+        return firstDay.withDayOfMonth(dayOfMonth.coerceIn(1, maxDay))
+    }
+
+    private fun findNearestLeapYear(startYear: Int): Int {
+        return (startYear..startYear + 3).first { LocalDate(it, 2, 1).dayOfMonth().maximumValue == 29 }
+    }
+
+    private fun setUpRepeatEnd(timedTask: TimedTask) {
+        when (timedTask.endMode) {
+            TimedTask.END_MODE_UNTIL_DATE -> {
+                mRepeatEndUntilDate.isChecked = true
+                if (timedTask.endValue > 0) {
+                    mRepeatUntilDate.text = DATE_FORMATTER.print(timedTask.endValue)
+                }
+            }
+            TimedTask.END_MODE_COUNT -> {
+                mRepeatEndCount.isChecked = true
+                if (timedTask.endValue > 0) {
+                    mRepeatCount.setText(timedTask.endValue.toString())
+                }
+            }
+            else -> mRepeatEndForever.isChecked = true
         }
     }
 
@@ -264,6 +373,7 @@ class TimedTaskSettingActivity : BaseActivity() {
                 else -> post { collapse() }
             }
         }
+        updateRepeatEndVisibility()
         ViewUtils.hideSoftInput(mCustomBroadcastAction)
     }
 
@@ -275,6 +385,22 @@ class TimedTaskSettingActivity : BaseActivity() {
             }
         }
         throw IllegalStateException("findExpandableLayout: button = " + button + ", parent = " + parent + ", childCount = " + parent.childCount)
+    }
+
+    private fun updateRepeatEndVisibility() {
+        mRepeatEndContainer.visibility = when {
+            mDailyTaskRadio.isChecked || mWeeklyTaskRadio.isChecked || mMonthlyTaskRadio.isChecked || mYearlyTaskRadio.isChecked -> View.VISIBLE
+            else -> View.GONE
+        }
+    }
+
+    private fun updateRepeatEndInputState() {
+        val untilEnabled = mRepeatEndUntilDate.isChecked
+        val countEnabled = mRepeatEndCount.isChecked
+        mRepeatUntilDate.isEnabled = untilEnabled
+        mRepeatUntilDate.alpha = if (untilEnabled) 1.0f else 0.45f
+        mRepeatCount.isEnabled = countEnabled
+        mRepeatCount.alpha = if (countEnabled) 1.0f else 0.45f
     }
 
     private fun showDisposableTaskTimePicker() {
@@ -305,10 +431,44 @@ class TimedTaskSettingActivity : BaseActivity() {
         }.show(supportFragmentManager, "TimedTaskDatePickerDialog")
     }
 
+    private fun showMonthlyTaskDatePicker() {
+        showDatePicker(mMonthlyTaskDate.text.toString(), "MonthlyTaskDatePickerDialog") {
+            mMonthlyTaskDate.text = DATE_FORMATTER.print(it)
+        }
+    }
+
+    private fun showYearlyTaskDatePicker() {
+        showDatePicker(mYearlyTaskDate.text.toString(), "YearlyTaskDatePickerDialog") {
+            mYearlyTaskDate.text = DATE_FORMATTER.print(it)
+        }
+    }
+
+    private fun showRepeatUntilDatePicker() {
+        showDatePicker(mRepeatUntilDate.text.toString(), "RepeatUntilDatePickerDialog") {
+            mRepeatUntilDate.text = DATE_FORMATTER.print(it)
+        }
+    }
+
+    private fun showDatePicker(initialDate: String, tag: String, callback: (LocalDate) -> Unit) {
+        val date = DATE_FORMATTER.parseLocalDate(initialDate)
+        MaterialDatePickerDialog.newInstance(
+            /* callBack = */ { _, year, month, dayOfMonth -> callback(LocalDate(year, month + 1, dayOfMonth)) },
+            /* year = */ date.year,
+            /* monthOfYear = */ date.monthOfYear - 1,
+            /* dayOfMonth = */ date.dayOfMonth,
+        ).apply {
+            version = MaterialDatePickerDialog.Version.VERSION_2
+            ThemeColorHelper.setThemeColorPrimary(this, this@TimedTaskSettingActivity, true)
+            isThemeDark = ViewUtils.isNightModeYes(this@TimedTaskSettingActivity)
+        }.show(supportFragmentManager, tag)
+    }
+
     private fun createTimedTask(): TimedTask? = when {
         mDisposableTaskRadio.isChecked -> createDisposableTask()
         mDailyTaskRadio.isChecked -> createDailyTask()
-        else -> createWeeklyTask()
+        mWeeklyTaskRadio.isChecked -> createWeeklyTask()
+        mMonthlyTaskRadio.isChecked -> createMonthlyTask()
+        else -> createYearlyTask()
     }
 
     private fun createWeeklyTask(): TimedTask? {
@@ -323,12 +483,24 @@ class TimedTaskSettingActivity : BaseActivity() {
             return null
         }
         val time = LocalTime(mWeeklyTaskTimePicker.hour, mWeeklyTaskTimePicker.minute)
-        return TimedTask.weeklyTask(time, timeFlag, mScriptFile.path, default)
+        return applyRepeatEnd(TimedTask.weeklyTask(time, timeFlag, mScriptFile.path, default))
     }
 
-    private fun createDailyTask(): TimedTask {
+    private fun createDailyTask(): TimedTask? {
         val time = LocalTime(mDailyTaskTimePicker.hour, mDailyTaskTimePicker.minute)
-        return TimedTask.dailyTask(time, mScriptFile.path, ExecutionConfig())
+        return applyRepeatEnd(TimedTask.dailyTask(time, mScriptFile.path, ExecutionConfig()))
+    }
+
+    private fun createMonthlyTask(): TimedTask? {
+        val time = LocalTime(mMonthlyTaskTimePicker.hour, mMonthlyTaskTimePicker.minute)
+        val date = DATE_FORMATTER.parseLocalDate(mMonthlyTaskDate.text.toString())
+        return applyRepeatEnd(TimedTask.monthlyTask(time, date.dayOfMonth, mScriptFile.path, default))
+    }
+
+    private fun createYearlyTask(): TimedTask? {
+        val time = LocalTime(mYearlyTaskTimePicker.hour, mYearlyTaskTimePicker.minute)
+        val date = DATE_FORMATTER.parseLocalDate(mYearlyTaskDate.text.toString())
+        return applyRepeatEnd(TimedTask.yearlyTask(time, date.monthOfYear, date.dayOfMonth, mScriptFile.path, default))
     }
 
     private fun createDisposableTask(): TimedTask? {
@@ -343,6 +515,34 @@ class TimedTaskSettingActivity : BaseActivity() {
             return null
         }
         return TimedTask.disposableTask(dateTime, mScriptFile.path, default)
+    }
+
+    private fun applyRepeatEnd(task: TimedTask): TimedTask? {
+        when (mRepeatEndGroup.checkedRadioButtonId) {
+            R.id.repeat_end_until_date -> {
+                val date = DATE_FORMATTER.parseLocalDate(mRepeatUntilDate.text.toString())
+                if (date.isBefore(LocalDate.now())) {
+                    showToast(this, R.string.text_repeat_until_date_before_now)
+                    return null
+                }
+                task.endMode = TimedTask.END_MODE_UNTIL_DATE
+                task.endValue = date.toDateTimeAtStartOfDay().millis
+            }
+            R.id.repeat_end_count -> {
+                val count = mRepeatCount.text.toString().toIntOrNull() ?: 0
+                if (count <= 0) {
+                    mRepeatCount.error = getString(R.string.text_repeat_count_must_be_positive)
+                    return null
+                }
+                task.endMode = TimedTask.END_MODE_COUNT
+                task.endValue = count.toLong()
+            }
+            else -> {
+                task.endMode = TimedTask.END_MODE_FOREVER
+                task.endValue = 0
+            }
+        }
+        return task
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -394,6 +594,7 @@ class TimedTaskSettingActivity : BaseActivity() {
             showToast(this, R.string.text_already_created)
         } else {
             task.id = mTimedTask!!.id
+            task.finishedTimes = mTimedTask!!.finishedTimes
             updateTask(task)
         }
         finish()

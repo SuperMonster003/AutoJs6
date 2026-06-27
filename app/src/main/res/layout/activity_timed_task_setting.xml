@@ -257,6 +257,126 @@
                         </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
 
                         <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+                            android:id="@+id/monthly_task_radio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:paddingStart="16dp"
+                            android:text="@string/text_monthly_task"
+                            tools:ignore="RtlSymmetry" />
+
+                        <com.github.aakira.expandablelayout.ExpandableRelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:ael_expanded="false"
+                            app:ael_interpolator="fastOutSlowIn"
+                            app:ael_orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TimePicker
+                                    android:id="@+id/monthly_task_time_picker"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:timePickerMode="spinner" />
+
+                                <LinearLayout
+                                    android:id="@+id/monthly_task_date_container"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="36dp"
+                                    android:background="?selectableItemBackground"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal"
+                                    android:paddingTop="6dp"
+                                    android:paddingBottom="6dp">
+
+                                    <org.autojs.autojs.theme.widget.ThemeColorImageViewCompat
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_gravity="center_vertical"
+                                        android:gravity="center"
+                                        android:src="@drawable/ic_date_range_black_48dp" />
+
+                                    <TextView
+                                        android:id="@+id/monthly_task_date"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="36dp"
+                                        android:layout_marginStart="12dp"
+                                        android:gravity="center_vertical"
+                                        android:textColor="?android:textColorPrimary"
+                                        android:textSize="16sp" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                        </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
+
+                        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+                            android:id="@+id/yearly_task_radio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:paddingStart="16dp"
+                            android:text="@string/text_yearly_task"
+                            tools:ignore="RtlSymmetry" />
+
+                        <com.github.aakira.expandablelayout.ExpandableRelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:ael_expanded="false"
+                            app:ael_interpolator="fastOutSlowIn"
+                            app:ael_orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TimePicker
+                                    android:id="@+id/yearly_task_time_picker"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:timePickerMode="spinner" />
+
+                                <LinearLayout
+                                    android:id="@+id/yearly_task_date_container"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="36dp"
+                                    android:background="?selectableItemBackground"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal"
+                                    android:paddingTop="6dp"
+                                    android:paddingBottom="6dp">
+
+                                    <org.autojs.autojs.theme.widget.ThemeColorImageViewCompat
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_gravity="center_vertical"
+                                        android:gravity="center"
+                                        android:src="@drawable/ic_date_range_black_48dp" />
+
+                                    <TextView
+                                        android:id="@+id/yearly_task_date"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="36dp"
+                                        android:layout_marginStart="12dp"
+                                        android:gravity="center_vertical"
+                                        android:textColor="?android:textColorPrimary"
+                                        android:textSize="16sp" />
+
+                                </LinearLayout>
+
+                            </LinearLayout>
+
+                        </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
+
+                        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                             android:id="@+id/run_on_broadcast"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -452,6 +572,107 @@
                         </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
 
                     </RadioGroup>
+
+                    <LinearLayout
+                        android:id="@+id/repeat_end_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/text_repeat_end"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                            android:textColor="?android:textColorSecondary" />
+
+                        <RadioGroup
+                            android:id="@+id/repeat_end_group"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+                                android:id="@+id/repeat_end_forever"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingStart="16dp"
+                                android:text="@string/text_repeat_forever"
+                                tools:ignore="RtlSymmetry" />
+
+                            <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+                                android:id="@+id/repeat_end_until_date"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:paddingStart="16dp"
+                                android:text="@string/text_repeat_until_date"
+                                tools:ignore="RtlSymmetry" />
+
+                            <LinearLayout
+                                android:id="@+id/repeat_until_date_container"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="36dp"
+                                android:background="?selectableItemBackground"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingTop="6dp"
+                                android:paddingBottom="6dp">
+
+                                <org.autojs.autojs.theme.widget.ThemeColorImageViewCompat
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center_vertical"
+                                    android:gravity="center"
+                                    android:src="@drawable/ic_date_range_black_48dp" />
+
+                                <TextView
+                                    android:id="@+id/repeat_until_date"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="36dp"
+                                    android:layout_marginStart="12dp"
+                                    android:gravity="center_vertical"
+                                    android:textColor="?android:textColorPrimary"
+                                    android:textSize="16sp" />
+
+                            </LinearLayout>
+
+                            <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+                                android:id="@+id/repeat_end_count"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:paddingStart="16dp"
+                                android:text="@string/text_repeat_for_number_of_events"
+                                tools:ignore="RtlSymmetry" />
+
+                            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+                                android:id="@+id/repeat_count_container"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="36dp"
+                                android:layout_marginTop="6dp"
+                                android:hint="@string/text_repeat_count_times"
+                                app:expandedHintEnabled="false">
+
+                                <androidx.appcompat.widget.AppCompatEditText
+                                    android:id="@+id/repeat_count"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number"
+                                    android:maxLines="1"
+                                    android:text="1" />
+
+                            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+                        </RadioGroup>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 

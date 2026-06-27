@@ -14,6 +14,7 @@ import org.autojs.autojs.storage.database.BaseModel;
 import org.autojs.autojs6.R;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
@@ -34,6 +35,17 @@ public class TimedTask extends BaseModel {
     private static final int FLAG_EVERYDAY = 0x7F;
     private static final int REQUEST_CODE = 2000;
 
+    public static final int REPEAT_MODE_UNKNOWN = -1;
+    public static final int REPEAT_MODE_DISPOSABLE = 0;
+    public static final int REPEAT_MODE_DAILY = 1;
+    public static final int REPEAT_MODE_WEEKLY = 2;
+    public static final int REPEAT_MODE_MONTHLY = 3;
+    public static final int REPEAT_MODE_YEARLY = 4;
+
+    public static final int END_MODE_FOREVER = 0;
+    public static final int END_MODE_UNTIL_DATE = 1;
+    public static final int END_MODE_COUNT = 2;
+
     long mTimeFlag;
 
     boolean mScheduled;
@@ -48,6 +60,18 @@ public class TimedTask extends BaseModel {
 
     String mScriptPath;
 
+    int mRepeatMode = REPEAT_MODE_UNKNOWN;
+
+    int mEndMode = END_MODE_FOREVER;
+
+    long mEndValue = 0;
+
+    int mFinishedTimes = 0;
+
+    int mDayOfMonth = 0;
+
+    int mMonthOfYear = 0;
+
     private final Context mGlobalAppContext = GlobalAppContext.get();
 
     public TimedTask() {
@@ -61,10 +85,11 @@ public class TimedTask extends BaseModel {
         mDelay = config.getDelay();
         mLoopTimes = config.getLoopTimes();
         mInterval = config.getInterval();
+        mRepeatMode = inferRepeatMode(timeFlag);
     }
 
     public boolean isDisposable() {
-        return mTimeFlag == FLAG_DISPOSABLE;
+        return getRepeatMode() == REPEAT_MODE_DISPOSABLE;
     }
 
     public boolean isScheduled() {
@@ -84,16 +109,31 @@ public class TimedTask extends BaseModel {
         if (isDisposable()) {
             return mMillis;
         }
-        if (isDaily()) {
-            LocalTime time = LocalTime.fromMillisOfDay(mMillis);
-            long nextTimeMillis = time.toDateTimeToday().getMillis();
-            if (System.currentTimeMillis() > nextTimeMillis) {
-                return nextTimeMillis + TimeUnit.DAYS.toMillis(1);
-            }
-            return nextTimeMillis;
+        if (isRepeatCountReached()) {
+            return -1;
         }
-        return getNextTimeOfWeeklyTask(context);
+        long nextTime;
+        if (isDaily()) {
+            nextTime = getNextTimeOfDailyTask();
+        } else if (isWeekly()) {
+            nextTime = getNextTimeOfWeeklyTask(context);
+        } else if (isMonthly()) {
+            nextTime = getNextTimeOfMonthlyTask();
+        } else if (isYearly()) {
+            nextTime = getNextTimeOfYearlyTask();
+        } else {
+            nextTime = getNextTimeOfWeeklyTask(context);
+        }
+        return isWithinEndDate(nextTime) ? nextTime : -1;
+    }
 
+    private long getNextTimeOfDailyTask() {
+        LocalTime time = LocalTime.fromMillisOfDay(mMillis);
+        long nextTimeMillis = time.toDateTimeToday().getMillis();
+        if (System.currentTimeMillis() > nextTimeMillis) {
+            return nextTimeMillis + TimeUnit.DAYS.toMillis(1);
+        }
+        return nextTimeMillis;
     }
 
     @ScriptInterface
@@ -114,6 +154,61 @@ public class TimedTask extends BaseModel {
             nextTimeMillis += TimeUnit.DAYS.toMillis(1);
         }
         return -1;
+    }
+
+    private long getNextTimeOfMonthlyTask() {
+        DateTime now = DateTime.now();
+        DateTime nextTime = createMonthlyDateTime(now.getYear(), now.getMonthOfYear());
+        if (now.getMillis() > nextTime.getMillis()) {
+            DateTime nextMonth = now.plusMonths(1);
+            nextTime = createMonthlyDateTime(nextMonth.getYear(), nextMonth.getMonthOfYear());
+        }
+        return nextTime.getMillis();
+    }
+
+    private DateTime createMonthlyDateTime(int year, int monthOfYear) {
+        DateTime firstDay = new LocalDate(year, monthOfYear, 1).toDateTimeAtStartOfDay();
+        int dayOfMonth = normalizeDayOfMonth(firstDay);
+        return firstDay.withDayOfMonth(dayOfMonth).withMillisOfDay((int) mMillis);
+    }
+
+    private long getNextTimeOfYearlyTask() {
+        DateTime now = DateTime.now();
+        DateTime nextTime = createYearlyDateTime(now.getYear());
+        if (now.getMillis() > nextTime.getMillis()) {
+            nextTime = createYearlyDateTime(now.getYear() + 1);
+        }
+        return nextTime.getMillis();
+    }
+
+    private DateTime createYearlyDateTime(int year) {
+        int monthOfYear = mMonthOfYear <= 0 ? 1 : Math.min(mMonthOfYear, DateTimeConstants.DECEMBER);
+        DateTime firstDay = new LocalDate(year, monthOfYear, 1).toDateTimeAtStartOfDay();
+        int dayOfMonth = normalizeDayOfMonth(firstDay);
+        return firstDay.withDayOfMonth(dayOfMonth).withMillisOfDay((int) mMillis);
+    }
+
+    private int normalizeDayOfMonth(DateTime dateTime) {
+        int maxDay = dateTime.dayOfMonth().getMaximumValue();
+        int targetDay = mDayOfMonth <= 0 ? 1 : mDayOfMonth;
+        return Math.min(targetDay, maxDay);
+    }
+
+    private boolean isRepeatCountReached() {
+        return mEndMode == END_MODE_COUNT && mEndValue > 0 && mFinishedTimes >= mEndValue;
+    }
+
+    private boolean isWithinEndDate(long nextTimeMillis) {
+        if (nextTimeMillis < 0) {
+            return false;
+        }
+        if (mEndMode != END_MODE_UNTIL_DATE) {
+            return true;
+        }
+        if (mEndValue <= 0) {
+            return false;
+        }
+        return !new LocalDate(nextTimeMillis).isAfter(new LocalDate(mEndValue));
     }
 
     @ScriptInterface
@@ -191,7 +286,76 @@ public class TimedTask extends BaseModel {
     }
 
     public boolean isDaily() {
-        return mTimeFlag == FLAG_EVERYDAY;
+        return getRepeatMode() == REPEAT_MODE_DAILY;
+    }
+
+    public boolean isWeekly() {
+        return getRepeatMode() == REPEAT_MODE_WEEKLY;
+    }
+
+    public boolean isMonthly() {
+        return getRepeatMode() == REPEAT_MODE_MONTHLY;
+    }
+
+    public boolean isYearly() {
+        return getRepeatMode() == REPEAT_MODE_YEARLY;
+    }
+
+    public int getRepeatMode() {
+        if (mRepeatMode == REPEAT_MODE_UNKNOWN) {
+            mRepeatMode = inferRepeatMode(mTimeFlag);
+        }
+        return mRepeatMode;
+    }
+
+    public void setRepeatMode(int repeatMode) {
+        mRepeatMode = repeatMode;
+    }
+
+    public int getEndMode() {
+        return mEndMode;
+    }
+
+    public void setEndMode(int endMode) {
+        mEndMode = endMode;
+    }
+
+    public long getEndValue() {
+        return mEndValue;
+    }
+
+    public void setEndValue(long endValue) {
+        mEndValue = endValue;
+    }
+
+    public int getFinishedTimes() {
+        return mFinishedTimes;
+    }
+
+    public void setFinishedTimes(int finishedTimes) {
+        mFinishedTimes = finishedTimes;
+    }
+
+    public int getDayOfMonth() {
+        return mDayOfMonth;
+    }
+
+    public void setDayOfMonth(int dayOfMonth) {
+        mDayOfMonth = dayOfMonth;
+    }
+
+    public int getMonthOfYear() {
+        return mMonthOfYear;
+    }
+
+    public void setMonthOfYear(int monthOfYear) {
+        mMonthOfYear = monthOfYear;
+    }
+
+    public void notifyFinished() {
+        if (!isDisposable()) {
+            mFinishedTimes++;
+        }
     }
 
     public Intent createIntent() {
@@ -219,6 +383,12 @@ public class TimedTask extends BaseModel {
                 ", mInterval=" + mInterval +
                 ", mLoopTimes=" + mLoopTimes +
                 ", mMillis=" + mMillis +
+                ", mRepeatMode=" + getRepeatMode() +
+                ", mEndMode=" + mEndMode +
+                ", mEndValue=" + mEndValue +
+                ", mFinishedTimes=" + mFinishedTimes +
+                ", mDayOfMonth=" + mDayOfMonth +
+                ", mMonthOfYear=" + mMonthOfYear +
                 ", mScriptPath='" + mScriptPath + '\'' +
                 '}';
     }
@@ -232,10 +402,37 @@ public class TimedTask extends BaseModel {
     }
 
     public static TimedTask weeklyTask(LocalTime time, long timeFlag, String scriptPath, ExecutionConfig config) {
-        return new TimedTask(time.getMillisOfDay(), timeFlag, scriptPath, config);
+        TimedTask task = new TimedTask(time.getMillisOfDay(), timeFlag, scriptPath, config);
+        task.mRepeatMode = REPEAT_MODE_WEEKLY;
+        return task;
+    }
+
+    public static TimedTask monthlyTask(LocalTime time, int dayOfMonth, String scriptPath, ExecutionConfig config) {
+        TimedTask task = new TimedTask(time.getMillisOfDay(), FLAG_DISPOSABLE, scriptPath, config);
+        task.mRepeatMode = REPEAT_MODE_MONTHLY;
+        task.mDayOfMonth = dayOfMonth;
+        return task;
+    }
+
+    public static TimedTask yearlyTask(LocalTime time, int monthOfYear, int dayOfMonth, String scriptPath, ExecutionConfig config) {
+        TimedTask task = new TimedTask(time.getMillisOfDay(), FLAG_DISPOSABLE, scriptPath, config);
+        task.mRepeatMode = REPEAT_MODE_YEARLY;
+        task.mMonthOfYear = monthOfYear;
+        task.mDayOfMonth = dayOfMonth;
+        return task;
     }
 
     public boolean hasDayOfWeek(Context context, int dayOfWeek) {
         return (mTimeFlag & getDayOfWeekTimeFlag(context, dayOfWeek)) != 0;
+    }
+
+    private static int inferRepeatMode(long timeFlag) {
+        if (timeFlag == FLAG_DISPOSABLE) {
+            return REPEAT_MODE_DISPOSABLE;
+        }
+        if (timeFlag == FLAG_EVERYDAY) {
+            return REPEAT_MODE_DAILY;
+        }
+        return REPEAT_MODE_WEEKLY;
     }
 }

@@ -10,7 +10,7 @@ import org.autojs.autojs.timing.TimedTask;
 
 public class TimedTaskDatabase extends Database<TimedTask> {
 
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
     private static final String NAME = "TimedTaskDatabase";
 
     public TimedTaskDatabase(Context context) {
@@ -27,6 +27,12 @@ public class TimedTaskDatabase extends Database<TimedTask> {
         values.put("loop_times", model.getLoopTimes());
         values.put("millis", model.getMillis());
         values.put("script_path", model.getScriptPath());
+        values.put("repeat_mode", model.getRepeatMode());
+        values.put("end_mode", model.getEndMode());
+        values.put("end_value", model.getEndValue());
+        values.put("finished_times", model.getFinishedTimes());
+        values.put("day_of_month", model.getDayOfMonth());
+        values.put("month_of_year", model.getMonthOfYear());
         return values;
     }
 
@@ -41,7 +47,23 @@ public class TimedTaskDatabase extends Database<TimedTask> {
         task.setLoopTimes(cursor.getInt(5));
         task.setMillis(cursor.getLong(6));
         task.setScriptPath(cursor.getString(7));
+        task.setRepeatMode(getInt(cursor, "repeat_mode", TimedTask.REPEAT_MODE_UNKNOWN));
+        task.setEndMode(getInt(cursor, "end_mode", TimedTask.END_MODE_FOREVER));
+        task.setEndValue(getLong(cursor, "end_value", 0));
+        task.setFinishedTimes(getInt(cursor, "finished_times", 0));
+        task.setDayOfMonth(getInt(cursor, "day_of_month", 0));
+        task.setMonthOfYear(getInt(cursor, "month_of_year", 0));
         return task;
+    }
+
+    private static int getInt(Cursor cursor, String columnName, int defaultValue) {
+        int index = cursor.getColumnIndex(columnName);
+        return index < 0 ? defaultValue : cursor.getInt(index);
+    }
+
+    private static long getLong(Cursor cursor, String columnName, long defaultValue) {
+        int index = cursor.getColumnIndex(columnName);
+        return index < 0 ? defaultValue : cursor.getLong(index);
     }
 
     private static class SQLHelper extends SQLiteOpenHelper {
@@ -60,12 +82,33 @@ public class TimedTaskDatabase extends Database<TimedTask> {
                     "`interval` INTEGER, " +
                     "`loop_times` INTEGER, " +
                     "`millis` INTEGER, " +
-                    "`script_path` TEXT);");
+                    "`script_path` TEXT, " +
+                    "`repeat_mode` INTEGER DEFAULT -1, " +
+                    "`end_mode` INTEGER DEFAULT 0, " +
+                    "`end_value` INTEGER DEFAULT 0, " +
+                    "`finished_times` INTEGER DEFAULT 0, " +
+                    "`day_of_month` INTEGER DEFAULT 0, " +
+                    "`month_of_year` INTEGER DEFAULT 0);");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            /* Empty body. */
+            if (oldVersion < 4) {
+                addColumn(db, "repeat_mode", "INTEGER DEFAULT -1");
+                addColumn(db, "end_mode", "INTEGER DEFAULT 0");
+                addColumn(db, "end_value", "INTEGER DEFAULT 0");
+                addColumn(db, "finished_times", "INTEGER DEFAULT 0");
+                addColumn(db, "day_of_month", "INTEGER DEFAULT 0");
+                addColumn(db, "month_of_year", "INTEGER DEFAULT 0");
+            }
+        }
+
+        private void addColumn(SQLiteDatabase db, String name, String type) {
+            try {
+                db.execSQL("ALTER TABLE `" + TimedTask.TABLE + "` ADD COLUMN `" + name + "` " + type + ";");
+            } catch (Exception ignored) {
+                /* Ignored. */
+            }
         }
     }
 

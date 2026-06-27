@@ -1821,6 +1821,15 @@
     <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
     <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
     <string name="text_weekly_task">Weekly task</string>
+    <string name="text_monthly_task">Monthly task</string>
+    <string name="text_yearly_task">Yearly task</string>
+    <string name="text_repeat_end">Ends</string>
+    <string name="text_repeat_forever">Forever</string>
+    <string name="text_repeat_until_date">Until a date</string>
+    <string name="text_repeat_for_number_of_events">For a number of events</string>
+    <string name="text_repeat_count_times">Times</string>
+    <string name="text_repeat_count_must_be_positive">Times must be greater than 0</string>
+    <string name="text_repeat_until_date_before_now">End date should not be earlier than today</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_working_dir_path">Working directory path</string>
     <string name="text_write_secure_settings">Write security settings</string>

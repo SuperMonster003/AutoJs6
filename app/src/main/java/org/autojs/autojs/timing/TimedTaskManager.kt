@@ -182,7 +182,8 @@ object TimedTaskManager {
     @SuppressLint("CheckResult")
     fun notifyTaskFinished(id: Long) {
         val task = getTimedTask(id) ?: return
-        if (task.isDisposable) {
+        task.notifyFinished()
+        if (task.isDisposable || task.getNextTime(globalAppContext) < 0) {
             mTimedTaskDatabase.delete(task)
                 .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
         } else {

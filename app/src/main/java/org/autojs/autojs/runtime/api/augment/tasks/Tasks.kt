@@ -30,6 +30,7 @@ import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.now
+import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
 import org.mozilla.javascript.BaseFunction
@@ -37,7 +38,6 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
-import java.time.LocalDate
 import kotlin.math.pow
 
 @Suppress("unused", "UNUSED_PARAMETER")
@@ -45,8 +45,11 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     override val selfAssignmentFunctions = listOf(
         ::addTask.name,
+        ::addTimedTask.name,
         ::addDailyTask.name,
         ::addWeeklyTask.name,
+        ::addMonthlyTask.name,
+        ::addYearlyTask.name,
         ::addDisposableTask.name,
         ::addIntentTask.name,
         ::getTimedTask.name,
@@ -93,15 +96,22 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun addTimedTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
+            val (options) = argList
+            val opt = coerceObject(options, newNativeObject())
+
+            createTimedTask(scriptRuntime, opt, parseRepeatMode(opt))
+                .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun addDailyTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
             val (options) = argList
             val opt = coerceObject(options, newNativeObject())
 
-            TimedTask.dailyTask(
-                parseLocalTime(opt),
-                opt.acquire("path") { it.toRuntimePath(scriptRuntime) },
-                parseConfig(opt),
-            ).let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
+            createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_DAILY)
+                .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
         }
 
         @JvmStatic
@@ -110,12 +120,28 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val (options) = argList
             val opt = coerceObject(options, newNativeObject())
 
-            TimedTask.weeklyTask(
-                parseLocalTime(opt),
-                parseDayOfWeekTimeFlag(opt).toLong(),
-                opt.acquire("path") { it.toRuntimePath(scriptRuntime) },
-                parseConfig(opt),
-            ).let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
+            createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_WEEKLY)
+                .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun addMonthlyTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
+            val (options) = argList
+            val opt = coerceObject(options, newNativeObject())
+
+            createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_MONTHLY)
+                .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun addYearlyTask(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsAtMost(args, 1) { argList ->
+            val (options) = argList
+            val opt = coerceObject(options, newNativeObject())
+
+            createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_YEARLY)
+                .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
         }
 
         @JvmStatic
@@ -124,11 +150,8 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val (options) = argList
             val opt = coerceObject(options, newNativeObject())
 
-            TimedTask.disposableTask(
-                parseLocalDateTime(opt),
-                opt.acquire("path") { it.toRuntimePath(scriptRuntime) },
-                parseConfig(opt),
-            ).let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
+            createTimedTask(scriptRuntime, opt, TimedTask.REPEAT_MODE_DISPOSABLE)
+                .let { task -> taskFulfilled(scriptRuntime, addTaskRhino(task), opt) }
         }
 
         @JvmStatic
@@ -286,6 +309,87 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             loopTimes = config.inquire("loopTimes", ::coerceIntNumber, 1)
         }
 
+        private fun createTimedTask(scriptRuntime: ScriptRuntime, opt: NativeObject, repeatMode: Int): TimedTask {
+            val path = opt.acquire("path") { it.toRuntimePath(scriptRuntime) }
+            val config = parseConfig(opt)
+            return when (repeatMode) {
+                TimedTask.REPEAT_MODE_DISPOSABLE -> TimedTask.disposableTask(parseLocalDateTime(opt), path, config)
+                TimedTask.REPEAT_MODE_DAILY -> TimedTask.dailyTask(parseLocalTime(opt), path, config)
+                TimedTask.REPEAT_MODE_WEEKLY -> TimedTask.weeklyTask(parseLocalTime(opt), parseDayOfWeekTimeFlag(opt).toLong(), path, config)
+                TimedTask.REPEAT_MODE_MONTHLY -> TimedTask.monthlyTask(parseLocalTime(opt), parseDayOfMonth(opt), path, config)
+                TimedTask.REPEAT_MODE_YEARLY -> parseYearlyMonthDay(opt).let { (monthOfYear, dayOfMonth) ->
+                    TimedTask.yearlyTask(parseLocalTime(opt), monthOfYear, dayOfMonth, path, config)
+                }
+                else -> throw WrappedIllegalArgumentException("Unknown repeat mode: $repeatMode")
+            }.let { applyRepeatEnd(it, opt) }
+        }
+
+        private fun applyRepeatEnd(task: TimedTask, opt: NativeObject): TimedTask {
+            if (task.isDisposable) {
+                return task
+            }
+            when (parseEndMode(opt)) {
+                TimedTask.END_MODE_UNTIL_DATE -> {
+                    task.endMode = TimedTask.END_MODE_UNTIL_DATE
+                    task.endValue = parseRequiredEndDate(opt).toDateTimeAtStartOfDay().millis
+                }
+                TimedTask.END_MODE_COUNT -> {
+                    val times: Int = opt.inquire(listOf("times", "endCount", "count")) { coerceIntNumber(it) }
+                        ?: throw WrappedIllegalArgumentException("Property \"times\" or \"endCount\" is required when end mode is count")
+                    require(times > 0) { "Property \"times\" must be greater than 0" }
+                    task.endMode = TimedTask.END_MODE_COUNT
+                    task.endValue = times.toLong()
+                }
+                else -> {
+                    task.endMode = TimedTask.END_MODE_FOREVER
+                    task.endValue = 0L
+                }
+            }
+            return task
+        }
+
+        private fun parseRepeatMode(opt: NativeObject): Int {
+            val mode = opt.inquire(listOf("repeatMode", "repeat", "type", "mode"))
+                ?: throw WrappedIllegalArgumentException("Property \"repeatMode\" is required for tasks.addTimedTask")
+            return parseRepeatMode(mode)
+        }
+
+        private fun parseRepeatMode(mode: Any): Int = when (mode) {
+            is Number -> coerceIntNumber(mode)
+            else -> when (normalizeModeName(mode)) {
+                "disposable", "once", "onetime", "oneoff" -> TimedTask.REPEAT_MODE_DISPOSABLE
+                "daily", "day" -> TimedTask.REPEAT_MODE_DAILY
+                "weekly", "week" -> TimedTask.REPEAT_MODE_WEEKLY
+                "monthly", "month" -> TimedTask.REPEAT_MODE_MONTHLY
+                "yearly", "year", "annually", "annual" -> TimedTask.REPEAT_MODE_YEARLY
+                else -> throw WrappedIllegalArgumentException("Unknown repeat mode: ${mode.jsBrief()}")
+            }
+        }
+
+        private fun parseEndMode(opt: NativeObject): Int {
+            val mode = opt.inquire(listOf("endMode", "ends", "end", "repeatEnd"))
+            return when {
+                !mode.isJsNullish() -> parseEndMode(mode!!)
+                opt.inquire(listOf("untilDate", "until", "endDate")) != null -> TimedTask.END_MODE_UNTIL_DATE
+                opt.inquire(listOf("times", "endCount")) != null -> TimedTask.END_MODE_COUNT
+                else -> TimedTask.END_MODE_FOREVER
+            }
+        }
+
+        private fun parseEndMode(mode: Any): Int = when (mode) {
+            is Number -> coerceIntNumber(mode)
+            else -> when (normalizeModeName(mode)) {
+                "forever", "always", "never" -> TimedTask.END_MODE_FOREVER
+                "untildate", "until", "date" -> TimedTask.END_MODE_UNTIL_DATE
+                "count", "times", "number", "numberofevents", "fornumberofevents" -> TimedTask.END_MODE_COUNT
+                else -> throw WrappedIllegalArgumentException("Unknown end mode: ${mode.jsBrief()}")
+            }
+        }
+
+        private fun normalizeModeName(value: Any): String {
+            return coerceString(value).lowercase().replace(Regex("[\\s_-]"), "")
+        }
+
         private fun parseLocalTime(options: ScriptableObject): LocalTime {
             val dateTime = options.prop("time").takeUnless { it.isJsNullish() } ?: options.prop("date")
             return when {
@@ -308,10 +412,51 @@ class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
         }
 
+        private fun parseDayOfMonth(opt: NativeObject): Int {
+            val dayOfMonth: Int = opt.inquire(listOf("dayOfMonth", "day")) { coerceIntNumber(it) }
+                ?: opt.inquire("date") { parseLocalDate(it).dayOfMonth }
+                ?: LocalDate.now().dayOfMonth
+            require(dayOfMonth in 1..31) { "Property \"dayOfMonth\" must be between 1 and 31" }
+            return dayOfMonth
+        }
+
+        private fun parseYearlyMonthDay(opt: NativeObject): Pair<Int, Int> {
+            val date = opt.inquire("date") { parseLocalDate(it) } ?: LocalDate.now()
+            val monthOfYear: Int = opt.inquire(listOf("monthOfYear", "month")) { coerceIntNumber(it) } ?: date.monthOfYear
+            val dayOfMonth: Int = opt.inquire(listOf("dayOfMonth", "day")) { coerceIntNumber(it) } ?: date.dayOfMonth
+            require(monthOfYear in 1..12) { "Property \"monthOfYear\" must be between 1 and 12" }
+            require(dayOfMonth in 1..31) { "Property \"dayOfMonth\" must be between 1 and 31" }
+            return monthOfYear to dayOfMonth
+        }
+
+        private fun parseRequiredEndDate(opt: NativeObject): LocalDate {
+            val value = opt.inquire(listOf("untilDate", "until", "endDate"))
+                ?: throw WrappedIllegalArgumentException("Property \"untilDate\" or \"endDate\" is required when end mode is until date")
+            return parseLocalDate(value)
+        }
+
+        private fun parseLocalDate(date: Any?): LocalDate {
+            return when {
+                date.isJsNullish() -> LocalDate.now()
+                date is Number -> LocalDate(date.toLong())
+                date is NativeDate -> LocalDate(date.date)
+                date is String -> parseLocalDateString(date)
+                else -> throw WrappedIllegalArgumentException("Unknown localDate ${date.jsBrief()}")
+            }
+        }
+
+        private fun parseLocalDateString(date: String): LocalDate {
+            return runCatching { LocalDate.parse(date) }.getOrElse {
+                runCatching { LocalDateTime.parse(date).toLocalDate() }.getOrElse {
+                    throw WrappedIllegalArgumentException("Unknown localDate ${date.jsBrief()}")
+                }
+            }
+        }
+
         private fun parseDayOfWeekTimeFlag(opt: NativeObject): Int {
             var timeFlag = 0
 
-            val daysOfWeek: List<Any?> = opt.inquire("daysOfWeek", ::coerceArray, listOf(LocalDate.now().dayOfWeek.value % 7).toNativeArray())
+            val daysOfWeek: List<Any?> = opt.inquire("daysOfWeek", ::coerceArray, listOf(LocalDate.now().dayOfWeek % 7).toNativeArray())
             daysOfWeek.forEach { element ->
                 val eleString = coerceString(element)
                 val dayIndex = daysOfWeekFlatList.indexOf(eleString.lowercase()) % 7
