@@ -56,7 +56,7 @@ that keep broader Desktop behavior future work.
 ## Remaining Work
 
 - Broader module-by-module conformance needs hostile inputs, more edge cases,
-  and Android-specific unsupported behavior notes.
+  Android terminal/OS edge cases, and packaged lifecycle evidence.
 - Additional stdlib-dependent packages and broader connected differential
   dashboards remain future work beyond the current +3 fixed-fixture delta.
 - Full desktop parity still needs future policy for raw native handles, broad

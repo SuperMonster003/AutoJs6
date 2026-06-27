@@ -122,8 +122,18 @@ function buildReport(files) {
       token(files.coreBuiltinTest, "perfHooksAndDiagnosticsChannelExposeSafeRuntimeTelemetry"),
       token(files.coreBuiltinTest, "promiseAndWebPlatformSweepMatchesNode24SupportedSubset"),
     ], [
-      "Full desktop stdlib parity is not claimed; P13-43 records representative Safe subset conformance only.",
       "More module-by-module hostile inputs, Android terminal/OS edge cases, and packaged lifecycle evidence remain future work.",
+    ]),
+    scenario("android_differences_and_stable_denials", "Android differences and stable denials are documented without claiming desktop parity", [
+      token(files.p13Report, "Android differences are documented as stable for"),
+      token(files.p13Report, "os.setPriority"),
+      token(files.p13Report, "network interfaces"),
+      token(files.p13Report, "raw TTY mode"),
+      token(files.p13Report, "zlib/promises"),
+      token(files.p13Report, "node:test/reporters"),
+      token(files.desktopMatrix, "Android difference notes"),
+      token(files.desktopMatrix, "P13-43 records zlib/promises as a stable disabled gap"),
+      token(files.capabilityMatrix, "Full desktop stdlib parity, raw native handles, unrestricted network/OS behavior, broad terminal control"),
     ]),
     scenario("matrix_corpus_and_differential", "Builtin matrix, real npm corpus, and modern-core differential keep stdlib evidence connected to package compatibility", [
       token(files.runtimeCapabilities, "val limitedBuiltinModuleNames = listOf("),
@@ -164,7 +174,7 @@ function buildReport(files) {
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-43 stdlib conformance"),
     ], [
-      "P13-43 remains partial until every stdlib module has broader conformance, Android differences, and package-corpus deltas closed.",
+      "P13-43 remains partial until broader module-by-module conformance, Android terminal/OS edge cases, and packaged lifecycle evidence close.",
     ]),
   ];
 
@@ -227,6 +237,7 @@ function buildReport(files) {
       finalBlockerClosable,
       diagnosticProfileReady: scenarioById(scenarios, "diagnostic_profile").status === "ready",
       representativeModulesReady: scenarioById(scenarios, "representative_module_conformance").status !== "missing_evidence",
+      androidDifferencesDocumented: scenarioById(scenarios, "android_differences_and_stable_denials").status === "ready",
       matrixCorpusDifferentialReady: scenarioById(scenarios, "matrix_corpus_and_differential").status !== "missing_evidence",
       rawDesktopParityPromoted: false,
       processGetBuiltinModuleControlledPartial: true,

@@ -394,7 +394,7 @@ Reason open: `evidence`, `implementation`.
 - [ ] Expand module-by-module hostile input coverage.
 - [ ] Add Android terminal/OS edge cases and lifecycle evidence.
 - [x] Grow stdlib-dependent npm corpus and record pass-rate deltas.
-- [ ] Document per-module Android differences and stable denials.
+- [x] Document per-module Android differences and stable denials.
 
 #### P13-44 process/env/argv parity
 
