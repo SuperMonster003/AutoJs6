@@ -68,8 +68,6 @@ function buildReport(files) {
       token(files.rawNetworkTest, 'expectSync("dgram", () => require("dgram"), "ERR_AUTOJS6_BUILTIN_DISABLED")'),
       token(files.coreBuiltinTest, 'requireDenied("dgram")'),
       token(files.securityRegressionTest, '"require.dgram"'),
-    ], [
-      "No shape-only dgram facade is exposed in v1.1 because UDP client/server, bind, connect, recv, and send semantics lack provider evidence.",
     ]),
     scenario("multicast_broadcast_decision", "multicast, broadcast, and UDP server authority remain out of profile", [
       token(files.p13Report, "multicast and broadcast remain unavailable"),

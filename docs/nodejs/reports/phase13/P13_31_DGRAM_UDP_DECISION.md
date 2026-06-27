@@ -6,6 +6,8 @@ P13-31 records `dgram` / `node:dgram` as stable-denied for the current Node
 Profile v1.1 Desktop track. UDP is not promoted as a client, server, or
 shape-only facade in this phase because the required Android provider,
 packaged permission, socket lifecycle, and fd cleanup evidence is not present.
+The stable-denied no-facade boundary is covered by focused runtime and
+shadow-bypass tests; it is not counted as a separate provider-promotion blocker.
 
 ## Decision
 

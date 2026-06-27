@@ -289,6 +289,7 @@ Reason open: `policy`, `implementation`.
 - [ ] If promoted later, split unicast, server bind/listen, broadcast, multicast, and source-specific multicast capabilities.
 - [ ] Prove permission mapping, packet budgets, lifecycle cleanup, and packaged behavior.
 - [x] Keep local shadow bypass and raw socket authority denied until the provider exists.
+- [x] Keep the stable-denied no-shape-facade boundary from counting as separate provider evidence.
 - [x] Keep docs/matrix evidence gate from counting UDP permission, packaged, fd-leak, and lifecycle evidence twice.
 
 #### P13-32 filesystem profile relaxation
