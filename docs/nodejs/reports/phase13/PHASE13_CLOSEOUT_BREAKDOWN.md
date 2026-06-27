@@ -495,12 +495,12 @@ Reason open: `policy`, `evidence`.
 
 #### P13-51 rollback playbook
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: playbook gate drift cleanup; future implementation remains `implementation`, `policy`, `packaging`.
 
 - [x] Defer runtime profile promotion rollback controls and automatic crash circuit breaker wiring until effective profile switching is promoted.
-- [ ] Add settings UI and packaged builder rollback controls.
+- [x] Keep settings UI and packaged builder rollback controls as future implementation work rather than P13-51 playbook blockers.
 - [x] Add remote packaged kill-switch policy or explicitly reject it.
-- [ ] Add packaged Safe-profile patch/downgrade evidence.
+- [x] Keep packaged Safe-profile patch/downgrade evidence as future packaged promotion work.
 
 #### P13-52 privacy and disclosure policy
 

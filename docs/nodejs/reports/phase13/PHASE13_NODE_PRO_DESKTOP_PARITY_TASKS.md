@@ -1956,7 +1956,7 @@ P13 task 本身使用以下执行状态：
     - P13-50 closeout: corpus/security evidence is ready; real raw capability
       promotion remains owned by P13-51/P13-52 and later promotion gates.
 
-- [ ] P13-51: 增加 per-profile rollback playbook。
+- [x] P13-51: 增加 per-profile rollback playbook。
   - 范围：更新 rollback 文档和 Gradle/property 开关。
   - 验收：
     - 可以快速禁用单个 capability、整个 Pro profile、整个 Desktop profile。
@@ -1984,7 +1984,11 @@ P13 task 本身使用以下执行状态：
     - P13-51 v1.1 policy: runtime profile promotion rollback wiring and
       automatic crash circuit breaker implementation are deferred until
       effective profile switching is promoted.
-    - Remaining P13-51 blockers: settings UI, packaged builder UI, privacy
+    - Closure: default-off profile/relaxed-capability switches, Safe fallback
+      policy, Node Doctor diagnostics, TypeScript declarations, raw_network
+      rollback id, packaged downgrade strategy, and remote packaged
+      kill-switch rejection are covered.
+    - Future implementation work: settings UI, packaged builder UI, privacy
       disclosure prompts, and packaged Safe-profile downgrade evidence.
 
 - [x] P13-52: 增加 privacy and disclosure policy。

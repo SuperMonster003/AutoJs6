@@ -1,10 +1,11 @@
 # P13-51 Profile Rollback Playbook
 
-P13-51 records per-profile rollback playbook as partial. The current landing
-adds default-off Gradle switches for Pro/Desktop/Debug profile promotion and
-the relaxed-capability bundle, exposes a shared rollback policy through Kotlin,
-Node Doctor, and `autojs6:profile.profileRollbackPolicy`, and ties the evidence
-to a host verifier.
+P13-51 records per-profile rollback playbook as partial capability evidence.
+The P13-51 playbook gate is ready: the current landing adds default-off Gradle
+switches for Pro/Desktop/Debug profile promotion and the relaxed-capability
+bundle, exposes a shared rollback policy through Kotlin, Node Doctor, and
+`autojs6:profile.profileRollbackPolicy`, and ties the evidence to a host
+verifier.
 
 ## Covered
 
@@ -33,7 +34,7 @@ to a host verifier.
 - `verifyNodePhase13ProfileRollbackPlaybook` generates
   `phase13-profile-rollback-playbook.json` and `.md`.
 
-## Remaining Work
+## Future Implementation Work
 
 - Runtime profile promotion and user-selectable profile switching remain
   unpromoted.

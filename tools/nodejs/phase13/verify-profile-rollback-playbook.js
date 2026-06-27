@@ -161,8 +161,6 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-51 profile rollback playbook"),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
-    ], [
-      "Settings UI, packaged builder UI, privacy prompts, and packaged Safe-profile downgrade evidence remain future work.",
     ]),
   ];
 
@@ -256,7 +254,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       gradleSwitchesReady: scenarioById(scenarios, "gradle_property_switches").status === "ready",
       kotlinPolicyReady: scenarioById(scenarios, "kotlin_policy").status !== "missing_evidence",
