@@ -73,11 +73,13 @@ function buildReport(files) {
       token(files.profileSelectionDiagnostics, "fun fromWorkingDirectory"),
       token(files.profileSelectionDiagnostics, "fun failureHintForMissingCapabilities"),
       token(files.profileSelectionDiagnostics, "fun missingCapabilityMessage"),
+      token(files.profileSelectionDiagnostics, "declarationExamplesJson"),
       token(files.profileSelectionDiagnostics, 'put("effectiveProfile", SAFE_DEFAULT)'),
       token(files.profileSelectionDiagnostics, 'put("profilePromotion", false)'),
       token(files.profileSelectionDiagnostics, 'put("userSelectable", false)'),
       token(files.profileSelectionDiagnostics, 'put("highRiskCapabilities", JSONArray(highRiskCapabilitiesJson(declaredPermissions)))'),
       token(files.p13ProfileSelectionTest, "diagnosticsReportProjectPackageProfileSelectionAndFailureHints"),
+      token(files.p13ProfileSelectionTest, 'getJSONObject("declarationExamples")'),
       token(files.p13ProfileSelectionTest, "desktop_compat_opt_in"),
       token(files.p13ProfileSelectionTest, "debug_unsafe_lab"),
     ], [
@@ -88,6 +90,8 @@ function buildReport(files) {
       token(files.nodeBridgeSources, "profileSelection,"),
       token(files.nodeBridgeSources, "function __autojs6_profile_required_profile_for_capability"),
       token(files.nodeBridgeSources, "function __autojs6_profile_failure_hint_for_missing_capabilities"),
+      token(files.nodeBridgeSources, "function __autojs6_profile_declaration_examples"),
+      token(files.nodeBridgeSources, "declarationExamples: __autojs6_profile_declaration_examples(missing)"),
       token(files.nodeBridgeSources, 'schema: "autojs6-node-profile-selection-diagnostics-v1"'),
       token(files.nodeBridgeSources, 'selectionMode: "safe_default_effective_metadata_only"'),
       token(files.nodeBridgeSources, 'profilePromotion: false'),
@@ -98,11 +102,15 @@ function buildReport(files) {
       token(files.nodeBridgeSources, '__autojs6_define_error_property(error, "requiredProfiles", profileSelectionHint.requiredProfiles);'),
       token(files.nodeBridgeSources, '__autojs6_define_error_property(error, "profileSelectionHint", profileSelectionHint);'),
       token(files.typesAutojsGlobal, "export interface ProfileSelectionDiagnostics"),
+      token(files.typesAutojsGlobal, "export interface ProfileSelectionDeclarationExamples"),
       token(files.typesAutojsGlobal, "export interface AutoJsBridgeCapabilityNotDeclaredError"),
       token(files.typesAutojsGlobal, "readonly profileSelection: ProfileSelectionDiagnostics"),
+      token(files.typesAutojsGlobal, "readonly declarationExamples: ProfileSelectionDeclarationExamples"),
       token(files.typescriptSmoke, "autojsProfile.profileSelection.highRiskCapabilities"),
+      token(files.typescriptSmoke, "profileSelectionFailureHint.declarationExamples"),
       token(files.typescriptSmoke, "AutoJs6Node.AutoJsBridgeCapabilityNotDeclaredError"),
       token(files.p13ProfileSelectionTest, "runtimeProfileSelectionAndCapabilityErrorsExposeActionableHints"),
+      token(files.p13ProfileSelectionTest, "declarationExamples.projectJson.node.permissions"),
       token(files.p13ProfileSelectionTest, "p13profile.error="),
     ]),
     scenario("doctor_ux", "Node Doctor JSON and text reports include project/package profile selection and high-risk declarations", [
@@ -119,6 +127,7 @@ function buildReport(files) {
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-49", [
       token(files.phase13Tasks, "P13-49 partial landing"),
       token(files.p13Report, "P13-49 records profile selection UX and diagnostics as partial"),
+      token(files.p13Report, "declarationExamples"),
       token(files.phase13GradleGate, "verifyNodePhase13ProfileSelectionDiagnostics"),
       token(files.testingDoc, "verifyNodePhase13ProfileSelectionDiagnostics"),
       token(files.ciGatesDoc, "verifyNodePhase13ProfileSelectionDiagnostics"),
@@ -168,8 +177,9 @@ function buildReport(files) {
         errorBlock.includes('__autojs6_define_error_property(error, "requiredNodePermissions", profileSelectionHint.requiredNodePermissions);') &&
         errorBlock.includes('__autojs6_define_error_property(error, "requiredAndroidPermissions", profileSelectionHint.requiredAndroidPermissions);') &&
         errorBlock.includes('__autojs6_define_error_property(error, "profileSelectionHint", profileSelectionHint);') &&
-        files.nodeBridgeSources.text.includes("declare node.permissions"),
-      "Capability-not-declared errors must include profile, node permission, Android permission, and declaration hints.",
+        files.nodeBridgeSources.text.includes("declare node.permissions") &&
+        files.nodeBridgeSources.text.includes("declarationExamples"),
+      "Capability-not-declared errors must include profile, node permission, Android permission, declaration hints, and declaration examples.",
     ),
     check(
       "no-profile-promotion",

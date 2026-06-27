@@ -10836,6 +10836,24 @@ std::string buildEmbeddedScriptExecutionSource(
     }
     return message;
   }
+  function __autojs6_profile_declaration_examples(missingCapabilities) {
+    const nodePermissions = Object.freeze(missingCapabilities.slice());
+    return Object.freeze({
+      nodePermissions,
+      projectJson: Object.freeze({
+        node: Object.freeze({
+          permissions: Object.freeze(missingCapabilities.slice())
+        })
+      }),
+      packageJson: Object.freeze({
+        autojs6: Object.freeze({
+          node: Object.freeze({
+            permissions: Object.freeze(missingCapabilities.slice())
+          })
+        })
+      })
+    });
+  }
   function __autojs6_profile_failure_hint_for_missing_capabilities(moduleName, methodName, missingCapabilities) {
     const missing = Object.freeze(missingCapabilities.slice());
     const requiredProfiles = __autojs6_profile_required_profiles_for_capabilities(missing);
@@ -10850,7 +10868,8 @@ std::string buildEmbeddedScriptExecutionSource(
       requiredAndroidPermissions: androidPermissions,
       profileSelectionRequired: requiredProfiles.some(function(profile) { return profile !== "safe_default"; }),
       message: __autojs6_profile_missing_capability_message(moduleName, methodName, missing),
-      declarationHint: "Declare node.permissions/project autojs6.node.permissions for the missing capabilities; profile metadata is diagnostic-only until promotion is implemented."
+      declarationHint: "Declare node.permissions/project autojs6.node.permissions for the missing capabilities; profile metadata is diagnostic-only until promotion is implemented.",
+      declarationExamples: __autojs6_profile_declaration_examples(missing)
     });
   }
   function __autojs6_profile_catalog(requestedProfiles) {

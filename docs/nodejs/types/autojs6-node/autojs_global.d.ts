@@ -293,6 +293,22 @@ declare namespace AutoJs6Node {
     readonly releaseForbidden?: boolean;
   }
 
+  export interface ProfileSelectionDeclarationExamples {
+    readonly nodePermissions: readonly string[];
+    readonly projectJson: {
+      readonly node: {
+        readonly permissions: readonly string[];
+      };
+    };
+    readonly packageJson: {
+      readonly autojs6: {
+        readonly node: {
+          readonly permissions: readonly string[];
+        };
+      };
+    };
+  }
+
   export interface ProfileSelectionFailureHint {
     readonly schema: "autojs6-node-profile-selection-failure-hint-v1" | string;
     readonly module: string;
@@ -304,6 +320,7 @@ declare namespace AutoJs6Node {
     readonly profileSelectionRequired: boolean;
     readonly message: string;
     readonly declarationHint: string;
+    readonly declarationExamples: ProfileSelectionDeclarationExamples;
   }
 
   export interface ProfileSelectionFailureHints {

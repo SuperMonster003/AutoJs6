@@ -698,6 +698,8 @@ async function smoke(): Promise<void> {
     autojsProfile.profileSelection.highRiskCapabilities;
   const profileSelectionFailureHint: AutoJs6Node.ProfileSelectionFailureHint =
     autojsProfile.profileSelection.failureHints.capabilityNotDeclared;
+  const profileSelectionDeclarationExamples: AutoJs6Node.ProfileSelectionDeclarationExamples =
+    profileSelectionFailureHint.declarationExamples;
   const profileRollbackStatus: string = autojsProfile.profileRollbackPolicy.status;
   const profileRollbackTarget: string = autojsProfile.profileRollbackPolicy.rollbackTargetProfile;
   const profileRollbackProfileSwitches: Readonly<Record<string, string>> =
@@ -1055,6 +1057,7 @@ async function smoke(): Promise<void> {
   void profileSelectionRequested;
   void profileSelectionHighRisk;
   void profileSelectionFailureHint;
+  void profileSelectionDeclarationExamples;
   void profileRollbackStatus;
   void profileRollbackTarget;
   void profileRollbackProfileSwitches;

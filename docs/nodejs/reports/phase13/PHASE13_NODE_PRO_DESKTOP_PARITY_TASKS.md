@@ -1757,6 +1757,9 @@ P13 task 本身使用以下执行状态：
     - Missing bridge capability errors now expose `requiredProfiles`,
       `requiredNodePermissions`, `requiredAndroidPermissions`, and
       `profileSelectionHint`.
+    - Failure hints now include `declarationExamples` for
+      `node.permissions`, `project.json` (`node.permissions`), and
+      `package.json` (`autojs6.node.permissions`) declarations.
     - Current effective profile remains `safe_default`; requested
       `pro_compat_opt_in`, `desktop_compat_opt_in`, and `debug_unsafe_lab`
       metadata is diagnostic-only and does not grant authority.

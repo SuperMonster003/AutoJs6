@@ -61,6 +61,15 @@ class NodeProfileSelectionDiagnosticsPhase13DecisionInstrumentationTest {
         assertTrue(hint.getJSONArray("requiredNodePermissions").toString().contains("network"))
         assertTrue(hint.getJSONArray("requiredAndroidPermissions").toString().contains("android.permission.INTERNET"))
         assertTrue(hint.getString("message").contains("required profile: desktop_compat_opt_in"))
+        assertTrue(hint.getJSONObject("declarationExamples").getJSONArray("nodePermissions").toString().contains("network"))
+        assertTrue(
+            hint.getJSONObject("declarationExamples")
+                .getJSONObject("projectJson")
+                .getJSONObject("node")
+                .getJSONArray("permissions")
+                .toString()
+                .contains("network"),
+        )
     }
 
     @Test
@@ -98,7 +107,14 @@ class NodeProfileSelectionDiagnosticsPhase13DecisionInstrumentationTest {
                       error && error.profileSelectionHint ? error.profileSelectionHint.effectiveProfile : "",
                       error && error.profileSelectionHint ? error.profileSelectionHint.profileSelectionRequired : "",
                       String(error && error.message || "").indexOf("required profile: pro_compat_opt_in") >= 0,
-                      Object.isFrozen(error && error.profileSelectionHint)
+                      error && error.profileSelectionHint && error.profileSelectionHint.declarationExamples
+                        ? error.profileSelectionHint.declarationExamples.projectJson.node.permissions.join(",")
+                        : "",
+                      Object.isFrozen(error && error.profileSelectionHint),
+                      Object.isFrozen(error && error.profileSelectionHint && error.profileSelectionHint.declarationExamples),
+                      Object.isFrozen(error && error.profileSelectionHint && error.profileSelectionHint.declarationExamples.nodePermissions),
+                      Object.isFrozen(error && error.profileSelectionHint && error.profileSelectionHint.declarationExamples.projectJson.node.permissions),
+                      Object.isFrozen(error && error.profileSelectionHint && error.profileSelectionHint.declarationExamples.packageJson.autojs6.node.permissions)
                     ].join("|"));
                   }
                 })();
@@ -125,7 +141,7 @@ class NodeProfileSelectionDiagnosticsPhase13DecisionInstrumentationTest {
             result.stdout,
             result.stdout.contains(
                 "p13profile.error=${NodeRuntimeErrorCodes.BRIDGE_CAPABILITY_NOT_DECLARED}|" +
-                    "pro_compat_opt_in|accessibility||safe_default|true|true|true",
+                    "pro_compat_opt_in|accessibility||safe_default|true|true|accessibility|true|true|true|true|true",
             ),
         )
     }

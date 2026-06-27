@@ -1373,7 +1373,10 @@ exposes `autojs6:profile.profileSelection`, backed by
 profiles, declared Node permissions, Android permission synthesis, high-risk
 capability rows, blocked profile promotions, and failure hints. Missing bridge
 capability errors now include `requiredProfiles`, `requiredNodePermissions`,
-`requiredAndroidPermissions`, and `profileSelectionHint`. The effective
+`requiredAndroidPermissions`, and `profileSelectionHint` with
+`declarationExamples` snippets for `node.permissions`,
+`project.json#node.permissions`, and
+`package.json#autojs6.node.permissions`. The effective
 profile remains `safe_default`; requested Pro/Desktop/Debug metadata is
 diagnostic-only and does not grant authority.
 
@@ -2192,7 +2195,8 @@ Examples:
 - closed or non-owned scoped FileHandle descriptor: `code=EBADF`
 - undeclared bridge capability: `code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED`
   with P13-49 `requiredProfiles`, `requiredNodePermissions`,
-  `requiredAndroidPermissions`, and `profileSelectionHint` diagnostics.
+  `requiredAndroidPermissions`, and `profileSelectionHint.declarationExamples`
+  diagnostics.
 - cancelled bridge call: `code=ERR_AUTOJS6_BRIDGE_CANCELLED`, `autojs6Code=ERR_AUTOJS6_BRIDGE_CANCELLED`
 - malformed bridge request: `code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`, `autojs6Code=ERR_AUTOJS6_BRIDGE_INVALID_REQUEST`
 - bridge resource limit: `code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`, `autojs6Code=ERR_AUTOJS6_BRIDGE_RESOURCE_LIMIT`

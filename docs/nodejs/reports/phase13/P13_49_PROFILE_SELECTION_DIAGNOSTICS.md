@@ -18,6 +18,9 @@ capability errors with profile, capability, and Android permission hints.
 - `ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED` errors now include
   `requiredProfiles`, `requiredNodePermissions`, `requiredAndroidPermissions`,
   and `profileSelectionHint`.
+- `profileSelectionHint.declarationExamples` now carries JSON-safe
+  `nodePermissions`, `projectJson.node.permissions`, and
+  `packageJson.autojs6.node.permissions` snippets for the missing capabilities.
 - Node Doctor JSON/text reports include a Profile Selection section and can
   summarize project/package metadata from a project root.
 - TypeScript declarations and the smoke project cover

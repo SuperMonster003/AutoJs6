@@ -127,6 +127,7 @@ object NodeProfileSelectionDiagnostics {
                 "declarationHint",
                 "Declare node.permissions/project autojs6.node.permissions for the missing capabilities; profile metadata is diagnostic-only until promotion is implemented.",
             )
+            put("declarationExamples", declarationExamplesJson(missing))
         }
     }
 
@@ -269,6 +270,27 @@ object NodeProfileSelectionDiagnostics {
     private fun failureHintsJson(): JSONObject = JSONObject().apply {
         put("capabilityNotDeclared", failureHintForMissingCapabilities("module", "method", listOf("capability")))
         put("profilePromotionBlocked", "Requested Pro/Desktop/Debug profile metadata is visible but does not grant authority in Phase 13.")
+    }
+
+    private fun declarationExamplesJson(missingCapabilities: List<String>): JSONObject = JSONObject().apply {
+        put("nodePermissions", JSONArray(missingCapabilities))
+        put(
+            "projectJson",
+            JSONObject().put(
+                "node",
+                JSONObject().put("permissions", JSONArray(missingCapabilities)),
+            ),
+        )
+        put(
+            "packageJson",
+            JSONObject().put(
+                "autojs6",
+                JSONObject().put(
+                    "node",
+                    JSONObject().put("permissions", JSONArray(missingCapabilities)),
+                ),
+            ),
+        )
     }
 
     private fun List<String>.sortedByProfileOrder(): List<String> =

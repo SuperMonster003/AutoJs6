@@ -212,8 +212,10 @@ P13-49 extends the `autojs6:profile` declaration with `profileSelection` and
 adds the `AutoJsBridgeCapabilityNotDeclaredError` shape. These diagnostics
 report requested Safe/Pro/Desktop/Debug profiles, declared Node permissions,
 Android permissions, high-risk capabilities, blocked promotions, and
-`profileSelectionHint` details for missing capability failures. They do not
-promote any effective profile beyond `safe_default`.
+`profileSelectionHint` details for missing capability failures, including
+typed `declarationExamples` snippets for `node.permissions`, project
+`node.permissions`, and package `autojs6.node.permissions`. They do not promote
+any effective profile beyond `safe_default`.
 
 P13-51 extends the `autojs6:profile` declaration with `profileRollbackPolicy`.
 The field reports per-profile kill switches, per-capability rollback actions,
