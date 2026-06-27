@@ -1890,8 +1890,12 @@ P13 task 本身使用以下执行状态：
     - Safe profile 下的拒绝路径也有示例或测试。
   - Progress:
     - P13-54 partial landing adds `sample/nodejs/desktop-parity-suite` with
-      guarded snippets for ESM, `worker_threads`, HTTP/HTTPS, advanced fs,
-      WASI, inspector, and sanitized pure JavaScript npm dependency usage.
+      guarded snippets for ESM, `worker_threads`, HTTP/HTTPS, raw network,
+      advanced fs, WASI, inspector, and sanitized pure JavaScript npm
+      dependency usage.
+    - The desktop catalog now includes an explicit `raw_network` example and
+      Safe-profile denial marker aligned with the P13-50/P13-51/P13-52
+      relaxed-capability id.
     - Each catalog entry in `sample/nodejs/desktop-parity-suite/examples.json`
       records `desktop_compat_opt_in`, required capabilities, expected output,
       packaged behavior, skip reason, and Safe-profile denial output.
@@ -1919,7 +1923,11 @@ P13 task 本身使用以下执行状态：
     - The declaration matrix covers P13-53 and P13-54 surfaces including
       `$autojs.java`, `java`, `rhino.install`, UI, overlay, tasks,
       screenshot/OCR, accessibility, ESM, `worker_threads`, HTTP/HTTPS,
-      advanced fs, WASI, inspector, package manager, and pure-JS npm usage.
+      raw network, advanced fs, WASI, inspector, package manager, and pure-JS
+      npm usage.
+    - The matrix now includes `raw_network` as a metadata-only
+      `desktop_compat_opt_in` surface so the P13-54 raw network example has
+      matching TypeScript profile evidence.
     - `sample/nodejs/typescript-smoke/src/main.ts` now type-checks
       Safe/Pro/Desktop/Debug conditional profile differences without declaring
       denied desktop modules as callable modules.

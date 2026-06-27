@@ -738,6 +738,8 @@ async function smoke(): Promise<void> {
   const safeWorkerMode: AutoJs6Node.ProfileModuleModeFor<"worker_threads", "safe_default"> = "denied";
   const desktopWorkerMode: AutoJs6Node.ProfileModuleModeFor<"worker_threads", "desktop_compat_opt_in"> = "profile_gated";
   const desktopHttpMode: AutoJs6Node.ProfileModuleModeFor<"http", "desktop_compat_opt_in"> = "partial";
+  const safeRawNetworkMode: AutoJs6Node.ProfileModuleModeFor<"raw_network", "safe_default"> = "denied";
+  const desktopRawNetworkMode: AutoJs6Node.ProfileModuleModeFor<"raw_network", "desktop_compat_opt_in"> = "profile_gated";
   const desktopWasiMode: AutoJs6Node.ProfileModuleModeFor<"wasi", "desktop_compat_opt_in"> = "profile_gated";
   const debugInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "debug_unsafe_lab"> = "profile_gated";
   const safeInspectorMode: AutoJs6Node.ProfileModuleModeFor<"inspector", "safe_default"> = "denied";
@@ -761,6 +763,8 @@ async function smoke(): Promise<void> {
     profileDeclarationMatrix.modules.java;
   const profileCatalogWorker: AutoJs6Node.ProfileModuleFor<"worker_threads"> =
     profileDeclarationMatrix.modules.worker_threads;
+  const profileCatalogRawNetwork: AutoJs6Node.ProfileModuleFor<"raw_network"> =
+    profileDeclarationMatrix.modules.raw_network;
   const typedCapabilityError = {} as AutoJs6Node.AutoJsBridgeCapabilityNotDeclaredError;
   const capabilityErrorProfiles: readonly string[] = typedCapabilityError.requiredProfiles;
   const capabilityErrorNodePermissions: readonly string[] = typedCapabilityError.requiredNodePermissions;
@@ -1084,6 +1088,8 @@ async function smoke(): Promise<void> {
   void safeWorkerMode;
   void desktopWorkerMode;
   void desktopHttpMode;
+  void safeRawNetworkMode;
+  void desktopRawNetworkMode;
   void desktopWasiMode;
   void debugInspectorMode;
   void safeInspectorMode;
@@ -1098,6 +1104,7 @@ async function smoke(): Promise<void> {
   void profileDeclarationMatrix;
   void profileCatalogJava;
   void profileCatalogWorker;
+  void profileCatalogRawNetwork;
   void capabilityErrorProfiles;
   void capabilityErrorNodePermissions;
   void capabilityErrorAndroidPermissions;

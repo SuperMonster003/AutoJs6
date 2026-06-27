@@ -66,8 +66,8 @@ P13-55 adds `profile_capabilities.d.ts`, a declaration-only matrix for
 Safe/Pro/Desktop/Debug profile differences. The matrix covers the P13-53 and
 P13-54 example surfaces including `$autojs.java`, `java`,
 `rhino.install`, UI, overlay, tasks, screenshot/OCR, accessibility, ESM,
-`worker_threads`, HTTP/HTTPS, advanced fs, WASI, inspector, and npm dependency
-usage. It provides `RuntimeProfileId`, `ProfileModuleCatalog`,
+`worker_threads`, HTTP/HTTPS, raw network, advanced fs, WASI, inspector, and
+npm dependency usage. It provides `RuntimeProfileId`, `ProfileModuleCatalog`,
 `ProfileModuleModeFor`, `ProfileRequiredFor`, and related conditional helpers.
 These types document profile requirements and Safe-profile denial behavior;
 they do not declare denied desktop modules as callable modules or grant

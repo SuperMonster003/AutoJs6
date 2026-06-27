@@ -10,8 +10,9 @@ The declaration matrix covers the P13-53 and P13-54 example surfaces:
 
 - `$autojs.java`, `java`, and `rhino.install`.
 - UI, overlay, WorkManager tasks, screenshot/image/OCR, and accessibility.
-- ESM, `worker_threads`, HTTP/HTTPS, advanced fs, WASI, inspector, package
-  manager, and sanitized pure JavaScript npm dependency usage.
+- ESM, `worker_threads`, HTTP/HTTPS, raw network, advanced fs, WASI,
+  inspector, package manager, and sanitized pure JavaScript npm dependency
+  usage.
 
 The file provides:
 

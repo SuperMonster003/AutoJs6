@@ -2228,8 +2228,8 @@ This host gate records P13-54 as partial. It requires the
 metadata, expected output markers, Safe-profile denial markers, README
 profile/packaged-behavior/skip-reason coverage, root example manifest
 registration, surface manifest evidence, release matrix updates, and Phase 13
-docs. The examples cover ESM, `worker_threads`, HTTP/HTTPS, advanced fs, WASI,
-inspector, and sanitized pure JavaScript npm dependency usage, but remain
+docs. The examples cover ESM, `worker_threads`, HTTP/HTTPS, raw network,
+advanced fs, WASI, inspector, and sanitized pure JavaScript npm dependency usage, but remain
 outside default runtime smoke and do not grant Desktop authority.
 
 Phase 13 profile-aware TypeScript declarations gate:

@@ -52,6 +52,22 @@
       "skipReason": "controlled HTTP/HTTPS provider or network permission may be unavailable"
     },
     {
+      "id": "raw-network",
+      "title": "raw native Node network module opt-in migration",
+      "file": "snippets/raw-network.cjs",
+      "targetProfile": "desktop_compat_opt_in",
+      "requiredCapabilities": ["raw_network"],
+      "expectedOutput": "sample.desktop-parity-suite.raw-network=PASS",
+      "safeProfile": {
+        "profile": "safe_default",
+        "denialExample": "snippets/safe-denials.cjs",
+        "expectedOutput": "sample.desktop-parity-suite.safe-denial.raw-network=DENIED",
+        "behavior": "Safe profile denies native Node http/https/net/tls/dns module authority unless raw_network is explicitly enabled"
+      },
+      "packagedBehavior": "packaged raw network requires reviewed disclosure, INTERNET permission proof, and rollback policy evidence",
+      "skipReason": "raw native Node network modules may be unavailable or disabled by profile policy"
+    },
+    {
       "id": "fs-advanced",
       "title": "scoped advanced fs migration",
       "file": "snippets/fs-advanced.cjs",

@@ -510,8 +510,8 @@ not part of default runtime smoke and do not grant Pro profile authority.
 
 P13-54 records desktop Node parity examples as partial. AutoJs6 Node now ships
 `sample/nodejs/desktop-parity-suite`, a guarded catalog for ESM,
-`worker_threads`, HTTP/HTTPS, advanced fs, WASI, inspector, and sanitized pure
-JavaScript npm dependency migration. The catalog records `desktop_compat_opt_in`,
+`worker_threads`, HTTP/HTTPS, raw network, advanced fs, WASI, inspector, and
+sanitized pure JavaScript npm dependency migration. The catalog records `desktop_compat_opt_in`,
 required capabilities, expected output, Safe-profile denial output, packaged
 behavior, and skip reasons. It is documentation and static-verification
 evidence only; the snippets are not part of default runtime smoke and do not
@@ -520,10 +520,11 @@ grant Desktop profile authority.
 P13-55 records TypeScript profile declarations as partial. AutoJs6 Node now
 ships `profile_capabilities.d.ts`, a declaration-only matrix for
 Safe/Pro/Desktop/Debug profile differences across the P13-53 and P13-54
-surfaces. Scripts can type-check profile requirements and Safe-profile denial
-behavior with `ProfileModuleModeFor` and related helpers, but denied desktop
-modules are not declared as callable modules and no Pro/Desktop authority is
-granted by the declaration package.
+surfaces, including the `raw_network` desktop opt-in marker. Scripts can
+type-check profile requirements and Safe-profile denial behavior with
+`ProfileModuleModeFor` and related helpers, but denied desktop modules are not
+declared as callable modules and no Pro/Desktop authority is granted by the
+declaration package.
 
 P13-56 records migration and Pro9 comparison docs as partial. Existing
 AutoJs/Rhino bridge modules and covered `autojs6:compat` wrappers are the main

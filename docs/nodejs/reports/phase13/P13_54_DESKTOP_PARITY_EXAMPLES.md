@@ -12,6 +12,7 @@ The catalog covers:
 - Managed local ESM loader migration.
 - `worker_threads` opt-in migration.
 - Controlled HTTP/HTTPS client migration.
+- Raw native Node network module opt-in migration.
 - Scoped advanced filesystem migration.
 - Controlled WASI profile migration.
 - Debug inspector profile migration.

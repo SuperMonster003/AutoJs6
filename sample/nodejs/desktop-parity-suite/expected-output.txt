@@ -1,10 +1,12 @@
-sample.desktop-parity-suite.catalog=7
+sample.desktop-parity-suite.catalog=8
 sample.desktop-parity-suite.esm-loader=PASS
 sample.desktop-parity-suite.safe-denial.esm-loader=DENIED
 sample.desktop-parity-suite.worker-threads=PASS
 sample.desktop-parity-suite.safe-denial.worker-threads=DENIED
 sample.desktop-parity-suite.http-https=PASS
 sample.desktop-parity-suite.safe-denial.http-https=DENIED
+sample.desktop-parity-suite.raw-network=PASS
+sample.desktop-parity-suite.safe-denial.raw-network=DENIED
 sample.desktop-parity-suite.fs-advanced=PASS
 sample.desktop-parity-suite.safe-denial.fs-advanced=DENIED
 sample.desktop-parity-suite.wasi=PASS

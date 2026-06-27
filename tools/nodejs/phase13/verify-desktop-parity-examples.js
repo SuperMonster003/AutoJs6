@@ -10,6 +10,7 @@ const REQUIRED_EXAMPLES = Object.freeze([
   ["esm-loader", ["esm_loader"]],
   ["worker-threads", ["worker_threads"]],
   ["http-https", ["network", "http", "https"]],
+  ["raw-network", ["raw_network"]],
   ["fs-advanced", ["fs.advanced", "scoped_fs"]],
   ["wasi", ["wasi"]],
   ["inspector", ["inspector"]],
@@ -209,7 +210,7 @@ function buildReport(repoRoot, files) {
         files.exampleReadme.text.includes("Safe profile behavior") &&
         files.exampleReadme.text.includes("Packaged behavior") &&
         files.exampleReadme.text.includes("Skip reason") &&
-        includesAll(files.exampleReadme.text, ["ESM", "worker_threads", "http/https", "advanced fs", "WASI", "inspector", "npm dependency"]) &&
+        includesAll(files.exampleReadme.text, ["ESM", "worker_threads", "http/https", "raw network", "advanced fs", "WASI", "inspector", "npm dependency"]) &&
         requiredIds.every((id) => files.exampleReadme.text.includes(`snippets/${id}.cjs`)),
       "`README.md` must document target profile, Safe denial behavior, packaged behavior, and unavailable/skip conditions for every snippet.",
     ),

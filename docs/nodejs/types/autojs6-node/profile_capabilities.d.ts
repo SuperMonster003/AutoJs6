@@ -62,6 +62,7 @@ declare namespace AutoJs6Node {
     readonly "worker_threads": ProfileModuleSpec<"worker_threads", "desktop_compat_opt_in", "denied", "profile_gated", "gated">;
     readonly "http": ProfileModuleSpec<"http", "desktop_compat_opt_in", "partial", "partial", "gated">;
     readonly "https": ProfileModuleSpec<"https", "desktop_compat_opt_in", "partial", "partial", "gated">;
+    readonly "raw_network": ProfileModuleSpec<"raw_network", "desktop_compat_opt_in", "denied", "profile_gated", "gated">;
     readonly "fs.advanced": ProfileModuleSpec<"fs.advanced", "desktop_compat_opt_in", "partial", "partial", "gated">;
     readonly "wasi": ProfileModuleSpec<"wasi", "desktop_compat_opt_in", "denied", "profile_gated", "gated">;
     readonly "inspector": ProfileModuleSpec<"inspector", "debug_unsafe_lab", "denied", "profile_gated", "denied">;

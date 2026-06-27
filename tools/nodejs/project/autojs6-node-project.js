@@ -35,6 +35,7 @@ const KNOWN_CAPABILITIES = new Set([
   "shell.root",
   "shell.shizuku",
   "network",
+  "raw_network",
   "work_manager",
   "java_interop"
 ]);
@@ -63,6 +64,11 @@ const CAPABILITY_ALIASES = new Map([
   ["power-manager", "device.power"],
   ["power_manager", "device.power"],
   ["java", "java_interop"],
+  ["raw.network", "raw_network"],
+  ["raw-network", "raw_network"],
+  ["raw.node.network", "raw_network"],
+  ["raw-node-network", "raw_network"],
+  ["raw_node_network_modules", "raw_network"],
   ["qrcode", "barcode"],
   ["qr_code", "barcode"],
   ["audio", "media.audio"],
@@ -739,7 +745,7 @@ function validatePermissions(projectJson, packageJson, issues) {
           "UNKNOWN_PERMISSION",
           label,
           "Unknown Node bridge capability '" + item + "'.",
-          "Use a known capability such as toast, app, app.launch, app.query, image, ocr, barcode, network, storage, shell, or plugin.<id>."
+          "Use a known capability such as toast, app, app.launch, app.query, image, ocr, barcode, network, raw_network, storage, shell, or plugin.<id>."
         );
       }
     });

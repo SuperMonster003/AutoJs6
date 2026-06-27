@@ -46,7 +46,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
               "name": "bridge-permission-manifest",
               "autojs6": {
                 "node": {
-                  "permissions": ["network", "media_projection", "notifications"]
+                  "permissions": ["network", "raw_network", "media_projection", "notifications"]
                 }
               }
             }
@@ -57,7 +57,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
 
         assertTrue(manifest.enforced)
         assertEquals(
-            listOf("app.launch", "network", "notifications", "screen_capture", "toast", "unknown.future"),
+            listOf("app.launch", "network", "notifications", "raw_network", "screen_capture", "toast", "unknown.future"),
             manifest.permissions,
         )
         assertEquals(listOf("unknown.future"), manifest.unknownPermissions)
@@ -444,7 +444,7 @@ class NodeBridgePermissionManifestInstrumentationTest {
     @Test
     fun androidPermissionMismatchIsDerivedFromCapabilityManifest() {
         val missing = NodeBridgePermissionManifest.missingAndroidPermissionsForCapabilities(
-            capabilities = listOf("network", "screen_capture", "notifications", "media.recording"),
+            capabilities = listOf("network", "raw_network", "screen_capture", "notifications", "media.recording"),
             declaredAndroidPermissions = listOf(NodeBridgePermissionManifest.ANDROID_PERMISSION_INTERNET),
         )
 

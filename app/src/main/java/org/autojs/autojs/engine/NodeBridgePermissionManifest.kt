@@ -46,6 +46,7 @@ object NodeBridgePermissionManifest {
     const val SHELL_ROOT = "shell.root"
     const val SHELL_SHIZUKU = "shell.shizuku"
     const val NETWORK = "network"
+    const val RAW_NETWORK = "raw_network"
     const val WORK_MANAGER = "work_manager"
     const val PACKAGE_MANAGER = "package_manager"
     const val PACKAGE_MANAGER_MUTATE = "package_manager.mutate"
@@ -105,6 +106,7 @@ object NodeBridgePermissionManifest {
         SHELL_ROOT,
         SHELL_SHIZUKU,
         NETWORK,
+        RAW_NETWORK,
         WORK_MANAGER,
         PACKAGE_MANAGER,
         PACKAGE_MANAGER_MUTATE,
@@ -198,6 +200,11 @@ object NodeBridgePermissionManifest {
         "ui-overlay.foreground" to UI_OVERLAY_FOREGROUND,
         "overlay.packaged" to UI_OVERLAY_PACKAGED,
         "ui-overlay.packaged" to UI_OVERLAY_PACKAGED,
+        "raw.network" to RAW_NETWORK,
+        "raw-network" to RAW_NETWORK,
+        "raw.node.network" to RAW_NETWORK,
+        "raw-node-network" to RAW_NETWORK,
+        "raw_node_network_modules" to RAW_NETWORK,
     )
 
     private val androidPermissionsByCapability = linkedMapOf(
@@ -208,6 +215,7 @@ object NodeBridgePermissionManifest {
             ANDROID_PERMISSION_FOREGROUND_SERVICE_MICROPHONE,
         ),
         NETWORK to listOf(ANDROID_PERMISSION_INTERNET),
+        RAW_NETWORK to listOf(ANDROID_PERMISSION_INTERNET),
         SCREEN_CAPTURE to listOf(
             ANDROID_PERMISSION_FOREGROUND_SERVICE,
             ANDROID_PERMISSION_FOREGROUND_SERVICE_MEDIA_PROJECTION,

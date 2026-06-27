@@ -28,6 +28,7 @@ private val nodeExampleKnownTags = setOf(
     "esm",
     "dynamic-import",
     "network",
+    "raw-network",
     "websocket",
     "ocr",
     "long-running",

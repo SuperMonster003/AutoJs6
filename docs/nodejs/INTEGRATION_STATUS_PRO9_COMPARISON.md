@@ -1262,8 +1262,8 @@ smoke or granting Pro authority.
 
 P13-54 records desktop Node parity examples as partial: AutoJs6 Node now
 includes `sample/nodejs/desktop-parity-suite`, a static example catalog for
-ESM, `worker_threads`, HTTP/HTTPS, advanced fs, WASI, inspector, and sanitized
-pure JavaScript npm dependency migration. Each snippet records
+ESM, `worker_threads`, HTTP/HTTPS, raw network, advanced fs, WASI, inspector,
+and sanitized pure JavaScript npm dependency migration. Each snippet records
 `desktop_compat_opt_in`, required capabilities, expected output, packaged
 behavior, skip reason, and a Safe-profile denial marker. The catalog improves
 desktop Node porting evidence without adding the snippets to default runtime
@@ -1271,10 +1271,11 @@ smoke or granting Desktop authority.
 
 P13-55 records TypeScript profile declarations as partial: AutoJs6 Node now
 ships `profile_capabilities.d.ts`, a declaration-only Safe/Pro/Desktop/Debug
-matrix for the P13-53 and P13-54 migration surfaces. TypeScript scripts can
-use `ProfileModuleModeFor`, `ProfileRequiredFor`, `SafeDefaultModeFor`, and
-`PackagedBehaviorFor` to document profile requirements and Safe-profile denial
-behavior. The matrix is metadata-only and does not declare denied desktop
+matrix for the P13-53 and P13-54 migration surfaces, including `raw_network`.
+TypeScript scripts can use `ProfileModuleModeFor`, `ProfileRequiredFor`,
+`SafeDefaultModeFor`, and `PackagedBehaviorFor` to document profile
+requirements and Safe-profile denial behavior. The matrix is metadata-only and
+does not declare denied desktop
 modules as callable modules or grant Pro/Desktop authority.
 
 P13-56 records migration and Pro9 comparison docs as partial: this document now
