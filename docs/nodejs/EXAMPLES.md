@@ -134,14 +134,15 @@ Verify the catalog with:
 .\gradlew.bat --console=plain :app:verifyNodePhase13DesktopParityExamples
 ```
 
-`smoke.cjs` is the focused runtime smoke subset for managed local ESM and the
-checked-in pure JavaScript dependency path. It is covered by
+`smoke.cjs` is the focused runtime smoke subset for managed local ESM, the
+checked-in pure JavaScript dependency path, and scoped advanced filesystem
+FileHandle/watch behavior. It is covered by
 `NodeExampleProjectInstrumentationTest#desktopParitySafeSubsetExamplesRun`.
 
 P13-54 keeps high-risk desktop examples out of the default runtime smoke list.
 The catalog remains migration evidence for desktop parity planning; packaged
-desktop execution, raw worker/network/fs/WASI/inspector authority, and Android
-package-manager parity remain gated by future promotion evidence.
+desktop execution, raw worker/network/expanded-root/WASI/inspector authority,
+and Android package-manager parity remain gated by future promotion evidence.
 
 ## Smoke Coverage
 

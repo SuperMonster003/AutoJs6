@@ -6,7 +6,7 @@ const path = require("path");
 
 const REPORT_BASENAME = "phase13-desktop-parity-examples";
 const EXAMPLE_NAME = "desktop-parity-suite";
-const REQUIRED_SMOKE_EXAMPLES = Object.freeze(["esm-loader", "npm-dependency"]);
+const REQUIRED_SMOKE_EXAMPLES = Object.freeze(["esm-loader", "npm-dependency", "fs-advanced"]);
 const REQUIRED_EXAMPLES = Object.freeze([
   ["esm-loader", ["esm_loader"]],
   ["worker-threads", ["worker_threads"]],
@@ -133,6 +133,10 @@ function buildReport(repoRoot, files) {
     REQUIRED_SMOKE_EXAMPLES.every((id) =>
       files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.${id}=PASS`) &&
       files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.${id}=PASS`)) &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.fs-advanced.handle=true`) &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.fs-advanced.watch=true`) &&
+    files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.fs-advanced.handle=true`) &&
+    files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.fs-advanced.watch=true`) &&
     files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.smoke=PASS`) &&
     files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.smoke=PASS`) &&
     files.nodeExampleInstrumentationTest.text.includes("desktopParitySafeSubsetExamplesRun") &&
@@ -255,7 +259,6 @@ function buildReport(repoRoot, files) {
         !smokeSubsetExamples.includes("worker-threads") &&
         !smokeSubsetExamples.includes("http-https") &&
         !smokeSubsetExamples.includes("raw-network") &&
-        !smokeSubsetExamples.includes("fs-advanced") &&
         !smokeSubsetExamples.includes("wasi") &&
         !smokeSubsetExamples.includes("inspector"),
       "Non-promoted desktop snippets must remain static/catalog-backed and clearly marked outside the Safe smoke subset.",

@@ -536,7 +536,8 @@ P13-54 records desktop Node parity examples as partial. AutoJs6 Node now ships
 sanitized pure JavaScript npm dependency migration. The catalog records `desktop_compat_opt_in`,
 required capabilities, expected output, Safe-profile denial output, packaged
 behavior, and skip reasons. A focused runtime smoke subset runs managed local
-ESM and the checked-in pure JavaScript dependency path; high-risk desktop
+ESM, the checked-in pure JavaScript dependency path, and scoped advanced fs
+FileHandle/watch behavior; high-risk desktop
 snippets remain documentation and static-verification evidence only, are not
 part of default runtime smoke, and do not grant Desktop profile authority.
 

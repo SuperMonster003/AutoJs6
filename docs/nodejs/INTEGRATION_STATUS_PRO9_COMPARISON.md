@@ -1280,9 +1280,10 @@ includes `sample/nodejs/desktop-parity-suite`, an example catalog for ESM,
 sanitized pure JavaScript npm dependency migration. Each snippet records
 `desktop_compat_opt_in`, required capabilities, expected output, packaged
 behavior, skip reason, and a Safe-profile denial marker. The focused runtime
-smoke subset runs managed local ESM and the checked-in pure JavaScript
-dependency path, while high-risk desktop snippets remain outside default
-runtime smoke and do not grant Desktop authority.
+smoke subset runs managed local ESM, the checked-in pure JavaScript dependency
+path, and scoped advanced fs FileHandle/watch behavior, while high-risk desktop
+snippets remain outside default runtime smoke and do not grant Desktop
+authority.
 
 P13-55 records TypeScript profile declarations as partial: AutoJs6 Node now
 ships `profile_capabilities.d.ts`, a declaration-only Safe/Pro/Desktop/Debug
