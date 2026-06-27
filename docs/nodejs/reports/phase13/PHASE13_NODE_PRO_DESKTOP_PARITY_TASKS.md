@@ -1817,6 +1817,8 @@ P13 task 本身使用以下执行状态：
     - Rollback playbook 记录 Safe/Pro/Desktop/Debug profile 独立禁用、
       raw/relaxed capability 降级动作、crash/stress/security/package
       triggers，以及 packaged APK Safe-profile patch 策略。
+    - Rollback policy 现在暴露 `raw_network` capability id，与 P13-50 corpus
+      对齐，并映射到 `autojs.nodejs.rawNetworkModules.experimental=false`。
     - Host verifier:
       `tools/nodejs/phase13/verify-profile-rollback-playbook.js`。
     - Gradle gate:

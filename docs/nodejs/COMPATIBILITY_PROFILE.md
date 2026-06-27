@@ -1398,8 +1398,10 @@ rollback triggers, and packaged Safe-profile downgrade guidance. Gradle
 properties default to false for `autojs.nodejs.profile.pro.enabled`,
 `autojs.nodejs.profile.desktop.enabled`,
 `autojs.nodejs.profile.debugUnsafeLab.enabled`, and
-`autojs.nodejs.relaxedCapabilities.enabled`. This is rollback metadata only:
-effective authority remains `safe_default` until promotion gates close.
+`autojs.nodejs.relaxedCapabilities.enabled`; `raw_network` maps to
+`autojs.nodejs.rawNetworkModules.experimental` so P13-50 corpus ids and P13-51
+rollback ids line up. This is rollback metadata only: effective authority
+remains `safe_default` until promotion gates close.
 
 P13-52 records privacy and disclosure policy as partial. The runtime exposes
 `autojs6:profile.privacyDisclosurePolicy`, backed by

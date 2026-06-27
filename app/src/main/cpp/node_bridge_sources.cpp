@@ -10006,6 +10006,7 @@ std::string buildEmbeddedScriptExecutionSource(
     });
     const capabilityKillSwitches = Object.freeze({
       network: "autojs.nodejs.network.experimental",
+      raw_network: "autojs.nodejs.rawNetworkModules.experimental",
       worker_threads: "autojs.nodejs.worker_threads.experimental",
       java_interop: "autojs.nodejs.javaInterop.experimental",
       all_relaxed_capabilities: "autojs.nodejs.relaxedCapabilities.enabled",
@@ -10077,6 +10078,14 @@ std::string buildEmbeddedScriptExecutionSource(
           property: capabilityKillSwitches.network,
           enabled: flagEnabled("network"),
           rollbackAction: "set_autojs_nodejs_network_experimental_false",
+          fallbackProfile: "safe_default"
+        }),
+        Object.freeze({
+          id: "raw_network",
+          profile: "desktop_compat_opt_in",
+          property: capabilityKillSwitches.raw_network,
+          enabled: flagEnabled("raw_node_network_modules"),
+          rollbackAction: "set_autojs_nodejs_rawNetworkModules_experimental_false",
           fallbackProfile: "safe_default"
         }),
         Object.freeze({

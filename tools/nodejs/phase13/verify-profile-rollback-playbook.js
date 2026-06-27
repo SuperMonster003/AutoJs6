@@ -41,6 +41,7 @@ const PROFILE_PROPERTIES = [
 
 const RELAXED_CAPABILITIES = [
   "network",
+  "raw_network",
   "worker_threads",
   "java_interop",
   "filesystem_relaxation",

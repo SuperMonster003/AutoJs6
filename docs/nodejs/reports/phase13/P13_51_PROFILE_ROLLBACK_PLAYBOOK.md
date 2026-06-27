@@ -19,6 +19,10 @@ to a host verifier.
 - `require("autojs6:profile").profileRollbackPolicy` exposes frozen
   per-profile switches, capability rollback actions, crash/stress/security
   triggers, packaged downgrade strategy, and Safe fallback metadata.
+- `raw_network` is now exposed as the P13-50 corpus-facing rollback capability
+  id for the `autojs.nodejs.rawNetworkModules.experimental` kill switch, while
+  `raw_node_network_modules` remains available as the implementation-specific
+  alias.
 - Node Doctor JSON/text reports include a Profile Rollback Policy section.
 - TypeScript declarations and the smoke project cover
   `ProfileRollbackPolicy`, profile/capability rollback states, triggers,

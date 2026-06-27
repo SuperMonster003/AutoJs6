@@ -79,6 +79,7 @@ object NodeProfileRollbackPolicy {
 
     private fun capabilityKillSwitchesJson(): JSONObject = JSONObject()
         .put("network", NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY)
+        .put("raw_network", NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY)
         .put("worker_threads", NodeRuntimeCapabilities.WORKER_THREADS_EXPERIMENTAL_PROPERTY)
         .put("java_interop", NodeRuntimeCapabilities.JAVA_INTEROP_EXPERIMENTAL_PROPERTY)
         .put("all_relaxed_capabilities", RELAXED_CAPABILITIES_PROPERTY)
@@ -131,6 +132,13 @@ object NodeProfileRollbackPolicy {
             property = NodeRuntimeCapabilities.NETWORK_EXPERIMENTAL_PROPERTY,
             enabled = BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED,
             rollbackAction = "set_autojs_nodejs_network_experimental_false",
+        ),
+        CapabilityState(
+            id = "raw_network",
+            profile = DESKTOP_COMPAT_OPT_IN,
+            property = NodeRuntimeCapabilities.RAW_NETWORK_MODULES_EXPERIMENTAL_PROPERTY,
+            enabled = BuildConfig.NODEJS_RAW_NETWORK_MODULES_EXPERIMENTAL_ENABLED,
+            rollbackAction = "set_autojs_nodejs_rawNetworkModules_experimental_false",
         ),
         CapabilityState(
             id = "raw_node_network_modules",
