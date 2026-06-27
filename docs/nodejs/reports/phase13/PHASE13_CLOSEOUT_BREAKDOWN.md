@@ -469,8 +469,7 @@ Reason open: `policy`, `evidence`.
 
 Reason open: `implementation`, `policy`, `packaging`.
 
-- [ ] Implement runtime profile promotion rollback controls.
-- [ ] Add automatic crash circuit breaker.
+- [x] Defer runtime profile promotion rollback controls and automatic crash circuit breaker wiring until effective profile switching is promoted.
 - [ ] Add settings UI and packaged builder rollback controls.
 - [x] Add remote packaged kill-switch policy or explicitly reject it.
 - [ ] Add packaged Safe-profile patch/downgrade evidence.

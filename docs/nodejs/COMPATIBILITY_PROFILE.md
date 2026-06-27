@@ -1413,7 +1413,9 @@ properties default to false for `autojs.nodejs.profile.pro.enabled`,
 `autojs.nodejs.relaxedCapabilities.enabled`; `raw_network` maps to
 `autojs.nodejs.rawNetworkModules.experimental` so P13-50 corpus ids and P13-51
 rollback ids line up. This is rollback metadata only: effective authority
-remains `safe_default` until promotion gates close.
+remains `safe_default` until promotion gates close. Runtime profile promotion
+rollback wiring and automatic crash circuit breaker implementation are
+deferred until effective profile switching is promoted.
 
 P13-52 records privacy and disclosure policy as partial. The runtime exposes
 `autojs6:profile.privacyDisclosurePolicy`, backed by

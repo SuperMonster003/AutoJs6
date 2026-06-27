@@ -1970,9 +1970,11 @@ P13 task 本身使用以下执行状态：
       `:app:verifyNodePhase13ProfileRollbackPlaybook`。
     - Report:
       `docs/nodejs/reports/phase13/P13_51_PROFILE_ROLLBACK_PLAYBOOK.md`。
-    - Remaining P13-51 blockers: settings UI、packaged builder UI、
-      automatic crash circuit breaker、remote packaged kill switch、privacy
-      disclosure prompts、actual runtime profile promotion 仍未完成。
+    - P13-51 v1.1 policy: runtime profile promotion rollback wiring and
+      automatic crash circuit breaker implementation are deferred until
+      effective profile switching is promoted.
+    - Remaining P13-51 blockers: settings UI, packaged builder UI, privacy
+      disclosure prompts, and packaged Safe-profile downgrade evidence.
 
 - [ ] P13-52: 增加 privacy and disclosure policy。
   - 范围：截图、录音、悬浮窗、无障碍、网络、文件系统、Java interop、子进程等

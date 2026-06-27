@@ -112,9 +112,7 @@ function buildReport(files) {
       ...RELAXED_CAPABILITIES.map((id) => token(files.rollbackPolicy, `id = "${id}"`)),
       token(files.rollbackPolicy, "publish_safe_profile_patch_or_remove_promoted_metadata"),
       token(files.rollbackPolicy, 'put("remoteKillSwitchPolicy", "rejected_v1_1_publish_safe_profile_patch")'),
-    ], [
-      "Runtime profile promotion and automatic crash circuit breaker remain future work; P13-51 records the rollback playbook and switches.",
-    ]),
+    ], []),
     scenario("runtime_and_doctor_diagnostics", "autojs6:profile and Node Doctor expose the rollback playbook to scripts and diagnostics", [
       token(files.nodeBridgeSources, "const profileRollbackPolicy = __autojs6_profile_rollback_policy_report(featureFlags);"),
       token(files.nodeBridgeSources, "profileRollbackPolicy,"),
@@ -164,7 +162,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
     ], [
-      "Settings UI, packaged builder UI, privacy prompts, and automatic crash circuit breaker remain deferred to later promotion/privacy work.",
+      "Settings UI, packaged builder UI, privacy prompts, and packaged Safe-profile downgrade evidence remain future work.",
     ]),
   ];
 
@@ -226,6 +224,16 @@ function buildReport(files) {
         !kotlinBlock.includes('put("grantsAuthority", true)'),
       "P13-51 must not promote profiles or grant relaxed authority.",
     ),
+    check(
+      "runtime-wiring-deferred-until-profile-promotion",
+      files.p13Report.text.includes("Runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted") &&
+        files.rollbackPlaybook.text.includes("Runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted") &&
+        runtimeBlock.includes("profilePromotion: false") &&
+        runtimeBlock.includes('rollbackTargetProfile: "safe_default"') &&
+        kotlinBlock.includes('put("profilePromotion", false)') &&
+        kotlinBlock.includes('put("rollbackTargetProfile", SAFE_DEFAULT)'),
+      "P13-51 must defer runtime rollback wiring and automatic crash circuit breaker implementation until profile promotion exists.",
+    ),
   ];
 
   const policyViolations = checks.filter((entry) => !entry.passed).map((entry) => entry.message);
@@ -255,6 +263,7 @@ function buildReport(files) {
       runtimeDiagnosticsReady: scenarioById(scenarios, "runtime_and_doctor_diagnostics").status === "ready",
       typescriptSurfaceReady: scenarioById(scenarios, "typescript_surface").status === "ready",
       remotePackagedKillSwitchRejected: checkById(checks, "remote-packaged-kill-switch-rejected").passed,
+      runtimeWiringDeferredUntilProfilePromotion: checkById(checks, "runtime-wiring-deferred-until-profile-promotion").passed,
       rollbackTargetProfile: "safe_default",
       profilePromotionPromoted: false,
       automaticCrashCircuitBreakerReady: false,

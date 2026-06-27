@@ -1249,8 +1249,9 @@ rollback switches, Safe-profile crash/stress fallback, and packaged APK
 downgrade actions through `NodeProfileRollbackPolicy`,
 `autojs6:profile.profileRollbackPolicy`, and Node Doctor. This supports the
 long-term Auto.js Pro plus desktop Node target without silently granting
-authority; settings UI, packaged builder UI, automatic crash circuit breaker,
-remote packaged kill switch, and privacy prompts remain future work.
+authority; runtime rollback wiring and automatic crash circuit breaker
+implementation are deferred until effective profile switching is promoted,
+while settings UI, packaged builder UI, and privacy prompts remain future work.
 
 P13-52 records privacy and disclosure policy as partial: AutoJs6 Node now
 documents prompt channels, foreground disclosure requirements, Android

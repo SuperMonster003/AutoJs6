@@ -25,6 +25,7 @@ to a host verifier.
   alias.
 - Remote packaged kill switches are explicitly rejected for v1.1; packaged
   rollback uses a published Safe-profile patch or removal of promoted metadata.
+- Runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted.
 - Node Doctor JSON/text reports include a Profile Rollback Policy section.
 - TypeScript declarations and the smoke project cover
   `ProfileRollbackPolicy`, profile/capability rollback states, triggers,
@@ -36,8 +37,8 @@ to a host verifier.
 
 - Runtime profile promotion and user-selectable profile switching remain
   unpromoted.
-- Settings UI, packaged builder UI, automatic crash circuit breaker, and
-  privacy disclosure prompts remain future work.
+- Settings UI, packaged builder UI, privacy disclosure prompts, and packaged
+  Safe-profile downgrade evidence remain future work.
 - The rollback playbook does not grant Pro/Desktop/Debug authority; effective
   runtime authority remains `safe_default`.
 

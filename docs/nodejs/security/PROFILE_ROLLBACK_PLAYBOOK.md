@@ -64,5 +64,4 @@ strategy:
 
 Remote packaged kill switches are explicitly rejected for v1.1 because packaged
 rollback must be auditable through a published Safe-profile patch or removal of
-promoted metadata. Automatic crash circuit breakers, settings UI, packaged
-builder UI, and privacy disclosure prompts are still future work.
+promoted metadata. Runtime profile promotion rollback wiring and automatic crash circuit breaker implementation are deferred until effective profile switching is promoted. Settings UI, packaged builder UI, and privacy disclosure prompts are still future work.

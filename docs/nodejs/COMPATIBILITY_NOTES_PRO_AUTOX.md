@@ -482,7 +482,9 @@ exposes `profileRollbackPolicy` diagnostics and Node Doctor rollback output
 for default-off Pro/Desktop/Debug profile switches, relaxed-capability
 rollback actions, Safe crash/stress fallback, and packaged APK Safe-profile
 downgrade guidance. The playbook helps staged Pro/AutoX compatibility work
-remain reversible; it does not enable profile authority by itself.
+remain reversible; it does not enable profile authority by itself. Runtime
+rollback wiring and automatic crash circuit breaker implementation are
+deferred until effective profile switching is promoted.
 
 P13-52 records privacy and disclosure policy as partial. AutoJs6 Node now
 exposes `privacyDisclosurePolicy` diagnostics and Node Doctor privacy
