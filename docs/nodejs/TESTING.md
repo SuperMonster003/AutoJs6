@@ -2,6 +2,13 @@
 
 This document records the current test commands and the expected gates for future Embedded Node work.
 
+## Shared Deployment Context
+
+Use [NODE_DEPLOYMENT_SHARED_CONTEXT.md](NODE_DEPLOYMENT_SHARED_CONTEXT.md)
+for shared Node.js deployment constraints, including worktree hygiene, timeout
+defaults, preferred connected-test device selection, and fallback-device cleanup
+rules.
+
 ## Baseline Reports
 
 - Post-18 baseline: `docs/nodejs/reports/BASELINE_AFTER_TASK_18.md`

@@ -2,6 +2,10 @@
 
 Status: living closeout plan for the remaining open Phase 13 tasks.
 
+Shared Node.js deployment constraints, timeout defaults, and device-selection
+rules are recorded in
+[`NODE_DEPLOYMENT_SHARED_CONTEXT.md`](../../NODE_DEPLOYMENT_SHARED_CONTEXT.md).
+
 Phase 13 intentionally keeps many parent tasks open after partial landings.
 Most open items are not regressions; they are promotion gates that require one
 or more of implementation, connected-device evidence, packaged APK evidence,
