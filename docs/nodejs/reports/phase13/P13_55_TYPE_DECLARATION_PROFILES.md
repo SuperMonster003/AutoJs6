@@ -1,8 +1,9 @@
 # P13-55 Type Declaration Profiles
 
-P13-55 records TypeScript profile declarations as partial. The landing adds
-`docs/nodejs/types/autojs6-node/profile_capabilities.d.ts` as a
-declaration-only matrix for Safe/Pro/Desktop/Debug profile differences.
+P13-55 records TypeScript profile declarations as partial capability evidence.
+The P13-55 declaration gate is ready: the landing adds
+`docs/nodejs/types/autojs6-node/profile_capabilities.d.ts` as a declaration-only
+matrix for Safe/Pro/Desktop/Debug profile differences.
 
 ## Scope
 
@@ -59,7 +60,7 @@ Reports:
 
 ## Current Decision
 
-Status is `partial`.
+Status is `ready` for the declaration gate.
 
 This gate proves the declaration matrix, package index wiring, README
 documentation, `typescript-smoke` Safe/Pro/Desktop coverage, P13-49/P13-51/P13-52
@@ -68,6 +69,6 @@ enforced as type-described gated surfaces instead of callable module
 declarations.
 
 Runtime profile promotion remains owned by P13-49/P13-52 and later promotion
-gates; P13-55 keeps declarations metadata-only until then. The remaining
-P13-55 blocker is generated declaration package release checks after promotion
-and release packaging.
+gates; P13-55 keeps declarations metadata-only until then. Generated
+declaration package release checks remain future release-packaging work after
+profile promotion.

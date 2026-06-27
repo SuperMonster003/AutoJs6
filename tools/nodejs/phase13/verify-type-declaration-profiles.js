@@ -161,8 +161,6 @@ function buildReport(files) {
       token(files.capabilityMatrix, "P13-55 TypeScript profile declarations"),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.surfaceManifestDoc, REPORT_BASENAME),
-    ], [
-      "Generated declaration package release checks remain gated until profile promotion and release packaging.",
     ]),
   ];
 
@@ -233,7 +231,7 @@ function buildReport(files) {
     policyViolations,
     decision: {
       status: policyViolations.length > 0 ? "failed" : finalBlockerClosable ? "ready" : "partial",
-      phase13TaskComplete: false,
+      phase13TaskComplete: finalBlockerClosable,
       finalBlockerClosable,
       declarationMatrixReady: scenarioById(scenarios, "profile_capability_matrix").status === "ready",
       typeSmokeCoversProfiles: scenarioById(scenarios, "typescript_smoke").status === "ready",

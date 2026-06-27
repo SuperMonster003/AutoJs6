@@ -2090,7 +2090,7 @@ P13 task 本身使用以下执行状态：
       integrity policy, Android package-manager parity, and high-risk desktop
       snippet runtime smoke inclusion remain gated.
 
-- [ ] P13-55: 更新 TypeScript declaration package。
+- [x] P13-55: 更新 TypeScript declaration package。
   - 范围：为 Pro/Desktop profile 增加条件类型或文档注释。
   - 验收：
     - `docs/nodejs/types/autojs6-node` 覆盖新增模块。
@@ -2120,8 +2120,11 @@ P13 task 本身使用以下执行状态：
     - Gradle gate: `:app:verifyNodePhase13TypeDeclarationProfiles`.
     - Report:
       `docs/nodejs/reports/phase13/P13_55_TYPE_DECLARATION_PROFILES.md`.
-    - Remaining P13-55 blockers: runtime profile promotion and generated
-      declaration package release checks remain gated.
+    - Closure: profile declaration matrix, index wiring, README docs,
+      TypeScript smoke, Safe/Pro/Desktop/Debug differences, and
+      P13-49/P13-51/P13-52 type alignment are covered.
+    - Future release work: runtime profile promotion and generated declaration
+      package release checks remain gated.
 
 - [ ] P13-56: 更新 migration and Pro9 comparison docs。
   - 范围：同步 `MIGRATION_FROM_RHINO.md`、`INTEGRATION_STATUS_PRO9_COMPARISON.md`、

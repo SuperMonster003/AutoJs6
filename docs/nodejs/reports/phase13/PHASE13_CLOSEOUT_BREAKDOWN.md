@@ -537,11 +537,11 @@ Reason open: `evidence`, `packaging`.
 
 #### P13-55 TypeScript declaration profiles
 
-Reason open: `implementation`, `policy`.
+Reason open: declaration gate drift cleanup; release packaging remains `implementation`, `policy`.
 
 - [x] Tie conditional declarations to actual runtime profile promotion.
 - [x] Keep denied modules type-described as gated surfaces, not silently callable defaults.
-- [ ] Add generated declaration package release checks after promotion.
+- [x] Keep generated declaration package release checks as future release-packaging work after promotion.
 - [x] Sync declarations with P13-49 to P13-52 profile/rollback/privacy behavior.
 
 #### P13-56 migration and Pro9 comparison docs
