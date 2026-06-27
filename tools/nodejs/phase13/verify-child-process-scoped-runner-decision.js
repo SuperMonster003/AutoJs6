@@ -210,6 +210,20 @@ function buildReport(files) {
       "child_process must remain denied by default while the native builtin is debug opt-in.",
     ),
     check(
+      "dangerous-process-shapes-rejected",
+      childProcessProfile.includes('arbitraryPaths: __autojs6_child_process_experimental_enabled ? "native_node_policy" : "denied"') &&
+        childProcessProfile.includes('detached: "denied"') &&
+        childProcessProfile.includes('shellOperators: __autojs6_child_process_experimental_enabled ? "native_shell_option" : "denied"') &&
+        childProcessProfile.includes('processHandles: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"') &&
+        childProcessProfile.includes('fdStreams: __autojs6_child_process_experimental_enabled ? "native_available" : "denied"') &&
+        files.p13Report.text.includes("Arbitrary paths, detached processes, shell operators") &&
+        files.p13Report.text.includes("raw file descriptors, streams, and signals") &&
+        files.p13Report.text.includes("package-managed downloaded binaries") &&
+        files.compatibilityProfile.text.includes("`child_process.spawn()`, `fork()`, streaming stdio, and interactive shells are not supported") &&
+        files.securityModel.text.includes("JavaScript never receives a `Process`, file descriptor, stream, signal handle, or raw Android shell object"),
+      "P13-40 must keep arbitrary paths, downloaded binaries, shell operators, detached processes, and inherited handles rejected in the Safe/default boundary.",
+    ),
+    check(
       "no-scoped-runner-types-or-runtime-facade",
       !files.typesAutojsGlobal.text.includes('declare module "child_process"') &&
         !files.typesAutojsGlobal.text.includes('declare module "node:child_process"') &&
@@ -246,6 +260,7 @@ function buildReport(files) {
       experimentalNativeOptInReady: scenarioById(scenarios, "experimental_native_opt_in").status !== "missing_evidence",
       shellBridgeAlternativeReady: scenarioById(scenarios, "shell_bridge_separate_alternative").status === "ready",
       scopedRunnerIntroduced: false,
+      dangerousProcessShapesRejected: checkById(checks, "dangerous-process-shapes-rejected").passed,
       appPrivateBinaryAllowlistReady: false,
       stdioCancelCleanupReady: false,
       packagedBehaviorPromoted: false,
@@ -276,6 +291,10 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
 }
 
 function scenarioById(scenarios, id) {

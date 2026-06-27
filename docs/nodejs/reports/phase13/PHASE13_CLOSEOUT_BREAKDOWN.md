@@ -361,7 +361,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 - [ ] Design scoped exec/execFile/spawn-style API shape.
 - [ ] Define app-private binary packaging, allowlist metadata, hash checks, and path resolution.
-- [ ] Reject arbitrary paths, downloaded binaries, shell operators, detached processes, and inherited handles.
+- [x] Reject arbitrary paths, downloaded binaries, shell operators, detached processes, and inherited handles.
 - [ ] Implement bounded stdio, timeout, cancellation, kill, and cleanup.
 - [ ] Add process accounting, packaged metadata, disclosure, hostile corpus, and rollback controls.
 
