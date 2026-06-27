@@ -23,6 +23,11 @@ vocabulary for ordinary shell, root shell, and Shizuku.
 - `shell.checkAccess({ shizuku: true })` uses the explicit `shell.shizuku`
   capability token while still reporting `shizuku: false` because no provider
   is promoted.
+- Manifest enforcement diagnostics now distinguish root and Shizuku authority:
+  undeclared root requests report missing `shell.root`, combined
+  `checkAccess({ root: true, shizuku: true })` reports
+  `shell.root|shell.shizuku`, and Shizuku-only access reports
+  `shell|shell.shizuku` while execution remains unsupported.
 - `autojs6:compat.shell` exposes the same `execRoot`, `execShizuku`,
   `execFile`, `checkAccess`, and timeout helpers.
 
@@ -41,6 +46,10 @@ vocabulary for ordinary shell, root shell, and Shizuku.
 - Type smoke: `sample/nodejs/typescript-smoke/src/main.ts`
 - Conformance:
   `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgeConformanceInstrumentationTest.kt`
+- Split capability diagnostics:
+  `app/src/androidTest/java/org/autojs/autojs/engine/NodeShellBridgeInstrumentationTest.kt`
+  and
+  `app/src/androidTest/java/org/autojs/autojs/engine/NodeBridgePermissionManifestInstrumentationTest.kt`
 - Host verifier:
   `tools/nodejs/phase13/verify-shell-root-shizuku-capability.js`
 - Gradle gate: `:app:verifyNodePhase13ShellRootShizukuCapability`
@@ -71,9 +80,8 @@ partial until user-facing disclosure and failure diagnostics are complete.
   cleanup, package metadata, and user disclosure.
 - AbortSignal cancellation instrumentation for in-flight shell commands.
 - Packaged shell/root/Shizuku capability disclosure and rollback policy.
-- Audit report expansion that distinguishes undeclared capability,
-  unavailable provider, denied authorization, timeout, and resource-limit
-  failures.
+- Expanded audit report taxonomy for denied authorization, timeout, and
+  resource-limit failures.
 - Migration examples from Rhino `shell`, root shorthand, and Shizuku scripts.
 
 ## Verification

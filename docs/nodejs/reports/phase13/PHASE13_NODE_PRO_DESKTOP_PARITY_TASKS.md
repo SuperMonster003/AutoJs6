@@ -1000,6 +1000,13 @@ P13 task 本身使用以下执行状态：
     - Shizuku stable denial: `shell.execShizuku()` and
       `shell.exec(..., { shizuku: true })` reject with
       `ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED` before bridge dispatch.
+    - Split diagnostics:
+      `NodeBridgePermissionManifestInstrumentationTest` asserts undeclared
+      root requests report `shell.root`, `NodeShellBridgeInstrumentationTest`
+      asserts combined root/Shizuku access reports
+      `shell.root|shell.shizuku`, and
+      `NodeBridgeConformanceInstrumentationTest` asserts Shizuku-only access
+      reports `shell|shell.shizuku`.
     - Controlled execution evidence: scoped `cwd`, string-only `env`, bounded
       output, timeout code `124`, `ResourceRegistry` process cleanup, and
       active shell command limits.
@@ -1016,8 +1023,9 @@ P13 task 本身使用以下执行状态：
       `docs/nodejs/reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md`.
     - Open before closure: root available/unavailable device matrix, Shizuku
       service authorization and lifecycle, AbortSignal cancellation
-      instrumentation, packaged disclosure/failure diagnostics, expanded audit
-      taxonomy, and migration examples.
+      instrumentation, project/package metadata examples, packaged
+      disclosure/failure diagnostics, expanded audit taxonomy, and migration
+      examples.
 
 - [ ] P13-25: 扩展 notifications/settings/power manager。
   - 范围：补齐通知渠道、设置、电池优化、唤醒/亮屏等 Pro 能力。
