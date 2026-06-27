@@ -23,6 +23,7 @@ const FILES = {
   proComparison: "docs/nodejs/INTEGRATION_STATUS_PRO9_COMPARISON.md",
   proAutoxNotes: "docs/nodejs/COMPATIBILITY_NOTES_PRO_AUTOX.md",
   capabilityMatrix: "docs/nodejs/releases/NODE_PROFILE_V1_1_CAPABILITY_MATRIX.md",
+  phase13Summary: "docs/nodejs/reports/phase13/PHASE13_SUMMARY.md",
 };
 
 function main() {
@@ -125,8 +126,9 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-47 dependency compatibility corpus"),
-    ], [
-      "The corpus remains fixed/offline; live package acquisition, registry drift testing, and unsafe package execution remain blocked.",
+      token(files.phase13Summary, "P13-47 records dependency compatibility corpus as partial with 53 fixed offline fixtures"),
+      token(files.phase13Summary, "stdlib targetedFixtureDeltas +3"),
+      token(files.phase13Summary, "differential pass-rate rows"),
     ]),
   ];
 
@@ -234,7 +236,9 @@ function buildReport(files) {
       finalBlockerClosable,
       taxonomyReady: scenarioById(scenarios, "manifest_taxonomy").status === "ready",
       targetedDeltasReady: deltaProblems.length === 0,
+      passRateDeltasInSummary: scenarioById(scenarios, "docs_gate_and_surface").status === "ready",
       differentialCategoryReportingReady: scenarioById(scenarios, "instrumentation_and_differential").status !== "missing_evidence",
+      liveRegistryDriftInDefaultCi: false,
       unsafePackageExecutionPromoted: false,
       registryDriftTestingPromoted: false,
     },

@@ -25,10 +25,15 @@ category pass-rate rows, and adds a host verifier plus Gradle gate.
   differential artifacts are collected. Desktop-baseline-only runs can still
   return non-zero for fixtures that intentionally assert AutoJs6 policy
   denials.
+- `PHASE13_SUMMARY.md` records the 53 fixed offline fixtures, stdlib
+  `targetedFixtureDeltas` +3 pass delta, and differential pass-rate rows.
 - The differential runner can import connected AutoJs6 artifacts directly with
   `--autojs-connected-results <dir|file>`, scanning Gradle connected test
   result directories, XML reports, logcat text, and test logs for
   `realnpm.differential.result=` JSON lines.
+- Unsafe package execution remains denied in default CI. Native addons,
+  lifecycle scripts, postinstall downloads, and executable extraction are
+  represented as metadata blocker categories, not vendored runnable payloads.
 
 ## Remaining Work
 
@@ -37,9 +42,6 @@ category pass-rate rows, and adds a host verifier plus Gradle gate.
 - The corpus remains fixed and offline after the 53-fixture expansion; live
   registry drift testing is still a separate security and reproducibility
   problem.
-- Unsafe package execution remains denied. Native addons, lifecycle scripts,
-  postinstall downloads, and executable extraction are represented as metadata
-  blocker categories, not vendored runnable payloads.
 - Future capability relaxations should update the same category rows so
   pass-rate changes are visible by reason kind.
 

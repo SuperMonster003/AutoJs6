@@ -432,8 +432,8 @@ Reason open: `evidence`, `policy`.
 
 - [ ] Schedule connected AutoJs6 real npm corpus artifacts before host differential comparison.
 - [x] Add targeted packages for stdlib, ESM, network, fs, and package-manager deltas.
-- [ ] Keep live registry drift and unsafe package execution out of default CI.
-- [ ] Publish pass-rate deltas in the summary gate.
+- [x] Keep live registry drift and unsafe package execution out of default CI.
+- [x] Publish pass-rate deltas in the summary gate.
 
 #### P13-48 package lock and integrity policy
 
