@@ -6,6 +6,7 @@ const path = require("path");
 
 const REPORT_BASENAME = "phase13-pro-parity-examples";
 const EXAMPLE_NAME = "pro-parity-suite";
+const REQUIRED_SMOKE_EXAMPLES = Object.freeze(["ui-layout", "tasks-work-manager"]);
 const REQUIRED_EXAMPLES = Object.freeze([
   ["java-interop", ["java_interop"]],
   ["rhino-install", ["rhino", "java_interop"]],
@@ -36,6 +37,9 @@ const FILES = {
   exampleManifest: "sample/nodejs/pro-parity-suite/examples.json",
   exampleMain: "sample/nodejs/pro-parity-suite/main.cjs",
   exampleExpectedOutput: "sample/nodejs/pro-parity-suite/expected-output.txt",
+  exampleSmokeMain: "sample/nodejs/pro-parity-suite/smoke.cjs",
+  exampleSmokeExpectedOutput: "sample/nodejs/pro-parity-suite/smoke-output.txt",
+  nodeExampleInstrumentationTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeExampleProjectInstrumentationTest.kt",
 };
 
 function main() {
@@ -67,12 +71,14 @@ function loadFiles(repoRoot) {
 function buildReport(repoRoot, files) {
   const rootManifest = parseJson(files.rootExamplesManifest);
   const exampleManifest = parseJson(files.exampleManifest);
+  const smokeSubset = exampleManifest.smokeSubset || {};
   const project = parseJson(files.exampleProject);
   const packageJson = parseJson(files.examplePackage);
   const surfaceEntry = surface(files.surfaceManifest.text, "docs.examples.final_gate");
   const entries = Array.isArray(exampleManifest.examples) ? exampleManifest.examples : [];
   const entryById = new Map(entries.map((entry) => [entry.id, entry]));
   const requiredIds = REQUIRED_EXAMPLES.map(([id]) => id);
+  const smokeSubsetExamples = list(smokeSubset.examples);
   const projectPermissions = list(project.node && project.node.permissions);
   const snippetScenarios = REQUIRED_EXAMPLES.map(([id, capabilities]) => {
     const entry = entryById.get(id);
@@ -103,6 +109,23 @@ function buildReport(repoRoot, files) {
       remaining: missing,
     };
   });
+  const smokeSubsetReady =
+    smokeSubset.entry === "smoke.cjs" &&
+    smokeSubset.expectedOutput === "smoke-output.txt" &&
+    smokeSubset.profile === "pro_compat_opt_in" &&
+    REQUIRED_SMOKE_EXAMPLES.every((id) => smokeSubsetExamples.includes(id)) &&
+    smokeSubsetExamples.length === REQUIRED_SMOKE_EXAMPLES.length &&
+    files.exampleSmokeMain.text.trimStart().startsWith('"nodejs";') &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.smoke.catalog=${REQUIRED_SMOKE_EXAMPLES.length}`) &&
+    REQUIRED_SMOKE_EXAMPLES.every((id) =>
+      files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.${id}=PASS`) &&
+      files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.${id}=PASS`)) &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.ui-layout.closed=true`) &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.tasks-work-manager.cancelled=true`) &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.smoke=PASS`) &&
+    files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.smoke=PASS`) &&
+    files.nodeExampleInstrumentationTest.text.includes("proParitySafeSubsetExamplesRun") &&
+    files.nodeExampleInstrumentationTest.text.includes('runExample("pro-parity-suite", "smoke.cjs")');
 
   const checks = [
     check("required-files", Object.values(files).every((file) => file.exists), "All P13-53 source, doc, and gate files must exist."),
@@ -183,6 +206,11 @@ function buildReport(repoRoot, files) {
       "`expected-output.txt` must list the catalog count, each snippet marker, and final PASS marker.",
     ),
     check(
+      "smoke-subset",
+      smokeSubsetReady,
+      "`pro-parity-suite` must include a focused runtime smoke subset for already-covered UI and WorkManager paths.",
+    ),
+    check(
       "readme-acceptance",
       files.exampleReadme.text.includes("$autojs.java") &&
         files.exampleReadme.text.includes("rhino.install") &&
@@ -208,14 +236,14 @@ function buildReport(repoRoot, files) {
     ),
     check(
       "docs-and-surface-evidence",
-      includesAll(files.phase13Tasks.text, ["P13-53 partial landing", "verifyNodePhase13ProParityExamples"]) &&
-        includesAll(files.p13Report.text, ["P13-53 records Pro parity examples as partial", REPORT_BASENAME]) &&
+      includesAll(files.phase13Tasks.text, ["P13-53 partial landing", "safe subset smoke", "verifyNodePhase13ProParityExamples"]) &&
+        includesAll(files.p13Report.text, ["P13-53 records Pro parity examples as partial", "focused runtime smoke subset", REPORT_BASENAME]) &&
         includesAll(files.examplesDoc.text, [EXAMPLE_NAME, "Phase 13 Pro parity examples"]) &&
-        files.testingDoc.text.includes("verifyNodePhase13ProParityExamples") &&
-        files.ciGatesDoc.text.includes("verifyNodePhase13ProParityExamples") &&
+        includesAll(files.testingDoc.text, ["verifyNodePhase13ProParityExamples", "proParitySafeSubsetExamplesRun"]) &&
+        includesAll(files.ciGatesDoc.text, ["verifyNodePhase13ProParityExamples", "proParitySafeSubsetExamplesRun"]) &&
         files.proComparison.text.includes("P13-53 records Pro parity examples as partial") &&
         files.proAutoxNotes.text.includes("P13-53 records Pro parity examples as partial") &&
-        files.capabilityMatrix.text.includes("P13-53 Pro parity examples") &&
+        includesAll(files.capabilityMatrix.text, ["P13-53 Pro parity examples", "safe subset smoke"]) &&
         files.surfaceManifest.text.includes(REPORT_BASENAME) &&
         files.surfaceManifestDoc.text.includes(REPORT_BASENAME),
       "Docs, Pro/AutoX comparison, release matrix, and surface manifest must record the P13-53 example gate.",
@@ -238,7 +266,6 @@ function buildReport(repoRoot, files) {
     ...snippetScenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
     "live packaged Pro examples remain gated until reviewed prompt/disclosure UI, provider promotion, and packaged APK evidence land",
     "pro_compat_opt_in metadata remains diagnostic-only and does not grant Java/UI/overlay/accessibility/screenshot/OCR authority by itself",
-    "default runtime smoke does not execute high-risk snippets; P13-53 is a static catalog and documentation gate",
   ];
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
   return {
@@ -262,6 +289,9 @@ function buildReport(repoRoot, files) {
       finalBlockerClosable,
       catalogReady: snippetScenarios.every((entry) => entry.status === "ready"),
       defaultSmokeEnabled: false,
+      smokeSubsetEnabled: smokeSubsetReady,
+      smokeSubsetExamples,
+      highRiskSnippetsStatic: true,
       packagedRuntimePromoted: false,
       grantsAuthority: false,
       targetProfile: "pro_compat_opt_in",
@@ -308,6 +338,12 @@ function renderMarkdown(report) {
   for (const checkItem of report.checks) {
     lines.push(`- ${checkItem.passed ? "[x]" : "[ ]"} \`${checkItem.id}\`: ${checkItem.message}`);
   }
+  lines.push("", "## Smoke Subset", "");
+  lines.push(`- Enabled: ${report.decision.smokeSubsetEnabled ? "yes" : "no"}`);
+  lines.push(`- Examples: ${report.decision.smokeSubsetExamples.map((id) => `\`${id}\``).join(", ")}`);
+  lines.push("- Entry: `sample/nodejs/pro-parity-suite/smoke.cjs`");
+  lines.push("- Expected output: `sample/nodejs/pro-parity-suite/smoke-output.txt`");
+  lines.push("- Instrumentation: `NodeExampleProjectInstrumentationTest#proParitySafeSubsetExamplesRun`");
   if (report.policyViolations.length > 0) {
     lines.push("", "## Policy Violations", "");
     for (const violation of report.policyViolations) {

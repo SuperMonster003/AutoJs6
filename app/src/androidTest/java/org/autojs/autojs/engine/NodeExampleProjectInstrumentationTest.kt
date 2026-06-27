@@ -114,6 +114,19 @@ class NodeExampleProjectInstrumentationTest {
         assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.smoke=PASS"))
     }
 
+    @Test
+    fun proParitySafeSubsetExamplesRun() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node Pro parity safe subset example smoke")
+
+        val result = runExample("pro-parity-suite", "smoke.cjs")
+
+        NodeEmbeddedTestHarness.assertSucceeded("pro-parity-suite safe subset smoke", result)
+        assertTrue(result.stdout, result.stdout.contains("sample.pro-parity-suite.smoke.catalog=2"))
+        assertTrue(result.stdout, result.stdout.contains("sample.pro-parity-suite.ui-layout=PASS"))
+        assertTrue(result.stdout, result.stdout.contains("sample.pro-parity-suite.tasks-work-manager=PASS"))
+        assertTrue(result.stdout, result.stdout.contains("sample.pro-parity-suite.smoke=PASS"))
+    }
+
     private fun runExample(exampleName: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         return runExample(exampleName, null)
     }

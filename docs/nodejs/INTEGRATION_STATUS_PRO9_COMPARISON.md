@@ -1257,12 +1257,13 @@ granting implicit high privilege; prompt UI, notification ownership, and
 packaged disclosure review remain future work.
 
 P13-53 records Pro parity examples as partial: AutoJs6 Node now includes
-`sample/nodejs/pro-parity-suite`, a static example catalog for `$autojs.java`,
+`sample/nodejs/pro-parity-suite`, an example catalog for `$autojs.java`,
 `rhino.install`, UI, floaty/overlay, tasks, screenshot/OCR, and accessibility
 migration. Each snippet records required capabilities, expected output,
-packaged behavior, and a skip reason. The catalog improves script developer
-porting evidence without adding the high-risk snippets to default runtime
-smoke or granting Pro authority.
+packaged behavior, and a skip reason. The focused runtime smoke subset runs
+Activity-owned UI layout and WorkManager one-shot schedule/cancel behavior,
+while high-risk Pro snippets remain outside default runtime smoke and do not
+grant Pro authority.
 
 P13-54 records desktop Node parity examples as partial: AutoJs6 Node now
 includes `sample/nodejs/desktop-parity-suite`, an example catalog for ESM,

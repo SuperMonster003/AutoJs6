@@ -2,6 +2,13 @@
   "schema": "autojs6-node-pro-parity-examples-v1",
   "phase": "P13-53",
   "status": "partial",
+  "smokeSubset": {
+    "entry": "smoke.cjs",
+    "expectedOutput": "smoke-output.txt",
+    "profile": "pro_compat_opt_in",
+    "examples": ["ui-layout", "tasks-work-manager"],
+    "description": "Runs already-covered Activity-owned UI layout and WorkManager one-shot scheduling/cancel paths without enabling Java, Rhino, overlay, screenshot, OCR, or accessibility authority."
+  },
   "examples": [
     {
       "id": "java-interop",

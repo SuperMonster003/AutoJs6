@@ -2219,13 +2219,22 @@ Phase 13 Pro parity examples gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13ProParityExamples
 ```
 
+Focused device smoke for the already-covered Pro-safe subset:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeExampleProjectInstrumentationTest#proParitySafeSubsetExamplesRun" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
 This host gate records P13-53 as partial. It requires the
 `sample/nodejs/pro-parity-suite` catalog, `examples.json` snippet metadata,
-expected output markers, README capability/packaged-behavior/skip-reason
+expected output markers, the focused `proParitySafeSubsetExamplesRun` runtime
+smoke, README capability/packaged-behavior/skip-reason
 coverage, root example manifest registration, surface manifest evidence,
 release matrix updates, and Phase 13 docs. The examples cover `$autojs.java`,
 `rhino.install`, UI, floaty/overlay, tasks, screenshot/OCR, and accessibility,
-but remain outside default runtime smoke and do not grant Pro authority.
+but only the Activity-owned UI layout and WorkManager one-shot schedule/cancel
+paths run in the focused smoke. High-risk Pro authority remains outside default
+runtime smoke and does not grant Pro authority.
 
 Phase 13 desktop Node parity examples gate:
 

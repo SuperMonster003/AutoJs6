@@ -879,11 +879,14 @@ review UI, and runtime enforcement remain unpromoted.
 `verifyNodePhase13ProParityExamples` records P13-53 as the Pro parity examples
 gate. It requires the `sample/nodejs/pro-parity-suite` catalog, per-snippet
 required capabilities, expected outputs, packaged behavior, skip reasons,
-`verifyNodeExamples` registration, surface manifest evidence, release matrix
-updates, and docs updates while keeping the high-risk snippets out of default
-runtime smoke. P13-53 records Pro parity examples as partial; live packaged Pro
-execution, prompt/disclosure UI, provider promotion, and device permission
-matrices remain unpromoted.
+`verifyNodeExamples` registration,
+`NodeExampleProjectInstrumentationTest#proParitySafeSubsetExamplesRun`
+focused runtime smoke for Activity-owned UI layout and WorkManager one-shot
+schedule/cancel behavior, surface manifest evidence, release matrix updates,
+and docs updates while keeping high-risk snippets out of default runtime smoke.
+P13-53 records Pro parity examples as partial; live packaged Pro execution,
+prompt/disclosure UI, provider promotion, and device permission matrices remain
+unpromoted.
 `verifyNodePhase13DesktopParityExamples` records P13-54 as the desktop Node
 parity examples gate. It requires the `sample/nodejs/desktop-parity-suite`
 catalog, per-snippet `desktop_compat_opt_in` profile metadata, required

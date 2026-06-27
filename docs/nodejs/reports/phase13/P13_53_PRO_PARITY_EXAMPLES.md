@@ -1,9 +1,11 @@
 # P13-53 Pro Parity Examples
 
 P13-53 records Pro parity examples as partial. The landing adds
-`sample/nodejs/pro-parity-suite` as a static, machine-verifiable catalog for
-Auto.js Pro-style migration snippets without promoting the underlying
-high-risk providers.
+`sample/nodejs/pro-parity-suite` as a machine-verifiable catalog for Auto.js
+Pro-style migration snippets without promoting the underlying high-risk
+providers. It also includes a focused runtime smoke subset for the already
+covered Activity-owned UI layout and WorkManager one-shot schedule/cancel
+paths.
 
 ## Scope
 
@@ -30,6 +32,14 @@ in `expected-output.txt`. The runnable snippets under `snippets/` keep guarded
 try/catch paths and print explicit skip markers when a provider, permission, or
 profile is unavailable.
 
+`smoke.cjs` is the focused runtime smoke subset. It executes only the
+Activity-owned JSON UI path represented by `snippets/ui-layout.cjs` and the
+WorkManager one-shot schedule/cancel path represented by
+`snippets/tasks-work-manager.cjs`. `smoke-output.txt` records the expected
+output. Java interop, Rhino global install, overlay, screenshot/OCR, and
+accessibility authority examples remain static until their providers and
+policy gates are promoted.
+
 ## Gate
 
 Host verifier:
@@ -53,15 +63,16 @@ Reports:
 
 Status is `partial`.
 
-This gate proves the example catalog, metadata, documentation, and skip
-contract. It does not grant `pro_compat_opt_in` authority, does not add the
-high-risk snippets to default runtime smoke, and does not claim packaged Pro
-execution is ready.
+This gate proves the example catalog, metadata, documentation, skip contract,
+and the focused runtime smoke subset for already-covered UI and WorkManager
+paths. It does not grant `pro_compat_opt_in` authority, does not add high-risk
+snippets to default runtime smoke, and does not claim packaged Pro execution is
+ready.
 
 Remaining blockers:
 
 - Live packaged Pro examples need reviewed prompt/disclosure UI and packaged
   APK evidence.
-- Java/UI/overlay/accessibility/screenshot/OCR providers still need promotion
-  gates before the snippets can be treated as normal runnable examples.
+- Java/Rhino/overlay/accessibility/screenshot/OCR snippets remain static until
+  provider promotion and policy gates exist.
 - Device matrix coverage and permission-state smoke remain future work.

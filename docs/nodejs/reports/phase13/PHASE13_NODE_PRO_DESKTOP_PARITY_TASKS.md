@@ -1910,6 +1910,10 @@ P13 task 本身使用以下执行状态：
     - P13-53 partial landing adds `sample/nodejs/pro-parity-suite` with
       guarded snippets for `$autojs.java`, `rhino.install`, UI,
       floaty/overlay, tasks, screenshot/OCR, and accessibility.
+    - The Pro suite now includes `smoke.cjs` plus
+      `NodeExampleProjectInstrumentationTest#proParitySafeSubsetExamplesRun`
+      as safe subset smoke for Activity-owned UI layout and WorkManager
+      one-shot schedule/cancel behavior.
     - Each catalog entry in `sample/nodejs/pro-parity-suite/examples.json`
       records required capabilities, expected output, packaged behavior, and
       skip reason.
@@ -1918,8 +1922,8 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_53_PRO_PARITY_EXAMPLES.md`.
     - Remaining P13-53 blockers: live packaged Pro examples, prompt/disclosure
-      UI, provider promotion, permission device matrix, and default-runtime
-      smoke inclusion remain gated.
+      UI, provider promotion, permission device matrix, and high-risk Pro
+      snippet runtime smoke inclusion remain gated.
 
 - [ ] P13-54: 发布 desktop Node parity examples。
   - 范围：新增示例覆盖 ESM、worker、http/https、fs advanced、WASI、inspector、

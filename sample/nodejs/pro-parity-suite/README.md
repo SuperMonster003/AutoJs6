@@ -19,3 +19,9 @@ permissions or future providers are already promoted.
 | Accessibility | `snippets/accessibility-selector.cjs` | `accessibility` | packaged accessibility needs explicit service/disclosure review | accessibility service may be disabled |
 
 Expected output is listed in `expected-output.txt`.
+
+`smoke.cjs` is the focused runtime smoke subset. It executes only the
+Activity-owned JSON UI layout path represented by `snippets/ui-layout.cjs` and
+the WorkManager one-shot schedule/cancel path represented by
+`snippets/tasks-work-manager.cjs`. It does not execute Java interop, Rhino
+global install, overlay, screenshot/OCR, or accessibility authority examples.

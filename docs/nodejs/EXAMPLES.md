@@ -110,10 +110,14 @@ Verify the catalog with:
 .\gradlew.bat --console=plain :app:verifyNodePhase13ProParityExamples
 ```
 
-P13-53 keeps these examples out of the default runtime smoke list. The catalog
-is static evidence for migration shape and docs parity; packaged Pro execution
-remains gated by provider promotion, disclosure review, and device permission
-evidence.
+`smoke.cjs` is the focused runtime smoke subset for Activity-owned UI layout
+and WorkManager one-shot schedule/cancel behavior. It is covered by
+`NodeExampleProjectInstrumentationTest#proParitySafeSubsetExamplesRun`.
+
+P13-53 keeps high-risk Pro examples out of the default runtime smoke list. The
+catalog remains migration evidence for migration shape and docs parity;
+packaged Pro execution remains gated by provider promotion, disclosure review,
+and device permission evidence.
 
 ## Phase 13 Desktop Node Parity Examples
 

@@ -508,8 +508,10 @@ P13-53 records Pro parity examples as partial. AutoJs6 Node now ships
 `rhino.install`, UI, floaty/overlay, tasks, screenshot/OCR, and accessibility
 migration. The catalog records required capabilities, expected output,
 packaged behavior, and skip reasons for unavailable providers or permissions.
-It is documentation and static-verification evidence only; the snippets are
-not part of default runtime smoke and do not grant Pro profile authority.
+A focused runtime smoke subset runs Activity-owned UI layout and WorkManager
+one-shot schedule/cancel behavior; high-risk Pro snippets remain documentation
+and static-verification evidence only, are not part of default runtime smoke,
+and do not grant Pro profile authority.
 
 P13-54 records desktop Node parity examples as partial. AutoJs6 Node now ships
 `sample/nodejs/desktop-parity-suite`, a guarded catalog for ESM,
