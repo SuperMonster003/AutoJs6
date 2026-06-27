@@ -765,8 +765,8 @@ Phase 13 JavaAdapter / defineClass replacement decision:
 .\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeRhinoShimDesignGateInstrumentationTest,org.autojs.autojs.engine.NodeJavaInteropBridgeInstrumentationTest"
 ```
 
-`verifyNodePhase13RhinoJavaAdapterDecision` records the P13-16 partial
-decision: `require("rhino").JavaAdapter()` returns
+`verifyNodePhase13RhinoJavaAdapterDecision` records the P13-16 ready v1.1
+stable-denial decision: `require("rhino").JavaAdapter()` returns
 `ERR_AUTOJS6_RHINO_JAVA_ADAPTER_UNSUPPORTED`, no global `JavaAdapter` is
 installed, and `java.defineClass()` / `$autojs.java.defineClass()` are reserved
 stable denials until a bounded proxy-interface provider, callback cleanup,
