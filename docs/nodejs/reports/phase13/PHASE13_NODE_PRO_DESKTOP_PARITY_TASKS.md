@@ -1,5 +1,18 @@
 # Phase 13: Auto.js Pro And Desktop Node Parity Expansion Tasks
 
+## Closeout Breakdown
+
+- Detailed closeout decomposition:
+  `docs/nodejs/reports/phase13/PHASE13_CLOSEOUT_BREAKDOWN.md`.
+- Open Phase 13 parent tasks generally remain open because their partial
+  landings still need one or more of runtime implementation, connected-device
+  evidence, packaged APK evidence, security/product policy, rollback/privacy
+  behavior, or external native/runtime availability.
+- Parent tasks should not be checked complete until their verifier reports zero
+  blockers, required evidence is archived, profile/capability docs are synced,
+  stable-denial paths remain covered, and `generateNodePhase13Summary` no
+  longer reports the task as partial.
+
 ## P13-20 Partial Landing Note
 
 - P13-20 partial screenshot/image/OCR promotion gate records direct
