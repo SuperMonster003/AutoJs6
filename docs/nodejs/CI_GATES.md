@@ -638,9 +638,10 @@ packaged behavior, and raw Android objects require separate evidence.
 P13-24 additionally uses `verifyNodePhase13ShellRootShizukuCapability` as the
 host promotion-status gate for shell/root/Shizuku capability parity and keeps
 the surface partial: ordinary shell and explicit root facades are covered by
-the controlled `shell.exec` provider, while real Shizuku authorization,
-root-device matrix closure, packaged disclosure, cancellation evidence, and raw
-process/root/Shizuku handles require separate evidence.
+the controlled `shell.exec` provider, while Shizuku execution stays
+stable-denied for v1.1 and root-device matrix closure, packaged disclosure,
+cancellation evidence, and raw process/root/Shizuku handles require separate
+evidence.
 P13-25 additionally uses `verifyNodePhase13NotificationsSettingsPowerManager`
 as the host promotion-status gate for notifications/settings/power manager
 parity and keeps the surface partial: permission/settings snapshots and

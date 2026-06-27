@@ -210,13 +210,13 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 #### P13-24 shell/root/Shizuku
 
-Reason open: `implementation`, `evidence`, `policy`.
+Reason open: `implementation`, `evidence`, `packaging`.
 
 - [x] Split `shell.root` and `shell.shizuku` capability checks and diagnostics in runtime/verifier evidence.
 - [x] Add project/package metadata examples for both capabilities.
 - [ ] Add root-available and root-unavailable device matrix.
 - [ ] Add AbortSignal cancellation for in-flight shell commands.
-- [ ] Implement Shizuku only after service binding, permission, lifecycle, cleanup, packaged disclosure, and rollback evidence exist.
+- [x] Keep Shizuku execution stable-denied for v1.1; implement it only after service binding, permission, lifecycle, cleanup, packaged disclosure, and rollback evidence exist.
 
 #### P13-25 notifications/settings/power manager
 

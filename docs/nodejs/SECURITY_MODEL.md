@@ -601,9 +601,12 @@ capability vocabulary now distinguishes `shell`, `shell.root`, and
 `shell.shizuku`; `shell.execRoot()` is an explicit root facade over the
 controlled shell bridge, while `shell.execShizuku()` and
 `shell.exec(..., { shizuku: true })` reject with
-`ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED` before bridge dispatch. Real Shizuku
-execution, Shizuku service handles, Binder access, root shell handles, packaged
-disclosure, and raw process/file-descriptor/stream/signal objects remain denied.
+`ERR_AUTOJS6_SHELL_SHIZUKU_UNSUPPORTED` before bridge dispatch. For v1.1,
+Shizuku execution is stable-denied: `shell.shizuku` is auditable vocabulary
+only until a dedicated provider owns authorization, lifecycle, cleanup,
+packaged disclosure, and rollback evidence. Shizuku service handles, Binder
+access, root shell handles, and raw process/file-descriptor/stream/signal
+objects remain denied.
 
 The `fetch` bridge is the controlled AutoJs6 Safe-profile replacement for Node raw network modules. JavaScript receives only a fetch-compatible Promise wrapper and buffered response helpers. Request descriptors are JSON-serialized, method-limited to `GET` and `POST`, bounded by `timeoutMs`, `maxResponseBytes`, `maxRedirects`, and max active request count, and may be cancelled through `AbortController.signal`. Only `http:` and `https:` URLs are accepted. The live Android provider is gated by `BuildConfig.NODEJS_NETWORK_EXPERIMENTAL_ENABLED`; normal builds reject before network I/O. Provider destroy cancels tracked OkHttp calls and must not call back into a destroyed Node environment.
 

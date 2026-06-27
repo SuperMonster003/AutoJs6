@@ -269,9 +269,9 @@ smoke, and migration examples land.
 P13-24 records the partial shell/root/Shizuku capability gate. `shell.execRoot()`
 and `compat.shell.execRoot()` are typed over the existing controlled
 `shell.exec(..., { root: true })` path, while `shell.execShizuku()` and
-`compat.shell.execShizuku()` are stable rejecting `Promise<never>` APIs until a
-real Shizuku provider has authorization, lifecycle, cleanup, and packaged
-evidence.
+`compat.shell.execShizuku()` are stable rejecting `Promise<never>` APIs for
+v1.1 until a dedicated Shizuku provider owns authorization, lifecycle, cleanup,
+packaged disclosure, rollback, and device matrix evidence.
 
 P13-25 records the partial notifications/settings/power manager gate.
 `notifications.getPermissionStatus()`, `notifications.openSettings()`,

@@ -120,11 +120,13 @@ function buildReport(files) {
       token(files.typeSmoke, "const compatShizukuDenied: Promise<never>"),
       token(files.conformanceTest, 'await expectRejectCode("shell.execShizuku"'),
       token(files.conformanceTest, "shell Shizuku rejected stubs must not dispatch bridge requests"),
+      token(files.p13Report, "For P13-24 v1.1, Shizuku execution stays stable-denied"),
+      token(files.p13Report, "vocabulary-only `shell.shizuku` token"),
+      token(files.phase13Tasks, "For P13-24 v1.1, `shell.execShizuku()`"),
+      token(files.compatibilityProfile, "Shizuku execution stays stable-denied for v1.1"),
+      token(files.securityModel, "Shizuku execution is stable-denied"),
       token(files.securityModel, "P13-24 records shell/root/Shizuku capability promotion as partial"),
-      token(files.appIntentReport, "root/Shizuku/dual-user routes through explicit P13-24 capability surfaces"),
-    ], [
-      "Implement real Shizuku only after service binding, permission request/denial, process lifecycle, package metadata, and cleanup evidence exist.",
-      "Add packaged disclosure and rollback policy before accepting shell.shizuku as executable authority.",
+      token(files.appIntentReport, "P13-24 shell/root/Shizuku capability gates"),
     ]),
     scenario("docs_gate", "Phase 13 docs and Gradle gate record P13-24 as partial", [
       token(files.p13Report, "Status: partial"),
@@ -139,7 +141,7 @@ function buildReport(files) {
       token(files.typesReadme, "P13-24 records the partial shell/root/Shizuku capability gate"),
       token(files.surfaceManifestDoc, "phase13-shell-root-shizuku-capability"),
     ], [
-      "Keep P13-24 open until real root/Shizuku device matrix, packaged disclosure, authorization UI, and cancellation evidence land.",
+      "Keep P13-24 open until root device matrix, packaged shell/root disclosure, cancellation, and audit taxonomy evidence land.",
     ]),
   ];
   const checks = [

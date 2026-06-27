@@ -101,10 +101,13 @@
 - Report:
   `docs/nodejs/reports/phase13/P13_24_SHELL_ROOT_SHIZUKU_CAPABILITY.md`.
 - Surface manifest evidence: `phase13-shell-root-shizuku-capability`.
-- Remaining P13-24 blockers: root device matrix, Shizuku authorization and
-  service lifecycle, AbortSignal cancellation instrumentation, packaged
-  disclosure/failure diagnostics, expanded audit taxonomy, and migration
-  examples.
+- For P13-24 v1.1, `shell.execShizuku()` and `shell.exec(..., { shizuku: true })`
+  remain stable-denied; `shell.shizuku` is auditable vocabulary only until a
+  dedicated Shizuku provider owns authorization, lifecycle, cleanup, packaged
+  disclosure, and rollback evidence.
+- Remaining P13-24 blockers: root device matrix, AbortSignal cancellation
+  instrumentation, packaged disclosure/failure diagnostics, expanded audit
+  taxonomy, and migration examples.
 
 ## P13-25 Partial Landing Note
 

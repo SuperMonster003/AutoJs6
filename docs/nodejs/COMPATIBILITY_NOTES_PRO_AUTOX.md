@@ -288,8 +288,9 @@ P13-24 records shell/root/Shizuku capability promotion as partial. AutoJs6 Node
 now has explicit `shell`, `shell.root`, and `shell.shizuku` capability tokens,
 `shell.execRoot()` / `compat.shell.execRoot()` facades for the existing
 controlled root shell path, and stable pre-dispatch Shizuku rejection. Real
-Shizuku service binding, authorization prompts, lifecycle cleanup, packaged
-disclosure, and device matrix evidence remain blocked.
+Shizuku execution stays stable-denied for v1.1 until a dedicated provider owns
+authorization prompts, lifecycle cleanup, packaged disclosure, rollback, and
+device matrix evidence.
 
 P13-25 records notifications/settings/power manager promotion as partial.
 AutoJs6 Node now has JSON-safe notification permission/settings snapshots and

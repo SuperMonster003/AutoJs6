@@ -1514,7 +1514,9 @@ stable pre-dispatch rejection for `shell.execShizuku()` and `shell.exec(...,
 { shizuku: true })`, TypeScript coverage, conformance coverage, provider
 registry policy anchors, and cross-document evidence. It does not promote real
 Shizuku execution, root device matrix closure, packaged shell disclosure, or
-raw process/shizuku/root handles.
+raw process/shizuku/root handles; Shizuku execution stays stable-denied for
+v1.1 until a dedicated provider owns authorization, lifecycle, cleanup,
+packaged disclosure, and rollback evidence.
 
 Phase 13 notifications/settings/power manager status gate:
 

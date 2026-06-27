@@ -1037,9 +1037,9 @@ raw Android app/intent objects remain blocked.
 P13-24 records shell/root/Shizuku capability promotion as partial: ordinary
 `shell.exec()` stays on the controlled provider, `shell.execRoot()` and
 `compat.shell.execRoot()` are explicit root facades requiring `shell.root`, and
-`shell.execShizuku()` / `shizuku: true` reject before bridge dispatch until
-Shizuku authorization, lifecycle, packaged disclosure, and device matrix
-evidence exist.
+`shell.execShizuku()` / `shizuku: true` stay stable-denied for v1.1 until a
+dedicated Shizuku provider owns authorization, lifecycle, cleanup, packaged
+disclosure, rollback, and device matrix evidence.
 
 P13-25 records notifications/settings/power manager promotion as partial:
 `notifications.getPermissionStatus()`, `notifications.openSettings()`,

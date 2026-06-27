@@ -48,6 +48,11 @@ vocabulary for ordinary shell, root shell, and Shizuku.
 These examples document separate capability declarations only. Declaring
 `shell.shizuku` does not promote Shizuku execution; `shell.execShizuku()` and
 `shell.exec(..., { shizuku: true })` still reject before bridge dispatch.
+For P13-24 v1.1, Shizuku execution stays stable-denied. A future promotion
+must be owned by a dedicated provider with service binding, permission
+request/denial, lifecycle, cleanup, packaged disclosure, and rollback evidence;
+it must not turn the vocabulary-only `shell.shizuku` token into executable
+authority by declaration alone.
 
 ## Evidence
 
@@ -82,9 +87,11 @@ method. `execFile`, `execRoot`, and `execShizuku` are JavaScript facades:
 `execFile` validates and quotes scoped relative paths, `execRoot` requests
 `shell.root`, and `execShizuku` rejects without dispatch.
 
-Shizuku is not executed by Node in P13-24. No Shizuku service, Binder, user
-service, shell process, file descriptor, stream, signal handle, `Process`, root
-shell handle, or Android shell object crosses the bridge.
+Shizuku is not executed by Node in P13-24 v1.1. No Shizuku service, Binder,
+user service, shell process, file descriptor, stream, signal handle, `Process`,
+root shell handle, or Android shell object crosses the bridge. Declaring
+`shell.shizuku` is only auditable vocabulary until a dedicated Shizuku provider
+is promoted.
 
 Packaged queued fallback must not execute shell commands. Packaged shell use
 requires live bridge metadata plus explicit project capabilities, and remains
@@ -94,13 +101,11 @@ partial until user-facing disclosure and failure diagnostics are complete.
 
 - Root device matrix for devices with and without `su`, including stable denial
   and command-result evidence.
-- Shizuku permission request/denial, service binding, lifecycle, process
-  cleanup, package metadata, and user disclosure.
 - AbortSignal cancellation instrumentation for in-flight shell commands.
-- Packaged shell/root/Shizuku capability disclosure and rollback policy.
+- Packaged shell/root capability disclosure and rollback policy.
 - Expanded audit report taxonomy for denied authorization, timeout, and
   resource-limit failures.
-- Migration examples from Rhino `shell`, root shorthand, and Shizuku scripts.
+- Migration examples from Rhino `shell` and root shorthand.
 
 ## Verification
 
