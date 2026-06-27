@@ -806,10 +806,10 @@ packaged APK capability metadata decision gate. It requires
 focused packaged metadata instrumentation, existing bridge permission manifest
 evidence, APK builder Android permission synthesis evidence, packaged
 runtime/launch descriptor evidence, TypeScript declarations, surface manifest
-evidence, and docs updates while keeping profile selection, builtin promotion,
-native asset loading, expanded filesystem roots, and unreviewed Android
-permission synthesis unpromoted. P13-45 records packaged APK capability
-metadata as partial.
+evidence, metadata warning diagnostics, and docs updates while keeping profile
+selection, builtin promotion, native asset loading, expanded filesystem roots,
+and unreviewed Android permission synthesis unpromoted. P13-45 records packaged
+APK capability metadata as partial.
 `verifyNodePhase13PluginSystemParityDecision` records P13-46 as the plugin
 system parity decision gate. It requires `pluginSystemProfile`, focused plugin
 system parity instrumentation, existing JS-only plugin manager evidence, plugin

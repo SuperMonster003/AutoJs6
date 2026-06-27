@@ -1332,7 +1332,8 @@ native asset, filesystem-root, execution-mode, network, and Android permission
 metadata. The metadata is diagnostic-only: `node.permissions` remains the
 bridge authority source, Android manifest synthesis currently maps bridge
 capabilities to Android permissions, and profile/builtin/native/fs-root
-metadata does not widen runtime authority.
+metadata does not widen runtime authority. Invalid packaged metadata fields are
+mirrored into `packagedMetadata.warnings` for JS diagnostics.
 
 P13-46 records plugin system parity as partial. The runtime exposes
 `autojs6:profile.pluginSystemProfile` to document the current JS-only local

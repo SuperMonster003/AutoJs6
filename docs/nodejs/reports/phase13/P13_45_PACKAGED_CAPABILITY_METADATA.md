@@ -17,6 +17,9 @@ device instrumentation, a host verifier, and a Gradle gate.
   Android manifest permission synthesis.
 - `network` capability metadata maps to `android.permission.INTERNET` through
   the existing manifest permission path.
+- Invalid packaged metadata fields are reported through both top-level manifest
+  warnings and `packagedMetadata.warnings`, and JS receives the same frozen
+  diagnostics through `bridge.permissions()` and `autojs6:profile`.
 - Declared builtins, native assets, filesystem roots, and profiles are
   diagnostic-only and do not grant runtime authority.
 - Missing bridge capabilities still reject before dispatch in JavaScript.

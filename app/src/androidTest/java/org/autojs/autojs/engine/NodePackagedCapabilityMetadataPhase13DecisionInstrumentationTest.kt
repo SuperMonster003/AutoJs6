@@ -240,4 +240,90 @@ class NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest {
             workDir.deleteRecursively()
         }
     }
+
+    @Test
+    fun packagedCapabilityMetadataWarningsReachRuntimeReports() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("P13-45 packaged capability metadata warnings")
+
+        val workDir = File(context.cacheDir, "node-packaged-capability-warnings-p13-45-${System.nanoTime()}").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create P13-45 packaged metadata warnings work dir: $absolutePath" }
+        }
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "type": "node",
+              "node": {
+                "profile": "",
+                "profiles": ["desktop_compat_opt_in", 7],
+                "builtins": "fs",
+                "network": {
+                  "enabled": "yes"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(workDir, "package.json").writeText(
+            """
+            {
+              "name": "p13-packaged-capability-metadata-warnings",
+              "autojs6": {
+                "node": {
+                  "nativeAssets": ["", "native/addon.node"],
+                  "filesystemRoots": "cache"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+
+        try {
+            val manifest = NodeBridgePermissionManifest.fromWorkingDirectory(workDir.absolutePath)
+            assertTrue(manifest.packagedMetadata.warnings.any { it.contains("project.json:node.profile") })
+            assertTrue(manifest.packagedMetadata.warnings.any { it.contains("project.json:node.builtins") })
+            assertTrue(manifest.packagedMetadata.warnings.any { it.contains("package.json:autojs6.node.filesystemRoots") })
+            assertEquals(manifest.packagedMetadata.warnings, manifest.warnings)
+
+            val result = NodeEmbeddedTestHarness.runEmbeddedScript(
+                source = """
+                    "nodejs";
+                    const bridge = require("autojs6:bridge");
+                    const profile = require("autojs6:profile");
+                    const metadata = bridge.permissions().packagedMetadata;
+                    const profileMetadata = profile.bridgePermissions.packagedMetadata;
+                    const selectionWarnings = profile.profileSelection.warnings;
+                    const warnings = metadata.warnings;
+                    const profileWarnings = profileMetadata.warnings;
+                    const warningsOk =
+                      warnings.some((value) => value.includes("project.json:node.profile")) &&
+                      warnings.some((value) => value.includes("project.json:node.builtins")) &&
+                      warnings.some((value) => value.includes("package.json:autojs6.node.filesystemRoots")) &&
+                      warnings.join("\n") === profileWarnings.join("\n") &&
+                      warnings.join("\n") === selectionWarnings.join("\n") &&
+                      Object.isFrozen(warnings) &&
+                      Object.isFrozen(profileWarnings) &&
+                      Object.isFrozen(selectionWarnings) &&
+                      metadata.nativeAssets.join(",") === "native/addon.node" &&
+                      metadata.requestedProfiles.join(",") === "desktop_compat_opt_in";
+                    console.log("p13packaged.warnings=" + [
+                      warnings.length,
+                      profileWarnings.length,
+                      warningsOk,
+                      metadata.metadataOnly,
+                      metadata.grantsAuthority
+                    ].join("|"));
+                """.trimIndent(),
+                sourceName = "<node-packaged-capability-warnings-phase13-p13-45.js>",
+                workingDirectory = workDir,
+                timeoutMs = 10_000L,
+                runtimeModuleSources = mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson()),
+            )
+
+            NodeEmbeddedTestHarness.assertSucceeded("P13-45 packaged capability metadata warnings", result)
+            assertTrue(result.stdout, result.stdout.contains("p13packaged.warnings=6|6|true|true|false"))
+        } finally {
+            workDir.deleteRecursively()
+        }
+    }
 }

@@ -508,6 +508,62 @@ class NodeBridgePermissionManifestInstrumentationTest {
     }
 
     @Test
+    fun packagedMetadataWarningsAreMirroredIntoManifestAndMetadata() {
+        val workDir = File(context.cacheDir, "node-bridge-permission-packaged-warnings").apply {
+            deleteRecursively()
+            check(mkdirs()) { "Failed to create bridge permission packaged warnings directory: $absolutePath" }
+        }
+        File(workDir, "project.json").writeText(
+            """
+            {
+              "type": "node",
+              "node": {
+                "profile": "",
+                "profiles": ["desktop_compat_opt_in", 7],
+                "builtins": "fs",
+                "filesystem": {
+                  "roots": ["data", ""]
+                },
+                "network": {
+                  "enabled": "yes"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        File(workDir, "package.json").writeText(
+            """
+            {
+              "name": "packaged-capability-warnings",
+              "autojs6": {
+                "node": {
+                  "nativeAssets": ["", "native/addon.node"],
+                  "filesystemRoots": "cache"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val manifest = NodeBridgePermissionManifest.fromWorkingDirectory(workDir.absolutePath)
+        val expectedWarnings = listOf(
+            "project.json:node.profile must be a non-empty string.",
+            "project.json:node.profiles[1] must be a non-empty string.",
+            "project.json:node.builtins must be a JSON string array.",
+            "project.json:node.filesystem.roots[1] must be a non-empty string.",
+            "project.json:node.network.enabled must be a boolean when present.",
+            "package.json:autojs6.node.nativeAssets[0] must be a non-empty string.",
+            "package.json:autojs6.node.filesystemRoots must be a JSON string array.",
+        )
+
+        assertEquals(expectedWarnings, manifest.packagedMetadata.warnings)
+        assertEquals(expectedWarnings, manifest.warnings)
+        assertEquals(listOf("desktop_compat_opt_in"), manifest.packagedMetadata.requestedProfiles)
+        assertEquals(listOf("native/addon.node"), manifest.packagedMetadata.nativeAssets)
+        assertEquals(listOf("data"), manifest.packagedMetadata.filesystemRoots)
+    }
+
+    @Test
     fun jsManifestAllowsDeclaredToastRejectsUndeclaredAccessibilityAndReportsCapabilities() {
         NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node bridge permission manifest focused regression")
 

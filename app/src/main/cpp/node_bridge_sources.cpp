@@ -10902,6 +10902,7 @@ std::string buildEmbeddedScriptExecutionSource(
         releaseForbidden: flag.releaseForbidden === true
       }));
     }
+    const warnings = Array.from(new Set((manifest.warnings || []).slice().concat((metadata.warnings || []).slice())));
     return Object.freeze({
       schema: "autojs6-node-profile-selection-diagnostics-v1",
       status: "diagnostic_only",
@@ -10928,7 +10929,7 @@ std::string buildEmbeddedScriptExecutionSource(
         capabilityNotDeclared: __autojs6_profile_failure_hint_for_missing_capabilities("module", "method", ["capability"]),
         profilePromotionBlocked: "Requested Pro/Desktop/Debug profile metadata is visible but does not grant authority in Phase 13."
       }),
-      warnings: Object.freeze((manifest.warnings || []).slice().concat((metadata.warnings || []).slice()))
+      warnings: Object.freeze(warnings)
     });
   }
   function __autojs6_bridge_limit_defaults() {

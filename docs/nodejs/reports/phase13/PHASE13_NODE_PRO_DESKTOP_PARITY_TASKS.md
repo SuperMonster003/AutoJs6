@@ -1641,8 +1641,9 @@ P13 task 本身使用以下执行状态：
     - Focused instrumentation:
       `NodePackagedCapabilityMetadataPhase13DecisionInstrumentationTest`
       验证 metadata 解析、JS 冻结报告、`network` 到
-      `android.permission.INTERNET` 的映射、以及未声明 `accessibility`
-      在 dispatch 前稳定拒绝。
+      `android.permission.INTERNET` 的映射、metadata warning 在
+      `packagedMetadata.warnings` / JS profile 中可见、以及未声明
+      `accessibility` 在 dispatch 前稳定拒绝。
     - Existing evidence:
       `NodeBridgePermissionManifestInstrumentationTest`、`ApkBuilder`、
       `NodeProjectRuntimeCompatibilityDescriptor`、`NodeProjectLaunchDescriptor`、

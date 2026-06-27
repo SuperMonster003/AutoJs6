@@ -318,14 +318,14 @@ object NodeBridgePermissionManifest {
             val json = parseJsonObject(text, PROJECT_JSON, warnings)
             if (json != null) {
                 collectProjectJsonPermissions(json, sources, warnings)
-                collectProjectJsonPackagedMetadata(json, packagedMetadata, warnings)
+                collectProjectJsonPackagedMetadata(json, packagedMetadata)
             }
         }
         packageJsonText?.let { text ->
             val json = parseJsonObject(text, PACKAGE_JSON, warnings)
             if (json != null) {
                 collectPackageJsonPermissions(json, sources, warnings)
-                collectPackageJsonPackagedMetadata(json, packagedMetadata, warnings)
+                collectPackageJsonPackagedMetadata(json, packagedMetadata)
             }
         }
         val permissions = sources
@@ -514,7 +514,7 @@ object NodeBridgePermissionManifest {
             unknownPermissions = unknown,
             androidPermissions = androidPermissionsForCapabilities(permissions),
             serviceRequired = permissions.isNotEmpty(),
-            warnings = (warnings + unknown.map { "Unknown Node bridge capability: $it" }).distinct(),
+            warnings = (warnings + packagedMetadata.warnings + unknown.map { "Unknown Node bridge capability: $it" }).distinct(),
             packagedMetadata = packagedMetadata.build(normalizedPermissions),
         )
     }
@@ -532,10 +532,9 @@ object NodeBridgePermissionManifest {
     private fun collectProjectJsonPackagedMetadata(
         json: JSONObject,
         metadata: PackagedMetadataBuilder,
-        warnings: MutableList<String>,
     ) {
         val node = json.optJSONObject("node") ?: return
-        collectPackagedMetadata(node, "project.json:node", metadata, warnings)
+        collectPackagedMetadata(node, "project.json:node", metadata, metadata.warnings)
     }
 
     private fun collectPackageJsonPermissions(
@@ -555,12 +554,11 @@ object NodeBridgePermissionManifest {
     private fun collectPackageJsonPackagedMetadata(
         json: JSONObject,
         metadata: PackagedMetadataBuilder,
-        warnings: MutableList<String>,
     ) {
         val autojs6 = json.optJSONObject("autojs6") ?: return
-        collectPackagedMetadata(autojs6, "package.json:autojs6", metadata, warnings)
+        collectPackagedMetadata(autojs6, "package.json:autojs6", metadata, metadata.warnings)
         autojs6.optJSONObject("node")?.let { node ->
-            collectPackagedMetadata(node, "package.json:autojs6.node", metadata, warnings)
+            collectPackagedMetadata(node, "package.json:autojs6.node", metadata, metadata.warnings)
         }
     }
 
@@ -823,6 +821,7 @@ object NodeBridgePermissionManifest {
         val nativeAssets: MutableList<String> = mutableListOf(),
         val filesystemRoots: MutableList<String> = mutableListOf(),
         val sources: MutableList<String> = mutableListOf(),
+        val warnings: MutableList<String> = mutableListOf(),
         var executionMode: String? = null,
         var networkRequested: Boolean = false,
     ) {
@@ -861,7 +860,7 @@ object NodeBridgePermissionManifest {
                 metadataOnly = true,
                 grantsAuthority = false,
                 sources = sources.distinct().ifEmpty { listOf("none") },
-                warnings = emptyList(),
+                warnings = warnings.distinct(),
             )
         }
 

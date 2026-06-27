@@ -2020,9 +2020,10 @@ Phase 13 packaged APK capability metadata focused instrumentation:
 
 This suite verifies packaged metadata parsing from `project.json` and
 `package.json`, `network` to `android.permission.INTERNET` mapping,
-read-only JavaScript reports, diagnostic-only builtin/native/fs-root metadata,
-and stable pre-dispatch denial for undeclared bridge capabilities. P13-45
-records packaged APK capability metadata as partial.
+read-only JavaScript reports, packaged metadata warning propagation,
+diagnostic-only builtin/native/fs-root metadata, and stable pre-dispatch denial
+for undeclared bridge capabilities. P13-45 records packaged APK capability
+metadata as partial.
 
 Phase 13 plugin system parity decision gate:
 
