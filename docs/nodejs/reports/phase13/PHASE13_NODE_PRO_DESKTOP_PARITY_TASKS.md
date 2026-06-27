@@ -1783,6 +1783,9 @@ P13 task 本身使用以下执行状态：
       `child_process`、native addon、inspector、WASI 七类 relaxed
       capabilities 的 positive tests、negative tests、abuse cases、
       CI evidence 与 rollback posture。
+    - Corpus 现在强制每个 relaxed capability 提供 `runtimeGuards` 和
+      `promotionPreconditions`，记录 fail-closed error/flag、rollback、
+      privacy disclosure、packaged metadata 与 connected-CI 前置条件。
     - `NodeSecurityRegressionInstrumentationTest` 已新增 focused corpus：
       raw network deny、scoped fs positive/escape、shell bridge 替代
       `child_process`、native addon deny、inspector deny、raw WASI deny、

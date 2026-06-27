@@ -1384,7 +1384,7 @@ P13-50 records relaxed-capability security corpus as partial. The corpus at
 `docs/nodejs/security/RELAXED_CAPABILITY_SECURITY_CORPUS.json` covers raw
 network, filesystem relaxation, Java interop, `child_process`, native addon
 loading, inspector, and WASI with positive tests, negative tests, abuse cases,
-CI evidence, and rollback posture. The host gate
+CI evidence, runtime guards, promotion preconditions, and rollback posture. The host gate
 `verifyNodePhase13RelaxedCapabilitySecurityCorpus` and focused
 `NodeSecurityRegressionInstrumentationTest` additions prove the current
 runtime remains fail-closed while future Pro/Desktop/Debug promotion evidence

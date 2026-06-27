@@ -2133,7 +2133,8 @@ This host gate records P13-50 as partial. It requires
 `RELAXED_CAPABILITY_SECURITY_CORPUS.json`, focused
 `NodeSecurityRegressionInstrumentationTest` additions, companion raw
 network/filesystem/Java/child_process/native addon/inspector/WASI evidence,
-surface manifest evidence, release matrix updates, and Phase 13 docs. It keeps
+per-capability runtime guards and promotion preconditions, surface manifest
+evidence, release matrix updates, and Phase 13 docs. It keeps
 raw sockets, expanded filesystem roots, raw process/native handles, raw WASI,
 inspector, native addons, and release Java interop unpromoted.
 
@@ -2148,7 +2149,8 @@ These focused tests cover raw network denial, scoped fs positive and escape
 paths, shell-bridge replacement for `child_process`, native addon denial,
 inspector denial, pure WebAssembly with raw WASI denial, and Java interop
 allowlist/denylist behavior. P13-50 records relaxed-capability security corpus
-as partial.
+as partial; runtime guards and promotion preconditions remain evidence-only and
+do not grant authority.
 
 Phase 13 profile rollback playbook gate:
 

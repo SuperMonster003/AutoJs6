@@ -82,22 +82,36 @@ function buildReport(files) {
       : [],
   );
   const capabilityChecks = EXPECTED_CAPABILITIES.map((id) => capabilityEvidence(id, capabilityMap.get(id)));
-  const allCapabilityEvidencePresent = capabilityChecks.every((entry) => entry.present && entry.hasPositive && entry.hasNegative && entry.hasAbuse && entry.hasCi && entry.hasRollback);
+  const allCapabilityEvidencePresent = capabilityChecks.every(
+    (entry) =>
+      entry.present &&
+      entry.hasPositive &&
+      entry.hasNegative &&
+      entry.hasAbuse &&
+      entry.hasCi &&
+      entry.hasRuntimeGuards &&
+      entry.hasPromotionPreconditions &&
+      entry.hasRollback,
+  );
   const focusedBlock = files.securityTest.text;
   const runtimeBlock = block(files.nodeBridgeSources.text, "function __autojs6_profile()", "  function __autojs6_profile_profile_order()");
 
   const scenarios = [
-    scenario("corpus_descriptor", "Relaxed capability corpus records required positive, negative, abuse, CI, and rollback evidence for every high-risk surface", [
+    scenario("corpus_descriptor", "Relaxed capability corpus records required positive, negative, abuse, CI, runtime guard, promotion precondition, and rollback evidence for every high-risk surface", [
       token(files.corpus, '"schema": "autojs6-node-relaxed-capability-security-corpus-v1"'),
       token(files.corpus, '"task": "P13-50"'),
       token(files.corpus, '"profilePromotion": false'),
       token(files.corpus, '"rawCapabilitiesPromoted": false'),
+      token(files.corpus, '"runtimeGuards"'),
+      token(files.corpus, '"promotionPreconditions"'),
       ...EXPECTED_CAPABILITIES.map((id) => fact(files.corpus.relative, id, capabilityChecks.find((entry) => entry.id === id).present)),
       ...capabilityChecks.flatMap((entry) => [
         fact(files.corpus.relative, `${entry.id}.positiveTests`, entry.hasPositive),
         fact(files.corpus.relative, `${entry.id}.negativeTests`, entry.hasNegative),
         fact(files.corpus.relative, `${entry.id}.abuseCases`, entry.hasAbuse),
         fact(files.corpus.relative, `${entry.id}.ciEvidence`, entry.hasCi),
+        fact(files.corpus.relative, `${entry.id}.runtimeGuards`, entry.hasRuntimeGuards),
+        fact(files.corpus.relative, `${entry.id}.promotionPreconditions`, entry.hasPromotionPreconditions),
         fact(files.corpus.relative, `${entry.id}.rollback`, entry.hasRollback),
       ]),
     ], [
@@ -202,7 +216,7 @@ function buildReport(files) {
     check(
       "corpus-capability-evidence",
       allCapabilityEvidencePresent,
-      "each relaxed capability must include positiveTests, negativeTests, abuseCases, ciEvidence, and rollback evidence.",
+      "each relaxed capability must include positiveTests, negativeTests, abuseCases, ciEvidence, runtimeGuards, promotionPreconditions, and rollback evidence.",
     ),
     check("surface-present", Boolean(surfaceEntry), "`security.rollback_privacy` surface must exist."),
     check(
@@ -280,6 +294,8 @@ function capabilityEvidence(id, entry) {
     hasNegative: arrayHasItems("negativeTests"),
     hasAbuse: arrayHasItems("abuseCases"),
     hasCi: arrayHasItems("ciEvidence"),
+    hasRuntimeGuards: arrayHasItems("runtimeGuards"),
+    hasPromotionPreconditions: arrayHasItems("promotionPreconditions"),
     hasRollback: typeof (entry && entry.rollback) === "string" && entry.rollback.trim().length > 0,
   };
 }
@@ -382,9 +398,9 @@ function renderMarkdown(report) {
     "",
     "## Capabilities",
     "",
-    "| Capability | Present | Positive | Negative | Abuse | CI | Rollback |",
-    "| --- | --- | --- | --- | --- | --- | --- |",
-    ...report.capabilities.map((entry) => `| \`${entry.id}\` | ${yesNo(entry.present)} | ${yesNo(entry.hasPositive)} | ${yesNo(entry.hasNegative)} | ${yesNo(entry.hasAbuse)} | ${yesNo(entry.hasCi)} | ${yesNo(entry.hasRollback)} |`),
+    "| Capability | Present | Positive | Negative | Abuse | CI | Runtime Guards | Promotion Preconditions | Rollback |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...report.capabilities.map((entry) => `| \`${entry.id}\` | ${yesNo(entry.present)} | ${yesNo(entry.hasPositive)} | ${yesNo(entry.hasNegative)} | ${yesNo(entry.hasAbuse)} | ${yesNo(entry.hasCi)} | ${yesNo(entry.hasRuntimeGuards)} | ${yesNo(entry.hasPromotionPreconditions)} | ${yesNo(entry.hasRollback)} |`),
     "",
     "## Scenarios",
     "",

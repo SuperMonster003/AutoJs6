@@ -849,7 +849,8 @@ relaxed-capability security corpus gate. It requires
 `RELAXED_CAPABILITY_SECURITY_CORPUS.json`, focused
 `NodeSecurityRegressionInstrumentationTest` coverage, companion raw
 network/filesystem/Java/child_process/native addon/inspector/WASI evidence,
-surface manifest evidence, and docs updates while keeping raw sockets,
+per-capability runtime guards and promotion preconditions, surface manifest
+evidence, and docs updates while keeping raw sockets,
 expanded filesystem roots, raw process/native handles, raw WASI, inspector,
 native addons, and release Java interop unpromoted. P13-50 records
 relaxed-capability security corpus as partial.

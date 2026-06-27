@@ -90,8 +90,8 @@ P13-50 adds `RELAXED_CAPABILITY_SECURITY_CORPUS.json` as the shared relaxed
 capability corpus index. Any future promotion of raw network, filesystem
 relaxation, Java interop, `child_process`, native addon loading, inspector, or
 WASI must keep that corpus updated with positive tests, negative tests, abuse
-cases, CI evidence, and rollback posture before moving beyond diagnostic or
-controlled fail-closed behavior.
+cases, CI evidence, runtime guards, promotion preconditions, and rollback
+posture before moving beyond diagnostic or controlled fail-closed behavior.
 
 ## Release Rule
 

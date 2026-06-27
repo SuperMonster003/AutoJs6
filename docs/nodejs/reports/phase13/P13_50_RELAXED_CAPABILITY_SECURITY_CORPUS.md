@@ -10,7 +10,7 @@ that corpus to focused Android regression tests and a host verifier.
 - `RELAXED_CAPABILITY_SECURITY_CORPUS.json` defines
   `autojs6-node-relaxed-capability-security-corpus-v1`.
 - Every relaxed capability records positive tests, negative tests, abuse cases,
-  CI evidence, and rollback posture.
+  CI evidence, runtime guards, promotion preconditions, and rollback posture.
 - `NodeSecurityRegressionInstrumentationTest` now has focused P13-50 coverage
   for raw network denial, scoped filesystem positives/escapes, shell-bridge
   replacement for `child_process`, native addon denial, inspector denial, raw
@@ -21,6 +21,9 @@ that corpus to focused Android regression tests and a host verifier.
 - Runtime profile metadata remains fail-closed: raw sockets, broad filesystem
   roots, raw process/native handles, raw WASI, inspector, native addons, and
   release Java interop are not promoted by this task.
+- The corpus now requires per-capability `runtimeGuards` and
+  `promotionPreconditions` so future opt-in promotion has explicit fail-closed,
+  rollback, privacy, packaged metadata, and connected-CI prerequisites.
 - `verifyNodePhase13RelaxedCapabilitySecurityCorpus` generates
   `phase13-relaxed-capability-security-corpus.json` and `.md`.
 

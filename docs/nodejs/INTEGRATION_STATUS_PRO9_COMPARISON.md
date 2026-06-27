@@ -1228,10 +1228,10 @@ P13-50 records relaxed-capability security corpus as partial: AutoJs6 Node now
 tracks raw network, filesystem relaxation, Java interop, `child_process`,
 native addon loading, inspector, and WASI in
 `RELAXED_CAPABILITY_SECURITY_CORPUS.json`, with positive tests, negative tests,
-abuse cases, CI evidence, and rollback posture. This creates the security
-evidence lane needed for Pro/Desktop parity, but raw sockets, expanded roots,
-raw process/native handles, raw WASI, inspector, native addons, and release
-Java interop remain unpromoted.
+abuse cases, CI evidence, runtime guards, promotion preconditions, and rollback
+posture. This creates the security evidence lane needed for Pro/Desktop parity,
+but raw sockets, expanded roots, raw process/native handles, raw WASI,
+inspector, native addons, and release Java interop remain unpromoted.
 
 P13-51 records per-profile rollback playbook as partial: AutoJs6 Node now
 documents default-off Pro/Desktop/Debug profile switches, relaxed-capability
