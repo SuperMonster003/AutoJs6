@@ -33,6 +33,11 @@ These types document profile requirements, Safe-profile denial behavior, and
 packaged behavior. They do not declare denied desktop modules as callable
 modules and do not grant runtime authority.
 
+Conditional declarations remain tied to runtime profile promotion: the matrix
+records `targetProfile` and `targetMode` metadata plus no-authority flags, while
+the effective runtime profile stays `safe_default` until the P13-49/P13-52
+promotion, rollback, and disclosure gates are implemented.
+
 ## Gate
 
 Host verifier:

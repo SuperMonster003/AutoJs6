@@ -183,6 +183,15 @@ function buildReport(files) {
       "P13-55 declarations must remain metadata-only and must not grant authority.",
     ),
     check(
+      "conditional-declarations-follow-runtime-promotion",
+        files.typesProfileCapabilities.text.includes("readonly targetProfile: TTargetProfile") &&
+        files.typesProfileCapabilities.text.includes("readonly targetMode: TTargetMode") &&
+        files.typesProfileCapabilities.text.includes("readonly grantsAuthority: false") &&
+        includesAll(files.typesReadme.text, ["They do not promote", "effective profile beyond `safe_default`"]) &&
+        files.p13Report.text.includes("Conditional declarations remain tied to runtime profile promotion"),
+      "P13-55 conditional declarations must stay tied to runtime promotion metadata and not independently grant callable authority.",
+    ),
+    check(
       "smoke-safe-pro-desktop",
       REQUIRED_SMOKE_TOKENS.every((value) => files.typescriptSmoke.text.includes(value)),
       "TypeScript smoke must cover Safe, Pro, Desktop, and Debug declaration differences.",
@@ -230,6 +239,7 @@ function buildReport(files) {
       declarationMatrixReady: scenarioById(scenarios, "profile_capability_matrix").status === "ready",
       typeSmokeCoversProfiles: scenarioById(scenarios, "typescript_smoke").status === "ready",
       securityRollbackPrivacyAligned: scenarioById(scenarios, "security_rollback_privacy_alignment").status === "ready",
+      runtimePromotionBoundaryDocumented: checkById(checks, "conditional-declarations-follow-runtime-promotion").passed,
       deniedDesktopModulesCallable: false,
       metadataOnly: true,
       grantsAuthority: false,
@@ -259,6 +269,14 @@ function token(file, value) {
 
 function check(id, passed, message) {
   return { id, passed: Boolean(passed), message };
+}
+
+function checkById(checks, id) {
+  return checks.find((entry) => entry.id === id) || { passed: false };
+}
+
+function includesAll(text, values) {
+  return values.every((value) => text.includes(value));
 }
 
 function scenarioById(scenarios, id) {

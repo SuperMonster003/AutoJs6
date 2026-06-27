@@ -510,7 +510,7 @@ Reason open: `evidence`, `packaging`.
 
 Reason open: `implementation`, `policy`.
 
-- [ ] Tie conditional declarations to actual runtime profile promotion.
+- [x] Tie conditional declarations to actual runtime profile promotion.
 - [x] Keep denied modules type-described as gated surfaces, not silently callable defaults.
 - [ ] Add generated declaration package release checks after promotion.
 - [x] Sync declarations with P13-49 to P13-52 profile/rollback/privacy behavior.
