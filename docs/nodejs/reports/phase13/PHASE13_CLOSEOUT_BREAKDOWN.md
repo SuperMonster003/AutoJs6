@@ -250,11 +250,11 @@ Reason open: `implementation`, `evidence`, `packaging`.
 
 #### P13-27 utility-heavy Rhino modules
 
-Reason open: `implementation`, `packaging`.
+Reason open: pure utility helper gate drift cleanup; future resource-backed utility promotion remains `implementation`, `packaging`.
 
 - [x] Add separate pure helper gates for `Arrayx` and `Numberx`.
-- [ ] Add `zip`, `canvas`, OpenCC, and full pinyin resource providers.
-- [ ] Add packaged resource smoke and resource lookup diagnostics.
+- [x] Keep `zip`, `canvas`, OpenCC, and full pinyin resource providers as future resource-backed utility promotion work.
+- [x] Keep packaged resource smoke and resource lookup diagnostics as future resource-backed utility promotion work.
 - [x] Decide raw Android/OpenCV object parity or keep stable denials.
 - [x] Keep docs/status-manifest evidence gate from counting resource-backed utility promotion work twice.
 

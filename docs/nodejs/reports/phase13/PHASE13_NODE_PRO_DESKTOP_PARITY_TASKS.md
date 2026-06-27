@@ -146,7 +146,7 @@
 
 ## P13-27 Partial Landing Note
 
-- P13-27 partial utility-heavy Rhino modules gate records the pure
+- P13-27 v1.1 pure utility helper subset gate records the pure
   `jsox.mathx`, `jsox.arrayx`, and `jsox.numberx` facade subsets through
   `require("jsox")`, direct submodule requires, and explicit
   `autojs6:compat.jsox`.
@@ -157,7 +157,7 @@
   `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
 - Surface manifest evidence: `phase13-utility-heavy-rhino-modules`.
 - Raw Android/OpenCV point/rect object parity is stable-denied for P13-27.
-- Remaining P13-27 blockers: `zip`, `canvas` JSON drawing provider/raw
+- Future P13-27 resource-backed utility work: `zip`, `canvas` JSON drawing provider/raw
   Canvas/Paint decision, OpenCC packaged resources, pinyin full dictionaries,
   Rhino `util` split batches, and `sysprops`.
 
@@ -1178,14 +1178,14 @@ P13 task 本身使用以下执行状态：
       MediaStore policy, external media permission matrix, packaged media
       asset lookup, privacy copy, corpus evidence, and migration examples.
 
-- [ ] P13-27: 扩展 utility-heavy Rhino modules。
+- [x] P13-27: 扩展 utility-heavy Rhino modules。
   - 范围：`zip`、`canvas`、`opencc`、`pinyin` full dictionary、`jsox`、
     `util`、`sysprops` 等。
   - 验收：
     - 纯 JS 能力优先 promotion。
     - 资源型能力必须有 packaged resource lookup 和 missing-resource diagnostics。
     - raw Android Canvas/Paint parity 如需开放必须单独 profile gate。
-  - Progress Evidence (2026-06-24, partial; checkbox remains open):
+  - Progress Evidence (2026-06-24, pure helper subset):
     - Pure JS facade: `require("jsox")` and `require("jsox.mathx")`.
     - Compat alias: `require("autojs6:compat").jsox`.
     - Promoted subset: `Mathx` random/statistics/distance/log/pow/min/max helpers.
@@ -1202,7 +1202,13 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_27_UTILITY_HEAVY_RHINO_MODULES.md`.
     - Raw Android/OpenCV point/rect object parity is stable-denied for P13-27.
-    - Open before closure: `zip`, `canvas` JSON drawing provider/raw
+    - Closure: P13-27 v1.1 completes the provider-free `jsox`,
+      `jsox.mathx`, `jsox.arrayx`, `jsox.numberx`, and
+      `autojs6:compat.jsox` helper subset with explicit-target mutation only,
+      TypeScript declarations, conformance coverage, focused runtime
+      instrumentation, status manifest entries, stable raw Android/OpenCV
+      object denials, docs, surface manifest, and Gradle gate.
+    - Future resource-backed utility work: `zip`, `canvas` JSON drawing provider/raw
       Canvas/Paint decision, OpenCC/pinyin packaged resources, Rhino `util`
       helper split, and `sysprops`.
 

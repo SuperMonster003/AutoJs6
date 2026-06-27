@@ -7,8 +7,8 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 ## Task Checklist
 
 - Total tasks: 58
-- Completed tasks: 33
-- Open tasks: 25
+- Completed tasks: 34
+- Open tasks: 24
 - Deferred tasks: 0
 - Rejected tasks: 0
 
@@ -41,7 +41,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `P13-24` | `open` | `pro.tasks_app_shell_media_utils` | 扩展 shell/root/Shizuku 能力。 |
 | `P13-25` | `open` | `pro.tasks_app_shell_media_utils` | 扩展 notifications/settings/power manager。 |
 | `P13-26` | `open` | `pro.tasks_app_shell_media_utils` | 扩展 media/recorder/mediainfo provider。 |
-| `P13-27` | `open` | `pro.tasks_app_shell_media_utils` | 扩展 utility-heavy Rhino modules。 |
+| `P13-27` | `completed` | `pro.tasks_app_shell_media_utils` | 扩展 utility-heavy Rhino modules。 |
 | `P13-28` | `completed` | `desktop.network_fs` | 建立 Node builtin desktop parity matrix。 |
 | `P13-29` | `open` | `desktop.network_fs` | 推进 raw `http` / `https` client compatibility。 |
 | `P13-30` | `open` | `desktop.network_fs` | 推进 `net` / `tls` / `dns` staged compatibility。 |
@@ -159,7 +159,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 
 - Total reports: 53
 - Reports with policy violations: 0
-- Reports with blockers: 24
+- Reports with blockers: 23
 
 | Report | Gate | Task | Status | Policy violations | Blockers |
 | --- | --- | --- | --- | ---: | ---: |
@@ -213,7 +213,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-surface-manifest-verification.json` | `verifyNodePhase13SurfaceManifest` | `-` | `passed` | 0 | 0 |
 | `phase13-task-database-provider.json` | `verifyNodePhase13TaskDatabaseProvider` | `P13-21` | `partial` | 0 | 8 |
 | `phase13-type-declaration-profiles.json` | `verifyNodePhase13TypeDeclarationProfiles` | `P13-55` | `ready` | 0 | 0 |
-| `phase13-utility-heavy-rhino-modules.json` | `verifyNodePhase13UtilityHeavyRhinoModules` | `P13-27` | `partial` | 0 | 1 |
+| `phase13-utility-heavy-rhino-modules.json` | `verifyNodePhase13UtilityHeavyRhinoModules` | `P13-27` | `ready` | 0 | 0 |
 | `phase13-vm-module-decision.json` | `verifyNodePhase13VmModuleDecision` | `P13-36` | `partial` | 0 | 2 |
 | `phase13-worker-threads-opt-in-promotion.json` | `verifyNodePhase13WorkerThreadsOptInPromotion` | `P13-34` | `partial` | 0 | 4 |
 

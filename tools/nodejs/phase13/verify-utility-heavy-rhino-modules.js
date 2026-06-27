@@ -113,12 +113,10 @@ function buildReport(files) {
       token(files.utilityTest, "jsox.resolve=jsox|jsox.mathx|jsox.arrayx|jsox.numberx"),
       token(files.utilityTest, "numberx.parseAny(\"0xFF\")"),
       token(files.utilityTest, "ERR_AUTOJS6_RHINO_COMPAT_BLOCKED_BY_DESIGN"),
-    ], [
-      "Resource-backed utility modules need dedicated gates with packaged resource smoke, lookup diagnostics, and provider ownership before promotion.",
     ]),
     scenario("docs_manifest_and_gate", "docs, status manifest, surface manifest, and Gradle gate record P13-27", [
-      token(files.p13Report, "Status: partial"),
-      token(files.phase13Tasks, "P13-27 partial utility-heavy Rhino modules gate"),
+      token(files.p13Report, "Status: ready"),
+      token(files.phase13Tasks, "P13-27 v1.1 pure utility helper subset gate"),
       token(files.surfaceManifestDoc, "phase13-utility-heavy-rhino-modules"),
       token(files.gradleGate, "verifyNodePhase13UtilityHeavyRhinoModules"),
       token(files.testingDoc, "verifyNodePhase13UtilityHeavyRhinoModules"),
