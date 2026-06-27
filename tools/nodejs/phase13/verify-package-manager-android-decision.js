@@ -206,7 +206,7 @@ function buildReport(files) {
       token(files.p13AndroidManagerReport, "`NodeAndroidPackageInstallManager` supports"),
       token(files.p13AndroidManagerVerifier, "verifyNodePhase13AndroidPackageInstallManager"),
     ], [
-      "Signed packaged native payloads, native build execution, lifecycle debug mode, and bin shim strategy remain future work.",
+      "Signed packaged native payloads, native build execution, lifecycle debug mode, bin shim strategy, and packaged distribution evidence remain future work.",
     ]),
     scenario("host_managed_install_equivalent", "Host-side package manager remains the equivalent npm install path while Android runtime install stays constrained", [
       token(files.phase10PackageManager, 'const REPORT_BASENAME = "phase10-package-manager-boundary"'),
@@ -234,9 +234,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-42 Android package manager"),
-    ], [
-      "P13-42 remains partial until signed native payloads and packaged distribution evidence close.",
-    ]),
+    ], []),
   ];
 
   const checks = [

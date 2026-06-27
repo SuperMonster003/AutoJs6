@@ -385,6 +385,7 @@ Reason open: `implementation`, `policy`, `packaging`.
 - [x] Keep Android registry downloader, cache management, tarball extraction, and integrity-lock authority stable-denied as runtime user APIs for v1.1; implement only after a reviewed mobile install authority exists.
 - [x] Decide npm CLI, lifecycle, bin, native execution, and raw node_modules mutation policy.
 - [x] Keep host-managed install equivalent as the safe default until mobile install authority is reviewed.
+- [x] Keep docs/release-matrix evidence gate from counting the same signed native payload and packaged distribution work twice.
 - [ ] Add packaged distribution evidence.
 
 #### P13-43 stdlib conformance

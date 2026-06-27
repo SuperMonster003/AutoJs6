@@ -163,6 +163,10 @@ constrained to the local store substrate.
 - Raw `node_modules` mutation APIs from scripts.
 - Packaged APK dependency install/distribution evidence.
 
+The docs, release matrix, surface manifest, and Gradle gate remain evidence
+checks only. They do not add a second blocker for the same signed native
+payload and packaged distribution promotion work.
+
 ## Verification
 
 ```powershell
