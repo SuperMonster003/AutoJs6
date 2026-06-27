@@ -209,7 +209,7 @@ function networkNextStepFor(name) {
 
 function nextStepForLimited(name) {
   if (name === "vm") {
-    return "P13-36 promotes vm/node:vm to the native Node builtin for desktop npm compatibility; keep profile diagnostics, shadow-package protection, and follow-up evidence for memory, timeout, and packaged behavior.";
+    return "P13-36 promotes vm/node:vm to the native Node builtin for desktop npm compatibility; profile diagnostics, shadow-package protection, repeated-script budget, timeout, boundary-probe, and packaged fixture evidence are ready while VM remains a non-sandbox compatibility surface.";
   }
   if (name === "fs" || name === "fs/promises") {
     return "P13-32 records scoped filesystem profile and P13-33 records advanced fs APIs as partial; Safe profile stays working-directory scoped while Android watcher coalescing, recursive-watch denial, and realpath differences are documented; expanded roots, packaged watcher/fd/FileHandle close-on-destroy, and full desktop fs semantics remain future work.";
@@ -264,7 +264,7 @@ function nextStepForDisabled(name) {
     case "inspector":
       return "P13-37 records inspector debug-profile diagnostics as partial; Safe/default and release keep inspector denied while explicit debug-session UI, loopback ADB forwarding, DevTools attach, profiler artifact redaction, and packaged behavior evidence remain future work.";
     case "vm":
-      return "P13-36 records vm module diagnostics as partial; Safe/default keeps vm denied while vm.Script/context/timeout, escape denial, memory budget, and packaged behavior evidence remain future work.";
+      return "P13-36 records vm module diagnostics as ready for the partial native compatibility surface; Safe/default still treats VM as non-sandboxed compatibility and does not grant extra bridge, process, filesystem, or private binding authority.";
     case "wasi":
       return "P13-38 records controlled WASI diagnostics as partial; pure WebAssembly is the supported v1.1 runtime path while raw and controlled WASI APIs stay stable-denied, with controlled preopens, fd/env/args, resource budgets, worker integration, and packaged behavior remaining future work.";
     case "worker_threads":

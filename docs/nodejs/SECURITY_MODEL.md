@@ -151,7 +151,7 @@ but it does not grant Java interop, Android plugin APK access, native provider
 loading, update authority, package download authority, or packaged APK manifest
 injection.
 
-`vm` is enabled as a native Node builtin for desktop npm compatibility, but a second JavaScript context is not a security boundary in this embedder. AutoJs6 does not inject raw Android or bridge host objects into VM contexts, and disabled builtins remain governed by the loader policy. Memory/compiled-script budgets and packaged VM smoke evidence remain follow-up work.
+`vm` is enabled as a native Node builtin for desktop npm compatibility, but a second JavaScript context is not a security boundary in this embedder. AutoJs6 does not inject raw Android or bridge host objects into VM contexts, and disabled builtins remain governed by the loader policy. P13-36 focused VM stress now covers repeated compiled scripts, native timeout interruption, bridge/process/global non-injection probes, and packaged fixture smoke coverage.
 
 Inspector remains disabled because it is a live debugger control channel, not a passive diagnostic API. Any future support must be debug-build-only, loopback-only, explicitly user-started, and closed through the embedded service lifecycle. See `docs/nodejs/design/INSPECTOR.md`.
 
@@ -837,9 +837,11 @@ metadata and does not make a second JavaScript context a security boundary.
 `compileFunction`, VM module APIs, dynamic import hooks, and native timeout
 options follow Node behavior. AutoJs6 does not inject bridge or raw Android
 host objects into VM contexts, and disabled builtins remain governed by the
-loader policy. Follow-up work must prove memory budgets, repeated context
-cleanup, process/global leakage expectations, scoped filesystem preservation,
-and packaged diagnostics.
+loader policy. P13-36 focused VM stress now covers repeated compiled scripts,
+a 32 MiB heap-delta budget, native timeout interruption, VM
+bridge/process/global non-injection probes, scoped filesystem preservation, and
+packaged fixture smoke coverage; future work can broaden duration and corpus
+size without treating VM as a security boundary.
 
 P13-37 records inspector/devtools debug profile as partial.
 `inspectorProfile` is diagnostic metadata only and does not open a debugger

@@ -311,20 +311,24 @@
   target ABIs, process-worker packaging behavior, slot accounting, cleanup
   stress, and launch-surface evidence for any future promoted replacement.
 
-## P13-36 Partial Landing Note
+## P13-36 Closure Note
 
-- P13-36 partial `vm` module gate records `vmProfile` diagnostics and routes
+- P13-36 ready `vm` module gate records `vmProfile` diagnostics and routes
   `vm`/`node:vm` to Node's native builtin by default.
 - The gate documents the native `vm.Script`, context, `compileFunction`, VM
   module APIs, native timeout options, shadowing protection, and non-sandbox
   boundary for desktop npm compatibility.
+- Focused closure evidence covers repeated `vm.Script` and context workloads
+  under a 32 MiB heap-delta budget, native timeout interruption,
+  bridge/process/global non-injection probes, and a packaged fixture package
+  using `vm.Script`, contexts, `compileFunction`, and timeout behavior.
 - Host verifier: `tools/nodejs/phase13/verify-vm-module-decision.js`.
 - Gradle gate: `:app:verifyNodePhase13VmModuleDecision`.
 - Report: `docs/nodejs/reports/phase13/P13_36_VM_MODULE_DECISION.md`.
 - Surface manifest evidence: `phase13-vm-module-decision`.
-- Remaining P13-36 blockers: memory/compiled-script budgets, packaged APK
-  smoke evidence, bridge/process/global leakage probes, and timeout/lifecycle
-  stress evidence.
+- Future hardening outside P13-36 closure: longer VM stress, broader package
+  corpus coverage, and any stricter membrane design if a future profile treats
+  VM contexts as an isolation primitive.
 
 ## P13-38 Stable-Denied v1.1 Note
 
@@ -1447,7 +1451,7 @@ P13 task 本身使用以下执行状态：
       facade or UX; future WorkerPool promotion evidence remains owned by
       P13-34/future provider work.
 
-- [ ] P13-36: 推进 `vm` module。
+- [x] P13-36: 推进 `vm` module。
   - 范围：为 Desktop/npm 兼容开放原生 `vm.Script`、context 和 timeout。
   - 验收：
     - 禁止逃逸到 private bindings、bridge globals 或 host objects。
@@ -1462,6 +1466,14 @@ P13 task 本身使用以下执行状态：
       private binding/bridge/host object/process/global leakage probes
       和 packaged APK behavior 证据。
     - Device test: `NodeVmPhase13DecisionInstrumentationTest`。
+    - Closure evidence:
+      `NodeVmPhase13DecisionInstrumentationTest#vmMemoryCompiledScriptBudgetAndTimeoutStressAreBounded`
+      covers repeated compiled scripts, a 32 MiB heap-delta budget, native
+      timeout interruption, and VM boundary non-injection probes.
+    - Packaged evidence: `EmbeddedNodePackagedApkSmokeTest` includes
+      `packaged-vm-user`, a packaged fixture package using `vm.Script`,
+      contexts, `compileFunction`, timeout behavior, and shadow-package
+      protection.
     - Existing design gate: `NodeVmDesignGateInstrumentationTest`。
     - Host verifier: `tools/nodejs/phase13/verify-vm-module-decision.js`。
     - Gradle gate: `:app:verifyNodePhase13VmModuleDecision`。

@@ -1320,8 +1320,10 @@ runtime promotion gate explicitly changes their status.
 P13-36 records `vm` module promotion as partial: Safe Node now exposes
 `vmProfile` diagnostics and routes `vm` / `node:vm` to Node's native builtin.
 This improves Pro/desktop parity for packages that use `vm.Script` or contexts.
-Memory budgets, context cleanup stress, bridge/process/global leakage probes,
-private binding checks, and packaged behavior remain open.
+Focused P13-36 evidence now covers repeated compiled-script budgets, native
+timeout interruption, bridge/process/global non-injection probes, private
+binding boundaries, and packaged fixture behavior; broader duration and package
+corpus expansion remain future hardening work.
 
 P13-37 records inspector/devtools debug profile as partial: Safe Node now
 exposes `inspectorProfile` diagnostics while keeping `inspector` and

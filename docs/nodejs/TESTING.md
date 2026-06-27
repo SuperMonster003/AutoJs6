@@ -1144,11 +1144,13 @@ Phase 13 vm module decision gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13VmModuleDecision
 ```
 
-This host gate records P13-36 as partial. It requires `vmProfile`
+This host gate records P13-36 as ready while keeping `vm` a partial native
+compatibility surface rather than a security boundary. It requires `vmProfile`
 diagnostics, native `vm`/`node:vm` require and resolve behavior, shadowing
 protection, updated design-gate evidence, TypeScript declarations, the desktop
-builtin matrix, and Phase13 docs. It keeps memory/compiled-script budgets,
-packaged VM smoke coverage, and broader hardening evidence open.
+builtin matrix, focused repeated-script budget and timeout stress evidence,
+packaged fixture smoke coverage, and Phase13 docs. Broader hardening can extend
+duration and corpus coverage in future gates.
 
 Phase 13 inspector debug profile decision gate:
 
