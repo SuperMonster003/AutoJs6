@@ -70,6 +70,10 @@ current split:
 - ESM source-map parity is not yet equivalent to full desktop
   DevTools/source-map behavior.
 
+The docs, release matrix, surface manifest, type docs, and Gradle gate are
+evidence checks only. They do not add a second blocker for the same packaged
+graph, pending-evaluation cleanup, and source-map parity work.
+
 ## Rollback
 
 Remove `esmLoaderProfile` and the P13-41 verifier/report entries. Leave the

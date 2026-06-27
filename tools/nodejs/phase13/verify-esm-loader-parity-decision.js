@@ -137,9 +137,7 @@ function buildReport(files) {
       token(files.surfaceManifestDoc, REPORT_BASENAME),
       token(files.surfaceManifest, REPORT_BASENAME),
       token(files.capabilityMatrix, "P13-41 ESM loader parity"),
-    ], [
-      "P13-41 remains partial until packaged encrypted graph parity, broader ESM package corpus, pending-evaluation cleanup evidence, and source-map parity close.",
-    ]),
+    ], []),
   ];
 
   const checks = [

@@ -381,6 +381,7 @@ Reason open: `implementation`, `packaging`, `evidence`.
 - [ ] Add packaged encrypted package exports/imports graphs and broader dynamic import corpus.
 - [ ] Add top-level-await/linking cancellation and service-destroy cleanup stress.
 - [ ] Improve source-map parity for ESM and DevTools/debug reporting.
+- [x] Keep docs/release-matrix evidence gate from counting packaged graph, pending-evaluation cleanup, and source-map parity twice.
 
 #### P13-42 npm/package manager on Android
 
