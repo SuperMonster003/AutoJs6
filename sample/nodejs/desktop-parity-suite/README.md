@@ -21,3 +21,9 @@ claiming that gated desktop authority is already promoted.
 
 Safe-profile denial markers are centralized in `snippets/safe-denials.cjs`.
 Expected output is listed in `expected-output.txt`.
+
+`smoke.cjs` is the focused runtime smoke subset. It executes only
+`snippets/esm-loader.cjs` equivalent local ESM behavior and the checked-in
+`vendor/pure-math` dependency path used by `snippets/npm-dependency.cjs`. It
+does not execute worker, network, filesystem-root, WASI, inspector, or package
+manager authority examples.

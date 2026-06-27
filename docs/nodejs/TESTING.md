@@ -2233,14 +2233,23 @@ Phase 13 desktop Node parity examples gate:
 .\gradlew.bat --console=plain :app:verifyNodePhase13DesktopParityExamples
 ```
 
+Focused device smoke for the already-promoted desktop-safe subset:
+
+```powershell
+.\gradlew.bat --console=plain :app:connectedAppDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=org.autojs.autojs.engine.NodeExampleProjectInstrumentationTest#desktopParitySafeSubsetExamplesRun" "-Pautojs.nodejs.test.deviceProfile=sony"
+```
+
 This host gate records P13-54 as partial. It requires the
 `sample/nodejs/desktop-parity-suite` catalog, desktop-profile snippet
-metadata, expected output markers, Safe-profile denial markers, README
+metadata, expected output markers, Safe-profile denial markers, the focused
+`desktopParitySafeSubsetExamplesRun` runtime smoke, README
 profile/packaged-behavior/skip-reason coverage, root example manifest
 registration, surface manifest evidence, release matrix updates, and Phase 13
 docs. The examples cover ESM, `worker_threads`, HTTP/HTTPS, raw network,
-advanced fs, WASI, inspector, and sanitized pure JavaScript npm dependency usage, but remain
-outside default runtime smoke and do not grant Desktop authority.
+advanced fs, WASI, inspector, and sanitized pure JavaScript npm dependency
+usage. Only the managed local ESM and checked-in pure JavaScript dependency
+paths run in the focused smoke; high-risk desktop authority remains outside
+default runtime smoke and does not grant Desktop authority.
 
 Phase 13 profile-aware TypeScript declarations gate:
 

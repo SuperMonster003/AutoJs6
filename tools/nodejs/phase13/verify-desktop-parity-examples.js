@@ -6,6 +6,7 @@ const path = require("path");
 
 const REPORT_BASENAME = "phase13-desktop-parity-examples";
 const EXAMPLE_NAME = "desktop-parity-suite";
+const REQUIRED_SMOKE_EXAMPLES = Object.freeze(["esm-loader", "npm-dependency"]);
 const REQUIRED_EXAMPLES = Object.freeze([
   ["esm-loader", ["esm_loader"]],
   ["worker-threads", ["worker_threads"]],
@@ -37,7 +38,10 @@ const FILES = {
   exampleManifest: "sample/nodejs/desktop-parity-suite/examples.json",
   exampleMain: "sample/nodejs/desktop-parity-suite/main.cjs",
   exampleExpectedOutput: "sample/nodejs/desktop-parity-suite/expected-output.txt",
+  exampleSmokeMain: "sample/nodejs/desktop-parity-suite/smoke.cjs",
+  exampleSmokeExpectedOutput: "sample/nodejs/desktop-parity-suite/smoke-output.txt",
   safeDenials: "sample/nodejs/desktop-parity-suite/snippets/safe-denials.cjs",
+  nodeExampleInstrumentationTest: "app/src/androidTest/java/org/autojs/autojs/engine/NodeExampleProjectInstrumentationTest.kt",
 };
 
 function main() {
@@ -69,12 +73,14 @@ function loadFiles(repoRoot) {
 function buildReport(repoRoot, files) {
   const rootManifest = parseJson(files.rootExamplesManifest);
   const exampleManifest = parseJson(files.exampleManifest);
+  const smokeSubset = exampleManifest.smokeSubset || {};
   const project = parseJson(files.exampleProject);
   const packageJson = parseJson(files.examplePackage);
   const surfaceEntry = surface(files.surfaceManifest.text, "docs.examples.final_gate");
   const entries = Array.isArray(exampleManifest.examples) ? exampleManifest.examples : [];
   const entryById = new Map(entries.map((entry) => [entry.id, entry]));
   const requiredIds = REQUIRED_EXAMPLES.map(([id]) => id);
+  const smokeSubsetExamples = list(smokeSubset.examples);
   const projectPermissions = list(project.node && project.node.permissions);
   const snippetScenarios = REQUIRED_EXAMPLES.map(([id, capabilities]) => {
     const entry = entryById.get(id);
@@ -116,6 +122,21 @@ function buildReport(repoRoot, files) {
       remaining: missing,
     };
   });
+  const smokeSubsetReady =
+    smokeSubset.entry === "smoke.cjs" &&
+    smokeSubset.expectedOutput === "smoke-output.txt" &&
+    smokeSubset.profile === "safe_default" &&
+    REQUIRED_SMOKE_EXAMPLES.every((id) => smokeSubsetExamples.includes(id)) &&
+    smokeSubsetExamples.length === REQUIRED_SMOKE_EXAMPLES.length &&
+    files.exampleSmokeMain.text.trimStart().startsWith('"nodejs";') &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.smoke.catalog=${REQUIRED_SMOKE_EXAMPLES.length}`) &&
+    REQUIRED_SMOKE_EXAMPLES.every((id) =>
+      files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.${id}=PASS`) &&
+      files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.${id}=PASS`)) &&
+    files.exampleSmokeMain.text.includes(`sample.${EXAMPLE_NAME}.smoke=PASS`) &&
+    files.exampleSmokeExpectedOutput.text.includes(`sample.${EXAMPLE_NAME}.smoke=PASS`) &&
+    files.nodeExampleInstrumentationTest.text.includes("desktopParitySafeSubsetExamplesRun") &&
+    files.nodeExampleInstrumentationTest.text.includes('runExample("desktop-parity-suite", "smoke.cjs")');
 
   const checks = [
     check("required-files", Object.values(files).every((file) => file.exists), "All P13-54 source, doc, and gate files must exist."),
@@ -205,6 +226,11 @@ function buildReport(repoRoot, files) {
       "`expected-output.txt` must list the catalog count, each desktop marker, each Safe denial marker, and final PASS marker.",
     ),
     check(
+      "smoke-subset",
+      smokeSubsetReady,
+      "`desktop-parity-suite` must include a focused runtime smoke subset for already-promoted desktop-safe examples.",
+    ),
+    check(
       "readme-acceptance",
       files.exampleReadme.text.includes("Required profile") &&
         files.exampleReadme.text.includes("Safe profile behavior") &&
@@ -230,14 +256,14 @@ function buildReport(repoRoot, files) {
     ),
     check(
       "docs-and-surface-evidence",
-      includesAll(files.phase13Tasks.text, ["P13-54 partial landing", "verifyNodePhase13DesktopParityExamples"]) &&
-        includesAll(files.p13Report.text, ["P13-54 records desktop Node parity examples as partial", REPORT_BASENAME]) &&
+      includesAll(files.phase13Tasks.text, ["P13-54 partial landing", "safe subset smoke", "verifyNodePhase13DesktopParityExamples"]) &&
+        includesAll(files.p13Report.text, ["P13-54 records desktop Node parity examples as partial", "focused runtime smoke subset", REPORT_BASENAME]) &&
         includesAll(files.examplesDoc.text, [EXAMPLE_NAME, "Phase 13 desktop Node parity examples"]) &&
-        files.testingDoc.text.includes("verifyNodePhase13DesktopParityExamples") &&
-        files.ciGatesDoc.text.includes("verifyNodePhase13DesktopParityExamples") &&
+        includesAll(files.testingDoc.text, ["verifyNodePhase13DesktopParityExamples", "desktopParitySafeSubsetExamplesRun"]) &&
+        includesAll(files.ciGatesDoc.text, ["verifyNodePhase13DesktopParityExamples", "desktopParitySafeSubsetExamplesRun"]) &&
         files.proComparison.text.includes("P13-54 records desktop Node parity examples as partial") &&
         files.proAutoxNotes.text.includes("P13-54 records desktop Node parity examples as partial") &&
-        files.capabilityMatrix.text.includes("P13-54 desktop Node parity examples") &&
+        includesAll(files.capabilityMatrix.text, ["P13-54 desktop Node parity examples", "safe subset smoke"]) &&
         files.surfaceManifest.text.includes(REPORT_BASENAME) &&
         files.surfaceManifestDoc.text.includes(REPORT_BASENAME),
       "Docs, Pro/AutoX comparison, release matrix, and surface manifest must record the P13-54 example gate.",
@@ -259,7 +285,6 @@ function buildReport(repoRoot, files) {
   const blockers = [
     ...snippetScenarios.flatMap((entry) => entry.remaining.map((item) => `${entry.id}: ${item}`)),
     "desktop_compat_opt_in metadata remains diagnostic-only and does not grant raw worker/network/filesystem/WASI/inspector/package-manager authority by itself",
-    "default runtime smoke does not execute desktop parity snippets; P13-54 is a static catalog and documentation gate",
     "packaged desktop parity examples remain gated until provider promotion, integrity policy, and packaged APK evidence land",
   ];
   const finalBlockerClosable = blockers.length === 0 && policyViolations.length === 0;
@@ -284,6 +309,9 @@ function buildReport(repoRoot, files) {
       finalBlockerClosable,
       catalogReady: snippetScenarios.every((entry) => entry.status === "ready"),
       defaultSmokeEnabled: false,
+      smokeSubsetEnabled: smokeSubsetReady,
+      smokeSubsetExamples,
+      highRiskSnippetsStatic: true,
       packagedRuntimePromoted: false,
       grantsAuthority: false,
       targetProfile: "desktop_compat_opt_in",
@@ -322,6 +350,12 @@ function renderMarkdown(report) {
   for (const checkItem of report.checks) {
     lines.push(`- ${checkItem.passed ? "[x]" : "[ ]"} \`${checkItem.id}\`: ${checkItem.message}`);
   }
+  lines.push("", "## Smoke Subset", "");
+  lines.push(`- Enabled: ${report.decision.smokeSubsetEnabled ? "yes" : "no"}`);
+  lines.push(`- Examples: ${report.decision.smokeSubsetExamples.map((id) => `\`${id}\``).join(", ")}`);
+  lines.push("- Entry: `sample/nodejs/desktop-parity-suite/smoke.cjs`");
+  lines.push("- Expected output: `sample/nodejs/desktop-parity-suite/smoke-output.txt`");
+  lines.push("- Instrumentation: `NodeExampleProjectInstrumentationTest#desktopParitySafeSubsetExamplesRun`");
   if (report.policyViolations.length > 0) {
     lines.push("", "## Policy Violations", "");
     for (const violation of report.policyViolations) {

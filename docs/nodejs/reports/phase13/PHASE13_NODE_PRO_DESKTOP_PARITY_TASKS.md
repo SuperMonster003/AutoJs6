@@ -1935,6 +1935,10 @@ P13 task 本身使用以下执行状态：
     - The desktop catalog now includes an explicit `raw_network` example and
       Safe-profile denial marker aligned with the P13-50/P13-51/P13-52
       relaxed-capability id.
+    - The desktop suite now includes `smoke.cjs` plus
+      `NodeExampleProjectInstrumentationTest#desktopParitySafeSubsetExamplesRun`
+      as safe subset smoke for managed local ESM and checked-in pure
+      JavaScript dependency behavior.
     - Each catalog entry in `sample/nodejs/desktop-parity-suite/examples.json`
       records `desktop_compat_opt_in`, required capabilities, expected output,
       packaged behavior, skip reason, and Safe-profile denial output.
@@ -1945,8 +1949,8 @@ P13 task 本身使用以下执行状态：
     - Report:
       `docs/nodejs/reports/phase13/P13_54_DESKTOP_PARITY_EXAMPLES.md`.
     - Remaining P13-54 blockers: packaged desktop parity, provider promotion,
-      integrity policy, Android package-manager parity, and default-runtime
-      smoke inclusion remain gated.
+      integrity policy, Android package-manager parity, and high-risk desktop
+      snippet runtime smoke inclusion remain gated.
 
 - [ ] P13-55: 更新 TypeScript declaration package。
   - 范围：为 Pro/Desktop profile 增加条件类型或文档注释。

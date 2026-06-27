@@ -499,6 +499,7 @@ Reason open: `evidence`, `packaging`.
 
 Reason open: `evidence`, `packaging`.
 
+- [x] Add focused runtime smoke for already-promoted local ESM and checked-in pure JavaScript dependency examples.
 - [ ] Convert static desktop examples into packaged smoke where providers are promoted.
 - [ ] Link every example to profile metadata, capability requirements, integrity policy, and rollback guidance.
 - [ ] Keep non-promoted snippets static and clearly marked.

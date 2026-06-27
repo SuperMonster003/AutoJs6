@@ -2,6 +2,13 @@
   "schema": "autojs6-node-desktop-parity-examples-v1",
   "phase": "P13-54",
   "status": "partial",
+  "smokeSubset": {
+    "entry": "smoke.cjs",
+    "expectedOutput": "smoke-output.txt",
+    "profile": "safe_default",
+    "examples": ["esm-loader", "npm-dependency"],
+    "description": "Runs already-promoted managed local ESM and checked-in pure JavaScript dependency snippets without enabling high-risk desktop authority."
+  },
   "examples": [
     {
       "id": "esm-loader",

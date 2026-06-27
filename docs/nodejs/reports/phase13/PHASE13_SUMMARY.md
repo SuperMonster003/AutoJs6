@@ -173,7 +173,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-controlled-wasi-profile-decision.json` | `verifyNodePhase13ControlledWasiProfileDecision` | `P13-38` | `partial` | 0 | 7 |
 | `phase13-crash-evidence-automation.json` | `collectNodePhase13CrashEvidence` | `P13-05` | `ready` | 0 | 0 |
 | `phase13-dependency-compatibility-corpus.json` | `verifyNodePhase13DependencyCompatibilityCorpus` | `P13-47` | `partial` | 0 | 2 |
-| `phase13-desktop-parity-examples.json` | `verifyNodePhase13DesktopParityExamples` | `P13-54` | `partial` | 0 | 3 |
+| `phase13-desktop-parity-examples.json` | `verifyNodePhase13DesktopParityExamples` | `P13-54` | `partial` | 0 | 2 |
 | `phase13-dgram-udp-decision.json` | `verifyNodePhase13DgramUdpDecision` | `P13-31` | `partial` | 0 | 4 |
 | `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `partial` | 0 | 7 |
 | `phase13-filesystem-advanced-apis.json` | `verifyNodePhase13FilesystemAdvancedApis` | `P13-33` | `partial` | 0 | 5 |

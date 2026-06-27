@@ -101,14 +101,31 @@ class NodeExampleProjectInstrumentationTest {
         }
     }
 
+    @Test
+    fun desktopParitySafeSubsetExamplesRun() {
+        NodeEmbeddedTestHarness.assumeEmbeddedScriptExecutionEnabled("Node desktop parity safe subset example smoke")
+
+        val result = runExample("desktop-parity-suite", "smoke.cjs")
+
+        NodeEmbeddedTestHarness.assertSucceeded("desktop-parity-suite safe subset smoke", result)
+        assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.smoke.catalog=2"))
+        assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.esm-loader=PASS"))
+        assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.npm-dependency=PASS"))
+        assertTrue(result.stdout, result.stdout.contains("sample.desktop-parity-suite.smoke=PASS"))
+    }
+
     private fun runExample(exampleName: String): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
+        return runExample(exampleName, null)
+    }
+
+    private fun runExample(exampleName: String, entryOverride: String?): NativeNodeEmbeddedRuntimeBridge.EmbeddedScriptResult {
         val projectDir = File(context.cacheDir, "node-example-$exampleName-${System.nanoTime()}").apply {
             deleteRecursively()
             check(mkdirs()) { "Failed to create Node example project directory: $absolutePath" }
         }
         return try {
             NodeEmbeddedTestHarness.copyAssetTree(exampleName, projectDir)
-            val main = exampleMainFile(projectDir)
+            val main = exampleMainFile(projectDir, entryOverride)
             val timeoutMs = exampleTimeoutMs(projectDir)
             check(main.isFile) { "Node example $exampleName is missing declared main file: ${main.absolutePath}" }
             NodeEmbeddedTestHarness.runEmbeddedScript(
@@ -122,9 +139,9 @@ class NodeExampleProjectInstrumentationTest {
         }
     }
 
-    private fun exampleMainFile(projectDir: File): File {
+    private fun exampleMainFile(projectDir: File, entryOverride: String?): File {
         val projectJson = JSONObject(File(projectDir, "project.json").readText())
-        val entry = projectJson.optString("main", "main.cjs")
+        val entry = entryOverride ?: projectJson.optString("main", "main.cjs")
         val file = File(projectDir, entry)
         val canonicalFile = file.canonicalFile
         val root = projectDir.canonicalFile
