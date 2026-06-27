@@ -88,7 +88,7 @@ function buildReport(files) {
       token(files.proAutoxNotes, "P13-32 records filesystem profile expansion as partial"),
     ], [
       "Implement a filesystem root authority provider for user-authorized directories, SAF/document roots, and app-private roots.",
-      "Define manifest/project metadata, user grant persistence, revocation, diagnostics, and rollback behavior for expanded roots.",
+      "Define manifest/project metadata, user grant persistence, revocation, diagnostics, rollback behavior, and packaged expanded-root smoke for promoted roots.",
       "Re-run symlink, realpath, `..`, NUL, `/proc`, `/sys`, and `/dev` audits against every promoted root class.",
     ]),
     scenario("docs_gate_and_matrix", "docs, desktop matrix, release matrix, and Gradle gate record P13-32", [
@@ -102,10 +102,7 @@ function buildReport(files) {
       token(files.desktopMatrix, "P13-32 records scoped filesystem profile"),
       token(files.builtinMatrixGenerator, "P13-32 records scoped filesystem profile"),
       token(files.capabilityMatrix, "P13-32 filesystem profile decision"),
-    ], [
-      "P13-33 must separately decide advanced desktop fs APIs that are still unavailable or platform-limited.",
-      "Packaged expanded-root smoke evidence is still required before any Pro/Desktop root promotion.",
-    ]),
+    ], []),
   ];
 
   const checks = [

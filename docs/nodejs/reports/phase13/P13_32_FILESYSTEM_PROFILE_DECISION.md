@@ -38,9 +38,12 @@ The following remain future work before filesystem profile expansion:
 - full symlink, realpath, `..`, NUL, `/proc`, `/sys`, `/dev`, and sensitive
   path audit for every future root class;
 - packaged APK smoke tests proving explicit metadata, runtime disclosure,
-  missing-grant failure behavior, and downgrade rollback;
-- P13-33 advanced desktop fs API decision for APIs that are still unavailable
-  or platform-limited even inside scoped roots.
+  missing-grant failure behavior, and downgrade rollback.
+
+P13-33 owns advanced desktop fs APIs that are still unavailable or
+platform-limited even inside scoped roots. The docs, desktop matrix, release
+matrix, surface manifest, and Gradle gate are evidence checks only and do not
+add a second blocker for expanded-root promotion.
 
 ## Verification
 
@@ -63,8 +66,8 @@ The following remain future work before filesystem profile expansion:
 
 - Implement the explicit root authority provider and decide whether it is
   Pro-profile, Desktop-profile, or split by root type.
-- Add project/package metadata, user grant UI, revocation, and diagnostics for
-  expanded roots.
-- Add packaged expanded-root smokes plus live-device failure-mode evidence.
+- Add project/package metadata, user grant UI, revocation, diagnostics,
+  rollback behavior, packaged expanded-root smokes, and live-device
+  failure-mode evidence.
 - Re-run the scoped fs fuzzer and security corpus against each promoted root
   class before exposing broader paths to scripts.

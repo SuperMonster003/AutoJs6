@@ -282,9 +282,9 @@ Reason open: `policy`, `implementation`.
 Reason open: `implementation`, `policy`, `packaging`.
 
 - [ ] Implement user-authorized roots for SAF/document roots and app-private roots.
-- [ ] Define manifest metadata, grant persistence, revocation, diagnostics, and rollback.
+- [ ] Define manifest metadata, grant persistence, revocation, diagnostics, rollback, and packaged expanded-root smoke.
 - [ ] Re-run symlink, realpath, `..`, NUL, `/proc`, `/sys`, and `/dev` audits for each root class.
-- [ ] Add packaged expanded-root smoke before promotion.
+- [x] Keep docs/matrix evidence gate and P13-33 advanced fs APIs from counting as separate P13-32 blockers.
 
 #### P13-33 desktop fs advanced APIs
 
