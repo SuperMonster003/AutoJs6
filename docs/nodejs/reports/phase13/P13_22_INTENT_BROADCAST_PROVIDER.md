@@ -50,6 +50,11 @@ packaged behavior, user disclosure, and install/trigger/remove evidence land.
   files.
 - A future provider must return bounded JSON trigger payload snapshots instead
   of raw Android `Intent` or `Bundle` objects.
+- For P13-22 v1.1, `compat.tasks.addIntentTask()`,
+  `queryIntentTasks()`, `getIntentTask(id)`, and `removeIntentTask(id)` remain
+  Promise-returning stable rejection stubs. A future promotion must be owned by
+  a dedicated JSON-safe broadcast provider; it must not make these compat names
+  direct wrappers over raw Rhino `IntentTask` rows or objects.
 
 ## Remaining Blockers
 

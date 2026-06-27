@@ -54,6 +54,9 @@
 - Gradle gate: `:app:verifyNodePhase13IntentBroadcastProvider`.
 - Report: `docs/nodejs/reports/phase13/P13_22_INTENT_BROADCAST_PROVIDER.md`.
 - Surface manifest evidence: `phase13-intent-broadcast-provider`.
+- For P13-22 v1.1, `compat.tasks` IntentTask helpers remain
+  Promise-returning stable rejection stubs until a dedicated JSON-safe broadcast
+  provider owns the future surface.
 - Remaining P13-22 blockers: capability split, receiver authority,
   exported/non-exported policy, trigger payload serialization, packaged
   manifest synthesis, install/trigger/remove smoke, user disclosure, and raw

@@ -86,9 +86,17 @@ function buildReport(files) {
       token(files.rhinoCompatTypes, "addIntentTask(options?: unknown): Promise<never>;"),
       token(files.typeSmoke, "const compatIntentAddDenied: Promise<never>"),
       token(files.phase11Tasks, "IntentTask"),
-    ], [
-      "Replace P12-18 stable rejection stubs only after a dedicated JSON-safe broadcast provider exists.",
-      "Decide whether Rhino compat names remain Promise-only wrappers or a Pro-profile `tasks` provider owns them.",
+    ]),
+    scenario("compat_intent_provider_ownership", "compat IntentTask names stay stable-denied until a JSON-safe broadcast provider owns them", [
+      token(files.p13Report, "For P13-22 v1.1, `compat.tasks.addIntentTask()`"),
+      token(files.p13Report, "Promise-returning stable rejection stubs"),
+      token(files.p13Report, "dedicated JSON-safe broadcast provider"),
+      token(files.p13Report, "must not make these compat names"),
+      token(files.phase13Tasks, "For P13-22 v1.1, `compat.tasks` IntentTask helpers remain"),
+      token(files.nodeBridgeSources, "function __autojs6_rhino_compat_tasks_reject_intent(apiName)"),
+      token(files.conformanceTest, "compat.tasks rejected stubs must not dispatch bridge requests"),
+      token(files.rhinoCompatTypes, "addIntentTask(options?: unknown): Promise<never>;"),
+      token(files.typeSmoke, "const compatIntentAddDenied: Promise<never>"),
     ]),
     scenario("android_receiver_substrate", "Android/Rhino IntentTask database and receiver stack exist but stay outside Node", [
       token(files.tasksRhino, "fun addIntentTask"),

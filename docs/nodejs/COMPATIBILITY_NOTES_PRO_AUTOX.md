@@ -268,7 +268,9 @@ Android/Rhino `IntentTask` database and receiver stack are present, and the
 Node `compat.tasks` IntentTask helpers keep stable unsupported errors. AutoJs6
 Node still cannot register Android receivers, receive boot/package/custom
 broadcast triggers, mutate packaged manifests, inspect raw trigger payloads, or
-access raw `Intent` / `BroadcastReceiver` objects.
+access raw `Intent` / `BroadcastReceiver` objects. For v1.1 these compat names
+remain Promise-returning stable rejection stubs until a dedicated JSON-safe
+broadcast provider owns the future surface.
 
 P13-23 records app/intent/broadcast Pro parity as partial. AutoJs6 Node now has
 JSON-safe `app.intent()` descriptors and stricter `app.startActivity()`

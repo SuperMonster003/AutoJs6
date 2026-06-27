@@ -191,9 +191,9 @@ Reason open: `implementation`, `policy`, `packaging`.
 
 #### P13-22 IntentTask/broadcast provider
 
-Reason open: `implementation`, `policy`, `packaging`.
+Reason open: `implementation`, `packaging`.
 
-- [ ] Replace stable rejection stubs only after a JSON-safe broadcast provider exists.
+- [x] Replace stable rejection stubs only after a JSON-safe broadcast provider exists.
 - [ ] Define ownership between legacy Rhino rows, Node descriptors, and packaged records.
 - [ ] Add query/get snapshots without exposing raw IntentTask or receiver handles.
 - [ ] Add manifest synthesis, exported/non-exported policy, trigger payloads, and install/trigger/remove packaged smoke.
