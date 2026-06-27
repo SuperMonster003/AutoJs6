@@ -559,10 +559,12 @@ build/reports/nodejs/v1.1-differential.md
 `NodeRealNpmCompatInstrumentationTest` emits `realnpm.differential.result=...` JSON lines for each fixture through
 connected-test diagnostics/logcat. The Android Gradle plugin stores these lines in the connected test logcat output, for example under
 `app/build/outputs/androidTest-results/connected/.../logcat-org.autojs.autojs.engine.NodeRealNpmCompatInstrumentationTest-realPureJavaScriptPackageCorpusPasses.txt`.
-Pass that file to the harness with `--autojs-log <file>` to compare AutoJs6 against the desktop baseline. Differences are
-classified as matched, expected AutoJs6 restriction, unsupported, flaky, or bug. The `v1.1-differential.md` report
-also groups the fixed fixtures by the Task 188 capability areas: ESM packages, stream packages, zlib packages, fetch
-packages, and buffer packages.
+Pass that file to the harness with `--autojs-log <file>` to compare AutoJs6 against the desktop baseline, or pass the
+connected test artifact directory with `--autojs-connected-results app/build/outputs/androidTest-results/connected`
+to let the harness scan XML reports, logcat text, and test logs directly. Differences are classified as matched,
+expected AutoJs6 restriction, unsupported, flaky, or bug. The `v1.1-differential.md` report also groups the fixed
+fixtures by the Task 188 capability areas: ESM packages, stream packages, zlib packages, fetch packages, and buffer
+packages.
 
 Modern core differential harness:
 

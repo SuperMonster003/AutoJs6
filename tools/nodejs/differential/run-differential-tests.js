@@ -21,7 +21,8 @@ function main() {
     throw new Error("No differential fixtures found in " + path.join(fixtureRoot, "manifest.json"));
   }
 
-  const autoJsResults = readAutoJsResults(options);
+  const autoJsImport = readAutoJsResults(options);
+  const autoJsResults = autoJsImport.results;
   const rows = fixtures.map((fixture) => {
     const fixtureDir = path.join(fixtureRoot, fixture.name);
     const expectedOutput = readText(path.join(fixtureDir, "expected.txt")).trim();
@@ -44,7 +45,9 @@ function main() {
       binary: nodeBinary,
       version: runNodeVersion(nodeBinary),
     },
-    autoJsSource: options.autojsJson || options.autojsLog || null,
+    autoJsSource: autoJsImport.sources.length > 0 ? autoJsImport.sources.join("; ") : null,
+    autoJsSources: autoJsImport.sources,
+    autoJsImportedRecords: autoJsImport.recordCount,
     rows,
     summary: summarize(rows),
     phase13Compatibility: summarizePhase13CompatibilityCategories(rows, manifest.phase13Compatibility),
@@ -110,6 +113,7 @@ function printHelp() {
     "  --node <path>         Desktop Node binary. Defaults to process.execPath.",
     "  --autojs-log <file>   Gradle/logcat text containing realnpm.differential.result= JSON lines.",
     "  --autojs-json <file>  JSON file containing an array, {results:[]}, or {rows:[{autojs}]} shape.",
+    "  --autojs-connected-results <dir|file>  Scan Gradle connected test results/logcat output for realnpm.differential.result= JSON lines.",
     "  --compat-report <file>  Output v1.1 npm compatibility Markdown report.",
     "  --v11-differential-report <file>  Output v1.1 differential Markdown report.",
   ].join("\n"));
@@ -172,17 +176,36 @@ function runDesktopFixture(nodeBinary, fixtureDir, fixtureName, expectedOutput) 
 
 function readAutoJsResults(options) {
   const results = new Map();
-  [options.autojsJson, options.autojsLog].filter(Boolean).forEach((file) => {
-    const resolved = path.resolve(file);
-    const text = fs.readFileSync(resolved, "utf8");
-    const records = file === options.autojsJson ? parseAutoJsJson(text) : parseAutoJsLog(text);
+  const sources = [];
+  let recordCount = 0;
+  function addRecords(source, records) {
+    if (records.length > 0) {
+      sources.push(source);
+      recordCount += records.length;
+    }
     records.forEach((record) => {
       if (record && record.fixture) {
         results.set(record.fixture, normalizeRuntimeRecord(record));
       }
     });
+  }
+  [options.autojsJson, options.autojsLog].filter(Boolean).forEach((file) => {
+    const resolved = path.resolve(file);
+    const text = fs.readFileSync(resolved, "utf8");
+    const records = file === options.autojsJson ? parseAutoJsJson(text) : parseAutoJsLog(text);
+    addRecords(resolved, records);
   });
-  return results;
+  if (options.autojsConnectedResults) {
+    const connected = readAutoJsConnectedResults(path.resolve(options.autojsConnectedResults));
+    connected.files.forEach((file) => {
+      addRecords(file, connected.recordsByFile.get(file) || []);
+    });
+  }
+  return {
+    results,
+    sources,
+    recordCount,
+  };
 }
 
 function parseAutoJsJson(text) {
@@ -203,14 +226,129 @@ function parseAutoJsJson(text) {
 }
 
 function parseAutoJsLog(text) {
-  return String(text).split(/\r?\n/).map((line) => {
-    const index = line.indexOf(AUTOJS_RESULT_PREFIX);
-    if (index < 0) {
-      return null;
+  const output = [];
+  String(text).split(/\r?\n/).forEach((line) => {
+    let searchFrom = 0;
+    while (searchFrom < line.length) {
+      const index = line.indexOf(AUTOJS_RESULT_PREFIX, searchFrom);
+      if (index < 0) {
+        break;
+      }
+      const payload = line.slice(index + AUTOJS_RESULT_PREFIX.length).trim();
+      const jsonText = extractJsonObject(payload);
+      if (!jsonText) {
+        break;
+      }
+      output.push(parseJsonPayload(jsonText));
+      searchFrom = index + AUTOJS_RESULT_PREFIX.length + jsonText.length;
     }
-    const payload = line.slice(index + AUTOJS_RESULT_PREFIX.length).trim();
+  });
+  return output;
+}
+
+function readAutoJsConnectedResults(root) {
+  const files = collectAutoJsResultFiles(root);
+  const recordsByFile = new Map();
+  files.forEach((file) => {
+    const text = fs.readFileSync(file, "utf8");
+    if (!text.includes(AUTOJS_RESULT_PREFIX)) {
+      return;
+    }
+    const records = parseAutoJsLog(text);
+    if (records.length > 0) {
+      recordsByFile.set(file, records);
+    }
+  });
+  return {
+    files: Array.from(recordsByFile.keys()),
+    recordsByFile,
+  };
+}
+
+function collectAutoJsResultFiles(root) {
+  const stat = fs.statSync(root);
+  if (stat.isFile()) {
+    return [root];
+  }
+  if (!stat.isDirectory()) {
+    return [];
+  }
+  const output = [];
+  const stack = [root];
+  while (stack.length > 0) {
+    const dir = stack.pop();
+    fs.readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(file);
+      } else if (entry.isFile() && isAutoJsResultTextFile(file)) {
+        output.push(file);
+      }
+    });
+  }
+  output.sort();
+  return output;
+}
+
+function isAutoJsResultTextFile(file) {
+  const extension = path.extname(file).toLowerCase();
+  return extension === ".txt" ||
+    extension === ".log" ||
+    extension === ".xml" ||
+    extension === ".textproto";
+}
+
+function extractJsonObject(value) {
+  const text = String(value || "");
+  const start = text.indexOf("{");
+  if (start < 0) {
+    const trimmed = text.trim();
+    return trimmed.length > 0 ? trimmed : "";
+  }
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let index = start; index < text.length; index += 1) {
+    const ch = text[index];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === "\"") {
+        inString = false;
+      }
+      continue;
+    }
+    if (ch === "\"") {
+      inString = true;
+    } else if (ch === "{") {
+      depth += 1;
+    } else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return text.slice(start, index + 1);
+      }
+    }
+  }
+  return text.slice(start).trim();
+}
+
+function parseJsonPayload(payload) {
+  try {
     return JSON.parse(payload);
-  }).filter(Boolean);
+  } catch (error) {
+    return JSON.parse(unescapeXml(payload));
+  }
+}
+
+function unescapeXml(value) {
+  return String(value)
+    .replace(/&quot;/g, "\"")
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
 }
 
 function normalizeRuntimeRecord(record) {

@@ -442,8 +442,9 @@ addons, or expose raw sockets.
 JSON/Markdown report under `build/reports/nodejs/differential/`, the v1.1 npm summary report
 `build/reports/nodejs/npm-compat-v1.1.md`, and the Task 188 measurement report
 `build/reports/nodejs/v1.1-differential.md`. When supplied with `realnpm.differential.result=...` lines emitted by
-`NodeRealNpmCompatInstrumentationTest`, it compares normalized stdout, exit code, error code, and error message pattern,
-then classifies differences as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
+`NodeRealNpmCompatInstrumentationTest` through `--autojs-log`, `--autojs-json`, or
+`--autojs-connected-results`, it compares normalized stdout, exit code, error code, and error message pattern, then
+classifies differences as matched, expected AutoJs6 restriction, unsupported, flaky, or bug.
 
 `tools/nodejs/differential/run-modern-core-differential.js` runs the fixed S7-36 modern core corpus under desktop Node
 24 and writes `build/reports/nodejs/differential/modern-core-differential.json` plus Markdown. When supplied with

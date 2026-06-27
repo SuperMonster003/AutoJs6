@@ -91,10 +91,12 @@ function buildReport(files) {
       token(files.realNpmTest, "EXPECTED_FIXTURE_COUNT = 50"),
       token(files.differentialRunner, "phase13Compatibility: summarizePhase13CompatibilityCategories"),
       token(files.differentialRunner, "summarizePhase13CompatibilityCategories"),
+      token(files.differentialRunner, "readAutoJsConnectedResults"),
+      token(files.differentialRunner, "--autojs-connected-results <dir|file>"),
       token(files.differentialRunner, "Phase 13 Dependency Compatibility Categories"),
       token(files.differentialRunner, "renderPassRate"),
     ], [
-      "CI still needs an automated import path for connected AutoJs6 real npm differential JSON/log artifacts.",
+      "CI still needs to schedule connected AutoJs6 real npm corpus artifacts before the host differential report.",
     ]),
     scenario("docs_gate_and_surface", "Docs, release matrix, surface manifest, and Gradle gate record P13-47", [
       token(files.phase13Tasks, "P13-47 partial landing"),

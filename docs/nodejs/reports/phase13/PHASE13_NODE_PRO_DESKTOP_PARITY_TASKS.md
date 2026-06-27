@@ -1703,12 +1703,16 @@ P13 task 本身使用以下执行状态：
     - `tools/nodejs/differential/run-differential-tests.js` 现在输出
       `phase13Compatibility` JSON，并在 v1.1 differential Markdown 中输出
       "Phase 13 Dependency Compatibility Categories" pass-rate 表。
+    - `run-differential-tests.js --autojs-connected-results <dir|file>` 可直接
+      扫描 Gradle connected test 结果目录、XML、logcat 和 test log 中的
+      `realnpm.differential.result=` JSON 行。
     - Gate:
       `tools/nodejs/phase13/verify-dependency-compatibility-corpus.js` 生成
       `phase13-dependency-compatibility-corpus` 报告，并接入
       `:app:verifyNodePhase13DependencyCompatibilityCorpus`。
   - Remaining:
-    - CI 仍需自动导入 connected AutoJs6 real npm differential log/JSON。
+    - CI 仍需调度 connected AutoJs6 real npm corpus，并把 connected-results
+      artifact 目录传给 host differential report。
     - 真实 registry drift、unsafe native/postinstall 包执行仍保持拒绝，仅以
       metadata blocker category 表达。
 

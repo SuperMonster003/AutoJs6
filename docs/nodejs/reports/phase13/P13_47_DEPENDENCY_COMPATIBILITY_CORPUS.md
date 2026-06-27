@@ -22,11 +22,15 @@ category pass-rate rows, and adds a host verifier plus Gradle gate.
   differential artifacts are collected. Desktop-baseline-only runs can still
   return non-zero for fixtures that intentionally assert AutoJs6 policy
   denials.
+- The differential runner can import connected AutoJs6 artifacts directly with
+  `--autojs-connected-results <dir|file>`, scanning Gradle connected test
+  result directories, XML reports, logcat text, and test logs for
+  `realnpm.differential.result=` JSON lines.
 
 ## Remaining Work
 
-- CI still needs a direct import path from connected AutoJs6 real npm
-  differential logs into the host differential report.
+- CI still needs to schedule the connected AutoJs6 real npm corpus and pass its
+  connected-results artifact directory into the host differential report.
 - The corpus remains fixed and offline; live registry drift testing is still a
   separate security and reproducibility problem.
 - Unsafe package execution remains denied. Native addons, lifecycle scripts,
