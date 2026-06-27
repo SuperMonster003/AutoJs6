@@ -177,7 +177,7 @@ This summary is generated from the Phase 13 task checklist, Phase 13 surface man
 | `phase13-dgram-udp-decision.json` | `verifyNodePhase13DgramUdpDecision` | `P13-31` | `partial` | 0 | 4 |
 | `phase13-esm-loader-parity-decision.json` | `verifyNodePhase13EsmLoaderParityDecision` | `P13-41` | `partial` | 0 | 7 |
 | `phase13-filesystem-advanced-apis.json` | `verifyNodePhase13FilesystemAdvancedApis` | `P13-33` | `partial` | 0 | 6 |
-| `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `partial` | 0 | 7 |
+| `phase13-filesystem-profile-decision.json` | `verifyNodePhase13FilesystemProfileDecision` | `P13-32` | `partial` | 0 | 5 |
 | `phase13-full-heavy-resource-stress-archive.json` | `-` | `-` | `validated` | 0 | 0 |
 | `phase13-full-heavy-resource-stress.json` | `verifyNodePhase13FullHeavyResourceStress` | `P13-08` | `partial` | 0 | 3 |
 | `phase13-http-https-client-parity.json` | `verifyNodePhase13HttpHttpsClientParity` | `P13-29` | `partial` | 0 | 5 |

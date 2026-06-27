@@ -79,7 +79,7 @@ function buildReport(files) {
       token(files.typescriptSmoke, "autojsProfile.filesystemProfile.additionalRoots"),
     ], []),
     scenario("expanded_roots_deferred", "Pro/Desktop filesystem roots require explicit authority before promotion", [
-      token(files.p13Report, "user-authorized roots"),
+      token(files.p13Report, "No user-authorized root"),
       token(files.p13Report, "SAF"),
       token(files.p13Report, "app-private"),
       token(files.compatibilityProfile, "P13-32 records filesystem profile expansion as partial"),
@@ -92,7 +92,7 @@ function buildReport(files) {
       "Re-run symlink, realpath, `..`, NUL, `/proc`, `/sys`, and `/dev` audits against every promoted root class.",
     ]),
     scenario("docs_gate_and_matrix", "docs, desktop matrix, release matrix, and Gradle gate record P13-32", [
-      token(files.phase13Tasks, "P13-32 partial landing"),
+      token(files.phase13Tasks, "P13-32 partial filesystem profile gate"),
       token(files.gradleGate, "verifyNodePhase13FilesystemProfileDecision"),
       token(files.testingDoc, "verifyNodePhase13FilesystemProfileDecision"),
       token(files.ciGatesDoc, "verifyNodePhase13FilesystemProfileDecision"),
